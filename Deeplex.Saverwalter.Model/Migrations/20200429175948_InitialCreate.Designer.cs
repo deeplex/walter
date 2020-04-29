@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20200428155241_InitialCreate")]
+    [Migration("20200429175948_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,12 +28,19 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("StrasseId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Postleitzahl")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Stadt")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Strasse")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("AdresseId");
-
-                    b.HasIndex("StrasseId");
 
                     b.ToTable("Adressen");
                 });
@@ -70,17 +77,21 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AdresseId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Beschreibung")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Bezeichnung")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Bezeichnung")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Schluessel")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("KalteBetriebskostenpunktId");
+
+                    b.HasIndex("AdresseId");
 
                     b.ToTable("KalteBetriebskosten");
                 });
@@ -205,61 +216,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.ToTable("MietobjektWohnungen");
                 });
 
-            modelBuilder.Entity("Deeplex.Saverwalter.Model.Postleitzahl", b =>
-                {
-                    b.Property<int>("PostleitzahlId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Bezeichnung")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("StadtId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("PostleitzahlId");
-
-                    b.HasIndex("StadtId");
-
-                    b.ToTable("Postleitzahlen");
-                });
-
-            modelBuilder.Entity("Deeplex.Saverwalter.Model.Stadt", b =>
-                {
-                    b.Property<int>("StadtId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("StadtId");
-
-                    b.ToTable("Staedte");
-                });
-
-            modelBuilder.Entity("Deeplex.Saverwalter.Model.Strasse", b =>
-                {
-                    b.Property<int>("StrasseId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("PostleitzahlId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("StrasseId");
-
-                    b.HasIndex("PostleitzahlId");
-
-                    b.ToTable("Strassen");
-                });
-
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Vertrag", b =>
                 {
                     b.Property<int>("rowid")
@@ -345,11 +301,11 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.ToTable("ZaehlerSet");
                 });
 
-            modelBuilder.Entity("Deeplex.Saverwalter.Model.Adresse", b =>
+            modelBuilder.Entity("Deeplex.Saverwalter.Model.KalteBetriebskostenpunkt", b =>
                 {
-                    b.HasOne("Deeplex.Saverwalter.Model.Strasse", "Strasse")
+                    b.HasOne("Deeplex.Saverwalter.Model.Adresse", "Adresse")
                         .WithMany()
-                        .HasForeignKey("StrasseId")
+                        .HasForeignKey("AdresseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -402,24 +358,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasOne("Deeplex.Saverwalter.Model.Wohnung", "Wohnung")
                         .WithMany()
                         .HasForeignKey("WohnungId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Deeplex.Saverwalter.Model.Postleitzahl", b =>
-                {
-                    b.HasOne("Deeplex.Saverwalter.Model.Stadt", "Stadt")
-                        .WithMany()
-                        .HasForeignKey("StadtId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Deeplex.Saverwalter.Model.Strasse", b =>
-                {
-                    b.HasOne("Deeplex.Saverwalter.Model.Postleitzahl", "Postleitzahl")
-                        .WithMany()
-                        .HasForeignKey("PostleitzahlId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -8,6 +8,22 @@ namespace Deeplex.Saverwalter.Model.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Adressen",
+                columns: table => new
+                {
+                    AdresseId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Hausnummer = table.Column<string>(nullable: false),
+                    Strasse = table.Column<string>(nullable: false),
+                    Postleitzahl = table.Column<string>(nullable: false),
+                    Stadt = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Adressen", x => x.AdresseId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Garagen",
                 columns: table => new
                 {
@@ -33,21 +49,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "KalteBetriebskosten",
-                columns: table => new
-                {
-                    KalteBetriebskostenpunktId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Bezeichnung = table.Column<string>(nullable: false),
-                    Beschreibung = table.Column<string>(nullable: true),
-                    Schluessel = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_KalteBetriebskosten", x => x.KalteBetriebskostenpunktId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Kontos",
                 columns: table => new
                 {
@@ -62,75 +63,24 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Staedte",
+                name: "KalteBetriebskosten",
                 columns: table => new
                 {
-                    StadtId = table.Column<int>(nullable: false)
+                    KalteBetriebskostenpunktId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(nullable: false)
+                    Bezeichnung = table.Column<int>(nullable: false),
+                    AdresseId = table.Column<int>(nullable: false),
+                    Beschreibung = table.Column<string>(nullable: true),
+                    Schluessel = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Staedte", x => x.StadtId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Postleitzahlen",
-                columns: table => new
-                {
-                    PostleitzahlId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Bezeichnung = table.Column<string>(nullable: false),
-                    StadtId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Postleitzahlen", x => x.PostleitzahlId);
+                    table.PrimaryKey("PK_KalteBetriebskosten", x => x.KalteBetriebskostenpunktId);
                     table.ForeignKey(
-                        name: "FK_Postleitzahlen_Staedte_StadtId",
-                        column: x => x.StadtId,
-                        principalTable: "Staedte",
-                        principalColumn: "StadtId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Strassen",
-                columns: table => new
-                {
-                    StrasseId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(nullable: false),
-                    PostleitzahlId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Strassen", x => x.StrasseId);
-                    table.ForeignKey(
-                        name: "FK_Strassen_Postleitzahlen_PostleitzahlId",
-                        column: x => x.PostleitzahlId,
-                        principalTable: "Postleitzahlen",
-                        principalColumn: "PostleitzahlId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Adressen",
-                columns: table => new
-                {
-                    AdresseId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Hausnummer = table.Column<string>(nullable: false),
-                    StrasseId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Adressen", x => x.AdresseId);
-                    table.ForeignKey(
-                        name: "FK_Adressen_Strassen_StrasseId",
-                        column: x => x.StrasseId,
-                        principalTable: "Strassen",
-                        principalColumn: "StrasseId",
+                        name: "FK_KalteBetriebskosten_Adressen_AdresseId",
+                        column: x => x.AdresseId,
+                        principalTable: "Adressen",
+                        principalColumn: "AdresseId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -314,9 +264,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Adressen_StrasseId",
-                table: "Adressen",
-                column: "StrasseId");
+                name: "IX_KalteBetriebskosten_AdresseId",
+                table: "KalteBetriebskosten",
+                column: "AdresseId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Kontakte_AdresseId",
@@ -352,16 +302,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 name: "IX_MietobjektWohnungen_WohnungId",
                 table: "MietobjektWohnungen",
                 column: "WohnungId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Postleitzahlen_StadtId",
-                table: "Postleitzahlen",
-                column: "StadtId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Strassen_PostleitzahlId",
-                table: "Strassen",
-                column: "PostleitzahlId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Vertraege_AnsprechpartnerKontaktId",
@@ -421,15 +361,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
             migrationBuilder.DropTable(
                 name: "Adressen");
-
-            migrationBuilder.DropTable(
-                name: "Strassen");
-
-            migrationBuilder.DropTable(
-                name: "Postleitzahlen");
-
-            migrationBuilder.DropTable(
-                name: "Staedte");
         }
     }
 }

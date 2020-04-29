@@ -5,6 +5,7 @@
 
 # User-specific files
 *.db
+*.docx
 dummies.cs
 *.rsuser
 *.suo

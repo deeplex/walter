@@ -8,21 +8,18 @@ namespace Deeplex.Saverwalter.Model
 {
     public class SaverwalterContext : DbContext
     {
-        public DbSet<Adresse> Adressen { get; set; }
-        public DbSet<Strasse> Strassen { get; set; }
-        public DbSet<Postleitzahl> Postleitzahlen { get; set; }
-        public DbSet<Stadt> Staedte { get; set; }
-        public DbSet<Wohnung> Wohnungen { get; set; }
-        public DbSet<Garage> Garagen { get; set; }
-        public DbSet<Zaehler> ZaehlerSet { get; set; }
-        public DbSet<Vertrag> Vertraege { get; set; }
-        public DbSet<MietobjektWohnung> MietobjektWohnungen { get; set; }
-        public DbSet<MietobjektGarage> MietobjektGaragen { get; set; }
-        public DbSet<JuristischePerson> JuristischePersonen { get; set; }
-        public DbSet<Mieter> MieterSet { get; set; }
-        public DbSet<Kontakt> Kontakte { get; set; }
-        public DbSet<Konto> Kontos { get; set; }
-        public DbSet<KalteBetriebskostenpunkt> KalteBetriebskosten { get; set; }
+        public DbSet<Adresse> Adressen { get; set; } = null!;
+        public DbSet<Wohnung> Wohnungen { get; set; } = null!;
+        public DbSet<Garage> Garagen { get; set; } = null!;
+        public DbSet<Zaehler> ZaehlerSet { get; set; } = null!;
+        public DbSet<Vertrag> Vertraege { get; set; } = null!;
+        public DbSet<MietobjektWohnung> MietobjektWohnungen { get; set; } = null!;
+        public DbSet<MietobjektGarage> MietobjektGaragen { get; set; } = null!;
+        public DbSet<JuristischePerson> JuristischePersonen { get; set; } = null!;
+        public DbSet<Mieter> MieterSet { get; set; } = null!;
+        public DbSet<Kontakt> Kontakte { get; set; } = null!;
+        public DbSet<Konto> Kontos { get; set; } = null!;
+        public DbSet<KalteBetriebskostenpunkt> KalteBetriebskosten { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             => options.UseSqlite("Data Source=walter.db");
@@ -41,37 +38,20 @@ namespace Deeplex.Saverwalter.Model
     public class Adresse
     {
         public int AdresseId { get; set; }
-        public string Hausnummer { get; set; }
-        public Strasse Strasse { get; set; }
+        public string Hausnummer { get; set; } = null!;
+        public string Strasse { get; set; } = null!;
+        public string Postleitzahl { get; set; } = null!;
+        public string Stadt { get; set; } = null!;
         public List<Wohnung> Wohnungen { get; } = new List<Wohnung>();
-    }
-
-    public class Strasse
-    {
-        public int StrasseId { get; set; }
-        public string Name { get; set; }
-        public Postleitzahl Postleitzahl { get; set; }
-    }
-
-    public class Postleitzahl
-    {
-        public int PostleitzahlId { get; set; }
-        public string Bezeichnung { get; set; }
-        public Stadt Stadt { get; set; }
-    }
-    public class Stadt
-    {
-        public int StadtId { get; set; }
-        public string Name { get; set; }
     }
 
     public class Wohnung
     {
         public int WohnungId { get; set; }
-        public string Bezeichnung { get; set; }
+        public string Bezeichnung { get; set; } = null!;
         public double Wohnflaeche { get; set; }
         public double Nutzflaeche { get; set; }
-        public Adresse Adresse { get; set; }
+        public Adresse Adresse { get; set; } = null!;
     }
 
     public class Garage
@@ -82,7 +62,7 @@ namespace Deeplex.Saverwalter.Model
     public class Zaehler
     {
         public int ZaehlerId { get; set; }
-        public Wohnung Wohnung { get; set; }
+        public Wohnung Wohnung { get; set; } = null!;
         public Zaehlertyp Typ { get; set; }
     }
 
@@ -93,6 +73,7 @@ namespace Deeplex.Saverwalter.Model
         Strom,
         Gas,
     }
+
     public class Vertrag
     {
         public int rowid { get; set; }
@@ -101,13 +82,13 @@ namespace Deeplex.Saverwalter.Model
         public List<Mieter> Mieter { get; } = new List<Mieter>();
         public List<MietobjektWohnung> Wohnungen { get; } = new List<MietobjektWohnung>();
         public List<MietobjektGarage> Garagen { get; } = new List<MietobjektGarage>();
-        public JuristischePerson Vermieter { get; set; }
+        public JuristischePerson Vermieter { get; set; } = null!;
         public int Personenzahl { get; set; }
         public DateTime Beginn { get; set; }
         public DateTime? Ende { get; set; }
-        public Kontakt Ansprechpartner { get; set; }
+        public Kontakt Ansprechpartner { get; set; } = null!;
 
-        public Vertrag() 
+        public Vertrag()
         {
             VertragId = Guid.NewGuid();
         }
@@ -146,40 +127,40 @@ namespace Deeplex.Saverwalter.Model
     {
         public int MietobjektWohnungId { get; set; }
         public int VertragId { get; set; }
-        public Vertrag Vertrag { get; set; }
+        public Vertrag Vertrag { get; set; } = null!;
         public int WohnungId { get; set; }
-        public Wohnung Wohnung { get; set; }
+        public Wohnung Wohnung { get; set; } = null!;
     }
 
     public class MietobjektGarage
     {
         public int MietobjektGarageId { get; set; }
         public int VertragId { get; set; }
-        public Vertrag Vertrag { get; set; }
+        public Vertrag Vertrag { get; set; } = null!;
         public int GarageId { get; set; }
-        public Garage Garage { get; set; }
+        public Garage Garage { get; set; } = null!;
     }
 
     public class JuristischePerson // TODO Angehörige Personen verlinken.
     {
         public int JuristischePersonId { get; set; }
-        public string Bezeichnung { get; set; }
+        public string Bezeichnung { get; set; } = null!;
     }
 
     public class Mieter
     {
         public int MieterId { get; set; }
         public int KontaktId { get; set; }
-        public Kontakt Kontakt { get; set; }
+        public Kontakt Kontakt { get; set; } = null!;
         public int VertragId { get; set; }
-        public Vertrag Vertrag { get; set; }
+        public Vertrag Vertrag { get; set; } = null!;
     }
 
     public class Kontakt
     {
         public int KontaktId { get; set; }
         public string? Vorname { get; set; }
-        public string Nachname { get; set; }
+        public string Nachname { get; set; } = null!;
         public Anrede Anrede { get; set; }
         public string? Telefon { get; set; }
         public string? Mobil { get; set; }
@@ -198,15 +179,36 @@ namespace Deeplex.Saverwalter.Model
     public class Konto
     {
         public int KontoId { get; set; }
-        public string Bank { get; set; }
-        public string Iban { get; set; }
+        public string Bank { get; set; } = null!;
+        public string Iban { get; set; } = null!;
     }
     public class KalteBetriebskostenpunkt
     {
         public int KalteBetriebskostenpunktId { get; set; }
-        public string Bezeichnung { get; set; }
+        public KalteBetriebskosten Bezeichnung { get; set; }
+        public Adresse Adresse { get; set; } = null!;
         public string? Beschreibung { get; set; }
         public UmlageSchluessel Schluessel { get; set; }
+    }
+    public enum KalteBetriebskosten
+    {
+        AllgemeinstromHausbeleuchtung,
+        Breinbandkabelanschluss,
+        Dachrinnenreinigung,
+        EntwaesserungNiederschlagswasser,
+        EntwaesserungSchmutzwasser,
+        Gartenpflege,
+        GebaeudereinigungUngezieverbekaempfung,
+        Grundsteuer,
+        Haftpflichtversicherung,
+        Hauswartarbeiten,
+        Muellbeseitigung,
+        Sachversicherung,
+        Schornsteinfegerarbeiten,
+        Strassenreinigung,
+        WartungThermenSpeicher,
+        Wasserversorgung,
+        WeitereSonstigeNebenkosten,
     }
     public enum UmlageSchluessel
     {
