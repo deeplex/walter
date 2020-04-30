@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -13,13 +14,13 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Garage> Garagen { get; set; } = null!;
         public DbSet<Zaehler> ZaehlerSet { get; set; } = null!;
         public DbSet<Vertrag> Vertraege { get; set; } = null!;
-        public DbSet<MietobjektWohnung> MietobjektWohnungen { get; set; } = null!;
         public DbSet<MietobjektGarage> MietobjektGaragen { get; set; } = null!;
         public DbSet<JuristischePerson> JuristischePersonen { get; set; } = null!;
         public DbSet<Mieter> MieterSet { get; set; } = null!;
         public DbSet<Kontakt> Kontakte { get; set; } = null!;
         public DbSet<Konto> Kontos { get; set; } = null!;
         public DbSet<KalteBetriebskostenpunkt> KalteBetriebskosten { get; set; } = null!;
+        public DbSet<KalteBetriebskostenRechnung> KalteBetriebskostenRechnungen { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             => options.UseSqlite("Data Source=walter.db");
@@ -42,6 +43,7 @@ namespace Deeplex.Saverwalter.Model
         public string Strasse { get; set; } = null!;
         public string Postleitzahl { get; set; } = null!;
         public string Stadt { get; set; } = null!;
+        public List<KalteBetriebskostenpunkt> KalteBetriebskosten { get; } = new List<KalteBetriebskostenpunkt>();
         public List<Wohnung> Wohnungen { get; } = new List<Wohnung>();
     }
 
@@ -80,8 +82,8 @@ namespace Deeplex.Saverwalter.Model
         public Guid VertragId { get; set; }
         public int Version { get; set; }
         public List<Mieter> Mieter { get; } = new List<Mieter>();
-        public List<MietobjektWohnung> Wohnungen { get; } = new List<MietobjektWohnung>();
         public List<MietobjektGarage> Garagen { get; } = new List<MietobjektGarage>();
+        public Wohnung? Wohnung { get; set; }
         public JuristischePerson Vermieter { get; set; } = null!;
         public int Personenzahl { get; set; }
         public DateTime Beginn { get; set; }
@@ -104,32 +106,18 @@ namespace Deeplex.Saverwalter.Model
                 Kontakt = m.Kontakt,
             }).ToList();
 
-            Wohnungen = alt.Wohnungen.Select(w => new MietobjektWohnung
-            {
-                Vertrag = this,
-                WohnungId = w.WohnungId,
-                Wohnung = w.Wohnung,
-            }).ToList();
             Garagen = alt.Garagen.Select(g => new MietobjektGarage
             {
                 Vertrag = this,
                 GarageId = g.GarageId,
                 Garage = g.Garage,
             }).ToList();
+            Wohnung = alt.Wohnung;
             Vermieter = alt.Vermieter;
             Ansprechpartner = alt.Ansprechpartner;
             alt.Ende = Datum.AddDays(-1);
             Beginn = Datum;
         }
-    }
-
-    public class MietobjektWohnung
-    {
-        public int MietobjektWohnungId { get; set; }
-        public int VertragId { get; set; }
-        public Vertrag Vertrag { get; set; } = null!;
-        public int WohnungId { get; set; }
-        public Wohnung Wohnung { get; set; } = null!;
     }
 
     public class MietobjektGarage
@@ -186,35 +174,62 @@ namespace Deeplex.Saverwalter.Model
     {
         public int KalteBetriebskostenpunktId { get; set; }
         public KalteBetriebskosten Bezeichnung { get; set; }
+        public List<KalteBetriebskostenRechnung> Rechnungen { get; } = new List<KalteBetriebskostenRechnung>();
         public Adresse Adresse { get; set; } = null!;
         public string? Beschreibung { get; set; }
         public UmlageSchluessel Schluessel { get; set; }
     }
     public enum KalteBetriebskosten
     {
+        [Description("AllgemeinstromHausbeleuchtung")]
         AllgemeinstromHausbeleuchtung,
+        [Description("Breinbandkabelanschluss")]
         Breinbandkabelanschluss,
+        [Description("Dachrinnenreinigung")]
         Dachrinnenreinigung,
+        [Description("Entwässerung/Niederschlagswasser")]
         EntwaesserungNiederschlagswasser,
+        [Description("Entwässerung/Schmutzwasser")]
         EntwaesserungSchmutzwasser,
+        [Description("Gartenpflege")]
         Gartenpflege,
+        [Description("Gebäudereinigung/Ungezieverbekämpfung")]
         GebaeudereinigungUngezieverbekaempfung,
+        [Description("Grundsteuer")]
         Grundsteuer,
+        [Description("Haftpflichtversicherung")]
         Haftpflichtversicherung,
+        [Description("Hauswartarbeiten")]
         Hauswartarbeiten,
+        [Description("Müllbeseitigung")]
         Muellbeseitigung,
+        [Description("Sachversicherung")]
         Sachversicherung,
+        [Description("Schornsteinfegerarbeiten")]
         Schornsteinfegerarbeiten,
+        [Description("Straßenreinigung")]
         Strassenreinigung,
+        [Description("Wartung Thermen/Speicher")]
         WartungThermenSpeicher,
+        [Description("Wasserversorgung")]
         Wasserversorgung,
+        [Description("Weitere/Sonstige Nebenkosten")]
         WeitereSonstigeNebenkosten,
     }
+
     public enum UmlageSchluessel
     {
         NachWohnflaeche,
         NachNutzeinheit,
         NachPersonenzahl,
         NachVerbrauch,
+    }
+
+    public class KalteBetriebskostenRechnung
+    {
+        public int KalteBetriebskostenRechnungId { get; set; }
+        public KalteBetriebskostenpunkt KalteBetriebskostenpunkt { get; set; } = null!;
+        public int Jahr { get; set; }
+        public double Betrag { get; set; }
     }
 }
