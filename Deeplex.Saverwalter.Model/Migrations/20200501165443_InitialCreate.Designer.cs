@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20200430145554_InitialCreate")]
+    [Migration("20200501165443_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -377,7 +377,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .IsRequired();
 
                     b.HasOne("Deeplex.Saverwalter.Model.Wohnung", "Wohnung")
-                        .WithMany()
+                        .WithMany("Vertraege")
                         .HasForeignKey("WohnungId");
                 });
 

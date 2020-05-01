@@ -375,7 +375,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .IsRequired();
 
                     b.HasOne("Deeplex.Saverwalter.Model.Wohnung", "Wohnung")
-                        .WithMany()
+                        .WithMany("Vertraege")
                         .HasForeignKey("WohnungId");
                 });
 

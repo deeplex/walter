@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace Deeplex.Saverwalter.Print
 {
@@ -67,16 +66,28 @@ namespace Deeplex.Saverwalter.Print
                 .Include(v => v.Wohnung!)
                     .ThenInclude(w => w.Adresse)
                         .ThenInclude(a => a.KalteBetriebskosten)
+                .Include(v => v.Wohnung!)
+                    .ThenInclude(w => w.Adresse)
+                        .ThenInclude(a => a.Wohnungen)
+                            .ThenInclude(w2 => w2.Vertraege)
                 .First();
 
-            var result = 123.45; // TODO has to be calculated.
 
-            var body = new Body(
+            var result = 123.45; // TODO has to be calculated.
+            var Jahr = 2018; // TODO Shouldn't be hard coded and btw must not be 1.1 to 31.12...
+            var Abrechnungsbeginn = new DateTime(Jahr, 1, 1);
+            var Abrechnungsende = new DateTime(Jahr, 12, 31);
+
+            var body = new Body(new SectionProperties(
+                // Margins after DIN5008
+                new PageMargin() { Left = 1418, Right = 567, Top = 958, Bottom = 958, },
+                // DIN A4
+                new PageSize() { Code = 1 }),
                 // p.1
                 AnschriftVermieter(vertrag.Vermieter, vertrag.Ansprechpartner),
                 PostalischerVermerk(vertrag.Mieter),
                 PrintDate(),
-                Betreff(vertrag),
+                Betreff(vertrag, Abrechnungsbeginn, Abrechnungsende),
                 Ergebnis(vertrag.Mieter, result),
                 GenericText(),
                 new Break() { Type = BreakValues.Page },
@@ -86,8 +97,12 @@ namespace Deeplex.Saverwalter.Print
                 Heading("Erläuterungen zu einzelnen Betriebskostenarten"),
                 ExplainKalteBetriebskosten(vertrag.Wohnung!.Adresse.KalteBetriebskosten.Where(k => k.Beschreibung is string).ToList()),
                 new Break() { Type = BreakValues.Page },
+                // p.3
                 Heading("Abrechnung der Nebenkosten (kalten Betriebskosten)"),
-                MietHeader(vertrag.Mieter, vertrag.Wohnung)
+                MietHeader(vertrag.Mieter, vertrag.Wohnung),
+                SubHeading("Angaben zur Abrechnungseinheit"),
+                Abrechnungseinheit(vertrag.Wohnung.Adresse, Abrechnungsbeginn, Abrechnungsende),
+                Abrechnungswohnung(vertrag, vertrag.Wohnung, Abrechnungsbeginn, Abrechnungsende)
             );
 
             return body;
@@ -98,6 +113,15 @@ namespace Deeplex.Saverwalter.Print
             return new Paragraph(new Run(new RunProperties(
                 new Bold() { Val = OnOffValue.FromBoolean(true) },
                 new Italic() { Val = OnOffValue.FromBoolean(true) }),
+                new Text(str)));
+        }
+
+        static Paragraph SubHeading(string str)
+        {
+            return new Paragraph(new Run(
+                new RunProperties(
+                    new Bold() { Val = OnOffValue.FromBoolean(true) },
+                    new SpacingBetweenLines() { After = "0" }),
                 new Text(str)));
         }
 
@@ -179,14 +203,10 @@ namespace Deeplex.Saverwalter.Print
             return para;
         }
 
-        private static Paragraph Betreff(Vertrag Vertrag)
+        private static Paragraph Betreff(Vertrag Vertrag, DateTime Abrechnungsbeginn, DateTime Abrechnungsende)
         {
             var Mieter = Vertrag.Mieter;
             var Adresse = Vertrag.Wohnung!.Adresse;
-
-            var Jahr = 2018;
-            var Abrechnungsbeginn = new DateTime(Jahr, 1, 1);
-            var Abrechnungsende = new DateTime(Jahr, 12, 31);
 
             var Nutzungsbeginn = Abrechnungsbeginn > Vertrag.Beginn
                 ? Abrechnungsbeginn : Vertrag.Beginn;
@@ -273,52 +293,52 @@ namespace Deeplex.Saverwalter.Print
                 new Run(new Text("Die Abrechnung betrifft zunächst die mietvertraglich vereinbarten Nebenkosten (die kalten Betriebskosten). Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses(warme Betriebskosten) werden gesondert berechnet, nach Verbrauch und Wohn -/ Nutzfläche auf die einzelnen Wohnungen umgelegt(= „Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der von Ihnen geleisteten Vorauszahlungen verrechnet. Bei bestehenden Mietrückständen ist das Ergebnis der Abrechnung zusätzlich mit den Mietrückständen verrechnet. Gegebenenfalls bestehende Mietminderungen / Ratenzahlungsvereinbarungen sind hier nicht berücksichtigt, haben aber weiterhin für den vereinbarten Zeitraum Bestand. Aufgelöste oder gekündigte Mietverhältnisse werden durch dieses Schreiben nicht neu begründet. Die Aufstellung, Verteilung und Erläuterung der Gesamtkosten, die Berechnung der Kostenanteile, die Verrechnung der geleisteten Vorauszahlungen und gegebenenfalls die Neuberechnung der monatlichen Vorauszahlungen entnehmen Sie bitte den folgenden Seiten.")));
         }
 
-
         private static Table ExplainUmlageschluessel()
         {
-            static RunProperties Bold() { return new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) }); }
-            static ParagraphProperties NoSpace() { return new ParagraphProperties(new SpacingBetweenLines() { After = "0" }); }
-            static Paragraph Content(string str) { return new Paragraph(NoSpace(), new Run(new Text(str))); }
+            static RunProperties Bold() => new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) });
+            static ParagraphProperties NoSpace() => new ParagraphProperties(new SpacingBetweenLines() { After = "0" });
+            static TableCell Content(string str) => new TableCell(new Paragraph(NoSpace(), new Run(new Text(str))));
+            static TableCell ContentEnd(string str) => new TableCell(new Paragraph(new Run(new Text(str))));
 
             return new Table(
                 // This cell defines the width of the left cell.
                 new TableRow(
                     new TableCell(
-                        new TableCellProperties(new TableCellWidth() { Type = TableWidthUnitValues.Dxa, Width = "1701" }),
+                        new TableCellProperties(new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = "1000" }), // 1000% / 50 = 20%
                         new Paragraph(NoSpace(), new Run(Bold(), new Text("Umlageschlüssel")))),
                     new TableCell(new Paragraph(NoSpace(), new Run(Bold(), new Text("Bedeutung"))))),
                 new TableRow(
-                    new TableCell(Content("n. WF.")),
-                    new TableCell(Content("nach Wohn-/Nutzfläche in m²"))),
+                    Content("n. WF."),
+                    Content("nach Wohn-/Nutzfläche in m²")),
                 new TableRow(
-                    new TableCell(Content("n. NE.")),
-                    new TableCell(Content("nach Anzahl der Wohn-/Nutzeinheiten"))),
+                    Content("n. NE."),
+                    Content("nach Anzahl der Wohn-/Nutzeinheiten")),
                 new TableRow(
-                    new TableCell(Content("n. Pers.")),
-                    new TableCell(Content("nach Personenzahl/Anzahl der Bewohner"))),
+                    Content("n. Pers."),
+                    Content("nach Personenzahl/Anzahl der Bewohner")),
                 new TableRow( // This row has SpacingBeetweenLine.
-                    new TableCell(new Paragraph(new Run(new Text("n. Verb.")))),
-                    new TableCell(new Paragraph(new Run(new Text("nach Verbrauch (in m³ oder in kWh)"))))),
+                    ContentEnd("n. Verb."),
+                    ContentEnd("nach Verbrauch (in m³ oder in kWh)")),
 
                 new TableRow(
                     new TableCell(new Paragraph(NoSpace(), new Run(Bold(), new Text("Umlageweg")))),
                     new TableCell(new Paragraph(NoSpace(), new Run(Bold(), new Text("Beschreibung"))))),
                 new TableRow(
-                    new TableCell(Content("n. WF.")),
-                    new TableCell(Content("Kostenanteil = Kosten je Quadratmeter Wohn-/Nutzfläche mal Anteil Fläche je Wohnung."))),
+                    Content("n. WF."),
+                    Content("Kostenanteil = Kosten je Quadratmeter Wohn-/Nutzfläche mal Anteil Fläche je Wohnung.")),
                 new TableRow(
-                    new TableCell(Content("n. NE.")),
-                    new TableCell(Content("Kostenanteil = Kosten je Wohn-/Nutzeinheit."))),
+                    Content("n. NE."),
+                    Content("Kostenanteil = Kosten je Wohn-/Nutzeinheit.")),
                 new TableRow(
-                    new TableCell(Content("n. Pers.")),
-                    new TableCell(Content("Kostenanteil = Kosten je Hausbewohner mal Anzahl Bewohner je Wohnung."))),
+                    Content("n. Pers."),
+                    Content("Kostenanteil = Kosten je Hausbewohner mal Anzahl Bewohner je Wohnung.")),
                 new TableRow( // This row has SpacingBeetweenLine.
-                    new TableCell(new Paragraph(new Run(new Text("n. Verb.")))),
-                    new TableCell(new Paragraph(new Run(new Text("Kostenanteil = Kosten je Verbrauchseinheit mal individuelle Verbrauchsmenge in Kubikmetern oder Kilowattstunden."))))),
+                    ContentEnd("n. Verb."),
+                    ContentEnd("Kostenanteil = Kosten je Verbrauchseinheit mal individuelle Verbrauchsmenge in Kubikmetern oder Kilowattstunden.")),
 
                 new TableRow(
-                    new TableCell(new Paragraph(new Run(new Text("Anmerkung: ")))),
-                    new TableCell(new Paragraph(new Run(new Text("Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger)Kostenanteil"))))));
+                    ContentEnd("Anmerkung: "),
+                    ContentEnd("Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger)Kostenanteil")));
         }
 
         private static Paragraph ExplainKalteBetriebskosten(IList<KalteBetriebskostenpunkt> items)
@@ -337,6 +357,152 @@ namespace Deeplex.Saverwalter.Print
             }
 
             return para;
+        }
+
+        private static Table Abrechnungseinheit(Adresse Adresse, DateTime Abrechnungsbeginn, DateTime Abrechnungsende)
+        {
+            static RunProperties Bold() => new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) });
+            static ParagraphProperties NoSpace() => new ParagraphProperties(new SpacingBetweenLines() { After = "0" });
+            static TableCell Content(string str)
+            {
+                return new TableCell(
+                    new Paragraph(NoSpace(), new ParagraphProperties(new Justification() { Val = JustificationValues.Center }),
+                    new Run(new Text(str))));
+            }
+            static TableCell HeaderCell(string pct, string str)
+            {
+                return new TableCell(
+                    new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = pct },
+                    new Paragraph(NoSpace(), new ParagraphProperties(new Justification() { Val = JustificationValues.Center }),
+                    new Run(Bold(), new Text(str))));
+            }
+
+            var vertraege = Adresse.Wohnungen.SelectMany(w => w.Vertraege.Where(v =>
+                v.Beginn <= Abrechnungsende && (v.Ende is null || v.Ende >= Abrechnungsbeginn)));
+
+            var table = new Table(
+                new TableRow(
+                    HeaderCell("1050", "Objekt"),
+                    HeaderCell("620", "Wohn-/Nutz- einheiten"),
+                    HeaderCell("565", "Wohnfläche in m²"),
+                    HeaderCell("675", "Nutzfläche Heizung in m²"),
+                    HeaderCell("480", "Haus- bewohner"),
+                    HeaderCell("1120", "Nutzungsintervall"),
+                    HeaderCell("480", "Tage")));
+
+            var Wohnflaeche = Adresse.Wohnungen.Sum(w => w.Wohnflaeche);
+            var Nutzflaeche = Adresse.Wohnungen.Sum(w => w.Nutzflaeche);
+            var Nutzeinheit = Adresse.Wohnungen.Count();
+            var Totaltimespan = ((Abrechnungsende - Abrechnungsbeginn).Days + 1).ToString();
+
+            var intervals = VertraegeIntervallPersonenzahl(vertraege, Abrechnungsbeginn, Abrechnungsende).ToList();
+            for (var i = 0; i < intervals.Count(); i++)
+            {
+                var (beginn, personenzahl) = intervals[i];
+                var f = beginn == Abrechnungsbeginn;
+                var endDate = i + 1 < intervals.Count() ? intervals[i + 1].beginn.AddDays(-1) : Abrechnungsende;
+
+                var timespan = ((endDate - beginn).Days + 1).ToString();
+
+                table.Append(new TableRow( // TODO check for duplicates...
+                    Content(f ? Adresse.Strasse + " " + Adresse.Hausnummer : ""),
+                    Content(f ? Nutzeinheit.ToString() : ""),
+                    Content(f ? Wohnflaeche.ToString() : ""),
+                    Content(f ? Nutzflaeche.ToString() : ""),
+                    Content(personenzahl.ToString()),
+                    Content(beginn.ToShortDateString() + " - " + endDate.ToShortDateString()),
+                    Content(timespan + "/" + Totaltimespan)));
+            };
+
+            return table;
+        }
+
+        private static Table Abrechnungswohnung(Vertrag Vertrag, Wohnung Wohnung, DateTime Abrechnungsbeginn, DateTime Abrechnungsende)
+        {
+            static RunProperties Bold() => new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) });
+            static ParagraphProperties NoSpace() => new ParagraphProperties(new SpacingBetweenLines() { After = "0" });
+            static TableCell Content(string str)
+            {
+                return new TableCell(
+                    new Paragraph(NoSpace(), new ParagraphProperties(new Justification() { Val = JustificationValues.Center }),
+                    new Run(new Text(str))));
+            }
+            static TableCell HeaderCell(string pct, string str)
+            {
+                return new TableCell(
+                    new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = pct },
+                    new Paragraph(NoSpace(), new ParagraphProperties(new Justification() { Val = JustificationValues.Center }),
+                    new Run(Bold(), new Text(str))));
+            }
+
+            var vertraege = Wohnung.Vertraege.Where(v => v.VertragId == Vertrag.VertragId);
+
+            var table = new Table(
+                new TableRow(
+                    HeaderCell("1050", "Ihre Wohnung"),
+                    HeaderCell("620", "Ihre Nutz- einheiten"),
+                    HeaderCell("565", "Ihre Wohn- fläche"),
+                    HeaderCell("675", "Ihre Nutzfläche"),
+                    HeaderCell("480", "Anzahl Bewohner"),
+                    HeaderCell("1120", "Nutzungsintervall"),
+                    HeaderCell("480", "Tage")));
+
+            var Totaltimespan = ((Abrechnungsende - Abrechnungsbeginn).Days + 1).ToString();
+            
+            var f = true;
+            foreach (var vertrag in vertraege)
+            {
+                var endDate = Min(vertrag.Ende ?? Abrechnungsende, Abrechnungsende);
+                var beginDate = Max(vertrag.Beginn, Abrechnungsbeginn);
+
+                var timespan = ((endDate - beginDate).Days + 1).ToString();
+
+                table.Append(new TableRow( // TODO check for duplicates...
+                    Content(f ? Wohnung.Bezeichnung : ""),
+                    Content(f ? 1.ToString() : ""), // TODO  ... 1 ? hmm...
+                    Content(f ? Wohnung.Wohnflaeche.ToString() : ""),
+                    Content(f ? Wohnung.Nutzflaeche.ToString() : ""),
+                    Content(Vertrag.Personenzahl.ToString()),
+                    Content(beginDate.ToShortDateString() + " - " + endDate.ToShortDateString()),
+                    Content(timespan + "/" + Totaltimespan)));
+
+                f = false;
+            };
+
+            return table;
+        }
+
+        private static T Max<T>(T l, T r) where T : IComparable<T>
+            => Max(l, r, Comparer<T>.Default);
+        private static T Max<T>(T l, T r, IComparer<T> c)
+            => c.Compare(l, r) < 0 ? r : l;
+
+        private static T Min<T>(T l, T r) where T : IComparable<T>
+            => Min(l, r, Comparer<T>.Default);
+        private static T Min<T>(T l, T r, IComparer<T> c)
+            => c.Compare(l, r) > 0 ? r : l;
+
+        private static List<(DateTime beginn, int personenzahl)> VertraegeIntervallPersonenzahl(IEnumerable<Vertrag> vertraege, DateTime Abrechnungsbeginn, DateTime Abrechnungsende)
+        {
+            var merged = vertraege
+                .Where(v => v.Beginn <= Abrechnungsende && (v.Ende is null || v.Ende >= Abrechnungsbeginn))
+                .SelectMany(v => new[]
+                {
+                    (Max(v.Beginn, Abrechnungsbeginn), v.Personenzahl),
+                    (Min(v.Ende ?? Abrechnungsende, Abrechnungsende).AddDays(1), -v.Personenzahl)
+                })
+                .GroupBy(t => t.Item1)
+                .Select(g => (beginn: g.Key, personenzahl: g.Sum(t => t.Item2)))
+                .OrderBy(t => t.beginn)
+                .ToList();
+            merged.RemoveAt(merged.Count - 1);
+
+            for (int i = 1, count = merged.Count; i < count; ++i)
+            {
+                merged[i] = (merged[i].beginn, merged[i - 1].personenzahl + merged[i].personenzahl);
+            }
+
+            return merged;
         }
     }
 }

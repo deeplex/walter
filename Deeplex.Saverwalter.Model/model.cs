@@ -53,6 +53,7 @@ namespace Deeplex.Saverwalter.Model
         public string Bezeichnung { get; set; } = null!;
         public double Wohnflaeche { get; set; }
         public double Nutzflaeche { get; set; }
+        public List<Vertrag> Vertraege { get; } = new List<Vertrag>();
         public Adresse Adresse { get; set; } = null!;
     }
 
