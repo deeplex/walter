@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Security.RightsManagement;
 
 namespace Deeplex.Saverwalter.Print
 {
@@ -138,45 +139,36 @@ namespace Deeplex.Saverwalter.Print
                 new Run(new Text(Header)));
         }
 
-        private static Paragraph AnschriftVermieter(JuristischePerson Vermieter, Kontakt Ansprechpartner)
+        private static Table AnschriftVermieter(JuristischePerson Vermieter, Kontakt Ansprechpartner)
         {
-            // TODO Make this a table.
+            static TableCell ContentCellRight(string str) => new TableCell(
+                new Paragraph(NoSpace(), new ParagraphProperties(new Justification() { Val = JustificationValues.Right }),
+                new Run(new Text(str))));
 
-            var para = new Paragraph(new ParagraphProperties(new Tabs(new TabStop()
-            {
-                Val = TabStopValues.Right,
-                Position = 8647, // TODO adapt to right margin
-            })));
+            var table = new Table(
+                new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
+                new TableRow(
+                    ContentCell(Vermieter.Bezeichnung),
+                    ContentCellRight("")),
+                new TableRow(
+                    ContentCell(Ansprechpartner.Vorname + " " + Ansprechpartner.Nachname),
+                    ContentCellRight("Tel.: " + Ansprechpartner.Telefon)),
+                new TableRow(
+                    ContentCell(Ansprechpartner.Adresse!.Strasse + " " + Ansprechpartner.Adresse.Hausnummer),
+                    ContentCellRight("Fax: " + Ansprechpartner.Fax)),
+                new TableRow(
+                    ContentCell(Ansprechpartner.Adresse.Postleitzahl + " " + Ansprechpartner.Adresse.Stadt),
+                    ContentCellRight("E-Mail: " + Ansprechpartner.Email)));
+            table.Append(Enumerable.Range(0, 9 - 4).Select(_ => new Break()));
 
-            var run = para.AppendChild(new Run(
-                new RunProperties(new Bold()
-                {
-                    Val = OnOffValue.FromBoolean(true),
-                }),
-                new Text(Vermieter.Bezeichnung),
-                new Break(), // 1
-                new Text(Ansprechpartner.Vorname + " " + Ansprechpartner.Nachname),
-                new TabChar(),
-                new Text("Tel.: " + Ansprechpartner.Telefon),
-                new Break(), // 2
-                new Text(Ansprechpartner.Adresse!.Strasse + " " + Ansprechpartner.Adresse.Hausnummer),
-                new TabChar(),
-                new Text("Fax: " + Ansprechpartner.Fax),
-                new Break(), // 3
-                new Text(Ansprechpartner.Adresse.Postleitzahl + " " + Ansprechpartner.Adresse.Stadt),
-                new TabChar(),
-                new Text("E-Mail: " + Ansprechpartner.Email)));
-
-            run.Append(Enumerable.Range(0, 9 - 3).Select(_ => new Break()));
-
-            return para;
+            return table;
         }
 
         private static Paragraph PostalischerVermerk(IList<Mieter> Mieter)
         {
             var run = new Run();
-
             int counter = 6;
+
             foreach (var m in Mieter)
             {
                 var anrede = m.Kontakt.Anrede == Anrede.Herr ? "Herrn " : m.Kontakt.Anrede == Anrede.Frau ? "Frau " : "";
@@ -208,12 +200,9 @@ namespace Deeplex.Saverwalter.Print
             var Mieterliste = string.Join(", ",
                 Vertrag.Mieter.Select(m => m.Kontakt.Vorname + " " + m.Kontakt.Nachname));
 
-            var para = new Paragraph(
+            return new Paragraph(
                 new Run(
-                    new RunProperties(new Bold()
-                    {
-                        Val = OnOffValue.FromBoolean(true)
-                    }),
+                    new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) }),
                     new Text("Betriebskostenabrechnung 2018"), // TODO 2018 is hard coded.
                     new Break()),
                 new Run(
@@ -229,8 +218,6 @@ namespace Deeplex.Saverwalter.Print
                     new Text("Nutzungszeitraum: "),
                     new TabChar(),
                     new Text(Nutzungsbeginn.ToShortDateString() + " - " + Nutzungsende.ToShortDateString())));
-
-            return para;
         }
 
         private static Paragraph Ergebnis(IList<Mieter> Mieter, double result)
@@ -271,7 +258,6 @@ namespace Deeplex.Saverwalter.Print
         private static Paragraph GenericText()
         {
             // TODO Text auf Anwesenheit von Heizung oder so testen und anpassen.
-
             return new Paragraph(
                 new ParagraphProperties(new Justification() { Val = JustificationValues.Both, }),
                 new Run(new Text("Die Abrechnung betrifft zunächst die mietvertraglich vereinbarten Nebenkosten (die kalten Betriebskosten). Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses(warme Betriebskosten) werden gesondert berechnet, nach Verbrauch und Wohn -/ Nutzfläche auf die einzelnen Wohnungen umgelegt(= „Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der von Ihnen geleisteten Vorauszahlungen verrechnet. Bei bestehenden Mietrückständen ist das Ergebnis der Abrechnung zusätzlich mit den Mietrückständen verrechnet. Gegebenenfalls bestehende Mietminderungen / Ratenzahlungsvereinbarungen sind hier nicht berücksichtigt, haben aber weiterhin für den vereinbarten Zeitraum Bestand. Aufgelöste oder gekündigte Mietverhältnisse werden durch dieses Schreiben nicht neu begründet. Die Aufstellung, Verteilung und Erläuterung der Gesamtkosten, die Berechnung der Kostenanteile, die Verrechnung der geleisteten Vorauszahlungen und gegebenenfalls die Neuberechnung der monatlichen Vorauszahlungen entnehmen Sie bitte den folgenden Seiten.")));
@@ -384,18 +370,17 @@ namespace Deeplex.Saverwalter.Print
         {
             var vertraege = Wohnung.Vertraege.Where(v => v.VertragId == Vertrag.VertragId);
 
-            var table = new Table(
-                new TableRow(
-                    ContentHeadCenter("1050", "Ihre Wohnung"),
-                    ContentHeadCenter("620", "Ihre Nutz- einheiten"),
-                    ContentHeadCenter("565", "Ihre Wohn- fläche"),
-                    ContentHeadCenter("675", "Ihre Nutzfläche"),
-                    ContentHeadCenter("480", "Anzahl Bewohner"),
-                    ContentHeadCenter("1120", "Nutzungsintervall"),
-                    ContentHeadCenter("480", "Tage")));
+            var table = new Table(new TableRow(
+                ContentHeadCenter("1050", "Ihre Wohnung"),
+                ContentHeadCenter("620", "Ihre Nutz- einheiten"),
+                ContentHeadCenter("565", "Ihre Wohn- fläche"),
+                ContentHeadCenter("675", "Ihre Nutzfläche"),
+                ContentHeadCenter("480", "Anzahl Bewohner"),
+                ContentHeadCenter("1120", "Nutzungsintervall"),
+                ContentHeadCenter("480", "Tage")));
 
             var Totaltimespan = ((Abrechnungsende - Abrechnungsbeginn).Days + 1).ToString();
-            
+
             var f = true;
             foreach (var vertrag in vertraege)
             {
@@ -464,6 +449,7 @@ namespace Deeplex.Saverwalter.Print
                 new Paragraph(NoSpace(), new ParagraphProperties(new Justification() { Val = JustificationValues.Center }),
                 new Run(new Text(str))));
         }
+
         static TableCell ContentHeadCenter(string pct, string str)
         {
             return new TableCell(
