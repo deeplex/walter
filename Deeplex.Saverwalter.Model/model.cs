@@ -182,10 +182,10 @@ namespace Deeplex.Saverwalter.Model
     }
     public enum KalteBetriebskosten
     {
-        [Description("AllgemeinstromHausbeleuchtung")]
+        [Description("Allgemeinstrom/Hausbeleuchtung")]
         AllgemeinstromHausbeleuchtung,
-        [Description("Breinbandkabelanschluss")]
-        Breinbandkabelanschluss,
+        [Description("Breitbandkabelanschluss")]
+        Breitbandkabelanschluss,
         [Description("Dachrinnenreinigung")]
         Dachrinnenreinigung,
         [Description("Entwässerung/Niederschlagswasser")]
@@ -194,8 +194,8 @@ namespace Deeplex.Saverwalter.Model
         EntwaesserungSchmutzwasser,
         [Description("Gartenpflege")]
         Gartenpflege,
-        [Description("Gebäudereinigung/Ungezieverbekämpfung")]
-        GebaeudereinigungUngezieverbekaempfung,
+        [Description("Ungezieferbekämpfung")]
+        Ungezieferbekaempfung,
         [Description("Grundsteuer")]
         Grundsteuer,
         [Description("Haftpflichtversicherung")]
@@ -220,9 +220,13 @@ namespace Deeplex.Saverwalter.Model
 
     public enum UmlageSchluessel
     {
+        [Description("n. WF")]
         NachWohnflaeche,
+        [Description("n. NE")]
         NachNutzeinheit,
+        [Description("n. Pers.")]
         NachPersonenzahl,
+        [Description("n. Verb.")]
         NachVerbrauch,
     }
 

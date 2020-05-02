@@ -7,6 +7,7 @@ namespace Deeplex.Saverwalter.CLI
     {
         private static void Main()
         {
+            //Dummies.CreateDummy();
             Betriebskostenabrechnung.Create();
         }
     }
