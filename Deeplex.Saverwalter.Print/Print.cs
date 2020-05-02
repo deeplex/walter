@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.Print
              * nur ein Vertrag abgehandelt. Das iterieren über eine Liste wird an dieser
              * Stelle also noch nicht implementiert.
             */
-            wordDocument.MainDocumentPart.Document.AppendChild(db.PrintBetriebskostenabrechnung(6));
+            wordDocument.MainDocumentPart.Document.AppendChild(db.PrintBetriebskostenabrechnung(7));
         }
         public static WordprocessingDocument CreateNew(string filepath)
         {
@@ -443,24 +443,27 @@ namespace Deeplex.Saverwalter.Print
                     ContentCellCenter(Percent(NEZeitanteil))),
                 new TableRow(
                     ContentHead("bei Umlage nach Personenzahl (n. Pers.)")));
-            
-            foreach (var v in Vertraege)
-            {
-                var Personenzahl = Wohnung.Adresse.Wohnungen
-                    .SelectMany(w => w.Vertraege)
-                    .Where(v => v.Ende > Vertrag.Beginn && Vertrag.Ende is null || v.Beginn < Vertrag.Ende)
-                    .Sum(a => a.Personenzahl);
 
-                var vBegin = Max(v.Beginn, Abrechnungsbeginn);
-                var vEnd = Min(v.Ende ?? Abrechnungsende, Abrechnungsende);
-                var vZeitraum = ((vEnd - vBegin).Days + 1);
-                var PersZeitanteil = ((double)v.Personenzahl / (double)Personenzahl) * ((double)vZeitraum / (double)Totaltimespan);
+            var Contracts = Wohnung.Adresse.Wohnungen.SelectMany(w => w.Vertraege.Where(v =>
+                v.Beginn <= Ende && (v.Ende is null || v.Ende >= Beginn)));
+            var intervals = VertraegeIntervallPersonenzahl(Contracts, Abrechnungsbeginn, Abrechnungsende).ToList();
+
+            for (var i = 0; i < intervals.Count(); ++i)
+            {
+                var (beginn, personenzahl) = intervals[i];
+                var v = Vertraege.Where(v =>
+                    v.Beginn <= beginn && (v.Ende is null || v.Ende > beginn)).First();
+
+                var endDate = i + 1 < intervals.Count() ? intervals[i + 1].beginn.AddDays(-1) : Abrechnungsende;
+                var timespan = ((endDate - beginn).Days + 1);
+
+                var anteil = ((double)v.Personenzahl / personenzahl) * ((double)timespan / Totaltimespan);
 
                 table.Append(new TableRow(
-                    ContentCellCenter(v.Personenzahl.ToString() + " / " + Personenzahl.ToString()),
-                    ContentCellCenter(vBegin.ToShortDateString() + " - " + vEnd.ToShortDateString()),
-                    ContentCellCenter(vZeitraum.ToString() + " / " + Totaltimespan.ToString()),
-                    ContentCellCenter(Percent(PersZeitanteil))));
+                    ContentCellCenter(v.Personenzahl.ToString() + " / " + personenzahl.ToString()),
+                    ContentCellCenter(beginn.ToShortDateString() + " - " + endDate.ToShortDateString()),
+                    ContentCellCenter(timespan.ToString() + " / " + Totaltimespan.ToString()),
+                    ContentCellCenter(Percent(anteil))));
             }
 
             return table;
@@ -468,17 +471,24 @@ namespace Deeplex.Saverwalter.Print
 
         private static Table ErmittlungKosten(Vertrag Vertrag, Wohnung Wohnung, DateTime Abrechnungsbeginn, DateTime Abrechnungsende, int Jahr)
         {
-            var Wohnflaeche = Wohnung.Adresse.Wohnungen.Sum(w => w.Wohnflaeche);
-            var Nutzeinheit = Wohnung.Adresse.Wohnungen.Count();
-
-            var Vertraege = Wohnung.Vertraege.Where(v => v.VertragId == Vertrag.VertragId).OrderBy(v => v.Beginn);
-            var Beginn = Max(Vertraege.First().Beginn, Abrechnungsbeginn);
-            var Ende = Min(Vertraege.Last().Ende ?? Abrechnungsende, Abrechnungsende);
-            var Nutzungszeitraum = ((Ende - Beginn).Days + 1);
             var Totaltimespan = ((Abrechnungsende - Abrechnungsbeginn).Days + 1);
-            var Zeitanteil = (double)Nutzungszeitraum / (double)Totaltimespan;
-            var WFZeitanteil = (Wohnung.Wohnflaeche / Wohnflaeche) * Zeitanteil;
-            var NEZeitanteil = (1.0 / Nutzeinheit) * Zeitanteil;
+            
+            var Wohnungen = Wohnung.Adresse.Wohnungen;
+            var Wohnflaeche = Wohnungen.Sum(w => w.Wohnflaeche);
+            var Nutzeinheit = Wohnungen.Count();
+
+            var LocalContract = Wohnung.Vertraege.Where(v => v.VertragId == Vertrag.VertragId).OrderBy(v => v.Beginn);
+            var Beginn = Max(LocalContract.First().Beginn, Abrechnungsbeginn);
+            var Ende = Min(LocalContract.Last().Ende ?? Abrechnungsende, Abrechnungsende);
+            var Nutzungszeitraum = ((Ende - Beginn).Days + 1);
+
+            var Contracts = Wohnungen.SelectMany(w => w.Vertraege.Where(v =>
+                v.Beginn <= Ende && (v.Ende is null || v.Ende >= Beginn)));
+            var intervals = VertraegeIntervallPersonenzahl(Contracts, Abrechnungsbeginn, Abrechnungsende).ToList();
+
+            var Zeitanteil = (double)Nutzungszeitraum / Totaltimespan;
+            var WFZeitanteil = Wohnung.Wohnflaeche / Wohnflaeche * Zeitanteil;
+            var NEZeitanteil = 1.0 / Nutzeinheit * Zeitanteil;
 
             var kalteBetriebskosten = Wohnung.Adresse.KalteBetriebskosten.OrderBy(k => k.Bezeichnung);
             var Rechnungen = kalteBetriebskosten.SelectMany(k => k.Rechnungen).Where(r => r.Jahr == Jahr);
@@ -505,8 +515,8 @@ namespace Deeplex.Saverwalter.Print
                 return new TableRow(
                     ContentCell(f ? punkt.Bezeichnung.ToDescriptionString() : ""),
                     ContentCell(f ? punkt.Schluessel.ToDescriptionString() : ""),
-                    ContentCellCenter(f ? zeitraum : ""),
-                    ContentCellRight(f ? string.Format("{0:N2}€", betrag) : ""),
+                    ContentCellCenter(zeitraum),
+                    ContentCellRight(string.Format("{0:N2}€", betrag)), // TODO f ? bold : normal?
                     ContentCellRight(Percent(anteil)),
                     ContentCellRight(string.Format("{0:N2}€", betrag * anteil)));
             }
@@ -516,19 +526,17 @@ namespace Deeplex.Saverwalter.Print
                 if (pt.Schluessel == UmlageSchluessel.NachPersonenzahl)
                 {
                     var first = true;
-                    foreach (var v in Vertraege)
+                    for (var i = 0; i < intervals.Count(); ++i)
                     {
-                        var Personenzahl = Wohnung.Adresse.Wohnungen
-                            .SelectMany(w => w.Vertraege)
-                            .Where(v => v.Ende > Vertrag.Beginn && Vertrag.Ende is null || v.Beginn < Vertrag.Ende)
-                            .Sum(a => a.Personenzahl);
+                        var (beginn, personenzahl) = intervals[i];
+                        var v = LocalContract.Where(v =>
+                            v.Beginn <= beginn && (v.Ende is null || v.Ende > beginn)).First();
 
-                        var vBegin = Max(v.Beginn, Abrechnungsbeginn);
-                        var vEnd = Min(v.Ende ?? Abrechnungsende, Abrechnungsende);
-                        var vZeitraum = ((vEnd - vBegin).Days + 1);
+                        var endDate = i + 1 < intervals.Count() ? intervals[i + 1].beginn.AddDays(-1) : Abrechnungsende;
+                        var timespan = ((endDate - beginn).Days + 1);
 
-                        var zeitraum = vBegin.ToShortDateString() + " - " + vEnd.ToShortDateString();
-                        var anteil = ((double)v.Personenzahl / (double)Personenzahl) * ((double)vZeitraum / (double)Totaltimespan);
+                        var zeitraum = beginn.ToShortDateString() + " - " + endDate.ToShortDateString();
+                        var anteil = ((double)v.Personenzahl / personenzahl) * ((double)timespan / Totaltimespan);
 
                         table.Append(kostenPunkt(pt, zeitraum, Jahr, anteil, first));
                         first = false;
