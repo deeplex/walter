@@ -83,7 +83,7 @@ namespace Deeplex.Saverwalter.Print
                 // Margins after DIN5008
                 new PageMargin() { Left = 1418, Right = 567, Top = 958, Bottom = 958, },
                 // DIN A4
-                new PageSize() { Code = 1 }),
+                new PageSize() { Code = 9, Width = 11906, Height = 16838 }),
                 // p.1
                 AnschriftVermieter(vertrag.Vermieter, vertrag.Ansprechpartner),
                 PostalischerVermerk(vertrag.Mieter),
