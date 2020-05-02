@@ -103,7 +103,9 @@ namespace Deeplex.Saverwalter.Print
                 MietHeader(vertrag.Mieter, vertrag.Wohnung),
                 SubHeading("Angaben zur Abrechnungseinheit"),
                 Abrechnungseinheit(vertrag.Wohnung.Adresse, Abrechnungsbeginn, Abrechnungsende),
-                Abrechnungswohnung(vertrag, vertrag.Wohnung, Abrechnungsbeginn, Abrechnungsende)
+                Abrechnungswohnung(vertrag, vertrag.Wohnung, Abrechnungsbeginn, Abrechnungsende),
+                new Paragraph(),
+                ErmittlungEinheiten(vertrag, vertrag.Wohnung, Abrechnungsbeginn, Abrechnungsende)
             );
 
             return body;
@@ -268,10 +270,8 @@ namespace Deeplex.Saverwalter.Print
             return new Table(
                 // This cell defines the width of the left cell.
                 new TableRow(
-                    new TableCell(
-                        new TableCellProperties(new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = "1000" }), // 1000% / 50 = 20%
-                        new Paragraph(NoSpace(), new Run(Bold(), new Text("Umlageschlüssel")))),
-                    new TableCell(new Paragraph(NoSpace(), new Run(Bold(), new Text("Bedeutung"))))),
+                    ContentHead("1000", "Umlageschlüssel"),
+                    ContentHead("Bedeutung")),
                 new TableRow(
                     ContentCell("n. WF."),
                     ContentCell("nach Wohn-/Nutzfläche in m²")),
@@ -389,7 +389,7 @@ namespace Deeplex.Saverwalter.Print
 
                 var timespan = ((endDate - beginDate).Days + 1).ToString();
 
-                table.Append(new TableRow( // TODO check for duplicates...
+                table.Append(new TableRow( // TODO the last one should have SpacingBetweenLines... 
                     ContentCellCenter(f ? Wohnung.Bezeichnung : ""),
                     ContentCellCenter(f ? 1.ToString() : ""), // TODO  ... 1 ? hmm...
                     ContentCellCenter(f ? Wohnung.Wohnflaeche.ToString() : ""),
@@ -403,6 +403,69 @@ namespace Deeplex.Saverwalter.Print
 
             return table;
         }
+
+        private static Table ErmittlungEinheiten(Vertrag Vertrag, Wohnung Wohnung, DateTime Abrechnungsbeginn, DateTime Abrechnungsende)
+        {
+            var Wohnflaeche = Wohnung.Adresse.Wohnungen.Sum(w => w.Wohnflaeche);
+            var Nutzeinheit = Wohnung.Adresse.Wohnungen.Count();
+
+            var Vertraege = Wohnung.Vertraege.Where(v => v.VertragId == Vertrag.VertragId).OrderBy(v => v.Beginn);
+            var Beginn = Max(Vertraege.First().Beginn, Abrechnungsbeginn);
+            var Ende = Min(Vertraege.Last().Ende ?? Abrechnungsende, Abrechnungsende);
+
+            var Nutzungszeitraum = ((Ende - Beginn).Days + 1);
+            var Totaltimespan = ((Abrechnungsende - Abrechnungsbeginn).Days + 1);
+
+            var Zeitanteil = (double)Nutzungszeitraum / (double)Totaltimespan;
+
+            var WFZeitanteil = (Wohnung.Wohnflaeche / Wohnflaeche) * Zeitanteil;
+            var NEZeitanteil = (1.0 / Nutzeinheit) * Zeitanteil;
+
+            var table = new Table(
+                new TableRow(ContentHead("2000", "Ermittlung Ihrer Einheiten")),
+                new TableRow(
+                    ContentHead("bei Umlage nach Wohnfläche (n. WF)"),
+                    ContentHeadCenter("1620", "Nutzungsintervall"),
+                    ContentHeadCenter("480", "Tage"),
+                    ContentHeadCenter("900", "Ihr Anteil")),
+                new TableRow(
+                    ContentCellCenter(Wohnung.Wohnflaeche.ToString() + " / " + Wohnflaeche.ToString()),
+                    ContentCellCenter(Beginn.ToShortDateString() + " - " + Ende.ToShortDateString()),
+                    ContentCellCenter(Nutzungszeitraum.ToString() + " / " + Totaltimespan.ToString()),
+                    ContentCellCenter(Percent(WFZeitanteil))),
+                new TableRow(
+                    ContentHead("bei Umlage nach Nutzeinheiten (n. NE)")),
+                new TableRow(
+                    ContentCellCenter(1.ToString() + " / " + Nutzeinheit),
+                    ContentCellCenter(Beginn.ToShortDateString() + " - " + Ende.ToShortDateString()),
+                    ContentCellCenter(Nutzungszeitraum.ToString() + " / " + Totaltimespan.ToString()),
+                    ContentCellCenter(Percent(NEZeitanteil))),
+                new TableRow(
+                    ContentHead("bei Umlage nach Personenzahl (n. Pers.)")));
+            
+            foreach (var v in Vertraege)
+            {
+                var Personenzahl = Wohnung.Adresse.Wohnungen
+                    .SelectMany(w => w.Vertraege)
+                    .Where(v => v.Ende > Vertrag.Beginn && Vertrag.Ende is null || v.Beginn < Vertrag.Ende)
+                    .Sum(a => a.Personenzahl);
+
+                var vBegin = Max(v.Beginn, Abrechnungsbeginn);
+                var vEnd = Min(v.Ende ?? Abrechnungsende, Abrechnungsende);
+                var vZeitraum = ((vEnd - vBegin).Days + 1);
+                var PersZeitanteil = ((double)v.Personenzahl / (double)Personenzahl) * ((double)vZeitraum / (double)Totaltimespan);
+
+                table.Append(new TableRow(
+                    ContentCellCenter(v.Personenzahl.ToString() + " / " + Personenzahl.ToString()),
+                    ContentCellCenter(vBegin.ToShortDateString() + " - " + vEnd.ToShortDateString()),
+                    ContentCellCenter(vZeitraum.ToString() + " / " + Totaltimespan.ToString()),
+                    ContentCellCenter(Percent(PersZeitanteil))));
+            }
+
+            return table;
+        }
+
+        private static string Percent(double d) => string.Format("{0:N2}%", d * 100);
 
         private static T Max<T>(T l, T r) where T : IComparable<T>
             => Max(l, r, Comparer<T>.Default);
@@ -441,6 +504,13 @@ namespace Deeplex.Saverwalter.Print
         static ParagraphProperties NoSpace() => new ParagraphProperties(new SpacingBetweenLines() { After = "0" });
 
         static TableCell ContentCell(string str) => new TableCell(new Paragraph(NoSpace(), new Run(new Text(str))));
+        static TableCell ContentHead(string str) => new TableCell(new Paragraph(NoSpace(), new Run(Bold(), new Text(str))));
+        static TableCell ContentHead(string pct, string str)
+        {
+            return new TableCell(
+                new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = pct },
+                new Paragraph(NoSpace(), new Run(Bold(), new Text(str))));
+        }
         static TableCell ContentCellEnd(string str) => new TableCell(new Paragraph(new Run(new Text(str))));
 
         static TableCell ContentCellCenter(string str)
