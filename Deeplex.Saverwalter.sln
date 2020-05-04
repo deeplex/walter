@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.Model",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.CLI", "Deeplex.Saverwalter.CLI\Deeplex.Saverwalter.CLI.csproj", "{8293BA49-2BD2-4888-A742-DC576DB19BD1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deeplex.Saverwalter.Print", "Deeplex.Saverwalter.Print\Deeplex.Saverwalter.Print.csproj", "{54CAB3F2-F07C-4D88-B50C-D140C0F799E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.Print", "Deeplex.Saverwalter.Print\Deeplex.Saverwalter.Print.csproj", "{54CAB3F2-F07C-4D88-B50C-D140C0F799E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
