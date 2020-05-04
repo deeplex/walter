@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel;
 
 namespace Deeplex.Saverwalter.Model
@@ -13,6 +12,9 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Wohnung> Wohnungen { get; set; } = null!;
         public DbSet<Garage> Garagen { get; set; } = null!;
         public DbSet<Zaehler> ZaehlerSet { get; set; } = null!;
+        public DbSet<Zaehlergemeinschaft> Zaehlergemeinschaften { get; set; } = null!;
+        public DbSet<Zaehlerstand> Zaehlerstaende { get; set; } = null!;
+        public DbSet<WarmeBetriebskostenRechnung> WarmeBetriebskostenRechnungen { get; set; } = null!;
         public DbSet<Vertrag> Vertraege { get; set; } = null!;
         public DbSet<MietobjektGarage> MietobjektGaragen { get; set; } = null!;
         public DbSet<JuristischePerson> JuristischePersonen { get; set; } = null!;
@@ -54,6 +56,8 @@ namespace Deeplex.Saverwalter.Model
         public double Wohnflaeche { get; set; }
         public double Nutzflaeche { get; set; }
         public List<Vertrag> Vertraege { get; } = new List<Vertrag>();
+        public List<Zaehler> Zaehler { get; } = new List<Zaehler>();
+        public List<Zaehlergemeinschaft> Zaehlergemeinschaften { get; } = new List<Zaehlergemeinschaft>();
         public Adresse Adresse { get; set; } = null!;
     }
 
@@ -62,19 +66,53 @@ namespace Deeplex.Saverwalter.Model
         public int GarageId { get; set; }
     }
 
+
+    public class Zaehlergemeinschaft
+    {
+        public int ZaehlergemeinschaftId { get; set; }
+        public Allgemeinzaehler Allgemeinzaehler { get; set; } = null!;
+        public Wohnung Wohnung { get; set; } = null!;
+        public Zaehlertyp Typ { get; set; }
+    }
+
+    public class Allgemeinzaehler
+    {
+        public int AllgemeinzaehlerId { get; set; }
+        public List<Zaehlergemeinschaft> Zaehlergemeinschaften { get; } = new List<Zaehlergemeinschaft>();
+        public List<WarmeBetriebskostenRechnung> Rechnungen { get; } = new List<WarmeBetriebskostenRechnung>();
+        public string? Beschreibung { get; set; }
+    }
+
     public class Zaehler
     {
         public int ZaehlerId { get; set; }
         public Wohnung Wohnung { get; set; } = null!;
         public Zaehlertyp Typ { get; set; }
+        public List<Zaehlerstand> Staende { get; } = new List<Zaehlerstand>();
     }
 
     public enum Zaehlertyp
     {
-        WarmWasser,
+        Warmwasser,
         Kaltwasser,
         Strom,
         Gas,
+    }
+
+    public class WarmeBetriebskostenRechnung
+    {
+        public int WarmeBetriebskostenRechnungId { get; set; }
+        public Allgemeinzaehler Allgemeinzaehler { get; set; } = null!;
+        public int Jahr { get; set; }
+        public double Betrag { get; set; }
+    }
+
+    public class Zaehlerstand
+    {
+        public int ZaehlerstandId { get; set; }
+        public Zaehler Zaehler { get; set; } = null!;
+        public DateTime Datum { get; set; }
+        public double Stand { get; set; }
     }
 
     public class Vertrag
@@ -171,6 +209,7 @@ namespace Deeplex.Saverwalter.Model
         public string Bank { get; set; } = null!;
         public string Iban { get; set; } = null!;
     }
+
     public class KalteBetriebskostenpunkt
     {
         public int KalteBetriebskostenpunktId { get; set; }
@@ -180,6 +219,7 @@ namespace Deeplex.Saverwalter.Model
         public string? Beschreibung { get; set; }
         public UmlageSchluessel Schluessel { get; set; }
     }
+
     public enum KalteBetriebskosten
     {
         [Description("Allgemeinstrom/Hausbeleuchtung")]
