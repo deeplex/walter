@@ -32,8 +32,7 @@
                 <controls:DataGridTextColumn
                             Header="Vorname"
                             Tag="Vorname"
-                            Binding="{Binding Vorname.Value}"
-                            CanUserSort="False"/>
+                            Binding="{Binding Vorname.Value}"/>
                 <controls:DataGridTextColumn
                             Header="Nachname"
                             Tag="Nachname"
@@ -41,7 +40,7 @@
                 <controls:DataGridTextColumn
                             Header="Anschrift"
                             Tag="Anschrift"
-                            Binding="{Binding Anschrift.Value}"/>
+                            Binding="{Binding Anschrift}"/>
                 <controls:DataGridTextColumn
                             Header="E-Mail"
                             Tag="Email"

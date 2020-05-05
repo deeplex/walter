@@ -20,8 +20,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<string> Mobil { get; } = new ObservableProperty<string>();
 
         public string Anschrift => Adresse.Value is Adresse a ?
-            (a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt) : ""; 
-
+            a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt : "";
+        
         public KontaktViewModel(Kontakt k)
         {
             Id = k.KontaktId;

@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public KontaktListViewModel(SaverwalterContext Walter)
         {
-            Kontakte = Walter.Kontakte.Select(k => new KontaktViewModel(k)).ToList();
+            Kontakte = Walter.Kontakte.Include(k => k.Adresse).Select(k => new KontaktViewModel(k)).ToList();
         }
     }
 }
