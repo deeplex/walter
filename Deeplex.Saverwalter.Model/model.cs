@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
+using Windows.Storage;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -25,7 +26,8 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<KalteBetriebskostenRechnung> KalteBetriebskostenRechnungen { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlite("Data Source=walter.db");
+            // TODO adjust this...
+            => options.UseSqlite("Data Source=" + ApplicationData.Current.LocalFolder.Path + @"\walter.db");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -1,0 +1,61 @@
+﻿<Page
+    x:Class="Deeplex.Saverwalter.App.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Deeplex.Saverwalter.App"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid
+        x:Name="LayoutRoot"
+        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+        <NavigationView
+            PaneDisplayMode="Left"
+            x:Name="NavView"
+            OpenPaneLength="160"
+            AlwaysShowHeader="False"
+            IsSettingsVisible="True"
+            ItemInvoked="NavView_ItemInvoked"
+            BackRequested="NavView_BackRequested"
+            IsBackEnabled="{x:Bind AppFrame.CanGoBack, Mode=OneWay}">
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem
+                    x:Name="KontaktListMenuItem"
+                    Content="{x:Bind KontaktListLabel}"
+                    Icon="ContactInfo"/>
+                <NavigationViewItem
+                    x:Name="WohnungListMenuItem"
+                    Content="{x:Bind WohnungListLabel}" 
+                    Icon="Home"/>
+                <NavigationViewItem
+                    x:Name="VertragListMenuItem"
+                    Content="{x:Bind VertragListLabel}" 
+                    Icon="Document"/>
+            </NavigationView.MenuItems>
+
+            <NavigationView.PaneFooter>
+                <StackPanel>
+                    <!--TODO about?-->
+                </StackPanel>
+            </NavigationView.PaneFooter>
+
+            <Frame
+                x:Name="frame"
+                Margin="0,0,0,0">
+                <Frame.ContentTransitions>
+                    <TransitionCollection>
+                        <NavigationThemeTransition>
+                            <NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                                <EntranceNavigationTransitionInfo />
+                            </NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                        </NavigationThemeTransition>
+                    </TransitionCollection>
+                </Frame.ContentTransitions>
+            </Frame>
+        </NavigationView>
+    </Grid>
+</Page>
