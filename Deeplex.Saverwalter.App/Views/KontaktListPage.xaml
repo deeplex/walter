@@ -5,55 +5,80 @@
     xmlns:local="using:Deeplex.Saverwalter.App.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
-            <AppBarButton Icon="Add" Label="Add"/>
-            <AppBarButton Icon="Edit" Label="Edit"/>
-            <AppBarButton Icon="Delete" Label="Delete"/>
-            <CommandBar.SecondaryCommands>
-                <AppBarButton Icon="Setting" Label="Settings">
-                    <AppBarButton.KeyboardAccelerators>
-                        <KeyboardAccelerator Modifiers="Control" Key="I" />
-                    </AppBarButton.KeyboardAccelerators>
-                </AppBarButton>
-            </CommandBar.SecondaryCommands>
-        </CommandBar>
-        <controls:DataGrid
+        <RelativePanel>
+            <TextBlock x:Name="Title"
+                Style="{StaticResource TitleTextBlockStyle}"
+                Margin="10,0,0,0"
+                Text="Kontakte" />
+            <CommandBar
+                x:Name="ButtonRow"
+                Background="Transparent"
+                IsOpen="False"
+                RelativePanel.LeftOf="KontaktFilter"
+                HorizontalAlignment="Stretch"
+                DefaultLabelPosition="Right">
+                <AppBarButton Icon="Add" Label="Add"/>
+                <AppBarButton Click="Details_Click" Icon="ContactInfo" Label="Details"/>
+                <AppBarButton Icon="Delete" Label="Delete"/>
+                <CommandBar.SecondaryCommands>
+                    <AppBarButton Icon="Setting" Label="Settings">
+                        <AppBarButton.KeyboardAccelerators>
+                            <KeyboardAccelerator Modifiers="Control" Key="I" />
+                        </AppBarButton.KeyboardAccelerators>
+                    </AppBarButton>
+                </CommandBar.SecondaryCommands>
+            </CommandBar>
+            <AutoSuggestBox
+                x:Name="KontaktFilter"
+                PlaceholderText="Filter Kontakte..."
+                RelativePanel.AlignRightWithPanel="True"
+                Width="240"
+                QueryIcon="Find"/>
+
+            <Grid
+                RelativePanel.AlignLeftWithPanel="True"
+                RelativePanel.AlignRightWithPanel="True"
+                RelativePanel.Below="Title">
+                <mtuuc:DataGrid
+                    IsReadOnly="True"
                     CanUserReorderColumns="False"
                     CanUserResizeColumns="True"
                     AutoGenerateColumns="False"
-                    BorderThickness="0"
-                    ItemsSource="{x:Bind ViewModel.Kontakte}">
-            <controls:DataGrid.Columns>
-                <controls:DataGridTextColumn
+                    SelectedItem="{x:Bind ViewModel.SelectedKontakt.Value, Mode=TwoWay}"
+                    ItemsSource="{x:Bind ViewModel.Kontakte.Value}">
+                    <mtuuc:DataGrid.Columns>
+                        <mtuuc:DataGridTextColumn
                             Header="Vorname"
                             Tag="Vorname"
                             Binding="{Binding Vorname.Value}"/>
-                <controls:DataGridTextColumn
+                        <mtuuc:DataGridTextColumn
                             Header="Nachname"
                             Tag="Nachname"
                             Binding="{Binding Nachname.Value}"/>
-                <controls:DataGridTextColumn
+                        <mtuuc:DataGridTextColumn
                             Header="Anschrift"
                             Tag="Anschrift"
                             Binding="{Binding Anschrift}"/>
-                <controls:DataGridTextColumn
+                        <mtuuc:DataGridTextColumn
                             Header="E-Mail"
                             Tag="Email"
                             Binding="{Binding Email.Value}"/>
-                <controls:DataGridTextColumn
+                        <mtuuc:DataGridTextColumn
                             Header="Telefon"
                             Tag="Telefon"
                             Binding="{Binding Telefon.Value}"/>
-                <controls:DataGridTextColumn
+                        <mtuuc:DataGridTextColumn
                             Header="Mobil"
                             Tag="Mobil"
                             Binding="{Binding Mobil.Value}"/>
-            </controls:DataGrid.Columns>
-        </controls:DataGrid>
+                    </mtuuc:DataGrid.Columns>
+                </mtuuc:DataGrid>
+            </Grid>
+        </RelativePanel>
     </Grid>
 </Page>

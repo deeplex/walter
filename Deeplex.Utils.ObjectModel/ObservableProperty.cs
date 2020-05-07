@@ -27,8 +27,8 @@ namespace Deeplex.Utils.ObjectModel
 
         public T Value
         {
-            get { return mValue; }
-            set { SetProperty(ref mValue, value); }
+            get => mValue;
+            set => SetProperty(ref mValue, value);
         }
     }
 }

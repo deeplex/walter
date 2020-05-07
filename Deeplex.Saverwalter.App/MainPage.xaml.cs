@@ -14,6 +14,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Deeplex.Saverwalter.App.Views;
 using Deeplex.Saverwalter.Model;
+using Microsoft.EntityFrameworkCore;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -31,8 +32,6 @@ namespace Deeplex.Saverwalter.App
 
         public Frame AppFrame => frame;
 
-        public static SaverwalterContext Walter { get; } = new SaverwalterContext();
-
         public readonly string KontaktListLabel = "Kontakte";
         public readonly string VertragListLabel = "Verträge";
         public readonly string WohnungListLabel = "Wohnungen";
@@ -43,6 +42,7 @@ namespace Deeplex.Saverwalter.App
             var pageType =
                 args.IsSettingsInvoked ? typeof(SettingsPage) :
                 label == KontaktListLabel ? typeof(KontaktListPage) :
+                label == WohnungListLabel ? typeof(AdresseListPage) :
                 label == VertragListLabel ? typeof(VertragListPage) :
                 null;
             if (pageType != null && pageType != AppFrame.CurrentSourcePageType)

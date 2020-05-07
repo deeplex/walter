@@ -1,0 +1,68 @@
+﻿<Page
+    x:Class="Deeplex.Saverwalter.App.Views.KontaktDetailPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Deeplex.Saverwalter.App.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <Style x:Name="Eintraege" TargetType="TextBox">
+            <Setter Property="Width" Value="250"/>
+            <Setter Property="TextWrapping" Value="NoWrap"/>
+            <Setter Property="Margin" Value="20,20,0,0"/>
+            <Setter Property="IsEnabled" Value="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid>
+        <RelativePanel>
+            <TextBlock x:Name="Title"
+                Style="{StaticResource TitleTextBlockStyle}"
+                Margin="10,0,0,0"
+                Text="{x:Bind ViewModel.Name}"/>
+
+            <CommandBar
+                x:Name="ButtonRow"
+                Background="Transparent"
+                IsOpen="False"
+                RelativePanel.AlignRightWithPanel="True"
+                HorizontalAlignment="Stretch"
+                DefaultLabelPosition="Right">
+                <AppBarButton
+                    Icon="Edit"
+                    Label="Edit"
+                    Command="{x:Bind ViewModel.BeginEdit}"/>
+                <AppBarButton Icon="Delete" Label="Delete"/>
+                <AppBarButton
+                    Icon="Save"
+                    Label="Save"
+                    Command="{x:Bind ViewModel.SaveEdit}" />
+                <CommandBar.SecondaryCommands>
+                    <AppBarButton Icon="Setting" Label="Settings">
+                        <AppBarButton.KeyboardAccelerators>
+                            <KeyboardAccelerator Modifiers="Control" Key="I" />
+                        </AppBarButton.KeyboardAccelerators>
+                    </AppBarButton>
+                </CommandBar.SecondaryCommands>
+            </CommandBar>
+            <Grid
+                RelativePanel.AlignLeftWithPanel="True"
+                RelativePanel.AlignRightWithPanel="True"
+                RelativePanel.Below="Title">
+                <RelativePanel>
+                    <TextBox x:Name="Vorname" Header="Vorname" Text="{x:Bind ViewModel.Vorname.Value, Mode=OneWay}" Style="{StaticResource Eintraege}" HorizontalAlignment="Left"/>
+                    <TextBox x:Name="Nachname" Header="Nachname" Text="{x:Bind ViewModel.Nachname.Value}" Style="{StaticResource Eintraege}" RelativePanel.RightOf="Vorname"/>
+                    <AutoSuggestBox x:Name="Adresse" Header="Anschrift" Text="{x:Bind ViewModel.Anschrift}" QueryIcon="Home" IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}" Width ="520" Margin="20,20,0,0" RelativePanel.Below="Vorname"/>
+                    <TextBox x:Name="Email" Header="E-Mail" Text="{x:Bind ViewModel.Email.Value}" Style="{StaticResource Eintraege}" RelativePanel.Below="Adresse"/>
+                    <TextBox x:Name="Fax" Header="Fax" Text="{x:Bind ViewModel.Fax.Value}" Style="{StaticResource Eintraege}" RelativePanel.Below="Adresse" RelativePanel.RightOf="Email"/>
+                    <TextBox x:Name="Telefon" Header="Telefon" Text="{x:Bind ViewModel.Telefon.Value}" Style="{StaticResource Eintraege}" RelativePanel.Below="Email"/>
+                    <TextBox x:Name="Mobil" Header="Mobil" Text="{x:Bind ViewModel.Mobil.Value}" Style="{StaticResource Eintraege}" RelativePanel.Below="Fax" RelativePanel.RightOf="Telefon"/>
+                </RelativePanel>
+            </Grid>
+        </RelativePanel>
+    </Grid>
+</Page>

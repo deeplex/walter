@@ -15,6 +15,8 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.App.ViewModels;
 
 namespace Deeplex.Saverwalter.App
 {
@@ -24,9 +26,17 @@ namespace Deeplex.Saverwalter.App
     sealed partial class App : Application
     {
         /// <summary>
+        /// Gets the app-wide MainViewModel singleton instance.
+        /// </summary>
+        public static MainViewModel ViewModel { get; private set;  }
+
+        public static SaverwalterContext Walter { get; private set; }
+
+        /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
         /// </summary>
+        ///
         public App()
         {
             // TODO: remove... This is to check where Walter has to go... Check todo in Model.cs aswell.
@@ -44,6 +54,8 @@ namespace Deeplex.Saverwalter.App
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
+             Walter = new SaverwalterContext();
+             ViewModel = new MainViewModel();
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,

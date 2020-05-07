@@ -9,43 +9,61 @@ using Deeplex.Saverwalter.Model;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class KontaktViewModel
+    public class KontaktViewModel : BindableBase
     {
         public int Id { get; }
         public ObservableProperty<string> Vorname { get; } = new ObservableProperty<string>();
         public ObservableProperty<string> Nachname { get; } = new ObservableProperty<string>();
-        public ObservableProperty<Adresse> Adresse { get; } = new ObservableProperty<Adresse>();
+        public ObservableProperty<AdresseViewModel> Adresse { get; } = new ObservableProperty<AdresseViewModel>();
         public ObservableProperty<string> Email { get; } = new ObservableProperty<string>();
         public ObservableProperty<string> Telefon { get; } = new ObservableProperty<string>();
         public ObservableProperty<string> Mobil { get; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Fax { get; } = new ObservableProperty<string>();
 
-        public string Anschrift => Adresse.Value is Adresse a ?
-            a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt : "";
+        public string Anschrift => Adresse.Value is AdresseViewModel a ?
+            a.Strasse.Value + " " + a.Hausnummer.Value + ", " +
+            a.Postleitzahl.Value + " " + a.Stadt.Value : "";
+
+        public string Name => Vorname.Value + " " + Nachname.Value;
         
         public KontaktViewModel(Kontakt k)
         {
             Id = k.KontaktId;
             Vorname.Value = k.Vorname ?? "";
             Nachname.Value = k.Nachname ?? "";
-            Adresse.Value = k.Adresse;
+            Adresse.Value = k.Adresse is Adresse ? new AdresseViewModel(k.Adresse) : null;
             Email.Value = k.Email ?? "";
+            Fax.Value = k.Fax ?? "";
             Telefon.Value = k.Telefon ?? "";
             Mobil.Value = k.Mobil ?? "";
+
+            BeginEdit = new RelayCommand(_ => IsInEdit.Value = true, _ => !IsInEdit.Value);
+            IsInEdit.PropertyChanged += (_, ev) => BeginEdit.RaiseCanExecuteChanged(ev);
+
+            SaveEdit = new RelayCommand(_ =>
+            {
+                IsInEdit.Value = false;
+
+                k.Vorname = Vorname.Value;
+                k.Nachname = Nachname.Value;
+                k.Email = Email.Value;
+                k.Telefon = Telefon.Value;
+                k.Mobil = Mobil.Value;
+                k.Fax = Fax.Value;
+
+                App.Walter.Kontakte.Update(k);
+                App.Walter.SaveChanges();
+
+            }, _ => IsInEdit.Value);
+            IsInEdit.PropertyChanged += (_, ev) => SaveEdit.RaiseCanExecuteChanged(ev);
+
+            IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
         }
 
-        public void BeginEdit()
-        {
-            throw new NotImplementedException();
-        }
+        public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
+        public bool IsNotInEdit => !IsInEdit.Value;
 
-        public void CancelEdit()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EndEdit()
-        {
-            throw new NotImplementedException();
-        }
+        public RelayCommand BeginEdit { get; }
+        public RelayCommand SaveEdit { get; }
     }
 }
