@@ -47,8 +47,8 @@ namespace Deeplex.Saverwalter.Model
         public string Strasse { get; set; } = null!;
         public string Postleitzahl { get; set; } = null!;
         public string Stadt { get; set; } = null!;
-        public List<KalteBetriebskostenpunkt> KalteBetriebskosten { get; } = new List<KalteBetriebskostenpunkt>();
-        public List<Wohnung> Wohnungen { get; } = new List<Wohnung>();
+        public List<KalteBetriebskostenpunkt> KalteBetriebskosten { get; private set; } = new List<KalteBetriebskostenpunkt>();
+        public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
     }
 
     public class Wohnung
@@ -57,9 +57,9 @@ namespace Deeplex.Saverwalter.Model
         public string Bezeichnung { get; set; } = null!;
         public double Wohnflaeche { get; set; }
         public double Nutzflaeche { get; set; }
-        public List<Vertrag> Vertraege { get; } = new List<Vertrag>();
-        public List<Zaehler> Zaehler { get; } = new List<Zaehler>();
-        public List<Zaehlergemeinschaft> Zaehlergemeinschaften { get; } = new List<Zaehlergemeinschaft>();
+        public List<Vertrag> Vertraege { get; private set; } = new List<Vertrag>();
+        public List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
+        public List<Zaehlergemeinschaft> Zaehlergemeinschaften { get; private set; } = new List<Zaehlergemeinschaft>();
         public Adresse Adresse { get; set; } = null!;
     }
 
@@ -80,8 +80,8 @@ namespace Deeplex.Saverwalter.Model
     public class Allgemeinzaehler
     {
         public int AllgemeinzaehlerId { get; set; }
-        public List<Zaehlergemeinschaft> Zaehlergemeinschaften { get; } = new List<Zaehlergemeinschaft>();
-        public List<WarmeBetriebskostenRechnung> Rechnungen { get; } = new List<WarmeBetriebskostenRechnung>();
+        public List<Zaehlergemeinschaft> Zaehlergemeinschaften { get; private set; } = new List<Zaehlergemeinschaft>();
+        public List<WarmeBetriebskostenRechnung> Rechnungen { get; private set; } = new List<WarmeBetriebskostenRechnung>();
         public string? Beschreibung { get; set; }
     }
 
@@ -90,7 +90,7 @@ namespace Deeplex.Saverwalter.Model
         public int ZaehlerId { get; set; }
         public Wohnung Wohnung { get; set; } = null!;
         public Zaehlertyp Typ { get; set; }
-        public List<Zaehlerstand> Staende { get; } = new List<Zaehlerstand>();
+        public List<Zaehlerstand> Staende { get; private set; } = new List<Zaehlerstand>();
     }
 
     public enum Zaehlertyp
@@ -122,8 +122,8 @@ namespace Deeplex.Saverwalter.Model
         public int rowid { get; set; }
         public Guid VertragId { get; set; }
         public int Version { get; set; }
-        public List<Mieter> Mieter { get; } = new List<Mieter>();
-        public List<MietobjektGarage> Garagen { get; } = new List<MietobjektGarage>();
+        public List<Mieter> Mieter { get; private set; } = new List<Mieter>();
+        public List<MietobjektGarage> Garagen { get; private set; } = new List<MietobjektGarage>();
         public Wohnung? Wohnung { get; set; }
         public JuristischePerson Vermieter { get; set; } = null!;
         public int Personenzahl { get; set; }
@@ -216,7 +216,7 @@ namespace Deeplex.Saverwalter.Model
     {
         public int KalteBetriebskostenpunktId { get; set; }
         public KalteBetriebskosten Bezeichnung { get; set; }
-        public List<KalteBetriebskostenRechnung> Rechnungen { get; } = new List<KalteBetriebskostenRechnung>();
+        public List<KalteBetriebskostenRechnung> Rechnungen { get; private set; } = new List<KalteBetriebskostenRechnung>();
         public Adresse Adresse { get; set; } = null!;
         public string? Beschreibung { get; set; }
         public UmlageSchluessel Schluessel { get; set; }
