@@ -54,13 +54,45 @@
                 RelativePanel.AlignRightWithPanel="True"
                 RelativePanel.Below="Title">
                 <RelativePanel>
-                    <TextBox x:Name="Vorname" Header="Vorname" Text="{x:Bind ViewModel.Vorname.Value, Mode=OneWay}" Style="{StaticResource Eintraege}" HorizontalAlignment="Left"/>
-                    <TextBox x:Name="Nachname" Header="Nachname" Text="{x:Bind ViewModel.Nachname.Value}" Style="{StaticResource Eintraege}" RelativePanel.RightOf="Vorname"/>
-                    <AutoSuggestBox x:Name="Adresse" Header="Anschrift" Text="{x:Bind ViewModel.Anschrift}" QueryIcon="Home" IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}" Width ="520" Margin="20,20,0,0" RelativePanel.Below="Vorname"/>
-                    <TextBox x:Name="Email" Header="E-Mail" Text="{x:Bind ViewModel.Email.Value}" Style="{StaticResource Eintraege}" RelativePanel.Below="Adresse"/>
-                    <TextBox x:Name="Fax" Header="Fax" Text="{x:Bind ViewModel.Fax.Value}" Style="{StaticResource Eintraege}" RelativePanel.Below="Adresse" RelativePanel.RightOf="Email"/>
-                    <TextBox x:Name="Telefon" Header="Telefon" Text="{x:Bind ViewModel.Telefon.Value}" Style="{StaticResource Eintraege}" RelativePanel.Below="Email"/>
-                    <TextBox x:Name="Mobil" Header="Mobil" Text="{x:Bind ViewModel.Mobil.Value}" Style="{StaticResource Eintraege}" RelativePanel.Below="Fax" RelativePanel.RightOf="Telefon"/>
+                    <TextBox 
+                        x:Name="Vorname" Header="Vorname"
+                        Text="{x:Bind ViewModel.Vorname.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource Eintraege}"
+                        HorizontalAlignment="Left"/>
+                    <TextBox
+                        x:Name="Nachname" Header="Nachname"
+                        Text="{x:Bind ViewModel.Nachname.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource Eintraege}"
+                        RelativePanel.RightOf="Vorname"/>
+                    <AutoSuggestBox
+                        x:Name="Adresse" Header="Anschrift"
+                        Text="{x:Bind ViewModel.Anschrift}"
+                        QueryIcon="Home"
+                        IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                        Width ="520" Margin="20,20,0,0"
+                        RelativePanel.Below="Vorname"/>
+                    <TextBox
+                        x:Name="Email" Header="E-Mail"
+                        Text="{x:Bind ViewModel.Email.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource Eintraege}"
+                        RelativePanel.Below="Adresse"/>
+                    <TextBox
+                        x:Name="Fax" Header="Fax"
+                        Text="{x:Bind ViewModel.Fax.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource Eintraege}"
+                        RelativePanel.Below="Adresse"
+                        RelativePanel.RightOf="Email"/>
+                    <TextBox
+                        x:Name="Telefon" Header="Telefon"
+                        Text="{x:Bind ViewModel.Telefon.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource Eintraege}"
+                        RelativePanel.Below="Email"/>
+                    <TextBox
+                        x:Name="Mobil" Header="Mobil"
+                        Text="{x:Bind ViewModel.Mobil.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource Eintraege}"
+                        RelativePanel.Below="Fax"
+                        RelativePanel.RightOf="Telefon"/>
                 </RelativePanel>
             </Grid>
         </RelativePanel>
