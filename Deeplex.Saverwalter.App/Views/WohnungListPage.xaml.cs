@@ -9,8 +9,11 @@ namespace Deeplex.Saverwalter.App.Views
 {
     public sealed partial class WohnungListPage : Page
     {
+        public ViewModels.WohnungListViewModel ViewModel { get; set; }
+
         public WohnungListPage()
         {
+            ViewModel = new ViewModels.WohnungListViewModel();
             InitializeComponent();
         }
     }

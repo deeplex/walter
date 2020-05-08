@@ -3,12 +3,73 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Deeplex.Saverwalter.App.Views"
+    xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
+    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
+    <Page.Resources>
+        <muxc:StackLayout x:Name="VerticalStackLayout" Orientation="Vertical" Spacing="8"/>
 
-    </Grid>
+        <DataTemplate x:Key="WohnungTemplate">
+            <Button
+                Width="200" Height="100"
+                Content="{Binding Bezeichnung.Value}" 
+	            Background="{ThemeResource SystemChromeLowColor}">
+            </Button>
+        </DataTemplate>
+
+        <DataTemplate x:Key="AdresseTemplate">
+            <!-- Make this an Expander - https://github.com/microsoft/microsoft-ui-xaml/issues/2003-->
+            <mtuuc:HeaderedContentControl
+                Header="{Binding Key}"
+                FontSize="20"
+                HorizontalContentAlignment="Stretch">
+                <RelativePanel CornerRadius="10" Background="{StaticResource SystemChromeMediumColor}">
+                    <AppBarButton Margin="10" Icon="Manage" Name="Abrechnung" Width="100" Label="Abrechnung" RelativePanel.LeftOf="Neue Wohnung"/>
+                    <AppBarButton Margin="10" Icon="Add" Name="Neue Wohnung" Width="100" Label="Neue Wohnung" RelativePanel.AlignRightWithPanel="True"/>
+                    <GridView
+                        IsItemClickEnabled="True"
+                        SelectionMode="Single"
+                        Margin="10"
+                        ItemsSource="{Binding Wohnungen}"
+                        ItemTemplate="{StaticResource WohnungTemplate}"
+                        RelativePanel.Below="Abrechnung">
+                    </GridView>
+                </RelativePanel>
+            </mtuuc:HeaderedContentControl>
+        </DataTemplate>
+    </Page.Resources>
+
+    <RelativePanel>
+        <CommandBar
+                x:Name="ButtonRow"
+                Background="Transparent"
+                IsOpen="False"
+                RelativePanel.AlignRightWithPanel="True"
+                HorizontalAlignment="Stretch"
+                DefaultLabelPosition="Right">
+            <AppBarButton Icon="Add" Label="Add"/>
+            <AppBarButton Icon="Edit" Label="Edit"/>
+            <AppBarButton Icon="Delete" Label="Delete"/>
+            <CommandBar.SecondaryCommands>
+                <AppBarButton Icon="Setting" Label="Settings">
+                    <AppBarButton.KeyboardAccelerators>
+                        <KeyboardAccelerator Modifiers="Control" Key="I" />
+                    </AppBarButton.KeyboardAccelerators>
+                </AppBarButton>
+            </CommandBar.SecondaryCommands>
+        </CommandBar>
+        <Grid Margin="10" RelativePanel.Below="ButtonRow">
+            <ScrollViewer>
+                <muxc:ItemsRepeater
+            ItemsSource="{x:Bind ViewModel.AdresseGroup}"
+            Layout="{StaticResource VerticalStackLayout}"
+            ItemTemplate="{StaticResource AdresseTemplate}"/>
+            </ScrollViewer>
+        </Grid>
+    </RelativePanel>
 </Page>

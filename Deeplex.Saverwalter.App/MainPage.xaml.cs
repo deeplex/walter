@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.App
             var pageType =
                 args.IsSettingsInvoked ? typeof(SettingsPage) :
                 label == KontaktListLabel ? typeof(KontaktListPage) :
-                label == WohnungListLabel ? typeof(AdresseListPage) :
+                label == WohnungListLabel ? typeof(WohnungListPage) :
                 label == VertragListLabel ? typeof(VertragListPage) :
                 null;
             if (pageType != null && pageType != AppFrame.CurrentSourcePageType)

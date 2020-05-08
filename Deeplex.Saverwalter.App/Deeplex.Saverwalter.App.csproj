@@ -125,10 +125,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\AdresseViewModel.cs" />
+    <Compile Include="ViewModels\WohnungListViewModel.cs" />
     <Compile Include="ViewModels\VertragViewModel.cs" />
     <Compile Include="ViewModels\VertragListViewModel.cs" />
     <Compile Include="ViewModels\WohnungViewModel.cs" />
-    <Compile Include="ViewModels\AdresseListViewModel.cs" />
     <Compile Include="ViewModels\KontaktViewModel.cs" />
     <Compile Include="Views\KontaktDetailPage.xaml.cs">
       <DependentUpon>KontaktDetailPage.xaml</DependentUpon>
@@ -142,8 +142,8 @@
     <Compile Include="Views\VertragListPage.xaml.cs">
       <DependentUpon>VertragListPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\AdresseListPage.xaml.cs">
-      <DependentUpon>AdresseListPage.xaml</DependentUpon>
+    <Compile Include="Views\WohnungListPage.xaml.cs">
+      <DependentUpon>WohnungListPage.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -186,7 +186,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\AdresseListPage.xaml">
+    <Page Include="Views\WohnungListPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
