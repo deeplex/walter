@@ -5,10 +5,85 @@
     xmlns:local="using:Deeplex.Saverwalter.App.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
+        <RelativePanel>
+            <TextBlock
+                x:Name="Title"
+                Style="{StaticResource TitleTextBlockStyle}"
+                Margin="10,0,0,0"
+                Text="Verträge" />
+            <AutoSuggestBox
+                x:Name="VertragFilter"
+                PlaceholderText="Filter Verträge..."
+                RelativePanel.LeftOf="ButtonRow"
+                Width="240"
+                QueryIcon="Find"/>
 
+            <CommandBar
+                x:Name="ButtonRow"
+                Background="Transparent"
+                IsOpen="False"
+                RelativePanel.AlignRightWithPanel="True"
+                HorizontalAlignment="Stretch"
+                DefaultLabelPosition="Right">
+                <AppBarButton Icon="Add" Label="Add"/>
+                <AppBarButton Icon="Edit" Label="Edit"/>
+                <AppBarButton Icon="Delete" Label="Delete"/>
+                <CommandBar.SecondaryCommands>
+                    <AppBarButton Icon="Setting" Label="Settings">
+                        <AppBarButton.KeyboardAccelerators>
+                            <KeyboardAccelerator Modifiers="Control" Key="I" />
+                        </AppBarButton.KeyboardAccelerators>
+                    </AppBarButton>
+                </CommandBar.SecondaryCommands>
+            </CommandBar>
+            <Grid
+                RelativePanel.AlignLeftWithPanel="True"
+                RelativePanel.AlignRightWithPanel="True"
+                RelativePanel.AlignVerticalCenterWithPanel="True">
+
+                <!-- TODO Set Height and Width to be responsive / OneRowMode enforces ItemHeight -->
+                <mtuuc:AdaptiveGridView
+                    OneRowModeEnabled="True"
+                    VerticalAlignment="Stretch"
+                    ItemHeight="565"
+                    StretchContentForSingleRow="True"
+                    SelectionMode="Single"
+                    ItemsSource="{x:Bind ViewModel.Vertraege}"
+                    IsItemClickEnabled="True">
+                    <mtuuc:AdaptiveGridView.ItemTemplate>
+                        <DataTemplate>
+                            <RelativePanel>
+                                <Grid
+                                Width="400"
+                                BorderThickness="1">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding AuflistungMieter}"/>
+                                        <TextBlock Text="{Binding Wohnung.Value.Anschrift}" />
+                                        <TextBlock>
+                                            <Run Text="Personenzahl: "/>
+                                            <Run Text="{Binding Personenzahl.Value}"/>
+                                        </TextBlock>
+                                        <TextBlock>
+                                            <Run Text="Beginn: "/>
+                                            <Run Text="{Binding BeginnString}"/>
+                                        </TextBlock>
+                                        <TextBlock>
+                                            <Run Text="Ende: "/>
+                                            <Run Text="{Binding EndeString}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Grid>
+                            </RelativePanel>
+                        </DataTemplate>
+                    </mtuuc:AdaptiveGridView.ItemTemplate>
+                </mtuuc:AdaptiveGridView>
+            </Grid>
+        </RelativePanel>
     </Grid>
 </Page>

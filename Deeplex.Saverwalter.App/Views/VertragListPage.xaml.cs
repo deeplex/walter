@@ -19,8 +19,11 @@ namespace Deeplex.Saverwalter.App.Views
 {
     public sealed partial class VertragListPage : Page
     {
+        public ViewModels.VertragListViewModel ViewModel { get; set; }
+
         public VertragListPage()
         {
+            ViewModel = new ViewModels.VertragListViewModel();
             InitializeComponent();
         }
     }
