@@ -4,20 +4,20 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.App.Views
 {
-    public sealed partial class KontaktDetailPage : Page
+    public sealed partial class WohnungDetailPage : Page
     {
-        public KontaktDetailViewModel ViewModel { get; set; }
+        public WohnungDetailViewModel ViewModel { get; set; }
 
-        public KontaktDetailPage()
+        public WohnungDetailPage()
         {
             InitializeComponent();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (e.Parameter is int kontaktId)
+            if (e.Parameter is int wohnungId)
             {
-                ViewModel = new KontaktDetailViewModel(kontaktId);
+                ViewModel = new WohnungDetailViewModel(wohnungId);
             }
             else // If invoked using "Add"
             {

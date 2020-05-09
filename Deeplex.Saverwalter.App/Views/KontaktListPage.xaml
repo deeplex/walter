@@ -49,6 +49,7 @@
                     CanUserReorderColumns="False"
                     CanUserResizeColumns="True"
                     AutoGenerateColumns="False"
+                    DoubleTapped="Details_Click"
                     SelectedItem="{x:Bind ViewModel.SelectedKontakt.Value, Mode=TwoWay}"
                     ItemsSource="{x:Bind ViewModel.Kontakte.Value}">
                     <mtuuc:DataGrid.Columns>

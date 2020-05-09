@@ -13,6 +13,8 @@
 
         <DataTemplate x:Key="WohnungTemplate">
             <Button
+                CommandParameter="{Binding Id}"
+                DoubleTapped="Wohnung_DoubleTapped"
                 Width="200" Height="100"
                 Content="{Binding Bezeichnung.Value}" 
 	            Background="{ThemeResource SystemChromeLowColor}">

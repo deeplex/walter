@@ -134,6 +134,7 @@
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\AdresseControlModel.cs" />
     <Compile Include="ViewModels\Utils.cs" />
+    <Compile Include="ViewModels\WohnungDetailViewModel.cs" />
     <Compile Include="ViewModels\WohnungListViewModel.cs" />
     <Compile Include="ViewModels\VertragListViewModel.cs" />
     <Compile Include="ViewModels\KontaktDetailViewModel.cs" />
@@ -148,6 +149,9 @@
     </Compile>
     <Compile Include="Views\VertragListPage.xaml.cs">
       <DependentUpon>VertragListPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\WohnungDetailPage.xaml.cs">
+      <DependentUpon>WohnungDetailPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\WohnungListPage.xaml.cs">
       <DependentUpon>WohnungListPage.xaml</DependentUpon>
@@ -198,6 +202,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\VertragListPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\WohnungDetailPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

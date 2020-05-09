@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel;
-using Deeplex.Utils.ObjectModel;
+﻿using Deeplex.Utils.ObjectModel;
 using Deeplex.Saverwalter.Model;
-using Windows.UI.Xaml;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
