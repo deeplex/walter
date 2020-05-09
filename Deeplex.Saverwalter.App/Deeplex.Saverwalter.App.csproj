@@ -123,6 +123,9 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UserControls\AdresseTemplate.xaml.cs">
+      <DependentUpon>AdresseTemplate.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModels\KontaktListViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\AdresseViewModel.cs" />
@@ -130,9 +133,6 @@
     <Compile Include="ViewModels\WohnungListViewModel.cs" />
     <Compile Include="ViewModels\VertragListViewModel.cs" />
     <Compile Include="ViewModels\KontaktDetailViewModel.cs" />
-    <Compile Include="Views\AdresseTemplate.xaml.cs">
-      <DependentUpon>AdresseTemplate.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\KontaktDetailPage.xaml.cs">
       <DependentUpon>KontaktDetailPage.xaml</DependentUpon>
     </Compile>
@@ -173,7 +173,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\AdresseTemplate.xaml">
+    <Page Include="UserControls\AdresseTemplate.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -222,9 +222,7 @@
       <Name>Deeplex.Utils.ObjectModel</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="UserControls\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

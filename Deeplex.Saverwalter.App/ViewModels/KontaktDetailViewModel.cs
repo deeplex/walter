@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public int Id { get; }
         public ObservableProperty<string> Vorname { get; } = new ObservableProperty<string>();
         public ObservableProperty<string> Nachname { get; } = new ObservableProperty<string>();
-        public ObservableProperty<int?> Adresse { get; } = new ObservableProperty<int?>();
+        public ObservableProperty<int> Adresse { get; } = new ObservableProperty<int>();
         public ObservableProperty<string> Email { get; } = new ObservableProperty<string>();
         public ObservableProperty<string> Telefon { get; } = new ObservableProperty<string>();
         public ObservableProperty<string> Mobil { get; } = new ObservableProperty<string>();
@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Id = k.KontaktId;
             Vorname.Value = k.Vorname ?? "";
             Nachname.Value = k.Nachname ?? "";
-            Adresse.Value = k.AdresseId;
+            Adresse.Value = k.AdresseId ?? 0;
             Email.Value = k.Email ?? "";
             Fax.Value = k.Fax ?? "";
             Telefon.Value = k.Telefon ?? "";

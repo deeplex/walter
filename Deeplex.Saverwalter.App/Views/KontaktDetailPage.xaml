@@ -11,7 +11,7 @@
 
     <Page.Resources>
         <Style x:Name="Eintraege" TargetType="TextBox">
-            <Setter Property="Width" Value="250"/>
+            <Setter Property="Width" Value="300"/>
             <Setter Property="TextWrapping" Value="NoWrap"/>
             <Setter Property="Margin" Value="20,20,0,0"/>
             <Setter Property="IsEnabled" Value="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"/>
@@ -24,8 +24,6 @@
                 Style="{StaticResource TitleTextBlockStyle}"
                 Margin="10,0,0,0"
                 Text="{x:Bind ViewModel.Name}"/>
-
-            <local:AdresseTemplate/>
 
             <CommandBar
                 x:Name="ButtonRow"
@@ -66,12 +64,10 @@
                         Text="{x:Bind ViewModel.Nachname.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Style="{StaticResource Eintraege}"
                         RelativePanel.RightOf="Vorname"/>
-                    <AutoSuggestBox
-                        x:Name="Adresse" Header="Anschrift"
-                        Text="Adresse... TODO"
-                        QueryIcon="Home"
+                    <local:AdresseTemplate
+                        AdressId="{x:Bind ViewModel.Adresse.Value}"
                         IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                        Width ="520" Margin="20,20,0,0"
+                        x:Name="Adresse"
                         RelativePanel.Below="Vorname"/>
                     <TextBox
                         x:Name="Email" Header="E-Mail"

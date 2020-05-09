@@ -12,7 +12,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public static string Anschrift(Kontakt k) => Anschrift(k.Adresse);
         public static string Anschrift(Wohnung w) => Anschrift(w.Adresse);
 
-        private static string Anschrift(Adresse a)
+        public static string Anschrift(Adresse a)
             => a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
     }
 }

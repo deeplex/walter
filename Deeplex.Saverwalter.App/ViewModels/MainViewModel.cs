@@ -23,6 +23,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public MainViewModel()
         {
             Kontakte.Value = App.Walter.Kontakte
+                .Include(k => k.Adresse)
                 .Select(k => new KontaktListViewModel(k))
                 .ToList();
         }

@@ -17,6 +17,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<string> Postleitzahl = new ObservableProperty<string>();
         public ObservableProperty<string> Stadt = new ObservableProperty<string>();
 
+        public AdresseViewModel(int id) : this(App.Walter.Adressen.Find(id)) { }
+
         public AdresseViewModel(Adresse a)
         {
             Id = a.AdresseId;
