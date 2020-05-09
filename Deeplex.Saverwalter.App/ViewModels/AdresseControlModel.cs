@@ -9,7 +9,7 @@ using Deeplex.Saverwalter.Model;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class AdresseViewModel
+    public class AdresseControlModel
     {
         public int Id { get; }
         public ObservableProperty<string> Strasse = new ObservableProperty<string>();
@@ -17,9 +17,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<string> Postleitzahl = new ObservableProperty<string>();
         public ObservableProperty<string> Stadt = new ObservableProperty<string>();
 
-        public AdresseViewModel(int id) : this(App.Walter.Adressen.Find(id)) { }
+        public AdresseControlModel(int id) : this(App.Walter.Adressen.Find(id)) { }
 
-        public AdresseViewModel(Adresse a)
+        public AdresseControlModel(Adresse a)
         {
             Id = a.AdresseId;
             Strasse.Value = a.Strasse;

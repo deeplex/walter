@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.App.Views
         public static readonly DependencyProperty AdressIdProperty =
            DependencyProperty.Register("AdressId", typeof(int), typeof(AdresseControl), new PropertyMetadata(0));
 
-        AdresseViewModel ViewModel { get; set; }
+        AdresseControlModel ViewModel { get; set; }
 
         public AdresseControl()
         {
@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 if (AdressId > 0)
                 {
-                    ViewModel = new AdresseViewModel(AdressId);
+                    ViewModel = new AdresseControlModel(AdressId);
                 }
                 InitializeComponent();
             };

@@ -132,7 +132,7 @@
     <Compile Include="ViewModels\VertragGridControlModel.cs" />
     <Compile Include="ViewModels\KontaktListViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="ViewModels\AdresseViewModel.cs" />
+    <Compile Include="ViewModels\AdresseControlModel.cs" />
     <Compile Include="ViewModels\Utils.cs" />
     <Compile Include="ViewModels\WohnungListViewModel.cs" />
     <Compile Include="ViewModels\VertragListViewModel.cs" />
