@@ -26,6 +26,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public int Id { get; }
         public int Version { get; }
         public ObservableProperty<int> Personenzahl { get; } = new ObservableProperty<int>();
+        public ObservableProperty<string> Anschrift { get; } = new ObservableProperty<string>();
         public ObservableProperty<string> Wohnung { get; } = new ObservableProperty<string>();
         public ObservableProperty<DateTime> Beginn { get; } = new ObservableProperty<DateTime>();
         public ObservableProperty<string> BeginnString { get; } = new ObservableProperty<string>();
@@ -38,7 +39,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Id = v.rowid;
             Version = v.Version;
             Personenzahl.Value = v.Personenzahl;
-            Wohnung.Value = v.Wohnung is Wohnung w ? Utils.Anschrift(w) + " - " + w.Bezeichnung : "";
+            Anschrift.Value = Utils.Anschrift(v.Wohnung); // TODO only true if wohnung and not adressen
+            Wohnung.Value = v.Wohnung is Wohnung w ? w.Bezeichnung : "";
             AuflistungMieter.Value = string.Join(", ", v.Mieter.Select(m =>
                 (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname)); // Such grace...
 
