@@ -63,7 +63,7 @@
                         <mtuuc:DataGridTextColumn
                             Header="Anschrift"
                             Tag="Anschrift"
-                            Binding="{Binding Anschrift}"/>
+                            Binding="{Binding Anschrift.Value}"/>
                         <mtuuc:DataGridTextColumn
                             Header="E-Mail"
                             Tag="Email"

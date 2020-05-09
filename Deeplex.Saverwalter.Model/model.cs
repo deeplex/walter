@@ -195,6 +195,7 @@ namespace Deeplex.Saverwalter.Model
         public string? Mobil { get; set; }
         public string? Fax { get; set; }
         public string? Email { get; set; }
+        public int? AdresseId { get; set; }
         public Adresse? Adresse { get; set; }
     }
 

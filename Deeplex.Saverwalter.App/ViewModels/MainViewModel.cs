@@ -12,11 +12,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public class MainViewModel : BindableBase
     {
         // TODO should get Kontakte Async and stuff. In an getKontakteAsyncFunc? 
-        public ObservableProperty<List<KontaktViewModel>> Kontakte { get; }
-            = new ObservableProperty<List<KontaktViewModel>>();
+        public ObservableProperty<List<KontaktListViewModel>> Kontakte { get; }
+            = new ObservableProperty<List<KontaktListViewModel>>();
 
-        public ObservableProperty<KontaktViewModel> SelectedKontakt { get; }
-            = new ObservableProperty<KontaktViewModel>();
+        public ObservableProperty<KontaktListViewModel> SelectedKontakt { get; }
+            = new ObservableProperty<KontaktListViewModel>();
 
         public ObservableProperty<bool> IsLoading { get; }
             = new ObservableProperty<bool>();
@@ -24,8 +24,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public MainViewModel()
         {
             Kontakte.Value = App.Walter.Kontakte
-                .Include(k => k.Adresse)
-                .Select(k => new KontaktViewModel(k))
+                .Select(k => new KontaktListViewModel(k))
                 .ToList();
         }
     }

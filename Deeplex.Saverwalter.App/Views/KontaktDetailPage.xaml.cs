@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.App.Views
 {
     public sealed partial class KontaktDetailPage : Page
     {
-        public KontaktViewModel ViewModel { get; set; }
+        public KontaktDetailViewModel ViewModel { get; set; }
 
         public KontaktDetailPage()
         {
@@ -20,17 +20,17 @@ namespace Deeplex.Saverwalter.App.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (false && e.Parameter == null) // If invoked using "Add"
+            if (e.Parameter is int kontaktId)
+            {
+                ViewModel = new KontaktDetailViewModel(kontaktId);
+            }
+            else // If invoked using "Add"
             {
                 //ViewModel = new KontaktViewModel
                 //{
                 //    IsNewCustomer = true,
                 //    IsInEdit = true
                 //};
-            }
-            else
-            {
-                ViewModel = App.ViewModel.Kontakte.Value.First(k => k.Id == (int)e.Parameter);
             }
 
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;

@@ -25,6 +25,8 @@
                 Margin="10,0,0,0"
                 Text="{x:Bind ViewModel.Name}"/>
 
+            <local:AdresseTemplate/>
+
             <CommandBar
                 x:Name="ButtonRow"
                 Background="Transparent"
@@ -66,7 +68,7 @@
                         RelativePanel.RightOf="Vorname"/>
                     <AutoSuggestBox
                         x:Name="Adresse" Header="Anschrift"
-                        Text="{x:Bind ViewModel.Anschrift}"
+                        Text="Adresse... TODO"
                         QueryIcon="Home"
                         IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                         Width ="520" Margin="20,20,0,0"
