@@ -126,10 +126,9 @@
     <Compile Include="ViewModels\KontaktListViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\AdresseViewModel.cs" />
+    <Compile Include="ViewModels\Utils.cs" />
     <Compile Include="ViewModels\WohnungListViewModel.cs" />
-    <Compile Include="ViewModels\VertragViewModel.cs" />
     <Compile Include="ViewModels\VertragListViewModel.cs" />
-    <Compile Include="ViewModels\WohnungViewModel.cs" />
     <Compile Include="ViewModels\KontaktDetailViewModel.cs" />
     <Compile Include="Views\AdresseTemplate.xaml.cs">
       <DependentUpon>AdresseTemplate.xaml</DependentUpon>

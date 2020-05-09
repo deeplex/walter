@@ -16,9 +16,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<string> Hausnummer = new ObservableProperty<string>();
         public ObservableProperty<string> Postleitzahl = new ObservableProperty<string>();
         public ObservableProperty<string> Stadt = new ObservableProperty<string>();
-        // public ObservableProperty<List<WohnungViewModel>> Wohnungen = new ObservableProperty<List<WohnungViewModel>>();
-
-        public string Anschrift => Strasse.Value + " " + Hausnummer.Value + ", " + Postleitzahl.Value + " " + Stadt.Value;
 
         public AdresseViewModel(Adresse a)
         {
@@ -27,8 +24,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Hausnummer.Value = a.Hausnummer;
             Postleitzahl.Value = a.Postleitzahl;
             Stadt.Value = a.Stadt;
-            // This produces an endless loop:
-            // Wohnungen.Value = a.Wohnungen.Select(w => new WohnungViewModel(w)).ToList();
         }
     }
 }

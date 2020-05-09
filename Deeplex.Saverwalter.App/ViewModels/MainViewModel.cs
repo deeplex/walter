@@ -11,7 +11,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public class MainViewModel : BindableBase
     {
-        // TODO should get Kontakte Async and stuff. In an getKontakteAsyncFunc? 
         public ObservableProperty<List<KontaktListViewModel>> Kontakte { get; }
             = new ObservableProperty<List<KontaktListViewModel>>();
 

@@ -54,7 +54,7 @@
                     ItemHeight="565"
                     StretchContentForSingleRow="True"
                     SelectionMode="Single"
-                    ItemsSource="{x:Bind ViewModel.Vertraege}"
+                    ItemsSource="{x:Bind ViewModel}"
                     IsItemClickEnabled="True">
                     <mtuuc:AdaptiveGridView.ItemTemplate>
                         <DataTemplate>
@@ -63,19 +63,22 @@
                                 Width="400"
                                 BorderThickness="1">
                                     <StackPanel>
-                                        <TextBlock Text="{Binding AuflistungMieter}"/>
-                                        <TextBlock Text="{Binding Wohnung.Value.Anschrift}" />
+                                        <TextBlock>
+                                            <Run Text="Mieter: "/>
+                                            <Run Text="{Binding AuflistungMieter.Value}"/>
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Wohnung.Value}" />
                                         <TextBlock>
                                             <Run Text="Personenzahl: "/>
                                             <Run Text="{Binding Personenzahl.Value}"/>
                                         </TextBlock>
                                         <TextBlock>
                                             <Run Text="Beginn: "/>
-                                            <Run Text="{Binding BeginnString}"/>
+                                            <Run Text="{Binding BeginnString.Value}"/>
                                         </TextBlock>
                                         <TextBlock>
                                             <Run Text="Ende: "/>
-                                            <Run Text="{Binding EndeString}"/>
+                                            <Run Text="{Binding EndeString.Value}"/>
                                         </TextBlock>
                                     </StackPanel>
                                 </Grid>

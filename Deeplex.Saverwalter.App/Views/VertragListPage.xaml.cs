@@ -1,28 +1,26 @@
-﻿using System;
+﻿using Deeplex.Saverwalter.App.ViewModels;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.App.Views
 {
     public sealed partial class VertragListPage : Page
     {
-        public ViewModels.VertragListViewModel ViewModel { get; set; }
+        public List<VertragListViewModel> ViewModel { get; set; }
 
         public VertragListPage()
         {
-            ViewModel = new ViewModels.VertragListViewModel();
             InitializeComponent();
+            ViewModel = App.Walter.Vertraege
+                .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
+                .Include(v => v.Mieter).ThenInclude(m => m.Kontakt)
+                .ToList()
+                .GroupBy(v => v.VertragId)
+                .Select(v => new VertragListViewModel(v))
+                .OrderBy(v => v.Beginn.Value).Reverse()
+                .ToList();
         }
     }
 }

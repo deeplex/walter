@@ -6,25 +6,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Deeplex.Saverwalter.App.ViewModels;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class AnschriftWohnungListXYZ
-    {
-        public string Key { get; set; }
-        public List<WohnungViewModel> Wohnungen { get; set; }
-    }
-
     public class WohnungListViewModel
     {
-        public List<WohnungViewModel> Wohnungen { get; }
+        public int Id { get; }
+        public ObservableProperty<string> Bezeichnung { get; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Anschrift { get; } = new ObservableProperty<string>();
 
-        public List<AnschriftWohnungListXYZ> AdresseGroup =>
-            Wohnungen.GroupBy(w => w.Anschrift).Select(g => new AnschriftWohnungListXYZ { Key = g.Key, Wohnungen = g.ToList() }).ToList();
-
-        public WohnungListViewModel()
+        public WohnungListViewModel(Wohnung w)
         {
-            Wohnungen = App.Walter.Wohnungen.Select(w => new WohnungViewModel(w)).ToList();
+            Id = w.WohnungId;
+            Bezeichnung.Value = w.Bezeichnung;
+            Anschrift.Value = Utils.Anschrift(w);
         }
     }
 }

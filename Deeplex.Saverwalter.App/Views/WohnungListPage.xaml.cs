@@ -1,20 +1,25 @@
-﻿using System;
+﻿using Deeplex.Saverwalter.App.ViewModels;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App.Views
 {
     public sealed partial class WohnungListPage : Page
     {
-        public ViewModels.WohnungListViewModel ViewModel { get; set; }
+        public List<WohnungListViewModel> ViewModel { get; set; }
+
+        public List<IGrouping<string, WohnungListViewModel>> AdresseGroup
+            => ViewModel.GroupBy(w => w.Anschrift.Value).ToList();
 
         public WohnungListPage()
         {
-            ViewModel = new ViewModels.WohnungListViewModel();
             InitializeComponent();
+            ViewModel = App.Walter.Wohnungen
+                .Include(w => w.Adresse)
+                .Select(w => new WohnungListViewModel(w))
+                .ToList();
         }
     }
 }

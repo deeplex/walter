@@ -1,0 +1,14 @@
+﻿<UserControl
+    x:Class="Deeplex.Saverwalter.App.Views.AdresseTemplate"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid
+        RelativePanel.AlignLeftWithPanel="True"
+        RelativePanel.AlignRightWithPanel="True"
+         RelativePanel.Below="Title">
+        <RelativePanel>
+            <TextBox Text="Test"/>
+        </RelativePanel>
+    </Grid>
+</UserControl>
