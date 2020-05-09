@@ -1,0 +1,38 @@
+﻿<UserControl
+    x:Class="Deeplex.Saverwalter.App.Views.VertragGridControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls">
+
+    <Grid>
+        <RelativePanel>
+            <TextBlock Name="Title" Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}" Text="Verträge"/>
+            <mtuuc:DataGrid
+                RelativePanel.Below="Title"
+                IsReadOnly="True"
+                CanUserReorderColumns="False"
+                CanUserResizeColumns="True"
+                AutoGenerateColumns="False"
+                ItemsSource="{x:Bind ViewModel}">   
+                <mtuuc:DataGrid.Columns>
+                    <mtuuc:DataGridTextColumn
+                        Header="Anschrift"
+                        Tag="Anschrift"
+                        Binding="{Binding Anschrift.Value}"/>
+                    <mtuuc:DataGridTextColumn
+                        Header="Wohnung"
+                        Tag="Wohnung"
+                        Binding="{Binding Wohnung.Value}"/>
+                    <mtuuc:DataGridTextColumn
+                        Header="Beginn"
+                        Tag="Beginn"
+                        Binding="{Binding BeginnString.Value}"/>
+                    <mtuuc:DataGridTextColumn
+                        Header="Ende"
+                        Tag="Ende"
+                        Binding="{Binding EndeString.Value}"/>
+                </mtuuc:DataGrid.Columns>
+            </mtuuc:DataGrid>
+        </RelativePanel>
+    </Grid>
+</UserControl>

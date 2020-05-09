@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -14,13 +15,12 @@ namespace Deeplex.Saverwalter.App.Views
     {
         public int AdressId
         {
-            get { return (int)GetValue(AdressIdProperty); }
+            get => (int)GetValue(AdressIdProperty);
             set { SetValue(AdressIdProperty, value); }
         }   
-
         public static readonly DependencyProperty AdressIdProperty =
            DependencyProperty.Register("AdressId", typeof(int), typeof(AdresseControl), new PropertyMetadata(0));
-        
+
         AdresseViewModel ViewModel { get; set; }
 
         public AdresseControl()

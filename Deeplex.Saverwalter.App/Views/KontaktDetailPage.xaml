@@ -50,6 +50,7 @@
                 </CommandBar.SecondaryCommands>
             </CommandBar>
             <Grid
+                x:Name="Details"
                 RelativePanel.AlignLeftWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True"
                 RelativePanel.Below="Title">
@@ -65,7 +66,7 @@
                         Style="{StaticResource Eintraege}"
                         RelativePanel.RightOf="Vorname"/>
                     <local:AdresseControl
-                        AdressId="{x:Bind ViewModel.Adresse.Value}"
+                        AdressId="{x:Bind ViewModel.AdresseId.Value}"
                         IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                         x:Name="Adresse"
                         RelativePanel.Below="Vorname"/>
@@ -93,6 +94,7 @@
                         RelativePanel.RightOf="Telefon"/>
                 </RelativePanel>
             </Grid>
+            <local:VertragGridControl KontaktId="{x:Bind ViewModel.Id}" Margin="20,20,20,20" RelativePanel.Below="Details"/>
         </RelativePanel>
     </Grid>
 </Page>
