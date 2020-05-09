@@ -10,7 +10,7 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.App.Views
 {
-    public sealed partial class AdresseTemplate : UserControl
+    public sealed partial class AdresseControl : UserControl
     {
         public int AdressId
         {
@@ -19,11 +19,11 @@ namespace Deeplex.Saverwalter.App.Views
         }   
 
         public static readonly DependencyProperty AdressIdProperty =
-           DependencyProperty.Register("AdressId", typeof(int), typeof(AdresseTemplate), new PropertyMetadata(0));
+           DependencyProperty.Register("AdressId", typeof(int), typeof(AdresseControl), new PropertyMetadata(0));
         
         AdresseViewModel ViewModel { get; set; }
 
-        public AdresseTemplate()
+        public AdresseControl()
         {
             Loaded += (args, sender) =>
             {

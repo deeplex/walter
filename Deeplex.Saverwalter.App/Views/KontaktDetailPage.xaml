@@ -64,7 +64,7 @@
                         Text="{x:Bind ViewModel.Nachname.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Style="{StaticResource Eintraege}"
                         RelativePanel.RightOf="Vorname"/>
-                    <local:AdresseTemplate
+                    <local:AdresseControl
                         AdressId="{x:Bind ViewModel.Adresse.Value}"
                         IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                         x:Name="Adresse"
