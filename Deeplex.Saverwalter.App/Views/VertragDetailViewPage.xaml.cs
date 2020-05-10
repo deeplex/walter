@@ -1,27 +1,28 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using System;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.App.Views
 {
-    public sealed partial class WohnungDetailPage : Page
+    public sealed partial class VertragDetailViewPage : Page
     {
-        public WohnungDetailViewModel ViewModel { get; set; }
+        public VertragDetailViewModel ViewModel { get; set; }
 
-        public WohnungDetailPage()
+        public VertragDetailViewPage()
         {
             InitializeComponent();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (e.Parameter is int wohnungId)
+            if (e.Parameter is Guid vertragId)
             {
-                ViewModel = new WohnungDetailViewModel(wohnungId);
+                ViewModel = new VertragDetailViewModel(vertragId);
             }
             else // If invoked using "Add"
             {
-                //ViewModel = new WohnungDetailViewModel
+                //ViewModel = new KontaktViewModel
                 //{
                 //    IsNewCustomer = true,
                 //    IsInEdit = true

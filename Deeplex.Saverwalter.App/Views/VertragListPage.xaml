@@ -54,6 +54,8 @@
                     ItemHeight="565"
                     StretchContentForSingleRow="True"
                     SelectionMode="Single"
+                    SelectedItem="{x:Bind SelectedVertrag.Value, Mode=TwoWay}"
+                    DoubleTapped="Vertrag_DoubleTapped"
                     ItemsSource="{x:Bind ViewModel}"
                     IsItemClickEnabled="True">
                     <mtuuc:AdaptiveGridView.ItemTemplate>
@@ -61,8 +63,8 @@
                             <RelativePanel
                                 Background="{ThemeResource SystemChromeLowColor}">
                                 <Grid
-                                Width="400"
-                                BorderThickness="1">
+                                    Width="400"
+                                    BorderThickness="1">
                                     <StackPanel
                                         Margin="20,20,20,20"
                                         HorizontalAlignment="Left">

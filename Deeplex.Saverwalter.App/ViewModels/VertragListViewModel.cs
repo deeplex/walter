@@ -24,6 +24,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public class VertragVersionListViewModel
     {
         public int Id { get; }
+        public Guid VertragId { get; }
         public int Version { get; }
         public ObservableProperty<int> Personenzahl { get; } = new ObservableProperty<int>();
         public ObservableProperty<string> Anschrift { get; } = new ObservableProperty<string>();
@@ -37,6 +38,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public VertragVersionListViewModel(Vertrag v)
         {
             Id = v.rowid;
+            VertragId = v.VertragId;
             Version = v.Version;
             Personenzahl.Value = v.Personenzahl;
             Anschrift.Value = Utils.Anschrift(v.Wohnung); // TODO only true if wohnung and not adressen
@@ -48,21 +50,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             BeginnString.Value = v.Beginn.ToShortDateString(); ;
             hasEnde.Value = v.Ende is DateTime;
             EndeString.Value = v.Ende is DateTime e ? e.ToShortDateString() : "";
-        }
-
-        public void BeginEdit()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void CancelEdit()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EndEdit()
-        {
-            throw new NotImplementedException();
         }
     }
 }
