@@ -30,6 +30,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<string> Anschrift { get; } = new ObservableProperty<string>();
         public ObservableProperty<string> Wohnung { get; } = new ObservableProperty<string>();
         public ObservableProperty<DateTime> Beginn { get; } = new ObservableProperty<DateTime>();
+        public ObservableProperty<string> AuflistungMieter { get; } = new ObservableProperty<string>();
         public ObservableProperty<string> BeginnString { get; } = new ObservableProperty<string>();
         public ObservableProperty<string> EndeString { get; } = new ObservableProperty<string>();
 
@@ -43,6 +44,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Beginn.Value = v.Beginn;
             BeginnString.Value = v.Beginn.ToShortDateString(); ;
             EndeString.Value = v.Ende is DateTime e ? e.ToShortDateString() : "";
+
+            AuflistungMieter.Value = string.Join(", ", v.Mieter.Select(m =>
+                (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname));
         }
     }
 }

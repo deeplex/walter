@@ -3,21 +3,35 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Deeplex.Saverwalter.App.Views"
+    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    
     <Grid>
+        <ScrollViewer>
         <RelativePanel>
-            <TextBlock x:Name="Title"
-                Style="{StaticResource TitleTextBlockStyle}"
-                Margin="10,0,0,0">
-                <Run Text="{x:Bind ViewModel.Anschrift.Value}"/>
-                <Run Text=" - "/>
-                <Run Text="{x:Bind ViewModel.Bezeichnung.Value}"/>
-            </TextBlock>
-
+            <!--TODO Insert image -->
+            <mtuuc:ScrollHeader
+                x:Name="ScrollHeader"
+                HorizontalAlignment="Stretch"
+                RelativePanel.AlignRightWithPanel="True"
+                RelativePanel.AlignLeftWithPanel="True"
+                Mode="Fade">
+                <Grid
+                    Background="{ThemeResource SystemChromeLowColor}"
+                    MinHeight="250">
+                    <TextBlock x:Name="Title"
+                        Style="{StaticResource TitleTextBlockStyle}"
+                        Margin="10,0,0,0">
+                        <Run Text="{x:Bind ViewModel.Anschrift.Value}"/>
+                        <Run Text=" - "/>
+                        <Run Text="{x:Bind ViewModel.Bezeichnung.Value}"/>
+                    </TextBlock>
+                </Grid>
+            </mtuuc:ScrollHeader>
             <CommandBar
                 x:Name="ButtonRow"
                 Background="Transparent"
@@ -40,16 +54,65 @@
                     </AppBarButton>
                 </CommandBar.SecondaryCommands>
             </CommandBar>
-            <TextBlock
-                x:Name="Anschrift"
-                Text="{x:Bind ViewModel.Anschrift.Value}"
-                RelativePanel.Below="ButtonRow"/>
-            <TextBlock
-                x:Name="Bezeichnung"
+            <local:AdresseControl
+                AdressId="{x:Bind ViewModel.AdresseId.Value}"
+                x:Name="Adresse"
+                RelativePanel.Below="ScrollHeader"/>
+            <TextBox
+                Width="210" Margin="20,20,0,0"
+                x:Name="Bezeichnung" Header="Bezeichnung"
                 Text="{x:Bind ViewModel.Bezeichnung.Value}"
-                RelativePanel.Below="ButtonRow"
-                RelativePanel.RightOf="Anschrift"/>
+                RelativePanel.Below="Adresse" />
+            <TextBox
+                Width="70" Margin="20,20,0,0"
+                x:Name="Wohnflaeche" Header="Wohnfl."
+                Text="{x:Bind ViewModel.Wohnflaeche.Value}"
+                RelativePanel.Below="Adresse"
+                RelativePanel.RightOf="Bezeichnung"/>
+            <TextBox
+                Width="70" Margin="20,20,0,0"
+                x:Name="Nutzflaeche" Header="Nutzfl."
+                Text="{x:Bind ViewModel.Nutzflaeche.Value}"
+                RelativePanel.Below="Adresse" 
+                RelativePanel.RightOf="Wohnflaeche"/>
 
+
+            <TextBlock
+                Name="Zaehlertitle"
+                Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}"
+                Text="Zähler"
+                RelativePanel.Below="Bezeichnung"/>
+
+            <GridView
+                x:Name="Zaehler"
+                IsItemClickEnabled="True"
+                SelectionMode="Single"
+                Margin="10"
+                ItemsSource="{x:Bind ViewModel.Zaehler.Value, Mode=OneWay}"
+                RelativePanel.Below="Zaehlertitle">
+                <GridView.ItemTemplate>
+                    <DataTemplate>
+                        <!--TODO Fix Bindings...-->
+                        <Button
+                            CommandParameter="Id"
+                            Click="Zaehler_Click"
+                            Width="200" Height="100"
+	                        Background="{ThemeResource SystemChromeLowColor}">
+                            <Button.Content>
+                                    <StackPanel>
+                                        <TextBlock Text="Typ.Value"/>
+                                        <TextBlock Text="Kennnummer.Value"/>
+                                    </StackPanel>
+                            </Button.Content>
+                        </Button>
+                    </DataTemplate>
+                </GridView.ItemTemplate>
+            </GridView>
+
+
+            <local:VertragGridControl
+                WohnungId="{x:Bind ViewModel.Id}" Margin="20,20,20,20" RelativePanel.Below="Zaehler"/>
         </RelativePanel>
+        </ScrollViewer>
     </Grid>
 </Page>

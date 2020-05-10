@@ -60,6 +60,7 @@ namespace Deeplex.Saverwalter.Model
         public List<Vertrag> Vertraege { get; private set; } = new List<Vertrag>();
         public List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
         public List<Zaehlergemeinschaft> Zaehlergemeinschaften { get; private set; } = new List<Zaehlergemeinschaft>();
+        public int AdresseId { get; set; }
         public Adresse Adresse { get; set; } = null!;
     }
 
@@ -89,6 +90,7 @@ namespace Deeplex.Saverwalter.Model
     {
         public int ZaehlerId { get; set; }
         public Wohnung Wohnung { get; set; } = null!;
+        public int WohnungId { get; set; }
         public Zaehlertyp Typ { get; set; }
         public List<Zaehlerstand> Staende { get; private set; } = new List<Zaehlerstand>();
     }
@@ -124,6 +126,7 @@ namespace Deeplex.Saverwalter.Model
         public int Version { get; set; }
         public List<Mieter> Mieter { get; private set; } = new List<Mieter>();
         public List<MietobjektGarage> Garagen { get; private set; } = new List<MietobjektGarage>();
+        public int? WohnungId { get; set; }
         public Wohnung? Wohnung { get; set; }
         public JuristischePerson Vermieter { get; set; } = null!;
         public int Personenzahl { get; set; }

@@ -24,6 +24,10 @@
                         Tag="Wohnung"
                         Binding="{Binding Wohnung.Value}"/>
                     <mtuuc:DataGridTextColumn
+                        Header="Mieter"
+                        Tag="Mieter"
+                        Binding="{Binding AuflistungMieter.Value}"/>
+                    <mtuuc:DataGridTextColumn
                         Header="Beginn"
                         Tag="Beginn"
                         Binding="{Binding BeginnString.Value}"/>

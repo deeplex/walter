@@ -14,6 +14,15 @@ namespace Deeplex.Saverwalter.App.Views
 {
     public sealed partial class VertragGridControl : UserControl
     {
+        public int WohnungId
+        {
+            get => (int)GetValue(WohnungIdProperty);
+            set { SetValue(WohnungIdProperty, value);  }
+        }
+
+        public static readonly DependencyProperty WohnungIdProperty =
+            DependencyProperty.Register("WohnungId", typeof(int), typeof(VertragGridControl), new PropertyMetadata(0));
+
         public int KontaktId
         {
             get => (int)GetValue(KontaktIdProperty);
@@ -28,12 +37,15 @@ namespace Deeplex.Saverwalter.App.Views
         {
             Loaded += (args, sender) =>
             {
-                if (KontaktId > 0)
-                {
-                    var vertraege = App.Walter.Vertraege.Include(v => v.Wohnung) // TODO This may be suboptimal...
-                        .Where(v => v.Mieter.Where(m => m.KontaktId == KontaktId).Count() > 0).ToList();
-                    ViewModel = vertraege.GroupBy(v => v.VertragId).Select(v => new VertragGridControlModel(v)).ToList();
-                }
+                var vs = App.Walter.Vertraege.Include(v => v.Mieter).ThenInclude(m => m.Kontakt).Include(v => v.Wohnung);
+                var vs2 =
+                    WohnungId is int wid && wid > 0 ?
+                        vs.Where(v => v.WohnungId == wid) :
+                    KontaktId is int kid && kid > 0 ?
+                        vs.Where(v => v.Mieter.Where(m => m.KontaktId == KontaktId).Count() > 0) :
+                    null;
+
+                ViewModel = vs2.ToList().GroupBy(v => v.VertragId).Select(v => new VertragGridControlModel(v)).ToList();
                 InitializeComponent();
             };
         }
