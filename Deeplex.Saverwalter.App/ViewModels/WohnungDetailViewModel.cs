@@ -33,20 +33,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             Zaehler.Value = w.Zaehler.Select(z => new WohnungDetailZaehler(z)).ToList();
         }
+    }
 
+    public class WohnungDetailZaehler : BindableBase
+    {
+        public int Id;
+        public ObservableProperty<string> Kennnummer = new ObservableProperty<string>();
+        public ObservableProperty<string> Typ = new ObservableProperty<string>();
 
-        public class WohnungDetailZaehler : BindableBase
+        public WohnungDetailZaehler(Zaehler z)
         {
-            public int Id;
-            public ObservableProperty<string> Kennnummer = new ObservableProperty<string>();
-            public ObservableProperty<string> Typ = new ObservableProperty<string>();
-
-            public WohnungDetailZaehler(Zaehler z)
-            {
-                Id = z.ZaehlerId;
-                Kennnummer.Value = "312k2112nj1fnj21"; // TODO Add Zaehler.Kennummer to Model.cs
-                Typ.Value = z.Typ.ToString(); // May be a descript thingy later on?...
-            }
+            Id = z.ZaehlerId;
+            Kennnummer.Value = "312k2112nj1fnj21"; // TODO Add Zaehler.Kennummer to Model.cs
+            Typ.Value = z.Typ.ToString(); // May be a descript thingy later on?...
         }
     }
 }

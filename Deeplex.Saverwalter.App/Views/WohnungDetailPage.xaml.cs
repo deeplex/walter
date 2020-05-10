@@ -31,10 +31,5 @@ namespace Deeplex.Saverwalter.App.Views
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
             base.OnNavigatedTo(e);
         }
-
-        private void Zaehler_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            var a = (Button)sender; // TODO. CommandParameter is null... Like all bindings...
-        }
     }
 }

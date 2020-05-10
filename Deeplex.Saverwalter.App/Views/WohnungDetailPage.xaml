@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Deeplex.Saverwalter.App.Views"
+    xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -91,17 +92,15 @@
                 ItemsSource="{x:Bind ViewModel.Zaehler.Value, Mode=OneWay}"
                 RelativePanel.Below="Zaehlertitle">
                 <GridView.ItemTemplate>
-                    <DataTemplate>
+                    <DataTemplate x:DataType="vm:WohnungDetailZaehler">
                         <!--TODO Fix Bindings...-->
                         <Button
-                            CommandParameter="Id"
-                            Click="Zaehler_Click"
                             Width="200" Height="100"
 	                        Background="{ThemeResource SystemChromeLowColor}">
                             <Button.Content>
                                     <StackPanel>
-                                        <TextBlock Text="Typ.Value"/>
-                                        <TextBlock Text="Kennnummer.Value"/>
+                                        <TextBlock Text="{x:Bind Typ.Value}"/>
+                                        <TextBlock Text="{x:Bind Kennnummer.Value}"/>
                                     </StackPanel>
                             </Button.Content>
                         </Button>
