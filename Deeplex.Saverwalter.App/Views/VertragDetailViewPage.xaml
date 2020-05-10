@@ -48,16 +48,25 @@
                 </CommandBar>
                 <TextBox
                     x:Name="Beginn" Header="Beginn"
+                    Margin="20,20,0,0"
                     Style="{StaticResource Eintraege}"
                     RelativePanel.Below="ButtonRow"
                     Text="{x:Bind ViewModel.BeginnString}"/>
                 <TextBox
                     x:Name="Ende" Header="Ende"
+                    Margin="20,20,0,0"
                     Style="{StaticResource Eintraege}"
                     RelativePanel.Below="ButtonRow"
                     RelativePanel.RightOf="Beginn"
                     Text="{x:Bind ViewModel.EndeString}"/>
-                
+
+                <AutoSuggestBox
+                    Width="300"
+                    Margin="20,20,0,0"
+                    RelativePanel.Below="Ende"
+                    TextChanged="KontaktSuggest_TextChanged"
+                    ItemsSource="{x:Bind ViewModel.Kontakte.Value}"/>
+
             </RelativePanel>
         </ScrollViewer>
     </Grid>

@@ -10,6 +10,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public class VertragDetailViewModel : VertragDetailVersion
     {
+        public ObservableProperty<List<VertragDetailKontakt>> Kontakte
+            = new ObservableProperty<List<VertragDetailKontakt>>();
+
         public ObservableProperty<List<VertragVersionListViewModel>> Versionen { get; }
             = new ObservableProperty<List<VertragVersionListViewModel>>();
 
@@ -24,6 +27,22 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Versionen.Value = v.OrderBy(vs => vs.Version).Select(vs => new VertragVersionListViewModel(vs)).ToList();
             Beginn.Value = Versionen.Value.First().Beginn.Value;
+
+            Kontakte.Value = App.Walter.Kontakte
+                .Select(k => new VertragDetailKontakt(k))
+                .ToList();
+        }
+    }
+
+    public class VertragDetailKontakt
+    {
+        public int Id;
+        public ObservableProperty<string> Name = new ObservableProperty<string>();
+
+        public VertragDetailKontakt(Kontakt k)
+        {
+            Id = k.KontaktId;
+            Name.Value = k.Vorname + " " + k.Nachname;
         }
     }
 
