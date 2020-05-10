@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.Model
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             // TODO adjust this...
-            => options.UseSqlite("Data Source=" + ApplicationData.Current.LocalFolder.Path + @"\walter.db");
+            => options.UseSqlite("Data Source=walter.db");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -59,6 +59,7 @@ namespace Deeplex.Saverwalter.Model
         public double Nutzflaeche { get; set; }
         public List<Vertrag> Vertraege { get; private set; } = new List<Vertrag>();
         public List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
+        public JuristischePerson Besitzer { get; set; } = null!;
         public List<Zaehlergemeinschaft> Zaehlergemeinschaften { get; private set; } = new List<Zaehlergemeinschaft>();
         public int AdresseId { get; set; }
         public Adresse Adresse { get; set; } = null!;
@@ -67,6 +68,8 @@ namespace Deeplex.Saverwalter.Model
     public class Garage
     {
         public int GarageId { get; set; }
+        public string Kennung { get; set; } = null!;
+        public JuristischePerson Besitzer { get; set; } = null!;
     }
 
 
@@ -128,7 +131,6 @@ namespace Deeplex.Saverwalter.Model
         public List<MietobjektGarage> Garagen { get; private set; } = new List<MietobjektGarage>();
         public int? WohnungId { get; set; }
         public Wohnung? Wohnung { get; set; }
-        public JuristischePerson Vermieter { get; set; } = null!;
         public int Personenzahl { get; set; }
         public DateTime Beginn { get; set; }
         public DateTime? Ende { get; set; }
@@ -157,7 +159,6 @@ namespace Deeplex.Saverwalter.Model
                 Garage = g.Garage,
             }).ToList();
             Wohnung = alt.Wohnung;
-            Vermieter = alt.Vermieter;
             Ansprechpartner = alt.Ansprechpartner;
             alt.Ende = Datum.AddDays(-1);
             Beginn = Datum;
@@ -177,6 +178,8 @@ namespace Deeplex.Saverwalter.Model
     {
         public int JuristischePersonId { get; set; }
         public string Bezeichnung { get; set; } = null!;
+        public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
+        public List<Garage> Garagen { get; private set; } = new List<Garage>();
     }
 
     public class Mieter

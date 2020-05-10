@@ -52,7 +52,6 @@ namespace Deeplex.Saverwalter.Model
 
             var vertrag = db.Vertraege
                 .Where(v => v.rowid == rowid)
-                .Include(v => v.Vermieter)
                 .Include(v => v.Ansprechpartner)
                     .ThenInclude(k => k.Adresse)
                 .Include(v => v.Mieter)
@@ -66,13 +65,15 @@ namespace Deeplex.Saverwalter.Model
                         .ThenInclude(a => a.Wohnungen)
                             .ThenInclude(w2 => w2.Vertraege)
                 .Include(v => v.Wohnung!)
+                    .ThenInclude(w => w.Besitzer)
+                .Include(v => v.Wohnung!)
                 .First();
 
-            Vermieter = vertrag.Vermieter;
             Ansprechpartner = vertrag.Ansprechpartner;
             Mieter = vertrag.Mieter.Select(m => m.Kontakt).ToList();
             Wohnung = vertrag.Wohnung!;
             Adresse = Wohnung.Adresse;
+            Vermieter = Wohnung.Besitzer;
             Wohnungen = Adresse.Wohnungen;
 
             Vertragsversionen = Wohnung.Vertraege

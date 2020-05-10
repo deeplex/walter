@@ -37,18 +37,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Garagen",
-                columns: table => new
-                {
-                    GarageId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Garagen", x => x.GarageId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "JuristischePersonen",
                 columns: table => new
                 {
@@ -124,28 +112,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Wohnungen",
-                columns: table => new
-                {
-                    WohnungId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Bezeichnung = table.Column<string>(nullable: false),
-                    Wohnflaeche = table.Column<double>(nullable: false),
-                    Nutzflaeche = table.Column<double>(nullable: false),
-                    AdresseId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Wohnungen", x => x.WohnungId);
-                    table.ForeignKey(
-                        name: "FK_Wohnungen_Adressen_AdresseId",
-                        column: x => x.AdresseId,
-                        principalTable: "Adressen",
-                        principalColumn: "AdresseId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "WarmeBetriebskostenRechnungen",
                 columns: table => new
                 {
@@ -163,6 +129,55 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         column: x => x.AllgemeinzaehlerId,
                         principalTable: "Allgemeinzaehler",
                         principalColumn: "AllgemeinzaehlerId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Garagen",
+                columns: table => new
+                {
+                    GarageId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Kennung = table.Column<string>(nullable: false),
+                    BesitzerJuristischePersonId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Garagen", x => x.GarageId);
+                    table.ForeignKey(
+                        name: "FK_Garagen_JuristischePersonen_BesitzerJuristischePersonId",
+                        column: x => x.BesitzerJuristischePersonId,
+                        principalTable: "JuristischePersonen",
+                        principalColumn: "JuristischePersonId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Wohnungen",
+                columns: table => new
+                {
+                    WohnungId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Bezeichnung = table.Column<string>(nullable: false),
+                    Wohnflaeche = table.Column<double>(nullable: false),
+                    Nutzflaeche = table.Column<double>(nullable: false),
+                    BesitzerJuristischePersonId = table.Column<int>(nullable: false),
+                    AdresseId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Wohnungen", x => x.WohnungId);
+                    table.ForeignKey(
+                        name: "FK_Wohnungen_Adressen_AdresseId",
+                        column: x => x.AdresseId,
+                        principalTable: "Adressen",
+                        principalColumn: "AdresseId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Wohnungen_JuristischePersonen_BesitzerJuristischePersonId",
+                        column: x => x.BesitzerJuristischePersonId,
+                        principalTable: "JuristischePersonen",
+                        principalColumn: "JuristischePersonId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -197,7 +212,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     Version = table.Column<int>(nullable: false, defaultValue: 0)
                         .Annotation("Sqlite:Autoincrement", true),
                     WohnungId = table.Column<int>(nullable: true),
-                    VermieterJuristischePersonId = table.Column<int>(nullable: false),
                     Personenzahl = table.Column<int>(nullable: false),
                     Beginn = table.Column<DateTime>(nullable: false),
                     Ende = table.Column<DateTime>(nullable: true),
@@ -212,12 +226,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         column: x => x.AnsprechpartnerKontaktId,
                         principalTable: "Kontakte",
                         principalColumn: "KontaktId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Vertraege_JuristischePersonen_VermieterJuristischePersonId",
-                        column: x => x.VermieterJuristischePersonId,
-                        principalTable: "JuristischePersonen",
-                        principalColumn: "JuristischePersonId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Vertraege_Wohnungen_WohnungId",
@@ -348,6 +356,11 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Garagen_BesitzerJuristischePersonId",
+                table: "Garagen",
+                column: "BesitzerJuristischePersonId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_KalteBetriebskosten_AdresseId",
                 table: "KalteBetriebskosten",
                 column: "AdresseId");
@@ -388,11 +401,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 column: "AnsprechpartnerKontaktId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Vertraege_VermieterJuristischePersonId",
-                table: "Vertraege",
-                column: "VermieterJuristischePersonId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Vertraege_WohnungId",
                 table: "Vertraege",
                 column: "WohnungId");
@@ -406,6 +414,11 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 name: "IX_Wohnungen_AdresseId",
                 table: "Wohnungen",
                 column: "AdresseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Wohnungen_BesitzerJuristischePersonId",
+                table: "Wohnungen",
+                column: "BesitzerJuristischePersonId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Zaehlergemeinschaften_AllgemeinzaehlerId",
@@ -470,13 +483,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 name: "Kontakte");
 
             migrationBuilder.DropTable(
-                name: "JuristischePersonen");
-
-            migrationBuilder.DropTable(
                 name: "Wohnungen");
 
             migrationBuilder.DropTable(
                 name: "Adressen");
+
+            migrationBuilder.DropTable(
+                name: "JuristischePersonen");
         }
     }
 }

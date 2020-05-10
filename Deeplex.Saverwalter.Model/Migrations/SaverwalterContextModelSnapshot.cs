@@ -63,7 +63,16 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("BesitzerJuristischePersonId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Kennung")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("GarageId");
+
+                    b.HasIndex("BesitzerJuristischePersonId");
 
                     b.ToTable("Garagen");
                 });
@@ -247,9 +256,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("Personenzahl")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("VermieterJuristischePersonId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("Version")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
@@ -266,8 +272,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasAlternateKey("VertragId", "Version");
 
                     b.HasIndex("AnsprechpartnerKontaktId");
-
-                    b.HasIndex("VermieterJuristischePersonId");
 
                     b.HasIndex("WohnungId");
 
@@ -305,6 +309,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("AdresseId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("BesitzerJuristischePersonId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Bezeichnung")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -318,6 +325,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasKey("WohnungId");
 
                     b.HasIndex("AdresseId");
+
+                    b.HasIndex("BesitzerJuristischePersonId");
 
                     b.ToTable("Wohnungen");
                 });
@@ -387,6 +396,15 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.ToTable("Zaehlerstaende");
                 });
 
+            modelBuilder.Entity("Deeplex.Saverwalter.Model.Garage", b =>
+                {
+                    b.HasOne("Deeplex.Saverwalter.Model.JuristischePerson", "Besitzer")
+                        .WithMany("Garagen")
+                        .HasForeignKey("BesitzerJuristischePersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Deeplex.Saverwalter.Model.KalteBetriebskostenRechnung", b =>
                 {
                     b.HasOne("Deeplex.Saverwalter.Model.KalteBetriebskostenpunkt", "KalteBetriebskostenpunkt")
@@ -450,12 +468,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Deeplex.Saverwalter.Model.JuristischePerson", "Vermieter")
-                        .WithMany()
-                        .HasForeignKey("VermieterJuristischePersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Deeplex.Saverwalter.Model.Wohnung", "Wohnung")
                         .WithMany("Vertraege")
                         .HasForeignKey("WohnungId");
@@ -475,6 +487,12 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasOne("Deeplex.Saverwalter.Model.Adresse", "Adresse")
                         .WithMany("Wohnungen")
                         .HasForeignKey("AdresseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Deeplex.Saverwalter.Model.JuristischePerson", "Besitzer")
+                        .WithMany("Wohnungen")
+                        .HasForeignKey("BesitzerJuristischePersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
