@@ -1,7 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Toolkit.Uwp.UI.Controls.TextToolbarSymbols;
 using System.Collections.Generic;
 using System.Linq;
 

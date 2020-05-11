@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Utils.ObjectModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Deeplex.Utils.ObjectModel;
-using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.App;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -13,7 +12,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<List<VertragVersionListViewModel>>();
 
         public VertragListViewModel(IGrouping<Guid, Vertrag> v)
-            : base (v.OrderBy(vs => vs.Version).Last())
+            : base(v.OrderBy(vs => vs.Version).Last())
         {
             Versionen.Value = v.OrderBy(vs => vs.Version).Select(vs => new VertragVersionListViewModel(vs)).ToList();
             BeginnString.Value = Versionen.Value.First().BeginnString.Value;

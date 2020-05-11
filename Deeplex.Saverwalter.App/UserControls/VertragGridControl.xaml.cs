@@ -1,14 +1,9 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.App.Views
 {
@@ -17,7 +12,7 @@ namespace Deeplex.Saverwalter.App.Views
         public int WohnungId
         {
             get => (int)GetValue(WohnungIdProperty);
-            set { SetValue(WohnungIdProperty, value);  }
+            set { SetValue(WohnungIdProperty, value); }
         }
 
         public static readonly DependencyProperty WohnungIdProperty =

@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
-using Deeplex.Saverwalter.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -88,7 +87,7 @@ namespace Deeplex.Saverwalter.App.Views
                     var m = ViewModel.Kontakte.Value.First(k => k.Name.Value == a);
                     ViewModel.Mieter.Value = ViewModel.Mieter.Value.Add(new VertragDetailMieter(m.Id))
                         // From the longest to the smallest because of XAML I guess;
-                        .OrderBy(mw => mw.Name.Value.Length).Reverse().ToImmutableList(); 
+                        .OrderBy(mw => mw.Name.Value.Length).Reverse().ToImmutableList();
                     sender.Text = "";
                 }
             }

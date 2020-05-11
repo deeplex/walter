@@ -1,5 +1,5 @@
-﻿using Deeplex.Utils.ObjectModel;
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Utils.ObjectModel;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<string> Fax { get; } = new ObservableProperty<string>();
 
         public string Name => Vorname.Value + " " + Nachname.Value;
-        
+
         public KontaktDetailViewModel(int id)
             : this(App.Walter.Kontakte.Find(id))
         {

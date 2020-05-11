@@ -1,7 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -27,7 +26,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             : this(App.Walter.Vertraege
                   .Include(v => v.Wohnung).ThenInclude(w => w.Besitzer)
                   .Include(v => v.Garagen)
-                  .Where(v => v.VertragId == id).ToList()) { }
+                  .Where(v => v.VertragId == id).ToList())
+        { }
 
         public VertragDetailViewModel(List<Vertrag> v)
             : base(v.OrderBy(vs => vs.Version).Last())
@@ -72,7 +72,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Id = v.rowid;
             Version = v.Version;
             Personenzahl.Value = v.Personenzahl;
-            Wohnung.Value = v.Wohnung is Wohnung w? new VertragDetailWohnung(w) : null;
+            Wohnung.Value = v.Wohnung is Wohnung w ? new VertragDetailWohnung(w) : null;
             Mieter.Value = v.Mieter.Select(m => new VertragDetailMieter(m.Kontakt))
                 .OrderBy(m => m.Name.Value.Length).Reverse() // From the longest to the smallest because of XAML I guess
                 .ToImmutableList();

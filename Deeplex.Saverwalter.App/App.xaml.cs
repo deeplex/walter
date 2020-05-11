@@ -1,22 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.Model;
+using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.App.ViewModels;
 
 namespace Deeplex.Saverwalter.App
 {
@@ -28,7 +18,7 @@ namespace Deeplex.Saverwalter.App
         /// <summary>
         /// Gets the app-wide MainViewModel singleton instance.
         /// </summary>
-        public static MainViewModel ViewModel { get; private set;  }
+        public static MainViewModel ViewModel { get; private set; }
 
         public static SaverwalterContext Walter { get; private set; }
 
@@ -54,8 +44,8 @@ namespace Deeplex.Saverwalter.App
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-             Walter = new SaverwalterContext();
-             ViewModel = new MainViewModel();
+            Walter = new SaverwalterContext();
+            ViewModel = new MainViewModel();
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
