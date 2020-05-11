@@ -224,6 +224,7 @@ namespace Deeplex.Saverwalter.Model
         public int KalteBetriebskostenpunktId { get; set; }
         public KalteBetriebskosten Bezeichnung { get; set; }
         public List<KalteBetriebskostenRechnung> Rechnungen { get; private set; } = new List<KalteBetriebskostenRechnung>();
+        public int AdresseId { get; set; }
         public Adresse Adresse { get; set; } = null!;
         public string? Beschreibung { get; set; }
         public UmlageSchluessel Schluessel { get; set; }
