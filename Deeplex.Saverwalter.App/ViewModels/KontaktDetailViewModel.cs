@@ -42,7 +42,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Telefon.Value = k.Telefon ?? "";
             Mobil.Value = k.Mobil ?? "";
 
-            Adresse.Value = k.Adresse is Adresse ? new AdresseViewModel(k.Adresse) : null;
+            Adresse.Value = k.Adresse is Adresse ?
+                new AdresseViewModel(k.Adresse) :
+                new AdresseViewModel();
 
             Vertraege.Value = App.Walter.Vertraege
                 .Include(v => v.Mieter)
