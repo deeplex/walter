@@ -13,5 +13,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Id = j.JuristischePersonId;
             Name.Value = j.Bezeichnung;
         }
+
+        public static JuristischePerson GetJuristischePerson(JuristischePersonViewModel j)
+        {
+            return App.Walter.JuristischePersonen.Find(j.Id);
+        }
     }
 }

@@ -10,6 +10,13 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.Resources>
+        <Style x:Name="Eintraege" TargetType="TextBox">
+            <Setter Property="TextWrapping" Value="NoWrap"/>
+            <Setter Property="Margin" Value="20,20,0,0"/>
+            <Setter Property="IsEnabled" Value="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"/>
+        </Style>
+    </Page.Resources>
 
     <Grid>
         <ScrollViewer>
@@ -42,11 +49,13 @@
                     DefaultLabelPosition="Right">
                     <AppBarButton
                     Icon="Edit"
+                    Command="{x:Bind ViewModel.BeginEdit}"
                     Label="Edit"/>
                     <AppBarButton Icon="Delete" Label="Delete"/>
                     <AppBarButton
                     Icon="Save"
-                    Label="Save"/>
+                    Label="Save"
+                    Command="{x:Bind ViewModel.SaveEdit}"/>
                     <CommandBar.SecondaryCommands>
                         <AppBarButton Icon="Setting" Label="Settings">
                             <AppBarButton.KeyboardAccelerators>
@@ -61,66 +70,68 @@
                     Name="BesitzerBox"
                     Header="Besitzer"
                     Width="300"
-                    Text="{x:Bind ViewModel.Besitzer.Value.Name.Value}"
-                    Margin="20,20,0,0" />
+                    Text="{x:Bind ViewModel.Besitzer.Value.Name.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource Eintraege}" />
 
                 <TextBox
                     RelativePanel.Below="BesitzerBox"
-                    
-                    Margin="20,20,0,0"
+                    Style="{StaticResource Eintraege}"
                     Name="Strasse"
                     Header="Straße"
                     Width="210"
-                    Text="{x:Bind ViewModel.Adresse.Value.Strasse.Value, Mode=TwoWay}"/>
+                    Text="{x:Bind ViewModel.Adresse.Value.Strasse.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 <TextBox
                     Name="Hausnummer"
-                    Margin="20,20,0,0"
+                    Style="{StaticResource Eintraege}"
                     Header="Hausnr."
                     Width="70"
                     RelativePanel.Below="BesitzerBox"
                     RelativePanel.RightOf="Strasse"
-                    Text="{x:Bind ViewModel.Adresse.Value.Hausnummer.Value, Mode=TwoWay}"/>
+                    Text="{x:Bind ViewModel.Adresse.Value.Hausnummer.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 <TextBox 
                     Name="Postleizahl"
-                    Margin="20,20,0,0"
+                    Style="{StaticResource Eintraege}"
                     Header="Postleitzahl"
                     Width="70"
                     RelativePanel.Below="BesitzerBox"
                     RelativePanel.RightOf="Hausnummer"
-                    Text="{x:Bind ViewModel.Adresse.Value.Postleitzahl.Value, Mode=TwoWay}"/>
+                    Text="{x:Bind ViewModel.Adresse.Value.Postleitzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 <TextBox
                     Name="Stadt"
                     Header="Stadt"
-                    Margin="20,20,0,0"
+                    Style="{StaticResource Eintraege}"
                     Width="210"
                     RelativePanel.Below="BesitzerBox"
                     RelativePanel.RightOf="Postleizahl"
-                    Text="{x:Bind ViewModel.Adresse.Value.Stadt.Value, Mode=TwoWay}"/>
+                    Text="{x:Bind ViewModel.Adresse.Value.Stadt.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <TextBox
-                    Width="210" Margin="20,20,0,0"
+                    Width="210"
+                    Style="{StaticResource Eintraege}"
                     x:Name="Bezeichnung" Header="Bezeichnung"
-                    Text="{x:Bind ViewModel.Bezeichnung.Value}"
+                    Text="{x:Bind ViewModel.Bezeichnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     RelativePanel.Below="Strasse" />
                 <TextBox
-                    Width="70" Margin="20,20,0,0"
+                    Width="70"
+                    Style="{StaticResource Eintraege}"
                     x:Name="Wohnflaeche" Header="Wohnfl."
-                    Text="{x:Bind ViewModel.Wohnflaeche.Value}"
+                    Text="{x:Bind ViewModel.Wohnflaeche.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     RelativePanel.Below="Strasse"
                     RelativePanel.RightOf="Bezeichnung"/>
                 <TextBox
-                    Width="70" Margin="20,20,0,0"
+                    Width="70"
+                    Style="{StaticResource Eintraege}"
                     x:Name="Nutzflaeche" Header="Nutzfl."
-                    Text="{x:Bind ViewModel.Nutzflaeche.Value}"
+                    Text="{x:Bind ViewModel.Nutzflaeche.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     RelativePanel.Below="Strasse" 
                     RelativePanel.RightOf="Wohnflaeche"/>
 
 
                 <TextBlock
-                Name="Zaehlertitle"
-                Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}"
-                Text="Zähler"
-                RelativePanel.Below="Bezeichnung"/>
+                    Name="Zaehlertitle"
+                    Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}"
+                    Text="Zähler"
+                    RelativePanel.Below="Bezeichnung"/>
 
                 <GridView
                 x:Name="Zaehler"

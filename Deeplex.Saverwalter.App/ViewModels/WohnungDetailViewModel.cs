@@ -44,10 +44,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Nutzflaeche.Value = w.Nutzflaeche;
 
             Adresse.Value = new AdresseViewModel(w.Adresse);
-
             Besitzer.Value = new JuristischePersonViewModel(w.Besitzer);
-
             Zaehler.Value = w.Zaehler.Select(z => new WohnungDetailZaehler(z)).ToList();
+
+            BeginEdit = new RelayCommand(_ => IsInEdit.Value = true, _ => !IsInEdit.Value);
+            IsInEdit.PropertyChanged += (_, ev) => BeginEdit.RaiseCanExecuteChanged(ev);
 
             Vertraege.Value = App.Walter.Vertraege
                 .Include(v => v.Mieter)
@@ -61,7 +62,41 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Where(k => k.AdresseId == w.AdresseId)
                 .Select(k => new KalteBetriebskostenViewModel(k, w))
                 .ToList();
+
+            SaveEdit = new RelayCommand(_ =>
+            {
+                IsInEdit.Value = false;
+
+                w.Adresse = AdresseViewModel.GetAdresse(Adresse.Value);
+                w.Besitzer = JuristischePersonViewModel.GetJuristischePerson(Besitzer.Value);
+                // w.Zaehler = ZaehlerViewModel // TODO
+                // w.Zaehlergemeinschaften = Zaehlergemeinschaften TODO
+                w.Bezeichnung = Bezeichnung.Value;
+                w.Nutzflaeche = Nutzflaeche.Value;
+                w.Wohnflaeche = Wohnflaeche.Value;
+
+                if (w.WohnungId > 0)
+                {
+                    App.Walter.Wohnungen.Update(w);
+                }
+                else
+                {
+                    App.Walter.Wohnungen.Add(w);
+                }
+
+                App.Walter.SaveChanges();
+            }, _ => IsInEdit.Value);
+
+
+            IsInEdit.PropertyChanged += (_, ev) => SaveEdit.RaiseCanExecuteChanged(ev);
+
+            IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
         }
+        public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
+        public bool IsNotInEdit => !IsInEdit.Value;
+
+        public RelayCommand BeginEdit { get; }
+        public RelayCommand SaveEdit { get; }
     }
 
     public class WohnungDetailZaehler

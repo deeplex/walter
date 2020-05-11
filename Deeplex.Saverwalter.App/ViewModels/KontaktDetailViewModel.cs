@@ -75,7 +75,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 }
                 else
                 {
-                    App.Walter.Add(k);
+                    App.Walter.Kontakte.Add(k);
                 }
 
                 App.Walter.SaveChanges();
