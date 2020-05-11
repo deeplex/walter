@@ -19,8 +19,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<string> Fax { get; } = new ObservableProperty<string>();
         public ObservableProperty<List<KontaktDetailVertrag>> Vertraege
             = new ObservableProperty<List<KontaktDetailVertrag>>();
-        public ObservableProperty<KontaktDetailAdresse> Adresse { get; }
-            = new ObservableProperty<KontaktDetailAdresse>();
+        public ObservableProperty<AdresseViewModel> Adresse { get; }
+            = new ObservableProperty<AdresseViewModel>();
 
         public string Name => Vorname.Value + " " + Nachname.Value;
 
@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Telefon.Value = k.Telefon ?? "";
             Mobil.Value = k.Mobil ?? "";
 
-            Adresse.Value = new KontaktDetailAdresse(k.Adresse);
+            Adresse.Value = new AdresseViewModel(k.Adresse);
 
             Vertraege.Value = App.Walter.Vertraege
                 .Include(v => v.Mieter)
@@ -78,24 +78,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public RelayCommand BeginEdit { get; }
         public RelayCommand SaveEdit { get; }
-
-        public class KontaktDetailAdresse
-        {
-            public int Id;
-            public ObservableProperty<string> Strasse { get; } = new ObservableProperty<string>();
-            public ObservableProperty<string> Hausnummer { get; } = new ObservableProperty<string>();
-            public ObservableProperty<string> Postleitzahl { get; } = new ObservableProperty<string>();
-            public ObservableProperty<string> Stadt { get; } = new ObservableProperty<string>();
-
-            public KontaktDetailAdresse(Adresse a)
-            {
-                Id = a.AdresseId;
-                Strasse.Value = a.Strasse;
-                Hausnummer.Value = a.Hausnummer;
-                Postleitzahl.Value = a.Postleitzahl;
-                Stadt.Value = a.Stadt;
-            }
-        }
 
         public class KontaktDetailVertrag
         {

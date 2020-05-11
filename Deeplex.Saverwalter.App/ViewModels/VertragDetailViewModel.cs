@@ -22,8 +22,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<List<VertragVersionListViewModel>> Versionen { get; }
             = new ObservableProperty<List<VertragVersionListViewModel>>();
 
-        public ObservableProperty<ImmutableList<VertragDetailKalteBetriebskosten>> KalteBetriebskosten { get; }
-            = new ObservableProperty<ImmutableList<VertragDetailKalteBetriebskosten>>();
+        public ObservableProperty<ImmutableList<KalteBetriebskostenViewModel>> KalteBetriebskosten { get; }
+            = new ObservableProperty<ImmutableList<KalteBetriebskostenViewModel>>();
 
         public VertragDetailViewModel(Guid id)
             : this(App.Walter.Vertraege
@@ -51,7 +51,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ToImmutableList();
 
             KalteBetriebskosten.Value = App.Walter.KalteBetriebskosten
-                .Select(k => new VertragDetailKalteBetriebskosten(k, v.Last()))
+                .Select(k => new KalteBetriebskostenViewModel(k, v.Last()))
                 .ToImmutableList();
         }
     }
@@ -127,46 +127,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Id = w.WohnungId;
             BesitzerId.Value = w.Besitzer.JuristischePersonId;
             BezeichnungVoll.Value = Utils.Anschrift(w) + " - " + w.Bezeichnung;
-        }
-    }
-
-    public class VertragDetailKalteBetriebskosten
-    {
-        public int Id { get; }
-        public ObservableProperty<string> Bezeichnung { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Schluessel { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Anteil { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Beschreibung { get; } = new ObservableProperty<string>();
-
-        public VertragDetailKalteBetriebskosten(KalteBetriebskostenpunkt k, Vertrag v)
-        {
-            string Percent(double d) => string.Format("{0:N2}%", d * 100);
-
-            var w = v.Wohnung;
-            var p = App.Walter.Vertraege
-                .Where(a => a.Wohnung.AdresseId == w.AdresseId)
-                .Where(a => a.Ende == null || a.Ende < DateTime.Today)
-                .Sum(a => a.Personenzahl);
-
-            Id = k.KalteBetriebskostenpunktId;
-            Bezeichnung.Value = k.Bezeichnung.ToDescriptionString();
-            Schluessel.Value = k.Schluessel.ToDescriptionString();
-            switch (k.Schluessel)
-            {
-                case UmlageSchluessel.NachWohnflaeche:
-                    Anteil.Value = Percent(w.Wohnflaeche / w.Adresse.Wohnungen.Sum(a => a.Wohnflaeche));
-                    break;
-                case UmlageSchluessel.NachNutzeinheit:
-                    Anteil.Value = Percent(1.0 / w.Adresse.Wohnungen.Count());
-                    break;
-                case UmlageSchluessel.NachPersonenzahl:
-                    Anteil.Value = Percent((double)v.Personenzahl / p);
-                    break;
-                case UmlageSchluessel.NachVerbrauch:
-                    Anteil.Value = "n/a";
-                    break;
-            }
-            Beschreibung.Value = k.Beschreibung;
         }
     }
 }

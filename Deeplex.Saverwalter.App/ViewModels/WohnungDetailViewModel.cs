@@ -19,10 +19,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<List<WohnungDetailZaehler>>();
         public ObservableProperty<List<WohnungDetailVertrag>> Vertraege
             = new ObservableProperty<List<WohnungDetailVertrag>>();
-        public ObservableProperty<List<WohnungDetailKalteBetriebskosten>> KalteBetriebskosten
-            = new ObservableProperty<List<WohnungDetailKalteBetriebskosten>>();
-        public ObservableProperty<WohnungDetailAdresse> Adresse
-            = new ObservableProperty<WohnungDetailAdresse>();
+        public ObservableProperty<List<KalteBetriebskostenViewModel>> KalteBetriebskosten
+            = new ObservableProperty<List<KalteBetriebskostenViewModel>>();
+        public ObservableProperty<AdresseViewModel> Adresse
+            = new ObservableProperty<AdresseViewModel>();
 
         public WohnungDetailViewModel(int id)
             : this(App.Walter.Wohnungen
@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Wohnflaeche.Value = w.Wohnflaeche;
             Nutzflaeche.Value = w.Nutzflaeche;
 
-            Adresse.Value = new WohnungDetailAdresse(w.Adresse);
+            Adresse.Value = new AdresseViewModel(w.Adresse);
 
             Zaehler.Value = w.Zaehler.Select(z => new WohnungDetailZaehler(z)).ToList();
 
@@ -54,58 +54,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             KalteBetriebskosten.Value = App.Walter.KalteBetriebskosten
                 .Where(k => k.AdresseId == w.AdresseId)
-                .Select(k => new WohnungDetailKalteBetriebskosten(k, w))
+                .Select(k => new KalteBetriebskostenViewModel(k, w))
                 .ToList();
-        }
-    }
-
-    public class WohnungDetailAdresse
-    {
-        public int Id;
-        public ObservableProperty<string> Strasse { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Hausnummer { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Postleitzahl { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Stadt { get; } = new ObservableProperty<string>();
-
-        public WohnungDetailAdresse(Adresse a)
-        {
-            Id = a.AdresseId;
-            Strasse.Value = a.Strasse;
-            Hausnummer.Value = a.Hausnummer;
-            Postleitzahl.Value = a.Postleitzahl;
-            Stadt.Value = a.Stadt;
-        }
-    }
-
-    public class WohnungDetailKalteBetriebskosten
-    {
-        public int Id { get; }
-        public ObservableProperty<string> Bezeichnung { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Schluessel { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Anteil { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Beschreibung { get; } = new ObservableProperty<string>();
-
-        public WohnungDetailKalteBetriebskosten(KalteBetriebskostenpunkt k, Wohnung w)
-        {
-            string Percent(double d) => string.Format("{0:N2}%", d * 100);
-
-            Id = k.KalteBetriebskostenpunktId;
-            Bezeichnung.Value = k.Bezeichnung.ToDescriptionString();
-            Schluessel.Value = k.Schluessel.ToDescriptionString();
-            switch (k.Schluessel)
-            {
-                case UmlageSchluessel.NachWohnflaeche:
-                    Anteil.Value = Percent(w.Wohnflaeche / w.Adresse.Wohnungen.Sum(a => a.Wohnflaeche));
-                    break;
-                case UmlageSchluessel.NachNutzeinheit:
-                    Anteil.Value = Percent(1.0 / w.Adresse.Wohnungen.Count());
-                    break;
-                case UmlageSchluessel.NachPersonenzahl:
-                case UmlageSchluessel.NachVerbrauch:
-                    Anteil.Value = "n/a";
-                    break;
-            }
-            Beschreibung.Value = k.Beschreibung;
         }
     }
 
