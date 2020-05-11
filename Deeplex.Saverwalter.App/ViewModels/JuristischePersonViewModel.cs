@@ -8,6 +8,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public int Id;
         public ObservableProperty<string> Name = new ObservableProperty<string>();
 
+        public JuristischePersonViewModel() { }
+
         public JuristischePersonViewModel(JuristischePerson j)
         {
             Id = j.JuristischePersonId;

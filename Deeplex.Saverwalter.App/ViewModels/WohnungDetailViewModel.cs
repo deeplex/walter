@@ -34,6 +34,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
                   .First(w => w.WohnungId == id))
         { }
 
+        public WohnungDetailViewModel() : this(new Wohnung())
+        {
+            IsInEdit.Value = true;
+        } // Create new Wohnung
+
         private WohnungDetailViewModel(Wohnung w)
         {
             Id = w.WohnungId;
@@ -43,8 +48,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Wohnflaeche.Value = w.Wohnflaeche;
             Nutzflaeche.Value = w.Nutzflaeche;
 
-            Adresse.Value = new AdresseViewModel(w.Adresse);
-            Besitzer.Value = new JuristischePersonViewModel(w.Besitzer);
+            Adresse.Value = w.Adresse is Adresse ?
+                new AdresseViewModel(w.Adresse) :
+                new AdresseViewModel();
+
+            Besitzer.Value = w.Besitzer is JuristischePerson ?
+                new JuristischePersonViewModel(w.Besitzer) :
+                new JuristischePersonViewModel();
+
             Zaehler.Value = w.Zaehler.Select(z => new WohnungDetailZaehler(z)).ToList();
 
             BeginEdit = new RelayCommand(_ => IsInEdit.Value = true, _ => !IsInEdit.Value);

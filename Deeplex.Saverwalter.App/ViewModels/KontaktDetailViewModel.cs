@@ -25,11 +25,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public string Name => Vorname.Value + " " + Nachname.Value;
 
         public KontaktDetailViewModel(int id)
-            : this(App.Walter.Kontakte.Find(id))
-        {
-        }
+            : this(App.Walter.Kontakte.Find(id)) { }
 
-        public KontaktDetailViewModel() : this(new Kontakt()) { } // Create new Contact
+        public KontaktDetailViewModel() : this(new Kontakt())
+        {
+            IsInEdit.Value = true;
+        } // Create new Kontakt
 
         private KontaktDetailViewModel(Kontakt k)
         {

@@ -29,5 +29,11 @@ namespace Deeplex.Saverwalter.App.Views
             Frame.Navigate(typeof(WohnungDetailPage), ((Button)sender).CommandParameter,
                 new DrillInNavigationTransitionInfo());
         }
+
+        private void AddWohnung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(WohnungDetailPage), null,
+                new DrillInNavigationTransitionInfo());
+        }
     }
 }

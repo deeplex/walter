@@ -8,6 +8,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public static string Anschrift(Wohnung w) => Anschrift(w.Adresse);
 
         public static string Anschrift(Adresse a)
-            => a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
+        {
+            if (a == null ||
+                a.Postleitzahl == null || a.Postleitzahl == "" ||
+                a.Hausnummer == null || a.Hausnummer == "" ||
+                a.Strasse == null || a.Strasse == "" ||
+                a.Stadt == null || a.Stadt == "")
+            {
+                return "";
+            }
+            return a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
+        }
     }
 }

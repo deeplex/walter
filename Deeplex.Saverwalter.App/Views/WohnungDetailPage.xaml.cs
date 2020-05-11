@@ -19,13 +19,9 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 ViewModel = new WohnungDetailViewModel(wohnungId);
             }
-            else // If invoked using "Add"
+            else if (e.Parameter is null) // New Wohnung
             {
-                //ViewModel = new WohnungDetailViewModel
-                //{
-                //    IsNewCustomer = true,
-                //    IsInEdit = true
-                //};
+                ViewModel = new WohnungDetailViewModel();
             }
 
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;

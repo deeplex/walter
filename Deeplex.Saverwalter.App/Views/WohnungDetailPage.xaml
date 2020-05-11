@@ -172,6 +172,7 @@
                     CanUserReorderColumns="False"
                     CanUserResizeColumns="True"
                     AutoGenerateColumns="False"
+                    IsEnabled="{x:Bind ViewModel.IsNotInEdit, Mode=OneWay}"
                     ItemsSource="{x:Bind ViewModel.Vertraege.Value}">
                     <mtuuc:DataGrid.Columns>
                         <mtuuc:DataGridTextColumn
@@ -205,6 +206,7 @@
                     CanUserReorderColumns="False"
                     CanUserResizeColumns="True"
                     AutoGenerateColumns="False"
+                    IsEnabled="{x:Bind ViewModel.IsNotInEdit, Mode=OneWay}"
                     ItemsSource="{x:Bind ViewModel.KalteBetriebskosten.Value}">
                     <mtuuc:DataGrid.Columns>
                         <mtuuc:DataGridTextColumn

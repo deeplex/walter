@@ -22,7 +22,7 @@ namespace Deeplex.Saverwalter.App.Views
             }
             else if (e.Parameter is null) // New Contact
             {
-                ViewModel = new KontaktDetailViewModel(); ;
+                ViewModel = new KontaktDetailViewModel();
             }
 
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;

@@ -26,8 +26,7 @@
             <Grid>
                 <RelativePanel CornerRadius="10" Background="{StaticResource SystemChromeMediumColor}">
                     <TextBlock Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}" Text="{Binding Key}"/>
-                    <AppBarButton Margin="10" Icon="Manage" Name="Abrechnung" Width="100" Label="Abrechnung" RelativePanel.LeftOf="Neue Wohnung"/>
-                    <AppBarButton Margin="10" Icon="Add" Name="Neue Wohnung" Width="100" Label="Neue Wohnung" RelativePanel.AlignRightWithPanel="True"/>
+                    <AppBarButton Margin="10" Icon="Manage" Name="Abrechnung" Width="100" Label="Abrechnung" RelativePanel.AlignRightWithPanel="True"/>
                     <GridView
                         IsItemClickEnabled="True"
                         SelectionMode="Single"
@@ -49,9 +48,8 @@
                 RelativePanel.AlignRightWithPanel="True"
                 HorizontalAlignment="Stretch"
                 DefaultLabelPosition="Right">
-            <AppBarButton Icon="Add" Label="Add"/>
-            <AppBarButton Icon="Edit" Label="Edit"/>
-            <AppBarButton Icon="Delete" Label="Delete"/>
+            <AppBarButton 
+               Click="AddWohnung_Click" Icon="Add" Label="Add"/>
             <CommandBar.SecondaryCommands>
                 <AppBarButton Icon="Setting" Label="Settings">
                     <AppBarButton.KeyboardAccelerators>
