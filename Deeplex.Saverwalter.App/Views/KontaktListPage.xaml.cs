@@ -23,5 +23,11 @@ namespace Deeplex.Saverwalter.App.Views
                     new DrillInNavigationTransitionInfo());
             }
         }
+
+        private void Add_Click(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(KontaktDetailPage), null,
+                new DrillInNavigationTransitionInfo());
+        }
     }
 }

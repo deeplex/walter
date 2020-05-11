@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.Model;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
@@ -19,13 +20,9 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 ViewModel = new KontaktDetailViewModel(kontaktId);
             }
-            else // If invoked using "Add"
+            else if (e.Parameter is null) // New Contact
             {
-                //ViewModel = new KontaktViewModel
-                //{
-                //    IsNewCustomer = true,
-                //    IsInEdit = true
-                //};
+                ViewModel = new KontaktDetailViewModel(); ;
             }
 
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;

@@ -29,6 +29,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
         }
 
+        public KontaktDetailViewModel() : this(new Kontakt()) { } // Create new Contact
+
         private KontaktDetailViewModel(Kontakt k)
         {
             Id = k.KontaktId;
@@ -40,7 +42,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Telefon.Value = k.Telefon ?? "";
             Mobil.Value = k.Mobil ?? "";
 
-            Adresse.Value = new AdresseViewModel(k.Adresse);
+            Adresse.Value = k.Adresse is Adresse ? new AdresseViewModel(k.Adresse) : null;
 
             Vertraege.Value = App.Walter.Vertraege
                 .Include(v => v.Mieter)
@@ -65,7 +67,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 k.Mobil = Mobil.Value;
                 k.Fax = Fax.Value;
 
-                App.Walter.Kontakte.Update(k);
+                if (k.KontaktId > 0)
+                {
+                    App.Walter.Kontakte.Update(k);
+                }
+                else
+                {
+                    App.Walter.Add(k);
+                }
+
                 App.Walter.SaveChanges();
 
             }, _ => IsInEdit.Value);

@@ -25,6 +25,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             // TODO Remove unreferenced Adresses - Add Wohnungen and Kontakte List to Walter.
 
+            // TODO Give some indication to the user?
+            // If one is set => all must be set.
+            if (avm is null ||
+                avm.Postleitzahl.Value == null || avm.Postleitzahl.Value == "" ||
+                avm.Hausnummer.Value == null || avm.Hausnummer.Value == "" ||
+                avm.Strasse.Value == null || avm.Strasse.Value == "" ||
+                avm.Stadt.Value == null || avm.Stadt.Value == "")
+            {
+                return null;
+            }
+
             var adr = App.Walter.Adressen.FirstOrDefault(a2 =>
                 a2.Postleitzahl == avm.Postleitzahl.Value &&
                 a2.Hausnummer == avm.Hausnummer.Value &&
