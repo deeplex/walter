@@ -62,19 +62,36 @@
                         </AppBarButton>
                     </CommandBar.SecondaryCommands>
                 </CommandBar>
-                <TextBox
+
+
+                <TextBlock
+                    x:Name="LaufzeitLabel"
+                    RelativePanel.Below="ButtonRow"
+                    Width="70"
+                    Margin="20,45,0,0"
+                    Text="Laufzeit:"/>
+
+                <CalendarDatePicker
                     x:Name="Beginn" Header="Beginn"
                     Margin="20,20,0,0"
-                    Style="{StaticResource Eintraege}"
+                    Width="190"
                     RelativePanel.Below="ButtonRow"
-                    Text="{x:Bind ViewModel.BeginnString}"/>
-                <TextBox
+                    RelativePanel.RightOf="LaufzeitLabel"
+                    Date="{x:Bind ViewModel.Beginn.Value}"
+                    Language="de"
+                    PlaceholderText="Wähle ein Datum"
+                    DateFormat="{}{day.integer}. {month.full} {year.full}"/>
+
+                <CalendarDatePicker
                     x:Name="Ende" Header="Ende"
                     Margin="20,20,0,0"
-                    Style="{StaticResource Eintraege}"
+                    Width="190"
                     RelativePanel.Below="ButtonRow"
                     RelativePanel.RightOf="Beginn"
-                    Text="{x:Bind ViewModel.EndeString}"/>
+                    PlaceholderText="Offen"
+                    Language="de"
+                    Date="{x:Bind ViewModel.Ende.Value}"
+                    DateFormat="{}{day.integer}. {month.full} {year.full}" />
 
                 <TextBlock
                     x:Name="VermieterLabel"
@@ -138,6 +155,31 @@
                     ItemsSource="{x:Bind ViewModel.AlleWohnungen.Value, Mode=OneWay}"
                     TextChanged="WohnungSuggest_TextChanged"/>
 
+
+                <mtuuc:DataGrid
+                    Margin="20,20,0,0"
+                    RelativePanel.Below="WohnungSuggest"
+                    IsReadOnly="True"
+                    CanUserReorderColumns="False"
+                    CanUserResizeColumns="True"
+                    AutoGenerateColumns="False"
+                    ItemsSource="{x:Bind ViewModel.Versionen.Value}">
+                    <mtuuc:DataGrid.Columns>
+                        <mtuuc:DataGridTextColumn
+                            Header="Beginn"
+                            Tag="Beginn"
+                            Binding="{Binding BeginnString.Value}"/>
+                        <mtuuc:DataGridTextColumn
+                            Header="Ende"
+                            Tag="Ende"
+                            Binding="{Binding EndeString.Value}"/>
+                        <mtuuc:DataGridTextColumn
+                            Header="Personenzahl"
+                            Tag="Personenzahl"
+                            Binding="{Binding Personenzahl.Value}"/>
+                    </mtuuc:DataGrid.Columns>
+                    
+                </mtuuc:DataGrid>
             </RelativePanel>
         </ScrollViewer>
     </Grid>
