@@ -34,12 +34,12 @@
                     </Grid>
                 </mtuuc:ScrollHeader>
                 <CommandBar
-                x:Name="ButtonRow"
-                Background="Transparent"
-                IsOpen="False"
-                RelativePanel.AlignRightWithPanel="True"
-                HorizontalAlignment="Stretch"
-                DefaultLabelPosition="Right">
+                    x:Name="ButtonRow"
+                    Background="Transparent"
+                    IsOpen="False"
+                    RelativePanel.AlignRightWithPanel="True"
+                    HorizontalAlignment="Stretch"
+                    DefaultLabelPosition="Right">
                     <AppBarButton
                     Icon="Edit"
                     Label="Edit"/>
@@ -55,26 +55,55 @@
                         </AppBarButton>
                     </CommandBar.SecondaryCommands>
                 </CommandBar>
-                <local:AdresseControl
-                AdressId="{x:Bind ViewModel.AdresseId.Value}"
-                x:Name="Adresse"
-                RelativePanel.Below="ScrollHeader"/>
+
+                <TextBox
+                    RelativePanel.Below="ScrollHeader"
+                    Margin="20,20,0,0"
+                    Name="Strasse"
+                    Header="Straße"
+                    Width="210"
+                    Text="{x:Bind ViewModel.Adresse.Value.Strasse.Value, Mode=TwoWay}"/>
+                <TextBox
+                    Name="Hausnummer"
+                    Margin="20,20,0,0"
+                    Header="Hausnr."
+                    Width="70"
+                    RelativePanel.Below="ScrollHeader"
+                    RelativePanel.RightOf="Strasse"
+                    Text="{x:Bind ViewModel.Adresse.Value.Hausnummer.Value, Mode=TwoWay}"/>
+                <TextBox 
+                    Name="Postleizahl"
+                    Margin="20,20,0,0"
+                    Header="Postleitzahl"
+                    Width="70"
+                    RelativePanel.Below="ScrollHeader"
+                    RelativePanel.RightOf="Hausnummer"
+                    Text="{x:Bind ViewModel.Adresse.Value.Postleitzahl.Value, Mode=TwoWay}"/>
+                <TextBox
+                    Name="Stadt"
+                    Header="Stadt"
+                    Margin="20,20,0,0"
+                    Width="210"
+                    RelativePanel.Below="ScrollHeader"
+                    RelativePanel.RightOf="Postleizahl"
+                    Text="{x:Bind ViewModel.Adresse.Value.Stadt.Value, Mode=TwoWay}"/>
+
                 <TextBox
                     Width="210" Margin="20,20,0,0"
                     x:Name="Bezeichnung" Header="Bezeichnung"
                     Text="{x:Bind ViewModel.Bezeichnung.Value}"
-                    RelativePanel.Below="Adresse" />
+                    RelativePanel.Below="Strasse" />
                 <TextBox
                     Width="70" Margin="20,20,0,0"
                     x:Name="Wohnflaeche" Header="Wohnfl."
                     Text="{x:Bind ViewModel.Wohnflaeche.Value}"
-                    RelativePanel.Below="Adresse"
+                    RelativePanel.Below="Strasse"
                     RelativePanel.RightOf="Bezeichnung"/>
                 <TextBox
                     Width="70" Margin="20,20,0,0"
                     x:Name="Nutzflaeche" Header="Nutzfl."
                     Text="{x:Bind ViewModel.Nutzflaeche.Value}"
-                    RelativePanel.Below="Adresse" 
+                    RelativePanel.Below="Strasse" 
                     RelativePanel.RightOf="Wohnflaeche"/>
 
 

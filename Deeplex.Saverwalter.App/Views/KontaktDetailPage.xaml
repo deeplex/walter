@@ -65,21 +65,49 @@
                         Text="{x:Bind ViewModel.Nachname.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Style="{StaticResource Eintraege}"
                         RelativePanel.RightOf="Vorname"/>
-                    <local:AdresseControl
-                        AdressId="{x:Bind ViewModel.AdresseId.Value}"
-                        IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                        x:Name="Adresse"
-                        RelativePanel.Below="Vorname"/>
+
+                    <TextBox
+                        RelativePanel.Below="Vorname"
+                        Style="{StaticResource Eintraege}"
+                        Name="Strasse"
+                        Header="Straße"
+                        Width="210"
+                        Text="{x:Bind ViewModel.Adresse.Value.Strasse.Value, Mode=TwoWay}"/>
+                    <TextBox
+                        Name="Hausnummer"
+                        Style="{StaticResource Eintraege}"
+                        Header="Hausnr."
+                        Width="70"
+                        RelativePanel.Below="Vorname"
+                        RelativePanel.RightOf="Strasse"
+                        Text="{x:Bind ViewModel.Adresse.Value.Hausnummer.Value, Mode=TwoWay}"/>
+                    <TextBox 
+                        Name="Postleizahl"
+                        Style="{StaticResource Eintraege}"
+                        Header="Postleitzahl"
+                        Width="70"
+                        RelativePanel.Below="Vorname"
+                        RelativePanel.RightOf="Hausnummer"
+                        Text="{x:Bind ViewModel.Adresse.Value.Postleitzahl.Value, Mode=TwoWay}"/>   
+                   <TextBox
+                        Name="Stadt"
+                        Header="Stadt"
+                        Style="{StaticResource Eintraege}"
+                        Width="210"
+                        RelativePanel.Below="Vorname"
+                       RelativePanel.RightOf="Postleizahl"
+                        Text="{x:Bind ViewModel.Adresse.Value.Stadt.Value, Mode=TwoWay}"/>
+
                     <TextBox
                         x:Name="Email" Header="E-Mail"
                         Text="{x:Bind ViewModel.Email.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Style="{StaticResource Eintraege}"
-                        RelativePanel.Below="Adresse"/>
+                        RelativePanel.Below="Strasse"/>
                     <TextBox
                         x:Name="Fax" Header="Fax"
                         Text="{x:Bind ViewModel.Fax.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Style="{StaticResource Eintraege}"
-                        RelativePanel.Below="Adresse"
+                        RelativePanel.Below="Strasse"
                         RelativePanel.RightOf="Email"/>
                     <TextBox
                         x:Name="Telefon" Header="Telefon"

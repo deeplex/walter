@@ -21,9 +21,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<List<WohnungDetailVertrag>>();
         public ObservableProperty<List<WohnungDetailKalteBetriebskosten>> KalteBetriebskosten
             = new ObservableProperty<List<WohnungDetailKalteBetriebskosten>>();
+        public ObservableProperty<WohnungDetailAdresse> Adresse
+            = new ObservableProperty<WohnungDetailAdresse>();
 
         public WohnungDetailViewModel(int id)
-            : this(App.Walter.Wohnungen.Include(w => w.Zaehler).First(w => w.WohnungId == id)) { }
+            : this(App.Walter.Wohnungen
+                  .Include(w => w.Adresse)
+                  .Include(w => w.Zaehler)
+                  .First(w => w.WohnungId == id))
+        { }
 
         private WohnungDetailViewModel(Wohnung w)
         {
@@ -33,6 +39,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Bezeichnung.Value = w.Bezeichnung;
             Wohnflaeche.Value = w.Wohnflaeche;
             Nutzflaeche.Value = w.Nutzflaeche;
+
+            Adresse.Value = new WohnungDetailAdresse(w.Adresse);
 
             Zaehler.Value = w.Zaehler.Select(z => new WohnungDetailZaehler(z)).ToList();
 
@@ -48,6 +56,24 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Where(k => k.AdresseId == w.AdresseId)
                 .Select(k => new WohnungDetailKalteBetriebskosten(k, w))
                 .ToList();
+        }
+    }
+
+    public class WohnungDetailAdresse
+    {
+        public int Id;
+        public ObservableProperty<string> Strasse { get; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Hausnummer { get; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Postleitzahl { get; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Stadt { get; } = new ObservableProperty<string>();
+
+        public WohnungDetailAdresse(Adresse a)
+        {
+            Id = a.AdresseId;
+            Strasse.Value = a.Strasse;
+            Hausnummer.Value = a.Hausnummer;
+            Postleitzahl.Value = a.Postleitzahl;
+            Stadt.Value = a.Stadt;
         }
     }
 

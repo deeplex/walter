@@ -123,16 +123,9 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserControls\AdresseControl.xaml.cs">
-      <DependentUpon>AdresseControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UserControls\KontaktControl.xaml.cs">
-      <DependentUpon>KontaktControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ViewModels\VertragDetailViewModel.cs" />
     <Compile Include="ViewModels\KontaktListViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="ViewModels\AdresseControlModel.cs" />
     <Compile Include="ViewModels\Utils.cs" />
     <Compile Include="ViewModels\WohnungDetailViewModel.cs" />
     <Compile Include="ViewModels\WohnungListViewModel.cs" />
@@ -183,14 +176,6 @@
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UserControls\AdresseControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UserControls\KontaktControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\KontaktDetailPage.xaml">
       <Generator>MSBuild:Compile</Generator>
