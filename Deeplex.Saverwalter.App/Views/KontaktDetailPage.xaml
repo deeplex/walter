@@ -94,7 +94,44 @@
                         RelativePanel.RightOf="Telefon"/>
                 </RelativePanel>
             </Grid>
-            <local:VertragGridControl KontaktId="{x:Bind ViewModel.Id}" Margin="20,20,20,20" RelativePanel.Below="Details"/>
+            
+            <TextBlock
+                RelativePanel.Below="Details"
+                Name="VertraegeTitle"
+                Margin ="10"
+                Style="{StaticResource SubtitleTextBlockStyle}"
+                Text="Verträge"/>
+            <mtuuc:DataGrid
+                Margin="20,20,0,0"
+                RelativePanel.Below="VertraegeTitle"
+                IsReadOnly="True"
+                CanUserReorderColumns="False"
+                CanUserResizeColumns="True"
+                AutoGenerateColumns="False"
+                ItemsSource="{x:Bind ViewModel.Vertraege.Value}">
+                <mtuuc:DataGrid.Columns>
+                    <mtuuc:DataGridTextColumn
+                        Header="Anschrift"
+                        Tag="Anschrift"
+                        Binding="{Binding Anschrift.Value}"/>
+                    <mtuuc:DataGridTextColumn
+                        Header="Wohnung"
+                        Tag="Wohnung"
+                        Binding="{Binding Wohnung.Value}"/>
+                    <mtuuc:DataGridTextColumn
+                        Header="Mieter"
+                        Tag="Mieter"
+                        Binding="{Binding AuflistungMieter.Value}"/>
+                    <mtuuc:DataGridTextColumn
+                        Header="Beginn"
+                        Tag="Beginn"
+                        Binding="{Binding BeginnString.Value}"/>
+                    <mtuuc:DataGridTextColumn
+                        Header="Ende"
+                        Tag="Ende"
+                        Binding="{Binding EndeString.Value}"/>
+                </mtuuc:DataGrid.Columns>
+            </mtuuc:DataGrid>
         </RelativePanel>
     </Grid>
 </Page>

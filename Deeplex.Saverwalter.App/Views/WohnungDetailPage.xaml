@@ -10,67 +10,67 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    
+
     <Grid>
         <ScrollViewer>
-        <RelativePanel>
-            <!--TODO Insert image -->
-            <mtuuc:ScrollHeader
+            <RelativePanel>
+                <!--TODO Insert image -->
+                <mtuuc:ScrollHeader
                 x:Name="ScrollHeader"
                 HorizontalAlignment="Stretch"
                 RelativePanel.AlignRightWithPanel="True"
                 RelativePanel.AlignLeftWithPanel="True"
                 Mode="Fade">
-                <Grid
+                    <Grid
                     Background="{ThemeResource SystemChromeLowColor}"
                     MinHeight="250">
-                    <TextBlock x:Name="Title"
+                        <TextBlock x:Name="Title"
                         Style="{StaticResource TitleTextBlockStyle}"
                         Margin="10,0,0,0">
                         <Run Text="{x:Bind ViewModel.Anschrift.Value}"/>
                         <Run Text=" - "/>
                         <Run Text="{x:Bind ViewModel.Bezeichnung.Value}"/>
-                    </TextBlock>
-                </Grid>
-            </mtuuc:ScrollHeader>
-            <CommandBar
+                        </TextBlock>
+                    </Grid>
+                </mtuuc:ScrollHeader>
+                <CommandBar
                 x:Name="ButtonRow"
                 Background="Transparent"
                 IsOpen="False"
                 RelativePanel.AlignRightWithPanel="True"
                 HorizontalAlignment="Stretch"
                 DefaultLabelPosition="Right">
-                <AppBarButton
+                    <AppBarButton
                     Icon="Edit"
                     Label="Edit"/>
-                <AppBarButton Icon="Delete" Label="Delete"/>
-                <AppBarButton
+                    <AppBarButton Icon="Delete" Label="Delete"/>
+                    <AppBarButton
                     Icon="Save"
                     Label="Save"/>
-                <CommandBar.SecondaryCommands>
-                    <AppBarButton Icon="Setting" Label="Settings">
-                        <AppBarButton.KeyboardAccelerators>
-                            <KeyboardAccelerator Modifiers="Control" Key="I" />
-                        </AppBarButton.KeyboardAccelerators>
-                    </AppBarButton>
-                </CommandBar.SecondaryCommands>
-            </CommandBar>
-            <local:AdresseControl
+                    <CommandBar.SecondaryCommands>
+                        <AppBarButton Icon="Setting" Label="Settings">
+                            <AppBarButton.KeyboardAccelerators>
+                                <KeyboardAccelerator Modifiers="Control" Key="I" />
+                            </AppBarButton.KeyboardAccelerators>
+                        </AppBarButton>
+                    </CommandBar.SecondaryCommands>
+                </CommandBar>
+                <local:AdresseControl
                 AdressId="{x:Bind ViewModel.AdresseId.Value}"
                 x:Name="Adresse"
                 RelativePanel.Below="ScrollHeader"/>
-            <TextBox
+                <TextBox
                 Width="210" Margin="20,20,0,0"
                 x:Name="Bezeichnung" Header="Bezeichnung"
                 Text="{x:Bind ViewModel.Bezeichnung.Value}"
                 RelativePanel.Below="Adresse" />
-            <TextBox
+                <TextBox
                 Width="70" Margin="20,20,0,0"
                 x:Name="Wohnflaeche" Header="Wohnfl."
                 Text="{x:Bind ViewModel.Wohnflaeche.Value}"
                 RelativePanel.Below="Adresse"
                 RelativePanel.RightOf="Bezeichnung"/>
-            <TextBox
+                <TextBox
                 Width="70" Margin="20,20,0,0"
                 x:Name="Nutzflaeche" Header="Nutzfl."
                 Text="{x:Bind ViewModel.Nutzflaeche.Value}"
@@ -78,39 +78,60 @@
                 RelativePanel.RightOf="Wohnflaeche"/>
 
 
-            <TextBlock
+                <TextBlock
                 Name="Zaehlertitle"
                 Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}"
                 Text="Zähler"
                 RelativePanel.Below="Bezeichnung"/>
 
-            <GridView
+                <GridView
                 x:Name="Zaehler"
                 IsItemClickEnabled="True"
                 SelectionMode="Single"
                 Margin="10"
                 ItemsSource="{x:Bind ViewModel.Zaehler.Value, Mode=OneWay}"
                 RelativePanel.Below="Zaehlertitle">
-                <GridView.ItemTemplate>
-                    <DataTemplate x:DataType="vm:WohnungDetailZaehler">
-                        <Button
+                    <GridView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:WohnungDetailZaehler">
+                            <Button
                             Width="200" Height="100"
 	                        Background="{ThemeResource SystemChromeLowColor}">
-                            <Button.Content>
+                                <Button.Content>
                                     <StackPanel>
                                         <TextBlock Text="{x:Bind Typ.Value}"/>
                                         <TextBlock Text="{x:Bind Kennnummer.Value}"/>
                                     </StackPanel>
-                            </Button.Content>
-                        </Button>
-                    </DataTemplate>
-                </GridView.ItemTemplate>
-            </GridView>
+                                </Button.Content>
+                            </Button>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                </GridView>
 
-
-            <local:VertragGridControl
-                WohnungId="{x:Bind ViewModel.Id}" Margin="20,20,20,20" RelativePanel.Below="Zaehler"/>
-        </RelativePanel>
+                <TextBlock RelativePanel.Below="Zaehler" Name="VertraegeTitle" Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}" Text="Verträge"/>
+                <mtuuc:DataGrid
+                    Margin="20,20,0,0"
+                    RelativePanel.Below="VertraegeTitle"
+                    IsReadOnly="True"
+                    CanUserReorderColumns="False"
+                    CanUserResizeColumns="True"
+                    AutoGenerateColumns="False"
+                    ItemsSource="{x:Bind ViewModel.Vertraege.Value}">
+                    <mtuuc:DataGrid.Columns>
+                        <mtuuc:DataGridTextColumn
+                        Header="Beginn"
+                        Tag="Beginn"
+                        Binding="{Binding BeginnString.Value}"/>
+                        <mtuuc:DataGridTextColumn
+                        Header="Ende"
+                        Tag="Ende"
+                        Binding="{Binding EndeString.Value}"/>
+                        <mtuuc:DataGridTextColumn
+                        Header="Mieter"
+                        Tag="Mieter"
+                        Binding="{Binding AuflistungMieter.Value}"/>
+                    </mtuuc:DataGrid.Columns>
+                </mtuuc:DataGrid>
+            </RelativePanel>
         </ScrollViewer>
     </Grid>
 </Page>
