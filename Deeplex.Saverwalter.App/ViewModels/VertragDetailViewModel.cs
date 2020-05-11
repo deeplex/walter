@@ -4,14 +4,21 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
     public class VertragDetailViewModel : VertragDetailVersion
     {
-        public ObservableProperty<List<VertragDetailKontakt>> Kontakte
-            = new ObservableProperty<List<VertragDetailKontakt>>();
+        public ObservableProperty<ImmutableList<VertragDetailMieter>> Kontakte
+            = new ObservableProperty<ImmutableList<VertragDetailMieter>>();
+
+        public ObservableProperty<ImmutableList<VertragDetailVermieter>> JuristischePersonen
+            = new ObservableProperty<ImmutableList<VertragDetailVermieter>>();
+
+        public ObservableProperty<ImmutableList<VertragDetailWohnung>> AlleWohnungen
+           = new ObservableProperty<ImmutableList<VertragDetailWohnung>>();
 
         public ObservableProperty<List<VertragVersionListViewModel>> Versionen { get; }
             = new ObservableProperty<List<VertragVersionListViewModel>>();
@@ -29,24 +36,20 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Beginn.Value = Versionen.Value.First().Beginn.Value;
 
             Kontakte.Value = App.Walter.Kontakte
-                .Select(k => new VertragDetailKontakt(k))
-                .ToList();
+                .Select(k => new VertragDetailMieter(k))
+                .ToImmutableList();
+
+            JuristischePersonen.Value = App.Walter.JuristischePersonen
+                .Select(j => new VertragDetailVermieter(j))
+                .ToImmutableList();
+
+            AlleWohnungen.Value = App.Walter.Wohnungen
+                .Select(w => new VertragDetailWohnung(w))
+                .ToImmutableList();
         }
     }
 
-    public class VertragDetailKontakt
-    {
-        public int Id;
-        public ObservableProperty<string> Name = new ObservableProperty<string>();
-
-        public VertragDetailKontakt(Kontakt k)
-        {
-            Id = k.KontaktId;
-            Name.Value = k.Vorname + " " + k.Nachname;
-        }
-    }
-
-    public class VertragDetailVersion
+    public class VertragDetailVersion : BindableBase
     {
         public int Id { get; }
         public int Version { get; }
@@ -57,9 +60,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<DateTime?> Ende { get; } = new ObservableProperty<DateTime?>();
         public ObservableProperty<VertragDetailVermieter> Vermieter
             = new ObservableProperty<VertragDetailVermieter>();
-
-        public ObservableProperty<List<VertragDetailMieter>> Mieter
-            = new ObservableProperty<List<VertragDetailMieter>>();
+        public ObservableProperty<ImmutableList<VertragDetailMieter>> Mieter
+            = new ObservableProperty<ImmutableList<VertragDetailMieter>>();
 
         public string BeginnString => Beginn.Value.ToShortDateString();
         public string EndeString => Ende.Value is DateTime e ? e.ToShortDateString() : "";
@@ -71,7 +73,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Version = v.Version;
             Personenzahl.Value = v.Personenzahl;
             Wohnung.Value = v.Wohnung is Wohnung w? new VertragDetailWohnung(w) : null;
-            Mieter.Value = v.Mieter.Select(m => new VertragDetailMieter(m.Kontakt)).ToList();
+            Mieter.Value = v.Mieter.Select(m => new VertragDetailMieter(m.Kontakt))
+                .OrderBy(m => m.Name.Value.Length).Reverse() // From the longest to the smallest because of XAML I guess
+                .ToImmutableList();
             Vermieter.Value = new VertragDetailVermieter(
                 v.Wohnung is Wohnung ? v.Wohnung.Besitzer : v.Garagen.First().Garage.Besitzer);
 
@@ -83,42 +87,39 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public class VertragDetailMieter
     {
         public int Id;
-        public ObservableProperty<Anrede> Anrede = new ObservableProperty<Anrede>();
-        public ObservableProperty<string> Vorname = new ObservableProperty<string>();
-        public ObservableProperty<string> Nachname = new ObservableProperty<string>();
+        public ObservableProperty<string> Name = new ObservableProperty<string>();
 
+        public VertragDetailMieter(int id) : this(App.Walter.Kontakte.Find(id)) { }
         public VertragDetailMieter(Kontakt k)
         {
             Id = k.KontaktId;
-            Anrede.Value = k.Anrede;
-            Vorname.Value = k.Vorname;
-            Nachname.Value = k.Nachname;
+            Name.Value = k.Vorname + " " + k.Nachname;
         }
     }
 
     public class VertragDetailVermieter
     {
         public int Id;
-        public ObservableProperty<string> Bezeichnung = new ObservableProperty<string>();
+        public ObservableProperty<string> Name = new ObservableProperty<string>();
 
         public VertragDetailVermieter(JuristischePerson j)
         {
             Id = j.JuristischePersonId;
-            Bezeichnung.Value = j.Bezeichnung;
+            Name.Value = j.Bezeichnung;
         }
     }
 
     public class VertragDetailWohnung
     {
         public int Id;
-        public ObservableProperty<string> Bezeichnung = new ObservableProperty<string>();
-        public ObservableProperty<string> Anschrift = new ObservableProperty<string>();
+        public ObservableProperty<int> BesitzerId = new ObservableProperty<int>();
+        public ObservableProperty<string> BezeichnungVoll = new ObservableProperty<string>();
 
         public VertragDetailWohnung(Wohnung w)
         {
             Id = w.WohnungId;
-            Bezeichnung.Value = w.Bezeichnung;
-            Anschrift.Value = Utils.Anschrift(w);
+            BesitzerId.Value = w.Besitzer.JuristischePersonId;
+            BezeichnungVoll.Value = Utils.Anschrift(w) + " - " + w.Bezeichnung;
         }
     }
 }

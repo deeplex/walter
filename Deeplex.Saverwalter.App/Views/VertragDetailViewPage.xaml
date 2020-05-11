@@ -3,6 +3,8 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Deeplex.Saverwalter.App.Views"
+    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -14,6 +16,20 @@
             <Setter Property="TextWrapping" Value="NoWrap"/>
             <Setter Property="Margin" Value="20,20,0,0"/>
         </Style>
+
+        <DataTemplate x:Key="Mieter" x:DataType="vm:VertragDetailMieter">
+            <mtuuc:DockPanel LastChildFill="False">
+                <TextBlock Text="{x:Bind Name.Value}"  VerticalAlignment="Center" Margin="10,0,0,0"/>
+                <Button
+                    CommandParameter="{x:Bind Id}"
+                    Click="RemoveMieter_Click"
+                    mtuuc:DockPanel.Dock="Right"
+                    Background="Transparent"
+                    Margin="10,0,0,0">
+                    <SymbolIcon Symbol="Cancel" />
+                </Button>
+            </mtuuc:DockPanel>
+        </DataTemplate>
     </Page.Resources>
 
     <Grid>
@@ -23,7 +39,7 @@
                 Style="{StaticResource TitleTextBlockStyle}"
                 Margin="10,0,0,0"
                 Text="Vertragdetails"/>
-                
+
                 <CommandBar
                 x:Name="ButtonRow"
                 Background="Transparent"
@@ -60,12 +76,67 @@
                     RelativePanel.RightOf="Beginn"
                     Text="{x:Bind ViewModel.EndeString}"/>
 
-                <AutoSuggestBox
-                    Width="300"
-                    Margin="20,20,0,0"
+                <TextBlock
+                    x:Name="VermieterLabel"
                     RelativePanel.Below="Ende"
+                    Width="70"
+                    Margin="20,20,0,0"
+                    Text="Vermieter:"/>
+                <AutoSuggestBox
+                    x:Name="VermieterSuggest"
+                    Margin="20,15,0,0"
+                    MinWidth="400"
+                    Text="{x:Bind ViewModel.Vermieter.Value.Name.Value}"
+                    PlaceholderText="Vermieter hinzufügen"
+                    RelativePanel.Below="Ende"
+                    RelativePanel.RightOf="VermieterLabel"
+                    QuerySubmitted="VermieterSuggest_QuerySubmitted"
+                    ItemsSource="{x:Bind ViewModel.JuristischePersonen.Value, Mode=OneWay}"
+                    TextChanged="VermieterSuggest_TextChanged"/>
+
+                <TextBlock
+                    x:Name="MieterLabel"
+                    RelativePanel.Below="VermieterLabel"
+                    Width="70"
+                    Margin="20,20,0,0"
+                    Text="Mieter:"/>
+                <mtuuc:AdaptiveGridView
+                    Margin="20,10,0,0"
+                    SelectionMode="Single"
+                    x:Name="MieterListe"
+                    VerticalAlignment="Center"
+                    RelativePanel.Below="VermieterLabel"
+                    RelativePanel.RightOf="MieterLabel"
+                    ItemsSource="{x:Bind ViewModel.Mieter.Value, Mode=OneWay}"
+                    ItemTemplate="{StaticResource Mieter}"/>
+                <AutoSuggestBox
+                    x:Name="KontaktSuggest"
+                    Margin="0,15,0,0"
+                    QueryIcon="AddFriend"
+                    MinWidth="200"
+                    PlaceholderText="Mieter hinzufügen..."
+                    RelativePanel.Below="VermieterLabel"
+                    RelativePanel.RightOf="MieterListe"
+                    QuerySubmitted="KontaktSuggest_QuerySubmitted"
                     TextChanged="KontaktSuggest_TextChanged"
-                    ItemsSource="{x:Bind ViewModel.Kontakte.Value}"/>
+                    ItemsSource="{x:Bind ViewModel.Kontakte.Value, Mode=OneWay}"/>
+
+                <TextBlock
+                    x:Name="WohnungLabel"
+                    RelativePanel.Below="MieterLabel"
+                    Width="70"
+                    Margin="20,20,0,0"
+                    Text="Wohnung:"/>
+                <AutoSuggestBox
+                    x:Name="WohnungSuggest"
+                    Margin="20,15,0,0"
+                    MinWidth="400"
+                    Text="{x:Bind ViewModel.Wohnung.Value.BezeichnungVoll.Value}"
+                    PlaceholderText="Wohnung hinzufügen"
+                    RelativePanel.Below="MieterLabel"
+                    RelativePanel.RightOf="WohnungLabel"
+                    ItemsSource="{x:Bind ViewModel.AlleWohnungen.Value, Mode=OneWay}"
+                    TextChanged="WohnungSuggest_TextChanged"/>
 
             </RelativePanel>
         </ScrollViewer>

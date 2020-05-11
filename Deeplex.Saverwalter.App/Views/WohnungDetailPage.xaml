@@ -93,7 +93,6 @@
                 RelativePanel.Below="Zaehlertitle">
                 <GridView.ItemTemplate>
                     <DataTemplate x:DataType="vm:WohnungDetailZaehler">
-                        <!--TODO Fix Bindings...-->
                         <Button
                             Width="200" Height="100"
 	                        Background="{ThemeResource SystemChromeLowColor}">
