@@ -58,6 +58,15 @@
 
                 <TextBox
                     RelativePanel.Below="ScrollHeader"
+                    Name="BesitzerBox"
+                    Header="Besitzer"
+                    Width="300"
+                    Text="{x:Bind ViewModel.Besitzer.Value.Name.Value}"
+                    Margin="20,20,0,0" />
+
+                <TextBox
+                    RelativePanel.Below="BesitzerBox"
+                    
                     Margin="20,20,0,0"
                     Name="Strasse"
                     Header="Straße"
@@ -68,7 +77,7 @@
                     Margin="20,20,0,0"
                     Header="Hausnr."
                     Width="70"
-                    RelativePanel.Below="ScrollHeader"
+                    RelativePanel.Below="BesitzerBox"
                     RelativePanel.RightOf="Strasse"
                     Text="{x:Bind ViewModel.Adresse.Value.Hausnummer.Value, Mode=TwoWay}"/>
                 <TextBox 
@@ -76,7 +85,7 @@
                     Margin="20,20,0,0"
                     Header="Postleitzahl"
                     Width="70"
-                    RelativePanel.Below="ScrollHeader"
+                    RelativePanel.Below="BesitzerBox"
                     RelativePanel.RightOf="Hausnummer"
                     Text="{x:Bind ViewModel.Adresse.Value.Postleitzahl.Value, Mode=TwoWay}"/>
                 <TextBox
@@ -84,7 +93,7 @@
                     Header="Stadt"
                     Margin="20,20,0,0"
                     Width="210"
-                    RelativePanel.Below="ScrollHeader"
+                    RelativePanel.Below="BesitzerBox"
                     RelativePanel.RightOf="Postleizahl"
                     Text="{x:Bind ViewModel.Adresse.Value.Stadt.Value, Mode=TwoWay}"/>
 

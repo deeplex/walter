@@ -13,8 +13,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<ImmutableList<VertragDetailMieter>> Kontakte
             = new ObservableProperty<ImmutableList<VertragDetailMieter>>();
 
-        public ObservableProperty<ImmutableList<VertragDetailVermieter>> JuristischePersonen
-            = new ObservableProperty<ImmutableList<VertragDetailVermieter>>();
+        public ObservableProperty<ImmutableList<JuristischePersonViewModel>> JuristischePersonen
+            = new ObservableProperty<ImmutableList<JuristischePersonViewModel>>();
 
         public ObservableProperty<ImmutableList<VertragDetailWohnung>> AlleWohnungen
            = new ObservableProperty<ImmutableList<VertragDetailWohnung>>();
@@ -43,7 +43,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ToImmutableList();
 
             JuristischePersonen.Value = App.Walter.JuristischePersonen
-                .Select(j => new VertragDetailVermieter(j))
+                .Select(j => new JuristischePersonViewModel(j))
                 .ToImmutableList();
 
             AlleWohnungen.Value = App.Walter.Wohnungen
@@ -65,8 +65,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<VertragDetailWohnung>();
         public ObservableProperty<DateTime> Beginn { get; } = new ObservableProperty<DateTime>();
         public ObservableProperty<DateTime?> Ende { get; } = new ObservableProperty<DateTime?>();
-        public ObservableProperty<VertragDetailVermieter> Vermieter
-            = new ObservableProperty<VertragDetailVermieter>();
+        public ObservableProperty<JuristischePersonViewModel> Vermieter
+            = new ObservableProperty<JuristischePersonViewModel>();
         public ObservableProperty<ImmutableList<VertragDetailMieter>> Mieter
             = new ObservableProperty<ImmutableList<VertragDetailMieter>>();
 
@@ -83,7 +83,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Mieter.Value = v.Mieter.Select(m => new VertragDetailMieter(m.Kontakt))
                 .OrderBy(m => m.Name.Value.Length).Reverse() // From the longest to the smallest because of XAML I guess
                 .ToImmutableList();
-            Vermieter.Value = new VertragDetailVermieter(
+            Vermieter.Value = new JuristischePersonViewModel(
                 v.Wohnung is Wohnung ? v.Wohnung.Besitzer : v.Garagen.First().Garage.Besitzer);
 
             Ende.Value = v.Ende;
@@ -101,18 +101,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Id = k.KontaktId;
             Name.Value = k.Vorname + " " + k.Nachname;
-        }
-    }
-
-    public class VertragDetailVermieter
-    {
-        public int Id;
-        public ObservableProperty<string> Name = new ObservableProperty<string>();
-
-        public VertragDetailVermieter(JuristischePerson j)
-        {
-            Id = j.JuristischePersonId;
-            Name.Value = j.Bezeichnung;
         }
     }
 

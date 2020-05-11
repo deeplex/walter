@@ -10,6 +10,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public class WohnungDetailViewModel : BindableBase
     {
         public int Id;
+        public ObservableProperty<JuristischePersonViewModel> Besitzer
+            = new ObservableProperty<JuristischePersonViewModel>();
         public ObservableProperty<int> AdresseId = new ObservableProperty<int>();
         public ObservableProperty<string> Bezeichnung = new ObservableProperty<string>();
         public ObservableProperty<string> Anschrift = new ObservableProperty<string>();
@@ -28,6 +30,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             : this(App.Walter.Wohnungen
                   .Include(w => w.Adresse)
                   .Include(w => w.Zaehler)
+                  .Include(w => w.Besitzer)
                   .First(w => w.WohnungId == id))
         { }
 
@@ -41,6 +44,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Nutzflaeche.Value = w.Nutzflaeche;
 
             Adresse.Value = new AdresseViewModel(w.Adresse);
+
+            Besitzer.Value = new JuristischePersonViewModel(w.Besitzer);
 
             Zaehler.Value = w.Zaehler.Select(z => new WohnungDetailZaehler(z)).ToList();
 
