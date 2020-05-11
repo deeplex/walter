@@ -157,7 +157,9 @@
 
 
                 <mtuuc:DataGrid
-                    Margin="20,20,0,0"
+                    RelativePanel.AlignLeftWithPanel="True"
+                    RelativePanel.AlignRightWithPanel="True"
+                    Margin="20,20,20,20"
                     RelativePanel.Below="WohnungSuggest"
                     IsReadOnly="True"
                     CanUserReorderColumns="False"

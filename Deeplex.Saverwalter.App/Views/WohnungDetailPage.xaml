@@ -60,22 +60,22 @@
                 x:Name="Adresse"
                 RelativePanel.Below="ScrollHeader"/>
                 <TextBox
-                Width="210" Margin="20,20,0,0"
-                x:Name="Bezeichnung" Header="Bezeichnung"
-                Text="{x:Bind ViewModel.Bezeichnung.Value}"
-                RelativePanel.Below="Adresse" />
+                    Width="210" Margin="20,20,0,0"
+                    x:Name="Bezeichnung" Header="Bezeichnung"
+                    Text="{x:Bind ViewModel.Bezeichnung.Value}"
+                    RelativePanel.Below="Adresse" />
                 <TextBox
-                Width="70" Margin="20,20,0,0"
-                x:Name="Wohnflaeche" Header="Wohnfl."
-                Text="{x:Bind ViewModel.Wohnflaeche.Value}"
-                RelativePanel.Below="Adresse"
-                RelativePanel.RightOf="Bezeichnung"/>
+                    Width="70" Margin="20,20,0,0"
+                    x:Name="Wohnflaeche" Header="Wohnfl."
+                    Text="{x:Bind ViewModel.Wohnflaeche.Value}"
+                    RelativePanel.Below="Adresse"
+                    RelativePanel.RightOf="Bezeichnung"/>
                 <TextBox
-                Width="70" Margin="20,20,0,0"
-                x:Name="Nutzflaeche" Header="Nutzfl."
-                Text="{x:Bind ViewModel.Nutzflaeche.Value}"
-                RelativePanel.Below="Adresse" 
-                RelativePanel.RightOf="Wohnflaeche"/>
+                    Width="70" Margin="20,20,0,0"
+                    x:Name="Nutzflaeche" Header="Nutzfl."
+                    Text="{x:Bind ViewModel.Nutzflaeche.Value}"
+                    RelativePanel.Below="Adresse" 
+                    RelativePanel.RightOf="Wohnflaeche"/>
 
 
                 <TextBlock
@@ -115,7 +115,9 @@
                     Text="Verträge"/>
                 <mtuuc:DataGrid
                     x:Name="VertraegeGrid"
-                    Margin="20,20,0,0"
+                    RelativePanel.AlignLeftWithPanel="True"
+                    RelativePanel.AlignRightWithPanel="True"
+                    Margin="20,20,20,20"
                     RelativePanel.Below="VertraegeTitle"
                     IsReadOnly="True"
                     CanUserReorderColumns="False"
@@ -147,8 +149,8 @@
                 <mtuuc:DataGrid
                     RelativePanel.AlignLeftWithPanel="True"
                     RelativePanel.AlignRightWithPanel="True"
-                    x:Name="KalteBetriebskostenGrid"
                     Margin="20,20,20,20"
+                    x:Name="KalteBetriebskostenGrid"
                     RelativePanel.Below="KalteBetriebskostenTitle"
                     IsReadOnly="True"
                     CanUserReorderColumns="False"

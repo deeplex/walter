@@ -102,7 +102,9 @@
                 Style="{StaticResource SubtitleTextBlockStyle}"
                 Text="Verträge"/>
             <mtuuc:DataGrid
-                Margin="20,20,0,0"
+                RelativePanel.AlignLeftWithPanel="True"
+                RelativePanel.AlignRightWithPanel="True"
+                Margin="20,20,20,20"
                 RelativePanel.Below="VertraegeTitle"
                 IsReadOnly="True"
                 CanUserReorderColumns="False"
