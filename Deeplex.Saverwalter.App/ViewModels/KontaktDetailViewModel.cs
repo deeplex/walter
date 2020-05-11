@@ -57,6 +57,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 IsInEdit.Value = false;
 
+                k.Adresse = AdresseViewModel.GetAdresse(Adresse.Value);
                 k.Vorname = Vorname.Value;
                 k.Nachname = Nachname.Value;
                 k.Email = Email.Value;
