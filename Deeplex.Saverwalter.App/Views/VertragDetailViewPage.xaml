@@ -84,7 +84,7 @@
                     x:Name="Beginn" Header="Beginn"
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Margin="20,20,0,0"
-                    Date="{x:Bind ViewModel.Beginn.Value}"
+                    Date="{x:Bind ViewModel.Beginn.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Width="190"
                     RelativePanel.Below="ButtonRow"
                     RelativePanel.RightOf="LaufzeitLabel"
@@ -101,7 +101,7 @@
                     RelativePanel.RightOf="Beginn"
                     PlaceholderText="Offen"
                     Language="de"
-                    Date="{x:Bind ViewModel.Ende.Value}"
+                    Date="{x:Bind ViewModel.Ende.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     DateFormat="{}{day.integer}. {month.full} {year.full}" />
 
                 <TextBlock

@@ -53,8 +53,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 IsInEdit.Value = false;
 
-                v.First().Beginn = Beginn.Value;
-                v.Last().Ende = Ende.Value;
+                v.First().Beginn = Beginn.Value.UtcDateTime;
+                v.Last().Ende = Ende.Value?.UtcDateTime;
                 v.Last().Personenzahl = Personenzahl.Value;
 
                 var MSet = App.Walter.MieterSet;
@@ -113,8 +113,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<int> Personenzahl = new ObservableProperty<int>();
         public ObservableProperty<VertragDetailWohnung> Wohnung
             = new ObservableProperty<VertragDetailWohnung>();
-        public ObservableProperty<DateTime> Beginn { get; } = new ObservableProperty<DateTime>();
-        public ObservableProperty<DateTime?> Ende { get; } = new ObservableProperty<DateTime?>();
+        public ObservableProperty<DateTimeOffset> Beginn { get; } = new ObservableProperty<DateTimeOffset>();
+        public ObservableProperty<DateTimeOffset?> Ende { get; } = new ObservableProperty<DateTimeOffset?>();
         public ObservableProperty<JuristischePersonViewModel> Vermieter
             = new ObservableProperty<JuristischePersonViewModel>();
         public ObservableProperty<VertragDetailKontakt> Ansprechpartner
@@ -124,9 +124,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<ImmutableList<KalteBetriebskostenViewModel>> KalteBetriebskosten { get; }
             = new ObservableProperty<ImmutableList<KalteBetriebskostenViewModel>>();
 
-        public string BeginnString => Beginn.Value.ToShortDateString();
-        public string EndeString => Ende.Value is DateTime e ? e.ToShortDateString() : "";
-        public bool HasEnde => Ende.Value is DateTime;
+        public string BeginnString => Beginn.Value.DateTime.ToShortDateString();
+        public string EndeString => Ende.Value is DateTimeOffset e ? e.DateTime.ToShortDateString() : "";
 
         public VertragDetailVersion(Vertrag v)
         {
