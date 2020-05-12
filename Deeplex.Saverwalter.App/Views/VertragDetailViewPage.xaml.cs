@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
-using Deeplex.Saverwalter.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;

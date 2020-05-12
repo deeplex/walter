@@ -28,7 +28,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             : this(App.Walter.Vertraege
                   .Include(v => v.Wohnung).ThenInclude(w => w.Besitzer)
                   .Include(v => v.Garagen)
-                  .Where(v => v.VertragId == id).ToList()) { }
+                  .Where(v => v.VertragId == id).ToList())
+        { }
 
         public VertragDetailViewModel(List<Vertrag> v) : base(v.OrderBy(vs => vs.Version).Last())
         {
@@ -155,7 +156,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public int Id;
         public ObservableProperty<string> Name = new ObservableProperty<string>();
-        
+
         public VertragDetailKontakt(int id) : this(App.Walter.Kontakte.Find(id)) { }
 
         public VertragDetailKontakt(Kontakt k)
