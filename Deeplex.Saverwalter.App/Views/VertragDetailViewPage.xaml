@@ -112,6 +112,13 @@
                     Language="de"
                     Date="{x:Bind ViewModel.Ende.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     DateFormat="{}{day.integer}. {month.full} {year.full}" />
+                <Button
+                    Margin="0,43,0,0"
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    Click="RemoveDate_Click">
+                    <SymbolIcon Symbol="Delete"></SymbolIcon>
+                </Button>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Vermieter:" Style="{StaticResource Labels}"/>

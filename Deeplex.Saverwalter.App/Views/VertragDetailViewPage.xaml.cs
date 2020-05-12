@@ -135,5 +135,11 @@ namespace Deeplex.Saverwalter.App.Views
             var mieter = ViewModel.Mieter.Value.Find(m => m.Id == id);
             ViewModel.Mieter.Value = ViewModel.Mieter.Value.Remove(mieter);
         }
+
+        private void RemoveDate_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            ViewModel.Ende.Value = null;
+            ViewModel.Versionen.Value.Last().Ende.Value = null;
+        }
     }
 }
