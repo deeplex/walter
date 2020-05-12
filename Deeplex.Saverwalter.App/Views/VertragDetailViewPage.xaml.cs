@@ -62,11 +62,12 @@ namespace Deeplex.Saverwalter.App.Views
                 "Juristische Person");
         }
 
-        private void KontaktSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        private void MieterSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             Suggest(sender, args,
                 ViewModel.Kontakte.Value
                     .Where(k => k.Name.Value.Contains(sender.Text))
+                    .Where(k => !ViewModel.Mieter.Value.Exists(m => m.Name.Value == k.Name.Value))
                     .Select(k => k.Name.Value).ToList(),
                 "Kontakt");
         }
@@ -81,7 +82,7 @@ namespace Deeplex.Saverwalter.App.Views
                 "Kontakt");
         }
 
-        private void KontaktSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        private void MieterSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
             if (args.ChosenSuggestion is string a)
             {

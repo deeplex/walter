@@ -5,6 +5,7 @@
     xmlns:local="using:Deeplex.Saverwalter.App.Views"
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
+    xmlns:s="using:System"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -34,6 +35,24 @@
                     <SymbolIcon Symbol="Cancel" />
                 </Button>
             </mtuuc:DockPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="BeginnGrid" x:DataType="vm:VertragDetailVersion">
+            <CalendarDatePicker
+                Date="{x:Bind Beginn.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Language="de"
+                Width="176"
+                PlaceholderText="Offen"
+                DateFormat="{}{day.integer}. {month.full} {year.full}"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="EndeGrid" x:DataType="vm:VertragDetailVersion">
+            <CalendarDatePicker
+                Date="{x:Bind Ende.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Width="176"
+                Language="de"
+                PlaceholderText="Offen"
+                DateFormat="{}{day.integer}. {month.full} {year.full}"/>
         </DataTemplate>
     </Page.Resources>
 
@@ -165,7 +184,7 @@
                     ItemsSource="{x:Bind ViewModel.Mieter.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     ItemTemplate="{StaticResource Mieter}"/>
                 <AutoSuggestBox
-                    x:Name="KontaktSuggest"
+                    x:Name="MieterSuggest"
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Margin="0,15,0,0"
@@ -174,8 +193,8 @@
                     PlaceholderText="Mieter hinzufügen..."
                     RelativePanel.Below="AnsprechpartnerLabel"
                     RelativePanel.RightOf="MieterListe"
-                    QuerySubmitted="KontaktSuggest_QuerySubmitted"
-                    TextChanged="KontaktSuggest_TextChanged"
+                    QuerySubmitted="MieterSuggest_QuerySubmitted"
+                    TextChanged="MieterSuggest_TextChanged"
                     ItemsSource="{x:Bind ViewModel.Kontakte.Value, Mode=OneWay}"/>
 
                 <TextBlock
@@ -204,27 +223,16 @@
                     Margin="20,20,20,20"
                     RelativePanel.Below="WohnungSuggest"
                     IsReadOnly="True"
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     CanUserReorderColumns="False"
                     CanUserResizeColumns="True"
                     AutoGenerateColumns="False"
                     ItemsSource="{x:Bind ViewModel.Versionen.Value}">
                     <mtuuc:DataGrid.Columns>
-                        <mtuuc:DataGridTextColumn
-                            Header="Version"
-                            Tag="Version"
-                            Binding="{Binding Version}"/>
-                        <mtuuc:DataGridTextColumn
-                            Header="Beginn"
-                            Tag="Beginn"
-                            Binding="{Binding BeginnString.Value}"/>
-                        <mtuuc:DataGridTextColumn
-                            Header="Ende"
-                            Tag="Ende"
-                            Binding="{Binding EndeString.Value}"/>
-                        <mtuuc:DataGridTextColumn
-                            Header="Personenzahl"
-                            Tag="Personenzahl"
-                            Binding="{Binding Personenzahl.Value}"/>
+                        <mtuuc:DataGridTextColumn IsReadOnly="True" Header="Version" Binding="{Binding Version}"/>
+                        <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
+                        <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
+                        <mtuuc:DataGridTextColumn Header="Personenzahl" Binding="{Binding Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </mtuuc:DataGrid.Columns>
                 </mtuuc:DataGrid>
 

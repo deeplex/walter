@@ -128,12 +128,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public int Id { get; }
         public int Version { get; }
-        public ObservableProperty<DateTime> Beginn { get; } = new ObservableProperty<DateTime>();
         public ObservableProperty<string> AuflistungMieter { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> BeginnString { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> EndeString { get; } = new ObservableProperty<string>();
-        public ObservableProperty<List<VertragVersionListViewModel>> Versionen { get; }
-            = new ObservableProperty<List<VertragVersionListViewModel>>();
+        public ObservableProperty<DateTimeOffset> Beginn { get; } = new ObservableProperty<DateTimeOffset>();
+        public ObservableProperty<DateTimeOffset?> Ende { get; } = new ObservableProperty<DateTimeOffset?>();
+        public ObservableProperty<List<WohnungDetailVertrag>> Versionen { get; }
+            = new ObservableProperty<List<WohnungDetailVertrag>>();
 
         public WohnungDetailVertrag(Guid id)
             : this(App.Walter.Vertraege.Where(v => v.VertragId == id)) { }
@@ -141,9 +140,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private WohnungDetailVertrag(IEnumerable<Vertrag> v)
             : this(v.OrderBy(vs => vs.Version).Last())
         {
-            Versionen.Value = v.OrderBy(vs => vs.Version).Select(vs => new VertragVersionListViewModel(vs)).ToList();
-            BeginnString.Value = Versionen.Value.First().BeginnString.Value;
+            Versionen.Value = v.OrderBy(vs => vs.Version).Select(vs => new WohnungDetailVertrag(vs)).ToList();
             Beginn.Value = Versionen.Value.First().Beginn.Value;
+            Ende.Value = Versionen.Value.Last().Ende.Value;
         }
 
         private WohnungDetailVertrag(Vertrag v)
@@ -152,8 +151,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Version = v.Version;
 
             Beginn.Value = v.Beginn;
-            BeginnString.Value = v.Beginn.ToShortDateString(); ;
-            EndeString.Value = v.Ende is DateTime e ? e.ToShortDateString() : "";
+            Ende.Value = v.Ende;
 
             AuflistungMieter.Value = string.Join(", ", v.Mieter.Select(m =>
                 (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname));

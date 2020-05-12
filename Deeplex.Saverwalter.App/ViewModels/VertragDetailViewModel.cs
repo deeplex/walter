@@ -53,10 +53,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 IsInEdit.Value = false;
 
-                v.First().Beginn = Beginn.Value.UtcDateTime;
-                v.Last().Ende = Ende.Value?.UtcDateTime;
-                v.Last().Personenzahl = Personenzahl.Value;
-
                 var MSet = App.Walter.MieterSet;
                 //Remove deprecated MieterSets
                 MSet.ToList().Where(ms =>
@@ -75,20 +71,24 @@ namespace Deeplex.Saverwalter.App.ViewModels
                         Kontakt = VertragDetailKontakt.GetKontakt(d.Id)
                     })));
 
-                v.ForEach(vs =>
+                for (int i = 0; i < v.Count(); ++i)
                 {
-                    // vs.Garagen
-                    vs.Ansprechpartner = VertragDetailKontakt.GetKontakt(Ansprechpartner.Value.Id);
-                    vs.Wohnung = VertragDetailWohnung.GetWohnung(Wohnung.Value.Id);
-                    if (vs.rowid > 0)
+                    var val = Versionen.Value[i];
+                    v[i].Beginn = val.Beginn.Value.UtcDateTime;
+                    v[i].Ende = val.Ende.Value?.UtcDateTime;
+                    v[i].Wohnung = VertragDetailWohnung.GetWohnung(Wohnung.Value.Id);
+                    v[i].Personenzahl = val.Personenzahl.Value;
+                    v[i].Ansprechpartner = VertragDetailKontakt.GetKontakt(val.Ansprechpartner.Value.Id);
+
+                    if (v[i].rowid > 0)
                     {
-                        App.Walter.Vertraege.Update(vs);
+                        App.Walter.Vertraege.Update(v[i]);
                     }
                     else
                     {
-                        App.Walter.Vertraege.Add(vs);
+                        App.Walter.Vertraege.Add(v[i]);
                     }
-                });
+                }
 
                 App.Walter.SaveChanges();
 
@@ -110,7 +110,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public int Id { get; }
         public int Version { get; }
-        public ObservableProperty<int> Personenzahl = new ObservableProperty<int>();
+        public ObservableProperty<int> Personenzahl { get; } = new ObservableProperty<int>();
         public ObservableProperty<VertragDetailWohnung> Wohnung
             = new ObservableProperty<VertragDetailWohnung>();
         public ObservableProperty<DateTimeOffset> Beginn { get; } = new ObservableProperty<DateTimeOffset>();
@@ -123,9 +123,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<ImmutableList<VertragDetailKontakt>>();
         public ObservableProperty<ImmutableList<KalteBetriebskostenViewModel>> KalteBetriebskosten { get; }
             = new ObservableProperty<ImmutableList<KalteBetriebskostenViewModel>>();
-
-        public string BeginnString => Beginn.Value.DateTime.ToShortDateString();
-        public string EndeString => Ende.Value is DateTimeOffset e ? e.DateTime.ToShortDateString() : "";
 
         public VertragDetailVersion(Vertrag v)
         {

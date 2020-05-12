@@ -16,6 +16,26 @@
             <Setter Property="Margin" Value="20,20,0,0"/>
             <Setter Property="IsEnabled" Value="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"/>
         </Style>
+
+        <DataTemplate x:Key="BeginnGrid" x:DataType="vm:WohnungDetailVertrag">
+            <CalendarDatePicker
+                IsEnabled="False"
+                Width="176"
+                Date="{x:Bind Beginn.Value, Mode=OneWay}"
+                Language="de"
+                PlaceholderText="Offen"
+                DateFormat="{}{day.integer}. {month.full} {year.full}"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="EndeGrid" x:DataType="vm:WohnungDetailVertrag">
+            <CalendarDatePicker
+                IsEnabled="False"
+                Width="176"
+                Date="{x:Bind Ende.Value, Mode=OneWay}"
+                Language="de"
+                PlaceholderText="Offen"
+                DateFormat="{}{day.integer}. {month.full} {year.full}"/>
+        </DataTemplate>
     </Page.Resources>
 
     <Grid>
@@ -175,18 +195,9 @@
                     IsEnabled="{x:Bind ViewModel.IsNotInEdit, Mode=OneWay}"
                     ItemsSource="{x:Bind ViewModel.Vertraege.Value}">
                     <mtuuc:DataGrid.Columns>
-                        <mtuuc:DataGridTextColumn
-                        Header="Beginn"
-                        Tag="Beginn"
-                        Binding="{Binding BeginnString.Value}"/>
-                        <mtuuc:DataGridTextColumn
-                        Header="Ende"
-                        Tag="Ende"
-                        Binding="{Binding EndeString.Value}"/>
-                        <mtuuc:DataGridTextColumn
-                        Header="Mieter"
-                        Tag="Mieter"
-                        Binding="{Binding AuflistungMieter.Value}"/>
+                        <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
+                        <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
+                        <mtuuc:DataGridTextColumn Header="Mieter" Binding="{Binding AuflistungMieter.Value}"/>
                     </mtuuc:DataGrid.Columns>
                 </mtuuc:DataGrid>
 

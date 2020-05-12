@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Deeplex.Saverwalter.App.Views"
+    xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
@@ -16,6 +17,26 @@
             <Setter Property="Margin" Value="20,20,0,0"/>
             <Setter Property="IsEnabled" Value="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"/>
         </Style>
+
+        <DataTemplate x:Key="BeginnGrid" x:DataType="vm:KontaktDetailVertrag">
+            <CalendarDatePicker
+                IsEnabled="False"
+                Width="176"
+                Date="{x:Bind Beginn.Value, Mode=OneWay}"
+                Language="de"
+                PlaceholderText="Offen"
+                DateFormat="{}{day.integer}. {month.full} {year.full}"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="EndeGrid" x:DataType="vm:KontaktDetailVertrag">
+            <CalendarDatePicker
+                IsEnabled="False"
+                Width="176"
+                Date="{x:Bind Ende.Value, Mode=OneWay}"
+                Language="de"
+                PlaceholderText="Offen"
+                DateFormat="{}{day.integer}. {month.full} {year.full}"/>
+        </DataTemplate>
     </Page.Resources>
 
     <Grid>
@@ -140,26 +161,11 @@
                 AutoGenerateColumns="False"
                 ItemsSource="{x:Bind ViewModel.Vertraege.Value}">
                 <mtuuc:DataGrid.Columns>
-                    <mtuuc:DataGridTextColumn
-                        Header="Anschrift"
-                        Tag="Anschrift"
-                        Binding="{Binding Anschrift.Value}"/>
-                    <mtuuc:DataGridTextColumn
-                        Header="Wohnung"
-                        Tag="Wohnung"
-                        Binding="{Binding Wohnung.Value}"/>
-                    <mtuuc:DataGridTextColumn
-                        Header="Mieter"
-                        Tag="Mieter"
-                        Binding="{Binding AuflistungMieter.Value}"/>
-                    <mtuuc:DataGridTextColumn
-                        Header="Beginn"
-                        Tag="Beginn"
-                        Binding="{Binding BeginnString.Value}"/>
-                    <mtuuc:DataGridTextColumn
-                        Header="Ende"
-                        Tag="Ende"
-                        Binding="{Binding EndeString.Value}"/>
+                    <mtuuc:DataGridTextColumn Header="Anschrift" Binding="{Binding Anschrift.Value}"/>
+                    <mtuuc:DataGridTextColumn Header="Wohnung" Binding="{Binding Wohnung.Value}"/>
+                    <mtuuc:DataGridTextColumn Header="Mieter" Binding="{Binding AuflistungMieter.Value}"/>
+                    <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
+                    <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
                 </mtuuc:DataGrid.Columns>
             </mtuuc:DataGrid>
         </RelativePanel>
