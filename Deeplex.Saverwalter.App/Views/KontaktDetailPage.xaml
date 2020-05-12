@@ -72,15 +72,15 @@
                 </CommandBar>
             </RelativePanel>
 
-            <StackPanel Orientation="Horizontal">
+            <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBox
                     Text="{x:Bind ViewModel.Vorname.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Header="Vorname" Style="{StaticResource Eintraege}"/>
                 <TextBox
                     Text="{x:Bind ViewModel.Nachname.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Header="Nachname" Style="{StaticResource Eintraege}"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBox
                     Text="{x:Bind ViewModel.Adresse.Value.Strasse.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Style="{StaticResource Eintraege}" Header="Straße" Width="210"/>
@@ -93,23 +93,23 @@
                 <TextBox 
                     Text="{x:Bind ViewModel.Adresse.Value.Stadt.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Header="Stadt" Style="{StaticResource Eintraege}" Width="210"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBox
                     Text="{x:Bind ViewModel.Email.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Header="E-Mail" Style="{StaticResource Eintraege}"/>
                 <TextBox
                     Text="{x:Bind ViewModel.Fax.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Header="Fax" Style="{StaticResource Eintraege}"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBox
                 Text="{x:Bind ViewModel.Telefon.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Telefon" Style="{StaticResource Eintraege}"/>
                 <TextBox
                 Text="{x:Bind ViewModel.Mobil.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Mobil" Style="{StaticResource Eintraege}"/>
-            </StackPanel>
+            </mtuuc:WrapPanel>
 
             <TextBlock Text="Verträge" Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}"/>
             <RelativePanel>

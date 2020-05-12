@@ -91,7 +91,7 @@
                     </CommandBar.SecondaryCommands>
                 </CommandBar>
             </RelativePanel>
-            <StackPanel Orientation="Horizontal">
+            <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Laufzeit:" Margin="20,50,0,0" Style="{StaticResource Labels}"/>
                 <CalendarDatePicker
                     Header="Beginn"
@@ -119,8 +119,8 @@
                     Click="RemoveDate_Click">
                     <SymbolIcon Symbol="Delete"></SymbolIcon>
                 </Button>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Vermieter:" Style="{StaticResource Labels}"/>
                 <AutoSuggestBox
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
@@ -131,8 +131,8 @@
                     QuerySubmitted="VermieterSuggest_QuerySubmitted"
                     ItemsSource="{x:Bind ViewModel.JuristischePersonen.Value, Mode=OneWay}"
                     TextChanged="VermieterSuggest_TextChanged"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Ansprechpartner: " Style="{StaticResource Labels}"/>
                 <AutoSuggestBox
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
@@ -148,8 +148,8 @@
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Content="Teil der jur. Person?"
                     Margin="15,15,0,0"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Mieter:" Style="{StaticResource Labels}"/>
                 <mtuuc:AdaptiveGridView
                     Margin="20,10,0,0"
@@ -168,8 +168,8 @@
                     QuerySubmitted="MieterSuggest_QuerySubmitted"
                     TextChanged="MieterSuggest_TextChanged"
                     ItemsSource="{x:Bind ViewModel.Kontakte.Value, Mode=OneWay}"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Wohnung:" Style="{StaticResource Labels}"/>
                 <AutoSuggestBox
                     Margin="20,15,0,0"
@@ -180,7 +180,7 @@
                     PlaceholderText="Wohnung hinzufügen"
                     ItemsSource="{x:Bind ViewModel.AlleWohnungen.Value, Mode=OneWay}"
                     TextChanged="WohnungSuggest_TextChanged"/>
-            </StackPanel>
+            </mtuuc:WrapPanel>
             <RelativePanel>
                 <mtuuc:DataGrid
                     RelativePanel.AlignLeftWithPanel="True"

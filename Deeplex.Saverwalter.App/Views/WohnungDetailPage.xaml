@@ -78,12 +78,12 @@
                     </CommandBar.SecondaryCommands>
                 </CommandBar>
             </RelativePanel>
-            <StackPanel Orientation="Horizontal">
+            <mtuuc:WrapPanel Orientation="Horizontal">
             <TextBox
                 Text="{x:Bind ViewModel.Besitzer.Value.Name.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Besitzer" Width="300" Style="{StaticResource Eintraege}"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBox
                     Text="{x:Bind ViewModel.Adresse.Value.Strasse.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Header="Straße" Width="210" Style="{StaticResource Eintraege}"/>
@@ -96,8 +96,8 @@
                 <TextBox
                     Text="{x:Bind ViewModel.Adresse.Value.Stadt.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Header="Stadt" Width="210" Style="{StaticResource Eintraege}"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
             <TextBox
                 Text="{x:Bind ViewModel.Bezeichnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Bezeichnung" Width="210" Style="{StaticResource Eintraege}"/>
@@ -107,7 +107,7 @@
                 <TextBox
                 Text="{x:Bind ViewModel.Nutzflaeche.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Nutzfl." Width="70" Style="{StaticResource Eintraege}"/>
-            </StackPanel>
+            </mtuuc:WrapPanel>
 
             <TextBlock Text="Zähler" Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}"/>
 
