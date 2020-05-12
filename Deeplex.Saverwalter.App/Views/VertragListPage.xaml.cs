@@ -34,5 +34,11 @@ namespace Deeplex.Saverwalter.App.Views
             Frame.Navigate(typeof(VertragDetailViewPage), SelectedVertrag.Value.VertragId,
                 new DrillInNavigationTransitionInfo());
         }
+
+        private void AddVertrag_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(VertragDetailViewPage), null,
+                new DrillInNavigationTransitionInfo());
+        }
     }
 }

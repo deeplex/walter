@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -25,11 +26,7 @@ namespace Deeplex.Saverwalter.App.Views
             }
             else // If invoked using "Add"
             {
-                //ViewModel = new KontaktViewModel
-                //{
-                //    IsNewCustomer = true,
-                //    IsInEdit = true
-                //};
+                ViewModel = new VertragDetailViewModel();
             }
 
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
@@ -102,6 +99,16 @@ namespace Deeplex.Saverwalter.App.Views
                 }
             }
         }
+
+        private void WohnungSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            if (args.ChosenSuggestion is string a)
+            {
+                ViewModel.Wohnung.Value = ViewModel.AlleWohnungen.Value.First(w => w.BezeichnungVoll.Value == a);
+                sender.Text = a;
+            }
+        }
+
 
         private void AnsprechpartnerSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
