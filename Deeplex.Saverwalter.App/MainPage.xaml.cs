@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.App
 
         public readonly string KontaktListLabel = "Kontakte";
         public readonly string VertragListLabel = "Verträge";
-        public readonly string WohnungListLabel = "Wohnungen";
+        public readonly string WohnungListLabel = "Mietobjekte";
 
         private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
         {

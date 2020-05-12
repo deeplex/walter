@@ -12,12 +12,17 @@
 
     <Page.Resources>
         <Style x:Name="Eintraege" TargetType="TextBox">
-            <Setter Property="Width" Value="300"/>
             <Setter Property="TextWrapping" Value="NoWrap"/>
             <Setter Property="Margin" Value="20,20,0,0"/>
+            <Setter Property="IsEnabled" Value="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"/>
         </Style>
 
-        <DataTemplate x:Key="Mieter" x:DataType="vm:VertragDetailMieter">
+        <Style x:Name="Labels" TargetType="TextBlock">
+            <Setter Property="Margin" Value="20,20,0,0"/>
+            <Setter Property="Width" Value="110" />
+        </Style>
+
+        <DataTemplate x:Key="Mieter" x:DataType="vm:VertragDetailKontakt">
             <mtuuc:DockPanel LastChildFill="False">
                 <TextBlock Text="{x:Bind Name.Value}"  VerticalAlignment="Center" Margin="10,0,0,0"/>
                 <Button
@@ -48,12 +53,16 @@
                 HorizontalAlignment="Stretch"
                 DefaultLabelPosition="Right">
                     <AppBarButton
-                    Icon="Edit"
-                    Label="Edit"/>
-                    <AppBarButton Icon="Delete" Label="Delete"/>
+                        Icon="Edit"
+                        Label="Edit"
+                        Command="{x:Bind ViewModel.BeginEdit}"/>
                     <AppBarButton
-                    Icon="Save"
-                    Label="Save"/>
+                        Icon="Delete"
+                        Label="Delete"/>
+                    <AppBarButton
+                        Icon="Save"
+                        Label="Save"
+                        Command="{x:Bind ViewModel.SaveEdit}"/>
                     <CommandBar.SecondaryCommands>
                         <AppBarButton Icon="Setting" Label="Settings">
                             <AppBarButton.KeyboardAccelerators>
@@ -67,12 +76,13 @@
                 <TextBlock
                     x:Name="LaufzeitLabel"
                     RelativePanel.Below="ButtonRow"
-                    Width="70"
-                    Margin="20,45,0,0"
+                    Style="{StaticResource Labels}"
+                    Margin="20,50,0,0"
                     Text="Laufzeit:"/>
 
                 <CalendarDatePicker
                     x:Name="Beginn" Header="Beginn"
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Margin="20,20,0,0"
                     Width="190"
                     RelativePanel.Below="ButtonRow"
@@ -84,6 +94,7 @@
 
                 <CalendarDatePicker
                     x:Name="Ende" Header="Ende"
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Margin="20,20,0,0"
                     Width="190"
                     RelativePanel.Below="ButtonRow"
@@ -96,11 +107,11 @@
                 <TextBlock
                     x:Name="VermieterLabel"
                     RelativePanel.Below="Ende"
-                    Width="70"
-                    Margin="20,20,0,0"
+                    Style="{StaticResource Labels}"
                     Text="Vermieter:"/>
                 <AutoSuggestBox
                     x:Name="VermieterSuggest"
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Margin="20,15,0,0"
                     MinWidth="400"
                     Text="{x:Bind ViewModel.Vermieter.Value.Name.Value}"
@@ -112,27 +123,56 @@
                     TextChanged="VermieterSuggest_TextChanged"/>
 
                 <TextBlock
-                    x:Name="MieterLabel"
+                    x:Name="AnsprechpartnerLabel"
                     RelativePanel.Below="VermieterLabel"
-                    Width="70"
-                    Margin="20,20,0,0"
+                    Style="{StaticResource Labels}"
+                    Text="Ansprechpartner: "/>
+
+                <AutoSuggestBox
+                    x:Name="AnsprechpartnerSuggest"
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    Margin="20,15,0,0"
+                    MinWidth="200"
+                    Text="{x:Bind ViewModel.Ansprechpartner.Value.Name.Value}"
+                    PlaceholderText="Ansprechpartner"
+                    RelativePanel.Below="VermieterLabel"
+                    RelativePanel.RightOf="AnsprechpartnerLabel"
+                    QuerySubmitted="AnsprechpartnerSuggest_QuerySubmitted"
+                    TextChanged="AnsprechpartnerSuggest_TextChanged"
+                    ItemsSource="{x:Bind ViewModel.Kontakte.Value, Mode=OneWay}"/>
+
+                <CheckBox
+                    Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    Content="Teil der jur. Person?"
+                    Margin="15,15,0,0"
+                    RelativePanel.Below="VermieterLabel"
+                    RelativePanel.RightOf="AnsprechpartnerSuggest"/>
+
+                <TextBlock
+                    x:Name="MieterLabel"
+                    RelativePanel.Below="AnsprechpartnerLabel"
+                    Style="{StaticResource Labels}"
                     Text="Mieter:"/>
                 <mtuuc:AdaptiveGridView
                     Margin="20,10,0,0"
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     SelectionMode="Single"
                     x:Name="MieterListe"
                     VerticalAlignment="Center"
-                    RelativePanel.Below="VermieterLabel"
+                    RelativePanel.Below="AnsprechpartnerLabel"
                     RelativePanel.RightOf="MieterLabel"
                     ItemsSource="{x:Bind ViewModel.Mieter.Value, Mode=OneWay}"
                     ItemTemplate="{StaticResource Mieter}"/>
                 <AutoSuggestBox
                     x:Name="KontaktSuggest"
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Margin="0,15,0,0"
                     QueryIcon="AddFriend"
                     MinWidth="200"
                     PlaceholderText="Mieter hinzufügen..."
-                    RelativePanel.Below="VermieterLabel"
+                    RelativePanel.Below="AnsprechpartnerLabel"
                     RelativePanel.RightOf="MieterListe"
                     QuerySubmitted="KontaktSuggest_QuerySubmitted"
                     TextChanged="KontaktSuggest_TextChanged"
@@ -141,12 +181,12 @@
                 <TextBlock
                     x:Name="WohnungLabel"
                     RelativePanel.Below="MieterLabel"
-                    Width="70"
-                    Margin="20,20,0,0"
+                    Style="{StaticResource Labels}"
                     Text="Wohnung:"/>
                 <AutoSuggestBox
                     x:Name="WohnungSuggest"
                     Margin="20,15,0,0"
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     MinWidth="400"
                     Text="{x:Bind ViewModel.Wohnung.Value.BezeichnungVoll.Value}"
                     PlaceholderText="Wohnung hinzufügen"

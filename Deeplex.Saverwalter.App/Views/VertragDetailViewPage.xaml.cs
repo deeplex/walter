@@ -74,6 +74,16 @@ namespace Deeplex.Saverwalter.App.Views
                 "Kontakt");
         }
 
+        private void AnsprechpartnerSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            Suggest(sender, args,
+                ViewModel.Kontakte.Value
+                    // If Checkbox => .Where(k => k.JuristischePersonen.Contains(ViewModel.Vermieter.Id))
+                    .Where(k => k.Name.Value.Contains(sender.Text))
+                    .Select(k => k.Name.Value).ToList(),
+                "Kontakt");
+        }
+
         private void KontaktSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
             if (args.ChosenSuggestion is string a)
@@ -85,11 +95,20 @@ namespace Deeplex.Saverwalter.App.Views
                 else
                 {
                     var m = ViewModel.Kontakte.Value.First(k => k.Name.Value == a);
-                    ViewModel.Mieter.Value = ViewModel.Mieter.Value.Add(new VertragDetailMieter(m.Id))
+                    ViewModel.Mieter.Value = ViewModel.Mieter.Value.Add(new VertragDetailKontakt(m.Id))
                         // From the longest to the smallest because of XAML I guess;
                         .OrderBy(mw => mw.Name.Value.Length).Reverse().ToImmutableList();
                     sender.Text = "";
                 }
+            }
+        }
+
+        private void AnsprechpartnerSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            if (args.ChosenSuggestion is string a)
+            {
+                ViewModel.Ansprechpartner.Value = ViewModel.Kontakte.Value.First(k => k.Name.Value == a);
+                sender.Text = a;
             }
         }
 
