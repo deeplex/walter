@@ -37,17 +37,16 @@
                 DateFormat="{}{day.integer}. {month.full} {year.full}"/>
         </DataTemplate>
     </Page.Resources>
-
-    <Grid>
-        <ScrollViewer>
+    <ScrollViewer>
+        <StackPanel>
             <RelativePanel>
                 <!--TODO Insert image -->
                 <mtuuc:ScrollHeader
-                x:Name="ScrollHeader"
-                HorizontalAlignment="Stretch"
-                RelativePanel.AlignRightWithPanel="True"
-                RelativePanel.AlignLeftWithPanel="True"
-                Mode="Fade">
+                    x:Name="ScrollHeader"
+                    HorizontalAlignment="Stretch"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignLeftWithPanel="True"
+                    Mode="Fade">
                     <Grid
                     Background="{ThemeResource SystemChromeLowColor}"
                     MinHeight="250">
@@ -67,15 +66,9 @@
                     RelativePanel.AlignRightWithPanel="True"
                     HorizontalAlignment="Stretch"
                     DefaultLabelPosition="Right">
-                    <AppBarButton
-                    Icon="Edit"
-                    Command="{x:Bind ViewModel.BeginEdit}"
-                    Label="Edit"/>
+                    <AppBarButton Icon="Edit" Label="Edit" Command="{x:Bind ViewModel.BeginEdit}"/>
                     <AppBarButton Icon="Delete" Label="Delete"/>
-                    <AppBarButton
-                    Icon="Save"
-                    Label="Save"
-                    Command="{x:Bind ViewModel.SaveEdit}"/>
+                    <AppBarButton Icon="Save" Label="Save" Command="{x:Bind ViewModel.SaveEdit}"/>
                     <CommandBar.SecondaryCommands>
                         <AppBarButton Icon="Setting" Label="Settings">
                             <AppBarButton.KeyboardAccelerators>
@@ -84,167 +77,113 @@
                         </AppBarButton>
                     </CommandBar.SecondaryCommands>
                 </CommandBar>
+            </RelativePanel>
+            <StackPanel Orientation="Horizontal">
+            <TextBox
+                Text="{x:Bind ViewModel.Besitzer.Value.Name.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Header="Besitzer" Width="300" Style="{StaticResource Eintraege}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBox
+                    Text="{x:Bind ViewModel.Adresse.Value.Strasse.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Header="Straße" Width="210" Style="{StaticResource Eintraege}"/>
+                <TextBox
+                    Text="{x:Bind ViewModel.Adresse.Value.Hausnummer.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Header="Hausnr." Width="70" Style="{StaticResource Eintraege}"/>
+                <TextBox
+                    Text="{x:Bind ViewModel.Adresse.Value.Postleitzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Header="Postleitzahl" Width="70" Style="{StaticResource Eintraege}"/>
+                <TextBox
+                    Text="{x:Bind ViewModel.Adresse.Value.Stadt.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Header="Stadt" Width="210" Style="{StaticResource Eintraege}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+            <TextBox
+                Text="{x:Bind ViewModel.Bezeichnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Header="Bezeichnung" Width="210" Style="{StaticResource Eintraege}"/>
+            <TextBox
+                Text="{x:Bind ViewModel.Wohnflaeche.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Header="Wohnfl." Width="70" Style="{StaticResource Eintraege}"/>
+                <TextBox
+                Text="{x:Bind ViewModel.Nutzflaeche.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Header="Nutzfl." Width="70" Style="{StaticResource Eintraege}"/>
+            </StackPanel>
 
-                <TextBox
-                    RelativePanel.Below="ScrollHeader"
-                    Name="BesitzerBox"
-                    Header="Besitzer"
-                    Width="300"
-                    Text="{x:Bind ViewModel.Besitzer.Value.Name.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Style="{StaticResource Eintraege}" />
+            <TextBlock Text="Zähler" Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}"/>
 
-                <TextBox
-                    RelativePanel.Below="BesitzerBox"
-                    Style="{StaticResource Eintraege}"
-                    Name="Strasse"
-                    Header="Straße"
-                    Width="210"
-                    Text="{x:Bind ViewModel.Adresse.Value.Strasse.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBox
-                    Name="Hausnummer"
-                    Style="{StaticResource Eintraege}"
-                    Header="Hausnr."
-                    Width="70"
-                    RelativePanel.Below="BesitzerBox"
-                    RelativePanel.RightOf="Strasse"
-                    Text="{x:Bind ViewModel.Adresse.Value.Hausnummer.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBox 
-                    Name="Postleizahl"
-                    Style="{StaticResource Eintraege}"
-                    Header="Postleitzahl"
-                    Width="70"
-                    RelativePanel.Below="BesitzerBox"
-                    RelativePanel.RightOf="Hausnummer"
-                    Text="{x:Bind ViewModel.Adresse.Value.Postleitzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBox
-                    Name="Stadt"
-                    Header="Stadt"
-                    Style="{StaticResource Eintraege}"
-                    Width="210"
-                    RelativePanel.Below="BesitzerBox"
-                    RelativePanel.RightOf="Postleizahl"
-                    Text="{x:Bind ViewModel.Adresse.Value.Stadt.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <TextBox
-                    Width="210"
-                    Style="{StaticResource Eintraege}"
-                    x:Name="Bezeichnung" Header="Bezeichnung"
-                    Text="{x:Bind ViewModel.Bezeichnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    RelativePanel.Below="Strasse" />
-                <TextBox
-                    Width="70"
-                    Style="{StaticResource Eintraege}"
-                    x:Name="Wohnflaeche" Header="Wohnfl."
-                    Text="{x:Bind ViewModel.Wohnflaeche.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    RelativePanel.Below="Strasse"
-                    RelativePanel.RightOf="Bezeichnung"/>
-                <TextBox
-                    Width="70"
-                    Style="{StaticResource Eintraege}"
-                    x:Name="Nutzflaeche" Header="Nutzfl."
-                    Text="{x:Bind ViewModel.Nutzflaeche.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    RelativePanel.Below="Strasse" 
-                    RelativePanel.RightOf="Wohnflaeche"/>
-
-
-                <TextBlock
-                    Name="Zaehlertitle"
-                    Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}"
-                    Text="Zähler"
-                    RelativePanel.Below="Bezeichnung"/>
-
-                <GridView
-                x:Name="Zaehler"
+            <GridView
                 IsItemClickEnabled="True"
                 SelectionMode="Single"
                 Margin="10"
-                ItemsSource="{x:Bind ViewModel.Zaehler.Value, Mode=OneWay}"
-                RelativePanel.Below="Zaehlertitle">
-                    <GridView.ItemTemplate>
-                        <DataTemplate x:DataType="vm:WohnungDetailZaehler">
-                            <Button
-                            Width="200" Height="100"
-	                        Background="{ThemeResource SystemChromeLowColor}">
-                                <Button.Content>
-                                    <StackPanel>
-                                        <TextBlock Text="{x:Bind Typ.Value}"/>
-                                        <TextBlock Text="{x:Bind Kennnummer.Value}"/>
-                                    </StackPanel>
-                                </Button.Content>
-                            </Button>
-                        </DataTemplate>
-                    </GridView.ItemTemplate>
-                </GridView>
+                ItemsSource="{x:Bind ViewModel.Zaehler.Value, Mode=OneWay}">
+                <GridView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:WohnungDetailZaehler">
+                        <Button
+                    Width="200" Height="100"
+	                Background="{ThemeResource SystemChromeLowColor}">
+                            <Button.Content>
+                                <StackPanel>
+                                    <TextBlock Text="{x:Bind Typ.Value}"/>
+                                    <TextBlock Text="{x:Bind Kennnummer.Value}"/>
+                                </StackPanel>
+                            </Button.Content>
+                        </Button>
+                    </DataTemplate>
+                </GridView.ItemTemplate>
+            </GridView>
 
-                <TextBlock
-                    RelativePanel.Below="Zaehler"
-                    Name="VertraegeTitle"
-                    Margin ="10"
-                    Style="{StaticResource SubtitleTextBlockStyle}"
-                    Text="Verträge"/>
+            <TextBlock Text="Verträge" Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}"/>
+            <RelativePanel>
                 <mtuuc:DataGrid
-                    x:Name="VertraegeGrid"
                     RelativePanel.AlignLeftWithPanel="True"
                     RelativePanel.AlignRightWithPanel="True"
                     Margin="20,20,20,20"
-                    RelativePanel.Below="VertraegeTitle"
-                    IsReadOnly="True"
+                     IsReadOnly="True"
                     CanUserReorderColumns="False"
                     CanUserResizeColumns="True"
                     AutoGenerateColumns="False"
                     IsEnabled="{x:Bind ViewModel.IsNotInEdit, Mode=OneWay}"
                     ItemsSource="{x:Bind ViewModel.Vertraege.Value}">
-                    <mtuuc:DataGrid.Columns>
+                     <mtuuc:DataGrid.Columns>
                         <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
                         <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
-                        <mtuuc:DataGridTextColumn Header="Mieter" Binding="{Binding AuflistungMieter.Value}"/>
-                    </mtuuc:DataGrid.Columns>
+                         <mtuuc:DataGridTextColumn Header="Mieter" Binding="{Binding AuflistungMieter.Value}"/>
+                     </mtuuc:DataGrid.Columns>
                 </mtuuc:DataGrid>
+            </RelativePanel>
 
-                <TextBlock
-                    RelativePanel.Below="VertraegeGrid"
-                    Name="KalteBetriebskostenTitle"
-                    Margin="10"
-                    Style="{StaticResource SubtitleTextBlockStyle}"
-                    Text="Kalte Betriebskosten"/>
+            <TextBlock
+                Margin="10"
+                Style="{StaticResource SubtitleTextBlockStyle}"
+                Text="Kalte Betriebskosten"/>
+            <RelativePanel>
                 <mtuuc:DataGrid
-                    RelativePanel.AlignLeftWithPanel="True"
-                    RelativePanel.AlignRightWithPanel="True"
-                    Margin="20,20,20,20"
-                    x:Name="KalteBetriebskostenGrid"
-                    RelativePanel.Below="KalteBetriebskostenTitle"
-                    IsReadOnly="True"
-                    CanUserReorderColumns="False"
-                    CanUserResizeColumns="True"
-                    AutoGenerateColumns="False"
-                    IsEnabled="{x:Bind ViewModel.IsNotInEdit, Mode=OneWay}"
-                    ItemsSource="{x:Bind ViewModel.KalteBetriebskosten.Value}">
+                RelativePanel.AlignLeftWithPanel="True"
+                RelativePanel.AlignRightWithPanel="True"
+                Margin="20,20,20,20"
+                IsReadOnly="True"
+                CanUserReorderColumns="False"
+                CanUserResizeColumns="True"
+                AutoGenerateColumns="False"
+                IsEnabled="{x:Bind ViewModel.IsNotInEdit, Mode=OneWay}"
+                ItemsSource="{x:Bind ViewModel.KalteBetriebskosten.Value}">
                     <mtuuc:DataGrid.Columns>
-                        <mtuuc:DataGridTextColumn
-                            Header="Bezeichnung"
-                            Tag="Bezeichnung"
-                            Binding="{Binding Bezeichnung.Value}"/>
-                        <mtuuc:DataGridTextColumn
-                            Header="Schlüssel"
-                            Tag="Schluessel"
-                            Binding="{Binding Schluessel.Value}"/>
-                        <mtuuc:DataGridTextColumn
-                            Header="Anteil"
-                            Tag="Anteil"
-                            Binding="{Binding Anteil.Value}"/>
+                        <mtuuc:DataGridTextColumn Header="Bezeichnung" Binding="{Binding Bezeichnung.Value}"/>
+                        <mtuuc:DataGridTextColumn Header="Schlüssel" Binding="{Binding Schluessel.Value}"/>
+                        <mtuuc:DataGridTextColumn Header="Anteil" Binding="{Binding Anteil.Value}"/>
                     </mtuuc:DataGrid.Columns>
                     <mtuuc:DataGrid.RowDetailsTemplate>
                         <DataTemplate>
                             <Grid>
                                 <TextBlock
-                                    TextWrapping="Wrap"
-                                    Margin="20,20,20,20"
-                                    Text="{Binding Beschreibung.Value}"/>
+                                TextWrapping="Wrap"
+                                Margin="20,20,20,20"
+                                Text="{Binding Beschreibung.Value}"/>
                             </Grid>
                         </DataTemplate>
                     </mtuuc:DataGrid.RowDetailsTemplate>
                 </mtuuc:DataGrid>
             </RelativePanel>
-        </ScrollViewer>
-    </Grid>
+        </StackPanel>
+    </ScrollViewer>
 </Page>
