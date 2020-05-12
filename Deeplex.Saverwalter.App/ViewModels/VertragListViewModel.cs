@@ -46,9 +46,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname)); // Such grace...
 
             Beginn.Value = v.Beginn;
-            BeginnString.Value = v.Beginn.ToShortDateString(); ;
+            BeginnString.Value = v.Beginn.ToString("dd.MM.yyyy"); ;
             hasEnde.Value = v.Ende is DateTime;
-            EndeString.Value = v.Ende is DateTime e ? e.ToShortDateString() : "";
+            EndeString.Value = v.Ende is DateTime e ? e.ToString("dd.MM.yyyy") : "";
         }
     }
 }
