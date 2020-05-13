@@ -64,13 +64,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 v.ForEach(vs => Mieter.Value
                     .Where(mv =>
                         !MSet.ToList().Exists(ms =>
-                            ms.VertragId == Id &&
-                            ms.MieterId == mv.Id))
+                            ms.VertragId == vs.rowid &&
+                            ms.KontaktId == mv.Id))
                     .ToList().ForEach(d => MSet.Add(new Mieter()
                     {
                         Vertrag = vs,
                         Kontakt = VertragDetailKontakt.GetKontakt(d.Id)
                     })));
+
+                // TODO Remove duplicates?
 
                 for (int i = 0; i < v.Count(); ++i)
                 {
