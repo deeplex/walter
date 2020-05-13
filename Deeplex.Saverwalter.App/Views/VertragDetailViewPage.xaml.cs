@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.App.Views
         {
             Suggest(sender, args,
                 ViewModel.AlleWohnungen.Value
-                    .Where(w => w.BesitzerId.Value == ViewModel.Vermieter.Value.Id)
+                    .Where(w => ViewModel.Vermieter.Value?.Id is int vv ? w.BesitzerId.Value == vv : true)
                     .Where(k => k.BezeichnungVoll.Value.Contains(sender.Text))
                     .Select(k => k.BezeichnungVoll.Value).ToList(),
                 "Wohnung");
@@ -56,6 +56,7 @@ namespace Deeplex.Saverwalter.App.Views
         {
             Suggest(sender, args,
                 ViewModel.JuristischePersonen.Value
+                    .Where(k => ViewModel.Wohnung.Value?.BesitzerId.Value is int wb ? k.Id == wb : true)
                     .Where(k => k.Name.Value.Contains(sender.Text))
                     .Select(k => k.Name.Value).ToList(),
                 "Juristische Person");
@@ -140,5 +141,6 @@ namespace Deeplex.Saverwalter.App.Views
             ViewModel.Ende.Value = null;
             ViewModel.Versionen.Value.Last().Ende.Value = null;
         }
+
     }
 }

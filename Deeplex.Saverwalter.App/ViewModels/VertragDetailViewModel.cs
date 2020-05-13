@@ -79,7 +79,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     var val = Versionen.Value[i];
                     v[i].Beginn = val.Beginn.Value.UtcDateTime;
                     v[i].Ende = val.Ende.Value?.UtcDateTime;
-                    v[i].Wohnung = VertragDetailWohnung.GetWohnung(Wohnung.Value.Id);
+
+                    if (Wohnung.Value is VertragDetailWohnung &&
+                        AlleWohnungen.Value.Exists(w => w.BezeichnungVoll.Value == Wohnung.Value.BezeichnungVoll.Value))
+                    {
+                        v[i].Wohnung = VertragDetailWohnung.GetWohnung(Wohnung.Value.Id);
+                    }
+                    else
+                    {
+                        v[i].Wohnung = null;
+                    }
+                    
                     v[i].Personenzahl = val.Personenzahl.Value;
                     v[i].Ansprechpartner = VertragDetailKontakt.GetKontakt(val.Ansprechpartner.Value.Id);
 
