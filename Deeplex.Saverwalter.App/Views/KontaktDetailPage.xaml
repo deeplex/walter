@@ -47,12 +47,12 @@
                 Text="{x:Bind ViewModel.Name}"/>
 
                 <CommandBar
-                x:Name="ButtonRow"
-                Background="Transparent" 
-                IsOpen="False"
-                RelativePanel.AlignRightWithPanel="True"
-                HorizontalAlignment="Stretch"
-                DefaultLabelPosition="Right">
+                    x:Name="ButtonRow"
+                    Background="Transparent" 
+                    IsOpen="False"
+                    RelativePanel.AlignRightWithPanel="True"
+                    HorizontalAlignment="Stretch"
+                    DefaultLabelPosition="Right">
                     <AppBarButton
                     Icon="Edit"
                     Label="Edit"

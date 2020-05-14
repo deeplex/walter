@@ -35,5 +35,12 @@ namespace Deeplex.Saverwalter.App.Views
             Frame.Navigate(typeof(WohnungDetailPage), null,
                 new DrillInNavigationTransitionInfo());
         }
+
+        private void Rechnungen_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(KalteBetriebskostenRechnungPage),
+                AdresseViewModel.GetAdresseIdByAnschrift((string)((Button)sender).CommandParameter),
+                new DrillInNavigationTransitionInfo());
+        }
     }
 }

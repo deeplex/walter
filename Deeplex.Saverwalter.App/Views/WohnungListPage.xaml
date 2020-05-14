@@ -11,29 +11,37 @@
     <Page.Resources>
         <muxc:StackLayout x:Name="VerticalStackLayout" Orientation="Vertical" Spacing="8"/>
 
-        <DataTemplate x:Key="WohnungTemplate">
-            <Button
-                CommandParameter="{Binding Id}"
-                DoubleTapped="Wohnung_DoubleTapped"
-                Width="200" Height="100"
-                Content="{Binding Bezeichnung.Value}" 
-	            Background="{ThemeResource SystemChromeLowColor}">
-            </Button>
-        </DataTemplate>
-
         <DataTemplate x:Key="AdresseTemplate">
             <!-- Make this an Expander - https://github.com/microsoft/microsoft-ui-xaml/issues/2003-->
             <Grid>
                 <RelativePanel CornerRadius="10" Background="{StaticResource SystemChromeMediumColor}">
                     <TextBlock Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}" Text="{Binding Key}"/>
-                    <AppBarButton Margin="10" Icon="Manage" Name="Abrechnung" Width="100" Label="Abrechnung" RelativePanel.AlignRightWithPanel="True"/>
+                    <AppBarButton
+                        Click="Rechnungen_Click"
+                        CommandParameter="{Binding Key}"
+                        Margin="10"
+                        Icon="List"
+                        Name="Rechnungen"
+                        Width="100"
+                        Label="Rechnungen"
+                        RelativePanel.AlignRightWithPanel="True"/>
                     <GridView
                         IsItemClickEnabled="True"
                         SelectionMode="Single"
                         Margin="10"
                         ItemsSource="{Binding}"
-                        ItemTemplate="{StaticResource WohnungTemplate}"
-                        RelativePanel.Below="Abrechnung">
+                        RelativePanel.Below="Rechnungen">
+                        <GridView.ItemTemplate>
+                            <DataTemplate>
+                                <Button
+                                    CommandParameter="{Binding Id}"
+                                    DoubleTapped="Wohnung_DoubleTapped"
+                                    Width="200" Height="100"
+                                    Content="{Binding Bezeichnung.Value}" 
+	                                Background="{ThemeResource SystemChromeLowColor}">
+                                </Button>
+                            </DataTemplate>
+                        </GridView.ItemTemplate>
                     </GridView>
                 </RelativePanel>
             </Grid>

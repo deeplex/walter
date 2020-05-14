@@ -9,11 +9,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<string> Bezeichnung { get; } = new ObservableProperty<string>();
         public ObservableProperty<string> Anschrift { get; } = new ObservableProperty<string>();
 
-        public WohnungListViewModel(Wohnung w)
+    public WohnungListViewModel(Wohnung w)
         {
             Id = w.WohnungId;
             Bezeichnung.Value = w.Bezeichnung;
-            Anschrift.Value = Utils.Anschrift(w);
+            Anschrift.Value = AdresseViewModel.Anschrift(w);
         }
     }
 }

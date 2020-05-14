@@ -121,7 +121,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Id = v.rowid;
             Version = v.Version;
-            Anschrift.Value = v.Wohnung is Wohnung w ? Utils.Anschrift(w) : "";
+            Anschrift.Value = v.Wohnung is Wohnung w ? AdresseViewModel.Anschrift(w) : "";
             Wohnung.Value = v.Wohnung is Wohnung ww ? ww.Bezeichnung : "";
 
             Beginn.Value = v.Beginn;

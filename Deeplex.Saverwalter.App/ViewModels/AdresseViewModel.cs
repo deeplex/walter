@@ -23,6 +23,25 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Stadt.Value = a.Stadt;
         }
 
+        public static int GetAdresseIdByAnschrift(string s)
+            => App.Walter.Adressen.ToList().First(a => Anschrift(a) == s).AdresseId;
+
+        public static string Anschrift(int id) => Anschrift(App.Walter.Adressen.Find(id));
+        public static string Anschrift(Kontakt k) => Anschrift(k is Kontakt a ? a.Adresse : null);
+        public static string Anschrift(Wohnung w) => Anschrift(w is Wohnung a ? a.Adresse : null);
+        public static string Anschrift(Adresse a)
+        {
+            if (a == null ||
+                a.Postleitzahl == null || a.Postleitzahl == "" ||
+                a.Hausnummer == null || a.Hausnummer == "" ||
+                a.Strasse == null || a.Strasse == "" ||
+                a.Stadt == null || a.Stadt == "")
+            {
+                return "";
+            }
+            return a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
+        }
+
         public static Adresse GetAdresse(AdresseViewModel avm)
         {
             // TODO Remove unreferenced Adresses - Add Wohnungen and Kontakte List to Walter.

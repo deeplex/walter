@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             VertragId = v.VertragId;
             Version = v.Version;
             Personenzahl.Value = v.Personenzahl;
-            Anschrift.Value = Utils.Anschrift(v.Wohnung); // TODO only true if wohnung and not adressen
+            Anschrift.Value = AdresseViewModel.Anschrift(v.Wohnung); // TODO only true if wohnung and not adressen
             Wohnung.Value = v.Wohnung is Wohnung w ? w.Bezeichnung : "";
             AuflistungMieter.Value = string.Join(", ", v.Mieter.Select(m =>
                 (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname)); // Such grace...

@@ -43,7 +43,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Id = w.WohnungId;
             AdresseId.Value = w.AdresseId;
-            Anschrift.Value = Utils.Anschrift(w);
+            Anschrift.Value = AdresseViewModel.Anschrift(w);
             Bezeichnung.Value = w.Bezeichnung;
             Wohnflaeche.Value = w.Wohnflaeche;
             Nutzflaeche.Value = w.Nutzflaeche;
