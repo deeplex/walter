@@ -48,7 +48,9 @@ namespace Deeplex.Saverwalter.Model
         public string Postleitzahl { get; set; } = null!;
         public string Stadt { get; set; } = null!;
         public List<KalteBetriebskostenpunkt> KalteBetriebskosten { get; private set; } = new List<KalteBetriebskostenpunkt>();
+        public List<KalteBetriebskostenRechnung> KalteBetriebskostenRechnungen { get; private set; } = new List<KalteBetriebskostenRechnung>();
         public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
+        public List<Garage> Garagen { get; private set; } = new List<Garage>();
     }
 
     public class Wohnung
@@ -68,6 +70,7 @@ namespace Deeplex.Saverwalter.Model
     public class Garage
     {
         public int GarageId { get; set; }
+        public Adresse Adresse { get; set; } = null!;
         public string Kennung { get; set; } = null!;
         public JuristischePerson Besitzer { get; set; } = null!;
     }
@@ -180,6 +183,16 @@ namespace Deeplex.Saverwalter.Model
         public string Bezeichnung { get; set; } = null!;
         public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
         public List<Garage> Garagen { get; private set; } = new List<Garage>();
+        public List<JuristischePersonenMitglied> Mitglieder { get; private set; } = new List<JuristischePersonenMitglied>();
+    }
+
+    public class JuristischePersonenMitglied
+    {
+        public int JuristischePersonenMitgliedId { get; set; }
+        public int KontaktId { get; set; }
+        public Kontakt Kontakt { get; set; } = null!;
+        public int JuristischePersonId { get; set; }
+        public JuristischePerson JuristischePerson { get; set; } = null!;
     }
 
     public class Mieter
@@ -203,6 +216,7 @@ namespace Deeplex.Saverwalter.Model
         public string? Email { get; set; }
         public int? AdresseId { get; set; }
         public Adresse? Adresse { get; set; }
+        public List<JuristischePersonenMitglied> JuristischePersonen { get; private set; } = new List<JuristischePersonenMitglied>();
     }
 
     public enum Anrede
@@ -222,8 +236,7 @@ namespace Deeplex.Saverwalter.Model
     public class KalteBetriebskostenpunkt
     {
         public int KalteBetriebskostenpunktId { get; set; }
-        public KalteBetriebskosten Bezeichnung { get; set; }
-        public List<KalteBetriebskostenRechnung> Rechnungen { get; private set; } = new List<KalteBetriebskostenRechnung>();
+        public KalteBetriebskosten Typ { get; set; }
         public int AdresseId { get; set; }
         public Adresse Adresse { get; set; } = null!;
         public string? Beschreibung { get; set; }
@@ -283,7 +296,8 @@ namespace Deeplex.Saverwalter.Model
     public class KalteBetriebskostenRechnung
     {
         public int KalteBetriebskostenRechnungId { get; set; }
-        public KalteBetriebskostenpunkt KalteBetriebskostenpunkt { get; set; } = null!;
+        public KalteBetriebskosten Typ { get; set; }
+        public Adresse Adresse { get; set; } = null!;
         public int Jahr { get; set; }
         public double Betrag { get; set; }
     }

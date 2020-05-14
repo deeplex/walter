@@ -59,7 +59,9 @@ namespace Deeplex.Saverwalter.Model
                 .Include(v => v.Wohnung!)
                     .ThenInclude(w => w.Adresse)
                         .ThenInclude(a => a.KalteBetriebskosten)
-                            .ThenInclude(k => k.Rechnungen)
+                .Include(v => v.Wohnung!)
+                    .ThenInclude(w => w.Adresse)
+                        .ThenInclude(a => a.KalteBetriebskostenRechnungen)
                 .Include(v => v.Wohnung!)
                     .ThenInclude(w => w.Adresse)
                         .ThenInclude(a => a.Wohnungen)
@@ -110,11 +112,11 @@ namespace Deeplex.Saverwalter.Model
                     (double)PersonenIntervall.Where(p => p.Beginn <= w.Beginn).First().Personenzahl / w.Personenzahl *
                     (((double)(w.Ende - w.Beginn).Days + 1) / Abrechnungszeitspanne))).ToList();
 
-            KalteBetriebskosten = Adresse.KalteBetriebskosten.OrderBy(k => k.Bezeichnung).ToList();
-            RechnungenKalt = KalteBetriebskosten.SelectMany(k => k.Rechnungen).Where(r => r.Jahr == Jahr).ToList();
+            KalteBetriebskosten = Adresse.KalteBetriebskosten.OrderBy(k => k.Typ).ToList();
+            RechnungenKalt = Adresse.KalteBetriebskostenRechnungen.Where(k => k.Jahr == Jahr).OrderBy(k => k.Typ).ToList();
             GesamtBetragKalt = RechnungenKalt.Sum(r => r.Betrag);
             BetragKalt = RechnungenKalt.Aggregate(0.0, (a, b) =>
-                b.KalteBetriebskostenpunkt.Schluessel switch
+                KalteBetriebskosten.First(k => k.Typ == b.Typ).Schluessel switch
                 {
                     UmlageSchluessel.NachWohnflaeche => a + b.Betrag * WFZeitanteil,
                     UmlageSchluessel.NachNutzeinheit => a + b.Betrag * NEZeitanteil,

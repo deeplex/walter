@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     KalteBetriebskostenpunktId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Bezeichnung = table.Column<int>(nullable: false),
+                    Typ = table.Column<int>(nullable: false),
                     AdresseId = table.Column<int>(nullable: false),
                     Beschreibung = table.Column<string>(nullable: true),
                     Schluessel = table.Column<int>(nullable: false)
@@ -138,12 +138,19 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     GarageId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    AdresseId = table.Column<int>(nullable: false),
                     Kennung = table.Column<string>(nullable: false),
                     BesitzerJuristischePersonId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Garagen", x => x.GarageId);
+                    table.ForeignKey(
+                        name: "FK_Garagen_Adressen_AdresseId",
+                        column: x => x.AdresseId,
+                        principalTable: "Adressen",
+                        principalColumn: "AdresseId",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Garagen_JuristischePersonen_BesitzerJuristischePersonId",
                         column: x => x.BesitzerJuristischePersonId,
@@ -187,18 +194,52 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     KalteBetriebskostenRechnungId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    KalteBetriebskostenpunktId = table.Column<int>(nullable: false),
+                    Typ = table.Column<int>(nullable: false),
+                    AdresseId = table.Column<int>(nullable: false),
                     Jahr = table.Column<int>(nullable: false),
-                    Betrag = table.Column<double>(nullable: false)
+                    Betrag = table.Column<double>(nullable: false),
+                    KalteBetriebskostenpunktId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_KalteBetriebskostenRechnungen", x => x.KalteBetriebskostenRechnungId);
                     table.ForeignKey(
+                        name: "FK_KalteBetriebskostenRechnungen_Adressen_AdresseId",
+                        column: x => x.AdresseId,
+                        principalTable: "Adressen",
+                        principalColumn: "AdresseId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_KalteBetriebskostenRechnungen_KalteBetriebskosten_KalteBetriebskostenpunktId",
                         column: x => x.KalteBetriebskostenpunktId,
                         principalTable: "KalteBetriebskosten",
                         principalColumn: "KalteBetriebskostenpunktId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "JuristischePersonenMitglied",
+                columns: table => new
+                {
+                    JuristischePersonenMitgliedId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    KontaktId = table.Column<int>(nullable: false),
+                    JuristischePersonId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JuristischePersonenMitglied", x => x.JuristischePersonenMitgliedId);
+                    table.ForeignKey(
+                        name: "FK_JuristischePersonenMitglied_JuristischePersonen_JuristischePersonId",
+                        column: x => x.JuristischePersonId,
+                        principalTable: "JuristischePersonen",
+                        principalColumn: "JuristischePersonId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_JuristischePersonenMitglied_Kontakte_KontaktId",
+                        column: x => x.KontaktId,
+                        principalTable: "Kontakte",
+                        principalColumn: "KontaktId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -356,13 +397,33 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Garagen_AdresseId",
+                table: "Garagen",
+                column: "AdresseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Garagen_BesitzerJuristischePersonId",
                 table: "Garagen",
                 column: "BesitzerJuristischePersonId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_JuristischePersonenMitglied_JuristischePersonId",
+                table: "JuristischePersonenMitglied",
+                column: "JuristischePersonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_JuristischePersonenMitglied_KontaktId",
+                table: "JuristischePersonenMitglied",
+                column: "KontaktId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_KalteBetriebskosten_AdresseId",
                 table: "KalteBetriebskosten",
+                column: "AdresseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_KalteBetriebskostenRechnungen_AdresseId",
+                table: "KalteBetriebskostenRechnungen",
                 column: "AdresseId");
 
             migrationBuilder.CreateIndex(
@@ -443,6 +504,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "JuristischePersonenMitglied");
+
             migrationBuilder.DropTable(
                 name: "KalteBetriebskostenRechnungen");
 

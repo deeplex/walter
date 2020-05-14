@@ -229,7 +229,7 @@ namespace Deeplex.Saverwalter.Print
                 para.Append(
                     new Run(
                         new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) }),
-                        new Text(item.Bezeichnung.ToDescriptionString() + ": ") { Space = SpaceProcessingModeValues.Preserve }),
+                        new Text(item.Typ.ToDescriptionString() + ": ") { Space = SpaceProcessingModeValues.Preserve }),
                     new Run(
                         new Text(item.Beschreibung),
                         new Break()));
@@ -369,11 +369,11 @@ namespace Deeplex.Saverwalter.Print
 
             TableRow kostenPunkt(KalteBetriebskostenpunkt punkt, string zeitraum, int Jahr, double anteil, bool f = true)
             {
-                var rechnung = punkt.Rechnungen.Where(r => r.Jahr == Jahr);
-                var betrag = rechnung.Count() == 1 ? rechnung.First().Betrag : 0.0;
+                var rechnung = b.RechnungenKalt.FirstOrDefault(k => k.Typ == punkt.Typ);
+                var betrag = rechnung?.Betrag ?? 0.0;
 
                 return new TableRow(
-                    ContentCell(f ? punkt.Bezeichnung.ToDescriptionString() : ""),
+                    ContentCell(f ? punkt.Typ.ToDescriptionString() : ""),
                     ContentCell(f ? punkt.Schluessel.ToDescriptionString() : ""),
                     ContentCell(zeitraum, JustificationValues.Center),
                     ContentCell(Euro(betrag), JustificationValues.Right), // TODO f ? bold : normal?

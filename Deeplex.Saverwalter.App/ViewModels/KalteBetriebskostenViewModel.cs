@@ -58,7 +58,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private KalteBetriebskostenViewModel(KalteBetriebskostenpunkt k)
         {
             Id = k.KalteBetriebskostenpunktId;
-            Bezeichnung.Value = k.Bezeichnung.ToDescriptionString();
+            Bezeichnung.Value = k.Typ.ToDescriptionString();
             Schluessel.Value = k.Schluessel.ToDescriptionString();
             Beschreibung.Value = k.Beschreibung;
         }
