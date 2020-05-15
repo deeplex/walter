@@ -30,7 +30,7 @@
                 <NavigationViewItem
                     x:Name="WohnungListMenuItem"
                     Content="{x:Bind WohnungListLabel}" 
-                    Icon="Home"/>
+                    Icon="Street"/>
                 <NavigationViewItem
                     x:Name="VertragListMenuItem"
                     Content="{x:Bind VertragListLabel}" 

@@ -1,5 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -7,44 +10,64 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public class KalteBetriebskostenRechnungViewModel
     {
-        public ObservableProperty<string> Anschrift = new ObservableProperty<string>();
+        public string Anschrift;
 
-        public ObservableProperty<ImmutableDictionary<int, ImmutableList<KalteBetriebskostenRechnungJahr>>> Jahre
-            = new ObservableProperty<ImmutableDictionary<int, ImmutableList<KalteBetriebskostenRechnungJahr>>>();
+        public ObservableProperty<ImmutableSortedDictionary<int, ImmutableList<KalteBetriebskostenRechnungJahr>>> Jahre
+            = new ObservableProperty<ImmutableSortedDictionary<int, ImmutableList<KalteBetriebskostenRechnungJahr>>>();
 
-        public KalteBetriebskostenRechnungViewModel(int id) : this(App.Walter.Adressen.Find(id)) { }
+        public ObservableProperty<int> AddJahrBox = new ObservableProperty<int>();
+
+        public KalteBetriebskostenRechnungViewModel(int id)
+            : this(App.Walter.Adressen.Find(id)) { }
         public KalteBetriebskostenRechnungViewModel(Adresse a)
         {
-            Anschrift.Value = AdresseViewModel.Anschrift(a);
+            Anschrift = AdresseViewModel.Anschrift(a);
 
             Jahre.Value = App.Walter.KalteBetriebskostenRechnungen
                 .Where(r => r.Adresse == a)
+                .Include(r => r.Adresse).ThenInclude(a2 => a2.KalteBetriebskosten)
                 .Select(r => new KalteBetriebskostenRechnungJahr(r))
                 .ToList()
                 .GroupBy(r => r.Jahr.Value)
-                .ToImmutableDictionary(g => g.Key, g => g.ToImmutableList());
+                .ToImmutableSortedDictionary(g => g.Key, g => g.ToImmutableList(),
+                    Comparer<int>.Create((x, y) => y.CompareTo(x)));
+
+            AddJahr = new RelayCommand(_ => {
+                Jahre.Value = Jahre.Value.Add(AddJahrBox.Value, a.KalteBetriebskosten
+                    .Select(k => new KalteBetriebskostenRechnungJahr(k.Typ, AddJahrBox.Value))
+                    .ToImmutableList()).ToImmutableSortedDictionary(Comparer<int>.Create((x, y) => y.CompareTo(x)));
+                AddJahrBox.Value = Jahre.Value.First().Key + 1;
+                },
+                _ => true);
+
+            AddJahrBox.Value = Jahre.Value.Count() > 0 ? Jahre.Value.First().Key + 1 : DateTime.Today.Year;
         }
 
-        public void AddJahr(Adresse a, int jahr)
-        {
-            Jahre.Value = Jahre.Value.Add(jahr, App.Walter.Adressen.Find(a.AdresseId).KalteBetriebskosten
-                .Select(k => new KalteBetriebskostenRechnungJahr(k.Typ, jahr)).ToImmutableList());
-        }
+        public RelayCommand AddJahr { get; }
     }
 
     public class KalteBetriebskostenRechnungJahr
     {
         public ObservableProperty<int> Jahr = new ObservableProperty<int>();
-        public ObservableProperty<double> Betrag = new ObservableProperty<double>();
         public ObservableProperty<KalteBetriebskosten> Typ = new ObservableProperty<KalteBetriebskosten>();
 
         public string Bezeichnung => Typ.Value.ToDescriptionString();
 
+        public ObservableProperty<double> Betrag = new ObservableProperty<double>();
         public string BetragString
         {
             get => string.Format("{0:F2}", Betrag.Value);
-            set { this.Betrag.Value = double.Parse(value); }
-         }
+            set {
+                if (double.TryParse(value, out double result))
+                {
+                    Betrag.Value = result;
+                }
+                else
+                {
+                    Betrag.Value = 0.0;
+                }
+            }
+        }
 
         public KalteBetriebskostenRechnungJahr(KalteBetriebskosten typ, int jahr)
         {
