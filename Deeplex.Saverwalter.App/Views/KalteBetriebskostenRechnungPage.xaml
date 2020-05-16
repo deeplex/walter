@@ -86,6 +86,16 @@
                                     </mtuuc:DataGridTemplateColumn.CellTemplate>
                                 </mtuuc:DataGridTemplateColumn>
                             </mtuuc:DataGrid.Columns>
+                            <mtuuc:DataGrid.RowDetailsTemplate>
+                                <DataTemplate>
+                                    <Grid Visibility="{Binding HatBeschreibung}">
+                                        <TextBlock
+                                            TextWrapping="Wrap"
+                                            Margin="20,20,20,20"
+                                            Text="{Binding Beschreibung}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </mtuuc:DataGrid.RowDetailsTemplate>
                         </mtuuc:DataGrid>
                     </DataTemplate>
                 </Pivot.ItemTemplate>

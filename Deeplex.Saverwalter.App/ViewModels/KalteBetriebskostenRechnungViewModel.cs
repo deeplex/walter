@@ -54,6 +54,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public ObservableProperty<int> Jahr = new ObservableProperty<int>();
         public ObservableProperty<KalteBetriebskosten> Typ = new ObservableProperty<KalteBetriebskosten>();
+        public string Beschreibung { get; } = "";
+        public bool HatBeschreibung => Beschreibung.Length > 0;
 
         public string Bezeichnung => Typ.Value.ToDescriptionString();
 
@@ -83,6 +85,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public KalteBetriebskostenRechnungJahr(KalteBetriebskostenRechnung r)
         {
+            Beschreibung = r.Adresse.KalteBetriebskosten.First(k => k.Typ == r.Typ).Beschreibung;
             Jahr.Value = r.Jahr;
             Betrag.Value = r.Betrag;
             Typ.Value = r.Typ;
