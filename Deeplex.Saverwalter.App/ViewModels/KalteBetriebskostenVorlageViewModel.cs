@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public string Anschrift;
 
         public KalteBetriebskostenVorlageViewModel(int id)
-            : this(App.Walter.Adressen.Find(id)) { }
+            : this(App.Walter.Adressen.Include(a => a.KalteBetriebskosten).First(a => a.AdresseId == id)) { }
         public KalteBetriebskostenVorlageViewModel(Adresse a)
         {           
             AlleSchluessel = Enum.GetValues(typeof(UmlageSchluessel)).Cast<UmlageSchluessel>()
@@ -28,29 +29,75 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Anschrift = AdresseViewModel.Anschrift(a);
             var enums = Enum.GetValues(typeof(KalteBetriebskosten)).Cast<KalteBetriebskosten>().ToList();
             Punkte.Value = enums.Select(e => new KalteBetriebskostenVorlageKostenpunkt(a, e)).ToList();
+
+            SaveEdit = new RelayCommand(_ =>
+            {
+                foreach (var p in Punkte.Value)
+                {
+                    var kbkp = a.KalteBetriebskosten.FirstOrDefault(k => k.Typ == p.Typ);
+                    if (kbkp != null)
+                    {
+                        if (!p.Active.Value)
+                        {
+                            App.Walter.KalteBetriebskosten.Remove(kbkp);
+                        }
+                        else
+                        {
+                            kbkp.Beschreibung = p.Beschreibung;
+                            kbkp.Schluessel = p.Schluessel;
+                            App.Walter.KalteBetriebskosten.Update(kbkp);
+                        }
+                    }
+                    else if(p.Active.Value)
+                    {
+                        App.Walter.KalteBetriebskosten.Add(new KalteBetriebskostenpunkt
+                        {
+                            Adresse = a,
+                            Schluessel = p.Schluessel,
+                            Beschreibung = p.Beschreibung,
+                            Typ = p.Typ,
+                        });
+                    }
+                    App.Walter.SaveChanges();
+                };
+            });
         }
+
+        public RelayCommand SaveEdit { get; }
     }
 
-    public class KalteBetriebskostenVorlageKostenpunkt
+    public class KalteBetriebskostenVorlageKostenpunkt : BindableBase
     {
-        public string Bezeichnung { get; }
+        public KalteBetriebskosten Typ { get; }
         public ObservableProperty<bool> Active { get; } = new ObservableProperty<bool>();
         public UmlageSchluessel Schluessel { get; set; }
-        public ObservableProperty<string> Beschreibung { get; } = new ObservableProperty<string>();
+        
 
-        public string BeschreibungKurz => Beschreibung.Value.Length > 20 ?
-            Beschreibung.Value.Substring(0, 30) + "…" :
-            Beschreibung.Value;
+        private string mBeschreibung;
+        public string Beschreibung
+        {
+            get => mBeschreibung;
+            set
+            {
+                SetProperty(ref mBeschreibung, value);
+                RaisePropertyChanged(nameof(BeschreibungKurz));
+            }
+        }
+
+        public string Bezeichnung => Typ.ToDescriptionString();
+
+        public string BeschreibungKurz => Beschreibung.Length > 30 ?
+            Beschreibung.Substring(0, 30) + "…" :
+            Beschreibung;
 
         public KalteBetriebskostenVorlageKostenpunkt(Adresse a, KalteBetriebskosten e)
         {
-            Bezeichnung = e.ToDescriptionString();
-
+            Typ = e;
 
             var pt = a.KalteBetriebskosten.FirstOrDefault(k => k.Typ == e);
             Active.Value = pt is KalteBetriebskostenpunkt p;
             Schluessel = pt?.Schluessel ?? UmlageSchluessel.NachWohnflaeche;
-            Beschreibung.Value = pt?.Beschreibung ?? "";
+            Beschreibung = pt?.Beschreibung ?? "";
         }
     }
 

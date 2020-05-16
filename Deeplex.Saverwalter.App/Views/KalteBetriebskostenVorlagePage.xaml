@@ -36,8 +36,9 @@
                     HorizontalAlignment="Stretch"
                     DefaultLabelPosition="Right">
                 <AppBarButton
-                        Icon="Save"
-                        Label="Save"/>
+                    Command="{x:Bind ViewModel.SaveEdit}"
+                    Icon="Save"
+                    Label="Save"/>
             </CommandBar>
         </RelativePanel>
         <TextBlock
@@ -59,16 +60,16 @@
                     <mtuuc:DataGridCheckBoxColumn
                         Header="Aktiv"
                         MaxWidth="75"
-                        Binding="{Binding Active.Value}"/>
+                        Binding="{Binding Active.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <mtuuc:DataGridTextColumn Header="Bezeichnung" Binding="{Binding Bezeichnung}"/>
                     <mtuuc:DataGridComboBoxColumn
                         Header="Schlüssel"
                         ItemsSource="{x:Bind ViewModel.AlleSchluessel, Mode=OneWay}"
                         DisplayMemberPath="Bezeichnung"
-                        Binding="{Binding Schluessel}"/>
+                        Binding="{Binding Schluessel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <mtuuc:DataGridTextColumn
                         Header="Beschreibung"
-                        Binding="{Binding BeschreibungKurz}"/>
+                        Binding="{Binding BeschreibungKurz, Mode=TwoWay}"/>
                 </mtuuc:DataGrid.Columns>
                 <mtuuc:DataGrid.RowDetailsTemplate>
                     <DataTemplate>
@@ -77,7 +78,7 @@
                                 PlaceholderText="Füge eine Beschreibung dieses kalten Betriebskostenpunktes hinzu..."
                                 Margin="10"
                                 TextWrapping="Wrap"
-                                Text="{Binding Beschreibung.Value}"/>
+                                Text="{Binding Beschreibung, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                     </DataTemplate>
                 </mtuuc:DataGrid.RowDetailsTemplate>
