@@ -89,7 +89,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     {
                         v[i].Wohnung = null;
                     }
-                    
+
                     v[i].Personenzahl = val.Personenzahl.Value;
                     v[i].Ansprechpartner = VertragDetailKontakt.GetKontakt(val.Ansprechpartner.Value.Id);
 

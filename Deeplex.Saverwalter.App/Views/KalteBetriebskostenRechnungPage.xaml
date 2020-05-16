@@ -43,8 +43,9 @@
                         </AppBarButton.Flyout>
                     </AppBarButton>
                     <AppBarButton
-                        Icon="Edit"
-                        Label="Edit"/>
+                        Icon="AllApps"
+                        Label="Vorlage"
+                        Click="Vorlage_Click"/>
                     <AppBarButton Icon="Delete" Label="Delete"/>
                     <AppBarButton
                         Icon="Save"

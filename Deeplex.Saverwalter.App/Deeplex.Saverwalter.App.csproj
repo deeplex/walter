@@ -127,6 +127,7 @@
     <Compile Include="ViewModels\JuristischePersonViewModel.cs" />
     <Compile Include="ViewModels\KalteBetriebskostenRechnungViewModel.cs" />
     <Compile Include="ViewModels\KalteBetriebskostenViewModel.cs" />
+    <Compile Include="ViewModels\KalteBetriebskostenVorlageViewModel.cs" />
     <Compile Include="ViewModels\VertragDetailViewModel.cs" />
     <Compile Include="ViewModels\KontaktListViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
@@ -136,6 +137,9 @@
     <Compile Include="ViewModels\KontaktDetailViewModel.cs" />
     <Compile Include="Views\KalteBetriebskostenRechnungPage.xaml.cs">
       <DependentUpon>KalteBetriebskostenRechnungPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\KalteBetriebskostenVorlagePage.xaml.cs">
+      <DependentUpon>KalteBetriebskostenVorlagePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\KontaktDetailPage.xaml.cs">
       <DependentUpon>KontaktDetailPage.xaml</DependentUpon>
@@ -184,6 +188,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\KalteBetriebskostenRechnungPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\KalteBetriebskostenVorlagePage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

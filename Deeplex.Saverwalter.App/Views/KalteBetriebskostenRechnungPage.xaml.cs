@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
@@ -26,11 +27,17 @@ namespace Deeplex.Saverwalter.App.Views
             }
             else if (e.Parameter is null) // New Contact
             {
-               // ViewModel = new KalteBetriebskostenRechnungViewModel();
+                // ViewModel = new KalteBetriebskostenRechnungViewModel();
             }
 
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
             base.OnNavigatedTo(e);
+        }
+
+        private void Vorlage_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(KalteBetriebskostenVorlagePage), ViewModel.AdresseId,
+                new DrillInNavigationTransitionInfo());
         }
     }
 }

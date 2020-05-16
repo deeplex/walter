@@ -12,6 +12,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public string Anschrift;
 
+        public int AdresseId;
+
         public ObservableProperty<ImmutableSortedDictionary<int, ImmutableList<KalteBetriebskostenRechnungJahr>>> Jahre
             = new ObservableProperty<ImmutableSortedDictionary<int, ImmutableList<KalteBetriebskostenRechnungJahr>>>();
 
@@ -22,6 +24,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public KalteBetriebskostenRechnungViewModel(Adresse a)
         {
             Anschrift = AdresseViewModel.Anschrift(a);
+            AdresseId = a.AdresseId;
 
             Jahre.Value = App.Walter.KalteBetriebskostenRechnungen
                 .Where(r => r.Adresse == a)
@@ -32,12 +35,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ToImmutableSortedDictionary(g => g.Key, g => g.ToImmutableList(),
                     Comparer<int>.Create((x, y) => y.CompareTo(x)));
 
-            AddJahr = new RelayCommand(_ => {
+            AddJahr = new RelayCommand(_ =>
+            {
                 Jahre.Value = Jahre.Value.Add(AddJahrBox.Value, a.KalteBetriebskosten
                     .Select(k => new KalteBetriebskostenRechnungJahr(k.Typ, AddJahrBox.Value))
                     .ToImmutableList()).ToImmutableSortedDictionary(Comparer<int>.Create((x, y) => y.CompareTo(x)));
                 AddJahrBox.Value = Jahre.Value.First().Key + 1;
-                },
+            },
                 _ => true);
 
             AddJahrBox.Value = Jahre.Value.Count() > 0 ? Jahre.Value.First().Key + 1 : DateTime.Today.Year;
@@ -57,7 +61,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public string BetragString
         {
             get => string.Format("{0:F2}", Betrag.Value);
-            set {
+            set
+            {
                 if (double.TryParse(value, out double result))
                 {
                     Betrag.Value = result;
