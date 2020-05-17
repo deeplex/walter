@@ -70,6 +70,19 @@
                             AutoGenerateColumns="False"
                             ItemsSource="{Binding Value, Mode=OneWay}">
                             <mtuuc:DataGrid.Columns>
+                                <mtuuc:DataGridTemplateColumn>
+                                    <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button
+                                                HorizontalAlignment="Center"
+                                                Background="Transparent"
+                                                CommandParameter="{Binding}"
+                                                Click="RemoveRechnung_Click">
+                                                <SymbolIcon Symbol="Delete"></SymbolIcon>
+                                            </Button>
+                                        </DataTemplate>
+                                    </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                </mtuuc:DataGridTemplateColumn>
                                 <mtuuc:DataGridTextColumn Header="Bezeichnung" Binding="{Binding Bezeichnung}"/>
                                 <mtuuc:DataGridTemplateColumn Header="Betrag">
                                     <mtuuc:DataGridTemplateColumn.CellTemplate>

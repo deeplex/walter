@@ -3,7 +3,6 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Deeplex.Saverwalter.App.Views"
-    xmlns:m="using:Deeplex.Saverwalter.Model"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
@@ -64,7 +63,7 @@
                     <mtuuc:DataGridTextColumn Header="Bezeichnung" Binding="{Binding Bezeichnung}"/>
                     <mtuuc:DataGridComboBoxColumn
                         Header="Schlüssel"
-                        ItemsSource="{x:Bind ViewModel.AlleSchluessel, Mode=OneWay}"
+                        ItemsSource="{x:Bind ViewModel.AlleSchluessel}"
                         DisplayMemberPath="Bezeichnung"
                         Binding="{Binding Schluessel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <mtuuc:DataGridTextColumn

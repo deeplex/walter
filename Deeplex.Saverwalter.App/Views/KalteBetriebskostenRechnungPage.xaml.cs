@@ -1,15 +1,11 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using System.Linq;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
-
 namespace Deeplex.Saverwalter.App.Views
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class KalteBetriebskostenRechnungPage : Page
     {
         public KalteBetriebskostenRechnungViewModel ViewModel { get; set; }
@@ -38,6 +34,14 @@ namespace Deeplex.Saverwalter.App.Views
         {
             Frame.Navigate(typeof(KalteBetriebskostenVorlagePage), ViewModel.AdresseId,
                 new DrillInNavigationTransitionInfo());
+        }
+
+        private void RemoveRechnung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            var param = (KalteBetriebskostenRechnungJahr)((Button)sender).CommandParameter;
+            var j = ViewModel.Jahre.Value[param.Jahr.Value];
+            var upd = j.RemoveAll(r => r.Jahr == param.Jahr && r.Typ == param.Typ);
+            ViewModel.Jahre.Value = ViewModel.Jahre.Value.SetItem(param.Jahr.Value, upd);
         }
     }
 }
