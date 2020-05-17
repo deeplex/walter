@@ -52,9 +52,9 @@
                     ItemHeight="565"
                     StretchContentForSingleRow="True"
                     SelectionMode="Single"
-                    SelectedItem="{x:Bind SelectedVertrag.Value, Mode=TwoWay}"
+                    SelectedItem="{x:Bind ViewModel.SelectedVertrag.Value, Mode=TwoWay}"
                     DoubleTapped="Vertrag_DoubleTapped"
-                    ItemsSource="{x:Bind ViewModel}"
+                    ItemsSource="{x:Bind ViewModel.Vertraege}"
                     IsItemClickEnabled="True">
                     <mtuuc:AdaptiveGridView.ItemTemplate>
                         <DataTemplate>
@@ -68,27 +68,27 @@
                                         HorizontalAlignment="Left">
                                         <TextBlock>
                                             <Run Text="Mieter: "/>
-                                            <Run Text="{Binding AuflistungMieter.Value}"/>
+                                            <Run Text="{Binding AuflistungMieter}"/>
                                         </TextBlock>
                                         <TextBlock>
                                             <Run Text="Adresse: "/>
-                                            <Run Text="{Binding Anschrift.Value}"/>
+                                            <Run Text="{Binding Anschrift}"/>
                                         </TextBlock>
                                         <TextBlock>
                                             <Run Text="Wohnung: "/>
-                                            <Run Text="{Binding Wohnung.Value}"/>
+                                            <Run Text="{Binding Wohnung}"/>
                                         </TextBlock>
                                         <TextBlock>
                                             <Run Text="Personenzahl: "/>
-                                            <Run Text="{Binding Personenzahl.Value}"/>
+                                            <Run Text="{Binding Personenzahl}"/>
                                         </TextBlock>
                                         <TextBlock>
                                             <Run Text="Beginn: "/>
-                                            <Run Text="{Binding BeginnString.Value}"/>
+                                            <Run Text="{Binding BeginnString}"/>
                                         </TextBlock>
                                         <TextBlock>
                                             <Run Text="Ende: "/>
-                                            <Run Text="{Binding EndeString.Value}"/>
+                                            <Run Text="{Binding EndeString}"/>
                                         </TextBlock>
                                     </StackPanel>
                                 </Grid>

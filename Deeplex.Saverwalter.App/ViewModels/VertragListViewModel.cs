@@ -1,22 +1,42 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class VertragListViewModel : VertragVersionListViewModel
+    public class VertragListViewModel
     {
-        public ObservableProperty<List<VertragVersionListViewModel>> Versionen { get; }
-            = new ObservableProperty<List<VertragVersionListViewModel>>();
+        public List<VertragListVertrag> Vertraege = new List<VertragListVertrag>();
+        public ObservableProperty<VertragListVertrag> SelectedVertrag
+            = new ObservableProperty<VertragListVertrag>();
 
-        public VertragListViewModel(IGrouping<Guid, Vertrag> v)
+        public VertragListViewModel()
+        {
+            Vertraege = App.Walter.Vertraege
+                .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
+                .Include(v => v.Mieter).ThenInclude(m => m.Kontakt)
+                .ToList()
+                .GroupBy(v => v.VertragId)
+                .Select(v => new VertragListVertrag(v))
+                .OrderBy(v => v.Beginn).Reverse()
+                .ToList();
+        }
+    }
+
+    public class VertragListVertrag : VertragVersionListViewModel
+    {
+        public List<VertragVersionListViewModel> Versionen { get; }
+            = new List<VertragVersionListViewModel>();
+
+        public VertragListVertrag(IGrouping<Guid, Vertrag> v)
             : base(v.OrderBy(vs => vs.Version).Last())
         {
-            Versionen.Value = v.OrderBy(vs => vs.Version).Select(vs => new VertragVersionListViewModel(vs)).ToList();
-            BeginnString.Value = Versionen.Value.First().BeginnString.Value;
-            Beginn.Value = Versionen.Value.First().Beginn.Value;
+            Versionen = v.OrderBy(vs => vs.Version).Select(vs => new VertragVersionListViewModel(vs)).ToList();
+            BeginnString = Versionen.First().BeginnString;
+            Beginn = Versionen.First().Beginn;
         }
     }
 
@@ -25,30 +45,30 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public int Id { get; }
         public Guid VertragId { get; }
         public int Version { get; }
-        public ObservableProperty<int> Personenzahl { get; } = new ObservableProperty<int>();
-        public ObservableProperty<string> Anschrift { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Wohnung { get; } = new ObservableProperty<string>();
-        public ObservableProperty<DateTime> Beginn { get; } = new ObservableProperty<DateTime>();
-        public ObservableProperty<string> BeginnString { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> EndeString { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> AuflistungMieter { get; } = new ObservableProperty<string>();
-        public ObservableProperty<bool> hasEnde = new ObservableProperty<bool>();
+        public int Personenzahl { get; }
+        public string Anschrift { get; }
+        public string Wohnung { get; }
+        public DateTime Beginn { get; set; }
+        public string BeginnString { get; set; }
+        public string EndeString { get; }
+        public string AuflistungMieter { get; }
+        public bool hasEnde { get; }
 
         public VertragVersionListViewModel(Vertrag v)
         {
             Id = v.rowid;
             VertragId = v.VertragId;
             Version = v.Version;
-            Personenzahl.Value = v.Personenzahl;
-            Anschrift.Value = AdresseViewModel.Anschrift(v.Wohnung); // TODO only true if wohnung and not adressen
-            Wohnung.Value = v.Wohnung is Wohnung w ? w.Bezeichnung : "";
-            AuflistungMieter.Value = string.Join(", ", v.Mieter.Select(m =>
+            Personenzahl = v.Personenzahl;
+            Anschrift = AdresseViewModel.Anschrift(v.Wohnung); // TODO only true if wohnung and not adressen
+            Wohnung = v.Wohnung is Wohnung w ? w.Bezeichnung : "";
+            AuflistungMieter = string.Join(", ", v.Mieter.Select(m =>
                 (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname)); // Such grace...
 
-            Beginn.Value = v.Beginn;
-            BeginnString.Value = v.Beginn.ToString("dd.MM.yyyy"); ;
-            hasEnde.Value = v.Ende is DateTime;
-            EndeString.Value = v.Ende is DateTime e ? e.ToString("dd.MM.yyyy") : "";
+            Beginn = v.Beginn;
+            BeginnString = v.Beginn.ToString("dd.MM.yyyy"); ;
+            hasEnde = v.Ende is DateTime;
+            EndeString = v.Ende is DateTime e ? e.ToString("dd.MM.yyyy") : "";
         }
     }
 }
