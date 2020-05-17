@@ -1,4 +1,6 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.Model;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -51,6 +53,42 @@ namespace Deeplex.Saverwalter.App.Views
             ViewModel.SelectedJahr
                 = ((KeyValuePair<int, ImmutableList<KalteBetriebskostenRechnungJahr>>)
                     ((Pivot)sender).SelectedItem).Key;
+        }
+
+        private void AddRechnung_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
+            {
+                var jahr = ViewModel.SelectedJahr;
+                sender.ItemsSource = Enum.GetValues(typeof(KalteBetriebskosten)).Cast<KalteBetriebskosten>()
+                    .ToList()
+                    .Where(r => jahr > 0 ? !ViewModel.Jahre.Value[jahr].Exists(j => j.Typ.Value == r) : false)
+                    .Select(k => new AddRechnung
+                    {
+                        Typ = k,
+                        Bezeichnung = k.ToDescriptionString(),
+                    })
+                    .Where(k => k.Bezeichnung.Contains(sender.Text)).ToList();
+            }
+        }
+
+        private void AddRechnung_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            if (args.ChosenSuggestion is AddRechnung a)
+            {
+                var jahr = ViewModel.SelectedJahr;
+                var j = ViewModel.Jahre.Value[jahr];
+                var upd = j.Add(new KalteBetriebskostenRechnungJahr(a.Typ, jahr));
+                ViewModel.Jahre.Value = ViewModel.Jahre.Value.SetItem(jahr, upd);
+                sender.IsSuggestionListOpen = false;
+                sender.Text = "";
+            }
+        }
+
+        private class AddRechnung
+        {
+            public KalteBetriebskosten Typ { get; set; }
+            public string Bezeichnung { get; set; }
         }
     }
 }
