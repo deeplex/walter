@@ -46,20 +46,13 @@
                         Icon="AllApps"
                         Label="Vorlage"
                         Click="Vorlage_Click"/>
-                    <AppBarButton Icon="Delete" Label="Delete"/>
                     <AppBarButton
+                        Command="{x:Bind ViewModel.SaveEdit}"
                         Icon="Save"
                         Label="Save"/>
-                    <CommandBar.SecondaryCommands>
-                        <AppBarButton Icon="Setting" Label="Settings">
-                            <AppBarButton.KeyboardAccelerators>
-                                <KeyboardAccelerator Modifiers="Control" Key="I" />
-                            </AppBarButton.KeyboardAccelerators>
-                        </AppBarButton>
-                    </CommandBar.SecondaryCommands>
                 </CommandBar>
             </RelativePanel>
-            <Pivot ItemsSource="{x:Bind ViewModel.Jahre.Value, Mode=OneWay}">
+            <Pivot ItemsSource="{x:Bind ViewModel.Jahre.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                 <Pivot.HeaderTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Key, Mode=OneWay}"/>
@@ -81,7 +74,9 @@
                                 <mtuuc:DataGridTemplateColumn Header="Betrag">
                                     <mtuuc:DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <muxc:NumberBox Value="{Binding BetragString, Mode=TwoWay}" PlaceholderText="0,00"/>
+                                            <muxc:NumberBox
+                                                Value="{Binding BetragString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                PlaceholderText="0,00"/>
                                         </DataTemplate>
                                     </mtuuc:DataGridTemplateColumn.CellTemplate>
                                 </mtuuc:DataGridTemplateColumn>

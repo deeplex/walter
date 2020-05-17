@@ -41,16 +41,48 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     .Select(k => new KalteBetriebskostenRechnungJahr(k.Typ, AddJahrBox.Value))
                     .ToImmutableList()).ToImmutableSortedDictionary(Comparer<int>.Create((x, y) => y.CompareTo(x)));
                 AddJahrBox.Value = Jahre.Value.First().Key + 1;
-            },
-                _ => true);
+            }, _ => true);
+
+            SaveEdit = new RelayCommand(_ =>
+            {
+                var alleJahre = Jahre.Value.SelectMany(r => r.Value).ToList();
+                foreach (var kbr in a.KalteBetriebskostenRechnungen)
+                {
+                    var alleRechnungen = alleJahre.FirstOrDefault(r => r.Jahr.Value == kbr.Jahr && r.Typ.Value == kbr.Typ);
+                    if (alleRechnungen == null)
+                    {
+                        App.Walter.KalteBetriebskostenRechnungen.Remove(kbr);
+                    }
+                    else
+                    {
+                        kbr.Betrag = alleRechnungen.Betrag;
+                        App.Walter.KalteBetriebskostenRechnungen.Update(kbr);
+                    }
+                }
+                foreach (var rechnung in alleJahre)
+                {
+                    if (!a.KalteBetriebskostenRechnungen.Exists(r => r.Jahr == rechnung.Jahr.Value && r.Typ == rechnung.Typ.Value))
+                    {
+                        App.Walter.KalteBetriebskostenRechnungen.Add(new KalteBetriebskostenRechnung
+                        {
+                            Adresse = a,
+                            Typ = rechnung.Typ.Value,
+                            Betrag = rechnung.Betrag,
+                            Jahr = rechnung.Jahr.Value,
+                        });
+                    }
+                }
+                App.Walter.SaveChanges();
+            }, _ => true);
 
             AddJahrBox.Value = Jahre.Value.Count() > 0 ? Jahre.Value.First().Key + 1 : DateTime.Today.Year;
         }
 
         public RelayCommand AddJahr { get; }
+        public RelayCommand SaveEdit { get; }
     }
 
-    public class KalteBetriebskostenRechnungJahr
+    public class KalteBetriebskostenRechnungJahr : BindableBase
     {
         public ObservableProperty<int> Jahr = new ObservableProperty<int>();
         public ObservableProperty<KalteBetriebskosten> Typ = new ObservableProperty<KalteBetriebskosten>();
@@ -59,20 +91,21 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public string Bezeichnung => Typ.Value.ToDescriptionString();
 
-        public ObservableProperty<double> Betrag = new ObservableProperty<double>();
+        public double Betrag;
         public string BetragString
         {
-            get => string.Format("{0:F2}", Betrag.Value);
+            get => Betrag > 0 ? string.Format("{0:F2}", Betrag) : "";
             set
             {
                 if (double.TryParse(value, out double result))
                 {
-                    Betrag.Value = result;
+                    SetProperty(ref Betrag, result);
                 }
                 else
                 {
-                    Betrag.Value = 0.0;
+                    SetProperty(ref Betrag, 0.0);
                 }
+                RaisePropertyChanged(nameof(Betrag));
             }
         }
 
@@ -80,14 +113,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Jahr.Value = jahr;
             Typ.Value = typ;
-            Betrag.Value = 0.0;
+            Betrag = 0.0;
         }
 
         public KalteBetriebskostenRechnungJahr(KalteBetriebskostenRechnung r)
         {
             Beschreibung = r.Adresse.KalteBetriebskosten.First(k => k.Typ == r.Typ).Beschreibung;
             Jahr.Value = r.Jahr;
-            Betrag.Value = r.Betrag;
+            Betrag = r.Betrag;
             Typ.Value = r.Typ;
         }
     }
