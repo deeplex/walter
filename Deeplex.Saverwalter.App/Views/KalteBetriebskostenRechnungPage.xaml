@@ -24,6 +24,10 @@
                     HorizontalAlignment="Stretch"
                     DefaultLabelPosition="Right">
                     <AppBarButton
+                        Icon="Delete"
+                        Label="Entferne Jahr"
+                        Command="{x:Bind ViewModel.RemoveJahr}"/>
+                    <AppBarButton
                         Icon="Add"
                         Label="Neues Jahr">
                         <AppBarButton.Flyout>
@@ -52,7 +56,10 @@
                         Label="Save"/>
                 </CommandBar>
             </RelativePanel>
-            <Pivot ItemsSource="{x:Bind ViewModel.Jahre.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            <Pivot
+                SelectionChanged="Pivot_SelectionChanged"
+                ItemsSource="{x:Bind ViewModel.Jahre.Value, Mode=TwoWay,
+                UpdateSourceTrigger=PropertyChanged}">
                 <Pivot.HeaderTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Key, Mode=OneWay}"/>

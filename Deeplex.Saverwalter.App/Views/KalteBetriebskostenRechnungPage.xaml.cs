@@ -1,4 +1,6 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
@@ -42,6 +44,13 @@ namespace Deeplex.Saverwalter.App.Views
             var j = ViewModel.Jahre.Value[param.Jahr.Value];
             var upd = j.RemoveAll(r => r.Jahr == param.Jahr && r.Typ == param.Typ);
             ViewModel.Jahre.Value = ViewModel.Jahre.Value.SetItem(param.Jahr.Value, upd);
+        }
+
+        private void Pivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ViewModel.SelectedJahr
+                = ((KeyValuePair<int, ImmutableList<KalteBetriebskostenRechnungJahr>>)
+                    ((Pivot)sender).SelectedItem).Key;
         }
     }
 }

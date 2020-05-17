@@ -17,6 +17,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<ImmutableSortedDictionary<int, ImmutableList<KalteBetriebskostenRechnungJahr>>> Jahre
             = new ObservableProperty<ImmutableSortedDictionary<int, ImmutableList<KalteBetriebskostenRechnungJahr>>>();
 
+        public int SelectedJahr { get; set; }
+
         public ObservableProperty<int> AddJahrBox = new ObservableProperty<int>();
 
         public KalteBetriebskostenRechnungViewModel(int id)
@@ -42,6 +44,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     .ToImmutableList()).ToImmutableSortedDictionary(Comparer<int>.Create((x, y) => y.CompareTo(x)));
                 AddJahrBox.Value = Jahre.Value.First().Key + 1;
             }, _ => true);
+
+            RemoveJahr = new RelayCommand(_ =>
+            {
+                Jahre.Value = Jahre.Value.Remove(SelectedJahr);
+
+            }, _ => true); // TODO Only if a year is selected
 
             SaveEdit = new RelayCommand(_ =>
             {
@@ -79,6 +87,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         public RelayCommand AddJahr { get; }
+        public RelayCommand RemoveJahr { get; }
         public RelayCommand SaveEdit { get; }
     }
 
