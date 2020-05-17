@@ -19,10 +19,6 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 ViewModel = new KalteBetriebskostenVorlageViewModel(adresseId);
             }
-            else if (e.Parameter is null) // New Contact
-            {
-                // ViewModel = new KalteBetriebskostenRechnungViewModel();
-            }
 
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
             base.OnNavigatedTo(e);

@@ -44,32 +44,32 @@
                     AutoGenerateColumns="False"
                     DoubleTapped="Details_Click"
                     SelectedItem="{x:Bind ViewModel.SelectedKontakt.Value, Mode=TwoWay}"
-                    ItemsSource="{x:Bind ViewModel.Kontakte.Value}">
+                    ItemsSource="{x:Bind ViewModel.Kontakte}">
                     <mtuuc:DataGrid.Columns>
                         <mtuuc:DataGridTextColumn
                             Header="Vorname"
                             Tag="Vorname"
-                            Binding="{Binding Vorname.Value}"/>
+                            Binding="{Binding Vorname}"/>
                         <mtuuc:DataGridTextColumn
                             Header="Nachname"
                             Tag="Nachname"
-                            Binding="{Binding Nachname.Value}"/>
+                            Binding="{Binding Nachname}"/>
                         <mtuuc:DataGridTextColumn
                             Header="Anschrift"
                             Tag="Anschrift"
-                            Binding="{Binding Anschrift.Value}"/>
+                            Binding="{Binding Anschrift}"/>
                         <mtuuc:DataGridTextColumn
                             Header="E-Mail"
                             Tag="Email"
-                            Binding="{Binding Email.Value}"/>
+                            Binding="{Binding Email}"/>
                         <mtuuc:DataGridTextColumn
                             Header="Telefon"
                             Tag="Telefon"
-                            Binding="{Binding Telefon.Value}"/>
+                            Binding="{Binding Telefon}"/>
                         <mtuuc:DataGridTextColumn
                             Header="Mobil"
                             Tag="Mobil"
-                            Binding="{Binding Mobil.Value}"/>
+                            Binding="{Binding Mobil}"/>
                     </mtuuc:DataGrid.Columns>
                 </mtuuc:DataGrid>
             </Grid>

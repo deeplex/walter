@@ -7,8 +7,7 @@ namespace Deeplex.Saverwalter.App.Views
 {
     public sealed partial class KontaktListPage : Page
     {
-
-        public MainViewModel ViewModel => App.ViewModel;
+        public KontaktListViewModel ViewModel = new KontaktListViewModel();
 
         public KontaktListPage()
         {
@@ -19,7 +18,7 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (ViewModel.SelectedKontakt.Value != null)
             {
-                Frame.Navigate(typeof(KontaktDetailPage), App.ViewModel.SelectedKontakt.Value.Id,
+                Frame.Navigate(typeof(KontaktDetailPage), ViewModel.SelectedKontakt.Value.Id,
                     new DrillInNavigationTransitionInfo());
             }
         }
