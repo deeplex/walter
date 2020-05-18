@@ -181,48 +181,54 @@
                     ItemsSource="{x:Bind ViewModel.AlleWohnungen.Value, Mode=OneWay}"
                     TextChanged="WohnungSuggest_TextChanged"/>
             </mtuuc:WrapPanel>
-            <RelativePanel>
-                <mtuuc:DataGrid
-                    RelativePanel.AlignLeftWithPanel="True"
+            <RelativePanel Margin="0,20,0,0">
+                <StackPanel
                     RelativePanel.AlignRightWithPanel="True"
-                    Margin="20,20,20,20"
+                    RelativePanel.AlignLeftWithPanel="True">
+                    <mtuuc:Expander
+                        Background="Transparent"
+                        Header="Versionen"
+                        HorizontalContentAlignment="Left">
+                    <mtuuc:DataGrid
+                    
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     CanUserReorderColumns="False"
                     CanUserResizeColumns="True"
                     AutoGenerateColumns="False"
                     ItemsSource="{x:Bind ViewModel.Versionen.Value}">
-                    <mtuuc:DataGrid.Columns>
-                        <mtuuc:DataGridTextColumn IsReadOnly="True" Header="Version" Binding="{Binding Version}"/>
-                        <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
-                        <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
-                        <mtuuc:DataGridTextColumn Header="Personenzahl" Binding="{Binding Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    </mtuuc:DataGrid.Columns>
-                </mtuuc:DataGrid>
-            </RelativePanel>
-            <TextBlock Text="Kalte Betriebskosten" Margin="10" Style="{StaticResource SubtitleTextBlockStyle}"/>
-            <RelativePanel>
-                <mtuuc:DataGrid
-                    RelativePanel.AlignLeftWithPanel="True"
-                    RelativePanel.AlignRightWithPanel="True"
-                    Margin="20,20,20,20"
-                    IsReadOnly="True"
-                    CanUserReorderColumns="False"
-                    CanUserResizeColumns="True"
-                    AutoGenerateColumns="False"
-                    ItemsSource="{x:Bind ViewModel.KalteBetriebskosten.Value}">
-                    <mtuuc:DataGrid.Columns>
-                        <mtuuc:DataGridTextColumn Header="Bezeichnung" Binding="{Binding Bezeichnung.Value}"/>
-                        <mtuuc:DataGridTextColumn Header="Schlüssel" Binding="{Binding Schluessel.Value}"/>
-                        <mtuuc:DataGridTextColumn Header="Anteil" Binding="{Binding Anteil.Value}"/>
-                    </mtuuc:DataGrid.Columns>
-                    <mtuuc:DataGrid.RowDetailsTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <TextBlock Text="{Binding Beschreibung.Value}" TextWrapping="Wrap" Margin="20,20,20,20"/>
-                            </Grid>
-                        </DataTemplate>
-                    </mtuuc:DataGrid.RowDetailsTemplate>
-                </mtuuc:DataGrid>
+                        <mtuuc:DataGrid.Columns>
+                            <mtuuc:DataGridTextColumn IsReadOnly="True" Header="Version" Binding="{Binding Version}"/>
+                            <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
+                            <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
+                            <mtuuc:DataGridTextColumn Header="Personenzahl" Binding="{Binding Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </mtuuc:DataGrid.Columns>
+                    </mtuuc:DataGrid>
+                </mtuuc:Expander>
+                <mtuuc:Expander
+                    HorizontalContentAlignment="Left"
+                    Background="Transparent"
+                    Header="Kalte Betriebskosten">
+                    <mtuuc:DataGrid
+                        IsReadOnly="True"
+                        CanUserReorderColumns="False"
+                        CanUserResizeColumns="True"
+                        AutoGenerateColumns="False"
+                        ItemsSource="{x:Bind ViewModel.KalteBetriebskosten.Value}">
+                        <mtuuc:DataGrid.Columns>
+                            <mtuuc:DataGridTextColumn Header="Bezeichnung" Binding="{Binding Bezeichnung.Value}"/>
+                            <mtuuc:DataGridTextColumn Header="Schlüssel" Binding="{Binding Schluessel.Value}"/>
+                            <mtuuc:DataGridTextColumn Header="Anteil" Binding="{Binding Anteil.Value}"/>
+                        </mtuuc:DataGrid.Columns>
+                        <mtuuc:DataGrid.RowDetailsTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <TextBlock Text="{Binding Beschreibung.Value}" TextWrapping="Wrap" Margin="20,20,20,20"/>
+                                </Grid>
+                            </DataTemplate>
+                        </mtuuc:DataGrid.RowDetailsTemplate>
+                    </mtuuc:DataGrid>
+                </mtuuc:Expander>
+                </StackPanel>
             </RelativePanel>
         </StackPanel>
     </ScrollViewer>
