@@ -18,6 +18,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Vertraege = App.Walter.Vertraege
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
+                .Include(v => v.Wohnung).ThenInclude(w => w.Besitzer)
                 .Include(v => v.Mieten)
                 .Include(v => v.Mieter).ThenInclude(m => m.Kontakt)
                 .ToList()
@@ -91,6 +92,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public string EndeString { get; }
         public string AuflistungMieter { get; }
         public bool hasEnde { get; }
+        public string Besitzer { get; }
 
         public VertragVersionListViewModel(Vertrag v)
         {
@@ -99,6 +101,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Version = v.Version;
             Personenzahl = v.Personenzahl;
             Anschrift = AdresseViewModel.Anschrift(v.Wohnung); // TODO only true if wohnung and not adressen
+            Besitzer = v.Wohnung.Besitzer.Bezeichnung; // TODO only true if wohnung and not adressen
             Wohnung = v.Wohnung is Wohnung w ? w.Bezeichnung : "";
             AuflistungMieter = string.Join(", ", v.Mieter.Select(m =>
                 (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname)); // Such grace...
@@ -107,6 +110,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             BeginnString = v.Beginn.ToString("dd.MM.yyyy"); ;
             hasEnde = v.Ende is DateTime;
             EndeString = v.Ende is DateTime e ? e.ToString("dd.MM.yyyy") : "Offen";
+
         }
     }
 

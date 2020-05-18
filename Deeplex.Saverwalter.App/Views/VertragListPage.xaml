@@ -64,6 +64,10 @@
                                         Margin="20,20,20,20"
                                         HorizontalAlignment="Left">
                                         <TextBlock>
+                                            <Run Text="Besitzer: "/>
+                                            <Run Text="{x:Bind Besitzer}"/>
+                                        </TextBlock>
+                                        <TextBlock>
                                             <Run Text="Mieter: "/>
                                             <Run Text="{x:Bind AuflistungMieter}"/>
                                         </TextBlock>
