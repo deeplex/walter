@@ -103,7 +103,7 @@ namespace Deeplex.Saverwalter.Model
     public class Allgemeinzaehler
     {
         public int AllgemeinzaehlerId { get; set; }
-        public string Kennnummer { get; set; }
+        public string Kennnummer { get; set; } = null!;
         public List<Zaehlergemeinschaft> Zaehlergemeinschaften { get; private set; } = new List<Zaehlergemeinschaft>();
         public List<WarmeBetriebskostenRechnung> Rechnungen { get; private set; } = new List<WarmeBetriebskostenRechnung>();
         public string? Beschreibung { get; set; }
@@ -153,6 +153,7 @@ namespace Deeplex.Saverwalter.Model
         public Guid VertragId { get; set; }
         public int Version { get; set; } = 1;
         public List<Mieter> Mieter { get; private set; } = new List<Mieter>();
+        public List<Miete> Mieten { get; private set; } = new List<Miete>();
         public List<MietobjektGarage> Garagen { get; private set; } = new List<MietobjektGarage>();
         public int? WohnungId { get; set; }
         public Wohnung? Wohnung { get; set; }

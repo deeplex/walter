@@ -19,6 +19,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<List<VertragDetailVersion>> Versionen { get; }
             = new ObservableProperty<List<VertragDetailVersion>>();
 
+        public ObservableProperty<VertragDetailMiete> AddMieteValue
+            = new ObservableProperty<VertragDetailMiete>();
+
         public VertragDetailViewModel() : this(new List<Vertrag> { new Vertrag() })
         {
             IsInEdit.Value = true;
@@ -26,6 +29,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public VertragDetailViewModel(Guid id)
             : this(App.Walter.Vertraege
+                  .Include(v => v.Ansprechpartner)
                   .Include(v => v.Wohnung).ThenInclude(w => w.Besitzer)
                   .Include(v => v.Garagen)
                   .Where(v => v.VertragId == id).ToList())
@@ -47,37 +51,80 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Select(w => new VertragDetailWohnung(w))
                 .ToImmutableList();
 
+            Mieten.Value = Versionen.Value.SelectMany(vs => vs.Mieten.Value).ToImmutableList();
+
+            AddMieteValue.Value = new VertragDetailMiete();
+
             BeginEdit = new RelayCommand(_ => IsInEdit.Value = true, _ => !IsInEdit.Value);
             IsInEdit.PropertyChanged += (_, ev) => BeginEdit.RaiseCanExecuteChanged(ev);
+            AddMiete = new RelayCommand(_ =>
+            {
+                var amv = AddMieteValue.Value;
+                amv.VertragsVersion.Value = v.Last().Version;
+                Mieten.Value = Mieten.Value.Add(AddMieteValue.Value);
+            }, _ => true);
 
             SaveEdit = new RelayCommand(_ =>
             {
                 IsInEdit.Value = false;
 
-                var MSet = App.Walter.MieterSet;
+                var MieterSet = App.Walter.MieterSet;
                 //Remove deprecated MieterSets
-                MSet.ToList().Where(ms =>
+                MieterSet.ToList().Where(ms =>
                         ms.VertragId == Id &&
                         !Mieter.Value.Exists(mv => mv.Id == ms.KontaktId))
-                    .ToList().ForEach(d => MSet.Remove(d));
+                    .ToList().ForEach(d => MieterSet.Remove(d));
                 // Add new MieterSets
                 v.ForEach(vs => Mieter.Value
                     .Where(mv =>
-                        !MSet.ToList().Exists(ms =>
+                        !MieterSet.ToList().Exists(ms =>
                             ms.VertragId == vs.rowid &&
                             ms.KontaktId == mv.Id))
-                    .ToList().ForEach(d => MSet.Add(new Mieter()
+                    .ToList().ForEach(d => MieterSet.Add(new Mieter()
                     {
                         Vertrag = vs,
                         Kontakt = VertragDetailKontakt.GetKontakt(d.Id)
                     })));
 
-                // TODO Remove duplicates?
+                var VertragMiete = App.Walter.Mieten.Where(m => m.VertragId == v.Last().rowid).ToList();
+                foreach (var miete in VertragMiete)
+                {
+                    if (!Mieten.Value.Exists(m => m.Id == miete.MieteId))
+                    {
+                        App.Walter.Mieten.Remove(miete);
+                    }
+                }
+                foreach (var miete in Mieten.Value)
+                {
+                    var vm = VertragMiete.FirstOrDefault(m => m.MieteId == miete.Id);
+                    if (vm != null)
+                    {
+                        vm.Vertrag = v.First(vs => miete.VertragsVersion.Value == vs.Version);
+                        vm.Datum = miete.Datum.Value.UtcDateTime;
+                        vm.KaltMiete = miete.Kalt;
+                        vm.WarmMiete = miete.Warm;
+                        vm.Notiz = miete.Notiz.Value;
+                        App.Walter.Mieten.Update(vm);
+                    }
+                    else
+                    {
+                        App.Walter.Mieten.Add(new Miete
+                        {
+                            Datum = miete.Datum.Value.UtcDateTime,
+                            KaltMiete = miete.Kalt,
+                            WarmMiete = miete.Warm,
+                            Notiz = miete.Notiz.Value,
+                            Vertrag = v.First(vs => vs.Version == miete.VertragsVersion.Value),
+                        });
+                    }
+                }
 
                 for (int i = 0; i < v.Count(); ++i)
                 {
                     var val = Versionen.Value[i];
                     v[i].Beginn = val.Beginn.Value.UtcDateTime;
+
+
                     v[i].Ende = val.Ende.Value?.UtcDateTime;
 
                     if (Wohnung.Value is VertragDetailWohnung &&
@@ -116,6 +163,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public bool IsNotInEdit => !IsInEdit.Value;
 
         public RelayCommand BeginEdit { get; }
+        public RelayCommand AddMiete { get; }
         public RelayCommand SaveEdit { get; }
     }
 
@@ -136,6 +184,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<ImmutableList<VertragDetailKontakt>>();
         public ObservableProperty<ImmutableList<KalteBetriebskostenViewModel>> KalteBetriebskosten { get; }
             = new ObservableProperty<ImmutableList<KalteBetriebskostenViewModel>>();
+        public ObservableProperty<ImmutableList<VertragDetailMiete>> Mieten
+            = new ObservableProperty<ImmutableList<VertragDetailMiete>>();
 
         public VertragDetailVersion(Vertrag v)
         {
@@ -153,7 +203,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     v.Garagen.First().Garage.Besitzer) :
                 null;
             Ansprechpartner.Value = v.Ansprechpartner is Kontakt va ? new VertragDetailKontakt(va) : null;
-
             Ende.Value = v.Ende;
             Beginn.Value = v.Beginn == DateTime.MinValue ? DateTime.Today : v.Beginn;
 
@@ -161,6 +210,69 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Where(k => k.Adresse == w2.Adresse)
                 .Select(k => new KalteBetriebskostenViewModel(k, v))
                 .ToImmutableList() : null;
+            Mieten.Value = v.Mieten.Select(vm => new VertragDetailMiete(vm)).ToImmutableList();
+        }
+    }
+
+    public class VertragDetailMiete : BindableBase
+    {
+        public int Id;
+        public ObservableProperty<int> VertragsVersion
+            = new ObservableProperty<int>();
+        public ObservableProperty<DateTimeOffset> Datum = new ObservableProperty<DateTimeOffset>();
+        public double Kalt;
+        public string KaltString
+        {
+            get => Kalt > 0 ? string.Format("{0:F2}", Kalt) : "";
+            set
+            {
+                if (double.TryParse(value, out double result))
+                {
+                    SetProperty(ref Kalt, result);
+                }
+                else
+                {
+                    SetProperty(ref Kalt, 0.0);
+                }
+                RaisePropertyChanged(nameof(Kalt));
+            }
+        }
+        public double Warm;
+        public string WarmString
+        {
+            get => Warm > 0 ? string.Format("{0:F2}", Warm) : "";
+            set
+            {
+                if (double.TryParse(value, out double result))
+                {
+                    SetProperty(ref Warm, result);
+                }
+                else
+                {
+                    SetProperty(ref Warm, 0.0);
+                }
+                RaisePropertyChanged(nameof(Warm));
+            }
+        }
+
+        public ObservableProperty<string> Notiz = new ObservableProperty<string>();
+
+        public VertragDetailMiete()
+        {
+            Datum.Value = DateTime.UtcNow;
+            Kalt = 0;
+            Warm = 0;
+            Notiz.Value = "";
+        }
+
+        public VertragDetailMiete(Miete m)
+        {
+            Id = m.MieteId;
+            VertragsVersion.Value = m.Vertrag.Version;
+            Datum.Value = m.Datum;
+            Kalt = m.KaltMiete ?? 0;
+            Warm = m.WarmMiete ?? 0;
+            Notiz.Value = m.Notiz ?? "";
         }
     }
 

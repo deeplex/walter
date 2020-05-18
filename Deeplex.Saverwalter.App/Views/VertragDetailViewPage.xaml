@@ -7,7 +7,7 @@
     xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     xmlns:s="using:System"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -187,47 +187,124 @@
                     RelativePanel.AlignLeftWithPanel="True">
                     <mtuuc:Expander
                         Background="Transparent"
+                        Header="Mieten"
+                        HorizontalContentAlignment="Left">
+                        <StackPanel>
+                            <mtuuc:DataGrid
+                                IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                                CanUserReorderColumns="False"
+                                CanUserResizeColumns="True"
+                                AutoGenerateColumns="False"
+                                ItemsSource="{x:Bind ViewModel.Mieten.Value, Mode=TwoWay}">
+                                <mtuuc:DataGrid.Columns>
+                                    <mtuuc:DataGridTemplateColumn Header="Datum">
+                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="vm:VertragDetailMiete">
+                                                <CalendarDatePicker
+                                                    Date="{x:Bind Datum.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    Language="de"
+                                                    Width="176"
+                                                    PlaceholderText="Offen"
+                                                    DateFormat="{}{day.integer}. {month.full} {year.full}"/>
+                                            </DataTemplate>
+                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    </mtuuc:DataGridTemplateColumn>
+                                    <mtuuc:DataGridTemplateColumn Header="Kalt">
+                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <muxc:NumberBox
+                                                    Value="{Binding KaltString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    PlaceholderText="0,00"/>
+                                            </DataTemplate>
+                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    </mtuuc:DataGridTemplateColumn>
+                                    <mtuuc:DataGridTemplateColumn Header="Warm">
+                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <muxc:NumberBox
+                                                    Value="{Binding WarmString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    PlaceholderText="0,00"/>
+                                            </DataTemplate>
+                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    </mtuuc:DataGridTemplateColumn>
+                                </mtuuc:DataGrid.Columns>
+                            </mtuuc:DataGrid>
+                            <Button
+                                Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                                IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                                Margin="20,20,0,20"
+                                Content="Eintrag hinzufügen">
+                                <Button.Flyout>
+                                    <Flyout>
+                                        <StackPanel Orientation="Horizontal">
+                                            <CalendarDatePicker
+                                                Header="Datum"
+                                                Language="de"
+                                                DateFormat="{}{day.integer}. {month.full} {year.full}"
+                                                PlaceholderText="Datum hinzufügen"
+                                                Date="{x:Bind ViewModel.AddMieteValue.Value.Datum.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <muxc:NumberBox
+                                                Header="Kalt"
+                                                Value="{x:Bind ViewModel.AddMieteValue.Value.Kalt, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                PlaceholderText="0,00"/>
+                                            <muxc:NumberBox
+                                                Header="Warm"
+                                                Value="{x:Bind ViewModel.AddMieteValue.Value.Warm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                PlaceholderText="0,00"/>
+                                            <Button
+                                                VerticalAlignment="Bottom"
+                                                Command="{x:Bind ViewModel.AddMiete}"
+                                                Background="Transparent">
+                                                <SymbolIcon Symbol="Add"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                        </StackPanel>
+                    </mtuuc:Expander>
+                    <mtuuc:Expander
+                        Background="Transparent"
                         Header="Versionen"
                         HorizontalContentAlignment="Left">
-                    <mtuuc:DataGrid
-                    
-                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                    CanUserReorderColumns="False"
-                    CanUserResizeColumns="True"
-                    AutoGenerateColumns="False"
-                    ItemsSource="{x:Bind ViewModel.Versionen.Value}">
-                        <mtuuc:DataGrid.Columns>
-                            <mtuuc:DataGridTextColumn IsReadOnly="True" Header="Version" Binding="{Binding Version}"/>
-                            <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
-                            <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
-                            <mtuuc:DataGridTextColumn Header="Personenzahl" Binding="{Binding Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                        </mtuuc:DataGrid.Columns>
-                    </mtuuc:DataGrid>
-                </mtuuc:Expander>
-                <mtuuc:Expander
-                    HorizontalContentAlignment="Left"
-                    Background="Transparent"
-                    Header="Kalte Betriebskosten">
-                    <mtuuc:DataGrid
-                        IsReadOnly="True"
-                        CanUserReorderColumns="False"
-                        CanUserResizeColumns="True"
-                        AutoGenerateColumns="False"
-                        ItemsSource="{x:Bind ViewModel.KalteBetriebskosten.Value}">
-                        <mtuuc:DataGrid.Columns>
-                            <mtuuc:DataGridTextColumn Header="Bezeichnung" Binding="{Binding Bezeichnung.Value}"/>
-                            <mtuuc:DataGridTextColumn Header="Schlüssel" Binding="{Binding Schluessel.Value}"/>
-                            <mtuuc:DataGridTextColumn Header="Anteil" Binding="{Binding Anteil.Value}"/>
-                        </mtuuc:DataGrid.Columns>
-                        <mtuuc:DataGrid.RowDetailsTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <TextBlock Text="{Binding Beschreibung.Value}" TextWrapping="Wrap" Margin="20,20,20,20"/>
-                                </Grid>
-                            </DataTemplate>
-                        </mtuuc:DataGrid.RowDetailsTemplate>
-                    </mtuuc:DataGrid>
-                </mtuuc:Expander>
+                        <mtuuc:DataGrid
+                            IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                            CanUserReorderColumns="False"
+                            CanUserResizeColumns="True"
+                            AutoGenerateColumns="False"
+                            ItemsSource="{x:Bind ViewModel.Versionen.Value}">
+                            <mtuuc:DataGrid.Columns>
+                                <mtuuc:DataGridTextColumn IsReadOnly="True" Header="Version" Binding="{Binding Version}"/>
+                                <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
+                                <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
+                                <mtuuc:DataGridTextColumn Header="Personenzahl" Binding="{Binding Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </mtuuc:DataGrid.Columns>
+                        </mtuuc:DataGrid>
+                    </mtuuc:Expander>
+                    <mtuuc:Expander
+                        HorizontalContentAlignment="Left"
+                        Background="Transparent"
+                        Header="Kalte Betriebskosten">
+                        <mtuuc:DataGrid
+                            IsReadOnly="True"
+                            CanUserReorderColumns="False"
+                            CanUserResizeColumns="True"
+                            AutoGenerateColumns="False"
+                            ItemsSource="{x:Bind ViewModel.KalteBetriebskosten.Value}">
+                            <mtuuc:DataGrid.Columns>
+                                <mtuuc:DataGridTextColumn Header="Bezeichnung" Binding="{Binding Bezeichnung.Value}"/>
+                                <mtuuc:DataGridTextColumn Header="Schlüssel" Binding="{Binding Schluessel.Value}"/>
+                                <mtuuc:DataGridTextColumn Header="Anteil" Binding="{Binding Anteil.Value}"/>
+                            </mtuuc:DataGrid.Columns>
+                            <mtuuc:DataGrid.RowDetailsTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <TextBlock Text="{Binding Beschreibung.Value}" TextWrapping="Wrap" Margin="20,20,20,20"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </mtuuc:DataGrid.RowDetailsTemplate>
+                        </mtuuc:DataGrid>
+                    </mtuuc:Expander>
                 </StackPanel>
             </RelativePanel>
         </StackPanel>

@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public KalteBetriebskostenVorlageViewModel(int id)
             : this(App.Walter.Adressen.Include(a => a.KalteBetriebskosten).First(a => a.AdresseId == id)) { }
         public KalteBetriebskostenVorlageViewModel(Adresse a)
-        {           
+        {
             AlleSchluessel = Enum.GetValues(typeof(UmlageSchluessel)).Cast<UmlageSchluessel>()
                 .Select(k => new KalteBetriebskostenUmlageSchluessel
                 {
@@ -48,7 +48,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                             App.Walter.KalteBetriebskosten.Update(kbkp);
                         }
                     }
-                    else if(p.Active.Value)
+                    else if (p.Active.Value)
                     {
                         App.Walter.KalteBetriebskosten.Add(new KalteBetriebskostenpunkt
                         {
@@ -71,7 +71,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public KalteBetriebskosten Typ { get; }
         public ObservableProperty<bool> Active { get; } = new ObservableProperty<bool>();
         public UmlageSchluessel Schluessel { get; set; }
-        
+
 
         private string mBeschreibung;
         public string Beschreibung

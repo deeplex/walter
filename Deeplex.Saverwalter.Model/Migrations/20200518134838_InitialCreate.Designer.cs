@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20200518092815_InitialCreate")]
+    [Migration("20200518134838_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -250,6 +250,34 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasKey("KontoId");
 
                     b.ToTable("Kontos");
+                });
+
+            modelBuilder.Entity("Deeplex.Saverwalter.Model.Miete", b =>
+                {
+                    b.Property<int>("MieteId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Datum")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("KaltMiete")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Notiz")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("VertragId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double?>("WarmMiete")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("MieteId");
+
+                    b.HasIndex("VertragId");
+
+                    b.ToTable("Mieten");
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Mieter", b =>
@@ -528,6 +556,15 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasOne("Deeplex.Saverwalter.Model.Adresse", "Adresse")
                         .WithMany()
                         .HasForeignKey("AdresseId");
+                });
+
+            modelBuilder.Entity("Deeplex.Saverwalter.Model.Miete", b =>
+                {
+                    b.HasOne("Deeplex.Saverwalter.Model.Vertrag", "Vertrag")
+                        .WithMany("Mieten")
+                        .HasForeignKey("VertragId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Mieter", b =>

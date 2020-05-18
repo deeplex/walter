@@ -331,6 +331,29 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Mieten",
+                columns: table => new
+                {
+                    MieteId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    VertragId = table.Column<int>(nullable: false),
+                    Datum = table.Column<DateTime>(nullable: false),
+                    WarmMiete = table.Column<double>(nullable: true),
+                    KaltMiete = table.Column<double>(nullable: true),
+                    Notiz = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Mieten", x => x.MieteId);
+                    table.ForeignKey(
+                        name: "FK_Mieten_Vertraege_VertragId",
+                        column: x => x.VertragId,
+                        principalTable: "Vertraege",
+                        principalColumn: "rowid",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MieterSet",
                 columns: table => new
                 {
@@ -440,6 +463,11 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 column: "AdresseId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Mieten_VertragId",
+                table: "Mieten",
+                column: "VertragId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MieterSet_KontaktId",
                 table: "MieterSet",
                 column: "KontaktId");
@@ -518,6 +546,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
             migrationBuilder.DropTable(
                 name: "Kontos");
+
+            migrationBuilder.DropTable(
+                name: "Mieten");
 
             migrationBuilder.DropTable(
                 name: "MieterSet");

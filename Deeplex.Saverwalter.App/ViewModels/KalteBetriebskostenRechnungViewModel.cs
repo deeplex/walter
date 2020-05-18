@@ -96,7 +96,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<int> Jahr = new ObservableProperty<int>();
         public ObservableProperty<KalteBetriebskosten> Typ = new ObservableProperty<KalteBetriebskosten>();
         public string Beschreibung { get; } = "";
-        public bool HatBeschreibung => Beschreibung.Length > 0;
+        public bool HatBeschreibung => Beschreibung == null ? false : Beschreibung.Length > 0;
 
         public string Bezeichnung => Typ.Value.ToDescriptionString();
 
