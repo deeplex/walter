@@ -108,6 +108,15 @@
                 Text="{x:Bind ViewModel.Mobil.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Mobil" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel>
+                <TextBox
+                    Width="620"
+                    Style="{StaticResource Eintraege}"
+                    Margin="20"
+                    Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Header="Notiz"/>
+            </mtuuc:WrapPanel>
+
 
             <TextBlock Text="Verträge" Margin ="10,20,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
             <RelativePanel>

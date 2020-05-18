@@ -25,6 +25,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<List<KalteBetriebskostenViewModel>>();
         public ObservableProperty<AdresseViewModel> Adresse
             = new ObservableProperty<AdresseViewModel>();
+        public ObservableProperty<string> Notiz
+            = new ObservableProperty<string>();
 
         public WohnungDetailViewModel(int id)
             : this(App.Walter.Wohnungen
@@ -47,6 +49,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Bezeichnung.Value = w.Bezeichnung;
             Wohnflaeche.Value = w.Wohnflaeche;
             Nutzflaeche.Value = w.Nutzflaeche;
+            Notiz.Value = w.Notiz;
 
             Adresse.Value = w.Adresse is Adresse ?
                 new AdresseViewModel(w.Adresse) :
@@ -85,6 +88,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 w.Bezeichnung = Bezeichnung.Value;
                 w.Nutzflaeche = Nutzflaeche.Value;
                 w.Wohnflaeche = Wohnflaeche.Value;
+                w.Notiz = Notiz.Value;
 
                 if (w.WohnungId > 0)
                 {
@@ -119,7 +123,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public WohnungDetailZaehler(Zaehler z)
         {
             Id = z.ZaehlerId;
-            Kennnummer.Value = "312k2112nj1fnj21"; // TODO Add Zaehler.Kennummer to Model.cs
+            Kennnummer.Value = z.Kennnummer;
             Typ.Value = z.Typ.ToString(); // May be a descript thingy later on?...
         }
     }

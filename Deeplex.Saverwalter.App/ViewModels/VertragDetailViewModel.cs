@@ -146,6 +146,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                         v[i].Wohnung = null;
                     }
 
+                    v[i].Notiz = val.Notiz.Value;
                     v[i].Personenzahl = val.Personenzahl.Value;
                     v[i].Ansprechpartner = VertragDetailKontakt.GetKontakt(val.Ansprechpartner.Value.Id);
 
@@ -194,11 +195,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<ImmutableList<KalteBetriebskostenViewModel>>();
         public ObservableProperty<ImmutableList<VertragDetailMiete>> Mieten
             = new ObservableProperty<ImmutableList<VertragDetailMiete>>();
+        public ObservableProperty<string> Notiz { get; }
+            = new ObservableProperty<string>();
 
         public VertragDetailVersion(Vertrag v)
         {
             Id = v.rowid;
             Version = v.Version;
+            Notiz.Value = v.Notiz;
             Personenzahl.Value = v.Personenzahl;
             Wohnung.Value = v.Wohnung is Wohnung w ? new VertragDetailWohnung(w) : null;
             Mieter.Value = v.Mieter.Select(m => new VertragDetailKontakt(m.Kontakt))
@@ -228,20 +232,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<int> VertragsVersion
             = new ObservableProperty<int>();
         public ObservableProperty<DateTimeOffset> Datum = new ObservableProperty<DateTimeOffset>();
+        public ObservableProperty<string> Notiz { get; } = new ObservableProperty<string>();
         public double Kalt;
         public string KaltString
         {
             get => Kalt > 0 ? string.Format("{0:F2}", Kalt) : "";
             set
             {
-                if (double.TryParse(value, out double result))
-                {
-                    SetProperty(ref Kalt, result);
-                }
-                else
-                {
-                    SetProperty(ref Kalt, 0.0);
-                }
+                SetProperty(ref Kalt, double.TryParse(value, out double result) ? result : 0);
                 RaisePropertyChanged(nameof(Kalt));
             }
         }
@@ -251,19 +249,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Warm > 0 ? string.Format("{0:F2}", Warm) : "";
             set
             {
-                if (double.TryParse(value, out double result))
-                {
-                    SetProperty(ref Warm, result);
-                }
-                else
-                {
-                    SetProperty(ref Warm, 0.0);
-                }
+                SetProperty(ref Warm, double.TryParse(value, out double result) ? result : 0);
                 RaisePropertyChanged(nameof(Warm));
             }
         }
-
-        public ObservableProperty<string> Notiz = new ObservableProperty<string>();
 
         public VertragDetailMiete()
         {

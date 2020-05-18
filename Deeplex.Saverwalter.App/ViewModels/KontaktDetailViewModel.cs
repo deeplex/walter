@@ -17,6 +17,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<string> Telefon { get; } = new ObservableProperty<string>();
         public ObservableProperty<string> Mobil { get; } = new ObservableProperty<string>();
         public ObservableProperty<string> Fax { get; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Notiz { get; } = new ObservableProperty<string>();
         public ObservableProperty<List<KontaktDetailVertrag>> Vertraege
             = new ObservableProperty<List<KontaktDetailVertrag>>();
         public ObservableProperty<AdresseViewModel> Adresse { get; }
@@ -42,6 +43,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Fax.Value = k.Fax ?? "";
             Telefon.Value = k.Telefon ?? "";
             Mobil.Value = k.Mobil ?? "";
+            Notiz.Value = k.Notiz ?? "";
 
             Adresse.Value = k.Adresse is Adresse ?
                 new AdresseViewModel(k.Adresse) :
@@ -69,6 +71,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 k.Telefon = Telefon.Value;
                 k.Mobil = Mobil.Value;
                 k.Fax = Fax.Value;
+                k.Notiz = Notiz.Value;
 
                 if (k.KontaktId > 0)
                 {

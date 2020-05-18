@@ -103,7 +103,15 @@
                 Text="{x:Bind ViewModel.Nutzflaeche.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Nutzfl." Width="70" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
-
+            <RelativePanel>
+                <TextBox
+                    Style="{StaticResource Eintraege}"
+                    Margin="20"
+                    RelativePanel.AlignLeftWithPanel="True"
+                    RelativePanel.AlignRightWithPanel="True"
+                    Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Header="Notiz"/>
+            </RelativePanel>
             <TextBlock Text="Zähler" Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}"/>
 
             <GridView

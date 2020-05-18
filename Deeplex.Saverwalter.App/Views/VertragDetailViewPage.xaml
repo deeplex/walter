@@ -59,10 +59,11 @@
     <ScrollViewer>
         <StackPanel>
             <RelativePanel>
-                <TextBlock x:Name="Title"
-                Style="{StaticResource TitleTextBlockStyle}"
-                Margin="10,0,0,0"
-                Text="Vertragdetails"/>
+                <TextBlock
+                    x:Name="Title"
+                    Style="{StaticResource TitleTextBlockStyle}"
+                    Margin="10,0,0,0"
+                    Text="Vertragdetails"/>
                 <CommandBar
                     x:Name="ButtonRow"
                     Background="Transparent"
@@ -223,22 +224,23 @@
                                     </mtuuc:DataGridTemplateColumn>
                                     <mtuuc:DataGridTemplateColumn Header="Kalt">
                                         <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
+                                            <DataTemplate x:DataType="vm:VertragDetailMiete">
                                                 <muxc:NumberBox
-                                                    Value="{Binding KaltString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    Value="{x:Bind KaltString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                     PlaceholderText="0,00"/>
                                             </DataTemplate>
                                         </mtuuc:DataGridTemplateColumn.CellTemplate>
                                     </mtuuc:DataGridTemplateColumn>
                                     <mtuuc:DataGridTemplateColumn Header="Warm">
                                         <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
+                                            <DataTemplate x:DataType="vm:VertragDetailMiete">
                                                 <muxc:NumberBox
-                                                    Value="{Binding WarmString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    Value="{x:Bind WarmString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                     PlaceholderText="0,00"/>
                                             </DataTemplate>
                                         </mtuuc:DataGridTemplateColumn.CellTemplate>
                                     </mtuuc:DataGridTemplateColumn>
+                                    <mtuuc:DataGridTextColumn IsReadOnly="False" Binding="{Binding Notiz.Value}" Header="Notiz"/>
                                 </mtuuc:DataGrid.Columns>
                             </mtuuc:DataGrid>
                             <Button
@@ -290,6 +292,7 @@
                                 <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
                                 <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
                                 <mtuuc:DataGridTextColumn Header="Personenzahl" Binding="{Binding Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <mtuuc:DataGridTextColumn Header="Notiz" IsReadOnly="False" Binding="{Binding Notiz.Value}"/>
                             </mtuuc:DataGrid.Columns>
                         </mtuuc:DataGrid>
                     </mtuuc:Expander>
