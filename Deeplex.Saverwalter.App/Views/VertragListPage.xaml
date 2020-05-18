@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -57,7 +58,7 @@
                     ItemsSource="{x:Bind ViewModel.Vertraege}"
                     IsItemClickEnabled="True">
                     <mtuuc:AdaptiveGridView.ItemTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="vm:VertragListVertrag">
                             <RelativePanel
                                 Background="{ThemeResource SystemChromeLowColor}">
                                 <Grid
@@ -68,28 +69,62 @@
                                         HorizontalAlignment="Left">
                                         <TextBlock>
                                             <Run Text="Mieter: "/>
-                                            <Run Text="{Binding AuflistungMieter}"/>
+                                            <Run Text="{x:Bind AuflistungMieter}"/>
                                         </TextBlock>
                                         <TextBlock>
                                             <Run Text="Adresse: "/>
-                                            <Run Text="{Binding Anschrift}"/>
+                                            <Run Text="{x:Bind Anschrift}"/>
                                         </TextBlock>
                                         <TextBlock>
                                             <Run Text="Wohnung: "/>
-                                            <Run Text="{Binding Wohnung}"/>
+                                            <Run Text="{x:Bind Wohnung}"/>
                                         </TextBlock>
                                         <TextBlock>
                                             <Run Text="Personenzahl: "/>
-                                            <Run Text="{Binding Personenzahl}"/>
+                                            <Run Text="{x:Bind Personenzahl}"/>
                                         </TextBlock>
                                         <TextBlock>
                                             <Run Text="Beginn: "/>
-                                            <Run Text="{Binding BeginnString}"/>
+                                            <Run Text="{x:Bind BeginnString}"/>
                                         </TextBlock>
                                         <TextBlock>
                                             <Run Text="Ende: "/>
-                                            <Run Text="{Binding EndeString}"/>
+                                            <Run Text="{x:Bind EndeString}"/>
                                         </TextBlock>
+                                        <TextBlock Visibility="{x:Bind HasLastMiete, Mode=OneWay}">
+                                            <Run Text="Letzte Zahlung: "/>
+                                            <Run Text="{x:Bind LastMiete, Mode=OneWay}"/>
+                                        </TextBlock>
+                                        <Button
+                                            Margin="0,20,0,20"
+                                            Content="Miete hinzufügen">
+                                            <Button.Flyout>
+                                                <Flyout>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <CalendarDatePicker
+                                                            Header="Datum"
+                                                            Language="de"
+                                                            DateFormat="{}{day.integer}. {month.full} {year.full}"
+                                                            PlaceholderText="Datum hinzufügen"
+                                                            Date="{x:Bind AddMieteValue.Value.Datum.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                        <muxc:NumberBox
+                                                            Header="Kalt"
+                                                            Value="{x:Bind AddMieteValue.Value.Kalt, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                            PlaceholderText="0,00"/>
+                                                        <muxc:NumberBox
+                                                            Header="Warm"
+                                                            Value="{x:Bind AddMieteValue.Value.Warm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                            PlaceholderText="0,00"/>
+                                                        <Button
+                                                            VerticalAlignment="Bottom"
+                                                            Command="{x:Bind AddMiete}"
+                                                            Background="Transparent">
+                                                            <SymbolIcon Symbol="Add"/>
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                        </Button>
                                     </StackPanel>
                                 </Grid>
                             </RelativePanel>

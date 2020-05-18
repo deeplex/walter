@@ -3,6 +3,7 @@ using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
@@ -17,6 +18,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Vertraege = App.Walter.Vertraege
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
+                .Include(v => v.Mieten)
                 .Include(v => v.Mieter).ThenInclude(m => m.Kontakt)
                 .ToList()
                 .GroupBy(v => v.VertragId)
@@ -30,6 +32,22 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public List<VertragVersionListViewModel> Versionen { get; }
             = new List<VertragVersionListViewModel>();
+        public ObservableProperty<VertragListMiete> AddMieteValue
+            = new ObservableProperty<VertragListMiete>();
+
+        public ImmutableList<VertragListMiete> Mieten { get; set; }
+        public string LastMiete
+        {
+            get
+            {
+                var mieten = Mieten.OrderBy(m => m.Datum.Value);
+                var last = mieten.Count() > 0 ? mieten.Last() : null;
+                return last != null ? last.Datum.Value.ToString("dd.MM.yyyy") +
+                    " / Kalt: " + string.Format("{0:F2}€", last.Kalt) +
+                    " / Warm: " + string.Format("{0:F2}€", last.Warm) : "";
+            }
+        }
+        public bool HasLastMiete => LastMiete != "";
 
         public VertragListVertrag(IGrouping<Guid, Vertrag> v)
             : base(v.OrderBy(vs => vs.Version).Last())
@@ -37,10 +55,30 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Versionen = v.OrderBy(vs => vs.Version).Select(vs => new VertragVersionListViewModel(vs)).ToList();
             BeginnString = Versionen.First().BeginnString;
             Beginn = Versionen.First().Beginn;
+
+            Mieten = v.SelectMany(vs => vs.Mieten).Select(m => new VertragListMiete(m)).ToImmutableList();
+
+            AddMieteValue.Value = new VertragListMiete();
+            AddMiete = new RelayCommand(_ =>
+            {
+                Mieten = Mieten.Add(AddMieteValue.Value);
+                App.Walter.Mieten.Add(new Miete
+                {
+                    Datum = AddMieteValue.Value.Datum.Value.UtcDateTime,
+                    KaltMiete = AddMieteValue.Value.Kalt,
+                    WarmMiete = AddMieteValue.Value.Warm,
+                    VertragId = Versionen.Last().Id,
+                });
+                App.Walter.SaveChanges();
+                AddMieteValue.Value = new VertragListMiete();
+                RaisePropertyChanged(nameof(LastMiete));
+                RaisePropertyChanged(nameof(HasLastMiete));
+            }, _ => true);
         }
+        public RelayCommand AddMiete { get; }
     }
 
-    public class VertragVersionListViewModel
+    public class VertragVersionListViewModel : BindableBase
     {
         public int Id { get; }
         public Guid VertragId { get; }
@@ -68,7 +106,68 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Beginn = v.Beginn;
             BeginnString = v.Beginn.ToString("dd.MM.yyyy"); ;
             hasEnde = v.Ende is DateTime;
-            EndeString = v.Ende is DateTime e ? e.ToString("dd.MM.yyyy") : "";
+            EndeString = v.Ende is DateTime e ? e.ToString("dd.MM.yyyy") : "Offen";
+        }
+    }
+
+    public class VertragListMiete : BindableBase
+    {
+        public int Id;
+        public ObservableProperty<int> VertragsVersion = new ObservableProperty<int>();
+        public ObservableProperty<DateTimeOffset> Datum = new ObservableProperty<DateTimeOffset>();
+        public double Kalt;
+        public string KaltString
+        {
+            get => Kalt > 0 ? string.Format("{0:F2}", Kalt) : "";
+            set
+            {
+                if (double.TryParse(value, out double result))
+                {
+                    SetProperty(ref Kalt, result);
+                }
+                else
+                {
+                    SetProperty(ref Kalt, 0.0);
+                }
+                RaisePropertyChanged(nameof(Kalt));
+            }
+        }
+        public double Warm;
+        public string WarmString
+        {
+            get => Warm > 0 ? string.Format("{0:F2}", Warm) : "";
+            set
+            {
+                if (double.TryParse(value, out double result))
+                {
+                    SetProperty(ref Warm, result);
+                }
+                else
+                {
+                    SetProperty(ref Warm, 0.0);
+                }
+                RaisePropertyChanged(nameof(Warm));
+            }
+        }
+
+        public ObservableProperty<string> Notiz = new ObservableProperty<string>();
+
+        public VertragListMiete()
+        {
+            Datum.Value = DateTime.UtcNow;
+            Kalt = 0;
+            Warm = 0;
+            Notiz.Value = "";
+        }
+
+        public VertragListMiete(Miete m)
+        {
+            Id = m.MieteId;
+            VertragsVersion.Value = m.Vertrag.Version;
+            Datum.Value = m.Datum;
+            Kalt = m.KaltMiete ?? 0;
+            Warm = m.WarmMiete ?? 0;
+            Notiz.Value = m.Notiz ?? "";
         }
     }
 }

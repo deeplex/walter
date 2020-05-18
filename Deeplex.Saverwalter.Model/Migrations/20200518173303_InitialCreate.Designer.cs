@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20200518134838_InitialCreate")]
+    [Migration("20200518173303_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

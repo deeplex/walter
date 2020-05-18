@@ -51,17 +51,26 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Select(w => new VertragDetailWohnung(w))
                 .ToImmutableList();
 
-            Mieten.Value = Versionen.Value.SelectMany(vs => vs.Mieten.Value).ToImmutableList();
-
-            AddMieteValue.Value = new VertragDetailMiete();
+            Mieten.Value = v
+                .SelectMany(vs => vs.Mieten)
+                .Select(m => new VertragDetailMiete(m))
+                .OrderBy(m => m.Datum.Value).Reverse()
+                .ToImmutableList();
 
             BeginEdit = new RelayCommand(_ => IsInEdit.Value = true, _ => !IsInEdit.Value);
             IsInEdit.PropertyChanged += (_, ev) => BeginEdit.RaiseCanExecuteChanged(ev);
+            
+            AddMieteValue.Value = new VertragDetailMiete();
             AddMiete = new RelayCommand(_ =>
             {
                 var amv = AddMieteValue.Value;
                 amv.VertragsVersion.Value = v.Last().Version;
-                Mieten.Value = Mieten.Value.Add(AddMieteValue.Value);
+                Mieten.Value = Mieten.Value
+                    .Add(amv)
+                    .OrderBy(m => m.Datum.Value)
+                    .Reverse()
+                    .ToImmutableList(); ;
+                AddMieteValue.Value = new VertragDetailMiete();
             }, _ => true);
 
             SaveEdit = new RelayCommand(_ =>
@@ -86,7 +95,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                         Kontakt = VertragDetailKontakt.GetKontakt(d.Id)
                     })));
 
-                var VertragMiete = App.Walter.Mieten.Where(m => m.VertragId == v.Last().rowid).ToList();
+                var VertragMiete = App.Walter.Mieten.Where(m => m.Vertrag.rowid == v.Last().rowid).ToList();
                 foreach (var miete in VertragMiete)
                 {
                     if (!Mieten.Value.Exists(m => m.Id == miete.MieteId))
