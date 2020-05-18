@@ -110,7 +110,6 @@ namespace Deeplex.Saverwalter.App.Views
             }
         }
 
-
         private void AnsprechpartnerSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
             if (args.ChosenSuggestion is string a)
@@ -142,5 +141,10 @@ namespace Deeplex.Saverwalter.App.Views
             ViewModel.Versionen.Value.Last().Ende.Value = null;
         }
 
+        private void RemoveMiete_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            var miete = (VertragDetailMiete)((Button)sender).CommandParameter;
+            ViewModel.Mieten.Value = ViewModel.Mieten.Value.Remove(miete).ToImmutableList();
+        }
     }
 }

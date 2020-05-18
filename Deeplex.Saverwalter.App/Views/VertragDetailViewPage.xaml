@@ -197,6 +197,19 @@
                                 AutoGenerateColumns="False"
                                 ItemsSource="{x:Bind ViewModel.Mieten.Value, Mode=TwoWay}">
                                 <mtuuc:DataGrid.Columns>
+                                    <mtuuc:DataGridTemplateColumn>
+                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button
+                                                    HorizontalAlignment="Center"
+                                                    Background="Transparent"
+                                                    CommandParameter="{Binding}"
+                                                    Click="RemoveMiete_Click">
+                                                    <SymbolIcon Symbol="Delete"></SymbolIcon>
+                                                </Button>
+                                            </DataTemplate>
+                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    </mtuuc:DataGridTemplateColumn>
                                     <mtuuc:DataGridTemplateColumn Header="Datum">
                                         <mtuuc:DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate x:DataType="vm:VertragDetailMiete">
