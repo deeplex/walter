@@ -47,7 +47,8 @@ namespace Deeplex.Saverwalter.App.Views
             Suggest(sender, args,
                 ViewModel.AlleWohnungen.Value
                     .Where(w => ViewModel.Vermieter.Value?.Id is int vv ? w.BesitzerId.Value == vv : true)
-                    .Where(k => k.BezeichnungVoll.Value.Contains(sender.Text))
+                    .Where(k => k.BezeichnungVoll.Value.Trim().ToLower()
+                        .Contains(sender.Text.Trim().ToLower()))
                     .Select(k => k.BezeichnungVoll.Value).ToList(),
                 "Wohnung");
         }
@@ -57,7 +58,8 @@ namespace Deeplex.Saverwalter.App.Views
             Suggest(sender, args,
                 ViewModel.JuristischePersonen.Value
                     .Where(k => ViewModel.Wohnung.Value?.BesitzerId.Value is int wb ? k.Id == wb : true)
-                    .Where(k => k.Name.Value.Contains(sender.Text))
+                    .Where(k => k.Name.Value.Trim().ToLower()
+                        .Contains(sender.Text.Trim().ToLower()))
                     .Select(k => k.Name.Value).ToList(),
                 "Juristische Person");
         }
@@ -66,7 +68,8 @@ namespace Deeplex.Saverwalter.App.Views
         {
             Suggest(sender, args,
                 ViewModel.Kontakte.Value
-                    .Where(k => k.Name.Value.Contains(sender.Text))
+                    .Where(k => k.Name.Value.Trim().ToLower()
+                        .Contains(sender.Text.Trim().ToLower()))
                     .Where(k => !ViewModel.Mieter.Value.Exists(m => m.Name.Value == k.Name.Value))
                     .Select(k => k.Name.Value).ToList(),
                 "Kontakt");
@@ -77,7 +80,8 @@ namespace Deeplex.Saverwalter.App.Views
             Suggest(sender, args,
                 ViewModel.Kontakte.Value
                     // If Checkbox => .Where(k => k.JuristischePersonen.Contains(ViewModel.Vermieter.Id))
-                    .Where(k => k.Name.Value.Contains(sender.Text))
+                    .Where(k => k.Name.Value.Trim().ToLower()
+                        .Contains(sender.Text.Trim().ToLower()))
                     .Select(k => k.Name.Value).ToList(),
                 "Kontakt");
         }
