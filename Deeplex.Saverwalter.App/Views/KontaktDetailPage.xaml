@@ -54,20 +54,18 @@
                     HorizontalAlignment="Stretch"
                     DefaultLabelPosition="Right">
                     <AppBarButton
-                    Icon="Edit"
-                    Label="Edit"
-                    Command="{x:Bind ViewModel.BeginEdit}"/>
-                    <AppBarButton Icon="Delete" Label="Delete"/>
+                        Icon="Edit"
+                        Label="Bearbeiten"
+                        Command="{x:Bind ViewModel.BeginEdit}"/>
                     <AppBarButton
                     Icon="Save"
-                    Label="Save"
+                    Label="Speichern"
                     Command="{x:Bind ViewModel.SaveEdit}" />
                     <CommandBar.SecondaryCommands>
-                        <AppBarButton Icon="Setting" Label="Settings">
-                            <AppBarButton.KeyboardAccelerators>
-                                <KeyboardAccelerator Modifiers="Control" Key="I" />
-                            </AppBarButton.KeyboardAccelerators>
-                        </AppBarButton>
+                        <AppBarButton
+                            IsEnabled="False"
+                            Icon="Delete"
+                            Label="Löschen"/>
                     </CommandBar.SecondaryCommands>
                 </CommandBar>
             </RelativePanel>
@@ -111,12 +109,12 @@
                 Header="Mobil" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
 
-            <TextBlock Text="Verträge" Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}"/>
+            <TextBlock Text="Verträge" Margin ="10,20,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
             <RelativePanel>
                 <mtuuc:DataGrid
                     RelativePanel.AlignLeftWithPanel="True"
                     RelativePanel.AlignRightWithPanel="True"
-                    Margin="20,20,20,20"
+                    Margin="20,0,20,20"
                     IsReadOnly="True"
                     CanUserReorderColumns="False"
                     CanUserResizeColumns="True"

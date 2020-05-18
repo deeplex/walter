@@ -53,7 +53,7 @@
                     <AppBarButton
                         Command="{x:Bind ViewModel.SaveEdit}"
                         Icon="Save"
-                        Label="Save"/>
+                        Label="Speichern"/>
                 </CommandBar>
             </RelativePanel>
             <Pivot

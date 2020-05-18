@@ -23,21 +23,22 @@
 
         <StackPanel>
         <RelativePanel>
-            <TextBlock x:Name="Title"
-                    Style="{StaticResource TitleTextBlockStyle}"
-                    Margin="10,0,0,0"
-                    Text="{x:Bind ViewModel.Anschrift}"/>
+            <TextBlock
+                x:Name="Title"
+                Style="{StaticResource TitleTextBlockStyle}"
+                Margin="10,0,0,0"
+                Text="{x:Bind ViewModel.Anschrift}"/>
             <CommandBar
-                    x:Name="ButtonRow"
-                    Background="Transparent" 
-                    IsOpen="False"
-                    RelativePanel.AlignRightWithPanel="True"
-                    HorizontalAlignment="Stretch"
-                    DefaultLabelPosition="Right">
+                x:Name="ButtonRow"
+                Background="Transparent" 
+                IsOpen="False"
+                RelativePanel.AlignRightWithPanel="True"
+                HorizontalAlignment="Stretch"
+                DefaultLabelPosition="Right">
                 <AppBarButton
                     Command="{x:Bind ViewModel.SaveEdit}"
                     Icon="Save"
-                    Label="Save"/>
+                    Label="Speichern"/>
             </CommandBar>
         </RelativePanel>
         <TextBlock

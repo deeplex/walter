@@ -20,15 +20,7 @@
                 RelativePanel.AlignRightWithPanel="True"
                 HorizontalAlignment="Stretch"
                 DefaultLabelPosition="Right">
-            <AppBarButton 
-               Click="AddWohnung_Click" Icon="Add" Label="Add"/>
-            <CommandBar.SecondaryCommands>
-                <AppBarButton Icon="Setting" Label="Settings">
-                    <AppBarButton.KeyboardAccelerators>
-                        <KeyboardAccelerator Modifiers="Control" Key="I" />
-                    </AppBarButton.KeyboardAccelerators>
-                </AppBarButton>
-            </CommandBar.SecondaryCommands>
+            <AppBarButton Click="AddWohnung_Click" Icon="Add" Label="Wohnung hinzufügen"/>
         </CommandBar>
         <Grid Margin="10" RelativePanel.Below="ButtonRow">
             <ScrollViewer>

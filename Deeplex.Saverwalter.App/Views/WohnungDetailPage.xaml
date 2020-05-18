@@ -66,15 +66,10 @@
                     RelativePanel.AlignRightWithPanel="True"
                     HorizontalAlignment="Stretch"
                     DefaultLabelPosition="Right">
-                    <AppBarButton Icon="Edit" Label="Edit" Command="{x:Bind ViewModel.BeginEdit}"/>
-                    <AppBarButton Icon="Delete" Label="Delete"/>
-                    <AppBarButton Icon="Save" Label="Save" Command="{x:Bind ViewModel.SaveEdit}"/>
+                    <AppBarButton Icon="Edit" Label="Bearbeiten" Command="{x:Bind ViewModel.BeginEdit}"/>
+                    <AppBarButton Icon="Save" Label="Speichern" Command="{x:Bind ViewModel.SaveEdit}"/>
                     <CommandBar.SecondaryCommands>
-                        <AppBarButton Icon="Setting" Label="Settings">
-                            <AppBarButton.KeyboardAccelerators>
-                                <KeyboardAccelerator Modifiers="Control" Key="I" />
-                            </AppBarButton.KeyboardAccelerators>
-                        </AppBarButton>
+                        <AppBarButton Icon="Delete" Label="Löschen"/>
                     </CommandBar.SecondaryCommands>
                 </CommandBar>
             </RelativePanel>

@@ -22,9 +22,9 @@
                 RelativePanel.LeftOf="KontaktFilter"
                 HorizontalAlignment="Stretch"
                 DefaultLabelPosition="Right">
-                <AppBarButton Click="Add_Click" Icon="Add" Label="Add"/>
+                <AppBarButton Click="Add_Click" Icon="Add" Label="Hinzufügen"/>
                 <AppBarButton Click="Details_Click" Icon="ContactInfo" Label="Details"/>
-                <AppBarButton IsEnabled="False" Icon="Delete" Label="Delete"/>
+                <AppBarButton IsEnabled="False" Icon="Delete" Label="Löschen"/>
             </CommandBar>
             <AutoSuggestBox
                 x:Name="KontaktFilter"

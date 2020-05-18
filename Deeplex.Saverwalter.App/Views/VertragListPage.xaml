@@ -32,13 +32,9 @@
                 RelativePanel.AlignRightWithPanel="True"
                 HorizontalAlignment="Stretch"
                 DefaultLabelPosition="Right">
-                <AppBarButton Click="AddVertrag_Click" Icon="Add" Label="Add"/>
+                <AppBarButton Click="AddVertrag_Click" Icon="Add" Label="Hinzufügen"/>
                 <CommandBar.SecondaryCommands>
-                    <AppBarButton Icon="Setting" Label="Settings">
-                        <AppBarButton.KeyboardAccelerators>
-                            <KeyboardAccelerator Modifiers="Control" Key="I" />
-                        </AppBarButton.KeyboardAccelerators>
-                    </AppBarButton>
+                    <AppBarButton IsEnabled="False" Icon="Delete" Label="Löschen"/>
                 </CommandBar.SecondaryCommands>
             </CommandBar>
             <Grid

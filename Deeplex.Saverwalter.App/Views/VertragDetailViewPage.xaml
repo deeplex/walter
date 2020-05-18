@@ -56,14 +56,13 @@
         </DataTemplate>
     </Page.Resources>
 
-        <ScrollViewer>
+    <ScrollViewer>
         <StackPanel>
             <RelativePanel>
                 <TextBlock x:Name="Title"
                 Style="{StaticResource TitleTextBlockStyle}"
                 Margin="10,0,0,0"
                 Text="Vertragdetails"/>
-
                 <CommandBar
                     x:Name="ButtonRow"
                     Background="Transparent"
@@ -73,14 +72,14 @@
                     DefaultLabelPosition="Right">
                     <AppBarButton
                         Icon="Edit"
-                        Label="Edit"
+                        Label="Bearbeiten"
                         Command="{x:Bind ViewModel.BeginEdit}"/>
                     <AppBarButton
                         Icon="Delete"
-                        Label="Delete"/>
+                        Label="Löschen"/>
                     <AppBarButton
                         Icon="Save"
-                        Label="Save"
+                        Label="Speichern"
                         Command="{x:Bind ViewModel.SaveEdit}"/>
                     <CommandBar.SecondaryCommands>
                         <AppBarButton Icon="Setting" Label="Settings">
