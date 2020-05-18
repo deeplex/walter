@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20200514103104_InitialCreate")]
+    [Migration("20200518092815_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,6 +26,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<string>("Hausnummer")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notiz")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Postleitzahl")
@@ -54,6 +57,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<string>("Beschreibung")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Kennnummer")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notiz")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("AllgemeinzaehlerId");
 
                     b.ToTable("Allgemeinzaehler");
@@ -75,6 +85,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Notiz")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("GarageId");
 
                     b.HasIndex("AdresseId");
@@ -92,6 +105,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<string>("Bezeichnung")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notiz")
                         .HasColumnType("TEXT");
 
                     b.HasKey("JuristischePersonId");
@@ -135,8 +151,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("Jahr")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("KalteBetriebskostenpunktId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Notiz")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Typ")
                         .HasColumnType("INTEGER");
@@ -144,8 +160,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasKey("KalteBetriebskostenRechnungId");
 
                     b.HasIndex("AdresseId");
-
-                    b.HasIndex("KalteBetriebskostenpunktId");
 
                     b.ToTable("KalteBetriebskostenRechnungen");
                 });
@@ -200,6 +214,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Notiz")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Telefon")
                         .HasColumnType("TEXT");
 
@@ -225,6 +242,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<string>("Iban")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notiz")
                         .HasColumnType("TEXT");
 
                     b.HasKey("KontoId");
@@ -289,13 +309,17 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<DateTime?>("Ende")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Notiz")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Personenzahl")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Version")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(0);
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("VersionsNotiz")
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("VertragId")
                         .HasColumnType("TEXT");
@@ -329,6 +353,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("Jahr")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Notiz")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("WarmeBetriebskostenRechnungId");
 
                     b.HasIndex("AllgemeinzaehlerId");
@@ -352,6 +379,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Notiz")
+                        .HasColumnType("TEXT");
+
                     b.Property<double>("Nutzflaeche")
                         .HasColumnType("REAL");
 
@@ -372,6 +402,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("ZaehlerId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Kennnummer")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notiz")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Typ")
                         .HasColumnType("INTEGER");
@@ -395,6 +432,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("AllgemeinzaehlerId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Notiz")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Typ")
                         .HasColumnType("INTEGER");
 
@@ -417,6 +457,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Datum")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notiz")
                         .HasColumnType("TEXT");
 
                     b.Property<double>("Stand")
@@ -465,14 +508,10 @@ namespace Deeplex.Saverwalter.Model.Migrations
             modelBuilder.Entity("Deeplex.Saverwalter.Model.KalteBetriebskostenRechnung", b =>
                 {
                     b.HasOne("Deeplex.Saverwalter.Model.Adresse", "Adresse")
-                        .WithMany()
+                        .WithMany("KalteBetriebskostenRechnungen")
                         .HasForeignKey("AdresseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Deeplex.Saverwalter.Model.KalteBetriebskostenpunkt", null)
-                        .WithMany("Rechnungen")
-                        .HasForeignKey("KalteBetriebskostenpunktId");
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.KalteBetriebskostenpunkt", b =>

@@ -24,9 +24,11 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Konto> Kontos { get; set; } = null!;
         public DbSet<KalteBetriebskostenpunkt> KalteBetriebskosten { get; set; } = null!;
         public DbSet<KalteBetriebskostenRechnung> KalteBetriebskostenRechnungen { get; set; } = null!;
+        public DbSet<Miete> Mieten { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             // TODO adjust this...
+            //=> options.UseSqlite("Data Source=walter.db");
             => options.UseSqlite("Data Source=" + ApplicationData.Current.LocalFolder.Path + @"\walter.db");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -36,8 +38,7 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<Vertrag>()
                 .HasAlternateKey("VertragId", "Version");
             modelBuilder.Entity<Vertrag>()
-                .Property(v => v.Version)
-                .HasDefaultValue(0);
+                .Property(v => v.Version);
         }
     }
     public class Adresse
@@ -47,6 +48,7 @@ namespace Deeplex.Saverwalter.Model
         public string Strasse { get; set; } = null!;
         public string Postleitzahl { get; set; } = null!;
         public string Stadt { get; set; } = null!;
+        public string? Notiz { get; set; }
         public List<KalteBetriebskostenpunkt> KalteBetriebskosten { get; private set; } = new List<KalteBetriebskostenpunkt>();
         public List<KalteBetriebskostenRechnung> KalteBetriebskostenRechnungen { get; private set; } = new List<KalteBetriebskostenRechnung>();
         public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
@@ -59,6 +61,7 @@ namespace Deeplex.Saverwalter.Model
         public string Bezeichnung { get; set; } = null!;
         public double Wohnflaeche { get; set; }
         public double Nutzflaeche { get; set; }
+        public string? Notiz { get; set; }
         public List<Vertrag> Vertraege { get; private set; } = new List<Vertrag>();
         public List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
         public JuristischePerson Besitzer { get; set; } = null!;
@@ -67,12 +70,24 @@ namespace Deeplex.Saverwalter.Model
         public Adresse Adresse { get; set; } = null!;
     }
 
+    public class Miete
+    {
+        public int MieteId { get; set; }
+        public int VertragId { get; set; }
+        public Vertrag Vertrag { get; set; } = null!;
+        public DateTime Datum { get; set; }
+        public double? WarmMiete { get; set; }
+        public double? KaltMiete { get; set; }
+        public string? Notiz { get; set; }
+    }
+
     public class Garage
     {
         public int GarageId { get; set; }
         public Adresse Adresse { get; set; } = null!;
         public string Kennung { get; set; } = null!;
         public JuristischePerson Besitzer { get; set; } = null!;
+        public string? Notiz { get; set; }
     }
 
 
@@ -82,23 +97,28 @@ namespace Deeplex.Saverwalter.Model
         public Allgemeinzaehler Allgemeinzaehler { get; set; } = null!;
         public Wohnung Wohnung { get; set; } = null!;
         public Zaehlertyp Typ { get; set; }
+        public string? Notiz { get; set; }
     }
 
     public class Allgemeinzaehler
     {
         public int AllgemeinzaehlerId { get; set; }
+        public string Kennnummer { get; set; }
         public List<Zaehlergemeinschaft> Zaehlergemeinschaften { get; private set; } = new List<Zaehlergemeinschaft>();
         public List<WarmeBetriebskostenRechnung> Rechnungen { get; private set; } = new List<WarmeBetriebskostenRechnung>();
         public string? Beschreibung { get; set; }
+        public string? Notiz { get; set; }
     }
 
     public class Zaehler
     {
         public int ZaehlerId { get; set; }
+        public string Kennnummer { get; set; } = null!;
         public Wohnung Wohnung { get; set; } = null!;
         public int WohnungId { get; set; }
         public Zaehlertyp Typ { get; set; }
         public List<Zaehlerstand> Staende { get; private set; } = new List<Zaehlerstand>();
+        public string? Notiz { get; set; }
     }
 
     public enum Zaehlertyp
@@ -115,6 +135,7 @@ namespace Deeplex.Saverwalter.Model
         public Allgemeinzaehler Allgemeinzaehler { get; set; } = null!;
         public int Jahr { get; set; }
         public double Betrag { get; set; }
+        public string? Notiz { get; set; }
     }
 
     public class Zaehlerstand
@@ -123,13 +144,14 @@ namespace Deeplex.Saverwalter.Model
         public Zaehler Zaehler { get; set; } = null!;
         public DateTime Datum { get; set; }
         public double Stand { get; set; }
+        public string? Notiz { get; set; }
     }
 
     public class Vertrag
     {
         public int rowid { get; set; }
         public Guid VertragId { get; set; }
-        public int Version { get; set; }
+        public int Version { get; set; } = 1;
         public List<Mieter> Mieter { get; private set; } = new List<Mieter>();
         public List<MietobjektGarage> Garagen { get; private set; } = new List<MietobjektGarage>();
         public int? WohnungId { get; set; }
@@ -138,6 +160,8 @@ namespace Deeplex.Saverwalter.Model
         public DateTime Beginn { get; set; }
         public DateTime? Ende { get; set; }
         public Kontakt Ansprechpartner { get; set; } = null!;
+        public string? VersionsNotiz { get; set; }
+        public string? Notiz { get; set; }
 
         public Vertrag()
         {
@@ -162,6 +186,7 @@ namespace Deeplex.Saverwalter.Model
                 Garage = g.Garage,
             }).ToList();
             Wohnung = alt.Wohnung;
+            Notiz = alt.Notiz;
             Ansprechpartner = alt.Ansprechpartner;
             alt.Ende = Datum.AddDays(-1);
             Beginn = Datum;
@@ -184,6 +209,7 @@ namespace Deeplex.Saverwalter.Model
         public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
         public List<Garage> Garagen { get; private set; } = new List<Garage>();
         public List<JuristischePersonenMitglied> Mitglieder { get; private set; } = new List<JuristischePersonenMitglied>();
+        public string? Notiz { get; set; }
     }
 
     public class JuristischePersonenMitglied
@@ -217,6 +243,7 @@ namespace Deeplex.Saverwalter.Model
         public int? AdresseId { get; set; }
         public Adresse? Adresse { get; set; }
         public List<JuristischePersonenMitglied> JuristischePersonen { get; private set; } = new List<JuristischePersonenMitglied>();
+        public string? Notiz { get; set; }
     }
 
     public enum Anrede
@@ -231,6 +258,7 @@ namespace Deeplex.Saverwalter.Model
         public int KontoId { get; set; }
         public string Bank { get; set; } = null!;
         public string Iban { get; set; } = null!;
+        public string? Notiz { get; set; }
     }
 
     public class KalteBetriebskostenpunkt
@@ -300,5 +328,6 @@ namespace Deeplex.Saverwalter.Model
         public Adresse Adresse { get; set; } = null!;
         public int Jahr { get; set; }
         public double Betrag { get; set; }
+        public string? Notiz { get; set; }
     }
 }
