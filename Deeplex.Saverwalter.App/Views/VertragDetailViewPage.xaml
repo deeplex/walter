@@ -129,7 +129,6 @@
                     Text="{x:Bind ViewModel.Vermieter.Value.Name.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     PlaceholderText="Vermieter hinzufügen"
                     QuerySubmitted="VermieterSuggest_QuerySubmitted"
-                    ItemsSource="{x:Bind ViewModel.JuristischePersonen.Value, Mode=OneWay}"
                     TextChanged="VermieterSuggest_TextChanged"/>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
@@ -141,8 +140,7 @@
                     Text="{x:Bind ViewModel.Ansprechpartner.Value.Name.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     PlaceholderText="Ansprechpartner"
                     QuerySubmitted="AnsprechpartnerSuggest_QuerySubmitted"
-                    TextChanged="AnsprechpartnerSuggest_TextChanged"
-                    ItemsSource="{x:Bind ViewModel.Kontakte.Value, Mode=OneWay}"/>
+                    TextChanged="AnsprechpartnerSuggest_TextChanged"/>
                 <CheckBox
                     Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
@@ -166,13 +164,12 @@
                     MinWidth="200"
                     PlaceholderText="Mieter hinzufügen..."
                     QuerySubmitted="MieterSuggest_QuerySubmitted"
-                    TextChanged="MieterSuggest_TextChanged"
-                    ItemsSource="{x:Bind ViewModel.Kontakte.Value, Mode=OneWay}"/>
+                    TextChanged="MieterSuggest_TextChanged"/>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
-                <TextBlock Text="Wohnung:" Style="{StaticResource Labels}"/>
+                <TextBlock Text="Wohnung:" Style="{StaticResource Labels}" Margin="20,0,0,0"/>
                 <AutoSuggestBox
-                    Margin="20,15,0,0"
+                    Margin="20,0,0,0"
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     MinWidth="400"
                     QuerySubmitted="WohnungSuggest_QuerySubmitted"

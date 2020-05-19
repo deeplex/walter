@@ -120,8 +120,7 @@
                 Margin="50,0,0,0"
                 Width="350"
                 PlaceholderText="Füge Rechnung hinzu..."
-                TextMemberPath="Typ"
-                DisplayMemberPath="Typ"
+                DisplayMemberPath="Bezeichnung"
                 QuerySubmitted="AddRechnung_QuerySubmitted"
                 TextChanged="AddRechnung_TextChanged"/>
         </StackPanel>
