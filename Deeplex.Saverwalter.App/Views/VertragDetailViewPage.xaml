@@ -198,36 +198,44 @@
                     <mtuuc:DataGridTextColumn Header="Notiz" IsReadOnly="False" Binding="{Binding Notiz.Value}"/>
                 </mtuuc:DataGrid.Columns>
             </mtuuc:DataGrid>
-            <Button
+            <StackPanel Orientation="Horizontal">
+                <Button
                 Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                 IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                 Margin="20,20,0,20"
                 Content="Vertrag ändern">
-                <Button.Flyout>
-                    <Flyout>
-                        <StackPanel Orientation="Horizontal">
-                            <CalendarDatePicker
+                    <Button.Flyout>
+                        <Flyout>
+                            <StackPanel Orientation="Horizontal">
+                                <CalendarDatePicker
                                 Header="Beginn"
                                 MinDate="{x:Bind ViewModel.AddVersionValue.Value.Beginn.Value, Mode=TwoWay}"
                                 Language="de"
                                 DateFormat="{}{day.integer}. {month.full} {year.full}"
                                 PlaceholderText="Datum hinzufügen"
                                 Date="{x:Bind ViewModel.AddVersionValue.Value.Beginn.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                            <muxc:NumberBox
+                                <muxc:NumberBox
                                 SpinButtonPlacementMode="Inline"
                                 Header="Personenzahl"
                                 Value="{x:Bind ViewModel.AddVersionValue.Value.Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 PlaceholderText="0"/>
-                            <Button
+                                <Button
                                 VerticalAlignment="Bottom"
                                 Command="{x:Bind ViewModel.AddVersion}"
                                 Background="Transparent">
-                                <SymbolIcon Symbol="Add"/>
-                            </Button>
-                        </StackPanel>
-                    </Flyout>
-                </Button.Flyout>
-            </Button>
+                                    <SymbolIcon Symbol="Add"/>
+                                </Button>
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+                <Button
+                    Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    Margin="20, 0, 0, 0"
+                    Content="Entferne aktuelle Version"
+                    Command="{x:Bind ViewModel.RemoveVersion}"/>
+            </StackPanel>
             <RelativePanel Margin="0,20,0,0">
                 <StackPanel
                     RelativePanel.AlignRightWithPanel="True"

@@ -109,6 +109,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 AddMieteValue.Value = new VertragDetailMiete();
             }, _ => true);
 
+            RemoveVersion = new RelayCommand(_ =>
+            {
+                Versionen.Value = Versionen.Value.Skip(1).ToImmutableList();
+                AddVersionValue.Value = new VertragDetailVersion(Versionen.Value.First());
+            }, _ => true);
+
             SaveEdit = new RelayCommand(_ =>
             {
                 IsInEdit.Value = false;
@@ -211,6 +217,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
                         App.Walter.Vertraege.Add(neueVersion);
                     }
                 }
+
+                var highest = Versionen.Value.First().Version;
+                foreach (var vs in v)
+                {
+                    if (vs.Version > highest)
+                    {
+                        App.Walter.Vertraege.Remove(vs);
+                    }
+                }
                 App.Walter.SaveChanges();
             }, _ => IsInEdit.Value);
             IsInEdit.PropertyChanged += (_, ev) => SaveEdit.RaiseCanExecuteChanged(ev);
@@ -224,6 +239,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public RelayCommand BeginEdit { get; }
         public RelayCommand AddMiete { get; }
         public RelayCommand AddVersion { get; }
+        public RelayCommand RemoveVersion { get; }
         public RelayCommand SaveEdit { get; }
     }
 
