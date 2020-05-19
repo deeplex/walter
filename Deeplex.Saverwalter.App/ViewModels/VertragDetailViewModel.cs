@@ -75,7 +75,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public VertragDetailViewModel(List<Vertrag> v) : base(v.OrderBy(vs => vs.Version).Last())
         {
             Versionen.Value = v.Select(vs => new VertragDetailVersion(vs)).ToImmutableList();
-            Beginn.Value = Versionen.Value.First().Beginn.Value;
+            Beginn.Value = Versionen.Value.Last().Beginn.Value;
 
             KalteBetriebskosten.Value = v.First().Wohnung is Wohnung w2 ? App.Walter.KalteBetriebskosten
                 .Where(k => k.Adresse == w2.Adresse)
@@ -189,7 +189,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                         vi.VersionsNotiz = nV.Notiz.Value;
                         vi.Wohnung = VertragDetailWohnung.GetWohnung(nV.Wohnung.Value.Id);
                         vi.Ende = nV != Versionen.Value.First() ?
-                            Versionen.Value[i+1].Beginn.Value.UtcDateTime.AddDays(-1) :
+                            Versionen.Value[Versionen.Value.Count - i - 2].Beginn.Value.UtcDateTime.AddDays(-1) :
                             Ende.Value?.UtcDateTime;
 
                         App.Walter.Vertraege.Update(vi);
