@@ -50,10 +50,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 new AdresseViewModel();
 
             Vertraege.Value = App.Walter.Vertraege
-                .Include(v => v.Mieter)
-                .ThenInclude(m => m.Kontakt)
                 .Include(v => v.Wohnung).ToList()
-                .Where(v => v.Mieter.Exists(m => m.KontaktId == Id))
+                .Where(v => App.Walter.MieterSet.ToList().Exists(m => m.VertragId == v.VertragId))
                 .Select(v => new KontaktDetailVertrag(v.VertragId))
                 .ToList();
 
@@ -130,7 +128,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Beginn.Value = v.Beginn;
             Ende.Value = v.Ende;
 
-            AuflistungMieter.Value = string.Join(", ", v.Mieter.Select(m => m.Kontakt.Nachname));
+            AuflistungMieter.Value = string.Join(", ",
+                App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList().Select(m =>
+                (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname));
         }
     }
 }

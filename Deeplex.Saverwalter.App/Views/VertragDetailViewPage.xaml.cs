@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.App.Views
         private void VermieterSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             Suggest(sender, args,
-                ViewModel.JuristischePersonen.Value
+                ViewModel.AlleJuristischePersonen.Value
                     .Where(k => ViewModel.Wohnung.Value?.BesitzerId.Value is int wb ? k.Id == wb : true)
                     .Where(k => k.Name.Value.Trim().ToLower()
                         .Contains(sender.Text.Trim().ToLower()))
@@ -67,7 +67,7 @@ namespace Deeplex.Saverwalter.App.Views
         private void MieterSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             Suggest(sender, args,
-                ViewModel.Kontakte.Value
+                ViewModel.AlleKontakte.Value
                     .Where(k => k.Name.Value.Trim().ToLower()
                         .Contains(sender.Text.Trim().ToLower()))
                     .Where(k => !ViewModel.Mieter.Value.Exists(m => m.Name.Value == k.Name.Value))
@@ -78,7 +78,7 @@ namespace Deeplex.Saverwalter.App.Views
         private void AnsprechpartnerSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             Suggest(sender, args,
-                ViewModel.Kontakte.Value
+                ViewModel.AlleKontakte.Value
                     // If Checkbox => .Where(k => k.JuristischePersonen.Contains(ViewModel.Vermieter.Id))
                     .Where(k => k.Name.Value.Trim().ToLower()
                         .Contains(sender.Text.Trim().ToLower()))
@@ -96,7 +96,7 @@ namespace Deeplex.Saverwalter.App.Views
                 }
                 else
                 {
-                    var m = ViewModel.Kontakte.Value.First(k => k.Name.Value == a);
+                    var m = ViewModel.AlleKontakte.Value.First(k => k.Name.Value == a);
                     ViewModel.Mieter.Value = ViewModel.Mieter.Value.Add(new VertragDetailKontakt(m.Id))
                         // From the longest to the smallest because of XAML I guess;
                         .OrderBy(mw => mw.Name.Value.Length).Reverse().ToImmutableList();
@@ -118,7 +118,7 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (args.ChosenSuggestion is string a)
             {
-                ViewModel.Ansprechpartner.Value = ViewModel.Kontakte.Value.First(k => k.Name.Value == a);
+                ViewModel.Ansprechpartner.Value = ViewModel.AlleKontakte.Value.First(k => k.Name.Value == a);
                 sender.Text = a;
             }
         }
@@ -127,7 +127,7 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (args.ChosenSuggestion is string a)
             {
-                ViewModel.Vermieter.Value = ViewModel.JuristischePersonen.Value.First(k => k.Name.Value == a);
+                ViewModel.Vermieter.Value = ViewModel.AlleJuristischePersonen.Value.First(k => k.Name.Value == a);
                 sender.Text = a;
             }
         }

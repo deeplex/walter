@@ -50,6 +50,7 @@
             <CalendarDatePicker
                 Date="{x:Bind Ende.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Width="176"
+                IsEnabled="False"
                 Language="de"
                 PlaceholderText="Offen"
                 DateFormat="{}{day.integer}. {month.full} {year.full}"/>
@@ -150,7 +151,7 @@
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Mieter:" Style="{StaticResource Labels}"/>
                 <mtuuc:AdaptiveGridView
-                    Margin="20,10,0,0"
+                    Margin="20,0,0,-70"
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     SelectionMode="Single"
                     VerticalAlignment="Center"
@@ -159,7 +160,7 @@
                 <AutoSuggestBox
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                    Margin="0,15,0,0"
+                    Margin="0,10,0,0"
                     QueryIcon="AddFriend"
                     MinWidth="200"
                     PlaceholderText="Mieter hinzufügen..."
@@ -167,9 +168,9 @@
                     TextChanged="MieterSuggest_TextChanged"/>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
-                <TextBlock Text="Wohnung:" Style="{StaticResource Labels}" Margin="20,0,0,0"/>
+                <TextBlock Text="Wohnung:" Style="{StaticResource Labels}" Margin="20,20,0,0"/>
                 <AutoSuggestBox
-                    Margin="20,0,0,0"
+                    Margin="20,15,0,0"
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     MinWidth="400"
                     QuerySubmitted="WohnungSuggest_QuerySubmitted"
@@ -178,6 +179,55 @@
                     ItemsSource="{x:Bind ViewModel.AlleWohnungen.Value, Mode=OneWay}"
                     TextChanged="WohnungSuggest_TextChanged"/>
             </mtuuc:WrapPanel>
+            <TextBlock
+                Margin="20,20,0,0"
+                Style="{StaticResource SubtitleTextBlockStyle}"
+                Text="Versionen"/>
+            <mtuuc:DataGrid
+                Margin="10"
+                IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                CanUserReorderColumns="False"
+                CanUserResizeColumns="True"
+                AutoGenerateColumns="False"
+                ItemsSource="{x:Bind ViewModel.Versionen.Value, Mode=TwoWay}">
+                <mtuuc:DataGrid.Columns>
+                    <mtuuc:DataGridTextColumn IsReadOnly="True" Header="Version" Binding="{Binding Version}"/>
+                    <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
+                    <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
+                    <mtuuc:DataGridTextColumn Header="Personenzahl" Binding="{Binding Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <mtuuc:DataGridTextColumn Header="Notiz" IsReadOnly="False" Binding="{Binding Notiz.Value}"/>
+                </mtuuc:DataGrid.Columns>
+            </mtuuc:DataGrid>
+            <Button
+                Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                Margin="20,20,0,20"
+                Content="Vertrag ändern">
+                <Button.Flyout>
+                    <Flyout>
+                        <StackPanel Orientation="Horizontal">
+                            <CalendarDatePicker
+                                Header="Beginn"
+                                MinDate="{x:Bind ViewModel.AddVersionValue.Value.Beginn.Value, Mode=TwoWay}"
+                                Language="de"
+                                DateFormat="{}{day.integer}. {month.full} {year.full}"
+                                PlaceholderText="Datum hinzufügen"
+                                Date="{x:Bind ViewModel.AddVersionValue.Value.Beginn.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <muxc:NumberBox
+                                SpinButtonPlacementMode="Inline"
+                                Header="Personenzahl"
+                                Value="{x:Bind ViewModel.AddVersionValue.Value.Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                PlaceholderText="0"/>
+                            <Button
+                                VerticalAlignment="Bottom"
+                                Command="{x:Bind ViewModel.AddVersion}"
+                                Background="Transparent">
+                                <SymbolIcon Symbol="Add"/>
+                            </Button>
+                        </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
             <RelativePanel Margin="0,20,0,0">
                 <StackPanel
                     RelativePanel.AlignRightWithPanel="True"
@@ -273,25 +323,6 @@
                                 </Button.Flyout>
                             </Button>
                         </StackPanel>
-                    </mtuuc:Expander>
-                    <mtuuc:Expander
-                        Background="Transparent"
-                        Header="Versionen"
-                        HorizontalContentAlignment="Left">
-                        <mtuuc:DataGrid
-                            IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                            CanUserReorderColumns="False"
-                            CanUserResizeColumns="True"
-                            AutoGenerateColumns="False"
-                            ItemsSource="{x:Bind ViewModel.Versionen.Value}">
-                            <mtuuc:DataGrid.Columns>
-                                <mtuuc:DataGridTextColumn IsReadOnly="True" Header="Version" Binding="{Binding Version}"/>
-                                <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
-                                <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
-                                <mtuuc:DataGridTextColumn Header="Personenzahl" Binding="{Binding Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                <mtuuc:DataGridTextColumn Header="Notiz" IsReadOnly="False" Binding="{Binding Notiz.Value}"/>
-                            </mtuuc:DataGrid.Columns>
-                        </mtuuc:DataGrid>
                     </mtuuc:Expander>
                     <mtuuc:Expander
                         HorizontalContentAlignment="Left"

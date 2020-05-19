@@ -73,8 +73,7 @@ namespace Deeplex.Saverwalter.Model
     public class Miete
     {
         public int MieteId { get; set; }
-        public int VertragId { get; set; }
-        public Vertrag Vertrag { get; set; } = null!;
+        public Guid VertragId { get; set; }
         public DateTime Datum { get; set; }
         public double? WarmMiete { get; set; }
         public double? KaltMiete { get; set; }
@@ -89,7 +88,6 @@ namespace Deeplex.Saverwalter.Model
         public JuristischePerson Besitzer { get; set; } = null!;
         public string? Notiz { get; set; }
     }
-
 
     public class Zaehlergemeinschaft
     {
@@ -152,9 +150,6 @@ namespace Deeplex.Saverwalter.Model
         public int rowid { get; set; }
         public Guid VertragId { get; set; }
         public int Version { get; set; } = 1;
-        public List<Mieter> Mieter { get; private set; } = new List<Mieter>();
-        public List<Miete> Mieten { get; private set; } = new List<Miete>();
-        public List<MietobjektGarage> Garagen { get; private set; } = new List<MietobjektGarage>();
         public int? WohnungId { get; set; }
         public Wohnung? Wohnung { get; set; }
         public int Personenzahl { get; set; }
@@ -173,19 +168,6 @@ namespace Deeplex.Saverwalter.Model
         {
             VertragId = alt.VertragId;
             Version = alt.Version + 1;
-            Mieter = alt.Mieter.Select(m => new Mieter
-            {
-                Vertrag = this,
-                KontaktId = m.KontaktId,
-                Kontakt = m.Kontakt,
-            }).ToList();
-
-            Garagen = alt.Garagen.Select(g => new MietobjektGarage
-            {
-                Vertrag = this,
-                GarageId = g.GarageId,
-                Garage = g.Garage,
-            }).ToList();
             Wohnung = alt.Wohnung;
             Notiz = alt.Notiz;
             Ansprechpartner = alt.Ansprechpartner;
@@ -197,8 +179,7 @@ namespace Deeplex.Saverwalter.Model
     public class MietobjektGarage
     {
         public int MietobjektGarageId { get; set; }
-        public int VertragId { get; set; }
-        public Vertrag Vertrag { get; set; } = null!;
+        public Guid VertragId { get; set; }
         public int GarageId { get; set; }
         public Garage Garage { get; set; } = null!;
     }
@@ -227,8 +208,7 @@ namespace Deeplex.Saverwalter.Model
         public int MieterId { get; set; }
         public int KontaktId { get; set; }
         public Kontakt Kontakt { get; set; } = null!;
-        public int VertragId { get; set; }
-        public Vertrag Vertrag { get; set; } = null!;
+        public Guid VertragId { get; set; }
     }
 
     public class Kontakt

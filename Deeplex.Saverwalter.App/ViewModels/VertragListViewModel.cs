@@ -19,8 +19,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Vertraege = App.Walter.Vertraege
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
                 .Include(v => v.Wohnung).ThenInclude(w => w.Besitzer)
-                .Include(v => v.Mieten)
-                .Include(v => v.Mieter).ThenInclude(m => m.Kontakt)
                 .ToList()
                 .GroupBy(v => v.VertragId)
                 .Select(v => new VertragListVertrag(v))
@@ -57,7 +55,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             BeginnString = Versionen.First().BeginnString;
             Beginn = Versionen.First().Beginn;
 
-            Mieten = v.SelectMany(vs => vs.Mieten).Select(m => new VertragListMiete(m)).ToImmutableList();
+            Mieten = App.Walter.Mieten
+                .Where(m => m.VertragId == v.First().VertragId)
+                .Select(m => new VertragListMiete(m))
+                .ToImmutableList();
 
             AddMieteValue.Value = new VertragListMiete();
             AddMiete = new RelayCommand(_ =>
@@ -68,7 +69,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     Datum = AddMieteValue.Value.Datum.Value.UtcDateTime,
                     KaltMiete = AddMieteValue.Value.Kalt,
                     WarmMiete = AddMieteValue.Value.Warm,
-                    VertragId = Versionen.Last().Id,
+                    VertragId = Versionen.Last().VertragId,
                 });
                 App.Walter.SaveChanges();
                 AddMieteValue.Value = new VertragListMiete();
@@ -103,8 +104,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Anschrift = AdresseViewModel.Anschrift(v.Wohnung); // TODO only true if wohnung and not adressen
             Besitzer = v.Wohnung.Besitzer.Bezeichnung; // TODO only true if wohnung and not adressen
             Wohnung = v.Wohnung is Wohnung w ? w.Bezeichnung : "";
-            AuflistungMieter = string.Join(", ", v.Mieter.Select(m =>
-                (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname)); // Such grace...
+            AuflistungMieter = string.Join(", ",
+                App.Walter.MieterSet
+                    .Where(m => m.VertragId == v.VertragId)
+                    .Include(m => m.Kontakt)
+                    .ToList()
+                    .Select(m => (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname));
+            // Such grace...
 
             Beginn = v.Beginn;
             BeginnString = v.Beginn.ToString("dd.MM.yyyy"); ;
@@ -117,7 +123,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public class VertragListMiete : BindableBase
     {
         public int Id;
-        public ObservableProperty<int> VertragsVersion = new ObservableProperty<int>();
         public ObservableProperty<DateTimeOffset> Datum = new ObservableProperty<DateTimeOffset>();
         public double Kalt;
         public string KaltString
@@ -167,7 +172,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public VertragListMiete(Miete m)
         {
             Id = m.MieteId;
-            VertragsVersion.Value = m.Vertrag.Version;
             Datum.Value = m.Datum;
             Kalt = m.KaltMiete ?? 0;
             Warm = m.WarmMiete ?? 0;

@@ -265,15 +265,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<string>("Notiz")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("VertragId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("VertragId")
+                        .HasColumnType("TEXT");
 
                     b.Property<double?>("WarmMiete")
                         .HasColumnType("REAL");
 
                     b.HasKey("MieteId");
-
-                    b.HasIndex("VertragId");
 
                     b.ToTable("Mieten");
                 });
@@ -287,14 +285,12 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("KontaktId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("VertragId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("VertragId")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("MieterId");
 
                     b.HasIndex("KontaktId");
-
-                    b.HasIndex("VertragId");
 
                     b.ToTable("MieterSet");
                 });
@@ -308,14 +304,12 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("GarageId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("VertragId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("VertragId")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("MietobjektGarageId");
 
                     b.HasIndex("GarageId");
-
-                    b.HasIndex("VertragId");
 
                     b.ToTable("MietobjektGaragen");
                 });
@@ -556,26 +550,11 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("AdresseId");
                 });
 
-            modelBuilder.Entity("Deeplex.Saverwalter.Model.Miete", b =>
-                {
-                    b.HasOne("Deeplex.Saverwalter.Model.Vertrag", "Vertrag")
-                        .WithMany("Mieten")
-                        .HasForeignKey("VertragId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Mieter", b =>
                 {
                     b.HasOne("Deeplex.Saverwalter.Model.Kontakt", "Kontakt")
                         .WithMany()
                         .HasForeignKey("KontaktId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Deeplex.Saverwalter.Model.Vertrag", "Vertrag")
-                        .WithMany("Mieter")
-                        .HasForeignKey("VertragId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -585,12 +564,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasOne("Deeplex.Saverwalter.Model.Garage", "Garage")
                         .WithMany()
                         .HasForeignKey("GarageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Deeplex.Saverwalter.Model.Vertrag", "Vertrag")
-                        .WithMany("Garagen")
-                        .HasForeignKey("VertragId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

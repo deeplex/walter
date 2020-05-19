@@ -54,8 +54,6 @@ namespace Deeplex.Saverwalter.Model
                 .Where(v => v.rowid == rowid)
                 .Include(v => v.Ansprechpartner)
                     .ThenInclude(k => k.Adresse)
-                .Include(v => v.Mieter)
-                    .ThenInclude(m => m.Kontakt)
                 .Include(v => v.Wohnung!)
                     .ThenInclude(w => w.Adresse)
                         .ThenInclude(a => a.KalteBetriebskosten)
@@ -72,7 +70,10 @@ namespace Deeplex.Saverwalter.Model
                 .First();
 
             Ansprechpartner = vertrag.Ansprechpartner;
-            Mieter = vertrag.Mieter.Select(m => m.Kontakt).ToList();
+            Mieter = db.MieterSet
+                .Where(m => m.VertragId == vertrag.VertragId)
+                .Select(m => m.Kontakt)
+                .ToList();
             Wohnung = vertrag.Wohnung!;
             Adresse = Wohnung.Adresse;
             Vermieter = Wohnung.Besitzer;

@@ -65,8 +65,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             IsInEdit.PropertyChanged += (_, ev) => BeginEdit.RaiseCanExecuteChanged(ev);
 
             Vertraege.Value = App.Walter.Vertraege
-                .Include(v => v.Mieter)
-                .ThenInclude(m => m.Kontakt)
                 .Include(v => v.Wohnung).ToList()
                 .Where(v => v.Wohnung.WohnungId == Id)
                 .Select(v => new WohnungDetailVertrag(v.VertragId))
@@ -157,7 +155,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Beginn.Value = v.Beginn;
             Ende.Value = v.Ende;
 
-            AuflistungMieter.Value = string.Join(", ", v.Mieter.Select(m =>
+            AuflistungMieter.Value = string.Join(", ",
+                App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList().Select(m =>
                 (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname));
         }
     }
