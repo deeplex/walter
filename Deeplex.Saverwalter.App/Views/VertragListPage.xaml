@@ -97,7 +97,7 @@
                                         </TextBlock>
                                         <Button
                                             Margin="0,20,0,20"
-                                            Content="Miete hinzufügen">
+                                            Content="Zahlung hinzufügen">
                                             <Button.Flyout>
                                                 <Flyout>
                                                     <StackPanel Orientation="Horizontal">

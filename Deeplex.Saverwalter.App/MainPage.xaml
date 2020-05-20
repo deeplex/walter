@@ -34,7 +34,7 @@
                 <NavigationViewItem
                     x:Name="VertragListMenuItem"
                     Content="{x:Bind VertragListLabel}" 
-                    Icon="Document"/>
+                    Icon="Library"/>
                 <NavigationViewItem
                     x:Name="JurPersonenListMenuItem"
                     Content="{x:Bind JuristischePersonenListLabel}" 

@@ -161,10 +161,7 @@ namespace Deeplex.Saverwalter.Print
             var refund = new Run(
                 new Text("Dieser Betrag wird über die von Ihnen angegebene Bankverbindung erstattet."));
 
-            var demand = new Run(
-                new Text("Bitte überweisen Sie diesen Betrag auf das Ihnen bekannte Mietkonto bei der "),
-                new Break(),
-                new Text("Bankkonto IBAN TODO!")); // TODO Konto fehlt noch...
+            var demand = new Run(new Text("Bitte überweisen Sie diesen Betrag auf das Ihnen bekannte Konto."));
 
             return new Paragraph(
                 new Run(
@@ -432,6 +429,8 @@ namespace Deeplex.Saverwalter.Print
         private static Table GesamtErgebnis(Betriebskostenabrechnung b)
         {
             return new Table(
+                new TableProperties(
+                    new TableBorders(new InsideHorizontalBorder() { Val = BorderValues.Thick, Color = "888888" })),
                 new TableWidth() { Width = "2500", Type = TableWidthUnitValues.Pct },
                 new TableRow(
                     ContentCell("Ihre geleisteten Vorauszahlungen:"),
@@ -441,7 +440,7 @@ namespace Deeplex.Saverwalter.Print
                     ContentCell(Euro(b.BetragKalt), JustificationValues.Right)),
                 new TableRow(
                     ContentCell(b.Result > 0 ? "Erstattungsbetrag:" : "Nachforderungsbetrag:"),
-                    ContentCell(Euro(Math.Abs(b.Result)), JustificationValues.Right)));
+                    ContentHead(Euro(Math.Abs(b.Result)), JustificationValues.Right)));
         }
 
         // Helper

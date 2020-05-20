@@ -77,7 +77,7 @@
                         Label="Betriebskostenabrechnung">
                         <AppBarButton.Flyout>
                             <Flyout>
-                                <StackPanel>
+                                <StackPanel Orientation="Horizontal">
                                     <muxc:NumberBox
                                         SpinButtonPlacementMode="Inline"
                                         AllowFocusOnInteraction="True"
@@ -86,7 +86,7 @@
                                         CommandParameter="{x:Bind ViewModel.BetriebskostenJahr.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         Click="Betriebskostenabrechnung_Click"
                                         Background="Transparent">
-                                        <SymbolIcon Symbol="Add"/>
+                                        <SymbolIcon Symbol="SaveLocal"/>
                                     </Button>
                                 </StackPanel>
                             </Flyout>
