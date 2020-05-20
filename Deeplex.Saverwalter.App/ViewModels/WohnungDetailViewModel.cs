@@ -155,9 +155,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Beginn.Value = v.Beginn;
             Ende.Value = v.Ende;
 
-            AuflistungMieter.Value = string.Join(", ",
-                App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList().Select(m =>
-                (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname));
+            AuflistungMieter.Value = string.Join(", ", App.Walter.MieterSet
+                .Include(m => m.Kontakt)
+                .Where(m => m.VertragId == v.VertragId)
+                .ToList()
+                .Select(m => (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname));
         }
     }
 }

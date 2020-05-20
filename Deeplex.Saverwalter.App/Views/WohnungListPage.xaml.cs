@@ -32,5 +32,10 @@ namespace Deeplex.Saverwalter.App.Views
                 AdresseViewModel.GetAdresseIdByAnschrift((string)((Button)sender).CommandParameter),
                 new DrillInNavigationTransitionInfo());
         }
+
+        private void Adresse_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ViewModel.IsInEdit.Value = true;
+        }
     }
 }
