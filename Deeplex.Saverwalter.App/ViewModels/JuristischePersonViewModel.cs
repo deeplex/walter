@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -18,7 +19,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public static JuristischePerson GetJuristischePerson(JuristischePersonViewModel j)
         {
-            return App.Walter.JuristischePersonen.Find(j.Id);
+            if (j.Id != 0)
+            {
+                return App.Walter.JuristischePersonen.Find(j.Id);
+            }
+            else
+            {
+                return App.Walter.JuristischePersonen.First(p => p.Bezeichnung == j.Name.Value);
+            }
         }
     }
 }
