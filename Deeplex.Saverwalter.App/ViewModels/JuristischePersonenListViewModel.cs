@@ -22,9 +22,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             AddPerson = new RelayCommand(_ =>
             {
                 var j = new JuristischePerson { Bezeichnung = AddPersonName.Value };
-                Personen.Value = Personen.Value.Add(new JuristischePersonenPerson(j));
                 App.Walter.JuristischePersonen.Add(j);
                 App.Walter.SaveChanges();
+                Personen.Value = Personen.Value.Add(new JuristischePersonenPerson(j));
             }, _ => true);
         }
 
