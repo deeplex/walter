@@ -113,7 +113,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             // Such grace...
 
             Beginn = v.Beginn;
-            BeginnString = v.Beginn.ToString("dd.MM.yyyy");
+            BeginnString = v.Beginn.ToUniversalTime().ToString("dd.MM.yyyy");
             hasEnde = v.Ende is DateTime;
             EndeString = v.Ende is DateTime e ? e.ToString("dd.MM.yyyy") : "Offen";
 

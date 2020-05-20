@@ -112,7 +112,7 @@
                 <TextBlock Text="Laufzeit:" Margin="20,50,0,0" Style="{StaticResource Labels}"/>
                 <CalendarDatePicker
                     Header="Beginn"
-                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    IsEnabled="False"                
                     Margin="20,20,0,0"
                     Date="{x:Bind ViewModel.Beginn.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Width="190"
@@ -224,21 +224,21 @@
                         <Flyout>
                             <StackPanel Orientation="Horizontal">
                                 <CalendarDatePicker
-                                Header="Beginn"
-                                MinDate="{x:Bind ViewModel.AddVersionValue.Value.Beginn.Value, Mode=TwoWay}"
-                                Language="de"
-                                DateFormat="{}{day.integer}. {month.full} {year.full}"
-                                PlaceholderText="Datum hinzufügen"
-                                Date="{x:Bind ViewModel.AddVersionValue.Value.Beginn.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    Header="Beginn"
+                                    MinDate="{x:Bind ViewModel.AddVersionValue.Value.Beginn.Value, Mode=TwoWay}"
+                                    Language="de"
+                                    DateFormat="{}{day.integer}. {month.full} {year.full}"
+                                    PlaceholderText="Datum hinzufügen"
+                                    Date="{x:Bind ViewModel.AddVersionValue.Value.Beginn.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 <muxc:NumberBox
-                                SpinButtonPlacementMode="Inline"
-                                Header="Personenzahl"
-                                Value="{x:Bind ViewModel.AddVersionValue.Value.Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                PlaceholderText="0"/>
+                                    SpinButtonPlacementMode="Inline"
+                                    Header="Personenzahl"
+                                    Value="{x:Bind ViewModel.AddVersionValue.Value.Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    PlaceholderText="0"/>
                                 <Button
-                                VerticalAlignment="Bottom"
-                                Command="{x:Bind ViewModel.AddVersion}"
-                                Background="Transparent">
+                                    VerticalAlignment="Bottom"
+                                    Command="{x:Bind ViewModel.AddVersion}"
+                                    Background="Transparent">
                                     <SymbolIcon Symbol="Add"/>
                                 </Button>
                             </StackPanel>

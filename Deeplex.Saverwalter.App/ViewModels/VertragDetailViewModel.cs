@@ -33,8 +33,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public ObservableProperty<int> BetriebskostenJahr = new ObservableProperty<int>();
 
+        public bool isNew = false;
+
         public VertragDetailViewModel() : this(new List<Vertrag> { new Vertrag() })
         {
+            isNew = true;
+            App.Walter.Vertraege
+                  .Include(v => v.Ansprechpartner)
+                  .Include(v => v.Wohnung).ThenInclude(w => w.Besitzer);
             IsInEdit.Value = true;
         }
 
@@ -48,6 +54,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
                   .Reverse()
                   .ToList())
         {
+        }
+
+        public VertragDetailViewModel(List<Vertrag> v) : base(v.OrderBy(vs => vs.Version).Last())
+        {
             AlleKontakte.Value = App.Walter.Kontakte
                 .Select(k => new VertragDetailKontakt(k))
                 .ToImmutableList();
@@ -59,7 +69,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ToImmutableList();
 
             Mieter.Value = App.Walter.MieterSet
-               .Where(m => m.VertragId == id)
+               .Where(m => m.VertragId == v.First().VertragId)
                .Include(m => m.Kontakt)
                .Select(m => new VertragDetailKontakt(m.Kontakt))
                .ToList()
@@ -67,17 +77,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
                .ToImmutableList();
 
             Mieten.Value = App.Walter.Mieten
-                .Where(m => m.VertragId == id)
+                .Where(m => m.VertragId == v.First().VertragId)
                 .Select(m => new VertragDetailMiete(m))
                 .ToList()
                 .OrderBy(m => m.Datum.Value).Reverse()
                 .ToImmutableList();
 
             BetriebskostenJahr.Value = DateTime.Now.Year - 1;
-        }
 
-        public VertragDetailViewModel(List<Vertrag> v) : base(v.OrderBy(vs => vs.Version).Last())
-        {
             Versionen.Value = v.Select(vs => new VertragDetailVersion(vs)).ToImmutableList();
             Beginn.Value = Versionen.Value.Last().Beginn.Value;
 
@@ -186,11 +193,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     }
                 }
 
-                
                 for (var i = 0; i < Versionen.Value.Count; ++i)
                 {
                     var nV = Versionen.Value[Versionen.Value.Count - i - 1];
-                    if (v.Count - i > 0)
+                    if (v.Count - i > 0 && !isNew)
                     {
                         var vi = v[v.Count - i - 1];
                         vi.Beginn = nV.Beginn.Value.UtcDateTime;
@@ -230,6 +236,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                         App.Walter.Vertraege.Remove(vs);
                     }
                 }
+                isNew = false;
                 App.Walter.SaveChanges();
             }, _ => IsInEdit.Value);
 
@@ -282,9 +289,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Version = v.Version;
             Notiz.Value = v.Notiz;
             Personenzahl.Value = v.Personenzahl;
-            Wohnung.Value = v.Wohnung is Wohnung w ? new VertragDetailWohnung(w) : null;
-           
-            Vermieter.Value = new JuristischePersonViewModel(v.Wohnung.Besitzer);
+            var w = v.Wohnung is Wohnung;
+            Wohnung.Value = w ? new VertragDetailWohnung(v.Wohnung) : null;
+            Vermieter.Value = w ? new JuristischePersonViewModel(v.Wohnung.Besitzer) : null;
             Ansprechpartner.Value = v.Ansprechpartner is Kontakt va ? new VertragDetailKontakt(va) : null;
             Ende.Value = v.Ende;
             Beginn.Value = v.Beginn == DateTime.MinValue ? DateTime.Today : v.Beginn;

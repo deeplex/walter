@@ -58,9 +58,9 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void VermieterSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            Suggest(sender, args,
+           Suggest(sender, args,
                 ViewModel.AlleJuristischePersonen.Value
-                    .Where(k => ViewModel.Wohnung.Value?.BesitzerId.Value is int wb ? k.Id == wb : true)
+                    .Where(k => ViewModel.Wohnung?.Value?.BesitzerId.Value is int wb ? k.Id == wb : true)
                     .Where(k => k.Name.Value.Trim().ToLower()
                         .Contains(sender.Text.Trim().ToLower()))
                     .Select(k => k.Name.Value).ToList(),
@@ -112,7 +112,9 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (args.ChosenSuggestion is string a)
             {
-                ViewModel.Wohnung.Value = ViewModel.AlleWohnungen.Value.First(w => w.BezeichnungVoll.Value == a);
+                var wohnung = ViewModel.AlleWohnungen.Value.First(w => w.BezeichnungVoll.Value == a);
+                ViewModel.Wohnung.Value = wohnung;
+                ViewModel.Versionen.Value.ForEach(v => v.Wohnung.Value = wohnung);
                 sender.Text = a;
             }
         }
@@ -121,7 +123,10 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (args.ChosenSuggestion is string a)
             {
-                ViewModel.Ansprechpartner.Value = ViewModel.AlleKontakte.Value.First(k => k.Name.Value == a);
+                var ansprechpartner = ViewModel.AlleKontakte.Value.First(k => k.Name.Value == a);
+                ViewModel.Ansprechpartner.Value = ansprechpartner;
+                ViewModel.Versionen.Value.ForEach(v => v.Ansprechpartner.Value = ansprechpartner);
+
                 sender.Text = a;
             }
         }
