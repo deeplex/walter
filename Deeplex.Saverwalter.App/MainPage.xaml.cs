@@ -15,6 +15,7 @@ namespace Deeplex.Saverwalter.App
         public readonly string KontaktListLabel = "Kontakte";
         public readonly string VertragListLabel = "Verträge";
         public readonly string WohnungListLabel = "Mietobjekte";
+        public readonly string JuristischePersonenListLabel = "Jur. Personen";
 
         private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
         {
@@ -24,6 +25,7 @@ namespace Deeplex.Saverwalter.App
                 label == KontaktListLabel ? typeof(KontaktListPage) :
                 label == WohnungListLabel ? typeof(WohnungListPage) :
                 label == VertragListLabel ? typeof(VertragListPage) :
+                label == JuristischePersonenListLabel ? typeof(JuristischePersonenListPage) :
                 null;
             if (pageType != null && pageType != AppFrame.CurrentSourcePageType)
             {

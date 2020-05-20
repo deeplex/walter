@@ -1,0 +1,77 @@
+﻿<Page
+    x:Class="Deeplex.Saverwalter.App.Views.JuristischePersonenListPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Deeplex.Saverwalter.App.Views"
+    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <muxc:StackLayout x:Name="VerticalStackLayout" Orientation="Vertical" Spacing="8"/>
+    </Page.Resources>
+
+    <StackPanel>
+        <CommandBar
+                Background="Transparent"
+                IsOpen="False"
+                HorizontalAlignment="Stretch"
+                DefaultLabelPosition="Right">
+            <CommandBar.Content>
+                <TextBlock Text="Juristische Personen"
+                    Style="{StaticResource TitleTextBlockStyle}"
+                    Margin="10,0,0,0"/>
+            </CommandBar.Content>
+            <AppBarButton
+                AllowFocusOnInteraction="True"
+                Icon="Add" Label="Hinzufügen">
+                <AppBarButton.Flyout>
+                    <Flyout>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox
+                                MinWidth="300"
+                                Text="{x:Bind ViewModel.AddPersonName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <Button
+                                Command="{x:Bind ViewModel.AddPerson}"
+                                Background="Transparent">
+                                <SymbolIcon Symbol="Add"/>
+                            </Button>
+                        </StackPanel>
+                    </Flyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
+        </CommandBar>
+
+        <muxc:ItemsRepeater
+            Layout="{StaticResource VerticalStackLayout}"
+            ItemsSource="{x:Bind ViewModel.Personen.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            <DataTemplate x:DataType="vm:JuristischePersonenPerson">
+                <Grid>
+                    <mtuuc:Expander Header="{x:Bind Name.Value}">
+                        <StackPanel>
+                            <Button
+                                CommandParameter="{x:Bind}"
+                                Click="EntfernePerson_Click"
+                                Background="Transparent"
+                                Margin="10">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Entfernen"/>
+                                    <SymbolIcon Symbol="Delete" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </mtuuc:Expander>
+                </Grid>
+            </DataTemplate>
+        </muxc:ItemsRepeater>
+
+
+
+    </StackPanel>
+
+
+</Page>

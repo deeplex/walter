@@ -35,6 +35,10 @@
                     x:Name="VertragListMenuItem"
                     Content="{x:Bind VertragListLabel}" 
                     Icon="Document"/>
+                <NavigationViewItem
+                    x:Name="JurPersonenListMenuItem"
+                    Content="{x:Bind JuristischePersonenListLabel}" 
+                    Icon="People"/>
             </NavigationView.MenuItems>
 
             <NavigationView.PaneFooter>
