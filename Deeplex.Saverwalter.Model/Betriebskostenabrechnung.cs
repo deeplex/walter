@@ -19,6 +19,7 @@ namespace Deeplex.Saverwalter.Model
         public List<KalteBetriebskostenRechnung> RechnungenKalt { get; set; }
         public double GesamtBetragKalt { get; set; }
         public double BetragKalt { get; set; }
+        public double Gezahlt { get; set; }
 
         public DateTime Abrechnungsbeginn { get; set; }
         public DateTime Abrechnungsende { get; set; }
@@ -42,8 +43,6 @@ namespace Deeplex.Saverwalter.Model
 
         public Betriebskostenabrechnung(int rowid, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
         {
-            Result = 123.45; // TODO... obvious
-
             Abrechnungsbeginn = abrechnungsbeginn;
             Abrechnungsende = abrechnungsende;
             Jahr = jahr;
@@ -127,6 +126,14 @@ namespace Deeplex.Saverwalter.Model
                     _ => a + 0, // TODO or throw something...
                 }
             );
+
+            // TODO Timerange should be more dynamic...
+            Gezahlt = db.Mieten
+                .Where(m => m.VertragId == vertrag.VertragId)
+                .Where(m => m.Datum >= Abrechnungsbeginn && m.Datum < Abrechnungsende)
+                .Sum(z => z.WarmMiete ?? 0);
+
+            Result = Gezahlt - BetragKalt;
         }
 
         private static T Max<T>(T l, T r) where T : IComparable<T>

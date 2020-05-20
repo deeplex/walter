@@ -52,32 +52,30 @@ namespace Deeplex.Saverwalter.Print
                 SubHeading("Angaben zur Abrechnungseinheit"),
                 Abrechnungseinheit(b),
                 Abrechnungswohnung(b),
-                new Paragraph(), // Necessary to split there tables
+                new Paragraph(), // Necessary to split tables...
                 ErmittlungEinheiten(b),
                 SubHeading("Ermittlung der kalten Betriebskosten"),
-                ErmittlungKosten(b)));
+                ErmittlungKosten(b),
+                Heading("Gesamtergebnis der Abrechnung"),
+                GesamtErgebnis(b)));
         }
 
         private static Table AnschriftVermieter(Betriebskostenabrechnung b)
         {
-            static TableCell ContentCellRight(string str) => new TableCell(
-                new Paragraph(NoSpace(), new ParagraphProperties(new Justification() { Val = JustificationValues.Right }),
-                new Run(new Text(str))));
-
             var table = new Table(
                 new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
                 new TableRow(
                     ContentCell(b.Vermieter.Bezeichnung),
-                    ContentCellRight("")),
+                    ContentCell("", JustificationValues.Right)),
                 new TableRow(
-                    ContentCell(b.Ansprechpartner.Vorname + " " + b.Ansprechpartner.Nachname),
-                    ContentCellRight("Tel.: " + b.Ansprechpartner.Telefon)),
+                    ContentCell("℅ " + b.Ansprechpartner.Vorname + " " + b.Ansprechpartner.Nachname),
+                    ContentCell("Tel.: " + b.Ansprechpartner.Telefon, JustificationValues.Right)),
                 new TableRow(
                     ContentCell(b.Ansprechpartner.Adresse!.Strasse + " " + b.Ansprechpartner.Adresse.Hausnummer),
-                    ContentCellRight("Fax: " + b.Ansprechpartner.Fax)),
+                    ContentCell("Fax: " + b.Ansprechpartner.Fax, JustificationValues.Right)),
                 new TableRow(
                     ContentCell(b.Ansprechpartner.Adresse.Postleitzahl + " " + b.Ansprechpartner.Adresse.Stadt),
-                    ContentCellRight("E-Mail: " + b.Ansprechpartner.Email)));
+                    ContentCell("E-Mail: " + b.Ansprechpartner.Email, JustificationValues.Right)));
             table.Append(Enumerable.Range(0, 9 - 4).Select(_ => new Break()));
 
             return table;
@@ -85,6 +83,8 @@ namespace Deeplex.Saverwalter.Print
 
         private static Paragraph PostalischerVermerk(Betriebskostenabrechnung b)
         {
+            // TODO We have problems if there are more than 4 Mieter...
+
             var run = new Run();
             int counter = 6;
 
@@ -92,6 +92,16 @@ namespace Deeplex.Saverwalter.Print
             {
                 var Anrede = m.Anrede == Model.Anrede.Herr ? "Herrn " : m.Anrede == Model.Anrede.Frau ? "Frau " : "";
                 run.Append(new Text(Anrede + m.Vorname + " " + m.Nachname));
+                run.Append(new Break());
+                counter--;
+            }
+            var a = b.Mieter.First().Adresse;
+            if (a != null)
+            {
+                run.Append(new Text(a.Strasse + " " + a.Hausnummer));
+                run.Append(new Break());
+                counter--;
+                run.Append(new Text(a.Postleitzahl + " " + a.Stadt));
                 run.Append(new Break());
                 counter--;
             }
@@ -144,8 +154,9 @@ namespace Deeplex.Saverwalter.Print
             // Capitalize first letter...
             var Gruss = gruss.Remove(1).ToUpper() + gruss.Substring(1);
 
-            var resultTxt1 = "Die Abrechnung schließt mit " + (b.Result > 0 ?
-                "einer Nachforderung" : "einem Guthaben") + " in Höhe von: ";
+            var resultTxt1 = "Die Abrechnung schließt mit " +
+                (b.Result > 0 ? "einem Guthaben" : "einer Nachforderung") +
+                " in Höhe von: ";
 
             var refund = new Run(
                 new Text("Dieser Betrag wird über die von Ihnen angegebene Bankverbindung erstattet."));
@@ -166,7 +177,7 @@ namespace Deeplex.Saverwalter.Print
                     new RunProperties(
                         new Bold() { Val = OnOffValue.FromBoolean(true), },
                         new Underline() { Val = UnderlineValues.Single, }),
-                    new Text(Euro(b.Result)),
+                    new Text(Euro(Math.Abs(b.Result))),
                     new Break()),
                 b.Result > 0 ? refund : demand);
         }
@@ -416,6 +427,21 @@ namespace Deeplex.Saverwalter.Print
                 ContentHead(Euro(b.BetragKalt), JustificationValues.Right)));
 
             return table;
+        }
+
+        private static Table GesamtErgebnis(Betriebskostenabrechnung b)
+        {
+            return new Table(
+                new TableWidth() { Width = "2500", Type = TableWidthUnitValues.Pct },
+                new TableRow(
+                    ContentCell("Ihre geleisteten Vorauszahlungen:"),
+                    ContentCell(Euro(b.Gezahlt), JustificationValues.Right)),
+                new TableRow(
+                    ContentCell("abzüglich Ihrer Nebenkostenanteile:"),
+                    ContentCell(Euro(b.BetragKalt), JustificationValues.Right)),
+                new TableRow(
+                    ContentCell(b.Result > 0 ? "Erstattungsbetrag:" : "Nachforderungsbetrag:"),
+                    ContentCell(Euro(Math.Abs(b.Result)), JustificationValues.Right)));
         }
 
         // Helper
