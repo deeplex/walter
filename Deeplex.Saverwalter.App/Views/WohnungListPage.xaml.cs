@@ -28,8 +28,7 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void Rechnungen_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(KalteBetriebskostenRechnungPage),
-                AdresseViewModel.GetAdresseIdByAnschrift((string)((Button)sender).CommandParameter),
+            Frame.Navigate(typeof(KalteBetriebskostenRechnungPage), (int)((Button)sender).CommandParameter,
                 new DrillInNavigationTransitionInfo());
         }
 

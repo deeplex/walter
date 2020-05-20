@@ -25,10 +25,6 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 ViewModel = new KalteBetriebskostenRechnungViewModel(adresseId);
             }
-            else if (e.Parameter is null) // New Contact
-            {
-                // ViewModel = new KalteBetriebskostenRechnungViewModel();
-            }
 
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
             base.OnNavigatedTo(e);
@@ -51,8 +47,8 @@ namespace Deeplex.Saverwalter.App.Views
         private void Pivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ViewModel.SelectedJahr
-                = ((KeyValuePair<int, ImmutableList<KalteBetriebskostenRechnungJahr>>)
-                    ((Pivot)sender).SelectedItem).Key;
+                = ViewModel.IsNotEmpty ? ((KeyValuePair<int, ImmutableList<KalteBetriebskostenRechnungJahr>>)
+                    ((Pivot)sender).SelectedItem).Key : 0;
         }
 
         private void AddRechnung_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)

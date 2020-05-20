@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class KalteBetriebskostenRechnungViewModel
+    public class KalteBetriebskostenRechnungViewModel : BindableBase
     {
         public string Anschrift;
 
@@ -16,6 +16,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public ObservableProperty<ImmutableSortedDictionary<int, ImmutableList<KalteBetriebskostenRechnungJahr>>> Jahre
             = new ObservableProperty<ImmutableSortedDictionary<int, ImmutableList<KalteBetriebskostenRechnungJahr>>>();
+
+        public bool IsNotEmpty => !Jahre.Value.IsEmpty;
 
         public int SelectedJahr { get; set; }
 
@@ -43,12 +45,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     .Select(k => new KalteBetriebskostenRechnungJahr(k.Typ, AddJahrBox.Value))
                     .ToImmutableList()).ToImmutableSortedDictionary(Comparer<int>.Create((x, y) => y.CompareTo(x)));
                 AddJahrBox.Value = Jahre.Value.First().Key + 1;
+                RaisePropertyChanged(nameof(IsNotEmpty));
             }, _ => true);
 
             RemoveJahr = new RelayCommand(_ =>
             {
                 Jahre.Value = Jahre.Value.Remove(SelectedJahr);
-
+                RaisePropertyChanged(nameof(IsNotEmpty));
             }, _ => true); // TODO Only if a year is selected
 
             SaveEdit = new RelayCommand(_ =>
@@ -127,7 +130,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public KalteBetriebskostenRechnungJahr(KalteBetriebskostenRechnung r)
         {
-            Beschreibung = r.Adresse.KalteBetriebskosten.First(k => k.Typ == r.Typ).Beschreibung;
+            Beschreibung = r.Adresse.KalteBetriebskosten.FirstOrDefault(k => k.Typ == r.Typ)?.Beschreibung;
             Jahr.Value = r.Jahr;
             Betrag = r.Betrag;
             Typ.Value = r.Typ;

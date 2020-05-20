@@ -43,7 +43,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class WohnungListAdresse
     {
-        public int Id;
+        public int Id { get; }
         public ObservableProperty<string> Postleitzahl { get; }
             = new ObservableProperty<string>();
         public ObservableProperty<string> Hausnummer { get; }
@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public WohnungListAdresse(int id)
         {
             Id = id;
-            var Adresse = App.Walter.Adressen.Find(id);
+            var Adresse = App.Walter.Adressen.Find(Id);
             Postleitzahl.Value = Adresse.Postleitzahl;
             Hausnummer.Value = Adresse.Hausnummer;
             Strasse.Value = Adresse.Strasse;

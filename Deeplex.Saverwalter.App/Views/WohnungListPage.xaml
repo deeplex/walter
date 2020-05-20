@@ -70,7 +70,7 @@
                                 </StackPanel>
                                 <AppBarButton
                                     Click="Rechnungen_Click"
-                                    CommandParameter="{Binding Key}"
+                                    CommandParameter="{Binding Key.Id}"
                                     Margin="10"
                                     Icon="List"
                                     Name="Rechnungen"

@@ -24,10 +24,6 @@
                     HorizontalAlignment="Stretch"
                     DefaultLabelPosition="Right">
                     <AppBarButton
-                        Icon="Delete"
-                        Label="Entferne Jahr"
-                        Command="{x:Bind ViewModel.RemoveJahr}"/>
-                    <AppBarButton
                         Icon="Add"
                         Label="Neues Jahr">
                         <AppBarButton.Flyout>
@@ -54,6 +50,13 @@
                         Command="{x:Bind ViewModel.SaveEdit}"
                         Icon="Save"
                         Label="Speichern"/>
+                    <CommandBar.SecondaryCommands>
+                        <AppBarButton
+                            Icon="Delete"
+                            Label="Entferne Jahr"
+                            IsEnabled="{x:Bind ViewModel.IsNotEmpty, Mode=OneWay}"
+                            Command="{x:Bind ViewModel.RemoveJahr}"/>
+                    </CommandBar.SecondaryCommands>
                 </CommandBar>
             </RelativePanel>
             <Pivot
@@ -116,6 +119,7 @@
                 </Pivot.ItemTemplate>
             </Pivot>
             <AutoSuggestBox
+                Visibility="{x:Bind ViewModel.IsNotEmpty, Mode=OneWay}"
                 HorizontalAlignment="Left"
                 Margin="50,0,0,0"
                 Width="350"
