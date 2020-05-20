@@ -68,10 +68,5 @@
                 </Grid>
             </DataTemplate>
         </muxc:ItemsRepeater>
-
-
-
     </StackPanel>
-
-
 </Page>

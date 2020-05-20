@@ -159,7 +159,10 @@ namespace Deeplex.Saverwalter.App.Views
             var Jahr = (int)((Button)sender).CommandParameter;
             var b = new Betriebskostenabrechnung(
                 ViewModel.Versionen.Value.First().Id, Jahr, new DateTime(Jahr, 1, 1), new DateTime(Jahr, 12, 31));
-            b.SaveAsDocx(ApplicationData.Current.LocalFolder.Path + @"\walter.docx");
+
+            var s = Jahr.ToString() + " - " + ViewModel.Wohnung.Value.BezeichnungVoll.Value;
+
+            b.SaveAsDocx(ApplicationData.Current.LocalFolder.Path + @"\" + s + ".docx");
         }
     }
 }

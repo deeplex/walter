@@ -72,6 +72,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ToList()
                 .OrderBy(m => m.Datum.Value).Reverse()
                 .ToImmutableList();
+
+            BetriebskostenJahr.Value = DateTime.Now.Year - 1;
         }
 
         public VertragDetailViewModel(List<Vertrag> v) : base(v.OrderBy(vs => vs.Version).Last())
