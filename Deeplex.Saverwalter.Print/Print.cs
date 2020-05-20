@@ -117,7 +117,7 @@ namespace Deeplex.Saverwalter.Print
             {
                 Val = JustificationValues.Right,
             }),
-                new Run(new Text(DateTime.Today.ToShortDateString())));
+                new Run(new Text(Datum(DateTime.Today))));
         }
 
         private static Paragraph Betreff(Betriebskostenabrechnung b)
@@ -138,11 +138,11 @@ namespace Deeplex.Saverwalter.Print
                     new Break(),
                     new Text("Abrechnungszeitraum: "),
                     new TabChar(),
-                    new Text(b.Abrechnungsbeginn.ToShortDateString() + " - " + b.Abrechnungsende.ToShortDateString()),
+                    new Text(Datum(b.Abrechnungsbeginn) + " - " + Datum(b.Abrechnungsende)),
                     new Break(),
                     new Text("Nutzungszeitraum: "),
                     new TabChar(),
-                    new Text(b.Nutzungsbeginn.ToShortDateString() + " - " + b.Nutzungsende.ToShortDateString())));
+                    new Text(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende))));
         }
 
         private static Paragraph Ergebnis(Betriebskostenabrechnung b)
@@ -287,7 +287,7 @@ namespace Deeplex.Saverwalter.Print
                     ContentCell(f ? b.GesamtWohnflaeche.ToString() : "", JustificationValues.Center),
                     ContentCell(f ? b.GesamtNutzflaeche.ToString() : "", JustificationValues.Center),
                     ContentCell(Personenzahl.ToString(), JustificationValues.Center),
-                    ContentCell(Beginn.ToShortDateString() + " - " + Ende.ToShortDateString(), JustificationValues.Center),
+                    ContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center),
                     ContentCell(timespan + "/" + b.Abrechnungszeitspanne, JustificationValues.Center)));
             };
 
@@ -318,7 +318,7 @@ namespace Deeplex.Saverwalter.Print
                     ContentCell(f ? b.Wohnung.Wohnflaeche.ToString() : "", JustificationValues.Center),
                     ContentCell(f ? b.Wohnung.Nutzflaeche.ToString() : "", JustificationValues.Center),
                     ContentCell(Personenzahl.ToString(), JustificationValues.Center),
-                    ContentCell(Beginn.ToShortDateString() + " - " + Ende.ToShortDateString(), JustificationValues.Center),
+                    ContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center),
                     ContentCell(timespan + "/" + b.Abrechnungszeitspanne, JustificationValues.Center)));
             };
 
@@ -336,14 +336,14 @@ namespace Deeplex.Saverwalter.Print
                     ContentHead("900", "Ihr Anteil", JustificationValues.Center)),
                 new TableRow(
                     ContentCell(b.Wohnung.Wohnflaeche.ToString() + " / " + b.GesamtWohnflaeche.ToString(), JustificationValues.Center),
-                    ContentCell(b.Nutzungsbeginn.ToShortDateString() + " - " + b.Nutzungsende.ToShortDateString(), JustificationValues.Center),
+                    ContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center),
                     ContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
                     ContentCell(Percent(b.WFZeitanteil), JustificationValues.Center)),
                 new TableRow(
                     ContentHead("bei Umlage nach Nutzeinheiten (n. NE)")),
                 new TableRow(
                     ContentCell(1.ToString() + " / " + b.GesamtEinheiten, JustificationValues.Center),
-                    ContentCell(b.Nutzungsbeginn.ToShortDateString() + " - " + b.Nutzungsende.ToShortDateString(), JustificationValues.Center),
+                    ContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center),
                     ContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
                     ContentCell(Percent(b.NEZeitanteil), JustificationValues.Center)),
                 new TableRow(
@@ -357,7 +357,7 @@ namespace Deeplex.Saverwalter.Print
 
                 table.Append(new TableRow(
                     ContentCell(Personenzahl.ToString() + " / " + GesamtPersonenzahl.ToString(), JustificationValues.Center),
-                    ContentCell(Beginn.ToShortDateString() + " - " + Ende.ToShortDateString(), JustificationValues.Center),
+                    ContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center),
                     ContentCell(timespan + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
                     ContentCell(Percent(b.PersZeitanteil[i].Anteil), JustificationValues.Center)));
             }
@@ -398,18 +398,18 @@ namespace Deeplex.Saverwalter.Print
                 switch (pt.Schluessel)
                 {
                     case UmlageSchluessel.NachWohnflaeche:
-                        zeitraum = b.Nutzungsbeginn.ToShortDateString() + " - " + b.Nutzungsende.ToShortDateString();
+                        zeitraum = Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende);
                         table.Append(kostenPunkt(pt, zeitraum, b.Jahr, b.WFZeitanteil));
                         break;
                     case UmlageSchluessel.NachNutzeinheit:
-                        zeitraum = b.Nutzungsbeginn.ToShortDateString() + " - " + b.Nutzungsende.ToShortDateString();
+                        zeitraum = Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende);
                         table.Append(kostenPunkt(pt, zeitraum, b.Jahr, b.NEZeitanteil));
                         break;
                     case UmlageSchluessel.NachPersonenzahl:
                         var first = true;
                         foreach (var a in b.PersZeitanteil)
                         {
-                            zeitraum = a.Beginn.ToShortDateString() + " - " + a.Ende.ToShortDateString();
+                            zeitraum = Datum(a.Beginn) + " - " + Datum(a.Ende);
                             table.Append(kostenPunkt(pt, zeitraum, b.Jahr, a.Anteil, first));
                             first = false;
                         }
@@ -447,6 +447,7 @@ namespace Deeplex.Saverwalter.Print
         // Helper
         private static string Percent(double d) => string.Format("{0:N2}%", d * 100);
         private static string Euro(double d) => string.Format("{0:N2}€", d);
+        private static string Datum(DateTime d) => d.ToString("dd.MM.yyyy");
 
         static RunProperties Bold() => new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) });
         static ParagraphProperties NoSpace() => new ParagraphProperties(new SpacingBetweenLines() { After = "0" });
