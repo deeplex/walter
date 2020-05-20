@@ -31,6 +31,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<ImmutableList<VertragDetailMiete>> Mieten
             = new ObservableProperty<ImmutableList<VertragDetailMiete>>();
 
+        public ObservableProperty<int> BetriebskostenJahr = new ObservableProperty<int>();
+
         public VertragDetailViewModel() : this(new List<Vertrag> { new Vertrag() })
         {
             IsInEdit.Value = true;
@@ -228,6 +230,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 }
                 App.Walter.SaveChanges();
             }, _ => IsInEdit.Value);
+
             IsInEdit.PropertyChanged += (_, ev) => SaveEdit.RaiseCanExecuteChanged(ev);
 
             IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));

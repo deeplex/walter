@@ -243,6 +243,10 @@
       <Project>{86b31247-2795-4d84-b78b-de8d502e6719}</Project>
       <Name>Deeplex.Saverwalter.Model</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Deeplex.Saverwalter.Print\Deeplex.Saverwalter.Print.csproj">
+      <Project>{54cab3f2-f07c-4d88-b50c-d140c0f799e0}</Project>
+      <Name>Deeplex.Saverwalter.Print</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Deeplex.Utils.ObjectModel\Deeplex.Utils.ObjectModel.csproj">
       <Project>{81840d1d-eb12-40ce-bcd1-84e2b2e12ed9}</Project>
       <Name>Deeplex.Utils.ObjectModel</Name>

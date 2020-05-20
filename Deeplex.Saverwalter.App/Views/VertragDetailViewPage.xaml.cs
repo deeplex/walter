@@ -1,8 +1,11 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Print;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Windows.Storage;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
@@ -149,6 +152,14 @@ namespace Deeplex.Saverwalter.App.Views
         {
             var miete = (VertragDetailMiete)((Button)sender).CommandParameter;
             ViewModel.Mieten.Value = ViewModel.Mieten.Value.Remove(miete).ToImmutableList();
+        }
+
+        private void Betriebskostenabrechnung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            var Jahr = (int)((Button)sender).CommandParameter;
+            var b = new Betriebskostenabrechnung(
+                ViewModel.Versionen.Value.First().Id, Jahr, new DateTime(Jahr, 1, 1), new DateTime(Jahr, 12, 31));
+            b.SaveAsDocx(ApplicationData.Current.LocalFolder.Path + @"\walter.docx");
         }
     }
 }
