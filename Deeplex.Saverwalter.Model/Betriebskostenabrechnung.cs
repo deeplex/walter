@@ -116,7 +116,7 @@ namespace Deeplex.Saverwalter.Model
             RechnungenKalt = Adresse.KalteBetriebskostenRechnungen.Where(k => k.Jahr == Jahr).OrderBy(k => k.Typ).ToList();
             GesamtBetragKalt = RechnungenKalt.Sum(r => r.Betrag);
             BetragKalt = RechnungenKalt.Aggregate(0.0, (a, b) =>
-                KalteBetriebskosten.First(k => k.Typ == b.Typ).Schluessel switch
+                KalteBetriebskosten.FirstOrDefault(k => k.Typ == b.Typ)?.Schluessel switch
                 {
                     UmlageSchluessel.NachWohnflaeche => a + b.Betrag * WFZeitanteil,
                     UmlageSchluessel.NachNutzeinheit => a + b.Betrag * NEZeitanteil,
