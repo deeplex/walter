@@ -26,12 +26,6 @@ namespace Deeplex.Saverwalter.App.Views
                 new DrillInNavigationTransitionInfo());
         }
 
-        private void Rechnungen_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            Frame.Navigate(typeof(KalteBetriebskostenRechnungPage), (int)((Button)sender).CommandParameter,
-                new DrillInNavigationTransitionInfo());
-        }
-
         private void Adresse_TextChanged(object sender, TextChangedEventArgs e)
         {
             ViewModel.IsInEdit.Value = true;

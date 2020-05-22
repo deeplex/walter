@@ -7,7 +7,7 @@ namespace Deeplex.Saverwalter.Model
 {
     public static class KalteBetriebskostenExtensions
     {
-        public static string ToDescriptionString(this KalteBetriebskosten val)
+        public static string ToDescriptionString(this Betriebskostentyp val)
         {
             DescriptionAttribute[] attributes = (DescriptionAttribute[])val
                .GetType()

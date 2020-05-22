@@ -156,35 +156,6 @@
                             </mtuuc:DataGrid.Columns>
                         </mtuuc:DataGrid>
                     </mtuuc:Expander>
-                    <mtuuc:Expander
-                        ScrollViewer.VerticalScrollMode="Auto"
-                        HorizontalContentAlignment="Left"
-                        Background="Transparent"
-                        Header="Kalte Betriebskosten">
-                        <mtuuc:DataGrid
-                            IsReadOnly="True"
-                            CanUserReorderColumns="False"
-                            CanUserResizeColumns="True"
-                            AutoGenerateColumns="False"
-                            IsEnabled="{x:Bind ViewModel.IsNotInEdit, Mode=OneWay}"
-                            ItemsSource="{x:Bind ViewModel.KalteBetriebskosten.Value}">
-                            <mtuuc:DataGrid.Columns>
-                                <mtuuc:DataGridTextColumn Header="Bezeichnung" Binding="{Binding Bezeichnung.Value}"/>
-                                <mtuuc:DataGridTextColumn Header="Schlüssel" Binding="{Binding Schluessel.Value}"/>
-                                <mtuuc:DataGridTextColumn Header="Anteil" Binding="{Binding Anteil.Value}"/>
-                            </mtuuc:DataGrid.Columns>
-                            <mtuuc:DataGrid.RowDetailsTemplate>
-                                <DataTemplate>
-                                    <Grid>
-                                        <TextBlock
-                                            TextWrapping="Wrap"
-                                            Margin="20,20,20,20"
-                                            Text="{Binding Beschreibung.Value}"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </mtuuc:DataGrid.RowDetailsTemplate>
-                        </mtuuc:DataGrid>
-                    </mtuuc:Expander>
                 </StackPanel>
             </RelativePanel>
         </StackPanel>

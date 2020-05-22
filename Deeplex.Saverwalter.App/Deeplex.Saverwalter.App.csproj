@@ -124,11 +124,9 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\AdresseViewModel.cs" />
+    <Compile Include="ViewModels\BetriebskostenRechnungenViewModel.cs" />
     <Compile Include="ViewModels\JuristischePersonenListViewModel.cs" />
     <Compile Include="ViewModels\JuristischePersonViewModel.cs" />
-    <Compile Include="ViewModels\KalteBetriebskostenRechnungViewModel.cs" />
-    <Compile Include="ViewModels\KalteBetriebskostenViewModel.cs" />
-    <Compile Include="ViewModels\KalteBetriebskostenVorlageViewModel.cs" />
     <Compile Include="ViewModels\VertragDetailViewModel.cs" />
     <Compile Include="ViewModels\KontaktListViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
@@ -136,14 +134,11 @@
     <Compile Include="ViewModels\WohnungListViewModel.cs" />
     <Compile Include="ViewModels\VertragListViewModel.cs" />
     <Compile Include="ViewModels\KontaktDetailViewModel.cs" />
+    <Compile Include="Views\BetriebskostenRechnungenListViewPage.xaml.cs">
+      <DependentUpon>BetriebskostenRechnungenListViewPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\JuristischePersonenListPage.xaml.cs">
       <DependentUpon>JuristischePersonenListPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\KalteBetriebskostenRechnungPage.xaml.cs">
-      <DependentUpon>KalteBetriebskostenRechnungPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\KalteBetriebskostenVorlagePage.xaml.cs">
-      <DependentUpon>KalteBetriebskostenVorlagePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\KontaktDetailPage.xaml.cs">
       <DependentUpon>KontaktDetailPage.xaml</DependentUpon>
@@ -191,15 +186,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\BetriebskostenRechnungenListViewPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\JuristischePersonenListPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\KalteBetriebskostenRechnungPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\KalteBetriebskostenVorlagePage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
