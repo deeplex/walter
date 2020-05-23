@@ -12,7 +12,7 @@
 
     <StackPanel>
         <muxc:ItemsRepeater
-            ItemsSource="{x:Bind ViewModel.Gruppen}">
+            ItemsSource="{x:Bind ViewModel.Typen}">
             <DataTemplate>
                 <mtuuc:Expander>
                 </mtuuc:Expander>

@@ -19,10 +19,10 @@ using Windows.UI.Xaml.Navigation;
 namespace Deeplex.Saverwalter.App.Views
 {
 
-    public sealed partial class BetriebskostenRechnungenViewPage : Page
+    public sealed partial class BetriebskostenRechnungenListViewPage : Page
     {
-        public BetriebskostenRechnungenViewModel ViewModel = new BetriebskostenRechnungenViewModel();
-        public BetriebskostenRechnungenViewPage()
+        public BetriebskostenRechnungenListViewModel ViewModel = new BetriebskostenRechnungenListViewModel();
+        public BetriebskostenRechnungenListViewPage()
         {
             InitializeComponent();
         }
