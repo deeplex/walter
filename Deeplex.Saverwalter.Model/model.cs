@@ -225,6 +225,7 @@ namespace Deeplex.Saverwalter.Model
     public class Betriebskostenrechnungsgruppe
     {
         public int BetriebskostenrechnungsgruppeId { get; set; }
+        public int WohnungId { get; set; }
         public Wohnung Wohnung { get; set; } = null!;
         public Betriebskostenrechnung Rechnung { get; set; } = null!;
     }

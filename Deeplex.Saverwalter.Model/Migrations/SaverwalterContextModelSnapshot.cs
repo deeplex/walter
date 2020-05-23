@@ -64,6 +64,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("Schluessel")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Typ")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("BetriebskostenrechnungId");
 
                     b.ToTable("Betriebskostenrechnungen");

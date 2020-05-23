@@ -1,5 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.CustomAttributes;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -9,16 +12,93 @@ using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
+
     public class BetriebskostenRechnungenListViewModel
     {
         public ObservableProperty<ImmutableDictionary<Betriebskostentyp, BetriebskostenRechnungenListTyp>> Typen
             = new ObservableProperty<ImmutableDictionary<Betriebskostentyp, BetriebskostenRechnungenListTyp>>();
 
+        public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
+
+        public List<BetriebskostenRechnungenBetriebskostentyp> Betriebskostentypen =
+            Enum.GetValues(typeof(Betriebskostentyp))
+                .Cast<Betriebskostentyp>()
+                .ToList()
+                .Select(e => new BetriebskostenRechnungenBetriebskostentyp(e))
+                .ToList();
+
+        public List<BetriebskostenRechnungenSchluessel> Betriebskostenschluessel =
+            Enum.GetValues(typeof(UmlageSchluessel))
+                .Cast<UmlageSchluessel>()
+                .ToList()
+                .Select(t => new BetriebskostenRechnungenSchluessel(t))
+                .ToList();
+
+        public TreeViewNode AddBetriebskostenTree;
         public BetriebskostenRechnungenListViewModel()
         {
             Typen.Value = App.Walter.Betriebskostenrechnungsgruppen
+                .ToList()
                 .GroupBy(g => g.Rechnung.Typ)
                 .ToImmutableDictionary(g => g.Key, g => new BetriebskostenRechnungenListTyp(g.ToList()));
+
+
+            AdresseGroup = App.Walter.Wohnungen
+                .Include(w => w.Adresse)
+                .ToList()
+                .Select(w => new BetriebskostenRechungenListWohnungListWohnung(w))
+                .GroupBy(w => w.AdresseId)
+                .ToImmutableDictionary(g => new BetriebskostenRechungenListWohnungListAdresse(g.Key), g => g.ToImmutableList());
+        }
+    }
+
+    public class BetriebskostenRechnungenBetriebskostentyp
+    {
+        public Betriebskostentyp Typ { get; }
+        public string Beschreibung { get; }
+        public BetriebskostenRechnungenBetriebskostentyp(Betriebskostentyp t)
+        {
+            Typ = t;
+            Beschreibung = t.ToDescriptionString();
+        }
+    }
+
+    public class BetriebskostenRechnungenSchluessel
+    {
+        public UmlageSchluessel Schluessel { get; }
+        public string Beschreibung { get; }
+        public BetriebskostenRechnungenSchluessel(UmlageSchluessel u)
+        {
+            Schluessel = u;
+            Beschreibung = u.ToDescriptionString();
+        }
+    }
+
+    public class BetriebskostenRechungenListWohnungListAdresse : TreeViewNode
+    {
+        public int Id { get; }
+        public string Anschrift { get; }
+        public BetriebskostenRechungenListWohnungListAdresse(int id)
+        {
+            Id = id;
+            Anschrift = AdresseViewModel.Anschrift(id);
+            Content = Anschrift;
+        }
+    }
+
+    public class BetriebskostenRechungenListWohnungListWohnung : TreeViewNode
+    {
+        public int Id { get; }
+        public int AdresseId { get; }
+        public string Bezeichnung { get; }
+
+
+        public BetriebskostenRechungenListWohnungListWohnung(Wohnung w)
+        {
+            Id = w.WohnungId;
+            AdresseId = w.AdresseId;
+            Bezeichnung = w.Bezeichnung;
+            Content = Bezeichnung;
         }
     }
 
@@ -73,10 +153,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class BetriebskostenRechnungenWohnung
     {
-        public ObservableProperty<string> Bezeichnung = new ObservableProperty<string>();
+        public string Bezeichnung { get; }
         public BetriebskostenRechnungenWohnung(Betriebskostenrechnungsgruppe g)
         {
-            Bezeichnung.Value = g.Wohnung.Bezeichnung;
+            Bezeichnung = g.Wohnung.Bezeichnung;
         }
     }
 }

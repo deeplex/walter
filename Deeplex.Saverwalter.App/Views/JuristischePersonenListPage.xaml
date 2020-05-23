@@ -17,10 +17,10 @@
 
     <StackPanel>
         <CommandBar
-                Background="Transparent"
-                IsOpen="False"
-                HorizontalAlignment="Stretch"
-                DefaultLabelPosition="Right">
+            Background="Transparent"
+            IsOpen="False"
+            HorizontalAlignment="Stretch"
+            DefaultLabelPosition="Right">
             <CommandBar.Content>
                 <TextBlock Text="Juristische Personen"
                     Style="{StaticResource TitleTextBlockStyle}"

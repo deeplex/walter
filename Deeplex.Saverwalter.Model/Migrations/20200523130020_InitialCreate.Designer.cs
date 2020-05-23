@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20200521200955_InitialCreate")]
+    [Migration("20200523130020_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -64,6 +64,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Schluessel")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Typ")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("BetriebskostenrechnungId");

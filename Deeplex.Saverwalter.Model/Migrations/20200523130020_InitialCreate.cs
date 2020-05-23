@@ -30,6 +30,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     BetriebskostenrechnungId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    Typ = table.Column<int>(nullable: false),
                     Betrag = table.Column<double>(nullable: false),
                     Datum = table.Column<DateTime>(nullable: false),
                     Schluessel = table.Column<int>(nullable: false),
