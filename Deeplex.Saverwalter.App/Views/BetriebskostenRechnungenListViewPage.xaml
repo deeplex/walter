@@ -11,6 +11,10 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.Resources>
+        <muxc:StackLayout x:Name="VerticalStackLayout" Orientation="Vertical" Spacing="8"/>
+    </Page.Resources>
+
     <StackPanel>
         <CommandBar
             Background="Transparent"
@@ -51,14 +55,37 @@
                 </AppBarButton.Flyout>
             </AppBarButton>
         </CommandBar>
-        
-        <!--<muxc:ItemsRepeater
-            ItemsSource="{x:Bind ViewModel.Typen}">
+
+        <muxc:ItemsRepeater
+            Layout="{StaticResource VerticalStackLayout}"
+            ItemsSource="{x:Bind ViewModel.Typen.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
             <DataTemplate>
-                <mtuuc:Expander>
-                </mtuuc:Expander>
+                <Grid>
+                    <mtuuc:Expander Header="{Binding Key.Beschreibung}">
+                        <StackPanel>
+                            <Pivot ItemsSource="{Binding Value}">
+                                <Pivot.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Value.Jahr}"/>
+                                    </DataTemplate>
+                                </Pivot.HeaderTemplate>
+                                <PivotItem>
+                                    <Grid>
+                                        <GridView ItemsSource="{Binding Gruppe.Value}">
+                                            <GridView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="hi"/>
+                                                </DataTemplate>
+                                            </GridView.ItemTemplate>
+                                        </GridView>
+                                    </Grid>
+                                </PivotItem>
+                            </Pivot>
+                        </StackPanel>
+                    </mtuuc:Expander>
+                </Grid>
             </DataTemplate>
-        </muxc:ItemsRepeater>-->
-            
+        </muxc:ItemsRepeater>
+
     </StackPanel>
 </Page>

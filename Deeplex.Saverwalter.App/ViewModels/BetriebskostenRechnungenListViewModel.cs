@@ -15,8 +15,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class BetriebskostenRechnungenListViewModel
     {
-        public ObservableProperty<ImmutableDictionary<Betriebskostentyp, BetriebskostenRechnungenListTyp>> Typen
-            = new ObservableProperty<ImmutableDictionary<Betriebskostentyp, BetriebskostenRechnungenListTyp>>();
+        public ObservableProperty<ImmutableDictionary<BetriebskostenRechnungenBetriebskostentyp, BetriebskostenRechnungenListTypenJahr>> Typen
+            = new ObservableProperty<ImmutableDictionary<BetriebskostenRechnungenBetriebskostentyp, BetriebskostenRechnungenListTypenJahr>>();
 
         public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
 
@@ -38,10 +38,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public BetriebskostenRechnungenListViewModel()
         {
             Typen.Value = App.Walter.Betriebskostenrechnungsgruppen
+                .Include(b => b.Rechnung)
+                .Include(b => b.Wohnung)
                 .ToList()
                 .GroupBy(g => g.Rechnung.Typ)
-                .ToImmutableDictionary(g => g.Key, g => new BetriebskostenRechnungenListTyp(g.ToList()));
-
+                .ToImmutableDictionary(g => new BetriebskostenRechnungenBetriebskostentyp(g.Key), g => new BetriebskostenRechnungenListTypenJahr(g.ToList()));
 
             AdresseGroup = App.Walter.Wohnungen
                 .Include(w => w.Adresse)
@@ -102,37 +103,24 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class BetriebskostenRechnungenListTyp
-    {
-        public ObservableProperty<ImmutableSortedDictionary<int, BetriebskostenRechnungenListTypenJahr>> Jahre
-            = new ObservableProperty<ImmutableSortedDictionary<int, BetriebskostenRechnungenListTypenJahr>>();
-
-
-        public BetriebskostenRechnungenListTyp(List<Betriebskostenrechnungsgruppe> g)
-        {
-            Jahre.Value = g
-                .GroupBy(gg => gg.Rechnung.Datum.Year)
-                .ToImmutableSortedDictionary(gg => gg.Key, gg => new BetriebskostenRechnungenListTypenJahr(gg.ToList()));
-        }
-    }
-
     public class BetriebskostenRechnungenListTypenJahr
     {
-        public ObservableProperty<ImmutableDictionary<string, BetriebskostenRechnungenGruppe>> Gruppe
-            = new ObservableProperty<ImmutableDictionary<string, BetriebskostenRechnungenGruppe>>();
+        public ImmutableDictionary<string, BetriebskostenRechnungenGruppe> Gruppe { get; }
 
-        public ObservableProperty<double> Betrag = new ObservableProperty<double>();
-        public ObservableProperty<DateTimeOffset> Datum = new ObservableProperty<DateTimeOffset>();
+        public double Betrag { get; }
+        public int Jahr { get; }
+        public DateTimeOffset Datum { get; }
         public BetriebskostenRechnungenListTypenJahr(List<Betriebskostenrechnungsgruppe> g)
         {
-            Gruppe.Value = g
+            Gruppe = g
                 .GroupBy(gg => gg.Wohnung.Adresse)
                 .ToImmutableDictionary(
                     gg => AdresseViewModel.Anschrift(gg.Key),
                     gg => new BetriebskostenRechnungenGruppe(gg.ToList()));
 
-            Betrag.Value = g.First().Rechnung.Betrag;
-            Datum.Value = g.First().Rechnung.Datum;
+            Betrag = g.First().Rechnung.Betrag;
+            Datum = g.First().Rechnung.Datum;
+            Jahr = Datum.Year;
         }
     }
 
