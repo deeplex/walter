@@ -17,6 +17,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using Windows.ApplicationModel.VoiceCommands;
 
 namespace Deeplex.Utils.ObjectModel
 {
@@ -64,6 +66,8 @@ namespace Deeplex.Utils.ObjectModel
             }
             RaiseErrorsChanged(new DataErrorsChangedEventArgs(propertyName));
         }
+        protected void AddErrorAuto(string error, [CallerMemberName] string propertyName = "")
+            => AddError(propertyName, error);
 
         protected void AddErrors(string propertyName, IEnumerable<string> errors)
         {
@@ -97,5 +101,7 @@ namespace Deeplex.Utils.ObjectModel
             }
             RaiseErrorsChanged(new DataErrorsChangedEventArgs(propertyName));
         }
+        protected void ClearErrorsAuto([CallerMemberName] string propertyName = "")
+            => ClearErrors(propertyName);
     }
 }

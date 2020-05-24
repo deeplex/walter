@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class WohnungDetailViewModel : BindableBase
+    public class WohnungDetailViewModel : ValidatableBase
     {
         public int Id;
         public ObservableProperty<JuristischePersonViewModel> Besitzer
@@ -15,8 +15,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<int> AdresseId = new ObservableProperty<int>();
         public ObservableProperty<string> Bezeichnung = new ObservableProperty<string>();
         public ObservableProperty<string> Anschrift = new ObservableProperty<string>();
-        public ObservableProperty<double> Wohnflaeche = new ObservableProperty<double>();
-        public ObservableProperty<double> Nutzflaeche = new ObservableProperty<double>();
         public ObservableProperty<List<WohnungDetailZaehler>> Zaehler
             = new ObservableProperty<List<WohnungDetailZaehler>>();
         public ObservableProperty<List<WohnungDetailVertrag>> Vertraege
@@ -25,6 +23,41 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<AdresseViewModel>();
         public ObservableProperty<string> Notiz
             = new ObservableProperty<string>();
+
+        private double mWohnflaeche;
+        public double Wohnflaeche
+        {
+            get => mWohnflaeche;
+            set 
+            { 
+                SetProperty(ref mWohnflaeche, value);
+                if (mWohnflaeche <= mNutzflaeche)
+                {
+                    ClearErrors(nameof(Nutzflaeche));
+                }
+                else
+                {
+                    AddError(nameof(Nutzflaeche), "Wohnfläche muss kleiner als Nutzfläche");
+                }
+            }
+        }
+        private double mNutzflaeche;
+        public double Nutzflaeche
+        {
+            get => mNutzflaeche;
+            set
+            {
+                SetProperty(ref mNutzflaeche, value);
+                if (mWohnflaeche <= mNutzflaeche)
+                {
+                    ClearErrors(nameof(Nutzflaeche));
+                }
+                else
+                {
+                    AddErrorAuto("Wohnfläche muss kleiner als Nutzfläche");
+                }
+            }
+        }
 
         public WohnungDetailViewModel(int id)
             : this(App.Walter.Wohnungen
@@ -45,8 +78,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             AdresseId.Value = w.AdresseId;
             Anschrift.Value = AdresseViewModel.Anschrift(w);
             Bezeichnung.Value = w.Bezeichnung;
-            Wohnflaeche.Value = w.Wohnflaeche;
-            Nutzflaeche.Value = w.Nutzflaeche;
+            mWohnflaeche = w.Wohnflaeche;
+            Nutzflaeche = w.Nutzflaeche;
             Notiz.Value = w.Notiz;
 
             Adresse.Value = w.Adresse is Adresse ?
@@ -77,8 +110,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 // w.Zaehler = ZaehlerViewModel // TODO
                 // w.Zaehlergemeinschaften = Zaehlergemeinschaften TODO
                 w.Bezeichnung = Bezeichnung.Value;
-                w.Nutzflaeche = Nutzflaeche.Value;
-                w.Wohnflaeche = Wohnflaeche.Value;
+                w.Nutzflaeche = Nutzflaeche;
+                w.Wohnflaeche = Wohnflaeche;
                 w.Notiz = Notiz.Value;
 
                 if (w.WohnungId > 0)
