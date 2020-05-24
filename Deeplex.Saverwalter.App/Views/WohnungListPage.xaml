@@ -27,15 +27,15 @@
                 Label="Änderungen speichern"/>
             <AppBarButton Click="AddWohnung_Click" Icon="Add" Label="Wohnung hinzufügen"/>
         </CommandBar>
-        <Grid Margin="10" RelativePanel.Below="ButtonRow">
+        <StackPanel Margin="10" RelativePanel.Below="ButtonRow">
             <ScrollViewer>
                 <muxc:ItemsRepeater
                     ItemsSource="{x:Bind ViewModel.AdresseGroup}"
                     Layout="{StaticResource VerticalStackLayout}">
                     <DataTemplate>
                         <!-- Make this an Expander - https://github.com/microsoft/microsoft-ui-xaml/issues/2003-->
-                        <Grid>
                             <RelativePanel CornerRadius="10" Background="{StaticResource SystemChromeMediumColor}">
+                            <StackPanel>
                                 <StackPanel Margin="10, 10, 0, 0" Orientation="Horizontal">
                                 <TextBox
                                     Background="Transparent"
@@ -85,11 +85,11 @@
                                         </DataTemplate>
                                     </GridView.ItemTemplate>
                                 </GridView>
-                            </RelativePanel>
-                        </Grid>
+                            </StackPanel>
+                        </RelativePanel>
                     </DataTemplate>
                 </muxc:ItemsRepeater>
             </ScrollViewer>
-        </Grid>
+        </StackPanel>
     </RelativePanel>
 </Page>
