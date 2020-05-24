@@ -232,7 +232,7 @@ namespace Deeplex.Saverwalter.Print
         {
             var para = new Paragraph();
 
-            foreach (var item in b.KalteBetriebskosten.Where(k => k.Beschreibung is string))
+            foreach (var item in b.KalteBetriebskosten.Where(k => k.Beschreibung is string && k.Beschreibung.Length > 0))
             {
                 para.Append(
                     new Run(
@@ -349,7 +349,7 @@ namespace Deeplex.Saverwalter.Print
             for (var i = 0; i < b.PersZeitanteil.Count; ++i)
             {
                 var (Beginn, Ende, GesamtPersonenzahl) = b.GesamtPersonenIntervall.SkipWhile(g => g.Beginn < b.PersZeitanteil[i].Beginn).First();
-                var Personenzahl = b.PersonenIntervall.Where(p => p.Beginn <= Beginn).First().Personenzahl;
+                var Personenzahl = b.PersonenIntervall.Where(p => p.Beginn >= Beginn).First().Personenzahl;
                 var timespan = ((Ende - Beginn).Days + 1).ToString();
 
                 table.Append(new TableRow(
