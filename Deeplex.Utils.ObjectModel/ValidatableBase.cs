@@ -69,7 +69,7 @@ namespace Deeplex.Utils.ObjectModel
         {
             if (!mValidationErrors.TryGetValue(propertyName, out var errorList))
             {
-                mValidationErrors.Add(propertyName, new List<string>(errors));
+                mValidationErrors.Add(propertyName, errors.ToList());
             }
             else
             {
