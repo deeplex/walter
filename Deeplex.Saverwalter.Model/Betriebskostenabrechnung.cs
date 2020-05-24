@@ -15,8 +15,6 @@ namespace Deeplex.Saverwalter.Model
         public Wohnung Wohnung { get; set; }
         public Adresse Adresse { get; set; }
         public List<Wohnung> Wohnungen { get; set; }
-        public List<KalteBetriebskostenpunkt> KalteBetriebskosten { get; set; }
-        public List<KalteBetriebskostenRechnung> RechnungenKalt { get; set; }
         public double GesamtBetragKalt { get; set; }
         public double BetragKalt { get; set; }
         public double Gezahlt { get; set; }
@@ -53,12 +51,6 @@ namespace Deeplex.Saverwalter.Model
                 .Where(v => v.rowid == rowid)
                 .Include(v => v.Ansprechpartner)
                     .ThenInclude(k => k.Adresse)
-                .Include(v => v.Wohnung!)
-                    .ThenInclude(w => w.Adresse)
-                        .ThenInclude(a => a.KalteBetriebskosten)
-                .Include(v => v.Wohnung!)
-                    .ThenInclude(w => w.Adresse)
-                        .ThenInclude(a => a.KalteBetriebskostenRechnungen)
                 .Include(v => v.Wohnung!)
                     .ThenInclude(w => w.Adresse)
                         .ThenInclude(a => a.Wohnungen)
@@ -112,20 +104,20 @@ namespace Deeplex.Saverwalter.Model
                     (double)PersonenIntervall.Where(p => p.Beginn >= w.Beginn).First().Personenzahl / w.Personenzahl *
                     (((double)(w.Ende - w.Beginn).Days + 1) / Abrechnungszeitspanne))).ToList();
 
-            KalteBetriebskosten = Adresse.KalteBetriebskosten.OrderBy(k => k.Typ).ToList();
-            RechnungenKalt = Adresse.KalteBetriebskostenRechnungen.Where(k => k.Jahr == Jahr).OrderBy(k => k.Typ).ToList();
-            GesamtBetragKalt = RechnungenKalt.Sum(r => r.Betrag);
-            BetragKalt = RechnungenKalt.Aggregate(0.0, (a, b) =>
-                KalteBetriebskosten.FirstOrDefault(k => k.Typ == b.Typ)?.Schluessel switch
-                {
-                    UmlageSchluessel.NachWohnflaeche => a + b.Betrag * WFZeitanteil,
-                    UmlageSchluessel.NachNutzeinheit => a + b.Betrag * NEZeitanteil,
-                    UmlageSchluessel.NachPersonenzahl => a + PersZeitanteil
-                            .Aggregate(0.0, (c, z) => c += z.Anteil * b.Betrag),
-                    UmlageSchluessel.NachVerbrauch => a + 0, // TODO
-                    _ => a + 0, // TODO or throw something...
-                }
-            );
+            //KalteBetriebskosten = Adresse.KalteBetriebskosten.OrderBy(k => k.Typ).ToList();
+            //RechnungenKalt = Adresse.KalteBetriebskostenRechnungen.Where(k => k.Jahr == Jahr).OrderBy(k => k.Typ).ToList();
+            //GesamtBetragKalt = RechnungenKalt.Sum(r => r.Betrag);
+            //BetragKalt = RechnungenKalt.Aggregate(0.0, (a, b) =>
+            //    KalteBetriebskosten.FirstOrDefault(k => k.Typ == b.Typ)?.Schluessel switch
+            //    {
+            //        UmlageSchluessel.NachWohnflaeche => a + b.Betrag * WFZeitanteil,
+            //        UmlageSchluessel.NachNutzeinheit => a + b.Betrag * NEZeitanteil,
+            //        UmlageSchluessel.NachPersonenzahl => a + PersZeitanteil
+            //                .Aggregate(0.0, (c, z) => c += z.Anteil * b.Betrag),
+            //        UmlageSchluessel.NachVerbrauch => a + 0, // TODO
+            //        _ => a + 0, // TODO or throw something...
+            //    }
+            //);
 
             // TODO Timerange should be more dynamic...
             Gezahlt = db.Mieten

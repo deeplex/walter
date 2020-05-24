@@ -232,17 +232,6 @@ namespace Deeplex.Saverwalter.Print
         {
             var para = new Paragraph();
 
-            foreach (var item in b.KalteBetriebskosten.Where(k => k.Beschreibung is string && k.Beschreibung.Length > 0))
-            {
-                para.Append(
-                    new Run(
-                        new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) }),
-                        new Text(item.Typ.ToDescriptionString() + ": ") { Space = SpaceProcessingModeValues.Preserve }),
-                    new Run(
-                        new Text(item.Beschreibung),
-                        new Break()));
-            }
-
             return para;
         }
 
@@ -374,47 +363,6 @@ namespace Deeplex.Saverwalter.Print
                     ContentHead("550", "Betrag", JustificationValues.Center),
                     ContentHead("630", "Ihr Anteil", JustificationValues.Center),
                     ContentHead("550", "Ihre Kosten", JustificationValues.Center)));
-
-            TableRow kostenPunkt(KalteBetriebskostenpunkt punkt, string zeitraum, int Jahr, double anteil, bool f = true)
-            {
-                var rechnung = b.RechnungenKalt.FirstOrDefault(k => k.Typ == punkt.Typ);
-                var betrag = rechnung?.Betrag ?? 0.0;
-
-                return new TableRow(
-                    ContentCell(f ? punkt.Typ.ToDescriptionString() : ""),
-                    ContentCell(f ? punkt.Schluessel.ToDescriptionString() : ""),
-                    ContentCell(zeitraum, JustificationValues.Center),
-                    ContentCell(Euro(betrag), JustificationValues.Right), // TODO f ? bold : normal?
-                    ContentCell(Percent(anteil), JustificationValues.Right),
-                    ContentCell(Euro(betrag * anteil), JustificationValues.Right));
-            }
-
-            foreach (var pt in b.KalteBetriebskosten)
-            {
-                string zeitraum;
-                switch (pt.Schluessel)
-                {
-                    case UmlageSchluessel.NachWohnflaeche:
-                        zeitraum = Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende);
-                        table.Append(kostenPunkt(pt, zeitraum, b.Jahr, b.WFZeitanteil));
-                        break;
-                    case UmlageSchluessel.NachNutzeinheit:
-                        zeitraum = Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende);
-                        table.Append(kostenPunkt(pt, zeitraum, b.Jahr, b.NEZeitanteil));
-                        break;
-                    case UmlageSchluessel.NachPersonenzahl:
-                        var first = true;
-                        foreach (var a in b.PersZeitanteil)
-                        {
-                            zeitraum = Datum(a.Beginn) + " - " + Datum(a.Ende);
-                            table.Append(kostenPunkt(pt, zeitraum, b.Jahr, a.Anteil, first));
-                            first = false;
-                        }
-                        break;
-                    default:
-                        break; // TODO or throw something...
-                }
-            }
 
             table.Append(new TableRow(
                 ContentCell(""), ContentCell(""),

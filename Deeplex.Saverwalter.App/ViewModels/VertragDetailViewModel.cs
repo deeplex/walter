@@ -26,8 +26,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public ObservableProperty<ImmutableList<VertragDetailKontakt>> Mieter
             = new ObservableProperty<ImmutableList<VertragDetailKontakt>>();
-        public ObservableProperty<ImmutableList<KalteBetriebskostenViewModel>> KalteBetriebskosten { get; }
-            = new ObservableProperty<ImmutableList<KalteBetriebskostenViewModel>>();
         public ObservableProperty<ImmutableList<VertragDetailMiete>> Mieten
             = new ObservableProperty<ImmutableList<VertragDetailMiete>>();
 
@@ -87,11 +85,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             Versionen.Value = v.Select(vs => new VertragDetailVersion(vs)).ToImmutableList();
             Beginn.Value = Versionen.Value.Last().Beginn.Value;
-
-            KalteBetriebskosten.Value = v.First().Wohnung is Wohnung w2 ? App.Walter.KalteBetriebskosten
-                .Where(k => k.Adresse == w2.Adresse)
-                .Select(k => new KalteBetriebskostenViewModel(k, v.First()))
-                .ToImmutableList() : null;
 
             BeginEdit = new RelayCommand(_ => IsInEdit.Value = true, _ => !IsInEdit.Value);
             IsInEdit.PropertyChanged += (_, ev) => BeginEdit.RaiseCanExecuteChanged(ev);

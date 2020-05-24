@@ -25,18 +25,20 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Allgemeinzaehler",
+                name: "Betriebskostenrechnungen",
                 columns: table => new
                 {
-                    AllgemeinzaehlerId = table.Column<int>(nullable: false)
+                    BetriebskostenrechnungId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Kennnummer = table.Column<string>(nullable: false),
-                    Beschreibung = table.Column<string>(nullable: true),
-                    Notiz = table.Column<string>(nullable: true)
+                    Typ = table.Column<int>(nullable: false),
+                    Betrag = table.Column<double>(nullable: false),
+                    Datum = table.Column<DateTime>(nullable: false),
+                    Schluessel = table.Column<int>(nullable: false),
+                    Beschreibung = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Allgemeinzaehler", x => x.AllgemeinzaehlerId);
+                    table.PrimaryKey("PK_Betriebskostenrechnungen", x => x.BetriebskostenrechnungId);
                 });
 
             migrationBuilder.CreateTable(
@@ -86,51 +88,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "KalteBetriebskosten",
-                columns: table => new
-                {
-                    KalteBetriebskostenpunktId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Typ = table.Column<int>(nullable: false),
-                    AdresseId = table.Column<int>(nullable: false),
-                    Beschreibung = table.Column<string>(nullable: true),
-                    Schluessel = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_KalteBetriebskosten", x => x.KalteBetriebskostenpunktId);
-                    table.ForeignKey(
-                        name: "FK_KalteBetriebskosten_Adressen_AdresseId",
-                        column: x => x.AdresseId,
-                        principalTable: "Adressen",
-                        principalColumn: "AdresseId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "KalteBetriebskostenRechnungen",
-                columns: table => new
-                {
-                    KalteBetriebskostenRechnungId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Typ = table.Column<int>(nullable: false),
-                    AdresseId = table.Column<int>(nullable: false),
-                    Jahr = table.Column<int>(nullable: false),
-                    Betrag = table.Column<double>(nullable: false),
-                    Notiz = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_KalteBetriebskostenRechnungen", x => x.KalteBetriebskostenRechnungId);
-                    table.ForeignKey(
-                        name: "FK_KalteBetriebskostenRechnungen_Adressen_AdresseId",
-                        column: x => x.AdresseId,
-                        principalTable: "Adressen",
-                        principalColumn: "AdresseId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Kontakte",
                 columns: table => new
                 {
@@ -155,28 +112,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         principalTable: "Adressen",
                         principalColumn: "AdresseId",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "WarmeBetriebskostenRechnungen",
-                columns: table => new
-                {
-                    WarmeBetriebskostenRechnungId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    AllgemeinzaehlerId = table.Column<int>(nullable: false),
-                    Jahr = table.Column<int>(nullable: false),
-                    Betrag = table.Column<double>(nullable: false),
-                    Notiz = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_WarmeBetriebskostenRechnungen", x => x.WarmeBetriebskostenRechnungId);
-                    table.ForeignKey(
-                        name: "FK_WarmeBetriebskostenRechnungen_Allgemeinzaehler_AllgemeinzaehlerId",
-                        column: x => x.AllgemeinzaehlerId,
-                        principalTable: "Allgemeinzaehler",
-                        principalColumn: "AllgemeinzaehlerId",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -304,6 +239,32 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Betriebskostenrechnungsgruppen",
+                columns: table => new
+                {
+                    BetriebskostenrechnungsgruppeId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    WohnungId = table.Column<int>(nullable: false),
+                    RechnungBetriebskostenrechnungId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Betriebskostenrechnungsgruppen", x => x.BetriebskostenrechnungsgruppeId);
+                    table.ForeignKey(
+                        name: "FK_Betriebskostenrechnungsgruppen_Betriebskostenrechnungen_RechnungBetriebskostenrechnungId",
+                        column: x => x.RechnungBetriebskostenrechnungId,
+                        principalTable: "Betriebskostenrechnungen",
+                        principalColumn: "BetriebskostenrechnungId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Betriebskostenrechnungsgruppen_Wohnungen_WohnungId",
+                        column: x => x.WohnungId,
+                        principalTable: "Wohnungen",
+                        principalColumn: "WohnungId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Vertraege",
                 columns: table => new
                 {
@@ -335,34 +296,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         principalTable: "Wohnungen",
                         principalColumn: "WohnungId",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Zaehlergemeinschaften",
-                columns: table => new
-                {
-                    ZaehlergemeinschaftId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    AllgemeinzaehlerId = table.Column<int>(nullable: false),
-                    WohnungId = table.Column<int>(nullable: false),
-                    Typ = table.Column<int>(nullable: false),
-                    Notiz = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Zaehlergemeinschaften", x => x.ZaehlergemeinschaftId);
-                    table.ForeignKey(
-                        name: "FK_Zaehlergemeinschaften_Allgemeinzaehler_AllgemeinzaehlerId",
-                        column: x => x.AllgemeinzaehlerId,
-                        principalTable: "Allgemeinzaehler",
-                        principalColumn: "AllgemeinzaehlerId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Zaehlergemeinschaften_Wohnungen_WohnungId",
-                        column: x => x.WohnungId,
-                        principalTable: "Wohnungen",
-                        principalColumn: "WohnungId",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -410,6 +343,16 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Betriebskostenrechnungsgruppen_RechnungBetriebskostenrechnungId",
+                table: "Betriebskostenrechnungsgruppen",
+                column: "RechnungBetriebskostenrechnungId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Betriebskostenrechnungsgruppen_WohnungId",
+                table: "Betriebskostenrechnungsgruppen",
+                column: "WohnungId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Garagen_AdresseId",
                 table: "Garagen",
                 column: "AdresseId");
@@ -428,16 +371,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 name: "IX_JuristischePersonenMitglied_KontaktId",
                 table: "JuristischePersonenMitglied",
                 column: "KontaktId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_KalteBetriebskosten_AdresseId",
-                table: "KalteBetriebskosten",
-                column: "AdresseId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_KalteBetriebskostenRechnungen_AdresseId",
-                table: "KalteBetriebskostenRechnungen",
-                column: "AdresseId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Kontakte_AdresseId",
@@ -465,11 +398,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 column: "WohnungId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_WarmeBetriebskostenRechnungen_AllgemeinzaehlerId",
-                table: "WarmeBetriebskostenRechnungen",
-                column: "AllgemeinzaehlerId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Wohnungen_AdresseId",
                 table: "Wohnungen",
                 column: "AdresseId");
@@ -478,16 +406,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 name: "IX_Wohnungen_BesitzerJuristischePersonId",
                 table: "Wohnungen",
                 column: "BesitzerJuristischePersonId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Zaehlergemeinschaften_AllgemeinzaehlerId",
-                table: "Zaehlergemeinschaften",
-                column: "AllgemeinzaehlerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Zaehlergemeinschaften_WohnungId",
-                table: "Zaehlergemeinschaften",
-                column: "WohnungId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ZaehlerSet_WohnungId",
@@ -503,13 +421,10 @@ namespace Deeplex.Saverwalter.Model.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Betriebskostenrechnungsgruppen");
+
+            migrationBuilder.DropTable(
                 name: "JuristischePersonenMitglied");
-
-            migrationBuilder.DropTable(
-                name: "KalteBetriebskosten");
-
-            migrationBuilder.DropTable(
-                name: "KalteBetriebskostenRechnungen");
 
             migrationBuilder.DropTable(
                 name: "Kontos");
@@ -527,22 +442,16 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 name: "Vertraege");
 
             migrationBuilder.DropTable(
-                name: "WarmeBetriebskostenRechnungen");
-
-            migrationBuilder.DropTable(
-                name: "Zaehlergemeinschaften");
-
-            migrationBuilder.DropTable(
                 name: "Zaehlerstaende");
+
+            migrationBuilder.DropTable(
+                name: "Betriebskostenrechnungen");
 
             migrationBuilder.DropTable(
                 name: "Garagen");
 
             migrationBuilder.DropTable(
                 name: "Kontakte");
-
-            migrationBuilder.DropTable(
-                name: "Allgemeinzaehler");
 
             migrationBuilder.DropTable(
                 name: "ZaehlerSet");

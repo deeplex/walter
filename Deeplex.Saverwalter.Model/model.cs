@@ -10,22 +10,19 @@ namespace Deeplex.Saverwalter.Model
     public class SaverwalterContext : DbContext
     {
         public DbSet<Adresse> Adressen { get; set; } = null!;
-        public DbSet<Wohnung> Wohnungen { get; set; } = null!;
+        public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
+        public DbSet<Betriebskostenrechnungsgruppe> Betriebskostenrechnungsgruppen { get; set; } = null!;
         public DbSet<Garage> Garagen { get; set; } = null!;
-        public DbSet<Zaehler> ZaehlerSet { get; set; } = null!;
-        public DbSet<Zaehlergemeinschaft> Zaehlergemeinschaften { get; set; } = null!;
-        public DbSet<Zaehlerstand> Zaehlerstaende { get; set; } = null!;
-        public DbSet<WarmeBetriebskostenRechnung> WarmeBetriebskostenRechnungen { get; set; } = null!;
-        public DbSet<Vertrag> Vertraege { get; set; } = null!;
-        public DbSet<MietobjektGarage> MietobjektGaragen { get; set; } = null!;
         public DbSet<JuristischePerson> JuristischePersonen { get; set; } = null!;
-        public DbSet<Mieter> MieterSet { get; set; } = null!;
         public DbSet<Kontakt> Kontakte { get; set; } = null!;
         public DbSet<Konto> Kontos { get; set; } = null!;
-        public DbSet<KalteBetriebskostenpunkt> KalteBetriebskosten { get; set; } = null!;
-        public DbSet<KalteBetriebskostenRechnung> KalteBetriebskostenRechnungen { get; set; } = null!;
         public DbSet<Miete> Mieten { get; set; } = null!;
-
+        public DbSet<Mieter> MieterSet { get; set; } = null!;
+        public DbSet<MietobjektGarage> MietobjektGaragen { get; set; } = null!;
+        public DbSet<Vertrag> Vertraege { get; set; } = null!;
+        public DbSet<Wohnung> Wohnungen { get; set; } = null!;
+        public DbSet<Zaehler> ZaehlerSet { get; set; } = null!;
+        public DbSet<Zaehlerstand> Zaehlerstaende { get; set; } = null!;
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             // TODO adjust this...
             //=> options.UseSqlite("Data Source=walter.db");
@@ -49,8 +46,6 @@ namespace Deeplex.Saverwalter.Model
         public string Postleitzahl { get; set; } = null!;
         public string Stadt { get; set; } = null!;
         public string? Notiz { get; set; }
-        public List<KalteBetriebskostenpunkt> KalteBetriebskosten { get; private set; } = new List<KalteBetriebskostenpunkt>();
-        public List<KalteBetriebskostenRechnung> KalteBetriebskostenRechnungen { get; private set; } = new List<KalteBetriebskostenRechnung>();
         public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
         public List<Garage> Garagen { get; private set; } = new List<Garage>();
     }
@@ -64,8 +59,8 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
         public List<Vertrag> Vertraege { get; private set; } = new List<Vertrag>();
         public List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
+        public List<Betriebskostenrechnungsgruppe> Betriebskostenrechnungsgruppen { get; private set; } = new List<Betriebskostenrechnungsgruppe>();
         public JuristischePerson Besitzer { get; set; } = null!;
-        public List<Zaehlergemeinschaft> Zaehlergemeinschaften { get; private set; } = new List<Zaehlergemeinschaft>();
         public int AdresseId { get; set; }
         public Adresse Adresse { get; set; } = null!;
     }
@@ -89,25 +84,6 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
-    public class Zaehlergemeinschaft
-    {
-        public int ZaehlergemeinschaftId { get; set; }
-        public Allgemeinzaehler Allgemeinzaehler { get; set; } = null!;
-        public Wohnung Wohnung { get; set; } = null!;
-        public Zaehlertyp Typ { get; set; }
-        public string? Notiz { get; set; }
-    }
-
-    public class Allgemeinzaehler
-    {
-        public int AllgemeinzaehlerId { get; set; }
-        public string Kennnummer { get; set; } = null!;
-        public List<Zaehlergemeinschaft> Zaehlergemeinschaften { get; private set; } = new List<Zaehlergemeinschaft>();
-        public List<WarmeBetriebskostenRechnung> Rechnungen { get; private set; } = new List<WarmeBetriebskostenRechnung>();
-        public string? Beschreibung { get; set; }
-        public string? Notiz { get; set; }
-    }
-
     public class Zaehler
     {
         public int ZaehlerId { get; set; }
@@ -125,15 +101,6 @@ namespace Deeplex.Saverwalter.Model
         Kaltwasser,
         Strom,
         Gas,
-    }
-
-    public class WarmeBetriebskostenRechnung
-    {
-        public int WarmeBetriebskostenRechnungId { get; set; }
-        public Allgemeinzaehler Allgemeinzaehler { get; set; } = null!;
-        public int Jahr { get; set; }
-        public double Betrag { get; set; }
-        public string? Notiz { get; set; }
     }
 
     public class Zaehlerstand
@@ -184,7 +151,7 @@ namespace Deeplex.Saverwalter.Model
         public Garage Garage { get; set; } = null!;
     }
 
-    public class JuristischePerson // TODO Angehörige Personen verlinken.
+    public class JuristischePerson
     {
         public int JuristischePersonId { get; set; }
         public string Bezeichnung { get; set; } = null!;
@@ -242,52 +209,65 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
-    public class KalteBetriebskostenpunkt
+
+    public class Betriebskostenrechnung
     {
-        public int KalteBetriebskostenpunktId { get; set; }
-        public KalteBetriebskosten Typ { get; set; }
-        public int AdresseId { get; set; }
-        public Adresse Adresse { get; set; } = null!;
-        public string? Beschreibung { get; set; }
+        public int BetriebskostenrechnungId { get; set; }
+        public Betriebskostentyp Typ { get; set; }
+        public double Betrag { get; set; }
+        public DateTime Datum { get; set; }
         public UmlageSchluessel Schluessel { get; set; }
+        public string? Beschreibung { get; set; }
+
+        public List<Betriebskostenrechnungsgruppe> Gruppen { get; private set; } = new List<Betriebskostenrechnungsgruppe>();
     }
 
-    public enum KalteBetriebskosten
+    public class Betriebskostenrechnungsgruppe
+    {
+        public int BetriebskostenrechnungsgruppeId { get; set; }
+        public int WohnungId { get; set; }
+        public Wohnung Wohnung { get; set; } = null!;
+        public Betriebskostenrechnung Rechnung { get; set; } = null!;
+    }
+
+    // Even is Kalte Betriebskosten
+    // Uneven is Warme Betriebskosten
+    public enum Betriebskostentyp
     {
         [Description("Allgemeinstrom/Hausbeleuchtung")]
-        AllgemeinstromHausbeleuchtung,
+        AllgemeinstromHausbeleuchtung = 0,
         [Description("Breitbandkabelanschluss")]
-        Breitbandkabelanschluss,
+        Breitbandkabelanschluss = 2,
         [Description("Dachrinnenreinigung")]
-        Dachrinnenreinigung,
+        Dachrinnenreinigung = 4,
         [Description("Entwässerung/Niederschlagswasser")]
-        EntwaesserungNiederschlagswasser,
+        EntwaesserungNiederschlagswasser = 6,
         [Description("Entwässerung/Schmutzwasser")]
-        EntwaesserungSchmutzwasser,
+        EntwaesserungSchmutzwasser = 8,
         [Description("Gartenpflege")]
-        Gartenpflege,
+        Gartenpflege = 10,
         [Description("Ungezieferbekämpfung")]
-        Ungezieferbekaempfung,
+        Ungezieferbekaempfung = 12,
         [Description("Grundsteuer")]
-        Grundsteuer,
+        Grundsteuer = 14,
         [Description("Haftpflichtversicherung")]
-        Haftpflichtversicherung,
+        Haftpflichtversicherung = 16,
         [Description("Hauswartarbeiten")]
-        Hauswartarbeiten,
+        Hauswartarbeiten = 18,
         [Description("Müllbeseitigung")]
-        Muellbeseitigung,
+        Muellbeseitigung = 20,
         [Description("Sachversicherung")]
-        Sachversicherung,
+        Sachversicherung = 22,
         [Description("Schornsteinfegerarbeiten")]
-        Schornsteinfegerarbeiten,
+        Schornsteinfegerarbeiten = 24,
         [Description("Straßenreinigung")]
-        Strassenreinigung,
+        Strassenreinigung = 26,
         [Description("Wartung Thermen/Speicher")]
-        WartungThermenSpeicher,
+        WartungThermenSpeicher = 28,
         [Description("Wasserversorgung")]
-        Wasserversorgung,
+        Wasserversorgung = 30,
         [Description("Weitere/Sonstige Nebenkosten")]
-        WeitereSonstigeNebenkosten,
+        WeitereSonstigeNebenkosten = 32,
     }
 
     public enum UmlageSchluessel
@@ -300,15 +280,5 @@ namespace Deeplex.Saverwalter.Model
         NachPersonenzahl,
         [Description("n. Verb.")]
         NachVerbrauch,
-    }
-
-    public class KalteBetriebskostenRechnung
-    {
-        public int KalteBetriebskostenRechnungId { get; set; }
-        public KalteBetriebskosten Typ { get; set; }
-        public Adresse Adresse { get; set; } = null!;
-        public int Jahr { get; set; }
-        public double Betrag { get; set; }
-        public string? Notiz { get; set; }
     }
 }

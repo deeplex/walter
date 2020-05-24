@@ -21,8 +21,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<List<WohnungDetailZaehler>>();
         public ObservableProperty<List<WohnungDetailVertrag>> Vertraege
             = new ObservableProperty<List<WohnungDetailVertrag>>();
-        public ObservableProperty<List<KalteBetriebskostenViewModel>> KalteBetriebskosten
-            = new ObservableProperty<List<KalteBetriebskostenViewModel>>();
         public ObservableProperty<AdresseViewModel> Adresse
             = new ObservableProperty<AdresseViewModel>();
         public ObservableProperty<string> Notiz
@@ -68,11 +66,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Include(v => v.Wohnung).ToList()
                 .Where(v => v.Wohnung.WohnungId == Id)
                 .Select(v => new WohnungDetailVertrag(v.VertragId))
-                .ToList();
-
-            KalteBetriebskosten.Value = App.Walter.KalteBetriebskosten
-                .Where(k => k.AdresseId == w.AdresseId)
-                .Select(k => new KalteBetriebskostenViewModel(k, w))
                 .ToList();
 
             SaveEdit = new RelayCommand(_ =>

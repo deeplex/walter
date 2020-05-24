@@ -39,6 +39,10 @@
                     x:Name="JurPersonenListMenuItem"
                     Content="{x:Bind JuristischePersonenListLabel}" 
                     Icon="People"/>
+                <NavigationViewItem
+                    x:Name="BetriebskostenListMenuItem"
+                    Content="{x:Bind BetriebskostenrechnungenListLabel}" 
+                    Icon="List"/>
             </NavigationView.MenuItems>
 
             <NavigationView.PaneFooter>

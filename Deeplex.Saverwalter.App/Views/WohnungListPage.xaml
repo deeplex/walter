@@ -68,21 +68,11 @@
                                     TextChanged="Adresse_TextChanged"
                                     Text="{Binding Key.Stadt.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 </StackPanel>
-                                <AppBarButton
-                                    Click="Rechnungen_Click"
-                                    CommandParameter="{Binding Key.Id}"
-                                    Margin="10"
-                                    Icon="List"
-                                    Name="Rechnungen"
-                                    Width="100"
-                                    Label="Rechnungen"
-                                    RelativePanel.AlignRightWithPanel="True"/>
                                 <GridView
                                     IsItemClickEnabled="True"
                                     SelectionMode="Single"
                                     Margin="10"
-                                    ItemsSource="{Binding Value}"
-                                    RelativePanel.Below="Rechnungen">
+                                    ItemsSource="{Binding Value}">
                                     <GridView.ItemTemplate>
                                         <DataTemplate>
                                             <Button
