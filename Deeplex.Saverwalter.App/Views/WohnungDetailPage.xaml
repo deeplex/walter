@@ -97,10 +97,10 @@
                 Text="{x:Bind ViewModel.Bezeichnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Bezeichnung" Width="210" Style="{StaticResource Eintraege}"/>
                 <TextBox
-                Text="{x:Bind ViewModel.Wohnflaeche.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Text="{x:Bind ViewModel.Wohnflaeche, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                 Header="Wohnfl." Width="70" Style="{StaticResource Eintraege}"/>
                 <TextBox
-                Text="{x:Bind ViewModel.Nutzflaeche.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Text="{x:Bind ViewModel.Nutzflaeche, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                 Header="Nutzfl." Width="70" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
             <RelativePanel>

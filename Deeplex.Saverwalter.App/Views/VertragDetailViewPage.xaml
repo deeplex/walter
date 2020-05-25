@@ -285,7 +285,7 @@
                                         <mtuuc:DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate x:DataType="vm:VertragDetailMiete">
                                                 <CalendarDatePicker
-                                                    Date="{x:Bind Datum.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    Date="{x:Bind Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                                     Language="de"
                                                     Width="176"
                                                     PlaceholderText="Offen"
@@ -297,7 +297,7 @@
                                         <mtuuc:DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate x:DataType="vm:VertragDetailMiete">
                                                 <muxc:NumberBox
-                                                    Value="{x:Bind KaltString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    Value="{x:Bind Kalt, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                                     PlaceholderText="0,00"/>
                                             </DataTemplate>
                                         </mtuuc:DataGridTemplateColumn.CellTemplate>
@@ -306,12 +306,12 @@
                                         <mtuuc:DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate x:DataType="vm:VertragDetailMiete">
                                                 <muxc:NumberBox
-                                                    Value="{x:Bind WarmString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    Value="{x:Bind Warm, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                                     PlaceholderText="0,00"/>
                                             </DataTemplate>
                                         </mtuuc:DataGridTemplateColumn.CellTemplate>
                                     </mtuuc:DataGridTemplateColumn>
-                                    <mtuuc:DataGridTextColumn IsReadOnly="False" Binding="{Binding Notiz.Value}" Header="Notiz"/>
+                                    <mtuuc:DataGridTextColumn IsReadOnly="False" Binding="{Binding Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Header="Notiz"/>
                                 </mtuuc:DataGrid.Columns>
                             </mtuuc:DataGrid>
                             <Button
@@ -327,7 +327,7 @@
                                                 Language="de"
                                                 DateFormat="{}{day.integer}. {month.full} {year.full}"
                                                 PlaceholderText="Datum hinzufügen"
-                                                Date="{x:Bind ViewModel.AddMieteValue.Value.Datum.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                Date="{x:Bind ViewModel.AddMieteValue.Value.Datum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                             <muxc:NumberBox
                                                 Header="Kalt"
                                                 Value="{x:Bind ViewModel.AddMieteValue.Value.Kalt, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

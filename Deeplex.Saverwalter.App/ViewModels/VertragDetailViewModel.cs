@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 
@@ -78,7 +79,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Where(m => m.VertragId == v.First().VertragId)
                 .Select(m => new VertragDetailMiete(m))
                 .ToList()
-                .OrderBy(m => m.Datum.Value).Reverse()
+                .OrderBy(m => m.Datum).Reverse()
                 .ToImmutableList();
 
             BetriebskostenJahr.Value = DateTime.Now.Year - 1;
@@ -100,17 +101,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 AddVersionValue.Value = new VertragDetailVersion(AddVersionValue.Value);
             }, _ => true);
 
-            AddMieteValue.Value = new VertragDetailMiete();
+            AddMieteValue.Value = new VertragDetailMiete(v.First().VertragId);
             AddMiete = new RelayCommand(_ =>
             {
                 var amv = AddMieteValue.Value;
-                amv.VertragsVersion.Value = v.Last().Version;
                 Mieten.Value = Mieten.Value
                     .Add(amv)
-                    .OrderBy(m => m.Datum.Value)
+                    .OrderBy(m => m.Datum)
                     .Reverse()
                     .ToImmutableList();
-                AddMieteValue.Value = new VertragDetailMiete();
+                AddMieteValue.Value = new VertragDetailMiete(v.First().VertragId);
             }, _ => true);
 
             RemoveVersion = new RelayCommand(_ =>
@@ -126,38 +126,38 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Guid guid = v.First().VertragId;
 
                 // Update Mieten
-                var mieten = App.Walter.Mieten.Where(m => m.VertragId == guid).ToList();
-                for (var i = 0; i < mieten.Count(); ++i)
-                {
-                    var m = mieten[i];
-                    var mv = Mieten.Value.FirstOrDefault(mm => mm.Id == m.MieteId);
-                    if (mv != null)
-                    {
-                        m.KaltMiete = mv.Kalt;
-                        m.WarmMiete = mv.Warm;
-                        m.Datum = mv.Datum.Value.UtcDateTime;
-                        m.Notiz = mv.Notiz.Value;
-                        App.Walter.Mieten.Update(m);
-                    }
-                    else
-                    {
-                        App.Walter.Mieten.Remove(m);
-                    }
-                }
-                foreach (var m in Mieten.Value)
-                {
-                    if (!mieten.Exists(mm => mm.MieteId == m.Id))
-                    {
-                        App.Walter.Mieten.Add(new Miete
-                        {
-                            Datum = m.Datum.Value.UtcDateTime,
-                            Notiz = m.Notiz.Value,
-                            KaltMiete = m.Kalt,
-                            WarmMiete = m.Warm,
-                            VertragId = guid,
-                        });
-                    }
-                }
+                //var mieten = App.Walter.Mieten.Where(m => m.VertragId == guid).ToList();
+                //for (var i = 0; i < mieten.Count(); ++i)
+                //{
+                //    var m = mieten[i];
+                //    var mv = Mieten.Value.FirstOrDefault(mm => mm.Id == m.MieteId);
+                //    if (mv != null)
+                //    {
+                //        m.KaltMiete = mv.Kalt;
+                //        m.WarmMiete = mv.Warm;
+                //        m.Datum = mv.Datum.Value.UtcDateTime;
+                //        m.Notiz = mv.Notiz.Value;
+                //        App.Walter.Mieten.Update(m);
+                //    }
+                //    else
+                //    {
+                //        App.Walter.Mieten.Remove(m);
+                //    }
+                //}
+                //foreach (var m in Mieten.Value)
+                //{
+                //    if (!mieten.Exists(mm => mm.MieteId == m.Id))
+                //    {
+                //        App.Walter.Mieten.Add(new Miete
+                //        {
+                //            Datum = m.Datum.Value.UtcDateTime,
+                //            Notiz = m.Notiz.Value,
+                //            KaltMiete = m.Kalt,
+                //            WarmMiete = m.Warm,
+                //            VertragId = guid,
+                //        });
+                //    }
+                //}
                 // Update Mieter
                 var mieterset = App.Walter.MieterSet.Where(m => m.VertragId == guid).ToList();
                 for (var i = 0; i < mieterset.Count(); ++i)
@@ -293,48 +293,87 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class VertragDetailMiete : BindableBase
     {
-        public int Id;
-        public ObservableProperty<int> VertragsVersion
-            = new ObservableProperty<int>();
-        public ObservableProperty<DateTimeOffset> Datum = new ObservableProperty<DateTimeOffset>();
-        public ObservableProperty<string> Notiz { get; } = new ObservableProperty<string>();
-        public double Kalt;
-        public string KaltString
+        private Miete Entity { get; }
+
+        public DateTimeOffset Datum
         {
-            get => Kalt > 0 ? string.Format("{0:F2}", Kalt) : "";
+            get => Entity.Datum;
             set
             {
-                SetProperty(ref Kalt, double.TryParse(value, out double result) ? result : 0);
-                RaisePropertyChanged(nameof(Kalt));
+                Entity.Datum = value.UtcDateTime;
+                RaisePropertyChangedAuto();
             }
+
         }
-        public double Warm;
-        public string WarmString
+
+        public string Notiz
         {
-            get => Warm > 0 ? string.Format("{0:F2}", Warm) : "";
+            get => Entity.Notiz;
             set
             {
-                SetProperty(ref Warm, double.TryParse(value, out double result) ? result : 0);
-                RaisePropertyChanged(nameof(Warm));
+                Entity.Notiz = value;
+                RaisePropertyChangedAuto();
             }
         }
 
-        public VertragDetailMiete()
+        public double Kalt 
+        { 
+            get => Entity.KaltMiete ?? 0; 
+            set
+            {
+                Entity.KaltMiete = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public double Warm 
         {
-            Datum.Value = DateTime.UtcNow;
-            Kalt = 0;
-            Warm = 0;
-            Notiz.Value = "";
+            get => Entity.WarmMiete ?? 0;
+            set 
+            { 
+                Entity.WarmMiete = value; 
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public VertragDetailMiete(Guid vertragId)
+            : this(new Miete
+            {
+                VertragId = vertragId,
+                Datum = DateTime.UtcNow,
+            })
+        {
         }
 
         public VertragDetailMiete(Miete m)
         {
-            Id = m.MieteId;
-            //VertragsVersion.Value = m.Vertrag.Version;
-            Datum.Value = m.Datum;
-            Kalt = m.KaltMiete ?? 0;
-            Warm = m.WarmMiete ?? 0;
-            Notiz.Value = m.Notiz ?? "";
+            Entity = m;
+
+            PropertyChanged += OnUpdate;
+        }
+
+        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Warm):
+                case nameof(Kalt):
+                case nameof(Datum):
+                case nameof(Notiz):
+                    break;
+                default:
+                    return;
+            }
+
+            if (Entity.MieteId != 0)
+            {
+                App.Walter.Mieten.Update(Entity);
+            }
+            else
+            {
+                App.Walter.Mieten.Add(Entity);
+            }
+            App.Walter.SaveChanges();
         }
     }
 
