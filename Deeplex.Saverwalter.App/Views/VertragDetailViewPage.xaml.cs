@@ -167,6 +167,8 @@ namespace Deeplex.Saverwalter.App.Views
         {
             var miete = (VertragDetailMiete)((Button)sender).CommandParameter;
             ViewModel.Mieten.Value = ViewModel.Mieten.Value.Remove(miete).ToImmutableList();
+            App.Walter.Mieten.Remove(miete.Entity);
+            App.Walter.SaveChanges();
         }
 
         private void Betriebskostenabrechnung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)

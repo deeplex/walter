@@ -142,7 +142,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             SaveEdit = new RelayCommand(_ =>
             {
                 IsInEdit.Value = false;
-
             }, _ => IsInEdit.Value);
 
             IsInEdit.PropertyChanged += (_, ev) => SaveEdit.RaiseCanExecuteChanged(ev);
@@ -205,7 +204,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class VertragDetailMiete : BindableBase
     {
-        private Miete Entity { get; }
+        public Miete Entity { get; }
 
         public DateTimeOffset Datum
         {
