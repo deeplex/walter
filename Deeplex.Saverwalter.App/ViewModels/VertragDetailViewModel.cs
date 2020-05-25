@@ -91,9 +91,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Versionen.Value = v.Select(vs => new VertragDetailVersion(vs)).ToImmutableList();
             Beginn.Value = Versionen.Value.Last().Beginn.Value;
 
-            BeginEdit = new RelayCommand(_ => IsInEdit.Value = true, _ => !IsInEdit.Value);
-            IsInEdit.PropertyChanged += (_, ev) => BeginEdit.RaiseCanExecuteChanged(ev);
-
             AddVersionValue.Value = Versionen.Value.Count() > 0 ?
                 new VertragDetailVersion(Versionen.Value.First()) :
                 new VertragDetailVersion(this);
@@ -139,24 +136,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.Walter.SaveChanges();
             }, _ => true);
 
-            SaveEdit = new RelayCommand(_ =>
-            {
-                IsInEdit.Value = false;
-            }, _ => IsInEdit.Value);
-
-            IsInEdit.PropertyChanged += (_, ev) => SaveEdit.RaiseCanExecuteChanged(ev);
-
             IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
         }
 
         public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
         public bool IsNotInEdit => !IsInEdit.Value;
 
-        public RelayCommand BeginEdit { get; }
         public RelayCommand AddMiete { get; }
         public RelayCommand AddVersion { get; }
         public RelayCommand RemoveVersion { get; }
-        public RelayCommand SaveEdit { get; }
     }
 
     public class VertragDetailVersion : BindableBase

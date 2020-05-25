@@ -92,15 +92,12 @@
                             </Flyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
-                    <AppBarButton
-                        Icon="Edit"
-                        Label="Bearbeiten"
-                        Command="{x:Bind ViewModel.BeginEdit}"/>
-                    <AppBarButton
-                        Icon="Save"
-                        Label="Speichern"
-                        Command="{x:Bind ViewModel.SaveEdit}"/>
                     <CommandBar.SecondaryCommands>
+                        <AppBarToggleButton
+                            Click="EditToggle_Click"
+                            x:Name="EditToggle"
+                            Label="Bearbeiten"
+                            Icon="Edit"/>
                         <AppBarButton
                             IsEnabled="False"
                             Icon="Delete"

@@ -181,5 +181,10 @@ namespace Deeplex.Saverwalter.App.Views
 
             b.SaveAsDocx(ApplicationData.Current.LocalFolder.Path + @"\" + s + ".docx");
         }
+
+        private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            ViewModel.IsInEdit.Value = EditToggle.IsChecked ?? false;
+        }
     }
 }
