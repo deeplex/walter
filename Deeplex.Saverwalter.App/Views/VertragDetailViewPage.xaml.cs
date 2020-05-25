@@ -71,10 +71,10 @@ namespace Deeplex.Saverwalter.App.Views
         {
             Suggest(sender, args,
                 ViewModel.AlleKontakte.Value
-                    .Where(k => k.Name.Value.Trim().ToLower()
+                    .Where(k => k.Name.Trim().ToLower()
                         .Contains(sender.Text.Trim().ToLower()))
-                    .Where(k => !ViewModel.Mieter.Value.Exists(m => m.Name.Value == k.Name.Value))
-                    .Select(k => k.Name.Value).ToList(),
+                    .Where(k => !ViewModel.Mieter.Value.Exists(m => m.Name == k.Name))
+                    .Select(k => k.Name).ToList(),
                 "Kontakt");
         }
 
@@ -83,9 +83,9 @@ namespace Deeplex.Saverwalter.App.Views
             Suggest(sender, args,
                 ViewModel.AlleKontakte.Value
                     // If Checkbox => .Where(k => k.JuristischePersonen.Contains(ViewModel.Vermieter.Id))
-                    .Where(k => k.Name.Value.Trim().ToLower()
+                    .Where(k => k.Name.Trim().ToLower()
                         .Contains(sender.Text.Trim().ToLower()))
-                    .Select(k => k.Name.Value).ToList(),
+                    .Select(k => k.Name).ToList(),
                 "Kontakt");
         }
 
@@ -93,16 +93,22 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (args.ChosenSuggestion is string a)
             {
-                if (ViewModel.Mieter.Value.Exists(w => w.Name.Value == a))
+                if (ViewModel.Mieter.Value.Exists(w => w.Name == a))
                 {
 
                 }
                 else
                 {
-                    var m = ViewModel.AlleKontakte.Value.First(k => k.Name.Value == a);
+                    var m = ViewModel.AlleKontakte.Value.First(k => k.Name == a);
+                    App.Walter.MieterSet.Add(new Mieter
+                    {
+                        KontaktId = m.Id,
+                        VertragId = ViewModel.guid,
+                    });
+                    App.Walter.SaveChanges();
                     ViewModel.Mieter.Value = ViewModel.Mieter.Value.Add(new VertragDetailKontakt(m.Id))
                         // From the longest to the smallest because of XAML I guess;
-                        .OrderBy(mw => mw.Name.Value.Length).Reverse().ToImmutableList();
+                        .OrderBy(mw => mw.Name.Length).Reverse().ToImmutableList();
                     sender.Text = "";
                 }
             }
@@ -123,7 +129,7 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (args.ChosenSuggestion is string a)
             {
-                var ansprechpartner = ViewModel.AlleKontakte.Value.First(k => k.Name.Value == a);
+                var ansprechpartner = ViewModel.AlleKontakte.Value.First(k => k.Name == a);
                 ViewModel.Ansprechpartner.Value = ansprechpartner;
                 ViewModel.Versionen.Value.ForEach(v => v.Ansprechpartner.Value = ansprechpartner);
 
@@ -145,6 +151,10 @@ namespace Deeplex.Saverwalter.App.Views
             var id = (int)((Button)sender).CommandParameter;
             var mieter = ViewModel.Mieter.Value.Find(m => m.Id == id);
             ViewModel.Mieter.Value = ViewModel.Mieter.Value.Remove(mieter);
+            App.Walter.MieterSet.Remove(
+                App.Walter.MieterSet.First(
+                    m => m.VertragId == ViewModel.guid && m.KontaktId == id));
+            App.Walter.SaveChanges();
         }
 
         private void RemoveDate_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)

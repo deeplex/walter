@@ -25,7 +25,7 @@
 
         <DataTemplate x:Key="Mieter" x:DataType="vm:VertragDetailKontakt">
             <mtuuc:DockPanel LastChildFill="False">
-                <TextBlock Text="{x:Bind Name.Value}"  VerticalAlignment="Center" Margin="10,0,0,0"/>
+                <TextBlock Text="{x:Bind Name}"  VerticalAlignment="Center" Margin="10,0,0,0"/>
                 <Button
                     CommandParameter="{x:Bind Id}"
                     Click="RemoveMieter_Click"
@@ -154,7 +154,7 @@
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Margin="20,15,0,0"
                     MinWidth="200"
-                    Text="{x:Bind ViewModel.Ansprechpartner.Value.Name.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Text="{x:Bind ViewModel.Ansprechpartner.Value.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     PlaceholderText="Ansprechpartner"
                     QuerySubmitted="AnsprechpartnerSuggest_QuerySubmitted"
                     TextChanged="AnsprechpartnerSuggest_TextChanged"/>
