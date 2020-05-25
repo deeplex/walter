@@ -102,10 +102,16 @@ namespace Deeplex.Saverwalter.App.Views
             if (args.ChosenSuggestion is string a)
             {
                 var ansprechpartner = ViewModel.AlleKontakte.First(k => k.Name == a);
+                var entity = App.Walter.Kontakte.Find(ansprechpartner.Id);
+
                 ViewModel.Ansprechpartner.Value = ansprechpartner;
                 ViewModel.Versionen.Value.ForEach(v => v.Ansprechpartner.Value = ansprechpartner);
-
+                App.Walter.Vertraege.Where(vs => vs.VertragId == ViewModel.guid).ToList().ForEach(vs =>
+                {
+                    vs.Ansprechpartner = entity;
+                });
                 sender.Text = a;
+                App.Walter.SaveChanges();
             }
         }
 
