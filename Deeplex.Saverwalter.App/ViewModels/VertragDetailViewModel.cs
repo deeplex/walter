@@ -12,12 +12,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public class VertragDetailViewModel : VertragDetailVersion
     {
-        public ObservableProperty<ImmutableList<VertragDetailKontakt>> AlleKontakte
-            = new ObservableProperty<ImmutableList<VertragDetailKontakt>>();
-        public ObservableProperty<ImmutableList<JuristischePersonViewModel>> AlleJuristischePersonen
-            = new ObservableProperty<ImmutableList<JuristischePersonViewModel>>();
-        public ObservableProperty<ImmutableList<VertragDetailWohnung>> AlleWohnungen
-           = new ObservableProperty<ImmutableList<VertragDetailWohnung>>();
+        public ImmutableList<VertragDetailKontakt> AlleKontakte { get; }
+        public ImmutableList<JuristischePersonViewModel> AlleJuristischePersonen { get; }
+        public ImmutableList<VertragDetailWohnung> AlleWohnungen { get; }
+
         public ObservableProperty<ImmutableList<VertragDetailVersion>> Versionen { get; }
             = new ObservableProperty<ImmutableList<VertragDetailVersion>>();
         public ObservableProperty<VertragDetailVersion> AddVersionValue
@@ -61,13 +59,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             guid = v.First().VertragId;
 
-            AlleKontakte.Value = App.Walter.Kontakte
+            AlleKontakte = App.Walter.Kontakte
                 .Select(k => new VertragDetailKontakt(k))
                 .ToImmutableList();
-            AlleJuristischePersonen.Value = App.Walter.JuristischePersonen
+            AlleJuristischePersonen = App.Walter.JuristischePersonen
                 .Select(j => new JuristischePersonViewModel(j))
                 .ToImmutableList();
-            AlleWohnungen.Value = App.Walter.Wohnungen
+            AlleWohnungen = App.Walter.Wohnungen
                 .Select(w => new VertragDetailWohnung(w))
                 .ToImmutableList();
 
@@ -214,9 +212,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public double Kalt 
-        { 
-            get => Entity.KaltMiete ?? 0; 
+        public double Kalt
+        {
+            get => Entity.KaltMiete ?? 0;
             set
             {
                 Entity.KaltMiete = value;
@@ -224,12 +222,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public double Warm 
+        public double Warm
         {
             get => Entity.WarmMiete ?? 0;
-            set 
-            { 
-                Entity.WarmMiete = value; 
+            set
+            {
+                Entity.WarmMiete = value;
                 RaisePropertyChangedAuto();
             }
         }
@@ -293,15 +291,22 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class VertragDetailWohnung
     {
+        public override string ToString() => BezeichnungVoll;
+
+        public Wohnung Entity { get; }
+
         public int Id;
-        public ObservableProperty<int> BesitzerId = new ObservableProperty<int>();
-        public ObservableProperty<string> BezeichnungVoll = new ObservableProperty<string>();
+        public int BesitzerId { get; }
+        public string Besitzer { get; }
+        public string BezeichnungVoll { get; }
 
         public VertragDetailWohnung(Wohnung w)
         {
+            Entity = w;
             Id = w.WohnungId;
-            BesitzerId.Value = w.Besitzer.JuristischePersonId;
-            BezeichnungVoll.Value = AdresseViewModel.Anschrift(w) + " - " + w.Bezeichnung;
+            Besitzer = w.Besitzer.Bezeichnung;
+            BesitzerId = w.Besitzer.JuristischePersonId;
+            BezeichnungVoll = AdresseViewModel.Anschrift(w) + " - " + w.Bezeichnung;
         }
 
         public static Wohnung GetWohnung(int id) => App.Walter.Wohnungen.Find(id);

@@ -31,6 +31,11 @@ namespace Deeplex.Saverwalter.App.Views
                 ViewModel = new VertragDetailViewModel();
             }
 
+            // TODO this can be fixed by having the selected item be a pointer to the respecitve element in the list.
+            if (ViewModel.Wohnung.Value != null)
+            {
+                WohnungComboBox.SelectedIndex = ViewModel.AlleWohnungen.FindIndex(w => w.Id == ViewModel.Wohnung.Value.Id);
+            }
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
             base.OnNavigatedTo(e);
         }
@@ -44,33 +49,11 @@ namespace Deeplex.Saverwalter.App.Views
                     : new List<string> { sender.Text + " (" + add + " hinzufügen)" };
             }
         }
-
-        private void WohnungSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
-        {
-            Suggest(sender, args,
-                ViewModel.AlleWohnungen.Value
-                    .Where(w => ViewModel.Vermieter.Value?.Id is int vv ? w.BesitzerId.Value == vv : true)
-                    .Where(k => k.BezeichnungVoll.Value.Trim().ToLower()
-                        .Contains(sender.Text.Trim().ToLower()))
-                    .Select(k => k.BezeichnungVoll.Value).ToList(),
-                "Wohnung");
-        }
-
-        private void VermieterSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
-        {
-           Suggest(sender, args,
-                ViewModel.AlleJuristischePersonen.Value
-                    .Where(k => ViewModel.Wohnung?.Value?.BesitzerId.Value is int wb ? k.Id == wb : true)
-                    .Where(k => k.Name.Value.Trim().ToLower()
-                        .Contains(sender.Text.Trim().ToLower()))
-                    .Select(k => k.Name.Value).ToList(),
-                "Juristische Person");
-        }
-
+     
         private void MieterSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             Suggest(sender, args,
-                ViewModel.AlleKontakte.Value
+                ViewModel.AlleKontakte
                     .Where(k => k.Name.Trim().ToLower()
                         .Contains(sender.Text.Trim().ToLower()))
                     .Where(k => !ViewModel.Mieter.Value.Exists(m => m.Name == k.Name))
@@ -81,7 +64,7 @@ namespace Deeplex.Saverwalter.App.Views
         private void AnsprechpartnerSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             Suggest(sender, args,
-                ViewModel.AlleKontakte.Value
+                ViewModel.AlleKontakte
                     // If Checkbox => .Where(k => k.JuristischePersonen.Contains(ViewModel.Vermieter.Id))
                     .Where(k => k.Name.Trim().ToLower()
                         .Contains(sender.Text.Trim().ToLower()))
@@ -99,7 +82,7 @@ namespace Deeplex.Saverwalter.App.Views
                 }
                 else
                 {
-                    var m = ViewModel.AlleKontakte.Value.First(k => k.Name == a);
+                    var m = ViewModel.AlleKontakte.First(k => k.Name == a);
                     App.Walter.MieterSet.Add(new Mieter
                     {
                         KontaktId = m.Id,
@@ -114,34 +97,14 @@ namespace Deeplex.Saverwalter.App.Views
             }
         }
 
-        private void WohnungSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
-        {
-            if (args.ChosenSuggestion is string a)
-            {
-                var wohnung = ViewModel.AlleWohnungen.Value.First(w => w.BezeichnungVoll.Value == a);
-                ViewModel.Wohnung.Value = wohnung;
-                ViewModel.Versionen.Value.ForEach(v => v.Wohnung.Value = wohnung);
-                sender.Text = a;
-            }
-        }
-
         private void AnsprechpartnerSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
             if (args.ChosenSuggestion is string a)
             {
-                var ansprechpartner = ViewModel.AlleKontakte.Value.First(k => k.Name == a);
+                var ansprechpartner = ViewModel.AlleKontakte.First(k => k.Name == a);
                 ViewModel.Ansprechpartner.Value = ansprechpartner;
                 ViewModel.Versionen.Value.ForEach(v => v.Ansprechpartner.Value = ansprechpartner);
 
-                sender.Text = a;
-            }
-        }
-
-        private void VermieterSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
-        {
-            if (args.ChosenSuggestion is string a)
-            {
-                ViewModel.Vermieter.Value = ViewModel.AlleJuristischePersonen.Value.First(k => k.Name.Value == a);
                 sender.Text = a;
             }
         }
@@ -177,7 +140,7 @@ namespace Deeplex.Saverwalter.App.Views
             var b = new Betriebskostenabrechnung(
                 ViewModel.Versionen.Value.First().Id, Jahr, new DateTime(Jahr, 1, 1), new DateTime(Jahr, 12, 31));
 
-            var s = Jahr.ToString() + " - " + ViewModel.Wohnung.Value.BezeichnungVoll.Value;
+            var s = Jahr.ToString() + " - " + ViewModel.Wohnung.Value.BezeichnungVoll;
 
             b.SaveAsDocx(ApplicationData.Current.LocalFolder.Path + @"\" + s + ".docx");
         }
@@ -185,6 +148,20 @@ namespace Deeplex.Saverwalter.App.Views
         private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             ViewModel.IsInEdit.Value = EditToggle.IsChecked ?? false;
+        }
+
+        private void WohnungComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var w = (VertragDetailWohnung)WohnungComboBox.SelectedItem;
+            ViewModel.Wohnung.Value = w;
+            ViewModel.Versionen.Value.ForEach(vs =>
+            {
+                vs.Wohnung.Value = w;
+                var v = App.Walter.Vertraege.Find(vs.Id);
+                v.Wohnung = w.Entity;
+                App.Walter.Vertraege.Update(v);
+            });
+            App.Walter.SaveChanges();
         }
     }
 }

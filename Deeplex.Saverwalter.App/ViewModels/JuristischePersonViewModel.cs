@@ -11,6 +11,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public JuristischePersonViewModel() { }
 
+        public override string ToString() => Name.Value;
+
         public JuristischePersonViewModel(JuristischePerson j)
         {
             Id = j.JuristischePersonId;

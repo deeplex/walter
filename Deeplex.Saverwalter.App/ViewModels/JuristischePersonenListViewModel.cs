@@ -15,7 +15,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public JuristischePersonenListViewModel()
         {
-            Personen.Value = App.Walter.JuristischePersonen
+
+        Personen.Value = App.Walter.JuristischePersonen
                 .Select(j => new JuristischePersonenPerson(j))
                 .ToImmutableList();
 

@@ -135,15 +135,19 @@
                 </Button>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
-                <TextBlock Text="Vermieter:" Style="{StaticResource Labels}"/>
-                <AutoSuggestBox
-                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                    Margin="20,15,0,0"
+                <TextBlock Text="Wohnung:" Style="{StaticResource Labels}"/>
+                <ComboBox
+                    IsEnabled="True"
+                    x:Name="WohnungComboBox"
+                    SelectionChanged="WohnungComboBox_SelectionChanged"
+                    Margin="20,20,0,0"
+                    PlaceholderText="Wohnung hinzufügen"
                     MinWidth="400"
-                    Text="{x:Bind ViewModel.Vermieter.Value.Name.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    PlaceholderText="Vermieter hinzufügen"
-                    QuerySubmitted="VermieterSuggest_QuerySubmitted"
-                    TextChanged="VermieterSuggest_TextChanged"/>
+                    ItemsSource="{x:Bind ViewModel.AlleWohnungen, Mode=OneWay}"/>
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
+                <TextBlock Text="Vermieter:" Style="{StaticResource Labels}"/>
+                <TextBlock Width="400" Style="{StaticResource Labels}" Text="{x:Bind ViewModel.Wohnung.Value.Besitzer, Mode=OneWay}"/>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Ansprechpartner: " Style="{StaticResource Labels}"/>
@@ -179,18 +183,6 @@
                     PlaceholderText="Mieter hinzufügen..."
                     QuerySubmitted="MieterSuggest_QuerySubmitted"
                     TextChanged="MieterSuggest_TextChanged"/>
-            </mtuuc:WrapPanel>
-            <mtuuc:WrapPanel Orientation="Horizontal">
-                <TextBlock Text="Wohnung:" Style="{StaticResource Labels}" Margin="20,20,0,0"/>
-                <AutoSuggestBox
-                    Margin="20,15,0,0"
-                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                    MinWidth="400"
-                    QuerySubmitted="WohnungSuggest_QuerySubmitted"
-                    Text="{x:Bind ViewModel.Wohnung.Value.BezeichnungVoll.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    PlaceholderText="Wohnung hinzufügen"
-                    ItemsSource="{x:Bind ViewModel.AlleWohnungen.Value, Mode=OneWay}"
-                    TextChanged="WohnungSuggest_TextChanged"/>
             </mtuuc:WrapPanel>
             <TextBlock
                 Margin="20,20,0,0"
