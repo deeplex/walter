@@ -137,7 +137,7 @@
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Wohnung:" Style="{StaticResource Labels}"/>
                 <ComboBox
-                    IsEnabled="True"
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value}"
                     x:Name="WohnungComboBox"
                     SelectionChanged="WohnungComboBox_SelectionChanged"
                     Margin="20,20,0,0"
@@ -304,8 +304,6 @@
                                 </mtuuc:DataGrid.Columns>
                             </mtuuc:DataGrid>
                             <Button
-                                Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                                IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                                 Margin="20,20,0,20"
                                 Content="Eintrag hinzufügen">
                                 <Button.Flyout>
