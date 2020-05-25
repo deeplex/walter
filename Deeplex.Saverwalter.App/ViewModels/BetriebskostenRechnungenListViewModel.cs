@@ -37,19 +37,24 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public TreeViewNode AddBetriebskostenTree;
         public BetriebskostenRechnungenListViewModel()
         {
-            Typen.Value = App.Walter.Betriebskostenrechnungsgruppen
-                .Include(b => b.Rechnung)
-                .Include(b => b.Wohnung)
+            Typen.Value = App.Walter.Betriebskostenrechnungen
+                .Include(b => b.Gruppen)
+                .ThenInclude(g => g.Wohnung)
+                .ThenInclude(w => w.Adresse)
                 .ToList()
-                .GroupBy(g => g.Rechnung.Typ)
-                .ToImmutableDictionary(g => new BetriebskostenRechnungenBetriebskostentyp(g.Key), g => new BetriebskostenRechnungenListTypenJahr(g.ToList()));
+                .GroupBy(g => g.Typ)
+                .ToImmutableDictionary(
+                    g => new BetriebskostenRechnungenBetriebskostentyp(g.Key),
+                    g => new BetriebskostenRechnungenListTypenJahr(g.ToList()));
 
             AdresseGroup = App.Walter.Wohnungen
                 .Include(w => w.Adresse)
                 .ToList()
                 .Select(w => new BetriebskostenRechungenListWohnungListWohnung(w))
                 .GroupBy(w => w.AdresseId)
-                .ToImmutableDictionary(g => new BetriebskostenRechungenListWohnungListAdresse(g.Key), g => g.ToImmutableList());
+                .ToImmutableDictionary(
+                    g => new BetriebskostenRechungenListWohnungListAdresse(g.Key),
+                    g => g.ToImmutableList());
         }
     }
 
@@ -105,46 +110,38 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class BetriebskostenRechnungenListTypenJahr
     {
-        public ImmutableDictionary<string, BetriebskostenRechnungenGruppe> Gruppe { get; }
+        public ImmutableDictionary<int, ImmutableList<BetriebskostenRechnungenRechnung>> Jahre { get; }
 
-        public double Betrag { get; }
-        public int Jahr { get; }
-        public DateTimeOffset Datum { get; }
-        public BetriebskostenRechnungenListTypenJahr(List<Betriebskostenrechnungsgruppe> g)
+        public BetriebskostenRechnungenListTypenJahr(List<Betriebskostenrechnung> r)
         {
-            Gruppe = g
-                .GroupBy(gg => gg.Wohnung.Adresse)
+            Jahre = r.GroupBy(gg => gg.Datum.Year).ToImmutableDictionary(
+                gg => gg.Key, gg => gg.ToList().Select(ggg => new BetriebskostenRechnungenRechnung(ggg)).ToImmutableList());
+        }
+    }
+
+    public class BetriebskostenRechnungenRechnung
+    {
+        public string Betrag { get; }
+        public string Datum { get; }
+        public ImmutableDictionary<string, ImmutableList<string>> Gruppen { get; }
+        public ImmutableList<string> Wohnungen { get; }
+
+        public BetriebskostenRechnungenRechnung(Betriebskostenrechnung r)
+        {
+            Betrag = string.Format("{0:F2}€", r.Betrag);
+            Datum = r.Datum.ToString("dd.MM.yyyy");
+            Gruppen = App.Walter.Betriebskostenrechnungsgruppen
+                .Where(g => g.Rechnung == r)
+                .ToList()
+                .GroupBy(g => g.Wohnung.Adresse)
                 .ToImmutableDictionary(
-                    gg => AdresseViewModel.Anschrift(gg.Key),
-                    gg => new BetriebskostenRechnungenGruppe(gg.ToList()));
+                    g => AdresseViewModel.Anschrift(g.Key),
+                    g => g.Select(gg => gg.Wohnung.Bezeichnung).ToImmutableList());
 
-            Betrag = g.First().Rechnung.Betrag;
-            Datum = g.First().Rechnung.Datum;
-            Jahr = Datum.Year;
-        }
-    }
-
-    public class BetriebskostenRechnungenGruppe
-    {
-        public ObservableProperty<ImmutableDictionary<string, ImmutableList<BetriebskostenRechnungenWohnung>>> Anschriften
-            = new ObservableProperty<ImmutableDictionary<string, ImmutableList<BetriebskostenRechnungenWohnung>>>();
-
-        public BetriebskostenRechnungenGruppe(List<Betriebskostenrechnungsgruppe> g)
-        {
-            Anschriften.Value = g
-                .GroupBy(gg => gg.Wohnung.Adresse)
-                .ToImmutableDictionary(gg => AdresseViewModel.Anschrift(gg.Key), gg => gg
-                    .Select(ggg => new BetriebskostenRechnungenWohnung(ggg))
-                    .ToImmutableList());
-        }
-    }
-
-    public class BetriebskostenRechnungenWohnung
-    {
-        public string Bezeichnung { get; }
-        public BetriebskostenRechnungenWohnung(Betriebskostenrechnungsgruppe g)
-        {
-            Bezeichnung = g.Wohnung.Bezeichnung;
+            Wohnungen = App.Walter.Betriebskostenrechnungsgruppen
+                .Where(g => g.Rechnung == r)
+                .Select(g => AdresseViewModel.Anschrift(g.Wohnung) + " — " + g.Wohnung.Bezeichnung)
+                .ToImmutableList();
         }
     }
 }

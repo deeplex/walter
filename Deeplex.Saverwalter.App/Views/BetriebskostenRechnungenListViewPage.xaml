@@ -14,7 +14,7 @@
     <Page.Resources>
         <muxc:StackLayout x:Name="VerticalStackLayout" Orientation="Vertical" Spacing="8"/>
     </Page.Resources>
-
+    
     <StackPanel>
         <CommandBar
             Background="Transparent"
@@ -63,24 +63,49 @@
                 <Grid>
                     <mtuuc:Expander Header="{Binding Key.Beschreibung}">
                         <StackPanel>
-                            <Pivot ItemsSource="{Binding Value}">
+                            <Pivot ItemsSource="{Binding Value.Jahre, Mode=OneWay}">
                                 <Pivot.HeaderTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Value.Jahr}"/>
+                                        <TextBlock Text="{Binding Key, Mode=OneWay}"/>
                                     </DataTemplate>
                                 </Pivot.HeaderTemplate>
-                                <PivotItem>
-                                    <Grid>
-                                        <GridView ItemsSource="{Binding Gruppe.Value}">
+                                <Pivot.ItemTemplate>
+                                    <DataTemplate>
+                                        <GridView ItemsSource="{Binding Value, Mode=OneWay}">
+                                            <CollectionViewSource x:Name="Wohnungen" IsSourceGrouped="True"/>
                                             <GridView.ItemTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="hi"/>
+                                                    <StackPanel Margin="5">
+                                                        <ListView
+                                                            CanDragItems="True" CanReorderItems="True" 
+                                                            AllowDrop="True"
+                                                            ItemsSource="{Binding Wohnungen, Mode=OneWay}">
+                                                            <ListView.ItemsPanel>
+                                                                <ItemsPanelTemplate>
+                                                                    <ItemsStackPanel AreStickyGroupHeadersEnabled="True">
+                                                                    </ItemsStackPanel>
+                                                                </ItemsPanelTemplate>
+                                                            </ListView.ItemsPanel>
+                                                        </ListView>
+                                                        <TextBlock
+                                                            Margin="5"
+                                                            FontSize="18">
+                                                            <Run Text="Betrag:"/>
+                                                            <Run Text="{Binding Betrag}"/>
+                                                        </TextBlock>
+                                                        <TextBlock
+                                                            Margin="5"
+                                                            FontSize="18">
+                                                            <Run Text="Datum:"/>
+                                                            <Run Text="{Binding Datum}"/>
+                                                        </TextBlock>
+                                                    </StackPanel>
                                                 </DataTemplate>
                                             </GridView.ItemTemplate>
                                         </GridView>
-                                    </Grid>
-                                </PivotItem>
-                            </Pivot>
+                                    </DataTemplate>
+                                </Pivot.ItemTemplate>
+                        </Pivot>
                         </StackPanel>
                     </mtuuc:Expander>
                 </Grid>
