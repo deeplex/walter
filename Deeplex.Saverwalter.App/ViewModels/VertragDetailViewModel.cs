@@ -96,9 +96,22 @@ namespace Deeplex.Saverwalter.App.ViewModels
             AddVersion = new RelayCommand(_ =>
             {
                 Versionen.Value.First().Ende.Value = AddVersionValue.Value.Beginn.Value.AddDays(-1);
-                Versionen.Value = Versionen.Value
-                    .Insert(0, AddVersionValue.Value);
+                App.Walter.Vertraege.Update(App.Walter.Vertraege.Find(Versionen.Value.First().Id));
+                Versionen.Value = Versionen.Value.Insert(0, AddVersionValue.Value);
+                App.Walter.Vertraege.Add(new Vertrag
+                {
+                    Version = AddVersionValue.Value.Version,
+                    Ansprechpartner = App.Walter.Kontakte.Find(AddVersionValue.Value.Ansprechpartner.Value.Id),
+                    Personenzahl = AddVersionValue.Value.Personenzahl.Value,
+                    Beginn = AddVersionValue.Value.Beginn.Value.UtcDateTime,
+                    Ende = AddVersionValue.Value.Ende.Value?.UtcDateTime,
+                    Notiz = AddVersionValue.Value.Notiz.Value,
+                    // VersionsNotiz
+                    WohnungId = AddVersionValue.Value.Wohnung.Value.Id,
+                    VertragId = v.First().VertragId,
+                });
                 AddVersionValue.Value = new VertragDetailVersion(AddVersionValue.Value);
+                App.Walter.SaveChanges();
             }, _ => true);
 
             AddMieteValue.Value = new VertragDetailMiete(v.First().VertragId);
@@ -115,8 +128,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             RemoveVersion = new RelayCommand(_ =>
             {
+                var vs = App.Walter.Vertraege.Find(Versionen.Value.First().Id);
+                App.Walter.Vertraege.Remove(vs);
                 Versionen.Value = Versionen.Value.Skip(1).ToImmutableList();
                 AddVersionValue.Value = new VertragDetailVersion(Versionen.Value.First());
+                App.Walter.SaveChanges();
             }, _ => true);
 
             SaveEdit = new RelayCommand(_ =>
@@ -125,39 +141,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
                 Guid guid = v.First().VertragId;
 
-                // Update Mieten
-                //var mieten = App.Walter.Mieten.Where(m => m.VertragId == guid).ToList();
-                //for (var i = 0; i < mieten.Count(); ++i)
-                //{
-                //    var m = mieten[i];
-                //    var mv = Mieten.Value.FirstOrDefault(mm => mm.Id == m.MieteId);
-                //    if (mv != null)
-                //    {
-                //        m.KaltMiete = mv.Kalt;
-                //        m.WarmMiete = mv.Warm;
-                //        m.Datum = mv.Datum.Value.UtcDateTime;
-                //        m.Notiz = mv.Notiz.Value;
-                //        App.Walter.Mieten.Update(m);
-                //    }
-                //    else
-                //    {
-                //        App.Walter.Mieten.Remove(m);
-                //    }
-                //}
-                //foreach (var m in Mieten.Value)
-                //{
-                //    if (!mieten.Exists(mm => mm.MieteId == m.Id))
-                //    {
-                //        App.Walter.Mieten.Add(new Miete
-                //        {
-                //            Datum = m.Datum.Value.UtcDateTime,
-                //            Notiz = m.Notiz.Value,
-                //            KaltMiete = m.Kalt,
-                //            WarmMiete = m.Warm,
-                //            VertragId = guid,
-                //        });
-                //    }
-                //}
                 // Update Mieter
                 var mieterset = App.Walter.MieterSet.Where(m => m.VertragId == guid).ToList();
                 for (var i = 0; i < mieterset.Count(); ++i)
@@ -186,50 +169,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     }
                 }
 
-                for (var i = 0; i < Versionen.Value.Count; ++i)
-                {
-                    var nV = Versionen.Value[Versionen.Value.Count - i - 1];
-                    if (v.Count - i > 0 && !isNew)
-                    {
-                        var vi = v[v.Count - i - 1];
-                        vi.Beginn = nV.Beginn.Value.UtcDateTime;
-                        vi.Personenzahl = nV.Personenzahl.Value;
-                        vi.Notiz = nV.Notiz.Value;
-                        vi.VersionsNotiz = nV.Notiz.Value;
-                        vi.Wohnung = VertragDetailWohnung.GetWohnung(nV.Wohnung.Value.Id);
-                        vi.Ende = nV != Versionen.Value.First() ?
-                            Versionen.Value[Versionen.Value.Count - i - 2].Beginn.Value.UtcDateTime.AddDays(-1) :
-                            Ende.Value?.UtcDateTime;
-
-                        App.Walter.Vertraege.Update(vi);
-                    }
-                    else
-                    {
-                        var neueVersion = new Vertrag
-                        {
-                            Ansprechpartner = VertragDetailKontakt.GetKontakt(nV.Ansprechpartner.Value.Id),
-                            Wohnung = VertragDetailWohnung.GetWohnung(nV.Wohnung.Value.Id),
-                            Personenzahl = nV.Personenzahl.Value,
-                            Beginn = nV.Beginn.Value.UtcDateTime,
-                            Ende = nV.Ende.Value?.UtcDateTime,
-                            Notiz = nV.Notiz.Value,
-                            Version = nV.Version,
-                            VertragId = guid,
-                        };
-                        v.Insert(0, neueVersion);
-                        App.Walter.Vertraege.Add(neueVersion);
-                    }
-                }
-
-                var highest = Versionen.Value.First().Version;
-                foreach (var vs in v)
-                {
-                    if (vs.Version > highest)
-                    {
-                        App.Walter.Vertraege.Remove(vs);
-                    }
-                }
-                isNew = false;
                 App.Walter.SaveChanges();
             }, _ => IsInEdit.Value);
 
