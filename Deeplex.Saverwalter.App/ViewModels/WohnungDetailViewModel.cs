@@ -3,6 +3,7 @@ using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
@@ -10,19 +11,44 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public class WohnungDetailViewModel : ValidatableBase
     {
         public int Id;
+
+        public ImmutableList<JuristischePersonViewModel> AlleJuristischePersonen { get; }
+        public ImmutableList<AdresseViewModel> AlleAdressen { get; }    
+
         public ObservableProperty<JuristischePersonViewModel> Besitzer
             = new ObservableProperty<JuristischePersonViewModel>();
         public ObservableProperty<int> AdresseId = new ObservableProperty<int>();
-        public ObservableProperty<string> Bezeichnung = new ObservableProperty<string>();
-        public ObservableProperty<string> Anschrift = new ObservableProperty<string>();
         public ObservableProperty<List<WohnungDetailZaehler>> Zaehler
             = new ObservableProperty<List<WohnungDetailZaehler>>();
         public ObservableProperty<List<WohnungDetailVertrag>> Vertraege
             = new ObservableProperty<List<WohnungDetailVertrag>>();
-        public ObservableProperty<AdresseViewModel> Adresse
-            = new ObservableProperty<AdresseViewModel>();
-        public ObservableProperty<string> Notiz
-            = new ObservableProperty<string>();
+        public AdresseViewModel Adresse { get; }
+        public string Anschrift => AdresseViewModel.Anschrift(App.Walter.Wohnungen.Find(Id));
+        private string mBezeichnung;
+        public string Bezeichnung
+        {
+            get => mBezeichnung;
+            set
+            {
+                SetProperty(ref mBezeichnung, value);
+                var w = App.Walter.Wohnungen.Find(Id);
+                w.Bezeichnung = value;
+                App.Walter.SaveChanges();
+            }
+        }
+
+        private string mNotiz;
+        public string Notiz
+        {
+            get => mNotiz;
+            set
+            {
+                SetProperty(ref mNotiz, value);
+                var w = App.Walter.Wohnungen.Find(Id);
+                w.Notiz = value;
+                App.Walter.SaveChanges();
+            }
+        }
 
         private double mWohnflaeche;
         public double Wohnflaeche
@@ -31,6 +57,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set 
             { 
                 SetProperty(ref mWohnflaeche, value);
+                var w = App.Walter.Wohnungen.Find(Id);
+                w.Wohnflaeche = value;
+                App.Walter.SaveChanges();
                 if (mWohnflaeche <= mNutzflaeche)
                 {
                     ClearErrors(nameof(Nutzflaeche));
@@ -48,6 +77,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set
             {
                 SetProperty(ref mNutzflaeche, value);
+                var w = App.Walter.Wohnungen.Find(Id);
+                w.Nutzflaeche = value;
+                App.Walter.SaveChanges();
                 if (mWohnflaeche <= mNutzflaeche)
                 {
                     ClearErrors(nameof(Nutzflaeche));
@@ -74,15 +106,21 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private WohnungDetailViewModel(Wohnung w)
         {
+            AlleJuristischePersonen = App.Walter.JuristischePersonen
+                .Select(j => new JuristischePersonViewModel(j))
+                .ToImmutableList();
+            AlleAdressen = App.Walter.Adressen
+                .Select(a => new AdresseViewModel(a))
+                .ToImmutableList();
+
             Id = w.WohnungId;
             AdresseId.Value = w.AdresseId;
-            Anschrift.Value = AdresseViewModel.Anschrift(w);
-            Bezeichnung.Value = w.Bezeichnung;
+            Bezeichnung = w.Bezeichnung;
             mWohnflaeche = w.Wohnflaeche;
             Nutzflaeche = w.Nutzflaeche;
-            Notiz.Value = w.Notiz;
+            Notiz = w.Notiz;
 
-            Adresse.Value = w.Adresse is Adresse ?
+            Adresse = w.Adresse is Adresse ?
                 new AdresseViewModel(w.Adresse) :
                 new AdresseViewModel();
 
@@ -105,14 +143,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 IsInEdit.Value = false;
 
-                w.Adresse = AdresseViewModel.GetAdresse(Adresse.Value);
+                w.Adresse = AdresseViewModel.GetAdresse(Adresse);
                 w.Besitzer = JuristischePersonViewModel.GetJuristischePerson(Besitzer.Value);
                 // w.Zaehler = ZaehlerViewModel // TODO
                 // w.Zaehlergemeinschaften = Zaehlergemeinschaften TODO
-                w.Bezeichnung = Bezeichnung.Value;
-                w.Nutzflaeche = Nutzflaeche;
-                w.Wohnflaeche = Wohnflaeche;
-                w.Notiz = Notiz.Value;
+                w.Bezeichnung = Bezeichnung;
+                w.Notiz = Notiz;
 
                 if (w.WohnungId > 0)
                 {

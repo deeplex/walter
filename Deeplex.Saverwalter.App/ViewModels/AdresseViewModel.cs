@@ -7,10 +7,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public class AdresseViewModel
     {
         public int Id;
-        public ObservableProperty<string> Strasse { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Hausnummer { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Postleitzahl { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Stadt { get; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Strasse { get; set; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Hausnummer { get; set; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Postleitzahl { get; set; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Stadt { get; set; } = new ObservableProperty<string>();
 
         public AdresseViewModel() { }
 
