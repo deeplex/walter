@@ -15,8 +15,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class BetriebskostenRechnungenListViewModel
     {
-        public ObservableProperty<ImmutableDictionary<BetriebskostenRechnungenBetriebskostentyp, BetriebskostenRechnungenListTypenJahr>> Typen
-            = new ObservableProperty<ImmutableDictionary<BetriebskostenRechnungenBetriebskostentyp, BetriebskostenRechnungenListTypenJahr>>();
+        public ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostentyp, BetriebskostenRechnungenListTypenJahr>> Typen
+            = new ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostentyp, BetriebskostenRechnungenListTypenJahr>>();
 
         public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
 
@@ -43,9 +43,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ThenInclude(w => w.Adresse)
                 .ToList()
                 .GroupBy(g => g.Typ)
-                .ToImmutableDictionary(
+                .ToImmutableSortedDictionary(
                     g => new BetriebskostenRechnungenBetriebskostentyp(g.Key),
-                    g => new BetriebskostenRechnungenListTypenJahr(g.ToList()));
+                    g => new BetriebskostenRechnungenListTypenJahr(g.ToList()),
+                    Comparer<BetriebskostenRechnungenBetriebskostentyp>.Create((x, y)
+                        => x.Beschreibung.CompareTo(y.Beschreibung)));
 
             AdresseGroup = App.Walter.Wohnungen
                 .Include(w => w.Adresse)
@@ -110,12 +112,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class BetriebskostenRechnungenListTypenJahr
     {
-        public ImmutableDictionary<int, ImmutableList<BetriebskostenRechnungenRechnung>> Jahre { get; }
+        public ImmutableSortedDictionary<int, ImmutableList<BetriebskostenRechnungenRechnung>> Jahre { get; }
 
         public BetriebskostenRechnungenListTypenJahr(List<Betriebskostenrechnung> r)
         {
-            Jahre = r.GroupBy(gg => gg.Datum.Year).ToImmutableDictionary(
-                gg => gg.Key, gg => gg.ToList().Select(ggg => new BetriebskostenRechnungenRechnung(ggg)).ToImmutableList());
+            Jahre = r.GroupBy(gg => gg.Datum.Year)
+                .ToImmutableSortedDictionary(
+                gg => gg.Key, gg => gg
+                    .ToList()
+                    .Select(ggg => new BetriebskostenRechnungenRechnung(ggg))
+                    .ToImmutableList(),
+                    Comparer<int>.Create((x, y) => y.CompareTo(x)));
         }
     }
 

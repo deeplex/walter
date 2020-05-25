@@ -71,22 +71,11 @@
                                 </Pivot.HeaderTemplate>
                                 <Pivot.ItemTemplate>
                                     <DataTemplate>
-                                        <GridView ItemsSource="{Binding Value, Mode=OneWay}">
+                                        <GridView Margin="0,10,0,0" ItemsSource="{Binding Value, Mode=OneWay}">
                                             <CollectionViewSource x:Name="Wohnungen" IsSourceGrouped="True"/>
                                             <GridView.ItemTemplate>
                                                 <DataTemplate>
-                                                    <StackPanel Margin="5">
-                                                        <ListView
-                                                            CanDragItems="True" CanReorderItems="True" 
-                                                            AllowDrop="True"
-                                                            ItemsSource="{Binding Wohnungen, Mode=OneWay}">
-                                                            <ListView.ItemsPanel>
-                                                                <ItemsPanelTemplate>
-                                                                    <ItemsStackPanel AreStickyGroupHeadersEnabled="True">
-                                                                    </ItemsStackPanel>
-                                                                </ItemsPanelTemplate>
-                                                            </ListView.ItemsPanel>
-                                                        </ListView>
+                                                    <StackPanel BorderBrush="LightGray" BorderThickness="2" Padding="5">
                                                         <TextBlock
                                                             Margin="5"
                                                             FontSize="18">
@@ -99,6 +88,27 @@
                                                             <Run Text="Datum:"/>
                                                             <Run Text="{Binding Datum}"/>
                                                         </TextBlock>
+                                                        <mtuuc:Expander>
+                                                            <mtuuc:Expander.Header>
+                                                                <TextBlock>
+                                                                    <Run Text="Wohnungen ("/>
+                                                                    <Run Text="{Binding Wohnungen.Count}"/>
+                                                                    <Run Text=")"/>
+                                                                </TextBlock>
+                                                            </mtuuc:Expander.Header>
+                                                            <ListView
+                                                                SelectionMode="None"
+                                                                CanDragItems="True" CanReorderItems="True" 
+                                                                AllowDrop="True"
+                                                                ItemsSource="{Binding Wohnungen, Mode=OneWay}">
+                                                                <ListView.ItemsPanel>
+                                                                    <ItemsPanelTemplate>
+                                                                        <ItemsStackPanel AreStickyGroupHeadersEnabled="True">
+                                                                        </ItemsStackPanel>
+                                                                    </ItemsPanelTemplate>
+                                                                </ListView.ItemsPanel>
+                                                            </ListView>
+                                                        </mtuuc:Expander>
                                                     </StackPanel>
                                                 </DataTemplate>
                                             </GridView.ItemTemplate>
