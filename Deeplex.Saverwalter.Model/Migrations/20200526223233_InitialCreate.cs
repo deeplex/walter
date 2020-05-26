@@ -33,8 +33,10 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     Typ = table.Column<int>(nullable: false),
                     Betrag = table.Column<double>(nullable: false),
                     Datum = table.Column<DateTime>(nullable: false),
+                    BetreffendesJahr = table.Column<int>(nullable: false),
                     Schluessel = table.Column<int>(nullable: false),
-                    Beschreibung = table.Column<string>(nullable: true)
+                    Beschreibung = table.Column<string>(nullable: true),
+                    Notiz = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -77,14 +79,31 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     MieteId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     VertragId = table.Column<Guid>(nullable: false),
-                    Datum = table.Column<DateTime>(nullable: false),
-                    WarmMiete = table.Column<double>(nullable: true),
-                    KaltMiete = table.Column<double>(nullable: true),
+                    Zahlungsdatum = table.Column<DateTime>(nullable: false),
+                    BetreffenderMonat = table.Column<DateTime>(nullable: false),
+                    Betrag = table.Column<double>(nullable: true),
                     Notiz = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Mieten", x => x.MieteId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MietMinderungen",
+                columns: table => new
+                {
+                    MietMinderungId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    VetragId = table.Column<Guid>(nullable: false),
+                    Beginn = table.Column<DateTime>(nullable: false),
+                    Ende = table.Column<DateTime>(nullable: false),
+                    Minderung = table.Column<double>(nullable: false),
+                    Notiz = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MietMinderungen", x => x.MietMinderungId);
                 });
 
             migrationBuilder.CreateTable(
@@ -148,12 +167,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     WohnungId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    AdresseId = table.Column<int>(nullable: false),
                     Bezeichnung = table.Column<string>(nullable: false),
+                    BesitzerJuristischePersonId = table.Column<int>(nullable: false),
                     Wohnflaeche = table.Column<double>(nullable: false),
                     Nutzflaeche = table.Column<double>(nullable: false),
-                    Notiz = table.Column<string>(nullable: true),
-                    BesitzerJuristischePersonId = table.Column<int>(nullable: false),
-                    AdresseId = table.Column<int>(nullable: false)
+                    Nutzeinheit = table.Column<int>(nullable: false),
+                    Notiz = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -274,6 +294,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     Version = table.Column<int>(nullable: false),
                     WohnungId = table.Column<int>(nullable: true),
                     Personenzahl = table.Column<int>(nullable: false),
+                    KaltMiete = table.Column<double>(nullable: false),
                     Beginn = table.Column<DateTime>(nullable: false),
                     Ende = table.Column<DateTime>(nullable: true),
                     AnsprechpartnerKontaktId = table.Column<int>(nullable: false),
@@ -434,6 +455,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
             migrationBuilder.DropTable(
                 name: "MieterSet");
+
+            migrationBuilder.DropTable(
+                name: "MietMinderungen");
 
             migrationBuilder.DropTable(
                 name: "MietobjektGaragen");

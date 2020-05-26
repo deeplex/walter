@@ -274,7 +274,7 @@
                                         <mtuuc:DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate x:DataType="vm:VertragDetailMiete">
                                                 <CalendarDatePicker
-                                                    Date="{x:Bind Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                    Date="{x:Bind Zahlungsdatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                                     Language="de"
                                                     Width="176"
                                                     PlaceholderText="Offen"
@@ -282,20 +282,11 @@
                                             </DataTemplate>
                                         </mtuuc:DataGridTemplateColumn.CellTemplate>
                                     </mtuuc:DataGridTemplateColumn>
-                                    <mtuuc:DataGridTemplateColumn Header="Kalt">
+                                    <mtuuc:DataGridTemplateColumn Header="Betrag">
                                         <mtuuc:DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate x:DataType="vm:VertragDetailMiete">
                                                 <muxc:NumberBox
-                                                    Value="{x:Bind Kalt, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                    PlaceholderText="0,00"/>
-                                            </DataTemplate>
-                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    </mtuuc:DataGridTemplateColumn>
-                                    <mtuuc:DataGridTemplateColumn Header="Warm">
-                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="vm:VertragDetailMiete">
-                                                <muxc:NumberBox
-                                                    Value="{x:Bind Warm, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                    Value="{x:Bind Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                                     PlaceholderText="0,00"/>
                                             </DataTemplate>
                                         </mtuuc:DataGridTemplateColumn.CellTemplate>
@@ -314,14 +305,10 @@
                                                 Language="de"
                                                 DateFormat="{}{day.integer}. {month.full} {year.full}"
                                                 PlaceholderText="Datum hinzufügen"
-                                                Date="{x:Bind ViewModel.AddMieteValue.Value.Datum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                Date="{x:Bind ViewModel.AddMieteValue.Value.Zahlungsdatum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                             <muxc:NumberBox
-                                                Header="Kalt"
-                                                Value="{x:Bind ViewModel.AddMieteValue.Value.Kalt, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                PlaceholderText="0,00"/>
-                                            <muxc:NumberBox
-                                                Header="Warm"
-                                                Value="{x:Bind ViewModel.AddMieteValue.Value.Warm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Header="Betrag"
+                                                Value="{x:Bind ViewModel.AddMieteValue.Value.Betrag, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 PlaceholderText="0,00"/>
                                             <Button
                                                 VerticalAlignment="Bottom"

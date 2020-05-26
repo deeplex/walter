@@ -108,12 +108,8 @@
                                                             PlaceholderText="Datum hinzufügen"
                                                             Date="{x:Bind AddMieteValue.Value.Datum.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                                         <muxc:NumberBox
-                                                            Header="Kalt"
-                                                            Value="{x:Bind AddMieteValue.Value.Kalt, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                            PlaceholderText="0,00"/>
-                                                        <muxc:NumberBox
-                                                            Header="Warm"
-                                                            Value="{x:Bind AddMieteValue.Value.Warm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                            Header="Betrag"
+                                                            Value="{x:Bind AddMieteValue.Value.Betrag, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                             PlaceholderText="0,00"/>
                                                         <Button
                                                             VerticalAlignment="Bottom"

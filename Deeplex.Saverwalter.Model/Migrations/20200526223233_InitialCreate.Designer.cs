@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20200523130020_InitialCreate")]
+    [Migration("20200526223233_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,7 +60,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<double>("Betrag")
                         .HasColumnType("REAL");
 
+                    b.Property<int>("BetreffendesJahr")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("Datum")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notiz")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Schluessel")
@@ -225,17 +231,43 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.ToTable("Kontos");
                 });
 
+            modelBuilder.Entity("Deeplex.Saverwalter.Model.MietMinderung", b =>
+                {
+                    b.Property<int>("MietMinderungId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Beginn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Ende")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("Minderung")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Notiz")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("VetragId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("MietMinderungId");
+
+                    b.ToTable("MietMinderungen");
+                });
+
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Miete", b =>
                 {
                     b.Property<int>("MieteId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("Datum")
-                        .HasColumnType("TEXT");
-
-                    b.Property<double?>("KaltMiete")
+                    b.Property<double?>("Betrag")
                         .HasColumnType("REAL");
+
+                    b.Property<DateTime>("BetreffenderMonat")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Notiz")
                         .HasColumnType("TEXT");
@@ -243,8 +275,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<Guid>("VertragId")
                         .HasColumnType("TEXT");
 
-                    b.Property<double?>("WarmMiete")
-                        .HasColumnType("REAL");
+                    b.Property<DateTime>("Zahlungsdatum")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("MieteId");
 
@@ -304,6 +336,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<DateTime?>("Ende")
                         .HasColumnType("TEXT");
 
+                    b.Property<double>("KaltMiete")
+                        .HasColumnType("REAL");
+
                     b.Property<string>("Notiz")
                         .HasColumnType("TEXT");
 
@@ -351,6 +386,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<string>("Notiz")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Nutzeinheit")
+                        .HasColumnType("INTEGER");
 
                     b.Property<double>("Nutzflaeche")
                         .HasColumnType("REAL");

@@ -81,7 +81,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Where(m => m.VertragId == v.First().VertragId)
                 .Select(m => new VertragDetailMiete(m))
                 .ToList()
-                .OrderBy(m => m.Datum).Reverse()
+                .OrderBy(m => m.Zahlungsdatum).Reverse()
                 .ToImmutableList();
 
             BetriebskostenJahr.Value = DateTime.Now.Year - 1;
@@ -119,7 +119,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 var amv = AddMieteValue.Value;
                 Mieten.Value = Mieten.Value
                     .Add(amv)
-                    .OrderBy(m => m.Datum)
+                    .OrderBy(m => m.Zahlungsdatum)
                     .Reverse()
                     .ToImmutableList();
                 AddMieteValue.Value = new VertragDetailMiete(v.First().VertragId);
@@ -192,12 +192,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public Miete Entity { get; }
 
-        public DateTimeOffset Datum
+        public DateTimeOffset Zahlungsdatum
         {
-            get => Entity.Datum;
+            get => Entity.Zahlungsdatum;
             set
             {
-                Entity.Datum = value.UtcDateTime;
+                Entity.Zahlungsdatum = value.UtcDateTime;
                 RaisePropertyChangedAuto();
             }
         }
@@ -212,22 +212,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public double Kalt
+        public double Betrag
         {
-            get => Entity.KaltMiete ?? 0;
+            get => Entity.Betrag ?? 0;
             set
             {
-                Entity.KaltMiete = value;
-                RaisePropertyChangedAuto();
-            }
-        }
-
-        public double Warm
-        {
-            get => Entity.WarmMiete ?? 0;
-            set
-            {
-                Entity.WarmMiete = value;
+                Entity.Betrag = value;
                 RaisePropertyChangedAuto();
             }
         }
@@ -236,7 +226,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             : this(new Miete
             {
                 VertragId = vertragId,
-                Datum = DateTime.UtcNow,
+                Zahlungsdatum = DateTime.UtcNow,
             })
         {
         }
@@ -252,9 +242,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             switch (e.PropertyName)
             {
-                case nameof(Warm):
-                case nameof(Kalt):
-                case nameof(Datum):
+                case nameof(Betrag):
+                case nameof(Zahlungsdatum):
                 case nameof(Notiz):
                     break;
                 default:

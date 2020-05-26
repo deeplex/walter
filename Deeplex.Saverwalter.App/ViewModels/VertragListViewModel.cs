@@ -42,8 +42,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 var mieten = Mieten.OrderBy(m => m.Datum.Value);
                 var last = mieten.Count() > 0 ? mieten.Last() : null;
                 return last != null ? last.Datum.Value.ToString("dd.MM.yyyy") +
-                    " / Kalt: " + string.Format("{0:F2}€", last.Kalt) +
-                    " / Warm: " + string.Format("{0:F2}€", last.Warm) : "";
+                    " - Betrag: " + string.Format("{0:F2}€", last.Betrag) : "";
             }
         }
         public bool HasLastMiete => LastMiete != "";
@@ -66,9 +65,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Mieten = Mieten.Add(AddMieteValue.Value);
                 App.Walter.Mieten.Add(new Miete
                 {
-                    Datum = AddMieteValue.Value.Datum.Value.UtcDateTime,
-                    KaltMiete = AddMieteValue.Value.Kalt,
-                    WarmMiete = AddMieteValue.Value.Warm,
+                    Zahlungsdatum = AddMieteValue.Value.Datum.Value.UtcDateTime,
+                    Betrag = AddMieteValue.Value.Betrag,
                     VertragId = Versionen.Last().VertragId,
                 });
                 App.Walter.SaveChanges();
@@ -141,21 +139,21 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 RaisePropertyChanged(nameof(Kalt));
             }
         }
-        public double Warm;
-        public string WarmString
+        public double Betrag;
+        public string BetragString
         {
-            get => Warm > 0 ? string.Format("{0:F2}", Warm) : "";
+            get => Betrag > 0 ? string.Format("{0:F2}", Betrag) : "";
             set
             {
                 if (double.TryParse(value, out double result))
                 {
-                    SetProperty(ref Warm, result);
+                    SetProperty(ref Betrag, result);
                 }
                 else
                 {
-                    SetProperty(ref Warm, 0.0);
+                    SetProperty(ref Betrag, 0.0);
                 }
-                RaisePropertyChanged(nameof(Warm));
+                RaisePropertyChanged(nameof(Betrag));
             }
         }
 
@@ -164,17 +162,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public VertragListMiete()
         {
             Datum.Value = DateTime.UtcNow;
-            Kalt = 0;
-            Warm = 0;
+            Betrag = 0;
             Notiz.Value = "";
         }
 
         public VertragListMiete(Miete m)
         {
             Id = m.MieteId;
-            Datum.Value = m.Datum;
-            Kalt = m.KaltMiete ?? 0;
-            Warm = m.WarmMiete ?? 0;
+            Datum.Value = m.Zahlungsdatum;
+            Betrag = m.Betrag ?? 0;
             Notiz.Value = m.Notiz ?? "";
         }
     }
