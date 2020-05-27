@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20200526223233_InitialCreate")]
+    [Migration("20200527181945_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -327,7 +327,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AnsprechpartnerKontaktId")
+                    b.Property<int>("AnsprechpartnerId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Beginn")
@@ -354,14 +354,14 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<Guid>("VertragId")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("WohnungId")
+                    b.Property<int>("WohnungId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("rowid");
 
                     b.HasAlternateKey("VertragId", "Version");
 
-                    b.HasIndex("AnsprechpartnerKontaktId");
+                    b.HasIndex("AnsprechpartnerId");
 
                     b.HasIndex("WohnungId");
 
@@ -530,13 +530,15 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     b.HasOne("Deeplex.Saverwalter.Model.Kontakt", "Ansprechpartner")
                         .WithMany()
-                        .HasForeignKey("AnsprechpartnerKontaktId")
+                        .HasForeignKey("AnsprechpartnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Deeplex.Saverwalter.Model.Wohnung", "Wohnung")
                         .WithMany("Vertraege")
-                        .HasForeignKey("WohnungId");
+                        .HasForeignKey("WohnungId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Wohnung", b =>

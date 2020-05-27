@@ -292,12 +292,12 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     VertragId = table.Column<Guid>(nullable: false),
                     Version = table.Column<int>(nullable: false),
-                    WohnungId = table.Column<int>(nullable: true),
+                    WohnungId = table.Column<int>(nullable: false),
                     Personenzahl = table.Column<int>(nullable: false),
                     KaltMiete = table.Column<double>(nullable: false),
                     Beginn = table.Column<DateTime>(nullable: false),
                     Ende = table.Column<DateTime>(nullable: true),
-                    AnsprechpartnerKontaktId = table.Column<int>(nullable: false),
+                    AnsprechpartnerId = table.Column<int>(nullable: false),
                     VersionsNotiz = table.Column<string>(nullable: true),
                     Notiz = table.Column<string>(nullable: true)
                 },
@@ -306,8 +306,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     table.PrimaryKey("PK_Vertraege", x => x.rowid);
                     table.UniqueConstraint("AK_Vertraege_VertragId_Version", x => new { x.VertragId, x.Version });
                     table.ForeignKey(
-                        name: "FK_Vertraege_Kontakte_AnsprechpartnerKontaktId",
-                        column: x => x.AnsprechpartnerKontaktId,
+                        name: "FK_Vertraege_Kontakte_AnsprechpartnerId",
+                        column: x => x.AnsprechpartnerId,
                         principalTable: "Kontakte",
                         principalColumn: "KontaktId",
                         onDelete: ReferentialAction.Cascade);
@@ -316,7 +316,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         column: x => x.WohnungId,
                         principalTable: "Wohnungen",
                         principalColumn: "WohnungId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -409,9 +409,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 column: "GarageId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Vertraege_AnsprechpartnerKontaktId",
+                name: "IX_Vertraege_AnsprechpartnerId",
                 table: "Vertraege",
-                column: "AnsprechpartnerKontaktId");
+                column: "AnsprechpartnerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Vertraege_WohnungId",

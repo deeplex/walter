@@ -1,42 +1,42 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using DocumentFormat.OpenXml.Bibliography;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
     public class VertragDetailViewModel : VertragDetailVersion
     {
+        public Guid guid { get; }
         public ImmutableList<VertragDetailKontakt> AlleKontakte { get; }
         public ImmutableList<JuristischePersonViewModel> AlleJuristischePersonen { get; }
         public ImmutableList<VertragDetailWohnung> AlleWohnungen { get; }
 
-        public ObservableProperty<ImmutableList<VertragDetailVersion>> Versionen { get; }
+        public ObservableProperty<ImmutableList<VertragDetailVersion>> Versionen
             = new ObservableProperty<ImmutableList<VertragDetailVersion>>();
-        public ObservableProperty<VertragDetailVersion> AddVersionValue
-            = new ObservableProperty<VertragDetailVersion>();
         public ObservableProperty<VertragDetailMiete> AddMieteValue
             = new ObservableProperty<VertragDetailMiete>();
-
-        public Guid guid { get; }
-
         public ObservableProperty<ImmutableList<VertragDetailKontakt>> Mieter
             = new ObservableProperty<ImmutableList<VertragDetailKontakt>>();
         public ObservableProperty<ImmutableList<VertragDetailMiete>> Mieten
             = new ObservableProperty<ImmutableList<VertragDetailMiete>>();
-
-        public ObservableProperty<int> BetriebskostenJahr = new ObservableProperty<int>();
-
-        public bool isNew = false;
-
-        public VertragDetailViewModel() : this(new List<Vertrag> { new Vertrag() })
+        public DateTimeOffset? AddVersionDatum;
+        public ObservableProperty<int> BetriebskostenJahr
+            = new ObservableProperty<int>();
+        public VertragDetailViewModel() : this(
+            new List<Vertrag>
+            {
+                new Vertrag
+                {
+                    Beginn = DateTime.Today,
+                }
+            })
         {
-            isNew = true;
             App.Walter.Vertraege
                   .Include(v => v.Ansprechpartner)
                   .Include(v => v.Wohnung).ThenInclude(w => w.Besitzer);
@@ -52,65 +52,41 @@ namespace Deeplex.Saverwalter.App.ViewModels
                   .OrderBy(v => v.Version)
                   .Reverse()
                   .ToList())
-        {
-        }
+        { }
 
         public VertragDetailViewModel(List<Vertrag> v) : base(v.OrderBy(vs => vs.Version).Last())
         {
             guid = v.First().VertragId;
 
-            AlleKontakte = App.Walter.Kontakte
-                .Select(k => new VertragDetailKontakt(k))
-                .ToImmutableList();
-            AlleJuristischePersonen = App.Walter.JuristischePersonen
-                .Select(j => new JuristischePersonViewModel(j))
-                .ToImmutableList();
-            AlleWohnungen = App.Walter.Wohnungen
-                .Select(w => new VertragDetailWohnung(w))
-                .ToImmutableList();
+            AlleKontakte = App.Walter.Kontakte.Select(k => new VertragDetailKontakt(k)).ToImmutableList();
+            AlleWohnungen = App.Walter.Wohnungen.Select(w => new VertragDetailWohnung(w)).ToImmutableList();
+            AlleJuristischePersonen = App.Walter.JuristischePersonen.Select(j => new JuristischePersonViewModel(j)).ToImmutableList();
 
             Mieter.Value = App.Walter.MieterSet
-               .Where(m => m.VertragId == v.First().VertragId)
-               .Include(m => m.Kontakt)
-               .Select(m => new VertragDetailKontakt(m.Kontakt))
-               .ToList()
-               .OrderBy(m => m.Name.Length).Reverse() // From the longest to the smallest because of XAML I guess
-               .ToImmutableList();
+                .Where(m => m.VertragId == v.First().VertragId).Include(m => m.Kontakt)
+                .Select(m => new VertragDetailKontakt(m.Kontakt)).ToList()
+                .OrderBy(m => m.Name.Length).Reverse().ToImmutableList();
 
             Mieten.Value = App.Walter.Mieten
                 .Where(m => m.VertragId == v.First().VertragId)
-                .Select(m => new VertragDetailMiete(m))
-                .ToList()
-                .OrderBy(m => m.Zahlungsdatum).Reverse()
-                .ToImmutableList();
+                .Select(m => new VertragDetailMiete(m)).ToList()
+                .OrderBy(m => m.Zahlungsdatum).Reverse().ToImmutableList();
 
             BetriebskostenJahr.Value = DateTime.Now.Year - 1;
 
             Versionen.Value = v.Select(vs => new VertragDetailVersion(vs)).ToImmutableList();
-            Beginn.Value = Versionen.Value.Last().Beginn.Value;
+            Beginn = Versionen.Value.Last().Beginn;
 
-            AddVersionValue.Value = Versionen.Value.Count() > 0 ?
-                new VertragDetailVersion(Versionen.Value.First()) :
-                new VertragDetailVersion(this);
             AddVersion = new RelayCommand(_ =>
             {
-                Versionen.Value.First().Ende.Value = AddVersionValue.Value.Beginn.Value.AddDays(-1);
-                App.Walter.Vertraege.Update(App.Walter.Vertraege.Find(Versionen.Value.First().Id));
-                Versionen.Value = Versionen.Value.Insert(0, AddVersionValue.Value);
-                App.Walter.Vertraege.Add(new Vertrag
+                var last = App.Walter.Vertraege.Find(Versionen.Value.First().Id);
+                var entity = new Vertrag(last, AddVersionDatum?.UtcDateTime ?? DateTime.Today)
                 {
-                    Version = AddVersionValue.Value.Version,
-                    Ansprechpartner = App.Walter.Kontakte.Find(AddVersionValue.Value.Ansprechpartner.Value.Id),
-                    Personenzahl = AddVersionValue.Value.Personenzahl.Value,
-                    Beginn = AddVersionValue.Value.Beginn.Value.UtcDateTime,
-                    Ende = AddVersionValue.Value.Ende.Value?.UtcDateTime,
-                    Notiz = AddVersionValue.Value.Notiz.Value,
-                    // VersionsNotiz
-                    WohnungId = AddVersionValue.Value.Wohnung.Value.Id,
-                    VertragId = v.First().VertragId,
-                });
-                AddVersionValue.Value = new VertragDetailVersion(AddVersionValue.Value);
-                App.Walter.SaveChanges();
+                    Personenzahl = Personenzahl,
+                    //KaltMiete = KaltMiete, TODO
+                };
+                var nv = new VertragDetailVersion(entity);
+                Versionen.Value = Versionen.Value.Insert(0, nv);
             }, _ => true);
 
             AddMieteValue.Value = new VertragDetailMiete(v.First().VertragId);
@@ -130,7 +106,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 var vs = App.Walter.Vertraege.Find(Versionen.Value.First().Id);
                 App.Walter.Vertraege.Remove(vs);
                 Versionen.Value = Versionen.Value.Skip(1).ToImmutableList();
-                AddVersionValue.Value = new VertragDetailVersion(Versionen.Value.First());
                 App.Walter.SaveChanges();
             }, _ => true);
 
@@ -147,50 +122,130 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class VertragDetailVersion : BindableBase
     {
-        public int Id { get; }
-        public int Version { get; }
-        public ObservableProperty<int> Personenzahl { get; } = new ObservableProperty<int>();
-        public ObservableProperty<VertragDetailWohnung> Wohnung
-            = new ObservableProperty<VertragDetailWohnung>();
-        public ObservableProperty<DateTimeOffset> Beginn { get; } = new ObservableProperty<DateTimeOffset>();
-        public ObservableProperty<DateTimeOffset?> Ende { get; } = new ObservableProperty<DateTimeOffset?>();
-        public ObservableProperty<JuristischePersonViewModel> Vermieter
-            = new ObservableProperty<JuristischePersonViewModel>();
-        public ObservableProperty<VertragDetailKontakt> Ansprechpartner
-            = new ObservableProperty<VertragDetailKontakt>();
-        public ObservableProperty<string> Notiz { get; }
-            = new ObservableProperty<string>();
-
-        public VertragDetailVersion(VertragDetailVersion v)
+        private Vertrag Entity { get; }
+        public int Id => Entity.rowid;
+        public int Version => Entity.Version;
+        public int Personenzahl
         {
-            Version = v.Version + 1;
-            Personenzahl.Value = v.Personenzahl.Value;
-            Wohnung.Value = v.Wohnung.Value;
-            Beginn.Value = v.Beginn.Value.AddDays(1);
-            Ende.Value = null;
-            Vermieter.Value = v.Vermieter.Value;
-            Ansprechpartner.Value = v.Ansprechpartner.Value;
-            Notiz.Value = "";
+            get => Entity.Personenzahl;
+            set
+            {
+                Entity.Personenzahl = value;
+                RaisePropertyChangedAuto();
+            }
         }
 
+        private VertragDetailWohnung mWohnung;
+        public VertragDetailWohnung Wohnung
+        {
+            get => mWohnung;
+            set
+            {
+                mWohnung = value;
+                Entity.WohnungId = mWohnung.Id;
+                RaisePropertyChangedAuto();
+            }
+        }
+        public DateTimeOffset Beginn
+        {
+            get => Entity.Beginn;
+            set
+            {
+                Entity.Beginn = value.UtcDateTime;
+                RaisePropertyChangedAuto();
+            }
+        }
+        public DateTimeOffset? Ende
+        {
+            get => Entity.Ende;
+            set
+            {
+                Entity.Ende = value?.UtcDateTime;
+                RaisePropertyChangedAuto();
+            }
+        }
+        public string Notiz
+        {
+            get => Entity.Notiz;
+            set
+            {
+                Entity.Notiz = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+        public string Vermieter => Wohnung.Besitzer;
+        private VertragDetailKontakt mAnsprechpartner;
+        public VertragDetailKontakt Ansprechpartner
+        {
+            get => mAnsprechpartner;
+            set
+            {
+                mAnsprechpartner = value;
+                Entity.AnsprechpartnerId = mAnsprechpartner.Id;
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public VertragDetailVersion(int id) : this(App.Walter.Vertraege.Find(id)) { }
         public VertragDetailVersion(Vertrag v)
         {
-            Id = v.rowid;
-            Version = v.Version;
-            Notiz.Value = v.Notiz;
-            Personenzahl.Value = v.Personenzahl;
-            var w = v.Wohnung is Wohnung;
-            Wohnung.Value = w ? new VertragDetailWohnung(v.Wohnung) : null;
-            Vermieter.Value = w ? new JuristischePersonViewModel(v.Wohnung.Besitzer) : null;
-            Ansprechpartner.Value = v.Ansprechpartner is Kontakt va ? new VertragDetailKontakt(va) : null;
-            Ende.Value = v.Ende;
-            Beginn.Value = v.Beginn == DateTime.MinValue ? DateTime.Today : v.Beginn;
+            Entity = v;
+
+            if (v.Wohnung != null)
+            {
+                Wohnung = new VertragDetailWohnung(v.Wohnung);
+            }
+            if (v.Ansprechpartner != null)
+            {
+                Ansprechpartner = new VertragDetailKontakt(v.Ansprechpartner);
+            }
+        }
+
+        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Wohnung):
+                case nameof(Beginn):
+                case nameof(Ende):
+                case nameof(Notiz):
+                case nameof(Personenzahl):
+                //case nameof(KaltMiete):
+                // case nameof(VersionsNotiz):
+                case nameof(Ansprechpartner):
+                    break;
+                default:
+                    return;
+            }
+
+            if (Entity.VertragId != null &&
+                Entity.Wohnung != null &&
+                Entity.Beginn != null &&
+                Entity.Ansprechpartner != null &&
+                Entity.Version != null &&
+                Entity.Personenzahl != null &&
+                Entity.KaltMiete != null) return;
+
+            if (Entity.rowid != 0)
+            {
+                App.Walter.Vertraege.Update(Entity);
+            }
+            else
+            {
+                App.Walter.Vertraege.Add(Entity);
+            }
+            App.Walter.SaveChanges();
         }
     }
 
     public class VertragDetailMiete : BindableBase
     {
-        public Miete Entity { get; }
+        public void selfDestruct()
+        {
+            App.Walter.Remove(Entity);
+            App.Walter.SaveChanges();
+        }
+        private Miete Entity { get; }
 
         public DateTimeOffset Zahlungsdatum
         {
@@ -234,9 +289,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public VertragDetailMiete(Miete m)
         {
             Entity = m;
-
             PropertyChanged += OnUpdate;
         }
+
+        private bool savable =>
+            Entity.Betrag != null &&
+            Entity.BetreffenderMonat != null &&
+            Entity.Zahlungsdatum != null &&
+            Entity.VertragId != null;
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
         {
@@ -249,6 +309,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 default:
                     return;
             }
+
+            if (!savable) return;
 
             if (Entity.MieteId != 0)
             {
@@ -281,10 +343,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public class VertragDetailWohnung
     {
         public override string ToString() => BezeichnungVoll;
-
         public Wohnung Entity { get; }
 
-        public int Id;
+        public int Id { get; }
         public int BesitzerId { get; }
         public string Besitzer { get; }
         public string BezeichnungVoll { get; }

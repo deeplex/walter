@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public int Id;
 
         public ImmutableList<JuristischePersonViewModel> AlleJuristischePersonen { get; }
-        public ImmutableList<AdresseViewModel> AlleAdressen { get; }    
+        public ImmutableList<AdresseViewModel> AlleAdressen { get; }
 
         public ObservableProperty<JuristischePersonViewModel> Besitzer
             = new ObservableProperty<JuristischePersonViewModel>();
@@ -22,6 +22,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<List<WohnungDetailZaehler>>();
         public ObservableProperty<List<WohnungDetailVertrag>> Vertraege
             = new ObservableProperty<List<WohnungDetailVertrag>>();
+
         public AdresseViewModel Adresse { get; }
         public string Anschrift => AdresseViewModel.Anschrift(App.Walter.Wohnungen.Find(Id));
         private string mBezeichnung;
@@ -54,8 +55,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public double Wohnflaeche
         {
             get => mWohnflaeche;
-            set 
-            { 
+            set
+            {
                 SetProperty(ref mWohnflaeche, value);
                 var w = App.Walter.Wohnungen.Find(Id);
                 w.Wohnflaeche = value;

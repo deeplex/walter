@@ -32,9 +32,9 @@ namespace Deeplex.Saverwalter.App.Views
             }
 
             // TODO this can be fixed by having the selected item be a pointer to the respecitve element in the list.
-            if (ViewModel.Wohnung.Value != null)
+            if (ViewModel.Wohnung != null)
             {
-                WohnungComboBox.SelectedIndex = ViewModel.AlleWohnungen.FindIndex(w => w.Id == ViewModel.Wohnung.Value.Id);
+                WohnungComboBox.SelectedIndex = ViewModel.AlleWohnungen.FindIndex(w => w.Id == ViewModel.Wohnung.Id);
             }
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
             base.OnNavigatedTo(e);
@@ -49,7 +49,7 @@ namespace Deeplex.Saverwalter.App.Views
                     : new List<string> { sender.Text + " (" + add + " hinzufügen)" };
             }
         }
-     
+
         private void MieterSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             Suggest(sender, args,
@@ -104,8 +104,8 @@ namespace Deeplex.Saverwalter.App.Views
                 var ansprechpartner = ViewModel.AlleKontakte.First(k => k.Name == a);
                 var entity = App.Walter.Kontakte.Find(ansprechpartner.Id);
 
-                ViewModel.Ansprechpartner.Value = ansprechpartner;
-                ViewModel.Versionen.Value.ForEach(v => v.Ansprechpartner.Value = ansprechpartner);
+                ViewModel.Ansprechpartner = ansprechpartner;
+                ViewModel.Versionen.Value.ForEach(v => v.Ansprechpartner = ansprechpartner);
                 App.Walter.Vertraege.Where(vs => vs.VertragId == ViewModel.guid).ToList().ForEach(vs =>
                 {
                     vs.Ansprechpartner = entity;
@@ -128,16 +128,15 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void RemoveDate_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            ViewModel.Ende.Value = null;
-            ViewModel.Versionen.Value.Last().Ende.Value = null;
+            ViewModel.Ende = null;
+            ViewModel.Versionen.Value.Last().Ende = null;
         }
 
         private void RemoveMiete_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             var miete = (VertragDetailMiete)((Button)sender).CommandParameter;
             ViewModel.Mieten.Value = ViewModel.Mieten.Value.Remove(miete).ToImmutableList();
-            App.Walter.Mieten.Remove(miete.Entity);
-            App.Walter.SaveChanges();
+            miete.selfDestruct();
         }
 
         private void Betriebskostenabrechnung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
@@ -146,7 +145,7 @@ namespace Deeplex.Saverwalter.App.Views
             var b = new Betriebskostenabrechnung(
                 ViewModel.Versionen.Value.First().Id, Jahr, new DateTime(Jahr, 1, 1), new DateTime(Jahr, 12, 31));
 
-            var s = Jahr.ToString() + " - " + ViewModel.Wohnung.Value.BezeichnungVoll;
+            var s = Jahr.ToString() + " - " + ViewModel.Wohnung.BezeichnungVoll;
 
             b.SaveAsDocx(ApplicationData.Current.LocalFolder.Path + @"\" + s + ".docx");
         }
@@ -154,20 +153,6 @@ namespace Deeplex.Saverwalter.App.Views
         private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             ViewModel.IsInEdit.Value = EditToggle.IsChecked ?? false;
-        }
-
-        private void WohnungComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var w = (VertragDetailWohnung)WohnungComboBox.SelectedItem;
-            ViewModel.Wohnung.Value = w;
-            ViewModel.Versionen.Value.ForEach(vs =>
-            {
-                vs.Wohnung.Value = w;
-                var v = App.Walter.Vertraege.Find(vs.Id);
-                v.Wohnung = w.Entity;
-                App.Walter.Vertraege.Update(v);
-            });
-            App.Walter.SaveChanges();
         }
     }
 }

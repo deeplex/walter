@@ -26,8 +26,8 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Zaehlerstand> Zaehlerstaende { get; set; } = null!;
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             // TODO adjust this...
-            => options.UseSqlite("Data Source=walter.db");
-            //=> options.UseSqlite("Data Source=" + ApplicationData.Current.LocalFolder.Path + @"\walter.db");
+            //=> options.UseSqlite("Data Source=walter.db");
+            => options.UseSqlite("Data Source=" + ApplicationData.Current.LocalFolder.Path + @"\walter.db");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -100,8 +100,8 @@ namespace Deeplex.Saverwalter.Model
         public int rowid { get; set; }
         public Guid VertragId { get; set; }
         public int Version { get; set; } = 1;
-        public int? WohnungId { get; set; }
-        public Wohnung? Wohnung { get; set; }
+        public int WohnungId { get; set; }
+        public Wohnung Wohnung { get; set; } = null!;
         // Personenzahl is not inherently a property of a Vertrag.
         // But it is best tracked in as Vertrag(version). 
         public int Personenzahl { get; set; }
@@ -110,6 +110,7 @@ namespace Deeplex.Saverwalter.Model
         public double KaltMiete { get; set; }
         public DateTime Beginn { get; set; }
         public DateTime? Ende { get; set; }
+        public int AnsprechpartnerId { get; set; }
         public Kontakt Ansprechpartner { get; set; } = null!;
         public string? VersionsNotiz { get; set; }
         public string? Notiz { get; set; }
