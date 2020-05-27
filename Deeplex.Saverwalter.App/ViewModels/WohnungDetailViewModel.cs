@@ -4,14 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
     public class WohnungDetailViewModel : ValidatableBase
     {
+        private Wohnung Entity;
         public int Id;
-
         public ImmutableList<JuristischePersonViewModel> AlleJuristischePersonen { get; }
         public ImmutableList<AdresseViewModel> AlleAdressen { get; }
 
@@ -23,72 +24,53 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<List<WohnungDetailVertrag>> Vertraege
             = new ObservableProperty<List<WohnungDetailVertrag>>();
 
-        public AdresseViewModel Adresse { get; }
-        public string Anschrift => AdresseViewModel.Anschrift(App.Walter.Wohnungen.Find(Id));
-        private string mBezeichnung;
+        private AdresseViewModel mAdresse;
+        public AdresseViewModel Adresse
+        {
+            get => mAdresse;
+            set
+            {
+                SetProperty(ref mAdresse, value);
+                Entity.AdresseId = mAdresse.Id;
+            }
+        }
+        public string Anschrift => AdresseViewModel.Anschrift(Entity);
         public string Bezeichnung
         {
-            get => mBezeichnung;
+            get => Entity.Bezeichnung;
             set
             {
-                SetProperty(ref mBezeichnung, value);
-                var w = App.Walter.Wohnungen.Find(Id);
-                w.Bezeichnung = value;
-                App.Walter.SaveChanges();
+                Entity.Bezeichnung = value;
+                RaisePropertyChangedAuto();
             }
         }
 
-        private string mNotiz;
         public string Notiz
         {
-            get => mNotiz;
+            get => Entity.Notiz;
             set
             {
-                SetProperty(ref mNotiz, value);
-                var w = App.Walter.Wohnungen.Find(Id);
-                w.Notiz = value;
-                App.Walter.SaveChanges();
+                Entity.Notiz = value;
+                RaisePropertyChangedAuto();
             }
         }
 
-        private double mWohnflaeche;
         public double Wohnflaeche
         {
-            get => mWohnflaeche;
+            get => Entity.Wohnflaeche;
             set
             {
-                SetProperty(ref mWohnflaeche, value);
-                var w = App.Walter.Wohnungen.Find(Id);
-                w.Wohnflaeche = value;
-                App.Walter.SaveChanges();
-                if (mWohnflaeche <= mNutzflaeche)
-                {
-                    ClearErrors(nameof(Nutzflaeche));
-                }
-                else
-                {
-                    AddError(nameof(Nutzflaeche), "Wohnfläche muss kleiner als Nutzfläche");
-                }
+                Entity.Wohnflaeche = value;
+                RaisePropertyChangedAuto();
             }
         }
-        private double mNutzflaeche;
         public double Nutzflaeche
         {
-            get => mNutzflaeche;
+            get => Entity.Nutzflaeche;
             set
             {
-                SetProperty(ref mNutzflaeche, value);
-                var w = App.Walter.Wohnungen.Find(Id);
-                w.Nutzflaeche = value;
-                App.Walter.SaveChanges();
-                if (mWohnflaeche <= mNutzflaeche)
-                {
-                    ClearErrors(nameof(Nutzflaeche));
-                }
-                else
-                {
-                    AddErrorAuto("Wohnfläche muss kleiner als Nutzfläche");
-                }
+                Entity.Nutzflaeche = value;
+                RaisePropertyChangedAuto();
             }
         }
 
@@ -107,6 +89,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private WohnungDetailViewModel(Wohnung w)
         {
+            Entity = w;
+
             AlleJuristischePersonen = App.Walter.JuristischePersonen
                 .Select(j => new JuristischePersonViewModel(j))
                 .ToImmutableList();
@@ -114,20 +98,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Select(a => new AdresseViewModel(a))
                 .ToImmutableList();
 
-            Id = w.WohnungId;
-            AdresseId.Value = w.AdresseId;
-            Bezeichnung = w.Bezeichnung;
-            mWohnflaeche = w.Wohnflaeche;
-            Nutzflaeche = w.Nutzflaeche;
-            Notiz = w.Notiz;
-
-            Adresse = w.Adresse is Adresse ?
-                new AdresseViewModel(w.Adresse) :
-                new AdresseViewModel();
-
-            Besitzer.Value = w.Besitzer is JuristischePerson ?
-                new JuristischePersonViewModel(w.Besitzer) :
-                new JuristischePersonViewModel();
+            if (w.Adresse != null)
+            {
+                Adresse = new AdresseViewModel(w.Adresse);
+            }
 
             Zaehler.Value = w.Zaehler.Select(z => new WohnungDetailZaehler(z)).ToList();
 
@@ -167,12 +141,42 @@ namespace Deeplex.Saverwalter.App.ViewModels
             IsInEdit.PropertyChanged += (_, ev) => SaveEdit.RaiseCanExecuteChanged(ev);
 
             IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
+
+            PropertyChanged += OnUpdate;
         }
         public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
         public bool IsNotInEdit => !IsInEdit.Value;
-
         public RelayCommand BeginEdit { get; }
         public RelayCommand SaveEdit { get; }
+
+        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Besitzer):
+                case nameof(Bezeichnung):
+                case nameof(Wohnflaeche):
+                case nameof(Nutzflaeche):
+                case nameof(Notiz):
+                    break;
+                default:
+                    return;
+            }
+
+            if (Entity.Besitzer != null &&
+                Entity.Wohnflaeche != null &&
+                Entity.Nutzflaeche != null) return;
+
+            if (Entity.WohnungId != 0)
+            {
+                App.Walter.Wohnungen.Update(Entity);
+            }
+            else
+            {
+                App.Walter.Wohnungen.Add(Entity);
+            }
+            App.Walter.SaveChanges();
+        }
     }
 
     public class WohnungDetailZaehler

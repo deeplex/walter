@@ -39,7 +39,7 @@
 
         <DataTemplate x:Key="BeginnGrid" x:DataType="vm:VertragDetailVersion">
             <CalendarDatePicker
-                Date="{x:Bind Beginn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Date="{x:Bind Beginn, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                 Language="de"
                 Width="176"
                 PlaceholderText="Offen"
@@ -48,7 +48,7 @@
 
         <DataTemplate x:Key="EndeGrid" x:DataType="vm:VertragDetailVersion">
             <CalendarDatePicker
-                Date="{x:Bind Ende, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Date="{x:Bind Ende, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                 Width="176"
                 IsEnabled="False"
                 Language="de"
@@ -81,9 +81,9 @@
                                     <muxc:NumberBox
                                         SpinButtonPlacementMode="Inline"
                                         AllowFocusOnInteraction="True"
-                                        Value="{x:Bind ViewModel.BetriebskostenJahr.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                        Value="{x:Bind ViewModel.BetriebskostenJahr.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                     <Button
-                                        CommandParameter="{x:Bind ViewModel.BetriebskostenJahr.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        CommandParameter="{x:Bind ViewModel.BetriebskostenJahr.Value, Mode=OneWay}"
                                         Click="Betriebskostenabrechnung_Click"
                                         Background="Transparent">
                                         <SymbolIcon Symbol="SaveLocal"/>
@@ -111,20 +111,19 @@
                     Header="Beginn"
                     IsEnabled="False"                
                     Margin="20,20,0,0"
-                    Date="{x:Bind ViewModel.Beginn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Date="{x:Bind ViewModel.lastBeginn, Mode=OneWay}"
                     Width="190"
                     Language="de"
                     PlaceholderText="Wähle ein Datum"
                     DateFormat="{}{day.integer}. {month.full} {year.full}"/>
-
                 <CalendarDatePicker
                     Header="Ende"
-                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    IsEnabled="False"
                     Margin="20,20,0,0"
                     Width="190"
                     PlaceholderText="Offen"
                     Language="de"
-                    Date="{x:Bind ViewModel.Ende, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Date="{x:Bind ViewModel.firstEnde, Mode=OneWay}"
                     DateFormat="{}{day.integer}. {month.full} {year.full}" />
                 <Button
                     Margin="0,43,0,0"
@@ -139,7 +138,7 @@
                 <ComboBox
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value}"
                     x:Name="WohnungComboBox"
-                    SelectedItem="{x:Bind ViewModel.Wohnung}"
+                    SelectedItem="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Margin="20,20,0,0"
                     PlaceholderText="Wohnung hinzufügen"
                     MinWidth="400"
@@ -155,7 +154,7 @@
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Margin="20,15,0,0"
                     MinWidth="200"
-                    Text="{x:Bind ViewModel.Ansprechpartner.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Text="{x:Bind ViewModel.Ansprechpartner, Mode=OneWay}"
                     PlaceholderText="Ansprechpartner"
                     QuerySubmitted="AnsprechpartnerSuggest_QuerySubmitted"
                     TextChanged="AnsprechpartnerSuggest_TextChanged"/>
@@ -199,7 +198,7 @@
                     <mtuuc:DataGridTextColumn IsReadOnly="True" Header="Version" Binding="{Binding Version}"/>
                     <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
                     <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
-                    <mtuuc:DataGridTextColumn Header="Personenzahl" Binding="{Binding Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <mtuuc:DataGridTextColumn Header="Personenzahl" Binding="{Binding Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                     <mtuuc:DataGridTextColumn Header="Notiz" IsReadOnly="False" Binding="{Binding Notiz.Value}"/>
                 </mtuuc:DataGrid.Columns>
             </mtuuc:DataGrid>
@@ -218,7 +217,7 @@
                                     Language="de"
                                     DateFormat="{}{day.integer}. {month.full} {year.full}"
                                     PlaceholderText="Datum hinzufügen"
-                                    Date="{x:Bind ViewModel.AddVersionDatum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    Date="{x:Bind ViewModel.AddVersionDatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                 <Button
                                     VerticalAlignment="Bottom"
                                     Command="{x:Bind ViewModel.AddVersion}"
@@ -300,10 +299,10 @@
                                                 Language="de"
                                                 DateFormat="{}{day.integer}. {month.full} {year.full}"
                                                 PlaceholderText="Datum hinzufügen"
-                                                Date="{x:Bind ViewModel.AddMieteValue.Value.Zahlungsdatum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                Date="{x:Bind ViewModel.AddMieteValue.Value.Zahlungsdatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                             <muxc:NumberBox
                                                 Header="Betrag"
-                                                Value="{x:Bind ViewModel.AddMieteValue.Value.Betrag, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Value="{x:Bind ViewModel.AddMieteValue.Value.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                                 PlaceholderText="0,00"/>
                                             <Button
                                                 VerticalAlignment="Bottom"

@@ -27,14 +27,6 @@ namespace Deeplex.Saverwalter.App.Views
             }
 
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
-
-            // TODO this is really bad...
-            BesitzerCombobox.SelectedIndex = ViewModel.AlleJuristischePersonen.FindIndex(j => j.Id == ViewModel.Besitzer.Value.Id);
-            var adress = ViewModel.AlleAdressen.FindIndex(a => a.Id == ViewModel.Adresse.Id);
-            ComboBoxStrasse.SelectedIndex = adress;
-            ComboBoxHausnummer.SelectedIndex = adress;
-            ComboBoxPostleitzahl.SelectedIndex = adress;
-            ComboBoxStadt.SelectedIndex = adress;
             base.OnNavigatedTo(e);
         }
 
@@ -42,15 +34,10 @@ namespace Deeplex.Saverwalter.App.Views
         {
             var j = (JuristischePersonViewModel)BesitzerCombobox.SelectedValue;
             ViewModel.Besitzer.Value = j;
-            var w = App.Walter.Wohnungen.Find(ViewModel.Id);
-            w.Besitzer = App.Walter.JuristischePersonen.Find(j.Id);
-            App.Walter.JuristischePersonen.Update(w.Besitzer);
-            App.Walter.SaveChanges();
         }
 
         private void UpdateAdresse_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            var w = App.Walter.Wohnungen.Find(ViewModel.Id);
             var adress = App.Walter.Adressen.FirstOrDefault(a =>
                 a.Strasse == ComboBoxStrasse.Text &&
                 a.Hausnummer == ComboBoxHausnummer.Text &&
@@ -58,7 +45,7 @@ namespace Deeplex.Saverwalter.App.Views
                 a.Stadt == ComboBoxStadt.Text);
             if (adress != null)
             {
-                w.Adresse = adress;
+                ViewModel.Adresse = new AdresseViewModel(adress);
             }
             else
             {
@@ -70,10 +57,8 @@ namespace Deeplex.Saverwalter.App.Views
                     Stadt = ComboBoxStadt.Text,
                 };
                 App.Walter.Adressen.Add(a);
-                w.Adresse = a;
+                ViewModel.Adresse = new AdresseViewModel(a);
             }
-            App.Walter.Wohnungen.Update(w);
-            App.Walter.SaveChanges();
         }
     }
 }

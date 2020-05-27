@@ -28,6 +28,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public DateTimeOffset? AddVersionDatum;
         public ObservableProperty<int> BetriebskostenJahr
             = new ObservableProperty<int>();
+
+        // TODO Define setter
+        public DateTimeOffset lastBeginn
+        {
+            get => Versionen.Value.Last().Beginn;
+        }
+        public DateTimeOffset? firstEnde
+        {
+            get => Versionen.Value.First().Ende;
+        }
+
         public VertragDetailViewModel() : this(
             new List<Vertrag>
             {
@@ -37,16 +48,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 }
             })
         {
-            App.Walter.Vertraege
-                  .Include(v => v.Ansprechpartner)
-                  .Include(v => v.Wohnung).ThenInclude(w => w.Besitzer);
             IsInEdit.Value = true;
         }
 
         public VertragDetailViewModel(Guid id)
             : this(App.Walter.Vertraege
-                  .Include(v => v.Ansprechpartner)
-                  .Include(v => v.Wohnung).ThenInclude(w => w.Besitzer)
                   .Where(v => v.VertragId == id)
                   .ToList()
                   .OrderBy(v => v.Version)
@@ -59,7 +65,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             guid = v.First().VertragId;
 
             AlleKontakte = App.Walter.Kontakte.Select(k => new VertragDetailKontakt(k)).ToImmutableList();
-            AlleWohnungen = App.Walter.Wohnungen.Select(w => new VertragDetailWohnung(w)).ToImmutableList();
+            AlleWohnungen = App.Walter.Wohnungen.Include(w => w.Besitzer).Select(w => new VertragDetailWohnung(w)).ToImmutableList();
             AlleJuristischePersonen = App.Walter.JuristischePersonen.Select(j => new JuristischePersonViewModel(j)).ToImmutableList();
 
             Mieter.Value = App.Walter.MieterSet
@@ -75,7 +81,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             BetriebskostenJahr.Value = DateTime.Now.Year - 1;
 
             Versionen.Value = v.Select(vs => new VertragDetailVersion(vs)).ToImmutableList();
-            Beginn = Versionen.Value.Last().Beginn;
 
             AddVersion = new RelayCommand(_ =>
             {
@@ -87,6 +92,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 };
                 var nv = new VertragDetailVersion(entity);
                 Versionen.Value = Versionen.Value.Insert(0, nv);
+                App.Walter.Add(entity);
+                App.Walter.SaveChanges();
             }, _ => true);
 
             AddMieteValue.Value = new VertragDetailMiete(v.First().VertragId);
@@ -143,6 +150,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 mWohnung = value;
                 Entity.WohnungId = mWohnung.Id;
+                RaisePropertyChanged(nameof(Vermieter));
                 RaisePropertyChangedAuto();
             }
         }
@@ -199,6 +207,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 Ansprechpartner = new VertragDetailKontakt(v.Ansprechpartner);
             }
+            PropertyChanged += OnUpdate;
         }
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
@@ -218,13 +227,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     return;
             }
 
-            if (Entity.VertragId != null &&
-                Entity.Wohnung != null &&
-                Entity.Beginn != null &&
-                Entity.Ansprechpartner != null &&
-                Entity.Version != null &&
-                Entity.Personenzahl != null &&
-                Entity.KaltMiete != null) return;
+            if (Entity.VertragId == null ||
+                Entity.Beginn == null ||
+                (Entity.Wohnung == null && Entity.WohnungId == 0) ||
+                (Entity.Ansprechpartner == null && Entity.AnsprechpartnerId == 0))
+            {
+                return;
+            }
 
             if (Entity.rowid != 0)
             {
@@ -326,6 +335,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class VertragDetailKontakt
     {
+        public override string ToString() => Name;
+
         public int Id;
         public string Name;
 
