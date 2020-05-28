@@ -117,6 +117,25 @@ namespace Deeplex.Saverwalter.Model
                 }
             }
 
+            for (int i = 0, count = PersZeitanteil.Count - 1; i < count; ++i)
+            {
+                var gpz = GesamtPersonenIntervall.Last(g => g.Beginn.Date <= PersZeitanteil[i].Beginn.Date).Personenzahl;
+                var ngpz = GesamtPersonenIntervall.Last(g => g.Beginn.Date <= PersZeitanteil[i+1].Beginn.Date).Personenzahl;
+                var pz = PersonenIntervall.Last(p => p.Beginn.Date <= PersZeitanteil[i].Beginn).Personenzahl;
+                var npz = PersonenIntervall.Last(p => p.Beginn.Date <= PersZeitanteil[i+1].Beginn).Personenzahl;
+
+                if (gpz == ngpz && pz == npz)
+                {
+                    PersZeitanteil[i] = (
+                        PersZeitanteil[i].Beginn,
+                        PersZeitanteil[i + 1].Ende,
+                        PersZeitanteil[i].Anteil + PersZeitanteil[i + 1].Anteil);
+
+                    PersZeitanteil.RemoveAt(1 + i--);
+                    count--;
+                }
+            }
+
             //KalteBetriebskosten = Adresse.KalteBetriebskosten.OrderBy(k => k.Typ).ToList();
             //RechnungenKalt = Adresse.KalteBetriebskostenRechnungen.Where(k => k.Jahr == Jahr).OrderBy(k => k.Typ).ToList();
             //GesamtBetragKalt = RechnungenKalt.Sum(r => r.Betrag);
