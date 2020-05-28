@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 namespace Deeplex.Saverwalter.Model
 {
@@ -24,20 +25,11 @@ namespace Deeplex.Saverwalter.Model
         public DateTime Nutzungsbeginn { get; set; }
         public DateTime Nutzungsende { get; set; }
 
-        public List<(DateTime Beginn, DateTime Ende, int Personenzahl)> GesamtPersonenIntervall { get; set; }
-        public double GesamtWohnflaeche { get; set; }
-        public double GesamtNutzflaeche { get; set; }
-        public int GesamtEinheiten { get; set; }
+        public int Abrechnungszeitspanne;
+        public int Nutzungszeitspanne;
+        public double Zeitanteil;
 
-        public int Nutzungszeitspanne { get; set; }
-        public int Abrechnungszeitspanne { get; set; }
-
-        public double Zeitanteil { get; set; }
-        public double WFZeitanteil { get; set; }
-        public double NEZeitanteil { get; set; }
-        public List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil { get; set; }
-
-        public List<(DateTime Beginn, DateTime Ende, int Personenzahl)> PersonenIntervall { get; set; }
+        public List<Rechnungsgruppe> Gruppen { get; set; }
 
         public Betriebskostenabrechnung(int rowid, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
         {
@@ -51,13 +43,17 @@ namespace Deeplex.Saverwalter.Model
                 .Where(v => v.rowid == rowid)
                 .Include(v => v.Ansprechpartner)
                     .ThenInclude(k => k.Adresse)
-                .Include(v => v.Wohnung!)
+                .Include(v => v.Wohnung)
                     .ThenInclude(w => w.Adresse)
                         .ThenInclude(a => a.Wohnungen)
                             .ThenInclude(w2 => w2.Vertraege)
-                .Include(v => v.Wohnung!)
+                .Include(v => v.Wohnung)
                     .ThenInclude(w => w.Besitzer)
-                .Include(v => v.Wohnung!)
+                .Include(v => v.Wohnung)
+                    .ThenInclude(w => w.Betriebskostenrechnungsgruppen)
+                        .ThenInclude(b => b.Rechnung)
+                            .ThenInclude(r => r.Gruppen)
+                                .ThenInclude(g => g.Wohnung)
                 .First();
 
             Ansprechpartner = vertrag.Ansprechpartner;
@@ -77,87 +73,116 @@ namespace Deeplex.Saverwalter.Model
             Nutzungsbeginn = Max(Vertragsversionen.First().Beginn, Abrechnungsbeginn);
             Nutzungsende = Min(Vertragsversionen.Last().Ende ?? Abrechnungsende, Abrechnungsende);
 
-            var alleVertraegeDieserWohnungen = Wohnungen.SelectMany(w => w.Vertraege.Where(v =>
-                v.Beginn <= Abrechnungsende && (v.Ende is null || v.Ende >= Abrechnungsbeginn)));
-
-            GesamtWohnflaeche = Wohnungen.Sum(w => w.Wohnflaeche);
-            GesamtNutzflaeche = Wohnungen.Sum(w => w.Nutzflaeche);
-            GesamtEinheiten = Wohnungen.Count();
-            GesamtPersonenIntervall =
-                VertraegeIntervallPersonenzahl(alleVertraegeDieserWohnungen,
-                Abrechnungsbeginn, Abrechnungsende).ToList();
-            PersonenIntervall =
-                VertraegeIntervallPersonenzahl(Vertragsversionen,
-                Nutzungsbeginn, Nutzungsende).ToList();
-
-            Abrechnungszeitspanne = (Abrechnungsende - Abrechnungsbeginn).Days + 1;
-            Nutzungszeitspanne = (Nutzungsende - Nutzungsbeginn).Days + 1;
-
+            Abrechnungszeitspanne = (Abrechnungsende - Abrechnungsbeginn).Days;
+            Nutzungszeitspanne = (Nutzungsende - Nutzungsbeginn).Days;
             Zeitanteil = (double)Nutzungszeitspanne / Abrechnungszeitspanne;
-            WFZeitanteil = (Wohnung.Wohnflaeche / GesamtWohnflaeche) * Zeitanteil;
-            NEZeitanteil = (1.0 / GesamtEinheiten) * Zeitanteil;
 
-            PersZeitanteil = GesamtPersonenIntervall
-                .Where(g => g.Beginn < Nutzungsende && g.Ende >= Nutzungsbeginn)
-                .Select((w, i) =>
-                    (w.Beginn, w.Ende, Anteil:
-                    (double)PersonenIntervall.Where(p => p.Beginn <= w.Beginn).First().Personenzahl / w.Personenzahl *
-                    (((double)(w.Ende - w.Beginn).Days + 1) / Abrechnungszeitspanne))).ToList();
-
-            for (int i = 0, count = GesamtPersonenIntervall.Count - 1; i < count; ++i)
-            {
-                if (GesamtPersonenIntervall[i].Personenzahl == GesamtPersonenIntervall[i+1].Personenzahl)
-                {
-                    var Beginn = GesamtPersonenIntervall[i].Beginn;
-                    var Ende = GesamtPersonenIntervall[i+1].Ende;
-
-                    GesamtPersonenIntervall[i] = (Beginn, Ende, GesamtPersonenIntervall[i].Personenzahl);
-                    GesamtPersonenIntervall.RemoveAt(1 + i--);
-                    count--;
-                }
-            }
-
-            for (int i = 0, count = PersZeitanteil.Count - 1; i < count; ++i)
-            {
-                var gpz = GesamtPersonenIntervall.Last(g => g.Beginn.Date <= PersZeitanteil[i].Beginn.Date).Personenzahl;
-                var ngpz = GesamtPersonenIntervall.Last(g => g.Beginn.Date <= PersZeitanteil[i+1].Beginn.Date).Personenzahl;
-                var pz = PersonenIntervall.Last(p => p.Beginn.Date <= PersZeitanteil[i].Beginn).Personenzahl;
-                var npz = PersonenIntervall.Last(p => p.Beginn.Date <= PersZeitanteil[i+1].Beginn).Personenzahl;
-
-                if (gpz == ngpz && pz == npz)
-                {
-                    PersZeitanteil[i] = (
-                        PersZeitanteil[i].Beginn,
-                        PersZeitanteil[i + 1].Ende,
-                        PersZeitanteil[i].Anteil + PersZeitanteil[i + 1].Anteil);
-
-                    PersZeitanteil.RemoveAt(1 + i--);
-                    count--;
-                }
-            }
-
-            //KalteBetriebskosten = Adresse.KalteBetriebskosten.OrderBy(k => k.Typ).ToList();
-            //RechnungenKalt = Adresse.KalteBetriebskostenRechnungen.Where(k => k.Jahr == Jahr).OrderBy(k => k.Typ).ToList();
-            //GesamtBetragKalt = RechnungenKalt.Sum(r => r.Betrag);
-            //BetragKalt = RechnungenKalt.Aggregate(0.0, (a, b) =>
-            //    KalteBetriebskosten.FirstOrDefault(k => k.Typ == b.Typ)?.Schluessel switch
-            //    {
-            //        UmlageSchluessel.NachWohnflaeche => a + b.Betrag * WFZeitanteil,
-            //        UmlageSchluessel.NachNutzeinheit => a + b.Betrag * NEZeitanteil,
-            //        UmlageSchluessel.NachPersonenzahl => a + PersZeitanteil
-            //                .Aggregate(0.0, (c, z) => c += z.Anteil * b.Betrag),
-            //        UmlageSchluessel.NachVerbrauch => a + 0, // TODO
-            //        _ => a + 0, // TODO or throw something...
-            //    }
-            //);
+            // TODO Nicht YEAR, sondern betreffendes Jahr. Das muss noch.
+            Gruppen = vertrag.Wohnung.Betriebskostenrechnungsgruppen
+                .Where(g => g.Rechnung.Datum.Year == Jahr)
+                .GroupBy(g => g.Rechnung.Gruppen.ToImmutableHashSet())
+                .Select(g => new Rechnungsgruppe(this, g.Select(g => g.Rechnung).ToList()))
+                .ToList();
 
             // TODO Timerange should be more dynamic...
             Gezahlt = db.Mieten
                 .Where(m => m.VertragId == vertrag.VertragId)
-                .Where(m => m.Zahlungsdatum >= Abrechnungsbeginn && m.Zahlungsdatum < Abrechnungsende)
-                .Sum(z => z.Betrag ?? 0);
+                    .Where(m => m.Zahlungsdatum >= Abrechnungsbeginn && m.Zahlungsdatum < Abrechnungsende)
+                    .Sum(z => z.Betrag ?? 0);
 
             Result = Gezahlt - BetragKalt;
+        }
+
+        public class Rechnungsgruppe
+        {
+            public List<Betriebskostenrechnung> Rechnungen;
+
+            public double GesamtWohnflaeche;
+            public double WFZeitanteil;
+            public double GesamtNutzflaeche;
+            public int GesamtEinheiten;
+            public double NEZeitanteil;
+            public List<(DateTime Beginn, DateTime Ende, int Personenzahl)> GesamtPersonenIntervall;
+            public List<(DateTime Beginn, DateTime Ende, int Personenzahl)> PersonenIntervall;
+            public List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil;
+
+            public Rechnungsgruppe(Betriebskostenabrechnung b, List<Betriebskostenrechnung> gruppe)
+            {
+                var gr = gruppe.First().Gruppen;
+                Rechnungen = gruppe;
+                GesamtWohnflaeche = gr.Sum(w => w.Wohnung.Wohnflaeche);
+                GesamtNutzflaeche = gr.Sum(w => w.Wohnung.Nutzflaeche);
+                GesamtEinheiten = gr.Sum(w => w.Wohnung.Nutzeinheit);
+
+                var alleVertraegeDieserWohnungen = gr.SelectMany(w => w.Wohnung.Vertraege.Where(v =>
+                    v.Beginn <= b.Abrechnungsende && (v.Ende is null || v.Ende >= b.Abrechnungsbeginn)));
+
+                GesamtPersonenIntervall =
+                    VertraegeIntervallPersonenzahl(alleVertraegeDieserWohnungen,
+                    b.Abrechnungsbeginn, b.Abrechnungsende).ToList();
+
+                PersonenIntervall =
+                    VertraegeIntervallPersonenzahl(b.Vertragsversionen,
+                    b.Nutzungsbeginn, b.Nutzungsende).ToList();
+
+                WFZeitanteil = (b.Wohnung.Wohnflaeche / GesamtWohnflaeche) * b.Zeitanteil;
+                NEZeitanteil = ((double)b.Wohnung.Nutzeinheit / GesamtEinheiten) * b.Zeitanteil;
+
+                PersZeitanteil = GesamtPersonenIntervall
+                    .Where(g => g.Beginn < b.Nutzungsende && g.Ende >= b.Nutzungsbeginn)
+                    .Select((w, i) =>
+                        (w.Beginn, w.Ende, Anteil:
+                            (double)PersonenIntervall.Where(p => p.Beginn <= w.Beginn).First().Personenzahl / w.Personenzahl *
+                            (((double)(w.Ende - w.Beginn).Days + 1) / b.Abrechnungszeitspanne))).ToList();
+
+                // TODO Betrag ausrechnen:
+                //KalteBetriebskosten = Adresse.KalteBetriebskosten.OrderBy(k => k.Typ).ToList();
+                //RechnungenKalt = Adresse.KalteBetriebskostenRechnungen.Where(k => k.Jahr == Jahr).OrderBy(k => k.Typ).ToList();
+                //GesamtBetragKalt = RechnungenKalt.Sum(r => r.Betrag);
+                //BetragKalt = RechnungenKalt.Aggregate(0.0, (a, b) =>
+                //    KalteBetriebskosten.FirstOrDefault(k => k.Typ == b.Typ)?.Schluessel switch
+                //    {
+                //        UmlageSchluessel.NachWohnflaeche => a + b.Betrag * WFZeitanteil,
+                //        UmlageSchluessel.NachNutzeinheit => a + b.Betrag * NEZeitanteil,
+                //        UmlageSchluessel.NachPersonenzahl => a + PersZeitanteil
+                //                .Aggregate(0.0, (c, z) => c += z.Anteil * b.Betrag),
+                //        UmlageSchluessel.NachVerbrauch => a + 0, // TODO
+                //        _ => a + 0, // TODO or throw something...
+                //    }
+                //);
+
+                for (int i = 0, count = GesamtPersonenIntervall.Count - 1; i < count; ++i)
+                {
+                    if (GesamtPersonenIntervall[i].Personenzahl == GesamtPersonenIntervall[i + 1].Personenzahl)
+                    {
+                        var Beginn = GesamtPersonenIntervall[i].Beginn;
+                        var Ende = GesamtPersonenIntervall[i + 1].Ende;
+
+                        GesamtPersonenIntervall[i] = (Beginn, Ende, GesamtPersonenIntervall[i].Personenzahl);
+                        GesamtPersonenIntervall.RemoveAt(1 + i--);
+                        count--;
+                    }
+                }
+
+                for (int i = 0, count = PersZeitanteil.Count - 1; i < count; ++i)
+                {
+                    var gpz = GesamtPersonenIntervall.Last(g => g.Beginn.Date <= PersZeitanteil[i].Beginn.Date).Personenzahl;
+                    var ngpz = GesamtPersonenIntervall.Last(g => g.Beginn.Date <= PersZeitanteil[i + 1].Beginn.Date).Personenzahl;
+                    var pz = PersonenIntervall.Last(p => p.Beginn.Date <= PersZeitanteil[i].Beginn).Personenzahl;
+                    var npz = PersonenIntervall.Last(p => p.Beginn.Date <= PersZeitanteil[i + 1].Beginn).Personenzahl;
+
+                    if (gpz == ngpz && pz == npz)
+                    {
+                        PersZeitanteil[i] = (
+                            PersZeitanteil[i].Beginn,
+                            PersZeitanteil[i + 1].Ende,
+                            PersZeitanteil[i].Anteil + PersZeitanteil[i + 1].Anteil);
+
+                        PersZeitanteil.RemoveAt(1 + i--);
+                        count--;
+                    }
+                }
+            }
         }
 
         private static T Max<T>(T l, T r) where T : IComparable<T>
