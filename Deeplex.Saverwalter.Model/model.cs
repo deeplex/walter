@@ -62,6 +62,7 @@ namespace Deeplex.Saverwalter.Model
         public int AdresseId { get; set; }
         public Adresse Adresse { get; set; } = null!;
         public string Bezeichnung { get; set; } = null!;
+        public int BesitzerId { get; set; }
         public JuristischePerson Besitzer { get; set; } = null!;
         public double Wohnflaeche { get; set; }
         public double Nutzflaeche { get; set; }

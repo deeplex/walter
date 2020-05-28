@@ -30,12 +30,6 @@ namespace Deeplex.Saverwalter.App.Views
             base.OnNavigatedTo(e);
         }
 
-        private void BesitzerCombobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var j = (JuristischePersonViewModel)BesitzerCombobox.SelectedValue;
-            ViewModel.Besitzer.Value = j;
-        }
-
         private void UpdateAdresse_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             var adress = App.Walter.Adressen.FirstOrDefault(a =>
@@ -59,6 +53,11 @@ namespace Deeplex.Saverwalter.App.Views
                 App.Walter.Adressen.Add(a);
                 ViewModel.Adresse = new AdresseViewModel(a);
             }
+        }
+
+        private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            ViewModel.IsInEdit.Value = EditToggle.IsChecked ?? false;
         }
     }
 }

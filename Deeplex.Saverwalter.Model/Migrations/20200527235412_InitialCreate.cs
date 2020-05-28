@@ -169,7 +169,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     AdresseId = table.Column<int>(nullable: false),
                     Bezeichnung = table.Column<string>(nullable: false),
-                    BesitzerJuristischePersonId = table.Column<int>(nullable: false),
+                    BesitzerId = table.Column<int>(nullable: false),
                     Wohnflaeche = table.Column<double>(nullable: false),
                     Nutzflaeche = table.Column<double>(nullable: false),
                     Nutzeinheit = table.Column<int>(nullable: false),
@@ -185,8 +185,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         principalColumn: "AdresseId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Wohnungen_JuristischePersonen_BesitzerJuristischePersonId",
-                        column: x => x.BesitzerJuristischePersonId,
+                        name: "FK_Wohnungen_JuristischePersonen_BesitzerId",
+                        column: x => x.BesitzerId,
                         principalTable: "JuristischePersonen",
                         principalColumn: "JuristischePersonId",
                         onDelete: ReferentialAction.Cascade);
@@ -424,9 +424,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 column: "AdresseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Wohnungen_BesitzerJuristischePersonId",
+                name: "IX_Wohnungen_BesitzerId",
                 table: "Wohnungen",
-                column: "BesitzerJuristischePersonId");
+                column: "BesitzerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ZaehlerSet_WohnungId",

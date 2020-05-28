@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20200527181945_InitialCreate")]
+    [Migration("20200527235412_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -377,7 +377,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("AdresseId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BesitzerJuristischePersonId")
+                    b.Property<int>("BesitzerId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Bezeichnung")
@@ -400,7 +400,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.HasIndex("AdresseId");
 
-                    b.HasIndex("BesitzerJuristischePersonId");
+                    b.HasIndex("BesitzerId");
 
                     b.ToTable("Wohnungen");
                 });
@@ -551,7 +551,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.HasOne("Deeplex.Saverwalter.Model.JuristischePerson", "Besitzer")
                         .WithMany("Wohnungen")
-                        .HasForeignKey("BesitzerJuristischePersonId")
+                        .HasForeignKey("BesitzerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

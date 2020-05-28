@@ -16,13 +16,22 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ImmutableList<JuristischePersonViewModel> AlleJuristischePersonen { get; }
         public ImmutableList<AdresseViewModel> AlleAdressen { get; }
 
-        public ObservableProperty<JuristischePersonViewModel> Besitzer
-            = new ObservableProperty<JuristischePersonViewModel>();
-        public ObservableProperty<int> AdresseId = new ObservableProperty<int>();
         public ObservableProperty<List<WohnungDetailZaehler>> Zaehler
             = new ObservableProperty<List<WohnungDetailZaehler>>();
         public ObservableProperty<List<WohnungDetailVertrag>> Vertraege
             = new ObservableProperty<List<WohnungDetailVertrag>>();
+
+        private JuristischePersonViewModel mBesitzer;
+        public JuristischePersonViewModel Besitzer
+        {
+            get => mBesitzer;
+            set
+            {
+                Entity.BesitzerId = value.Id;
+                mBesitzer = value;
+                RaisePropertyChangedAuto();
+            }
+        }
 
         private AdresseViewModel mAdresse;
         public AdresseViewModel Adresse
@@ -30,8 +39,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => mAdresse;
             set
             {
-                SetProperty(ref mAdresse, value);
-                Entity.AdresseId = mAdresse.Id;
+                Entity.Adresse = AdresseViewModel.GetAdresse(value);
+                mAdresse = value;
+                RaisePropertyChangedAuto();
             }
         }
         public string Anschrift => AdresseViewModel.Anschrift(Entity);
@@ -105,40 +115,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             Zaehler.Value = w.Zaehler.Select(z => new WohnungDetailZaehler(z)).ToList();
 
-            BeginEdit = new RelayCommand(_ => IsInEdit.Value = true, _ => !IsInEdit.Value);
-            IsInEdit.PropertyChanged += (_, ev) => BeginEdit.RaiseCanExecuteChanged(ev);
-
             Vertraege.Value = App.Walter.Vertraege
                 .Include(v => v.Wohnung).ToList()
                 .Where(v => v.Wohnung.WohnungId == Id)
                 .Select(v => new WohnungDetailVertrag(v.VertragId))
                 .ToList();
-
-            SaveEdit = new RelayCommand(_ =>
-            {
-                IsInEdit.Value = false;
-
-                w.Adresse = AdresseViewModel.GetAdresse(Adresse);
-                w.Besitzer = JuristischePersonViewModel.GetJuristischePerson(Besitzer.Value);
-                // w.Zaehler = ZaehlerViewModel // TODO
-                // w.Zaehlergemeinschaften = Zaehlergemeinschaften TODO
-                w.Bezeichnung = Bezeichnung;
-                w.Notiz = Notiz;
-
-                if (w.WohnungId > 0)
-                {
-                    App.Walter.Wohnungen.Update(w);
-                }
-                else
-                {
-                    App.Walter.Wohnungen.Add(w);
-                }
-
-                App.Walter.SaveChanges();
-            }, _ => IsInEdit.Value);
-
-
-            IsInEdit.PropertyChanged += (_, ev) => SaveEdit.RaiseCanExecuteChanged(ev);
 
             IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
 
@@ -146,8 +127,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
         public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
         public bool IsNotInEdit => !IsInEdit.Value;
-        public RelayCommand BeginEdit { get; }
-        public RelayCommand SaveEdit { get; }
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
         {
@@ -163,9 +142,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     return;
             }
 
-            if (Entity.Besitzer != null &&
-                Entity.Wohnflaeche != null &&
-                Entity.Nutzflaeche != null) return;
+            if ((Entity.Besitzer == null && Entity.BesitzerId == 0) ||
+                (Entity.Adresse == null && Entity.AdresseId == 0))
+            {
+                return;
+            }
 
             if (Entity.WohnungId != 0)
             {
