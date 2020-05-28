@@ -15,9 +15,6 @@ namespace Deeplex.Saverwalter.Model
         public List<Kontakt> Mieter { get; set; }
         public Wohnung Wohnung { get; set; }
         public Adresse Adresse { get; set; }
-        public List<Wohnung> Wohnungen { get; set; }
-        public double GesamtBetragKalt { get; set; }
-        public double BetragKalt { get; set; }
         public double Gezahlt { get; set; }
 
         public DateTime Abrechnungsbeginn { get; set; }
@@ -28,6 +25,8 @@ namespace Deeplex.Saverwalter.Model
         public int Abrechnungszeitspanne;
         public int Nutzungszeitspanne;
         public double Zeitanteil;
+
+        public double Betrag;
 
         public List<Rechnungsgruppe> Gruppen { get; set; }
 
@@ -64,7 +63,6 @@ namespace Deeplex.Saverwalter.Model
             Wohnung = vertrag.Wohnung!;
             Adresse = Wohnung.Adresse;
             Vermieter = Wohnung.Besitzer;
-            Wohnungen = Adresse.Wohnungen;
 
             Vertragsversionen = Wohnung.Vertraege
                 .Where(v => v.VertragId == vertrag.VertragId)
@@ -90,7 +88,9 @@ namespace Deeplex.Saverwalter.Model
                     .Where(m => m.Zahlungsdatum >= Abrechnungsbeginn && m.Zahlungsdatum < Abrechnungsende)
                     .Sum(z => z.Betrag ?? 0);
 
-            Result = Gezahlt - BetragKalt;
+            Betrag = Gruppen.Sum(g => g.Betrag);
+
+            Result = Gezahlt - Betrag;
         }
 
         public class Rechnungsgruppe
@@ -105,6 +105,8 @@ namespace Deeplex.Saverwalter.Model
             public List<(DateTime Beginn, DateTime Ende, int Personenzahl)> GesamtPersonenIntervall;
             public List<(DateTime Beginn, DateTime Ende, int Personenzahl)> PersonenIntervall;
             public List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil;
+            public double GesamtBetrag;
+            public double Betrag;
 
             public Rechnungsgruppe(Betriebskostenabrechnung b, List<Betriebskostenrechnung> gruppe)
             {
@@ -135,21 +137,18 @@ namespace Deeplex.Saverwalter.Model
                             (double)PersonenIntervall.Where(p => p.Beginn <= w.Beginn).First().Personenzahl / w.Personenzahl *
                             (((double)(w.Ende - w.Beginn).Days + 1) / b.Abrechnungszeitspanne))).ToList();
 
-                // TODO Betrag ausrechnen:
-                //KalteBetriebskosten = Adresse.KalteBetriebskosten.OrderBy(k => k.Typ).ToList();
-                //RechnungenKalt = Adresse.KalteBetriebskostenRechnungen.Where(k => k.Jahr == Jahr).OrderBy(k => k.Typ).ToList();
-                //GesamtBetragKalt = RechnungenKalt.Sum(r => r.Betrag);
-                //BetragKalt = RechnungenKalt.Aggregate(0.0, (a, b) =>
-                //    KalteBetriebskosten.FirstOrDefault(k => k.Typ == b.Typ)?.Schluessel switch
-                //    {
-                //        UmlageSchluessel.NachWohnflaeche => a + b.Betrag * WFZeitanteil,
-                //        UmlageSchluessel.NachNutzeinheit => a + b.Betrag * NEZeitanteil,
-                //        UmlageSchluessel.NachPersonenzahl => a + PersZeitanteil
-                //                .Aggregate(0.0, (c, z) => c += z.Anteil * b.Betrag),
-                //        UmlageSchluessel.NachVerbrauch => a + 0, // TODO
-                //        _ => a + 0, // TODO or throw something...
-                //    }
-                //);
+                GesamtBetrag = gruppe.Sum(r => r.Betrag);
+                Betrag = gruppe.Aggregate(0.0, (a, b) =>
+                    b.Schluessel switch
+                    {
+                        UmlageSchluessel.NachWohnflaeche => a + b.Betrag * WFZeitanteil,
+                        UmlageSchluessel.NachNutzeinheit => a + b.Betrag * NEZeitanteil,
+                        UmlageSchluessel.NachPersonenzahl => a + PersZeitanteil
+                                .Aggregate(0.0, (c, z) => c += z.Anteil * b.Betrag),
+                        UmlageSchluessel.NachVerbrauch => a + 0, // TODO
+                        _ => a + 0, // TODO or throw something...
+                    }
+                );
 
                 for (int i = 0, count = GesamtPersonenIntervall.Count - 1; i < count; ++i)
                 {

@@ -341,12 +341,13 @@ namespace Deeplex.Saverwalter.Print
             }
             if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachNutzeinheit))
             {
-                table.Append(new TableRow(
-                        ContentHead("bei Umlage nach Nutzeinheiten (n. NE)")),
+                table.Append(
+                    new TableRow(ContentHead("bei Umlage nach Nutzeinheiten (n. NE)")),
+                    new TableRow(
                         ContentCell(1.ToString() + " / " + g.GesamtEinheiten, JustificationValues.Center),
                         ContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center),
                         ContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
-                        ContentCell(Percent(g.NEZeitanteil), JustificationValues.Center));
+                        ContentCell(Percent(g.NEZeitanteil), JustificationValues.Center)));
             }
             if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachPersonenzahl))
             {
@@ -424,9 +425,9 @@ namespace Deeplex.Saverwalter.Print
             table.Append(new TableRow(
                 ContentCell(""), ContentCell(""),
                 ContentHead("Summe Gesamtkosten: ", JustificationValues.Right),
-                ContentHead(Euro(b.GesamtBetragKalt), JustificationValues.Right),
+                ContentHead(Euro(g.GesamtBetrag), JustificationValues.Right),
                 ContentHead("Ihre Summe: ", JustificationValues.Right),
-                ContentHead(Euro(b.BetragKalt), JustificationValues.Right)));
+                ContentHead(Euro(g.Betrag), JustificationValues.Right)));
 
             return table;
         }
@@ -442,7 +443,7 @@ namespace Deeplex.Saverwalter.Print
                     ContentCell(Euro(b.Gezahlt), JustificationValues.Right)),
                 new TableRow(
                     ContentCell("abzüglich Ihrer Nebenkostenanteile:"),
-                    ContentCell(Euro(b.BetragKalt), JustificationValues.Right)),
+                    ContentCell(Euro(b.Betrag), JustificationValues.Right)),
                 new TableRow(
                     ContentCell(b.Result > 0 ? "Erstattungsbetrag:" : "Nachforderungsbetrag:"),
                     ContentHead(Euro(Math.Abs(b.Result)), JustificationValues.Right)));
