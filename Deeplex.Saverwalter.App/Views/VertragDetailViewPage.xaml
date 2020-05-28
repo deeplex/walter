@@ -39,7 +39,7 @@
 
         <DataTemplate x:Key="BeginnGrid" x:DataType="vm:VertragDetailVersion">
             <CalendarDatePicker
-                Date="{x:Bind Beginn, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Date="{x:Bind Beginn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Language="de"
                 Width="176"
                 PlaceholderText="Offen"
@@ -48,9 +48,9 @@
 
         <DataTemplate x:Key="EndeGrid" x:DataType="vm:VertragDetailVersion">
             <CalendarDatePicker
-                Date="{x:Bind Ende, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Date="{x:Bind Ende, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Width="176"
-                IsEnabled="False"
+                IsEnabled="True"
                 Language="de"
                 PlaceholderText="Offen"
                 DateFormat="{}{day.integer}. {month.full} {year.full}"/>
@@ -198,7 +198,15 @@
                     <mtuuc:DataGridTextColumn IsReadOnly="True" Header="Version" Binding="{Binding Version}"/>
                     <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
                     <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
-                    <mtuuc:DataGridTextColumn Header="Personenzahl" Binding="{Binding Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                    <mtuuc:DataGridTemplateColumn Header="Personenzahl">
+                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:VertragDetailVersion">
+                                <muxc:NumberBox
+                                    Value="{x:Bind Personenzahl, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                    PlaceholderText="0"/>
+                            </DataTemplate>
+                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                    </mtuuc:DataGridTemplateColumn>
                     <mtuuc:DataGridTextColumn Header="Notiz" IsReadOnly="False" Binding="{Binding Notiz.Value}"/>
                 </mtuuc:DataGrid.Columns>
             </mtuuc:DataGrid>

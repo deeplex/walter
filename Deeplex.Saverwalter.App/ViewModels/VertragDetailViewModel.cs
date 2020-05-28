@@ -148,6 +148,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => mWohnung;
             set
             {
+                if (value == null) return;
                 mWohnung = value;
                 Entity.WohnungId = mWohnung.Id;
                 RaisePropertyChanged(nameof(Vermieter));
