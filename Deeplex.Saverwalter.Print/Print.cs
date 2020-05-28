@@ -337,8 +337,10 @@ namespace Deeplex.Saverwalter.Print
 
             for (var i = 0; i < b.PersZeitanteil.Count; ++i)
             {
-                var (Beginn, Ende, GesamtPersonenzahl) = b.GesamtPersonenIntervall.SkipWhile(g => g.Beginn < b.PersZeitanteil[i].Beginn).First();
-                var Personenzahl = b.PersonenIntervall.Where(p => p.Beginn <= Beginn).First().Personenzahl;
+                var Beginn = b.PersZeitanteil[i].Beginn;
+                var Ende = b.PersZeitanteil[i].Ende;
+                var GesamtPersonenzahl = b.GesamtPersonenIntervall.Last(g => g.Beginn.Date <= b.PersZeitanteil[i].Beginn.Date).Personenzahl;
+                var Personenzahl = b.PersonenIntervall.Last(p => p.Beginn.Date <= b.PersZeitanteil[i].Beginn).Personenzahl;
                 var timespan = ((Ende - Beginn).Days + 1).ToString();
 
                 table.Append(new TableRow(

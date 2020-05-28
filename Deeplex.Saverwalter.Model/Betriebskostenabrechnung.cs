@@ -104,6 +104,19 @@ namespace Deeplex.Saverwalter.Model
                     (double)PersonenIntervall.Where(p => p.Beginn <= w.Beginn).First().Personenzahl / w.Personenzahl *
                     (((double)(w.Ende - w.Beginn).Days + 1) / Abrechnungszeitspanne))).ToList();
 
+            for (int i = 0, count = GesamtPersonenIntervall.Count - 1; i < count; ++i)
+            {
+                if (GesamtPersonenIntervall[i].Personenzahl == GesamtPersonenIntervall[i+1].Personenzahl)
+                {
+                    var Beginn = GesamtPersonenIntervall[i].Beginn;
+                    var Ende = GesamtPersonenIntervall[i+1].Ende;
+
+                    GesamtPersonenIntervall[i] = (Beginn, Ende, GesamtPersonenIntervall[i].Personenzahl);
+                    GesamtPersonenIntervall.RemoveAt(1 + i--);
+                    count--;
+                }
+            }
+
             //KalteBetriebskosten = Adresse.KalteBetriebskosten.OrderBy(k => k.Typ).ToList();
             //RechnungenKalt = Adresse.KalteBetriebskostenRechnungen.Where(k => k.Jahr == Jahr).OrderBy(k => k.Typ).ToList();
             //GesamtBetragKalt = RechnungenKalt.Sum(r => r.Betrag);
