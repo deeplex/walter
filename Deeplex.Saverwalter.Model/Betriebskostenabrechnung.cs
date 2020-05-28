@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.Model
                 .Where(g => g.Beginn < Nutzungsende && g.Ende >= Nutzungsbeginn)
                 .Select((w, i) =>
                     (w.Beginn, w.Ende, Anteil:
-                    (double)PersonenIntervall.Where(p => p.Beginn >= w.Beginn).First().Personenzahl / w.Personenzahl *
+                    (double)PersonenIntervall.Where(p => p.Beginn <= w.Beginn).First().Personenzahl / w.Personenzahl *
                     (((double)(w.Ende - w.Beginn).Days + 1) / Abrechnungszeitspanne))).ToList();
 
             //KalteBetriebskosten = Adresse.KalteBetriebskosten.OrderBy(k => k.Typ).ToList();
@@ -148,24 +148,17 @@ namespace Deeplex.Saverwalter.Model
                     (Max(v.Beginn, Beginn), v.Personenzahl),
                     (Min(v.Ende ?? Ende, Ende).AddDays(1), -v.Personenzahl)
                 })
-                .GroupBy(t => t.Item1)
+                .GroupBy(t => t.Item1.Date)
                 .Select(g => (Beginn: g.Key, Ende, Personenzahl: g.Sum(t => t.Item2)))
                 .OrderBy(t => t.Beginn)
                 .ToList();
 
-            for (int i = 0, count = merged.Count - 1; i < count; ++i)
+            for (int i = 0; i < merged.Count; ++i)
             {
                 merged[i] = (
                     merged[i].Beginn,
                     i + 1 < merged.Count ? merged[i + 1].Beginn.AddDays(-1) : Ende,
                     i - 1 >= 0 ? merged[i - 1].Personenzahl + merged[i].Personenzahl : merged[i].Personenzahl);
-
-                if (merged[i + 1].Personenzahl == 0)
-                {
-                    merged[i] = (merged[i].Beginn, merged[i + 1].Ende, merged[i].Personenzahl);
-                    merged.RemoveAt(1 + i--);
-                    count--;
-                }
             }
             merged.RemoveAt(merged.Count - 1);
 
