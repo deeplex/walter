@@ -53,15 +53,12 @@
                     RelativePanel.AlignRightWithPanel="True"
                     HorizontalAlignment="Stretch"
                     DefaultLabelPosition="Right">
-                    <AppBarButton
-                        Icon="Edit"
-                        Label="Bearbeiten"
-                        Command="{x:Bind ViewModel.BeginEdit}"/>
-                    <AppBarButton
-                    Icon="Save"
-                    Label="Speichern"
-                    Command="{x:Bind ViewModel.SaveEdit}" />
                     <CommandBar.SecondaryCommands>
+                        <AppBarToggleButton
+                            Icon="Edit"
+                            x:Name="EditToggle"
+                            Label="Bearbeiten"
+                            Click="EditToggle_Click"/>
                         <AppBarButton
                             IsEnabled="False"
                             Icon="Delete"
@@ -72,40 +69,59 @@
 
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBox
-                    Text="{x:Bind ViewModel.Vorname.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Text="{x:Bind ViewModel.Vorname, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Header="Vorname" Style="{StaticResource Eintraege}"/>
                 <TextBox
-                    Text="{x:Bind ViewModel.Nachname.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Text="{x:Bind ViewModel.Nachname, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Header="Nachname" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
-                <TextBox
-                    Text="{x:Bind ViewModel.Adresse.Value.Strasse.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Style="{StaticResource Eintraege}" Header="Straße" Width="210"/>
-                <TextBox
-                    Text="{x:Bind ViewModel.Adresse.Value.Hausnummer.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Style="{StaticResource Eintraege}" Header="Hausnr." Width="70"/>
-                <TextBox
-                    Text="{x:Bind ViewModel.Adresse.Value.Postleitzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Style="{StaticResource Eintraege}" Header="Postleitzahl" Width="70"/>
-                <TextBox 
-                    Text="{x:Bind ViewModel.Adresse.Value.Stadt.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Header="Stadt" Style="{StaticResource Eintraege}" Width="210"/>
+                <Button Margin="20,20,0,0">
+                    <Button.Content>
+                        <TextBlock>
+                            <Run Text="{x:Bind ViewModel.Adresse.Strasse.Value, Mode=OneWay}"/>
+                            <Run Text="{x:Bind ViewModel.Adresse.Hausnummer.Value, Mode=OneWay}"/>
+                            <Run Text="{x:Bind ViewModel.Adresse.Postleitzahl.Value, Mode=OneWay}"/>
+                            <Run Text="{x:Bind ViewModel.Adresse.Stadt.Value, Mode=OneWay}"/>
+                        </TextBlock>
+                    </Button.Content>
+                    <Button.Flyout>
+                        <Flyout>
+                            <mtuuc:WrapPanel Orientation="Horizontal">
+                                <ComboBox
+                                    x:Name="ComboBoxStrasse" Width="150" IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
+                                    DisplayMemberPath="Strasse.Value" SelectedItem="{x:Bind ViewModel.Adresse.Strasse, Mode=OneWay}"/>
+                                <ComboBox
+                                    x:Name="ComboBoxHausnummer" IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
+                                    DisplayMemberPath="Hausnummer.Value" SelectedItem="{x:Bind ViewModel.Adresse.Hausnummer, Mode=OneWay}"/>
+                                <ComboBox
+                                    x:Name="ComboBoxPostleitzahl"  IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
+                                    DisplayMemberPath="Postleitzahl.Value" SelectedItem="{x:Bind ViewModel.Adresse.Postleitzahl, Mode=OneWay}"/>
+                                <ComboBox
+                                    x:Name="ComboBoxStadt" Width="100" IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
+                                    DisplayMemberPath="Stadt.Value" SelectedItem="{x:Bind ViewModel.Adresse.Stadt, Mode=OneWay}"/>
+                                <Button Click="UpdateAdresse_Click" Background="Transparent" VerticalAlignment="Bottom">
+                                    <SymbolIcon Symbol="Add"/>
+                                </Button>
+                            </mtuuc:WrapPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBox
-                    Text="{x:Bind ViewModel.Email.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Text="{x:Bind ViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Header="E-Mail" Style="{StaticResource Eintraege}"/>
                 <TextBox
-                    Text="{x:Bind ViewModel.Fax.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Text="{x:Bind ViewModel.Fax, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Header="Fax" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBox
-                Text="{x:Bind ViewModel.Telefon.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Text="{x:Bind ViewModel.Telefon, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                 Header="Telefon" Style="{StaticResource Eintraege}"/>
                 <TextBox
-                Text="{x:Bind ViewModel.Mobil.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Text="{x:Bind ViewModel.Mobil, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                 Header="Mobil" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel>
@@ -113,7 +129,7 @@
                     Width="620"
                     Style="{StaticResource Eintraege}"
                     Margin="20"
-                    Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Header="Notiz"/>
             </mtuuc:WrapPanel>
 

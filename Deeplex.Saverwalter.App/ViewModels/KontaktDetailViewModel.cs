@@ -3,27 +3,103 @@ using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
     public class KontaktDetailViewModel : BindableBase
     {
+        public Kontakt Entity { get; }
         public int Id { get; }
-        public ObservableProperty<string> Vorname { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Nachname { get; } = new ObservableProperty<string>();
-        public ObservableProperty<int> AdresseId { get; } = new ObservableProperty<int>();
-        public ObservableProperty<string> Email { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Telefon { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Mobil { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Fax { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Notiz { get; } = new ObservableProperty<string>();
+
+        public ImmutableList<AdresseViewModel> AlleAdressen { get; }
+
+        public string Vorname
+        {
+            get => Entity.Vorname;
+            set
+            {
+                Entity.Vorname = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+        public string Nachname
+        {
+            get => Entity.Nachname;
+            set
+            {
+                Entity.Nachname = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+        private AdresseViewModel mAdresse;
+        public AdresseViewModel Adresse
+        {
+            get => mAdresse;
+            set
+            {
+                Entity.AdresseId = value.Id;
+                mAdresse = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public string Email
+        {
+            get => Entity.Email;
+            set
+            {
+                Entity.Email = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public string Telefon
+        {
+            get => Entity.Telefon;
+            set
+            {
+                Entity.Telefon = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public string Mobil
+        {
+            get => Entity.Mobil;
+            set
+            {
+                Entity.Mobil = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public string Fax
+        {
+            get => Entity.Fax;
+            set
+            {
+                Entity.Fax = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public string Notiz
+        {
+            get => Entity.Notiz;
+            set
+            {
+                Entity.Notiz = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
         public ObservableProperty<List<KontaktDetailVertrag>> Vertraege
             = new ObservableProperty<List<KontaktDetailVertrag>>();
-        public ObservableProperty<AdresseViewModel> Adresse { get; }
-            = new ObservableProperty<AdresseViewModel>();
 
-        public string Name => Vorname.Value + " " + Nachname.Value;
+        public string Name => Vorname + " " + Nachname;
 
         public KontaktDetailViewModel(int id)
             : this(App.Walter.Kontakte.Find(id)) { }
@@ -35,19 +111,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private KontaktDetailViewModel(Kontakt k)
         {
+            Entity = k;
             Id = k.KontaktId;
-            Vorname.Value = k.Vorname ?? "";
-            Nachname.Value = k.Nachname ?? "";
-            AdresseId.Value = k.AdresseId ?? 0;
-            Email.Value = k.Email ?? "";
-            Fax.Value = k.Fax ?? "";
-            Telefon.Value = k.Telefon ?? "";
-            Mobil.Value = k.Mobil ?? "";
-            Notiz.Value = k.Notiz ?? "";
+            
+            AlleAdressen = App.Walter.Adressen
+                .Select(a => new AdresseViewModel(a))
+                .ToImmutableList();
 
-            Adresse.Value = k.Adresse is Adresse ?
-                new AdresseViewModel(k.Adresse) :
-                new AdresseViewModel();
+            if (k.Adresse != null)
+            {
+                Adresse = new AdresseViewModel(k.Adresse);
+            }
 
             Vertraege.Value = App.Walter.Vertraege
                 .Include(v => v.Wohnung).ToList()
@@ -55,44 +129,44 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Select(v => new KontaktDetailVertrag(v.VertragId))
                 .ToList();
 
-            BeginEdit = new RelayCommand(_ => IsInEdit.Value = true, _ => !IsInEdit.Value);
-            IsInEdit.PropertyChanged += (_, ev) => BeginEdit.RaiseCanExecuteChanged(ev);
-
-            SaveEdit = new RelayCommand(_ =>
-            {
-                IsInEdit.Value = false;
-
-                k.Adresse = AdresseViewModel.GetAdresse(Adresse.Value);
-                k.Vorname = Vorname.Value;
-                k.Nachname = Nachname.Value;
-                k.Email = Email.Value;
-                k.Telefon = Telefon.Value;
-                k.Mobil = Mobil.Value;
-                k.Fax = Fax.Value;
-                k.Notiz = Notiz.Value;
-
-                if (k.KontaktId > 0)
-                {
-                    App.Walter.Kontakte.Update(k);
-                }
-                else
-                {
-                    App.Walter.Kontakte.Add(k);
-                }
-
-                App.Walter.SaveChanges();
-
-            }, _ => IsInEdit.Value);
-            IsInEdit.PropertyChanged += (_, ev) => SaveEdit.RaiseCanExecuteChanged(ev);
-
-            IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
+            PropertyChanged += OnUpdate;
         }
 
         public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
         public bool IsNotInEdit => !IsInEdit.Value;
 
-        public RelayCommand BeginEdit { get; }
-        public RelayCommand SaveEdit { get; }
+        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Vorname):
+                case nameof(Nachname):
+                case nameof(Adresse):
+                case nameof(Email):
+                case nameof(Telefon):
+                case nameof(Mobil):
+                case nameof(Fax):
+                case nameof(Notiz):
+                    break;
+                default:
+                    return;
+            }
+
+            if (Entity.Nachname == null)
+            {
+                return;
+            }
+
+            if (Entity.KontaktId != 0)
+            {
+                App.Walter.Kontakte.Update(Entity);
+            }
+            else
+            {
+                App.Walter.Kontakte.Add(Entity);
+            }
+            App.Walter.SaveChanges();
+        }
     }
 
     public class KontaktDetailVertrag
