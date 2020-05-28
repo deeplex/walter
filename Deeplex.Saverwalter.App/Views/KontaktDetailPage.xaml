@@ -66,9 +66,13 @@
                     </CommandBar.SecondaryCommands>
                 </CommandBar>
             </RelativePanel>
-
             <mtuuc:WrapPanel Orientation="Horizontal">
+                <ComboBox
+                    Margin="20,20,0,0" Header="Anrede" IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    x:Name="ComboBoxAnrede" Width="80" ItemsSource="{x:Bind ViewModel.Anreden}"
+                    SelectedItem="{x:Bind ViewModel.Anrede, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                 <TextBox
+                    Width="200"
                     Text="{x:Bind ViewModel.Vorname, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Header="Vorname" Style="{StaticResource Eintraege}"/>
                 <TextBox

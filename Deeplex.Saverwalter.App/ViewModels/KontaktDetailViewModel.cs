@@ -15,6 +15,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public int Id { get; }
 
         public ImmutableList<AdresseViewModel> AlleAdressen { get; }
+        public ImmutableList<Anrede> Anreden { get; }
+
+        public Anrede Anrede
+        {
+            get => Entity.Anrede;
+            set
+            {
+                Entity.Anrede = value;
+                RaisePropertyChangedAuto();
+            }
+        }
 
         public string Vorname
         {
@@ -118,6 +129,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Select(a => new AdresseViewModel(a))
                 .ToImmutableList();
 
+            Anreden = Enum.GetValues(typeof(Anrede)).Cast<Anrede>().ToImmutableList();
+
             if (k.Adresse != null)
             {
                 Adresse = new AdresseViewModel(k.Adresse);
@@ -139,6 +152,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             switch (e.PropertyName)
             {
+                case nameof(Anrede):
                 case nameof(Vorname):
                 case nameof(Nachname):
                 case nameof(Adresse):
