@@ -51,7 +51,7 @@ namespace Deeplex.Saverwalter.Print
                 // p.3
                 Heading("Abrechnung der Nebenkosten (kalten Betriebskosten)"),
                 MietHeader(b));
-                
+
             foreach (var gruppe in b.Gruppen)
             {
                 body.Append(
@@ -138,7 +138,7 @@ namespace Deeplex.Saverwalter.Print
             return new Paragraph(
                 new Run(
                     new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) }),
-                    new Text("Betriebskostenabrechnung " + b.Jahr.ToString()), 
+                    new Text("Betriebskostenabrechnung " + b.Jahr.ToString()),
                     new Break()),
                 new Run(
                     new Text("Mieter: " + Mieterliste),
@@ -329,37 +329,44 @@ namespace Deeplex.Saverwalter.Print
                     ContentHead("bei Umlage nach Wohnfläche (n. WF)"),
                     ContentHead("1620", "Nutzungsintervall", JustificationValues.Center),
                     ContentHead("480", "Tage", JustificationValues.Center),
-                    ContentHead("900", "Ihr Anteil", JustificationValues.Center)),
-                new TableRow(
+                    ContentHead("900", "Ihr Anteil", JustificationValues.Center)));
+            
+            if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachWohnflaeche))
+            {
+                table.Append(new TableRow(
                     ContentCell(b.Wohnung.Wohnflaeche.ToString() + " / " + g.GesamtWohnflaeche.ToString(), JustificationValues.Center),
                     ContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center),
                     ContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
-                    ContentCell(Percent(g.WFZeitanteil), JustificationValues.Center)),
-                new TableRow(
-                    ContentHead("bei Umlage nach Nutzeinheiten (n. NE)")),
-                new TableRow(
-                    ContentCell(1.ToString() + " / " + g.GesamtEinheiten, JustificationValues.Center),
-                    ContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center),
-                    ContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
-                    ContentCell(Percent(g.NEZeitanteil), JustificationValues.Center)),
-                new TableRow(
-                    ContentHead("bei Umlage nach Personenzahl (n. Pers.)")));
-
-            for (var i = 0; i < g.PersZeitanteil.Count; ++i)
-            {
-                var Beginn = g.PersZeitanteil[i].Beginn;
-                var Ende = g.PersZeitanteil[i].Ende;
-                var GesamtPersonenzahl = g.GesamtPersonenIntervall.Last(gs => gs.Beginn.Date <= g.PersZeitanteil[i].Beginn.Date).Personenzahl;
-                var Personenzahl = g.PersonenIntervall.Last(p => p.Beginn.Date <= g.PersZeitanteil[i].Beginn).Personenzahl;
-                var timespan = ((Ende - Beginn).Days + 1).ToString();
-
-                table.Append(new TableRow(
-                    ContentCell(Personenzahl.ToString() + " / " + GesamtPersonenzahl.ToString(), JustificationValues.Center),
-                    ContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center),
-                    ContentCell(timespan + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
-                    ContentCell(Percent(g.PersZeitanteil[i].Anteil), JustificationValues.Center)));
+                    ContentCell(Percent(g.WFZeitanteil), JustificationValues.Center)));
             }
+            if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachNutzeinheit))
+            {
+                table.Append(new TableRow(
+                        ContentHead("bei Umlage nach Nutzeinheiten (n. NE)")),
+                        ContentCell(1.ToString() + " / " + g.GesamtEinheiten, JustificationValues.Center),
+                        ContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center),
+                        ContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
+                        ContentCell(Percent(g.NEZeitanteil), JustificationValues.Center));
+            }
+            if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachPersonenzahl))
+            {
+                table.Append(new TableRow(
+                    ContentHead("bei Umlage nach Personenzahl (n. Pers.)")));
+                for (var i = 0; i < g.PersZeitanteil.Count; ++i)
+                {
+                    var Beginn = g.PersZeitanteil[i].Beginn;
+                    var Ende = g.PersZeitanteil[i].Ende;
+                    var GesamtPersonenzahl = g.GesamtPersonenIntervall.Last(gs => gs.Beginn.Date <= g.PersZeitanteil[i].Beginn.Date).Personenzahl;
+                    var Personenzahl = g.PersonenIntervall.Last(p => p.Beginn.Date <= g.PersZeitanteil[i].Beginn).Personenzahl;
+                    var timespan = ((Ende - Beginn).Days + 1).ToString();
 
+                    table.Append(new TableRow(
+                        ContentCell(Personenzahl.ToString() + " / " + GesamtPersonenzahl.ToString(), JustificationValues.Center),
+                        ContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center),
+                        ContentCell(timespan + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
+                        ContentCell(Percent(g.PersZeitanteil[i].Anteil), JustificationValues.Center)));
+                }
+            }
             return table;
         }
 
@@ -460,7 +467,7 @@ namespace Deeplex.Saverwalter.Print
             => new TableCell(
                 new Paragraph(NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
                 new Run(new Text(str))));
-        
+
         static TableCell ContentHead(string str) => new TableCell(new Paragraph(NoSpace(), new Run(Bold(), new Text(str))));
         static TableCell ContentHead(string pct, string str)
             => new TableCell(
