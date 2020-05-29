@@ -207,6 +207,15 @@
                             </DataTemplate>
                         </mtuuc:DataGridTemplateColumn.CellTemplate>
                     </mtuuc:DataGridTemplateColumn>
+                    <mtuuc:DataGridTemplateColumn Header="Kaltmiete">
+                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:VertragDetailVersion">
+                                <muxc:NumberBox
+                                    Value="{x:Bind KaltMiete, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                    PlaceholderText="0"/>
+                            </DataTemplate>
+                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                    </mtuuc:DataGridTemplateColumn>
                     <mtuuc:DataGridTextColumn Header="Notiz" IsReadOnly="False" Binding="{Binding Notiz.Value}"/>
                 </mtuuc:DataGrid.Columns>
             </mtuuc:DataGrid>

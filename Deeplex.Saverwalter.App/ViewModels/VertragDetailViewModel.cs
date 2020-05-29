@@ -132,6 +132,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private Vertrag Entity { get; }
         public int Id => Entity.rowid;
         public int Version => Entity.Version;
+        public double KaltMiete
+        {
+            get => Entity.KaltMiete;
+            set
+            {
+                Entity.KaltMiete = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
         public int Personenzahl
         {
             get => Entity.Personenzahl;
@@ -220,7 +230,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 case nameof(Ende):
                 case nameof(Notiz):
                 case nameof(Personenzahl):
-                //case nameof(KaltMiete):
+                case nameof(KaltMiete):
                 // case nameof(VersionsNotiz):
                 case nameof(Ansprechpartner):
                     break;
