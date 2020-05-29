@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -44,8 +45,6 @@ namespace Deeplex.Saverwalter.Model
                     .ThenInclude(k => k.Adresse)
                 .Include(v => v.Wohnung)
                     .ThenInclude(w => w.Adresse)
-                        .ThenInclude(a => a.Wohnungen)
-                            .ThenInclude(w2 => w2.Vertraege)
                 .Include(v => v.Wohnung)
                     .ThenInclude(w => w.Besitzer)
                 .Include(v => v.Wohnung)
@@ -53,6 +52,13 @@ namespace Deeplex.Saverwalter.Model
                         .ThenInclude(b => b.Rechnung)
                             .ThenInclude(r => r.Gruppen)
                                 .ThenInclude(g => g.Wohnung)
+                                    .ThenInclude(w => w.Adresse)
+                .Include(v => v.Wohnung)
+                    .ThenInclude(w => w.Betriebskostenrechnungsgruppen)
+                        .ThenInclude(b => b.Rechnung)
+                            .ThenInclude(r => r.Gruppen)
+                                .ThenInclude(g => g.Wohnung)
+                                    .ThenInclude(w => w.Vertraege)
                 .First();
 
             Ansprechpartner = vertrag.Ansprechpartner;
@@ -71,8 +77,8 @@ namespace Deeplex.Saverwalter.Model
             Nutzungsbeginn = Max(Vertragsversionen.First().Beginn, Abrechnungsbeginn);
             Nutzungsende = Min(Vertragsversionen.Last().Ende ?? Abrechnungsende, Abrechnungsende);
 
-            Abrechnungszeitspanne = (Abrechnungsende - Abrechnungsbeginn).Days;
-            Nutzungszeitspanne = (Nutzungsende - Nutzungsbeginn).Days;
+            Abrechnungszeitspanne = (Abrechnungsende - Abrechnungsbeginn).Days + 1;
+            Nutzungszeitspanne = (Nutzungsende - Nutzungsbeginn).Days + 1;
             Zeitanteil = (double)Nutzungszeitspanne / Abrechnungszeitspanne;
 
             // TODO Nicht YEAR, sondern betreffendes Jahr. Das muss noch.
@@ -111,6 +117,7 @@ namespace Deeplex.Saverwalter.Model
             public Rechnungsgruppe(Betriebskostenabrechnung b, List<Betriebskostenrechnung> gruppe)
             {
                 var gr = gruppe.First().Gruppen;
+
                 Rechnungen = gruppe;
                 GesamtWohnflaeche = gr.Sum(w => w.Wohnung.Wohnflaeche);
                 GesamtNutzflaeche = gr.Sum(w => w.Wohnung.Nutzflaeche);
