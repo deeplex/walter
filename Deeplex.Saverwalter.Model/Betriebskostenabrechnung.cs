@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
+
 namespace Deeplex.Saverwalter.Model
 {
     public class Betriebskostenabrechnung
@@ -78,8 +78,8 @@ namespace Deeplex.Saverwalter.Model
             // TODO Nicht YEAR, sondern betreffendes Jahr. Das muss noch.
             Gruppen = vertrag.Wohnung.Betriebskostenrechnungsgruppen
                 .Where(g => g.Rechnung.Datum.Year == Jahr)
-                .GroupBy(g => g.Rechnung.Gruppen.ToImmutableHashSet())
-                .Select(g => new Rechnungsgruppe(this, g.Select(g => g.Rechnung).ToList()))
+                .GroupBy(p => new SortedSet<int>(p.Rechnung.Gruppen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
+                .Select(g => new Rechnungsgruppe(this, g.Select(i => i.Rechnung).ToList()))
                 .ToList();
 
             // TODO Timerange should be more dynamic...
@@ -127,8 +127,8 @@ namespace Deeplex.Saverwalter.Model
                     VertraegeIntervallPersonenzahl(b.Vertragsversionen,
                     b.Nutzungsbeginn, b.Nutzungsende).ToList();
 
-                WFZeitanteil = (b.Wohnung.Wohnflaeche / GesamtWohnflaeche) * b.Zeitanteil;
-                NEZeitanteil = ((double)b.Wohnung.Nutzeinheit / GesamtEinheiten) * b.Zeitanteil;
+                WFZeitanteil = b.Wohnung.Wohnflaeche / GesamtWohnflaeche * b.Zeitanteil;
+                NEZeitanteil = (double)b.Wohnung.Nutzeinheit / GesamtEinheiten * b.Zeitanteil;
 
                 PersZeitanteil = GesamtPersonenIntervall
                     .Where(g => g.Beginn < b.Nutzungsende && g.Ende >= b.Nutzungsbeginn)

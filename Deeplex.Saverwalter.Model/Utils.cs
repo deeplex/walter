@@ -28,4 +28,17 @@ namespace Deeplex.Saverwalter.Model
             return attributes.Length > 0 ? attributes[0].Description : string.Empty;
         }
     }
+
+    // Used to determine Betriebskostengruppen.
+    public class SortedSetIntEqualityComparer : EqualityComparer<SortedSet<int>>
+    {
+        public override bool Equals(SortedSet<int> x, SortedSet<int> y)
+        {
+            return x.SetEquals(y);
+        }
+        public override int GetHashCode(SortedSet<int> obj)
+        {
+            return 0;
+        }
+    }
 }
