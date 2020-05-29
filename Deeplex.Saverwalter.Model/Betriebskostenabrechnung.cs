@@ -17,6 +17,8 @@ namespace Deeplex.Saverwalter.Model
         public Wohnung Wohnung { get; set; }
         public Adresse Adresse { get; set; }
         public double Gezahlt { get; set; }
+        public double KaltMiete { get; set; }
+        public double BezahltNebenkosten { get; set; }
 
         public DateTime Abrechnungsbeginn { get; set; }
         public DateTime Abrechnungsende { get; set; }
@@ -27,7 +29,7 @@ namespace Deeplex.Saverwalter.Model
         public int Nutzungszeitspanne;
         public double Zeitanteil;
 
-        public double Betrag;
+        public double BetragNebenkosten;
 
         public List<Rechnungsgruppe> Gruppen { get; set; }
 
@@ -94,9 +96,11 @@ namespace Deeplex.Saverwalter.Model
                     .Where(m => m.Zahlungsdatum >= Abrechnungsbeginn && m.Zahlungsdatum < Abrechnungsende)
                     .Sum(z => z.Betrag ?? 0);
 
-            Betrag = Gruppen.Sum(g => g.Betrag);
+            KaltMiete = Vertragsversionen.Sum(v => (Min(v.Ende?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);
+            BezahltNebenkosten = Gezahlt - KaltMiete;
+            BetragNebenkosten = Gruppen.Sum(g => g.Betrag);
 
-            Result = Gezahlt - Betrag;
+            Result = BezahltNebenkosten - BetragNebenkosten;
         }
 
         public class Rechnungsgruppe

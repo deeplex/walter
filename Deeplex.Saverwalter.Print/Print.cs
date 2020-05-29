@@ -463,19 +463,31 @@ namespace Deeplex.Saverwalter.Print
 
         private static Table GesamtErgebnis(Betriebskostenabrechnung b)
         {
-            return new Table(
+            var table = new Table(
                 new TableProperties(
                     new TableBorders(new InsideHorizontalBorder() { Val = BorderValues.Thick, Color = "888888" })),
                 new TableWidth() { Width = "2500", Type = TableWidthUnitValues.Pct },
                 new TableRow(
-                    ContentCell("Ihre geleisteten Vorauszahlungen:"),
+                    ContentCell("Sie haben gezahlt:"),
                     ContentCell(Euro(b.Gezahlt), JustificationValues.Right)),
                 new TableRow(
-                    ContentCell("abzüglich Ihrer Nebenkostenanteile:"),
-                    ContentCell(Euro(b.Betrag), JustificationValues.Right)),
-                new TableRow(
-                    ContentCell(b.Result > 0 ? "Erstattungsbetrag:" : "Nachforderungsbetrag:"),
-                    ContentHead(Euro(Math.Abs(b.Result)), JustificationValues.Right)));
+                    ContentCell("Abzüglich Ihrer Kaltmiete:"),
+                    ContentCell("-" + Euro(b.KaltMiete), JustificationValues.Right)));
+
+            var f = true;
+            foreach (var gruppe in b.Gruppen)
+            {
+                table.Append(new TableRow(
+                    ContentCell(f ? "Abzüglich Ihrer Nebenkostenanteile:" : ""),
+                    ContentCell("-" + Euro(gruppe.Betrag), JustificationValues.Right)));
+                f = false;
+            }
+
+            table.Append(new TableRow(
+                ContentCell("Ergebnis:"),
+                ContentHead(Euro(b.Result), JustificationValues.Right)));
+
+            return table;
         }
 
         // Helper
