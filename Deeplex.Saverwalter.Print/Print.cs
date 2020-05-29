@@ -279,7 +279,14 @@ namespace Deeplex.Saverwalter.Print
                 var a = adr.Key;
                 var ret = a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
 
-                if (adr.Count() != a.Wohnungen.Count) ret += ": " + string.Join(", ", adr.Select(w => w.Bezeichnung));
+                if (adr.Count() != a.Wohnungen.Count)
+                {
+                    ret += ": " + string.Join(", ", adr.Select(w => w.Bezeichnung));
+                }
+                else
+                {
+                    ret += " (gesamt)";
+                }
 
                 p.Append(new Run(new Text(ret)));
                 if (a != adressen.Last().Key)
