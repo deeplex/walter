@@ -14,7 +14,24 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private Wohnung Entity;
         public int Id;
         public ImmutableList<JuristischePersonViewModel> AlleJuristischePersonen { get; }
-        public ImmutableList<AdresseViewModel> AlleAdressen { get; }
+        
+        private ImmutableList<Adresse> AlleAdressen => App.Walter.Adressen.ToImmutableList();
+
+        public ObservableProperty<string> Stadt = new ObservableProperty<string>();
+        public ObservableProperty<string> Postleitzahl = new ObservableProperty<string>();
+        public ObservableProperty<string> Strasse = new ObservableProperty<string>();
+        public ObservableProperty<string> Hausnummer = new ObservableProperty<string>();
+
+        public ImmutableList<string> Staedte => AlleAdressen.Select(a => a.Stadt).Distinct().ToImmutableList();
+        public ImmutableList<string> Postleitzahlen => AlleAdressen
+            .Where(a => Stadt.Value != "" && a.Stadt == Stadt.Value)
+            .Select(a => a.Postleitzahl).Distinct().ToImmutableList();
+        public ImmutableList<string> Strassen => AlleAdressen
+            .Where(a => Postleitzahl.Value != "" && a.Postleitzahl == Entity.Adresse.Postleitzahl)
+            .Select(a => a.Strasse).Distinct().ToImmutableList();
+        public ImmutableList<string> Hausnummern => AlleAdressen
+            .Where(a => Hausnummer.Value != "" && a.Hausnummer == Entity.Adresse.Hausnummer)
+            .Select(a => a.Hausnummer).Distinct().ToImmutableList();
 
         public ObservableProperty<List<WohnungDetailZaehler>> Zaehler
             = new ObservableProperty<List<WohnungDetailZaehler>>();
@@ -27,9 +44,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => mBesitzer;
             set
             {
-                Entity.BesitzerId = value.Id;
-                mBesitzer = value;
-                RaisePropertyChangedAuto();
+                if (value != null)
+                { 
+                    Entity.BesitzerId = value.Id;
+                    mBesitzer = value;
+                    RaisePropertyChangedAuto();
+                }
             }
         }
 
@@ -101,11 +121,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = w;
 
+            Stadt.Value = w.Adresse?.Stadt ?? "";
+            Postleitzahl.Value = w.Adresse?.Postleitzahl ?? "";
+            Strasse.Value = w.Adresse?.Strasse ?? "";
+            Hausnummer.Value = w.Adresse?.Strasse ?? "";
+
             AlleJuristischePersonen = App.Walter.JuristischePersonen
                 .Select(j => new JuristischePersonViewModel(j))
-                .ToImmutableList();
-            AlleAdressen = App.Walter.Adressen
-                .Select(a => new AdresseViewModel(a))
                 .ToImmutableList();
 
             if (w.Adresse != null)
@@ -143,7 +165,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
 
             if ((Entity.Besitzer == null && Entity.BesitzerId == 0) ||
-                (Entity.Adresse == null && Entity.AdresseId == 0))
+                (Entity.Adresse == null && Entity.AdresseId == 0) ||
+                Entity.Bezeichnung == null || Entity.Bezeichnung == "")
             {
                 return;
             }

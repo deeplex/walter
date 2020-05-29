@@ -92,27 +92,38 @@
                         <TextBlock>
                             <Run Text="{x:Bind ViewModel.Adresse.Strasse.Value, Mode=OneWay}"/>
                             <Run Text="{x:Bind ViewModel.Adresse.Hausnummer.Value, Mode=OneWay}"/>
+                            <Run Text=", "/>
                             <Run Text="{x:Bind ViewModel.Adresse.Postleitzahl.Value, Mode=OneWay}"/>
                             <Run Text="{x:Bind ViewModel.Adresse.Stadt.Value, Mode=OneWay}"/>
                         </TextBlock>
                     </Button.Content>
                     <Button.Flyout>
-                        <Flyout>
+                        <Flyout Placement="Bottom">
+                            <Flyout.FlyoutPresenterStyle>
+                                <Style TargetType="FlyoutPresenter">
+                                    <Setter Property="MinWidth" Value="625" />
+                                </Style>
+                            </Flyout.FlyoutPresenterStyle>
                             <mtuuc:WrapPanel Orientation="Horizontal">
                                 <ComboBox
-                                    x:Name="ComboBoxStrasse" Width="150" IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
-                                    DisplayMemberPath="Strasse.Value" SelectedItem="{x:Bind ViewModel.Adresse.Strasse, Mode=OneWay}"/>
+                                    Header="Straße"
+                                    x:Name="ComboBoxStrasse" Width="200" IsEditable="True" ItemsSource="{x:Bind ViewModel.Strassen, Mode=OneWay}"
+                                    SelectedValue="{x:Bind ViewModel.Strasse.Value, Mode=TwoWay}"/>
                                 <ComboBox
-                                    x:Name="ComboBoxHausnummer" IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
-                                    DisplayMemberPath="Hausnummer.Value" SelectedItem="{x:Bind ViewModel.Adresse.Hausnummer, Mode=OneWay}"/>
+                                    Header="Hausnr."
+                                    x:Name="ComboBoxHausnummer" IsEditable="True" ItemsSource="{x:Bind ViewModel.Hausnummern, Mode=OneWay}"
+                                    SelectedValue="{x:Bind ViewModel.Hausnummer.Value, Mode=TwoWay}"/>
                                 <ComboBox
-                                    x:Name="ComboBoxPostleitzahl"  IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
-                                    DisplayMemberPath="Postleitzahl.Value" SelectedItem="{x:Bind ViewModel.Adresse.Postleitzahl, Mode=OneWay}"/>
+                                    Header="Postleitzahl"
+                                    x:Name="ComboBoxPostleitzahl"  IsEditable="True" ItemsSource="{x:Bind ViewModel.Postleitzahlen, Mode=OneWay}"
+                                    SelectedValue="{x:Bind ViewModel.Postleitzahl.Value, Mode=TwoWay}"/>
                                 <ComboBox
-                                    x:Name="ComboBoxStadt" Width="100" IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
-                                    DisplayMemberPath="Stadt.Value" SelectedItem="{x:Bind ViewModel.Adresse.Stadt, Mode=OneWay}"/>
-                                <Button Click="UpdateAdresse_Click" Background="Transparent" VerticalAlignment="Bottom">
-                                    <SymbolIcon Symbol="Add"/>
+                                    Header="Stadt"
+                                    x:Name="ComboBoxStadt" Width="200" IsEditable="True" ItemsSource="{x:Bind ViewModel.Staedte, Mode=OneWay}"
+                                    SelectedValue="{x:Bind ViewModel.Stadt.Value, Mode=TwoWay}"/>
+                                
+                                <Button Margin="0,20,0,0" Click="UpdateAdresse_Click" Background="Transparent" VerticalAlignment="Bottom">
+                                    <SymbolIcon Symbol="Accept"/>
                                 </Button>
                             </mtuuc:WrapPanel>
                         </Flyout>

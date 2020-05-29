@@ -93,6 +93,7 @@ namespace Deeplex.Saverwalter.Model
         public string Stadt { get; set; } = null!;
         public string? Notiz { get; set; }
         public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
+        public List<Kontakt> Kontakte { get; private set; } = new List<Kontakt>();
         public List<Garage> Garagen { get; private set; } = new List<Garage>();
     }
 

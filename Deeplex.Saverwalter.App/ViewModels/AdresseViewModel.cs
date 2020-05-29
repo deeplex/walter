@@ -44,9 +44,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public static Adresse GetAdresse(AdresseViewModel avm)
         {
-            // TODO Remove unreferenced Adresses - Add Wohnungen and Kontakte List to Walter.
-
-            // TODO Give some indication to the user?
             // If one is set => all must be set.
             if (avm is null ||
                 avm.Postleitzahl.Value == null || avm.Postleitzahl.Value == "" ||
@@ -54,17 +51,28 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 avm.Strasse.Value == null || avm.Strasse.Value == "" ||
                 avm.Stadt.Value == null || avm.Stadt.Value == "")
             {
+                App.Walter.Remove(GetAdresse(avm));
                 return null;
             }
 
-            var adr = App.Walter.Adressen.FirstOrDefault(a2 =>
-                a2.Postleitzahl == avm.Postleitzahl.Value &&
-                a2.Hausnummer == avm.Hausnummer.Value &&
-                a2.Strasse == avm.Strasse.Value &&
-                a2.Stadt == avm.Stadt.Value);
-
-            if (adr is Adresse)
+            // Remove deprecated Adressen
+            foreach (var adresse in App.Walter.Adressen)
             {
+                if (adresse.Wohnungen.Count == 0 && adresse.Kontakte.Count == 0 && adresse.Garagen.Count == 0)
+                {
+                    App.Walter.Remove(adresse);
+                }
+            }
+
+            var adr = App.Walter.Adressen.FirstOrDefault(a =>
+                a.Postleitzahl == avm.Postleitzahl.Value &&
+                a.Hausnummer == avm.Hausnummer.Value &&
+                a.Strasse == avm.Strasse.Value &&
+                a.Stadt == avm.Stadt.Value);
+
+            if (adr != null)
+            {
+                App.Walter.SaveChanges();
                 return adr;
             }
             else
@@ -76,6 +84,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     Strasse = avm.Strasse.Value,
                     Stadt = avm.Stadt.Value
                 };
+                
                 App.Walter.Adressen.Add(adr);
                 App.Walter.SaveChanges();
                 return adr;
