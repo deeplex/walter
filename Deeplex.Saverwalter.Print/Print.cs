@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.Print
                         SubHeading("Angaben zur Abrechnungseinheit:"),
                         Abrechnungsgruppe(b, gruppe),
                         Abrechnungseinheit(b, gruppe),
-                        new Paragraph(), // Necessary to split tables...
+                        SubHeading("Ermittlung Ihrer Einheiten"),
                         ErmittlungEinheiten(b, gruppe),
                         SubHeading("Ermittlung der kalten Betriebskosten"),
                         ErmittlungKosten(b, gruppe));
@@ -279,10 +279,13 @@ namespace Deeplex.Saverwalter.Print
                 var a = adr.Key;
                 var ret = a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
 
-                if (adr.Count() != adr.Key.Wohnungen.Count) ret += ": " + string.Join(", ", adr.Select(w => w.Bezeichnung));
+                if (adr.Count() != a.Wohnungen.Count) ret += ": " + string.Join(", ", adr.Select(w => w.Bezeichnung));
 
                 p.Append(new Run(new Text(ret)));
-                if (adr != adressen.Last()) p.Append(new Break());
+                if (a != adressen.Last().Key)
+                {
+                    p.Append(new Break());
+                }
             }
 
             return p;
@@ -349,17 +352,11 @@ namespace Deeplex.Saverwalter.Print
 
         private static Table ErmittlungEinheiten(Betriebskostenabrechnung b, Rechnungsgruppe g)
         {
-            var table = new Table(
-                new TableRow(
-                    ContentHead("2150", "Ermittlung Ihrer Einheiten"),
-                    ContentHead("1120", ""),
-                    ContentHead("865", ""),
-                    ContentHead("865", "")),
-                new TableRow(
-                    ContentHead("bei Umlage nach Wohnfläche (n. WF)"),
-                    ContentHead("Nutzungsintervall", JustificationValues.Center),
-                    ContentHead("Tage", JustificationValues.Center),
-                    ContentHead("Ihr Anteil", JustificationValues.Center)));
+            var table = new Table(new TableRow(
+                ContentHead("2150", "bei Umlage nach Wohnfläche (n. WF)"),
+                ContentHead("1120", "Nutzungsintervall", JustificationValues.Center),
+                ContentHead("865", "Tage", JustificationValues.Center),
+                ContentHead("865", "Ihr Anteil", JustificationValues.Center)));
 
             if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachWohnflaeche))
             {
