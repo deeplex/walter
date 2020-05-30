@@ -169,7 +169,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     AdresseId = table.Column<int>(nullable: false),
                     Bezeichnung = table.Column<string>(nullable: false),
-                    BesitzerId = table.Column<int>(nullable: false),
+                    BesitzerId = table.Column<int>(nullable: true),
                     Wohnflaeche = table.Column<double>(nullable: false),
                     Nutzflaeche = table.Column<double>(nullable: false),
                     Nutzeinheit = table.Column<int>(nullable: false),
@@ -189,7 +189,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         column: x => x.BesitzerId,
                         principalTable: "JuristischePersonen",
                         principalColumn: "JuristischePersonId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(

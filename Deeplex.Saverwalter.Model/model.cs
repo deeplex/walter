@@ -62,12 +62,12 @@ namespace Deeplex.Saverwalter.Model
         public int AdresseId { get; set; }
         public Adresse Adresse { get; set; } = null!;
         public string Bezeichnung { get; set; } = null!;
-        public int BesitzerId { get; set; }
-        public JuristischePerson Besitzer { get; set; } = null!;
+        public int? BesitzerId { get; set; }
+        public JuristischePerson? Besitzer { get; set; }
         public double Wohnflaeche { get; set; }
         public double Nutzflaeche { get; set; }
         // Nutzeinheit is always 1, but dummies may have more... Or really big Wohnungen, who knows.
-        public int Nutzeinheit { get; set; }
+        public int Nutzeinheit { get; set; } = 1;
         public string? Notiz { get; set; }
         public List<Vertrag> Vertraege { get; private set; } = new List<Vertrag>();
         public List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
