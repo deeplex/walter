@@ -12,22 +12,17 @@
         <muxc:StackLayout x:Name="VerticalStackLayout" Orientation="Vertical" Spacing="8"/>
     </Page.Resources>
 
-    <RelativePanel>
+    <ScrollViewer>
+    <StackPanel>
         <CommandBar
-            x:Name="ButtonRow"
             Background="Transparent"
             IsOpen="False"
             RelativePanel.AlignRightWithPanel="True"
             HorizontalAlignment="Stretch"
             DefaultLabelPosition="Right">
-            <AppBarButton
-                Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                Command="{x:Bind ViewModel.SaveEdit}"
-                Icon="Save"
-                Label="Änderungen speichern"/>
             <AppBarButton Click="AddWohnung_Click" Icon="Add" Label="Wohnung hinzufügen"/>
         </CommandBar>
-        <StackPanel Margin="10" RelativePanel.Below="ButtonRow">
+        <StackPanel Margin="10">
             <ScrollViewer>
                 <muxc:ItemsRepeater
                     ItemsSource="{x:Bind ViewModel.AdresseGroup}"
@@ -97,5 +92,6 @@
                 </muxc:ItemsRepeater>
             </ScrollViewer>
         </StackPanel>
-    </RelativePanel>
+    </StackPanel>
+    </ScrollViewer>
 </Page>
