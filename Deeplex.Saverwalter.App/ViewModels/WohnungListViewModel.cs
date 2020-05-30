@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -16,6 +17,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             AdresseGroup = App.Walter.Wohnungen
                 .Include(w => w.Adresse)
+                .Include(w => w.Vertraege)
                 .ToList()
                 .Select(w => new WohnungListWohnung(w))
                 .GroupBy(w => w.AdresseId)
@@ -52,10 +54,29 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<string> Stadt { get; }
             = new ObservableProperty<string>();
 
+        public string GesamtString 
+            => "Nutzeinheiten: " + GesamtNutzeinheiten
+            + ", Wohnfläche: " + string.Format("{0:N2}", GesamtWohnflaeche)
+            + "m², Nutzfläche: " + string.Format("{0:N2}", GesamtNutzflaeche)
+            + "m², Bewohnerzahl: " + GesamtBewohner;
+
+        private double GesamtWohnflaeche;
+        private int GesamtNutzeinheiten;
+        private double GesamtNutzflaeche;
+        private int GesamtBewohner;
+
         public WohnungListAdresse(int id)
         {
             Id = id;
             var Adresse = App.Walter.Adressen.Find(Id);
+            var wn = Adresse.Wohnungen;
+            GesamtNutzeinheiten = wn.Sum(w => w.Nutzeinheit);
+            GesamtWohnflaeche = wn.Sum(w => w.Wohnflaeche);
+            GesamtNutzflaeche = wn.Sum(w => w.Nutzflaeche);
+            GesamtBewohner = wn
+                .Select(w => w.Vertraege.FirstOrDefault(v => v.Ende == null || v.Ende >= DateTime.Today))
+                .Sum(v => v?.Personenzahl ?? 0);
+
             Postleitzahl.Value = Adresse.Postleitzahl;
             Hausnummer.Value = Adresse.Hausnummer;
             Strasse.Value = Adresse.Strasse;

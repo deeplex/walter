@@ -34,8 +34,8 @@
                     Layout="{StaticResource VerticalStackLayout}">
                     <DataTemplate>
                         <!-- Make this an Expander - https://github.com/microsoft/microsoft-ui-xaml/issues/2003-->
-                            <RelativePanel CornerRadius="10" Background="{StaticResource SystemChromeMediumColor}">
-                            <StackPanel>
+                        <RelativePanel CornerRadius="10" Background="{StaticResource SystemChromeMediumColor}">
+                            <StackPanel x:Name="StackWohnungen">
                                 <StackPanel Margin="10, 10, 0, 0" Orientation="Horizontal">
                                 <TextBox
                                     Background="Transparent"
@@ -86,6 +86,12 @@
                                     </GridView.ItemTemplate>
                                 </GridView>
                             </StackPanel>
+                            <TextBlock
+                                Margin="0,0,5,5"
+                                RelativePanel.Below="StackWohnungen"
+                                RelativePanel.AlignRightWithPanel="True"
+                                Text="{Binding Key.GesamtString}"
+                                TextWrapping="WrapWholeWords"/>
                         </RelativePanel>
                     </DataTemplate>
                 </muxc:ItemsRepeater>
