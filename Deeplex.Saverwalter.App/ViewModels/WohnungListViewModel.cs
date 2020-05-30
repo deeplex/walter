@@ -74,7 +74,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             GesamtWohnflaeche = wn.Sum(w => w.Wohnflaeche);
             GesamtNutzflaeche = wn.Sum(w => w.Nutzflaeche);
             GesamtBewohner = wn
-                .Select(w => w.Vertraege.FirstOrDefault(v => v.Ende == null || v.Ende >= DateTime.Today))
+                .Select(w => w.Vertraege.FirstOrDefault(v => v.Ende == null || v.Ende >= DateTime.UtcNow.Date))
                 .Sum(v => v?.Personenzahl ?? 0);
 
             Postleitzahl.Value = Adresse.Postleitzahl;

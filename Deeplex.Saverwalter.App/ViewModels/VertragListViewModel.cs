@@ -110,8 +110,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     .Select(m => (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname));
             // Such grace...
 
-            Beginn = v.Beginn;
-            BeginnString = v.Beginn.ToUniversalTime().ToString("dd.MM.yyyy");
+            Beginn = v.Beginn.AsUtcKind();
+            BeginnString = v.Beginn.ToString("dd.MM.yyyy");
             hasEnde = v.Ende is DateTime;
             EndeString = v.Ende is DateTime e ? e.ToString("dd.MM.yyyy") : "Offen";
 
@@ -161,7 +161,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public VertragListMiete()
         {
-            Datum.Value = DateTime.UtcNow;
+            Datum.Value = DateTime.UtcNow.Date;
             Betrag = 0;
             Notiz.Value = "";
         }
@@ -169,7 +169,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public VertragListMiete(Miete m)
         {
             Id = m.MieteId;
-            Datum.Value = m.Zahlungsdatum;
+            Datum.Value = m.Zahlungsdatum.AsUtcKind();
             Betrag = m.Betrag ?? 0;
             Notiz.Value = m.Notiz ?? "";
         }

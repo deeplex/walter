@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Text;
 
 namespace Deeplex.Saverwalter.Model
 {
     public static class KalteBetriebskostenExtensions
     {
+        public static DateTime AsUtcKind(this DateTime dt)
+        {
+            return new DateTime(dt.Ticks, DateTimeKind.Utc);
+        }
+
         public static string ToDescriptionString(this Betriebskostentyp val)
         {
             DescriptionAttribute[] attributes = (DescriptionAttribute[])val
@@ -38,7 +44,7 @@ namespace Deeplex.Saverwalter.Model
         }
         public override int GetHashCode(SortedSet<int> obj)
         {
-            return 0;
+            return obj.Sum(i => i.GetHashCode());
         }
     }
 }

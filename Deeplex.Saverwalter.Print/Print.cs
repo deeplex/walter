@@ -138,7 +138,7 @@ namespace Deeplex.Saverwalter.Print
             {
                 Val = JustificationValues.Right,
             }),
-                new Run(new Text(Datum(DateTime.Today))));
+                new Run(new Text(Datum(DateTime.UtcNow.Date))));
         }
 
         private static Paragraph Betreff(Betriebskostenabrechnung b)

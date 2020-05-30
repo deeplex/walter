@@ -223,8 +223,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Id = v.rowid;
             Version = v.Version;
 
-            Beginn.Value = v.Beginn;
-            Ende.Value = v.Ende;
+            Beginn.Value = v.Beginn.AsUtcKind();
+            Ende.Value = v.Ende?.AsUtcKind();
 
             AuflistungMieter.Value = string.Join(", ", App.Walter.MieterSet
                 .Include(m => m.Kontakt)

@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 new Vertrag
                 {
-                    Beginn = DateTime.Today,
+                    Beginn = DateTime.UtcNow.Date,
                 }
             })
         {
@@ -85,7 +85,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             AddVersion = new RelayCommand(_ =>
             {
                 var last = App.Walter.Vertraege.Find(Versionen.Value.First().Id);
-                var entity = new Vertrag(last, AddVersionDatum?.UtcDateTime ?? DateTime.Today)
+                var entity = new Vertrag(last, AddVersionDatum?.UtcDateTime ?? DateTime.UtcNow.Date)
                 {
                     Personenzahl = Personenzahl,
                     //KaltMiete = KaltMiete, TODO
@@ -167,7 +167,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
         public DateTimeOffset Beginn
         {
-            get => Entity.Beginn;
+            get => Entity.Beginn.AsUtcKind();
             set
             {
                 Entity.Beginn = value.UtcDateTime;
@@ -176,7 +176,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
         public DateTimeOffset? Ende
         {
-            get => Entity.Ende;
+            get => Entity.Ende?.AsUtcKind();
             set
             {
                 Entity.Ende = value?.UtcDateTime;
@@ -269,7 +269,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public DateTimeOffset Zahlungsdatum
         {
-            get => Entity.Zahlungsdatum;
+            get => Entity.Zahlungsdatum.AsUtcKind();
             set
             {
                 Entity.Zahlungsdatum = value.UtcDateTime;
@@ -301,7 +301,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             : this(new Miete
             {
                 VertragId = vertragId,
-                Zahlungsdatum = DateTime.UtcNow,
+                Zahlungsdatum = DateTime.UtcNow.Date,
             })
         {
         }

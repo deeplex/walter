@@ -213,8 +213,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Anschrift.Value = v.Wohnung is Wohnung w ? AdresseViewModel.Anschrift(w) : "";
             Wohnung.Value = v.Wohnung is Wohnung ww ? ww.Bezeichnung : "";
 
-            Beginn.Value = v.Beginn;
-            Ende.Value = v.Ende;
+            Beginn.Value = v.Beginn.AsUtcKind();
+            Ende.Value = v.Ende?.AsUtcKind();
 
             AuflistungMieter.Value = string.Join(", ",
                 App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList().Select(m =>
