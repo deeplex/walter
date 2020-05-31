@@ -140,6 +140,9 @@
                 <TextBox
                     Text="{x:Bind ViewModel.Nutzflaeche, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Header="Nutzfl." Width="70" Style="{StaticResource Eintraege}"/>
+                <TextBox
+                    Text="{x:Bind ViewModel.Nutzeinheit, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                    Header="Einheiten" Width="70" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
             <RelativePanel>
                 <TextBox

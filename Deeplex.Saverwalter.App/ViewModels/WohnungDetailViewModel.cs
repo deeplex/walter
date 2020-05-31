@@ -104,6 +104,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
+        public int Nutzeinheit
+        {
+            get => Entity.Nutzeinheit;
+            set
+            {
+                Entity.Nutzeinheit = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
         public WohnungDetailViewModel(int id)
             : this(App.Walter.Wohnungen
                   .Include(w => w.Adresse)
@@ -158,6 +168,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 case nameof(Bezeichnung):
                 case nameof(Wohnflaeche):
                 case nameof(Nutzflaeche):
+                case nameof(Nutzeinheit):
                 case nameof(Notiz):
                     break;
                 default:
