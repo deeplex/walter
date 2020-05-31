@@ -60,10 +60,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             + "m², Nutzfläche: " + string.Format("{0:N2}", GesamtNutzflaeche)
             + "m², Bewohnerzahl: " + GesamtBewohner;
 
-        private double GesamtWohnflaeche;
-        private int GesamtNutzeinheiten;
-        private double GesamtNutzflaeche;
-        private int GesamtBewohner;
+        public double GesamtWohnflaeche;
+        public int GesamtNutzeinheiten;
+        public double GesamtNutzflaeche;
+        public int GesamtBewohner;
 
         public WohnungListAdresse(int id)
         {

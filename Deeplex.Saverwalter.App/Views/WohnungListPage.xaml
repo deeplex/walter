@@ -81,12 +81,39 @@
                                     </GridView.ItemTemplate>
                                 </GridView>
                             </StackPanel>
-                            <TextBlock
-                                Margin="0,0,5,5"
-                                RelativePanel.Below="StackWohnungen"
-                                RelativePanel.AlignRightWithPanel="True"
-                                Text="{Binding Key.GesamtString}"
-                                TextWrapping="WrapWholeWords"/>
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    RelativePanel.Below="StackWohnungen"
+                                    RelativePanel.AlignRightWithPanel="True">
+                                    <TextBlock
+                                        Margin="0,5,5,0"
+                                        Text="{Binding Key.GesamtString}"
+                                        TextWrapping="WrapWholeWords"/>
+                                    <Button Margin="0,0,10,0" Background="Transparent">
+                                        <SymbolIcon Symbol="Edit"/>
+                                        <Button.Flyout>
+                                            <Flyout Placement="Bottom">
+                                                <StackPanel>
+                                                    <TextBlock Text="Werte für das gesamte Haus:"/>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <muxc:NumberBox x:Name="AddRest_Wohnflaeche" Header="Wohnfläche"/>
+                                                        <muxc:NumberBox x:Name="AddRest_Nutzflaeche" Header="Nutzfläche" Margin="10,0,0,0"/>
+                                                        <muxc:NumberBox x:Name="AddRest_Nutzeinheit" Header="Einheiten" Margin="10,0,0,0"/>
+                                                        <muxc:NumberBox x:Name="AddRest_Personen" Header="Personen" Margin="10,0,0,0"/>
+                                                        <Button
+                                                            CommandParameter="{Binding Key}"
+                                                            Click="AddRest_Click"
+                                                            Background="Transparent"
+                                                            Margin="10,20,0,0" >
+                                                            <SymbolIcon Symbol="Accept"/>
+                                                        </Button>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Flyout>
+                                        </Button.Flyout>
+                                    </Button>
+                                </StackPanel>
+                         
                         </RelativePanel>
                     </DataTemplate>
                 </muxc:ItemsRepeater>

@@ -99,8 +99,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             VertragId = v.VertragId;
             Version = v.Version;
             Personenzahl = v.Personenzahl;
-            Anschrift = AdresseViewModel.Anschrift(v.Wohnung); // TODO only true if wohnung and not adressen
-            Besitzer = v.Wohnung.Besitzer.Bezeichnung; // TODO only true if wohnung and not adressen
+            Anschrift = AdresseViewModel.Anschrift(v.Wohnung);
+            Besitzer = v.Wohnung.Besitzer?.Bezeichnung ?? ""; // TODO Vertrag w/o Besitzer is a dummy (?)
             Wohnung = v.Wohnung is Wohnung w ? w.Bezeichnung : "";
             AuflistungMieter = string.Join(", ",
                 App.Walter.MieterSet
