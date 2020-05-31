@@ -297,7 +297,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     KaltMiete = table.Column<double>(nullable: false),
                     Beginn = table.Column<DateTime>(nullable: false),
                     Ende = table.Column<DateTime>(nullable: true),
-                    AnsprechpartnerId = table.Column<int>(nullable: false),
+                    AnsprechpartnerId = table.Column<int>(nullable: true),
                     VersionsNotiz = table.Column<string>(nullable: true),
                     Notiz = table.Column<string>(nullable: true)
                 },
@@ -310,7 +310,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         column: x => x.AnsprechpartnerId,
                         principalTable: "Kontakte",
                         principalColumn: "KontaktId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Vertraege_Wohnungen_WohnungId",
                         column: x => x.WohnungId,

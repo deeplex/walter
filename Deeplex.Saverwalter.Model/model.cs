@@ -112,8 +112,8 @@ namespace Deeplex.Saverwalter.Model
         public double KaltMiete { get; set; }
         public DateTime Beginn { get; set; }
         public DateTime? Ende { get; set; }
-        public int AnsprechpartnerId { get; set; }
-        public Kontakt Ansprechpartner { get; set; } = null!;
+        public int? AnsprechpartnerId { get; set; }
+        public Kontakt? Ansprechpartner { get; set; }
         public string? VersionsNotiz { get; set; }
         public string? Notiz { get; set; }
 

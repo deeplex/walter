@@ -325,7 +325,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AnsprechpartnerId")
+                    b.Property<int?>("AnsprechpartnerId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Beginn")
@@ -528,9 +528,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     b.HasOne("Deeplex.Saverwalter.Model.Kontakt", "Ansprechpartner")
                         .WithMany()
-                        .HasForeignKey("AnsprechpartnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AnsprechpartnerId");
 
                     b.HasOne("Deeplex.Saverwalter.Model.Wohnung", "Wohnung")
                         .WithMany("Vertraege")

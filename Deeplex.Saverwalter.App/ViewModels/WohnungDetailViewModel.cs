@@ -164,7 +164,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     return;
             }
 
-            if ((Entity.Adresse == null && Entity.AdresseId == 0) ||
+            if ((Entity.Besitzer == null && Entity.BesitzerId == 0) ||
+                (Entity.Adresse == null && Entity.AdresseId == 0) ||
                 Entity.Bezeichnung == null || Entity.Bezeichnung == "")
             {
                 return;
