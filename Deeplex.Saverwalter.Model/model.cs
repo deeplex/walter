@@ -26,8 +26,8 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Zaehlerstand> Zaehlerstaende { get; set; } = null!;
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             // TODO adjust this...
-            => options.UseSqlite("Data Source=walter.db");
-            //=> options.UseSqlite("Data Source=" + ApplicationData.Current.LocalFolder.Path + @"\walter.db");
+            //=> options.UseSqlite("Data Source=walter.db");
+            => options.UseSqlite("Data Source=" + ApplicationData.Current.LocalFolder.Path + @"\walter.db");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

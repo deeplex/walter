@@ -140,6 +140,9 @@
     <Compile Include="Views\JuristischePersonenListPage.xaml.cs">
       <DependentUpon>JuristischePersonenListPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\JuristischePersonenDetailPage.xaml.cs">
+      <DependentUpon>JuristischePersonenDetailPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\KontaktDetailPage.xaml.cs">
       <DependentUpon>KontaktDetailPage.xaml</DependentUpon>
     </Compile>
@@ -193,6 +196,10 @@
     <Page Include="Views\JuristischePersonenListPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\JuristischePersonenDetailPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\KontaktDetailPage.xaml">
       <Generator>MSBuild:Compile</Generator>

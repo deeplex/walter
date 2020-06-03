@@ -1,0 +1,134 @@
+﻿<Page
+    x:Class="Deeplex.Saverwalter.App.Views.JuristischePersonenDetailPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Deeplex.Saverwalter.App.Views"
+    xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <Style x:Name="Eintraege" TargetType="TextBox">
+            <Setter Property="Width" Value="300"/>
+            <Setter Property="TextWrapping" Value="NoWrap"/>
+            <Setter Property="Margin" Value="20,20,0,0"/>
+            <Setter Property="IsEnabled" Value="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"/>
+        </Style>
+
+        <DataTemplate x:Key="BeginnGrid" x:DataType="vm:KontaktDetailVertrag">
+            <CalendarDatePicker
+                IsEnabled="False"
+                Width="176"
+                Date="{x:Bind Beginn.Value, Mode=OneWay}"
+                Language="de"
+                PlaceholderText="Offen"
+                DateFormat="{}{day.integer}. {month.full} {year.full}"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="EndeGrid" x:DataType="vm:KontaktDetailVertrag">
+            <CalendarDatePicker
+                IsEnabled="False"
+                Width="176"
+                Date="{x:Bind Ende.Value, Mode=OneWay}"
+                Language="de"
+                PlaceholderText="Offen"
+                DateFormat="{}{day.integer}. {month.full} {year.full}"/>
+        </DataTemplate>
+    </Page.Resources>
+    <ScrollViewer>
+        <StackPanel>
+            <RelativePanel>
+                <TextBlock x:Name="Title"
+                Style="{StaticResource TitleTextBlockStyle}"
+                Margin="10,0,0,0"
+                Text="{x:Bind ViewModel.Name}"/>
+
+                <CommandBar
+                    x:Name="ButtonRow"
+                    Background="Transparent" 
+                    IsOpen="False"
+                    RelativePanel.AlignRightWithPanel="True"
+                    HorizontalAlignment="Stretch"
+                    DefaultLabelPosition="Right">
+                    <CommandBar.SecondaryCommands>
+                        <AppBarToggleButton
+                            Icon="Edit"
+                            x:Name="EditToggle"
+                            Label="Bearbeiten"
+                            Click="EditToggle_Click"/>
+                        <AppBarButton
+                            IsEnabled="False"
+                            Icon="Delete"
+                            Label="Löschen"/>
+                    </CommandBar.SecondaryCommands>
+                </CommandBar>
+            </RelativePanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
+                <TextBox
+                    Width="620"
+                    Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                    Header="Nachname" Style="{StaticResource Eintraege}"/>
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
+                <Button Margin="20,20,0,0">
+                    <Button.Content>
+                        <TextBlock>
+                            <Run Text="{x:Bind ViewModel.Adresse.Strasse.Value, Mode=OneWay}"/>
+                            <Run Text="{x:Bind ViewModel.Adresse.Hausnummer.Value, Mode=OneWay}"/>
+                            <Run Text="{x:Bind ViewModel.Adresse.Postleitzahl.Value, Mode=OneWay}"/>
+                            <Run Text="{x:Bind ViewModel.Adresse.Stadt.Value, Mode=OneWay}"/>
+                        </TextBlock>
+                    </Button.Content>
+                    <Button.Flyout>
+                        <Flyout>
+                            <mtuuc:WrapPanel Orientation="Horizontal">
+                                <ComboBox
+                                    x:Name="ComboBoxStrasse" Width="150" IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
+                                    DisplayMemberPath="Strasse.Value" SelectedItem="{x:Bind ViewModel.Adresse.Strasse, Mode=OneWay}"/>
+                                <ComboBox
+                                    x:Name="ComboBoxHausnummer" IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
+                                    DisplayMemberPath="Hausnummer.Value" SelectedItem="{x:Bind ViewModel.Adresse.Hausnummer, Mode=OneWay}"/>
+                                <ComboBox
+                                    x:Name="ComboBoxPostleitzahl"  IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
+                                    DisplayMemberPath="Postleitzahl.Value" SelectedItem="{x:Bind ViewModel.Adresse.Postleitzahl, Mode=OneWay}"/>
+                                <ComboBox
+                                    x:Name="ComboBoxStadt" Width="100" IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
+                                    DisplayMemberPath="Stadt.Value" SelectedItem="{x:Bind ViewModel.Adresse.Stadt, Mode=OneWay}"/>
+                                <Button Click="UpdateAdresse_Click" Background="Transparent" VerticalAlignment="Bottom">
+                                    <SymbolIcon Symbol="Add"/>
+                                </Button>
+                            </mtuuc:WrapPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
+                <TextBox
+                    Text="{x:Bind ViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                    Header="E-Mail" Style="{StaticResource Eintraege}"/>
+                <TextBox
+                    Text="{x:Bind ViewModel.Fax, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                    Header="Fax" Style="{StaticResource Eintraege}"/>
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
+                <TextBox
+                Text="{x:Bind ViewModel.Telefon, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Header="Telefon" Style="{StaticResource Eintraege}"/>
+                <TextBox
+                Text="{x:Bind ViewModel.Mobil, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Header="Mobil" Style="{StaticResource Eintraege}"/>
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel>
+                <TextBox
+                    Width="620"
+                    Style="{StaticResource Eintraege}"
+                    Margin="20"
+                    Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                    Header="Notiz"/>
+            </mtuuc:WrapPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

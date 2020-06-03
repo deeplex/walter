@@ -47,20 +47,16 @@
                     ItemsSource="{x:Bind ViewModel.Kontakte}">
                     <mtuuc:DataGrid.Columns>
                         <mtuuc:DataGridTextColumn
+                            Header="Name"
+                            Binding="{Binding Name}"/>
+                        <mtuuc:DataGridTextColumn
                             Header="Vorname"
-                            Tag="Vorname"
                             Binding="{Binding Vorname}"/>
                         <mtuuc:DataGridTextColumn
-                            Header="Nachname"
-                            Tag="Nachname"
-                            Binding="{Binding Nachname}"/>
-                        <mtuuc:DataGridTextColumn
                             Header="Anschrift"
-                            Tag="Anschrift"
                             Binding="{Binding Anschrift}"/>
                         <mtuuc:DataGridTextColumn
                             Header="E-Mail"
-                            Tag="Email"
                             Binding="{Binding Email}"/>
                         <mtuuc:DataGridTextColumn
                             Header="Telefon"

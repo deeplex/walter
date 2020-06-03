@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.Model;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
@@ -16,9 +17,15 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.SelectedKontakt.Value != null)
+            var sk = ViewModel.SelectedKontakt.Value;
+            if (sk != null)
             {
-                Frame.Navigate(typeof(KontaktDetailPage), ViewModel.SelectedKontakt.Value.Id,
+                var target =
+                    sk.Type == typeof(Kontakt) ? typeof(KontaktDetailPage) :
+                    sk.Type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailPage) :
+                    null;
+
+                Frame.Navigate(target, ViewModel.SelectedKontakt.Value.Id,
                     new DrillInNavigationTransitionInfo());
             }
         }
@@ -29,4 +36,4 @@ namespace Deeplex.Saverwalter.App.Views
                 new DrillInNavigationTransitionInfo());
         }
     }
-}
+} 
