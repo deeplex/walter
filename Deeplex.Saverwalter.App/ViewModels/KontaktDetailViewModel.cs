@@ -51,7 +51,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => mAdresse;
             set
             {
-                Entity.AdresseId = value.Id;
+                Entity.Adresse = AdresseViewModel.GetAdresse(value);
                 mAdresse = value;
                 RaisePropertyChangedAuto();
             }

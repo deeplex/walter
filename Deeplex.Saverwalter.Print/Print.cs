@@ -28,14 +28,17 @@ namespace Deeplex.Saverwalter.Print
 
         public static void SaveAsDocx(this Betriebskostenabrechnung b, string filepath)
         {
-            var body = new Body(new SectionProperties(
+            var body = new Body(
+                new SectionProperties(
                 // Margins after DIN5008
                 new PageMargin() { Left = 1418, Right = 567, Top = 958, Bottom = 958, },
                 // DIN A4
                 new PageSize() { Code = 9, Width = 11906, Height = 16838 }));
+
             body.Append(
                 // p.1
                 AnschriftVermieter(b),
+                EmptyRows(4),
                 PostalischerVermerk(b),
                 PrintDate(),
                 Betreff(b),
@@ -52,7 +55,7 @@ namespace Deeplex.Saverwalter.Print
                 Heading("Abrechnung der Nebenkosten (kalten Betriebskosten)"),
                 MietHeader(b),
                 SubHeading("Angaben zu Ihrer Einheit:"),
-                Abrechnungswohnung(b, b.Gruppen.First()));
+                Abrechnungswohnung(b, b.Gruppen.FirstOrDefault()));
 
             foreach (var gruppe in b.Gruppen)
             {
@@ -97,16 +100,27 @@ namespace Deeplex.Saverwalter.Print
                 new TableRow(
                     ContentCell(b.Ansprechpartner.Adresse.Postleitzahl + " " + b.Ansprechpartner.Adresse.Stadt),
                     ContentCell("E-Mail: " + b.Ansprechpartner.Email, JustificationValues.Right)));
-            table.Append(Enumerable.Range(0, 9 - 4).Select(_ => new Break()));
 
             return table;
+        }
+
+        private static Paragraph EmptyRows(int len)
+        {
+            var p = new Paragraph(Font());
+            var r = new Run(Font());
+            p.Append(r);
+            for (var i = 0; i < len; ++i)
+            {
+                r.Append(new Break());
+            }
+            return p;
         }
 
         private static Paragraph PostalischerVermerk(Betriebskostenabrechnung b)
         {
             // TODO We have problems if there are more than 4 Mieter...
 
-            var run = new Run();
+            var run = new Run(Font());
             int counter = 6;
 
             foreach (var m in b.Mieter)
@@ -129,7 +143,7 @@ namespace Deeplex.Saverwalter.Print
 
             run.Append(Enumerable.Range(0, counter).Select(_ => new Break()));
 
-            return new Paragraph(run);
+            return new Paragraph(Font(), run);
         }
 
         private static Paragraph PrintDate()
@@ -138,7 +152,7 @@ namespace Deeplex.Saverwalter.Print
             {
                 Val = JustificationValues.Right,
             }),
-                new Run(new Text(Datum(DateTime.UtcNow.Date))));
+                new Run(Font(), new Text(Datum(DateTime.UtcNow.Date))));
         }
 
         private static Paragraph Betreff(Betriebskostenabrechnung b)
@@ -146,12 +160,12 @@ namespace Deeplex.Saverwalter.Print
             var Mieterliste = string.Join(", ",
                 b.Mieter.Select(m => m.Vorname + " " + m.Nachname));
 
-            return new Paragraph(
-                new Run(
+            return new Paragraph(Font(), 
+                new Run(Font(), 
                     new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) }),
                     new Text("Betriebskostenabrechnung " + b.Jahr.ToString()),
                     new Break()),
-                new Run(
+                new Run(Font(), 
                     new Text("Mieter: " + Mieterliste),
                     new Break(),
                     new Text("Mietobjekt: " + b.Adresse.Strasse + " " +
@@ -179,19 +193,19 @@ namespace Deeplex.Saverwalter.Print
                 (b.Result > 0 ? "einem Guthaben" : "einer Nachforderung") +
                 " in Höhe von: ";
 
-            var refund = new Run(
+            var refund = new Run(Font(), 
                 new Text("Dieser Betrag wird über die von Ihnen angegebene Bankverbindung erstattet."));
 
-            var demand = new Run(new Text("Bitte überweisen Sie diesen Betrag auf das Ihnen bekannte Konto."));
+            var demand = new Run(Font(), new Text("Bitte überweisen Sie diesen Betrag auf das Ihnen bekannte Konto."));
 
-            return new Paragraph(
-                new Run(
+            return new Paragraph(Font(),
+                new Run(Font(), 
                     new Text(Gruss),
                     new Break(),
                     new Text("wir haben die Kosten, die im Abrechnungszeitraum angefallen sind, berechnet. " +
                         resultTxt1),
                     new TabChar()),
-                new Run(
+                new Run(Font(), 
                     new RunProperties(
                         new Bold() { Val = OnOffValue.FromBoolean(true), },
                         new Underline() { Val = UnderlineValues.Single, }),
@@ -203,9 +217,9 @@ namespace Deeplex.Saverwalter.Print
         private static Paragraph GenericText()
         {
             // TODO Text auf Anwesenheit von Heizung oder so testen und anpassen.
-            return new Paragraph(
+            return new Paragraph(Font(), 
                 new ParagraphProperties(new Justification() { Val = JustificationValues.Both, }),
-                new Run(new Text("Die Abrechnung betrifft zunächst die mietvertraglich vereinbarten Nebenkosten (die kalten Betriebskosten). Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses(warme Betriebskosten) werden gesondert berechnet, nach Verbrauch und Wohn -/ Nutzfläche auf die einzelnen Wohnungen umgelegt(= „Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der von Ihnen geleisteten Vorauszahlungen verrechnet. Bei bestehenden Mietrückständen ist das Ergebnis der Abrechnung zusätzlich mit den Mietrückständen verrechnet. Gegebenenfalls bestehende Mietminderungen / Ratenzahlungsvereinbarungen sind hier nicht berücksichtigt, haben aber weiterhin für den vereinbarten Zeitraum Bestand. Aufgelöste oder gekündigte Mietverhältnisse werden durch dieses Schreiben nicht neu begründet. Die Aufstellung, Verteilung und Erläuterung der Gesamtkosten, die Berechnung der Kostenanteile, die Verrechnung der geleisteten Vorauszahlungen und gegebenenfalls die Neuberechnung der monatlichen Vorauszahlungen entnehmen Sie bitte den folgenden Seiten.")));
+                new Run(Font(), new Text("Die Abrechnung betrifft zunächst die mietvertraglich vereinbarten Nebenkosten (die kalten Betriebskosten). Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses(warme Betriebskosten) werden gesondert berechnet, nach Verbrauch und Wohn -/ Nutzfläche auf die einzelnen Wohnungen umgelegt(= „Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der von Ihnen geleisteten Vorauszahlungen verrechnet. Bei bestehenden Mietrückständen ist das Ergebnis der Abrechnung zusätzlich mit den Mietrückständen verrechnet. Gegebenenfalls bestehende Mietminderungen / Ratenzahlungsvereinbarungen sind hier nicht berücksichtigt, haben aber weiterhin für den vereinbarten Zeitraum Bestand. Aufgelöste oder gekündigte Mietverhältnisse werden durch dieses Schreiben nicht neu begründet. Die Aufstellung, Verteilung und Erläuterung der Gesamtkosten, die Berechnung der Kostenanteile, die Verrechnung der geleisteten Vorauszahlungen und gegebenenfalls die Neuberechnung der monatlichen Vorauszahlungen entnehmen Sie bitte den folgenden Seiten.")));
         }
 
         private static Table ExplainUmlageschluessel()
@@ -229,8 +243,8 @@ namespace Deeplex.Saverwalter.Print
                     ContentCellEnd("nach Verbrauch (in m³ oder in kWh)")),
 
                 new TableRow(
-                    new TableCell(new Paragraph(NoSpace(), new Run(Bold(), new Text("Umlageweg")))),
-                    new TableCell(new Paragraph(NoSpace(), new Run(Bold(), new Text("Beschreibung"))))),
+                    new TableCell(new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Text("Umlageweg")))),
+                    new TableCell(new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Text("Beschreibung"))))),
                 new TableRow(
                     ContentCell("n. WF."),
                     ContentCell("Kostenanteil = Kosten je Quadratmeter Wohn-/Nutzfläche mal Anteil Fläche je Wohnung.")),
@@ -251,7 +265,7 @@ namespace Deeplex.Saverwalter.Print
 
         private static Paragraph ExplainKalteBetriebskosten(Betriebskostenabrechnung b)
         {
-            var para = new Paragraph();
+            var para = new Paragraph(Font());
 
             return para;
         }
@@ -264,14 +278,14 @@ namespace Deeplex.Saverwalter.Print
                 m.Vorname) + " " + m.Nachname)) +
                 " (" + b.Adresse.Strasse + " " + b.Adresse.Hausnummer + ", " + b.Wohnung.Bezeichnung + ")";
 
-            return new Paragraph(
+            return new Paragraph(Font(),
                 new ParagraphProperties(new Justification() { Val = JustificationValues.Right }),
-                new Run(new Text(Header)));
+                new Run(Font(), new Text(Header)));
         }
 
         private static Paragraph Abrechnungsgruppe(Betriebskostenabrechnung b, Rechnungsgruppe g)
         {
-            var p = new Paragraph();
+            var p = new Paragraph(Font());
             var adressen = g.Rechnungen.First().Gruppen.Select(w => w.Wohnung).GroupBy(w => w.Adresse);
 
             foreach (var adr in adressen)
@@ -288,7 +302,7 @@ namespace Deeplex.Saverwalter.Print
                     ret += " (gesamt)";
                 }
 
-                p.Append(new Run(new Text(ret)));
+                p.Append(new Run(Font(), new Text(ret)));
                 if (a != adressen.Last().Key)
                 {
                     p.Append(new Break());
@@ -337,6 +351,8 @@ namespace Deeplex.Saverwalter.Print
                 ContentHead("600", "Bewohner", JustificationValues.Center),
                 ContentHead("1400", "Nutzungsintervall", JustificationValues.Center),
                 ContentHead("300", "Tage", JustificationValues.Center)));
+
+            if (g == null) return table; // If Gruppen is empty...
 
             for (var i = 0; i < g.PersonenIntervall.Count(); ++i)
             {
@@ -499,36 +515,44 @@ namespace Deeplex.Saverwalter.Print
         private static string Euro(double d) => string.Format("{0:N2}€", d);
         private static string Datum(DateTime d) => d.ToString("dd.MM.yyyy");
 
+        static RunProperties Font()
+        {
+            var font = "Times New Roman";
+            return new RunProperties(
+                new RunFonts() { Ascii = font, HighAnsi = font, ComplexScript = font, },
+                new FontSize() { Val = "22" }); // Size = 11
+        }
+        static Run Break(BreakValues val = BreakValues.TextWrapping) => new Run(Font(), new Break() { Type = val });
         static RunProperties Bold() => new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) });
         static ParagraphProperties NoSpace() => new ParagraphProperties(new SpacingBetweenLines() { After = "0" });
-        static Paragraph SubHeading(string str) => new Paragraph(NoSpace(), new Run(Bold(), new Text(str)));
+        static Paragraph SubHeading(string str) => new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Text(str)));
         static Paragraph Heading(string str)
-            => new Paragraph(new Run(new RunProperties(
+            => new Paragraph(Font(), new Run(Font(), new RunProperties(
                 new Bold() { Val = OnOffValue.FromBoolean(true) },
                 new Italic() { Val = OnOffValue.FromBoolean(true) }),
                 new Text(str)));
 
-        static TableCell ContentCell(string str) => new TableCell(new Paragraph(NoSpace(), new Run(new Text(str))));
+        static TableCell ContentCell(string str) => new TableCell(new Paragraph(Font(), NoSpace(), new Run(Font(), new Text(str))));
         static TableCell ContentCell(string str, JustificationValues value)
             => new TableCell(
-                new Paragraph(NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
-                new Run(new Text(str))));
+                new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
+                new Run(Font(), new Text(str))));
 
-        static TableCell ContentHead(string str) => new TableCell(new Paragraph(NoSpace(), new Run(Bold(), new Text(str))));
+        static TableCell ContentHead(string str) => new TableCell(new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Text(str))));
         static TableCell ContentHead(string pct, string str)
             => new TableCell(
                 new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = pct },
-                new Paragraph(NoSpace(), new Run(Bold(), new Text(str))));
+                new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Text(str))));
         static TableCell ContentHead(string str, JustificationValues value)
             => new TableCell(
-                new Paragraph(NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
-                new Run(Bold(), new Text(str))));
+                new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
+                new Run(Font(), Bold(), new Text(str))));
         static TableCell ContentHead(string pct, string str, JustificationValues value)
             => new TableCell(
                 new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = pct },
-                new Paragraph(NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
-                new Run(Bold(), new Text(str))));
+                new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
+                new Run(Font(), Bold(), new Text(str))));
 
-        static TableCell ContentCellEnd(string str) => new TableCell(new Paragraph(new Run(new Text(str))));
+        static TableCell ContentCellEnd(string str) => new TableCell(new Paragraph(Font(), new Run(Font(), new Text(str))));
     }
 }

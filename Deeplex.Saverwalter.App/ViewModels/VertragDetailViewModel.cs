@@ -241,7 +241,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             if (Entity.VertragId == null ||
                 Entity.Beginn == null ||
                 (Entity.Wohnung == null && Entity.WohnungId == 0) ||
-                (Entity.Ansprechpartner == null && Entity.AnsprechpartnerId == 0))
+                (Entity.Ansprechpartner == null && (Entity.AnsprechpartnerId == 0 || Entity.AnsprechpartnerId == null)))
             {
                 return;
             }
