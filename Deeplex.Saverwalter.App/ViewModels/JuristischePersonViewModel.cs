@@ -97,7 +97,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public override string ToString() => Name;
 
-        public JuristischePersonViewModel() { }
+        public JuristischePersonViewModel() : this(new JuristischePerson()) { IsInEdit.Value = true; }
         public JuristischePersonViewModel(int id) : this(App.Walter.JuristischePersonen.Find(id)) { }
         public JuristischePersonViewModel(JuristischePerson j)
         {

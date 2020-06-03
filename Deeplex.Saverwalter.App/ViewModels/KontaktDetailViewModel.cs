@@ -115,11 +115,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public KontaktDetailViewModel(int id)
             : this(App.Walter.Kontakte.Find(id)) { }
 
-        public KontaktDetailViewModel() : this(new Kontakt())
-        {
-            IsInEdit.Value = true;
-        } // Create new Kontakt
-
+        public KontaktDetailViewModel() : this(new Kontakt()) { IsInEdit.Value = true; }
         private KontaktDetailViewModel(Kontakt k)
         {
             Entity = k;

@@ -22,7 +22,16 @@
                 RelativePanel.LeftOf="KontaktFilter"
                 HorizontalAlignment="Stretch"
                 DefaultLabelPosition="Right">
-                <AppBarButton Click="Add_Click" Icon="Add" Label="Hinzufügen"/>
+                <AppBarButton Icon="Add" Label="Hinzufügen">
+                    <AppBarButton.Flyout>
+                        <Flyout>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Click="AddKontakt_Click" Content="Natürliche Person"/>
+                                <Button  Margin="20,0,0,0" Click="AddJuristischePeron_Click" Content="Juristische Person"/>
+                            </StackPanel>
+                        </Flyout>
+                    </AppBarButton.Flyout>
+                </AppBarButton>
                 <AppBarButton Click="Details_Click" Icon="ContactInfo" Label="Details"/>
                 <AppBarButton IsEnabled="False" Icon="Delete" Label="Löschen"/>
             </CommandBar>

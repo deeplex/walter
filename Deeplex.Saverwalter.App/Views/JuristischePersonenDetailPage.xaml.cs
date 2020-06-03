@@ -21,12 +21,11 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 ViewModel = new JuristischePersonViewModel(jpId);
             }
-            else if (e.Parameter is null) // New Contact
+            else if (e.Parameter is null)
             {
                 ViewModel = new JuristischePersonViewModel();
             }
 
-            // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
             base.OnNavigatedTo(e);
         }
 

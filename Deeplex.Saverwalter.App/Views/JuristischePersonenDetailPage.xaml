@@ -70,7 +70,7 @@
                 <TextBox
                     Width="620"
                     Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                    Header="Nachname" Style="{StaticResource Eintraege}"/>
+                    Header="Bezeichnung" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <Button Margin="20,20,0,0">
