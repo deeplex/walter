@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20200531000638_InitialCreate")]
+    [Migration("20200603092814_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -135,14 +135,31 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("AdresseId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Bezeichnung")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Fax")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Mobil")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Notiz")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Telefon")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("JuristischePersonId");
+
+                    b.HasIndex("AdresseId");
 
                     b.ToTable("JuristischePersonen");
                 });
@@ -484,6 +501,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("BesitzerJuristischePersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Deeplex.Saverwalter.Model.JuristischePerson", b =>
+                {
+                    b.HasOne("Deeplex.Saverwalter.Model.Adresse", "Adresse")
+                        .WithMany()
+                        .HasForeignKey("AdresseId");
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.JuristischePersonenMitglied", b =>

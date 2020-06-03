@@ -63,6 +63,8 @@ namespace Deeplex.Saverwalter.Model
                                     .ThenInclude(w => w.Vertraege)
                 .First();
 
+            // If Ansprechpartner or Besitzer is null => throw
+
             Ansprechpartner = vertrag.Ansprechpartner;
             Mieter = db.MieterSet
                 .Where(m => m.VertragId == vertrag.VertragId)

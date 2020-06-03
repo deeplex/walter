@@ -26,8 +26,8 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Zaehlerstand> Zaehlerstaende { get; set; } = null!;
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             // TODO adjust this...
-            //=> options.UseSqlite("Data Source=walter.db");
-            => options.UseSqlite("Data Source=" + ApplicationData.Current.LocalFolder.Path + @"\walter.db");
+            => options.UseSqlite("Data Source=walter.db");
+            //=> options.UseSqlite("Data Source=" + ApplicationData.Current.LocalFolder.Path + @"\walter.db");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -179,6 +179,12 @@ namespace Deeplex.Saverwalter.Model
     {
         public int JuristischePersonId { get; set; }
         public string Bezeichnung { get; set; } = null!;
+        public string? Telefon { get; set; }
+        public string? Mobil { get; set; }
+        public string? Fax { get; set; }
+        public string? Email { get; set; }
+        public int? AdresseId { get; set; }
+        public Adresse? Adresse { get; set; }
         public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
         public List<Garage> Garagen { get; private set; } = new List<Garage>();
         public List<JuristischePersonenMitglied> Mitglieder { get; private set; } = new List<JuristischePersonenMitglied>();

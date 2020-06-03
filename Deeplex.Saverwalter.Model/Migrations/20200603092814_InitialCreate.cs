@@ -44,20 +44,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "JuristischePersonen",
-                columns: table => new
-                {
-                    JuristischePersonId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Bezeichnung = table.Column<string>(nullable: false),
-                    Notiz = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_JuristischePersonen", x => x.JuristischePersonId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Kontos",
                 columns: table => new
                 {
@@ -104,6 +90,31 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MietMinderungen", x => x.MietMinderungId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "JuristischePersonen",
+                columns: table => new
+                {
+                    JuristischePersonId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Bezeichnung = table.Column<string>(nullable: false),
+                    Telefon = table.Column<string>(nullable: true),
+                    Mobil = table.Column<string>(nullable: true),
+                    Fax = table.Column<string>(nullable: true),
+                    Email = table.Column<string>(nullable: true),
+                    AdresseId = table.Column<int>(nullable: true),
+                    Notiz = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JuristischePersonen", x => x.JuristischePersonId);
+                    table.ForeignKey(
+                        name: "FK_JuristischePersonen_Adressen_AdresseId",
+                        column: x => x.AdresseId,
+                        principalTable: "Adressen",
+                        principalColumn: "AdresseId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -384,6 +395,11 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 column: "BesitzerJuristischePersonId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_JuristischePersonen_AdresseId",
+                table: "JuristischePersonen",
+                column: "AdresseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_JuristischePersonenMitglied_JuristischePersonId",
                 table: "JuristischePersonenMitglied",
                 column: "JuristischePersonId");
@@ -484,10 +500,10 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 name: "Wohnungen");
 
             migrationBuilder.DropTable(
-                name: "Adressen");
+                name: "JuristischePersonen");
 
             migrationBuilder.DropTable(
-                name: "JuristischePersonen");
+                name: "Adressen");
         }
     }
 }
