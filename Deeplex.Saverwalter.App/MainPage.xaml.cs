@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.App
                 label == WohnungListLabel ? typeof(WohnungListPage) :
                 label == VertragListLabel ? typeof(VertragListPage) :
                 label == JuristischePersonenListLabel ? typeof(JuristischePersonenListPage) :
-                label == BetriebskostenrechnungenListLabel ? typeof(BetriebskostenRechnungenListViewPage) :
+                label == BetriebskostenrechnungenListLabel ? typeof(BetriebskostenRechnungenTypListViewPage) :
                 null;
             if (pageType != null && pageType != AppFrame.CurrentSourcePageType)
             {

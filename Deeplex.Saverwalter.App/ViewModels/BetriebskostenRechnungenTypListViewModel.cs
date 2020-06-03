@@ -10,12 +10,36 @@ using System.Linq;
 namespace Deeplex.Saverwalter.App.ViewModels
 {
 
-    public class BetriebskostenRechnungenListViewModel
+    public class BetriebskostenRechnungenTypListViewModel
     {
         public ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostentyp, BetriebskostenRechnungenListTypenJahr>> Typen
             = new ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostentyp, BetriebskostenRechnungenListTypenJahr>>();
 
         public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
+
+        public string BetriebskostenRechnungenListGruppe(SortedSet<int> set)
+        {
+            var adressen = App.Walter.Wohnungen
+                .Include(w => w.Adresse)
+                .ToList()
+                .Where(w => set.Contains(w.WohnungId))
+                .GroupBy(w => w.Adresse)
+                .ToDictionary(g => g.Key, g => g.ToList());
+            return string.Join(" — ", adressen.Select(adr =>
+            {
+                var a = adr.Key;
+                var ret = a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
+                if (adr.Value.Count() != a.Wohnungen.Count)
+                {
+                    ret += ": " + string.Join(", ", adr.Value.Select(w => w.Bezeichnung));
+                }
+                else
+                {
+                    ret += " (gesamt)";
+                }
+                return ret;
+            }));
+        }
 
         public List<BetriebskostenRechnungenBetriebskostentyp> Betriebskostentypen =
             Enum.GetValues(typeof(Betriebskostentyp))
@@ -32,7 +56,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ToList();
 
         public TreeViewNode AddBetriebskostenTree;
-        public BetriebskostenRechnungenListViewModel()
+        public BetriebskostenRechnungenTypListViewModel()
         {
             Typen.Value = App.Walter.Betriebskostenrechnungen
                 .Include(b => b.Gruppen)
@@ -53,7 +77,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .GroupBy(w => w.AdresseId)
                 .ToImmutableDictionary(
                     g => new BetriebskostenRechungenListWohnungListAdresse(g.Key),
-                    g => g.ToImmutableList());
+                    g => g.ToImmutableList());                                                                                                             
         }
     }
 
