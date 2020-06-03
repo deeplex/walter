@@ -135,6 +135,9 @@
     <Compile Include="ViewModels\WohnungListViewModel.cs" />
     <Compile Include="ViewModels\VertragListViewModel.cs" />
     <Compile Include="ViewModels\KontaktDetailViewModel.cs" />
+    <Compile Include="Views\BetriebskostenRechnungenGruppeListViewPage.xaml.cs">
+      <DependentUpon>BetriebskostenRechnungenGruppeListViewPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\BetriebskostenRechnungenTypListViewPage.xaml.cs">
       <DependentUpon>BetriebskostenRechnungenTypListViewPage.xaml</DependentUpon>
     </Compile>
@@ -187,6 +190,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="MainPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\BetriebskostenRechnungenGruppeListViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

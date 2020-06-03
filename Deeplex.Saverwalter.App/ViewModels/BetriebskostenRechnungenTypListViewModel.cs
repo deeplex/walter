@@ -17,30 +17,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
 
-        public string BetriebskostenRechnungenListGruppe(SortedSet<int> set)
-        {
-            var adressen = App.Walter.Wohnungen
-                .Include(w => w.Adresse)
-                .ToList()
-                .Where(w => set.Contains(w.WohnungId))
-                .GroupBy(w => w.Adresse)
-                .ToDictionary(g => g.Key, g => g.ToList());
-            return string.Join(" — ", adressen.Select(adr =>
-            {
-                var a = adr.Key;
-                var ret = a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
-                if (adr.Value.Count() != a.Wohnungen.Count)
-                {
-                    ret += ": " + string.Join(", ", adr.Value.Select(w => w.Bezeichnung));
-                }
-                else
-                {
-                    ret += " (gesamt)";
-                }
-                return ret;
-            }));
-        }
-
         public List<BetriebskostenRechnungenBetriebskostentyp> Betriebskostentypen =
             Enum.GetValues(typeof(Betriebskostentyp))
                 .Cast<Betriebskostentyp>()
@@ -133,7 +109,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class BetriebskostenRechnungenListTypenJahr
     {
-        public ImmutableSortedDictionary<int, ImmutableList<BetriebskostenRechnungenRechnung>> Jahre { get; }
+        public ImmutableSortedDictionary<int, ImmutableList<BetriebskostenTypRechnungenRechnung>> Jahre { get; }
 
         public BetriebskostenRechnungenListTypenJahr(List<Betriebskostenrechnung> r)
         {
@@ -141,20 +117,20 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ToImmutableSortedDictionary(
                 gg => gg.Key, gg => gg
                     .ToList()
-                    .Select(ggg => new BetriebskostenRechnungenRechnung(ggg))
+                    .Select(ggg => new BetriebskostenTypRechnungenRechnung(ggg))
                     .ToImmutableList(),
                     Comparer<int>.Create((x, y) => y.CompareTo(x)));
         }
     }
 
-    public class BetriebskostenRechnungenRechnung
+    public class BetriebskostenTypRechnungenRechnung
     {
         public string Betrag { get; }
         public string Datum { get; }
         public ImmutableDictionary<string, ImmutableList<string>> Gruppen { get; }
         public ImmutableList<string> Wohnungen { get; }
 
-        public BetriebskostenRechnungenRechnung(Betriebskostenrechnung r)
+        public BetriebskostenTypRechnungenRechnung(Betriebskostenrechnung r)
         {
             Betrag = string.Format("{0:F2}€", r.Betrag);
             Datum = r.Datum.ToString("dd.MM.yyyy");
