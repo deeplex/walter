@@ -66,6 +66,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.Walter.Mieten.Add(new Miete
                 {
                     Zahlungsdatum = AddMieteValue.Value.Datum.Value.UtcDateTime,
+                    BetreffenderMonat = AddMieteValue.Value.BetreffenderMonat.Value.UtcDateTime,
                     Betrag = AddMieteValue.Value.Betrag,
                     VertragId = Versionen.Last().VertragId,
                 });
@@ -122,6 +123,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public int Id;
         public ObservableProperty<DateTimeOffset> Datum = new ObservableProperty<DateTimeOffset>();
+        public ObservableProperty<DateTimeOffset> BetreffenderMonat = new ObservableProperty<DateTimeOffset>();
         public double Kalt;
         public string KaltString
         {
@@ -162,6 +164,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public VertragListMiete()
         {
             Datum.Value = DateTime.UtcNow.Date;
+            BetreffenderMonat.Value = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1).AsUtcKind();
             Betrag = 0;
             Notiz.Value = "";
         }
@@ -170,6 +173,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Id = m.MieteId;
             Datum.Value = m.Zahlungsdatum.AsUtcKind();
+            BetreffenderMonat.Value = m.BetreffenderMonat.AsUtcKind();
             Betrag = m.Betrag ?? 0;
             Notiz.Value = m.Notiz ?? "";
         }

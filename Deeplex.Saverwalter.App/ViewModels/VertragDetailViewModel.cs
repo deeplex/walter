@@ -277,6 +277,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
+        public DateTimeOffset BetreffenderMonat
+        {
+            get => Entity.BetreffenderMonat.AsUtcKind();
+            set
+            {
+                Entity.BetreffenderMonat = new DateTime(value.Year, value.Month, 1).AsUtcKind();
+                RaisePropertyChangedAuto();
+            }
+        }
+
         public string Notiz
         {
             get => Entity.Notiz;
@@ -325,6 +335,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 case nameof(Betrag):
                 case nameof(Zahlungsdatum):
                 case nameof(Notiz):
+                case nameof(BetreffenderMonat):
                     break;
                 default:
                     return;

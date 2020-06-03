@@ -293,6 +293,15 @@
                                             </DataTemplate>
                                         </mtuuc:DataGridTemplateColumn.CellTemplate>
                                     </mtuuc:DataGridTemplateColumn>
+                                    <mtuuc:DataGridTemplateColumn Header="Betr. Monat" Width="175">
+                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="vm:VertragDetailMiete">
+                                                <DatePicker
+                                                    Date="{x:Bind BetreffenderMonat, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                    Language="de" DayVisible="False"/>
+                                            </DataTemplate>
+                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    </mtuuc:DataGridTemplateColumn>
                                     <mtuuc:DataGridTemplateColumn Header="Betrag">
                                         <mtuuc:DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate x:DataType="vm:VertragDetailMiete">
@@ -317,6 +326,9 @@
                                                 DateFormat="{}{day.integer}. {month.full} {year.full}"
                                                 PlaceholderText="Datum hinzufügen"
                                                 Date="{x:Bind ViewModel.AddMieteValue.Value.Zahlungsdatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                            <DatePicker
+                                                Date="{x:Bind ViewModel.AddMieteValue.Value.BetreffenderMonat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Language="de" Width="175" Header="Betr. Monat" DayVisible="False"/>
                                             <muxc:NumberBox
                                                 Header="Betrag"
                                                 Value="{x:Bind ViewModel.AddMieteValue.Value.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"

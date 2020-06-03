@@ -107,6 +107,9 @@
                                                             DateFormat="{}{day.integer}. {month.full} {year.full}"
                                                             PlaceholderText="Datum hinzufügen"
                                                             Date="{x:Bind AddMieteValue.Value.Datum.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                        <DatePicker
+                                                            Date="{x:Bind AddMieteValue.Value.BetreffenderMonat.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                            Language="de" Width="175" Header="Betr. Monat" DayVisible="False"/>
                                                         <muxc:NumberBox
                                                             Header="Betrag"
                                                             Value="{x:Bind AddMieteValue.Value.Betrag, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

@@ -94,7 +94,7 @@ namespace Deeplex.Saverwalter.Model
             // TODO Timerange should be more dynamic...
             Gezahlt = db.Mieten
                 .Where(m => m.VertragId == vertrag.VertragId)
-                    .Where(m => m.Zahlungsdatum >= Abrechnungsbeginn && m.Zahlungsdatum < Abrechnungsende)
+                    .Where(m => m.BetreffenderMonat >= Abrechnungsbeginn && m.BetreffenderMonat < Abrechnungsende)
                     .Sum(z => z.Betrag ?? 0);
 
             KaltMiete = Vertragsversionen.Sum(v => (Min(v.Ende?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);
