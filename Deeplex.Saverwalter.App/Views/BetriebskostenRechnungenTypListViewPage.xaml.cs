@@ -1,9 +1,10 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
+using System;
 using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-
+using Windows.UI.Xaml.Media.Animation;
 
 namespace Deeplex.Saverwalter.App.Views
 {
@@ -20,6 +21,8 @@ namespace Deeplex.Saverwalter.App.Views
                 ViewModel.AdresseGroup[k].ForEach(v => k.Children.Add(v));
                 AddBetriebskostenrechnungBetroffeneWohneinheiten.RootNodes.Add(k);
             });
+            AddBetriebskostenrechnungSchluessel.SelectedIndex = 0; // n.WF.
+            AddBetriebskostenrechnungJahr.Value = DateTime.UtcNow.Year - 1;
         }
 
         private void AddBetriebskostenrechnung_Click(object sender, RoutedEventArgs e)
@@ -30,6 +33,7 @@ namespace Deeplex.Saverwalter.App.Views
                 Datum = AddBetriebskostenrechnungDatum.Date.Value.UtcDateTime,
                 Schluessel = ((BetriebskostenRechnungenSchluessel)AddBetriebskostenrechnungSchluessel.SelectedItem).Schluessel,
                 Typ = ((BetriebskostenRechnungenBetriebskostentyp)AddBetriebskostenrechnungTyp.SelectedItem).Typ,
+                BetreffendesJahr = (int)AddBetriebskostenrechnungJahr.Value,
                 Betrag = AddBetriebskostenrechnungBetrag.Value,
             };
             App.Walter.Betriebskostenrechnungen.Add(r);
@@ -47,6 +51,12 @@ namespace Deeplex.Saverwalter.App.Views
                 });
 
             App.Walter.SaveChanges();
+        }
+
+        private void SortiereNachGruppen_Click(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(BetriebskostenRechnungenGruppeListViewPage), null,
+                new DrillInNavigationTransitionInfo());
         }
     }
 }

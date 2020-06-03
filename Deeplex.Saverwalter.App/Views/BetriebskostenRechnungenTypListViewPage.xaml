@@ -26,6 +26,7 @@
                     Style="{StaticResource TitleTextBlockStyle}"
                     Margin="10,0,0,0"/>
             </CommandBar.Content>
+            <AppBarButton Icon="Sync" Label="Sortiere nach Gruppen" Click="SortiereNachGruppen_Click"/>
             <AppBarButton
                 AllowFocusOnInteraction="True"
                 Icon="Add" Label="Hinzufügen">
@@ -39,6 +40,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <ComboBox Header="Kostentyp" x:Name="AddBetriebskostenrechnungTyp" ItemsSource="{x:Bind ViewModel.Betriebskostentypen}" DisplayMemberPath="Beschreibung"/>
                                 <ComboBox Header="Umlageschlüssel" x:Name="AddBetriebskostenrechnungSchluessel" ItemsSource="{x:Bind ViewModel.Betriebskostenschluessel}" DisplayMemberPath="Beschreibung" Margin="10,0,0,0"/>
+                                <muxc:NumberBox Header="Betr. Jahr" x:Name="AddBetriebskostenrechnungJahr" Margin="10,0,0,0" SpinButtonPlacementMode="Inline"/>
                             </StackPanel>
                             <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
                                 <CalendarDatePicker x:Name="AddBetriebskostenrechnungDatum" Header="Datum"/>

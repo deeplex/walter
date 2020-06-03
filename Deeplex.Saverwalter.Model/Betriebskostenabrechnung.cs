@@ -85,9 +85,8 @@ namespace Deeplex.Saverwalter.Model
             Nutzungszeitspanne = (Nutzungsende - Nutzungsbeginn).Days + 1;
             Zeitanteil = (double)Nutzungszeitspanne / Abrechnungszeitspanne;
 
-            // TODO Nicht YEAR, sondern betreffendes Jahr. Das muss noch.
             Gruppen = vertrag.Wohnung.Betriebskostenrechnungsgruppen
-                .Where(g => g.Rechnung.Datum.Year == Jahr)
+                .Where(g => g.Rechnung.BetreffendesJahr == Jahr)
                 .GroupBy(p => new SortedSet<int>(p.Rechnung.Gruppen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
                 .Select(g => new Rechnungsgruppe(this, g.Select(i => i.Rechnung).ToList()))
                 .ToList();
