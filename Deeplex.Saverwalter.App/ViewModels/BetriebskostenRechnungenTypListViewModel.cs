@@ -111,6 +111,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public ImmutableSortedDictionary<int, ImmutableList<BetriebskostenTypRechnungenRechnung>> Jahre { get; }
 
+        public BetriebskostenRechnungenListTypenJahr(ImmutableSortedDictionary<int, ImmutableList<BetriebskostenTypRechnungenRechnung>> j)
+        {
+            Jahre = j;
+        }
         public BetriebskostenRechnungenListTypenJahr(List<Betriebskostenrechnung> r)
         {
             Jahre = r.GroupBy(gg => gg.BetreffendesJahr)
@@ -125,27 +129,66 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class BetriebskostenTypRechnungenRechnung
     {
-        public string Betrag { get; }
-        public string Datum { get; }
-        public ImmutableDictionary<string, ImmutableList<string>> Gruppen { get; }
-        public ImmutableList<string> Wohnungen { get; }
+        private Betriebskostenrechnung Entity { get; set; }
+        public void AddEntity(Betriebskostenrechnung r)
+        {
+            Entity = r;
+        }
 
+        public bool hasNoEntity => Entity == null;
+        public double Betrag { get; }
+        public string Beschreibung { get; }
+        public int BetreffendesJahr { get; }
+        public string BetragString => string.Format("{0:F2}€", Betrag);
+        public Betriebskostentyp Typ { get; }
+        public string DatumString => Datum.ToString("dd.MM.yyyy");
+        public UmlageSchluessel Schluessel { get; }
+        public DateTimeOffset Datum { get; set; }
+        public string Notiz { get; }
+        public ImmutableList<string> Wohnungen { get; }
+        public ImmutableList<int> WohnungenIds { get; }
+        //public ImmutableDictionary<string, ImmutableList<string>> Gruppen { get; }
+
+        public BetriebskostenTypRechnungenRechnung(BetriebskostenTypRechnungenRechnung r)
+        {
+            BetreffendesJahr = r.BetreffendesJahr + 1;
+            Datum = r.Datum.AddYears(1);
+            Betrag = r.Betrag;
+            Beschreibung = r.Beschreibung;
+            Notiz = r.Notiz;
+            Schluessel = r.Schluessel;
+            Typ = r.Typ;
+            
+            Wohnungen = r.Wohnungen.Select(w => w).ToImmutableList();
+            WohnungenIds = r.WohnungenIds.Select(w => w).ToImmutableList();
+        }
         public BetriebskostenTypRechnungenRechnung(Betriebskostenrechnung r)
         {
-            Betrag = string.Format("{0:F2}€", r.Betrag);
-            Datum = r.Datum.ToString("dd.MM.yyyy");
-            Gruppen = App.Walter.Betriebskostenrechnungsgruppen
-                .Where(g => g.Rechnung == r)
-                .ToList()
-                .GroupBy(g => g.Wohnung.Adresse)
-                .ToImmutableDictionary(
-                    g => AdresseViewModel.Anschrift(g.Key),
-                    g => g.Select(gg => gg.Wohnung.Bezeichnung).ToImmutableList());
+            Entity = r;
+            Betrag = r.Betrag;
+            Datum = r.Datum.AsUtcKind();
+            Beschreibung = r.Beschreibung;
+            BetreffendesJahr = r.BetreffendesJahr;
+            Notiz = r.Notiz;
+            Schluessel = r.Schluessel;
+            Typ = r.Typ;
 
-            Wohnungen = App.Walter.Betriebskostenrechnungsgruppen
-                .Where(g => g.Rechnung == r)
-                .Select(g => AdresseViewModel.Anschrift(g.Wohnung) + " — " + g.Wohnung.Bezeichnung)
+            var w = App.Walter.Betriebskostenrechnungsgruppen
+                .Where(g => g.Rechnung == r);
+
+            WohnungenIds = w.Select(g => g.WohnungId).ToImmutableList();
+
+            Wohnungen = w.Select(g => AdresseViewModel.Anschrift(g.Wohnung) + " — " + g.Wohnung.Bezeichnung)
                 .ToImmutableList();
+
+            // Sorting after Adress? Tree View sth?
+            //Gruppen = App.Walter.Betriebskostenrechnungsgruppen
+            //    .Where(g => g.Rechnung == r)
+            //    .ToList()
+            //    .GroupBy(g => g.Wohnung.Adresse)
+            //    .ToImmutableDictionary(
+            //        g => AdresseViewModel.Anschrift(g.Key),
+            //        g => g.Select(gg => gg.Wohnung.Bezeichnung).ToImmutableList());
         }
     }
 }

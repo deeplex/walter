@@ -14,7 +14,7 @@
     <Page.Resources>
         <muxc:StackLayout x:Name="VerticalStackLayout" Orientation="Vertical" Spacing="8"/>
     </Page.Resources>
-    
+
     <StackPanel>
         <CommandBar
             Background="Transparent"
@@ -64,7 +64,7 @@
             <DataTemplate>
                 <Grid>
                     <mtuuc:Expander Header="{Binding Key.Beschreibung}">
-                        <StackPanel>
+                        <RelativePanel>
                             <Pivot ItemsSource="{Binding Value.Jahre, Mode=OneWay}">
                                 <Pivot.HeaderTemplate>
                                     <DataTemplate>
@@ -73,52 +73,61 @@
                                 </Pivot.HeaderTemplate>
                                 <Pivot.ItemTemplate>
                                     <DataTemplate>
-                                        <GridView Margin="0,10,0,0" ItemsSource="{Binding Value, Mode=OneWay}">
-                                            <CollectionViewSource x:Name="Wohnungen" IsSourceGrouped="True"/>
-                                            <GridView.ItemTemplate>
-                                                <DataTemplate>
-                                                    <StackPanel BorderBrush="LightGray" BorderThickness="2" Padding="5">
-                                                        <TextBlock
-                                                            Margin="5"
-                                                            FontSize="18">
+                                        <StackPanel>
+                                            <GridView Margin="0,10,0,0" ItemsSource="{Binding Value, Mode=OneWay}">
+                                                <CollectionViewSource x:Name="Wohnungen" IsSourceGrouped="True"/>
+                                                <GridView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel BorderBrush="LightGray" BorderThickness="2" Padding="5">
+                                                            <TextBlock
+                                                                Margin="5"
+                                                                FontSize="18">
                                                             <Run Text="Betrag:"/>
-                                                            <Run Text="{Binding Betrag}"/>
-                                                        </TextBlock>
-                                                        <TextBlock
-                                                            Margin="5"
-                                                            FontSize="18">
+                                                            <Run Text="{Binding BetragString}"/>
+                                                            </TextBlock>
+                                                            <TextBlock
+                                                                Margin="5"
+                                                                FontSize="18">
                                                             <Run Text="Datum:"/>
-                                                            <Run Text="{Binding Datum}"/>
-                                                        </TextBlock>
-                                                        <mtuuc:Expander>
-                                                            <mtuuc:Expander.Header>
-                                                                <TextBlock>
+                                                            <Run Text="{Binding DatumString}"/>
+                                                            </TextBlock>
+                                                            <mtuuc:Expander>
+                                                                <mtuuc:Expander.Header>
+                                                                    <TextBlock>
                                                                     <Run Text="Wohnungen ("/>
                                                                     <Run Text="{Binding Wohnungen.Count}"/>
                                                                     <Run Text=")"/>
-                                                                </TextBlock>
-                                                            </mtuuc:Expander.Header>
-                                                            <ListView
+                                                                    </TextBlock>
+                                                                </mtuuc:Expander.Header>
+                                                                <ListView
                                                                 SelectionMode="None"
                                                                 CanDragItems="True" CanReorderItems="True" 
                                                                 AllowDrop="True"
                                                                 ItemsSource="{Binding Wohnungen, Mode=OneWay}">
-                                                                <ListView.ItemsPanel>
-                                                                    <ItemsPanelTemplate>
-                                                                        <ItemsStackPanel AreStickyGroupHeadersEnabled="True">
-                                                                        </ItemsStackPanel>
-                                                                    </ItemsPanelTemplate>
-                                                                </ListView.ItemsPanel>
-                                                            </ListView>
-                                                        </mtuuc:Expander>
-                                                    </StackPanel>
-                                                </DataTemplate>
-                                            </GridView.ItemTemplate>
-                                        </GridView>
+                                                                    <ListView.ItemsPanel>
+                                                                        <ItemsPanelTemplate>
+                                                                            <ItemsStackPanel AreStickyGroupHeadersEnabled="True">
+                                                                            </ItemsStackPanel>
+                                                                        </ItemsPanelTemplate>
+                                                                    </ListView.ItemsPanel>
+                                                                </ListView>
+                                                            </mtuuc:Expander>
+                                                            <Button CommandParameter="{Binding}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{Binding hasNoEntity}">
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="Speichern"/>
+                                                                    <SymbolIcon Margin="10,0,0,0" Symbol="Accept"/>
+                                                                </StackPanel>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </GridView.ItemTemplate>
+                                            </GridView>
+                                        </StackPanel>
                                     </DataTemplate>
                                 </Pivot.ItemTemplate>
-                        </Pivot>
-                        </StackPanel>
+                            </Pivot>
+                            <Button Margin="0,10,10,0" RelativePanel.AlignRightWithPanel="True" Content="Neues Jahr" Click="NeuesJahr_Click"/>
+                        </RelativePanel>
                     </mtuuc:Expander>
                 </Grid>
             </DataTemplate>
