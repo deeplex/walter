@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.Print
                 new Break() { Type = BreakValues.Page },
                 // p.2
                 Heading("Abrechnung der Nebenkosten (kalte Betriebskosten)"),
-                ExplainUmlageschluessel(),
+                ExplainUmlageschluessel(b),
                 Heading("Erläuterungen zu einzelnen Betriebskostenarten"),
                 ExplainKalteBetriebskosten(b),
                 new Break() { Type = BreakValues.Page },
@@ -222,45 +222,92 @@ namespace Deeplex.Saverwalter.Print
                 new Run(Font(), new Text("Die Abrechnung betrifft zunächst die mietvertraglich vereinbarten Nebenkosten (die kalten Betriebskosten). Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses(warme Betriebskosten) werden gesondert berechnet, nach Verbrauch und Wohn -/ Nutzfläche auf die einzelnen Wohnungen umgelegt(= „Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der von Ihnen geleisteten Vorauszahlungen verrechnet. Bei bestehenden Mietrückständen ist das Ergebnis der Abrechnung zusätzlich mit den Mietrückständen verrechnet. Gegebenenfalls bestehende Mietminderungen / Ratenzahlungsvereinbarungen sind hier nicht berücksichtigt, haben aber weiterhin für den vereinbarten Zeitraum Bestand. Aufgelöste oder gekündigte Mietverhältnisse werden durch dieses Schreiben nicht neu begründet. Die Aufstellung, Verteilung und Erläuterung der Gesamtkosten, die Berechnung der Kostenanteile, die Verrechnung der geleisteten Vorauszahlungen und gegebenenfalls die Neuberechnung der monatlichen Vorauszahlungen entnehmen Sie bitte den folgenden Seiten.")));
         }
 
-        private static Table ExplainUmlageschluessel()
+        private static Table ExplainUmlageschluessel(Betriebskostenabrechnung b)
         {
-            return new Table(
+            var dir = b.Gruppen.Any(g => g.Rechnungen.Any(r => r.Gruppen.Count == 1));
+            var nWF = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachWohnflaeche));
+            var nNE = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachNutzeinheit));
+            var nPZ = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachPersonenzahl));
+            var nVb = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachVerbrauch));
+
+            var t = new Table(
                 // This cell defines the width of the left cell.
                 new TableRow(
-                    ContentHead("1000", "Umlageschlüssel"),
-                    ContentHead("Bedeutung")),
-                new TableRow(
-                    ContentCell("n. WF."),
-                    ContentCell("nach Wohn-/Nutzfläche in m²")),
-                new TableRow(
-                    ContentCell("n. NE."),
-                    ContentCell("nach Anzahl der Wohn-/Nutzeinheiten")),
-                new TableRow(
-                    ContentCell("n. Pers."),
-                    ContentCell("nach Personenzahl/Anzahl der Bewohner")),
-                new TableRow( // This row has SpacingBeetweenLine.
-                    ContentCellEnd("n. Verb."),
-                    ContentCellEnd("nach Verbrauch (in m³ oder in kWh)")),
+                    ContentHead("1250", "Umlageschlüssel"),
+                    ContentHead("Bedeutung")));
 
+            if (dir == true)
+            {
+                t.Append(new TableRow(
+                    ContentCell("Direkt"),
+                    ContentCell("Direkte Zuordnung")));
+            }
+            if (nWF == true)
+            {
+                t.Append(new TableRow(
+                    ContentCell("n. WF."),
+                    ContentCell("nach Wohn-/Nutzfläche in m²")));
+            }
+            if (nNE == true)
+            {
+                t.Append(new TableRow(
+                    ContentCell("n. NE."),
+                    ContentCell("nach Anzahl der Wohn-/Nutzeinheiten")));
+            }
+            if (nPZ == true)
+            {
+                t.Append(new TableRow(
+                    ContentCell("n. Pers."),
+                    ContentCell("nach Personenzahl/Anzahl der Bewohner")));
+            }
+            if (nVb == true)
+            {
+                t.Append(new TableRow( // This row has SpacingBeetweenLine.
+                    ContentCell("n. Verb."),
+                    ContentCell("nach Verbrauch (in m³ oder in kWh)")));
+            }
+
+            t.Append(new TableRow(ContentCell(""), ContentCell("")),
                 new TableRow(
                     new TableCell(new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Text("Umlageweg")))),
-                    new TableCell(new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Text("Beschreibung"))))),
-                new TableRow(
-                    ContentCell("n. WF."),
-                    ContentCell("Kostenanteil = Kosten je Quadratmeter Wohn-/Nutzfläche mal Anteil Fläche je Wohnung.")),
-                new TableRow(
-                    ContentCell("n. NE."),
-                    ContentCell("Kostenanteil = Kosten je Wohn-/Nutzeinheit.")),
-                new TableRow(
-                    ContentCell("n. Pers."),
-                    ContentCell("Kostenanteil = Kosten je Hausbewohner mal Anzahl Bewohner je Wohnung.")),
-                new TableRow( // This row has SpacingBeetweenLine.
-                    ContentCellEnd("n. Verb."),
-                    ContentCellEnd("Kostenanteil = Kosten je Verbrauchseinheit mal individuelle Verbrauchsmenge in Kubikmetern oder Kilowattstunden.")),
+                    new TableCell(new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Text("Beschreibung"))))));
 
-                new TableRow(
+            if (dir == true)
+            {
+                t.Append(new TableRow(
+                    ContentCell("Direkt"),
+                    ContentCell("Kostenanteil = Kosten werden Einheit direkt zugeordnet.")));
+            }
+            if (nWF == true)
+            {
+                t.Append(new TableRow(
+                    ContentCell("n. WF."),
+                    ContentCell("Kostenanteil = Kosten je Quadratmeter Wohn-/Nutzfläche mal Anteil Fläche je Wohnung.")));
+            }
+            if (nNE == true)
+            {
+                t.Append(new TableRow(
+                    ContentCell("n. NE."),
+                    ContentCell("Kostenanteil = Kosten je Wohn-/Nutzeinheit.")));
+            }
+            if (nPZ == true)
+            {
+                t.Append(new TableRow(
+                    ContentCell("n. Pers."),
+                    ContentCell("Kostenanteil = Kosten je Hausbewohner mal Anzahl Bewohner je Wohnung.")));
+            }
+            if (nVb)
+            {
+                t.Append(new TableRow( // This row has SpacingBeetweenLine.
+                    ContentCellEnd("n. Verb."),
+                    ContentCellEnd("Kostenanteil = Kosten je Verbrauchseinheit mal individuelle Verbrauchsmenge in Kubikmetern oder Kilowattstunden.")));
+            }
+
+            t.Append(new TableRow(ContentCell(""), ContentCell("")),
                     ContentCellEnd("Anmerkung: "),
-                    ContentCellEnd("Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger)Kostenanteil")));
+                    ContentCellEnd("Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger) Kostenanteil"));
+
+            return t;
         }
 
         private static Paragraph ExplainKalteBetriebskosten(Betriebskostenabrechnung b)
