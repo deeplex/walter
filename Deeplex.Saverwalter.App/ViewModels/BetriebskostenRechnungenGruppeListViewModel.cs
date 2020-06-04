@@ -16,6 +16,40 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenGruppeListGruppe, BetriebskostenRechnungenListGruppenJahr>> Gruppen
             = new ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenGruppeListGruppe, BetriebskostenRechnungenListGruppenJahr>>();
 
+        public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
+
+        public List<BetriebskostenRechnungenBetriebskostentyp> Betriebskostentypen =
+            Enum.GetValues(typeof(Betriebskostentyp))
+                .Cast<Betriebskostentyp>()
+                .ToList()
+                .Select(e => new BetriebskostenRechnungenBetriebskostentyp(e))
+                .ToList();
+
+        public List<BetriebskostenRechnungenSchluessel> Betriebskostenschluessel =
+            Enum.GetValues(typeof(UmlageSchluessel))
+                .Cast<UmlageSchluessel>()
+                .ToList()
+                .Select(t => new BetriebskostenRechnungenSchluessel(t))
+                .ToList();
+
+        public TreeViewNode AddBetriebskostenTree;
+        public BetriebskostenRechnungenGruppeListViewModel()
+        {
+            AdresseGroup = App.Walter.Wohnungen
+                .Include(w => w.Adresse)
+                .ToList()
+                .Select(w => new BetriebskostenRechungenListWohnungListWohnung(w))
+                .GroupBy(w => w.AdresseId)
+                .ToImmutableDictionary(
+                    g => new BetriebskostenRechungenListWohnungListAdresse(g.Key),
+                    g => g.ToImmutableList());
+
+            Gruppen.Value = App.Walter.Betriebskostenrechnungsgruppen.ToList()
+                .GroupBy(p => new SortedSet<int>(p.Rechnung.Gruppen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
+                .ToImmutableSortedDictionary(
+                    g => new BetriebskostenRechnungenGruppeListGruppe(g.Key),
+                    g => new BetriebskostenRechnungenListGruppenJahr(g.ToList())); // TODO Comparer? 
+        }
 
         public class BetriebskostenRechnungenGruppeListGruppe
         {
@@ -45,16 +79,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     return ret;
                 }));
             }
-        }
-
-        public TreeViewNode AddBetriebskostenTree;
-        public BetriebskostenRechnungenGruppeListViewModel()
-        {
-            Gruppen.Value = App.Walter.Betriebskostenrechnungsgruppen.ToList()
-                .GroupBy(p => new SortedSet<int>(p.Rechnung.Gruppen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
-                .ToImmutableSortedDictionary(
-                    g => new BetriebskostenRechnungenGruppeListGruppe(g.Key),
-                    g => new BetriebskostenRechnungenListGruppenJahr(g.ToList())); // TODO Comparer? 
         }
 
         public class BetriebskostenRechnungenListGruppenJahr
