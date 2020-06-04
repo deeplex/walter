@@ -151,6 +151,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public BetriebskostenTypRechnungenRechnung(BetriebskostenTypRechnungenRechnung r)
         {
+            // Template for next year (Note: Entity is null here)
             BetreffendesJahr = r.BetreffendesJahr + 1;
             Datum = r.Datum.AddYears(1);
             Betrag = r.Betrag;

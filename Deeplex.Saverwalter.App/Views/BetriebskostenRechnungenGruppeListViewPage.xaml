@@ -64,8 +64,8 @@
             <DataTemplate>
                 <Grid>
                     <mtuuc:Expander Header="{Binding Key.Bezeichnung}">
-                        <StackPanel>
-                            <Pivot ItemsSource="{Binding Value.Jahre, Mode=OneWay}">
+                            <RelativePanel>
+                                <Pivot ItemsSource="{Binding Value.Jahre, Mode=OneWay}">
                                 <Pivot.HeaderTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Key, Mode=OneWay}"/>
@@ -82,18 +82,24 @@
                                                         Margin="5"
                                                         FontSize="18">
                                                         <Run Text="Betrag:"/>
-                                                        <Run Text="{Binding Betrag}"/>
+                                                        <Run Text="{Binding BetragString}"/>
                                                         </TextBlock>
                                                         <TextBlock
                                                         Margin="5"
                                                         FontSize="18">
                                                         <Run Text="Datum:"/>
-                                                        <Run Text="{Binding Datum}"/>
+                                                        <Run Text="{Binding DatumString}"/>
                                                         </TextBlock>
                                                         <TextBlock
                                                             Margin="5"
                                                             FontSize="18"
                                                             Text="{Binding Typ}"/>
+                                                        <Button CommandParameter="{Binding}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{Binding hasNoEntity}">
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="Speichern"/>
+                                                                <SymbolIcon Margin="10,0,0,0" Symbol="Accept"/>
+                                                            </StackPanel>
+                                                        </Button>
                                                     </StackPanel>
                                                 </DataTemplate>
                                             </GridView.ItemTemplate>
@@ -101,7 +107,8 @@
                                     </DataTemplate>
                                 </Pivot.ItemTemplate>
                             </Pivot>
-                        </StackPanel>
+                            <Button Margin="0,10,10,0" RelativePanel.AlignRightWithPanel="True" Content="Neues Jahr" Click="NeuesJahr_Click"/>
+                        </RelativePanel>
                     </mtuuc:Expander>
                 </Grid>
             </DataTemplate>
