@@ -8,11 +8,21 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class KontaktListViewModel
+    public class KontaktListViewModel : BindableBase
     {
         public List<KontaktListEntry> Kontakte = new List<KontaktListEntry>();
-        public ObservableProperty<KontaktListEntry> SelectedKontakt
-            = new ObservableProperty<KontaktListEntry>();
+        private KontaktListEntry mSelectedKontakt;
+        public KontaktListEntry SelectedKontakt
+        {
+            get => mSelectedKontakt;
+            set
+           {
+                mSelectedKontakt = value;
+                RaisePropertyChangedAuto();
+                RaisePropertyChanged(nameof(hasSelectedKontakt));
+           }
+        }
+        public bool hasSelectedKontakt => SelectedKontakt != null;
 
         public KontaktListViewModel()
         {

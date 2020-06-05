@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            var sk = ViewModel.SelectedKontakt.Value;
+            var sk = ViewModel.SelectedKontakt;
             if (sk != null)
             {
                 var target =
@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.App.Views
                     sk.Type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailPage) :
                     null;
 
-                Frame.Navigate(target, ViewModel.SelectedKontakt.Value.Id,
+                Frame.Navigate(target, ViewModel.SelectedKontakt.Id,
                     new DrillInNavigationTransitionInfo());
             }
         }
