@@ -41,5 +41,10 @@ namespace Deeplex.Saverwalter.App.Views
             Frame.Navigate(typeof(JuristischePersonenDetailPage), null,
                 new DrillInNavigationTransitionInfo());
         }
+
+        private void DataGrid_RightTapped(object sender, Windows.UI.Xaml.Input.RightTappedRoutedEventArgs e)
+        {
+            ViewModel.SelectedKontakt = (e.OriginalSource as FrameworkElement).DataContext as KontaktListEntry;
+        }
     }
 } 
