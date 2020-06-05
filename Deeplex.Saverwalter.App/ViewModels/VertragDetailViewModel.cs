@@ -21,10 +21,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<ImmutableList<VertragDetailVersion>>();
         public ObservableProperty<VertragDetailMiete> AddMieteValue
             = new ObservableProperty<VertragDetailMiete>();
+        public ObservableProperty<VertragDetailMietMinderung> AddMietMinderungValue
+            = new ObservableProperty<VertragDetailMietMinderung>();
         public ObservableProperty<ImmutableList<VertragDetailKontakt>> Mieter
             = new ObservableProperty<ImmutableList<VertragDetailKontakt>>();
         public ObservableProperty<ImmutableList<VertragDetailMiete>> Mieten
             = new ObservableProperty<ImmutableList<VertragDetailMiete>>();
+        public ObservableProperty<ImmutableList<VertragDetailMietMinderung>> MietMinderungen
+            = new ObservableProperty<ImmutableList<VertragDetailMietMinderung>>();
         public DateTimeOffset? AddVersionDatum;
         public ObservableProperty<int> BetriebskostenJahr
             = new ObservableProperty<int>();
@@ -78,6 +82,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Select(m => new VertragDetailMiete(m)).ToList()
                 .OrderBy(m => m.Zahlungsdatum).Reverse().ToImmutableList();
 
+            MietMinderungen.Value = App.Walter.MietMinderungen
+                .Where(m => m.VertragId == v.First().VertragId)
+                .Select(m => new VertragDetailMietMinderung(m)).ToList()
+                .OrderBy(m => m.Beginn).Reverse().ToImmutableList();
+
             BetriebskostenJahr.Value = DateTime.Now.Year - 1;
 
             Versionen.Value = v.Select(vs => new VertragDetailVersion(vs)).ToImmutableList();
@@ -108,6 +117,18 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 AddMieteValue.Value = new VertragDetailMiete(v.First().VertragId);
             }, _ => true);
 
+            AddMietMinderungValue.Value = new VertragDetailMietMinderung(v.First().VertragId);
+            AddMietMinderung = new RelayCommand(_ =>
+            {
+                var amv = AddMietMinderungValue.Value;
+                MietMinderungen.Value = MietMinderungen.Value
+                    .Add(amv)
+                    .OrderBy(m => m.Beginn)
+                    .Reverse()
+                    .ToImmutableList();
+                AddMietMinderungValue.Value = new VertragDetailMietMinderung(v.First().VertragId);
+            }, _ => true);
+
             RemoveVersion = new RelayCommand(_ =>
             {
                 var vs = App.Walter.Vertraege.Find(Versionen.Value.First().Id);
@@ -123,6 +144,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public bool IsNotInEdit => !IsInEdit.Value;
 
         public RelayCommand AddMiete { get; }
+        public RelayCommand AddMietMinderung { get; }
         public RelayCommand AddVersion { get; }
         public RelayCommand RemoveVersion { get; }
     }
@@ -350,6 +372,97 @@ namespace Deeplex.Saverwalter.App.ViewModels
             else
             {
                 App.Walter.Mieten.Add(Entity);
+            }
+            App.Walter.SaveChanges();
+        }
+    }
+
+    public class VertragDetailMietMinderung : BindableBase
+    {
+        private MietMinderung Entity { get; }
+        public void selfDestruct()
+        {
+            App.Walter.Remove(Entity);
+            App.Walter.SaveChanges();
+        }
+        public DateTimeOffset Beginn
+        {
+            get => Entity.Beginn;
+            set
+            {
+                Entity.Beginn = value.UtcDateTime.AsUtcKind();
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public DateTimeOffset? Ende
+        {
+            get => Entity.Ende;
+            set
+            {
+                Entity.Ende = value?.UtcDateTime.AsUtcKind();
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public double Minderung
+        {
+            get => Entity.Minderung;
+            set
+            {
+                Entity.Minderung = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public string Notiz
+        {
+            get => Entity.Notiz;
+            set
+            {
+                Entity.Notiz = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public VertragDetailMietMinderung(Guid vertragId)
+            : this(new MietMinderung
+            {
+                VertragId = vertragId,
+                Beginn = DateTime.UtcNow.Date,
+            })
+        {
+        }
+
+
+        public VertragDetailMietMinderung(MietMinderung m)
+        {
+            Entity = m;
+            PropertyChanged += OnUpdate;
+        }
+
+        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Beginn):
+                case nameof(Ende):
+                case nameof(Notiz):
+                case nameof(Minderung):
+                    break;
+                default:
+                    return;
+            }
+
+            if (Beginn == null || Minderung == 0) return;
+
+            if (Entity.MietMinderungId != 0)
+            {
+                App.Walter.MietMinderungen.Update(Entity);
+            }
+            else
+            {
+                App.Walter.MietMinderungen.Add(Entity);
             }
             App.Walter.SaveChanges();
         }

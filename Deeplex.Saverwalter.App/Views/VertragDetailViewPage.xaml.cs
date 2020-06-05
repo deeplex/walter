@@ -139,6 +139,13 @@ namespace Deeplex.Saverwalter.App.Views
             miete.selfDestruct();
         }
 
+        private void RemoveMietMinderung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            var mietminderung = (VertragDetailMietMinderung)((Button)sender).CommandParameter;
+            ViewModel.MietMinderungen.Value = ViewModel.MietMinderungen.Value.Remove(mietminderung).ToImmutableList();
+            mietminderung.selfDestruct();
+        }
+
         private void Betriebskostenabrechnung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             var Jahr = (int)((Button)sender).CommandParameter;

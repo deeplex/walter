@@ -102,7 +102,7 @@ namespace Deeplex.Saverwalter.Model
                     .Sum(z => z.Betrag ?? 0);
 
             Minderungen = db.MietMinderungen
-                .Where(m => m.VetragId == vertrag.VertragId && m.Ende > Abrechnungsbeginn && m.Beginn <= Abrechnungsende).ToList();
+                .Where(m => m.VertragId == vertrag.VertragId && (m.Ende == null || m.Ende > Abrechnungsbeginn) && m.Beginn <= Abrechnungsende).ToList();
             Minderung = Minderungen.Sum(m => m.Minderung * ((Min(m.Ende ?? Abrechnungsende, Abrechnungsende) - Max(m.Beginn, Abrechnungsbeginn)).Days + 1)) / Abrechnungszeitspanne;
 
             KaltMiete = Vertragsversionen.Sum(v => (Min(v.Ende?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);

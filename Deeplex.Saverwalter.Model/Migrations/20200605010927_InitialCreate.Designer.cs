@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20200603092814_InitialCreate")]
+    [Migration("20200605010927_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -257,7 +257,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<DateTime>("Beginn")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("Ende")
+                    b.Property<DateTime?>("Ende")
                         .HasColumnType("TEXT");
 
                     b.Property<double>("Minderung")
@@ -266,7 +266,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<string>("Notiz")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("VetragId")
+                    b.Property<Guid>("VertragId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("MietMinderungId");

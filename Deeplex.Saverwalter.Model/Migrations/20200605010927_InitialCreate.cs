@@ -81,9 +81,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     MietMinderungId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    VetragId = table.Column<Guid>(nullable: false),
+                    VertragId = table.Column<Guid>(nullable: false),
                     Beginn = table.Column<DateTime>(nullable: false),
-                    Ende = table.Column<DateTime>(nullable: false),
+                    Ende = table.Column<DateTime>(nullable: true),
                     Minderung = table.Column<double>(nullable: false),
                     Notiz = table.Column<string>(nullable: true)
                 },
