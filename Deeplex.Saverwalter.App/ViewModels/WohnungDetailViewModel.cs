@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class WohnungDetailViewModel : ValidatableBase
+    public sealed class WohnungDetailViewModel : ValidatableBase
     {
         private Wohnung Entity;
         public int Id;
@@ -194,7 +194,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class WohnungDetailZaehler
+    public sealed class WohnungDetailZaehler
     {
         public int Id;
         public ObservableProperty<string> Kennnummer = new ObservableProperty<string>();
@@ -208,7 +208,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class WohnungDetailVertrag
+    public sealed class WohnungDetailVertrag
     {
         public int Id { get; }
         public int Version { get; }

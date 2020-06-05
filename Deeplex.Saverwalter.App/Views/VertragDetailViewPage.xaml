@@ -347,7 +347,7 @@
                     </mtuuc:Expander>
                 </StackPanel>
             </RelativePanel>
-            <RelativePanel Margin="0,20,0,0">
+            <RelativePanel>
                 <StackPanel
                     RelativePanel.AlignRightWithPanel="True"
                     RelativePanel.AlignLeftWithPanel="True">

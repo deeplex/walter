@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class KontaktDetailViewModel : BindableBase
+    public sealed class KontaktDetailViewModel : BindableBase
     {
         public Kontakt Entity { get; }
         public int Id { get; }
@@ -185,7 +185,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class KontaktDetailVertrag
+    public sealed class KontaktDetailVertrag
     {
         public int Id { get; }
         public int Version { get; }

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class JuristischePersonenListViewModel
+    public sealed class JuristischePersonenListViewModel
     {
         public ObservableProperty<ImmutableList<JuristischePersonenPerson>> Personen
             = new ObservableProperty<ImmutableList<JuristischePersonenPerson>>();
@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     }
 
-    public class JuristischePersonenPerson
+    public sealed class JuristischePersonenPerson
     {
         public int Id;
         public ObservableProperty<string> Name = new ObservableProperty<string>();

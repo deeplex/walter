@@ -5,7 +5,7 @@ using System;
 namespace Deeplex.Saverwalter.CLI
 
 {
-    class Program
+    sealed class Program
     {
         private static void Main()
         {

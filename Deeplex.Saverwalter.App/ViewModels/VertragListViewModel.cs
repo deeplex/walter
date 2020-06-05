@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class VertragListViewModel
+    public sealed class VertragListViewModel
     {
         public List<VertragListVertrag> Vertraege = new List<VertragListVertrag>();
         public ObservableProperty<VertragListVertrag> SelectedVertrag
@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class VertragListVertrag : VertragVersionListViewModel
+    public sealed class VertragListVertrag : VertragVersionListViewModel
     {
         public List<VertragVersionListViewModel> Versionen { get; }
             = new List<VertragVersionListViewModel>();
@@ -119,7 +119,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class VertragListMiete : BindableBase
+    public sealed class VertragListMiete : BindableBase
     {
         public int Id;
         public ObservableProperty<DateTimeOffset> Datum = new ObservableProperty<DateTimeOffset>();

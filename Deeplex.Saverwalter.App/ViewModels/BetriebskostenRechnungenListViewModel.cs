@@ -10,13 +10,13 @@ using System.Linq;
 namespace Deeplex.Saverwalter.App.ViewModels
 {
 
-    public class BetriebskostenRechnungenListViewModel
+    public sealed class BetriebskostenRechnungenListViewModel
     {
         public ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenTyp, BetriebskostenRechnungenListJahr>> Typen
             = new ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenTyp, BetriebskostenRechnungenListJahr>>();
 
         public ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenGruppe, BetriebskostenRechnungenListJahr>> Gruppen
-    = new ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenGruppe, BetriebskostenRechnungenListJahr>>();
+            = new ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenGruppe, BetriebskostenRechnungenListJahr>>();
 
         public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
 
@@ -66,7 +66,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class BetriebskostenRechnungenBetriebskostenGruppe
+    public sealed class BetriebskostenRechnungenBetriebskostenGruppe
     {
         public string Bezeichnung { get; }
 
@@ -97,7 +97,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     }
 
 
-    public class BetriebskostenRechnungenBetriebskostenTyp
+    public sealed class BetriebskostenRechnungenBetriebskostenTyp
     {
         public Betriebskostentyp Typ { get; }
         public string Beschreibung { get; }
@@ -108,7 +108,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class BetriebskostenRechnungenSchluessel
+    public sealed class BetriebskostenRechnungenSchluessel
     {
         public UmlageSchluessel Schluessel { get; }
         public string Beschreibung { get; }
@@ -119,7 +119,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class BetriebskostenRechungenListWohnungListAdresse : TreeViewNode
+    public sealed class BetriebskostenRechungenListWohnungListAdresse : TreeViewNode
     {
         public int Id { get; }
         public string Anschrift { get; }
@@ -131,7 +131,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class BetriebskostenRechungenListWohnungListWohnung : TreeViewNode
+    public sealed class BetriebskostenRechungenListWohnungListWohnung : TreeViewNode
     {
         public int Id { get; }
         public int AdresseId { get; }
@@ -147,7 +147,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class BetriebskostenRechnungenListJahr
+    public sealed class BetriebskostenRechnungenListJahr
     {
         public ImmutableSortedDictionary<int, ImmutableList<BetriebskostenRechnungenRechnung>> Jahre { get; }
 
@@ -179,7 +179,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class BetriebskostenRechnungenRechnung
+    public sealed class BetriebskostenRechnungenRechnung
     {
         private Betriebskostenrechnung Entity { get; set; }
         public void AddEntity(Betriebskostenrechnung r)

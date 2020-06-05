@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class VertragDetailViewModel : VertragDetailVersion
+    public sealed class VertragDetailViewModel : VertragDetailVersion
     {
         public Guid guid { get; }
         public ImmutableList<VertragDetailKontakt> AlleKontakte { get; }
@@ -279,7 +279,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class VertragDetailMiete : BindableBase
+    public sealed class VertragDetailMiete : BindableBase
     {
         public void selfDestruct()
         {
@@ -376,7 +376,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class VertragDetailMietMinderung : BindableBase
+    public sealed class VertragDetailMietMinderung : BindableBase
     {
         private MietMinderung Entity { get; }
         public void selfDestruct()
@@ -467,7 +467,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class VertragDetailKontakt
+    public sealed class VertragDetailKontakt
     {
         public override string ToString() => Name;
 
@@ -485,7 +485,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public static Kontakt GetKontakt(int id) => App.Walter.Kontakte.Find(id);
     }
 
-    public class VertragDetailWohnung
+    public sealed class VertragDetailWohnung
     {
         public override string ToString() => BezeichnungVoll;
         public Wohnung Entity { get; }

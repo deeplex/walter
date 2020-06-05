@@ -6,7 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public class Betriebskostenabrechnung
+    public sealed class Betriebskostenabrechnung
     {
         public double Result { get; set; }
         public int Jahr { get; set; }
@@ -115,7 +115,7 @@ namespace Deeplex.Saverwalter.Model
             Result = BezahltNebenkosten - BetragNebenkosten + KaltMinderung + NebenkostenMinderung;
         }
 
-        public class Rechnungsgruppe
+        public sealed class Rechnungsgruppe
         {
             public List<Betriebskostenrechnung> Rechnungen;
 

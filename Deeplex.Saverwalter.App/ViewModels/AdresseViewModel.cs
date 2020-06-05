@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class AdresseViewModel
+    public sealed class AdresseViewModel
     {
         public int Id;
         public ObservableProperty<string> Strasse { get; set; } = new ObservableProperty<string>();

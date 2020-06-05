@@ -7,7 +7,7 @@ using Windows.Storage;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public class SaverwalterContext : DbContext
+    public sealed class SaverwalterContext : DbContext
     {
         public DbSet<Adresse> Adressen { get; set; } = null!;
         public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.Model
         }
     }
 
-    public class Kontakt
+    public sealed class Kontakt
     {
         public int KontaktId { get; set; }
         public string? Vorname { get; set; }
@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
-    public class Wohnung
+    public sealed class Wohnung
     {
         public int WohnungId { get; set; }
         public int AdresseId { get; set; }
@@ -74,7 +74,7 @@ namespace Deeplex.Saverwalter.Model
         public List<Betriebskostenrechnungsgruppe> Betriebskostenrechnungsgruppen { get; private set; } = new List<Betriebskostenrechnungsgruppe>();
     }
 
-    public class Garage
+    public sealed class Garage
     {
         public int GarageId { get; set; }
         public Adresse Adresse { get; set; } = null!;
@@ -84,7 +84,7 @@ namespace Deeplex.Saverwalter.Model
     }
 
     // An Adresse is pointed at by a Wohnung, Garage or Kontakt.
-    public class Adresse
+    public sealed class Adresse
     {
         public int AdresseId { get; set; }
         public string Hausnummer { get; set; } = null!;
@@ -97,7 +97,7 @@ namespace Deeplex.Saverwalter.Model
         public List<Garage> Garagen { get; private set; } = new List<Garage>();
     }
 
-    public class Vertrag
+    public sealed class Vertrag
     {
         public int rowid { get; set; }
         public Guid VertragId { get; set; }
@@ -135,7 +135,7 @@ namespace Deeplex.Saverwalter.Model
     }
 
     // JoinTable between a Kontakt and a Vertrag.
-    public class Mieter
+    public sealed class Mieter
     {
         public int MieterId { get; set; }
         public int KontaktId { get; set; }
@@ -143,7 +143,7 @@ namespace Deeplex.Saverwalter.Model
         public Guid VertragId { get; set; }
     }
 
-    public class Miete
+    public sealed class Miete
     {
         public int MieteId { get; set; }
         public Guid VertragId { get; set; }
@@ -156,7 +156,7 @@ namespace Deeplex.Saverwalter.Model
     }
 
     // Mietminderung is later taken away from the result of the Betriebskostenabrechnug.
-    public class MietMinderung
+    public sealed class MietMinderung
     {
         public int MietMinderungId { get; set; }
         public Guid VertragId { get; set; }
@@ -166,7 +166,7 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
-    public class MietobjektGarage
+    public sealed class MietobjektGarage
     {
         public int MietobjektGarageId { get; set; }
         public Guid VertragId { get; set; }
@@ -175,7 +175,7 @@ namespace Deeplex.Saverwalter.Model
     }
 
     // JuristischePerson is a Name. Kontakte may subscribe to this and is used for dashboards and stuff... nothing wild really.
-    public class JuristischePerson
+    public sealed class JuristischePerson
     {
         public int JuristischePersonId { get; set; }
         public string Bezeichnung { get; set; } = null!;
@@ -191,7 +191,7 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
-    public class JuristischePersonenMitglied
+    public sealed class JuristischePersonenMitglied
     {
         public int JuristischePersonenMitgliedId { get; set; }
         public int KontaktId { get; set; }
@@ -207,7 +207,7 @@ namespace Deeplex.Saverwalter.Model
         Divers,
     }
 
-    public class Konto
+    public sealed class Konto
     {
         public int KontoId { get; set; }
         public string Bank { get; set; } = null!;
@@ -215,7 +215,7 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
-    public class Betriebskostenrechnung
+    public sealed class Betriebskostenrechnung
     {
         public int BetriebskostenrechnungId { get; set; }
         public Betriebskostentyp Typ { get; set; }
@@ -230,7 +230,7 @@ namespace Deeplex.Saverwalter.Model
     }
 
     // A Betriebskostenrechnung may be issued to one Vertrag only, if e.g. extra costs and the Mieter is to blame.
-    public class VertragsBetriebskostenrechnung
+    public sealed class VertragsBetriebskostenrechnung
     {
         public int VertragsBetriebskostenrechnungId { get; set; }
         public Guid VertragId { get; set; }
@@ -239,7 +239,7 @@ namespace Deeplex.Saverwalter.Model
 
     // Many Wohnungen may share a Betriebskostenrechnung. The calculation is done by the
     // Umlageschluessel and then by respective calculations.
-    public class Betriebskostenrechnungsgruppe
+    public sealed class Betriebskostenrechnungsgruppe
     {
         public int BetriebskostenrechnungsgruppeId { get; set; }
         public int WohnungId { get; set; }
@@ -247,7 +247,7 @@ namespace Deeplex.Saverwalter.Model
         public Betriebskostenrechnung Rechnung { get; set; } = null!;
     }
 
-    public class Zaehler
+    public sealed class Zaehler
     {
         public int ZaehlerId { get; set; }
         public string Kennnummer { get; set; } = null!;
@@ -266,7 +266,7 @@ namespace Deeplex.Saverwalter.Model
         Gas,
     }
 
-    public class Zaehlerstand
+    public sealed class Zaehlerstand
     {
         public int ZaehlerstandId { get; set; }
         public Zaehler Zaehler { get; set; } = null!;

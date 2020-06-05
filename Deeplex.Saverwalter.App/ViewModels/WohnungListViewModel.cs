@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class WohnungListViewModel
+    public sealed class WohnungListViewModel
     {
         public ImmutableDictionary<WohnungListAdresse, ImmutableList<WohnungListWohnung>> AdresseGroup;
 
@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public RelayCommand SaveEdit { get; }
     }
 
-    public class WohnungListAdresse
+    public sealed class WohnungListAdresse
     {
         public int Id { get; }
         public ObservableProperty<string> Postleitzahl { get; }
@@ -84,7 +84,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class WohnungListWohnung
+    public sealed class WohnungListWohnung
     {
         public int Id { get; }
         public int AdresseId { get; }

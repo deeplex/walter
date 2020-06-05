@@ -1,6 +1,6 @@
 ﻿namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class MainViewModel
+    public sealed class MainViewModel
     {
         public MainViewModel()
         {

@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class KontaktListViewModel : BindableBase
+    public sealed class KontaktListViewModel : BindableBase
     {
         public List<KontaktListEntry> Kontakte = new List<KontaktListEntry>();
         private KontaktListEntry mSelectedKontakt;
@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public class KontaktListEntry
+    public sealed class KontaktListEntry
     {
         public Type Type { get; }
         public int Id { get; }
