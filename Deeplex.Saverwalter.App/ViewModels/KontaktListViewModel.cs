@@ -1,7 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +15,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             get => mSelectedKontakt;
             set
-           {
+            {
                 mSelectedKontakt = value;
                 RaisePropertyChangedAuto();
                 RaisePropertyChanged(nameof(hasSelectedKontakt));
-           }
+            }
         }
         public bool hasSelectedKontakt => SelectedKontakt != null;
 

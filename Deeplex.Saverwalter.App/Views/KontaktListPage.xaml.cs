@@ -47,4 +47,4 @@ namespace Deeplex.Saverwalter.App.Views
             ViewModel.SelectedKontakt = (e.OriginalSource as FrameworkElement).DataContext as KontaktListEntry;
         }
     }
-} 
+}

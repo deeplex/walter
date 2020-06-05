@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private Wohnung Entity;
         public int Id;
         public ImmutableList<JuristischePersonViewModel> AlleJuristischePersonen { get; }
-        
+
         private ImmutableList<Adresse> AlleAdressen => App.Walter.Adressen.ToImmutableList();
 
         public ObservableProperty<string> Stadt = new ObservableProperty<string>();
@@ -45,7 +45,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set
             {
                 if (value != null)
-                { 
+                {
                     Entity.BesitzerId = value.Id;
                     mBesitzer = value;
                     RaisePropertyChangedAuto();

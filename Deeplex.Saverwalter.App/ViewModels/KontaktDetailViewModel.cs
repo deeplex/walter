@@ -126,7 +126,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = k;
             Id = k.KontaktId;
-            
+
             AlleAdressen = App.Walter.Adressen
                 .Select(a => new AdresseViewModel(a))
                 .ToImmutableList();

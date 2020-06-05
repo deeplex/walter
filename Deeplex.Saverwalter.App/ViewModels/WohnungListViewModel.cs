@@ -54,7 +54,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<string> Stadt { get; }
             = new ObservableProperty<string>();
 
-        public string GesamtString 
+        public string GesamtString
             => "Nutzeinheiten: " + GesamtNutzeinheiten
             + ", Wohnfläche: " + string.Format("{0:N2}", GesamtWohnflaeche)
             + "m², Nutzfläche: " + string.Format("{0:N2}", GesamtNutzflaeche)

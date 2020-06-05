@@ -7,14 +7,13 @@ using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
-using static Deeplex.Saverwalter.App.ViewModels.BetriebskostenRechnungenGruppeListViewModel;
 
 namespace Deeplex.Saverwalter.App.Views
 {
 
     public sealed partial class BetriebskostenRechnungenGruppeListViewPage : Page
     {
-        public BetriebskostenRechnungenGruppeListViewModel ViewModel = new BetriebskostenRechnungenGruppeListViewModel();
+        public BetriebskostenRechnungenListViewModel ViewModel = new BetriebskostenRechnungenListViewModel();
         public BetriebskostenRechnungenGruppeListViewPage()
         {
             InitializeComponent();
@@ -35,7 +34,7 @@ namespace Deeplex.Saverwalter.App.Views
                 Beschreibung = AddBetriebskostenrechnungBeschreibung.Text,
                 Datum = AddBetriebskostenrechnungDatum.Date.Value.UtcDateTime,
                 Schluessel = ((BetriebskostenRechnungenSchluessel)AddBetriebskostenrechnungSchluessel.SelectedItem).Schluessel,
-                Typ = ((BetriebskostenRechnungenBetriebskostentyp)AddBetriebskostenrechnungTyp.SelectedItem).Typ,
+                Typ = ((BetriebskostenRechnungenBetriebskostenTyp)AddBetriebskostenrechnungTyp.SelectedItem).Typ,
                 BetreffendesJahr = (int)AddBetriebskostenrechnungJahr.Value,
                 Betrag = AddBetriebskostenrechnungBetrag.Value,
             };
@@ -64,14 +63,14 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void NeuesJahr_Click(object sender, RoutedEventArgs e)
         {
-            var dc = (KeyValuePair<BetriebskostenRechnungenGruppeListGruppe, BetriebskostenRechnungenListGruppenJahr>)((Button)sender).DataContext;
+            var dc = (KeyValuePair<BetriebskostenRechnungenBetriebskostenGruppe, BetriebskostenRechnungenListJahr>)((Button)sender).DataContext;
             var LetztesJahr = dc.Value.Jahre.First();
             var Rechnungen = LetztesJahr.Value;
 
-            var neueJahre = new BetriebskostenRechnungenListGruppenJahr(
+            var neueJahre = new BetriebskostenRechnungenListJahr(
                 ViewModel.Gruppen.Value[dc.Key].Jahre.Add(
                 LetztesJahr.Key + 1,
-                Rechnungen.Select(r => new BetriebskostenGruppenRechnungenRechnung(r)).ToImmutableList()));
+                Rechnungen.Select(r => new BetriebskostenRechnungenRechnung(r)).ToImmutableList()));
 
             var Typen = ViewModel.Gruppen.Value.Remove(dc.Key);
             ViewModel.Gruppen.Value = Typen.Add(dc.Key, neueJahre);
@@ -79,7 +78,7 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void SaveGruppe_Click(object sender, RoutedEventArgs e)
         {
-            var cp = (BetriebskostenGruppenRechnungenRechnung)((Button)sender).CommandParameter;
+            var cp = (BetriebskostenRechnungenRechnung)((Button)sender).CommandParameter;
             var r = new Betriebskostenrechnung
             {
                 Betrag = cp.Betrag,

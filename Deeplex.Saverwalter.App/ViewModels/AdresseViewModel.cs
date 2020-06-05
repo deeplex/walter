@@ -84,7 +84,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     Strasse = avm.Strasse.Value,
                     Stadt = avm.Stadt.Value
                 };
-                
+
                 App.Walter.Adressen.Add(adr);
                 App.Walter.SaveChanges();
                 return adr;
