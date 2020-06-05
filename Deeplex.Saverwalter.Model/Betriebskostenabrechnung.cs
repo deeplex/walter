@@ -95,7 +95,6 @@ namespace Deeplex.Saverwalter.Model
                 .Select(g => new Rechnungsgruppe(this, g.Select(i => i.Rechnung).ToList()))
                 .ToList();
 
-            // TODO Timerange should be more dynamic...
             Gezahlt = db.Mieten
                 .Where(m => m.VertragId == vertrag.VertragId)
                     .Where(m => m.BetreffenderMonat >= Abrechnungsbeginn && m.BetreffenderMonat < Abrechnungsende)

@@ -17,6 +17,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ImmutableList<AdresseViewModel> AlleAdressen { get; }
         public ImmutableList<Anrede> Anreden { get; }
 
+        public void selfDestruct()
+        {
+            App.Walter.Kontakte.Remove(Entity);
+            App.Walter.SaveChanges();
+        }
+
         public Anrede Anrede
         {
             get => Entity.Anrede;

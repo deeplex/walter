@@ -33,7 +33,6 @@
                     </AppBarButton.Flyout>
                 </AppBarButton>
                 <AppBarButton Click="Details_Click" Icon="ContactInfo" Label="Details"/>
-                <AppBarButton IsEnabled="False" Icon="Delete" Label="Löschen"/>
             </CommandBar>
             <AutoSuggestBox
                 x:Name="KontaktFilter"
