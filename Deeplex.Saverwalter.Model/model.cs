@@ -161,7 +161,7 @@ namespace Deeplex.Saverwalter.Model
         public int MietMinderungId { get; set; }
         public Guid VetragId { get; set; }
         public DateTime Beginn { get; set; }
-        public DateTime Ende { get; set; }
+        public DateTime? Ende { get; set; } = null!;
         public double Minderung { get; set; }
         public string? Notiz { get; set; }
     }

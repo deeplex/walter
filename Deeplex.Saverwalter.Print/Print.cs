@@ -541,6 +541,13 @@ namespace Deeplex.Saverwalter.Print
                     ContentCell("Abzüglich Ihrer Kaltmiete:"),
                     ContentCell("-" + Euro(b.KaltMiete), JustificationValues.Right)));
 
+            if (b.Minderung > 0)
+            {
+                table.Append(new TableRow(
+                    ContentCell("Verrechnung mit Mietminderung:"),
+                    ContentCell("+" + Euro(b.KaltMinderung), JustificationValues.Right)));
+            }
+
             var f = true;
             foreach (var gruppe in b.Gruppen)
             {
@@ -548,6 +555,13 @@ namespace Deeplex.Saverwalter.Print
                     ContentCell(f ? "Abzüglich Ihrer Nebenkostenanteile:" : ""),
                     ContentCell("-" + Euro(gruppe.Betrag), JustificationValues.Right)));
                 f = false;
+            }
+
+            if (b.Minderung > 0)
+            {
+                table.Append(new TableRow(
+                    ContentCell("Verrechnung mit Mietminderung:"),
+                    ContentCell("+" + Euro(b.NebenkostenMinderung), JustificationValues.Right)));
             }
 
             table.Append(new TableRow(

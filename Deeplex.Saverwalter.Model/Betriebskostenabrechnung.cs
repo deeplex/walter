@@ -18,7 +18,12 @@ namespace Deeplex.Saverwalter.Model
         public Adresse Adresse { get; set; }
         public double Gezahlt { get; set; }
         public double KaltMiete { get; set; }
+        public double BetragNebenkosten { get; set; }
         public double BezahltNebenkosten { get; set; }
+        public List<MietMinderung> Minderungen { get; set; }
+        public double Minderung { get; set; }
+        public double NebenkostenMinderung { get; set; }
+        public double KaltMinderung { get; set; }
 
         public DateTime Abrechnungsbeginn { get; set; }
         public DateTime Abrechnungsende { get; set; }
@@ -29,7 +34,6 @@ namespace Deeplex.Saverwalter.Model
         public int Nutzungszeitspanne;
         public double Zeitanteil;
 
-        public double BetragNebenkosten;
 
         public List<Rechnungsgruppe> Gruppen { get; set; }
 
@@ -97,11 +101,19 @@ namespace Deeplex.Saverwalter.Model
                     .Where(m => m.BetreffenderMonat >= Abrechnungsbeginn && m.BetreffenderMonat < Abrechnungsende)
                     .Sum(z => z.Betrag ?? 0);
 
-            KaltMiete = Vertragsversionen.Sum(v => (Min(v.Ende?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);
-            BezahltNebenkosten = Gezahlt - KaltMiete;
-            BetragNebenkosten = Gruppen.Sum(g => g.Betrag);
+            Minderungen = db.MietMinderungen
+                .Where(m => m.VetragId == vertrag.VertragId && m.Ende > Abrechnungsbeginn && m.Beginn <= Abrechnungsende).ToList();
+            Minderung = Minderungen.Sum(m => m.Minderung * ((Min(m.Ende ?? Abrechnungsende, Abrechnungsende) - Max(m.Beginn, Abrechnungsbeginn)).Days + 1)) / Abrechnungszeitspanne;
 
-            Result = BezahltNebenkosten - BetragNebenkosten;
+            KaltMiete = Vertragsversionen.Sum(v => (Min(v.Ende?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);
+            KaltMinderung = KaltMiete * Minderung;
+            
+            BetragNebenkosten = Gruppen.Sum(g => g.Betrag);
+            NebenkostenMinderung = BetragNebenkosten * Minderung;
+
+            BezahltNebenkosten = Gezahlt - KaltMiete;
+
+            Result = BezahltNebenkosten - BetragNebenkosten + KaltMinderung + NebenkostenMinderung;
         }
 
         public class Rechnungsgruppe
