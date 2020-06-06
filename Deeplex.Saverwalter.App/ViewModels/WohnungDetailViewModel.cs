@@ -203,10 +203,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public ObservableProperty<string> Kennnummer = new ObservableProperty<string>();
         public ObservableProperty<string> Typ = new ObservableProperty<string>();
-
         public ObservableProperty<ImmutableList<WohnungDetailZaehlerStand>> Zaehlerstaende
             = new ObservableProperty<ImmutableList<WohnungDetailZaehlerStand>>();
-
+        public DateTimeOffset AddZaehlerstandDatum => DateTime.UtcNow.Date.AsUtcKind();
+        // TODO interpolate between last and prelast to determine stand
+        public double AddZaehlerstandStand => Zaehlerstaende.Value.First().Stand;
         public void LoadList()
         {
             var self = this;

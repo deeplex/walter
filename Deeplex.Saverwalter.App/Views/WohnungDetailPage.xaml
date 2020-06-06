@@ -178,8 +178,8 @@
                                                 <StackPanel>
                                                     <TextBlock FontSize="18" Text="Zählerstand hinzufügen:"/>
                                                     <StackPanel x:Name="AddZaehlerstandPanel" Orientation="Horizontal">
-                                                        <CalendarDatePicker  Header="Datum"/>
-                                                        <muxc:NumberBox Margin="10,0,0,0" Header="Stand"/>
+                                                        <CalendarDatePicker Date="{x:Bind AddZaehlerstandDatum, Mode=OneWay}" Header="Datum"/>
+                                                        <muxc:NumberBox Value="{x:Bind AddZaehlerstandStand, Mode=OneWay}" Margin="10,0,0,0" Header="Stand"/>
                                                         <Button
                                                             CommandParameter="{Binding ElementName=AddZaehlerstandPanel}"
                                                             Command="{x:Bind AddZaehlerstand}"
