@@ -1,11 +1,16 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class AdresseViewModel
     {
+        private Adresse Entity;
+
+        public Adresse getEntity => Entity;
+
         public int Id;
         public ObservableProperty<string> Strasse { get; set; } = new ObservableProperty<string>();
         public ObservableProperty<string> Hausnummer { get; set; } = new ObservableProperty<string>();
@@ -16,6 +21,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public AdresseViewModel(Adresse a)
         {
+            Entity = a;
             Id = a.AdresseId;
             Strasse.Value = a.Strasse;
             Hausnummer.Value = a.Hausnummer;
@@ -51,16 +57,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 avm.Strasse.Value == null || avm.Strasse.Value == "" ||
                 avm.Stadt.Value == null || avm.Stadt.Value == "")
             {
-                App.Walter.Remove(GetAdresse(avm));
+                App.Walter.Adressen.Remove(avm.getEntity);
                 return null;
             }
 
             // Remove deprecated Adressen
-            foreach (var adresse in App.Walter.Adressen)
+            foreach (var adresse in App.Walter.Adressen.Include(a => a.Kontakte).Include(a => a.Wohnungen).Include(a => a.Garagen))
             {
                 if (adresse.Wohnungen.Count == 0 && adresse.Kontakte.Count == 0 && adresse.Garagen.Count == 0)
                 {
-                    App.Walter.Remove(adresse);
+                    App.Walter.Adressen.Remove(adresse);
                 }
             }
 
