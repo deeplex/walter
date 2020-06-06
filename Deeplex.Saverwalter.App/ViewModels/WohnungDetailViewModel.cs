@@ -199,24 +199,41 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class WohnungDetailZaehler : BindableBase
     {
         public int Id;
+        private Zaehler Entity;
+
         public ObservableProperty<string> Kennnummer = new ObservableProperty<string>();
         public ObservableProperty<string> Typ = new ObservableProperty<string>();
 
         public ObservableProperty<ImmutableList<WohnungDetailZaehlerStand>> Zaehlerstaende
             = new ObservableProperty<ImmutableList<WohnungDetailZaehlerStand>>();
 
-        public WohnungDetailZaehler(Zaehler z)
+        public void LoadList()
         {
-            Id = z.ZaehlerId;
-            Kennnummer.Value = z.Kennnummer;
-            Typ.Value = z.Typ.ToString(); // May be a descript thingy later on?...
+            var self = this;
 
             Zaehlerstaende.Value = App.Walter.Zaehlerstaende
-                .Where(zs => zs.Zaehler == z)
-                .Select(zs => new WohnungDetailZaehlerStand(zs))
+                .Where(zs => zs.Zaehler == Entity)
+                .Select(zs => new WohnungDetailZaehlerStand(zs, self))
                 .ToList()
                 .OrderBy(zs => zs.Datum).Reverse()
                 .ToImmutableList();
+        }
+
+        public WohnungDetailZaehler(Zaehler z)
+        {
+            Id = z.ZaehlerId;
+            Entity = z;
+            Kennnummer.Value = z.Kennnummer;
+            Typ.Value = z.Typ.ToString(); // May be a descript thingy later on?...
+
+            var self = this; // Protect against memory leaks? Ask the debugger im new.
+
+            Zaehlerstaende.Value = App.Walter.Zaehlerstaende
+            .Where(zs => zs.Zaehler == Entity)
+            .Select(zs => new WohnungDetailZaehlerStand(zs, self))
+            .ToList()
+            .OrderBy(zs => zs.Datum).Reverse()
+            .ToImmutableList();
 
             AddZaehlerstand = new RelayCommand(AddZaehlerstandPanel =>
             {
@@ -232,7 +249,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 };
                 App.Walter.Zaehlerstaende.Add(zs);
                 App.Walter.SaveChanges();
-                var wdzs = new WohnungDetailZaehlerStand(zs);
+                var wdzs = new WohnungDetailZaehlerStand(zs, self);
                 Zaehlerstaende.Value = Zaehlerstaende.Value
                     .Add(wdzs)
                     .OrderBy(nzs => nzs.Datum).Reverse()
@@ -268,11 +285,18 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public string DatumString => Datum.ToString("dd.MM.yyyy");
 
-        public WohnungDetailZaehlerStand(Zaehlerstand z)
+        public WohnungDetailZaehlerStand(Zaehlerstand z, WohnungDetailZaehler p)
         {
             Entity = z;
-        }
 
+            SelfDestruct = new RelayCommand(_ =>
+            {
+                App.Walter.Remove(Entity);
+                App.Walter.SaveChanges();
+                p.LoadList();
+            }, _ => true);
+        }
+        public RelayCommand SelfDestruct { get; }
     }
 
     public sealed class WohnungDetailVertrag

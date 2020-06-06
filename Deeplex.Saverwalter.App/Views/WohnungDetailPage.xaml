@@ -203,11 +203,17 @@
                                     ItemHeight="100"
                                     StretchContentForSingleRow="True"
                                     SelectionMode="Single"
+                                    x:Name="ZaehlerstandPanel"
                                     ItemsSource="{x:Bind Zaehlerstaende.Value, Mode=OneWay}">
                                     <mtuuc:AdaptiveGridView.ItemTemplate>
                                         <DataTemplate x:DataType="vm:WohnungDetailZaehlerStand">
                                             <RelativePanel Background="{ThemeResource SystemChromeLowColor}">
                                                 <Grid Width="200" BorderThickness="1">
+                                                    <Grid.ContextFlyout>
+                                                        <MenuFlyout>
+                                                            <MenuFlyoutItem CommandParameter="{Binding ElementName=ZaehlerstandPanel}" Command="{x:Bind SelfDestruct}" Icon="Delete" Text="Löschen"/>
+                                                        </MenuFlyout>
+                                                    </Grid.ContextFlyout>
                                                     <StackPanel Margin="10,10,10,10" HorizontalAlignment="Center">
                                                         <TextBlock>
                                                             <Run Text="Zählerstand: "/>
