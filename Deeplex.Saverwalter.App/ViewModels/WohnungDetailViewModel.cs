@@ -273,17 +273,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 RaisePropertyChangedAuto();
             }
         }
-        public DateTime Datum
+        public DateTimeOffset Datum
         {
             get => Entity.Datum.AsUtcKind();
             set
             {
-                Entity.Datum = value.AsUtcKind();
+                Entity.Datum = value.UtcDateTime.AsUtcKind();
                 RaisePropertyChangedAuto();
             }
         }
-
-        public string DatumString => Datum.ToString("dd.MM.yyyy");
 
         public WohnungDetailZaehlerStand(Zaehlerstand z, WohnungDetailZaehler p)
         {

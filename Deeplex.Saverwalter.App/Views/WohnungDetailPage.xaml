@@ -208,21 +208,20 @@
                                     <mtuuc:AdaptiveGridView.ItemTemplate>
                                         <DataTemplate x:DataType="vm:WohnungDetailZaehlerStand">
                                             <RelativePanel Background="{ThemeResource SystemChromeLowColor}">
-                                                <Grid Width="200" BorderThickness="1">
+                                                <Grid BorderThickness="1">
                                                     <Grid.ContextFlyout>
                                                         <MenuFlyout>
                                                             <MenuFlyoutItem CommandParameter="{Binding ElementName=ZaehlerstandPanel}" Command="{x:Bind SelfDestruct}" Icon="Delete" Text="Löschen"/>
                                                         </MenuFlyout>
                                                     </Grid.ContextFlyout>
-                                                    <StackPanel Margin="10,10,10,10" HorizontalAlignment="Center">
-                                                        <TextBlock>
-                                                            <Run Text="Zählerstand: "/>
-                                                            <Run Text="{x:Bind Stand}"/>
-                                                        </TextBlock>
-                                                        <TextBlock>
-                                                            <Run Text="Ablesedatum: "/>
-                                                            <Run Text="{x:Bind DatumString}"/>
-                                                        </TextBlock>
+                                                    <StackPanel Margin="10,10,10,10" Orientation="Horizontal">
+                                                        <TextBox Header="Zählerstand" Text="{x:Bind Stand, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                        <CalendarDatePicker
+                                                            Margin="10,0,0,0"
+                                                            Header="Ablesedatum"
+                                                            Date="{x:Bind Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                            Language="de"
+                                                            DateFormat="{}{day.integer}. {month.full} {year.full}"/>
                                                     </StackPanel>
                                                 </Grid>
                                             </RelativePanel>
