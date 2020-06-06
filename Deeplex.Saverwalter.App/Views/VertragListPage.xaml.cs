@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.App.Views
             InitializeComponent();
         }
 
-        private void Vertrag_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        private void Vertrag_Tapped(object sender, TappedRoutedEventArgs e)
         {
             Frame.Navigate(typeof(VertragDetailViewPage), ViewModel.SelectedVertrag.Value.VertragId,
                 new DrillInNavigationTransitionInfo());

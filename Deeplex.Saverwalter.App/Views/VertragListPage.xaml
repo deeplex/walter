@@ -50,7 +50,7 @@
                     StretchContentForSingleRow="True"
                     SelectionMode="Single"
                     SelectedItem="{x:Bind ViewModel.SelectedVertrag.Value, Mode=TwoWay}"
-                    DoubleTapped="Vertrag_DoubleTapped"
+                    Tapped="Vertrag_Tapped"
                     ItemsSource="{x:Bind ViewModel.Vertraege}"
                     IsItemClickEnabled="True">
                     <mtuuc:AdaptiveGridView.ItemTemplate>

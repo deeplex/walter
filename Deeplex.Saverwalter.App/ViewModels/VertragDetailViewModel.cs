@@ -57,6 +57,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public VertragDetailViewModel(Guid id)
             : this(App.Walter.Vertraege
                   .Where(v => v.VertragId == id)
+                  .Include(v => v.Wohnung)
+                  .ThenInclude(w => w.Besitzer)
                   .ToList()
                   .OrderBy(v => v.Version)
                   .Reverse()
@@ -491,7 +493,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public Wohnung Entity { get; }
 
         public int Id { get; }
-        public int BesitzerId { get; }
+        public int? BesitzerId { get; }
         public string Besitzer { get; }
         public string BezeichnungVoll { get; }
 
@@ -499,8 +501,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = w;
             Id = w.WohnungId;
-            Besitzer = w.Besitzer.Bezeichnung;
-            BesitzerId = w.Besitzer.JuristischePersonId;
+            Besitzer = w.Besitzer?.Bezeichnung ?? "";
+            BesitzerId = w.Besitzer?.JuristischePersonId ?? 0;
             BezeichnungVoll = AdresseViewModel.Anschrift(w) + " - " + w.Bezeichnung;
         }
 
