@@ -72,7 +72,7 @@
                                         <DataTemplate>
                                             <Button
                                                 CommandParameter="{Binding Id}"
-                                                DoubleTapped="Wohnung_DoubleTapped"
+                                                Tapped="Wohnung_Tapped"
                                                 Width="200" Height="100"
                                                 Content="{Binding Bezeichnung}" 
 	                                            Background="{ThemeResource SystemChromeLowColor}">

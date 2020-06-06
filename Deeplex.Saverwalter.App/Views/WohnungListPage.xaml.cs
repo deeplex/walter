@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.App.Views
             InitializeComponent();
         }
 
-        private void Wohnung_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        private void Wohnung_Tapped(object sender, TappedRoutedEventArgs e)
         {
             Frame.Navigate(typeof(WohnungDetailPage), ((Button)sender).CommandParameter,
                 new DrillInNavigationTransitionInfo());
