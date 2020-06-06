@@ -28,7 +28,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Personen.Value = Personen.Value.Add(new JuristischePersonenPerson(j));
             }, _ => true);
         }
-
     }
 
     public sealed class JuristischePersonenPerson

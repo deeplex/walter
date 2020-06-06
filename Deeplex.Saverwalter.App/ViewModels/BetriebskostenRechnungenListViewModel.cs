@@ -53,7 +53,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .GroupBy(p => new SortedSet<int>(p.Rechnung.Gruppen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
                 .ToImmutableSortedDictionary(
                     g => new BetriebskostenRechnungenBetriebskostenGruppe(g.Key),
-                    g => new BetriebskostenRechnungenListJahr(g.ToList())); // TODO Comparer? 
+                    g => new BetriebskostenRechnungenListJahr(g.ToList()),
+                    Comparer<BetriebskostenRechnungenBetriebskostenGruppe>.Create((x, y)
+                        => x.Bezeichnung.CompareTo(y.Bezeichnung)));
 
             AdresseGroup = App.Walter.Wohnungen
                 .Include(w => w.Adresse)

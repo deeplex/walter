@@ -5,6 +5,7 @@
     xmlns:local="using:Deeplex.Saverwalter.App.Views"
     xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -121,7 +122,7 @@
                                     Header="Stadt"
                                     x:Name="ComboBoxStadt" Width="200" IsEditable="True" ItemsSource="{x:Bind ViewModel.Staedte, Mode=OneWay}"
                                     SelectedValue="{x:Bind ViewModel.Stadt.Value, Mode=TwoWay}"/>
-                                
+
                                 <Button Margin="0,20,0,0" Click="UpdateAdresse_Click" Background="Transparent" VerticalAlignment="Bottom">
                                     <SymbolIcon Symbol="Accept"/>
                                 </Button>
@@ -145,40 +146,87 @@
                     Header="Einheiten" Width="70" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
             <RelativePanel>
-                <TextBox
-                    Style="{StaticResource Eintraege}"
-                    Margin="20"
-                    RelativePanel.AlignLeftWithPanel="True"
-                    RelativePanel.AlignRightWithPanel="True"
-                    Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Header="Notiz"/>
-            </RelativePanel>
-            <TextBlock Text="Zähler" Margin ="10" Style="{StaticResource SubtitleTextBlockStyle}"/>
-
-            <GridView
-                IsItemClickEnabled="True"
-                SelectionMode="Single"
-                Margin="10"
-                ItemsSource="{x:Bind ViewModel.Zaehler.Value, Mode=OneWay}">
-                <GridView.ItemTemplate>
-                    <DataTemplate x:DataType="vm:WohnungDetailZaehler">
-                        <Button
-                    Width="200" Height="100"
-	                Background="{ThemeResource SystemChromeLowColor}">
-                            <Button.Content>
-                                <StackPanel>
-                                    <TextBlock Text="{x:Bind Typ.Value}"/>
-                                    <TextBlock Text="{x:Bind Kennnummer.Value}"/>
-                                </StackPanel>
-                            </Button.Content>
-                        </Button>
-                    </DataTemplate>
-                </GridView.ItemTemplate>
-            </GridView>
-            <RelativePanel Margin="0,20,0,0">
                 <StackPanel
                     RelativePanel.AlignRightWithPanel="True"
                     RelativePanel.AlignLeftWithPanel="True">
+                    <TextBox
+                        Style="{StaticResource Eintraege}"
+                        Margin="20"
+                        Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Header="Notiz"/>
+
+                    <!--<mtuuc:Expander
+                        Background="Transparent"
+                        Header="Zähler"
+                        Height="500"
+                        HorizontalContentAlignment="Left">-->
+                    <TextBlock Text="Zähler" Margin="20,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <muxc:ItemsRepeater ItemsSource="{x:Bind ViewModel.Zaehler.Value, Mode=OneWay}">
+                        <DataTemplate x:DataType="vm:WohnungDetailZaehler">
+                            <StackPanel>
+                                <RelativePanel>
+                                    <TextBlock Margin="20,10,0,0">
+                                        <Run Text="{x:Bind Kennnummer.Value}"/>
+                                        <Run Text=" ("/>
+                                        <Run Text="{x:Bind Typ.Value}"/>
+                                        <Run Text=")"/>
+                                    </TextBlock>
+
+                                    <Button Margin="0,5,20,0" RelativePanel.AlignRightWithPanel="True" Background="Transparent">
+                                        <Button.Flyout>
+                                            <Flyout>
+                                                <StackPanel>
+                                                    <TextBlock FontSize="18" Text="Zählerstand hinzufügen:"/>
+                                                    <StackPanel x:Name="AddZaehlerstandPanel" Orientation="Horizontal">
+                                                        <CalendarDatePicker  Header="Datum"/>
+                                                        <muxc:NumberBox Margin="10,0,0,0" Header="Stand"/>
+                                                        <Button
+                                                            CommandParameter="{Binding ElementName=AddZaehlerstandPanel}"
+                                                            Command="{x:Bind AddZaehlerstand}"
+                                                            Background="Transparent"
+                                                            VerticalAlignment="Bottom">
+                                                            <SymbolIcon Symbol="Add"/>
+                                                        </Button>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Flyout>
+                                        </Button.Flyout>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Eintrag hinzufügen"/>
+                                            <SymbolIcon Margin="10,0,0,0" Symbol="Add"/>
+                                        </StackPanel>
+                                    </Button>
+                                </RelativePanel>
+                                <mtuuc:AdaptiveGridView
+                                    OneRowModeEnabled="True"
+                                    VerticalAlignment="Stretch"
+                                    ItemHeight="100"
+                                    StretchContentForSingleRow="True"
+                                    SelectionMode="Single"
+                                    ItemsSource="{x:Bind Zaehlerstaende.Value, Mode=OneWay}">
+                                    <mtuuc:AdaptiveGridView.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:WohnungDetailZaehlerStand">
+                                            <RelativePanel Background="{ThemeResource SystemChromeLowColor}">
+                                                <Grid Width="200" BorderThickness="1">
+                                                    <StackPanel Margin="10,10,10,10" HorizontalAlignment="Center">
+                                                        <TextBlock>
+                                                            <Run Text="Zählerstand: "/>
+                                                            <Run Text="{x:Bind Stand}"/>
+                                                        </TextBlock>
+                                                        <TextBlock>
+                                                            <Run Text="Ablesedatum: "/>
+                                                            <Run Text="{x:Bind DatumString}"/>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </RelativePanel>
+                                        </DataTemplate>
+                                    </mtuuc:AdaptiveGridView.ItemTemplate>
+                                </mtuuc:AdaptiveGridView>
+                            </StackPanel>
+                        </DataTemplate>
+                    </muxc:ItemsRepeater>
+                    <!--</mtuuc:Expander>-->
                     <mtuuc:Expander
                         Background="Transparent"
                         Header="Verträge"

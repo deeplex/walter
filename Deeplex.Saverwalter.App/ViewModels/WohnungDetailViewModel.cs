@@ -1,11 +1,13 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
+using Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -194,18 +196,83 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public sealed class WohnungDetailZaehler
+    public sealed class WohnungDetailZaehler : BindableBase
     {
         public int Id;
         public ObservableProperty<string> Kennnummer = new ObservableProperty<string>();
         public ObservableProperty<string> Typ = new ObservableProperty<string>();
+
+        public ObservableProperty<ImmutableList<WohnungDetailZaehlerStand>> Zaehlerstaende
+            = new ObservableProperty<ImmutableList<WohnungDetailZaehlerStand>>();
 
         public WohnungDetailZaehler(Zaehler z)
         {
             Id = z.ZaehlerId;
             Kennnummer.Value = z.Kennnummer;
             Typ.Value = z.Typ.ToString(); // May be a descript thingy later on?...
+
+            Zaehlerstaende.Value = App.Walter.Zaehlerstaende
+                .Where(zs => zs.Zaehler == z)
+                .Select(zs => new WohnungDetailZaehlerStand(zs))
+                .ToList()
+                .OrderBy(zs => zs.Datum).Reverse()
+                .ToImmutableList();
+
+            AddZaehlerstand = new RelayCommand(AddZaehlerstandPanel =>
+            {
+                var dtp = ((CalendarDatePicker)((StackPanel)AddZaehlerstandPanel).Children[0]).Date;
+                var datum = (dtp.HasValue ? dtp.Value.UtcDateTime : DateTime.UtcNow.Date).AsUtcKind();
+                var stand = Convert.ToDouble(((NumberBox)((StackPanel)AddZaehlerstandPanel).Children[1]).Text);
+
+                var zs = new Zaehlerstand
+                {
+                    Zaehler = z,
+                    Datum = datum,
+                    Stand = stand,
+                };
+                App.Walter.Zaehlerstaende.Add(zs);
+                App.Walter.SaveChanges();
+                var wdzs = new WohnungDetailZaehlerStand(zs);
+                Zaehlerstaende.Value = Zaehlerstaende.Value
+                    .Add(wdzs)
+                    .OrderBy(nzs => nzs.Datum).Reverse()
+                    .ToImmutableList();
+                RaisePropertyChanged(nameof(Zaehlerstaende));
+            }, _ => true);
         }
+        public RelayCommand AddZaehlerstand { get; }
+    }
+
+    public sealed class WohnungDetailZaehlerStand : BindableBase
+    {
+        public int Id => Entity.ZaehlerstandId;
+        public Zaehlerstand Entity;
+        public double Stand
+        {
+            get => Entity.Stand;
+            set
+            {
+                Entity.Stand = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+        public DateTime Datum
+        {
+            get => Entity.Datum.AsUtcKind();
+            set
+            {
+                Entity.Datum = value.AsUtcKind();
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public string DatumString => Datum.ToString("dd.MM.yyyy");
+
+        public WohnungDetailZaehlerStand(Zaehlerstand z)
+        {
+            Entity = z;
+        }
+
     }
 
     public sealed class WohnungDetailVertrag
