@@ -360,6 +360,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     ZaehlerId = table.Column<int>(nullable: false),
                     Datum = table.Column<DateTime>(nullable: false),
+                    Abgelesen = table.Column<bool>(nullable: false),
                     Stand = table.Column<double>(nullable: false),
                     Notiz = table.Column<string>(nullable: true)
                 },

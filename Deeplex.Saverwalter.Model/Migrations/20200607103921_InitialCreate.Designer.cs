@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20200605010927_InitialCreate")]
+    [Migration("20200607103921_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -452,6 +452,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     b.Property<int>("ZaehlerstandId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Abgelesen")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Datum")

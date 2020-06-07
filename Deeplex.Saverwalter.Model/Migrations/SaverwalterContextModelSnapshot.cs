@@ -452,6 +452,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("Abgelesen")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("Datum")
                         .HasColumnType("TEXT");
 

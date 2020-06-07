@@ -266,6 +266,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
                 var zs = new Zaehlerstand
                 {
+                    Abgelesen = true,
                     Zaehler = z,
                     Datum = datum,
                     Stand = stand,
