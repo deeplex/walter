@@ -35,8 +35,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             .Where(a => Hausnummer.Value != "" && a.Hausnummer == Entity.Adresse.Hausnummer)
             .Select(a => a.Hausnummer).Distinct().ToImmutableList();
 
-        public ObservableProperty<List<WohnungDetailZaehler>> Zaehler
-            = new ObservableProperty<List<WohnungDetailZaehler>>();
+        public ObservableProperty<ImmutableList<WohnungDetailZaehler>> Zaehler
+            = new ObservableProperty<ImmutableList<WohnungDetailZaehler>>();
         public ObservableProperty<List<WohnungDetailVertrag>> Vertraege
             = new ObservableProperty<List<WohnungDetailVertrag>>();
 
@@ -129,6 +129,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
             IsInEdit.Value = true;
         } // Create new Wohnung
 
+        public ImmutableList<Zaehlertyp> Zaehlertypen =
+            Enum.GetValues(typeof(Zaehlertyp))
+                .Cast<Zaehlertyp>()
+                .ToImmutableList();
+
         private WohnungDetailViewModel(Wohnung w)
         {
             Entity = w;
@@ -138,16 +143,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Strasse.Value = w.Adresse?.Strasse ?? "";
             Hausnummer.Value = w.Adresse?.Strasse ?? "";
 
-            AlleJuristischePersonen = App.Walter.JuristischePersonen
-                .Select(j => new JuristischePersonViewModel(j))
-                .ToImmutableList();
-
             if (w.Adresse != null)
             {
                 Adresse = new AdresseViewModel(w.Adresse);
             }
             var self = this;
-            Zaehler.Value = w.Zaehler.Select(z => new WohnungDetailZaehler(z, self)).ToList();
+            Zaehler.Value = w.Zaehler.Select(z => new WohnungDetailZaehler(z, self)).ToImmutableList();
 
             Vertraege.Value = App.Walter.Vertraege
                 .Include(v => v.Wohnung).ToList()
@@ -155,11 +156,29 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Select(v => new WohnungDetailVertrag(v.VertragId))
                 .ToList();
 
-            IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
+            AddZaehler = new RelayCommand(AddZaehlerPanel =>
+            {
+                var kn = ((TextBox)((StackPanel)AddZaehlerPanel).Children[0]).Text;
+                var Typ = (Zaehlertyp)((ComboBox)((StackPanel)AddZaehlerPanel).Children[1]).SelectedItem;
 
+                var z = new Zaehler
+                {
+                    Wohnung = w,
+                    Kennnummer = kn,
+                    Typ = Typ,
+                };
+                App.Walter.ZaehlerSet.Add(z);
+                App.Walter.SaveChanges();
+                var wdz = new WohnungDetailZaehler(z, self);
+                Zaehler.Value = Zaehler.Value.Add(wdz);
+                RaisePropertyChanged(nameof(Zaehler));
+            }, _ => true);
+
+            IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
             PropertyChanged += OnUpdate;
         }
         public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
+        public RelayCommand AddZaehler { get; }
         public bool IsNotInEdit => !IsInEdit.Value;
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
@@ -207,7 +226,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<ImmutableList<WohnungDetailZaehlerStand>>();
         public DateTimeOffset AddZaehlerstandDatum => DateTime.UtcNow.Date.AsUtcKind();
         // TODO interpolate between last and prelast to determine stand
-        public double AddZaehlerstandStand => Zaehlerstaende.Value.First().Stand;
+        public double AddZaehlerstandStand => Zaehlerstaende.Value.FirstOrDefault()?.Stand ?? 0;
         public void LoadList()
         {
             var self = this;

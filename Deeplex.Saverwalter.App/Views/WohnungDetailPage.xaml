@@ -146,7 +146,7 @@
                     Header="Einheiten" Width="70" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
             <RelativePanel>
-                <StackPanel
+                <StackPanel 
                     RelativePanel.AlignRightWithPanel="True"
                     RelativePanel.AlignLeftWithPanel="True">
                     <TextBox
@@ -160,19 +160,45 @@
                         Header="Zähler"
                         Height="500"
                         HorizontalContentAlignment="Left">-->
-                    <TextBlock Text="Zähler" Margin="20,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                    <muxc:ItemsRepeater x:Name="Test" ItemsSource="{x:Bind ViewModel.Zaehler.Value, Mode=OneWay}">
+                    <mtuuc:DockPanel>
+                            <TextBlock Text="Zähler" Margin="20,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <Button Margin="0,0,20,0"  Background="Transparent" HorizontalAlignment="Right" Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}">
+                                <Button.Flyout>
+                                    <Flyout>
+                                        <StackPanel>
+                                            <TextBlock FontSize="18" Text="Zähler hinzufügen:"/>
+                                            <StackPanel x:Name="AddZaehlerPanel" Orientation="Horizontal">
+                                                <TextBox PlaceholderText="Kennnummer"  Header="Kennnummer"/>
+                                                <ComboBox PlaceholderText="Typ auswählen" Margin="10,0,0,0" ItemsSource="{x:Bind ViewModel.Zaehlertypen, Mode=OneWay}" Header="Typ"/>
+                                                <Button
+                                                    CommandParameter="{Binding ElementName=AddZaehlerPanel}"
+                                                    Command="{x:Bind ViewModel.AddZaehler}"
+                                                    Background="Transparent"
+                                                    VerticalAlignment="Bottom">
+                                                    <SymbolIcon Symbol="Add"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Flyout>
+                                </Button.Flyout>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Zähler hinzufügen"/>
+                                    <SymbolIcon Margin="10,0,0,0" Symbol="Add"/>
+                                </StackPanel>
+                            </Button>
+                    </mtuuc:DockPanel>
+                    <muxc:ItemsRepeater ItemsSource="{x:Bind ViewModel.Zaehler.Value, Mode=OneWay}">
                         <DataTemplate x:DataType="vm:WohnungDetailZaehler">
                             <StackPanel>
                                 <RelativePanel>
-                                    <TextBlock Margin="20,10,0,0">
+                                    <TextBlock Margin="20,10,0,0" Style="{StaticResource SubtitleTextBlockStyle}">
                                         <Run Text="{x:Bind Kennnummer.Value}"/>
                                         <Run Text=" ("/>
                                         <Run Text="{x:Bind Typ.Value}"/>
                                         <Run Text=")"/>
                                     </TextBlock>
 
-                                    <Button Margin="0,5,20,0" RelativePanel.AlignRightWithPanel="True" Background="Transparent">
+                                    <Button Margin="0,10,20,0" RelativePanel.AlignRightWithPanel="True" Background="Transparent">
                                         <Button.Flyout>
                                             <Flyout>
                                                 <StackPanel>
@@ -199,6 +225,7 @@
                                     </Button>
                                 </RelativePanel>
                                 <mtuuc:AdaptiveGridView
+                                    Margin="10"
                                     OneRowModeEnabled="True"
                                     VerticalAlignment="Stretch"
                                     ItemHeight="100"
