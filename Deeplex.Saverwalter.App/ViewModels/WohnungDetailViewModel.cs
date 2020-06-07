@@ -146,8 +146,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 Adresse = new AdresseViewModel(w.Adresse);
             }
-
-            Zaehler.Value = w.Zaehler.Select(z => new WohnungDetailZaehler(z)).ToList();
+            var self = this;
+            Zaehler.Value = w.Zaehler.Select(z => new WohnungDetailZaehler(z, self)).ToList();
 
             Vertraege.Value = App.Walter.Vertraege
                 .Include(v => v.Wohnung).ToList()
@@ -220,9 +220,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ToImmutableList();
         }
 
-        public WohnungDetailZaehler(Zaehler z)
+        public ObservableProperty<bool> IsInEdit;
+
+        public WohnungDetailZaehler(Zaehler z, WohnungDetailViewModel p)
         {
             Id = z.ZaehlerId;
+            IsInEdit = p.IsInEdit;
             Entity = z;
             Kennnummer.Value = z.Kennnummer;
             Typ.Value = z.Typ.ToString(); // May be a descript thingy later on?...
@@ -284,16 +287,20 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
+        public ObservableProperty<bool> IsInEdit;
+
         public WohnungDetailZaehlerStand(Zaehlerstand z, WohnungDetailZaehler p)
         {
             Entity = z;
+
+            IsInEdit = p.IsInEdit;
 
             SelfDestruct = new RelayCommand(_ =>
             {
                 App.Walter.Remove(Entity);
                 App.Walter.SaveChanges();
                 p.LoadList();
-            }, _ => true);
+            }, _ => p.IsInEdit.Value);
         }
         public RelayCommand SelfDestruct { get; }
     }
