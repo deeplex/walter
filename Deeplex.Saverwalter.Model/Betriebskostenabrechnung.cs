@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using Windows.Foundation.Diagnostics;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -30,12 +32,15 @@ namespace Deeplex.Saverwalter.Model
         public DateTime Nutzungsbeginn { get; set; }
         public DateTime Nutzungsende { get; set; }
 
+        public List<Zaehler> Zaehler { get; set; }
+
         public int Abrechnungszeitspanne;
         public int Nutzungszeitspanne;
         public double Zeitanteil;
 
-
         public List<Rechnungsgruppe> Gruppen { get; set; }
+
+        private SaverwalterContext db { get; }
 
         public Betriebskostenabrechnung(int rowid, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
         {
@@ -43,7 +48,7 @@ namespace Deeplex.Saverwalter.Model
             Abrechnungsende = abrechnungsende;
             Jahr = jahr;
 
-            using var db = new SaverwalterContext();
+            db = new SaverwalterContext();
 
             var vertrag = db.Vertraege
                 .Where(v => v.rowid == rowid)
@@ -65,6 +70,9 @@ namespace Deeplex.Saverwalter.Model
                             .ThenInclude(r => r.Gruppen)
                                 .ThenInclude(g => g.Wohnung)
                                     .ThenInclude(w => w.Vertraege)
+                .Include(v => v.Wohnung)
+                    .ThenInclude(w => w.Zaehler)
+                        .ThenInclude(z => z.Staende)
                 .First();
 
             // If Ansprechpartner or Besitzer is null => throw
@@ -74,7 +82,9 @@ namespace Deeplex.Saverwalter.Model
                 .Where(m => m.VertragId == vertrag.VertragId)
                 .Select(m => m.Kontakt)
                 .ToList();
+
             Wohnung = vertrag.Wohnung!;
+            Zaehler = Wohnung.Zaehler;
             Adresse = Wohnung.Adresse;
             Vermieter = Wohnung.Besitzer;
 
@@ -104,15 +114,75 @@ namespace Deeplex.Saverwalter.Model
                 .Where(m => m.VertragId == vertrag.VertragId && (m.Ende == null || m.Ende > Abrechnungsbeginn) && m.Beginn <= Abrechnungsende).ToList();
             Minderung = Minderungen.Sum(m => m.Minderung * ((Min(m.Ende ?? Abrechnungsende, Abrechnungsende) - Max(m.Beginn, Abrechnungsbeginn)).Days + 1)) / Abrechnungszeitspanne;
 
-            KaltMiete = Vertragsversionen.Sum(v => (Min(v.Ende?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);
+            KaltMiete = Vertragsversionen.Sum(v => (Min(v.Ende ?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);
             KaltMinderung = KaltMiete * Minderung;
-            
+
             BetragNebenkosten = Gruppen.Sum(g => g.Betrag);
             NebenkostenMinderung = BetragNebenkosten * Minderung;
 
             BezahltNebenkosten = Gezahlt - KaltMiete;
 
             Result = BezahltNebenkosten - BetragNebenkosten + KaltMinderung + NebenkostenMinderung;
+
+            db.Dispose();
+        }
+
+        public List<(string Kennnummer, Zaehlertyp Typ, double Delta)> GetVerbrauch(Betriebskostenrechnung r)
+        {
+            Zaehlerstand interpolateZaehlerstand(DateTime d, Zaehlerstand z1, Zaehlerstand z2)
+            {
+                var m = (z1.Stand - z2.Stand) / (z1.Datum - z2.Datum).Days;
+                var Stand = m * (d - z1.Datum).Days + z1.Stand;
+
+                var zs = new Zaehlerstand
+                {
+                    Datum = d,
+                    Stand = Stand,
+                    Zaehler = z1.Zaehler,
+                    Abgelesen = false,
+                    Notiz = "Erstellt durch Betriebskostenabrechnung am " + DateTime.UtcNow.ToString("dd.mm.yyyy") +
+                        ". Berechnet durch Ablesung vom: " + z1.Datum.ToString("dd.mm.yyyy") + " und " + z2.Datum.ToString("dd.mm.yyyy")
+                };
+                db.Zaehlerstaende.Add(zs);
+                db.SaveChanges();
+                return zs;
+            }
+
+            var Zaehler = r.Typ switch
+            {
+                Betriebskostentyp.Wasserversorgung =>
+                    this.Zaehler.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
+                // Heizung wird zu 50% mit Warmwasser verrechnet oder so...
+                // Betriebskostentyp.Heizung => b.Zaehler.Where(z => z.Typ == Zaehlertyp.Heizung).ToList
+                _ => null
+            };
+
+            var Ende = Zaehler.Select(z => z.Staende
+                .LastOrDefault(l => l.Datum <= Nutzungsende && (Nutzungsende - l.Datum).Days < 30))
+                .Where(zs => zs != null)
+                .ToImmutableList();
+            var Beginn = Zaehler.Select(z => z.Staende
+                .LastOrDefault(l => l.Datum <= Nutzungsbeginn && (Nutzungsbeginn - l.Datum).Days < 30))
+                .Where(zs => zs != null)
+                .ToImmutableList();
+
+            if (Ende.IsEmpty) throw new Exception("Kein Zähler für Nutzungsbeginn gefunden.");
+            if (Beginn.IsEmpty) throw new Exception("Kein Zähler für Nutzungsende gefunden.");
+            if (Ende.Count() != Beginn.Count()) throw new Exception("Zählerstände sind nicht korrekt...");
+
+            List<(string Kennnummer, Zaehlertyp Typ, double Delta)> Deltas = new List<(string Kennnummer, Zaehlertyp Typ, double Delta)>();
+
+            for (var i = 0; i < Ende.Count(); ++i)
+            {
+                Zaehlerstand zBeginn = Beginn[i].Datum.Date == Nutzungsbeginn.Date.AddDays(-1) ? // TODO is same day also okay? ...
+                     Beginn[i] : interpolateZaehlerstand(Nutzungsbeginn, Beginn[i], Ende[i]);
+                Zaehlerstand zEnde = Ende[i].Datum.Date == Nutzungsende.Date ?
+                    Ende[i] : interpolateZaehlerstand(Nutzungsende, Beginn[i], Ende[i]);
+
+                Deltas.Add((zEnde.Zaehler.Kennnummer, zEnde.Zaehler.Typ, zEnde.Stand - zBeginn.Stand));
+            }
+
+            return Deltas;
         }
 
         public sealed class Rechnungsgruppe
@@ -127,6 +197,7 @@ namespace Deeplex.Saverwalter.Model
             public List<(DateTime Beginn, DateTime Ende, int Personenzahl)> GesamtPersonenIntervall;
             public List<(DateTime Beginn, DateTime Ende, int Personenzahl)> PersonenIntervall;
             public List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil;
+            public Dictionary<Betriebskostentyp, List<(string Kennnummer, Zaehlertyp Typ, double Delta)>> Verbrauch;
             public double GesamtBetrag;
             public double Betrag;
 
@@ -160,15 +231,16 @@ namespace Deeplex.Saverwalter.Model
                             (double)PersonenIntervall.Where(p => p.Beginn <= w.Beginn).First().Personenzahl / w.Personenzahl *
                             (((double)(w.Ende - w.Beginn).Days + 1) / b.Abrechnungszeitspanne))).ToList();
 
+                Verbrauch = gruppe.Where(g => g.Schluessel == UmlageSchluessel.NachVerbrauch).ToDictionary(r => r.Typ, r => b.GetVerbrauch(r));
+
                 GesamtBetrag = gruppe.Sum(r => r.Betrag);
-                Betrag = gruppe.Aggregate(0.0, (a, b) =>
-                    b.Schluessel switch
+                Betrag = gruppe.Aggregate(0.0, (a, r) =>
+                    r.Schluessel switch
                     {
-                        UmlageSchluessel.NachWohnflaeche => a + b.Betrag * WFZeitanteil,
-                        UmlageSchluessel.NachNutzeinheit => a + b.Betrag * NEZeitanteil,
-                        UmlageSchluessel.NachPersonenzahl => a + PersZeitanteil
-                                .Aggregate(0.0, (c, z) => c += z.Anteil * b.Betrag),
-                        UmlageSchluessel.NachVerbrauch => a + 0, // TODO
+                        UmlageSchluessel.NachWohnflaeche => a + r.Betrag * WFZeitanteil,
+                        UmlageSchluessel.NachNutzeinheit => a + r.Betrag * NEZeitanteil,
+                        UmlageSchluessel.NachPersonenzahl => a + PersZeitanteil.Aggregate(0.0, (a2, z) => a2 += z.Anteil * r.Betrag),
+                        UmlageSchluessel.NachVerbrauch => a + r.Betrag * 0 / 1, // obvious todo
                         _ => a + 0, // TODO or throw something...
                     }
                 );
