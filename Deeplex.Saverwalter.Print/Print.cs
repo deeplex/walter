@@ -1,8 +1,10 @@
 ﻿using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Vml;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System;
+using System.Collections.Immutable;
 using System.Linq;
 using static Deeplex.Saverwalter.Model.Betriebskostenabrechnung;
 
@@ -62,16 +64,17 @@ namespace Deeplex.Saverwalter.Print
                 if (gruppe.GesamtEinheiten == 1)
                 {
                     body.Append(
-                        SubHeading("Direkt zugeordnet:"),
+                        SubHeading("Direkt zugeordnet:", true),
                         ErmittlungKosten(b, gruppe, true));
                 }
                 else
                 {
                     body.Append(
-                        SubHeading("Angaben zur Abrechnungseinheit:"),
+                        SubHeading("Angaben zur Abrechnungseinheit:", true),
                         Abrechnungsgruppe(b, gruppe),
+                        GruppenVerbrauch(b, gruppe),
                         Abrechnungseinheit(b, gruppe),
-                        SubHeading("Ermittlung Ihrer Einheiten"),
+                        SubHeading("Ermittlung Ihrer Einheiten", true),
                         ErmittlungEinheiten(b, gruppe),
                         SubHeading("Ermittlung der kalten Betriebskosten"),
                         ErmittlungKosten(b, gruppe));
@@ -160,12 +163,12 @@ namespace Deeplex.Saverwalter.Print
             var Mieterliste = string.Join(", ",
                 b.Mieter.Select(m => m.Vorname + " " + m.Nachname));
 
-            return new Paragraph(Font(), 
-                new Run(Font(), 
+            return new Paragraph(Font(),
+                new Run(Font(),
                     new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) }),
                     new Text("Betriebskostenabrechnung " + b.Jahr.ToString()),
                     new Break()),
-                new Run(Font(), 
+                new Run(Font(),
                     new Text("Mieter: " + Mieterliste),
                     new Break(),
                     new Text("Mietobjekt: " + b.Adresse.Strasse + " " +
@@ -193,19 +196,19 @@ namespace Deeplex.Saverwalter.Print
                 (b.Result > 0 ? "einem Guthaben" : "einer Nachforderung") +
                 " in Höhe von: ";
 
-            var refund = new Run(Font(), 
+            var refund = new Run(Font(),
                 new Text("Dieser Betrag wird über die von Ihnen angegebene Bankverbindung erstattet."));
 
             var demand = new Run(Font(), new Text("Bitte überweisen Sie diesen Betrag auf das Ihnen bekannte Konto."));
 
             return new Paragraph(Font(),
-                new Run(Font(), 
+                new Run(Font(),
                     new Text(Gruss),
                     new Break(),
                     new Text("wir haben die Kosten, die im Abrechnungszeitraum angefallen sind, berechnet. " +
                         resultTxt1),
                     new TabChar()),
-                new Run(Font(), 
+                new Run(Font(),
                     new RunProperties(
                         new Bold() { Val = OnOffValue.FromBoolean(true), },
                         new Underline() { Val = UnderlineValues.Single, }),
@@ -217,7 +220,7 @@ namespace Deeplex.Saverwalter.Print
         private static Paragraph GenericText()
         {
             // TODO Text auf Anwesenheit von Heizung oder so testen und anpassen.
-            return new Paragraph(Font(), 
+            return new Paragraph(Font(),
                 new ParagraphProperties(new Justification() { Val = JustificationValues.Both, }),
                 new Run(Font(), new Text("Die Abrechnung betrifft zunächst die mietvertraglich vereinbarten Nebenkosten (die kalten Betriebskosten). Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses(warme Betriebskosten) werden gesondert berechnet, nach Verbrauch und Wohn -/ Nutzfläche auf die einzelnen Wohnungen umgelegt(= „Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der von Ihnen geleisteten Vorauszahlungen verrechnet. Bei bestehenden Mietrückständen ist das Ergebnis der Abrechnung zusätzlich mit den Mietrückständen verrechnet. Gegebenenfalls bestehende Mietminderungen / Ratenzahlungsvereinbarungen sind hier nicht berücksichtigt, haben aber weiterhin für den vereinbarten Zeitraum Bestand. Aufgelöste oder gekündigte Mietverhältnisse werden durch dieses Schreiben nicht neu begründet. Die Aufstellung, Verteilung und Erläuterung der Gesamtkosten, die Berechnung der Kostenanteile, die Verrechnung der geleisteten Vorauszahlungen und gegebenenfalls die Neuberechnung der monatlichen Vorauszahlungen entnehmen Sie bitte den folgenden Seiten.")));
         }
@@ -359,13 +362,18 @@ namespace Deeplex.Saverwalter.Print
             return p;
         }
 
+        private static Table GruppenVerbrauch(Betriebskostenabrechnung b, Rechnungsgruppe g)
+        {
+            return new Table();
+        }
+
         private static Table Abrechnungseinheit(Betriebskostenabrechnung b, Rechnungsgruppe g)
         {
             var table = new Table(
                 new TableRow(
                     ContentHead("700", "Nutzeinheiten", JustificationValues.Center),
-                    ContentHead("1050", "Wohnfläche in m²", JustificationValues.Center),
-                    ContentHead("950", "Nutzfläche in m²", JustificationValues.Center),
+                    ContentHead("1050", "Wohnfläche", JustificationValues.Center),
+                    ContentHead("950", "Nutzfläche", JustificationValues.Center),
                     ContentHead("600", "Bewohner", JustificationValues.Center),
                     ContentHead("1400", "Nutzungsintervall", JustificationValues.Center),
                     ContentHead("300", "Tage", JustificationValues.Center)));
@@ -379,8 +387,8 @@ namespace Deeplex.Saverwalter.Print
 
                 table.Append(new TableRow( // TODO check for duplicates...
                     ContentCell(f ? g.GesamtEinheiten.ToString() : "", JustificationValues.Center),
-                    ContentCell(f ? g.GesamtWohnflaeche.ToString() : "", JustificationValues.Center),
-                    ContentCell(f ? g.GesamtNutzflaeche.ToString() : "", JustificationValues.Center),
+                    ContentCell(f ? Quadrat(g.GesamtWohnflaeche) : "", JustificationValues.Center),
+                    ContentCell(f ? Quadrat(g.GesamtNutzflaeche) : "", JustificationValues.Center),
                     ContentCell(Personenzahl.ToString(), JustificationValues.Center),
                     ContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center),
                     ContentCell(timespan + "/" + b.Abrechnungszeitspanne, JustificationValues.Center)));
@@ -393,8 +401,8 @@ namespace Deeplex.Saverwalter.Print
         {
             var table = new Table(new TableRow(
                 ContentHead("700", "Nutzeinheiten", JustificationValues.Center),
-                ContentHead("1050", "Wohnfläche in m²", JustificationValues.Center),
-                ContentHead("950", "Nutzfläche in m²", JustificationValues.Center),
+                ContentHead("1050", "Wohnfläche", JustificationValues.Center),
+                ContentHead("950", "Nutzfläche", JustificationValues.Center),
                 ContentHead("600", "Bewohner", JustificationValues.Center),
                 ContentHead("1400", "Nutzungsintervall", JustificationValues.Center),
                 ContentHead("300", "Tage", JustificationValues.Center)));
@@ -410,8 +418,8 @@ namespace Deeplex.Saverwalter.Print
 
                 table.Append(new TableRow(
                     ContentCell(f ? 1.ToString() : "", JustificationValues.Center), // TODO  ... 1 ? hmm...
-                    ContentCell(f ? b.Wohnung.Wohnflaeche.ToString() : "", JustificationValues.Center),
-                    ContentCell(f ? b.Wohnung.Nutzflaeche.ToString() : "", JustificationValues.Center),
+                    ContentCell(f ? Quadrat(b.Wohnung.Wohnflaeche) : "", JustificationValues.Center),
+                    ContentCell(f ? Quadrat(b.Wohnung.Nutzflaeche) : "", JustificationValues.Center),
                     ContentCell(Personenzahl.ToString(), JustificationValues.Center),
                     ContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center),
                     ContentCell(timespan + "/" + b.Abrechnungszeitspanne, JustificationValues.Center)));
@@ -422,6 +430,8 @@ namespace Deeplex.Saverwalter.Print
 
         private static Table ErmittlungEinheiten(Betriebskostenabrechnung b, Rechnungsgruppe g)
         {
+            TableRow empty() => new TableRow(ContentCell(""), ContentCell(""), ContentCell(""), ContentCell(""));
+
             var table = new Table(new TableRow(
                 ContentHead("2150", "bei Umlage nach Wohnfläche (n. WF)"),
                 ContentHead("1120", "Nutzungsintervall", JustificationValues.Center),
@@ -431,20 +441,22 @@ namespace Deeplex.Saverwalter.Print
             if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachWohnflaeche))
             {
                 table.Append(new TableRow(
-                    ContentCell(b.Wohnung.Wohnflaeche.ToString() + " / " + g.GesamtWohnflaeche.ToString(), JustificationValues.Center),
+                    ContentCell(Quadrat(b.Wohnung.Wohnflaeche) + " / " + Quadrat(g.GesamtWohnflaeche)),
                     ContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center),
                     ContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
-                    ContentCell(Percent(g.WFZeitanteil), JustificationValues.Center)));
+                    ContentCell(Percent(g.WFZeitanteil), JustificationValues.Center)),
+                empty());
             }
             if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachNutzeinheit))
             {
                 table.Append(
                     new TableRow(ContentHead("bei Umlage nach Nutzeinheiten (n. NE)"), ContentHead(""), ContentHead(""), ContentHead("")),
                     new TableRow(
-                        ContentCell(1.ToString() + " / " + g.GesamtEinheiten, JustificationValues.Center),
+                        ContentCell(1.ToString() + " / " + g.GesamtEinheiten),
                         ContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center),
                         ContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
-                        ContentCell(Percent(g.NEZeitanteil), JustificationValues.Center)));
+                        ContentCell(Percent(g.NEZeitanteil), JustificationValues.Center)),
+                    empty());
             }
             if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachPersonenzahl))
             {
@@ -459,10 +471,40 @@ namespace Deeplex.Saverwalter.Print
                     var timespan = ((Ende - Beginn).Days + 1).ToString();
 
                     table.Append(new TableRow(
-                        ContentCell(Personenzahl.ToString() + " / " + GesamtPersonenzahl.ToString(), JustificationValues.Center),
+                        ContentCell(Personenzahl.ToString() + " / " + GesamtPersonenzahl.ToString()),
                         ContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center),
                         ContentCell(timespan + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
-                        ContentCell(Percent(g.PersZeitanteil[i].Anteil), JustificationValues.Center)));
+                        ContentCell(Percent(g.PersZeitanteil[i].Anteil), JustificationValues.Center)),
+                    empty());
+                }
+            }
+
+            TableCell IContentCell(string str, JustificationValues value) =>
+                new TableCell(new TableCellProperties(new TopBorder() { Val = BorderValues.Single, Size = 4 }),
+                    new Paragraph(new ParagraphProperties(new Justification() { Val = value }),
+                    Font(), NoSpace(), new Run(Font(), new Text(str))));
+
+            if (g.Verbrauch.Count > 0)
+            {
+                table.Append(new TableRow(
+                    ContentHead("2150", "bei Umlage nach Verbrauch (n. Verb.)"),
+                    ContentHead(""), ContentHead("Zählernummer"), ContentHead("")));
+                foreach (var Verbrauch in g.Verbrauch)
+                {
+                    foreach (var Value in Verbrauch.Value)
+                    {
+                        table.Append(new TableRow(
+                            ContentCell(Kubik(Value.Delta) + " / " + Kubik(Value.Delta / Value.Anteil) + "\t(" + Value.Typ + ")"),
+                            ContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende)),
+                            ContentCell(Value.Kennnummer, JustificationValues.Center),
+                            ContentCell("")));
+                    }
+                    table.Append(new TableRow(
+                        IContentCell(Kubik(Verbrauch.Value.Sum(v => v.Delta)) + " / " + Kubik(Verbrauch.Value.Sum(v => v.Delta / v.Anteil)), JustificationValues.Left),
+                        IContentCell(Verbrauch.Key.ToDescriptionString(), JustificationValues.Left),
+                        IContentCell("Gesamt:", JustificationValues.Right),
+                        IContentCell(Percent(g.VerbrauchAnteil[Verbrauch.Key]), JustificationValues.Center)),
+                    empty());
                 }
             }
             return table;
@@ -474,12 +516,12 @@ namespace Deeplex.Saverwalter.Print
                 new TableProperties(
                     new TableBorders(new InsideHorizontalBorder() { Val = BorderValues.Thick, Color = "888888" })),
                 new TableRow(
-                    ContentHead("1700", "Kostenanteil", JustificationValues.Center),
+                    ContentHead("1500", "Kostenanteil", JustificationValues.Center),
                     ContentHead("450", "Schlüssel"),
                     ContentHead("1120", "Nutzungsintervall", JustificationValues.Center),
-                    ContentHead("550", "Betrag", JustificationValues.Center),
-                    ContentHead("630", "Ihr Anteil", JustificationValues.Center),
-                    ContentHead("550", "Ihre Kosten", JustificationValues.Center)));
+                    ContentHead("700", "Betrag", JustificationValues.Center),
+                    ContentHead("600", "Ihr Anteil", JustificationValues.Right),
+                    ContentHead("630", "Ihre Kosten", JustificationValues.Right)));
 
             TableRow kostenPunkt(Betriebskostenrechnung rechnung, string zeitraum, int Jahr, double anteil, bool f = true)
             {
@@ -513,6 +555,10 @@ namespace Deeplex.Saverwalter.Print
                             table.Append(kostenPunkt(rechnung, zeitraum, b.Jahr, a.Anteil, first));
                             first = false;
                         }
+                        break;
+                    case UmlageSchluessel.NachVerbrauch:
+                        zeitraum = Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende);
+                        table.Append(kostenPunkt(rechnung, zeitraum, b.Jahr, g.VerbrauchAnteil[rechnung.Typ]));
                         break;
                     default:
                         break; // TODO or throw something...
@@ -574,6 +620,8 @@ namespace Deeplex.Saverwalter.Print
         // Helper
         private static string Percent(double d) => string.Format("{0:N2}%", d * 100);
         private static string Euro(double d) => string.Format("{0:N2}€", d);
+        private static string Kubik(double d) => string.Format("{0:N2} m³", d); // TODO this should be embedded in Zaehler...
+        private static string Quadrat(double d) => string.Format("{0:N2} m²", d); // TODO this should be embedded in Zaehler...
         private static string Datum(DateTime d) => d.ToString("dd.MM.yyyy");
 
         static RunProperties Font()
@@ -583,10 +631,10 @@ namespace Deeplex.Saverwalter.Print
                 new RunFonts() { Ascii = font, HighAnsi = font, ComplexScript = font, },
                 new FontSize() { Val = "22" }); // Size = 11
         }
-        static Run Break(BreakValues val = BreakValues.TextWrapping) => new Run(Font(), new Break() { Type = val });
         static RunProperties Bold() => new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) });
         static ParagraphProperties NoSpace() => new ParagraphProperties(new SpacingBetweenLines() { After = "0" });
         static Paragraph SubHeading(string str) => new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Text(str)));
+        static Paragraph SubHeading(string str, bool _) => new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Break(), new Text(str)));
         static Paragraph Heading(string str)
             => new Paragraph(Font(), new Run(Font(), new RunProperties(
                 new Bold() { Val = OnOffValue.FromBoolean(true) },
