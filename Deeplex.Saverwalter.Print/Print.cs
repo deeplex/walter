@@ -74,9 +74,9 @@ namespace Deeplex.Saverwalter.Print
                         Abrechnungsgruppe(b, gruppe),
                         GruppenVerbrauch(b, gruppe),
                         Abrechnungseinheit(b, gruppe),
-                        SubHeading("Ermittlung Ihrer Einheiten", true),
+                        new Paragraph(NoSpace()),
                         ErmittlungEinheiten(b, gruppe),
-                        SubHeading("Ermittlung der kalten Betriebskosten"),
+                        SubHeading("Ermittlung der kalten Betriebskosten", true),
                         ErmittlungKosten(b, gruppe));
                 }
             }
@@ -430,38 +430,46 @@ namespace Deeplex.Saverwalter.Print
 
         private static Table ErmittlungEinheiten(Betriebskostenabrechnung b, Rechnungsgruppe g)
         {
-            TableRow empty() => new TableRow(ContentCell(""), ContentCell(""), ContentCell(""), ContentCell(""));
+            TableCell IContentCell(string str, JustificationValues value, BorderType border) =>
+                new TableCell(new TableCellProperties(border),
+                    new Paragraph(new ParagraphProperties(new Justification() { Val = value }),
+                    Font(), NoSpace(), new Run(Font(), new Text(str))));
 
-            var table = new Table(new TableRow(
-                ContentHead("2150", "bei Umlage nach Wohnfläche (n. WF)"),
+            BottomBorder bot() => new BottomBorder() { Val = BorderValues.Single, Size = 4 };
+            TopBorder top() => new TopBorder() { Val = BorderValues.Single, Size = 4 };
+            TableRow empty() => new TableRow(ContentCell(""), ContentCell(""), ContentCell(""), ContentCell(""));
+        
+            var table = new Table(empty(), new TableRow(
+                ContentHead("2050", "Ermittlung Ihrer Einheiten"),
                 ContentHead("1120", "Nutzungsintervall", JustificationValues.Center),
-                ContentHead("865", "Tage", JustificationValues.Center),
-                ContentHead("865", "Ihr Anteil", JustificationValues.Center)));
+                ContentHead("1200", "Tage", JustificationValues.Center),
+                ContentHead("630", "Ihr Anteil", JustificationValues.Center)));
 
             if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachWohnflaeche))
             {
-                table.Append(new TableRow(
-                    ContentCell(Quadrat(b.Wohnung.Wohnflaeche) + " / " + Quadrat(g.GesamtWohnflaeche)),
-                    ContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center),
-                    ContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
-                    ContentCell(Percent(g.WFZeitanteil), JustificationValues.Center)),
-                empty());
+                table.Append(
+                    new TableRow(ContentHead("bei Umlage nach Wohnfläche (n. WF)"), ContentHead(""), ContentHead(""), ContentHead("")),
+                    new TableRow(
+                        IContentCell(Quadrat(b.Wohnung.Wohnflaeche) + " / " + Quadrat(g.GesamtWohnflaeche), JustificationValues.Left, bot()),
+                        IContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center, bot()),
+                        IContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center, bot()),
+                        IContentCell(Percent(g.WFZeitanteil), JustificationValues.Center, bot())));
             }
             if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachNutzeinheit))
             {
                 table.Append(
                     new TableRow(ContentHead("bei Umlage nach Nutzeinheiten (n. NE)"), ContentHead(""), ContentHead(""), ContentHead("")),
                     new TableRow(
-                        ContentCell(1.ToString() + " / " + g.GesamtEinheiten),
-                        ContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center),
-                        ContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
-                        ContentCell(Percent(g.NEZeitanteil), JustificationValues.Center)),
-                    empty());
+                        IContentCell(1.ToString() + " / " + g.GesamtEinheiten, JustificationValues.Left, bot()),
+                        IContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center, bot()),
+                        IContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center, bot()),
+                        IContentCell(Percent(g.NEZeitanteil), JustificationValues.Center, bot())));
             }
             if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachPersonenzahl))
             {
                 table.Append(new TableRow(
                     ContentHead("bei Umlage nach Personenzahl (n. Pers.)"), ContentHead(""), ContentHead(""), ContentHead("")));
+                string PersonEn(int i) => i.ToString() + (i > 1 ? " Personen" : " Person");
                 for (var i = 0; i < g.PersZeitanteil.Count; ++i)
                 {
                     var Beginn = g.PersZeitanteil[i].Beginn;
@@ -470,25 +478,30 @@ namespace Deeplex.Saverwalter.Print
                     var Personenzahl = g.PersonenIntervall.Last(p => p.Beginn.Date <= g.PersZeitanteil[i].Beginn).Personenzahl;
                     var timespan = ((Ende - Beginn).Days + 1).ToString();
 
-                    table.Append(new TableRow(
-                        ContentCell(Personenzahl.ToString() + " / " + GesamtPersonenzahl.ToString()),
-                        ContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center),
-                        ContentCell(timespan + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
-                        ContentCell(Percent(g.PersZeitanteil[i].Anteil), JustificationValues.Center)),
-                    empty());
+                    if (i == g.PersZeitanteil.Count - 1)
+                    {
+                        table.Append(new TableRow(
+                           IContentCell(PersonEn(Personenzahl) + " / " + PersonEn(GesamtPersonenzahl), JustificationValues.Left, bot()),
+                           IContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center, bot()),
+                           IContentCell(timespan + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center, bot()),
+                           IContentCell(Percent(g.PersZeitanteil[i].Anteil), JustificationValues.Center, bot())));
+                    }
+                    else
+                    {
+                        table.Append(new TableRow(
+                            ContentCell(PersonEn(Personenzahl) + " / " + PersonEn(GesamtPersonenzahl)),
+                            ContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center),
+                            ContentCell(timespan + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
+                            ContentCell(Percent(g.PersZeitanteil[i].Anteil), JustificationValues.Center)));
+                    }
                 }
             }
-
-            TableCell IContentCell(string str, JustificationValues value) =>
-                new TableCell(new TableCellProperties(new TopBorder() { Val = BorderValues.Single, Size = 4 }),
-                    new Paragraph(new ParagraphProperties(new Justification() { Val = value }),
-                    Font(), NoSpace(), new Run(Font(), new Text(str))));
 
             if (g.Verbrauch.Count > 0)
             {
                 table.Append(new TableRow(
-                    ContentHead("2150", "bei Umlage nach Verbrauch (n. Verb.)"),
-                    ContentHead(""), ContentHead("Zählernummer"), ContentHead("")));
+                    ContentHead("bei Umlage nach Verbrauch (n. Verb.)"),
+                    ContentHead(""), ContentHead("Zählernummer", JustificationValues.Center), ContentHead("")));
                 foreach (var Verbrauch in g.Verbrauch)
                 {
                     foreach (var Value in Verbrauch.Value)
@@ -500,11 +513,10 @@ namespace Deeplex.Saverwalter.Print
                             ContentCell("")));
                     }
                     table.Append(new TableRow(
-                        IContentCell(Kubik(Verbrauch.Value.Sum(v => v.Delta)) + " / " + Kubik(Verbrauch.Value.Sum(v => v.Delta / v.Anteil)), JustificationValues.Left),
-                        IContentCell(Verbrauch.Key.ToDescriptionString(), JustificationValues.Left),
-                        IContentCell("Gesamt:", JustificationValues.Right),
-                        IContentCell(Percent(g.VerbrauchAnteil[Verbrauch.Key]), JustificationValues.Center)),
-                    empty());
+                        IContentCell(Kubik(Verbrauch.Value.Sum(v => v.Delta)) + " / " + Kubik(Verbrauch.Value.Sum(v => v.Delta / v.Anteil)), JustificationValues.Left, top()),
+                        IContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Left, top()),
+                        IContentCell(Verbrauch.Key.ToDescriptionString(), JustificationValues.Center, top()),
+                        IContentCell(Percent(g.VerbrauchAnteil[Verbrauch.Key]), JustificationValues.Center, top())));
                 }
             }
             return table;
@@ -516,11 +528,11 @@ namespace Deeplex.Saverwalter.Print
                 new TableProperties(
                     new TableBorders(new InsideHorizontalBorder() { Val = BorderValues.Thick, Color = "888888" })),
                 new TableRow(
-                    ContentHead("1500", "Kostenanteil", JustificationValues.Center),
+                    ContentHead("1600", "Kostenanteil", JustificationValues.Center),
                     ContentHead("450", "Schlüssel"),
                     ContentHead("1120", "Nutzungsintervall", JustificationValues.Center),
-                    ContentHead("700", "Betrag", JustificationValues.Center),
-                    ContentHead("600", "Ihr Anteil", JustificationValues.Right),
+                    ContentHead("650", "Betrag", JustificationValues.Center),
+                    ContentHead("550", "Ihr Anteil", JustificationValues.Right),
                     ContentHead("630", "Ihre Kosten", JustificationValues.Right)));
 
             TableRow kostenPunkt(Betriebskostenrechnung rechnung, string zeitraum, int Jahr, double anteil, bool f = true)

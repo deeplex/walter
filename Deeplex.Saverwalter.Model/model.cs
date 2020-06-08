@@ -286,7 +286,7 @@ namespace Deeplex.Saverwalter.Model
         Breitbandkabelanschluss = 2,
         [Description("Dachrinnenreinigung")]
         Dachrinnenreinigung = 4,
-        [Description("Entwässerung/Niederschlagswasser")]
+        [Description("Entwässerung/Niederschlag")]
         EntwaesserungNiederschlagswasser = 6,
         [Description("Entwässerung/Schmutzwasser")]
         EntwaesserungSchmutzwasser = 8,
