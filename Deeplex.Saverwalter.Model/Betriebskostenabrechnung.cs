@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Windows.Foundation.Diagnostics;
+using Windows.UI.Xaml.Media;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -71,8 +72,12 @@ namespace Deeplex.Saverwalter.Model
                                 .ThenInclude(g => g.Wohnung)
                                     .ThenInclude(w => w.Vertraege)
                 .Include(v => v.Wohnung)
-                    .ThenInclude(w => w.Zaehler)
-                        .ThenInclude(z => z.Staende)
+                    .ThenInclude(w => w.Betriebskostenrechnungsgruppen)
+                        .ThenInclude(b => b.Rechnung)
+                            .ThenInclude(r => r.Gruppen)
+                                .ThenInclude(g => g.Wohnung)
+                                    .ThenInclude(w => w.Zaehler)
+                                        .ThenInclude(z => z.Staende)
                 .First();
 
             // If Ansprechpartner or Besitzer is null => throw
@@ -127,42 +132,46 @@ namespace Deeplex.Saverwalter.Model
             db.Dispose();
         }
 
-        public List<(string Kennnummer, Zaehlertyp Typ, double Delta)> GetVerbrauch(Betriebskostenrechnung r)
+        private Zaehlerstand interpolateZaehlerstand(DateTime d, Zaehlerstand z1, Zaehlerstand z2)
         {
-            Zaehlerstand interpolateZaehlerstand(DateTime d, Zaehlerstand z1, Zaehlerstand z2)
+            var m = (z1.Stand - z2.Stand) / (z1.Datum - z2.Datum).Days;
+            var Stand = m * (d - z1.Datum).Days + z1.Stand;
+
+            var zs = new Zaehlerstand
             {
-                var m = (z1.Stand - z2.Stand) / (z1.Datum - z2.Datum).Days;
-                var Stand = m * (d - z1.Datum).Days + z1.Stand;
+                Datum = d,
+                Stand = Stand,
+                Zaehler = z1.Zaehler,
+                Abgelesen = false,
+                Notiz = "Erstellt durch Betriebskostenabrechnung am " + DateTime.UtcNow.ToString("dd.mm.yyyy") +
+                    ". Berechnet durch Ablesung vom: " + z1.Datum.ToString("dd.mm.yyyy") + " und " + z2.Datum.ToString("dd.mm.yyyy")
+            };
+            db.Zaehlerstaende.Add(zs);
+            db.SaveChanges();
+            return zs;
+        }
 
-                var zs = new Zaehlerstand
-                {
-                    Datum = d,
-                    Stand = Stand,
-                    Zaehler = z1.Zaehler,
-                    Abgelesen = false,
-                    Notiz = "Erstellt durch Betriebskostenabrechnung am " + DateTime.UtcNow.ToString("dd.mm.yyyy") +
-                        ". Berechnet durch Ablesung vom: " + z1.Datum.ToString("dd.mm.yyyy") + " und " + z2.Datum.ToString("dd.mm.yyyy")
-                };
-                db.Zaehlerstaende.Add(zs);
-                db.SaveChanges();
-                return zs;
-            }
-
+        public List<(Betriebskostentyp bTyp, string Kennnummer, Zaehlertyp zTyp, double Delta)> GetVerbrauch(Betriebskostenrechnung r, bool ganzeGruppe = false)
+        {
             var Zaehler = r.Typ switch
             {
                 Betriebskostentyp.Wasserversorgung =>
-                    this.Zaehler.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
+                    db.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
                 // Heizung wird zu 50% mit Warmwasser verrechnet oder so...
                 // Betriebskostentyp.Heizung => b.Zaehler.Where(z => z.Typ == Zaehlertyp.Heizung).ToList
                 _ => null
             };
 
-            var Ende = Zaehler.Select(z => z.Staende
-                .LastOrDefault(l => l.Datum <= Nutzungsende && (Nutzungsende - l.Datum).Days < 30))
+            var fZaehler = Zaehler.Where(z => ganzeGruppe ?
+                r.Gruppen.Select(g => g.Wohnung).Contains(z.Wohnung) :
+                z.WohnungId == Wohnung.WohnungId);
+
+            var Ende = fZaehler
+                .Select(z => z.Staende.LastOrDefault(l => l.Datum <= Nutzungsende && (Nutzungsende - l.Datum).Days < 30))
                 .Where(zs => zs != null)
                 .ToImmutableList();
-            var Beginn = Zaehler.Select(z => z.Staende
-                .LastOrDefault(l => l.Datum <= Nutzungsbeginn && (Nutzungsbeginn - l.Datum).Days < 30))
+            var Beginn = fZaehler
+                .Select(z => z.Staende.LastOrDefault(l => l.Datum <= Nutzungsbeginn && (Nutzungsbeginn - l.Datum).Days < 30))
                 .Where(zs => zs != null)
                 .ToImmutableList();
 
@@ -170,16 +179,16 @@ namespace Deeplex.Saverwalter.Model
             if (Beginn.IsEmpty) throw new Exception("Kein Zähler für Nutzungsende gefunden.");
             if (Ende.Count() != Beginn.Count()) throw new Exception("Zählerstände sind nicht korrekt...");
 
-            List<(string Kennnummer, Zaehlertyp Typ, double Delta)> Deltas = new List<(string Kennnummer, Zaehlertyp Typ, double Delta)>();
+            List<(Betriebskostentyp bTyp, string Kennnummer, Zaehlertyp zTyp, double Delta)> Deltas = new List<(Betriebskostentyp bTyp, string Kennnummer, Zaehlertyp zTyp, double Delta)>();
 
             for (var i = 0; i < Ende.Count(); ++i)
             {
                 Zaehlerstand zBeginn = Beginn[i].Datum.Date == Nutzungsbeginn.Date.AddDays(-1) ? // TODO is same day also okay? ...
-                     Beginn[i] : interpolateZaehlerstand(Nutzungsbeginn, Beginn[i], Ende[i]);
+                        Beginn[i] : interpolateZaehlerstand(Nutzungsbeginn, Beginn[i], Ende[i]);
                 Zaehlerstand zEnde = Ende[i].Datum.Date == Nutzungsende.Date ?
                     Ende[i] : interpolateZaehlerstand(Nutzungsende, Beginn[i], Ende[i]);
 
-                Deltas.Add((zEnde.Zaehler.Kennnummer, zEnde.Zaehler.Typ, zEnde.Stand - zBeginn.Stand));
+                Deltas.Add((r.Typ, zEnde.Zaehler.Kennnummer, zEnde.Zaehler.Typ, zEnde.Stand - zBeginn.Stand));
             }
 
             return Deltas;
@@ -197,7 +206,9 @@ namespace Deeplex.Saverwalter.Model
             public List<(DateTime Beginn, DateTime Ende, int Personenzahl)> GesamtPersonenIntervall;
             public List<(DateTime Beginn, DateTime Ende, int Personenzahl)> PersonenIntervall;
             public List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil;
-            public Dictionary<Betriebskostentyp, List<(string Kennnummer, Zaehlertyp Typ, double Delta)>> Verbrauch;
+            public Dictionary<Betriebskostentyp, List<(string Kennnummer, Zaehlertyp Typ, double Delta, double Anteil)>> Verbrauch;
+            public Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch;
+            public Dictionary<Betriebskostentyp, double> VerbrauchAnteil;
             public double GesamtBetrag;
             public double Betrag;
 
@@ -231,7 +242,22 @@ namespace Deeplex.Saverwalter.Model
                             (double)PersonenIntervall.Where(p => p.Beginn <= w.Beginn).First().Personenzahl / w.Personenzahl *
                             (((double)(w.Ende - w.Beginn).Days + 1) / b.Abrechnungszeitspanne))).ToList();
 
-                Verbrauch = gruppe.Where(g => g.Schluessel == UmlageSchluessel.NachVerbrauch).ToDictionary(r => r.Typ, r => b.GetVerbrauch(r));
+                GesamtVerbrauch = gruppe
+                    .Where(g => g.Schluessel == UmlageSchluessel.NachVerbrauch)
+                    .Select(r => b.GetVerbrauch(r, true))
+                    .ToDictionary(g => g.First().bTyp, g => g.GroupBy(gg => gg.zTyp)
+                    .Select(gg => (gg.Key, gg.Sum(ggg => ggg.Delta))).ToList());
+                Verbrauch = gruppe
+                    .Where(g => g.Schluessel == UmlageSchluessel.NachVerbrauch)
+                    .Select(r => b.GetVerbrauch(r))
+                    .ToDictionary(r => r.First().bTyp, r => r
+                        .Select(rr => (rr.Kennnummer, rr.zTyp, rr.Delta, rr.Delta / GesamtVerbrauch[r.First().bTyp]
+                            .First(rrr => rrr.Typ == rr.zTyp).Delta))
+                            .ToList());
+
+                VerbrauchAnteil = Verbrauch
+                    .Select(v => (v.Key, v.Value.Sum(vv => vv.Delta), v.Value.Sum(vv => vv.Delta / vv.Anteil)))
+                    .ToDictionary(v => v.Key, v => v.Item2 / v.Item3);
 
                 GesamtBetrag = gruppe.Sum(r => r.Betrag);
                 Betrag = gruppe.Aggregate(0.0, (a, r) =>
@@ -240,7 +266,7 @@ namespace Deeplex.Saverwalter.Model
                         UmlageSchluessel.NachWohnflaeche => a + r.Betrag * WFZeitanteil,
                         UmlageSchluessel.NachNutzeinheit => a + r.Betrag * NEZeitanteil,
                         UmlageSchluessel.NachPersonenzahl => a + PersZeitanteil.Aggregate(0.0, (a2, z) => a2 += z.Anteil * r.Betrag),
-                        UmlageSchluessel.NachVerbrauch => a + r.Betrag * 0 / 1, // obvious todo
+                        UmlageSchluessel.NachVerbrauch => a + r.Betrag * VerbrauchAnteil[r.Typ],
                         _ => a + 0, // TODO or throw something...
                     }
                 );
