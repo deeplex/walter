@@ -7,11 +7,11 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.App.Views
 {
-    public sealed partial class KontaktDetailPage : Page
+    public sealed partial class NatuerlichePersonDetailPage : Page
     {
         public NatuerlichePersonViewModel ViewModel { get; set; }
 
-        public KontaktDetailPage()
+        public NatuerlichePersonDetailPage()
         {
             InitializeComponent();
         }

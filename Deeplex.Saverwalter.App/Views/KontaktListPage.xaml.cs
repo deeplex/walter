@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.App.Views
             if (sk != null)
             {
                 var target =
-                    sk.Type == typeof(NatuerlichePerson) ? typeof(KontaktDetailPage) :
+                    sk.Type == typeof(NatuerlichePerson) ? typeof(NatuerlichePersonDetailPage) :
                     sk.Type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailPage) :
                     null;
 
@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void AddKontakt_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(KontaktDetailPage), null,
+            Frame.Navigate(typeof(NatuerlichePersonDetailPage), null,
                 new DrillInNavigationTransitionInfo());
         }
 
