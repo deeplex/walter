@@ -60,6 +60,9 @@ namespace Deeplex.Saverwalter.Model
         public Guid PersonId { get; }
         public string Bezeichnung { get; }
 
+        public bool isVermieter { get; set; }
+        public bool isMieter { get; set; }
+        public bool isHandwerker { get; set; }
         public Anrede Anrede { get; set; }
         public string? Telefon { get; set; }
         public string? Mobil { get; set; }
@@ -72,13 +75,16 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class NatuerlichePerson : IPerson
     {
-        public string Bezeichnung => $"{Vorname} + {Nachname} = ♥";
+        public string Bezeichnung => $"{Vorname} {Nachname}";
 
         public Guid PersonId { get; set; }
         public int NatuerlichePersonId { get; set; }
         public string? Vorname { get; set; }
         public string Nachname { get; set; } = null!;
         // public Titel Titel { get; set; } TODO
+        public bool isVermieter { get; set; }
+        public bool isMieter { get; set; }
+        public bool isHandwerker { get; set; }
         public Anrede Anrede { get; set; }
         public string? Telefon { get; set; }
         public string? Mobil { get; set; }
@@ -101,6 +107,9 @@ namespace Deeplex.Saverwalter.Model
         public Guid PersonId { get; set; }
         public int JuristischePersonId { get; set; }
         public string Bezeichnung { get; set; } = null!;
+        public bool isVermieter { get; set; }
+        public bool isMieter { get; set; }
+        public bool isHandwerker { get; set; }
         public string? Telefon { get; set; }
         public string? Mobil { get; set; }
         public string? Fax { get; set; }

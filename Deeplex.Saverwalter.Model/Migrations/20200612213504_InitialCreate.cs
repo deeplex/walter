@@ -76,6 +76,20 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MieterSet",
+                columns: table => new
+                {
+                    MieterId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    PersonId = table.Column<Guid>(nullable: false),
+                    VertragId = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MieterSet", x => x.MieterId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MietMinderungen",
                 columns: table => new
                 {
@@ -98,17 +112,23 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     JuristischePersonId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    PersonId = table.Column<Guid>(nullable: false),
                     Bezeichnung = table.Column<string>(nullable: false),
+                    isVermieter = table.Column<bool>(nullable: false),
+                    isMieter = table.Column<bool>(nullable: false),
+                    isHandwerker = table.Column<bool>(nullable: false),
                     Telefon = table.Column<string>(nullable: true),
                     Mobil = table.Column<string>(nullable: true),
                     Fax = table.Column<string>(nullable: true),
                     Email = table.Column<string>(nullable: true),
                     AdresseId = table.Column<int>(nullable: true),
-                    Notiz = table.Column<string>(nullable: true)
+                    Notiz = table.Column<string>(nullable: true),
+                    Anrede = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_JuristischePersonen", x => x.JuristischePersonId);
+                    table.UniqueConstraint("AK_JuristischePersonen_PersonId", x => x.PersonId);
                     table.ForeignKey(
                         name: "FK_JuristischePersonen_Adressen_AdresseId",
                         column: x => x.AdresseId,
@@ -118,13 +138,17 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Kontakte",
+                name: "NatuerlichePersonen",
                 columns: table => new
                 {
-                    KontaktId = table.Column<int>(nullable: false)
+                    NatuerlichePersonId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    PersonId = table.Column<Guid>(nullable: false),
                     Vorname = table.Column<string>(nullable: true),
                     Nachname = table.Column<string>(nullable: false),
+                    isVermieter = table.Column<bool>(nullable: false),
+                    isMieter = table.Column<bool>(nullable: false),
+                    isHandwerker = table.Column<bool>(nullable: false),
                     Anrede = table.Column<int>(nullable: false),
                     Telefon = table.Column<string>(nullable: true),
                     Mobil = table.Column<string>(nullable: true),
@@ -135,9 +159,10 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Kontakte", x => x.KontaktId);
+                    table.PrimaryKey("PK_NatuerlichePersonen", x => x.NatuerlichePersonId);
+                    table.UniqueConstraint("AK_NatuerlichePersonen_PersonId", x => x.PersonId);
                     table.ForeignKey(
-                        name: "FK_Kontakte_Adressen_AdresseId",
+                        name: "FK_NatuerlichePersonen_Adressen_AdresseId",
                         column: x => x.AdresseId,
                         principalTable: "Adressen",
                         principalColumn: "AdresseId",
@@ -152,8 +177,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     AdresseId = table.Column<int>(nullable: false),
                     Kennung = table.Column<string>(nullable: false),
-                    BesitzerJuristischePersonId = table.Column<int>(nullable: false),
-                    Notiz = table.Column<string>(nullable: true)
+                    BesitzerId = table.Column<Guid>(nullable: false),
+                    Notiz = table.Column<string>(nullable: true),
+                    JuristischePersonId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -165,11 +191,11 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         principalColumn: "AdresseId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Garagen_JuristischePersonen_BesitzerJuristischePersonId",
-                        column: x => x.BesitzerJuristischePersonId,
+                        name: "FK_Garagen_JuristischePersonen_JuristischePersonId",
+                        column: x => x.JuristischePersonId,
                         principalTable: "JuristischePersonen",
                         principalColumn: "JuristischePersonId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -180,11 +206,12 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     AdresseId = table.Column<int>(nullable: false),
                     Bezeichnung = table.Column<string>(nullable: false),
-                    BesitzerId = table.Column<int>(nullable: true),
+                    BesitzerId = table.Column<Guid>(nullable: false),
                     Wohnflaeche = table.Column<double>(nullable: false),
                     Nutzflaeche = table.Column<double>(nullable: false),
                     Nutzeinheit = table.Column<int>(nullable: false),
-                    Notiz = table.Column<string>(nullable: true)
+                    Notiz = table.Column<string>(nullable: true),
+                    JuristischePersonId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -196,8 +223,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         principalColumn: "AdresseId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Wohnungen_JuristischePersonen_BesitzerId",
-                        column: x => x.BesitzerId,
+                        name: "FK_Wohnungen_JuristischePersonen_JuristischePersonId",
+                        column: x => x.JuristischePersonId,
                         principalTable: "JuristischePersonen",
                         principalColumn: "JuristischePersonId",
                         onDelete: ReferentialAction.Restrict);
@@ -209,8 +236,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     JuristischePersonenMitgliedId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    KontaktId = table.Column<int>(nullable: false),
-                    JuristischePersonId = table.Column<int>(nullable: false)
+                    PersonId = table.Column<Guid>(nullable: false),
+                    JuristischePersonId = table.Column<int>(nullable: false),
+                    NatuerlichePersonId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -222,31 +250,11 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         principalColumn: "JuristischePersonId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_JuristischePersonenMitglied_Kontakte_KontaktId",
-                        column: x => x.KontaktId,
-                        principalTable: "Kontakte",
-                        principalColumn: "KontaktId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "MieterSet",
-                columns: table => new
-                {
-                    MieterId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    KontaktId = table.Column<int>(nullable: false),
-                    VertragId = table.Column<Guid>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MieterSet", x => x.MieterId);
-                    table.ForeignKey(
-                        name: "FK_MieterSet_Kontakte_KontaktId",
-                        column: x => x.KontaktId,
-                        principalTable: "Kontakte",
-                        principalColumn: "KontaktId",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_JuristischePersonenMitglied_NatuerlichePersonen_NatuerlichePersonId",
+                        column: x => x.NatuerlichePersonId,
+                        principalTable: "NatuerlichePersonen",
+                        principalColumn: "NatuerlichePersonId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -308,7 +316,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     KaltMiete = table.Column<double>(nullable: false),
                     Beginn = table.Column<DateTime>(nullable: false),
                     Ende = table.Column<DateTime>(nullable: true),
-                    AnsprechpartnerId = table.Column<int>(nullable: true),
+                    AnsprechpartnerId = table.Column<Guid>(nullable: true),
                     VersionsNotiz = table.Column<string>(nullable: true),
                     Notiz = table.Column<string>(nullable: true)
                 },
@@ -316,12 +324,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     table.PrimaryKey("PK_Vertraege", x => x.rowid);
                     table.UniqueConstraint("AK_Vertraege_VertragId_Version", x => new { x.VertragId, x.Version });
-                    table.ForeignKey(
-                        name: "FK_Vertraege_Kontakte_AnsprechpartnerId",
-                        column: x => x.AnsprechpartnerId,
-                        principalTable: "Kontakte",
-                        principalColumn: "KontaktId",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Vertraege_Wohnungen_WohnungId",
                         column: x => x.WohnungId,
@@ -391,9 +393,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 column: "AdresseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Garagen_BesitzerJuristischePersonId",
+                name: "IX_Garagen_JuristischePersonId",
                 table: "Garagen",
-                column: "BesitzerJuristischePersonId");
+                column: "JuristischePersonId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_JuristischePersonen_AdresseId",
@@ -406,19 +408,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 column: "JuristischePersonId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_JuristischePersonenMitglied_KontaktId",
+                name: "IX_JuristischePersonenMitglied_NatuerlichePersonId",
                 table: "JuristischePersonenMitglied",
-                column: "KontaktId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Kontakte_AdresseId",
-                table: "Kontakte",
-                column: "AdresseId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MieterSet_KontaktId",
-                table: "MieterSet",
-                column: "KontaktId");
+                column: "NatuerlichePersonId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MietobjektGaragen_GarageId",
@@ -426,9 +418,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 column: "GarageId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Vertraege_AnsprechpartnerId",
-                table: "Vertraege",
-                column: "AnsprechpartnerId");
+                name: "IX_NatuerlichePersonen_AdresseId",
+                table: "NatuerlichePersonen",
+                column: "AdresseId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Vertraege_WohnungId",
@@ -441,9 +433,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 column: "AdresseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Wohnungen_BesitzerId",
+                name: "IX_Wohnungen_JuristischePersonId",
                 table: "Wohnungen",
-                column: "BesitzerId");
+                column: "JuristischePersonId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ZaehlerSet_WohnungId",
@@ -489,10 +481,10 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 name: "Betriebskostenrechnungen");
 
             migrationBuilder.DropTable(
-                name: "Garagen");
+                name: "NatuerlichePersonen");
 
             migrationBuilder.DropTable(
-                name: "Kontakte");
+                name: "Garagen");
 
             migrationBuilder.DropTable(
                 name: "ZaehlerSet");
