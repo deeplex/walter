@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public sealed class KontaktDetailViewModel : BindableBase
+    public sealed class NatuerlichePersonViewModel : BindableBase
     {
         public NatuerlichePerson Entity { get; }
         public int Id { get; }
@@ -113,16 +113,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public ObservableProperty<List<KontaktDetailVertrag>> Vertraege
-            = new ObservableProperty<List<KontaktDetailVertrag>>();
+        public ObservableProperty<List<NatuerlichePersonVertrag>> Vertraege
+            = new ObservableProperty<List<NatuerlichePersonVertrag>>();
 
         public string Name => Vorname + " " + Nachname;
 
-        public KontaktDetailViewModel(int id)
+        public NatuerlichePersonViewModel(int id)
             : this(App.Walter.NatuerlichePersonen.Find(id)) { }
 
-        public KontaktDetailViewModel() : this(new NatuerlichePerson()) { IsInEdit.Value = true; }
-        private KontaktDetailViewModel(NatuerlichePerson k)
+        public NatuerlichePersonViewModel() : this(new NatuerlichePerson()) { IsInEdit.Value = true; }
+        private NatuerlichePersonViewModel(NatuerlichePerson k)
         {
             Entity = k;
             Id = k.NatuerlichePersonId;
@@ -141,7 +141,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Vertraege.Value = App.Walter.Vertraege
                 .Include(v => v.Wohnung).ToList()
                 .Where(v => App.Walter.MieterSet.ToList().Exists(m => m.VertragId == v.VertragId))
-                .Select(v => new KontaktDetailVertrag(v.VertragId))
+                .Select(v => new NatuerlichePersonVertrag(v.VertragId))
                 .ToList();
 
             PropertyChanged += OnUpdate;
@@ -185,7 +185,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public sealed class KontaktDetailVertrag
+    public sealed class NatuerlichePersonVertrag
     {
         public int Id { get; }
         public int Version { get; }
@@ -194,21 +194,21 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<DateTimeOffset> Beginn { get; } = new ObservableProperty<DateTimeOffset>();
         public ObservableProperty<DateTimeOffset?> Ende { get; } = new ObservableProperty<DateTimeOffset?>();
         public ObservableProperty<string> AuflistungMieter { get; } = new ObservableProperty<string>();
-        public ObservableProperty<List<KontaktDetailVertrag>> Versionen { get; }
-            = new ObservableProperty<List<KontaktDetailVertrag>>();
+        public ObservableProperty<List<NatuerlichePersonVertrag>> Versionen { get; }
+            = new ObservableProperty<List<NatuerlichePersonVertrag>>();
 
-        public KontaktDetailVertrag(Guid id)
+        public NatuerlichePersonVertrag(Guid id)
             : this(App.Walter.Vertraege.Where(v => v.VertragId == id)) { }
 
-        private KontaktDetailVertrag(IEnumerable<Vertrag> v)
+        private NatuerlichePersonVertrag(IEnumerable<Vertrag> v)
             : this(v.OrderBy(vs => vs.Version).Last())
         {
-            Versionen.Value = v.OrderBy(vs => vs.Version).Select(vs => new KontaktDetailVertrag(vs)).ToList();
+            Versionen.Value = v.OrderBy(vs => vs.Version).Select(vs => new NatuerlichePersonVertrag(vs)).ToList();
             Beginn.Value = Versionen.Value.First().Beginn.Value;
             Ende.Value = Versionen.Value.Last().Ende.Value;
         }
 
-        private KontaktDetailVertrag(Vertrag v)
+        private NatuerlichePersonVertrag(Vertrag v)
         {
             Id = v.rowid;
             Version = v.Version;

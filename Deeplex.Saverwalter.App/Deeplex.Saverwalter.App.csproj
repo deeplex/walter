@@ -133,7 +133,7 @@
     <Compile Include="ViewModels\WohnungDetailViewModel.cs" />
     <Compile Include="ViewModels\WohnungListViewModel.cs" />
     <Compile Include="ViewModels\VertragListViewModel.cs" />
-    <Compile Include="ViewModels\KontaktDetailViewModel.cs" />
+    <Compile Include="ViewModels\NatuerlichePersonViewModel.cs" />
     <Compile Include="Views\BetriebskostenRechnungenGruppeListViewPage.xaml.cs">
       <DependentUpon>BetriebskostenRechnungenGruppeListViewPage.xaml</DependentUpon>
     </Compile>

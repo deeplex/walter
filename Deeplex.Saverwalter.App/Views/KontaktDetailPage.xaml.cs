@@ -9,7 +9,7 @@ namespace Deeplex.Saverwalter.App.Views
 {
     public sealed partial class KontaktDetailPage : Page
     {
-        public KontaktDetailViewModel ViewModel { get; set; }
+        public NatuerlichePersonViewModel ViewModel { get; set; }
 
         public KontaktDetailPage()
         {
@@ -20,11 +20,11 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (e.Parameter is int kontaktId)
             {
-                ViewModel = new KontaktDetailViewModel(kontaktId);
+                ViewModel = new NatuerlichePersonViewModel(kontaktId);
             }
             else if (e.Parameter is null) // New Contact
             {
-                ViewModel = new KontaktDetailViewModel();
+                ViewModel = new NatuerlichePersonViewModel();
             }
 
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;

@@ -18,7 +18,7 @@
             <Setter Property="IsEnabled" Value="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"/>
         </Style>
 
-        <DataTemplate x:Key="BeginnGrid" x:DataType="vm:KontaktDetailVertrag">
+        <DataTemplate x:Key="BeginnGrid" x:DataType="vm:NatuerlichePersonVertrag">
             <CalendarDatePicker
                 IsEnabled="False"
                 Width="176"
@@ -28,7 +28,7 @@
                 DateFormat="{}{day.integer}. {month.full} {year.full}"/>
         </DataTemplate>
 
-        <DataTemplate x:Key="EndeGrid" x:DataType="vm:KontaktDetailVertrag">
+        <DataTemplate x:Key="EndeGrid" x:DataType="vm:NatuerlichePersonVertrag">
             <CalendarDatePicker
                 IsEnabled="False"
                 Width="176"
