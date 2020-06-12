@@ -44,6 +44,33 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 RaisePropertyChangedAuto();
             }
         }
+        public bool isVermieter
+        {
+            get => Entity.isVermieter;
+            set
+            {
+                Entity.isVermieter = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+        public bool isMieter
+        {
+            get => Entity.isMieter;
+            set
+            {
+                Entity.isMieter = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+        public bool isHandwerker
+        {
+            get => Entity.isHandwerker;
+            set
+            {
+                Entity.isHandwerker = value;
+                RaisePropertyChangedAuto();
+            }
+        }
         private AdresseViewModel mAdresse;
         public AdresseViewModel Adresse
         {
