@@ -89,13 +89,15 @@ namespace Deeplex.Saverwalter.Print
 
         private static Table AnschriftVermieter(Betriebskostenabrechnung b)
         {
+            var AnsprechpartnerBezeichnung = b.Ansprechpartner is NatuerlichePerson a ? a.Vorname + " " + a.Nachname : ""; // TODO jur. Person
+
             var table = new Table(
                 new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
                 new TableRow(
                     ContentCell(b.Vermieter.Bezeichnung),
                     ContentCell("", JustificationValues.Right)),
                 new TableRow(
-                    ContentCell("℅ " + b.Ansprechpartner.Vorname + " " + b.Ansprechpartner.Nachname),
+                    ContentCell("℅ " + AnsprechpartnerBezeichnung),
                     ContentCell("Tel.: " + b.Ansprechpartner.Telefon, JustificationValues.Right)),
                 new TableRow(
                     ContentCell(b.Ansprechpartner.Adresse!.Strasse + " " + b.Ansprechpartner.Adresse.Hausnummer),
@@ -126,14 +128,14 @@ namespace Deeplex.Saverwalter.Print
             var run = new Run(Font());
             int counter = 6;
 
-            foreach (var m in b.Mieter)
+            foreach (var m in b.NatuerlicheMieter)
             {
                 var Anrede = m.Anrede == Model.Anrede.Herr ? "Herrn " : m.Anrede == Model.Anrede.Frau ? "Frau " : "";
                 run.Append(new Text(Anrede + m.Vorname + " " + m.Nachname));
                 run.Append(new Break());
                 counter--;
             }
-            var a = b.Mieter.First().Adresse;
+            var a = b.NatuerlicheMieter.First().Adresse;
             if (a != null)
             {
                 run.Append(new Text(a.Strasse + " " + a.Hausnummer));
@@ -161,7 +163,7 @@ namespace Deeplex.Saverwalter.Print
         private static Paragraph Betreff(Betriebskostenabrechnung b)
         {
             var Mieterliste = string.Join(", ",
-                b.Mieter.Select(m => m.Vorname + " " + m.Nachname));
+                b.NatuerlicheMieter.Select(m => m.Vorname + " " + m.Nachname));
 
             return new Paragraph(Font(),
                 new Run(Font(),
@@ -185,7 +187,7 @@ namespace Deeplex.Saverwalter.Print
 
         private static Paragraph Ergebnis(Betriebskostenabrechnung b)
         {
-            var gruss = b.Mieter.Aggregate("", (r, m) => r + (
+            var gruss = b.NatuerlicheMieter.Aggregate("", (r, m) => r + (
                 m.Anrede == Anrede.Herr ? "sehr geehrter Herr " :
                 m.Anrede == Anrede.Frau ? "sehr geehrte Frau " :
                 m.Vorname) + m.Nachname + ", ");
@@ -322,7 +324,7 @@ namespace Deeplex.Saverwalter.Print
 
         private static Paragraph MietHeader(Betriebskostenabrechnung b)
         {
-            var Header = string.Join(", ", b.Mieter.Select(m => (
+            var Header = string.Join(", ", b.NatuerlicheMieter.Select(m => (
                 m.Anrede == Anrede.Herr ? "Herrn " :
                 m.Anrede == Anrede.Frau ? "Frau " :
                 m.Vorname) + " " + m.Nachname)) +

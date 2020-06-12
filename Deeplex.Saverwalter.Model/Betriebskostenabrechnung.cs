@@ -15,8 +15,9 @@ namespace Deeplex.Saverwalter.Model
         public int Jahr { get; set; }
         public List<Vertrag> Vertragsversionen { get; set; }
         public JuristischePerson Vermieter { get; set; }
-        public Kontakt Ansprechpartner { get; set; }
-        public List<Kontakt> Mieter { get; set; }
+        public IPerson Ansprechpartner { get; set; }
+        public List<NatuerlichePerson> NatuerlicheMieter { get; set; }
+        // TODO juristische
         public Wohnung Wohnung { get; set; }
         public Adresse Adresse { get; set; }
         public double Gezahlt { get; set; }
@@ -53,12 +54,8 @@ namespace Deeplex.Saverwalter.Model
 
             var vertrag = db.Vertraege
                 .Where(v => v.rowid == rowid)
-                .Include(v => v.Ansprechpartner)
-                    .ThenInclude(k => k.Adresse)
                 .Include(v => v.Wohnung)
                     .ThenInclude(w => w.Adresse)
-                .Include(v => v.Wohnung)
-                    .ThenInclude(w => w.Besitzer)
                 .Include(v => v.Wohnung)
                     .ThenInclude(w => w.Betriebskostenrechnungsgruppen)
                         .ThenInclude(b => b.Rechnung)
@@ -82,16 +79,16 @@ namespace Deeplex.Saverwalter.Model
 
             // If Ansprechpartner or Besitzer is null => throw
 
-            Ansprechpartner = vertrag.Ansprechpartner;
-            Mieter = db.MieterSet
+            Ansprechpartner = db.FindPerson(vertrag.AnsprechpartnerId!.Value);
+            NatuerlicheMieter = db.MieterSet
                 .Where(m => m.VertragId == vertrag.VertragId)
-                .Select(m => m.Kontakt)
+                .Select(m => db.NatuerlichePersonen.Find(m.PersonId))
                 .ToList();
 
             Wohnung = vertrag.Wohnung!;
             Zaehler = Wohnung.Zaehler;
             Adresse = Wohnung.Adresse;
-            Vermieter = Wohnung.Besitzer;
+            Vermieter = db.JuristischePersonen.Find(Wohnung.BesitzerId);
 
             Vertragsversionen = Wohnung.Vertraege
                 .Where(v => v.VertragId == vertrag.VertragId)

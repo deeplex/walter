@@ -18,7 +18,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Vertraege = App.Walter.Vertraege
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
-                .Include(v => v.Wohnung).ThenInclude(w => w.Besitzer)
                 .ToList()
                 .GroupBy(v => v.VertragId)
                 .Select(v => new VertragListVertrag(v))
@@ -101,15 +100,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Version = v.Version;
             Personenzahl = v.Personenzahl;
             Anschrift = AdresseViewModel.Anschrift(v.Wohnung);
-            Besitzer = v.Wohnung.Besitzer?.Bezeichnung ?? ""; // TODO Vertrag w/o Besitzer is a dummy (?)
+            Besitzer = App.Walter.FindPerson(v.Wohnung.BesitzerId) is JuristischePerson j ? j.Bezeichnung : ""; // TODO check for nat. Person
             Wohnung = v.Wohnung is Wohnung w ? w.Bezeichnung : "";
-            AuflistungMieter = string.Join(", ",
-                App.Walter.MieterSet
-                    .Where(m => m.VertragId == v.VertragId)
-                    .Include(m => m.Kontakt)
-                    .ToList()
-                    .Select(m => (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname));
-            // Such grace...
+
+
+            var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
+            var cs = bs.Select(b => {
+                var c = App.Walter.NatuerlichePersonen.Find(b);
+                return string.Join(" ", c.Vorname ?? "", c.Nachname);
+            });
+            AuflistungMieter = string.Join(", ", cs);
 
             Beginn = v.Beginn.AsUtcKind();
             BeginnString = v.Beginn.ToString("dd.MM.yyyy");

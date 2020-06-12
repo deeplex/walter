@@ -48,7 +48,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 if (value != null)
                 {
-                    Entity.BesitzerId = value.Id;
+                    Entity.BesitzerId = value.PersonId;
                     mBesitzer = value;
                     RaisePropertyChangedAuto();
                 }
@@ -120,7 +120,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             : this(App.Walter.Wohnungen
                   .Include(w => w.Adresse)
                   .Include(w => w.Zaehler)
-                  .Include(w => w.Besitzer)
                   .First(w => w.WohnungId == id))
         { }
 
@@ -196,7 +195,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     return;
             }
 
-            if ((Entity.Besitzer == null && Entity.BesitzerId == 0) ||
+            if (Entity.BesitzerId == null ||
                 (Entity.Adresse == null && Entity.AdresseId == 0) ||
                 Entity.Bezeichnung == null || Entity.Bezeichnung == "")
             {
@@ -354,11 +353,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Beginn.Value = v.Beginn.AsUtcKind();
             Ende.Value = v.Ende?.AsUtcKind();
 
-            AuflistungMieter.Value = string.Join(", ", App.Walter.MieterSet
-                .Include(m => m.Kontakt)
-                .Where(m => m.VertragId == v.VertragId)
-                .ToList()
-                .Select(m => (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname));
+            var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
+            var cs = bs.Select(b => {
+                var c = App.Walter.NatuerlichePersonen.Find(b);
+                return string.Join(" ", c.Vorname ?? "", c.Nachname);
+            });
+            AuflistungMieter.Value = string.Join(", ", cs);
         }
     }
 }

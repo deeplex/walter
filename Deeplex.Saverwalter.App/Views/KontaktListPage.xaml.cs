@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.App.Views
             if (sk != null)
             {
                 var target =
-                    sk.Type == typeof(Kontakt) ? typeof(KontaktDetailPage) :
+                    sk.Type == typeof(NatuerlichePerson) ? typeof(KontaktDetailPage) :
                     sk.Type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailPage) :
                     null;
 

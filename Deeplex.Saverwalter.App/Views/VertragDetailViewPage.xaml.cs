@@ -85,7 +85,7 @@ namespace Deeplex.Saverwalter.App.Views
                     var m = ViewModel.AlleKontakte.First(k => k.Name == a);
                     App.Walter.MieterSet.Add(new Mieter
                     {
-                        KontaktId = m.Id,
+                        PersonId = m.PersonId,
                         VertragId = ViewModel.guid,
                     });
                     App.Walter.SaveChanges();
@@ -102,13 +102,13 @@ namespace Deeplex.Saverwalter.App.Views
             if (args.ChosenSuggestion is string a)
             {
                 var ansprechpartner = ViewModel.AlleKontakte.First(k => k.Name == a);
-                var entity = App.Walter.Kontakte.Find(ansprechpartner.Id);
+                var entity = App.Walter.NatuerlichePersonen.Find(ansprechpartner.Id); // TODO could be jur. Person
 
                 ViewModel.Ansprechpartner = ansprechpartner;
                 ViewModel.Versionen.Value.ForEach(v => v.Ansprechpartner = ansprechpartner);
                 App.Walter.Vertraege.Where(vs => vs.VertragId == ViewModel.guid).ToList().ForEach(vs =>
                 {
-                    vs.Ansprechpartner = entity;
+                    vs.AnsprechpartnerId = entity.PersonId;
                 });
                 sender.Text = a;
                 App.Walter.SaveChanges();
@@ -117,12 +117,12 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void RemoveMieter_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            var id = (int)((Button)sender).CommandParameter;
-            var mieter = ViewModel.Mieter.Value.Find(m => m.Id == id);
+            var id = (Guid)((Button)sender).CommandParameter;
+            var mieter = ViewModel.Mieter.Value.Find(m => m.PersonId == id);
             ViewModel.Mieter.Value = ViewModel.Mieter.Value.Remove(mieter);
             App.Walter.MieterSet.Remove(
                 App.Walter.MieterSet.First(
-                    m => m.VertragId == ViewModel.guid && m.KontaktId == id));
+                    m => m.VertragId == ViewModel.guid && m.PersonId == id));
             App.Walter.SaveChanges();
         }
 

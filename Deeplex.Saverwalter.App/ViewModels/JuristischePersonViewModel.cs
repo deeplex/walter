@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using System;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
@@ -13,6 +14,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public ImmutableList<AdresseViewModel> AlleAdressen { get; }
         public ImmutableList<Anrede> Anreden { get; }
+
+        public Guid PersonId
+        {
+            get => Entity.PersonId;
+            set
+            {
+                Entity.PersonId = value;
+                RaisePropertyChangedAuto();
+            }
+        }
 
         public string Bezeichnung
         {

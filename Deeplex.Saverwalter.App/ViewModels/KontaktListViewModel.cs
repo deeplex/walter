@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public KontaktListViewModel()
         {
-            Kontakte = App.Walter.Kontakte
+            Kontakte = App.Walter.NatuerlichePersonen
                 .Include(k => k.Adresse)
                 .Select(k => new KontaktListEntry(k)).ToList();
 
@@ -62,10 +62,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 a.Postleitzahl + " " + a.Stadt : "";
         }
 
-        public KontaktListEntry(Kontakt k)
+        public KontaktListEntry(NatuerlichePerson k)
         {
             Type = k.GetType();
-            Id = k.KontaktId;
+            Id = k.NatuerlichePersonId;
             Vorname = k.Vorname ?? "";
             Name = k.Nachname ?? "";
             Email = k.Email ?? "";

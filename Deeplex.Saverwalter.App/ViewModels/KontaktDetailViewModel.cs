@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class KontaktDetailViewModel : BindableBase
     {
-        public Kontakt Entity { get; }
+        public NatuerlichePerson Entity { get; }
         public int Id { get; }
 
         public ImmutableList<AdresseViewModel> AlleAdressen { get; }
@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public void selfDestruct()
         {
-            App.Walter.Kontakte.Remove(Entity);
+            App.Walter.NatuerlichePersonen.Remove(Entity);
             App.Walter.SaveChanges();
         }
 
@@ -119,13 +119,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public string Name => Vorname + " " + Nachname;
 
         public KontaktDetailViewModel(int id)
-            : this(App.Walter.Kontakte.Find(id)) { }
+            : this(App.Walter.NatuerlichePersonen.Find(id)) { }
 
-        public KontaktDetailViewModel() : this(new Kontakt()) { IsInEdit.Value = true; }
-        private KontaktDetailViewModel(Kontakt k)
+        public KontaktDetailViewModel() : this(new NatuerlichePerson()) { IsInEdit.Value = true; }
+        private KontaktDetailViewModel(NatuerlichePerson k)
         {
             Entity = k;
-            Id = k.KontaktId;
+            Id = k.NatuerlichePersonId;
 
             AlleAdressen = App.Walter.Adressen
                 .Select(a => new AdresseViewModel(a))
@@ -173,13 +173,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 return;
             }
 
-            if (Entity.KontaktId != 0)
+            if (Entity.NatuerlichePersonId != 0)
             {
-                App.Walter.Kontakte.Update(Entity);
+                App.Walter.NatuerlichePersonen.Update(Entity);
             }
             else
             {
-                App.Walter.Kontakte.Add(Entity);
+                App.Walter.NatuerlichePersonen.Add(Entity);
             }
             App.Walter.SaveChanges();
         }
@@ -218,9 +218,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Beginn.Value = v.Beginn.AsUtcKind();
             Ende.Value = v.Ende?.AsUtcKind();
 
-            AuflistungMieter.Value = string.Join(", ",
-                App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList().Select(m =>
-                (m.Kontakt.Vorname is string n ? n + " " : "") + m.Kontakt.Nachname));
+            var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
+            var cs = bs.Select(b => {
+                var c = App.Walter.NatuerlichePersonen.Find(b);
+                return string.Join(" ", c.Vorname ?? "", c.Nachname);
+            });
+            AuflistungMieter.Value = string.Join(", ", cs);
         }
     }
 }

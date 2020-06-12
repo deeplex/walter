@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             => App.Walter.Adressen.ToList().First(a => Anschrift(a) == s).AdresseId;
 
         public static string Anschrift(int id) => Anschrift(App.Walter.Adressen.Find(id));
-        public static string Anschrift(Kontakt k) => Anschrift(k is Kontakt a ? a.Adresse : null);
+        public static string Anschrift(IPerson k) => Anschrift(k is IPerson a ? a.Adresse : null);
         public static string Anschrift(Wohnung w) => Anschrift(w is Wohnung a ? a.Adresse : null);
         public static string Anschrift(Adresse a)
         {
@@ -61,14 +61,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 return null;
             }
 
-            // Remove deprecated Adressen
-            foreach (var adresse in App.Walter.Adressen.Include(a => a.Kontakte).Include(a => a.Wohnungen).Include(a => a.Garagen))
-            {
-                if (adresse.Wohnungen.Count == 0 && adresse.Kontakte.Count == 0 && adresse.Garagen.Count == 0)
-                {
-                    App.Walter.Adressen.Remove(adresse);
-                }
-            }
+            // TODO Remove deprecated Adressen
 
             var adr = App.Walter.Adressen.FirstOrDefault(a =>
                 a.Postleitzahl == avm.Postleitzahl.Value &&

@@ -14,12 +14,12 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Betriebskostenrechnungsgruppe> Betriebskostenrechnungsgruppen { get; set; } = null!;
         public DbSet<Garage> Garagen { get; set; } = null!;
         public DbSet<JuristischePerson> JuristischePersonen { get; set; } = null!;
-        public DbSet<Kontakt> Kontakte { get; set; } = null!;
         public DbSet<Konto> Kontos { get; set; } = null!;
         public DbSet<Miete> Mieten { get; set; } = null!;
         public DbSet<Mieter> MieterSet { get; set; } = null!;
         public DbSet<MietMinderung> MietMinderungen { get; set; } = null!;
         public DbSet<MietobjektGarage> MietobjektGaragen { get; set; } = null!;
+        public DbSet<NatuerlichePerson> NatuerlichePersonen { get; set; } = null!;
         public DbSet<Vertrag> Vertraege { get; set; } = null!;
         public DbSet<Wohnung> Wohnungen { get; set; } = null!;
         public DbSet<Zaehler> ZaehlerSet { get; set; } = null!;
@@ -29,6 +29,16 @@ namespace Deeplex.Saverwalter.Model
             //=> options.UseSqlite("Data Source=walter.db");
             => options.UseSqlite("Data Source=" + ApplicationData.Current.LocalFolder.Path + @"\walter.db");
 
+        public IPerson FindPerson(Guid PersonId)
+        {
+            var left = JuristischePersonen.Find(PersonId);
+            if (left != null)
+            {
+                return left;
+            }
+            return NatuerlichePersonen.Find(PersonId);
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Vertrag>()
@@ -37,14 +47,38 @@ namespace Deeplex.Saverwalter.Model
                 .HasAlternateKey("VertragId", "Version");
             modelBuilder.Entity<Vertrag>()
                 .Property(v => v.Version);
+
+            modelBuilder.Entity<JuristischePerson>()
+                .HasAlternateKey(jp => jp.PersonId);
+            modelBuilder.Entity<NatuerlichePerson>()
+                .HasAlternateKey(np => np.PersonId);
         }
     }
 
-    public sealed class Kontakt
+    public interface IPerson
     {
-        public int KontaktId { get; set; }
+        public Guid PersonId { get; }
+        public string Bezeichnung { get; }
+
+        public Anrede Anrede { get; set; }
+        public string? Telefon { get; set; }
+        public string? Mobil { get; set; }
+        public string? Fax { get; set; }
+        public string? Email { get; set; }
+        public int? AdresseId { get; set; }
+        public Adresse? Adresse { get; set; }
+        public string? Notiz { get; set; }
+    }
+
+    public sealed class NatuerlichePerson : IPerson
+    {
+        public string Bezeichnung => $"{Vorname} + {Nachname} = ♥";
+
+        public Guid PersonId { get; set; }
+        public int NatuerlichePersonId { get; set; }
         public string? Vorname { get; set; }
         public string Nachname { get; set; } = null!;
+        // public Titel Titel { get; set; } TODO
         public Anrede Anrede { get; set; }
         public string? Telefon { get; set; }
         public string? Mobil { get; set; }
@@ -54,6 +88,43 @@ namespace Deeplex.Saverwalter.Model
         public Adresse? Adresse { get; set; }
         public List<JuristischePersonenMitglied> JuristischePersonen { get; private set; } = new List<JuristischePersonenMitglied>();
         public string? Notiz { get; set; }
+
+        public NatuerlichePerson()
+        {
+            PersonId = Guid.NewGuid();
+        }
+    }
+
+    // JuristischePerson is a Name. Kontakte may subscribe to this and is used for dashboards and stuff... nothing wild really.
+    public sealed class JuristischePerson : IPerson
+    {
+        public Guid PersonId { get; set; }
+        public int JuristischePersonId { get; set; }
+        public string Bezeichnung { get; set; } = null!;
+        public string? Telefon { get; set; }
+        public string? Mobil { get; set; }
+        public string? Fax { get; set; }
+        public string? Email { get; set; }
+        public int? AdresseId { get; set; }
+        public Adresse? Adresse { get; set; }
+        public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
+        public List<Garage> Garagen { get; private set; } = new List<Garage>();
+        public List<JuristischePersonenMitglied> Mitglieder { get; private set; } = new List<JuristischePersonenMitglied>();
+        public string? Notiz { get; set; }
+        public Anrede Anrede { get; set; }
+
+        public JuristischePerson()
+        {
+            PersonId = Guid.NewGuid();
+        }
+    }
+
+    public sealed class JuristischePersonenMitglied
+    {
+        public int JuristischePersonenMitgliedId { get; set; }
+        public Guid PersonId { get; set; }
+        public int JuristischePersonId { get; set; }
+        public JuristischePerson JuristischePerson { get; set; } = null!;
     }
 
     public sealed class Wohnung
@@ -62,8 +133,7 @@ namespace Deeplex.Saverwalter.Model
         public int AdresseId { get; set; }
         public Adresse Adresse { get; set; } = null!;
         public string Bezeichnung { get; set; } = null!;
-        public int? BesitzerId { get; set; }
-        public JuristischePerson? Besitzer { get; set; }
+        public Guid BesitzerId { get; set; }
         public double Wohnflaeche { get; set; }
         public double Nutzflaeche { get; set; }
         // Nutzeinheit is always 1, but dummies may have more... Or really big Wohnungen, who knows.
@@ -79,7 +149,7 @@ namespace Deeplex.Saverwalter.Model
         public int GarageId { get; set; }
         public Adresse Adresse { get; set; } = null!;
         public string Kennung { get; set; } = null!;
-        public JuristischePerson Besitzer { get; set; } = null!;
+        public Guid BesitzerId { get; set; }
         public string? Notiz { get; set; }
     }
 
@@ -93,7 +163,6 @@ namespace Deeplex.Saverwalter.Model
         public string Stadt { get; set; } = null!;
         public string? Notiz { get; set; }
         public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
-        public List<Kontakt> Kontakte { get; private set; } = new List<Kontakt>();
         public List<Garage> Garagen { get; private set; } = new List<Garage>();
     }
 
@@ -112,8 +181,7 @@ namespace Deeplex.Saverwalter.Model
         public double KaltMiete { get; set; }
         public DateTime Beginn { get; set; }
         public DateTime? Ende { get; set; }
-        public int? AnsprechpartnerId { get; set; }
-        public Kontakt? Ansprechpartner { get; set; }
+        public Guid? AnsprechpartnerId { get; set; }
         public string? VersionsNotiz { get; set; }
         public string? Notiz { get; set; }
 
@@ -128,7 +196,7 @@ namespace Deeplex.Saverwalter.Model
             Version = alt.Version + 1;
             Wohnung = alt.Wohnung;
             Notiz = alt.Notiz;
-            Ansprechpartner = alt.Ansprechpartner;
+            AnsprechpartnerId = alt.AnsprechpartnerId;
             alt.Ende = Datum.AddDays(-1);
             Beginn = Datum;
         }
@@ -138,8 +206,7 @@ namespace Deeplex.Saverwalter.Model
     public sealed class Mieter
     {
         public int MieterId { get; set; }
-        public int KontaktId { get; set; }
-        public Kontakt Kontakt { get; set; } = null!;
+        public Guid PersonId { get; set; }
         public Guid VertragId { get; set; }
     }
 
@@ -172,32 +239,6 @@ namespace Deeplex.Saverwalter.Model
         public Guid VertragId { get; set; }
         public int GarageId { get; set; }
         public Garage Garage { get; set; } = null!;
-    }
-
-    // JuristischePerson is a Name. Kontakte may subscribe to this and is used for dashboards and stuff... nothing wild really.
-    public sealed class JuristischePerson
-    {
-        public int JuristischePersonId { get; set; }
-        public string Bezeichnung { get; set; } = null!;
-        public string? Telefon { get; set; }
-        public string? Mobil { get; set; }
-        public string? Fax { get; set; }
-        public string? Email { get; set; }
-        public int? AdresseId { get; set; }
-        public Adresse? Adresse { get; set; }
-        public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
-        public List<Garage> Garagen { get; private set; } = new List<Garage>();
-        public List<JuristischePersonenMitglied> Mitglieder { get; private set; } = new List<JuristischePersonenMitglied>();
-        public string? Notiz { get; set; }
-    }
-
-    public sealed class JuristischePersonenMitglied
-    {
-        public int JuristischePersonenMitgliedId { get; set; }
-        public int KontaktId { get; set; }
-        public Kontakt Kontakt { get; set; } = null!;
-        public int JuristischePersonId { get; set; }
-        public JuristischePerson JuristischePerson { get; set; } = null!;
     }
 
     public enum Anrede
