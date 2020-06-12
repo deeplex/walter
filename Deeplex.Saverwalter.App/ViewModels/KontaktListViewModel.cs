@@ -48,30 +48,28 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public string Telefon { get; }
         public string Mobil { get; }
 
-        public KontaktListEntry(JuristischePerson j)
+        public KontaktListEntry(JuristischePerson j) : this(j as IPerson)
         {
             Type = j.GetType();
             Id = j.JuristischePersonId;
             Vorname = "";
             Name = j.Bezeichnung;
-            Email = j.Email ?? "";
-            Telefon = j.Telefon ?? "";
-            Mobil = j.Mobil ?? "";
-            Anschrift = j.Adresse is Adresse a ?
-                a.Strasse + " " + a.Hausnummer + ", " +
-                a.Postleitzahl + " " + a.Stadt : "";
         }
 
-        public KontaktListEntry(NatuerlichePerson k)
+        public KontaktListEntry(NatuerlichePerson k) : this(k as IPerson)
         {
             Type = k.GetType();
             Id = k.NatuerlichePersonId;
             Vorname = k.Vorname ?? "";
-            Name = k.Nachname ?? "";
-            Email = k.Email ?? "";
-            Telefon = k.Telefon ?? "";
-            Mobil = k.Mobil ?? "";
-            Anschrift = k.Adresse is Adresse a ?
+            Name = k.Nachname;
+        }
+
+        private KontaktListEntry(IPerson p)
+        {
+            Email = p.Email ?? "";
+            Telefon = p.Telefon ?? "";
+            Mobil = p.Mobil ?? "";
+            Anschrift = p.Adresse is Adresse a ?
                 a.Strasse + " " + a.Hausnummer + ", " +
                 a.Postleitzahl + " " + a.Stadt : "";
         }
