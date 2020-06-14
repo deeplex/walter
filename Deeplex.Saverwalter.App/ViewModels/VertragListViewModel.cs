@@ -100,15 +100,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Version = v.Version;
             Personenzahl = v.Personenzahl;
             Anschrift = AdresseViewModel.Anschrift(v.Wohnung);
-            Besitzer = App.Walter.FindPerson(v.Wohnung.BesitzerId) is JuristischePerson j ? j.Bezeichnung : ""; // TODO check for nat. Person
+            Besitzer = App.Walter.FindPerson(v.Wohnung.BesitzerId).Bezeichnung;
             Wohnung = v.Wohnung is Wohnung w ? w.Bezeichnung : "";
 
 
             var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
-            var cs = bs.Select(b => {
-                var c = App.Walter.NatuerlichePersonen.Find(b);
-                return string.Join(" ", c.Vorname ?? "", c.Nachname);
-            });
+            var cs = bs.Select(b => App.Walter.FindPerson(b.PersonId).Bezeichnung);
             AuflistungMieter = string.Join(", ", cs);
 
             Beginn = v.Beginn.AsUtcKind();

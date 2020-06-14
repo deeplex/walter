@@ -12,9 +12,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class VertragDetailViewModel : VertragDetailVersion
     {
         public Guid guid { get; }
-        public ImmutableList<VertragDetailKontakt> AlleKontakte { get; }
-        public ImmutableList<JuristischePersonViewModel> AlleJuristischePersonen { get; }
-        public ImmutableList<VertragDetailWohnung> AlleWohnungen { get; }
+        public ImmutableList<VertragDetailKontakt> AlleMieter
+            => App.Walter.JuristischePersonen.ToImmutableList()
+                    .Where(j => j.isMieter == true).Select(j => new VertragDetailKontakt(j))
+                    .Concat(App.Walter.NatuerlichePersonen
+                        .Where(n => n.isMieter == true).Select(n => new VertragDetailKontakt(n)))
+                    .ToImmutableList();
+        public ImmutableList<VertragDetailWohnung> AlleWohnungen
+            => App.Walter.Wohnungen.Select(w => new VertragDetailWohnung(w)).ToImmutableList();
+
+        public ImmutableList<VertragDetailKontakt> AlleKontakte =>
+                App.Walter.JuristischePersonen.ToImmutableList().Select(j => new VertragDetailKontakt(j))
+                    .Concat(App.Walter.NatuerlichePersonen.Select(n => new VertragDetailKontakt(n)))
+                    .ToImmutableList();
 
         public ObservableProperty<ImmutableList<VertragDetailVersion>> Versionen
             = new ObservableProperty<ImmutableList<VertragDetailVersion>>();
@@ -68,14 +78,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             guid = v.First().VertragId;
 
-            AlleKontakte = App.Walter.NatuerlichePersonen.Select(k => new VertragDetailKontakt(k)).ToImmutableList();
-            AlleWohnungen = App.Walter.Wohnungen.Include(w => w.BesitzerId).Select(w => new VertragDetailWohnung(w)).ToImmutableList();
-            AlleJuristischePersonen = App.Walter.JuristischePersonen.Select(j => new JuristischePersonViewModel(j)).ToImmutableList();
-
             Mieter.Value = App.Walter.MieterSet
                 .Where(m => m.VertragId == v.First().VertragId)
                 .Select(m => new VertragDetailKontakt(m.PersonId)).ToList()
-                .OrderBy(m => m.Name.Length).Reverse().ToImmutableList();
+                .OrderBy(m => m.Bezeichnung.Length).Reverse().ToImmutableList();
 
             Mieten.Value = App.Walter.Mieten
                 .Where(m => m.VertragId == v.First().VertragId)
@@ -239,7 +245,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             if (v.AnsprechpartnerId != null)
             {
                 // TODO Could be a jur. Person
-                Ansprechpartner = new VertragDetailKontakt(App.Walter.NatuerlichePersonen.Find(v.AnsprechpartnerId).NatuerlichePersonId);
+                Ansprechpartner = new VertragDetailKontakt(v.Wohnung.BesitzerId);
             }
             PropertyChanged += OnUpdate;
         }
@@ -471,30 +477,20 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public sealed class VertragDetailKontakt
     {
-        public override string ToString() => Name;
+        public override string ToString() => Bezeichnung;
 
-        // TODO Remove Id
-        public int Id;
         public Guid PersonId;
-        public string Name;
+        public bool isMieter;
+        public string Bezeichnung;
 
-        public VertragDetailKontakt(int id) : this(App.Walter.NatuerlichePersonen.Find(id)) { }
+        public VertragDetailKontakt(Guid i) : this(App.Walter.FindPerson(i)) { }
 
-        public VertragDetailKontakt(Guid i)
+        public VertragDetailKontakt(IPerson p)
         {
-            var p = App.Walter.FindPerson(i);
-            Id = 0;
             PersonId = p.PersonId;
-            Name = p is NatuerlichePerson n ? n.Vorname + " " + n.Nachname : p.Bezeichnung;
-        }
-
-        // TODO Remove this
-        public VertragDetailKontakt(NatuerlichePerson k)
-        {
-            PersonId = k.PersonId;
-            Id = k.NatuerlichePersonId;
-            Name = k.Vorname + " " + k.Nachname;
-        }
+            isMieter = p.isMieter;
+            Bezeichnung = p.Bezeichnung;
+    }
 
         public static NatuerlichePerson GetKontakt(int id) => App.Walter.NatuerlichePersonen.Find(id);
     }
@@ -512,8 +508,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = w;
             Id = w.WohnungId;
-            // TODO Besitzer could be natürlich
-            Besitzer = App.Walter.JuristischePersonen.Find(w.BesitzerId).Bezeichnung;
+            Besitzer = App.Walter.FindPerson(w.BesitzerId).Bezeichnung;
             BezeichnungVoll = AdresseViewModel.Anschrift(w) + " - " + w.Bezeichnung;
         }
 

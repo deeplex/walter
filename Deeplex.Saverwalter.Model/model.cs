@@ -75,7 +75,7 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class NatuerlichePerson : IPerson
     {
-        public string Bezeichnung => $"{Vorname} {Nachname}";
+        public string Bezeichnung => string.Join(" ", Vorname ?? "", Nachname);
 
         public Guid PersonId { get; set; }
         public int NatuerlichePersonId { get; set; }

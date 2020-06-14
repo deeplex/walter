@@ -25,9 +25,9 @@
 
         <DataTemplate x:Key="Mieter" x:DataType="vm:VertragDetailKontakt">
             <mtuuc:DockPanel LastChildFill="False">
-                <TextBlock Text="{x:Bind Name}"  VerticalAlignment="Center" Margin="10,0,0,0"/>
+                <TextBlock Text="{x:Bind Bezeichnung}"  VerticalAlignment="Center" Margin="10,0,0,0"/>
                 <Button
-                    CommandParameter="{x:Bind Id}"
+                    CommandParameter="{x:Bind PersonId}"
                     Click="RemoveMieter_Click"
                     mtuuc:DockPanel.Dock="Right"
                     Background="Transparent"
@@ -156,6 +156,7 @@
                     MinWidth="200"
                     Text="{x:Bind ViewModel.Ansprechpartner, Mode=OneWay}"
                     PlaceholderText="Ansprechpartner"
+                    TextMemberPath="Bezeichnung"
                     QuerySubmitted="AnsprechpartnerSuggest_QuerySubmitted"
                     TextChanged="AnsprechpartnerSuggest_TextChanged"/>
                 <CheckBox
@@ -178,6 +179,7 @@
                     Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Margin="0,10,0,0"
                     QueryIcon="AddFriend"
+                    TextMemberPath="Bezeichnung"
                     MinWidth="200"
                     PlaceholderText="Mieter hinzufügen..."
                     QuerySubmitted="MieterSuggest_QuerySubmitted"

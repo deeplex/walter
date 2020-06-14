@@ -16,12 +16,11 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void Vertrag_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            try
+            if (ViewModel.SelectedVertrag.Value != null)
             {
                 Frame.Navigate(typeof(VertragDetailViewPage), ViewModel.SelectedVertrag.Value.VertragId,
                     new DrillInNavigationTransitionInfo());
             }
-            catch { }
         }
 
         private void AddVertrag_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)

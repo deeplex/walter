@@ -40,58 +40,43 @@ namespace Deeplex.Saverwalter.App.Views
             base.OnNavigatedTo(e);
         }
 
-        private void Suggest(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args,
-            List<string> suggestions, string add)
-        {
-            if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
-            {
-                sender.ItemsSource = suggestions.Count > 0 ? suggestions
-                    : new List<string> { sender.Text + " (" + add + " hinzufügen)" };
-            }
-        }
-
         private void MieterSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            Suggest(sender, args,
-                ViewModel.AlleKontakte
-                    .Where(k => k.Name.Trim().ToLower()
+            sender.ItemsSource = ViewModel.AlleMieter.Where(k => k.isMieter == true)
+                    // If Checkbox => .Where(k => k.JuristischePersonen.Contains(ViewModel.Vermieter.Id))
+                    .Where(k => k.Bezeichnung.Trim().ToLower()
                         .Contains(sender.Text.Trim().ToLower()))
-                    .Where(k => !ViewModel.Mieter.Value.Exists(m => m.Name == k.Name))
-                    .Select(k => k.Name).ToList(),
-                "Kontakt");
+                    .ToImmutableList();
         }
 
         private void AnsprechpartnerSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            Suggest(sender, args,
-                ViewModel.AlleKontakte
+            sender.ItemsSource = ViewModel.AlleKontakte
                     // If Checkbox => .Where(k => k.JuristischePersonen.Contains(ViewModel.Vermieter.Id))
-                    .Where(k => k.Name.Trim().ToLower()
-                        .Contains(sender.Text.Trim().ToLower()))
-                    .Select(k => k.Name).ToList(),
-                "Kontakt");
+                    .Where(k => k.Bezeichnung.Trim().ToLower().Contains(sender.Text.Trim().ToLower()))
+                    .ToImmutableList();
         }
 
         private void MieterSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
-            if (args.ChosenSuggestion is string a)
+            if (args.ChosenSuggestion is VertragDetailKontakt a)
             {
-                if (ViewModel.Mieter.Value.Exists(w => w.Name == a))
+                if (ViewModel.Mieter.Value.Exists(w => w.PersonId == a.PersonId))
                 {
 
                 }
                 else
                 {
-                    var m = ViewModel.AlleKontakte.First(k => k.Name == a);
+                    var m = ViewModel.AlleMieter.First(k => k.PersonId == a.PersonId);
                     App.Walter.MieterSet.Add(new Mieter
                     {
                         PersonId = m.PersonId,
                         VertragId = ViewModel.guid,
                     });
                     App.Walter.SaveChanges();
-                    ViewModel.Mieter.Value = ViewModel.Mieter.Value.Add(new VertragDetailKontakt(m.Id))
+                    ViewModel.Mieter.Value = ViewModel.Mieter.Value.Add(new VertragDetailKontakt(m.PersonId))
                         // From the longest to the smallest because of XAML I guess;
-                        .OrderBy(mw => mw.Name.Length).Reverse().ToImmutableList();
+                        .OrderBy(mw => mw.Bezeichnung.Length).Reverse().ToImmutableList();
                     sender.Text = "";
                 }
             }
@@ -99,18 +84,16 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void AnsprechpartnerSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
-            if (args.ChosenSuggestion is string a)
+            if (args.ChosenSuggestion is VertragDetailKontakt a)
             {
-                var ansprechpartner = ViewModel.AlleKontakte.First(k => k.Name == a);
-                var entity = App.Walter.NatuerlichePersonen.Find(ansprechpartner.Id); // TODO could be jur. Person
+                var ansprechpartner = ViewModel.AlleKontakte.First(k => k.PersonId == a.PersonId);
 
                 ViewModel.Ansprechpartner = ansprechpartner;
                 ViewModel.Versionen.Value.ForEach(v => v.Ansprechpartner = ansprechpartner);
                 App.Walter.Vertraege.Where(vs => vs.VertragId == ViewModel.guid).ToList().ForEach(vs =>
                 {
-                    vs.AnsprechpartnerId = entity.PersonId;
+                    vs.AnsprechpartnerId = a.PersonId;
                 });
-                sender.Text = a;
                 App.Walter.SaveChanges();
             }
         }
