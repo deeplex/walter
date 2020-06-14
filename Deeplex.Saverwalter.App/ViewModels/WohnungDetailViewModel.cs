@@ -154,7 +154,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = w;
 
-            Besitzer = new WohnungDetailVermieter(w.BesitzerId);
+            if (w.BesitzerId != Guid.Empty)
+            {
+                Besitzer = new WohnungDetailVermieter(w.BesitzerId);
+            }
             Stadt.Value = w.Adresse?.Stadt ?? "";
             Postleitzahl.Value = w.Adresse?.Postleitzahl ?? "";
             Strasse.Value = w.Adresse?.Strasse ?? "";

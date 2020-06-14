@@ -27,7 +27,10 @@ namespace Deeplex.Saverwalter.App.Views
             }
 
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
-            BesitzerCombobox.SelectedIndex = ViewModel.AlleVermieter.FindIndex(v => v.Id == ViewModel.Besitzer.Id);
+            if (ViewModel.Besitzer != null) // TODO this is an ugly way to accomplish initial loading of Besitzer in GUI
+            {
+                BesitzerCombobox.SelectedIndex = ViewModel.AlleVermieter.FindIndex(v => v.Id == ViewModel.Besitzer.Id);
+            }
             base.OnNavigatedTo(e);
         }
 
