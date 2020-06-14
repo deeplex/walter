@@ -15,7 +15,25 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         private Wohnung Entity;
         public int Id;
-        public ImmutableList<JuristischePersonViewModel> AlleJuristischePersonen { get; }
+
+        public ImmutableList<WohnungDetailVermieter> AlleVermieter =>
+            App.Walter.JuristischePersonen.ToImmutableList()
+                .Where(j => j.isVermieter == true).Select(j => new WohnungDetailVermieter(j))
+                .Concat(App.Walter.NatuerlichePersonen
+                    .Where(n => n.isVermieter == true).Select(n => new WohnungDetailVermieter(n)))
+                .ToImmutableList();
+
+        private WohnungDetailVermieter mBesitzer;
+        public WohnungDetailVermieter Besitzer
+        {
+            get => mBesitzer;
+            set
+            {
+                Entity.BesitzerId = value.Id;
+                mBesitzer = value;
+                RaisePropertyChangedAuto();
+            }
+        }
 
         private ImmutableList<Adresse> AlleAdressen => App.Walter.Adressen.ToImmutableList();
 
@@ -40,18 +58,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<List<WohnungDetailVertrag>> Vertraege
             = new ObservableProperty<List<WohnungDetailVertrag>>();
 
-        private JuristischePersonViewModel mBesitzer;
-        public JuristischePersonViewModel Besitzer
+        public class WohnungDetailVermieter
         {
-            get => mBesitzer;
-            set
+            public Guid Id { get; set; }
+            public string Bezeichnung { get; }
+
+            public WohnungDetailVermieter(Guid g) : this(App.Walter.FindPerson(g)) { }
+
+            public WohnungDetailVermieter(IPerson p)
             {
-                if (value != null)
-                {
-                    Entity.BesitzerId = value.PersonId;
-                    mBesitzer = value;
-                    RaisePropertyChangedAuto();
-                }
+                Id = p.PersonId;
+                Bezeichnung = p.Bezeichnung;
             }
         }
 
@@ -137,6 +154,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = w;
 
+            Besitzer = new WohnungDetailVermieter(w.BesitzerId);
             Stadt.Value = w.Adresse?.Stadt ?? "";
             Postleitzahl.Value = w.Adresse?.Postleitzahl ?? "";
             Strasse.Value = w.Adresse?.Strasse ?? "";
@@ -311,7 +329,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public WohnungDetailZaehlerStand(Zaehlerstand z, WohnungDetailZaehler p)
         {
             Entity = z;
-
             IsInEdit = p.IsInEdit;
 
             SelfDestruct = new RelayCommand(_ =>

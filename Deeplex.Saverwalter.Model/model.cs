@@ -31,12 +31,12 @@ namespace Deeplex.Saverwalter.Model
 
         public IPerson FindPerson(Guid PersonId)
         {
-            var left = JuristischePersonen.Find(PersonId);
+            var left = JuristischePersonen.SingleOrDefault(j => PersonId == j.PersonId);
             if (left != null)
             {
                 return left;
             }
-            return NatuerlichePersonen.Find(PersonId);
+            return NatuerlichePersonen.Single(n => PersonId == n.PersonId);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -79,16 +79,17 @@
             </RelativePanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <ComboBox
-                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value}"
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     x:Name="BesitzerCombobox"
                     SelectedItem="{x:Bind ViewModel.Besitzer, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Margin="20,20,0,0"
                     PlaceholderText="Besitzer"
                     MinWidth="300"
-                    ItemsSource="{x:Bind ViewModel.AlleJuristischePersonen, Mode=OneWay}"/>
+                    DisplayMemberPath="Bezeichnung"
+                    ItemsSource="{x:Bind ViewModel.AlleVermieter, Mode=OneWay}"/>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel>
-                <Button Margin="20,20,0,0">
+                <Button Margin="20,20,0,0" IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}">
                     <Button.Content>
                         <TextBlock>
                             <Run Text="{x:Bind ViewModel.Adresse.Strasse.Value, Mode=OneWay}"/>

@@ -27,6 +27,7 @@ namespace Deeplex.Saverwalter.App.Views
             }
 
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
+            BesitzerCombobox.SelectedIndex = ViewModel.AlleVermieter.FindIndex(v => v.Id == ViewModel.Besitzer.Id);
             base.OnNavigatedTo(e);
         }
 
