@@ -30,13 +30,13 @@ namespace Deeplex.Saverwalter.App.Views
             }
         }
 
-        private void AddKontakt_Click(object sender, RoutedEventArgs e)
+        private void AddNatuerlichePerson_Click(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(NatuerlichePersonDetailPage), null,
                 new DrillInNavigationTransitionInfo());
         }
 
-        private void AddJuristischePeron_Click(object sender, RoutedEventArgs e)
+        private void AddJuristischePerson_Click(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(JuristischePersonenDetailPage), null,
                 new DrillInNavigationTransitionInfo());

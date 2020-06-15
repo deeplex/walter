@@ -26,8 +26,18 @@
                     <AppBarButton.Flyout>
                         <Flyout>
                             <StackPanel Orientation="Horizontal">
-                                <Button Click="AddKontakt_Click" Content="Natürliche Person"/>
-                                <Button  Margin="20,0,0,0" Click="AddJuristischePeron_Click" Content="Juristische Person"/>
+                                <Button Click="AddNatuerlichePerson_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <SymbolIcon Symbol="Contact"/>
+                                        <TextBlock Text=" Natürliche Person"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Margin="20,0,0,0" Click="AddJuristischePerson_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <SymbolIcon Symbol="People"/>
+                                        <TextBlock Text=" Juristische Person"/>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </Flyout>
                     </AppBarButton.Flyout>
