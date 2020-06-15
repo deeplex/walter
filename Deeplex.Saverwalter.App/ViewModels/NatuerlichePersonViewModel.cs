@@ -246,10 +246,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Ende.Value = v.Ende?.AsUtcKind();
 
             var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
-            var cs = bs.Select(b => {
-                var c = App.Walter.NatuerlichePersonen.Find(b);
-                return string.Join(" ", c.Vorname ?? "", c.Nachname);
-            });
+            var cs = bs.Select(b => App.Walter.FindPerson(b.PersonId).Bezeichnung);
             AuflistungMieter.Value = string.Join(", ", cs);
         }
     }

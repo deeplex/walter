@@ -490,9 +490,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             PersonId = p.PersonId;
             isMieter = p.isMieter;
             Bezeichnung = p.Bezeichnung;
-    }
-
-        public static NatuerlichePerson GetKontakt(int id) => App.Walter.NatuerlichePersonen.Find(id);
+        }
     }
 
     public sealed class VertragDetailWohnung

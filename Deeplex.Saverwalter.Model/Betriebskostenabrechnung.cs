@@ -14,9 +14,9 @@ namespace Deeplex.Saverwalter.Model
         public double Result { get; set; }
         public int Jahr { get; set; }
         public List<Vertrag> Vertragsversionen { get; set; }
-        public JuristischePerson Vermieter { get; set; }
+        public IPerson Vermieter { get; set; }
         public IPerson Ansprechpartner { get; set; }
-        public List<NatuerlichePerson> NatuerlicheMieter { get; set; }
+        public List<IPerson> Mieter { get; set; }
         // TODO juristische
         public Wohnung Wohnung { get; set; }
         public Adresse Adresse { get; set; }
@@ -80,15 +80,15 @@ namespace Deeplex.Saverwalter.Model
             // If Ansprechpartner or Besitzer is null => throw
 
             Ansprechpartner = db.FindPerson(vertrag.AnsprechpartnerId!.Value);
-            NatuerlicheMieter = db.MieterSet
+            Mieter = db.MieterSet
                 .Where(m => m.VertragId == vertrag.VertragId)
-                .Select(m => db.NatuerlichePersonen.Find(m.PersonId))
+                .Select(m => db.FindPerson(m.PersonId))
                 .ToList();
 
             Wohnung = vertrag.Wohnung!;
             Zaehler = Wohnung.Zaehler;
             Adresse = Wohnung.Adresse;
-            Vermieter = db.JuristischePersonen.Find(Wohnung.BesitzerId);
+            Vermieter = db.FindPerson(Wohnung.BesitzerId);
 
             Vertragsversionen = Wohnung.Vertraege
                 .Where(v => v.VertragId == vertrag.VertragId)

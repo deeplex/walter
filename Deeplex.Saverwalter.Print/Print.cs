@@ -91,6 +91,7 @@ namespace Deeplex.Saverwalter.Print
         {
             var AnsprechpartnerBezeichnung = b.Ansprechpartner is NatuerlichePerson a ? a.Vorname + " " + a.Nachname : ""; // TODO jur. Person
 
+            // TODO Ansprechpartner HAS to have a Adresse...
             var table = new Table(
                 new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
                 new TableRow(
@@ -128,14 +129,15 @@ namespace Deeplex.Saverwalter.Print
             var run = new Run(Font());
             int counter = 6;
 
-            foreach (var m in b.NatuerlicheMieter)
+            foreach (var m in b.Mieter)
             {
+                // If b.Mieter is a jur. Person, there is no Anrede...
                 var Anrede = m.Anrede == Model.Anrede.Herr ? "Herrn " : m.Anrede == Model.Anrede.Frau ? "Frau " : "";
-                run.Append(new Text(Anrede + m.Vorname + " " + m.Nachname));
+                run.Append(new Text(Anrede + m.Bezeichnung));
                 run.Append(new Break());
                 counter--;
             }
-            var a = b.NatuerlicheMieter.First().Adresse;
+            var a = b.Mieter.First().Adresse;
             if (a != null)
             {
                 run.Append(new Text(a.Strasse + " " + a.Hausnummer));
@@ -162,8 +164,7 @@ namespace Deeplex.Saverwalter.Print
 
         private static Paragraph Betreff(Betriebskostenabrechnung b)
         {
-            var Mieterliste = string.Join(", ",
-                b.NatuerlicheMieter.Select(m => m.Vorname + " " + m.Nachname));
+            var Mieterliste = string.Join(", ", b.Mieter.Select(m => m.Bezeichnung));
 
             return new Paragraph(Font(),
                 new Run(Font(),
@@ -187,10 +188,21 @@ namespace Deeplex.Saverwalter.Print
 
         private static Paragraph Ergebnis(Betriebskostenabrechnung b)
         {
-            var gruss = b.NatuerlicheMieter.Aggregate("", (r, m) => r + (
-                m.Anrede == Anrede.Herr ? "sehr geehrter Herr " :
-                m.Anrede == Anrede.Frau ? "sehr geehrte Frau " :
-                m.Vorname) + m.Nachname + ", ");
+            var gruss = b.Mieter.Aggregate("", (r, m) =>
+            {
+                if (m is NatuerlichePerson n)
+                {
+                    return (n.Anrede == Anrede.Herr ? "sehr geehrter Herr " :
+                        n.Anrede == Anrede.Frau ? "sehr geehrte Frau " :
+                        n.Vorname) + n.Nachname + ", ";
+                }
+                else
+                {
+                    return "";
+                }
+            });
+
+
             // Capitalize first letter...
             var Gruss = gruss.Remove(1).ToUpper() + gruss.Substring(1);
 
@@ -324,11 +336,19 @@ namespace Deeplex.Saverwalter.Print
 
         private static Paragraph MietHeader(Betriebskostenabrechnung b)
         {
-            var Header = string.Join(", ", b.NatuerlicheMieter.Select(m => (
-                m.Anrede == Anrede.Herr ? "Herrn " :
-                m.Anrede == Anrede.Frau ? "Frau " :
-                m.Vorname) + " " + m.Nachname)) +
-                " (" + b.Adresse.Strasse + " " + b.Adresse.Hausnummer + ", " + b.Wohnung.Bezeichnung + ")";
+            var Header = string.Join(", ", b.Mieter.Select(m =>
+            {
+                if (m is NatuerlichePerson n)
+                {
+                    return (n.Anrede == Anrede.Herr ? "Herrn " :
+                        n.Anrede == Anrede.Frau ? "Frau " :
+                        n.Vorname) + " " + n.Nachname;
+                }
+                else
+                {
+                    return "";
+                }
+            })) + " (" + b.Adresse.Strasse + " " + b.Adresse.Hausnummer + ", " + b.Wohnung.Bezeichnung + ")";
 
             return new Paragraph(Font(),
                 new ParagraphProperties(new Justification() { Val = JustificationValues.Right }),
@@ -440,7 +460,7 @@ namespace Deeplex.Saverwalter.Print
             BottomBorder bot() => new BottomBorder() { Val = BorderValues.Single, Size = 4 };
             TopBorder top() => new TopBorder() { Val = BorderValues.Single, Size = 4 };
             TableRow empty() => new TableRow(ContentCell(""), ContentCell(""), ContentCell(""), ContentCell(""));
-        
+
             var table = new Table(empty(), new TableRow(
                 ContentHead("2050", "Ermittlung Ihrer Einheiten"),
                 ContentHead("1120", "Nutzungsintervall", JustificationValues.Center),
