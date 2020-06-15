@@ -154,7 +154,7 @@
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Margin="20,15,0,0"
                     MinWidth="200"
-                    Text="{x:Bind ViewModel.Ansprechpartner, Mode=OneWay}"
+                    x:Name="AnsprechpartnerSuggest"
                     PlaceholderText="Ansprechpartner"
                     TextMemberPath="Bezeichnung"
                     QuerySubmitted="AnsprechpartnerSuggest_QuerySubmitted"

@@ -238,14 +238,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = v;
 
+            if (v.AnsprechpartnerId != Guid.Empty && v.AnsprechpartnerId != null)
+            {
+                Ansprechpartner = new VertragDetailKontakt(v.AnsprechpartnerId.Value);
+            }
+
             if (v.Wohnung != null)
             {
                 Wohnung = new VertragDetailWohnung(v.Wohnung);
-            }
-            if (v.AnsprechpartnerId != null)
-            {
-                // TODO Could be a jur. Person
-                Ansprechpartner = new VertragDetailKontakt(v.Wohnung.BesitzerId);
             }
             PropertyChanged += OnUpdate;
         }

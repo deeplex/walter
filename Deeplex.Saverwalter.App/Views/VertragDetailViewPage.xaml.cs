@@ -37,6 +37,10 @@ namespace Deeplex.Saverwalter.App.Views
                 WohnungComboBox.SelectedIndex = ViewModel.AlleWohnungen.FindIndex(w => w.Id == ViewModel.Wohnung.Id);
             }
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
+            if (ViewModel.Ansprechpartner != null) // TODO this is an ugly way to accomplish initial loading of Besitzer in GUI
+            {
+                AnsprechpartnerSuggest.Text = ViewModel.Ansprechpartner.Bezeichnung;
+            }
             base.OnNavigatedTo(e);
         }
 
