@@ -40,15 +40,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public string Name
-        {
-            get => Entity.Bezeichnung;
-            set
-            {
-                Entity.Bezeichnung = value;
-                RaisePropertyChangedAuto();
-            }
-        }
         public bool isVermieter
         {
             get => Entity.isVermieter;
@@ -138,7 +129,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public override string ToString() => Name;
+        public override string ToString() => Bezeichnung;
 
         public JuristischePersonViewModel() : this(new JuristischePerson()) { IsInEdit.Value = true; }
         public JuristischePersonViewModel(int id) : this(App.Walter.JuristischePersonen.Find(id)) { }
@@ -146,6 +137,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = j;
             Id = j.JuristischePersonId;
+
+            PropertyChanged += OnUpdate;
         }
 
         public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
@@ -181,18 +174,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.Walter.JuristischePersonen.Add(Entity);
             }
             App.Walter.SaveChanges();
-        }
-
-        public static JuristischePerson GetJuristischePerson(JuristischePersonViewModel j)
-        {
-            if (j.Id != 0)
-            {
-                return j.Entity;
-            }
-            else // TODO where is this applicable? ...
-            {
-                return App.Walter.JuristischePersonen.First(p => p.Bezeichnung == j.Name);
-            }
         }
     }
 }

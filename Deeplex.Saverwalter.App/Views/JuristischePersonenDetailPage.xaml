@@ -44,7 +44,7 @@
                 <TextBlock x:Name="Title"
                 Style="{StaticResource TitleTextBlockStyle}"
                 Margin="10,0,0,0"
-                Text="{x:Bind ViewModel.Name}"/>
+                Text="{x:Bind ViewModel.Bezeichnung}"/>
 
                 <CommandBar
                     x:Name="ButtonRow"
@@ -69,7 +69,7 @@
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBox
                     Width="620"
-                    Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                    Text="{x:Bind ViewModel.Bezeichnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Header="Bezeichnung" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
