@@ -148,14 +148,15 @@ namespace Deeplex.Saverwalter.Model
             return zs;
         }
 
-        public List<(Betriebskostentyp bTyp, string Kennnummer, Zaehlertyp zTyp, double Delta)> GetVerbrauch(Betriebskostenrechnung r, bool ganzeGruppe = false)
+        public List<(Betriebskostentyp bTyp, string Kennnummer, Zaehlertyp zTyp, double Delta)>
+            GetVerbrauch(Betriebskostenrechnung r, bool ganzeGruppe = false)
         {
             var Zaehler = r.Typ switch
             {
                 Betriebskostentyp.Wasserversorgung =>
                     db.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
-                // Heizung wird zu 50% mit Warmwasser verrechnet oder so...
-                // Betriebskostentyp.Heizung => b.Zaehler.Where(z => z.Typ == Zaehlertyp.Heizung).ToList
+                Betriebskostentyp.Heizkosten => // TODO Man kann auch mit was anderem als Gas heizen...
+                    db.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Gas).ToList(),
                 _ => null
             };
 
@@ -164,11 +165,11 @@ namespace Deeplex.Saverwalter.Model
                 z.WohnungId == Wohnung.WohnungId);
 
             var Ende = fZaehler
-                .Select(z => z.Staende.LastOrDefault(l => l.Datum <= Nutzungsende && (Nutzungsende - l.Datum).Days < 30))
+                .Select(z => z.Staende.OrderBy(s => s.Datum).LastOrDefault(l => l.Datum.Date <= Nutzungsende.Date && (Nutzungsende.Date - l.Datum.Date).Days < 30))
                 .Where(zs => zs != null)
                 .ToImmutableList();
             var Beginn = fZaehler
-                .Select(z => z.Staende.LastOrDefault(l => l.Datum <= Nutzungsbeginn && (Nutzungsbeginn - l.Datum).Days < 30))
+                .Select(z => z.Staende.OrderBy(s => s.Datum).FirstOrDefault(l => l.Datum.Date <= Nutzungsbeginn.Date && (Nutzungsbeginn.Date - l.Datum.Date).Days < 30))
                 .Where(zs => zs != null)
                 .ToImmutableList();
 

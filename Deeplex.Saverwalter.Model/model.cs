@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.Model
             {
                 return left;
             }
-            return NatuerlichePersonen.Single(n => PersonId == n.PersonId);
+            return NatuerlichePersonen.SingleOrDefault(n => PersonId == n.PersonId);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -364,6 +364,8 @@ namespace Deeplex.Saverwalter.Model
         Wasserversorgung = 30,
         [Description("Weitere/Sonstige Nebenkosten")]
         WeitereSonstigeNebenkosten = 32,
+        [Description("Heizkosten")]
+        Heizkosten = 1,
     }
 
     public enum UmlageSchluessel

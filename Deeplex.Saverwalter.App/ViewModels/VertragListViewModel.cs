@@ -100,7 +100,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Version = v.Version;
             Personenzahl = v.Personenzahl;
             Anschrift = AdresseViewModel.Anschrift(v.Wohnung);
-            Besitzer = App.Walter.FindPerson(v.Wohnung.BesitzerId).Bezeichnung;
+            Besitzer = App.Walter.FindPerson(v.Wohnung.BesitzerId)?.Bezeichnung;
             Wohnung = v.Wohnung is Wohnung w ? w.Bezeichnung : "";
 
 

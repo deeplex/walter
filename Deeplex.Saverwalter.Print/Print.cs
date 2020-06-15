@@ -54,7 +54,7 @@ namespace Deeplex.Saverwalter.Print
                 ExplainKalteBetriebskosten(b),
                 new Break() { Type = BreakValues.Page },
                 // p.3
-                Heading("Abrechnung der Nebenkosten (kalten Betriebskosten)"),
+                Heading("Abrechnung der Nebenkosten (kalte Betriebskosten)"),
                 MietHeader(b),
                 SubHeading("Angaben zu Ihrer Einheit:"),
                 Abrechnungswohnung(b, b.Gruppen.FirstOrDefault()));
@@ -65,7 +65,7 @@ namespace Deeplex.Saverwalter.Print
                 {
                     body.Append(
                         SubHeading("Direkt zugeordnet:", true),
-                        ErmittlungKosten(b, gruppe, true));
+                        ErmittlungKalteKosten(b, gruppe, true));
                 }
                 else
                 {
@@ -75,12 +75,25 @@ namespace Deeplex.Saverwalter.Print
                         GruppenVerbrauch(b, gruppe),
                         Abrechnungseinheit(b, gruppe),
                         new Paragraph(NoSpace()),
-                        ErmittlungEinheiten(b, gruppe),
+                        ErmittlungKalteEinheiten(b, gruppe),
                         SubHeading("Ermittlung der kalten Betriebskosten", true),
-                        ErmittlungKosten(b, gruppe));
+                        ErmittlungKalteKosten(b, gruppe));
                 }
             }
             body.Append(
+                Heading("Abrechnung der Nebenkosten (warme Nebenkosten)"));
+            foreach (var gruppe in b.Gruppen)
+            {
+                if (gruppe.GesamtEinheiten == 1)
+                {
+                    body.Append(
+                        SubHeading("Direkt zugeordnet:"),
+                        ErmittlungWarmeKosten(b, gruppe, true));
+                }
+            }
+
+            body.Append(
+                new Paragraph(),
                 Heading("Gesamtergebnis der Abrechnung"),
                 GesamtErgebnis(b));
 
@@ -450,7 +463,7 @@ namespace Deeplex.Saverwalter.Print
             return table;
         }
 
-        private static Table ErmittlungEinheiten(Betriebskostenabrechnung b, Rechnungsgruppe g)
+        private static Table ErmittlungKalteEinheiten(Betriebskostenabrechnung b, Rechnungsgruppe g)
         {
             TableCell IContentCell(string str, JustificationValues value, BorderType border) =>
                 new TableCell(new TableCellProperties(border),
@@ -524,7 +537,7 @@ namespace Deeplex.Saverwalter.Print
                 table.Append(new TableRow(
                     ContentHead("bei Umlage nach Verbrauch (n. Verb.)"),
                     ContentHead(""), ContentHead("Zählernummer", JustificationValues.Center), ContentHead("")));
-                foreach (var Verbrauch in g.Verbrauch)
+                foreach (var Verbrauch in g.Verbrauch.Where(v => (int)v.Key % 2 == 0)) // Kalte Betriebskosten are equal / warme are odd
                 {
                     foreach (var Value in Verbrauch.Value)
                     {
@@ -544,7 +557,7 @@ namespace Deeplex.Saverwalter.Print
             return table;
         }
 
-        private static Table ErmittlungKosten(Betriebskostenabrechnung b, Rechnungsgruppe g, bool direkt = false)
+        private static Table ErmittlungKalteKosten(Betriebskostenabrechnung b, Rechnungsgruppe g, bool direkt = false)
         {
             var table = new Table(
                 new TableProperties(
@@ -568,7 +581,7 @@ namespace Deeplex.Saverwalter.Print
                     ContentCell(Euro(rechnung.Betrag * anteil), JustificationValues.Right));
             }
 
-            foreach (var rechnung in g.Rechnungen)
+            foreach (var rechnung in g.Rechnungen.Where(r => (int)r.Typ % 2 == 0)) // Kalte Betriebskosten are equal / warme are odd
             {
                 string zeitraum;
                 switch (rechnung.Schluessel)
@@ -604,6 +617,29 @@ namespace Deeplex.Saverwalter.Print
                 ContentCell(""), ContentCell(""),
                 ContentHead("Summe: ", JustificationValues.Center),
                 ContentHead(Euro(g.Betrag), JustificationValues.Right)));
+             
+            return table;
+        }
+
+        private static Table ErmittlungWarmeKosten(Betriebskostenabrechnung b, Rechnungsgruppe g, bool direkt = false)
+        {
+            var table = new Table(new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct });
+            var result = 0.0;
+            foreach(var rechnung in g.Rechnungen.Where(r => (int)r.Typ % 2 == 1)) // Kalte Betriebskosten are equal / warme are odd
+            {
+                result += rechnung.Betrag * 1.05;
+                table.Append(
+                    new TableRow(
+                        ContentHead("2500", rechnung.Typ.ToDescriptionString()),
+                        ContentHead("2500", "Betrag")),
+                    new TableRow(
+                        ContentCell("Kosten für Brennstoffe"),
+                        ContentCell(Euro(rechnung.Betrag))),
+                    new TableRow(
+                        ContentCell("Betriebskosten der Anlage (5% pauschal)"),
+                        ContentCell(Euro(rechnung.Betrag * 0.05))));
+            }
+            table.Append(new TableRow(ContentHead("Gesamt"), ContentHead(Euro(result))));
 
             return table;
         }
