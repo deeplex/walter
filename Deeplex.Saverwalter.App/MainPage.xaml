@@ -36,10 +36,6 @@
                     Content="{x:Bind VertragListLabel}" 
                     Icon="Library"/>
                 <NavigationViewItem
-                    x:Name="JurPersonenListMenuItem"
-                    Content="{x:Bind JuristischePersonenListLabel}" 
-                    Icon="People"/>
-                <NavigationViewItem
                     x:Name="BetriebskostenListMenuItem"
                     Content="{x:Bind BetriebskostenrechnungenListLabel}" 
                     Icon="List"/>
