@@ -54,17 +54,18 @@ namespace Deeplex.Saverwalter.Print
                 ExplainKalteBetriebskosten(b),
                 new Break() { Type = BreakValues.Page },
                 // p.3
-                Heading("Abrechnung der Nebenkosten (kalte Betriebskosten)"),
-                MietHeader(b),
                 SubHeading("Angaben zu Ihrer Einheit:"),
-                Abrechnungswohnung(b, b.Gruppen.FirstOrDefault()));
+                Abrechnungswohnung(b, b.Gruppen.FirstOrDefault()),
+                new Paragraph(NoSpace()),
+                Heading("Abrechnung der Nebenkosten (kalte Betriebskosten)"));
+                // MietHeader(b), TODO Make this in a heading
 
             foreach (var gruppe in b.Gruppen)
             {
                 if (gruppe.GesamtEinheiten == 1)
                 {
                     body.Append(
-                        SubHeading("Direkt zugeordnet:", true),
+                        SubHeading("Direkt zugeordnet:"),
                         ErmittlungKalteKosten(b, gruppe, true));
                 }
                 else
@@ -474,7 +475,7 @@ namespace Deeplex.Saverwalter.Print
             TopBorder top() => new TopBorder() { Val = BorderValues.Single, Size = 4 };
             TableRow empty() => new TableRow(ContentCell(""), ContentCell(""), ContentCell(""), ContentCell(""));
 
-            var table = new Table(empty(), new TableRow(
+            var table = new Table(new TableRow(
                 ContentHead("2050", "Ermittlung Ihrer Einheiten"),
                 ContentHead("1120", "Nutzungsintervall", JustificationValues.Center),
                 ContentHead("1200", "Tage", JustificationValues.Center),
