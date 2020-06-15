@@ -58,5 +58,11 @@ namespace Deeplex.Saverwalter.App.Views
         {
             ViewModel.IsInEdit.Value = EditToggle.IsChecked ?? false;
         }
+
+        private void SelfDestruct(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            ViewModel.selfDestruct();
+            ((Frame)((NavigationView)Frame.Parent).Content).GoBack();
+        }
     }
 }

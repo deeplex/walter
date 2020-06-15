@@ -13,7 +13,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public int Id;
 
         public ImmutableList<AdresseViewModel> AlleAdressen { get; }
-        public ImmutableList<Anrede> Anreden { get; }
+
+        public void selfDestruct()
+        {
+            App.Walter.JuristischePersonen.Remove(Entity);
+            App.Walter.SaveChanges();
+        }
 
         public Guid PersonId
         {

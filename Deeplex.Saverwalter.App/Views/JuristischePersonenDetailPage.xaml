@@ -60,7 +60,7 @@
                             Label="Bearbeiten"
                             Click="EditToggle_Click"/>
                         <AppBarButton
-                            IsEnabled="False"
+                            Click="SelfDestruct"
                             Icon="Delete"
                             Label="Löschen"/>
                     </CommandBar.SecondaryCommands>
