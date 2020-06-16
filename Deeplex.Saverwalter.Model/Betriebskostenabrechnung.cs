@@ -119,7 +119,7 @@ namespace Deeplex.Saverwalter.Model
             KaltMiete = Vertragsversionen.Sum(v => (Min(v.Ende ?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);
             KaltMinderung = KaltMiete * Minderung;
 
-            BetragNebenkosten = Gruppen.Sum(g => g.Betrag);
+            BetragNebenkosten = Gruppen.Sum(g => g.BetragKalt + g.BetragWarm);
             NebenkostenMinderung = BetragNebenkosten * Minderung;
 
             BezahltNebenkosten = Gezahlt - KaltMiete;
@@ -207,8 +207,10 @@ namespace Deeplex.Saverwalter.Model
             public Dictionary<Betriebskostentyp, List<(string Kennnummer, Zaehlertyp Typ, double Delta, double Anteil)>> Verbrauch;
             public Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch;
             public Dictionary<Betriebskostentyp, double> VerbrauchAnteil;
-            public double GesamtBetrag;
-            public double Betrag;
+            public double GesamtBetragKalt;
+            public double GesamtBetragWarm;
+            public double BetragKalt;
+            public double BetragWarm;
 
             public Rechnungsgruppe(Betriebskostenabrechnung b, List<Betriebskostenrechnung> gruppe)
             {
@@ -257,8 +259,9 @@ namespace Deeplex.Saverwalter.Model
                     .Select(v => (v.Key, v.Value.Sum(vv => vv.Delta), v.Value.Sum(vv => vv.Delta / vv.Anteil)))
                     .ToDictionary(v => v.Key, v => v.Item2 / v.Item3);
 
-                GesamtBetrag = gruppe.Sum(r => r.Betrag);
-                Betrag = gruppe.Aggregate(0.0, (a, r) =>
+                var gruppeKalt = gruppe.Where(r => (int)r.Typ % 2 == 0);
+                GesamtBetragKalt = gruppeKalt.Sum(r => r.Betrag);
+                BetragKalt = gruppeKalt.Aggregate(0.0, (a, r) =>
                     r.Schluessel switch
                     {
                         UmlageSchluessel.NachWohnflaeche => a + r.Betrag * WFZeitanteil,
@@ -268,6 +271,20 @@ namespace Deeplex.Saverwalter.Model
                         _ => a + 0, // TODO or throw something...
                     }
                 );
+
+                var gruppeWarm = gruppe.Where(r => (int)r.Typ % 2 == 1);
+                GesamtBetragWarm = gruppeWarm.Sum(r => r.Betrag);
+                BetragWarm = gruppeWarm.Aggregate(0.0, (a, r) =>
+                    (r.Typ == Betriebskostentyp.Heizkosten ? 1.05 : 1.00) * r.Schluessel switch
+                    {
+                        UmlageSchluessel.NachWohnflaeche => a + r.Betrag * WFZeitanteil,
+                        UmlageSchluessel.NachNutzeinheit => a + r.Betrag * NEZeitanteil,
+                        UmlageSchluessel.NachPersonenzahl => a + PersZeitanteil.Aggregate(0.0, (a2, z) => a2 += z.Anteil * r.Betrag),
+                        UmlageSchluessel.NachVerbrauch => a + r.Betrag * VerbrauchAnteil[r.Typ],
+                        _ => a + 0, // TODO or throw something...
+                    }
+                );
+
 
                 for (int i = 0, count = GesamtPersonenIntervall.Count - 1; i < count; ++i)
                 {

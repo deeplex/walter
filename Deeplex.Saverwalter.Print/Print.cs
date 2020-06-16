@@ -58,7 +58,7 @@ namespace Deeplex.Saverwalter.Print
                 Abrechnungswohnung(b, b.Gruppen.FirstOrDefault()),
                 new Paragraph(NoSpace()),
                 Heading("Abrechnung der Nebenkosten (kalte Betriebskosten)"));
-                // MietHeader(b), TODO Make this in a heading
+            // MietHeader(b), TODO Make this in a heading
 
             foreach (var gruppe in b.Gruppen)
             {
@@ -473,7 +473,6 @@ namespace Deeplex.Saverwalter.Print
 
             BottomBorder bot() => new BottomBorder() { Val = BorderValues.Single, Size = 4 };
             TopBorder top() => new TopBorder() { Val = BorderValues.Single, Size = 4 };
-            TableRow empty() => new TableRow(ContentCell(""), ContentCell(""), ContentCell(""), ContentCell(""));
 
             var table = new Table(new TableRow(
                 ContentHead("2050", "Ermittlung Ihrer Einheiten"),
@@ -617,30 +616,28 @@ namespace Deeplex.Saverwalter.Print
                 ContentCell(""), ContentCell(""),
                 ContentCell(""), ContentCell(""),
                 ContentHead("Summe: ", JustificationValues.Center),
-                ContentHead(Euro(g.Betrag), JustificationValues.Right)));
-             
+                ContentHead(Euro(g.BetragKalt), JustificationValues.Right)));
+
             return table;
         }
 
         private static Table ErmittlungWarmeKosten(Betriebskostenabrechnung b, Rechnungsgruppe g, bool direkt = false)
         {
-            var table = new Table(new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct });
-            var result = 0.0;
-            foreach(var rechnung in g.Rechnungen.Where(r => (int)r.Typ % 2 == 1)) // Kalte Betriebskosten are equal / warme are odd
+            var table = new Table(new TableWidth() { Width = "3000", Type = TableWidthUnitValues.Pct });
+            foreach (var rechnung in g.Rechnungen.Where(r => (int)r.Typ % 2 == 1)) // Kalte Betriebskosten are equal / warme are odd
             {
-                result += rechnung.Betrag * 1.05;
                 table.Append(
                     new TableRow(
                         ContentHead("2500", rechnung.Typ.ToDescriptionString()),
-                        ContentHead("2500", "Betrag")),
+                        ContentHead("500", "Betrag", JustificationValues.Right)),
                     new TableRow(
                         ContentCell("Kosten für Brennstoffe"),
-                        ContentCell(Euro(rechnung.Betrag))),
+                        ContentCell(Euro(rechnung.Betrag), JustificationValues.Right)),
                     new TableRow(
                         ContentCell("Betriebskosten der Anlage (5% pauschal)"),
-                        ContentCell(Euro(rechnung.Betrag * 0.05))));
+                        ContentCell(Euro(rechnung.Betrag * 0.05), JustificationValues.Right)));
             }
-            table.Append(new TableRow(ContentHead("Gesamt"), ContentHead(Euro(result))));
+            table.Append(new TableRow(ContentHead("Gesamt"), ContentHead(Euro(g.BetragWarm), JustificationValues.Right)));
 
             return table;
         }
@@ -668,9 +665,23 @@ namespace Deeplex.Saverwalter.Print
             var f = true;
             foreach (var gruppe in b.Gruppen)
             {
-                table.Append(new TableRow(
-                    ContentCell(f ? "Abzüglich Ihrer Nebenkostenanteile:" : ""),
-                    ContentCell("-" + Euro(gruppe.Betrag), JustificationValues.Right)));
+                if (gruppe.BetragKalt > 0)
+                {
+                    table.Append(new TableRow(
+                        ContentCell(f ? "Abzüglich Ihrer Nebenkostenanteile:" : ""),
+                        ContentCell("-" + Euro(gruppe.BetragKalt), JustificationValues.Right)));
+                    f = false;
+                }
+            }
+
+            foreach (var gruppe in b.Gruppen)
+            {
+                if (gruppe.BetragWarm > 0)
+                {
+                    table.Append(new TableRow(
+                        ContentCell(f ? "Abzüglich Ihrer Nebenkostenanteile:" : ""),
+                        ContentCell("-" + Euro(gruppe.BetragWarm), JustificationValues.Right)));
+                }
                 f = false;
             }
 
