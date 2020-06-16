@@ -1,10 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Vml;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System;
-using System.Collections.Immutable;
 using System.Linq;
 using static Deeplex.Saverwalter.Model.Betriebskostenabrechnung;
 
@@ -73,7 +71,6 @@ namespace Deeplex.Saverwalter.Print
                     body.Append(
                         SubHeading("Angaben zur Abrechnungseinheit:", true),
                         Abrechnungsgruppe(b, gruppe),
-                        GruppenVerbrauch(b, gruppe),
                         Abrechnungseinheit(b, gruppe),
                         new Paragraph(NoSpace()),
                         ErmittlungKalteEinheiten(b, gruppe),
@@ -90,6 +87,18 @@ namespace Deeplex.Saverwalter.Print
                     body.Append(
                         SubHeading("Direkt zugeordnet:"),
                         ErmittlungWarmeKosten(b, gruppe, true));
+                }
+                else
+                {
+                    body.Append(
+                        SubHeading("Angaben zur Abrechnungseinheit:", true),
+                        Abrechnungsgruppe(b, gruppe),
+                        Abrechnungseinheit(b, gruppe),
+                        new Paragraph(NoSpace()),
+                        ErmittlungWarmeKosten(b, gruppe),
+                        GenericTextWarmeKosten(),
+                        EqHeizkostenV9_2(b, gruppe));
+                        //ErmittlungAnteilWarmWasser(b, gruppe));
                 }
             }
 
@@ -398,11 +407,6 @@ namespace Deeplex.Saverwalter.Print
             return p;
         }
 
-        private static Table GruppenVerbrauch(Betriebskostenabrechnung b, Rechnungsgruppe g)
-        {
-            return new Table();
-        }
-
         private static Table Abrechnungseinheit(Betriebskostenabrechnung b, Rechnungsgruppe g)
         {
             var table = new Table(
@@ -637,9 +641,52 @@ namespace Deeplex.Saverwalter.Print
                         ContentCell("Betriebskosten der Anlage (5% pauschal)"),
                         ContentCell(Euro(rechnung.Betrag * 0.05), JustificationValues.Right)));
             }
-            table.Append(new TableRow(ContentHead("Gesamt"), ContentHead(Euro(g.BetragWarm), JustificationValues.Right)));
+            table.Append(new TableRow(ContentHead("Gesamt"), ContentHead(Euro(g.GesamtBetragWarm), JustificationValues.Right)));
 
             return table;
+        }
+
+        private static Paragraph GenericTextWarmeKosten()
+            => new Paragraph(Font(), new Run(Font(), new Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):")));
+
+        private static Paragraph EqHeizkostenV9_2(Betriebskostenabrechnung b, Rechnungsgruppe gruppe)
+        {
+            RunProperties rp() => new RunProperties(new RunFonts() { Ascii = "Cambria Math", HighAnsi = "Cambria Math" }, new Italic());
+            DocumentFormat.OpenXml.Math.Run t(string str)
+                => new DocumentFormat.OpenXml.Math.Run(rp(), new DocumentFormat.OpenXml.Math.Text(str));
+
+
+            DocumentFormat.OpenXml.Math.ParagraphProperties justifyLeft
+                () => new DocumentFormat.OpenXml.Math.ParagraphProperties(
+                    new DocumentFormat.OpenXml.Math.Justification()
+                    { Val = DocumentFormat.OpenXml.Math.JustificationValues.Left });
+
+            DocumentFormat.OpenXml.Math.Base tw()
+                => new DocumentFormat.OpenXml.Math.Base(
+                        new DocumentFormat.OpenXml.Math.Subscript(
+                        new DocumentFormat.OpenXml.Math.SubscriptProperties(
+                        new DocumentFormat.OpenXml.Math.ControlProperties(rp())),
+                        new DocumentFormat.OpenXml.Math.Base(t("t")),
+                        new DocumentFormat.OpenXml.Math.SubArgument(t("w"))));
+
+            DocumentFormat.OpenXml.Math.Fraction frac(string num, string den)
+                => new DocumentFormat.OpenXml.Math.Fraction(new DocumentFormat.OpenXml.Math.FractionProperties(
+                    new DocumentFormat.OpenXml.Math.ControlProperties(rp())),
+                    new DocumentFormat.OpenXml.Math.Numerator(t(num)),
+                    new DocumentFormat.OpenXml.Math.Denominator(t(den)));
+
+            DocumentFormat.OpenXml.Math.Fraction units() => frac("kWh", "m³ x K");
+
+            var p = new Paragraph();
+
+            foreach (var hk in gruppe.Heizkosten)
+            {
+                p.Append(new DocumentFormat.OpenXml.Math.Paragraph(justifyLeft(),
+                    new DocumentFormat.OpenXml.Math.OfficeMath(
+                    t("2,5 ×"), frac("V", "Q"), t(" × ("), tw(), t("-10°C)"), units(), t(" ⟹ "),
+                    t("2,5 ×"), frac(Kubik(hk.V), kWh(hk.Q)), t(" × ("), t(Celsius((int)hk.tw)), t("-10°C)"), units(), t(" = "), t(Percent(hk.AnteilWarmwasser)))));
+            }
+            return p;
         }
 
         private static Table GesamtErgebnis(Betriebskostenabrechnung b)
@@ -703,6 +750,9 @@ namespace Deeplex.Saverwalter.Print
         private static string Percent(double d) => string.Format("{0:N2}%", d * 100);
         private static string Euro(double d) => string.Format("{0:N2}€", d);
         private static string Kubik(double d) => string.Format("{0:N2} m³", d); // TODO this should be embedded in Zaehler...
+        private static string kWh(double d) => string.Format("{0:N2} kWh", d); // TODO this should be embedded in Zaehler...
+        private static string Celsius(double d) => string.Format("{0:N2}°C", d); // TODO this should be embedded in Zaehler...
+        private static string Celsius(int d) => d.ToString() + "°C";
         private static string Quadrat(double d) => string.Format("{0:N2} m²", d); // TODO this should be embedded in Zaehler...
         private static string Datum(DateTime d) => d.ToString("dd.MM.yyyy");
 

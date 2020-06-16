@@ -207,6 +207,7 @@ namespace Deeplex.Saverwalter.Model
             public Dictionary<Betriebskostentyp, List<(string Kennnummer, Zaehlertyp Typ, double Delta, double Anteil)>> Verbrauch;
             public Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch;
             public Dictionary<Betriebskostentyp, double> VerbrauchAnteil;
+            public List<HKVO> Heizkosten;
             public double GesamtBetragKalt;
             public double GesamtBetragWarm;
             public double BetragKalt;
@@ -273,7 +274,8 @@ namespace Deeplex.Saverwalter.Model
                 );
 
                 var gruppeWarm = gruppe.Where(r => (int)r.Typ % 2 == 1);
-                GesamtBetragWarm = gruppeWarm.Sum(r => r.Betrag);
+                GesamtBetragWarm = gruppeWarm.Sum(r => (r.Typ == Betriebskostentyp.Heizkosten ? 1.05 : 1.00) * r.Betrag);
+                Heizkosten = gruppeWarm.Select(r => new HKVO(r)).ToList();
                 BetragWarm = gruppeWarm.Aggregate(0.0, (a, r) =>
                     (r.Typ == Betriebskostentyp.Heizkosten ? 1.05 : 1.00) * r.Schluessel switch
                     {
@@ -284,7 +286,6 @@ namespace Deeplex.Saverwalter.Model
                         _ => a + 0, // TODO or throw something...
                     }
                 );
-
 
                 for (int i = 0, count = GesamtPersonenIntervall.Count - 1; i < count; ++i)
                 {
@@ -320,6 +321,44 @@ namespace Deeplex.Saverwalter.Model
             }
         }
 
+        public sealed class HKVO
+        {
+            public double Betrag;
+
+            public double tw;
+            public double V;
+            public double Q;
+
+            public double WaermeAnteilWF;
+            public double WaermeAnteilVerb;
+
+            public double AnteilWarmwasser;
+
+            public double WarmwasserAnteilWF;
+            public double WarmwasserAnteilVerb;
+
+            public HKVO(Betriebskostenrechnung r)
+            {
+                Betrag = r.Betrag;
+
+
+                // TODO These should be Variable
+                tw = 60;
+                var WaermeNachVerbrauch = 0.5; // HeizkostenV §7
+                var WasserNachVerbrauch = 0.5; // HeizkostenV §8
+
+                V = 100;
+                Q = 40000;
+
+                AnteilWarmwasser = 2.5 * (V / Q) * (tw - 10); // TODO HeizkostenV §9
+
+                WaermeAnteilWF = r.Betrag * (1 - AnteilWarmwasser) * (1 - WaermeNachVerbrauch);
+                WaermeAnteilVerb = r.Betrag * (1 - AnteilWarmwasser) * (1 - WaermeNachVerbrauch);
+
+                WarmwasserAnteilWF = r.Betrag * AnteilWarmwasser * (1- WasserNachVerbrauch);
+                WarmwasserAnteilVerb = r.Betrag * AnteilWarmwasser * WasserNachVerbrauch;
+            }
+        }
         private static T Max<T>(T l, T r) where T : IComparable<T>
             => Max(l, r, Comparer<T>.Default);
         private static T Max<T>(T l, T r, IComparer<T> c)
