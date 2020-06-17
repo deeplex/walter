@@ -689,8 +689,9 @@ namespace Deeplex.Saverwalter.Print
                     t("2,5 ×"), frac(Kubik(hk.V), kWh(hk.Q)), t(" × ("), t(Celsius((int)hk.tw)), t("-10°C)"), units(), t(" = "), t(Percent(hk.AnteilWarmwasser)))));
             }
             p.Append(new Break(), new Break(),
-                new Run(Font(), r("Wobei "), om("V"), r(" die Menge des Warmwassers ist, die im Zeitraum von 01.01.2019 – 31.12.2019 gemessen wurde, "),
-                new Break(), om("Q"), r(" die gemessene Wärmemenge ist und "), omtw(), r("die geschätzte mittlere Temperatur des Warmwassers darstellt.")));  ;
+                new Run(Font(), r("Wobei "), om("V"), r(" die Menge des Warmwassers, die im Zeitraum von "),
+                r(b.Nutzungsbeginn.ToString("dd.MM.yyyy")), r(" – "), r(b.Nutzungsende.ToString("dd.MM.yyyy")), r(" gemessen wurde, "),
+                new Break(), om("Q"), r(" die gemessene Wärmemenge und "), omtw(), r("die geschätzte mittlere Temperatur des Warmwassers darstellt.")));
             return p;
         }
 

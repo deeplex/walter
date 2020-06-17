@@ -140,8 +140,8 @@ namespace Deeplex.Saverwalter.Model
                 Stand = Stand,
                 Zaehler = z1.Zaehler,
                 Abgelesen = false,
-                Notiz = "Erstellt durch Betriebskostenabrechnung am " + DateTime.UtcNow.ToString("dd.mm.yyyy") +
-                    ". Berechnet durch Ablesung vom: " + z1.Datum.ToString("dd.mm.yyyy") + " und " + z2.Datum.ToString("dd.mm.yyyy")
+                Notiz = "Erstellt durch Betriebskostenabrechnung am " + DateTime.UtcNow.ToString("dd.MM.yyyy") +
+                    ". Berechnet durch Ablesung vom: " + z1.Datum.ToString("dd.MM.yyyy") + " und " + z2.Datum.ToString("dd.MM.yyyy")
             };
             db.Zaehlerstaende.Add(zs);
             db.SaveChanges();
