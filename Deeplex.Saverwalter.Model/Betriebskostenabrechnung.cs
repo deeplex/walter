@@ -169,7 +169,7 @@ namespace Deeplex.Saverwalter.Model
                 .Where(zs => zs != null)
                 .ToImmutableList();
             var Beginn = fZaehler
-                .Select(z => z.Staende.OrderBy(s => s.Datum).FirstOrDefault(l => l.Datum.Date <= Nutzungsbeginn.Date && (Nutzungsbeginn.Date - l.Datum.Date).Days < 30))
+                .Select(z => z.Staende.OrderBy(s => s.Datum).LastOrDefault(l => l.Datum.Date <= Nutzungsbeginn.Date.AddDays(-1) && (Nutzungsbeginn.Date - l.Datum.Date).Days < 30))
                 .Where(zs => zs != null)
                 .ToImmutableList();
 
@@ -182,7 +182,7 @@ namespace Deeplex.Saverwalter.Model
             for (var i = 0; i < Ende.Count(); ++i)
             {
                 Zaehlerstand zBeginn = Beginn[i].Datum.Date == Nutzungsbeginn.Date.AddDays(-1) ? // TODO is same day also okay? ...
-                        Beginn[i] : interpolateZaehlerstand(Nutzungsbeginn, Beginn[i], Ende[i]);
+                        Beginn[i] : interpolateZaehlerstand(Nutzungsbeginn.Date.AddDays(-1), Beginn[i], Ende[i]);
                 Zaehlerstand zEnde = Ende[i].Datum.Date == Nutzungsende.Date ?
                     Ende[i] : interpolateZaehlerstand(Nutzungsende, Beginn[i], Ende[i]);
 
@@ -275,7 +275,7 @@ namespace Deeplex.Saverwalter.Model
 
                 var gruppeWarm = gruppe.Where(r => (int)r.Typ % 2 == 1);
                 GesamtBetragWarm = gruppeWarm.Sum(r => (r.Typ == Betriebskostentyp.Heizkosten ? 1.05 : 1.00) * r.Betrag);
-                Heizkosten = gruppeWarm.Select(r => new HKVO(r)).ToList();
+                Heizkosten = gruppeWarm.Select(r => new HKVO(r, b)).ToList();
                 BetragWarm = gruppeWarm.Aggregate(0.0, (a, r) =>
                     (r.Typ == Betriebskostentyp.Heizkosten ? 1.05 : 1.00) * r.Schluessel switch
                     {
@@ -319,46 +319,71 @@ namespace Deeplex.Saverwalter.Model
                     }
                 }
             }
-        }
 
-        public sealed class HKVO
-        {
-            public double Betrag;
-
-            public double tw;
-            public double V;
-            public double Q;
-
-            public double WaermeAnteilWF;
-            public double WaermeAnteilVerb;
-
-            public double AnteilWarmwasser;
-
-            public double WarmwasserAnteilWF;
-            public double WarmwasserAnteilVerb;
-
-            public HKVO(Betriebskostenrechnung r)
+            public sealed class HKVO
             {
-                Betrag = r.Betrag;
+                public double Betrag;
+
+                public double tw;
+                public double V;
+                public double Q;
+
+                public double WaermeAnteilWF;
+                public double WaermeAnteilVerb;
+
+                public double AnteilWarmwasser;
+
+                public double WarmwasserAnteilWF;
+                public double WarmwasserAnteilVerb;
+
+                public HKVO(Betriebskostenrechnung r, Betriebskostenabrechnung b)
+                {
+                    Betrag = r.Betrag;
 
 
-                // TODO These should be Variable
-                tw = 60;
-                var WaermeNachVerbrauch = 0.5; // HeizkostenV §7
-                var WasserNachVerbrauch = 0.5; // HeizkostenV §8
+                    // TODO These should be Variable
+                    tw = 60;
+                    var WaermeNachVerbrauch = 0.5; // HeizkostenV §7
+                    var WasserNachVerbrauch = 0.5; // HeizkostenV §8
 
-                V = 100;
-                Q = 40000;
+                    var WarmwasserZaehler = b.db.ZaehlerSet.Where(z =>
+                        z.Typ == Zaehlertyp.Warmwasser && r.Gruppen.Select(g => g.Wohnung).Contains(z.Wohnung)).ToImmutableList();
 
-                AnteilWarmwasser = 2.5 * (V / Q) * (tw - 10); // TODO HeizkostenV §9
+                    var WaermeZaehler = b.db.ZaehlerSet.Where(z =>
+                        z.Typ == Zaehlertyp.Gas && r.Gruppen.Select(g => g.Wohnung).Contains(z.Wohnung)).ToImmutableList();
 
-                WaermeAnteilWF = r.Betrag * (1 - AnteilWarmwasser) * (1 - WaermeNachVerbrauch);
-                WaermeAnteilVerb = r.Betrag * (1 - AnteilWarmwasser) * (1 - WaermeNachVerbrauch);
+                    ImmutableList<Zaehlerstand> Ende(ImmutableList<Zaehler> z)
+                        => z.Select(z => z.Staende.OrderBy(s => s.Datum)
+                        .LastOrDefault(l => l.Datum.Date <= b.Nutzungsende.Date && (b.Nutzungsende.Date - l.Datum.Date).Days < 30))
+                        .Where(zs => zs != null)
+                        .ToImmutableList();
 
-                WarmwasserAnteilWF = r.Betrag * AnteilWarmwasser * (1- WasserNachVerbrauch);
-                WarmwasserAnteilVerb = r.Betrag * AnteilWarmwasser * WasserNachVerbrauch;
+                    ImmutableList<Zaehlerstand> Beginn(ImmutableList<Zaehler> z)
+                        => z.Select(z => z.Staende.OrderBy(s => s.Datum)
+                        .LastOrDefault(l => l.Datum.Date <= b.Nutzungsbeginn.Date.AddDays(-1) && (b.Nutzungsbeginn.Date - l.Datum.Date).Days < 30))
+                        .Where(zs => zs != null)
+                        .ToImmutableList();
+
+                    V = Ende(WarmwasserZaehler).Sum(w => w.Stand) - Beginn(WarmwasserZaehler).Sum(w => w.Stand);
+                    Q = Ende(WaermeZaehler).Sum(w => w.Stand) - Beginn(WaermeZaehler).Sum(w => w.Stand);
+
+                    AnteilWarmwasser = 2.5 * (V / Q) * (tw - 10); // TODO HeizkostenV §9
+
+                    if (AnteilWarmwasser > 1)
+                    {
+                        throw new Exception("no.");
+                    }
+
+                    WaermeAnteilWF = r.Betrag * (1 - AnteilWarmwasser) * (1 - WaermeNachVerbrauch);
+                    WaermeAnteilVerb = r.Betrag * (1 - AnteilWarmwasser) * (1 - WaermeNachVerbrauch);
+
+                    WarmwasserAnteilWF = r.Betrag * AnteilWarmwasser * (1 - WasserNachVerbrauch);
+                    WarmwasserAnteilVerb = r.Betrag * AnteilWarmwasser * WasserNachVerbrauch;
+                }
             }
         }
+
+
         private static T Max<T>(T l, T r) where T : IComparable<T>
             => Max(l, r, Comparer<T>.Default);
         private static T Max<T>(T l, T r, IComparer<T> c)
