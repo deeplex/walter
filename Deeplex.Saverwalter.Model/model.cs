@@ -10,20 +10,32 @@ namespace Deeplex.Saverwalter.Model
     public sealed class SaverwalterContext : DbContext
     {
         public DbSet<Adresse> Adressen { get; set; } = null!;
+        public DbSet<AdresseAnhang> AdresseAnhaenge {get; set; } = null!;
         public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
+        public DbSet<BetriebskostenrechnungAnhang> BetriebskostenrechnungAnhaenge { get; set; } = null!;
         public DbSet<Betriebskostenrechnungsgruppe> Betriebskostenrechnungsgruppen { get; set; } = null!;
         public DbSet<Garage> Garagen { get; set; } = null!;
+        public DbSet<GarageAnhang> GarageAnhaenge { get; set; } = null!;
         public DbSet<JuristischePerson> JuristischePersonen { get; set; } = null!;
+        public DbSet<JuristischePersonAnhang> JuristischePersonAnhaenge { get; set; } = null!;
         public DbSet<Konto> Kontos { get; set; } = null!;
+        public DbSet<KontoAnhang> KontoAnhaenge { get; set; } = null!;
         public DbSet<Miete> Mieten { get; set; } = null!;
+        public DbSet<MieteAnhang> MieteAnhaenge { get; set; } = null!;
         public DbSet<Mieter> MieterSet { get; set; } = null!;
         public DbSet<MietMinderung> MietMinderungen { get; set; } = null!;
+        public DbSet<MietMinderungAnhang> MietMinderungAnhaenge { get; set; } = null!;
         public DbSet<MietobjektGarage> MietobjektGaragen { get; set; } = null!;
         public DbSet<NatuerlichePerson> NatuerlichePersonen { get; set; } = null!;
+        public DbSet<NatuerlichePersonAnhang> NatuerlichePersonAnhaenge { get; set; } = null!;
         public DbSet<Vertrag> Vertraege { get; set; } = null!;
+        public DbSet<VertragAnhang> VertragAnhaenge { get; set; } = null!;
         public DbSet<Wohnung> Wohnungen { get; set; } = null!;
+        public DbSet<WohnungAnhang> WohnungAnhaenge { get; set; } = null!;
         public DbSet<Zaehler> ZaehlerSet { get; set; } = null!;
+        public DbSet<ZaehlerAnhang> ZaehlerAnhaenge { get; set; } = null!;
         public DbSet<Zaehlerstand> Zaehlerstaende { get; set; } = null!;
+        public DbSet<ZaehlerstandAnhang> ZaehlerstandAnhaenge { get; set; } = null!;
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             // TODO adjust this...
             //=> options.UseSqlite("Data Source=walter.db");
@@ -55,6 +67,11 @@ namespace Deeplex.Saverwalter.Model
         }
     }
 
+    public sealed class Anhang
+    {
+
+    }
+
     public interface IPerson
     {
         public Guid PersonId { get; }
@@ -71,6 +88,12 @@ namespace Deeplex.Saverwalter.Model
         public int? AdresseId { get; set; }
         public Adresse? Adresse { get; set; }
         public string? Notiz { get; set; }
+    }
+
+    public sealed class NatuerlichePersonAnhang
+    {
+        public NatuerlichePerson Person { get; set; } = null!;
+        public Anhang Anhang { get; set; } = null!;
     }
 
     public sealed class NatuerlichePerson : IPerson
@@ -128,6 +151,12 @@ namespace Deeplex.Saverwalter.Model
         }
     }
 
+    public sealed class JuristischePersonAnhang
+    {
+        public JuristischePerson Person { get; set; } = null!;
+        public Anhang Anhang { get; set; } = null!;
+    }
+
     public sealed class JuristischePersonenMitglied
     {
         public int JuristischePersonenMitgliedId { get; set; }
@@ -153,6 +182,12 @@ namespace Deeplex.Saverwalter.Model
         public List<Betriebskostenrechnungsgruppe> Betriebskostenrechnungsgruppen { get; private set; } = new List<Betriebskostenrechnungsgruppe>();
     }
 
+    public sealed class WohnungAnhang
+    {
+        public Wohnung Wohnung { get; set; } = null!;
+        public Anhang Anhang { get; set; } = null!;
+    }
+
     public sealed class Garage
     {
         public int GarageId { get; set; }
@@ -160,6 +195,12 @@ namespace Deeplex.Saverwalter.Model
         public string Kennung { get; set; } = null!;
         public Guid BesitzerId { get; set; }
         public string? Notiz { get; set; }
+    }
+
+    public sealed class GarageAnhang
+    {
+        public Garage Garage { get; set; } = null!;
+        public Anhang Anhang { get; set; } = null!;
     }
 
     // An Adresse is pointed at by a Wohnung, Garage or Kontakt.
@@ -173,6 +214,12 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
         public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
         public List<Garage> Garagen { get; private set; } = new List<Garage>();
+    }
+
+    public sealed class AdresseAnhang
+    {
+        public Adresse Adresse { get; set; } = null!;
+        public Anhang Anhang { get; set; } = null!;
     }
 
     public sealed class Vertrag
@@ -211,6 +258,12 @@ namespace Deeplex.Saverwalter.Model
         }
     }
 
+    public sealed class VertragAnhang
+    {
+        public Vertrag Vertrag { get; set; } = null!;
+        public Anhang Anhang { get; set; } = null!;
+    }
+
     // JoinTable between a Kontakt and a Vertrag.
     public sealed class Mieter
     {
@@ -231,6 +284,12 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
+    public sealed class MieteAnhang
+    {
+        public Miete Miete { get; set; } = null!;
+        public Anhang Anhang { get; set; } = null!;
+    }
+
     // Mietminderung is later taken away from the result of the Betriebskostenabrechnug.
     public sealed class MietMinderung
     {
@@ -240,6 +299,12 @@ namespace Deeplex.Saverwalter.Model
         public DateTime? Ende { get; set; } = null!;
         public double Minderung { get; set; }
         public string? Notiz { get; set; }
+    }
+
+    public sealed class MietMinderungAnhang
+    {
+        public MietMinderung MietMinderung { get; set; } = null!;
+        public Anhang Anhang { get; set; } = null!;
     }
 
     public sealed class MietobjektGarage
@@ -265,6 +330,12 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
+    public sealed class KontoAnhang
+    {
+        public Konto Konto { get; set; } = null!;
+        public Anhang Anhang { get; set; } = null!;
+    }
+
     public sealed class Betriebskostenrechnung
     {
         public int BetriebskostenrechnungId { get; set; }
@@ -279,12 +350,24 @@ namespace Deeplex.Saverwalter.Model
         public List<Betriebskostenrechnungsgruppe> Gruppen { get; private set; } = new List<Betriebskostenrechnungsgruppe>();
     }
 
+    public sealed class BetriebskostenrechnungAnhang
+    {
+        public Betriebskostenrechnung Betriebskostenrechnung { get; set; } = null!;
+        public Anhang Anhang { get; set; } = null!;
+    }
+
     // A Betriebskostenrechnung may be issued to one Vertrag only, if e.g. extra costs and the Mieter is to blame.
     public sealed class VertragsBetriebskostenrechnung
     {
         public int VertragsBetriebskostenrechnungId { get; set; }
         public Guid VertragId { get; set; }
         public Betriebskostenrechnung Rechnung { get; set; } = null!;
+    }
+
+    public sealed class VertragsBetriebskostenrechnungAnhang
+    {
+        public VertragsBetriebskostenrechnung VertragsBetriebskostenrechnung { get; set; } = null!;
+        public Anhang Anhang { get; set; } = null!;
     }
 
     // Many Wohnungen may share a Betriebskostenrechnung. The calculation is done by the
@@ -308,6 +391,12 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
+    public sealed class ZaehlerAnhang
+    {
+        public Zaehler Zaehler { get; set; } = null!;
+        public Anhang Anhang { get; set; } = null!;
+    }
+
     public enum Zaehlertyp
     {
         Warmwasser,
@@ -324,6 +413,12 @@ namespace Deeplex.Saverwalter.Model
         public bool Abgelesen { get; set; }
         public double Stand { get; set; }
         public string? Notiz { get; set; }
+    }
+
+    public sealed class ZaehlerstandAnhang
+    {
+        public Zaehlerstand Zaehlerstand { get; set; } = null!;
+        public Anhang Anhang { get; set; } = null!;
     }
 
     // Even is Kalte Betriebskosten
