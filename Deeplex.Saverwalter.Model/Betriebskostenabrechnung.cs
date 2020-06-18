@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using Windows.Foundation.Diagnostics;
-using Windows.UI.Xaml.Media;
 
 namespace Deeplex.Saverwalter.Model
 {
