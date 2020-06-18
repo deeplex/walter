@@ -10,7 +10,8 @@ namespace Deeplex.Saverwalter.Model
     public sealed class SaverwalterContext : DbContext
     {
         public DbSet<Adresse> Adressen { get; set; } = null!;
-        public DbSet<AdresseAnhang> AdresseAnhaenge {get; set; } = null!;
+        public DbSet<AdresseAnhang> AdresseAnhaenge { get; set; } = null!;
+        public DbSet<Anhang> Anhaenge { get; set; }
         public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
         public DbSet<BetriebskostenrechnungAnhang> BetriebskostenrechnungAnhaenge { get; set; } = null!;
         public DbSet<Betriebskostenrechnungsgruppe> Betriebskostenrechnungsgruppen { get; set; } = null!;
@@ -36,10 +37,11 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<ZaehlerAnhang> ZaehlerAnhaenge { get; set; } = null!;
         public DbSet<Zaehlerstand> Zaehlerstaende { get; set; } = null!;
         public DbSet<ZaehlerstandAnhang> ZaehlerstandAnhaenge { get; set; } = null!;
+
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             // TODO adjust this...
-            //=> options.UseSqlite("Data Source=walter.db");
-            => options.UseSqlite("Data Source=" + ApplicationData.Current.LocalFolder.Path + @"\walter.db");
+            => options.UseSqlite("Data Source=walter.db");
+            //=> options.UseSqlite("Data Source=" + ApplicationData.Current.LocalFolder.Path + @"\walter.db");
 
         public IPerson FindPerson(Guid PersonId)
         {
@@ -69,7 +71,17 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class Anhang
     {
+        public Guid AnhangId { get; set; }
+        public string FileName { get; set; } = null!;
+        public byte[] Sha256Hash { get; set; } = null!;
+        public string? ContentType { get; set; }
+        public byte[] Content { get; set; } = null!;
+        public DateTime CreationTime { get; set; }
 
+        public Anhang()
+        {
+            AnhangId = Guid.NewGuid();
+        }
     }
 
     public interface IPerson
