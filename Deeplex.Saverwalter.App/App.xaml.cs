@@ -1,6 +1,8 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.IO;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Storage;
@@ -44,9 +46,11 @@ namespace Deeplex.Saverwalter.App
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-            Walter = new SaverwalterContext();
+            var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
+            optionsBuilder.UseSqlite("Data Source=" + Path.Combine(ApplicationData.Current.LocalFolder.Path, @"\walter.db"));
+            Walter = new SaverwalterContext(optionsBuilder.Options);
             ViewModel = new MainViewModel();
-            Frame rootFrame = Window.Current.Content as Frame;
+            var rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
