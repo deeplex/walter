@@ -14,124 +14,124 @@
     <Page.Resources>
         <muxc:StackLayout x:Name="VerticalStackLayout" Orientation="Vertical" Spacing="8"/>
     </Page.Resources>
-
-    <StackPanel>
-        <CommandBar
+    <ScrollViewer>
+        <StackPanel>
+            <CommandBar
             Background="Transparent"
             IsOpen="False"
             HorizontalAlignment="Stretch"
             DefaultLabelPosition="Right">
-            <CommandBar.Content>
-                <TextBlock Text="Betriebskostenrechnungen"
+                <CommandBar.Content>
+                    <TextBlock Text="Betriebskostenrechnungen"
                     Style="{StaticResource TitleTextBlockStyle}"
                     Margin="10,0,0,0"/>
-            </CommandBar.Content>
-            <AppBarButton Icon="Sync" Label="Sortiere nach Gruppen" Click="SortiereNachGruppen_Click"/>
-            <AppBarButton
+                </CommandBar.Content>
+                <AppBarButton Icon="Sync" Label="Sortiere nach Gruppen" Click="SortiereNachGruppen_Click"/>
+                <AppBarButton
                 AllowFocusOnInteraction="True"
                 Icon="Add" Label="Hinzufügen">
-                <AppBarButton.Flyout>
-                    <Flyout>
-                        <StackPanel>
-                            <TextBlock Margin="0,0,0,20" Text="Füge Betriebskostenrechnung hinzu:" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                            <TextBlock Text="Betroffene Wohneinheiten:"/>
-                            <muxc:TreeView SelectionMode="Multiple" x:Name="AddBetriebskostenrechnungBetroffeneWohneinheiten"/>
-                            <TextBox Header="Beschreibung" x:Name="AddBetriebskostenrechnungBeschreibung" HorizontalAlignment="Stretch"/>
-                            <StackPanel Orientation="Horizontal">
-                                <ComboBox Header="Kostentyp" x:Name="AddBetriebskostenrechnungTyp" ItemsSource="{x:Bind ViewModel.Betriebskostentypen}" DisplayMemberPath="Beschreibung"/>
-                                <ComboBox Header="Umlageschlüssel" x:Name="AddBetriebskostenrechnungSchluessel" ItemsSource="{x:Bind ViewModel.Betriebskostenschluessel}" DisplayMemberPath="Beschreibung" Margin="10,0,0,0"/>
-                                <muxc:NumberBox Header="Betr. Jahr" x:Name="AddBetriebskostenrechnungJahr" Margin="10,0,0,0" SpinButtonPlacementMode="Inline"/>
+                    <AppBarButton.Flyout>
+                        <Flyout>
+                            <StackPanel>
+                                <TextBlock Margin="0,0,0,20" Text="Füge Betriebskostenrechnung hinzu:" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                                <TextBlock Text="Betroffene Wohneinheiten:"/>
+                                <muxc:TreeView SelectionMode="Multiple" x:Name="AddBetriebskostenrechnungBetroffeneWohneinheiten"/>
+                                <TextBox Header="Beschreibung" x:Name="AddBetriebskostenrechnungBeschreibung" HorizontalAlignment="Stretch"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <ComboBox Header="Kostentyp" x:Name="AddBetriebskostenrechnungTyp" ItemsSource="{x:Bind ViewModel.Betriebskostentypen}" DisplayMemberPath="Beschreibung"/>
+                                    <ComboBox Header="Umlageschlüssel" x:Name="AddBetriebskostenrechnungSchluessel" ItemsSource="{x:Bind ViewModel.Betriebskostenschluessel}" DisplayMemberPath="Beschreibung" Margin="10,0,0,0"/>
+                                    <muxc:NumberBox Header="Betr. Jahr" x:Name="AddBetriebskostenrechnungJahr" Margin="10,0,0,0" SpinButtonPlacementMode="Inline"/>
+                                </StackPanel>
+                                <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
+                                    <CalendarDatePicker x:Name="AddBetriebskostenrechnungDatum" Header="Datum"/>
+                                    <muxc:NumberBox x:Name="AddBetriebskostenrechnungBetrag" Margin="10,0,0,0" Header="Betrag"/>
+                                    <Button IsEnabled="False" VerticalAlignment="Bottom" Margin="10,0,0,0">
+                                        <SymbolIcon Symbol="Attach"/>
+                                    </Button>
+                                    <Button VerticalAlignment="Bottom" Margin="10,0,0,0" Click="AddBetriebskostenrechnung_Click">
+                                        <SymbolIcon Symbol="Add"/>
+                                    </Button>
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
-                                <CalendarDatePicker x:Name="AddBetriebskostenrechnungDatum" Header="Datum"/>
-                                <muxc:NumberBox x:Name="AddBetriebskostenrechnungBetrag" Margin="10,0,0,0" Header="Betrag"/>
-                                <Button IsEnabled="False" VerticalAlignment="Bottom" Margin="10,0,0,0">
-                                    <SymbolIcon Symbol="Attach"/>
-                                </Button>
-                                <Button VerticalAlignment="Bottom" Margin="10,0,0,0" Click="AddBetriebskostenrechnung_Click">
-                                    <SymbolIcon Symbol="Add"/>
-                                </Button>
-                            </StackPanel>
-                        </StackPanel>
-                    </Flyout>
-                </AppBarButton.Flyout>
-            </AppBarButton>
-        </CommandBar>
+                        </Flyout>
+                    </AppBarButton.Flyout>
+                </AppBarButton>
+            </CommandBar>
 
-        <muxc:ItemsRepeater
+            <muxc:ItemsRepeater
             Layout="{StaticResource VerticalStackLayout}"
             ItemsSource="{x:Bind ViewModel.Typen.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-            <DataTemplate>
-                <Grid>
-                    <mtuuc:Expander Header="{Binding Key.Beschreibung}">
-                        <RelativePanel>
-                            <Pivot ItemsSource="{Binding Value.Jahre, Mode=OneWay}">
-                                <Pivot.HeaderTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Key, Mode=OneWay}"/>
-                                    </DataTemplate>
-                                </Pivot.HeaderTemplate>
-                                <Pivot.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel>
-                                            <GridView Margin="0,10,0,0" ItemsSource="{Binding Value, Mode=OneWay}">
-                                                <CollectionViewSource x:Name="Wohnungen" IsSourceGrouped="True"/>
-                                                <GridView.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <StackPanel BorderBrush="LightGray" BorderThickness="2" Padding="5">
-                                                            <TextBlock
+                <DataTemplate>
+                    <Grid>
+                        <mtuuc:Expander Header="{Binding Key.Beschreibung}">
+                            <RelativePanel>
+                                <Pivot ItemsSource="{Binding Value.Jahre, Mode=OneWay}">
+                                    <Pivot.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Key, Mode=OneWay}"/>
+                                        </DataTemplate>
+                                    </Pivot.HeaderTemplate>
+                                    <Pivot.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <GridView Margin="0,10,0,0" ItemsSource="{Binding Value, Mode=OneWay}">
+                                                    <CollectionViewSource x:Name="Wohnungen" IsSourceGrouped="True"/>
+                                                    <GridView.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel BorderBrush="LightGray" BorderThickness="2" Padding="5">
+                                                                <TextBlock
                                                                 Margin="5"
                                                                 FontSize="18">
                                                             <Run Text="Betrag:"/>
                                                             <Run Text="{Binding BetragString}"/>
-                                                            </TextBlock>
-                                                            <TextBlock
+                                                                </TextBlock>
+                                                                <TextBlock
                                                                 Margin="5"
                                                                 FontSize="18">
                                                             <Run Text="Datum:"/>
                                                             <Run Text="{Binding DatumString}"/>
-                                                            </TextBlock>
-                                                            <mtuuc:Expander>
-                                                                <mtuuc:Expander.Header>
-                                                                    <TextBlock>
+                                                                </TextBlock>
+                                                                <mtuuc:Expander>
+                                                                    <mtuuc:Expander.Header>
+                                                                        <TextBlock>
                                                                     <Run Text="Wohnungen ("/>
                                                                     <Run Text="{Binding Wohnungen.Count}"/>
                                                                     <Run Text=")"/>
-                                                                    </TextBlock>
-                                                                </mtuuc:Expander.Header>
-                                                                <ListView
+                                                                        </TextBlock>
+                                                                    </mtuuc:Expander.Header>
+                                                                    <ListView
                                                                 SelectionMode="None"
                                                                 CanDragItems="True" CanReorderItems="True" 
                                                                 AllowDrop="True"
                                                                 ItemsSource="{Binding Wohnungen, Mode=OneWay}">
-                                                                    <ListView.ItemsPanel>
-                                                                        <ItemsPanelTemplate>
-                                                                            <ItemsStackPanel AreStickyGroupHeadersEnabled="True">
-                                                                            </ItemsStackPanel>
-                                                                        </ItemsPanelTemplate>
-                                                                    </ListView.ItemsPanel>
-                                                                </ListView>
-                                                            </mtuuc:Expander>
-                                                            <Button CommandParameter="{Binding}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{Binding hasNoEntity}">
-                                                                <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="Speichern"/>
-                                                                    <SymbolIcon Margin="10,0,0,0" Symbol="Accept"/>
-                                                                </StackPanel>
-                                                            </Button>
-                                                        </StackPanel>
-                                                    </DataTemplate>
-                                                </GridView.ItemTemplate>
-                                            </GridView>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </Pivot.ItemTemplate>
-                            </Pivot>
-                            <Button Margin="0,10,10,0" RelativePanel.AlignRightWithPanel="True" Content="Neues Jahr" Click="NeuesJahr_Click"/>
-                        </RelativePanel>
-                    </mtuuc:Expander>
-                </Grid>
-            </DataTemplate>
-        </muxc:ItemsRepeater>
-
-    </StackPanel>
+                                                                        <ListView.ItemsPanel>
+                                                                            <ItemsPanelTemplate>
+                                                                                <ItemsStackPanel AreStickyGroupHeadersEnabled="True">
+                                                                                </ItemsStackPanel>
+                                                                            </ItemsPanelTemplate>
+                                                                        </ListView.ItemsPanel>
+                                                                    </ListView>
+                                                                </mtuuc:Expander>
+                                                                <Button CommandParameter="{Binding}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{Binding hasNoEntity}">
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <TextBlock Text="Speichern"/>
+                                                                        <SymbolIcon Margin="10,0,0,0" Symbol="Accept"/>
+                                                                    </StackPanel>
+                                                                </Button>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </GridView.ItemTemplate>
+                                                </GridView>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </Pivot.ItemTemplate>
+                                </Pivot>
+                                <Button Margin="0,10,10,0" RelativePanel.AlignRightWithPanel="True" Content="Neues Jahr" Click="NeuesJahr_Click"/>
+                            </RelativePanel>
+                        </mtuuc:Expander>
+                    </Grid>
+                </DataTemplate>
+            </muxc:ItemsRepeater>
+        </StackPanel>
+    </ScrollViewer>
 </Page>
