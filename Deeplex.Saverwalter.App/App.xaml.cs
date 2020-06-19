@@ -47,8 +47,9 @@ namespace Deeplex.Saverwalter.App
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
             var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
-            optionsBuilder.UseSqlite("Data Source=" + Path.Combine(ApplicationData.Current.LocalFolder.Path, @"\walter.db"));
+            optionsBuilder.UseSqlite("Data Source=" + Path.Combine(ApplicationData.Current.LocalFolder.Path, "walter.db"));
             Walter = new SaverwalterContext(optionsBuilder.Options);
+            Walter.Database.Migrate();
             ViewModel = new MainViewModel();
             var rootFrame = Window.Current.Content as Frame;
 
