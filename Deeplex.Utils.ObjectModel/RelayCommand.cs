@@ -38,7 +38,7 @@ namespace Deeplex.Utils.ObjectModel
                && (mCanExecute == null || mCanExecute((T)parameter));
 
         public void Execute(object parameter)
-            => mExecute?.Invoke((T)parameter);
+            => mExecute((T)parameter);
 
         public void RaiseCanExecuteChanged(EventArgs args)
             => CanExecuteChanged?.Invoke(this, args);

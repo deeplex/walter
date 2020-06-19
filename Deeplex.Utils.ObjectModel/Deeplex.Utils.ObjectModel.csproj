@@ -120,6 +120,7 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AsyncRelayCommand.cs" />
     <Compile Include="BindableBase.cs" />
     <Compile Include="ObservableDictionary.cs" />
     <Compile Include="ObservableProperty.cs" />

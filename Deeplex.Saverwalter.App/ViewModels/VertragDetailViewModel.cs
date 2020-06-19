@@ -145,16 +145,21 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
 
-            ImportFile = new RelayCommand(_ =>
+            ImportFile = new AsyncRelayCommand(async _ =>
             {
+                var picker = new Windows.Storage.Pickers.FileOpenPicker();
+                picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
+                picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop;
+                picker.FileTypeFilter.Add(".pdf");
 
+                var anhang = await Deeplex.Saverwalter.App.Utils.Files.ExtractFrom(await picker.PickSingleFileAsync());
             }, _ => true);
         }
 
         public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
         public bool IsNotInEdit => !IsInEdit.Value;
 
-        public RelayCommand ImportFile { get; }
+        public AsyncRelayCommand ImportFile { get; }
         public RelayCommand AddMiete { get; }
         public RelayCommand AddMietMinderung { get; }
         public RelayCommand AddVersion { get; }
