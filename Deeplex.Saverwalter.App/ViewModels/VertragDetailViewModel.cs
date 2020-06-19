@@ -144,11 +144,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }, _ => true);
 
             IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
+
+            ImportFile = new RelayCommand(_ =>
+            {
+
+            }, _ => true);
         }
 
         public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
         public bool IsNotInEdit => !IsInEdit.Value;
 
+        public RelayCommand ImportFile { get; }
         public RelayCommand AddMiete { get; }
         public RelayCommand AddMietMinderung { get; }
         public RelayCommand AddVersion { get; }

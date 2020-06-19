@@ -73,6 +73,11 @@
                     HorizontalAlignment="Stretch"
                     DefaultLabelPosition="Right">
                     <AppBarButton
+                        Icon="Upload"
+                        Command="{x:Bind ViewModel.ImportFile}"
+                        Label="Datei importieren">
+                    </AppBarButton>
+                    <AppBarButton
                         Icon="PostUpdate"
                         Label="Betriebskostenabrechnung">
                         <AppBarButton.Flyout>
