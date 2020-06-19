@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
-// using Windows.Storage;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -104,6 +103,7 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class NatuerlichePersonAnhang
     {
+        public int NatuerlichePersonAnhangId { get; set; }
         public NatuerlichePerson Person { get; set; } = null!;
         public Anhang Anhang { get; set; } = null!;
     }
@@ -165,6 +165,7 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class JuristischePersonAnhang
     {
+        public int JuristischePersonAnhangId { get; set; }
         public JuristischePerson Person { get; set; } = null!;
         public Anhang Anhang { get; set; } = null!;
     }
@@ -196,6 +197,7 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class WohnungAnhang
     {
+        public int WohnungAnhangId { get; set; }
         public Wohnung Wohnung { get; set; } = null!;
         public Anhang Anhang { get; set; } = null!;
     }
@@ -211,6 +213,7 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class GarageAnhang
     {
+        public int GarageAnhangId { get; set; }
         public Garage Garage { get; set; } = null!;
         public Anhang Anhang { get; set; } = null!;
     }
@@ -230,6 +233,7 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class AdresseAnhang
     {
+        public int AdresseAnhangId { get; set; }
         public Adresse Adresse { get; set; } = null!;
         public Anhang Anhang { get; set; } = null!;
     }
@@ -272,6 +276,7 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class VertragAnhang
     {
+        public int VertragAnhangId { get; set; }
         public Vertrag Vertrag { get; set; } = null!;
         public Anhang Anhang { get; set; } = null!;
     }
@@ -298,6 +303,7 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class MieteAnhang
     {
+        public int MieteAnhangId { get; set; }
         public Miete Miete { get; set; } = null!;
         public Anhang Anhang { get; set; } = null!;
     }
@@ -315,6 +321,7 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class MietMinderungAnhang
     {
+        public int MietMinderungAnhangId { get; set; }
         public MietMinderung MietMinderung { get; set; } = null!;
         public Anhang Anhang { get; set; } = null!;
     }
@@ -344,6 +351,7 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class KontoAnhang
     {
+        public int KontoAnhangId { get; set; }
         public Konto Konto { get; set; } = null!;
         public Anhang Anhang { get; set; } = null!;
     }
@@ -364,6 +372,7 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class BetriebskostenrechnungAnhang
     {
+        public int BetriebskostenrechnungAnhangId { get; set; }
         public Betriebskostenrechnung Betriebskostenrechnung { get; set; } = null!;
         public Anhang Anhang { get; set; } = null!;
     }
@@ -405,6 +414,7 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class ZaehlerAnhang
     {
+        public int ZaehlerAnhangId { get; set; }
         public Zaehler Zaehler { get; set; } = null!;
         public Anhang Anhang { get; set; } = null!;
     }
@@ -429,6 +439,7 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class ZaehlerstandAnhang
     {
+        public int ZaehlerstandAnhangId { get; set; }
         public Zaehlerstand Zaehlerstand { get; set; } = null!;
         public Anhang Anhang { get; set; } = null!;
     }
