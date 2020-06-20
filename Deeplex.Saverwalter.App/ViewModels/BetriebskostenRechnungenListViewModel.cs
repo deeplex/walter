@@ -236,14 +236,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Wohnungen = w.Select(g => AdresseViewModel.Anschrift(g.Wohnung) + " — " + g.Wohnung.Bezeichnung)
                 .ToImmutableList();
 
-            // Sorting after Adress? Tree View sth?
-            //Gruppen = App.Walter.Betriebskostenrechnungsgruppen
-            //    .Where(g => g.Rechnung == r)
-            //    .ToList()
-            //    .GroupBy(g => g.Wohnung.Adresse)
-            //    .ToImmutableDictionary(
-            //        g => AdresseViewModel.Anschrift(g.Key),
-            //        g => g.Select(gg => gg.Wohnung.Bezeichnung).ToImmutableList());
+            AttachFile = new AsyncRelayCommand(async _ =>
+                await Utils.Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
         }
+
+        public AsyncRelayCommand AttachFile;
+
+        // Sorting after Adress? Tree View sth?
+        //Gruppen = App.Walter.Betriebskostenrechnungsgruppen
+        //    .Where(g => g.Rechnung == r)
+        //    .ToList()
+        //    .GroupBy(g => g.Wohnung.Adresse)
+        //    .ToImmutableDictionary(
+        //        g => AdresseViewModel.Anschrift(g.Key),
+        //        g => g.Select(gg => gg.Wohnung.Bezeichnung).ToImmutableList());
     }
 }

@@ -172,8 +172,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ToList();
 
             PropertyChanged += OnUpdate;
+
+            AttachFile = new AsyncRelayCommand(async _ =>
+                await Utils.Files.SaveFilesToWalter(App.Walter.NatuerlichePersonAnhaenge, k), _ => true);
         }
 
+        public AsyncRelayCommand AttachFile;
         public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
         public bool IsNotInEdit => !IsInEdit.Value;
 

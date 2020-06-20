@@ -145,14 +145,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
 
-            ImportFile = new AsyncRelayCommand(async _ =>
+            AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.VertragAnhaenge, guid), _ => true);
         }
 
         public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
         public bool IsNotInEdit => !IsInEdit.Value;
 
-        public AsyncRelayCommand ImportFile { get; }
+        public AsyncRelayCommand AttachFile { get; }
         public RelayCommand AddMiete { get; }
         public RelayCommand AddMietMinderung { get; }
         public RelayCommand AddVersion { get; }
@@ -353,9 +353,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = m;
             PropertyChanged += OnUpdate;
-            AttachFile = new AsyncRelayCommand(_ => null
-
-            , _ => true);
+            AttachFile = new AsyncRelayCommand(async _ =>
+                await Utils.Files.SaveFilesToWalter(App.Walter.MieteAnhaenge, m), _ => true);
         }
 
         public AsyncRelayCommand AttachFile;
@@ -454,8 +453,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public VertragDetailMietMinderung(MietMinderung m)
         {
             Entity = m;
+            AttachFile = new AsyncRelayCommand(async _ =>
+                await Utils.Files.SaveFilesToWalter(App.Walter.MietMinderungAnhaenge, m), _ => true);
             PropertyChanged += OnUpdate;
         }
+
+        public AsyncRelayCommand AttachFile;
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
         {

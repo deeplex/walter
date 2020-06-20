@@ -194,10 +194,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 RaisePropertyChanged(nameof(Zaehler));
             }, _ => true);
 
+            AttachFile = new AsyncRelayCommand(async _ =>
+                await Utils.Files.SaveFilesToWalter(App.Walter.WohnungAnhaenge, w), _ => true);
+
             IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
             PropertyChanged += OnUpdate;
         }
+
         public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
+        public AsyncRelayCommand AttachFile;
         public RelayCommand AddZaehler { get; }
         public bool IsNotInEdit => !IsInEdit.Value;
 
@@ -300,7 +305,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     .ToImmutableList();
                 RaisePropertyChanged(nameof(Zaehlerstaende));
             }, _ => true);
+
+
+            AttachFile = new AsyncRelayCommand(async _ =>
+                await Utils.Files.SaveFilesToWalter(App.Walter.ZaehlerAnhaenge, z), _ => true);
         }
+        public AsyncRelayCommand AttachFile;
         public RelayCommand AddZaehlerstand { get; }
     }
 
@@ -340,7 +350,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.Walter.SaveChanges();
                 p.LoadList();
             }, _ => p.IsInEdit.Value);
+
+            AttachFile = new AsyncRelayCommand(async _ =>
+                await Utils.Files.SaveFilesToWalter(App.Walter.ZaehlerstandAnhaenge, z), _ => true);
         }
+
+        public AsyncRelayCommand AttachFile;
         public RelayCommand SelfDestruct { get; }
     }
 
@@ -374,7 +389,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Ende.Value = v.Ende?.AsUtcKind();
 
             var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
-            var cs = bs.Select(b => {
+            var cs = bs.Select(b =>
+            {
                 var c = App.Walter.NatuerlichePersonen.Find(b);
                 return string.Join(" ", c.Vorname ?? "", c.Nachname);
             });

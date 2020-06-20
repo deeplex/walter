@@ -27,7 +27,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Hausnummer.Value = a.Hausnummer;
             Postleitzahl.Value = a.Postleitzahl;
             Stadt.Value = a.Stadt;
+
+            AttachFile = new AsyncRelayCommand(async _ =>
+                await Utils.Files.SaveFilesToWalter(App.Walter.AdresseAnhaenge, a), _ => true);
         }
+
+        public AsyncRelayCommand AttachFile;
 
         public static int GetAdresseIdByAnschrift(string s)
             => App.Walter.Adressen.ToList().First(a => Anschrift(a) == s).AdresseId;
