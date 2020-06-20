@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.App.Utils
             {
                 picker.FileTypeFilter.Add("*");
             }
-            
+
             return picker;
         }
 
@@ -65,7 +65,7 @@ namespace Deeplex.Saverwalter.App.Utils
         {
             var files = await PickFiles(filters);
 
-            foreach(var file in files)
+            foreach (var file in files)
             {
                 var attachment = new T
                 {
@@ -77,5 +77,13 @@ namespace Deeplex.Saverwalter.App.Utils
             }
             App.Walter.SaveChanges();
         }
+
+        public static async Task<List<T>> PrepareFilesForWalter<T>(Microsoft.EntityFrameworkCore.DbSet<T> Set, params string[] filters) where T : class, IAnhang, new()
+            => (await PickFiles(filters))
+                .Select(file => new T
+                {
+                    Anhang = file,
+                    AnhangId = file.AnhangId,
+                }).ToList();
     }
 }
