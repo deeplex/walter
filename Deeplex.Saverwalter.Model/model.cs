@@ -292,7 +292,8 @@ namespace Deeplex.Saverwalter.Model
     public sealed class VertragAnhang
     {
         public int VertragAnhangId { get; set; }
-        public Vertrag Vertrag { get; set; } = null!;
+        public Vertrag Vertrag { get; set; } = null!; // TODO: Remove this
+        public Guid VertragId { get; set; }
         public Anhang Anhang { get; set; } = null!;
     }
 

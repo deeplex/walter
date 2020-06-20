@@ -147,10 +147,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             ImportFile = new AsyncRelayCommand(async _ =>
             {
-                foreach (var anhang in await Utils.Files.PickFiles())
+                foreach (var anhang in await Utils.Files.PickFiles("*"))
                 {
+                    App.Walter.VertragAnhaenge.Add(new VertragAnhang
+                    {
+                        Anhang = anhang,
+                        Vertrag = v.First(), // TODO Remove this
+                        VertragId = guid,
+                    });
                     App.Walter.Anhaenge.Add(anhang);
                 }
+                App.Walter.SaveChanges();
             }, _ => true);
         }
 

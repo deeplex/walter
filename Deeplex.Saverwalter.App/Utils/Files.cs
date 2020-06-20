@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
@@ -41,13 +42,19 @@ namespace Deeplex.Saverwalter.App.Utils
 
         public static async Task<Anhang> PickFile(params string[] filters)
         {
-            return await ExtractFrom(await FilePicker(filters).PickSingleFileAsync());
+            var file = await FilePicker(filters).PickSingleFileAsync();
+            return await ExtractFrom(file);
         }
 
-        public static async Task<ImmutableList<Anhang>> PickFiles(params string[] filters)
-            => (await FilePicker(filters).PickMultipleFilesAsync())
-                .Select(async f => await ExtractFrom(f))
-                .Select(t => t.Result)
-                .ToImmutableList();
+        public static async Task<List<Anhang>> PickFiles(params string[] filters)
+        {
+            var files = await FilePicker(filters).PickMultipleFilesAsync();
+            var list = new List<Anhang>();
+            foreach (var file in files)
+            {
+                list.Add(await ExtractFrom(file));
+            }
+            return list;
+        }            
     }
 }
