@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
@@ -24,5 +25,29 @@ namespace Deeplex.Saverwalter.App.Utils
 
             return anhang;
         }
+
+        public static Windows.Storage.Pickers.FileOpenPicker FilePicker(params string[] filters)
+        {
+            var picker = new Windows.Storage.Pickers.FileOpenPicker();
+            picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop;
+            foreach (var filter in filters)
+            {
+                picker.FileTypeFilter.Add(filter);
+            }
+
+            return picker;
+        }
+
+        public static async Task<Anhang> PickFile(params string[] filters)
+        {
+            return await ExtractFrom(await FilePicker(filters).PickSingleFileAsync());
+        }
+
+        public static async Task<ImmutableList<Anhang>> PickFiles(params string[] filters)
+            => (await FilePicker(filters).PickMultipleFilesAsync())
+                .Select(async f => await ExtractFrom(f))
+                .Select(t => t.Result)
+                .ToImmutableList();
     }
 }
