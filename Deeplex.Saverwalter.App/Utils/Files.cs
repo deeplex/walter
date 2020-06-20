@@ -1,12 +1,9 @@
 ﻿using Deeplex.Saverwalter.Model;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -32,11 +29,18 @@ namespace Deeplex.Saverwalter.App.Utils
             var picker = new Windows.Storage.Pickers.FileOpenPicker();
             picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
             picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop;
-            foreach (var filter in filters)
+            if (filters != null && filters.Length > 0)
             {
-                picker.FileTypeFilter.Add(filter);
+                foreach (var filter in filters)
+                {
+                    picker.FileTypeFilter.Add(filter);
+                }
             }
-
+            else
+            {
+                picker.FileTypeFilter.Add("*");
+            }
+            
             return picker;
         }
 
@@ -55,6 +59,23 @@ namespace Deeplex.Saverwalter.App.Utils
                 list.Add(await ExtractFrom(file));
             }
             return list;
-        }            
+        }
+
+        public static async Task SaveFilesToWalter<T, U>(Microsoft.EntityFrameworkCore.DbSet<T> Set, U target, params string[] filters) where T : class, IAnhang<U>, new()
+        {
+            var files = await PickFiles(filters);
+
+            foreach(var file in files)
+            {
+                var attachment = new T
+                {
+                    Anhang = file,
+                    AnhangId = file.AnhangId,
+                    Target = target,
+                };
+                Set.Add(attachment);
+            }
+            App.Walter.SaveChanges();
+        }
     }
 }

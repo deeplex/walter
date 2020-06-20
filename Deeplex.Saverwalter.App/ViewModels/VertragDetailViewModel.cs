@@ -146,19 +146,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
 
             ImportFile = new AsyncRelayCommand(async _ =>
-            {
-                foreach (var anhang in await Utils.Files.PickFiles("*"))
-                {
-                    App.Walter.VertragAnhaenge.Add(new VertragAnhang
-                    {
-                        Anhang = anhang,
-                        Vertrag = v.First(), // TODO Remove this
-                        VertragId = guid,
-                    });
-                    App.Walter.Anhaenge.Add(anhang);
-                }
-                App.Walter.SaveChanges();
-            }, _ => true);
+                await Utils.Files.SaveFilesToWalter(App.Walter.VertragAnhaenge, guid), _ => true);
         }
 
         public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
@@ -365,7 +353,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = m;
             PropertyChanged += OnUpdate;
+            AttachFile = new AsyncRelayCommand(_ => null
+
+            , _ => true);
         }
+
+        public AsyncRelayCommand AttachFile;
 
         private bool savable =>
             Entity.Betrag != null &&

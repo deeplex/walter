@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<NatuerlichePersonAnhang> NatuerlichePersonAnhaenge { get; set; } = null!;
         public DbSet<Vertrag> Vertraege { get; set; } = null!;
         public DbSet<VertragAnhang> VertragAnhaenge { get; set; } = null!;
-        public DbSet<Wohnung> Wohnungen { get; set; } = null!;
+        public DbSet<Wohnung> Wohnungen { get; set; } = null!;           
         public DbSet<WohnungAnhang> WohnungAnhaenge { get; set; } = null!;
         public DbSet<Zaehler> ZaehlerSet { get; set; } = null!;
         public DbSet<ZaehlerAnhang> ZaehlerAnhaenge { get; set; } = null!;
@@ -97,6 +97,16 @@ namespace Deeplex.Saverwalter.Model
             AnhangId = Guid.NewGuid();
         }
     }
+    public interface IAnhang
+    {
+        public Guid AnhangId { get; set; }
+        public Anhang Anhang { get; set; }
+    }
+    public interface IAnhang<T> : IAnhang
+    {
+        public T Target { get; set; }
+    }
+
 
     public interface IPerson
     {
@@ -116,10 +126,11 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
-    public sealed class NatuerlichePersonAnhang
+    public sealed class NatuerlichePersonAnhang : IAnhang<NatuerlichePerson>
     {
         public int NatuerlichePersonAnhangId { get; set; }
-        public NatuerlichePerson Person { get; set; } = null!;
+        public NatuerlichePerson Target { get; set; }
+        public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;
     }
 
@@ -178,10 +189,11 @@ namespace Deeplex.Saverwalter.Model
         }
     }
 
-    public sealed class JuristischePersonAnhang
+    public sealed class JuristischePersonAnhang : IAnhang<JuristischePerson>
     {
         public int JuristischePersonAnhangId { get; set; }
-        public JuristischePerson Person { get; set; } = null!;
+        public JuristischePerson Target { get; set; } = null!;
+        public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;
     }
 
@@ -210,10 +222,11 @@ namespace Deeplex.Saverwalter.Model
         public List<Betriebskostenrechnungsgruppe> Betriebskostenrechnungsgruppen { get; private set; } = new List<Betriebskostenrechnungsgruppe>();
     }
 
-    public sealed class WohnungAnhang
+    public sealed class WohnungAnhang : IAnhang<Wohnung>
     {
         public int WohnungAnhangId { get; set; }
-        public Wohnung Wohnung { get; set; } = null!;
+        public Wohnung Target { get; set; } = null!;
+        public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;
     }
 
@@ -226,10 +239,11 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
-    public sealed class GarageAnhang
+    public sealed class GarageAnhang : IAnhang<Garage>
     {
         public int GarageAnhangId { get; set; }
-        public Garage Garage { get; set; } = null!;
+        public Garage Target { get; set; } = null!;
+        public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;
     }
 
@@ -246,10 +260,11 @@ namespace Deeplex.Saverwalter.Model
         public List<Garage> Garagen { get; private set; } = new List<Garage>();
     }
 
-    public sealed class AdresseAnhang
+    public sealed class AdresseAnhang : IAnhang<Adresse>
     {
         public int AdresseAnhangId { get; set; }
-        public Adresse Adresse { get; set; } = null!;
+        public Adresse Target { get; set; } = null!;
+        public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;
     }
 
@@ -289,12 +304,18 @@ namespace Deeplex.Saverwalter.Model
         }
     }
 
-    public sealed class VertragAnhang
+    public sealed class VertragAnhang : IAnhang<Guid>
     {
         public int VertragAnhangId { get; set; }
-        public Vertrag Vertrag { get; set; } = null!; // TODO: Remove this
-        public Guid VertragId { get; set; }
+        public Guid Target { get; set; }
         public Anhang Anhang { get; set; } = null!;
+        public Guid AnhangId { get; set; }
+        public VertragAnhangTyp Typ { get; set; }
+    }
+    public enum VertragAnhangTyp
+    {
+        Sonstiges,
+        Mietvertrag,
     }
 
     // JoinTable between a Kontakt and a Vertrag.
@@ -317,10 +338,11 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
-    public sealed class MieteAnhang
+    public sealed class MieteAnhang : IAnhang<Miete>
     {
         public int MieteAnhangId { get; set; }
-        public Miete Miete { get; set; } = null!;
+        public Miete Target { get; set; } = null!;
+        public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;
     }
 
@@ -335,10 +357,11 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
-    public sealed class MietMinderungAnhang
+    public sealed class MietMinderungAnhang : IAnhang<MietMinderung>
     {
         public int MietMinderungAnhangId { get; set; }
-        public MietMinderung MietMinderung { get; set; } = null!;
+        public MietMinderung Target { get; set; } = null!;
+        public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;
     }
 
@@ -365,10 +388,11 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
-    public sealed class KontoAnhang
+    public sealed class KontoAnhang : IAnhang<Konto>
     {
         public int KontoAnhangId { get; set; }
-        public Konto Konto { get; set; } = null!;
+        public Konto Target { get; set; } = null!;
+        public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;
     }
 
@@ -386,10 +410,11 @@ namespace Deeplex.Saverwalter.Model
         public List<Betriebskostenrechnungsgruppe> Gruppen { get; private set; } = new List<Betriebskostenrechnungsgruppe>();
     }
 
-    public sealed class BetriebskostenrechnungAnhang
+    public sealed class BetriebskostenrechnungAnhang : IAnhang<Betriebskostenrechnung>
     {
         public int BetriebskostenrechnungAnhangId { get; set; }
-        public Betriebskostenrechnung Betriebskostenrechnung { get; set; } = null!;
+        public Betriebskostenrechnung Target { get; set; } = null!;
+        public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;
     }
 
@@ -401,9 +426,11 @@ namespace Deeplex.Saverwalter.Model
         public Betriebskostenrechnung Rechnung { get; set; } = null!;
     }
 
-    public sealed class VertragsBetriebskostenrechnungAnhang
+    public sealed class VertragsBetriebskostenrechnungAnhang : IAnhang<VertragsBetriebskostenrechnung>
     {
-        public VertragsBetriebskostenrechnung VertragsBetriebskostenrechnung { get; set; } = null!;
+        public int VertragsBetriebskostenrechnungId { get; set; }
+        public VertragsBetriebskostenrechnung Target { get; set; } = null!;
+        public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;
     }
 
@@ -428,10 +455,11 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
-    public sealed class ZaehlerAnhang
+    public sealed class ZaehlerAnhang : IAnhang<Zaehler>
     {
         public int ZaehlerAnhangId { get; set; }
-        public Zaehler Zaehler { get; set; } = null!;
+        public Zaehler Target { get; set; } = null!;
+        public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;
     }
 
@@ -453,10 +481,11 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
     }
 
-    public sealed class ZaehlerstandAnhang
+    public sealed class ZaehlerstandAnhang : IAnhang<Zaehlerstand>
     {
         public int ZaehlerstandAnhangId { get; set; }
-        public Zaehlerstand Zaehlerstand { get; set; } = null!;
+        public Zaehlerstand Target { get; set; } = null!;
+        public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;
     }
 
