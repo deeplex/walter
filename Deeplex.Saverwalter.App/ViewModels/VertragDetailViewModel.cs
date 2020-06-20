@@ -147,12 +147,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             ImportFile = new AsyncRelayCommand(async _ =>
             {
-                var picker = new Windows.Storage.Pickers.FileOpenPicker();
-                picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
-                picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop;
-                picker.FileTypeFilter.Add(".pdf");
-
-                var anhang = await Deeplex.Saverwalter.App.Utils.Files.ExtractFrom(await picker.PickSingleFileAsync());
+                foreach (var anhang in await Utils.Files.PickFiles())
+                {
+                    App.Walter.Anhaenge.Add(anhang);
+                }
             }, _ => true);
         }
 
