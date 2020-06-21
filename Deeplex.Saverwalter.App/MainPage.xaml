@@ -3,9 +3,11 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Deeplex.Saverwalter.App"
+    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
+    xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid
@@ -47,19 +49,51 @@
                 </StackPanel>
             </NavigationView.PaneFooter>
 
-            <Frame
+            <SplitView
+                x:Name="splitview"
+                DisplayMode="CompactInline"
+                PanePlacement="Right"
+                OpenPaneLength="300"
+                IsPaneOpen="True">
+                <SplitView.Content>
+                <Frame
                 x:Name="frame"
                 Margin="0,0,0,0">
-                <Frame.ContentTransitions>
-                    <TransitionCollection>
-                        <NavigationThemeTransition>
-                            <NavigationThemeTransition.DefaultNavigationTransitionInfo>
-                                <EntranceNavigationTransitionInfo />
-                            </NavigationThemeTransition.DefaultNavigationTransitionInfo>
-                        </NavigationThemeTransition>
-                    </TransitionCollection>
-                </Frame.ContentTransitions>
-            </Frame>
+                    <Frame.ContentTransitions>
+                        <TransitionCollection>
+                            <NavigationThemeTransition>
+                                <NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                                    <EntranceNavigationTransitionInfo />
+                                </NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                            </NavigationThemeTransition>
+                        </TransitionCollection>
+                    </Frame.ContentTransitions>
+                </Frame>
+                </SplitView.Content>
+                <SplitView.Pane>
+                    <StackPanel>
+                        <RelativePanel>
+                            <TextBlock Margin="5,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}" Text="Explorer" RelativePanel.AlignLeftWithPanel="True"/>
+                            <ToggleButton
+                                RelativePanel.AlignRightWithPanel="True"
+                                Width="50"
+                                CornerRadius="0"
+                                Background="Transparent"
+                                x:Name="togglepane"
+                                Click="togglepane_Click">
+                                <SymbolIcon x:Name="togglepanesymbol" Symbol="OpenPane"/>
+                            </ToggleButton>
+                        </RelativePanel>
+                        <ListView ItemsSource="{x:Bind ViewModel.Anhang.Value}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="vm:AnhangViewModel">
+                                    <TextBlock Text="{x:Bind DateiName}"/>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </StackPanel>
+                </SplitView.Pane>
+            </SplitView>
         </NavigationView>
     </Grid>
 </Page>

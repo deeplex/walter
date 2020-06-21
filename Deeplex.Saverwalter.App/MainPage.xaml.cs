@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.App.Views;
+﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.App.Views;
 using Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App
@@ -11,6 +12,8 @@ namespace Deeplex.Saverwalter.App
         }
 
         public Frame AppFrame => frame;
+        public SplitView AppSplitView => splitview;
+        public MainViewModel ViewModel = new MainViewModel();
 
         public readonly string KontaktListLabel = "Kontakte";
         public readonly string VertragListLabel = "Verträge";
@@ -39,6 +42,12 @@ namespace Deeplex.Saverwalter.App
             {
                 AppFrame.GoBack();
             }
+        }
+
+        private void togglepane_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            splitview.IsPaneOpen = !splitview.IsPaneOpen;
+            togglepanesymbol.Symbol = splitview.IsPaneOpen ? Symbol.OpenPane : Symbol.ClosePane;
         }
     }
 }

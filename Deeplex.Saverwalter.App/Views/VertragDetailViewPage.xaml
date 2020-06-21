@@ -342,6 +342,12 @@
                                                 PlaceholderText="0,00"/>
                                             <Button
                                                 VerticalAlignment="Bottom"
+                                                IsEnabled="False"
+                                                Background="Transparent">
+                                                <SymbolIcon Symbol="Attach"/>
+                                            </Button>
+                                            <Button
+                                                VerticalAlignment="Bottom"
                                                 Command="{x:Bind ViewModel.AddMiete}"
                                                 Background="Transparent">
                                                 <SymbolIcon Symbol="Add"/>
