@@ -84,9 +84,9 @@
                                 <SymbolIcon x:Name="togglepanesymbol" Symbol="OpenPane"/>
                             </ToggleButton>
                         </RelativePanel>
-                        <ListView ItemsSource="{x:Bind ViewModel.Anhang.Value}">
+                        <ListView ItemsSource="{x:Bind ViewModel.Anhang.Dateien.Value}">
                             <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="vm:AnhangViewModel">
+                                <DataTemplate x:DataType="vm:AnhangDatei">
                                     <TextBlock Text="{x:Bind DateiName}"/>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
