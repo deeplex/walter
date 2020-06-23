@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Deeplex.Saverwalter.App"
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -84,6 +85,60 @@
                                 <SymbolIcon x:Name="togglepanesymbol" Symbol="OpenPane"/>
                             </ToggleButton>
                         </RelativePanel>
+                        <mtuuc:WrapPanel Orientation="Horizontal" Margin="2.5,0,2.5,0">
+                            <Button CornerRadius="0">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <SymbolIcon Symbol="ContactInfo"/>
+                                        <TextBlock Text=" Personen"/>
+                                    </StackPanel>
+                                </Button.Content>
+                                <Button.Flyout>
+                                    <Flyout>
+                                        <muxc:ItemsRepeater ItemsSource="{x:Bind ViewModel.Anhang.AnhangKontaktList.Value}">
+                                            <DataTemplate x:DataType="vm:AnhangKontakt">
+                                                <MenuFlyoutItem Text="{x:Bind Bezeichnung}"/>
+                                            </DataTemplate>
+                                        </muxc:ItemsRepeater>
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                            <Button CornerRadius="0">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <SymbolIcon Symbol="Street"/>
+                                        <TextBlock Text=" Adressen"/>
+                                    </StackPanel>
+                                </Button.Content>
+                                <Button.Flyout>
+                                    <Flyout>
+                                        <muxc:ItemsRepeater ItemsSource="{x:Bind ViewModel.Anhang.AnhangAdresseList.Value}">
+                                            <DataTemplate x:DataType="vm:AnhangAdresse">
+                                                <MenuFlyoutItem Text="{x:Bind Bezeichnung}"/>
+                                            </DataTemplate>
+                                        </muxc:ItemsRepeater>
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                            <Button CornerRadius="0">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <SymbolIcon Symbol="Library"/>
+                                        <TextBlock Text=" Verträge"/>
+                                    </StackPanel>
+                                </Button.Content>
+                                <Button.Flyout>
+                                    <Flyout>
+                                        <muxc:ItemsRepeater ItemsSource="{x:Bind ViewModel.Anhang.AnhangVertragList.Value}">
+                                            <DataTemplate x:DataType="vm:AnhangVertrag">
+                                                <MenuFlyoutItem Text="{x:Bind Bezeichnung}"/>
+                                            </DataTemplate>
+                                        </muxc:ItemsRepeater>
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                        </mtuuc:WrapPanel>
+                        <TextBlock Text="{x:Bind ViewModel.Anhang.FilterText.Value}"/>
                         <ListView ItemsSource="{x:Bind ViewModel.Anhang.Dateien.Value}">
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="vm:AnhangDatei">
