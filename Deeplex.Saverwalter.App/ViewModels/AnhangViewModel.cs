@@ -61,17 +61,53 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Text = p.Bezeichnung
             };
 
-        private MenuFlyoutItem AnhangVertrag(Vertrag v)
+        private MenuFlyoutSubItem AnhangVertrag(Vertrag v)
         {
             var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
             var cs = bs.Select(b => App.Walter.FindPerson(b.PersonId).Bezeichnung);
             var mieter = string.Join(", ", cs);
 
-            return new MenuFlyoutItem()
+            var sub = new MenuFlyoutSubItem()
             {
                 Text = mieter + " – " + v.Wohnung.Adresse.Strasse + " " + v.Wohnung.Adresse.Hausnummer + " – " + v.Wohnung.Bezeichnung,
             };
+
+            var mieten = new MenuFlyoutSubItem()
+            {
+                Text = "Mieten",
+            };
+            App.Walter.Mieten
+                .Where(m => m.VertragId == v.VertragId)
+                .ToList()
+                .ForEach(m => mieten.Items.Add(AnhangMiete(m)));
+
+            var mietminderungen = new MenuFlyoutSubItem()
+            {
+                Text = "Mietminderungen",
+            };
+            App.Walter.MietMinderungen
+                .Where(m => m.VertragId == v.VertragId)
+                .ToList()
+                .ForEach(m => mietminderungen.Items.Add(AnhangMietMinderung(m)));
+
+            sub.Items.Add(mieten);
+            sub.Items.Add(mietminderungen);
+
+            return sub;
         }
+
+        private MenuFlyoutItem AnhangMiete(Miete m)
+            => new MenuFlyoutItem()
+            {
+                Text = m.BetreffenderMonat.ToString(),
+            };
+
+        private MenuFlyoutItem AnhangMietMinderung(MietMinderung m)
+            => new MenuFlyoutItem()
+            {
+                Text = m.Beginn.ToString("dd.MM.yyyy") + " – " +
+                    m.Ende != null ? m.Ende.Value.ToString("dd.MM.yyyy") : "Offen"
+            };
 
         private MenuFlyoutSubItem AnhangAdresse(Adresse a)
         {
