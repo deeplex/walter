@@ -253,8 +253,12 @@
                                                             <Flyout>
                                                                 <StackPanel>
                                                                     <TextBlock Text="{x:Bind AbgelesenText}"/>
-                                                                    <MenuFlyoutSeparator Visibility="{x:Bind HasNotiz}"/>
-                                                                    <TextBlock Width="300" TextWrapping="Wrap" Text="{x:Bind Notiz}"/>
+                                                                    <MenuFlyoutSeparator/>
+                                                                    <TextBox
+                                                                        PlaceholderText="Notiz"
+                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                        Width="300" TextWrapping="Wrap"
+                                                                        Text="{x:Bind Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                                                 </StackPanel>
                                                             </Flyout>
                                                         </Button.Flyout>

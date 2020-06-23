@@ -337,6 +337,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
+        public string Notiz
+        {
+            get => Entity.Notiz;
+            set
+            {
+                Entity.Notiz = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
         public ObservableProperty<bool> IsInEdit;
 
         public WohnungDetailZaehlerStand(Zaehlerstand z, WohnungDetailZaehler p)
@@ -356,9 +366,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         public bool Gerechnet => !Entity.Abgelesen;
-        public bool HasNotiz => Entity.Notiz != null ? Entity.Notiz.Length > 0 : false;
         public string AbgelesenText => "Wert wurde " + (Gerechnet == true ? "errechnet." : "abgelesen.");
-        public string Notiz => Entity.Notiz;
 
         public AsyncRelayCommand AttachFile;
         public RelayCommand SelfDestruct { get; }
