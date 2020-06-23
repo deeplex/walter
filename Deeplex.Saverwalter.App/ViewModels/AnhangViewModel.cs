@@ -13,9 +13,22 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<ImmutableList<AnhangDatei>> Dateien = new ObservableProperty<ImmutableList<AnhangDatei>>();
         public ObservableProperty<string> FilterText = new ObservableProperty<string>();
 
-        public Microsoft.UI.Xaml.Controls.MenuBarItem AnhangKontaktList = new Microsoft.UI.Xaml.Controls.MenuBarItem();
-        public Microsoft.UI.Xaml.Controls.MenuBarItem AnhangVertragList = new Microsoft.UI.Xaml.Controls.MenuBarItem();
-        public Microsoft.UI.Xaml.Controls.MenuBarItem AnhangAdresseList = new Microsoft.UI.Xaml.Controls.MenuBarItem();
+        public Microsoft.UI.Xaml.Controls.MenuBarItem AnhangKontaktList
+            = new Microsoft.UI.Xaml.Controls.MenuBarItem()
+            {
+                Title = "Kontakte",
+            };
+        public Microsoft.UI.Xaml.Controls.MenuBarItem AnhangAdresseList
+            = new Microsoft.UI.Xaml.Controls.MenuBarItem()
+            {
+                Title = "Mietobjekte"
+            };
+        public Microsoft.UI.Xaml.Controls.MenuBarItem AnhangVertragList
+            = new Microsoft.UI.Xaml.Controls.MenuBarItem()
+            {
+                Title = "Verträge",
+            };
+
 
         public AnhangViewModel()
         {
