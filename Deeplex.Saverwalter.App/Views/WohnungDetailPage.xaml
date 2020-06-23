@@ -245,6 +245,22 @@
                                                             Text="Löschen"/>
                                                     </MenuFlyout>
                                                 </RelativePanel.ContextFlyout>
+                                                <StackPanel Orientation="Horizontal" RelativePanel.AlignRightWithPanel="True">
+                                                    <SymbolIcon Visibility="{x:Bind Gerechnet}" Symbol="Calculator"/>
+                                                    <Button Background="Transparent">
+                                                        <SymbolIcon Symbol="More"/>
+                                                        <Button.Flyout>
+                                                            <Flyout>
+                                                                <StackPanel>
+                                                                    <TextBlock Text="{x:Bind AbgelesenText}"/>
+                                                                    <MenuFlyoutSeparator Visibility="{x:Bind HasNotiz}"/>
+                                                                    <TextBlock Width="300" TextWrapping="Wrap" Text="{x:Bind Notiz}"/>
+                                                                </StackPanel>
+                                                            </Flyout>
+                                                        </Button.Flyout>
+                                                    </Button>
+                                                </StackPanel>
+                                                
                                                 <Grid BorderThickness="1">
                                                     <StackPanel Width="275" Margin="10,10,10,10" Orientation="Horizontal">
                                                         <muxc:NumberBox

@@ -355,6 +355,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 await Utils.Files.SaveFilesToWalter(App.Walter.ZaehlerstandAnhaenge, z), _ => true);
         }
 
+        public bool Gerechnet => !Entity.Abgelesen;
+        public bool HasNotiz => Entity.Notiz != null ? Entity.Notiz.Length > 0 : false;
+        public string AbgelesenText => "Wert wurde " + (Gerechnet == true ? "errechnet." : "abgelesen.");
+        public string Notiz => Entity.Notiz;
+
         public AsyncRelayCommand AttachFile;
         public RelayCommand SelfDestruct { get; }
     }
