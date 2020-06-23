@@ -1,140 +1,136 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class AnhangViewModel : BindableBase
     {
         public ObservableProperty<ImmutableList<AnhangDatei>> Dateien = new ObservableProperty<ImmutableList<AnhangDatei>>();
-        public ObservableProperty<string>FilterText = new ObservableProperty<string>();
+        public ObservableProperty<string> FilterText = new ObservableProperty<string>();
 
-        public ObservableProperty<ImmutableList<AnhangKontakt>> AnhangKontaktList = new ObservableProperty<ImmutableList<AnhangKontakt>>();
-        public ObservableProperty<ImmutableList<AnhangVertrag>> AnhangVertragList = new ObservableProperty<ImmutableList<AnhangVertrag>>();
-        public ObservableProperty<ImmutableList<AnhangAdresse>> AnhangAdresseList = new ObservableProperty<ImmutableList<AnhangAdresse>>();
+        public Microsoft.UI.Xaml.Controls.MenuBarItem AnhangKontaktList = new Microsoft.UI.Xaml.Controls.MenuBarItem();
+        public Microsoft.UI.Xaml.Controls.MenuBarItem AnhangVertragList = new Microsoft.UI.Xaml.Controls.MenuBarItem();
+        public Microsoft.UI.Xaml.Controls.MenuBarItem AnhangAdresseList = new Microsoft.UI.Xaml.Controls.MenuBarItem();
 
         public AnhangViewModel()
         {
             Dateien.Value = App.Walter.Anhaenge.Select(a => new AnhangDatei(a)).ToImmutableList();
             FilterText.Value = "Hier könnte ein sinnvoller Filtertext stehen...";
 
-            AnhangKontaktList.Value = App.Walter.JuristischePersonen.ToImmutableList()
-                .Select(j => new AnhangKontakt(j))
-                .Concat(App.Walter.NatuerlichePersonen.Select(n => new AnhangKontakt(n)))
-                .ToImmutableList();
+            App.Walter.JuristischePersonen.ToList().ForEach(j => AnhangKontaktList.Items.Add(AnhangKontakt(j)));
+            App.Walter.NatuerlichePersonen.ToList().ForEach(n => AnhangKontaktList.Items.Add(AnhangKontakt(n)));
 
-            AnhangVertragList.Value = App.Walter.Vertraege
+            App.Walter.Vertraege
                 .Include(v => v.Wohnung)
                 .ThenInclude(w => w.Adresse)
-                .Select(v => new AnhangVertrag(v)).ToImmutableList();
-
-            AnhangAdresseList.Value = App.Walter.Adressen.Select(a => new AnhangAdresse(a)).ToImmutableList();
-        }
-    }
-
-    public sealed class AnhangDatei : BindableBase
-    {
-        public Anhang Entity { get; }
-
-        public AnhangDatei(Anhang a)
-        {
-            Entity = a;
-        }
-
-        public string DateiName => Entity.FileName;
-    }
-    public sealed class AnhangKontakt
-    {
-        public string Bezeichnung { get; }
-        public ObservableProperty<ImmutableList<AnhangVertrag>> Vertraege = new ObservableProperty<ImmutableList<AnhangVertrag>>();
-
-        public AnhangKontakt(IPerson p)
-        {
-            Bezeichnung = p.Bezeichnung;
-
-            var ms = App.Walter.MieterSet.ToList();
-
-            Vertraege.Value = App.Walter.Vertraege
-                .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
                 .ToList()
-                .Where(v => v.Wohnung.BesitzerId == p.PersonId || ms.Exists(m => m.VertragId == v.VertragId && m.PersonId == p.PersonId))
-                .Select(v => new AnhangVertrag(v))
-                .ToImmutableList();
+                .ForEach(v => AnhangVertragList.Items.Add(AnhangVertrag(v)));
+
+            App.Walter.Adressen
+                .Include(a => a.Wohnungen)
+                    .ThenInclude(w => w.Zaehler)
+                    .ThenInclude(z => z.Staende)
+                .Include(a => a.Wohnungen)
+                    .ThenInclude(w => w.Betriebskostenrechnungsgruppen)
+                    .ThenInclude(g => g.Rechnung)
+                .ToList()
+                .ForEach(a => AnhangAdresseList.Items.Add(AnhangAdresse(a)));
         }
-    }
 
-    public sealed class AnhangVertrag
-    {
-        public string Bezeichnung { get; }
+        private MenuFlyoutItem AnhangKontakt(IPerson p)
+            => new MenuFlyoutItem()
+            {
+                Text = p.Bezeichnung
+            };
 
-        public AnhangVertrag(Vertrag v)
+        private MenuFlyoutItem AnhangVertrag(Vertrag v)
         {
             var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
             var cs = bs.Select(b => App.Walter.FindPerson(b.PersonId).Bezeichnung);
             var mieter = string.Join(", ", cs);
 
-            Bezeichnung = mieter + " – " + v.Wohnung.Adresse.Strasse + " " + v.Wohnung.Adresse.Hausnummer + " – " + v.Wohnung.Bezeichnung;
+            return new MenuFlyoutItem()
+            {
+                Text = mieter + " – " + v.Wohnung.Adresse.Strasse + " " + v.Wohnung.Adresse.Hausnummer + " – " + v.Wohnung.Bezeichnung,
+            };
         }
-    }
 
-    public sealed class AnhangAdresse
-    {
-        public string Bezeichnung { get; }
-
-        public ObservableProperty<ImmutableList<AnhangWohnung>> Wohnungen = new ObservableProperty<ImmutableList<AnhangWohnung>>();
-
-        public AnhangAdresse(Adresse a)
+        private MenuFlyoutSubItem AnhangAdresse(Adresse a)
         {
-            Bezeichnung = AdresseViewModel.Anschrift(a);
-            Wohnungen.Value = a.Wohnungen.Select(w => new AnhangWohnung(w)).ToImmutableList();
+            var sub = new MenuFlyoutSubItem()
+            {
+                Text = AdresseViewModel.Anschrift(a),
+            };
+            a.Wohnungen.ToList().ForEach(w => sub.Items.Add(AnhangWohnung(w)));
+
+            return sub;
         }
-    }
 
-    public sealed class AnhangWohnung
-    {
-        public string Bezeichnung { get; }
-        public ObservableProperty<ImmutableList<AnhangZaehler>> Zaehler
-            = new ObservableProperty<ImmutableList<AnhangZaehler>>();
-        public ObservableProperty<ImmutableList<AnhangBetriebskostenRechnung>> BetriebskostenRechnungen
-            = new ObservableProperty<ImmutableList<AnhangBetriebskostenRechnung>>();
-
-        public AnhangWohnung(Wohnung w)
+        private MenuFlyoutSubItem AnhangWohnung(Wohnung w)
         {
-            Bezeichnung = w.Bezeichnung;
-            Zaehler.Value = w.Zaehler.Select(z => new AnhangZaehler(z)).ToImmutableList();
+            var sub = new MenuFlyoutSubItem()
+            {
+                Text = w.Bezeichnung,
+            };
+            var zaehler = new MenuFlyoutSubItem()
+            {
+                Text = "Zähler",
+            };
+            w.Zaehler.ToList().ForEach(z => zaehler.Items.Add(AnhangZaehler(z)));
+
+            var betrRechnungen = new MenuFlyoutSubItem()
+            {
+                Text = "Betriebskostenrechnungen",
+            };
+            // TODO group these by years.
+            w.Betriebskostenrechnungsgruppen.ToList()
+                .ForEach(r => betrRechnungen.Items
+                    .Add(AnhangBetriebskostenRechnung(r.Rechnung)));
+
+            sub.Items.Add(zaehler);
+            sub.Items.Add(betrRechnungen);
+
+            return sub;
         }
-    }
 
-    public sealed class AnhangZaehler
-    {
-        public string Bezeichnung { get; }
-        public ObservableProperty<ImmutableList<AnhangZaehlerstand>> Zaehlerstaende
-            = new ObservableProperty<ImmutableList<AnhangZaehlerstand>>();
-        public AnhangZaehler(Zaehler z)
+        private MenuFlyoutSubItem AnhangZaehler(Zaehler z)
         {
-            Bezeichnung = z.Kennnummer;
-            Zaehlerstaende.Value = z.Staende.Select(zs => new AnhangZaehlerstand(zs)).ToImmutableList();
+            var sub = new MenuFlyoutSubItem()
+            {
+                Text = z.Kennnummer,
+            };
+            z.Staende.ToList().ForEach(zs => sub.Items.Add(AnhangZaehlerstand(zs)));
+
+            return sub;
         }
-    }
 
-    public sealed class AnhangZaehlerstand
-    {
-        public string Bezeichnung { get; }
-        public AnhangZaehlerstand(Zaehlerstand z)
+        private MenuFlyoutItem AnhangZaehlerstand(Zaehlerstand zs)
+            => new MenuFlyoutItem()
+            {
+                Text = zs.Datum.ToString("dd.MM.yyyy"),
+            };
+
+        private MenuFlyoutItem AnhangBetriebskostenRechnung(Betriebskostenrechnung r)
+            => new MenuFlyoutItem()
+            {
+                Text = r.Typ.ToDescriptionString() + " " + r.BetreffendesJahr.ToString(),
+            };
+
+        public sealed class AnhangDatei : BindableBase
         {
-            Bezeichnung = z.Datum.ToString("dd.MM.yyyy");
-        }
-    }
+            public Anhang Entity { get; }
 
-    public sealed class AnhangBetriebskostenRechnung
-    {
-        public string Bezeichnung { get; }
+            public AnhangDatei(Anhang a)
+            {
+                Entity = a;
+            }
 
-        public AnhangBetriebskostenRechnung(Betriebskostenrechnung r)
-        {
-            Bezeichnung = r.Typ.ToDescriptionString() + " " + r.BetreffendesJahr.ToString();
+            public string DateiName => Entity.FileName;
         }
     }
 }

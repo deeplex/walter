@@ -1,9 +1,4 @@
-﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Utils.ObjectModel;
-using System.Collections.Immutable;
-using System.Linq;
-
-namespace Deeplex.Saverwalter.App.ViewModels
+﻿namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class MainViewModel
     {

@@ -1,5 +1,7 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.App.Views;
+using System;
+using System.Collections.Immutable;
 using Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App
@@ -9,6 +11,9 @@ namespace Deeplex.Saverwalter.App
         public MainPage()
         {
             InitializeComponent();
+            ExplorerMenuBar.Items.Add(ViewModel.Anhang.AnhangKontaktList);
+            ExplorerMenuBar.Items.Add(ViewModel.Anhang.AnhangAdresseList);
+            ExplorerMenuBar.Items.Add(ViewModel.Anhang.AnhangVertragList);
         }
 
         public Frame AppFrame => frame;
@@ -20,7 +25,7 @@ namespace Deeplex.Saverwalter.App
         public readonly string WohnungListLabel = "Mietobjekte";
         public readonly string BetriebskostenrechnungenListLabel = "Betr. Rechnung";
 
-        private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+        private void NavView_ItemInvoked(Windows.UI.Xaml.Controls.NavigationView sender, Windows.UI.Xaml.Controls.NavigationViewItemInvokedEventArgs args)
         {
             var label = args.InvokedItem as string;
             var pageType =
@@ -36,7 +41,7 @@ namespace Deeplex.Saverwalter.App
             }
         }
 
-        private void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
+        private void NavView_BackRequested(Windows.UI.Xaml.Controls.NavigationView sender, Windows.UI.Xaml.Controls.NavigationViewBackRequestedEventArgs args)
         {
             if (AppFrame.CanGoBack)
             {
