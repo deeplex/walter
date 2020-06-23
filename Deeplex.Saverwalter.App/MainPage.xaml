@@ -86,6 +86,13 @@
                             </ToggleButton>
                         </RelativePanel>
                         <muxc:MenuBar x:Name="ExplorerMenuBar"/>
+                        <ListView ItemsSource="{x:Bind ViewModel.Anhang.Dateien.Value}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="vm:AnhangDatei">
+                                    <TextBlock Text="{x:Bind DateiName}"/>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
                     </StackPanel>
                 </SplitView.Pane>
             </SplitView>
