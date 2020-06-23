@@ -83,9 +83,58 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public string Bezeichnung { get; }
 
+        public ObservableProperty<ImmutableList<AnhangWohnung>> Wohnungen = new ObservableProperty<ImmutableList<AnhangWohnung>>();
+
         public AnhangAdresse(Adresse a)
         {
             Bezeichnung = AdresseViewModel.Anschrift(a);
+            Wohnungen.Value = a.Wohnungen.Select(w => new AnhangWohnung(w)).ToImmutableList();
+        }
+    }
+
+    public sealed class AnhangWohnung
+    {
+        public string Bezeichnung { get; }
+        public ObservableProperty<ImmutableList<AnhangZaehler>> Zaehler
+            = new ObservableProperty<ImmutableList<AnhangZaehler>>();
+        public ObservableProperty<ImmutableList<AnhangBetriebskostenRechnung>> BetriebskostenRechnungen
+            = new ObservableProperty<ImmutableList<AnhangBetriebskostenRechnung>>();
+
+        public AnhangWohnung(Wohnung w)
+        {
+            Bezeichnung = w.Bezeichnung;
+            Zaehler.Value = w.Zaehler.Select(z => new AnhangZaehler(z)).ToImmutableList();
+        }
+    }
+
+    public sealed class AnhangZaehler
+    {
+        public string Bezeichnung { get; }
+        public ObservableProperty<ImmutableList<AnhangZaehlerstand>> Zaehlerstaende
+            = new ObservableProperty<ImmutableList<AnhangZaehlerstand>>();
+        public AnhangZaehler(Zaehler z)
+        {
+            Bezeichnung = z.Kennnummer;
+            Zaehlerstaende.Value = z.Staende.Select(zs => new AnhangZaehlerstand(zs)).ToImmutableList();
+        }
+    }
+
+    public sealed class AnhangZaehlerstand
+    {
+        public string Bezeichnung { get; }
+        public AnhangZaehlerstand(Zaehlerstand z)
+        {
+            Bezeichnung = z.Datum.ToString("dd.MM.yyyy");
+        }
+    }
+
+    public sealed class AnhangBetriebskostenRechnung
+    {
+        public string Bezeichnung { get; }
+
+        public AnhangBetriebskostenRechnung(Betriebskostenrechnung r)
+        {
+            Bezeichnung = r.Typ.ToDescriptionString() + " " + r.BetreffendesJahr.ToString();
         }
     }
 }
