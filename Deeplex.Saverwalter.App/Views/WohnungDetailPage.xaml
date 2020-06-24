@@ -289,6 +289,12 @@
                                                             DateFormat="{}{day.integer}. {month.full} {year.full}"/>
                                                     </StackPanel>
                                                 </Grid>
+                                                <Button
+                                                    RelativePanel.AlignRightWithPanel="True"
+                                                    RelativePanel.AlignBottomWithPanel="True"
+                                                    Command="{x:Bind AttachFile}" Background="Transparent">
+                                                    <SymbolIcon Symbol="Attach"/>
+                                                </Button>
                                             </RelativePanel>
                                         </DataTemplate>
                                     </mtuuc:AdaptiveGridView.ItemTemplate>
