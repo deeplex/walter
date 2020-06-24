@@ -78,13 +78,21 @@
                                                     <CollectionViewSource x:Name="Wohnungen" IsSourceGrouped="True"/>
                                                     <GridView.ItemTemplate>
                                                         <DataTemplate x:DataType="vm:BetriebskostenRechnungenRechnung">
-                                                            <StackPanel BorderBrush="LightGray" BorderThickness="2" Padding="5">
-                                                                <TextBlock
-                                                                    Margin="5"
-                                                                    FontSize="18">
-                                                                    <Run Text="Betrag:"/>
-                                                                    <Run Text="{x:Bind BetragString}"/>
-                                                                </TextBlock>
+                                                            <StackPanel Width="250" BorderBrush="LightGray" BorderThickness="2" Padding="5">
+                                                                <RelativePanel>
+                                                                    <TextBlock
+                                                                        Margin="5"
+                                                                        FontSize="18">
+                                                                        <Run Text="Betrag:"/>
+                                                                        <Run Text="{x:Bind BetragString}"/>
+                                                                    </TextBlock>
+                                                                    <Button
+                                                                        RelativePanel.AlignRightWithPanel="True"
+                                                                        Background="Transparent"
+                                                                        Command="{x:Bind AttachFile}">
+                                                                        <SymbolIcon Symbol="Attach"/>
+                                                                    </Button>
+                                                                </RelativePanel>
                                                                 <TextBlock
                                                                     Margin="5"
                                                                     FontSize="18">
@@ -92,12 +100,12 @@
                                                                     <Run Text="{x:Bind DatumString}"/>
                                                                 </TextBlock>
                                                                 <ListView
-                                                                    SelectionMode="None"
+                                                                    SelectionMode="Single"
                                                                     ItemsSource="{x:Bind Wohnungen, Mode=OneWay}">
                                                                     <ListView.ItemTemplate>
                                                                         <DataTemplate>
                                                                             <ListViewItem>
-                                                                                <TextBlock Text="{Binding}"/>
+                                                                                <TextBlock TextWrapping="Wrap" Text="{Binding}"/>
                                                                             </ListViewItem>
                                                                         </DataTemplate>
                                                                     </ListView.ItemTemplate>
