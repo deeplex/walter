@@ -1,7 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Windows.UI.Xaml.Controls;
@@ -13,6 +12,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<ImmutableList<AnhangDatei>> Dateien = new ObservableProperty<ImmutableList<AnhangDatei>>();
         public ObservableProperty<string> FilterText = new ObservableProperty<string>();
 
+        // TODO Add icons - People, Street, Library
         public Microsoft.UI.Xaml.Controls.MenuBarItem AnhangKontaktList
             = new Microsoft.UI.Xaml.Controls.MenuBarItem()
             {
@@ -56,10 +56,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         private MenuFlyoutItem AnhangKontakt(IPerson p)
-            => new MenuFlyoutItem()
+        {
+            var person = new MenuFlyoutItem()
             {
-                Text = p.Bezeichnung
+                Text = p.Bezeichnung,
+                Tag = p,
             };
+
+            person.ContextRequested += ApplyFilter;
+            return person;
+        }
 
         private MenuFlyoutSubItem AnhangVertrag(Vertrag v)
         {
@@ -69,12 +75,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             var sub = new MenuFlyoutSubItem()
             {
-                Text = mieter + " – " + v.Wohnung.Adresse.Strasse + " " + v.Wohnung.Adresse.Hausnummer + " – " + v.Wohnung.Bezeichnung,
+                Text = mieter + " – " + v.Wohnung.Adresse.Strasse + " " +
+                    v.Wohnung.Adresse.Hausnummer + " – " + v.Wohnung.Bezeichnung,
+                Tag = v,
             };
 
             var mieten = new MenuFlyoutSubItem()
             {
                 Text = "Mieten",
+                // TODO Filter for all Mieten
             };
             App.Walter.Mieten
                 .Where(m => m.VertragId == v.VertragId)
@@ -84,6 +93,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             var mietminderungen = new MenuFlyoutSubItem()
             {
                 Text = "Mietminderungen",
+                // TODO Filter for all Mietminderungen
             };
             App.Walter.MietMinderungen
                 .Where(m => m.VertragId == v.VertragId)
@@ -93,30 +103,43 @@ namespace Deeplex.Saverwalter.App.ViewModels
             sub.Items.Add(mieten);
             sub.Items.Add(mietminderungen);
 
+            sub.ContextRequested += ApplyFilter;
             return sub;
         }
 
         private MenuFlyoutItem AnhangMiete(Miete m)
-            => new MenuFlyoutItem()
+        {
+            var miete = new MenuFlyoutItem()
             {
                 Text = m.BetreffenderMonat.ToString(),
+                Tag = m,
             };
+            miete.ContextRequested += ApplyFilter;
+            return miete;
+        }
 
         private MenuFlyoutItem AnhangMietMinderung(MietMinderung m)
-            => new MenuFlyoutItem()
+        {
+            var mietminderung = new MenuFlyoutItem()
             {
                 Text = m.Beginn.ToString("dd.MM.yyyy") + " – " +
-                    m.Ende != null ? m.Ende.Value.ToString("dd.MM.yyyy") : "Offen"
+                    m.Ende != null ? m.Ende.Value.ToString("dd.MM.yyyy") : "Offen",
+                Tag = m,
             };
+            mietminderung.ContextRequested += ApplyFilter;
+            return mietminderung;
+        }
 
         private MenuFlyoutSubItem AnhangAdresse(Adresse a)
         {
             var sub = new MenuFlyoutSubItem()
             {
                 Text = AdresseViewModel.Anschrift(a),
+                Tag = a,
             };
             a.Wohnungen.ToList().ForEach(w => sub.Items.Add(AnhangWohnung(w)));
 
+            sub.ContextRequested += ApplyFilter;
             return sub;
         }
 
@@ -129,12 +152,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             var zaehler = new MenuFlyoutSubItem()
             {
                 Text = "Zähler",
+                // TODO filter for all zähler
             };
             w.Zaehler.ToList().ForEach(z => zaehler.Items.Add(AnhangZaehler(z)));
 
             var betrRechnungen = new MenuFlyoutSubItem()
             {
                 Text = "Betriebskostenrechnungen",
+                // TODO filter for all betriebskostenrechnungen
             };
             // TODO group these by years.
             w.Betriebskostenrechnungsgruppen.ToList()
@@ -144,6 +169,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             sub.Items.Add(zaehler);
             sub.Items.Add(betrRechnungen);
 
+            sub.ContextRequested += ApplyFilter;
             return sub;
         }
 
@@ -152,34 +178,78 @@ namespace Deeplex.Saverwalter.App.ViewModels
             var sub = new MenuFlyoutSubItem()
             {
                 Text = z.Kennnummer,
+                Tag = z,
             };
             z.Staende.ToList().ForEach(zs => sub.Items.Add(AnhangZaehlerstand(zs)));
 
+            sub.ContextRequested += ApplyFilter;
             return sub;
         }
 
         private MenuFlyoutItem AnhangZaehlerstand(Zaehlerstand zs)
-            => new MenuFlyoutItem()
+        {
+            var m = new MenuFlyoutItem()
             {
                 Text = zs.Datum.ToString("dd.MM.yyyy"),
+                Tag = zs,
             };
+
+            m.ContextRequested += ApplyFilter;
+            return m;
+        }
 
         private MenuFlyoutItem AnhangBetriebskostenRechnung(Betriebskostenrechnung r)
-            => new MenuFlyoutItem()
+        {
+            var rechnung = new MenuFlyoutItem()
             {
                 Text = r.Typ.ToDescriptionString() + " " + r.BetreffendesJahr.ToString(),
+                Tag = r,
             };
 
-        public sealed class AnhangDatei : BindableBase
-        {
-            public Anhang Entity { get; }
+            rechnung.ContextRequested += ApplyFilter;
+            return rechnung;
+        }
 
-            public AnhangDatei(Anhang a)
+        private void ApplyFilter(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            ImmutableList<AnhangDatei> GetFilteredList<T>(T u)
             {
-                Entity = a;
+                ImmutableList<AnhangDatei> r<U>(IQueryable<IAnhang<U>> l, U target)
+                    => l.Where(member => member.Target.Equals(target))
+                        .Select(member => new AnhangDatei(member.Anhang))
+                        .ToImmutableList();
+
+                switch (u)
+                {
+                    case Adresse v: return r(App.Walter.AdresseAnhaenge, v);
+                    case Betriebskostenrechnung v: return r(App.Walter.BetriebskostenrechnungAnhaenge, v);
+                    case Garage v: return r(App.Walter.GarageAnhaenge, v);
+                    case JuristischePerson v: return r(App.Walter.JuristischePersonAnhaenge, v);
+                    case Konto v: return r(App.Walter.KontoAnhaenge, v);
+                    case Miete v: return r(App.Walter.MieteAnhaenge, v);
+                    case MietMinderung v: return r(App.Walter.MietMinderungAnhaenge, v);
+                    case NatuerlichePerson v: return r(App.Walter.NatuerlichePersonAnhaenge, v);
+                    case Vertrag v: return r(App.Walter.VertragAnhaenge, v.VertragId);
+                    case Wohnung v: return r(App.Walter.WohnungAnhaenge, v);
+                    case Zaehler v: return r(App.Walter.ZaehlerAnhaenge, v);
+                    case Zaehlerstand v: return r(App.Walter.ZaehlerstandAnhaenge, v);
+                    default: return App.Walter.Anhaenge.Select(a => new AnhangDatei(a)).ToImmutableList();
+                };
             }
 
-            public string DateiName => Entity.FileName;
+            var cp = (sender is MenuFlyoutItem s ? s : null)?.Tag ?? (sender as MenuFlyoutSubItem).Tag;
+            Dateien.Value = GetFilteredList(cp);
         }
+    }
+
+    public sealed class AnhangDatei : BindableBase
+    {
+        public Anhang Entity { get; }
+
+        public AnhangDatei(Anhang a)
+        {
+            Entity = a;
+        }
+        public string DateiName => Entity.FileName;
     }
 }

@@ -86,7 +86,7 @@
                             </ToggleButton>
                         </RelativePanel>
                         <muxc:MenuBar x:Name="ExplorerMenuBar"/>
-                        <ListView ItemsSource="{x:Bind ViewModel.Anhang.Dateien.Value}">
+                        <ListView ItemsSource="{x:Bind ViewModel.Anhang.Dateien.Value, Mode=OneWay}">
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="vm:AnhangDatei">
                                     <TextBlock Text="{x:Bind DateiName}"/>
