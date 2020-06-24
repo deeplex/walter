@@ -58,6 +58,11 @@
                         <DataTemplate x:DataType="vm:VertragListVertrag">
                             <RelativePanel
                                 Background="{ThemeResource SystemChromeLowColor}">
+                                <Button
+                                    RelativePanel.AlignRightWithPanel="True"
+                                    Command="{x:Bind AttachFile}" Background="Transparent">
+                                    <SymbolIcon Symbol="Attach"/>
+                                </Button>
                                 <Grid
                                     Width="400"
                                     BorderThickness="1">
