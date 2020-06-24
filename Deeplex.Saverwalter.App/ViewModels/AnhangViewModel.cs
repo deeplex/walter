@@ -1,9 +1,13 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using DocumentFormat.OpenXml.Bibliography;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using System.Linq;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -28,6 +32,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 Title = "Verträge",
             };
+
+        public Microsoft.Toolkit.Uwp.UI.Controls.WrapPanel BreadCrumbs { get; set; }
 
         public AnhangViewModel()
         {
@@ -54,17 +60,32 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ForEach(a => AnhangAdresseList.Items.Add(AnhangAdresse(a)));
         }
 
-        private MenuFlyoutItem AnhangKontakt(IPerson p)
+        private MenuFlyoutItem MakeItem(string text, object o)
         {
-            var person = new MenuFlyoutItem()
+            var item = new MenuFlyoutItem()
             {
-                Text = p.Bezeichnung,
-                Tag = p,
+                Text = text,
+                Tag = o,
             };
 
-            person.ContextRequested += ApplyFilter;
-            return person;
+            item.ContextRequested += ContextRequestedFilter;
+            return item;
         }
+
+        private MenuFlyoutSubItem MakeSubItem(string text, object o)
+        {
+            var item = new MenuFlyoutSubItem()
+            {
+                Text = text,
+                Tag = o,
+            };
+
+            item.ContextRequested += ContextRequestedFilter;
+            return item;
+        }
+
+        private MenuFlyoutItem AnhangKontakt(IPerson p)
+            => MakeItem(p.Bezeichnung, p);
 
         private MenuFlyoutSubItem AnhangVertrag(Vertrag v)
         {
@@ -72,28 +93,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
             var cs = bs.Select(b => App.Walter.FindPerson(b.PersonId).Bezeichnung);
             var mieter = string.Join(", ", cs);
 
-            var sub = new MenuFlyoutSubItem()
-            {
-                Text = mieter + " – " + v.Wohnung.Adresse.Strasse + " " +
-                    v.Wohnung.Adresse.Hausnummer + " – " + v.Wohnung.Bezeichnung,
-                Tag = v,
-            };
+            var sub = MakeSubItem(mieter + " – " + v.Wohnung.Adresse.Strasse + " " +
+                    v.Wohnung.Adresse.Hausnummer + " – " + v.Wohnung.Bezeichnung, v);
 
-            var mieten = new MenuFlyoutSubItem()
-            {
-                Text = "Mieten",
-                // TODO Filter for all Mieten
-            };
+            var mieten = MakeSubItem("Mieten", null);
+
             App.Walter.Mieten
                 .Where(m => m.VertragId == v.VertragId)
                 .ToList()
                 .ForEach(m => mieten.Items.Add(AnhangMiete(m)));
 
-            var mietminderungen = new MenuFlyoutSubItem()
-            {
-                Text = "Mietminderungen",
-                // TODO Filter for all Mietminderungen
-            };
+            var mietminderungen = MakeSubItem("Mietminderung", null);
             App.Walter.MietMinderungen
                 .Where(m => m.VertragId == v.VertragId)
                 .ToList()
@@ -102,66 +112,30 @@ namespace Deeplex.Saverwalter.App.ViewModels
             sub.Items.Add(mieten);
             sub.Items.Add(mietminderungen);
 
-            sub.ContextRequested += ApplyFilter;
             return sub;
         }
 
         private MenuFlyoutItem AnhangMiete(Miete m)
-        {
-            var miete = new MenuFlyoutItem()
-            {
-                Text = m.BetreffenderMonat.ToString(),
-                Tag = m,
-            };
-            miete.ContextRequested += ApplyFilter;
-            return miete;
-        }
+            => MakeItem(m.BetreffenderMonat.ToString(), m);
 
         private MenuFlyoutItem AnhangMietMinderung(MietMinderung m)
-        {
-            var mietminderung = new MenuFlyoutItem()
-            {
-                Text = m.Beginn.ToString("dd.MM.yyyy") + " – " +
-                    m.Ende != null ? m.Ende.Value.ToString("dd.MM.yyyy") : "Offen",
-                Tag = m,
-            };
-            mietminderung.ContextRequested += ApplyFilter;
-            return mietminderung;
-        }
+            => MakeItem(m.Beginn.ToString("dd.MM.yyyy") + " – " +
+                    m.Ende != null ? m.Ende.Value.ToString("dd.MM.yyyy") : "Offen", m);
 
         private MenuFlyoutSubItem AnhangAdresse(Adresse a)
         {
-            var sub = new MenuFlyoutSubItem()
-            {
-                Text = AdresseViewModel.Anschrift(a),
-                Tag = a,
-            };
+            var sub = MakeSubItem(AdresseViewModel.Anschrift(a), a);
             a.Wohnungen.ToList().ForEach(w => sub.Items.Add(AnhangWohnung(w)));
-
-            sub.ContextRequested += ApplyFilter;
             return sub;
         }
 
         private MenuFlyoutSubItem AnhangWohnung(Wohnung w)
         {
-            var sub = new MenuFlyoutSubItem()
-            {
-                Text = w.Bezeichnung,
-                Tag = w,
-            };
-            var zaehler = new MenuFlyoutSubItem()
-            {
-                Text = "Zähler",
-                // TODO filter for all zähler
-            };
+            var sub = MakeSubItem(w.Bezeichnung, w);
+            var zaehler = MakeSubItem("Zähler", null);
             w.Zaehler.ToList().ForEach(z => zaehler.Items.Add(AnhangZaehler(z)));
 
-            var betrRechnungen = new MenuFlyoutSubItem()
-            {
-                Text = "Betriebskostenrechnungen",
-                // TODO filter for all betriebskostenrechnungen
-            };
-            // TODO group these by years.
+            var betrRechnungen = MakeSubItem("Betriebskostenrechnungen", null);
             w.Betriebskostenrechnungsgruppen.ToList()
                 .ForEach(r => betrRechnungen.Items
                     .Add(AnhangBetriebskostenRechnung(r.Rechnung)));
@@ -169,48 +143,27 @@ namespace Deeplex.Saverwalter.App.ViewModels
             sub.Items.Add(zaehler);
             sub.Items.Add(betrRechnungen);
 
-            sub.ContextRequested += ApplyFilter;
             return sub;
         }
 
         private MenuFlyoutSubItem AnhangZaehler(Zaehler z)
         {
-            var sub = new MenuFlyoutSubItem()
-            {
-                Text = z.Kennnummer,
-                Tag = z,
-            };
+            var sub = MakeSubItem(z.Kennnummer, z);
             z.Staende.ToList().ForEach(zs => sub.Items.Add(AnhangZaehlerstand(zs)));
 
-            sub.ContextRequested += ApplyFilter;
             return sub;
         }
 
         private MenuFlyoutItem AnhangZaehlerstand(Zaehlerstand zs)
-        {
-            var m = new MenuFlyoutItem()
-            {
-                Text = zs.Datum.ToString("dd.MM.yyyy"),
-                Tag = zs,
-            };
-
-            m.ContextRequested += ApplyFilter;
-            return m;
-        }
+            => MakeItem(zs.Datum.ToString("dd.MM.yyyy"), zs);
 
         private MenuFlyoutItem AnhangBetriebskostenRechnung(Betriebskostenrechnung r)
-        {
-            var rechnung = new MenuFlyoutItem()
-            {
-                Text = r.Typ.ToDescriptionString() + " " + r.BetreffendesJahr.ToString(),
-                Tag = r,
-            };
+            => MakeItem(r.Typ.ToDescriptionString() + " " + r.BetreffendesJahr.ToString(), r);
 
-            rechnung.ContextRequested += ApplyFilter;
-            return rechnung;
-        }
+        private void ContextRequestedFilter(object sender, ContextRequestedEventArgs e)
+            => ApplyFilter(sender);
 
-        private void ApplyFilter(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private void ApplyFilter(object sender)
         {
             ImmutableList<AnhangDatei> GetFilteredList<T>(T u)
             {
