@@ -379,8 +379,45 @@
                     RelativePanel.AlignLeftWithPanel="True">
                     <mtuuc:Expander
                         Background="Transparent"
-                        Header="Mietminderungen"
                         HorizontalContentAlignment="Left">
+                        <mtuuc:Expander.Header>
+                            <mtuuc:WrapPanel>
+                                <TextBlock Margin="0,7,0,0" Text="Mietminderungen"/>
+                                <Button Background="Transparent" Margin="10,0,0,0">
+                                    <Button.Content>
+                                        <SymbolIcon Symbol="Add"/>
+                                    </Button.Content>
+                                    <Button.Flyout>
+                                        <Flyout>
+                                            <StackPanel Orientation="Horizontal">
+                                                <CalendarDatePicker
+                                                Header="Beginn"
+                                                Language="de"
+                                                DateFormat="{}{day.integer}. {month.full} {year.full}"
+                                                PlaceholderText="Beginn"
+                                                Date="{x:Bind ViewModel.AddMietMinderungValue.Value.Beginn, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                <CalendarDatePicker
+                                                Header="Ende"
+                                                Language="de"
+                                                DateFormat="{}{day.integer}. {month.full} {year.full}"
+                                                PlaceholderText="Beginn"
+                                                Date="{x:Bind ViewModel.AddMietMinderungValue.Value.Ende, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                <muxc:NumberBox
+                                                Header="Minderung"
+                                                Value="{x:Bind ViewModel.AddMietMinderungValue.Value.Minderung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                PlaceholderText="0.1"/>
+                                                <Button
+                                                VerticalAlignment="Bottom"
+                                                Command="{x:Bind ViewModel.AddMietMinderung}"
+                                                Background="Transparent">
+                                                    <SymbolIcon Symbol="Add"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </mtuuc:WrapPanel>
+                        </mtuuc:Expander.Header>
                         <StackPanel>
                             <mtuuc:DataGrid
                                 IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
@@ -447,38 +484,6 @@
                                     </mtuuc:DataGridTemplateColumn>
                                 </mtuuc:DataGrid.Columns>
                             </mtuuc:DataGrid>
-                            <Button
-                                Margin="20,20,0,20"
-                                Content="Eintrag hinzufügen">
-                                <Button.Flyout>
-                                    <Flyout>
-                                        <StackPanel Orientation="Horizontal">
-                                            <CalendarDatePicker
-                                                Header="Datum"
-                                                Language="de"
-                                                DateFormat="{}{day.integer}. {month.full} {year.full}"
-                                                PlaceholderText="Beginn"
-                                                Date="{x:Bind ViewModel.AddMietMinderungValue.Value.Beginn, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                            <CalendarDatePicker
-                                                Header="Datum"
-                                                Language="de"
-                                                DateFormat="{}{day.integer}. {month.full} {year.full}"
-                                                PlaceholderText="Beginn"
-                                                Date="{x:Bind ViewModel.AddMietMinderungValue.Value.Ende, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                            <muxc:NumberBox
-                                                Header="Minderung"
-                                                Value="{x:Bind ViewModel.AddMietMinderungValue.Value.Minderung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                PlaceholderText="0.1"/>
-                                            <Button
-                                                VerticalAlignment="Bottom"
-                                                Command="{x:Bind ViewModel.AddMietMinderung}"
-                                                Background="Transparent">
-                                                <SymbolIcon Symbol="Add"/>
-                                            </Button>
-                                        </StackPanel>
-                                    </Flyout>
-                                </Button.Flyout>
-                            </Button>
                         </StackPanel>
                     </mtuuc:Expander>
                 </StackPanel>
