@@ -81,7 +81,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Hausnummer.Value = Adresse.Hausnummer;
             Strasse.Value = Adresse.Strasse;
             Stadt.Value = Adresse.Stadt;
+
+            AttachFile = new AsyncRelayCommand(async _ =>
+                await Utils.Files.SaveFilesToWalter(App.Walter.AdresseAnhaenge, Adresse), _ => true);
         }
+
+        public AsyncRelayCommand AttachFile { get; }
     }
 
     public sealed class WohnungListWohnung
