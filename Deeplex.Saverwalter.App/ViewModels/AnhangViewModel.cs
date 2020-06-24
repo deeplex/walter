@@ -29,7 +29,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Title = "Verträge",
             };
 
-
         public AnhangViewModel()
         {
             Dateien.Value = App.Walter.Anhaenge.Select(a => new AnhangDatei(a)).ToImmutableList();
@@ -148,6 +147,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             var sub = new MenuFlyoutSubItem()
             {
                 Text = w.Bezeichnung,
+                Tag = w,
             };
             var zaehler = new MenuFlyoutSubItem()
             {
@@ -215,9 +215,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
             ImmutableList<AnhangDatei> GetFilteredList<T>(T u)
             {
                 ImmutableList<AnhangDatei> r<U>(IQueryable<IAnhang<U>> l, U target)
-                    => l.Where(member => member.Target.Equals(target))
-                        .Select(member => new AnhangDatei(member.Anhang))
-                        .ToImmutableList();
+                {
+                    var w = l.ToList().Where(member => member.Target.Equals(target));
+                    return w.Any() ?
+                        w.Select(member => new AnhangDatei(member.Anhang)).ToImmutableList() :
+                        ImmutableList<AnhangDatei>.Empty;
+                }
 
                 switch (u)
                 {
