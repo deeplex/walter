@@ -60,8 +60,8 @@
         </CommandBar>
 
             <muxc:ItemsRepeater
-            Layout="{StaticResource VerticalStackLayout}"
-            ItemsSource="{x:Bind ViewModel.Gruppen.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                Layout="{StaticResource VerticalStackLayout}"
+                ItemsSource="{x:Bind ViewModel.Gruppen.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                 <DataTemplate>
                     <Grid>
                         <mtuuc:Expander Header="{Binding Key.Bezeichnung}">
@@ -77,25 +77,25 @@
                                             <GridView Margin="0,10,0,0" ItemsSource="{Binding Value, Mode=OneWay}">
                                                 <CollectionViewSource x:Name="Wohnungen" IsSourceGrouped="True"/>
                                                 <GridView.ItemTemplate>
-                                                    <DataTemplate>
+                                                    <DataTemplate x:DataType="vm:BetriebskostenRechnungenRechnung">
                                                         <StackPanel BorderBrush="LightGray" BorderThickness="2" Padding="5">
                                                             <TextBlock
-                                                        Margin="5"
-                                                        FontSize="18">
-                                                        <Run Text="Betrag:"/>
-                                                        <Run Text="{Binding BetragString}"/>
+                                                                Margin="5"
+                                                                FontSize="18">
+                                                                <Run Text="Betrag:"/>
+                                                                <Run Text="{x:Bind BetragString}"/>
                                                             </TextBlock>
                                                             <TextBlock
                                                         Margin="5"
                                                         FontSize="18">
                                                         <Run Text="Datum:"/>
-                                                        <Run Text="{Binding DatumString}"/>
+                                                        <Run Text="{x:Bind DatumString}"/>
                                                             </TextBlock>
                                                             <TextBlock
                                                             Margin="5"
                                                             FontSize="18"
-                                                            Text="{Binding Typ}"/>
-                                                            <Button CommandParameter="{Binding}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{Binding hasNoEntity}">
+                                                            Text="{x:Bind Typ}"/>
+                                                            <Button CommandParameter="{x:Bind}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{x:Bind hasNoEntity}">
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <TextBlock Text="Speichern"/>
                                                                     <SymbolIcon Margin="10,0,0,0" Symbol="Accept"/>

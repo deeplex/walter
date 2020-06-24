@@ -77,42 +77,50 @@
                                                 <GridView Margin="0,10,0,0" ItemsSource="{Binding Value, Mode=OneWay}">
                                                     <CollectionViewSource x:Name="Wohnungen" IsSourceGrouped="True"/>
                                                     <GridView.ItemTemplate>
-                                                        <DataTemplate>
+                                                        <DataTemplate x:DataType="vm:BetriebskostenRechnungenRechnung">
                                                             <StackPanel BorderBrush="LightGray" BorderThickness="2" Padding="5">
                                                                 <TextBlock
-                                                                Margin="5"
-                                                                FontSize="18">
-                                                            <Run Text="Betrag:"/>
-                                                            <Run Text="{Binding BetragString}"/>
+                                                                    Margin="5"
+                                                                    FontSize="18">
+                                                                    <Run Text="Betrag:"/>
+                                                                    <Run Text="{x:Bind BetragString}"/>
                                                                 </TextBlock>
                                                                 <TextBlock
-                                                                Margin="5"
-                                                                FontSize="18">
-                                                            <Run Text="Datum:"/>
-                                                            <Run Text="{Binding DatumString}"/>
+                                                                    Margin="5"
+                                                                    FontSize="18">
+                                                                    <Run Text="Datum:"/>
+                                                                    <Run Text="{x:Bind DatumString}"/>
                                                                 </TextBlock>
-                                                                <mtuuc:Expander>
+                                                                <ListView
+                                                                    SelectionMode="None"
+                                                                    ItemsSource="{x:Bind Wohnungen, Mode=OneWay}">
+                                                                    <ListView.ItemTemplate>
+                                                                        <DataTemplate>
+                                                                            <ListViewItem>
+                                                                                <TextBlock Text="{Binding}"/>
+                                                                            </ListViewItem>
+                                                                        </DataTemplate>
+                                                                    </ListView.ItemTemplate>
+                                                                </ListView>
+                                                                <!--<mtuuc:Expander>
                                                                     <mtuuc:Expander.Header>
                                                                         <TextBlock>
                                                                     <Run Text="Wohnungen ("/>
-                                                                    <Run Text="{Binding Wohnungen.Count}"/>
+                                                                    <Run Text="{x:Bind Wohnungen.Count}"/>
                                                                     <Run Text=")"/>
                                                                         </TextBlock>
                                                                     </mtuuc:Expander.Header>
                                                                     <ListView
-                                                                SelectionMode="None"
-                                                                CanDragItems="True" CanReorderItems="True" 
-                                                                AllowDrop="True"
-                                                                ItemsSource="{Binding Wohnungen, Mode=OneWay}">
-                                                                        <ListView.ItemsPanel>
-                                                                            <ItemsPanelTemplate>
-                                                                                <ItemsStackPanel AreStickyGroupHeadersEnabled="True">
-                                                                                </ItemsStackPanel>
-                                                                            </ItemsPanelTemplate>
-                                                                        </ListView.ItemsPanel>
+                                                                        SelectionMode="None"
+                                                                        ItemsSource="{x:Bind Wohnungen, Mode=OneWay}">
+                                                                        <ListView.ItemTemplate>
+                                                                            <DataTemplate>
+                                                                                <TextBlock Text="Test"/>
+                                                                            </DataTemplate>
+                                                                        </ListView.ItemTemplate>
                                                                     </ListView>
-                                                                </mtuuc:Expander>
-                                                                <Button CommandParameter="{Binding}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{Binding hasNoEntity}">
+                                                                </mtuuc:Expander>-->
+                                                                <Button CommandParameter="{x:Bind}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{x:Bind hasNoEntity}">
                                                                     <StackPanel Orientation="Horizontal">
                                                                         <TextBlock Text="Speichern"/>
                                                                         <SymbolIcon Margin="10,0,0,0" Symbol="Accept"/>
