@@ -53,6 +53,7 @@
                     RelativePanel.AlignRightWithPanel="True"
                     HorizontalAlignment="Stretch"
                     DefaultLabelPosition="Right">
+                    <AppBarButton Command="{x:Bind ViewModel.AttachFile}" Icon="Attach"/>
                     <CommandBar.SecondaryCommands>
                         <AppBarToggleButton
                             Icon="Edit"
