@@ -1,13 +1,11 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
-using DocumentFormat.OpenXml.Bibliography;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -62,25 +60,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private MenuFlyoutItem MakeItem(string text, object o)
         {
-            var item = new MenuFlyoutItem()
-            {
-                Text = text,
-                Tag = o,
-            };
+            void ClickFilter(object sender, RoutedEventArgs e) => ApplyFilter(sender);
 
-            item.ContextRequested += ContextRequestedFilter;
+            var item = new MenuFlyoutItem() { Text = text, Tag = o };
+            item.Click += ClickFilter;
             return item;
         }
 
         private MenuFlyoutSubItem MakeSubItem(string text, object o)
         {
-            var item = new MenuFlyoutSubItem()
-            {
-                Text = text,
-                Tag = o,
-            };
-
-            item.ContextRequested += ContextRequestedFilter;
+            void TappedFilter(object sender, TappedRoutedEventArgs e) => ApplyFilter(sender);
+            
+            var item = new MenuFlyoutSubItem() { Text = text, Tag = o };
+            item.Tapped += TappedFilter;
             return item;
         }
 
@@ -159,9 +151,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private MenuFlyoutItem AnhangBetriebskostenRechnung(Betriebskostenrechnung r)
             => MakeItem(r.Typ.ToDescriptionString() + " " + r.BetreffendesJahr.ToString(), r);
-
-        private void ContextRequestedFilter(object sender, ContextRequestedEventArgs e)
-            => ApplyFilter(sender);
 
         private void ApplyFilter(object sender)
         {
