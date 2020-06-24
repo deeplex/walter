@@ -86,6 +86,8 @@
                             </ToggleButton>
                         </RelativePanel>
                         <muxc:MenuBar x:Name="ExplorerMenuBar"/>
+                        <mtuuc:WrapPanel x:Name="ExplorerBreadCrumbs"/>
+                        <MenuFlyoutSeparator/>
                         <ListView ItemsSource="{x:Bind ViewModel.Anhang.Dateien.Value, Mode=OneWay}">
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="vm:AnhangDatei">

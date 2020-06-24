@@ -14,6 +14,7 @@ namespace Deeplex.Saverwalter.App
             ExplorerMenuBar.Items.Add(ViewModel.Anhang.AnhangKontaktList);
             ExplorerMenuBar.Items.Add(ViewModel.Anhang.AnhangAdresseList);
             ExplorerMenuBar.Items.Add(ViewModel.Anhang.AnhangVertragList);
+            ViewModel.Anhang.BreadCrumbs = ExplorerBreadCrumbs;
         }
 
         public Frame AppFrame => frame;

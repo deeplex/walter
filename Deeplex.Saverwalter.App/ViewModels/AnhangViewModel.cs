@@ -82,11 +82,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private MenuFlyoutSubItem AnhangVertrag(Vertrag v)
         {
             var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
-            var cs = bs.Select(b => App.Walter.FindPerson(b.PersonId).Bezeichnung);
+            var cs = bs.Select(b => App.Walter.FindPerson(b.PersonId))
+                .Select(p => p is NatuerlichePerson  n ? n.Nachname : p.Bezeichnung);
             var mieter = string.Join(", ", cs);
 
             var sub = MakeSubItem(mieter + " – " + v.Wohnung.Adresse.Strasse + " " +
-                    v.Wohnung.Adresse.Hausnummer + " – " + v.Wohnung.Bezeichnung, v);
+                    v.Wohnung.Adresse.Hausnummer, v);
 
             var mieten = MakeSubItem("Mieten", null);
 
@@ -108,7 +109,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         private MenuFlyoutItem AnhangMiete(Miete m)
-            => MakeItem(m.BetreffenderMonat.ToString(), m);
+            => MakeItem(m.BetreffenderMonat.ToString("MMM yyyy"), m);
 
         private MenuFlyoutItem AnhangMietMinderung(MietMinderung m)
             => MakeItem(m.Beginn.ToString("dd.MM.yyyy") + " – " +
@@ -157,8 +158,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
             ImmutableList<AnhangDatei> GetFilteredList<T>(T u)
             {
                 ImmutableList<AnhangDatei> r<U>(IQueryable<IAnhang<U>> l, U target)
-                    => l.ToList().Where(member => member.Target.Equals(target))
+                {
+                    var text = (sender is MenuFlyoutItem t ? t : null)?.Text ?? (sender as MenuFlyoutSubItem).Text;
+
+                    BreadCrumbs.Children.Clear();
+                    BreadCrumbs.Children.Add(new Button { Content = text });
+
+                    return l.ToList().Where(member => member.Target.Equals(target))
                         .Select(member => new AnhangDatei(member.Anhang)).ToImmutableList();
+                }
 
                 switch (u)
                 {
