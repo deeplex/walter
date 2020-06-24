@@ -264,8 +264,48 @@
                     RelativePanel.AlignLeftWithPanel="True">
                     <mtuuc:Expander
                         Background="Transparent"
-                        Header="Mieten"
                         HorizontalContentAlignment="Left">
+                        <mtuuc:Expander.Header>
+                            <mtuuc:WrapPanel>
+                                <TextBlock Margin="0,7,0,0" Text="Mieten"/>
+                                <Button Background="Transparent" Margin="10,0,0,0">
+                                    <Button.Content>
+                                        <SymbolIcon Symbol="Add"/>
+                                    </Button.Content>
+                                    <Button.Flyout>
+                                        <Flyout>
+                                            <StackPanel Orientation="Horizontal">
+                                                <CalendarDatePicker
+                                                Header="Datum"
+                                                Language="de"
+                                                DateFormat="{}{day.integer}. {month.full} {year.full}"
+                                                PlaceholderText="Datum hinzufügen"
+                                                Date="{x:Bind ViewModel.AddMieteValue.Value.Zahlungsdatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                <DatePicker
+                                                Date="{x:Bind ViewModel.AddMieteValue.Value.BetreffenderMonat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Language="de" Width="175" Header="Betr. Monat" DayVisible="False"/>
+                                                <muxc:NumberBox
+                                                Header="Betrag"
+                                                Value="{x:Bind ViewModel.AddMieteValue.Value.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                PlaceholderText="0,00"/>
+                                                <Button
+                                                VerticalAlignment="Bottom"
+                                                IsEnabled="False"
+                                                Background="Transparent">
+                                                    <SymbolIcon Symbol="Attach"/>
+                                                </Button>
+                                                <Button
+                                                VerticalAlignment="Bottom"
+                                                Command="{x:Bind ViewModel.AddMiete}"
+                                                Background="Transparent">
+                                                    <SymbolIcon Symbol="Add"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </mtuuc:WrapPanel>
+                        </mtuuc:Expander.Header>
                         <StackPanel>
                             <mtuuc:DataGrid
                                 IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
@@ -329,41 +369,6 @@
                                     </mtuuc:DataGridTemplateColumn>
                                 </mtuuc:DataGrid.Columns>
                             </mtuuc:DataGrid>
-                            <Button
-                                Margin="20,20,0,20"
-                                Content="Eintrag hinzufügen">
-                                <Button.Flyout>
-                                    <Flyout>
-                                        <StackPanel Orientation="Horizontal">
-                                            <CalendarDatePicker
-                                                Header="Datum"
-                                                Language="de"
-                                                DateFormat="{}{day.integer}. {month.full} {year.full}"
-                                                PlaceholderText="Datum hinzufügen"
-                                                Date="{x:Bind ViewModel.AddMieteValue.Value.Zahlungsdatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                            <DatePicker
-                                                Date="{x:Bind ViewModel.AddMieteValue.Value.BetreffenderMonat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                Language="de" Width="175" Header="Betr. Monat" DayVisible="False"/>
-                                            <muxc:NumberBox
-                                                Header="Betrag"
-                                                Value="{x:Bind ViewModel.AddMieteValue.Value.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                PlaceholderText="0,00"/>
-                                            <Button
-                                                VerticalAlignment="Bottom"
-                                                IsEnabled="False"
-                                                Background="Transparent">
-                                                <SymbolIcon Symbol="Attach"/>
-                                            </Button>
-                                            <Button
-                                                VerticalAlignment="Bottom"
-                                                Command="{x:Bind ViewModel.AddMiete}"
-                                                Background="Transparent">
-                                                <SymbolIcon Symbol="Add"/>
-                                            </Button>
-                                        </StackPanel>
-                                    </Flyout>
-                                </Button.Flyout>
-                            </Button>
                         </StackPanel>
                     </mtuuc:Expander>
                 </StackPanel>
