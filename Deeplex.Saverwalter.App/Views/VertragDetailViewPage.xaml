@@ -73,11 +73,6 @@
                     HorizontalAlignment="Stretch"
                     DefaultLabelPosition="Right">
                     <AppBarButton
-                        Icon="Upload"
-                        Command="{x:Bind ViewModel.AttachFile}"
-                        Label="Datei importieren">
-                    </AppBarButton>
-                    <AppBarButton
                         Icon="PostUpdate"
                         Label="Betriebskostenabrechnung">
                         <AppBarButton.Flyout>
@@ -96,6 +91,10 @@
                                 </StackPanel>
                             </Flyout>
                         </AppBarButton.Flyout>
+                    </AppBarButton>
+                    <AppBarButton
+                        Icon="Attach"
+                        Command="{x:Bind ViewModel.AttachFile}">
                     </AppBarButton>
                     <CommandBar.SecondaryCommands>
                         <AppBarToggleButton
