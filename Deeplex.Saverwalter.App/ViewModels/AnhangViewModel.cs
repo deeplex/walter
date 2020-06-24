@@ -215,12 +215,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             ImmutableList<AnhangDatei> GetFilteredList<T>(T u)
             {
                 ImmutableList<AnhangDatei> r<U>(IQueryable<IAnhang<U>> l, U target)
-                {
-                    var w = l.ToList().Where(member => member.Target.Equals(target));
-                    return w.Any() ?
-                        w.Select(member => new AnhangDatei(member.Anhang)).ToImmutableList() :
-                        ImmutableList<AnhangDatei>.Empty;
-                }
+                    => l.ToList().Where(member => member.Target.Equals(target))
+                        .Select(member => new AnhangDatei(member.Anhang)).ToImmutableList();
 
                 switch (u)
                 {
