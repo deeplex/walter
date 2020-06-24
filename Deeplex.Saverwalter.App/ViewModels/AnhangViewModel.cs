@@ -112,8 +112,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             => MakeItem(m.BetreffenderMonat.ToString("MMM yyyy"), m);
 
         private MenuFlyoutItem AnhangMietMinderung(MietMinderung m)
-            => MakeItem(m.Beginn.ToString("dd.MM.yyyy") + " – " +
-                    m.Ende != null ? m.Ende.Value.ToString("dd.MM.yyyy") : "Offen", m);
+            =>  MakeItem(m.Beginn.ToString("dd.MM.yyyy") + " – " +
+                    (m.Ende != null ? m.Ende.Value.ToString("dd.MM.yyyy") : "Offen"), m);
 
         private MenuFlyoutSubItem AnhangAdresse(Adresse a)
         {

@@ -319,6 +319,15 @@
                                         </mtuuc:DataGridTemplateColumn.CellTemplate>
                                     </mtuuc:DataGridTemplateColumn>
                                     <mtuuc:DataGridTextColumn IsReadOnly="False" Binding="{Binding Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Header="Notiz"/>
+                                    <mtuuc:DataGridTemplateColumn>
+                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="vm:VertragDetailMiete">
+                                                <Button Background="Transparent" Command="{x:Bind AttachFile}">
+                                                    <SymbolIcon  Symbol="Attach"/>
+                                                </Button>
+                                            </DataTemplate>
+                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    </mtuuc:DataGridTemplateColumn>
                                 </mtuuc:DataGrid.Columns>
                             </mtuuc:DataGrid>
                             <Button
@@ -423,6 +432,15 @@
                                         </mtuuc:DataGridTemplateColumn.CellTemplate>
                                     </mtuuc:DataGridTemplateColumn>
                                     <mtuuc:DataGridTextColumn IsReadOnly="False" Binding="{Binding Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Header="Notiz"/>
+                                    <mtuuc:DataGridTemplateColumn>
+                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
+                                                <Button Background="Transparent" Command="{x:Bind AttachFile}">
+                                                    <SymbolIcon Symbol="Attach"/>
+                                                </Button>
+                                            </DataTemplate>
+                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    </mtuuc:DataGridTemplateColumn>
                                 </mtuuc:DataGrid.Columns>
                             </mtuuc:DataGrid>
                             <Button
