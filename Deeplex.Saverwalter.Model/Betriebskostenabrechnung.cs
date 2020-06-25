@@ -199,6 +199,7 @@ namespace Deeplex.Saverwalter.Model
 
             public double GesamtWohnflaeche;
             public double WFZeitanteil;
+            public double NFZeitanteil;
             public double GesamtNutzflaeche;
             public int GesamtEinheiten;
             public double NEZeitanteil;
@@ -235,6 +236,7 @@ namespace Deeplex.Saverwalter.Model
                     b.Nutzungsbeginn, b.Nutzungsende).ToList();
 
                 WFZeitanteil = b.Wohnung.Wohnflaeche / GesamtWohnflaeche * b.Zeitanteil;
+                NFZeitanteil = b.Wohnung.Nutzflaeche / GesamtNutzflaeche * b.Zeitanteil;
                 NEZeitanteil = (double)b.Wohnung.Nutzeinheit / GesamtEinheiten * b.Zeitanteil;
 
                 PersZeitanteil = GesamtPersonenIntervall

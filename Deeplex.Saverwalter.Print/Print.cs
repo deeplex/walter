@@ -512,6 +512,16 @@ namespace Deeplex.Saverwalter.Print
                         pContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center, bot()),
                         pContentCell(Prozent(g.WFZeitanteil), JustificationValues.Center, bot())));
             }
+            if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachNutzflaeche))
+            {
+                table.Append(
+                    new TableRow(ContentHead("bei Umlage nach Nutzfläche (n. NF)"), ContentHead(""), ContentHead(""), ContentHead("")),
+                    new TableRow(
+                        pContentCell(Quadrat(b.Wohnung.Nutzflaeche) + " / " + Quadrat(g.GesamtNutzflaeche), JustificationValues.Left, bot()),
+                        pContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center, bot()),
+                        pContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center, bot()),
+                        pContentCell(Prozent(g.NFZeitanteil), JustificationValues.Center, bot())));
+            }
             if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachNutzeinheit))
             {
                 table.Append(
