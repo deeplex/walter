@@ -125,25 +125,6 @@ namespace Deeplex.Saverwalter.Model
             Result = BezahltNebenkosten - BetragNebenkosten + KaltMinderung + NebenkostenMinderung;
         }
 
-        private Zaehlerstand interpolateZaehlerstand(DateTime d, Zaehlerstand z1, Zaehlerstand z2)
-        {
-            var m = (z1.Stand - z2.Stand) / (z1.Datum - z2.Datum).Days;
-            var Stand = m * (d - z1.Datum).Days + z1.Stand;
-
-            var zs = new Zaehlerstand
-            {
-                Datum = d,
-                Stand = Stand,
-                Zaehler = z1.Zaehler,
-                Abgelesen = false,
-                Notiz = "Erstellt durch Betriebskostenabrechnung am " + DateTime.UtcNow.ToString("dd.MM.yyyy") +
-                    ". Berechnet durch Ablesung vom: " + z1.Datum.ToString("dd.MM.yyyy") + " und " + z2.Datum.ToString("dd.MM.yyyy")
-            };
-            db.Zaehlerstaende.Add(zs);
-            db.SaveChanges();
-            return zs;
-        }
-
         public List<(Betriebskostentyp bTyp, string Kennnummer, Zaehlertyp zTyp, double Delta)>
             GetVerbrauch(Betriebskostenrechnung r, bool ganzeGruppe = false)
         {
@@ -182,12 +163,7 @@ namespace Deeplex.Saverwalter.Model
 
             for (var i = 0; i < Ende.Count(); ++i)
             {
-                Zaehlerstand zBeginn = Beginn[i].Datum.Date == beginn ? // TODO is same day also okay? ...
-                        Beginn[i] : interpolateZaehlerstand(beginn, Beginn[i], Ende[i]);
-                Zaehlerstand zEnde = Ende[i].Datum.Date == ende ?
-                    Ende[i] : interpolateZaehlerstand(ende, Beginn[i], Ende[i]);
-
-                Deltas.Add((r.Typ, zEnde.Zaehler.Kennnummer, zEnde.Zaehler.Typ, zEnde.Stand - zBeginn.Stand));
+                Deltas.Add((r.Typ, Ende[i].Zaehler.Kennnummer, Ende[i].Zaehler.Typ, Ende[i].Stand - Beginn[i].Stand));
             }
 
             return Deltas;
