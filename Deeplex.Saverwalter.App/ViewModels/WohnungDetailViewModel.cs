@@ -291,7 +291,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
                 var zs = new Zaehlerstand
                 {
-                    Abgelesen = true,
                     Zaehler = z,
                     Datum = datum,
                     Stand = stand,
@@ -364,9 +363,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.ZaehlerstandAnhaenge, z), _ => true);
         }
-
-        public bool Gerechnet => !Entity.Abgelesen;
-        public string AbgelesenText => "Wert wurde " + (Gerechnet == true ? "errechnet." : "abgelesen.");
 
         public AsyncRelayCommand AttachFile;
         public RelayCommand SelfDestruct { get; }
