@@ -42,13 +42,13 @@ namespace Deeplex.Saverwalter.Model
 
         private SaverwalterContext db { get; }
 
-        public Betriebskostenabrechnung(int rowid, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
+        public Betriebskostenabrechnung(SaverwalterContext db, int rowid, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
         {
+            this.db = db;
+
             Abrechnungsbeginn = abrechnungsbeginn;
             Abrechnungsende = abrechnungsende;
             Jahr = jahr;
-
-            db = new SaverwalterContext();
 
             var vertrag = db.Vertraege
                 .Where(v => v.rowid == rowid)
