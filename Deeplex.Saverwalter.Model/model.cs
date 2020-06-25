@@ -535,6 +535,8 @@ namespace Deeplex.Saverwalter.Model
     {
         [Description("n. WF")]
         NachWohnflaeche,
+        [Description("n. NF")]
+        NachNutzflaeche,
         [Description("n. NE")]
         NachNutzeinheit,
         [Description("n. Pers.")]

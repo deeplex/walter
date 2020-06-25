@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.Print
                 GenericText(),
                 new Break() { Type = BreakValues.Page },
                 // p.2
-                Heading("Abrechnung der Nebenkosten (kalte Betriebskosten)"),
+                Heading("Abrechnung der Nebenkosten"),
                 ExplainUmlageschluessel(b),
                 Heading("Erläuterungen zu einzelnen Betriebskostenarten"),
                 ExplainKalteBetriebskosten(b),
@@ -96,9 +96,9 @@ namespace Deeplex.Saverwalter.Print
                         Abrechnungseinheit(b, gruppe),
                         new Paragraph(NoSpace()),
                         ErmittlungWarmeKosten(b, gruppe),
-                        GenericTextWarmeKosten(),
-                        EqHeizkostenV9_2(b, gruppe));
-                        //ErmittlungAnteilWarmWasser(b, gruppe));
+                        EqHeizkostenV9_2(b, gruppe), // Only if §9(2) applies
+                        ErmittlungWarmanteil(b, gruppe));
+                    //ErmittlungAnteilWarmWasser(b, gruppe));
                 }
             }
 
@@ -266,9 +266,15 @@ namespace Deeplex.Saverwalter.Print
         {
             var dir = b.Gruppen.Any(g => g.Rechnungen.Any(r => r.Gruppen.Count == 1));
             var nWF = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachWohnflaeche));
+            var nNF = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachNutzflaeche));
             var nNE = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachNutzeinheit));
             var nPZ = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachPersonenzahl));
             var nVb = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachVerbrauch));
+            // There is a Umlage nach Nutzfläche in the Heizkostenberechnung:
+            if (!nNF)
+            {
+                nNF = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => (int)r.Typ % 2 == 1));
+            }
 
             var t = new Table(
                 // This cell defines the width of the left cell.
@@ -286,7 +292,13 @@ namespace Deeplex.Saverwalter.Print
             {
                 t.Append(new TableRow(
                     ContentCell("n. WF."),
-                    ContentCell("nach Wohn-/Nutzfläche in m²")));
+                    ContentCell("nach Wohnfläche in m²")));
+            }
+            if (nNF == true)
+            {
+                t.Append(new TableRow( // This row has SpacingBeetweenLine.
+                    ContentCell("n. NF."),
+                    ContentCell("nach Nutzfläche in m²")));
             }
             if (nNE == true)
             {
@@ -322,7 +334,13 @@ namespace Deeplex.Saverwalter.Print
             {
                 t.Append(new TableRow(
                     ContentCell("n. WF."),
-                    ContentCell("Kostenanteil = Kosten je Quadratmeter Wohn-/Nutzfläche mal Anteil Fläche je Wohnung.")));
+                    ContentCell("Kostenanteil = Kosten je Quadratmeter Wohnfläche mal Anteil Fläche je Wohnung.")));
+            }
+            if (nNF == true)
+            {
+                t.Append(new TableRow(
+                    ContentCell("n. WF."),
+                    ContentCell("Kostenanteil = Kosten je Quadratmeter Nutzfläche mal Anteil Fläche je Wohnung.")));
             }
             if (nNE == true)
             {
@@ -470,7 +488,7 @@ namespace Deeplex.Saverwalter.Print
 
         private static Table ErmittlungKalteEinheiten(Betriebskostenabrechnung b, Rechnungsgruppe g)
         {
-            TableCell IContentCell(string str, JustificationValues value, BorderType border) =>
+            TableCell pContentCell(string str, JustificationValues value, BorderType border) =>
                 new TableCell(new TableCellProperties(border),
                     new Paragraph(new ParagraphProperties(new Justification() { Val = value }),
                     Font(), NoSpace(), new Run(Font(), new Text(str))));
@@ -489,20 +507,20 @@ namespace Deeplex.Saverwalter.Print
                 table.Append(
                     new TableRow(ContentHead("bei Umlage nach Wohnfläche (n. WF)"), ContentHead(""), ContentHead(""), ContentHead("")),
                     new TableRow(
-                        IContentCell(Quadrat(b.Wohnung.Wohnflaeche) + " / " + Quadrat(g.GesamtWohnflaeche), JustificationValues.Left, bot()),
-                        IContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center, bot()),
-                        IContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center, bot()),
-                        IContentCell(Percent(g.WFZeitanteil), JustificationValues.Center, bot())));
+                        pContentCell(Quadrat(b.Wohnung.Wohnflaeche) + " / " + Quadrat(g.GesamtWohnflaeche), JustificationValues.Left, bot()),
+                        pContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center, bot()),
+                        pContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center, bot()),
+                        pContentCell(Prozent(g.WFZeitanteil), JustificationValues.Center, bot())));
             }
             if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachNutzeinheit))
             {
                 table.Append(
                     new TableRow(ContentHead("bei Umlage nach Nutzeinheiten (n. NE)"), ContentHead(""), ContentHead(""), ContentHead("")),
                     new TableRow(
-                        IContentCell(1.ToString() + " / " + g.GesamtEinheiten, JustificationValues.Left, bot()),
-                        IContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center, bot()),
-                        IContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center, bot()),
-                        IContentCell(Percent(g.NEZeitanteil), JustificationValues.Center, bot())));
+                        pContentCell(1.ToString() + " / " + g.GesamtEinheiten, JustificationValues.Left, bot()),
+                        pContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center, bot()),
+                        pContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center, bot()),
+                        pContentCell(Prozent(g.NEZeitanteil), JustificationValues.Center, bot())));
             }
             if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachPersonenzahl))
             {
@@ -520,10 +538,10 @@ namespace Deeplex.Saverwalter.Print
                     if (i == g.PersZeitanteil.Count - 1)
                     {
                         table.Append(new TableRow(
-                           IContentCell(PersonEn(Personenzahl) + " / " + PersonEn(GesamtPersonenzahl), JustificationValues.Left, bot()),
-                           IContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center, bot()),
-                           IContentCell(timespan + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center, bot()),
-                           IContentCell(Percent(g.PersZeitanteil[i].Anteil), JustificationValues.Center, bot())));
+                           pContentCell(PersonEn(Personenzahl) + " / " + PersonEn(GesamtPersonenzahl), JustificationValues.Left, bot()),
+                           pContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center, bot()),
+                           pContentCell(timespan + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center, bot()),
+                           pContentCell(Prozent(g.PersZeitanteil[i].Anteil), JustificationValues.Center, bot())));
                     }
                     else
                     {
@@ -531,7 +549,7 @@ namespace Deeplex.Saverwalter.Print
                             ContentCell(PersonEn(Personenzahl) + " / " + PersonEn(GesamtPersonenzahl)),
                             ContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center),
                             ContentCell(timespan + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center),
-                            ContentCell(Percent(g.PersZeitanteil[i].Anteil), JustificationValues.Center)));
+                            ContentCell(Prozent(g.PersZeitanteil[i].Anteil), JustificationValues.Center)));
                     }
                 }
             }
@@ -552,10 +570,10 @@ namespace Deeplex.Saverwalter.Print
                             ContentCell("")));
                     }
                     table.Append(new TableRow(
-                        IContentCell(Kubik(Verbrauch.Value.Sum(v => v.Delta)) + " / " + Kubik(Verbrauch.Value.Sum(v => v.Delta / v.Anteil)), JustificationValues.Left, top()),
-                        IContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Left, top()),
-                        IContentCell(Verbrauch.Key.ToDescriptionString(), JustificationValues.Center, top()),
-                        IContentCell(Percent(g.VerbrauchAnteil[Verbrauch.Key]), JustificationValues.Center, top())));
+                        pContentCell(Kubik(Verbrauch.Value.Sum(v => v.Delta)) + " / " + Kubik(Verbrauch.Value.Sum(v => v.Delta / v.Anteil)), JustificationValues.Left, top()),
+                        pContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Left, top()),
+                        pContentCell(Verbrauch.Key.ToDescriptionString(), JustificationValues.Center, top()),
+                        pContentCell(Prozent(g.VerbrauchAnteil[Verbrauch.Key]), JustificationValues.Center, top())));
                 }
             }
             return table;
@@ -581,7 +599,7 @@ namespace Deeplex.Saverwalter.Print
                     ContentCell(direkt ? "Direkt" : (f ? rechnung.Schluessel.ToDescriptionString() : "")),
                     ContentCell(zeitraum, JustificationValues.Center),
                     ContentCell(Euro(rechnung.Betrag), JustificationValues.Right), // TODO f ? bold : normal?
-                    ContentCell(Percent(anteil), JustificationValues.Right),
+                    ContentCell(Prozent(anteil), JustificationValues.Right),
                     ContentCell(Euro(rechnung.Betrag * anteil), JustificationValues.Right));
             }
 
@@ -646,9 +664,6 @@ namespace Deeplex.Saverwalter.Print
             return table;
         }
 
-        private static Paragraph GenericTextWarmeKosten()
-            => new Paragraph(Font(), new Run(Font(), new Break(), new Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):")));
-
         private static Paragraph EqHeizkostenV9_2(Betriebskostenabrechnung b, Rechnungsgruppe gruppe)
         {
             RunProperties rp() => new RunProperties(new RunFonts() { Ascii = "Cambria Math", HighAnsi = "Cambria Math" });
@@ -679,20 +694,80 @@ namespace Deeplex.Saverwalter.Print
 
             DocumentFormat.OpenXml.Math.Fraction units() => frac("kWh", "m³ x K");
 
-            var p = new Paragraph();
+            var p = new Paragraph(Font(), new Run(Font(), new Break(), new Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):"), new Break(), new Break()));
 
             foreach (var hk in gruppe.Heizkosten)
             {
                 p.Append(new DocumentFormat.OpenXml.Math.Paragraph(justifyLeft(),
                     new DocumentFormat.OpenXml.Math.OfficeMath(
                     t("2,5 ×"), frac("V", "Q"), t(" × ("), tw(), t("-10°C)"), units(), t(" ⟹ "),
-                    t("2,5 ×"), frac(Kubik(hk.V), kWh(hk.Q)), t(" × ("), t(Celsius((int)hk.tw)), t("-10°C)"), units(), t(" = "), t(Percent(hk.AnteilWarmwasser)))));
+                    t("2,5 ×"), frac(Kubik(hk.V), kWh(hk.Q)), t(" × ("), t(Celsius((int)hk.tw)), t("-10°C)"), units(), t(" = "), t(Prozent(hk.Para9_2)))));
             }
             p.Append(new Break(), new Break(),
                 new Run(Font(), r("Wobei "), om("V"), r(" die Menge des Warmwassers, die im Zeitraum von "),
                 r(b.Nutzungsbeginn.ToString("dd.MM.yyyy")), r(" – "), r(b.Nutzungsende.ToString("dd.MM.yyyy")), r(" gemessen wurde, "),
                 new Break(), om("Q"), r(" die gemessene Wärmemenge und "), omtw(), r("die geschätzte mittlere Temperatur des Warmwassers darstellt.")));
             return p;
+        }
+
+        private static Table ErmittlungWarmanteil(Betriebskostenabrechnung b, Rechnungsgruppe gruppe)
+        {
+
+            var table = new Table(
+                new TableProperties(
+                    new TableBorders(new InsideHorizontalBorder() { Val = BorderValues.Thick, Color = "888888" })),
+                new TableRow(
+                    ContentHead("1200", "Kostenanteil"),
+                    ContentHead("650", "Schlüssel"),
+                    ContentHead("450", "Betrag"),
+                    ContentHead("700", "Auft. $9(2)", JustificationValues.Center), // TODO Make this variable
+                    ContentHead("700", "Auft. §7,8", JustificationValues.Center),
+                    ContentHead("650", "Ihr Anteil", JustificationValues.Right),
+                    ContentHead("650", "Ihre Kosten", JustificationValues.Right)));
+
+            foreach (var hk in gruppe.Heizkosten)
+            {
+                table.Append(
+                    new TableRow(
+                        ContentCell("Heizung"),
+                        ContentCell(UmlageSchluessel.NachNutzflaeche.ToDescriptionString()),
+                        ContentCell(Euro(hk.PauschalBetrag)),
+                        ContentCell(Prozent(1 - hk.Para9_2), JustificationValues.Center),
+                        ContentCell(Prozent(1 - hk.Para7), JustificationValues.Center),
+                        ContentCell(Prozent(hk.NFZeitanteil), JustificationValues.Right),
+                        ContentCell(Euro(hk.WaermeAnteilNF), JustificationValues.Right)),
+                    new TableRow(
+                        ContentCell("Heizung"),
+                        ContentCell(UmlageSchluessel.NachVerbrauch.ToDescriptionString()),
+                        ContentCell(Euro(hk.PauschalBetrag)),
+                        ContentCell(Prozent(1 - hk.Para9_2), JustificationValues.Center),
+                        ContentCell(Prozent(hk.Para7), JustificationValues.Center),
+                        ContentCell(Prozent(hk.VerbrauchAnteil), JustificationValues.Right),
+                        ContentCell(Euro(hk.WaermeAnteilVerb), JustificationValues.Right)),
+                    new TableRow(
+                        ContentCell("Warmwasser"),
+                        ContentCell(UmlageSchluessel.NachNutzflaeche.ToDescriptionString()),
+                        ContentCell(Euro(hk.PauschalBetrag)),
+                        ContentCell(Prozent(hk.Para9_2), JustificationValues.Center),
+                        ContentCell(Prozent(hk.Para8), JustificationValues.Center),
+                        ContentCell(Prozent(hk.NFZeitanteil), JustificationValues.Right),
+                        ContentCell(Euro(hk.WarmwasserAnteilNF), JustificationValues.Right)),
+                    new TableRow(
+                        ContentCell("Warmwasser"),
+                        ContentCell(UmlageSchluessel.NachVerbrauch.ToDescriptionString()),
+                        ContentCell(Euro(hk.PauschalBetrag)),
+                        ContentCell(Prozent(hk.Para9_2), JustificationValues.Center),
+                        ContentCell(Prozent(hk.Para8), JustificationValues.Center),
+                        ContentCell(Prozent(hk.VerbrauchAnteil), JustificationValues.Right),
+                        ContentCell(Euro(hk.WarmwasserAnteilVerb), JustificationValues.Right)));
+            }
+            table.Append(new TableRow(
+                ContentCell(""), ContentCell(""),
+                ContentCell(""), ContentCell(""), ContentCell(""),
+                ContentHead("Summe: ", JustificationValues.Center),
+                ContentHead(Euro(gruppe.BetragWarm), JustificationValues.Right)));
+
+            return table;
         }
 
         private static Table GesamtErgebnis(Betriebskostenabrechnung b)
@@ -753,7 +828,7 @@ namespace Deeplex.Saverwalter.Print
         }
 
         // Helper
-        private static string Percent(double d) => string.Format("{0:N2}%", d * 100);
+        private static string Prozent(double d) => string.Format("{0:N2}%", d * 100);
         private static string Euro(double d) => string.Format("{0:N2}€", d);
         private static string Kubik(double d) => string.Format("{0:N2} m³", d); // TODO this should be embedded in Zaehler...
         private static string kWh(double d) => string.Format("{0:N2} kWh", d); // TODO this should be embedded in Zaehler...

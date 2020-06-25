@@ -156,16 +156,20 @@ namespace Deeplex.Saverwalter.Model
                 _ => null
             };
 
-            var fZaehler = Zaehler.Where(z => ganzeGruppe ?
-                r.Gruppen.Select(g => g.Wohnung).Contains(z.Wohnung) :
-                z.WohnungId == Wohnung.WohnungId);
+            var fZaehler = Zaehler.Where(z =>
+                ganzeGruppe ?
+                    r.Gruppen.Select(g => g.Wohnung).Contains(z.Wohnung) :
+                    z.WohnungId == Wohnung.WohnungId);
+
+            var ende = (ganzeGruppe ? Abrechnungsende : Nutzungsende).Date;
+            var beginn = (ganzeGruppe ? Abrechnungsbeginn : Nutzungsbeginn).Date.AddDays(-1);
 
             var Ende = fZaehler
-                .Select(z => z.Staende.OrderBy(s => s.Datum).LastOrDefault(l => l.Datum.Date <= Nutzungsende.Date && (Nutzungsende.Date - l.Datum.Date).Days < 30))
+                .Select(z => z.Staende.OrderBy(s => s.Datum).LastOrDefault(l => l.Datum.Date <= ende && (ende - l.Datum.Date).Days < 30))
                 .Where(zs => zs != null)
                 .ToImmutableList();
             var Beginn = fZaehler
-                .Select(z => z.Staende.OrderBy(s => s.Datum).LastOrDefault(l => l.Datum.Date <= Nutzungsbeginn.Date.AddDays(-1) && (Nutzungsbeginn.Date - l.Datum.Date).Days < 30))
+                .Select(z => z.Staende.OrderBy(s => s.Datum).LastOrDefault(l => l.Datum.Date <= beginn && (beginn - l.Datum.Date).Days < 30))
                 .Where(zs => zs != null)
                 .ToImmutableList();
 
@@ -173,14 +177,15 @@ namespace Deeplex.Saverwalter.Model
             if (Beginn.IsEmpty) throw new Exception("Kein Zähler für Nutzungsende gefunden.");
             if (Ende.Count() != Beginn.Count()) throw new Exception("Zählerstände sind nicht korrekt...");
 
-            List<(Betriebskostentyp bTyp, string Kennnummer, Zaehlertyp zTyp, double Delta)> Deltas = new List<(Betriebskostentyp bTyp, string Kennnummer, Zaehlertyp zTyp, double Delta)>();
+            List<(Betriebskostentyp bTyp, string Kennnummer, Zaehlertyp zTyp, double Delta)> Deltas
+                = new List<(Betriebskostentyp bTyp, string Kennnummer, Zaehlertyp zTyp, double Delta)>();
 
             for (var i = 0; i < Ende.Count(); ++i)
             {
-                Zaehlerstand zBeginn = Beginn[i].Datum.Date == Nutzungsbeginn.Date.AddDays(-1) ? // TODO is same day also okay? ...
-                        Beginn[i] : interpolateZaehlerstand(Nutzungsbeginn.Date.AddDays(-1), Beginn[i], Ende[i]);
-                Zaehlerstand zEnde = Ende[i].Datum.Date == Nutzungsende.Date ?
-                    Ende[i] : interpolateZaehlerstand(Nutzungsende, Beginn[i], Ende[i]);
+                Zaehlerstand zBeginn = Beginn[i].Datum.Date == beginn ? // TODO is same day also okay? ...
+                        Beginn[i] : interpolateZaehlerstand(beginn, Beginn[i], Ende[i]);
+                Zaehlerstand zEnde = Ende[i].Datum.Date == ende ?
+                    Ende[i] : interpolateZaehlerstand(ende, Beginn[i], Ende[i]);
 
                 Deltas.Add((r.Typ, zEnde.Zaehler.Kennnummer, zEnde.Zaehler.Typ, zEnde.Stand - zBeginn.Stand));
             }
@@ -203,7 +208,7 @@ namespace Deeplex.Saverwalter.Model
             public Dictionary<Betriebskostentyp, List<(string Kennnummer, Zaehlertyp Typ, double Delta, double Anteil)>> Verbrauch;
             public Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch;
             public Dictionary<Betriebskostentyp, double> VerbrauchAnteil;
-            public List<HKVO> Heizkosten;
+            public List<Heizkostenberechnung> Heizkosten;
             public double GesamtBetragKalt;
             public double GesamtBetragWarm;
             public double BetragKalt;
@@ -269,19 +274,12 @@ namespace Deeplex.Saverwalter.Model
                     }
                 );
 
-                var gruppeWarm = gruppe.Where(r => (int)r.Typ % 2 == 1);
-                GesamtBetragWarm = gruppeWarm.Sum(r => (r.Typ == Betriebskostentyp.Heizkosten ? 1.05 : 1.00) * r.Betrag);
-                Heizkosten = gruppeWarm.Select(r => new HKVO(r, b)).ToList();
-                BetragWarm = gruppeWarm.Aggregate(0.0, (a, r) =>
-                    (r.Typ == Betriebskostentyp.Heizkosten ? 1.05 : 1.00) * r.Schluessel switch
-                    {
-                        UmlageSchluessel.NachWohnflaeche => a + r.Betrag * WFZeitanteil,
-                        UmlageSchluessel.NachNutzeinheit => a + r.Betrag * NEZeitanteil,
-                        UmlageSchluessel.NachPersonenzahl => a + PersZeitanteil.Aggregate(0.0, (a2, z) => a2 += z.Anteil * r.Betrag),
-                        UmlageSchluessel.NachVerbrauch => a + r.Betrag * VerbrauchAnteil[r.Typ],
-                        _ => a + 0, // TODO or throw something...
-                    }
-                );
+                Heizkosten = gruppe
+                    .Where(r => (int)r.Typ % 2 == 1)
+                    .Select(r => new Heizkostenberechnung(r, b))
+                    .ToList();
+                GesamtBetragWarm = Heizkosten.Sum(h => h.PauschalBetrag);
+                BetragWarm = Heizkosten.Sum(h => h.Kosten);
 
                 for (int i = 0, count = GesamtPersonenIntervall.Count - 1; i < count; ++i)
                 {
@@ -316,65 +314,92 @@ namespace Deeplex.Saverwalter.Model
                 }
             }
 
-            public sealed class HKVO
+            public sealed class Heizkostenberechnung
             {
                 public double Betrag;
+                public double PauschalBetrag;
 
                 public double tw;
                 public double V;
                 public double Q;
 
-                public double WaermeAnteilWF;
+                public double Para7;
+                public double Para8;
+
+                public double GesamtNutzflaeche;
+                public double NFZeitanteil;
+                public double VerbrauchAnteil;
+
+                public double Para9_2;
+
+                public double WaermeAnteilNF;
                 public double WaermeAnteilVerb;
-
-                public double AnteilWarmwasser;
-
-                public double WarmwasserAnteilWF;
+                public double WarmwasserAnteilNF;
                 public double WarmwasserAnteilVerb;
 
-                public HKVO(Betriebskostenrechnung r, Betriebskostenabrechnung b)
+                public double Kosten;
+
+                public Heizkostenberechnung(Betriebskostenrechnung r, Betriebskostenabrechnung b)
                 {
                     Betrag = r.Betrag;
+                    PauschalBetrag = r.Betrag * 1.05;
 
-
-                    // TODO These should be Variable
+                    // TODO These should be variable
                     tw = 60;
-                    var WaermeNachVerbrauch = 0.5; // HeizkostenV §7
-                    var WasserNachVerbrauch = 0.5; // HeizkostenV §8
+                    Para7 = 0.5; // HeizkostenV §7
+                    Para8 = 0.5; // HeizkostenV §8
 
-                    var WarmwasserZaehler = b.db.ZaehlerSet.Where(z =>
+                    var AllgWarmwasserZaehler = b.db.ZaehlerSet.Where(z =>
                         z.Typ == Zaehlertyp.Warmwasser && r.Gruppen.Select(g => g.Wohnung).Contains(z.Wohnung)).ToImmutableList();
 
-                    var WaermeZaehler = b.db.ZaehlerSet.Where(z =>
+                    var AllgWaermeZaehler = b.db.ZaehlerSet.Where(z =>
                         z.Typ == Zaehlertyp.Gas && r.Gruppen.Select(g => g.Wohnung).Contains(z.Wohnung)).ToImmutableList();
 
-                    ImmutableList<Zaehlerstand> Ende(ImmutableList<Zaehler> z)
-                        => z.Select(z => z.Staende.OrderBy(s => s.Datum)
-                        .LastOrDefault(l => l.Datum.Date <= b.Nutzungsende.Date && (b.Nutzungsende.Date - l.Datum.Date).Days < 30))
-                        .Where(zs => zs != null)
+                    var WaermeZaehler = AllgWaermeZaehler
+                        .Where(z => z.Wohnung == b.Wohnung)
                         .ToImmutableList();
 
-                    ImmutableList<Zaehlerstand> Beginn(ImmutableList<Zaehler> z)
-                        => z.Select(z => z.Staende.OrderBy(s => s.Datum)
-                        .LastOrDefault(l => l.Datum.Date <= b.Nutzungsbeginn.Date.AddDays(-1) && (b.Nutzungsbeginn.Date - l.Datum.Date).Days < 30))
-                        .Where(zs => zs != null)
-                        .ToImmutableList();
+                    ImmutableList<Zaehlerstand> Ende(ImmutableList<Zaehler> z, bool ganzeGruppe = false)
+                    {
+                        var ende = (ganzeGruppe ? b.Abrechnungsende : b.Nutzungsende).Date;
+                        return z.Select(z => z.Staende.OrderBy(s => s.Datum)
+                            .LastOrDefault(l => l.Datum.Date <= ende && (ende - l.Datum.Date).Days < 30))
+                            .Where(zs => zs != null)
+                            .ToImmutableList();
+                    }
 
-                    V = Ende(WarmwasserZaehler).Sum(w => w.Stand) - Beginn(WarmwasserZaehler).Sum(w => w.Stand);
-                    Q = Ende(WaermeZaehler).Sum(w => w.Stand) - Beginn(WaermeZaehler).Sum(w => w.Stand);
+                    ImmutableList<Zaehlerstand> Beginn(ImmutableList<Zaehler> z, bool ganzeGruppe = false)
+                    {
+                        var beginn = (ganzeGruppe ? b.Abrechnungsbeginn : b.Nutzungsbeginn).Date.AddDays(-1);
+                        return z.Select(z => z.Staende.OrderBy(s => s.Datum)
+                            .LastOrDefault(l => l.Datum.Date <= beginn && (beginn - l.Datum.Date).Days < 30))
+                            .Where(zs => zs != null)
+                            .ToImmutableList();
+                    }
 
-                    AnteilWarmwasser = 2.5 * (V / Q) * (tw - 10); // TODO HeizkostenV §9
+                    V = Ende(AllgWarmwasserZaehler, true).Sum(w => w.Stand) -
+                        Beginn(AllgWarmwasserZaehler, true).Sum(w => w.Stand);
+                    Q = Ende(AllgWaermeZaehler, true).Sum(w => w.Stand) -
+                        Beginn(AllgWaermeZaehler, true).Sum(w => w.Stand);
 
-                    if (AnteilWarmwasser > 1)
+                    Para9_2 = 2.5 * (V / Q) * (tw - 10); // TODO HeizkostenV §9
+
+                    if (Para9_2 > 1)
                     {
                         throw new Exception("no.");
                     }
 
-                    WaermeAnteilWF = r.Betrag * (1 - AnteilWarmwasser) * (1 - WaermeNachVerbrauch);
-                    WaermeAnteilVerb = r.Betrag * (1 - AnteilWarmwasser) * (1 - WaermeNachVerbrauch);
+                    GesamtNutzflaeche = r.Gruppen.Sum(w => w.Wohnung.Nutzflaeche);
+                    NFZeitanteil = b.Wohnung.Nutzflaeche / GesamtNutzflaeche * b.Zeitanteil;
 
-                    WarmwasserAnteilWF = r.Betrag * AnteilWarmwasser * (1 - WasserNachVerbrauch);
-                    WarmwasserAnteilVerb = r.Betrag * AnteilWarmwasser * WasserNachVerbrauch;
+                    VerbrauchAnteil = (Ende(WaermeZaehler).Sum(w => w.Stand) - Beginn(WaermeZaehler).Sum(w => w.Stand)) / Q;
+
+                    WaermeAnteilNF = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * NFZeitanteil;
+                    WaermeAnteilVerb = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * VerbrauchAnteil;
+                    WarmwasserAnteilNF = PauschalBetrag * Para9_2 * Para8 * NFZeitanteil;
+                    WarmwasserAnteilVerb = PauschalBetrag * Para9_2 * Para8 * VerbrauchAnteil;
+
+                    Kosten = WaermeAnteilNF + WaermeAnteilVerb + WarmwasserAnteilNF + WarmwasserAnteilVerb;
                 }
             }
         }
