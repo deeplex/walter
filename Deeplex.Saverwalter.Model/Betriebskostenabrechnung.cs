@@ -123,8 +123,6 @@ namespace Deeplex.Saverwalter.Model
             BezahltNebenkosten = Gezahlt - KaltMiete;
 
             Result = BezahltNebenkosten - BetragNebenkosten + KaltMinderung + NebenkostenMinderung;
-
-            db.Dispose();
         }
 
         private Zaehlerstand interpolateZaehlerstand(DateTime d, Zaehlerstand z1, Zaehlerstand z2)
