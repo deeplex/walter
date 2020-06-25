@@ -330,7 +330,8 @@ namespace Deeplex.Saverwalter.Model
 
                 public double GesamtNutzflaeche;
                 public double NFZeitanteil;
-                public double VerbrauchAnteil;
+                public double HeizkostenVerbrauchAnteil;
+                public double WarmwasserVerbrauchAnteil;
 
                 public double Para9_2;
 
@@ -358,6 +359,10 @@ namespace Deeplex.Saverwalter.Model
                         z.Typ == Zaehlertyp.Gas && r.Gruppen.Select(g => g.Wohnung).Contains(z.Wohnung)).ToImmutableList();
 
                     var WaermeZaehler = AllgWaermeZaehler
+                        .Where(z => z.Wohnung == b.Wohnung)
+                        .ToImmutableList();
+
+                    var WarmwasserZaehler = AllgWarmwasserZaehler
                         .Where(z => z.Wohnung == b.Wohnung)
                         .ToImmutableList();
 
@@ -394,12 +399,13 @@ namespace Deeplex.Saverwalter.Model
                     GesamtNutzflaeche = r.Gruppen.Sum(w => w.Wohnung.Nutzflaeche);
                     NFZeitanteil = b.Wohnung.Nutzflaeche / GesamtNutzflaeche * b.Zeitanteil;
 
-                    VerbrauchAnteil = (Ende(WaermeZaehler).Sum(w => w.Stand) - Beginn(WaermeZaehler).Sum(w => w.Stand)) / Q;
+                    HeizkostenVerbrauchAnteil = (Ende(WaermeZaehler).Sum(w => w.Stand) - Beginn(WaermeZaehler).Sum(w => w.Stand)) / Q;
+                    WarmwasserVerbrauchAnteil = (Ende(WarmwasserZaehler).Sum(w => w.Stand) - Beginn(WarmwasserZaehler).Sum(w => w.Stand)) / V;
 
                     WaermeAnteilNF = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * NFZeitanteil;
-                    WaermeAnteilVerb = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * VerbrauchAnteil;
+                    WaermeAnteilVerb = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * HeizkostenVerbrauchAnteil;
                     WarmwasserAnteilNF = PauschalBetrag * Para9_2 * Para8 * NFZeitanteil;
-                    WarmwasserAnteilVerb = PauschalBetrag * Para9_2 * Para8 * VerbrauchAnteil;
+                    WarmwasserAnteilVerb = PauschalBetrag * Para9_2 * Para8 * WarmwasserVerbrauchAnteil;
 
                     Kosten = WaermeAnteilNF + WaermeAnteilVerb + WarmwasserAnteilNF + WarmwasserAnteilVerb;
                 }

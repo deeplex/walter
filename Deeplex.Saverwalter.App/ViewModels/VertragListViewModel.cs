@@ -39,7 +39,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get
             {
                 var mieten = Mieten.OrderBy(m => m.Datum.Value);
-                var last = mieten.Count() > 0 ? mieten.Last() : null;
+                var last = mieten.Any() ? mieten.Last() : null;
                 return last != null ? last.Datum.Value.ToString("dd.MM.yyyy") +
                     " - Betrag: " + string.Format("{0:F2}€", last.Betrag) : "";
             }

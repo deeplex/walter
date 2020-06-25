@@ -535,13 +535,13 @@ namespace Deeplex.Saverwalter.Model
     {
         [Description("n. WF")]
         NachWohnflaeche,
-        [Description("n. NF")]
-        NachNutzflaeche,
         [Description("n. NE")]
         NachNutzeinheit,
         [Description("n. Pers.")]
         NachPersonenzahl,
         [Description("n. Verb.")]
         NachVerbrauch,
+        [Description("n. NF")]
+        NachNutzflaeche,
     }
 }
