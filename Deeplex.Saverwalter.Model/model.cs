@@ -142,7 +142,7 @@ namespace Deeplex.Saverwalter.Model
         public int NatuerlichePersonId { get; set; }
         public string? Vorname { get; set; }
         public string Nachname { get; set; } = null!;
-        // public Titel Titel { get; set; } TODO
+        public Titel Titel { get; set; }
         public bool isVermieter { get; set; }
         public bool isMieter { get; set; }
         public bool isHandwerker { get; set; }
@@ -160,6 +160,19 @@ namespace Deeplex.Saverwalter.Model
         {
             PersonId = Guid.NewGuid();
         }
+    }
+
+    public enum Anrede
+    {
+        Herr,
+        Frau,
+        Keine,
+    }
+
+    public enum Titel
+    {
+        Kein,
+        Doktor,
     }
 
     // JuristischePerson is a Name. Kontakte may subscribe to this and is used for dashboards and stuff... nothing wild really.
@@ -373,13 +386,6 @@ namespace Deeplex.Saverwalter.Model
         public Garage Garage { get; set; } = null!;
     }
 
-    public enum Anrede
-    {
-        Herr,
-        Frau,
-        Divers,
-    }
-
     public sealed class Konto
     {
         public int KontoId { get; set; }
@@ -405,9 +411,22 @@ namespace Deeplex.Saverwalter.Model
         public int BetreffendesJahr { get; set; }
         public UmlageSchluessel Schluessel { get; set; }
         public string? Beschreibung { get; set; }
+
+        public double? HKVO_P7 { get; set; }
+        public double? HKVO_P8 { get; set; }
+        public HKVO_P9A2? HKVO_P9 { get; set; }
+        public AllgemeinZaehler? Allgemeinzaehler { get; set; }
+
         public string? Notiz { get; set; }
 
         public List<Betriebskostenrechnungsgruppe> Gruppen { get; private set; } = new List<Betriebskostenrechnungsgruppe>();
+    }
+
+    public enum HKVO_P9A2
+    {
+        Satz_1 = 1,
+        Satz_2 = 2,
+        Satz_4 = 4,
     }
 
     public sealed class BetriebskostenrechnungAnhang : IAnhang<Betriebskostenrechnung>
@@ -444,6 +463,23 @@ namespace Deeplex.Saverwalter.Model
         public Betriebskostenrechnung Rechnung { get; set; } = null!;
     }
 
+    public sealed class AllgemeinZaehler
+    {
+        public int AllgemeinZaehlerId { get; set; }
+        public string Kennnummer { get; set; } = null!;
+        public Zaehlertyp Typ { get; set; }
+        public List<Zaehlerstand> Staende { get; private set; } = new List<Zaehlerstand>();
+        public string? Notiz { get; set; }
+    }
+
+    public sealed class AllgemeinZaehlerAnhang : IAnhang<AllgemeinZaehler>
+    {
+        public int AllgemeinZaehlerId { get; set; }
+        public AllgemeinZaehler Target { get; set; } = null!;
+        public Guid AnhangId { get; set; }
+        public Anhang Anhang { get; set; } = null!;
+    }
+
     public sealed class Zaehler
     {
         public int ZaehlerId { get; set; }
@@ -474,9 +510,9 @@ namespace Deeplex.Saverwalter.Model
     public sealed class Zaehlerstand
     {
         public int ZaehlerstandId { get; set; }
-        public Zaehler Zaehler { get; set; } = null!;
+        public Zaehler? Zaehler { get; set; }
+        public AllgemeinZaehler? AllgemeinZaehler { get; set; }
         public DateTime Datum { get; set; }
-        public bool Abgelesen { get; set; } // TODO remove deprecated property
         public double Stand { get; set; }
         public string? Notiz { get; set; }
     }
