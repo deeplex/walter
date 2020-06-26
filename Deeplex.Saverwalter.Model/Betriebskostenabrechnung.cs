@@ -130,7 +130,7 @@ namespace Deeplex.Saverwalter.Model
         {
             var Zaehler = r.Typ switch
             {
-                Betriebskostentyp.Wasserversorgung =>
+                Betriebskostentyp.WasserversorgungKalt =>
                     db.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
                 Betriebskostentyp.Heizkosten => // TODO Man kann auch mit was anderem als Gas heizen...
                     db.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Gas || z.Typ == Zaehlertyp.Warmwasser).ToList(),

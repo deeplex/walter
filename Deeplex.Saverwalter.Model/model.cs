@@ -490,7 +490,7 @@ namespace Deeplex.Saverwalter.Model
     }
 
     // Even is Kalte Betriebskosten
-    // Uneven is Warme Betriebskosten
+    // Odd is Warme Betriebskosten
     public enum Betriebskostentyp
     {
         [Description("Allgemeinstrom/Hausbeleuchtung")]
@@ -518,17 +518,21 @@ namespace Deeplex.Saverwalter.Model
         [Description("Sachversicherung")]
         Sachversicherung = 22,
         [Description("Schornsteinfegerarbeiten")]
-        Schornsteinfegerarbeiten = 24,
+        SchornsteinfegerarbeitenKalt = 24,
+        [Description("Schornsteinfegerarbeiten")]
+        SchornsteinfegerarbeitenWarm = 25,
         [Description("Straßenreinigung")]
         Strassenreinigung = 26,
         [Description("Wartung Thermen/Speicher")]
         WartungThermenSpeicher = 28,
         [Description("Wasserversorgung")]
-        Wasserversorgung = 30,
+        WasserversorgungKalt = 30,
+        [Description("Wasserversorgung")]
+        WasserversorgungWarm = 31,
         [Description("Weitere/Sonstige Nebenkosten")]
         WeitereSonstigeNebenkosten = 32,
         [Description("Heizkosten")]
-        Heizkosten = 1,
+        Heizkosten = 35,
     }
 
     public enum UmlageSchluessel
