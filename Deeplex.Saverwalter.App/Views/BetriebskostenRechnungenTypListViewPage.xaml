@@ -99,18 +99,7 @@
                                                                     <Run Text="Datum:"/>
                                                                     <Run Text="{x:Bind DatumString}"/>
                                                                 </TextBlock>
-                                                                <ListView
-                                                                    SelectionMode="Single"
-                                                                    ItemsSource="{x:Bind Wohnungen, Mode=OneWay}">
-                                                                    <ListView.ItemTemplate>
-                                                                        <DataTemplate>
-                                                                            <ListViewItem>
-                                                                                <TextBlock TextWrapping="Wrap" Text="{Binding}"/>
-                                                                            </ListViewItem>
-                                                                        </DataTemplate>
-                                                                    </ListView.ItemTemplate>
-                                                                </ListView>
-                                                                <!--<mtuuc:Expander>
+                                                                <mtuuc:Expander>
                                                                     <mtuuc:Expander.Header>
                                                                         <TextBlock>
                                                                     <Run Text="Wohnungen ("/>
@@ -119,15 +108,15 @@
                                                                         </TextBlock>
                                                                     </mtuuc:Expander.Header>
                                                                     <ListView
-                                                                        SelectionMode="None"
+                                                                        SelectionMode="Single"
                                                                         ItemsSource="{x:Bind Wohnungen, Mode=OneWay}">
                                                                         <ListView.ItemTemplate>
-                                                                            <DataTemplate>
-                                                                                <TextBlock Text="Test"/>
+                                                                            <DataTemplate x:DataType="x:String">
+                                                                                <TextBlock Text="{x:Bind}"/>
                                                                             </DataTemplate>
                                                                         </ListView.ItemTemplate>
                                                                     </ListView>
-                                                                </mtuuc:Expander>-->
+                                                                </mtuuc:Expander>
                                                                 <Button CommandParameter="{x:Bind}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{x:Bind hasNoEntity}">
                                                                     <StackPanel Orientation="Horizontal">
                                                                         <TextBlock Text="Speichern"/>

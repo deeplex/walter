@@ -214,8 +214,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Schluessel = r.Schluessel;
             Typ = r.Typ;
 
-            Wohnungen = r.Wohnungen.Select(w => w).ToImmutableList();
-            WohnungenIds = r.WohnungenIds.Select(w => w).ToImmutableList();
+            Wohnungen = r.Wohnungen;
+            WohnungenIds = r.WohnungenIds;
         }
         public BetriebskostenRechnungenRechnung(Betriebskostenrechnung r)
         {
