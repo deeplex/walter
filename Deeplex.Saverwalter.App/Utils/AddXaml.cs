@@ -35,6 +35,7 @@ namespace Deeplex.Saverwalter.App.Utils
             Panel.Children.Add(Tree);
             var Beschreibung = new TextBox
             {
+                AllowFocusOnInteraction = true,
                 Header = "Beschreibung",
                 HorizontalAlignment = HorizontalAlignment.Stretch,
             };
@@ -46,14 +47,18 @@ namespace Deeplex.Saverwalter.App.Utils
             };
             var Kostentyp = new ComboBox
             {
+                AllowFocusOnInteraction = true,
                 Header = "Kostentyp",
+                PlaceholderText = "Wähle Typen aus…",
                 ItemsSource = ViewModel.Betriebskostentypen,
                 DisplayMemberPath = "Beschreibung",
             };
             Panel2.Children.Add(Kostentyp);
             var UmlageSchluessel = new ComboBox
             {
+                AllowFocusOnInteraction = true,
                 Header = "Umlageschlüssel",
+                Margin = new Thickness(10, 0, 0, 0),
                 SelectedIndex = 0, // n.WF
                 ItemsSource = ViewModel.Betriebskostenschluessel,
                 DisplayMemberPath = "Beschreibung"
@@ -61,6 +66,7 @@ namespace Deeplex.Saverwalter.App.Utils
             Panel2.Children.Add(UmlageSchluessel);
             var BetreffendesJahr = new NumberBox
             {
+                AllowFocusOnInteraction = true,
                 Header = "Betr. Jahr",
                 Value = DateTime.UtcNow.Year - 1,
                 Margin = new Thickness(10, 0, 0, 0),
@@ -78,6 +84,8 @@ namespace Deeplex.Saverwalter.App.Utils
             Panel3.Children.Add(Datum);
             var Betrag = new NumberBox
             {
+                AllowFocusOnInteraction = true,
+                Width = 106, // Defined by Header of Umlageschlüssel
                 Header = "Betrag",
                 Margin = new Thickness(10, 0, 0, 0),
             };
@@ -85,11 +93,14 @@ namespace Deeplex.Saverwalter.App.Utils
             Panel3.Children.Add(new Button
             {
                 IsEnabled = false, // TODO
-                Margin = new Thickness(10, 0, 0, 0),
+                Margin = new Thickness(10, 20, 0, 0),
                 Content = new SymbolIcon(Symbol.Attach),
             });
-            var AddButton = new Button { Content = new SymbolIcon(Symbol.Add), };
-
+            var AddButton = new Button
+            {
+                Content = new SymbolIcon(Symbol.Add),
+                Margin = new Thickness(10, 20, 0, 0),
+            };
 
             AddButton.Click += AddBetriebskostenrechnung_Click;
             Panel3.Children.Add(AddButton);
@@ -99,6 +110,7 @@ namespace Deeplex.Saverwalter.App.Utils
             return new AppBarButton
             {
                 Icon = new SymbolIcon(Symbol.Add),
+                Margin = new Thickness(10, 0, 0, 0),
                 Label = "Hinzufügen",
                 Flyout = new Flyout { Content = Panel }
             };
