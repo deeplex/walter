@@ -11,10 +11,7 @@
     xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid
-        x:Name="LayoutRoot"
-        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <NavigationView
             PaneDisplayMode="Left"
             x:Name="NavView"
@@ -49,7 +46,7 @@
                 </StackPanel>
             </NavigationView.PaneFooter>
             <StackPanel>
-                <RelativePanel>
+                <RelativePanel Background="{ThemeResource SystemChromeMediumColor}">
                     <TextBlock x:Name="MainTitel"
                         Style="{StaticResource TitleTextBlockStyle}"
                         Margin="10,0,0,0"
@@ -76,16 +73,16 @@
                     </CommandBar>
                 </RelativePanel>
                 <SplitView
-                    RelativePanel.AlignRightWithPanel="True"
                     x:Name="splitview"
                     DisplayMode="Inline"
                     PanePlacement="Right"
                     OpenPaneLength="300"
+                    PaneBackground="{StaticResource SystemChromeMediumColor}"
                     IsPaneOpen="False">
                     <SplitView.Content>
                         <Frame
-                    x:Name="frame"
-                    Margin="0,0,0,0">
+                            x:Name="frame"
+                            Margin="10">
                             <Frame.ContentTransitions>
                                 <TransitionCollection>
                                     <NavigationThemeTransition>
@@ -111,7 +108,7 @@
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
-                        </StackPanel>
+                            </StackPanel>
                     </SplitView.Pane>
                 </SplitView>
             </StackPanel>
