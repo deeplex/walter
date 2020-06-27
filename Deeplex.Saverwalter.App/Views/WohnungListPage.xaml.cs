@@ -15,6 +15,8 @@ namespace Deeplex.Saverwalter.App.Views
         public WohnungListPage()
         {
             InitializeComponent();
+
+            App.ViewModel.Titel.Value = "Mietobjekte";
         }
 
         private void Wohnung_Tapped(object sender, TappedRoutedEventArgs e)

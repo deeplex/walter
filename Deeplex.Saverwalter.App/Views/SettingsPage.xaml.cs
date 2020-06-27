@@ -7,6 +7,7 @@ namespace Deeplex.Saverwalter.App.Views
         public SettingsPage()
         {
             InitializeComponent();
+            App.ViewModel.Titel.Value = "Einstellungen";
         }
     }
 }

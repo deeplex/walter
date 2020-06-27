@@ -24,7 +24,6 @@
             ItemInvoked="NavView_ItemInvoked"
             BackRequested="NavView_BackRequested"
             IsBackEnabled="{x:Bind AppFrame.CanGoBack, Mode=OneWay}">
-
             <NavigationView.MenuItems>
                 <NavigationViewItem
                     x:Name="KontaktListMenuItem"
@@ -49,55 +48,71 @@
                     <!--TODO about?-->
                 </StackPanel>
             </NavigationView.PaneFooter>
-
-            <SplitView
-                x:Name="splitview"
-                DisplayMode="CompactInline"
-                PanePlacement="Right"
-                OpenPaneLength="300"
-                IsPaneOpen="True">
-                <SplitView.Content>
-                <Frame
-                x:Name="frame"
-                Margin="0,0,0,0">
-                    <Frame.ContentTransitions>
-                        <TransitionCollection>
-                            <NavigationThemeTransition>
-                                <NavigationThemeTransition.DefaultNavigationTransitionInfo>
-                                    <EntranceNavigationTransitionInfo />
-                                </NavigationThemeTransition.DefaultNavigationTransitionInfo>
-                            </NavigationThemeTransition>
-                        </TransitionCollection>
-                    </Frame.ContentTransitions>
-                </Frame>
-                </SplitView.Content>
-                <SplitView.Pane>
-                    <StackPanel>
-                        <RelativePanel>
+            <StackPanel>
+                
+            <RelativePanel>
+                <TextBlock x:Name="MainTitel"
+                    Style="{StaticResource TitleTextBlockStyle}"
+                    Margin="10,0,0,0"
+                    Text="{x:Bind ViewModel.Titel.Value, Mode=TwoWay}" />
+                <CommandBar
+                    RelativePanel.AlignRightWithPanel="True"
+                    x:Name="MainCommandBar"
+                    Background="Transparent"
+                    IsOpen="False"
+                    HorizontalAlignment="Stretch"
+                    DefaultLabelPosition="Right">
+                    <AppBarToggleButton
+                        RelativePanel.AlignRightWithPanel="True"
+                        Width="50"
+                        CornerRadius="0"
+                        Background="Transparent"
+                        x:Name="togglepane"
+                        Click="togglepane_Click">
+                        <SymbolIcon x:Name="togglepanesymbol" Symbol="ClosePane"/>
+                    </AppBarToggleButton>
+                </CommandBar>
+                </RelativePanel>
+                <SplitView
+                    RelativePanel.AlignRightWithPanel="True"
+                    x:Name="splitview"
+                    DisplayMode="Inline"
+                    PanePlacement="Right"
+                    OpenPaneLength="300"
+                    IsPaneOpen="False">
+                    <SplitView.Content>
+                        <Frame
+                    x:Name="frame"
+                    Margin="0,0,0,0">
+                            <Frame.ContentTransitions>
+                                <TransitionCollection>
+                                    <NavigationThemeTransition>
+                                        <NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                                            <EntranceNavigationTransitionInfo />
+                                        </NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                                    </NavigationThemeTransition>
+                                </TransitionCollection>
+                            </Frame.ContentTransitions>
+                        </Frame>
+                    </SplitView.Content>
+                    <SplitView.Pane>
+                        <StackPanel>
                             <TextBlock Margin="5,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}" Text="Explorer" RelativePanel.AlignLeftWithPanel="True"/>
-                            <ToggleButton
-                                RelativePanel.AlignRightWithPanel="True"
-                                Width="50"
-                                CornerRadius="0"
-                                Background="Transparent"
-                                x:Name="togglepane"
-                                Click="togglepane_Click">
-                                <SymbolIcon x:Name="togglepanesymbol" Symbol="OpenPane"/>
-                            </ToggleButton>
-                        </RelativePanel>
-                        <muxc:MenuBar x:Name="ExplorerMenuBar"/>
-                        <mtuuc:WrapPanel x:Name="ExplorerBreadCrumbs"/>
-                        <MenuFlyoutSeparator/>
-                        <ListView ItemsSource="{x:Bind ViewModel.Anhang.Dateien.Value, Mode=OneWay}">
-                            <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="vm:AnhangDatei">
-                                    <TextBlock Text="{x:Bind DateiName}"/>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-                    </StackPanel>
-                </SplitView.Pane>
-            </SplitView>
+                            <muxc:MenuBar x:Name="ExplorerMenuBar"/>
+                            <mtuuc:WrapPanel x:Name="ExplorerBreadCrumbs"/>
+                            <MenuFlyoutSeparator/>
+                            <ListView
+                                ItemsSource="{x:Bind ViewModel.Anhang.Dateien.Value, Mode=OneWay}">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:AnhangDatei">
+                                        <TextBlock Text="{x:Bind DateiName}"/>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </StackPanel>
+                    </SplitView.Pane>
+                </SplitView>
+            </StackPanel>
         </NavigationView>
     </Grid>
 </Page>

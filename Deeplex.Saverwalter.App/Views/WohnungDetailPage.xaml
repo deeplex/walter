@@ -51,13 +51,6 @@
                     <Grid
                     Background="{ThemeResource SystemChromeLowColor}"
                     MinHeight="250">
-                        <TextBlock x:Name="Title"
-                        Style="{StaticResource TitleTextBlockStyle}"
-                        Margin="10,0,0,0">
-                        <Run Text="{x:Bind ViewModel.Anschrift}"/>
-                        <Run Text=" - "/>
-                        <Run Text="{x:Bind ViewModel.Bezeichnung}"/>
-                        </TextBlock>
                     </Grid>
                 </mtuuc:ScrollHeader>
                 <CommandBar

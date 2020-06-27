@@ -44,6 +44,7 @@ namespace Deeplex.Saverwalter.App.Views
             }
             FillMieterBox();
             base.OnNavigatedTo(e);
+            App.ViewModel.Titel.Value = "Vertragdetails";
         }
 
         private void FillMieterBox()

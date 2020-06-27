@@ -28,6 +28,7 @@ namespace Deeplex.Saverwalter.App.Views
             }
 
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
+            App.ViewModel.Titel.Value = ViewModel.Name;
             base.OnNavigatedTo(e);
         }
 

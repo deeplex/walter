@@ -12,6 +12,8 @@ namespace Deeplex.Saverwalter.App.Views
         public VertragListPage()
         {
             InitializeComponent();
+
+            App.ViewModel.Titel.Value = "Verträge";
         }
 
         private void Vertrag_Tapped(object sender, TappedRoutedEventArgs e)

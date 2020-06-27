@@ -21,11 +21,6 @@
             IsOpen="False"
             HorizontalAlignment="Stretch"
             DefaultLabelPosition="Right">
-                <CommandBar.Content>
-                    <TextBlock Text="Betriebskostenrechnungen"
-                    Style="{StaticResource TitleTextBlockStyle}"
-                    Margin="10,0,0,0"/>
-                </CommandBar.Content>
                 <AppBarButton Icon="Sync" Label="Sortiere nach Gruppen" Click="SortiereNachGruppen_Click"/>
                 <AppBarButton
                 AllowFocusOnInteraction="True"

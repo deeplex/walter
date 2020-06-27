@@ -13,6 +13,7 @@ namespace Deeplex.Saverwalter.App.Views
         public KontaktListPage()
         {
             InitializeComponent();
+            App.ViewModel.Titel.Value = "Kontakte";
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)

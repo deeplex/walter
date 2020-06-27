@@ -27,6 +27,7 @@ namespace Deeplex.Saverwalter.App.Views
             }
 
             base.OnNavigatedTo(e);
+            App.ViewModel.Titel.Value = ViewModel.Bezeichnung;
         }
 
         private void UpdateAdresse_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)

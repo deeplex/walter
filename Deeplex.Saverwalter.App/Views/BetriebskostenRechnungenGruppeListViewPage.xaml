@@ -17,17 +17,12 @@
 
     <ScrollViewer>
     <StackPanel>
-        <CommandBar
+            <CommandBar
             Background="Transparent"
             IsOpen="False"
             HorizontalAlignment="Stretch"
             DefaultLabelPosition="Right">
-            <CommandBar.Content>
-                <TextBlock Text="Betriebskostenrechnungen"
-                    Style="{StaticResource TitleTextBlockStyle}"
-                    Margin="10,0,0,0"/>
-            </CommandBar.Content>
-            <AppBarButton Icon="Sync" Label="Sortiere nach Typ" Click="SortiereNachTyp_Click"/>
+                <AppBarButton Icon="Sync" Label="Sortiere nach Typ" Click="SortiereNachTyp_Click"/>
             <AppBarButton
                 AllowFocusOnInteraction="True"
                 Icon="Add" Label="Hinzufügen">

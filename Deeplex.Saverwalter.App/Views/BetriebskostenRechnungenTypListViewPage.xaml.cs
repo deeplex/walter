@@ -25,6 +25,8 @@ namespace Deeplex.Saverwalter.App.Views
             });
             AddBetriebskostenrechnungSchluessel.SelectedIndex = 0; // n.WF.
             AddBetriebskostenrechnungJahr.Value = DateTime.UtcNow.Year - 1;
+
+            App.ViewModel.Titel.Value = "Betriebskostenrechnungen";
         }
 
         private void AddBetriebskostenrechnung_Click(object sender, RoutedEventArgs e)

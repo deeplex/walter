@@ -41,11 +41,6 @@
     <ScrollViewer>
         <StackPanel>
             <RelativePanel>
-                <TextBlock x:Name="Title"
-                Style="{StaticResource TitleTextBlockStyle}"
-                Margin="10,0,0,0"
-                Text="{x:Bind ViewModel.Bezeichnung}"/>
-
                 <CommandBar
                     x:Name="ButtonRow"
                     Background="Transparent" 

@@ -32,6 +32,8 @@ namespace Deeplex.Saverwalter.App.Views
                 BesitzerCombobox.SelectedIndex = ViewModel.AlleVermieter.FindIndex(v => v.Id == ViewModel.Besitzer.Id);
             }
             base.OnNavigatedTo(e);
+
+            App.ViewModel.Titel.Value = ViewModel.Anschrift + " — " + ViewModel.Bezeichnung;
         }
 
         private void UpdateAdresse_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)

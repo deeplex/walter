@@ -1,7 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.App.Views;
-using System;
-using System.Collections.Immutable;
 using Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App
@@ -19,7 +17,7 @@ namespace Deeplex.Saverwalter.App
 
         public Frame AppFrame => frame;
         public SplitView AppSplitView => splitview;
-        public MainViewModel ViewModel = new MainViewModel();
+        public MainViewModel ViewModel = App.ViewModel;
 
         public readonly string KontaktListLabel = "Kontakte";
         public readonly string VertragListLabel = "Verträge";
@@ -36,6 +34,7 @@ namespace Deeplex.Saverwalter.App
                 label == VertragListLabel ? typeof(VertragListPage) :
                 label == BetriebskostenrechnungenListLabel ? typeof(BetriebskostenRechnungenTypListViewPage) :
                 null;
+
             if (pageType != null && pageType != AppFrame.CurrentSourcePageType)
             {
                 AppFrame.Navigate(pageType);
