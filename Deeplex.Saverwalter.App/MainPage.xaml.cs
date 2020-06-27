@@ -13,10 +13,11 @@ namespace Deeplex.Saverwalter.App
             ExplorerMenuBar.Items.Add(ViewModel.Anhang.AnhangAdresseList);
             ExplorerMenuBar.Items.Add(ViewModel.Anhang.AnhangVertragList);
             ViewModel.Anhang.BreadCrumbs = ExplorerBreadCrumbs;
+
+            ViewModel.SetCommandBar(MainCommandBar);
         }
 
         public Frame AppFrame => frame;
-        public SplitView AppSplitView => splitview;
         public MainViewModel ViewModel = App.ViewModel;
 
         public readonly string KontaktListLabel = "Kontakte";

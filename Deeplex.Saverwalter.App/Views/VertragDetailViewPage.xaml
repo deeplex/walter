@@ -45,51 +45,6 @@
 
     <ScrollViewer>
         <StackPanel>
-            <RelativePanel>
-                <CommandBar
-                    x:Name="ButtonRow"
-                    Background="Transparent"
-                    IsOpen="False"
-                    RelativePanel.AlignRightWithPanel="True"
-                    HorizontalAlignment="Stretch"
-                    DefaultLabelPosition="Right">
-                    <AppBarButton
-                        Icon="PostUpdate"
-                        Label="Betriebskostenabrechnung">
-                        <AppBarButton.Flyout>
-                            <Flyout>
-                                <StackPanel Orientation="Horizontal">
-                                    <muxc:NumberBox
-                                        SpinButtonPlacementMode="Inline"
-                                        AllowFocusOnInteraction="True"
-                                        Value="{x:Bind ViewModel.BetriebskostenJahr.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                    <Button
-                                        CommandParameter="{x:Bind ViewModel.BetriebskostenJahr.Value, Mode=OneWay}"
-                                        Click="Betriebskostenabrechnung_Click"
-                                        Background="Transparent">
-                                        <SymbolIcon Symbol="SaveLocal"/>
-                                    </Button>
-                                </StackPanel>
-                            </Flyout>
-                        </AppBarButton.Flyout>
-                    </AppBarButton>
-                    <AppBarButton
-                        Icon="Attach"
-                        Command="{x:Bind ViewModel.AttachFile}">
-                    </AppBarButton>
-                    <CommandBar.SecondaryCommands>
-                        <AppBarToggleButton
-                            Click="EditToggle_Click"
-                            x:Name="EditToggle"
-                            Label="Bearbeiten"
-                            Icon="Edit"/>
-                        <AppBarButton
-                            IsEnabled="False"
-                            Icon="Delete"
-                            Label="Löschen"/>
-                    </CommandBar.SecondaryCommands>
-                </CommandBar>
-            </RelativePanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Laufzeit:" Margin="20,50,0,0" Style="{StaticResource Labels}"/>
                 <CalendarDatePicker

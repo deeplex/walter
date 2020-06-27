@@ -40,28 +40,6 @@
     </Page.Resources>
     <ScrollViewer>
         <StackPanel>
-            <RelativePanel>
-                <CommandBar
-                    x:Name="ButtonRow"
-                    Background="Transparent" 
-                    IsOpen="False"
-                    RelativePanel.AlignRightWithPanel="True"
-                    HorizontalAlignment="Stretch"
-                    DefaultLabelPosition="Right">
-                    <AppBarButton Command="{x:Bind ViewModel.AttachFile}" Icon="Attach"/>
-                    <CommandBar.SecondaryCommands>
-                        <AppBarToggleButton
-                            Icon="Edit"
-                            x:Name="EditToggle"
-                            Label="Bearbeiten"
-                            Click="EditToggle_Click"/>
-                        <AppBarButton
-                            Click="SelfDestruct"
-                            Icon="Delete"
-                            Label="Löschen"/>
-                    </CommandBar.SecondaryCommands>
-                </CommandBar>
-            </RelativePanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBox
                     Width="620"

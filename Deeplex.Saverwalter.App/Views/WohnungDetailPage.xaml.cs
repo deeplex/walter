@@ -34,6 +34,20 @@ namespace Deeplex.Saverwalter.App.Views
             base.OnNavigatedTo(e);
 
             App.ViewModel.Titel.Value = ViewModel.Anschrift + " — " + ViewModel.Bezeichnung;
+            var EditToggle = new AppBarToggleButton
+            {
+                Icon = new SymbolIcon(Symbol.Edit),
+                Label = "Bearbeiten",
+            };
+            var Delete = new AppBarButton
+            {
+                Icon = new SymbolIcon(Symbol.Delete),
+                Label = "Löschen",
+                IsEnabled = false, // TODO
+            };
+            EditToggle.Click += EditToggle_Click;
+            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { },
+                new ICommandBarElement[] { EditToggle, Delete });
         }
 
         private void UpdateAdresse_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
@@ -63,7 +77,7 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            ViewModel.IsInEdit.Value = EditToggle.IsChecked ?? false;
+            ViewModel.IsInEdit.Value = (sender as AppBarToggleButton).IsChecked ?? false;
         }
     }
 }

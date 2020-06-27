@@ -70,7 +70,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private MenuFlyoutSubItem MakeSubItem(string text, object o)
         {
             void TappedFilter(object sender, TappedRoutedEventArgs e) => ApplyFilter(sender);
-            
+
             var item = new MenuFlyoutSubItem() { Text = text, Tag = o };
             item.Tapped += TappedFilter;
             return item;
@@ -83,7 +83,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
             var cs = bs.Select(b => App.Walter.FindPerson(b.PersonId))
-                .Select(p => p is NatuerlichePerson  n ? n.Nachname : p.Bezeichnung);
+                .Select(p => p is NatuerlichePerson n ? n.Nachname : p.Bezeichnung);
             var mieter = string.Join(", ", cs);
 
             var sub = MakeSubItem(mieter + " – " + v.Wohnung.Adresse.Strasse + " " +
@@ -112,7 +112,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             => MakeItem(m.BetreffenderMonat.ToString("MMM yyyy"), m);
 
         private MenuFlyoutItem AnhangMietMinderung(MietMinderung m)
-            =>  MakeItem(m.Beginn.ToString("dd.MM.yyyy") + " – " +
+            => MakeItem(m.Beginn.ToString("dd.MM.yyyy") + " – " +
                     (m.Ende != null ? m.Ende.Value.ToString("dd.MM.yyyy") : "Offen"), m);
 
         private MenuFlyoutSubItem AnhangAdresse(Adresse a)

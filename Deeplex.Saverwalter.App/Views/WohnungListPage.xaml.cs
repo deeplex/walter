@@ -17,6 +17,13 @@ namespace Deeplex.Saverwalter.App.Views
             InitializeComponent();
 
             App.ViewModel.Titel.Value = "Mietobjekte";
+            var AddWohnung = new AppBarButton
+            {
+                Icon = new SymbolIcon(Symbol.Add),
+                Label = "Wohnung hinzufügen",
+            };
+            AddWohnung.Click += AddWohnung_Click;
+            App.ViewModel.RefillCommandContainer(new[] { AddWohnung });
         }
 
         private void Wohnung_Tapped(object sender, TappedRoutedEventArgs e)

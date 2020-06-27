@@ -1,9 +1,8 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Print;
-using Microsoft.Toolkit.Uwp.UI.Extensions;
+using Microsoft.UI.Xaml.Controls;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Windows.Storage;
@@ -45,6 +44,66 @@ namespace Deeplex.Saverwalter.App.Views
             FillMieterBox();
             base.OnNavigatedTo(e);
             App.ViewModel.Titel.Value = "Vertragdetails";
+
+            var Primary = new ICommandBarElement[] {
+                BetriebskostenAbrechnungsButton(),
+                new AppBarButton
+                {
+                    Icon = new SymbolIcon(Symbol.Attach),
+                    Command = ViewModel.AttachFile,
+                }
+            };
+
+            var EditToggle = new AppBarToggleButton
+            {
+                Label = "Bearbeiten",
+                Icon = new SymbolIcon(Symbol.Edit),
+            };
+            EditToggle.Click += EditToggle_Click;
+
+            var Delete = new AppBarButton
+            {
+                Label = "Löschen",
+                Icon = new SymbolIcon(Symbol.Delete),
+                IsEnabled = false, // TODO
+            };
+
+            var Secondary = new ICommandBarElement[]
+            {
+                EditToggle, Delete,
+            };
+
+            App.ViewModel.RefillCommandContainer(Primary, Secondary);
+        }
+
+        private AppBarButton BetriebskostenAbrechnungsButton()
+        {
+            var BetrKostenAbrButtons = new StackPanel()
+            {
+                Orientation = Orientation.Horizontal,
+            };
+            BetrKostenAbrButtons.Children.Add(new NumberBox()
+            {
+                SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline,
+                AllowFocusOnInteraction = true,
+                Value = ViewModel.BetriebskostenJahr.Value,
+            });
+            var AddBetrKostenAbrBtn = new Button
+            {
+                CommandParameter = ViewModel.BetriebskostenJahr.Value,
+                Content = new SymbolIcon(Symbol.SaveLocal),
+            };
+            BetrKostenAbrButtons.Children.Add(AddBetrKostenAbrBtn);
+            AddBetrKostenAbrBtn.Click += Betriebskostenabrechnung_Click;
+            return new AppBarButton()
+            {
+                Icon = new SymbolIcon(Symbol.PostUpdate),
+                Label = "Betriebskostenabrechnung",
+                Flyout = new Flyout()
+                {
+                    Content = BetrKostenAbrButtons,
+                },
+            };
         }
 
         private void FillMieterBox()
@@ -116,7 +175,7 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            ViewModel.IsInEdit.Value = EditToggle.IsChecked ?? false;
+            ViewModel.IsInEdit.Value = (sender as AppBarToggleButton).IsChecked ?? false;
         }
 
         private void MieterBox_TokenItemRemoved(Microsoft.Toolkit.Uwp.UI.Controls.TokenizingTextBox sender, object args)

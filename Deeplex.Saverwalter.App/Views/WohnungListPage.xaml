@@ -14,16 +14,7 @@
     </Page.Resources>
 
     <ScrollViewer>
-    <StackPanel>
-        <CommandBar
-            Background="Transparent"
-            IsOpen="False"
-            RelativePanel.AlignRightWithPanel="True"
-            HorizontalAlignment="Stretch"
-            DefaultLabelPosition="Right">
-            <AppBarButton Click="AddWohnung_Click" Icon="Add" Label="Wohnung hinzufügen"/>
-        </CommandBar>
-        <StackPanel Margin="10">
+        <StackPanel>
             <ScrollViewer>
                 <muxc:ItemsRepeater
                     ItemsSource="{x:Bind ViewModel.AdresseGroup}"
@@ -110,6 +101,5 @@
                 </muxc:ItemsRepeater>
             </ScrollViewer>
         </StackPanel>
-    </StackPanel>
     </ScrollViewer>
 </Page>

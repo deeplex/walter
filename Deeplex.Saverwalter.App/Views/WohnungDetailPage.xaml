@@ -53,22 +53,6 @@
                     MinHeight="250">
                     </Grid>
                 </mtuuc:ScrollHeader>
-                <CommandBar
-                    x:Name="ButtonRow"
-                    Background="Transparent"
-                    IsOpen="False"
-                    RelativePanel.AlignRightWithPanel="True"
-                    HorizontalAlignment="Stretch"
-                    DefaultLabelPosition="Right">
-                    <CommandBar.SecondaryCommands>
-                        <AppBarToggleButton
-                            Icon="Edit"
-                            x:Name="EditToggle"
-                            Label="Bearbeiten"
-                            Click="EditToggle_Click"/>
-                        <AppBarButton Icon="Delete" Label="Löschen"/>
-                    </CommandBar.SecondaryCommands>
-                </CommandBar>
             </RelativePanel>
             <RelativePanel>
                 <mtuuc:WrapPanel Orientation="Horizontal">

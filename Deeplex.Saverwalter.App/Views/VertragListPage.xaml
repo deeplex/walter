@@ -13,25 +13,6 @@
 
     <Grid>
         <RelativePanel>
-            <AutoSuggestBox
-                x:Name="VertragFilter"
-                PlaceholderText="Filter Verträge..."
-                RelativePanel.LeftOf="ButtonRow"
-                Width="240"
-                QueryIcon="Find"/>
-
-            <CommandBar
-                x:Name="ButtonRow"
-                Background="Transparent"
-                IsOpen="False"
-                RelativePanel.AlignRightWithPanel="True"
-                HorizontalAlignment="Stretch"
-                DefaultLabelPosition="Right">
-                <AppBarButton Click="AddVertrag_Click" Icon="Add" Label="Hinzufügen"/>
-                <CommandBar.SecondaryCommands>
-                    <AppBarButton IsEnabled="False" Icon="Delete" Label="Löschen"/>
-                </CommandBar.SecondaryCommands>
-            </CommandBar>
             <Grid
                 RelativePanel.AlignLeftWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True"

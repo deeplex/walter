@@ -1,6 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -17,44 +16,19 @@ namespace Deeplex.Saverwalter.App.Views
         public BetriebskostenRechnungenGruppeListViewPage()
         {
             InitializeComponent();
-
-            ViewModel.AdresseGroup.Keys.ToList().ForEach(k =>
-            {
-                ViewModel.AdresseGroup[k].ForEach(v => k.Children.Add(v));
-                AddBetriebskostenrechnungBetroffeneWohneinheiten.RootNodes.Add(k);
-            });
-            AddBetriebskostenrechnungSchluessel.SelectedIndex = 0; // n.WF.
-            AddBetriebskostenrechnungJahr.Value = DateTime.UtcNow.Year - 1;
-
             App.ViewModel.Titel.Value = "Betriebskostenrechnungen";
-        }
 
-        private void AddBetriebskostenrechnung_Click(object sender, RoutedEventArgs e)
-        {
-            var r = new Betriebskostenrechnung()
+            var Sortiere = new AppBarButton
             {
-                Beschreibung = AddBetriebskostenrechnungBeschreibung.Text,
-                Datum = AddBetriebskostenrechnungDatum.Date.Value.UtcDateTime,
-                Schluessel = ((BetriebskostenRechnungenSchluessel)AddBetriebskostenrechnungSchluessel.SelectedItem).Schluessel,
-                Typ = ((BetriebskostenRechnungenBetriebskostenTyp)AddBetriebskostenrechnungTyp.SelectedItem).Typ,
-                BetreffendesJahr = (int)AddBetriebskostenrechnungJahr.Value,
-                Betrag = AddBetriebskostenrechnungBetrag.Value,
+                Icon = new SymbolIcon(Symbol.Sync),
+                Label = "Sortiere nach Typ"
             };
-            App.Walter.Betriebskostenrechnungen.Add(r);
+            Sortiere.Click += SortiereNachTyp_Click;
 
-            AddBetriebskostenrechnungBetroffeneWohneinheiten.SelectedItems
-                .Where(s => s is BetriebskostenRechungenListWohnungListWohnung)
-                .ToList()
-                .ForEach(b =>
-                {
-                    App.Walter.Betriebskostenrechnungsgruppen.Add(new Betriebskostenrechnungsgruppe
-                    {
-                        WohnungId = ((BetriebskostenRechungenListWohnungListWohnung)b).Id,
-                        Rechnung = r
-                    });
-                });
-
-            App.Walter.SaveChanges();
+            App.ViewModel.RefillCommandContainer(new ICommandBarElement[]
+            {
+                Sortiere, BetriebskostenRechnungenTypListViewPage.AddBetriebskostenrechnung(ViewModel),
+            });
         }
 
         private void SortiereNachTyp_Click(object sender, RoutedEventArgs e)

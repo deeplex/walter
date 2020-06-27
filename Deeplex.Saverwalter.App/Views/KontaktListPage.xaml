@@ -11,46 +11,9 @@
 
     <Grid>
         <RelativePanel>
-            <CommandBar
-                x:Name="ButtonRow"
-                Background="Transparent"
-                IsOpen="False"
-                RelativePanel.LeftOf="KontaktFilter"
-                HorizontalAlignment="Stretch"
-                DefaultLabelPosition="Right">
-                <AppBarButton Icon="Add" Label="Hinzufügen">
-                    <AppBarButton.Flyout>
-                        <Flyout>
-                            <StackPanel Orientation="Horizontal">
-                                <Button Click="AddNatuerlichePerson_Click">
-                                    <StackPanel Orientation="Horizontal">
-                                        <SymbolIcon Symbol="Contact"/>
-                                        <TextBlock Text=" Natürliche Person"/>
-                                    </StackPanel>
-                                </Button>
-                                <Button Margin="20,0,0,0" Click="AddJuristischePerson_Click">
-                                    <StackPanel Orientation="Horizontal">
-                                        <SymbolIcon Symbol="People"/>
-                                        <TextBlock Text=" Juristische Person"/>
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
-                        </Flyout>
-                    </AppBarButton.Flyout>
-                </AppBarButton>
-                <AppBarButton IsEnabled="{x:Bind ViewModel.hasSelectedKontakt, Mode=OneWay}" Click="Details_Click" Icon="ContactInfo" Label="Details"/>
-            </CommandBar>
-            <AutoSuggestBox
-                x:Name="KontaktFilter"
-                PlaceholderText="Filter Kontakte..."
-                RelativePanel.AlignRightWithPanel="True"
-                Width="240"
-                QueryIcon="Find"/>
-
             <Grid
                 RelativePanel.AlignLeftWithPanel="True"
-                RelativePanel.AlignRightWithPanel="True"
-                RelativePanel.Below="ButtonRow">
+                RelativePanel.AlignRightWithPanel="True">
                 <mtuuc:DataGrid
                     IsReadOnly="True"
                     CanUserReorderColumns="False"

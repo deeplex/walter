@@ -49,29 +49,31 @@
                 </StackPanel>
             </NavigationView.PaneFooter>
             <StackPanel>
-                
-            <RelativePanel>
-                <TextBlock x:Name="MainTitel"
-                    Style="{StaticResource TitleTextBlockStyle}"
-                    Margin="10,0,0,0"
-                    Text="{x:Bind ViewModel.Titel.Value, Mode=TwoWay}" />
-                <CommandBar
-                    RelativePanel.AlignRightWithPanel="True"
-                    x:Name="MainCommandBar"
-                    Background="Transparent"
-                    IsOpen="False"
-                    HorizontalAlignment="Stretch"
-                    DefaultLabelPosition="Right">
-                    <AppBarToggleButton
+                <RelativePanel>
+                    <TextBlock x:Name="MainTitel"
+                        Style="{StaticResource TitleTextBlockStyle}"
+                        Margin="10,0,0,0"
+                        Text="{x:Bind ViewModel.Titel.Value, Mode=TwoWay}" />
+                    <CommandBar
+                        Height="40"
+                        x:Name="MainCommandBar"
+                        DefaultLabelPosition="Right"
+                        RelativePanel.LeftOf="MainPermaCommands">
+                    </CommandBar>
+                    <CommandBar
                         RelativePanel.AlignRightWithPanel="True"
-                        Width="50"
-                        CornerRadius="0"
+                        x:Name="MainPermaCommands"
                         Background="Transparent"
-                        x:Name="togglepane"
-                        Click="togglepane_Click">
-                        <SymbolIcon x:Name="togglepanesymbol" Symbol="ClosePane"/>
-                    </AppBarToggleButton>
-                </CommandBar>
+                        IsOpen="False"
+                        HorizontalAlignment="Stretch"
+                        DefaultLabelPosition="Right">
+                        <AppBarToggleButton
+                            RelativePanel.AlignRightWithPanel="True"
+                            x:Name="togglepane"
+                            Click="togglepane_Click">
+                            <SymbolIcon x:Name="togglepanesymbol" Symbol="ClosePane"/>
+                        </AppBarToggleButton>
+                    </CommandBar>
                 </RelativePanel>
                 <SplitView
                     RelativePanel.AlignRightWithPanel="True"

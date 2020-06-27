@@ -14,6 +14,13 @@ namespace Deeplex.Saverwalter.App.Views
             InitializeComponent();
 
             App.ViewModel.Titel.Value = "Verträge";
+            var AddVertrag = new AppBarButton
+            {
+                Icon = new SymbolIcon(Symbol.Add),
+                Label = "Vertrag hinzufügen"
+            };
+            AddVertrag.Click += AddVertrag_Click;
+            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { AddVertrag });
         }
 
         private void Vertrag_Tapped(object sender, TappedRoutedEventArgs e)
