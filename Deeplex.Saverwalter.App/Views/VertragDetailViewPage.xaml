@@ -23,20 +23,6 @@
             <Setter Property="Width" Value="110" />
         </Style>
 
-        <DataTemplate x:Key="Mieter" x:DataType="vm:VertragDetailKontakt">
-            <mtuuc:DockPanel LastChildFill="False">
-                <TextBlock Text="{x:Bind Bezeichnung}"  VerticalAlignment="Center" Margin="10,0,0,0"/>
-                <Button
-                    CommandParameter="{x:Bind PersonId}"
-                    Click="RemoveMieter_Click"
-                    mtuuc:DockPanel.Dock="Right"
-                    Background="Transparent"
-                    Margin="10,0,0,0">
-                    <SymbolIcon Symbol="Cancel" />
-                </Button>
-            </mtuuc:DockPanel>
-        </DataTemplate>
-
         <DataTemplate x:Key="BeginnGrid" x:DataType="vm:VertragDetailVersion">
             <CalendarDatePicker
                 Date="{x:Bind Beginn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -171,23 +157,31 @@
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Mieter:" Style="{StaticResource Labels}"/>
-                <mtuuc:AdaptiveGridView
-                    Margin="20,0,0,-70"
+                <mtuuc:TokenizingTextBox
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                    SelectionMode="Single"
-                    VerticalAlignment="Center"
-                    ItemsSource="{x:Bind ViewModel.Mieter.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    ItemTemplate="{StaticResource Mieter}"/>
-                <AutoSuggestBox
-                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                    Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                    Margin="0,10,0,0"
-                    QueryIcon="AddFriend"
-                    TextMemberPath="Bezeichnung"
-                    MinWidth="200"
-                    PlaceholderText="Mieter hinzufügen..."
-                    QuerySubmitted="MieterSuggest_QuerySubmitted"
-                    TextChanged="MieterSuggest_TextChanged"/>
+                    Margin="20,15,20,0"
+                    x:Name="MieterBox"
+                    MaxHeight="104"
+                    PlaceholderText="Mieter hinzufügen…"
+                    TextChanged="MieterBox_TextChanged"
+                    SuggestedItemsSource="{x:Bind ViewModel.AlleMieter.Value, Mode=OneWay}"
+                    TokenItemAdded="MieterBox_TokenItemAdded"
+                    TokenItemRemoved="MieterBox_TokenItemRemoved">
+                    <mtuuc:TokenizingTextBox.TokenItemTemplate>
+                        <DataTemplate x:DataType="vm:VertragDetailKontakt">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{x:Bind Bezeichnung}" Padding="0,0,4,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </mtuuc:TokenizingTextBox.TokenItemTemplate>
+                    <mtuuc:TokenizingTextBox.SuggestedItemTemplate>
+                        <DataTemplate x:DataType="vm:VertragDetailKontakt">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{x:Bind Bezeichnung}" Padding="4,0,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </mtuuc:TokenizingTextBox.SuggestedItemTemplate>
+                </mtuuc:TokenizingTextBox>
             </mtuuc:WrapPanel>
             <TextBlock
                 Margin="20,20,0,0"

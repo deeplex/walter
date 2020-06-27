@@ -12,12 +12,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class VertragDetailViewModel : VertragDetailVersion
     {
         public Guid guid { get; }
-        public ImmutableList<VertragDetailKontakt> AlleMieter
-            => App.Walter.JuristischePersonen.ToImmutableList()
-                    .Where(j => j.isMieter == true).Select(j => new VertragDetailKontakt(j))
-                    .Concat(App.Walter.NatuerlichePersonen
-                        .Where(n => n.isMieter == true).Select(n => new VertragDetailKontakt(n)))
-                    .ToImmutableList();
+        public ObservableProperty<ImmutableList<VertragDetailKontakt>> AlleMieter
+            = new ObservableProperty<ImmutableList<VertragDetailKontakt>>();
         public ImmutableList<VertragDetailWohnung> AlleWohnungen
             => App.Walter.Wohnungen.Select(w => new VertragDetailWohnung(w)).ToImmutableList();
 
@@ -80,8 +76,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             Mieter.Value = App.Walter.MieterSet
                 .Where(m => m.VertragId == v.First().VertragId)
-                .Select(m => new VertragDetailKontakt(m.PersonId)).ToList()
-                .OrderBy(m => m.Bezeichnung.Length).Reverse().ToImmutableList();
+                .Select(m => new VertragDetailKontakt(m.PersonId))
+                .ToImmutableList();
+
+            AlleMieter.Value = App.Walter.JuristischePersonen.ToImmutableList()
+                    .Where(j => j.isMieter == true).Select(j => new VertragDetailKontakt(j))
+                    .Concat(App.Walter.NatuerlichePersonen
+                        .Where(n => n.isMieter == true).Select(n => new VertragDetailKontakt(n)))
+                    .Where(p => !Mieter.Value.Exists(e => p.PersonId == e.PersonId))
+                    .ToImmutableList();
 
             Mieten.Value = App.Walter.Mieten
                 .Where(m => m.VertragId == v.First().VertragId)
