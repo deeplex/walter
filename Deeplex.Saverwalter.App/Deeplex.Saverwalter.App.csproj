@@ -123,6 +123,7 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\AddXaml.cs" />
     <Compile Include="Utils\Files.cs" />
     <Compile Include="ViewModels\AnhangViewModel.cs" />
     <Compile Include="ViewModels\AdresseViewModel.cs" />

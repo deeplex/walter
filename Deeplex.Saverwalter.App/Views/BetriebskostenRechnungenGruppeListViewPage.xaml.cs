@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -27,7 +28,7 @@ namespace Deeplex.Saverwalter.App.Views
 
             App.ViewModel.RefillCommandContainer(new ICommandBarElement[]
             {
-                Sortiere, BetriebskostenRechnungenTypListViewPage.AddBetriebskostenrechnung(ViewModel),
+                Sortiere, AddXaml.AddBetriebskostenrechnung(ViewModel),
             });
         }
 
