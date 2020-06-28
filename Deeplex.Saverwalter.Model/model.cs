@@ -480,6 +480,14 @@ namespace Deeplex.Saverwalter.Model
         public Anhang Anhang { get; set; } = null!;
     }
 
+    public sealed class AllgemeinZaehlerGruppe
+    {
+        public int AllgemeinZaehlerGruppeId { get; set; }
+        public int WohnungId { get; set; }
+        public Wohnung Wohnung { get; set; } = null!;
+        public AllgemeinZaehler Zaehler { get; set; } = null!;
+    }
+
     public sealed class Zaehler
     {
         public int ZaehlerId { get; set; }
