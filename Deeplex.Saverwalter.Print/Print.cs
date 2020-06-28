@@ -725,9 +725,8 @@ namespace Deeplex.Saverwalter.Print
                     t("2,5 ×"), frac(Kubik(hk.V), kWh(hk.Q)), t(" × ("), t(Celsius((int)hk.tw)), t("-10°C)"), units(), t(" = "), t(Prozent(hk.Para9_2)))));
             }
             p.Append(new Break(), new Break(),
-                new Run(Font(), r("Wobei "), om("V"), r(" die Menge des Warmwassers, die im Zeitraum von "),
-                r(b.Nutzungsbeginn.ToString("dd.MM.yyyy")), r(" – "), r(b.Nutzungsende.ToString("dd.MM.yyyy")), r(" gemessen wurde, "),
-                new Break(), om("Q"), r(" die gemessene Wärmemenge und "), omtw(), r("die geschätzte mittlere Temperatur des Warmwassers darstellt.")));
+                new Run(Font(), r("Wobei "), om("V"), r(" die Menge des Warmwassers, die im Abrechnungszeitraum gemessen wurde, "),
+                om("Q"), r(" die gemessene Wärmemenge am Allgemeinzähler und "), omtw(), r("die geschätzte mittlere Temperatur des Warmwassers darstellt.")));
             return p;
         }
 
@@ -755,7 +754,7 @@ namespace Deeplex.Saverwalter.Print
                     pContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center, bot()),
                     pContentCell(Prozent(g.NFZeitanteil), JustificationValues.Center, bot())));
 
-            var warmeRechnungen = g.Rechnungen.Where(r => (int)r.Typ == 1).ToList();
+            var warmeRechnungen = g.Rechnungen.Where(r => (int)r.Typ % 2 == 1).ToList();
 
             if (warmeRechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachPersonenzahl))
             {
