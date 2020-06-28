@@ -158,7 +158,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Jahre = j;
         }
 
-        public BetriebskostenRechnungenListJahr(List<Betriebskostenrechnungsgruppe> r)
+        public BetriebskostenRechnungenListJahr(List<BetriebskostenrechnungsGruppe> r)
         {
             Jahre = r.GroupBy(gg => gg.Rechnung.BetreffendesJahr)
                 .ToImmutableSortedDictionary(

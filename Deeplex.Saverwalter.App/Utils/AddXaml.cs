@@ -132,7 +132,7 @@ namespace Deeplex.Saverwalter.App.Utils
                     .Where(s => s is BetriebskostenRechungenListWohnungListWohnung)
                     .ToList().ForEach(b =>
                     {
-                        App.Walter.Betriebskostenrechnungsgruppen.Add(new Betriebskostenrechnungsgruppe
+                        App.Walter.Betriebskostenrechnungsgruppen.Add(new BetriebskostenrechnungsGruppe
                         {
                             WohnungId = ((BetriebskostenRechungenListWohnungListWohnung)b).Id,
                             Rechnung = r

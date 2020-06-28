@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.App.Views
             App.Walter.Betriebskostenrechnungen.Add(r);
             foreach (var w in cp.WohnungenIds)
             {
-                App.Walter.Betriebskostenrechnungsgruppen.Add(new Betriebskostenrechnungsgruppe
+                App.Walter.Betriebskostenrechnungsgruppen.Add(new BetriebskostenrechnungsGruppe
                 {
                     Rechnung = r,
                     WohnungId = w

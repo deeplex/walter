@@ -148,20 +148,46 @@
                         <Button Margin="0,0,20,0"  Background="Transparent" HorizontalAlignment="Right" Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}">
                             <Button.Flyout>
                                 <Flyout>
-                                    <StackPanel>
-                                        <TextBlock FontSize="18" Text="Zähler hinzufügen:"/>
-                                        <StackPanel x:Name="AddZaehlerPanel" Orientation="Horizontal">
-                                            <TextBox PlaceholderText="Kennnummer"  Header="Kennnummer"/>
-                                            <ComboBox PlaceholderText="Typ auswählen" Margin="10,0,0,0" ItemsSource="{x:Bind ViewModel.Zaehlertypen, Mode=OneWay}" Header="Typ"/>
-                                            <Button
-                                                CommandParameter="{Binding ElementName=AddZaehlerPanel}"
-                                                Command="{x:Bind ViewModel.AddZaehler}"
-                                                Background="Transparent"
-                                                VerticalAlignment="Bottom">
-                                                <SymbolIcon Symbol="Add"/>
-                                            </Button>
-                                        </StackPanel>
-                                    </StackPanel>
+                                    <Pivot>
+                                        <PivotItem>
+                                            <PivotItem.Header>
+                                                <TextBlock FontSize="14" Text="Zähler"/>
+                                            </PivotItem.Header>
+                                            <StackPanel>
+                                                <StackPanel x:Name="AddZaehlerPanel" Orientation="Horizontal">
+                                                    <TextBox PlaceholderText="Kennnummer"  Header="Kennnummer"/>
+                                                    <ComboBox PlaceholderText="Typ auswählen" Margin="10,0,0,0" ItemsSource="{x:Bind ViewModel.Zaehlertypen, Mode=OneWay}" Header="Typ"/>
+                                                    <Button
+                                                        CommandParameter="{Binding ElementName=AddZaehlerPanel}"
+                                                        Command="{x:Bind ViewModel.AddZaehler}"
+                                                        Background="Transparent"
+                                                        VerticalAlignment="Bottom"> 
+                                                        <SymbolIcon Symbol="Add"/>
+                                                    </Button>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </PivotItem>
+                                        <PivotItem>
+                                            <PivotItem.Header>
+                                                <TextBlock FontSize="14" Text="Allgemeinzähler"/>
+                                            </PivotItem.Header>
+                                            <StackPanel x:Name="AddAllgemeinZaehlerPanel">
+                                                <muxc:TreeView x:Name="AllgemeinZaehlerTree" SelectionMode="Multiple"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBox PlaceholderText="Kennnummer"  Header="Kennnummer"/>
+                                                    <ComboBox PlaceholderText="Typ auswählen" Margin="10,0,0,0" ItemsSource="{x:Bind ViewModel.Zaehlertypen, Mode=OneWay}" Header="Typ"/>
+                                                    <Button
+                                                        CommandParameter="{Binding ElementName=AddAllgemeinZaehlerPanel}"
+                                                        Command="{x:Bind ViewModel.AddAllgemeinZaehler}"
+                                                        Background="Transparent"
+                                                        VerticalAlignment="Bottom">
+                                                        <SymbolIcon Symbol="Add"/>
+                                                    </Button>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </PivotItem>
+                                    </Pivot>
+
                                 </Flyout>
                             </Button.Flyout>
                             <StackPanel Orientation="Horizontal">

@@ -12,10 +12,13 @@ namespace Deeplex.Saverwalter.Model
 
         public DbSet<Adresse> Adressen { get; set; } = null!;
         public DbSet<AdresseAnhang> AdresseAnhaenge { get; set; } = null!;
+        public DbSet<AllgemeinZaehlerGruppe> AllgemeinZaehlerGruppen { get; set; } = null!;
+        public DbSet<AllgemeinZaehler> AllgemeinZaehlerSet { get; set; } = null!;
+        public DbSet<AllgemeinZaehlerAnhang> AllgemeinZaehlerAnhaenge { get; set; } = null!;
         public DbSet<Anhang> Anhaenge { get; set; } = null!;
         public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
         public DbSet<BetriebskostenrechnungAnhang> BetriebskostenrechnungAnhaenge { get; set; } = null!;
-        public DbSet<Betriebskostenrechnungsgruppe> Betriebskostenrechnungsgruppen { get; set; } = null!;
+        public DbSet<BetriebskostenrechnungsGruppe> Betriebskostenrechnungsgruppen { get; set; } = null!;
         public DbSet<Garage> Garagen { get; set; } = null!;
         public DbSet<GarageAnhang> GarageAnhaenge { get; set; } = null!;
         public DbSet<JuristischePerson> JuristischePersonen { get; set; } = null!;
@@ -232,7 +235,7 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
         public List<Vertrag> Vertraege { get; private set; } = new List<Vertrag>();
         public List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
-        public List<Betriebskostenrechnungsgruppe> Betriebskostenrechnungsgruppen { get; private set; } = new List<Betriebskostenrechnungsgruppe>();
+        public List<BetriebskostenrechnungsGruppe> Betriebskostenrechnungsgruppen { get; private set; } = new List<BetriebskostenrechnungsGruppe>();
     }
 
     public sealed class WohnungAnhang : IAnhang<Wohnung>
@@ -419,7 +422,7 @@ namespace Deeplex.Saverwalter.Model
 
         public string? Notiz { get; set; }
 
-        public List<Betriebskostenrechnungsgruppe> Gruppen { get; private set; } = new List<Betriebskostenrechnungsgruppe>();
+        public List<BetriebskostenrechnungsGruppe> Gruppen { get; private set; } = new List<BetriebskostenrechnungsGruppe>();
     }
 
     public enum HKVO_P9A2
@@ -455,9 +458,9 @@ namespace Deeplex.Saverwalter.Model
 
     // Many Wohnungen may share a Betriebskostenrechnung. The calculation is done by the
     // Umlageschluessel and then by respective calculations.
-    public sealed class Betriebskostenrechnungsgruppe
+    public sealed class BetriebskostenrechnungsGruppe
     {
-        public int BetriebskostenrechnungsgruppeId { get; set; }
+        public int BetriebskostenrechnungsGruppeId { get; set; }
         public int WohnungId { get; set; }
         public Wohnung Wohnung { get; set; } = null!;
         public Betriebskostenrechnung Rechnung { get; set; } = null!;
@@ -474,7 +477,7 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class AllgemeinZaehlerAnhang : IAnhang<AllgemeinZaehler>
     {
-        public int AllgemeinZaehlerId { get; set; }
+        public int AllgemeinZaehlerAnhangId { get; set; }
         public AllgemeinZaehler Target { get; set; } = null!;
         public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;

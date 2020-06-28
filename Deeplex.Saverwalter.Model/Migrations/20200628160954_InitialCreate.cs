@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AllgemeinZaehler",
+                name: "AllgemeinZaehlerSet",
                 columns: table => new
                 {
                     AllgemeinZaehlerId = table.Column<int>(nullable: false)
@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AllgemeinZaehler", x => x.AllgemeinZaehlerId);
+                    table.PrimaryKey("PK_AllgemeinZaehlerSet", x => x.AllgemeinZaehlerId);
                 });
 
             migrationBuilder.CreateTable(
@@ -204,9 +204,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     table.PrimaryKey("PK_Betriebskostenrechnungen", x => x.BetriebskostenrechnungId);
                     table.ForeignKey(
-                        name: "FK_Betriebskostenrechnungen_AllgemeinZaehler_AllgemeinZaehlerId",
+                        name: "FK_Betriebskostenrechnungen_AllgemeinZaehlerSet_AllgemeinZaehlerId",
                         column: x => x.AllgemeinZaehlerId,
-                        principalTable: "AllgemeinZaehler",
+                        principalTable: "AllgemeinZaehlerSet",
                         principalColumn: "AllgemeinZaehlerId",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -234,6 +234,32 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         column: x => x.TargetAdresseId,
                         principalTable: "Adressen",
                         principalColumn: "AdresseId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AllgemeinZaehlerAnhaenge",
+                columns: table => new
+                {
+                    AllgemeinZaehlerAnhangId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TargetAllgemeinZaehlerId = table.Column<int>(nullable: false),
+                    AnhangId = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AllgemeinZaehlerAnhaenge", x => x.AllgemeinZaehlerAnhangId);
+                    table.ForeignKey(
+                        name: "FK_AllgemeinZaehlerAnhaenge_Anhaenge_AnhangId",
+                        column: x => x.AnhangId,
+                        principalTable: "Anhaenge",
+                        principalColumn: "AnhangId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AllgemeinZaehlerAnhaenge_AllgemeinZaehlerSet_TargetAllgemeinZaehlerId",
+                        column: x => x.TargetAllgemeinZaehlerId,
+                        principalTable: "AllgemeinZaehlerSet",
+                        principalColumn: "AllgemeinZaehlerId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -549,17 +575,43 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AllgemeinZaehlerGruppen",
+                columns: table => new
+                {
+                    AllgemeinZaehlerGruppeId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    WohnungId = table.Column<int>(nullable: false),
+                    ZaehlerAllgemeinZaehlerId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AllgemeinZaehlerGruppen", x => x.AllgemeinZaehlerGruppeId);
+                    table.ForeignKey(
+                        name: "FK_AllgemeinZaehlerGruppen_Wohnungen_WohnungId",
+                        column: x => x.WohnungId,
+                        principalTable: "Wohnungen",
+                        principalColumn: "WohnungId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AllgemeinZaehlerGruppen_AllgemeinZaehlerSet_ZaehlerAllgemeinZaehlerId",
+                        column: x => x.ZaehlerAllgemeinZaehlerId,
+                        principalTable: "AllgemeinZaehlerSet",
+                        principalColumn: "AllgemeinZaehlerId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Betriebskostenrechnungsgruppen",
                 columns: table => new
                 {
-                    BetriebskostenrechnungsgruppeId = table.Column<int>(nullable: false)
+                    BetriebskostenrechnungsGruppeId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     WohnungId = table.Column<int>(nullable: false),
                     RechnungBetriebskostenrechnungId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Betriebskostenrechnungsgruppen", x => x.BetriebskostenrechnungsgruppeId);
+                    table.PrimaryKey("PK_Betriebskostenrechnungsgruppen", x => x.BetriebskostenrechnungsGruppeId);
                     table.ForeignKey(
                         name: "FK_Betriebskostenrechnungsgruppen_Betriebskostenrechnungen_RechnungBetriebskostenrechnungId",
                         column: x => x.RechnungBetriebskostenrechnungId,
@@ -693,9 +745,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     table.PrimaryKey("PK_Zaehlerstaende", x => x.ZaehlerstandId);
                     table.ForeignKey(
-                        name: "FK_Zaehlerstaende_AllgemeinZaehler_AllgemeinZaehlerId",
+                        name: "FK_Zaehlerstaende_AllgemeinZaehlerSet_AllgemeinZaehlerId",
                         column: x => x.AllgemeinZaehlerId,
-                        principalTable: "AllgemeinZaehler",
+                        principalTable: "AllgemeinZaehlerSet",
                         principalColumn: "AllgemeinZaehlerId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -741,6 +793,26 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 name: "IX_AdresseAnhaenge_TargetAdresseId",
                 table: "AdresseAnhaenge",
                 column: "TargetAdresseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AllgemeinZaehlerAnhaenge_AnhangId",
+                table: "AllgemeinZaehlerAnhaenge",
+                column: "AnhangId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AllgemeinZaehlerAnhaenge_TargetAllgemeinZaehlerId",
+                table: "AllgemeinZaehlerAnhaenge",
+                column: "TargetAllgemeinZaehlerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AllgemeinZaehlerGruppen_WohnungId",
+                table: "AllgemeinZaehlerGruppen",
+                column: "WohnungId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AllgemeinZaehlerGruppen_ZaehlerAllgemeinZaehlerId",
+                table: "AllgemeinZaehlerGruppen",
+                column: "ZaehlerAllgemeinZaehlerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BetriebskostenrechnungAnhaenge_AnhangId",
@@ -934,6 +1006,12 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 name: "AdresseAnhaenge");
 
             migrationBuilder.DropTable(
+                name: "AllgemeinZaehlerAnhaenge");
+
+            migrationBuilder.DropTable(
+                name: "AllgemeinZaehlerGruppen");
+
+            migrationBuilder.DropTable(
                 name: "BetriebskostenrechnungAnhaenge");
 
             migrationBuilder.DropTable(
@@ -1006,7 +1084,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 name: "Zaehlerstaende");
 
             migrationBuilder.DropTable(
-                name: "AllgemeinZaehler");
+                name: "AllgemeinZaehlerSet");
 
             migrationBuilder.DropTable(
                 name: "ZaehlerSet");
