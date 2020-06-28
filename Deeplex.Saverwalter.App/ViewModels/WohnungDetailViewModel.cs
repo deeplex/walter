@@ -155,7 +155,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private WohnungDetailViewModel(Wohnung w)
         {
             Entity = w;
-
+            
             if (w.BesitzerId != Guid.Empty)
             {
                 Besitzer = new WohnungDetailVermieter(w.BesitzerId);
@@ -301,6 +301,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private Zaehler Zaehler;
         private AllgemeinZaehler AllgemeinZaehler;
+
+        public string AllgemeinString => AllgemeinZaehler != null ? " Allgemein" : "";
 
         public ObservableProperty<string> Kennnummer = new ObservableProperty<string>();
         public ObservableProperty<string> Typ = new ObservableProperty<string>();

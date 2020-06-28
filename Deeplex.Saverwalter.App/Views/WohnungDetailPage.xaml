@@ -205,6 +205,7 @@
                                             <Run Text="{x:Bind Kennnummer.Value}"/>
                                             <Run Text=" ("/>
                                             <Run Text="{x:Bind Typ.Value}"/>
+                                            <Run Text="{x:Bind AllgemeinString}"/>
                                             <Run Text=")"/>
                                         </TextBlock>
                                         <Button Margin="10,10,0,0" Background="Transparent" Command="{x:Bind AttachFile}">
