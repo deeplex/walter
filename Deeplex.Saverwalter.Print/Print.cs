@@ -223,7 +223,8 @@ namespace Deeplex.Saverwalter.Print
                 }
                 else
                 {
-                    return "";
+                    // TODO...
+                    return (m as JuristischePerson).Bezeichnung;
                 }
             });
 
