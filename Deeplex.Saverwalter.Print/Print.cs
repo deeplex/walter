@@ -156,9 +156,15 @@ namespace Deeplex.Saverwalter.Print
 
             foreach (var m in b.Mieter)
             {
-                // If b.Mieter is a jur. Person, there is no Anrede...
-                var Anrede = m.Anrede == Model.Anrede.Herr ? "Herrn " : m.Anrede == Model.Anrede.Frau ? "Frau " : "";
-                run.Append(new Text(Anrede + m.Bezeichnung));
+                if (m is JuristischePerson j)
+                {
+                    run.Append(new Text(m.Bezeichnung));
+                }
+                else
+                {
+                    var Anrede = m.Anrede == Model.Anrede.Herr ? "Herrn " : m.Anrede == Model.Anrede.Frau ? "Frau " : "";
+                    run.Append(new Text(Anrede + m.Bezeichnung));
+                }
                 run.Append(new Break());
                 counter--;
             }
@@ -223,8 +229,7 @@ namespace Deeplex.Saverwalter.Print
                 }
                 else
                 {
-                    // TODO...
-                    return (m as JuristischePerson).Bezeichnung;
+                    return "Sehr geehrte Damen und Herren, ";
                 }
             });
 
