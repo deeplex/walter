@@ -97,18 +97,9 @@
                     <SplitView.Pane>
                         <StackPanel>
                             <TextBlock Margin="5,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}" Text="Explorer" RelativePanel.AlignLeftWithPanel="True"/>
-                            <muxc:MenuBar x:Name="ExplorerMenuBar"/>
-                            <mtuuc:WrapPanel x:Name="ExplorerBreadCrumbs"/>
                             <MenuFlyoutSeparator/>
-                            <ListView
-                                ItemsSource="{x:Bind ViewModel.Anhang.Dateien.Value, Mode=OneWay}">
-                                <ListView.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:AnhangDatei">
-                                        <TextBlock Text="{x:Bind DateiName}"/>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
-                            </StackPanel>
+                            <muxc:TreeView x:Name="ExplorerTree"/>
+                        </StackPanel>
                     </SplitView.Pane>
                 </SplitView>
             </StackPanel>

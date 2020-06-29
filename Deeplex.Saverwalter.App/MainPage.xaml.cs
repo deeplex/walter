@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.App.Views;
+using static Deeplex.Saverwalter.App.ViewModels.AnhangViewModel;
 using Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App
@@ -9,12 +10,9 @@ namespace Deeplex.Saverwalter.App
         public MainPage()
         {
             InitializeComponent();
-            ExplorerMenuBar.Items.Add(ViewModel.Anhang.AnhangKontaktList);
-            ExplorerMenuBar.Items.Add(ViewModel.Anhang.AnhangAdresseList);
-            ExplorerMenuBar.Items.Add(ViewModel.Anhang.AnhangVertragList);
-            ViewModel.Anhang.BreadCrumbs = ExplorerBreadCrumbs;
 
             ViewModel.SetCommandBar(MainCommandBar);
+            AnhangRoot(ExplorerTree);
         }
 
         public Frame AppFrame => frame;
