@@ -34,6 +34,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Select(t => new BetriebskostenRechnungenSchluessel(t))
                 .ToList();
 
+        public List<BetriebskostenRechnungenHKVO9> HKVO9 =
+            Enum.GetValues(typeof(HKVO_P9A2))
+                .Cast<HKVO_P9A2>()
+                .ToList()
+                .Select(t => new BetriebskostenRechnungenHKVO9(t))
+                .ToList();
+
         public TreeViewNode AddBetriebskostenTree;
         public BetriebskostenRechnungenListViewModel()
         {
@@ -118,6 +125,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Schluessel = u;
             Beschreibung = u.ToDescriptionString();
+        }
+    }
+
+    public sealed class BetriebskostenRechnungenHKVO9
+    {
+        public HKVO_P9A2 Enum { get; }
+        public string Absatz { get; }
+        public BetriebskostenRechnungenHKVO9(HKVO_P9A2 h)
+        {
+            Enum = h;
+            Absatz = "Absatz " + ((int)h).ToString();
         }
     }
 
