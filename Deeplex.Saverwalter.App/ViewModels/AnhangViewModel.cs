@@ -3,6 +3,7 @@ using Deeplex.Utils.ObjectModel;
 using System.Linq;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.EntityFrameworkCore;
+using wuxc = Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -40,12 +41,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public static void AnhangRoot(TreeView ExplorerTree)
         {
-            TreeViewNode MakeNode(string s)
-                => new TreeViewNode { Content = s };
-
-            var Kontakte = MakeNode("Kontakte");
-            var Mietobjekte = MakeNode("Mietobjete");
-            var Vertraege = MakeNode("Verträge");
+            var Kontakte = new TreeViewNode { Content = "Kontakte" };
+            var Mietobjekte = new TreeViewNode { Content = "Mietobjete" };
+            var Vertraege = new TreeViewNode { Content = "Verträge" };
 
             foreach (var j in App.Walter.JuristischePersonen)
             {

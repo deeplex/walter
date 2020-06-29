@@ -45,7 +45,7 @@
                     <!--TODO about?-->
                 </StackPanel>
             </NavigationView.PaneFooter>
-            <StackPanel>
+                <StackPanel>
                 <RelativePanel Background="{ThemeResource SystemChromeMediumColor}">
                     <TextBlock x:Name="MainTitel"
                         Style="{StaticResource TitleTextBlockStyle}"
@@ -76,7 +76,6 @@
                     x:Name="splitview"
                     DisplayMode="Inline"
                     PanePlacement="Right"
-                    OpenPaneLength="300"
                     PaneBackground="{StaticResource SystemChromeMediumColor}"
                     IsPaneOpen="False">
                     <SplitView.Content>
