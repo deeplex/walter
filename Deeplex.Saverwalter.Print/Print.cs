@@ -581,16 +581,18 @@ namespace Deeplex.Saverwalter.Print
                 {
                     foreach (var Value in Verbrauch.Value)
                     {
+                        var unit = Value.Typ.ToUnitString();
                         table.Append(new TableRow(
-                            ContentCell(Kubik(Value.Delta) + " / " + Kubik(Value.Delta / Value.Anteil) + "\t(" + Value.Typ + ")"),
+                            ContentCell(Unit(Value.Delta, unit) + " / " + Unit(Value.Delta / Value.Anteil, unit) + "\t(" + Value.Typ + ")"),
                             ContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende)),
                             ContentCell(Value.Kennnummer, JustificationValues.Center),
                             ContentCell(Verbrauch.Value.Count > 1 ? "" : Prozent(Value.Anteil), JustificationValues.Center)));
                     }
                     if (Verbrauch.Value.Count > 1)
                     {
+                        var unit = Verbrauch.Value[0].Typ.ToUnitString();
                         table.Append(new TableRow(
-                            pContentCell(Kubik(Verbrauch.Value.Sum(v => v.Delta)) + " / " + Kubik(Verbrauch.Value.Sum(v => v.Delta / v.Anteil)), JustificationValues.Left, top()),
+                            pContentCell(Unit(Verbrauch.Value.Sum(v => v.Delta), unit) + " / " + Unit(Verbrauch.Value.Sum(v => v.Delta / v.Anteil), unit), JustificationValues.Left, top()),
                             pContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Left, top()),
                             pContentCell(Verbrauch.Key.ToDescriptionString(), JustificationValues.Center, top()),
                             pContentCell(Prozent(g.VerbrauchAnteil[Verbrauch.Key]), JustificationValues.Center, top())));
@@ -722,7 +724,7 @@ namespace Deeplex.Saverwalter.Print
                 p.Append(new DocumentFormat.OpenXml.Math.Paragraph(justifyLeft(),
                     new DocumentFormat.OpenXml.Math.OfficeMath(
                     t("2,5 ×"), frac("V", "Q"), t(" × ("), tw(), t("-10°C)"), units(), t(" ⟹ "),
-                    t("2,5 ×"), frac(Kubik(hk.V), kWh(hk.Q)), t(" × ("), t(Celsius((int)hk.tw)), t("-10°C)"), units(), t(" = "), t(Prozent(hk.Para9_2)))));
+                    t("2,5 ×"), frac(Unit(hk.V, "m³"), Unit(hk.Q, "kWh")), t(" × ("), t(Celsius((int)hk.tw)), t("-10°C)"), units(), t(" = "), t(Prozent(hk.Para9_2)))));
             }
             p.Append(new Break(), new Break(),
                 new Run(Font(), r("Wobei "), om("V"), r(" die Menge des Warmwassers, die im Abrechnungszeitraum gemessen wurde, "),
@@ -797,8 +799,9 @@ namespace Deeplex.Saverwalter.Print
                 {
                     foreach (var Value in Verbrauch.Value)
                     {
+                        var unit = Value.Typ.ToUnitString();
                         table.Append(new TableRow(
-                            ContentCell(Kubik(Value.Delta) + " / " + Kubik(Value.Delta / Value.Anteil) + "\t(" + Value.Typ + ")"),
+                            ContentCell(Unit(Value.Delta, unit) + " / " + Unit(Value.Delta / Value.Anteil, unit) + "\t(" + Value.Typ + ")"),
                             ContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende)),
                             ContentCell(Value.Kennnummer, JustificationValues.Center),
                             ContentCell(Prozent(Value.Anteil), JustificationValues.Center)));
@@ -928,11 +931,10 @@ namespace Deeplex.Saverwalter.Print
         // Helper
         private static string Prozent(double d) => string.Format("{0:N2}%", d * 100);
         private static string Euro(double d) => string.Format("{0:N2}€", d);
-        private static string Kubik(double d) => string.Format("{0:N2} m³", d); // TODO this should be embedded in Zaehler...
-        private static string kWh(double d) => string.Format("{0:N2} kWh", d); // TODO this should be embedded in Zaehler...
-        private static string Celsius(double d) => string.Format("{0:N2}°C", d); // TODO this should be embedded in Zaehler...
+        private static string Unit(double d, string unit) => string.Format("{0:N2} " + unit, d);
+        private static string Celsius(double d) => string.Format("{0:N2}°C", d);
         private static string Celsius(int d) => d.ToString() + "°C";
-        private static string Quadrat(double d) => string.Format("{0:N2} m²", d); // TODO this should be embedded in Zaehler...
+        private static string Quadrat(double d) => string.Format("{0:N2} m²", d);
         private static string Datum(DateTime d) => d.ToString("dd.MM.yyyy");
 
         static RunProperties Font()

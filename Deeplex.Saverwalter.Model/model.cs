@@ -512,9 +512,13 @@ namespace Deeplex.Saverwalter.Model
 
     public enum Zaehlertyp
     {
+        [Unit("m³")]
         Warmwasser,
+        [Unit("m³")]
         Kaltwasser,
+        [Unit("kWh")]
         Strom,
+        [Unit("kWh")]
         Gas,
     }
 
