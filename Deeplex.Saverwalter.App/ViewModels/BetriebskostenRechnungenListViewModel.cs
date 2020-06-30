@@ -211,9 +211,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public double Betrag { get; }
         public string Beschreibung { get; }
         public int BetreffendesJahr { get; }
-        public string BetragString => string.Format("{0:F2}€", Betrag);
         public Betriebskostentyp Typ { get; }
-        public string DatumString => Datum.ToString("dd.MM.yyyy");
         public UmlageSchluessel Schluessel { get; }
         public DateTimeOffset Datum { get; set; }
         public string Notiz { get; }
