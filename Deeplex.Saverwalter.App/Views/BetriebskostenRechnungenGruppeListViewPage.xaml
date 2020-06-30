@@ -50,13 +50,15 @@
                                                                 </Button>
                                                             </RelativePanel>
                                                             <muxc:NumberBox
+                                                                IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
                                                                 HorizontalAlignment="Stretch"
                                                                 Header="Betrag"
-                                                                Value="{x:Bind Betrag}"/>
+                                                                Value="{x:Bind Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                                             <CalendarDatePicker
+                                                                IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
                                                                 Header="Datum"
                                                                 HorizontalAlignment="Stretch"
-                                                                Date="{x:Bind Datum}"/>
+                                                                Date="{x:Bind Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                                             <Button CommandParameter="{x:Bind}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{x:Bind hasNoEntity}">
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <TextBlock Text="Speichern"/>

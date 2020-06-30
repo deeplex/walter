@@ -20,6 +20,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
 
+        public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>();
+
         public List<BetriebskostenRechnungenBetriebskostenTyp> Betriebskostentypen =
             Enum.GetValues(typeof(Betriebskostentyp))
                 .Cast<Betriebskostentyp>()
@@ -52,7 +54,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .GroupBy(g => g.Typ)
                 .ToImmutableSortedDictionary(
                     g => new BetriebskostenRechnungenBetriebskostenTyp(g.Key),
-                    g => new BetriebskostenRechnungenListJahr(g.ToList()),
+                    g => new BetriebskostenRechnungenListJahr(this, g.ToList()),
                     Comparer<BetriebskostenRechnungenBetriebskostenTyp>.Create((x, y)
                         => x.Beschreibung.CompareTo(y.Beschreibung)));
 
@@ -60,7 +62,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .GroupBy(p => new SortedSet<int>(p.Rechnung.Gruppen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
                 .ToImmutableSortedDictionary(
                     g => new BetriebskostenRechnungenBetriebskostenGruppe(g.Key),
-                    g => new BetriebskostenRechnungenListJahr(g.ToList()),
+                    g => new BetriebskostenRechnungenListJahr(this, g.ToList()),
                     Comparer<BetriebskostenRechnungenBetriebskostenGruppe>.Create((x, y)
                         => x.Bezeichnung.CompareTo(y.Bezeichnung)));
 
@@ -171,35 +173,35 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public ImmutableSortedDictionary<int, ImmutableList<BetriebskostenRechnungenRechnung>> Jahre { get; }
 
-        public BetriebskostenRechnungenListJahr(ImmutableSortedDictionary<int, ImmutableList<BetriebskostenRechnungenRechnung>> j)
+        public BetriebskostenRechnungenListJahr(BetriebskostenRechnungenListViewModel t, ImmutableSortedDictionary<int, ImmutableList<BetriebskostenRechnungenRechnung>> j)
         {
             Jahre = j;
         }
 
-        public BetriebskostenRechnungenListJahr(List<BetriebskostenrechnungsGruppe> r)
+        public BetriebskostenRechnungenListJahr(BetriebskostenRechnungenListViewModel t, List<BetriebskostenrechnungsGruppe> r)
         {
             Jahre = r.GroupBy(gg => gg.Rechnung.BetreffendesJahr)
                 .ToImmutableSortedDictionary(
                 gg => gg.Key, gg => gg
                     .ToList()
-                    .Select(ggg => new BetriebskostenRechnungenRechnung(ggg.Rechnung))
+                    .Select(ggg => new BetriebskostenRechnungenRechnung(t, ggg.Rechnung))
                     .ToImmutableList(),
                     Comparer<int>.Create((x, y) => y.CompareTo(x)));
         }
 
-        public BetriebskostenRechnungenListJahr(List<Betriebskostenrechnung> r)
+        public BetriebskostenRechnungenListJahr(BetriebskostenRechnungenListViewModel t, List<Betriebskostenrechnung> r)
         {
             Jahre = r.GroupBy(gg => gg.BetreffendesJahr)
                 .ToImmutableSortedDictionary(
                 gg => gg.Key, gg => gg
                     .ToList()
-                    .Select(ggg => new BetriebskostenRechnungenRechnung(ggg))
+                    .Select(ggg => new BetriebskostenRechnungenRechnung(t, ggg))
                     .ToImmutableList(),
                     Comparer<int>.Create((x, y) => y.CompareTo(x)));
         }
     }
 
-    public sealed class BetriebskostenRechnungenRechnung
+    public sealed class BetriebskostenRechnungenRechnung : BindableBase
     {
         private Betriebskostenrechnung Entity { get; set; }
         public void AddEntity(Betriebskostenrechnung r)
@@ -208,18 +210,36 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         public bool hasNoEntity => Entity == null;
-        public double Betrag { get; }
+        public double Betrag
+        {
+            get => Entity.Betrag;
+            set
+            {
+                Entity.Betrag = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
         public string Beschreibung { get; }
         public int BetreffendesJahr { get; }
         public Betriebskostentyp Typ { get; }
         public UmlageSchluessel Schluessel { get; }
-        public DateTimeOffset Datum { get; set; }
+        public DateTimeOffset Datum {
+            get => Entity.Datum;
+            set
+            {
+                Entity.Datum = value.Date.AsUtcKind();
+                RaisePropertyChangedAuto();
+            }
+        }
         public string Notiz { get; }
         public ImmutableList<string> Wohnungen { get; }
         public ImmutableList<int> WohnungenIds { get; }
+
+        public ObservableProperty<bool> IsInEdit;
         //public ImmutableDictionary<string, ImmutableList<string>> Gruppen { get; }
 
-        public BetriebskostenRechnungenRechnung(BetriebskostenRechnungenRechnung r)
+        public BetriebskostenRechnungenRechnung(BetriebskostenRechnungenListViewModel t, BetriebskostenRechnungenRechnung r)
         {
             // Template for next year (Note: Entity is null here)
             BetreffendesJahr = r.BetreffendesJahr + 1;
@@ -232,8 +252,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             Wohnungen = r.Wohnungen;
             WohnungenIds = r.WohnungenIds;
+
+            IsInEdit = t.IsInEdit;
         }
-        public BetriebskostenRechnungenRechnung(Betriebskostenrechnung r)
+        public BetriebskostenRechnungenRechnung(BetriebskostenRechnungenListViewModel t, Betriebskostenrechnung r)
         {
             Entity = r;
             Betrag = r.Betrag;
@@ -254,6 +276,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
+
+            IsInEdit = t.IsInEdit;
         }
 
         public AsyncRelayCommand AttachFile;

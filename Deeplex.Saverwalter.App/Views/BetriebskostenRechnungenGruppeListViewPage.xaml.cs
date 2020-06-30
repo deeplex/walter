@@ -26,10 +26,17 @@ namespace Deeplex.Saverwalter.App.Views
             };
             Sortiere.Click += SortiereNachTyp_Click;
 
+            var EditToggle = new AppBarToggleButton
+            {
+                Label = "Bearbeiten",
+                Icon = new SymbolIcon(Symbol.Edit),
+            };
+            EditToggle.Click += EditToggle_Click;
+
             App.ViewModel.RefillCommandContainer(new ICommandBarElement[]
             {
                 Sortiere, AddXaml.AddBetriebskostenrechnung(ViewModel),
-            });
+            }, new ICommandBarElement[] { EditToggle });
         }
 
         private void SortiereNachTyp_Click(object sender, RoutedEventArgs e)
@@ -45,9 +52,10 @@ namespace Deeplex.Saverwalter.App.Views
             var Rechnungen = LetztesJahr.Value;
 
             var neueJahre = new BetriebskostenRechnungenListJahr(
+                ViewModel,
                 ViewModel.Gruppen.Value[dc.Key].Jahre.Add(
-                LetztesJahr.Key + 1,
-                Rechnungen.Select(r => new BetriebskostenRechnungenRechnung(r)).ToImmutableList()));
+                    LetztesJahr.Key + 1,
+                    Rechnungen.Select(r => new BetriebskostenRechnungenRechnung(ViewModel, r)).ToImmutableList()));
 
             var Typen = ViewModel.Gruppen.Value.Remove(dc.Key);
             ViewModel.Gruppen.Value = Typen.Add(dc.Key, neueJahre);
@@ -78,6 +86,11 @@ namespace Deeplex.Saverwalter.App.Views
             }
             App.Walter.SaveChanges();
             cp.AddEntity(r);
+        }
+
+        private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            ViewModel.IsInEdit.Value = (sender as AppBarToggleButton).IsChecked ?? false;
         }
     }
 }

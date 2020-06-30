@@ -39,20 +39,22 @@
                                                             <StackPanel Width="250" BorderBrush="LightGray" BorderThickness="2" Padding="5">
                                                                 <RelativePanel>
                                                                     <muxc:NumberBox
+                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
                                                                         Width="175"
                                                                         Header="Betrag"
-                                                                        Value="{x:Bind Betrag}"/>
+                                                                        Value="{x:Bind Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                                                     <Button
                                                                         RelativePanel.AlignRightWithPanel="True"
-                                                                    Background="Transparent"
-                                                                    Command="{x:Bind AttachFile}">
+                                                                        Background="Transparent"
+                                                                        Command="{x:Bind AttachFile}">
                                                                         <SymbolIcon Symbol="Attach"/>
                                                                     </Button>
                                                                 </RelativePanel>
                                                                 <CalendarDatePicker
+                                                                    IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
                                                                     Header="Datum"
                                                                     HorizontalAlignment="Stretch"
-                                                                    Date="{x:Bind Datum}"/>
+                                                                    Date="{x:Bind Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                                                 <mtuuc:Expander>
                                                                     <mtuuc:Expander.Header>
                                                                         <TextBlock>
