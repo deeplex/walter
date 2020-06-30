@@ -244,7 +244,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             // Template for next year (Note: Entity is null here)
             BetreffendesJahr = r.BetreffendesJahr + 1;
             Datum = r.Datum.AddYears(1);
-            Betrag = r.Betrag;
+            Betrag = 0;
             Beschreibung = r.Beschreibung;
             Notiz = r.Notiz;
             Schluessel = r.Schluessel;
