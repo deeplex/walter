@@ -37,6 +37,11 @@
                                                     <GridView.ItemTemplate>
                                                         <DataTemplate x:DataType="vm:BetriebskostenRechnungenRechnung">
                                                             <StackPanel Width="250" BorderBrush="LightGray" BorderThickness="2" Padding="5">
+                                                                <StackPanel.ContextFlyout>
+                                                                    <MenuFlyout>
+                                                                        <MenuFlyoutItem Icon="Delete" Text="Löschen" Command="{x:Bind SelfDestruct}"/>
+                                                                    </MenuFlyout>
+                                                                </StackPanel.ContextFlyout>
                                                                 <RelativePanel>
                                                                     <mtuuc:Expander>
                                                                         <mtuuc:Expander.Header>

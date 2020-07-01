@@ -333,6 +333,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
+            SelfDestruct = new RelayCommand(_ =>
+            {
+                App.Walter.Betriebskostenrechnungen.Remove(Entity);
+                App.Walter.SaveChanges();
+            }, _ => true);
 
             IsInEdit = t.IsInEdit;
 
@@ -340,6 +345,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         public AsyncRelayCommand AttachFile;
+        public RelayCommand SelfDestruct;
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
         {
