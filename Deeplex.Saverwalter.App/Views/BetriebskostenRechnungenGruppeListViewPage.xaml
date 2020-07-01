@@ -57,6 +57,14 @@
                                                                                         Header="Ändere betreffendes Jahr:"
                                                                                         Value="{x:Bind BetreffendesJahr, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                                                                         SpinButtonPlacementMode="Compact"/>
+                                                                                    <TextBox
+                                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                                        Text="{x:Bind Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                                        Header="Notiz"/>
+                                                                                    <TextBox
+                                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                                        Text="{x:Bind Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                                        Header="Beschreibung"/>
                                                                                     <Button
                                                                                         HorizontalContentAlignment="Left"
                                                                                         HorizontalAlignment="Stretch"

@@ -225,7 +225,26 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public string Beschreibung { get; }
+        public string Beschreibung
+        {
+            get => Entity.Beschreibung;
+            set
+            {
+                Entity.Beschreibung = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public string Notiz
+        {
+            get => Entity.Notiz;
+            set
+            {
+                Entity.Notiz = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
         public int BetreffendesJahr
         {
             get => Entity.BetreffendesJahr;
@@ -336,7 +355,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 RaisePropertyChangedAuto();
             }
         }
-        public string Notiz { get; }
         public ImmutableList<string> Wohnungen { get; }
         public ImmutableList<int> WohnungenIds { get; }
 
@@ -347,8 +365,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             // Template for next year (Note: Entity is null here)
             BetreffendesJahr = r.BetreffendesJahr + 1;
-            Beschreibung = r.Beschreibung;
-            Notiz = r.Notiz;
 
             Wohnungen = r.Wohnungen;
             WohnungenIds = r.WohnungenIds;
@@ -359,9 +375,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public BetriebskostenRechnungenRechnung(BetriebskostenRechnungenListViewModel t, Betriebskostenrechnung r)
         {
             Entity = r;
-            Beschreibung = r.Beschreibung;
-            BetreffendesJahr = r.BetreffendesJahr;
-            Notiz = r.Notiz;
 
             var w = App.Walter.Betriebskostenrechnungsgruppen
                 .Where(g => g.Rechnung == r);
@@ -392,7 +405,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             switch (e.PropertyName)
             {
                 // case Gruppen
-                //case nameof(Notiz):
+                case nameof(Notiz):
+                case nameof(Beschreibung):
                 case nameof(Typ):
                 case nameof(BetreffendesJahr):
                 case nameof(Betrag):
