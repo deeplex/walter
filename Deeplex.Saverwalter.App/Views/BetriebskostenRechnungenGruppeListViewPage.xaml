@@ -37,26 +37,6 @@
                                                 <GridView.ItemTemplate>
                                                     <DataTemplate x:DataType="vm:BetriebskostenRechnungenRechnung">
                                                         <StackPanel  Width="250" BorderBrush="LightGray" BorderThickness="2" Padding="5">
-                                                            <StackPanel.ContextFlyout>
-                                                                <Flyout>
-                                                                    <StackPanel>
-                                                                        <muxc:NumberBox
-                                                                            IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                            Header="Ändere betreffendes Jahr:"
-                                                                            Value="{x:Bind BetreffendesJahr, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                                            SpinButtonPlacementMode="Compact"/>
-                                                                        <Button
-                                                                            HorizontalContentAlignment="Left"
-                                                                            HorizontalAlignment="Stretch"
-                                                                            Background="Transparent" Command="{x:Bind SelfDestruct}">
-                                                                            <StackPanel Orientation="Horizontal">
-                                                                                <SymbolIcon Symbol="Delete"/>
-                                                                                <TextBlock Margin="10,0,0,0" Text="Löschen"/>
-                                                                            </StackPanel>
-                                                                        </Button>
-                                                                    </StackPanel>
-                                                                </Flyout>
-                                                            </StackPanel.ContextFlyout>
                                                             <RelativePanel>
                                                                 <ComboBox
                                                                     IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
@@ -64,12 +44,39 @@
                                                                     DisplayMemberPath="text"
                                                                     SelectedIndex="{x:Bind Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                     Header="Umlageschlüssel"/>
-                                                                <Button
+                                                                <StackPanel
                                                                     RelativePanel.AlignRightWithPanel="True"
+                                                                    Orientation="Horizontal">
+                                                                    <Button Background="Transparent">
+                                                                        <SymbolIcon Symbol="More"/>
+                                                                        <Button.Flyout>
+                                                                            <Flyout>
+                                                                                <StackPanel>
+                                                                                    <muxc:NumberBox
+                                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                                        Header="Ändere betreffendes Jahr:"
+                                                                                        Value="{x:Bind BetreffendesJahr, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                                        SpinButtonPlacementMode="Compact"/>
+                                                                                    <Button
+                                                                                        HorizontalContentAlignment="Left"
+                                                                                        HorizontalAlignment="Stretch"
+                                                                                        Background="Transparent" Command="{x:Bind SelfDestruct}">
+                                                                                        <StackPanel Orientation="Horizontal">
+                                                                                            <SymbolIcon Symbol="Delete"/>
+                                                                                            <TextBlock Margin="10,0,0,0" Text="Löschen"/>
+                                                                                        </StackPanel>
+                                                                                    </Button>
+                                                                                </StackPanel>
+                                                                            </Flyout>
+                                                                        </Button.Flyout>
+                                                                    </Button>
+                                                                    <Button
                                                                     Background="Transparent"
                                                                     Command="{x:Bind AttachFile}">
-                                                                    <SymbolIcon Symbol="Attach"/>
-                                                                </Button>
+                                                                        <SymbolIcon Symbol="Attach"/>
+                                                                    </Button>
+                                                                </StackPanel>
+                                                                
                                                             </RelativePanel>
                                                             <StackPanel Orientation="Horizontal">
                                                                 <muxc:NumberBox
