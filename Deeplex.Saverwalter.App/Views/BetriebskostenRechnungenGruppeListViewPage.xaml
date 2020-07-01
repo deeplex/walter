@@ -38,9 +38,23 @@
                                                     <DataTemplate x:DataType="vm:BetriebskostenRechnungenRechnung">
                                                         <StackPanel  Width="250" BorderBrush="LightGray" BorderThickness="2" Padding="5">
                                                             <StackPanel.ContextFlyout>
-                                                                <MenuFlyout>
-                                                                    <MenuFlyoutItem Icon="Remove" Text="Löschen" Command="{x:Bind SelfDestruct}"/>
-                                                                </MenuFlyout>
+                                                                <Flyout>
+                                                                    <StackPanel>
+                                                                        <muxc:NumberBox
+                                                                            Header="Ändere betreffendes Jahr:"
+                                                                            Value="{x:Bind BetreffendesJahr, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                            SpinButtonPlacementMode="Compact"/>
+                                                                        <Button
+                                                                            HorizontalContentAlignment="Left"
+                                                                            HorizontalAlignment="Stretch"
+                                                                            Background="Transparent" Command="{x:Bind SelfDestruct}">
+                                                                            <StackPanel Orientation="Horizontal">
+                                                                                <SymbolIcon Symbol="Delete"/>
+                                                                                <TextBlock Margin="10,0,0,0" Text="Löschen"/>
+                                                                            </StackPanel>
+                                                                        </Button>
+                                                                    </StackPanel>
+                                                                </Flyout>
                                                             </StackPanel.ContextFlyout>
                                                             <RelativePanel>
                                                                 <TextBlock

@@ -226,7 +226,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         public string Beschreibung { get; }
-        public int BetreffendesJahr { get; }
+        public int BetreffendesJahr
+        {
+            get => Entity.BetreffendesJahr;
+            set
+            {
+                Entity.BetreffendesJahr = value;
+                RaisePropertyChangedAuto();
+            }
+        }
         public Betriebskostentyp Typ { get; }
         public string Description => Typ.ToDescriptionString();
 
@@ -375,6 +383,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 // case Gruppen
                 //case nameof(Notiz):
+                case nameof(BetreffendesJahr):
                 case nameof(Betrag):
                 case nameof(Datum):
                 case nameof(HKVO_P7):
