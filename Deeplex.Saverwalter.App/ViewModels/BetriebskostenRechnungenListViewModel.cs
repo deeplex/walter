@@ -251,21 +251,33 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public List<BetriebskostenrechnungHKVO_P9A2> HKVO_P9_List =
+        public List<BetriebskostenrechnungEnum> HKVO_P9_List =
             Enum.GetValues(typeof(HKVO_P9A2))
                 .Cast<HKVO_P9A2>().ToList()
-                .Select(s => new BetriebskostenrechnungHKVO_P9A2(s))
+                .Select(s => new BetriebskostenrechnungEnum(s))
                 .ToList();
 
-        public sealed class BetriebskostenrechnungHKVO_P9A2
+        public List<BetriebskostenrechnungEnum> Schluessel_List =
+            Enum.GetValues(typeof(UmlageSchluessel))
+                .Cast<UmlageSchluessel>().ToList()
+                .Select(s => new BetriebskostenrechnungEnum(s))
+                .ToList();
+
+        public sealed class BetriebskostenrechnungEnum
         {
             public int index { get; }
             public string text { get; }
 
-            public BetriebskostenrechnungHKVO_P9A2(HKVO_P9A2 S)
+            public BetriebskostenrechnungEnum(HKVO_P9A2 S)
             {
                 index = (int)S;
                 text = "Satz " + index.ToString();
+            }
+
+            public BetriebskostenrechnungEnum(UmlageSchluessel S)
+            {
+                index = (int)S;
+                text = S.ToDescriptionString();
             }
         }
 
@@ -275,6 +287,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set
             {
                 Entity.HKVO_P9 = (HKVO_P9A2)HKVO_P9_List[value].index;
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public int UmlageSchluessel
+        {
+            get => (int)Entity.Schluessel;
+            set
+            {
+                Entity.Schluessel = (UmlageSchluessel)value;
                 RaisePropertyChangedAuto();
             }
         }
@@ -358,6 +380,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 case nameof(HKVO_P7):
                 case nameof(HKVO_P8):
                 case nameof(HKVO_P9):
+                case nameof(UmlageSchluessel):
                 //case nameof(AllgemeinZaehler):
                     break;
                 default:

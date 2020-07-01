@@ -68,18 +68,27 @@
                                                                         <SymbolIcon Symbol="Attach"/>
                                                                     </Button>
                                                                 </RelativePanel>
-                                                                <muxc:NumberBox
-                                                                    HorizontalAlignment="Left"
-                                                                    IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                    Width="175"
-                                                                    Header="Betrag"
-                                                                    Value="{x:Bind Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <muxc:NumberBox
+                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                        Width="120"
+                                                                        Header="Betrag"
+                                                                        Value="{x:Bind Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                                    <ComboBox
+                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                        Margin="10,0,0,0"
+                                                                        ItemsSource="{x:Bind Schluessel_List}"
+                                                                        DisplayMemberPath="text"
+                                                                        SelectedIndex="{x:Bind UmlageSchluessel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                        Header="Umlageschlüssel"/>
+                                                                </StackPanel>
                                                                 <CalendarDatePicker
                                                                     IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
                                                                     Header="Datum"
                                                                     HorizontalAlignment="Stretch"
                                                                     Date="{x:Bind Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                                                 <StackPanel Visibility="{x:Bind isHeizung, Mode=OneWay}">
+                                                                    <MenuFlyoutSeparator/>
                                                                     <StackPanel Orientation="Horizontal">
                                                                         <Slider
                                                                             IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
