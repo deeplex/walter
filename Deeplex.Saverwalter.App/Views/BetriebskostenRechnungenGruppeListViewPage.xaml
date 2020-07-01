@@ -121,10 +121,18 @@
                                                                     <ComboBox
                                                                         IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
                                                                         ItemsSource="{x:Bind HKVO_P9_List}"
+                                                                        Width="110"
                                                                         DisplayMemberPath="text"
                                                                         SelectedIndex="{x:Bind HKVO_P9, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                         Header="HKVO§9(2)"/>
-                                                                    <HyperlinkButton Margin="35, 10, 0, 0" Content="HeizkostenV" NavigateUri="https://www.gesetze-im-internet.de/heizkostenv" />
+                                                                    <ComboBox
+                                                                        Margin="10,0,0,0"
+                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                        ItemsSource="{x:Bind AllgemeinZaehler_List}"
+                                                                        Width="110"
+                                                                        DisplayMemberPath="Kennnummer"
+                                                                        SelectedIndex="{x:Bind AllgemeinZaehler, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                        Header="Allgemeinzähler"/>
                                                                 </StackPanel>
                                                             </StackPanel>
                                                             <Button CommandParameter="{x:Bind}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{x:Bind hasNoEntity}">

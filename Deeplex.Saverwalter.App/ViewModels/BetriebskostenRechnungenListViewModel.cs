@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -293,6 +294,35 @@ namespace Deeplex.Saverwalter.App.ViewModels
             .Select(s => new BetriebskostenrechnungEnum(s))
             .ToList();
 
+        public List<BetriebskostenrechnungAllgemeinZaehler> AllgemeinZaehler_List =
+            App.Walter.AllgemeinZaehlerSet
+                .Select(a => new BetriebskostenrechnungAllgemeinZaehler(a))
+                .ToList();
+
+        public sealed class BetriebskostenrechnungAllgemeinZaehler
+        {
+            public int Id { get; }
+            public string Kennnummer { get; }
+
+            public BetriebskostenrechnungAllgemeinZaehler(AllgemeinZaehler a)
+            {
+                Id = a.AllgemeinZaehlerId;
+                Kennnummer = a.Kennnummer;
+            }
+        }
+
+        public int AllgemeinZaehler
+        {
+            get => Entity.Allgemeinzaehler != null ?
+                AllgemeinZaehler_List.FindIndex(a => a.Id == Entity.Allgemeinzaehler.AllgemeinZaehlerId) :
+                0;
+            set
+            {
+                Entity.Allgemeinzaehler = App.Walter.AllgemeinZaehlerSet.Find(AllgemeinZaehler_List[value].Id);
+                RaisePropertyChangedAuto();
+            }
+        }
+
         public sealed class BetriebskostenrechnungEnum
         {
             public int index { get; }
@@ -415,7 +445,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 case nameof(HKVO_P8):
                 case nameof(HKVO_P9):
                 case nameof(UmlageSchluessel):
-                //case nameof(AllgemeinZaehler):
+                case nameof(AllgemeinZaehler):
                     break;
                 default:
                     return;
