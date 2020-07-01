@@ -71,8 +71,8 @@ namespace Deeplex.Saverwalter.App.Views
                 BetreffendesJahr = cp.BetreffendesJahr,
                 Datum = cp.Datum.UtcDateTime.AsUtcKind(),
                 Notiz = cp.Notiz,
-                Schluessel = cp.Schluessel,
-                Typ = cp.Typ
+                Schluessel = (UmlageSchluessel)cp.UmlageSchluessel,
+                Typ = (Betriebskostentyp)cp.Typ
             };
             App.Walter.Betriebskostenrechnungen.Add(r);
             foreach (var w in cp.WohnungenIds)

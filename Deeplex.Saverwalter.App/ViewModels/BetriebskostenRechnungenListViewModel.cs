@@ -235,10 +235,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 RaisePropertyChangedAuto();
             }
         }
-        public Betriebskostentyp Typ { get; }
-        public string Description => Typ.ToDescriptionString();
-
-        public bool isHeizung => Typ == Betriebskostentyp.Heizkosten;
+        public bool isHeizung => Entity.Typ == Betriebskostentyp.Heizkosten;
 
         public double HKVO_P7
         {
@@ -271,6 +268,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Select(s => new BetriebskostenrechnungEnum(s))
                 .ToList();
 
+        public List<BetriebskostenrechnungEnum> Typen_List =
+            Enum.GetValues(typeof(Betriebskostentyp))
+            .Cast<Betriebskostentyp>().ToList()
+            .Select(s => new BetriebskostenrechnungEnum(s))
+            .ToList();
+
         public sealed class BetriebskostenrechnungEnum
         {
             public int index { get; }
@@ -287,6 +290,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 index = (int)S;
                 text = S.ToDescriptionString();
             }
+
+            public BetriebskostenrechnungEnum(Betriebskostentyp T)
+            {
+                index = (int)T;
+                text = T.ToDescriptionString();
+            }
         }
 
         public int HKVO_P9
@@ -295,6 +304,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set
             {
                 Entity.HKVO_P9 = (HKVO_P9A2)HKVO_P9_List[value].index;
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public int Typ
+        {
+            get => Typen_List.FindIndex(i => i.index == (int)Entity.Typ);
+            set
+            {
+                Entity.Typ = (Betriebskostentyp)Typen_List[value].index;
                 RaisePropertyChangedAuto();
             }
         }
@@ -309,7 +328,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public UmlageSchluessel Schluessel { get; }
         public DateTimeOffset Datum {
             get => Entity.Datum;
             set
@@ -329,12 +347,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             // Template for next year (Note: Entity is null here)
             BetreffendesJahr = r.BetreffendesJahr + 1;
-            Datum = r.Datum.AddYears(1);
-            Betrag = 0;
             Beschreibung = r.Beschreibung;
             Notiz = r.Notiz;
-            Schluessel = r.Schluessel;
-            Typ = r.Typ;
 
             Wohnungen = r.Wohnungen;
             WohnungenIds = r.WohnungenIds;
@@ -345,13 +359,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public BetriebskostenRechnungenRechnung(BetriebskostenRechnungenListViewModel t, Betriebskostenrechnung r)
         {
             Entity = r;
-            Betrag = r.Betrag;
-            Datum = r.Datum.AsUtcKind();
             Beschreibung = r.Beschreibung;
             BetreffendesJahr = r.BetreffendesJahr;
             Notiz = r.Notiz;
-            Schluessel = r.Schluessel;
-            Typ = r.Typ;
 
             var w = App.Walter.Betriebskostenrechnungsgruppen
                 .Where(g => g.Rechnung == r);
@@ -383,6 +393,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 // case Gruppen
                 //case nameof(Notiz):
+                case nameof(Typ):
                 case nameof(BetreffendesJahr):
                 case nameof(Betrag):
                 case nameof(Datum):
@@ -397,7 +408,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
 
             if (Entity.Datum == null || (
-                Typ == Betriebskostentyp.Heizkosten && (
+                (Betriebskostentyp)Typ == Betriebskostentyp.Heizkosten && (
                     Entity.HKVO_P7 == null ||
                     Entity.HKVO_P8 == null ||
                     Entity.HKVO_P9 == null ||

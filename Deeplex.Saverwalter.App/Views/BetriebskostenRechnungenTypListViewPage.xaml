@@ -41,9 +41,16 @@
                                                                     <Flyout>
                                                                         <StackPanel>
                                                                             <muxc:NumberBox
-                                                                            Header="Ändere betreffendes Jahr:"
-                                                                            Value="{x:Bind BetreffendesJahr, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                                            SpinButtonPlacementMode="Compact"/>
+                                                                                IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                                Header="Ändere betreffendes Jahr:"
+                                                                                Value="{x:Bind BetreffendesJahr, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                                SpinButtonPlacementMode="Compact"/>
+                                                                            <ComboBox
+                                                                                IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                                ItemsSource="{x:Bind Typen_List}"
+                                                                                DisplayMemberPath="text"
+                                                                                SelectedIndex="{x:Bind Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                                Header="Umlageschlüssel"/>  
                                                                             <Button
                                                                             HorizontalContentAlignment="Left"
                                                                             HorizontalAlignment="Stretch"
