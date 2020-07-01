@@ -73,6 +73,30 @@
                                                                         </ListView.ItemTemplate>
                                                                     </ListView>
                                                                 </mtuuc:Expander>
+                                                                <StackPanel Visibility="{x:Bind isHeizung, Mode=OneWay}">
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <Slider
+                                                                            IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                            Width="110" Header="HKVO§7" Minimum="50" Maximum="70"
+                                                                            Value="{x:Bind HKVO_P7, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                                        <Slider
+                                                                            IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                            Width="110" Header="HKVO§8" Minimum="50" Maximum="70" Margin="10,0,0,0"
+                                                                            Value="{x:Bind HKVO_P8, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                                    </StackPanel>
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <ComboBox
+                                                                            IsEnabled="{x:Bind IsInEdit.Value}"
+                                                                            ItemsSource="{x:Bind HKVO_P9_List}"
+                                                                            DisplayMemberPath="text"
+                                                                            SelectedValuePath="index"
+                                                                            SelectedItem="{x:Bind HKVO_P9, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                            Header="HKVO§9"/>
+                                                                        <HyperlinkButton
+                                                                            Margin="35, 10, 0, 0" Content="HeizkostenV"
+                                                                            NavigateUri="https://www.gesetze-im-internet.de/heizkostenv" />
+                                                                    </StackPanel>
+                                                                </StackPanel>
                                                                 <Button CommandParameter="{x:Bind}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{x:Bind hasNoEntity}">
                                                                     <StackPanel Orientation="Horizontal">
                                                                         <TextBlock Text="Speichern"/>

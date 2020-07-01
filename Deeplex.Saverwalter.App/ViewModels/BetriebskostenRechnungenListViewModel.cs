@@ -223,6 +223,56 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public string Beschreibung { get; }
         public int BetreffendesJahr { get; }
         public Betriebskostentyp Typ { get; }
+
+        public bool isHeizung => Typ == Betriebskostentyp.Heizkosten;
+
+        public double HKVO_P7
+        {
+            get => Entity.HKVO_P7 ?? 0;
+            set
+            {
+                Entity.HKVO_P7 = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+        public double HKVO_P8
+        {
+            get => Entity.HKVO_P8 ?? 0;
+            set
+            {
+                Entity.HKVO_P8 = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public List<BetriebskostenrechnungHKVO_P9A2> HKVO_P9_List =
+            Enum.GetValues(typeof(HKVO_P9A2))
+                .Cast<HKVO_P9A2>().ToList()
+                .Select(s => new BetriebskostenrechnungHKVO_P9A2(s))
+                .ToList();
+
+        public sealed class BetriebskostenrechnungHKVO_P9A2
+        {
+            public int index { get; }
+            public string text { get; }
+
+            public BetriebskostenrechnungHKVO_P9A2(HKVO_P9A2 S)
+            {
+                index = (int)S;
+                text = "Satz " + index.ToString();
+            }
+        }
+
+        public BetriebskostenrechnungHKVO_P9A2 HKVO_P9
+        {
+            get => new BetriebskostenrechnungHKVO_P9A2(Entity.HKVO_P9 ?? HKVO_P9A2.Satz_1);
+            set
+            {
+                Entity.HKVO_P9 = (HKVO_P9A2)(value?.index ?? 2);
+                RaisePropertyChangedAuto();
+            }
+        }
+
         public UmlageSchluessel Schluessel { get; }
         public DateTimeOffset Datum {
             get => Entity.Datum;
