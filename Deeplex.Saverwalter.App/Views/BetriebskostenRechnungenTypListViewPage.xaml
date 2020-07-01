@@ -41,9 +41,9 @@
                                                                     <mtuuc:Expander>
                                                                         <mtuuc:Expander.Header>
                                                                             <TextBlock>
-                                                                        <Run Text="Wohnungen ("/>
-                                                                        <Run Text="{x:Bind Wohnungen.Count}"/>
-                                                                        <Run Text=")"/>
+                                                                                <Run Text="Wohnungen ("/>
+                                                                                <Run Text="{x:Bind Wohnungen.Count}"/>
+                                                                                <Run Text=")"/>
                                                                             </TextBlock>
                                                                         </mtuuc:Expander.Header>
                                                                         <ListView
@@ -106,6 +106,14 @@
                                                             </StackPanel>
                                                         </DataTemplate>
                                                     </GridView.ItemTemplate>
+                                                    <GridView.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <mtuuc:StaggeredPanel DesiredColumnWidth="250"
+                                                             HorizontalAlignment="Stretch"
+                                                             ColumnSpacing="5"
+                                                             RowSpacing="5" />
+                                                        </ItemsPanelTemplate>
+                                                    </GridView.ItemsPanel>
                                                 </GridView>
                                             </StackPanel>
                                         </DataTemplate>

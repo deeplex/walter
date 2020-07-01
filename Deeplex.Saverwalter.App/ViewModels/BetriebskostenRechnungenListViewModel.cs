@@ -187,6 +187,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 gg => gg.Key, gg => gg
                     .ToList()
                     .Select(ggg => new BetriebskostenRechnungenRechnung(t, ggg.Rechnung))
+                    .GroupBy(ggg => ggg.Id).Select(ggg => ggg.First()) // Remove duplicates from Gruppen
                     .ToImmutableList(),
                     Comparer<int>.Create((x, y) => y.CompareTo(x)));
         }
@@ -211,6 +212,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Entity = r;
         }
 
+
+        public int Id => Entity.BetriebskostenrechnungId;
         public bool hasNoEntity => Entity == null;
         public double Betrag
         {
@@ -225,6 +228,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public string Beschreibung { get; }
         public int BetreffendesJahr { get; }
         public Betriebskostentyp Typ { get; }
+        public string Description => Typ.ToDescriptionString();
 
         public bool isHeizung => Typ == Betriebskostentyp.Heizkosten;
 

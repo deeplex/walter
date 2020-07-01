@@ -41,7 +41,7 @@
                                                                 <TextBlock
                                                                     Margin="5"
                                                                     FontSize="18"
-                                                                    Text="{x:Bind Typ}"/>
+                                                                    Text="{x:Bind Description, Mode=OneWay}"/>
                                                                 <Button
                                                                     RelativePanel.AlignRightWithPanel="True"
                                                                     Background="Transparent"
