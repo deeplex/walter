@@ -36,8 +36,8 @@
                                                 <CollectionViewSource x:Name="Wohnungen" IsSourceGrouped="True"/>
                                                 <GridView.ItemTemplate>
                                                     <DataTemplate x:DataType="vm:BetriebskostenRechnungenRechnung">
-                                                        <StackPanel Width="250" BorderBrush="LightGray" BorderThickness="2" Padding="5">
-                                                            <RelativePanel>
+                                                        <StackPanel  Width="250" BorderBrush="LightGray" BorderThickness="2" Padding="5">
+                                                            <RelativePanel >
                                                                 <TextBlock
                                                                     Margin="5"
                                                                     FontSize="18"
@@ -59,8 +59,8 @@
                                                                 Header="Datum"
                                                                 HorizontalAlignment="Stretch"
                                                                 Date="{x:Bind Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                                            <MenuFlyoutSeparator/>
                                                             <StackPanel Visibility="{x:Bind isHeizung, Mode=OneWay}">
+                                                                <MenuFlyoutSeparator/>
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <Slider
                                                                         IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
@@ -90,6 +90,14 @@
                                                         </StackPanel>
                                                     </DataTemplate>
                                                 </GridView.ItemTemplate>
+                                                <GridView.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <mtuuc:StaggeredPanel DesiredColumnWidth="250"
+                                                             HorizontalAlignment="Stretch"
+                                                             ColumnSpacing="5"
+                                                             RowSpacing="5" />      
+                                                    </ItemsPanelTemplate>
+                                                </GridView.ItemsPanel>
                                             </GridView>
                                         </DataTemplate>
                                     </Pivot.ItemTemplate>

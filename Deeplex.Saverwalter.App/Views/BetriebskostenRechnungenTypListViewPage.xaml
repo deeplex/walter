@@ -38,11 +38,24 @@
                                                         <DataTemplate x:DataType="vm:BetriebskostenRechnungenRechnung">
                                                             <StackPanel Width="250" BorderBrush="LightGray" BorderThickness="2" Padding="5">
                                                                 <RelativePanel>
-                                                                    <muxc:NumberBox
-                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                        Width="175"
-                                                                        Header="Betrag"
-                                                                        Value="{x:Bind Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                                    <mtuuc:Expander>
+                                                                        <mtuuc:Expander.Header>
+                                                                            <TextBlock>
+                                                                        <Run Text="Wohnungen ("/>
+                                                                        <Run Text="{x:Bind Wohnungen.Count}"/>
+                                                                        <Run Text=")"/>
+                                                                            </TextBlock>
+                                                                        </mtuuc:Expander.Header>
+                                                                        <ListView
+                                                                            SelectionMode="Single"
+                                                                            ItemsSource="{x:Bind Wohnungen, Mode=OneWay}">
+                                                                            <ListView.ItemTemplate>
+                                                                                <DataTemplate x:DataType="x:String">
+                                                                                    <TextBlock Text="{x:Bind}"/>
+                                                                                </DataTemplate>
+                                                                            </ListView.ItemTemplate>
+                                                                        </ListView>
+                                                                    </mtuuc:Expander>
                                                                     <Button
                                                                         RelativePanel.AlignRightWithPanel="True"
                                                                         Background="Transparent"
@@ -50,29 +63,17 @@
                                                                         <SymbolIcon Symbol="Attach"/>
                                                                     </Button>
                                                                 </RelativePanel>
+                                                                <muxc:NumberBox
+                                                                    HorizontalAlignment="Left"
+                                                                    IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                    Width="175"
+                                                                    Header="Betrag"
+                                                                    Value="{x:Bind Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                                                 <CalendarDatePicker
                                                                     IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
                                                                     Header="Datum"
                                                                     HorizontalAlignment="Stretch"
                                                                     Date="{x:Bind Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                                                <mtuuc:Expander>
-                                                                    <mtuuc:Expander.Header>
-                                                                        <TextBlock>
-                                                                    <Run Text="Wohnungen ("/>
-                                                                    <Run Text="{x:Bind Wohnungen.Count}"/>
-                                                                    <Run Text=")"/>
-                                                                        </TextBlock>
-                                                                    </mtuuc:Expander.Header>
-                                                                    <ListView
-                                                                        SelectionMode="Single"
-                                                                        ItemsSource="{x:Bind Wohnungen, Mode=OneWay}">
-                                                                        <ListView.ItemTemplate>
-                                                                            <DataTemplate x:DataType="x:String">
-                                                                                <TextBlock Text="{x:Bind}"/>
-                                                                            </DataTemplate>
-                                                                        </ListView.ItemTemplate>
-                                                                    </ListView>
-                                                                </mtuuc:Expander>
                                                                 <StackPanel Visibility="{x:Bind isHeizung, Mode=OneWay}">
                                                                     <StackPanel Orientation="Horizontal">
                                                                         <Slider
