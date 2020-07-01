@@ -86,12 +86,11 @@
                                                                     </StackPanel>
                                                                     <StackPanel Orientation="Horizontal">
                                                                         <ComboBox
-                                                                            IsEnabled="{x:Bind IsInEdit.Value}"
+                                                                            IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
                                                                             ItemsSource="{x:Bind HKVO_P9_List}"
                                                                             DisplayMemberPath="text"
-                                                                            SelectedValuePath="index"
-                                                                            SelectedItem="{x:Bind HKVO_P9, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                                            Header="HKVO§9"/>
+                                                                            SelectedIndex="{x:Bind HKVO_P9, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                            Header="HKVO§9(2)"/>
                                                                         <HyperlinkButton
                                                                             Margin="35, 10, 0, 0" Content="HeizkostenV"
                                                                             NavigateUri="https://www.gesetze-im-internet.de/heizkostenv" />

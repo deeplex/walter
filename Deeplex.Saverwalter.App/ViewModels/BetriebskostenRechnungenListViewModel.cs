@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
@@ -50,6 +51,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Include(b => b.Gruppen)
                 .ThenInclude(g => g.Wohnung)
                 .ThenInclude(w => w.Adresse)
+                .Include(b => b.Allgemeinzaehler)
                 .ToList()
                 .GroupBy(g => g.Typ)
                 .ToImmutableSortedDictionary(
@@ -228,19 +230,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public double HKVO_P7
         {
-            get => Entity.HKVO_P7 ?? 0;
+            get => (Entity.HKVO_P7 ?? 0) * 100;
             set
             {
-                Entity.HKVO_P7 = value;
+                Entity.HKVO_P7 = value / 100;
                 RaisePropertyChangedAuto();
             }
         }
         public double HKVO_P8
         {
-            get => Entity.HKVO_P8 ?? 0;
+            get => (Entity.HKVO_P8 ?? 0) * 100;
             set
             {
-                Entity.HKVO_P8 = value;
+                Entity.HKVO_P8 = value / 100;
                 RaisePropertyChangedAuto();
             }
         }
@@ -263,12 +265,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public BetriebskostenrechnungHKVO_P9A2 HKVO_P9
+        public int HKVO_P9
         {
-            get => new BetriebskostenrechnungHKVO_P9A2(Entity.HKVO_P9 ?? HKVO_P9A2.Satz_1);
+            get => HKVO_P9_List.FindIndex(i => i.index == (int)Entity.HKVO_P9);
             set
             {
-                Entity.HKVO_P9 = (HKVO_P9A2)(value?.index ?? 2);
+                Entity.HKVO_P9 = (HKVO_P9A2)HKVO_P9_List[value].index;
                 RaisePropertyChangedAuto();
             }
         }
@@ -304,6 +306,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             WohnungenIds = r.WohnungenIds;
 
             IsInEdit = t.IsInEdit;
+            PropertyChanged += OnUpdate;
         }
         public BetriebskostenRechnungenRechnung(BetriebskostenRechnungenListViewModel t, Betriebskostenrechnung r)
         {
@@ -328,9 +331,49 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 await Utils.Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
 
             IsInEdit = t.IsInEdit;
+
+            PropertyChanged += OnUpdate;
         }
 
         public AsyncRelayCommand AttachFile;
+
+        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                // case Gruppen
+                //case nameof(Notiz):
+                case nameof(Betrag):
+                case nameof(Datum):
+                case nameof(HKVO_P7):
+                case nameof(HKVO_P8):
+                case nameof(HKVO_P9):
+                //case nameof(AllgemeinZaehler):
+                    break;
+                default:
+                    return;
+            }
+
+            if (Entity.Datum == null || (
+                Typ == Betriebskostentyp.Heizkosten && (
+                    Entity.HKVO_P7 == null ||
+                    Entity.HKVO_P8 == null ||
+                    Entity.HKVO_P9 == null ||
+                    Entity.Allgemeinzaehler == null)))
+            {
+                return;
+            }
+
+            if (Entity.BetriebskostenrechnungId != 0)
+            {
+                App.Walter.Betriebskostenrechnungen.Update(Entity);
+            }
+            else
+            {
+                App.Walter.Betriebskostenrechnungen.Add(Entity);
+            }
+            App.Walter.SaveChanges();
+        }
 
         // Sorting after Adress? Tree View sth?
         //Gruppen = App.Walter.Betriebskostenrechnungsgruppen
