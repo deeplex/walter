@@ -48,12 +48,12 @@ namespace Deeplex.Saverwalter.App.Views
         private void NeuesJahr_Click(object sender, RoutedEventArgs e)
         {
             var dc = (KeyValuePair<BetriebskostenRechnungenBetriebskostenTyp, BetriebskostenRechnungenListJahr>)((Button)sender).DataContext;
-            var LetztesJahr = dc.Value.Jahre.First();
+            var LetztesJahr = dc.Value.Jahre.Value.First();
             var Rechnungen = LetztesJahr.Value;
 
             var neueJahre = new BetriebskostenRechnungenListJahr(
                 ViewModel,
-                ViewModel.Typen.Value[dc.Key].Jahre.Add(
+                ViewModel.Typen.Value[dc.Key].Jahre.Value.Add(
                 LetztesJahr.Key + 1,
                 Rechnungen.Select(r => new BetriebskostenRechnungenRechnung(ViewModel, r)).ToImmutableList()));
 

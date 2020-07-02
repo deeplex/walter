@@ -23,7 +23,7 @@
                     <Grid>
                         <mtuuc:Expander Header="{Binding Key.Beschreibung}">
                             <RelativePanel>
-                                <Pivot ItemsSource="{Binding Value.Jahre, Mode=OneWay}">
+                                <Pivot ItemsSource="{Binding Value.Jahre.Value, Mode=OneWay}">
                                     <Pivot.HeaderTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Key, Mode=OneWay}"/>

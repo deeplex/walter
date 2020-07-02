@@ -173,34 +173,33 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public sealed class BetriebskostenRechnungenListJahr
     {
-        public ImmutableSortedDictionary<int, ImmutableList<BetriebskostenRechnungenRechnung>> Jahre { get; }
+        public ObservableProperty<ImmutableSortedDictionary<int, ImmutableList<BetriebskostenRechnungenRechnung>>> Jahre { get; set; }
+            = new ObservableProperty<ImmutableSortedDictionary<int, ImmutableList<BetriebskostenRechnungenRechnung>>>();
 
         public BetriebskostenRechnungenListJahr(BetriebskostenRechnungenListViewModel t, ImmutableSortedDictionary<int, ImmutableList<BetriebskostenRechnungenRechnung>> j)
         {
-            Jahre = j;
+            Jahre.Value = j;
         }
 
         public BetriebskostenRechnungenListJahr(BetriebskostenRechnungenListViewModel t, List<BetriebskostenrechnungsGruppe> r)
         {
-            Jahre = r.GroupBy(gg => gg.Rechnung.BetreffendesJahr)
+            Jahre.Value = r.GroupBy(gg => gg.Rechnung.BetreffendesJahr)
                 .ToImmutableSortedDictionary(
-                gg => gg.Key, gg => gg
-                    .ToList()
-                    .Select(ggg => new BetriebskostenRechnungenRechnung(t, ggg.Rechnung))
-                    .GroupBy(ggg => ggg.Id).Select(ggg => ggg.First()) // Remove duplicates from Gruppen
-                    .ToImmutableList(),
-                    Comparer<int>.Create((x, y) => y.CompareTo(x)));
+                    gg => gg.Key, gg => gg.ToList()
+                        .Select(ggg => new BetriebskostenRechnungenRechnung(t, ggg.Rechnung))
+                        .GroupBy(ggg => ggg.Id).Select(ggg => ggg.First()) // Remove duplicates from Gruppen
+                        .ToImmutableList(),
+                        Comparer<int>.Create((x, y) => y.CompareTo(x)));
         }
 
         public BetriebskostenRechnungenListJahr(BetriebskostenRechnungenListViewModel t, List<Betriebskostenrechnung> r)
         {
-            Jahre = r.GroupBy(gg => gg.BetreffendesJahr)
+            Jahre.Value = r.GroupBy(gg => gg.BetreffendesJahr)
                 .ToImmutableSortedDictionary(
-                gg => gg.Key, gg => gg
-                    .ToList()
-                    .Select(ggg => new BetriebskostenRechnungenRechnung(t, ggg))
-                    .ToImmutableList(),
-                    Comparer<int>.Create((x, y) => y.CompareTo(x)));
+                    gg => gg.Key, gg => gg.ToList()
+                        .Select(ggg => new BetriebskostenRechnungenRechnung(t, ggg))
+                        .ToImmutableList(),
+                        Comparer<int>.Create((x, y) => y.CompareTo(x)));
         }
     }
 
@@ -453,11 +452,40 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Wohnungen = r.Wohnungen;
             WohnungenIds = r.WohnungenIds;
 
+            // TODO Attach file to unsaved Entity.
+            SelfDestruct = new RelayCommand(_ => selfDestruct(t), _ => true);
+
             isNew.Value = true;
             t.IsInEdit.Value = true;
             IsInEdit = t.IsInEdit;
             PropertyChanged += OnUpdate;
         }
+
+        private void selfDestruct(BetriebskostenRechnungenListViewModel t)
+        {
+            var obj = t.Typen.Value.Single(s => s.Key.Typ == Entity.Typ).Value;
+            var lst = obj.Jahre.Value[BetreffendesJahr].Remove(this);
+
+            ImmutableSortedDictionary<int, ImmutableList<BetriebskostenRechnungenRechnung>> Remove()
+            {
+                var a = obj.Jahre.Value.Remove(BetreffendesJahr);
+                if (lst.Any())
+                {
+                    a = a.Add(BetreffendesJahr, lst);
+                }
+                return a;
+            }
+
+            obj.Jahre.Value = Remove();
+
+            // TODO remove from Gruppen
+            if (Entity.BetriebskostenrechnungId != 0)
+            {
+                App.Walter.Betriebskostenrechnungen.Remove(Entity);
+                App.Walter.SaveChanges();
+            }
+        }
+
         public BetriebskostenRechnungenRechnung(BetriebskostenRechnungenListViewModel t, Betriebskostenrechnung r)
         {
             Entity = r;
@@ -472,11 +500,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
-            SelfDestruct = new RelayCommand(_ =>
-            {
-                App.Walter.Betriebskostenrechnungen.Remove(Entity);
-                App.Walter.SaveChanges();
-            }, _ => true);
+            SelfDestruct = new RelayCommand(_ => selfDestruct(t), _ => true);
+
 
             IsInEdit = t.IsInEdit;
 
