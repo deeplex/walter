@@ -105,36 +105,47 @@
                                                                 Header="Datum"
                                                                 HorizontalAlignment="Stretch"
                                                                 Date="{x:Bind Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                                            <StackPanel Visibility="{x:Bind isHeizung, Mode=OneWay}">
-                                                                <MenuFlyoutSeparator/>
-                                                                <StackPanel Orientation="Horizontal">
-                                                                    <Slider
-                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                        Width="110" Header="HKVO§7" Minimum="50" Maximum="70"
-                                                                        Value="{x:Bind HKVO_P7, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                                                    <Slider
-                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                        Width="110" Header="HKVO§8" Minimum="50" Maximum="70" Margin="10,0,0,0"
-                                                                        Value="{x:Bind HKVO_P8, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                            <mtuuc:Expander Margin="0,10,0,0" Visibility="{x:Bind isHeizung, Mode=OneWay}">
+                                                                <mtuuc:Expander.Header>
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <TextBlock VerticalAlignment="Center" Text="Heizkostenverordnung"/>
+                                                                        <HyperlinkButton NavigateUri="https://www.gesetze-im-internet.de/heizkostenv">
+                                                                            <SymbolIcon Margin="10,0,0,0" Symbol="Link"/>
+                                                                        </HyperlinkButton>
+
+                                                                    </StackPanel>
+                                                                    
+                                                                </mtuuc:Expander.Header>
+                                                                <StackPanel>
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <Slider
+                                                                            IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                            Width="110" Header="HKVO§7" Minimum="50" Maximum="70"
+                                                                            Value="{x:Bind HKVO_P7, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                                        <Slider
+                                                                            IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                            Width="110" Header="HKVO§8" Minimum="50" Maximum="70" Margin="10,0,0,0"
+                                                                            Value="{x:Bind HKVO_P8, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                                    </StackPanel>
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <ComboBox
+                                                                            IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                            ItemsSource="{x:Bind HKVO_P9_List}"
+                                                                            Width="110"
+                                                                            DisplayMemberPath="text"
+                                                                            SelectedIndex="{x:Bind HKVO_P9, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                            Header="HKVO§9(2)"/>
+                                                                        <ComboBox
+                                                                            Margin="10,0,0,0"
+                                                                            IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
+                                                                            ItemsSource="{x:Bind AllgemeinZaehler_List}"
+                                                                            Width="110"
+                                                                            DisplayMemberPath="Kennnummer"
+                                                                            SelectedIndex="{x:Bind AllgemeinZaehler, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                            Header="Allgemeinzähler"/>
+                                                                    </StackPanel>
                                                                 </StackPanel>
-                                                                <StackPanel Orientation="Horizontal">
-                                                                    <ComboBox
-                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                        ItemsSource="{x:Bind HKVO_P9_List}"
-                                                                        Width="110"
-                                                                        DisplayMemberPath="text"
-                                                                        SelectedIndex="{x:Bind HKVO_P9, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                        Header="HKVO§9(2)"/>
-                                                                    <ComboBox
-                                                                        Margin="10,0,0,0"
-                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                        ItemsSource="{x:Bind AllgemeinZaehler_List}"
-                                                                        Width="110"
-                                                                        DisplayMemberPath="Kennnummer"
-                                                                        SelectedIndex="{x:Bind AllgemeinZaehler, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                        Header="Allgemeinzähler"/>
-                                                                </StackPanel>
-                                                            </StackPanel>
+                                                            </mtuuc:Expander>
                                                             <Button CommandParameter="{x:Bind}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{x:Bind hasNoEntity}">
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <TextBlock Text="Speichern"/>
