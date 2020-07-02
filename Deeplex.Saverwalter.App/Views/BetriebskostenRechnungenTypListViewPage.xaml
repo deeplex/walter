@@ -74,7 +74,7 @@
                                                                                         ItemsSource="{x:Bind Typen_List}"
                                                                                         DisplayMemberPath="text"
                                                                                         SelectedIndex="{x:Bind Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                                        Header="Umlageschlüssel"/>
+                                                                                        Header="Betriebskostentyp"/>
                                                                                     <TextBox
                                                                                         IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
                                                                                         Text="{x:Bind Beschreibung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
