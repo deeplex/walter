@@ -66,13 +66,18 @@ namespace Deeplex.Saverwalter.App.Views
             var cp = (BetriebskostenRechnungenRechnung)((Button)sender).CommandParameter;
             var r = new Betriebskostenrechnung
             {
+                Allgemeinzaehler = App.Walter.AllgemeinZaehlerSet
+                    .Find(cp.AllgemeinZaehler_List[cp.AllgemeinZaehler].Id),
                 Betrag = cp.Betrag,
                 Beschreibung = cp.Beschreibung,
                 BetreffendesJahr = cp.BetreffendesJahr,
                 Datum = cp.Datum.UtcDateTime.AsUtcKind(),
                 Notiz = cp.Notiz,
                 Schluessel = (UmlageSchluessel)cp.UmlageSchluessel,
-                Typ = (Betriebskostentyp)cp.Typ
+                HKVO_P7 = cp.HKVO_P7 / 100,
+                HKVO_P8 = cp.HKVO_P8 / 100,
+                HKVO_P9 = (HKVO_P9A2)cp.HKVO_P9_List[cp.HKVO_P9].index,
+                Typ = (Betriebskostentyp)cp.Typen_List[cp.Typ].index,
             };
             App.Walter.Betriebskostenrechnungen.Add(r);
             foreach (var w in cp.WohnungenIds)
@@ -85,7 +90,7 @@ namespace Deeplex.Saverwalter.App.Views
 
             }
             App.Walter.SaveChanges();
-            cp.AddEntity(r);
+            cp.isNew.Value = false;
         }
 
         private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)

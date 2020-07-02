@@ -208,19 +208,20 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class BetriebskostenRechnungenRechnung : BindableBase
     {
         private Betriebskostenrechnung Entity { get; set; }
-        public void AddEntity(Betriebskostenrechnung r)
-        {
-            Entity = r;
-        }
 
 
         public int Id => Entity.BetriebskostenrechnungId;
-        public bool hasNoEntity => Entity == null;
+        public ObservableProperty<bool> isNew { get; set; }
+            = new ObservableProperty<bool>(false);
         public double Betrag
         {
-            get => Entity.Betrag;
+            get => Entity?.Betrag ?? 0;
             set
             {
+                if (Entity == null)
+                {
+                    return;
+                }
                 Entity.Betrag = value;
                 RaisePropertyChangedAuto();
             }
@@ -228,9 +229,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public string Beschreibung
         {
-            get => Entity.Beschreibung;
+            get => Entity?.Beschreibung;
             set
             {
+                if (Entity == null)
+                {
+                    return;
+                }
                 Entity.Beschreibung = value;
                 RaisePropertyChangedAuto();
             }
@@ -238,9 +243,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public string Notiz
         {
-            get => Entity.Notiz;
+            get => Entity?.Notiz;
             set
             {
+                if (Entity == null)
+                {
+                    return;
+                }
                 Entity.Notiz = value;
                 RaisePropertyChangedAuto();
             }
@@ -248,29 +257,41 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public int BetreffendesJahr
         {
-            get => Entity.BetreffendesJahr;
+            get => Entity?.BetreffendesJahr ?? 0;
             set
             {
+                if (Entity == null)
+                {
+                    return;
+                }
                 Entity.BetreffendesJahr = value;
                 RaisePropertyChangedAuto();
             }
         }
-        public bool isHeizung => Entity.Typ == Betriebskostentyp.Heizkosten;
+        public bool isHeizung => Entity?.Typ == Betriebskostentyp.Heizkosten;
 
         public double HKVO_P7
         {
-            get => (Entity.HKVO_P7 ?? 0) * 100;
+            get => (Entity?.HKVO_P7 ?? 0) * 100;
             set
             {
+                if (Entity == null)
+                {
+                    return;
+                }
                 Entity.HKVO_P7 = value / 100;
                 RaisePropertyChangedAuto();
             }
         }
         public double HKVO_P8
         {
-            get => (Entity.HKVO_P8 ?? 0) * 100;
+            get => (Entity?.HKVO_P8 ?? 0) * 100;
             set
             {
+                if (Entity == null)
+                {
+                    return;
+                }
                 Entity.HKVO_P8 = value / 100;
                 RaisePropertyChangedAuto();
             }
@@ -313,11 +334,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public int AllgemeinZaehler
         {
-            get => Entity.Allgemeinzaehler != null ?
+            get => Entity?.Allgemeinzaehler != null ?
                 AllgemeinZaehler_List.FindIndex(a => a.Id == Entity.Allgemeinzaehler.AllgemeinZaehlerId) :
                 0;
             set
             {
+                if (Entity == null)
+                {
+                    return;
+                }
                 Entity.Allgemeinzaehler = App.Walter.AllgemeinZaehlerSet.Find(AllgemeinZaehler_List[value].Id);
                 RaisePropertyChangedAuto();
             }
@@ -349,9 +374,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public int HKVO_P9
         {
-            get => Entity.Typ == Betriebskostentyp.Heizkosten ? HKVO_P9_List.FindIndex(i => i.index == (int)Entity.HKVO_P9) : 0;
+            get => Entity?.Typ == Betriebskostentyp.Heizkosten ? HKVO_P9_List.FindIndex(i => i.index == (int)Entity.HKVO_P9) : 0;
             set
             {
+                if (Entity == null)
+                {
+                    return;
+                }
                 Entity.HKVO_P9 = (HKVO_P9A2)HKVO_P9_List[value].index;
                 RaisePropertyChangedAuto();
             }
@@ -359,9 +388,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public int Typ
         {
-            get => Typen_List.FindIndex(i => i.index == (int)Entity.Typ);
+            get => Typen_List.FindIndex(i => i.index == (Entity != null ? (int)Entity?.Typ : 0));
             set
             {
+                if (Entity == null)
+                {
+                    return;
+                }
                 Entity.Typ = (Betriebskostentyp)Typen_List[value].index;
                 RaisePropertyChangedAuto();
             }
@@ -369,18 +402,26 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public int UmlageSchluessel
         {
-            get => (int)Entity.Schluessel;
+            get => Entity != null ? (int)Entity.Schluessel : 0;
             set
             {
+                if (Entity == null)
+                {
+                    return;
+                }
                 Entity.Schluessel = (UmlageSchluessel)value;
                 RaisePropertyChangedAuto();
             }
         }
 
         public DateTimeOffset Datum {
-            get => Entity.Datum;
+            get => Entity?.Datum ?? DateTime.Now.Date.AsUtcKind();
             set
             {
+                if (Entity == null)
+                {
+                    return;
+                }
                 Entity.Datum = value.Date.AsUtcKind();
                 RaisePropertyChangedAuto();
             }
@@ -393,12 +434,26 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public BetriebskostenRechnungenRechnung(BetriebskostenRechnungenListViewModel t, BetriebskostenRechnungenRechnung r)
         {
-            // Template for next year (Note: Entity is null here)
-            BetreffendesJahr = r.BetreffendesJahr + 1;
+            Entity = new Betriebskostenrechnung()
+            {
+                Allgemeinzaehler = App.Walter.AllgemeinZaehlerSet
+                    .Find(AllgemeinZaehler_List[r.AllgemeinZaehler].Id),
+                Beschreibung = r.Beschreibung,
+                BetreffendesJahr = r.BetreffendesJahr + 1,
+                Betrag = 0,
+                Datum = r.Datum.Date.AddYears(1),
+                Schluessel = (UmlageSchluessel)r.UmlageSchluessel,
+                HKVO_P7 = r.HKVO_P7 / 100,
+                HKVO_P8 = r.HKVO_P8 / 100,
+                HKVO_P9 = (HKVO_P9A2)HKVO_P9_List[r.HKVO_P9].index,
+                Typ = (Betriebskostentyp)Typen_List[r.Typ].index,
+            };
 
             Wohnungen = r.Wohnungen;
             WohnungenIds = r.WohnungenIds;
 
+            isNew.Value = true;
+            t.IsInEdit.Value = true;
             IsInEdit = t.IsInEdit;
             PropertyChanged += OnUpdate;
         }

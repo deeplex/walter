@@ -146,7 +146,7 @@
                                                                     </StackPanel>
                                                                 </StackPanel>
                                                             </mtuuc:Expander>
-                                                            <Button CommandParameter="{x:Bind}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{x:Bind hasNoEntity}">
+                                                            <Button Margin="0,10,0,0" CommandParameter="{x:Bind}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{x:Bind isNew.Value, Mode=OneWay}">
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <TextBlock Text="Speichern"/>
                                                                     <SymbolIcon Margin="10,0,0,0" Symbol="Accept"/>
