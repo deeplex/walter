@@ -1,6 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
-using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -415,7 +414,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public DateTimeOffset Datum {
+        public DateTimeOffset Datum
+        {
             get => Entity?.Datum ?? DateTime.Now.Date.AsUtcKind();
             set
             {

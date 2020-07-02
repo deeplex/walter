@@ -155,7 +155,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private WohnungDetailViewModel(Wohnung w)
         {
             Entity = w;
-            
+
             if (w.BesitzerId != Guid.Empty)
             {
                 Besitzer = new WohnungDetailVermieter(w.BesitzerId);
@@ -187,7 +187,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 var Tree = (AddAllgemeinZaehlerPanel as StackPanel).Children[0] as Microsoft.UI.Xaml.Controls.TreeView;
                 var Panel = (AddAllgemeinZaehlerPanel as StackPanel).Children[1] as StackPanel;
-               
+
                 var kn = (Panel.Children[0] as TextBox).Text;
                 var Typ = (Zaehlertyp)(Panel.Children[1] as ComboBox).SelectedItem;
 
@@ -197,7 +197,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     Typ = Typ,
                 };
                 App.Walter.AllgemeinZaehlerSet.Add(z);
-                
+
                 foreach (var item in Tree.SelectedNodes)
                 {
                     if (!(item is WohnungDetailAdresseWohnung wohnung))
@@ -462,7 +462,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.Walter.SaveChanges();
                 p.LoadList();
             }, _ => p.IsInEdit.Value);
-            
+
         }
 
         private WohnungDetailZaehlerStand(Zaehlerstand z)

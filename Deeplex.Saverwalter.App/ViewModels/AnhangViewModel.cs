@@ -1,9 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
-using System.Linq;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.EntityFrameworkCore;
-using wuxc = Windows.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls;
+using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {

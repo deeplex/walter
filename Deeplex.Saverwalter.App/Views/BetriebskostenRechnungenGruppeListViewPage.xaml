@@ -146,12 +146,17 @@
                                                                     </StackPanel>
                                                                 </StackPanel>
                                                             </mtuuc:Expander>
-                                                            <Button Margin="0,10,0,0" CommandParameter="{x:Bind}" Click="SaveGruppe_Click" HorizontalAlignment="Stretch" Visibility="{x:Bind isNew.Value, Mode=OneWay}">
-                                                                <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="Speichern"/>
-                                                                    <SymbolIcon Margin="10,0,0,0" Symbol="Accept"/>
-                                                                </StackPanel>
-                                                            </Button>
+                                                            <StackPanel Margin="0,10,0,0" HorizontalAlignment="Stretch" Orientation="Horizontal" Visibility="{x:Bind isNew.Value, Mode=OneWay}">
+                                                                <Button CommandParameter="{x:Bind}" Click="SaveGruppe_Click" Width="170">
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <TextBlock Text="Speichern"/>
+                                                                        <SymbolIcon Margin="10,0,0,0" Symbol="Accept"/>
+                                                                    </StackPanel>
+                                                                </Button>
+                                                                <Button Command="{x:Bind SelfDestruct}" Margin="10,0,0,0" Width="50">
+                                                                    <SymbolIcon Symbol="Cancel"/>
+                                                                </Button>
+                                                            </StackPanel>
                                                         </StackPanel>
                                                     </DataTemplate>
                                                 </GridView.ItemTemplate>
