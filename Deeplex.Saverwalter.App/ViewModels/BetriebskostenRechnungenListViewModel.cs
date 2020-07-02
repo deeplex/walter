@@ -209,6 +209,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         private Betriebskostenrechnung Entity { get; set; }
 
+        public Betriebskostenrechnung GetEntity => Entity;
 
         public int Id => Entity.BetriebskostenrechnungId;
         public ObservableProperty<bool> isNew { get; set; }
@@ -506,7 +507,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     return;
             }
 
-            if (Entity.Datum == null || (
+            if (isNew.Value == true ||
+                Entity.Datum == null || (
                 (Betriebskostentyp)Typ == Betriebskostentyp.Heizkosten && (
                     Entity.HKVO_P7 == null ||
                     Entity.HKVO_P8 == null ||

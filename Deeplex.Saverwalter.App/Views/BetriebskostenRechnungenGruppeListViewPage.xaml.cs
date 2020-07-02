@@ -64,22 +64,15 @@ namespace Deeplex.Saverwalter.App.Views
         private void SaveGruppe_Click(object sender, RoutedEventArgs e)
         {
             var cp = (BetriebskostenRechnungenRechnung)((Button)sender).CommandParameter;
-            var r = new Betriebskostenrechnung
+            var r = cp.GetEntity;
+            if (r != null)
             {
-                Allgemeinzaehler = App.Walter.AllgemeinZaehlerSet
-                    .Find(cp.AllgemeinZaehler_List[cp.AllgemeinZaehler].Id),
-                Betrag = cp.Betrag,
-                Beschreibung = cp.Beschreibung,
-                BetreffendesJahr = cp.BetreffendesJahr,
-                Datum = cp.Datum.UtcDateTime.AsUtcKind(),
-                Notiz = cp.Notiz,
-                Schluessel = (UmlageSchluessel)cp.UmlageSchluessel,
-                HKVO_P7 = cp.HKVO_P7 / 100,
-                HKVO_P8 = cp.HKVO_P8 / 100,
-                HKVO_P9 = (HKVO_P9A2)cp.HKVO_P9_List[cp.HKVO_P9].index,
-                Typ = (Betriebskostentyp)cp.Typen_List[cp.Typ].index,
-            };
-            App.Walter.Betriebskostenrechnungen.Add(r);
+                App.Walter.Betriebskostenrechnungen.Update(r);
+            }
+            else
+            {
+                App.Walter.Betriebskostenrechnungen.Add(r);
+            }
             foreach (var w in cp.WohnungenIds)
             {
                 App.Walter.Betriebskostenrechnungsgruppen.Add(new BetriebskostenrechnungsGruppe
@@ -87,7 +80,6 @@ namespace Deeplex.Saverwalter.App.Views
                     Rechnung = r,
                     WohnungId = w
                 });
-
             }
             App.Walter.SaveChanges();
             cp.isNew.Value = false;
