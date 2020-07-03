@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.App.Views;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using static Deeplex.Saverwalter.App.ViewModels.AnhangViewModel;
 
@@ -7,12 +8,30 @@ namespace Deeplex.Saverwalter.App
 {
     public sealed partial class MainPage : Page
     {
+        private sealed class ExplorerItemTemplateSelector : DataTemplateSelector
+        {
+            public DataTemplate AnhangTemplate { get; private set; }
+            public DataTemplate OtherTemplate { get; private set; }
+
+            public ExplorerItemTemplateSelector(DataTemplate A, DataTemplate O)
+            {
+                AnhangTemplate = A;
+                OtherTemplate = O;
+            }
+
+            protected override DataTemplate SelectTemplateCore(object item)
+            {
+                return item is AnhangDatei ? AnhangTemplate : OtherTemplate;
+            }
+        }
+
         public MainPage()
         {
             InitializeComponent();
 
             ViewModel.SetCommandBar(MainCommandBar);
             AnhangRoot(ExplorerTree);
+            ExplorerTree.ItemTemplateSelector = new ExplorerItemTemplateSelector(AnhangTemplate, OtherTemplate);
         }
 
         public Frame AppFrame => frame;

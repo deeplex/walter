@@ -11,6 +11,23 @@
     xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.Resources>
+        <DataTemplate x:Name="AnhangTemplate" x:DataType="vm:AnhangDatei">
+            <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
+                <TextBlock VerticalAlignment="Center" Text="{x:Bind Content}"/>
+                <Button Background="Transparent" Command="{x:Bind SaveFile}">
+                    <SymbolIcon Symbol="Download"/>
+                </Button>
+            </StackPanel>
+
+        </DataTemplate>
+
+        <DataTemplate x:Name="OtherTemplate" x:DataType="muxc:TreeViewNode">
+            <StackPanel>
+                <TextBlock Text="{x:Bind Content}"/>
+            </StackPanel>
+        </DataTemplate>
+    </Page.Resources>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <NavigationView
             PaneDisplayMode="Left"

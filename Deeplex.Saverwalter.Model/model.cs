@@ -132,7 +132,7 @@ namespace Deeplex.Saverwalter.Model
     public sealed class NatuerlichePersonAnhang : IAnhang<NatuerlichePerson>
     {
         public int NatuerlichePersonAnhangId { get; set; }
-        public NatuerlichePerson Target { get; set; }
+        public NatuerlichePerson Target { get; set; } = null!;
         public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;
     }

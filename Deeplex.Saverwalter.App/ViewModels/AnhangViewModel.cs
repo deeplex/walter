@@ -10,7 +10,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public AnhangViewModel()
         {
-
         }
 
         public class AnhangKontakt : TreeViewNode
@@ -22,6 +21,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 if (p is NatuerlichePerson n)
                 {
                     foreach (var na in App.Walter.NatuerlichePersonAnhaenge
+                        .Include(a => a.Anhang)
                         .Where(a => a.Target.NatuerlichePersonId == n.NatuerlichePersonId))
                     {
                         Children.Add(new AnhangDatei(na.Anhang));
@@ -30,6 +30,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 else if (p is JuristischePerson j)
                 {
                     foreach (var ja in App.Walter.JuristischePersonAnhaenge
+                        .Include(a => a.Anhang)
                         .Where(a => a.Target.JuristischePersonId == j.JuristischePersonId))
                     {
                         Children.Add(new AnhangDatei(ja.Anhang));
@@ -80,6 +81,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 }
 
                 foreach (var aa in App.Walter.AdresseAnhaenge
+                    .Include(a2 => a2.Anhang)
                     .Where(a2 => a2.Target.AdresseId == a.AdresseId))
                 {
                     Children.Add(new AnhangDatei(aa.Anhang));
@@ -99,6 +101,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Content = mieter + " – " + v.Wohnung.Adresse.Strasse + " " + v.Wohnung.Adresse.Hausnummer;
 
                 foreach (var va in App.Walter.VertragAnhaenge
+                    .Include(a => a.Anhang)
                     .Where(a => a.Target == v.VertragId))
                 {
                     Children.Add(new AnhangDatei(va.Anhang));
@@ -128,11 +131,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 }
 
                 foreach (var wa in App.Walter.WohnungAnhaenge
+                    .Include(a => a.Anhang)
                     .Where(a => a.Target.WohnungId == w.WohnungId))
                 {
                     Children.Add(new AnhangDatei(wa.Anhang));
                 }
-
             }
         }
 
@@ -143,6 +146,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Content = r.BetreffendesJahr.ToString() + " " + r.Typ.ToDescriptionString();
 
                 foreach (var ra in App.Walter.BetriebskostenrechnungAnhaenge
+                    .Include(a => a.Anhang)
                     .Where(a => a.Target.BetriebskostenrechnungId == r.BetriebskostenrechnungId))
                 {
                     Children.Add(new AnhangDatei(ra.Anhang));
@@ -165,6 +169,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 }
 
                 foreach (var za in App.Walter.ZaehlerAnhaenge
+                    .Include(a => a.Anhang)
                     .Where(a => a.Target.ZaehlerId == z.ZaehlerId))
                 {
                     Children.Add(new AnhangDatei(za.Anhang));
@@ -179,6 +184,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Content = z.Datum.ToString("dd.MM.yyyy");
 
                 foreach (var za in App.Walter.ZaehlerstandAnhaenge
+                    .Include(a => a.Anhang)
                     .Where(a => a.Target.ZaehlerstandId == z.ZaehlerstandId))
                 {
                     Children.Add(new AnhangDatei(za.Anhang));
@@ -193,6 +199,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Content = m.BetreffenderMonat.ToString("MMM yyyy");
 
                 foreach (var ma in App.Walter.MieteAnhaenge
+                    .Include(a => a.Anhang)
                     .Where(a => a.Target.MieteId == m.MieteId))
                 {
                     Children.Add(new AnhangDatei(ma.Anhang));
@@ -208,23 +215,24 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     (m.Ende != null ? m.Ende.Value.ToString("dd.MM.yyyy") : "Offen");
 
                 foreach (var ma in App.Walter.MietMinderungAnhaenge
+                    .Include(a => a.Anhang)
                     .Where(a => a.Target.MietMinderungId == m.MietMinderungId))
                 {
                     Children.Add(new AnhangDatei(ma.Anhang));
                 }
             }
         }
+    }
 
-        public sealed class AnhangDatei : TreeViewNode
+    public sealed class AnhangDatei : TreeViewNode
+    {
+        public Anhang Entity { get; }
+
+        public AnhangDatei(Anhang a)
         {
-            public Anhang Entity { get; }
-
-            public AnhangDatei(Anhang a)
-            {
-                Entity = a;
-                Content = a.FileName;
-            }
-            public string DateiName => Entity.FileName;
+            Entity = a;
+            Content = a.FileName;
         }
+        public string DateiName => Entity.FileName;
     }
 }
