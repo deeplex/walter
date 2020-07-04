@@ -232,7 +232,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = a;
             Content = a.FileName;
+
+            SaveFile = new AsyncRelayCommand(async _
+                => await Utils.Files.ExtractTo(a), _ => true);
         }
+
+        public AsyncRelayCommand SaveFile;
         public string DateiName => Entity.FileName;
     }
 }

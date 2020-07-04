@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
@@ -22,6 +23,20 @@ namespace Deeplex.Saverwalter.App.Utils
             anhang.Sha256Hash = SHA256.Create().ComputeHash(anhang.Content);
 
             return anhang;
+        }
+
+        public static async Task ExtractTo(Anhang a)
+        {
+            var picker = new Windows.Storage.Pickers.FileSavePicker()
+            {
+                SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop,
+                SuggestedFileName = a.FileName,
+            };
+
+            picker.FileTypeChoices.Add(a.ContentType, new List<string> { Path.GetExtension(a.FileName) });
+
+            var file = await picker.PickSaveFileAsync();
+            await FileIO.WriteBytesAsync(file, a.Content);
         }
 
         public static Windows.Storage.Pickers.FileOpenPicker FilePicker(params string[] filters)
