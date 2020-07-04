@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.App.Utils
                 SuggestedFileName = a.FileName,
             };
 
-            picker.FileTypeChoices.Add(a.ContentType, new List<string> { Path.GetExtension(a.FileName) });
+            picker.FileTypeChoices.Add("", new List<string> { Path.GetExtension(a.FileName) });
 
             var file = await picker.PickSaveFileAsync();
             await FileIO.WriteBytesAsync(file, a.Content);
