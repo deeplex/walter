@@ -30,7 +30,7 @@ namespace Deeplex.Saverwalter.App
             InitializeComponent();
 
             ViewModel.SetCommandBar(MainCommandBar);
-            AnhangRoot(ExplorerTree);
+            App.ViewModel.Explorer = new AnhangViewModel(ExplorerTree);
             ExplorerTree.ItemTemplateSelector = new ExplorerItemTemplateSelector(AnhangTemplate, OtherTemplate);
         }
 

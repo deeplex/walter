@@ -16,7 +16,7 @@
             <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
                 <TextBlock VerticalAlignment="Center" Text="{x:Bind Content}"/>
                 <Button Background="Transparent" Command="{x:Bind SaveFile}">
-                    <SymbolIcon Symbol="Download"/>
+                    <SymbolIcon Symbol="Save"/>
                 </Button>
             </StackPanel>
 
@@ -112,7 +112,12 @@
                     </SplitView.Content>
                     <SplitView.Pane>
                         <StackPanel>
-                            <TextBlock Margin="5,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}" Text="Explorer" RelativePanel.AlignLeftWithPanel="True"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}" Text="Explorer" RelativePanel.AlignLeftWithPanel="True"/>
+                                <ToggleButton>
+                                    <SymbolIcon Symbol="Download"/>
+                                </ToggleButton>
+                            </StackPanel>
                             <MenuFlyoutSeparator/>
                             <muxc:TreeView x:Name="ExplorerTree"/>
                         </StackPanel>

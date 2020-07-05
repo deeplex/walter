@@ -8,11 +8,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class AnhangViewModel : BindableBase
     {
-        public AnhangViewModel()
-        {
-        }
-
-        public static void AnhangRoot(TreeView ExplorerTree)
+        public AnhangViewModel(TreeView ExplorerTree)
         {
             var Kontakte = new TreeViewNode { Content = "Kontakte" };
             var Mietobjekte = new TreeViewNode { Content = "Mietobjete" };
