@@ -12,33 +12,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
         }
 
-        public class AnhangKontakt : TreeViewNode
-        {
-            public AnhangKontakt(IPerson p)
-            {
-                Content = p.Bezeichnung;
-
-                if (p is NatuerlichePerson n)
-                {
-                    foreach (var na in App.Walter.NatuerlichePersonAnhaenge
-                        .Include(a => a.Anhang)
-                        .Where(a => a.Target.NatuerlichePersonId == n.NatuerlichePersonId))
-                    {
-                        Children.Add(new AnhangDatei(na.Anhang));
-                    }
-                }
-                else if (p is JuristischePerson j)
-                {
-                    foreach (var ja in App.Walter.JuristischePersonAnhaenge
-                        .Include(a => a.Anhang)
-                        .Where(a => a.Target.JuristischePersonId == j.JuristischePersonId))
-                    {
-                        Children.Add(new AnhangDatei(ja.Anhang));
-                    }
-                }
-            }
-        }
-
         public static void AnhangRoot(TreeView ExplorerTree)
         {
             var Kontakte = new TreeViewNode { Content = "Kontakte" };
@@ -67,6 +40,33 @@ namespace Deeplex.Saverwalter.App.ViewModels
             ExplorerTree.RootNodes.Add(Kontakte);
             ExplorerTree.RootNodes.Add(Mietobjekte);
             ExplorerTree.RootNodes.Add(Vertraege);
+        }
+
+        public class AnhangKontakt : TreeViewNode
+        {
+            public AnhangKontakt(IPerson p)
+            {
+                Content = p.Bezeichnung;
+
+                if (p is NatuerlichePerson n)
+                {
+                    foreach (var na in App.Walter.NatuerlichePersonAnhaenge
+                        .Include(a => a.Anhang)
+                        .Where(a => a.Target.NatuerlichePersonId == n.NatuerlichePersonId))
+                    {
+                        Children.Add(new AnhangDatei(na.Anhang));
+                    }
+                }
+                else if (p is JuristischePerson j)
+                {
+                    foreach (var ja in App.Walter.JuristischePersonAnhaenge
+                        .Include(a => a.Anhang)
+                        .Where(a => a.Target.JuristischePersonId == j.JuristischePersonId))
+                    {
+                        Children.Add(new AnhangDatei(ja.Anhang));
+                    }
+                }
+            }
         }
 
         public sealed class AnhangAdresse : TreeViewNode
