@@ -36,7 +36,10 @@ namespace Deeplex.Saverwalter.App.Utils
             picker.FileTypeChoices.Add("", new List<string> { Path.GetExtension(a.FileName) });
 
             var file = await picker.PickSaveFileAsync();
-            await FileIO.WriteBytesAsync(file, a.Content);
+            if (file != null)
+            {
+                await FileIO.WriteBytesAsync(file, a.Content);
+            }
         }
 
         public static Windows.Storage.Pickers.FileOpenPicker FilePicker(params string[] filters)
