@@ -8,6 +8,8 @@ namespace Deeplex.Saverwalter.App
 {
     public sealed partial class MainPage : Page
     {
+        public AnhangViewModel Explorer { get; }
+
         private sealed class ExplorerItemTemplateSelector : DataTemplateSelector
         {
             public DataTemplate AnhangTemplate { get; private set; }
@@ -30,7 +32,7 @@ namespace Deeplex.Saverwalter.App
             InitializeComponent();
 
             ViewModel.SetCommandBar(MainCommandBar);
-            App.ViewModel.Explorer = new AnhangViewModel(ExplorerTree);
+            Explorer = new AnhangViewModel(ExplorerTree);
             ExplorerTree.ItemTemplateSelector = new ExplorerItemTemplateSelector(AnhangTemplate, OtherTemplate);
         }
 

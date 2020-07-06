@@ -114,9 +114,16 @@
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}" Text="Explorer" RelativePanel.AlignLeftWithPanel="True"/>
-                                <ToggleButton>
+                                <Button
+                                    Visibility="{x:Bind Explorer.notInSelection, Mode=OneWay}"
+                                    Command="{x:Bind Explorer.SelectionMultilple}">
                                     <SymbolIcon Symbol="Download"/>
-                                </ToggleButton>
+                                </Button>
+                                <Button
+                                    Visibility="{x:Bind Explorer.inSelection, Mode=OneWay}"
+                                    Command="{x:Bind Explorer.SaveFiles}">
+                                    <SymbolIcon Symbol="Save"/>
+                                </Button>
                             </StackPanel>
                             <MenuFlyoutSeparator/>
                             <muxc:TreeView x:Name="ExplorerTree"/>

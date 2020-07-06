@@ -1,15 +1,24 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml.Controls;
+using System.IO;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class AnhangViewModel : BindableBase
     {
+        private TreeView Tree { get; }
+
+        public bool inSelection => Tree.SelectionMode == TreeViewSelectionMode.Multiple;
+        public bool notInSelection => Tree.SelectionMode != TreeViewSelectionMode.Multiple;
+
         public AnhangViewModel(TreeView ExplorerTree)
         {
+            Tree = ExplorerTree;
+
             var Kontakte = new TreeViewNode { Content = "Kontakte" };
             var Mietobjekte = new TreeViewNode { Content = "Mietobjete" };
             var Vertraege = new TreeViewNode { Content = "Verträge" };
@@ -36,7 +45,28 @@ namespace Deeplex.Saverwalter.App.ViewModels
             ExplorerTree.RootNodes.Add(Kontakte);
             ExplorerTree.RootNodes.Add(Mietobjekte);
             ExplorerTree.RootNodes.Add(Vertraege);
+
+            SelectionMultilple = new RelayCommand(_ =>
+                {
+                    Tree.SelectionMode = TreeViewSelectionMode.Multiple;
+                    RaiseSelectionPropertyChangedAuto();
+                }, _ => true);
+            SaveFiles = new AsyncRelayCommand(async _ =>
+                {
+                    Tree.SelectionMode = TreeViewSelectionMode.Single;
+                    RaiseSelectionPropertyChangedAuto();
+                    await Files.CreateFolder("walter");
+                }, _ => true);
         }
+
+        private void RaiseSelectionPropertyChangedAuto()
+        {
+            RaisePropertyChangedAuto(nameof(inSelection));
+            RaisePropertyChangedAuto(nameof(notInSelection));
+        }
+
+        public RelayCommand SelectionMultilple { get; }
+        public AsyncRelayCommand SaveFiles { get; }
 
         public class AnhangKontakt : TreeViewNode
         {
