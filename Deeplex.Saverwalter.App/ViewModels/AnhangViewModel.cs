@@ -1,16 +1,13 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
-using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Toolkit.Extensions;
 using Microsoft.UI.Xaml.Controls;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Windows.Storage;
+using wuxc = Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -73,7 +70,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     Tree.SelectionMode = TreeViewSelectionMode.Single;
                     RaiseSelectionPropertyChangedAuto();
 
-                    var directory  = await root.CreateFolderAsync("walter");
+                    var directory = await root.CreateFolderAsync("walter");
 
                     var local = ApplicationData.Current.LocalFolder;
                     foreach (var node in Tree.RootNodes)
@@ -318,5 +315,21 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public AsyncRelayCommand SaveFile;
         public RelayCommand DeleteFile;
         public string DateiName => Entity.FileName;
+        public string Symbol
+        {
+            get
+            {
+                var ext = Path.GetExtension(DateiName);
+                switch (ext)
+                {
+                    case "jpg":
+                    case "jpeg":
+                    case "png":
+                        return wuxc.Symbol.Camera.ToString();
+                    default:
+                        return wuxc.Symbol.Document.ToString();
+                }
+            }
+        }
     }
 }

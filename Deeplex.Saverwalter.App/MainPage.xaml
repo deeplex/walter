@@ -14,6 +14,7 @@
     <Page.Resources>
         <DataTemplate x:Name="AnhangTemplate" x:DataType="vm:AnhangDatei">
             <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
+                <SymbolIcon Symbol="{x:Bind Symbol}"/>
                 <TextBlock VerticalAlignment="Center" Text="{x:Bind Content}"/>
                 <Button Background="Transparent">
                     <SymbolIcon Symbol="More"/>
@@ -24,7 +25,7 @@
                                     HorizontalAlignment="Stretch"
                                     Background="Transparent"
                                     Command="{x:Bind SaveFile}">
-                                    <StackPanel Orientation="Horizontal">
+                                    <StackPanel Width="100" Orientation="Horizontal">
                                         <SymbolIcon Symbol="Save"/>
                                         <TextBlock Text=" Speichern"/>
                                     </StackPanel>
@@ -33,8 +34,8 @@
                                     HorizontalAlignment="Stretch"
                                     Background="Transparent"
                                     Command="{x:Bind DeleteFile}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <SymbolIcon Symbol="Remove"/>
+                                    <StackPanel Width="100" Orientation="Horizontal">
+                                        <SymbolIcon Symbol="Delete"/>
                                         <TextBlock Text=" Löschen"/>
                                     </StackPanel>
                                 </Button>
