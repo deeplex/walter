@@ -309,6 +309,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 App.Walter.Anhaenge.Remove(Entity);
                 App.Walter.SaveChanges();
+                Parent.Children.Remove(this);
             }, _ => true);
         }
 
