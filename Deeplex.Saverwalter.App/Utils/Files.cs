@@ -25,6 +25,18 @@ namespace Deeplex.Saverwalter.App.Utils
             return anhang;
         }
 
+        public static async Task<StorageFolder> SelectDirectory()
+        {
+            var picker = new Windows.Storage.Pickers.FolderPicker()
+            {
+                SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop,
+            };
+
+            picker.FileTypeFilter.Add("*");
+
+            return await picker.PickSingleFolderAsync(); ;
+        }
+
         public static async Task ExtractTo(Anhang a)
         {
             var picker = new Windows.Storage.Pickers.FileSavePicker()

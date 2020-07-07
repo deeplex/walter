@@ -62,40 +62,36 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     Tree.SelectionMode = TreeViewSelectionMode.Single;
                     RaiseSelectionPropertyChangedAuto();
 
+                    var directory = await (await Files.SelectDirectory()).CreateFolderAsync("walter");
+
+                    var local = ApplicationData.Current.LocalFolder;
                     foreach (var node in Tree.RootNodes)
                     {
-                        SaveFilesLocal(node, "walter", node.Content.ToString());
+                        SaveFilesLocal(node, directory, node.Content.ToString());
                     }
 
                 }, _ => true);
         }
 
-        private async void SaveFilesLocal(TreeViewNode n, params string[] paths)
+        private async void SaveFilesLocal(TreeViewNode n, StorageFolder root, params string[] paths)
         {
             foreach (var child in n.Children)
             {
                 if (child.HasChildren)
                 {
-                    SaveFilesLocal(child, paths.Append(child.Content.ToString()).ToArray());
+                    SaveFilesLocal(child, root, paths.Append(child.Content.ToString()).ToArray());
                 }
                 else if (child is AnhangDatei anhang && Tree.SelectedNodes.Contains(anhang))
                 {
-                    var dir = await createFolders(
-                        ApplicationData.Current.LocalFolder, paths);
+                    var dir = root;
+                    foreach (var path in paths)
+                    {
+                        dir = await dir.CreateFolderAsync(path, CreationCollisionOption.GenerateUniqueName);
+                    }
                     var file = await dir.CreateFileAsync(anhang.DateiName);
                     await FileIO.WriteBytesAsync(file, anhang.Entity.Content);
                 }
             }
-        }
-
-        private async Task<StorageFolder> createFolders(StorageFolder root, params string [] paths)
-        {
-            var dir = ApplicationData.Current.LocalFolder;
-            foreach (var path in paths)
-            {
-                dir = await dir.CreateFolderAsync(path, CreationCollisionOption.GenerateUniqueName);
-            }
-            return dir;
         }
 
         private void RaiseSelectionPropertyChangedAuto()
