@@ -13,7 +13,31 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class AnhangViewModel : BindableBase
     {
+        private interface IAnhangViewModel<T>
+        {
+            T Target { get; }
+        }
+
         private TreeView Tree { get; }
+
+        public void raiseChange<U>(U target, Anhang file)
+        {
+            void dig(TreeViewNode n)
+            {
+                n.Children.ToList().ForEach(dig);
+                var ax = n as IAnhangViewModel<U>;
+                if (ax == null)
+                {
+                    return;
+                }
+                else if (ax.Target.Equals(target))
+                {
+                    n.Children.Add(new AnhangDatei(file));
+                }
+            }
+
+            Tree.RootNodes.ToList().ForEach(dig);
+        }
 
         public bool inSelection => Tree.SelectionMode == TreeViewSelectionMode.Multiple;
         public bool notInSelection => Tree.SelectionMode != TreeViewSelectionMode.Multiple;
@@ -111,10 +135,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public RelayCommand SelectionMultilple { get; }
         public AsyncRelayCommand SaveFiles { get; }
 
-        public class AnhangKontakt : TreeViewNode
+        public class AnhangKontakt : TreeViewNode, IAnhangViewModel<IPerson>
         {
+            public IPerson Target { get; }
+
             public AnhangKontakt(IPerson p)
             {
+                Target = p;
                 Content = p.Bezeichnung;
 
                 if (p is NatuerlichePerson n)
@@ -138,10 +165,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public sealed class AnhangAdresse : TreeViewNode
+        public sealed class AnhangAdresse : TreeViewNode, IAnhangViewModel<Adresse>
         {
+            public Adresse Target { get; set; }
+
             public AnhangAdresse(Adresse a)
             {
+                Target = a;
+
                 Content = AdresseViewModel.Anschrift(a);
 
                 foreach (var w in a.Wohnungen)
@@ -158,10 +189,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public sealed class AnhangVertrag : TreeViewNode
+        public sealed class AnhangVertrag : TreeViewNode, IAnhangViewModel<Vertrag>
         {
+            public Vertrag Target { get; }
+
             public AnhangVertrag(Vertrag v)
             {
+                Target = v;
+
                 var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
                 var cs = bs.Select(b => App.Walter.FindPerson(b.PersonId))
                     .Select(p => p is NatuerlichePerson n ? n.Nachname : p.Bezeichnung);
@@ -179,10 +214,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public sealed class AnhangWohnung : TreeViewNode
+        public sealed class AnhangWohnung : TreeViewNode, IAnhangViewModel<Wohnung>
         {
+            public Wohnung Target { get; }
+
             public AnhangWohnung(Wohnung w)
             {
+                Target = w;
+
                 Content = w.Bezeichnung;
 
                 var zaehler = new TreeViewNode { Content = "Zähler" };
@@ -208,10 +247,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public sealed class AnhangBetriebskostenrechnung : TreeViewNode
+        public sealed class AnhangBetriebskostenrechnung : TreeViewNode, IAnhangViewModel<Betriebskostenrechnung>
         {
+            public Betriebskostenrechnung Target { get; }
+
             public AnhangBetriebskostenrechnung(Betriebskostenrechnung r)
             {
+                Target = r;
                 Content = r.BetreffendesJahr.ToString() + " " + r.Typ.ToDescriptionString();
 
                 foreach (var ra in App.Walter.BetriebskostenrechnungAnhaenge
@@ -224,10 +266,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         }
 
-        public sealed class AnhangZaehler : TreeViewNode
+        public sealed class AnhangZaehler : TreeViewNode, IAnhangViewModel<Zaehler>
         {
+            public Zaehler Target { get; }
+
             public AnhangZaehler(Zaehler z)
             {
+                Target = z;
+
                 Content = z.Kennnummer;
 
                 var zaehlerstaende = new TreeViewNode { Content = "Zählerstände" };
@@ -246,10 +292,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public sealed class AnhangZaehlerstand : TreeViewNode
+        public sealed class AnhangZaehlerstand : TreeViewNode, IAnhangViewModel<Zaehlerstand>
         {
+            public Zaehlerstand Target { get; }
+
             public AnhangZaehlerstand(Zaehlerstand z)
             {
+                Target = z;
+
                 Content = z.Datum.ToString("dd.MM.yyyy");
 
                 foreach (var za in App.Walter.ZaehlerstandAnhaenge
@@ -261,10 +311,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public sealed class AnhangMiete : TreeViewNode
+        public sealed class AnhangMiete : TreeViewNode, IAnhangViewModel<Miete>
         {
+            public Miete Target { get; }
+
             public AnhangMiete(Miete m)
             {
+                Target = m;
+
                 Content = m.BetreffenderMonat.ToString("MMM yyyy");
 
                 foreach (var ma in App.Walter.MieteAnhaenge
@@ -276,10 +330,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public sealed class AnhangMietminderung : TreeViewNode
+        public sealed class AnhangMietminderung : TreeViewNode, IAnhangViewModel<MietMinderung>
         {
+            public MietMinderung Target { get; }
+
             public AnhangMietminderung(MietMinderung m)
             {
+                Target = m;
+
                 Content = m.Beginn.ToString("dd.MM.yyyy") + " – " +
                     (m.Ende != null ? m.Ende.Value.ToString("dd.MM.yyyy") : "Offen");
 

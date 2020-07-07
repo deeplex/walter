@@ -7,6 +7,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class MainViewModel
     {
         public ObservableProperty<string> Titel = new ObservableProperty<string>();
+        public ObservableProperty<AnhangViewModel> Explorer = new ObservableProperty<AnhangViewModel>();
 
         private CommandBar CommandBar { get; set; }
 

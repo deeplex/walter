@@ -104,6 +104,7 @@ namespace Deeplex.Saverwalter.App.Utils
                     Target = target,
                 };
                 Set.Add(attachment);
+                App.ViewModel.Explorer.Value.raiseChange(target, file);
             }
             App.Walter.SaveChanges();
         }
