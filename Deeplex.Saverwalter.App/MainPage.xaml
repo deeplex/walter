@@ -15,9 +15,35 @@
         <DataTemplate x:Name="AnhangTemplate" x:DataType="vm:AnhangDatei">
             <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
                 <TextBlock VerticalAlignment="Center" Text="{x:Bind Content}"/>
-                <Button Background="Transparent" Command="{x:Bind SaveFile}">
-                    <SymbolIcon Symbol="Save"/>
+                <Button Background="Transparent">
+                    <SymbolIcon Symbol="More"/>
+                    <Button.Flyout>
+                        <Flyout>
+                            <StackPanel>
+                                <Button
+                                    HorizontalAlignment="Stretch"
+                                    Background="Transparent"
+                                    Command="{x:Bind SaveFile}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <SymbolIcon Symbol="Save"/>
+                                        <TextBlock Text=" Speichern"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button
+                                    HorizontalAlignment="Stretch"
+                                    Background="Transparent"
+                                    Command="{x:Bind DeleteFile}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <SymbolIcon Symbol="Remove"/>
+                                        <TextBlock Text=" Löschen"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Flyout>
+
+                    </Button.Flyout>
                 </Button>
+
             </StackPanel>
 
         </DataTemplate>

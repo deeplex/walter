@@ -306,10 +306,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Content = a.FileName;
 
             SaveFile = new AsyncRelayCommand(async _
-                => await Utils.Files.ExtractTo(a), _ => true);
+                => await Files.ExtractTo(a), _ => true);
+
+            DeleteFile = new RelayCommand(_ =>
+            {
+                App.Walter.Anhaenge.Remove(Entity);
+                App.Walter.SaveChanges();
+            }, _ => true);
         }
 
         public AsyncRelayCommand SaveFile;
+        public RelayCommand DeleteFile;
         public string DateiName => Entity.FileName;
     }
 }
