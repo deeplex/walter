@@ -59,10 +59,21 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 }, _ => true);
             SaveFiles = new AsyncRelayCommand(async _ =>
                 {
+                    if (!Tree.SelectedNodes.Any())
+                    {
+                        Tree.SelectionMode = TreeViewSelectionMode.Single;
+                        RaiseSelectionPropertyChangedAuto();
+                        return;
+                    }
+
+                    var root = await Files.SelectDirectory();
+
+                    if (root == null) return;
+
                     Tree.SelectionMode = TreeViewSelectionMode.Single;
                     RaiseSelectionPropertyChangedAuto();
 
-                    var directory = await (await Files.SelectDirectory()).CreateFolderAsync("walter");
+                    var directory  = await root.CreateFolderAsync("walter");
 
                     var local = ApplicationData.Current.LocalFolder;
                     foreach (var node in Tree.RootNodes)
