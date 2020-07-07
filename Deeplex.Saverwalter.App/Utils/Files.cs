@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.App.Utils
             return anhang;
         }
 
-        public static async Task CreateFolder(string FolderName)
+        public static async Task<DirectoryInfo> CreateFolder(params string[] paths)
         {
             //var picker = new Windows.Storage.Pickers.FolderPicker()
             //{
@@ -36,10 +36,9 @@ namespace Deeplex.Saverwalter.App.Utils
 
             //var directory = await picker.PickSingleFolderAsync();
 
-            var path = Path.Combine(ApplicationData.Current.LocalFolder.Path, FolderName);
+            var path = paths.Prepend(ApplicationData.Current.LocalFolder.Path).ToArray();
 
-            //var path = Path.Combine(directory.Path, FolderName);
-            var dir = Directory.CreateDirectory(path);
+            return Directory.CreateDirectory(Path.Combine(path));
         }
 
         public static async Task ExtractTo(Anhang a)

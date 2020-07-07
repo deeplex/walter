@@ -1,10 +1,16 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Toolkit.Extensions;
 using Microsoft.UI.Xaml.Controls;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -55,8 +61,41 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 {
                     Tree.SelectionMode = TreeViewSelectionMode.Single;
                     RaiseSelectionPropertyChangedAuto();
-                    await Files.CreateFolder("walter");
+
+                    foreach (var node in Tree.RootNodes)
+                    {
+                        SaveFilesLocal(node, "walter", node.Content.ToString());
+                    }
+
                 }, _ => true);
+        }
+
+        private async void SaveFilesLocal(TreeViewNode n, params string[] paths)
+        {
+            foreach (var child in n.Children)
+            {
+                if (child.HasChildren)
+                {
+                    SaveFilesLocal(child, paths.Append(child.Content.ToString()).ToArray());
+                }
+                else if (child is AnhangDatei anhang)
+                {
+                    var dir = await createFolders(
+                        ApplicationData.Current.LocalFolder, paths);
+                    var file = await dir.CreateFileAsync(anhang.DateiName);
+                    await FileIO.WriteBytesAsync(file, anhang.Entity.Content);
+                }
+            }
+        }
+
+        private async Task<StorageFolder> createFolders(StorageFolder root, params string [] paths)
+        {
+            var dir = ApplicationData.Current.LocalFolder;
+            foreach (var path in paths)
+            {
+                dir = await dir.CreateFolderAsync(path, CreationCollisionOption.GenerateUniqueName);
+            }
+            return dir;
         }
 
         private void RaiseSelectionPropertyChangedAuto()
