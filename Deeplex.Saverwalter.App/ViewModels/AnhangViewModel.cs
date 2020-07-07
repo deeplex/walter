@@ -78,7 +78,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 {
                     SaveFilesLocal(child, paths.Append(child.Content.ToString()).ToArray());
                 }
-                else if (child is AnhangDatei anhang)
+                else if (child is AnhangDatei anhang && Tree.SelectedNodes.Contains(anhang))
                 {
                     var dir = await createFolders(
                         ApplicationData.Current.LocalFolder, paths);
