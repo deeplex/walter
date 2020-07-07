@@ -25,22 +25,6 @@ namespace Deeplex.Saverwalter.App.Utils
             return anhang;
         }
 
-        public static async Task<DirectoryInfo> CreateFolder(params string[] paths)
-        {
-            //var picker = new Windows.Storage.Pickers.FolderPicker()
-            //{
-            //    SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop,
-            //};
-
-            //picker.FileTypeFilter.Add("*");
-
-            //var directory = await picker.PickSingleFolderAsync();
-
-            var path = paths.Prepend(ApplicationData.Current.LocalFolder.Path).ToArray();
-
-            return Directory.CreateDirectory(Path.Combine(path));
-        }
-
         public static async Task ExtractTo(Anhang a)
         {
             var picker = new Windows.Storage.Pickers.FileSavePicker()
