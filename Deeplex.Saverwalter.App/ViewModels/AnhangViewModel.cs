@@ -11,13 +11,19 @@ using wuxc = Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
+    public class AnhangTreeViewNode : TreeViewNode
+    {
+        public AsyncRelayCommand AttachFile { get; set; }
+        public AnhangTreeViewNode() { }
+    }
+
+    public interface IAnhangTreeViewNode<T>
+    {
+        T Target { get; }
+    }
+
     public sealed class AnhangViewModel : BindableBase
     {
-        private interface IAnhangViewModel<T>
-        {
-            T Target { get; }
-        }
-
         private TreeView Tree { get; }
 
         public void raiseChange<U>(U target, Anhang file)
@@ -25,7 +31,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             void dig(TreeViewNode n)
             {
                 n.Children.ToList().ForEach(dig);
-                var ax = n as IAnhangViewModel<U>;
+                var ax = n as IAnhangTreeViewNode<U>;
                 if (ax == null)
                 {
                     return;
@@ -135,7 +141,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public RelayCommand SelectionMultilple { get; }
         public AsyncRelayCommand SaveFiles { get; }
 
-        public class AnhangKontakt : TreeViewNode, IAnhangViewModel<IPerson>
+        public class AnhangKontakt : AnhangTreeViewNode, IAnhangTreeViewNode<IPerson>
         {
             public IPerson Target { get; }
 
@@ -146,6 +152,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
                 if (p is NatuerlichePerson n)
                 {
+                    AttachFile = new AsyncRelayCommand(async _ =>
+                        await Files.SaveFilesToWalter(App.Walter.NatuerlichePersonAnhaenge, n), _ => true);
+
                     foreach (var na in App.Walter.NatuerlichePersonAnhaenge
                         .Include(a => a.Anhang)
                         .Where(a => a.Target.NatuerlichePersonId == n.NatuerlichePersonId))
@@ -155,6 +164,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 }
                 else if (p is JuristischePerson j)
                 {
+                    AttachFile = new AsyncRelayCommand(async _ =>
+                        await Files.SaveFilesToWalter(App.Walter.JuristischePersonAnhaenge, j), _ => true);
                     foreach (var ja in App.Walter.JuristischePersonAnhaenge
                         .Include(a => a.Anhang)
                         .Where(a => a.Target.JuristischePersonId == j.JuristischePersonId))
@@ -165,9 +176,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public sealed class AnhangAdresse : TreeViewNode, IAnhangViewModel<Adresse>
+        public sealed class AnhangAdresse : AnhangTreeViewNode, IAnhangTreeViewNode<Adresse>
         {
-            public Adresse Target { get; set; }
+            public Adresse Target { get; }
 
             public AnhangAdresse(Adresse a)
             {
@@ -186,10 +197,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 {
                     Children.Add(new AnhangDatei(aa.Anhang));
                 }
+
+                AttachFile = new AsyncRelayCommand(async _ =>
+                    await Files.SaveFilesToWalter(App.Walter.AdresseAnhaenge, a), _ => true);
             }
         }
 
-        public sealed class AnhangVertrag : TreeViewNode, IAnhangViewModel<Vertrag>
+        public sealed class AnhangVertrag : AnhangTreeViewNode, IAnhangTreeViewNode<Vertrag>
         {
             public Vertrag Target { get; }
 
@@ -211,10 +225,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     Children.Add(new AnhangDatei(va.Anhang));
                 }
 
+                AttachFile = new AsyncRelayCommand(async _ =>
+                    await Files.SaveFilesToWalter(App.Walter.VertragAnhaenge, v.VertragId), _ => true);
             }
         }
 
-        public sealed class AnhangWohnung : TreeViewNode, IAnhangViewModel<Wohnung>
+        public sealed class AnhangWohnung : AnhangTreeViewNode, IAnhangTreeViewNode<Wohnung>
         {
             public Wohnung Target { get; }
 
@@ -244,10 +260,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 {
                     Children.Add(new AnhangDatei(wa.Anhang));
                 }
+
+                AttachFile = new AsyncRelayCommand(async _ =>
+                    await Files.SaveFilesToWalter(App.Walter.WohnungAnhaenge, w), _ => true);
             }
         }
 
-        public sealed class AnhangBetriebskostenrechnung : TreeViewNode, IAnhangViewModel<Betriebskostenrechnung>
+        public sealed class AnhangBetriebskostenrechnung : AnhangTreeViewNode, IAnhangTreeViewNode<Betriebskostenrechnung>
         {
             public Betriebskostenrechnung Target { get; }
 
@@ -262,11 +281,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 {
                     Children.Add(new AnhangDatei(ra.Anhang));
                 }
-            }
 
+                AttachFile = new AsyncRelayCommand(async _ =>
+                    await Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
+            }
         }
 
-        public sealed class AnhangZaehler : TreeViewNode, IAnhangViewModel<Zaehler>
+        public sealed class AnhangZaehler : AnhangTreeViewNode, IAnhangTreeViewNode<Zaehler>
         {
             public Zaehler Target { get; }
 
@@ -289,10 +310,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 {
                     Children.Add(new AnhangDatei(za.Anhang));
                 }
+
+                AttachFile = new AsyncRelayCommand(async _ =>
+                    await Files.SaveFilesToWalter(App.Walter.ZaehlerAnhaenge, z), _ => true);
             }
         }
 
-        public sealed class AnhangZaehlerstand : TreeViewNode, IAnhangViewModel<Zaehlerstand>
+        public sealed class AnhangZaehlerstand : AnhangTreeViewNode, IAnhangTreeViewNode<Zaehlerstand>
         {
             public Zaehlerstand Target { get; }
 
@@ -308,10 +332,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 {
                     Children.Add(new AnhangDatei(za.Anhang));
                 }
+
+                AttachFile = new AsyncRelayCommand(async _ =>
+                    await Files.SaveFilesToWalter(App.Walter.ZaehlerstandAnhaenge, z), _ => true);
             }
         }
 
-        public sealed class AnhangMiete : TreeViewNode, IAnhangViewModel<Miete>
+        public sealed class AnhangMiete : AnhangTreeViewNode, IAnhangTreeViewNode<Miete>
         {
             public Miete Target { get; }
 
@@ -327,10 +354,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 {
                     Children.Add(new AnhangDatei(ma.Anhang));
                 }
+
+                AttachFile = new AsyncRelayCommand(async _ =>
+                    await Files.SaveFilesToWalter(App.Walter.MieteAnhaenge, m), _ => true);
             }
         }
 
-        public sealed class AnhangMietminderung : TreeViewNode, IAnhangViewModel<MietMinderung>
+        public sealed class AnhangMietminderung : AnhangTreeViewNode, IAnhangTreeViewNode<MietMinderung>
         {
             public MietMinderung Target { get; }
 
@@ -347,6 +377,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 {
                     Children.Add(new AnhangDatei(ma.Anhang));
                 }
+
+                AttachFile = new AsyncRelayCommand(async _ =>
+                    await Files.SaveFilesToWalter(App.Walter.MietMinderungAnhaenge, m), _ => true);
             }
         }
     }

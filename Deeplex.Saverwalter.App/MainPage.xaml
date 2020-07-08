@@ -41,17 +41,31 @@
                                 </Button>
                             </StackPanel>
                         </Flyout>
-
                     </Button.Flyout>
                 </Button>
-
             </StackPanel>
-
         </DataTemplate>
 
-        <DataTemplate x:Name="OtherTemplate" x:DataType="muxc:TreeViewNode">
-            <StackPanel>
-                <TextBlock Text="{x:Bind Content}"/>
+        <DataTemplate x:Name="OtherTemplate" x:DataType="vm:AnhangTreeViewNode">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock VerticalAlignment="Center" Text="{Binding Content}"/>
+                <Button Margin="10,0,0,0" Background="Transparent">
+                    <SymbolIcon Symbol="More"></SymbolIcon>
+                    <Button.Flyout>
+                        <Flyout>
+                            <StackPanel>
+                                <Button
+                                    Command="{Binding AttachFile}"
+                                    Background="Transparent">
+                                    <StackPanel Orientation="Horizontal">
+                                        <SymbolIcon Symbol="Attach"/>
+                                        <TextBlock Text=" Datei anhängen"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
             </StackPanel>
         </DataTemplate>
     </Page.Resources>
