@@ -27,8 +27,8 @@ namespace Deeplex.Saverwalter.App
             {
                 return
                     item is AnhangDatei ? AnhangTemplate :
-                    item is AnhangTreeViewNode ? GroupTemplate
-                    : RootTemplate;
+                    item is AnhangTreeViewNode ? GroupTemplate :
+                    RootTemplate;
             }
         }
 

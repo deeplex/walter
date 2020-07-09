@@ -19,6 +19,8 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
         public DbSet<BetriebskostenrechnungAnhang> BetriebskostenrechnungAnhaenge { get; set; } = null!;
         public DbSet<BetriebskostenrechnungsGruppe> Betriebskostenrechnungsgruppen { get; set; } = null!;
+        public DbSet<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; set; } = null!;
+        public DbSet<ErhaltungsaufwendungAnhang> ErhaltungsaufwendungAnhaenge { get; set; } = null!;
         public DbSet<Garage> Garagen { get; set; } = null!;
         public DbSet<GarageAnhang> GarageAnhaenge { get; set; } = null!;
         public DbSet<JuristischePerson> JuristischePersonen { get; set; } = null!;
@@ -464,6 +466,23 @@ namespace Deeplex.Saverwalter.Model
         public int WohnungId { get; set; }
         public Wohnung Wohnung { get; set; } = null!;
         public Betriebskostenrechnung Rechnung { get; set; } = null!;
+    }
+
+    public sealed class Erhaltungsaufwendung
+    {
+        public int ErhaltungsaufwendungId { get; set; }
+        public DateTime Datum { get; set; }
+        public Guid AusstellerId { get; set; }
+        public string Bezeichnung { get; set; } = null!;
+        public double Betrag { get; set; }
+    }
+
+    public sealed class ErhaltungsaufwendungAnhang : IAnhang<Erhaltungsaufwendung>
+    {
+        public int ErhaltungsaufwendungAnhangId { get; set; }
+        public Erhaltungsaufwendung Target { get; set; } = null!;
+        public Guid AnhangId { get; set; }
+        public Anhang Anhang { get; set; } = null!;
     }
 
     public sealed class AllgemeinZaehler
