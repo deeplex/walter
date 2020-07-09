@@ -17,9 +17,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public AnhangTreeViewNode() { }
     }
 
-    public interface IAnhangTreeViewNode<T>
+    public interface IAnhangTreeViewNode
     {
-        T Target { get; }
+        object Target { get; }
+    }
+    public interface IAnhangTreeViewNode<T> : IAnhangTreeViewNode
+    {
+        new T Target { get; }
     }
 
     public sealed class AnhangViewModel : BindableBase
@@ -31,14 +35,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
             void dig(TreeViewNode n)
             {
                 n.Children.ToList().ForEach(dig);
-                var ax = n as IAnhangTreeViewNode<U>;
-                if (ax == null)
-                {
-                    return;
-                }
-                else if (ax.Target.Equals(target))
+
+                if (n is IAnhangTreeViewNode ax && ax.Target.Equals(target))
                 {
                     n.Children.Add(new AnhangDatei(file));
+                    n.IsExpanded = true;
                 }
             }
 
@@ -144,6 +145,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public class AnhangKontakt : AnhangTreeViewNode, IAnhangTreeViewNode<IPerson>
         {
             public IPerson Target { get; }
+            object IAnhangTreeViewNode.Target => Target;
 
             public AnhangKontakt(IPerson p)
             {
@@ -179,6 +181,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public sealed class AnhangAdresse : AnhangTreeViewNode, IAnhangTreeViewNode<Adresse>
         {
             public Adresse Target { get; }
+            object IAnhangTreeViewNode.Target => Target;
 
             public AnhangAdresse(Adresse a)
             {
@@ -206,6 +209,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public sealed class AnhangVertrag : AnhangTreeViewNode, IAnhangTreeViewNode<Vertrag>
         {
             public Vertrag Target { get; }
+            object IAnhangTreeViewNode.Target => Target;
 
             public AnhangVertrag(Vertrag v)
             {
@@ -233,6 +237,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public sealed class AnhangWohnung : AnhangTreeViewNode, IAnhangTreeViewNode<Wohnung>
         {
             public Wohnung Target { get; }
+            object IAnhangTreeViewNode.Target => Target;
 
             public AnhangWohnung(Wohnung w)
             {
@@ -269,6 +274,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public sealed class AnhangBetriebskostenrechnung : AnhangTreeViewNode, IAnhangTreeViewNode<Betriebskostenrechnung>
         {
             public Betriebskostenrechnung Target { get; }
+            object IAnhangTreeViewNode.Target => Target;
 
             public AnhangBetriebskostenrechnung(Betriebskostenrechnung r)
             {
@@ -290,6 +296,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public sealed class AnhangZaehler : AnhangTreeViewNode, IAnhangTreeViewNode<Zaehler>
         {
             public Zaehler Target { get; }
+            object IAnhangTreeViewNode.Target => Target;
 
             public AnhangZaehler(Zaehler z)
             {
@@ -319,6 +326,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public sealed class AnhangZaehlerstand : AnhangTreeViewNode, IAnhangTreeViewNode<Zaehlerstand>
         {
             public Zaehlerstand Target { get; }
+            object IAnhangTreeViewNode.Target => Target;
 
             public AnhangZaehlerstand(Zaehlerstand z)
             {
@@ -341,6 +349,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public sealed class AnhangMiete : AnhangTreeViewNode, IAnhangTreeViewNode<Miete>
         {
             public Miete Target { get; }
+            object IAnhangTreeViewNode.Target => Target;
 
             public AnhangMiete(Miete m)
             {
@@ -363,6 +372,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public sealed class AnhangMietminderung : AnhangTreeViewNode, IAnhangTreeViewNode<MietMinderung>
         {
             public MietMinderung Target { get; }
+            object IAnhangTreeViewNode.Target => Target;
 
             public AnhangMietminderung(MietMinderung m)
             {
