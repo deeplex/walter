@@ -37,24 +37,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        private ImmutableList<Adresse> AlleAdressen => App.Walter.Adressen.ToImmutableList();
-
-        public ObservableProperty<string> Stadt = new ObservableProperty<string>();
-        public ObservableProperty<string> Postleitzahl = new ObservableProperty<string>();
-        public ObservableProperty<string> Strasse = new ObservableProperty<string>();
-        public ObservableProperty<string> Hausnummer = new ObservableProperty<string>();
-
-        public ImmutableList<string> Staedte => AlleAdressen.Select(a => a.Stadt).Distinct().ToImmutableList();
-        public ImmutableList<string> Postleitzahlen => AlleAdressen
-            .Where(a => Stadt.Value != "" && a.Stadt == Stadt.Value)
-            .Select(a => a.Postleitzahl).Distinct().ToImmutableList();
-        public ImmutableList<string> Strassen => AlleAdressen
-            .Where(a => Postleitzahl.Value != "" && a.Postleitzahl == Entity.Adresse.Postleitzahl)
-            .Select(a => a.Strasse).Distinct().ToImmutableList();
-        public ImmutableList<string> Hausnummern => AlleAdressen
-            .Where(a => Hausnummer.Value != "" && a.Hausnummer == Entity.Adresse.Hausnummer)
-            .Select(a => a.Hausnummer).Distinct().ToImmutableList();
-
         public ObservableProperty<ImmutableList<WohnungDetailZaehler>> Zaehler
             = new ObservableProperty<ImmutableList<WohnungDetailZaehler>>();
         public ObservableProperty<List<WohnungDetailVertrag>> Vertraege
@@ -74,18 +56,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        private AdresseViewModel mAdresse;
-        public AdresseViewModel Adresse
-        {
-            get => mAdresse;
-            set
-            {
-                Entity.Adresse = AdresseViewModel.GetAdresse(value);
-                mAdresse = value;
-                RaisePropertyChangedAuto();
-            }
-        }
-        public string Anschrift => AdresseViewModel.Anschrift(Entity);
+        public int AdresseId => Entity.AdresseId;
+        public string Anschrift => AdresseViewModel.Anschrift(AdresseId);
+
         public string Bezeichnung
         {
             get => Entity.Bezeichnung;
@@ -160,15 +133,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 Besitzer = new WohnungDetailVermieter(w.BesitzerId);
             }
-            Stadt.Value = w.Adresse?.Stadt ?? "";
-            Postleitzahl.Value = w.Adresse?.Postleitzahl ?? "";
-            Strasse.Value = w.Adresse?.Strasse ?? "";
-            Hausnummer.Value = w.Adresse?.Strasse ?? "";
 
-            if (w.Adresse != null)
-            {
-                Adresse = new AdresseViewModel(w.Adresse);
-            }
             var self = this;
             Zaehler.Value = w.Zaehler
                 .Select(z => new WohnungDetailZaehler(z, self))

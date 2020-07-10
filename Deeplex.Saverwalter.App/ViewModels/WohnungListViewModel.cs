@@ -102,7 +102,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Id = w.WohnungId;
             Bezeichnung = w.Bezeichnung;
             Anschrift.Value = AdresseViewModel.Anschrift(w);
-            AdresseId = AdresseViewModel.GetAdresseIdByAnschrift(Anschrift.Value);
+            AdresseId = w.AdresseId;
         }
     }
 }

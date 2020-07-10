@@ -1,40 +1,44 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class AdresseViewModel
     {
-        private Adresse Entity;
-
+        private Adresse Entity { get; }
         public Adresse getEntity => Entity;
 
-        public int Id;
-        public ObservableProperty<string> Strasse { get; set; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Hausnummer { get; set; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Postleitzahl { get; set; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Stadt { get; set; } = new ObservableProperty<string>();
+        private ImmutableList<Adresse> AlleAdressen = App.Walter.Adressen.ToImmutableList();
 
-        public AdresseViewModel() { }
+        public ImmutableList<string> Staedte => AlleAdressen
+            .Select(a => a.Stadt).Distinct().ToImmutableList();
+        public ImmutableList<string> Postleitzahlen => AlleAdressen
+            .Where(a => Stadt != "" && a.Stadt == Stadt)
+            .Select(a => a.Postleitzahl).Distinct().ToImmutableList();
+        public ImmutableList<string> Strassen => AlleAdressen
+            .Where(a => Postleitzahl != "" && a.Postleitzahl == Entity.Postleitzahl)
+            .Select(a => a.Strasse).Distinct().ToImmutableList();
+        public ImmutableList<string> Hausnummern => AlleAdressen
+            .Where(a => Hausnummer != "" && a.Hausnummer == Entity.Hausnummer)
+            .Select(a => a.Hausnummer).Distinct().ToImmutableList();
+
+        public int Id;
+        public string Strasse => Entity.Strasse;
+        public string Hausnummer => Entity.Hausnummer;
+        public string Postleitzahl => Entity.Postleitzahl;
+        public string Stadt => Entity.Stadt;
 
         public AdresseViewModel(Adresse a)
         {
             Entity = a;
-            Id = a.AdresseId;
-            Strasse.Value = a.Strasse;
-            Hausnummer.Value = a.Hausnummer;
-            Postleitzahl.Value = a.Postleitzahl;
-            Stadt.Value = a.Stadt;
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.AdresseAnhaenge, a), _ => true);
         }
 
         public AsyncRelayCommand AttachFile;
-
-        public static int GetAdresseIdByAnschrift(string s)
-            => App.Walter.Adressen.ToList().First(a => Anschrift(a) == s).AdresseId;
 
         public static string Anschrift(int id) => Anschrift(App.Walter.Adressen.Find(id));
         public static string Anschrift(IPerson k) => Anschrift(k is IPerson a ? a.Adresse : null);
@@ -56,10 +60,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             // If one is set => all must be set.
             if (avm is null ||
-                avm.Postleitzahl.Value == null || avm.Postleitzahl.Value == "" ||
-                avm.Hausnummer.Value == null || avm.Hausnummer.Value == "" ||
-                avm.Strasse.Value == null || avm.Strasse.Value == "" ||
-                avm.Stadt.Value == null || avm.Stadt.Value == "")
+                avm.Postleitzahl == null || avm.Postleitzahl == "" ||
+                avm.Hausnummer == null || avm.Hausnummer == "" ||
+                avm.Strasse == null || avm.Strasse == "" ||
+                avm.Stadt == null || avm.Stadt == "")
             {
                 App.Walter.Adressen.Remove(avm.getEntity);
                 return null;
@@ -68,10 +72,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             // TODO Remove deprecated Adressen
 
             var adr = App.Walter.Adressen.FirstOrDefault(a =>
-                a.Postleitzahl == avm.Postleitzahl.Value &&
-                a.Hausnummer == avm.Hausnummer.Value &&
-                a.Strasse == avm.Strasse.Value &&
-                a.Stadt == avm.Stadt.Value);
+                a.Postleitzahl == avm.Postleitzahl &&
+                a.Hausnummer == avm.Hausnummer &&
+                a.Strasse == avm.Strasse &&
+                a.Stadt == avm.Stadt);
 
             if (adr != null)
             {
@@ -82,10 +86,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 adr = new Adresse
                 {
-                    Postleitzahl = avm.Postleitzahl.Value,
-                    Hausnummer = avm.Hausnummer.Value,
-                    Strasse = avm.Strasse.Value,
-                    Stadt = avm.Stadt.Value
+                    Postleitzahl = avm.Postleitzahl,
+                    Hausnummer = avm.Hausnummer,
+                    Strasse = avm.Strasse,
+                    Stadt = avm.Stadt
                 };
 
                 App.Walter.Adressen.Add(adr);

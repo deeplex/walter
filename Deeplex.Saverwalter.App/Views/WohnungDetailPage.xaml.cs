@@ -94,32 +94,7 @@ namespace Deeplex.Saverwalter.App.Views
                 Content = Anschrift;
             }
         }
-
-        private void UpdateAdresse_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            var adress = App.Walter.Adressen.FirstOrDefault(a =>
-                a.Strasse == ComboBoxStrasse.Text &&
-                a.Hausnummer == ComboBoxHausnummer.Text &&
-                a.Postleitzahl == ComboBoxPostleitzahl.Text &&
-                a.Stadt == ComboBoxStadt.Text);
-            if (adress != null)
-            {
-                ViewModel.Adresse = new AdresseViewModel(adress);
-            }
-            else
-            {
-                var a = new Adresse
-                {
-                    Strasse = ComboBoxStrasse.Text,
-                    Hausnummer = ComboBoxHausnummer.Text,
-                    Postleitzahl = ComboBoxPostleitzahl.Text,
-                    Stadt = ComboBoxStadt.Text,
-                };
-                App.Walter.Adressen.Add(a);
-                ViewModel.Adresse = new AdresseViewModel(a);
-            }
-        }
-
+        
         private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             ViewModel.IsInEdit.Value = (sender as AppBarToggleButton).IsChecked ?? false;

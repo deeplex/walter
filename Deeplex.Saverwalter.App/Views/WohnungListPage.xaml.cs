@@ -38,11 +38,6 @@ namespace Deeplex.Saverwalter.App.Views
                 new DrillInNavigationTransitionInfo());
         }
 
-        private void Adresse_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ViewModel.IsInEdit.Value = true;
-        }
-
         private void AddRest_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             var button = (Button)sender;

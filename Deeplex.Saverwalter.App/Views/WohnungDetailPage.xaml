@@ -8,6 +8,7 @@
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -71,48 +72,9 @@
                 </Button>
             </RelativePanel>
             <mtuuc:WrapPanel>
-                <Button Margin="20,20,0,0" IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}">
-                    <Button.Content>
-                        <TextBlock>
-                            <Run Text="{x:Bind ViewModel.Adresse.Strasse.Value, Mode=OneWay}"/>
-                            <Run Text="{x:Bind ViewModel.Adresse.Hausnummer.Value, Mode=OneWay}"/>
-                            <Run Text=", "/>
-                            <Run Text="{x:Bind ViewModel.Adresse.Postleitzahl.Value, Mode=OneWay}"/>
-                            <Run Text="{x:Bind ViewModel.Adresse.Stadt.Value, Mode=OneWay}"/>
-                        </TextBlock>
-                    </Button.Content>
-                    <Button.Flyout>
-                        <Flyout Placement="Bottom">
-                            <Flyout.FlyoutPresenterStyle>
-                                <Style TargetType="FlyoutPresenter">
-                                    <Setter Property="MinWidth" Value="625" />
-                                </Style>
-                            </Flyout.FlyoutPresenterStyle>
-                            <mtuuc:WrapPanel Orientation="Horizontal">
-                                <ComboBox
-                                    Header="Straße"
-                                    x:Name="ComboBoxStrasse" Width="200" IsEditable="True" ItemsSource="{x:Bind ViewModel.Strassen, Mode=OneWay}"
-                                    SelectedValue="{x:Bind ViewModel.Strasse.Value, Mode=TwoWay}"/>
-                                <ComboBox
-                                    Header="Hausnr."
-                                    x:Name="ComboBoxHausnummer" IsEditable="True" ItemsSource="{x:Bind ViewModel.Hausnummern, Mode=OneWay}"
-                                    SelectedValue="{x:Bind ViewModel.Hausnummer.Value, Mode=TwoWay}"/>
-                                <ComboBox
-                                    Header="Postleitzahl"
-                                    x:Name="ComboBoxPostleitzahl"  IsEditable="True" ItemsSource="{x:Bind ViewModel.Postleitzahlen, Mode=OneWay}"
-                                    SelectedValue="{x:Bind ViewModel.Postleitzahl.Value, Mode=TwoWay}"/>
-                                <ComboBox
-                                    Header="Stadt"
-                                    x:Name="ComboBoxStadt" Width="200" IsEditable="True" ItemsSource="{x:Bind ViewModel.Staedte, Mode=OneWay}"
-                                    SelectedValue="{x:Bind ViewModel.Stadt.Value, Mode=TwoWay}"/>
-
-                                <Button Margin="0,20,0,0" Click="UpdateAdresse_Click" Background="Transparent" VerticalAlignment="Bottom">
-                                    <SymbolIcon Symbol="Accept"/>
-                                </Button>
-                            </mtuuc:WrapPanel>
-                        </Flyout>
-                    </Button.Flyout>
-                </Button>
+                <uc:AddresseControl
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    Id="{x:Bind ViewModel.AdresseId}" />
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBox

@@ -11,8 +11,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private JuristischePerson Entity { get; }
         public int Id;
 
-        public ImmutableList<AdresseViewModel> AlleAdressen { get; }
-
         public void selfDestruct()
         {
             App.Walter.JuristischePersonen.Remove(Entity);
@@ -66,17 +64,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 RaisePropertyChangedAuto();
             }
         }
-        private AdresseViewModel mAdresse;
-        public AdresseViewModel Adresse
-        {
-            get => mAdresse;
-            set
-            {
-                Entity.AdresseId = value.Id;
-                mAdresse = value;
-                RaisePropertyChangedAuto();
-            }
-        }
+        public int AdresseId => Entity.AdresseId ?? 0;
 
         public string Email
         {
@@ -153,7 +141,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             switch (e.PropertyName)
             {
                 case nameof(Bezeichnung):
-                case nameof(Adresse):
                 case nameof(Email):
                 case nameof(Telefon):
                 case nameof(Mobil):

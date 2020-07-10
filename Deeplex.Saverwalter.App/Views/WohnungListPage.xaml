@@ -26,27 +26,13 @@
                                     <SymbolIcon Symbol="Attach"/>
                                 </Button>
                                 <StackPanel x:Name="StackWohnungen">
-                                    <StackPanel Margin="10, 10, 0, 0" Orientation="Horizontal">
-                                        <TextBox
-                                        Background="Transparent" BorderThickness="0" FontSize="18"
-                                        TextChanged="Adresse_TextChanged"
-                                        Text="{Binding Key.Strasse.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                        <TextBox
-                                        Background="Transparent" BorderThickness="0" FontSize="18"
-                                        TextChanged="Adresse_TextChanged" TextAlignment="Right"
-                                        Text="{Binding Key.Hausnummer.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                        <TextBlock
-                                        Margin="0,5,0,0" FontSize="18" Text=", "
-                                        Style="{StaticResource SubtitleTextBlockStyle}"/>
-                                        <TextBox
-                                        Background="Transparent" BorderThickness="0" FontSize="18"
-                                        TextChanged="Adresse_TextChanged"
-                                        Text="{Binding Key.Postleitzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                        <TextBox
-                                        Background="Transparent" BorderThickness="0" FontSize="18"
-                                        TextChanged="Adresse_TextChanged"
-                                        Text="{Binding Key.Stadt.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                    </StackPanel>
+                                    <TextBlock FontSize="18">
+                                        <Run Text="{Binding Key.Strasse.Value, Mode=OneWay}"/>
+                                        <Run Text="{Binding Key.Hausnummer.Value, Mode=OneWay}"/>
+                                        <Run Text=","/>
+                                        <Run Text="{Binding Key.Postleitzahl.Value, Mode=OneWay}"/>
+                                        <Run Text="{Binding Key.Stadt.Value, Mode=OneWay}"/>
+                                    </TextBlock>
                                     <GridView
                                     IsItemClickEnabled="True"
                                     SelectionMode="Single"

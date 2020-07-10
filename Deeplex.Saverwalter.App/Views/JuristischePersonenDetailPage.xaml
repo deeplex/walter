@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Deeplex.Saverwalter.App.Views"
     xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
+    xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
@@ -46,38 +47,10 @@
                     Text="{x:Bind ViewModel.Bezeichnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Header="Bezeichnung" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
-            <mtuuc:WrapPanel Orientation="Horizontal">
-                <Button Margin="20,20,0,0">
-                    <Button.Content>
-                        <TextBlock>
-                            <Run Text="{x:Bind ViewModel.Adresse.Strasse.Value, Mode=OneWay}"/>
-                            <Run Text="{x:Bind ViewModel.Adresse.Hausnummer.Value, Mode=OneWay}"/>
-                            <Run Text="{x:Bind ViewModel.Adresse.Postleitzahl.Value, Mode=OneWay}"/>
-                            <Run Text="{x:Bind ViewModel.Adresse.Stadt.Value, Mode=OneWay}"/>
-                        </TextBlock>
-                    </Button.Content>
-                    <Button.Flyout>
-                        <Flyout>
-                            <mtuuc:WrapPanel Orientation="Horizontal">
-                                <ComboBox
-                                    x:Name="ComboBoxStrasse" Width="150" IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
-                                    DisplayMemberPath="Strasse.Value" SelectedItem="{x:Bind ViewModel.Adresse.Strasse, Mode=OneWay}"/>
-                                <ComboBox
-                                    x:Name="ComboBoxHausnummer" IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
-                                    DisplayMemberPath="Hausnummer.Value" SelectedItem="{x:Bind ViewModel.Adresse.Hausnummer, Mode=OneWay}"/>
-                                <ComboBox
-                                    x:Name="ComboBoxPostleitzahl"  IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
-                                    DisplayMemberPath="Postleitzahl.Value" SelectedItem="{x:Bind ViewModel.Adresse.Postleitzahl, Mode=OneWay}"/>
-                                <ComboBox
-                                    x:Name="ComboBoxStadt" Width="100" IsEditable="True" ItemsSource="{x:Bind ViewModel.AlleAdressen}"
-                                    DisplayMemberPath="Stadt.Value" SelectedItem="{x:Bind ViewModel.Adresse.Stadt, Mode=OneWay}"/>
-                                <Button Click="UpdateAdresse_Click" Background="Transparent" VerticalAlignment="Bottom">
-                                    <SymbolIcon Symbol="Add"/>
-                                </Button>
-                            </mtuuc:WrapPanel>
-                        </Flyout>
-                    </Button.Flyout>
-                </Button>
+            <mtuuc:WrapPanel>
+                <uc:AddresseControl
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    Id="{x:Bind ViewModel.AdresseId}" />
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBox
