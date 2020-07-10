@@ -25,10 +25,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             .Select(a => a.Hausnummer).Distinct().ToImmutableList();
 
         public int Id;
-        public string Strasse => Entity.Strasse;
-        public string Hausnummer => Entity.Hausnummer;
-        public string Postleitzahl => Entity.Postleitzahl;
-        public string Stadt => Entity.Stadt;
+        public string Strasse => Entity?.Strasse ?? "";
+        public string Hausnummer => Entity?.Hausnummer ?? "";
+        public string Postleitzahl => Entity?.Postleitzahl ?? "";
+        public string Stadt => Entity?.Stadt ?? "";
 
         public AdresseViewModel(Adresse a)
         {

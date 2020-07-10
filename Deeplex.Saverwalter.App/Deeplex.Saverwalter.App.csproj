@@ -123,6 +123,9 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UserControls\ZaehlerControl.xaml.cs">
+      <DependentUpon>ZaehlerControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\AddXaml.cs" />
     <Compile Include="Utils\Files.cs" />
     <Compile Include="ViewModels\AnhangViewModel.cs" />
@@ -139,6 +142,8 @@
     <Compile Include="UserControls\AddresseControl.xaml.cs">
       <DependentUpon>AddresseControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\ZaehlerstandViewModel.cs" />
+    <Compile Include="ViewModels\ZaehlerViewModel.cs" />
     <Compile Include="Views\BetriebskostenRechnungenGruppeListViewPage.xaml.cs">
       <DependentUpon>BetriebskostenRechnungenGruppeListViewPage.xaml</DependentUpon>
     </Compile>
@@ -239,6 +244,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="UserControls\AddresseControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ZaehlerControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

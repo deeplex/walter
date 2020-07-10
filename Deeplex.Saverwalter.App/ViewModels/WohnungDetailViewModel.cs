@@ -37,8 +37,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public ObservableProperty<ImmutableList<WohnungDetailZaehler>> Zaehler
-            = new ObservableProperty<ImmutableList<WohnungDetailZaehler>>();
+        public ObservableProperty<ImmutableList<ZaehlerViewModel>> Zaehler
+            = new ObservableProperty<ImmutableList<ZaehlerViewModel>>();
         public ObservableProperty<List<WohnungDetailVertrag>> Vertraege
             = new ObservableProperty<List<WohnungDetailVertrag>>();
 
@@ -134,12 +134,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Besitzer = new WohnungDetailVermieter(w.BesitzerId);
             }
 
-            var self = this;
             Zaehler.Value = w.Zaehler
-                .Select(z => new WohnungDetailZaehler(z, self))
+                .Select(z => new ZaehlerViewModel(z))
                 .Concat(App.Walter.AllgemeinZaehlerGruppen
                     .Where(g => g.WohnungId == w.WohnungId)
-                    .Select(g => new WohnungDetailZaehler(g.Zaehler, self)))
+                    .Select(g => new ZaehlerViewModel(g.Zaehler)))
                     .ToImmutableList();
 
             Vertraege.Value = App.Walter.Vertraege
@@ -177,7 +176,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 }
 
                 App.Walter.SaveChanges();
-                var wdz = new WohnungDetailZaehler(z, self);
+                var wdz = new ZaehlerViewModel(z);
                 RaisePropertyChanged(nameof(AllgemeinZaehler));
             }, _ => true);
 
@@ -194,7 +193,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 };
                 App.Walter.ZaehlerSet.Add(z);
                 App.Walter.SaveChanges();
-                var wdz = new WohnungDetailZaehler(z, self);
+                var wdz = new ZaehlerViewModel(z);
                 Zaehler.Value = Zaehler.Value.Add(wdz);
                 RaisePropertyChanged(nameof(Zaehler));
             }, _ => true);
@@ -244,201 +243,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
             App.Walter.SaveChanges();
         }
-    }
-
-    public sealed class WohnungDetailZaehler : BindableBase
-    {
-        public int Id;
-        private object Entity
-        {
-            get
-            {
-                if (Zaehler == null)
-                {
-                    return AllgemeinZaehler;
-                }
-                else
-                {
-                    return Zaehler;
-                }
-            }
-        }
-
-        private Zaehler Zaehler;
-        private AllgemeinZaehler AllgemeinZaehler;
-
-        public string AllgemeinString => AllgemeinZaehler != null ? " Allgemein" : "";
-
-        public ObservableProperty<string> Kennnummer = new ObservableProperty<string>();
-        public ObservableProperty<string> Typ = new ObservableProperty<string>();
-        public ObservableProperty<ImmutableList<WohnungDetailZaehlerStand>> Zaehlerstaende
-            = new ObservableProperty<ImmutableList<WohnungDetailZaehlerStand>>();
-        public DateTimeOffset AddZaehlerstandDatum => DateTime.UtcNow.Date.AsUtcKind();
-        // TODO interpolate between last and prelast to determine stand
-        public double AddZaehlerstandStand => Zaehlerstaende.Value.FirstOrDefault()?.Stand ?? 0;
-        public void LoadList()
-        {
-            var self = this;
-
-            Zaehlerstaende.Value = App.Walter.Zaehlerstaende
-                .Where(zs => zs.Zaehler == Entity)
-                .Select(zs => new WohnungDetailZaehlerStand(zs, self))
-                .ToList()
-                .OrderBy(zs => zs.Datum).Reverse()
-                .ToImmutableList();
-        }
-
-        public ObservableProperty<bool> IsInEdit;
-
-        public WohnungDetailZaehler(Zaehler z, WohnungDetailViewModel p)
-        {
-            Id = z.ZaehlerId;
-            IsInEdit = p.IsInEdit;
-            Zaehler = z;
-            Kennnummer.Value = z.Kennnummer;
-            Typ.Value = z.Typ.ToString(); // May be a descript thingy later on?...
-
-            var self = this; // Protect against memory leaks? Ask the debugger im new.
-
-            Zaehlerstaende.Value = App.Walter.Zaehlerstaende
-                .Where(zs => zs.Zaehler == Entity)
-                .Select(zs => new WohnungDetailZaehlerStand(zs, self))
-                .ToList()
-                .OrderBy(zs => zs.Datum).Reverse()
-                .ToImmutableList();
-
-            AddZaehlerstand = new RelayCommand(AddZaehlerstandPanel =>
-            {
-                var dtp = ((CalendarDatePicker)((StackPanel)AddZaehlerstandPanel).Children[0]).Date;
-                var datum = (dtp.HasValue ? dtp.Value.UtcDateTime : DateTime.UtcNow.Date).AsUtcKind();
-                var stand = Convert.ToDouble(((NumberBox)((StackPanel)AddZaehlerstandPanel).Children[1]).Text);
-
-                var zs = new Zaehlerstand
-                {
-                    Zaehler = z,
-                    Datum = datum,
-                    Stand = stand,
-                };
-                App.Walter.Zaehlerstaende.Add(zs);
-                App.Walter.SaveChanges();
-                var wdzs = new WohnungDetailZaehlerStand(zs, self);
-                Zaehlerstaende.Value = Zaehlerstaende.Value
-                    .Add(wdzs)
-                    .OrderBy(nzs => nzs.Datum).Reverse()
-                    .ToImmutableList();
-                RaisePropertyChanged(nameof(Zaehlerstaende));
-            }, _ => true);
-
-
-            AttachFile = new AsyncRelayCommand(async _ =>
-                await Utils.Files.SaveFilesToWalter(App.Walter.ZaehlerAnhaenge, z), _ => true);
-        }
-
-        public WohnungDetailZaehler(AllgemeinZaehler z, WohnungDetailViewModel p)
-        {
-            Id = z.AllgemeinZaehlerId;
-            IsInEdit = p.IsInEdit;
-            AllgemeinZaehler = z;
-            Kennnummer.Value = z.Kennnummer;
-            Typ.Value = z.Typ.ToString(); // May be a descript thingy later on?...
-
-            var self = this; // Protect against memory leaks? Ask the debugger im new.
-
-            Zaehlerstaende.Value = App.Walter.Zaehlerstaende
-                .Where(zs => zs.AllgemeinZaehler == Entity)
-                .Select(zs => new WohnungDetailZaehlerStand(zs, self))
-                .ToList()
-                .OrderBy(zs => zs.Datum).Reverse()
-                .ToImmutableList();
-
-            AddZaehlerstand = new RelayCommand(AddZaehlerstandPanel =>
-            {
-                var dtp = ((CalendarDatePicker)((StackPanel)AddZaehlerstandPanel).Children[0]).Date;
-                var datum = (dtp.HasValue ? dtp.Value.UtcDateTime : DateTime.UtcNow.Date).AsUtcKind();
-                var stand = Convert.ToDouble(((NumberBox)((StackPanel)AddZaehlerstandPanel).Children[1]).Text);
-
-                var zs = new Zaehlerstand
-                {
-                    AllgemeinZaehler = z,
-                    Datum = datum,
-                    Stand = stand,
-                };
-                App.Walter.Zaehlerstaende.Add(zs);
-                App.Walter.SaveChanges();
-                var wdzs = new WohnungDetailZaehlerStand(zs, self);
-                Zaehlerstaende.Value = Zaehlerstaende.Value
-                    .Add(wdzs)
-                    .OrderBy(nzs => nzs.Datum).Reverse()
-                    .ToImmutableList();
-                RaisePropertyChanged(nameof(Zaehlerstaende));
-            }, _ => true);
-
-
-            AttachFile = new AsyncRelayCommand(async _ =>
-                await Utils.Files.SaveFilesToWalter(App.Walter.AllgemeinZaehlerAnhaenge, z), _ => true);
-        }
-
-        public AsyncRelayCommand AttachFile;
-        public RelayCommand AddZaehlerstand { get; }
-    }
-
-    public sealed class WohnungDetailZaehlerStand : BindableBase
-    {
-        public int Id => Entity.ZaehlerstandId;
-        public Zaehlerstand Entity;
-        public double Stand
-        {
-            get => Entity.Stand;
-            set
-            {
-                Entity.Stand = value;
-                RaisePropertyChangedAuto();
-            }
-        }
-        public DateTimeOffset Datum
-        {
-            get => Entity.Datum.AsUtcKind();
-            set
-            {
-                Entity.Datum = value.UtcDateTime.AsUtcKind();
-                RaisePropertyChangedAuto();
-            }
-        }
-
-        public string Notiz
-        {
-            get => Entity.Notiz;
-            set
-            {
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto();
-            }
-        }
-
-        public ObservableProperty<bool> IsInEdit;
-
-        public WohnungDetailZaehlerStand(Zaehlerstand z, WohnungDetailZaehler p) : this(z)
-        {
-            IsInEdit = p.IsInEdit;
-
-            SelfDestruct = new RelayCommand(_ =>
-            {
-                App.Walter.Remove(Entity);
-                App.Walter.SaveChanges();
-                p.LoadList();
-            }, _ => p.IsInEdit.Value);
-
-        }
-
-        private WohnungDetailZaehlerStand(Zaehlerstand z)
-        {
-            Entity = z;
-            AttachFile = new AsyncRelayCommand(async _ =>
-                await Utils.Files.SaveFilesToWalter(App.Walter.ZaehlerstandAnhaenge, z), _ => true);
-        }
-
-        public AsyncRelayCommand AttachFile;
-        public RelayCommand SelfDestruct { get; }
     }
 
     public sealed class WohnungDetailVertrag
