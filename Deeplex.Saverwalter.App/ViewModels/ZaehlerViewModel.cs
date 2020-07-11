@@ -10,7 +10,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class ZaehlerViewModel : BindableBase
     {
-        public int Id;
+        public ZaehlerViewModel self => this;
+
         private object Entity
         {
             get
@@ -26,64 +27,50 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        private Zaehler Zaehler;
-        private AllgemeinZaehler AllgemeinZaehler;
+        public int Id
+        {
+            get => Entity is Zaehler e ? e.ZaehlerId :
+                Entity is AllgemeinZaehler a ? a.AllgemeinZaehlerId : 0;
+        }
 
-        public string AllgemeinString => AllgemeinZaehler != null ? " Allgemein" : "";
+        private Zaehler Zaehler { get; }
+        private AllgemeinZaehler AllgemeinZaehler { get; }
 
-        public ObservableProperty<string> Kennnummer = new ObservableProperty<string>();
-        public ObservableProperty<string> Typ = new ObservableProperty<string>();
+        public bool isAllgemein => AllgemeinZaehler != null;
+        public string AllgemeinString => isAllgemein ? " Allgemein" : "";
+
+        public string Kennnummer
+        {
+            get => Entity is Zaehler e ? e.Kennnummer :
+                Entity is AllgemeinZaehler a ? a.Kennnummer : "";
+        }
+
+        public string Typ
+        {
+            get => Entity is Zaehler e ? e.Typ.ToString() :
+                Entity is AllgemeinZaehler a ? a.Typ.ToString() : "";
+        }
+
         public ObservableProperty<ImmutableList<ZaehlerstandViewModel>> Zaehlerstaende
             = new ObservableProperty<ImmutableList<ZaehlerstandViewModel>>();
         public DateTimeOffset AddZaehlerstandDatum => DateTime.UtcNow.Date.AsUtcKind();
-        // TODO interpolate between last and prelast to determine stand
         public double AddZaehlerstandStand => Zaehlerstaende.Value.FirstOrDefault()?.Stand ?? 0;
         public void LoadList()
         {
-            Zaehlerstaende.Value = App.Walter.Zaehlerstaende
-                .Where(zs => zs.Zaehler == Entity)
-                .Select(zs => new ZaehlerstandViewModel(zs))
-                .ToList()
+            Zaehlerstaende.Value = App.Walter.Zaehlerstaende.ToList()
+                .Where(zs => Entity == zs.Zaehler || Entity == zs.AllgemeinZaehler)
                 .OrderBy(zs => zs.Datum).Reverse()
-                .ToImmutableList();
+                .Select(zs => new ZaehlerstandViewModel(zs)).ToImmutableList();
         }
 
         public ZaehlerViewModel(Zaehler z)
         {
-            Id = z.ZaehlerId;
             Zaehler = z;
-            Kennnummer.Value = z.Kennnummer;
-            Typ.Value = z.Typ.ToString(); // May be a descript thingy later on?...
+            
+            LoadList();
 
-            Zaehlerstaende.Value = App.Walter.Zaehlerstaende
-                .Where(zs => zs.Zaehler == Entity)
-                .Select(zs => new ZaehlerstandViewModel(zs))
-                .ToList()
-                .OrderBy(zs => zs.Datum).Reverse()
-                .ToImmutableList();
-
-            AddZaehlerstand = new RelayCommand(AddZaehlerstandPanel =>
-            {
-                var dtp = ((CalendarDatePicker)((StackPanel)AddZaehlerstandPanel).Children[0]).Date;
-                var datum = (dtp.HasValue ? dtp.Value.UtcDateTime : DateTime.UtcNow.Date).AsUtcKind();
-                var stand = Convert.ToDouble(((NumberBox)((StackPanel)AddZaehlerstandPanel).Children[1]).Text);
-
-                var zs = new Zaehlerstand
-                {
-                    Zaehler = z,
-                    Datum = datum,
-                    Stand = stand,
-                };
-                App.Walter.Zaehlerstaende.Add(zs);
-                App.Walter.SaveChanges();
-                var wdzs = new ZaehlerstandViewModel(zs);
-                Zaehlerstaende.Value = Zaehlerstaende.Value
-                    .Add(wdzs)
-                    .OrderBy(nzs => nzs.Datum).Reverse()
-                    .ToImmutableList();
-                RaisePropertyChanged(nameof(Zaehlerstaende));
-            }, _ => true);
-
+            AddZaehlerstand = new RelayCommand(AddZaehlerstandPanel
+                => mAddZaehlerstand(AddZaehlerstandPanel, z, null), _ => true);
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.ZaehlerAnhaenge, z), _ => true);
@@ -91,39 +78,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public ZaehlerViewModel(AllgemeinZaehler z)
         {
-            Id = z.AllgemeinZaehlerId;
             AllgemeinZaehler = z;
-            Kennnummer.Value = z.Kennnummer;
-            Typ.Value = z.Typ.ToString(); // May be a descript thingy later on?...
 
-            Zaehlerstaende.Value = App.Walter.Zaehlerstaende
-                .Where(zs => zs.AllgemeinZaehler == Entity)
-                .Select(zs => new ZaehlerstandViewModel(zs))
-                .ToList()
-                .OrderBy(zs => zs.Datum).Reverse()
-                .ToImmutableList();
+            LoadList();
 
-            AddZaehlerstand = new RelayCommand(AddZaehlerstandPanel =>
-            {
-                var dtp = ((CalendarDatePicker)((StackPanel)AddZaehlerstandPanel).Children[0]).Date;
-                var datum = (dtp.HasValue ? dtp.Value.UtcDateTime : DateTime.UtcNow.Date).AsUtcKind();
-                var stand = Convert.ToDouble(((NumberBox)((StackPanel)AddZaehlerstandPanel).Children[1]).Text);
-
-                var zs = new Zaehlerstand
-                {
-                    AllgemeinZaehler = z,
-                    Datum = datum,
-                    Stand = stand,
-                };
-                App.Walter.Zaehlerstaende.Add(zs);
-                App.Walter.SaveChanges();
-                var wdzs = new ZaehlerstandViewModel(zs);
-                Zaehlerstaende.Value = Zaehlerstaende.Value
-                    .Add(wdzs)
-                    .OrderBy(nzs => nzs.Datum).Reverse()
-                    .ToImmutableList();
-                RaisePropertyChanged(nameof(Zaehlerstaende));
-            }, _ => true);
+            AddZaehlerstand = new RelayCommand(AddZaehlerstandPanel
+                => mAddZaehlerstand(AddZaehlerstandPanel, null, z), _ => true);
 
 
             AttachFile = new AsyncRelayCommand(async _ =>
@@ -132,5 +92,28 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public AsyncRelayCommand AttachFile;
         public RelayCommand AddZaehlerstand { get; }
+
+        private void mAddZaehlerstand(object AddZaehlerstandPanel, Zaehler z, AllgemeinZaehler az)
+        {
+            var dtp = ((CalendarDatePicker)((StackPanel)AddZaehlerstandPanel).Children[0]).Date;
+            var datum = (dtp.HasValue ? dtp.Value.UtcDateTime : DateTime.UtcNow.Date).AsUtcKind();
+            var stand = Convert.ToDouble(((NumberBox)((StackPanel)AddZaehlerstandPanel).Children[1]).Text);
+
+            var zs = new Zaehlerstand
+            {
+                AllgemeinZaehler = az,
+                Zaehler = z,
+                Datum = datum,
+                Stand = stand,
+            };
+            App.Walter.Zaehlerstaende.Add(zs);
+            App.Walter.SaveChanges();
+            var wdzs = new ZaehlerstandViewModel(zs);
+            Zaehlerstaende.Value = Zaehlerstaende.Value
+                .Add(wdzs)
+                .OrderBy(nzs => nzs.Datum).Reverse()
+                .ToImmutableList();
+            RaisePropertyChanged(nameof(Zaehlerstaende));
+        }
     }
 }

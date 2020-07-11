@@ -9,19 +9,17 @@ namespace Deeplex.Saverwalter.App.UserControls
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class ZaehlerControl : Page
+    public sealed partial class ZaehlerstandControl : Page
     {
-        public ZaehlerViewModel ViewModel { get; set; }
+        public ZaehlerstandViewModel ViewModel { get; set; }
 
-        public ZaehlerControl()
+        public ZaehlerstandControl()
         {
             InitializeComponent();
 
             RegisterPropertyChangedCallback(IdProperty, (idDepObject, idProp) =>
             {
-                ViewModel = Allgemein ?
-                    new ZaehlerViewModel(App.Walter.AllgemeinZaehlerSet.Find(Id)) :
-                    new ZaehlerViewModel(App.Walter.ZaehlerSet.Find(Id));
+                ViewModel = new ZaehlerstandViewModel(App.Walter.Zaehlerstaende.Find(Id));
             });
 
             RegisterPropertyChangedCallback(vmProperty, (vmDepObject, vmProp) =>
@@ -36,36 +34,23 @@ namespace Deeplex.Saverwalter.App.UserControls
             set { SetValue(IdProperty, value); }
         }
 
-        public bool Allgemein
-        {
-            get { return (bool)GetValue(AllgemeinProperty); }
-            set { SetValue(AllgemeinProperty, value); }
-        }
-
         public static readonly DependencyProperty IdProperty
             = DependencyProperty.Register(
                 "Id",
                 typeof(int),
-                typeof(ZaehlerControl),
+                typeof(ZaehlerstandControl),
                 new PropertyMetadata(0));
 
-        public static readonly DependencyProperty AllgemeinProperty
-            = DependencyProperty.Register(
-                "Allgemein",
-                typeof(bool),
-                typeof(ZaehlerControl),
-                new PropertyMetadata(false));
-
-        public ZaehlerViewModel vm
+        public ZaehlerstandViewModel vm
         {
-            get { return (ZaehlerViewModel)GetValue(vmProperty); }
+            get { return (ZaehlerstandViewModel)GetValue(vmProperty); }
             set { SetValue(vmProperty, value); }
         }
 
         public static readonly DependencyProperty vmProperty
             = DependencyProperty.Register(
                 "vm",
-                typeof(ZaehlerViewModel),
+                typeof(ZaehlerstandViewModel),
                 typeof(ZaehlerstandControl),
                 new PropertyMetadata(null));
     }

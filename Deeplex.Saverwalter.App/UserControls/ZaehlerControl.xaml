@@ -8,6 +8,7 @@
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
+    xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -15,9 +16,9 @@
         <RelativePanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock Margin="20,10,0,0" Style="{StaticResource SubtitleTextBlockStyle}">
-                    <Run Text="{x:Bind ViewModel.Kennnummer.Value}"/>
+                    <Run Text="{x:Bind ViewModel.Kennnummer}"/>
                     <Run Text=" ("/>
-                    <Run Text="{x:Bind ViewModel.Typ.Value}"/>
+                    <Run Text="{x:Bind ViewModel.Typ}"/>
                     <Run Text="{x:Bind ViewModel.AllgemeinString}"/>
                     <Run Text=")"/>
                 </TextBlock>
@@ -62,49 +63,7 @@
             ItemsSource="{x:Bind ViewModel.Zaehlerstaende.Value, Mode=OneWay}">
             <mtuuc:AdaptiveGridView.ItemTemplate>
                 <DataTemplate x:DataType="vm:ZaehlerstandViewModel">
-                    <RelativePanel Background="{ThemeResource SystemChromeLowColor}">
-                        <RelativePanel.ContextFlyout>
-                            <MenuFlyout>
-                                <MenuFlyoutItem
-                                    Command="{x:Bind SelfDestruct}"
-                                    Icon="Delete"
-                                    Text="Löschen"/>
-                            </MenuFlyout>
-                        </RelativePanel.ContextFlyout>
-                        <Button Background="Transparent" RelativePanel.AlignRightWithPanel="True">
-                            <SymbolIcon Symbol="More"/>
-                            <Button.Flyout>
-                                <Flyout>
-                                    <StackPanel>
-                                        <TextBox
-                                            PlaceholderText="Notiz"
-                                            Width="300" TextWrapping="Wrap"
-                                            Text="{x:Bind Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                    </StackPanel>
-                                </Flyout>
-                            </Button.Flyout>
-                        </Button>
-
-                        <Grid BorderThickness="1">
-                            <StackPanel Width="275" Margin="10,10,10,10" Orientation="Horizontal">
-                                <muxc:NumberBox
-                                    Header="Zählerstand"
-                                    Value="{x:Bind Stand, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                <CalendarDatePicker
-                                    Margin="10,0,0,0"
-                                    Header="Ablesedatum"
-                                    Date="{x:Bind Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                    Language="de"
-                                    DateFormat="{}{day.integer}. {month.full} {year.full}"/>
-                            </StackPanel>
-                        </Grid>
-                        <Button
-                            RelativePanel.AlignRightWithPanel="True"
-                            RelativePanel.AlignBottomWithPanel="True"
-                            Command="{x:Bind AttachFile}" Background="Transparent">
-                            <SymbolIcon Symbol="Attach"/>
-                        </Button>
-                    </RelativePanel>
+                    <uc:ZaehlerstandControl vm="{x:Bind self}"/>
                 </DataTemplate>
             </mtuuc:AdaptiveGridView.ItemTemplate>
         </mtuuc:AdaptiveGridView>

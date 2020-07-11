@@ -126,6 +126,9 @@
     <Compile Include="UserControls\ZaehlerControl.xaml.cs">
       <DependentUpon>ZaehlerControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\ZaehlerstandControl.xaml.cs">
+      <DependentUpon>ZaehlerstandControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\AddXaml.cs" />
     <Compile Include="Utils\Files.cs" />
     <Compile Include="ViewModels\AnhangViewModel.cs" />
@@ -248,6 +251,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\ZaehlerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ZaehlerstandControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

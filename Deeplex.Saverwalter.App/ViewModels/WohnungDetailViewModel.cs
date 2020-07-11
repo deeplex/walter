@@ -112,6 +112,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             : this(App.Walter.Wohnungen
                   .Include(w => w.Adresse)
                   .Include(w => w.Zaehler)
+                  .ThenInclude(z => z.Staende)
+                  .Include(w => w.AllgemeinZaehlerGruppen)
+                  .ThenInclude(g => g.Zaehler)
+                  .ThenInclude(z => z.Staende)
                   .First(w => w.WohnungId == id))
         { }
 
@@ -136,8 +140,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             Zaehler.Value = w.Zaehler
                 .Select(z => new ZaehlerViewModel(z))
-                .Concat(App.Walter.AllgemeinZaehlerGruppen
-                    .Where(g => g.WohnungId == w.WohnungId)
+                .Concat(w.AllgemeinZaehlerGruppen
                     .Select(g => new ZaehlerViewModel(g.Zaehler)))
                     .ToImmutableList();
 

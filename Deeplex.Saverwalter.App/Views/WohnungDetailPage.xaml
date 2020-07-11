@@ -160,8 +160,7 @@
                     </mtuuc:DockPanel>
                     <muxc:ItemsRepeater ItemsSource="{x:Bind ViewModel.Zaehler.Value, Mode=OneWay}">
                         <DataTemplate x:DataType="vm:ZaehlerViewModel">
-                            <uc:ZaehlerControl
-                                Id="{x:Bind Id}" />
+                            <uc:ZaehlerControl vm="{x:Bind self}"/>
                         </DataTemplate>
                     </muxc:ItemsRepeater>
                     <!--</mtuuc:Expander>-->
