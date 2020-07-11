@@ -1,4 +1,4 @@
-﻿<Page
+﻿<UserControl
     x:Class="Deeplex.Saverwalter.App.UserControls.ZaehlerstandControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -13,7 +13,7 @@
         <RelativePanel.ContextFlyout>
             <MenuFlyout>
                 <MenuFlyoutItem
-                    Command="{x:Bind ViewModel.SelfDestruct}"
+                    Command="{x:Bind ViewModel.SelfDestruct, Mode=OneWay}"
                     Icon="Delete"
                     Text="Löschen"/>
             </MenuFlyout>
@@ -52,4 +52,4 @@
             <SymbolIcon Symbol="Attach"/>
         </Button>
     </RelativePanel>
-</Page>
+</UserControl>

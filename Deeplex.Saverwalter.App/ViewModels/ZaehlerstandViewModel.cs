@@ -8,8 +8,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public ZaehlerstandViewModel self => this;
 
-        public int Id => Entity.ZaehlerstandId;
         public Zaehlerstand Entity { get; }
+        public int Id => Entity.ZaehlerstandId;
 
         public double Stand
         {
