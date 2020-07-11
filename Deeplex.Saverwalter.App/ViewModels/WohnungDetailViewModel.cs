@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class WohnungDetailViewModel : ValidatableBase
     {
         private Wohnung Entity;
-        public int Id;
+        public int Id => Entity.WohnungId;
 
         public ImmutableList<WohnungDetailVermieter> AlleVermieter =>
             App.Walter.JuristischePersonen.ToImmutableList()
@@ -39,8 +39,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public ObservableProperty<ImmutableList<ZaehlerViewModel>> Zaehler
             = new ObservableProperty<ImmutableList<ZaehlerViewModel>>();
-        public ObservableProperty<List<WohnungDetailVertrag>> Vertraege
-            = new ObservableProperty<List<WohnungDetailVertrag>>();
 
         public class WohnungDetailVermieter
         {
@@ -144,12 +142,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     .Select(g => new ZaehlerViewModel(g.Zaehler)))
                     .ToImmutableList();
 
-            Vertraege.Value = App.Walter.Vertraege
-                .Include(v => v.Wohnung).ToList()
-                .Where(v => v.Wohnung.WohnungId == Id)
-                .Select(v => new WohnungDetailVertrag(v.VertragId))
-                .ToList();
-
             AddAllgemeinZaehler = new RelayCommand(AddAllgemeinZaehlerPanel =>
             {
                 var Tree = (AddAllgemeinZaehlerPanel as StackPanel).Children[0] as Microsoft.UI.Xaml.Controls.TreeView;
@@ -245,45 +237,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.Walter.Wohnungen.Add(Entity);
             }
             App.Walter.SaveChanges();
-        }
-    }
-
-    public sealed class WohnungDetailVertrag
-    {
-        public int Id { get; }
-        public int Version { get; }
-        public ObservableProperty<string> AuflistungMieter { get; } = new ObservableProperty<string>();
-        public ObservableProperty<DateTimeOffset> Beginn { get; } = new ObservableProperty<DateTimeOffset>();
-        public ObservableProperty<DateTimeOffset?> Ende { get; } = new ObservableProperty<DateTimeOffset?>();
-        public ObservableProperty<List<WohnungDetailVertrag>> Versionen { get; }
-            = new ObservableProperty<List<WohnungDetailVertrag>>();
-
-        public WohnungDetailVertrag(Guid id)
-            : this(App.Walter.Vertraege.Where(v => v.VertragId == id)) { }
-
-        private WohnungDetailVertrag(IEnumerable<Vertrag> v)
-            : this(v.OrderBy(vs => vs.Version).Last())
-        {
-            Versionen.Value = v.OrderBy(vs => vs.Version).Select(vs => new WohnungDetailVertrag(vs)).ToList();
-            Beginn.Value = Versionen.Value.First().Beginn.Value;
-            Ende.Value = Versionen.Value.Last().Ende.Value;
-        }
-
-        private WohnungDetailVertrag(Vertrag v)
-        {
-            Id = v.rowid;
-            Version = v.Version;
-
-            Beginn.Value = v.Beginn.AsUtcKind();
-            Ende.Value = v.Ende?.AsUtcKind();
-
-            var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
-            var cs = bs.Select(b =>
-            {
-                var c = App.Walter.NatuerlichePersonen.Find(b);
-                return string.Join(" ", c.Vorname ?? "", c.Nachname);
-            });
-            AuflistungMieter.Value = string.Join(", ", cs);
         }
     }
 }

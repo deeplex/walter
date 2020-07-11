@@ -10,7 +10,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class VertragListViewModel
     {
-        public List<VertragListVertrag> Vertraege = new List<VertragListVertrag>();
+        public ImmutableList<VertragListVertrag> Vertraege;
         public ObservableProperty<VertragListVertrag> SelectedVertrag
             = new ObservableProperty<VertragListVertrag>();
 
@@ -22,7 +22,20 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .GroupBy(v => v.VertragId)
                 .Select(v => new VertragListVertrag(v))
                 .OrderBy(v => v.Beginn).Reverse()
-                .ToList();
+                .ToImmutableList();
+        }
+
+        public VertragListViewModel(Wohnung w) : this()
+        {
+            Vertraege = Vertraege.Where(v => v.Wohnung == w).ToImmutableList();
+        }
+
+        public VertragListViewModel(IPerson w) : this()
+        {
+            Vertraege = Vertraege.Where(v =>
+                v.Wohnung.BesitzerId == w.PersonId ||
+                v.Mieter.Contains(w.PersonId))
+                .ToImmutableList();
         }
     }
 
@@ -50,7 +63,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             : base(v.OrderBy(vs => vs.Version).Last())
         {
             Versionen = v.OrderBy(vs => vs.Version).Select(vs => new VertragVersionListViewModel(vs)).ToList();
-            BeginnString = Versionen.First().BeginnString;
             Beginn = Versionen.First().Beginn;
 
             Mieten = App.Walter.Mieten
@@ -91,12 +103,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public int Version { get; }
         public int Personenzahl { get; }
         public string Anschrift { get; }
-        public string Wohnung { get; }
+        public Wohnung Wohnung { get; }
+        public ImmutableList<Guid> Mieter { get; } 
         public DateTime Beginn { get; set; }
-        public string BeginnString { get; set; }
-        public string EndeString { get; }
+        public DateTime? Ende { get; set; }
+        public string BeginnString => Beginn.ToString("dd.MM.yyyy");
+        public string EndeString => Ende is DateTime e ? e.ToString("dd.MM.yyyy") : "Offen";
         public string AuflistungMieter { get; }
-        public bool hasEnde { get; }
+        public bool hasEnde => Ende != null;
         public string Besitzer { get; }
 
         public VertragVersionListViewModel(Vertrag v)
@@ -107,7 +121,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Personenzahl = v.Personenzahl;
             Anschrift = AdresseViewModel.Anschrift(v.Wohnung);
             Besitzer = App.Walter.FindPerson(v.Wohnung.BesitzerId)?.Bezeichnung;
-            Wohnung = v.Wohnung is Wohnung w ? w.Bezeichnung : "";
+
+            Mieter = App.Walter.MieterSet
+                .Where(w => w.VertragId == v.VertragId)
+                .Select(m => m.PersonId).ToImmutableList();
+
+            Wohnung = v.Wohnung;
 
 
             var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
@@ -115,9 +134,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             AuflistungMieter = string.Join(", ", cs);
 
             Beginn = v.Beginn.AsUtcKind();
-            BeginnString = v.Beginn.ToString("dd.MM.yyyy");
-            hasEnde = v.Ende is DateTime;
-            EndeString = v.Ende is DateTime e ? e.ToString("dd.MM.yyyy") : "Offen";
 
         }
     }

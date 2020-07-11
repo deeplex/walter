@@ -87,6 +87,12 @@
                     Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Header="Notiz"/>
             </mtuuc:WrapPanel>
+            <mtuuc:Expander
+                    Background="Transparent"
+                    Header="Verträge"
+                    HorizontalContentAlignment="Left">
+                <uc:VertragListControl PersonId="{x:Bind ViewModel.PersonId}"/>
+            </mtuuc:Expander>
         </StackPanel>
     </ScrollViewer>
 </Page>

@@ -22,6 +22,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
             App.Walter.SaveChanges();
         }
 
+        public Guid PersonId
+        {
+            get => Entity.PersonId;
+            set
+            {
+                Entity.PersonId = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
         public Anrede Anrede
         {
             get => Entity.Anrede;

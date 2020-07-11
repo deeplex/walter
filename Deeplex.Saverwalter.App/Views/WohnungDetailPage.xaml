@@ -18,26 +18,6 @@
             <Setter Property="Margin" Value="20,20,0,0"/>
             <Setter Property="IsEnabled" Value="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"/>
         </Style>
-
-        <DataTemplate x:Key="BeginnGrid" x:DataType="vm:WohnungDetailVertrag">
-            <CalendarDatePicker
-                IsEnabled="False"
-                Width="176"
-                Date="{x:Bind Beginn.Value, Mode=OneWay}"
-                Language="de"
-                PlaceholderText="Offen"
-                DateFormat="{}{day.integer}. {month.full} {year.full}"/>
-        </DataTemplate>
-
-        <DataTemplate x:Key="EndeGrid" x:DataType="vm:WohnungDetailVertrag">
-            <CalendarDatePicker
-                IsEnabled="False"
-                Width="176"
-                Date="{x:Bind Ende.Value, Mode=OneWay}"
-                Language="de"
-                PlaceholderText="Offen"
-                DateFormat="{}{day.integer}. {month.full} {year.full}"/>
-        </DataTemplate>
     </Page.Resources>
     <ScrollViewer>
         <StackPanel>
@@ -168,19 +148,7 @@
                         Background="Transparent"
                         Header="Verträge"
                         HorizontalContentAlignment="Left">
-                        <mtuuc:DataGrid
-                            IsReadOnly="True"
-                            CanUserReorderColumns="False"
-                            CanUserResizeColumns="True"
-                            AutoGenerateColumns="False"
-                            IsEnabled="{x:Bind ViewModel.IsNotInEdit, Mode=OneWay}"
-                            ItemsSource="{x:Bind ViewModel.Vertraege.Value}">
-                            <mtuuc:DataGrid.Columns>
-                                <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
-                                <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
-                                <mtuuc:DataGridTextColumn Header="Mieter" Binding="{Binding AuflistungMieter.Value}"/>
-                            </mtuuc:DataGrid.Columns>
-                        </mtuuc:DataGrid>
+                        <uc:VertragListControl WohnungId="{x:Bind ViewModel.Id}"/>
                     </mtuuc:Expander>
                 </StackPanel>
             </RelativePanel>

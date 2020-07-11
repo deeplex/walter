@@ -95,26 +95,12 @@
             </mtuuc:WrapPanel>
 
 
-            <TextBlock Text="Verträge" Margin ="10,20,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
-            <RelativePanel>
-                <mtuuc:DataGrid
-                    RelativePanel.AlignLeftWithPanel="True"
-                    RelativePanel.AlignRightWithPanel="True"
-                    Margin="20,0,20,20"
-                    IsReadOnly="True"
-                    CanUserReorderColumns="False"
-                    CanUserResizeColumns="True"
-                    AutoGenerateColumns="False"
-                    ItemsSource="{x:Bind ViewModel.Vertraege.Value}">
-                    <mtuuc:DataGrid.Columns>
-                        <mtuuc:DataGridTextColumn Header="Anschrift" Binding="{Binding Anschrift.Value}"/>
-                        <mtuuc:DataGridTextColumn Header="Wohnung" Binding="{Binding Wohnung.Value}"/>
-                        <mtuuc:DataGridTextColumn Header="Mieter" Binding="{Binding AuflistungMieter.Value}"/>
-                        <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
-                        <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
-                    </mtuuc:DataGrid.Columns>
-                </mtuuc:DataGrid>
-            </RelativePanel>
+            <mtuuc:Expander
+                        Background="Transparent"
+                        Header="Verträge"
+                        HorizontalContentAlignment="Left">
+                <uc:VertragListControl PersonId="{x:Bind ViewModel.PersonId}"/>
+            </mtuuc:Expander>
         </StackPanel>
     </ScrollViewer>
 </Page>

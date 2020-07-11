@@ -59,7 +59,7 @@
                                         </TextBlock>
                                         <TextBlock>
                                             <Run Text="Wohnung: "/>
-                                            <Run Text="{x:Bind Wohnung}"/>
+                                            <Run Text="{x:Bind Wohnung.Bezeichnung}"/>
                                         </TextBlock>
                                         <TextBlock>
                                             <Run Text="Personenzahl: "/>
