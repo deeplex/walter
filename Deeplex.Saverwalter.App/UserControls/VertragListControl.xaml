@@ -48,7 +48,13 @@
             </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTextColumn
                 Header="Mieter"
-                Binding="{Binding AuflistungMieter.Value}"/>
+                Binding="{Binding AuflistungMieter}"/>
+            <mtuuc:DataGridTextColumn
+                Header="Anschrift"
+                Binding="{Binding Anschrift}"/>
+            <mtuuc:DataGridTextColumn
+                Header="Wohnung"
+                Binding="{Binding Wohnung.Bezeichnung}"/>
         </mtuuc:DataGrid.Columns>
     </mtuuc:DataGrid>
 </UserControl>
