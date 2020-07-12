@@ -15,8 +15,7 @@
         <RelativePanel>
             <Grid
                 RelativePanel.AlignLeftWithPanel="True"
-                RelativePanel.AlignRightWithPanel="True"
-                RelativePanel.AlignVerticalCenterWithPanel="True">
+                RelativePanel.AlignRightWithPanel="True">
 
                 <!-- TODO Set Height and Width to be responsive / OneRowMode enforces ItemHeight -->
                 <mtuuc:AdaptiveGridView

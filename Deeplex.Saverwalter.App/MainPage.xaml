@@ -141,6 +141,7 @@
                         RelativePanel.AlignRightWithPanel="True"
                         RelativePanel.AlignLeftWithPanel="True"
                         RelativePanel.Below="CommandBarPanel"
+                        RelativePanel.AlignBottomWithPanel="True"
                         x:Name="splitview"
                         DisplayMode="Inline"
                         PanePlacement="Right"
