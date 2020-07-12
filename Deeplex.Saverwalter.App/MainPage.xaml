@@ -107,55 +107,59 @@
                     <!--TODO about?-->
                 </StackPanel>
             </NavigationView.PaneFooter>
-                <StackPanel>
-                <RelativePanel Background="{ThemeResource SystemChromeMediumColor}">
-                    <TextBlock x:Name="MainTitel"
-                        Style="{StaticResource TitleTextBlockStyle}"
-                        Margin="10,0,0,0"
-                        Text="{x:Bind ViewModel.Titel.Value, Mode=TwoWay}" />
-                    <CommandBar
-                        Height="40"
-                        x:Name="MainCommandBar"
-                        DefaultLabelPosition="Right"
-                        RelativePanel.LeftOf="MainPermaCommands">
-                    </CommandBar>
-                    <CommandBar
+                <RelativePanel>
+                    <RelativePanel
                         RelativePanel.AlignRightWithPanel="True"
-                        x:Name="MainPermaCommands"
-                        Background="Transparent"
-                        IsOpen="False"
-                        HorizontalAlignment="Stretch"
-                        DefaultLabelPosition="Right">
-                        <AppBarToggleButton
+                        RelativePanel.AlignLeftWithPanel="True"
+                        Background="{ThemeResource SystemChromeMediumColor}" x:Name="CommandBarPanel">
+                        <TextBlock x:Name="MainTitel"
+                            Style="{StaticResource TitleTextBlockStyle}"
+                            Margin="10,0,0,0"
+                            Text="{x:Bind ViewModel.Titel.Value, Mode=TwoWay}" />
+                        <CommandBar
+                            Height="40"
+                            x:Name="MainCommandBar"
+                            DefaultLabelPosition="Right"
+                            RelativePanel.LeftOf="MainPermaCommands">
+                        </CommandBar>
+                        <CommandBar
                             RelativePanel.AlignRightWithPanel="True"
-                            x:Name="togglepane"
-                            Click="togglepane_Click">
-                            <SymbolIcon x:Name="togglepanesymbol" Symbol="ClosePane"/>
-                        </AppBarToggleButton>
-                    </CommandBar>
-                </RelativePanel>
-                <SplitView
-                    x:Name="splitview"
-                    DisplayMode="Inline"
-                    PanePlacement="Right"
-                    PaneBackground="{StaticResource SystemChromeMediumColor}"
-                    IsPaneOpen="False">
-                    <SplitView.Content>
-                        <Frame
-                            x:Name="frame"
-                            Margin="10">
-                            <Frame.ContentTransitions>
-                                <TransitionCollection>
-                                    <NavigationThemeTransition>
-                                        <NavigationThemeTransition.DefaultNavigationTransitionInfo>
-                                            <EntranceNavigationTransitionInfo />
-                                        </NavigationThemeTransition.DefaultNavigationTransitionInfo>
-                                    </NavigationThemeTransition>
-                                </TransitionCollection>
-                            </Frame.ContentTransitions>
-                        </Frame>
-                    </SplitView.Content>
-                    <SplitView.Pane>
+                            x:Name="MainPermaCommands"
+                            Background="Transparent"
+                            IsOpen="False"
+                            HorizontalAlignment="Stretch"
+                            DefaultLabelPosition="Right">
+                            <AppBarToggleButton
+                                RelativePanel.AlignRightWithPanel="True"
+                                x:Name="togglepane"
+                                Click="togglepane_Click">
+                                <SymbolIcon x:Name="togglepanesymbol" Symbol="ClosePane"/>
+                            </AppBarToggleButton>
+                        </CommandBar>
+                    </RelativePanel>
+                    <SplitView
+                        RelativePanel.AlignRightWithPanel="True"
+                        RelativePanel.AlignLeftWithPanel="True"
+                        RelativePanel.Below="CommandBarPanel"
+                        x:Name="splitview"
+                        DisplayMode="Inline"
+                        PanePlacement="Right"
+                        PaneBackground="{StaticResource SystemChromeMediumColor}"
+                        IsPaneOpen="False">
+                        <SplitView.Content>
+                            <Frame x:Name="frame" Margin="10">
+                                <Frame.ContentTransitions>
+                                    <TransitionCollection>
+                                        <NavigationThemeTransition>
+                                            <NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                                                <EntranceNavigationTransitionInfo />
+                                            </NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                                        </NavigationThemeTransition>
+                                    </TransitionCollection>
+                                </Frame.ContentTransitions>
+                            </Frame>
+                        </SplitView.Content>
+                        <SplitView.Pane>
                         <StackPanel>
                             <RelativePanel Padding="10,5,10,0">
                                 <TextBlock Margin="5,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}" Text="Explorer" RelativePanel.AlignLeftWithPanel="True"/>
@@ -177,7 +181,7 @@
                         </StackPanel>
                     </SplitView.Pane>
                 </SplitView>
-            </StackPanel>
+            </RelativePanel>
         </NavigationView>
     </Grid>
 </Page>
