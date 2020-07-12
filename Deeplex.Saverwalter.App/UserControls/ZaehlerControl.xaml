@@ -60,23 +60,12 @@
             StretchContentForSingleRow="True"
             SelectionMode="Single"
             x:Name="ZaehlerstandPanel"
-            ItemsSource="{x:Bind ViewModel.Zaehlerstaende.Value, Mode=TwoWay}">
+            ItemsSource="{x:Bind ViewModel.Zaehlerstaende.Value, Mode=OneWay}">
             <mtuuc:AdaptiveGridView.ItemTemplate>
                 <DataTemplate x:DataType="vm:ZaehlerstandViewModel">
                     <uc:ZaehlerstandControl vm="{x:Bind self}"/>
                 </DataTemplate>
             </mtuuc:AdaptiveGridView.ItemTemplate>
         </mtuuc:AdaptiveGridView>
-
-        <!--TODO REMOVE THIS STACKPANEL!!!-->
-        
-        <TextBlock Text="Big TODO here: This should be unnecessary and I have no idea why it does not show in the gridview above..."/>
-        <StackPanel Orientation="Horizontal" Width="300">
-            <muxc:ItemsRepeater ItemsSource="{x:Bind ViewModel.Zaehlerstaende.Value}">
-                <DataTemplate x:DataType="vm:ZaehlerstandViewModel">
-                    <uc:ZaehlerstandControl vm="{x:Bind self}"/>
-                </DataTemplate>
-            </muxc:ItemsRepeater>
-        </StackPanel>
     </StackPanel>
 </UserControl>

@@ -14,29 +14,17 @@ namespace Deeplex.Saverwalter.App.UserControls
         {
             InitializeComponent();
 
-            RegisterPropertyChangedCallback(IdProperty, (idDepObject, idProp) =>
-            {
-                ViewModel = new ZaehlerstandViewModel(App.Walter.Zaehlerstaende.Find(Id));
-            });
-
             RegisterPropertyChangedCallback(vmProperty, (vmDepObject, vmProp) =>
             {
                 ViewModel = vm;
+                // TODO this should not be necessary, but without it the values are not set in GUI
+                Zaehlerstand.Value = ViewModel.Stand;
+                Ablesedatum.Date = ViewModel.Datum;
+                Attach.Command = ViewModel.AttachFile;
+                Notiz.Text = ViewModel.Notiz ?? "";
+                SelfDestruct.Command = ViewModel.SelfDestruct;
             });
         }
-
-        public int Id
-        {
-            get { return (int)GetValue(IdProperty); }
-            set { SetValue(IdProperty, value); }
-        }
-
-        public static readonly DependencyProperty IdProperty
-            = DependencyProperty.Register(
-                "Id",
-                typeof(int),
-                typeof(ZaehlerstandControl),
-                new PropertyMetadata(0));
 
         public ZaehlerstandViewModel vm
         {

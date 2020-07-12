@@ -60,7 +60,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Zaehlerstaende.Value = App.Walter.Zaehlerstaende.ToList()
                 .Where(zs => Entity == zs.Zaehler || Entity == zs.AllgemeinZaehler)
                 .OrderBy(zs => zs.Datum).Reverse()
-                .Select(zs => new ZaehlerstandViewModel(zs)).ToImmutableList();
+                .Select(zs => new ZaehlerstandViewModel(zs, this)).ToImmutableList();
         }
 
         public ZaehlerViewModel(Zaehler z)
@@ -108,7 +108,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             };
             App.Walter.Zaehlerstaende.Add(zs);
             App.Walter.SaveChanges();
-            var wdzs = new ZaehlerstandViewModel(zs);
+            var wdzs = new ZaehlerstandViewModel(zs, this);
             Zaehlerstaende.Value = Zaehlerstaende.Value
                 .Add(wdzs)
                 .OrderBy(nzs => nzs.Datum).Reverse()

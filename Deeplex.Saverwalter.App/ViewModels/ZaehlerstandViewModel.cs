@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public ZaehlerstandViewModel(Zaehlerstand z)
+        public ZaehlerstandViewModel(Zaehlerstand z, ZaehlerViewModel parent)
         {
             Entity = z;
             AttachFile = new AsyncRelayCommand(async _ =>
@@ -49,6 +49,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             SelfDestruct = new RelayCommand(_ =>
             {
                 App.Walter.Remove(Entity);
+                parent.Zaehlerstaende.Value = parent.Zaehlerstaende.Value.Remove(this);
+
                 App.Walter.SaveChanges();
             }, _ => true);
         }

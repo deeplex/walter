@@ -9,10 +9,12 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <RelativePanel Background="{ThemeResource SystemChromeLowColor}">
+    <Grid x:Name="RootGrid">
+        <RelativePanel Background="{ThemeResource SystemChromeLowColor}">
         <RelativePanel.ContextFlyout>
             <MenuFlyout>
                 <MenuFlyoutItem
+                    x:Name="SelfDestruct"
                     Command="{x:Bind ViewModel.SelfDestruct, Mode=OneWay}"
                     Icon="Delete"
                     Text="Löschen"/>
@@ -24,6 +26,7 @@
                 <Flyout>
                     <StackPanel>
                         <TextBox
+                            x:Name="Notiz"
                             PlaceholderText="Notiz"
                             Width="300" TextWrapping="Wrap"
                             Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
@@ -36,10 +39,12 @@
             <StackPanel Width="275" Margin="10,10,10,10" Orientation="Horizontal">
                 <muxc:NumberBox
                     Header="Zählerstand"
+                    x:Name="Zaehlerstand"
                     Value="{x:Bind ViewModel.Stand, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                 <CalendarDatePicker
                     Margin="10,0,0,0"
                     Header="Ablesedatum"
+                    x:Name="Ablesedatum"
                     Date="{x:Bind ViewModel.Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Language="de"
                     DateFormat="{}{day.integer}. {month.full} {year.full}"/>
@@ -48,8 +53,10 @@
         <Button
             RelativePanel.AlignRightWithPanel="True"
             RelativePanel.AlignBottomWithPanel="True"
-            Command="{x:Bind ViewModel.AttachFile}" Background="Transparent">
+            x:Name="Attach"
+            Command="{x:Bind ViewModel.AttachFile, Mode=OneWay}" Background="Transparent">
             <SymbolIcon Symbol="Attach"/>
         </Button>
     </RelativePanel>
+    </Grid>
 </UserControl>
