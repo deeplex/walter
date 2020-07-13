@@ -22,70 +22,59 @@ namespace Deeplex.Saverwalter.App.ViewModels
             App.SaveWalter();
         }
 
+        private void update<U>(string property, U value)
+        {
+            if (Entity == null) return;
+            var type = Entity.GetType();
+            var prop = type.GetProperty(property);
+            var val = prop.GetValue(Entity, null);
+            if (!value.Equals(val))
+            {
+                prop.SetValue(Entity, value);
+                RaisePropertyChanged(property);
+            };
+        }
+
         public Guid PersonId
         {
             get => Entity.PersonId;
-            set
-            {
-                Entity.PersonId = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.PersonId), value);
+
         }
 
         public Anrede Anrede
         {
             get => Entity.Anrede;
-            set
-            {
-                Entity.Anrede = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Anrede), value);
         }
 
         public string Vorname
         {
             get => Entity.Vorname;
-            set
-            {
-                Entity.Vorname = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Vorname), value);
         }
         public string Nachname
         {
             get => Entity.Nachname;
-            set
-            {
-                Entity.Nachname = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Nachname), value);
         }
         public bool isVermieter
         {
             get => Entity.isVermieter;
-            set
-            {
-                Entity.isVermieter = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.isVermieter), value);
+
         }
         public bool isMieter
         {
             get => Entity.isMieter;
-            set
-            {
-                Entity.isMieter = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.isMieter), value);
+
         }
         public bool isHandwerker
         {
             get => Entity.isHandwerker;
-            set
-            {
-                Entity.isHandwerker = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.isHandwerker), value);
+
         }
         public int AdresseId => Entity.AdresseId ?? 0;
 
@@ -93,51 +82,31 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public string Email
         {
             get => Entity.Email;
-            set
-            {
-                Entity.Email = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Email), value);
         }
 
         public string Telefon
         {
             get => Entity.Telefon;
-            set
-            {
-                Entity.Telefon = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Telefon), value);
         }
 
         public string Mobil
         {
             get => Entity.Mobil;
-            set
-            {
-                Entity.Mobil = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Mobil), value);
         }
 
         public string Fax
         {
             get => Entity.Fax;
-            set
-            {
-                Entity.Fax = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Fax), value);
         }
 
         public string Notiz
         {
             get => Entity.Notiz;
-            set
-            {
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Notiz), value);
         }
 
         public ObservableProperty<List<NatuerlichePersonVertrag>> Vertraege

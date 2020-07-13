@@ -54,56 +54,50 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
+        private void update<U>(string property, U value)
+        {
+            if (Entity == null) return;
+            var type = Entity.GetType();
+            var prop = type.GetProperty(property);
+            var val = prop.GetValue(Entity, null);
+            if (!value.Equals(val))
+            {
+                prop.SetValue(Entity, value);
+                RaisePropertyChanged(property);
+            };
+        }
+
         public int AdresseId => Entity.AdresseId;
         public string Anschrift => AdresseViewModel.Anschrift(AdresseId);
 
         public string Bezeichnung
         {
             get => Entity.Bezeichnung;
-            set
-            {
-                Entity.Bezeichnung = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Bezeichnung), value);
         }
 
         public string Notiz
         {
             get => Entity.Notiz;
-            set
-            {
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Notiz), value);
         }
 
         public double Wohnflaeche
         {
             get => Entity.Wohnflaeche;
-            set
-            {
-                Entity.Wohnflaeche = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Wohnflaeche), value);
+
         }
         public double Nutzflaeche
         {
             get => Entity.Nutzflaeche;
-            set
-            {
-                Entity.Nutzflaeche = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Nutzflaeche), value);
         }
 
         public int Nutzeinheit
         {
             get => Entity.Nutzeinheit;
-            set
-            {
-                Entity.Nutzeinheit = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Nutzeinheit), value);
         }
 
         public WohnungDetailViewModel(int id)

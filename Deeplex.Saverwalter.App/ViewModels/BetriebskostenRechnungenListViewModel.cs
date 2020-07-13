@@ -209,91 +209,56 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public Betriebskostenrechnung GetEntity => Entity;
 
+        private void update<U>(string property, U value)
+        {
+            if (Entity == null) return;
+            var type = Entity.GetType();
+            var prop = type.GetProperty(property);
+            var val = prop.GetValue(Entity, null);
+            if (!value.Equals(val))
+            {
+                prop.SetValue(Entity, value);
+                RaisePropertyChanged(property);
+            };
+        }
+
         public int Id => Entity.BetriebskostenrechnungId;
         public ObservableProperty<bool> isNew { get; set; }
             = new ObservableProperty<bool>(false);
         public double Betrag
         {
             get => Entity?.Betrag ?? 0;
-            set
-            {
-                if (Entity == null)
-                {
-                    return;
-                }
-                Entity.Betrag = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Betrag), value);
         }
 
         public string Beschreibung
         {
             get => Entity?.Beschreibung;
-            set
-            {
-                if (Entity == null)
-                {
-                    return;
-                }
-                Entity.Beschreibung = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Beschreibung), value);
         }
 
         public string Notiz
         {
             get => Entity?.Notiz;
-            set
-            {
-                if (Entity == null)
-                {
-                    return;
-                }
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Notiz), value);
         }
 
         public int BetreffendesJahr
         {
             get => Entity?.BetreffendesJahr ?? 0;
-            set
-            {
-                if (Entity == null)
-                {
-                    return;
-                }
-                Entity.BetreffendesJahr = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.BetreffendesJahr), value);
         }
         public bool isHeizung => Entity?.Typ == Betriebskostentyp.Heizkosten;
 
         public double HKVO_P7
         {
             get => (Entity?.HKVO_P7 ?? 0) * 100;
-            set
-            {
-                if (Entity == null)
-                {
-                    return;
-                }
-                Entity.HKVO_P7 = value / 100;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.HKVO_P7), value / 100);
         }
         public double HKVO_P8
         {
             get => (Entity?.HKVO_P8 ?? 0) * 100;
-            set
-            {
-                if (Entity == null)
-                {
-                    return;
-                }
-                Entity.HKVO_P8 = value / 100;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.HKVO_P8), value / 100);
         }
 
         public List<BetriebskostenrechnungEnum> HKVO_P9_List =
@@ -336,15 +301,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity?.Allgemeinzaehler != null ?
                 AllgemeinZaehler_List.FindIndex(a => a.Id == Entity.Allgemeinzaehler.AllgemeinZaehlerId) :
                 0;
-            set
-            {
-                if (Entity == null)
-                {
-                    return;
-                }
-                Entity.Allgemeinzaehler = App.Walter.AllgemeinZaehlerSet.Find(AllgemeinZaehler_List[value].Id);
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Allgemeinzaehler),
+                App.Walter.AllgemeinZaehlerSet.Find(AllgemeinZaehler_List[value].Id));
         }
 
         public sealed class BetriebskostenrechnungEnum
@@ -373,58 +331,27 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public int HKVO_P9
         {
-            get => Entity?.Typ == Betriebskostentyp.Heizkosten ? HKVO_P9_List.FindIndex(i => i.index == (int)Entity.HKVO_P9) : 0;
-            set
-            {
-                if (Entity == null)
-                {
-                    return;
-                }
-                Entity.HKVO_P9 = (HKVO_P9A2)HKVO_P9_List[value].index;
-                RaisePropertyChangedAuto();
-            }
+            get => Entity?.Typ == Betriebskostentyp.Heizkosten ?
+                HKVO_P9_List.FindIndex(i => i.index == (int)Entity.HKVO_P9) : 0;
+            set => update(nameof(Entity.HKVO_P9), (HKVO_P9A2)HKVO_P9_List[value].index);
         }
 
         public int Typ
         {
             get => Typen_List.FindIndex(i => i.index == (Entity != null ? (int)Entity?.Typ : 0));
-            set
-            {
-                if (Entity == null)
-                {
-                    return;
-                }
-                Entity.Typ = (Betriebskostentyp)Typen_List[value].index;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Typ), (Betriebskostentyp)Typen_List[value].index);
         }
 
         public int UmlageSchluessel
         {
             get => Entity != null ? (int)Entity.Schluessel : 0;
-            set
-            {
-                if (Entity == null)
-                {
-                    return;
-                }
-                Entity.Schluessel = (UmlageSchluessel)value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Schluessel), (UmlageSchluessel)value);
         }
 
         public DateTimeOffset Datum
         {
             get => Entity?.Datum ?? DateTime.Now.Date.AsUtcKind();
-            set
-            {
-                if (Entity == null)
-                {
-                    return;
-                }
-                Entity.Datum = value.Date.AsUtcKind();
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Datum), value.Date.AsUtcKind());
         }
         public ImmutableList<string> Wohnungen { get; }
         public ImmutableList<int> WohnungenIds { get; }

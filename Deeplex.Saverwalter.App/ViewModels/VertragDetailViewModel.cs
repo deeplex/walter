@@ -164,27 +164,34 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class VertragDetailVersion : BindableBase
     {
+        private void update<U>(string property, U value)
+        {
+            if (Entity == null) return;
+            var type = Entity.GetType();
+            var prop = type.GetProperty(property);
+            var val = prop.GetValue(Entity, null);
+            if (!value.Equals(val))
+            {
+                prop.SetValue(Entity, value);
+                RaisePropertyChanged(property);
+            };
+        }
+
         private Vertrag Entity { get; }
         public int Id => Entity.rowid;
         public int Version => Entity.Version;
         public double KaltMiete
         {
             get => Entity.KaltMiete;
-            set
-            {
-                Entity.KaltMiete = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.KaltMiete), value);
+
         }
 
         public int Personenzahl
         {
             get => Entity.Personenzahl;
-            set
-            {
-                Entity.Personenzahl = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Personenzahl), value);
+
         }
 
         private VertragDetailWohnung mWohnung;
@@ -195,37 +202,25 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 if (value == null) return;
                 mWohnung = value;
-                Entity.WohnungId = mWohnung.Id;
+                update(nameof(Entity.WohnungId), mWohnung.Id);
                 RaisePropertyChanged(nameof(Vermieter));
-                RaisePropertyChangedAuto();
             }
         }
         public DateTimeOffset Beginn
         {
             get => Entity.Beginn.AsUtcKind();
-            set
-            {
-                Entity.Beginn = value.UtcDateTime;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Beginn), value.UtcDateTime);
         }
-        public DateTimeOffset? Ende
+    public DateTimeOffset? Ende
         {
             get => Entity.Ende?.AsUtcKind();
-            set
-            {
-                Entity.Ende = value?.UtcDateTime;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Ende), value?.UtcDateTime);
         }
         public string Notiz
         {
             get => Entity.Notiz;
-            set
-            {
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Notiz), value);
+
         }
         public string Vermieter => Wohnung.Besitzer;
         private VertragDetailKontakt mAnsprechpartner;
@@ -235,8 +230,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set
             {
                 mAnsprechpartner = value;
-                Entity.AnsprechpartnerId = mAnsprechpartner.PersonId;
-                RaisePropertyChangedAuto();
+                update(nameof(Entity.AnsprechpartnerId), mAnsprechpartner.PersonId);
             }
         }
 
@@ -296,6 +290,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public sealed class VertragDetailMiete : BindableBase
     {
+        private void update<U>(string property, U value)
+        {
+            if (Entity == null) return;
+            var type = Entity.GetType();
+            var prop = type.GetProperty(property);
+            var val = prop.GetValue(Entity, null);
+            if (!value.Equals(val))
+            {
+                prop.SetValue(Entity, value);
+                RaisePropertyChanged(property);
+            };
+        }
+
         public void selfDestruct()
         {
             App.Walter.Remove(Entity);
@@ -306,41 +313,27 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public DateTimeOffset Zahlungsdatum
         {
             get => Entity.Zahlungsdatum.AsUtcKind();
-            set
-            {
-                Entity.Zahlungsdatum = value.UtcDateTime;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Zahlungsdatum), value.UtcDateTime);
+
         }
 
         public DateTimeOffset BetreffenderMonat
         {
             get => Entity.BetreffenderMonat.AsUtcKind();
-            set
-            {
-                Entity.BetreffenderMonat = new DateTime(value.Year, value.Month, 1).AsUtcKind();
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.BetreffenderMonat),
+                new DateTime(value.Year, value.Month, 1).AsUtcKind());
         }
 
         public string Notiz
         {
             get => Entity.Notiz;
-            set
-            {
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Notiz), value);
         }
 
         public double Betrag
         {
             get => Entity.Betrag ?? 0;
-            set
-            {
-                Entity.Betrag = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Betrag), value);
         }
 
         public VertragDetailMiete(Guid vertragId)
@@ -403,44 +396,44 @@ namespace Deeplex.Saverwalter.App.ViewModels
             App.Walter.Remove(Entity);
             App.SaveWalter();
         }
+
+        private void update<U>(string property, U value)
+        {
+            if (Entity == null) return;
+            var type = Entity.GetType();
+            var prop = type.GetProperty(property);
+            var val = prop.GetValue(Entity, null);
+            if (!value.Equals(val))
+            {
+                prop.SetValue(Entity, value);
+                RaisePropertyChanged(property);
+            };
+        }
+
         public DateTimeOffset Beginn
         {
             get => Entity.Beginn;
-            set
-            {
-                Entity.Beginn = value.UtcDateTime.AsUtcKind();
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Beginn), value.UtcDateTime.AsUtcKind());
+
         }
 
         public DateTimeOffset? Ende
         {
             get => Entity.Ende;
-            set
-            {
-                Entity.Ende = value?.UtcDateTime.AsUtcKind();
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Ende), value?.UtcDateTime.AsUtcKind());
         }
 
         public double Minderung
         {
             get => Entity.Minderung;
-            set
-            {
-                Entity.Minderung = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Minderung), value);
+
         }
 
         public string Notiz
         {
             get => Entity.Notiz;
-            set
-            {
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto();
-            }
+            set => update(nameof(Entity.Notiz), value);
         }
 
         public VertragDetailMietMinderung(Guid vertragId)
