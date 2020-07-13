@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public void selfDestruct()
         {
             App.Walter.NatuerlichePersonen.Remove(Entity);
-            App.Walter.SaveChanges();
+            App.SaveWalter();
         }
 
         public Guid PersonId
@@ -202,7 +202,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 App.Walter.NatuerlichePersonen.Add(Entity);
             }
-            App.Walter.SaveChanges();
+            App.SaveWalter();
         }
     }
 

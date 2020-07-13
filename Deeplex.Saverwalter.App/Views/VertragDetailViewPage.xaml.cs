@@ -134,7 +134,7 @@ namespace Deeplex.Saverwalter.App.Views
                 {
                     vs.AnsprechpartnerId = a.PersonId;
                 });
-                App.Walter.SaveChanges();
+                App.SaveWalter();
             }
         }
 
@@ -189,7 +189,7 @@ namespace Deeplex.Saverwalter.App.Views
                 if (target != null)
                 {
                     App.Walter.MieterSet.Remove(target);
-                    App.Walter.SaveChanges();
+                    App.SaveWalter();
                 }
             }
         }
@@ -210,7 +210,7 @@ namespace Deeplex.Saverwalter.App.Views
                         PersonId = mieter.PersonId,
                         VertragId = ViewModel.guid,
                     });
-                    App.Walter.SaveChanges();
+                    App.SaveWalter();
                 }
             }
         }

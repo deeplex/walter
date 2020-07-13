@@ -106,7 +106,7 @@ namespace Deeplex.Saverwalter.App.Utils
                 Set.Add(attachment);
                 App.ViewModel.Explorer.Value.raiseChange(target, file);
             }
-            App.Walter.SaveChanges();
+            App.SaveWalter();
         }
 
         public static async Task<List<T>> PrepareFilesForWalter<T>(Microsoft.EntityFrameworkCore.DbSet<T> Set, params string[] filters) where T : class, IAnhang, new()

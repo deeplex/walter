@@ -37,6 +37,7 @@ namespace Deeplex.Saverwalter.App
             InitializeComponent();
 
             ViewModel.SetCommandBar(MainCommandBar);
+            ViewModel.SetSavedIndicator(SavedIndicator);
             App.ViewModel.Explorer.Value = new AnhangViewModel(ExplorerTree);
             ExplorerTree.ItemTemplateSelector = new ExplorerItemTemplateSelector(AnhangTemplate, GroupTemplate, RootTemplate);
         }
@@ -66,7 +67,7 @@ namespace Deeplex.Saverwalter.App
             }
         }
 
-        private void NavView_BackRequested(Windows.UI.Xaml.Controls.NavigationView sender, Windows.UI.Xaml.Controls.NavigationViewBackRequestedEventArgs args)
+        private void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {
             if (AppFrame.CanGoBack)
             {

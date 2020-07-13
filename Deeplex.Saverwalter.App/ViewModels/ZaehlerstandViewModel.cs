@@ -51,7 +51,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.Walter.Remove(Entity);
                 parent.Zaehlerstaende.Value = parent.Zaehlerstaende.Value.Remove(this);
 
-                App.Walter.SaveChanges();
+                App.SaveWalter();
             }, _ => true);
         }
 

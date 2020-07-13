@@ -79,7 +79,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             if (adr != null)
             {
-                App.Walter.SaveChanges();
+                App.SaveWalter();
                 return adr;
             }
             else
@@ -93,7 +93,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 };
 
                 App.Walter.Adressen.Add(adr);
-                App.Walter.SaveChanges();
+                App.SaveWalter();
                 return adr;
             }
         }

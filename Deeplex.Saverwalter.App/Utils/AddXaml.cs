@@ -227,7 +227,7 @@ namespace Deeplex.Saverwalter.App.Utils
                         });
                     });
 
-                App.Walter.SaveChanges();
+                App.SaveWalter();
             }
         }
 

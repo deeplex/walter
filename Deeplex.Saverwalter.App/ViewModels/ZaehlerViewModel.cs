@@ -107,7 +107,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Stand = stand,
             };
             App.Walter.Zaehlerstaende.Add(zs);
-            App.Walter.SaveChanges();
+            App.SaveWalter();
             var wdzs = new ZaehlerstandViewModel(zs, this);
             Zaehlerstaende.Value = Zaehlerstaende.Value
                 .Add(wdzs)

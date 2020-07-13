@@ -67,7 +67,7 @@ namespace Deeplex.Saverwalter.App.Views
             };
             App.Walter.Wohnungen.Add(w);
             App.Walter.Vertraege.Add(v);
-            App.Walter.SaveChanges();
+            App.SaveWalter();
         }
     }
 }

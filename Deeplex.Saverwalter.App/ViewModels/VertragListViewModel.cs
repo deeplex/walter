@@ -81,7 +81,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     Betrag = AddMieteValue.Value.Betrag,
                     VertragId = Versionen.Last().VertragId,
                 });
-                App.Walter.SaveChanges();
+                App.SaveWalter();
                 AddMieteValue.Value = new VertragListMiete();
                 RaisePropertyChanged(nameof(LastMiete));
                 RaisePropertyChanged(nameof(HasLastMiete));

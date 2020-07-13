@@ -81,7 +81,7 @@ namespace Deeplex.Saverwalter.App.Views
                     WohnungId = w
                 });
             }
-            App.Walter.SaveChanges();
+            App.SaveWalter();
             cp.isNew.Value = false;
         }
 

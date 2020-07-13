@@ -482,7 +482,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             if (Entity.BetriebskostenrechnungId != 0)
             {
                 App.Walter.Betriebskostenrechnungen.Remove(Entity);
-                App.Walter.SaveChanges();
+                App.SaveWalter();
             }
         }
 
@@ -551,7 +551,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 App.Walter.Betriebskostenrechnungen.Add(Entity);
             }
-            App.Walter.SaveChanges();
+            App.SaveWalter();
         }
 
         // Sorting after Adress? Tree View sth?

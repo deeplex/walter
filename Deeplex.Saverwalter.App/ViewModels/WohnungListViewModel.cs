@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     a.Strasse = address.Key.Strasse.Value;
                     a.Stadt = address.Key.Stadt.Value;
                     App.Walter.Adressen.Update(a);
-                    App.Walter.SaveChanges();
+                    App.SaveWalter();
                 }
             });
         }

@@ -107,37 +107,37 @@
                     <!--TODO about?-->
                 </StackPanel>
             </NavigationView.PaneFooter>
-                <RelativePanel>
-                    <RelativePanel
+            <RelativePanel>
+                <RelativePanel
                         RelativePanel.AlignRightWithPanel="True"
                         RelativePanel.AlignLeftWithPanel="True"
                         Background="{ThemeResource SystemChromeMediumColor}" x:Name="CommandBarPanel">
-                        <TextBlock x:Name="MainTitel"
+                    <TextBlock x:Name="MainTitel"
                             Style="{StaticResource TitleTextBlockStyle}"
                             Margin="10,0,0,0"
                             Text="{x:Bind ViewModel.Titel.Value, Mode=TwoWay}" />
-                        <CommandBar
+                    <CommandBar
                             Height="40"
                             x:Name="MainCommandBar"
                             DefaultLabelPosition="Right"
                             RelativePanel.LeftOf="MainPermaCommands">
-                        </CommandBar>
-                        <CommandBar
+                    </CommandBar>
+                    <CommandBar
                             RelativePanel.AlignRightWithPanel="True"
                             x:Name="MainPermaCommands"
                             Background="Transparent"
                             IsOpen="False"
                             HorizontalAlignment="Stretch"
                             DefaultLabelPosition="Right">
-                            <AppBarToggleButton
+                        <AppBarToggleButton
                                 RelativePanel.AlignRightWithPanel="True"
                                 x:Name="togglepane"
                                 Click="togglepane_Click">
-                                <SymbolIcon x:Name="togglepanesymbol" Symbol="ClosePane"/>
-                            </AppBarToggleButton>
-                        </CommandBar>
-                    </RelativePanel>
-                    <SplitView
+                            <SymbolIcon x:Name="togglepanesymbol" Symbol="ClosePane"/>
+                        </AppBarToggleButton>
+                    </CommandBar>
+                </RelativePanel>
+                <SplitView
                         RelativePanel.AlignRightWithPanel="True"
                         RelativePanel.AlignLeftWithPanel="True"
                         RelativePanel.Below="CommandBarPanel"
@@ -147,20 +147,20 @@
                         PanePlacement="Right"
                         PaneBackground="{StaticResource SystemChromeMediumColor}"
                         IsPaneOpen="False">
-                        <SplitView.Content>
-                            <Frame x:Name="frame" Margin="10">
-                                <Frame.ContentTransitions>
-                                    <TransitionCollection>
-                                        <NavigationThemeTransition>
-                                            <NavigationThemeTransition.DefaultNavigationTransitionInfo>
-                                                <EntranceNavigationTransitionInfo />
-                                            </NavigationThemeTransition.DefaultNavigationTransitionInfo>
-                                        </NavigationThemeTransition>
-                                    </TransitionCollection>
-                                </Frame.ContentTransitions>
-                            </Frame>
-                        </SplitView.Content>
-                        <SplitView.Pane>
+                    <SplitView.Content>
+                        <Frame x:Name="frame" Margin="10">
+                            <Frame.ContentTransitions>
+                                <TransitionCollection>
+                                    <NavigationThemeTransition>
+                                        <NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                                            <EntranceNavigationTransitionInfo />
+                                        </NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                                    </NavigationThemeTransition>
+                                </TransitionCollection>
+                            </Frame.ContentTransitions>
+                        </Frame>
+                    </SplitView.Content>
+                    <SplitView.Pane>
                         <ScrollViewer>
                             <StackPanel>
                                 <RelativePanel Padding="10,5,10,0">
@@ -186,5 +186,14 @@
                 </SplitView>
             </RelativePanel>
         </NavigationView>
+        <mtuuc:InAppNotification
+            x:Name="SavedIndicator"
+            ShowDismissButton="False"
+            HorizontalAlignment="Right">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Gespeichert"/>
+                <SymbolIcon Margin="5,0,0,0" Symbol="Accept"/>
+            </StackPanel>
+        </mtuuc:InAppNotification>
     </Grid>
 </Page>

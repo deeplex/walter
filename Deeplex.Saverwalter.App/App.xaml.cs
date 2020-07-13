@@ -24,6 +24,12 @@ namespace Deeplex.Saverwalter.App
 
         public static SaverwalterContext Walter { get; private set; }
 
+        public static void SaveWalter()
+        {
+            Walter.SaveChanges();
+            ViewModel.ShowSavedIndicator(1000);
+        }
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().

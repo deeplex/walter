@@ -409,7 +409,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             DeleteFile = new RelayCommand(_ =>
             {
                 App.Walter.Anhaenge.Remove(Entity);
-                App.Walter.SaveChanges();
+                App.SaveWalter();
                 Parent.Children.Remove(this);
             }, _ => true);
         }

@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public void selfDestruct()
         {
             App.Walter.JuristischePersonen.Remove(Entity);
-            App.Walter.SaveChanges();
+            App.SaveWalter();
         }
 
         public Guid PersonId
@@ -164,7 +164,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 App.Walter.JuristischePersonen.Add(Entity);
             }
-            App.Walter.SaveChanges();
+            App.SaveWalter();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Deeplex.Utils.ObjectModel;
+using Microsoft.Toolkit.Uwp.UI.Controls;
 using System.Collections.Generic;
 using Windows.UI.Xaml.Controls;
 
@@ -10,12 +11,18 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<AnhangViewModel> Explorer = new ObservableProperty<AnhangViewModel>();
 
         private CommandBar CommandBar { get; set; }
+        private InAppNotification SavedIndicator { get; set; }
 
         public void SetCommandBar(CommandBar arg)
         {
             CommandBar = arg;
         }
 
+        public void SetSavedIndicator(InAppNotification arg)
+        {
+            SavedIndicator = arg;
+        }
+        public void ShowSavedIndicator(int ms = 500) => SavedIndicator.Show(ms);
 
         public MainViewModel()
         {

@@ -111,7 +111,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 var nv = new VertragDetailVersion(entity);
                 Versionen.Value = Versionen.Value.Insert(0, nv);
                 App.Walter.Add(entity);
-                App.Walter.SaveChanges();
+                App.SaveWalter();
             }, _ => true);
 
             AddMieteValue.Value = new VertragDetailMiete(v.First().VertragId);
@@ -143,7 +143,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 var vs = App.Walter.Vertraege.Find(Versionen.Value.First().Id);
                 App.Walter.Vertraege.Remove(vs);
                 Versionen.Value = Versionen.Value.Skip(1).ToImmutableList();
-                App.Walter.SaveChanges();
+                App.SaveWalter();
             }, _ => true);
 
             IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
@@ -290,7 +290,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 App.Walter.Vertraege.Add(Entity);
             }
-            App.Walter.SaveChanges();
+            App.SaveWalter();
         }
     }
 
@@ -299,7 +299,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public void selfDestruct()
         {
             App.Walter.Remove(Entity);
-            App.Walter.SaveChanges();
+            App.SaveWalter();
         }
         private Miete Entity { get; }
 
@@ -391,7 +391,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 App.Walter.Mieten.Add(Entity);
             }
-            App.Walter.SaveChanges();
+            App.SaveWalter();
         }
     }
 
@@ -401,7 +401,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public void selfDestruct()
         {
             App.Walter.Remove(Entity);
-            App.Walter.SaveChanges();
+            App.SaveWalter();
         }
         public DateTimeOffset Beginn
         {
@@ -486,7 +486,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 App.Walter.MietMinderungen.Add(Entity);
             }
-            App.Walter.SaveChanges();
+            App.SaveWalter();
         }
     }
 

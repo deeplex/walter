@@ -170,7 +170,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     });
                 }
 
-                App.Walter.SaveChanges();
+                App.SaveWalter();
                 var wdz = new ZaehlerViewModel(z);
                 RaisePropertyChanged(nameof(AllgemeinZaehler));
             }, _ => true);
@@ -187,7 +187,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     Typ = Typ,
                 };
                 App.Walter.ZaehlerSet.Add(z);
-                App.Walter.SaveChanges();
+                App.SaveWalter();
                 var wdz = new ZaehlerViewModel(z);
                 Zaehler.Value = Zaehler.Value.Add(wdz);
                 RaisePropertyChanged(nameof(Zaehler));
@@ -236,7 +236,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 App.Walter.Wohnungen.Add(Entity);
             }
-            App.Walter.SaveChanges();
+            App.SaveWalter();
         }
     }
 }
