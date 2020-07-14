@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenTyp, BetriebskostenRechnungenListJahr>> Typen
             = new ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenTyp, BetriebskostenRechnungenListJahr>>();
-
+        
         public ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenGruppe, BetriebskostenRechnungenListJahr>> Gruppen
             = new ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenGruppe, BetriebskostenRechnungenListJahr>>();
 
@@ -82,9 +82,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class BetriebskostenRechnungenBetriebskostenGruppe
     {
         public string Bezeichnung { get; }
+        public SortedSet<int> WohnungIds { get; }
 
         public BetriebskostenRechnungenBetriebskostenGruppe(SortedSet<int> set)
         {
+            WohnungIds = set;
+
             var adressen = App.Walter.Wohnungen
             .Include(w => w.Adresse)
             .ToList()
@@ -390,12 +393,23 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private void selfDestruct(BetriebskostenRechnungenListViewModel t)
         {
-            var obj = t.Typen.Value.Single(s => s.Key.Typ == Entity.Typ).Value;
-            var lst = obj.Jahre.Value[BetreffendesJahr].Remove(this);
+            var typ = t.Typen.Value.Single(s => s.Key.Typ == Entity.Typ).Value;
+            var grp = t.Gruppen.Value.Single(g => g.Key.WohnungIds.SequenceEqual(WohnungenIds)).Value;
+            ImmutableList<BetriebskostenRechnungenRechnung> lst;
+
+            var isTyp = typ.Jahre.Value.TryGetValue(BetreffendesJahr, out lst);
+            if (!isTyp)
+            {
+                grp.Jahre.Value.TryGetValue(BetreffendesJahr, out lst);
+            }
+            if (lst != null)
+            {
+                lst = lst.Remove(this);
+            }
 
             ImmutableSortedDictionary<int, ImmutableList<BetriebskostenRechnungenRechnung>> Remove()
             {
-                var a = obj.Jahre.Value.Remove(BetreffendesJahr);
+                var a = isTyp ? typ.Jahre.Value.Remove(BetreffendesJahr) : grp.Jahre.Value.Remove(BetreffendesJahr);
                 if (lst.Any())
                 {
                     a = a.Add(BetreffendesJahr, lst);
@@ -403,9 +417,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 return a;
             }
 
-            obj.Jahre.Value = Remove();
+            if (isTyp)
+            {
+                typ.Jahre.Value = Remove();
+            }
+            else
+            {
+                grp.Jahre.Value = Remove();
+            }
 
-            // TODO remove from Gruppen
             if (Entity.BetriebskostenrechnungId != 0)
             {
                 App.Walter.Betriebskostenrechnungen.Remove(Entity);

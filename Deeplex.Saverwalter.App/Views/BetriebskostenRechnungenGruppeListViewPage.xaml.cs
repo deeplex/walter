@@ -54,11 +54,11 @@ namespace Deeplex.Saverwalter.App.Views
             var neueJahre = new BetriebskostenRechnungenListJahr(
                 ViewModel,
                 ViewModel.Gruppen.Value[dc.Key].Jahre.Value.Add(
-                    LetztesJahr.Key + 1,
-                    Rechnungen.Select(r => new BetriebskostenRechnungenRechnung(ViewModel, r)).ToImmutableList()));
+                LetztesJahr.Key + 1,
+                Rechnungen.Select(r => new BetriebskostenRechnungenRechnung(ViewModel, r)).ToImmutableList()));
 
-            var Typen = ViewModel.Gruppen.Value.Remove(dc.Key);
-            ViewModel.Gruppen.Value = Typen.Add(dc.Key, neueJahre);
+            var Gruppen = ViewModel.Gruppen.Value.Remove(dc.Key);
+            ViewModel.Gruppen.Value = Gruppen.Add(dc.Key, neueJahre);
         }
 
         private void SaveGruppe_Click(object sender, RoutedEventArgs e)
