@@ -342,7 +342,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set => update(nameof(Entity.Typ), (Betriebskostentyp)Typen_List[value].index);
         }
 
-        public int UmlageSchluessel
+        public int Schluessel
         {
             get => Entity != null ? (int)Entity.Schluessel : 0;
             set => update(nameof(Entity.Schluessel), (UmlageSchluessel)value);
@@ -369,7 +369,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 BetreffendesJahr = r.BetreffendesJahr + 1,
                 Betrag = 0,
                 Datum = r.Datum.Date.AddYears(1),
-                Schluessel = (UmlageSchluessel)r.UmlageSchluessel,
+                Schluessel = (UmlageSchluessel)r.Schluessel,
                 HKVO_P7 = r.HKVO_P7 / 100,
                 HKVO_P8 = r.HKVO_P8 / 100,
                 HKVO_P9 = (HKVO_P9A2)HKVO_P9_List[r.HKVO_P9].index,
@@ -452,7 +452,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 case nameof(HKVO_P7):
                 case nameof(HKVO_P8):
                 case nameof(HKVO_P9):
-                case nameof(UmlageSchluessel):
+                case nameof(Schluessel):
                 case nameof(AllgemeinZaehler):
                     break;
                 default:

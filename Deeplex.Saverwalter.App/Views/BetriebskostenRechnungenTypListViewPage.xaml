@@ -113,7 +113,7 @@
                                                                         Margin="10,0,0,0"
                                                                         ItemsSource="{x:Bind Schluessel_List}"
                                                                         DisplayMemberPath="text"
-                                                                        SelectedIndex="{x:Bind UmlageSchluessel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                        SelectedIndex="{x:Bind Schluessel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                         Header="Umlageschlüssel"/>
                                                                 </StackPanel>
                                                                 <CalendarDatePicker
