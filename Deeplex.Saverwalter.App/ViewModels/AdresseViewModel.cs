@@ -1,13 +1,14 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public sealed class AdresseViewModel
+    public sealed class AdresseViewModel : BindableBase
     {
-        private Adresse Entity { get; }
+        private Adresse Entity { get; set; }
         public Adresse getEntity => Entity;
 
         private ImmutableList<Adresse> AlleAdressen = App.Walter.Adressen.ToImmutableList();
@@ -24,11 +25,43 @@ namespace Deeplex.Saverwalter.App.ViewModels
             .Where(a => Hausnummer != "" && a.Hausnummer == Entity.Hausnummer)
             .Select(a => a.Hausnummer).Distinct().ToImmutableList();
 
+        private void update<U>(string property, U value)
+        {
+            if (Entity == null) return;
+            var type = Entity.GetType();
+            var prop = type.GetProperty(property);
+            var val = prop.GetValue(Entity, null);
+            if (!value.Equals(val))
+            {
+                prop.SetValue(Entity, value);
+                RaisePropertyChanged(property);
+            };
+        }
+
         public int Id;
-        public string Strasse => Entity?.Strasse ?? "";
-        public string Hausnummer => Entity?.Hausnummer ?? "";
-        public string Postleitzahl => Entity?.Postleitzahl ?? "";
-        public string Stadt => Entity?.Stadt ?? "";
+        public string Strasse
+        {
+            get => Entity?.Strasse ?? "";
+            set => update(nameof(Entity.Strasse), value);
+        }
+
+        public string Hausnummer
+        {
+            get => Entity?.Hausnummer ?? "";
+            set => update(nameof(Entity.Hausnummer), value);
+        }
+
+        public string Postleitzahl
+        {
+            get => Entity?.Postleitzahl ?? "";
+            set => update(nameof(Entity.Postleitzahl), value);
+        }
+
+        public string Stadt
+        {
+            get => Entity?.Stadt ?? "";
+            set => update(nameof(Entity.Stadt), value);
+        }
 
         public AdresseViewModel(Adresse a)
         {
@@ -36,6 +69,42 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.AdresseAnhaenge, a), _ => true);
+
+            PropertyChanged += OnUpdate;
+        }
+
+        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Strasse):
+                case nameof(Hausnummer):
+                case nameof(Postleitzahl):
+                case nameof(Stadt):
+                    break;
+                default:
+                    return;
+            }
+
+            if (Entity.Strasse == null ||
+                Entity.Hausnummer == null ||
+                Entity.Postleitzahl == null ||
+                Entity.Stadt == null)
+            {
+                return;
+            }
+
+            // TODO this is different for Adressen...
+            if (Entity.AdresseId != 0)
+            {
+                App.Walter.Adressen.Update(Entity);
+            }
+            else
+            {
+                App.Walter.Adressen.Add(Entity);
+            }
+
+            App.SaveWalter();
         }
 
         public AsyncRelayCommand AttachFile;

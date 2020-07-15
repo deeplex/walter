@@ -36,30 +36,5 @@ namespace Deeplex.Saverwalter.App.UserControls
                   typeof(int),
                   typeof(AddresseControl),
                   new PropertyMetadata(0));
-
-        private void UpdateAdresse_Click(object sender, RoutedEventArgs e)
-        {
-            var adress = App.Walter.Adressen.FirstOrDefault(a =>
-                a.Strasse == ComboBoxStrasse.Text &&
-                a.Hausnummer == ComboBoxHausnummer.Text &&
-                a.Postleitzahl == ComboBoxPostleitzahl.Text &&
-                a.Stadt == ComboBoxStadt.Text);
-            if (adress != null)
-            {
-                ViewModel = new AdresseViewModel(adress);
-            }
-            else
-            {
-                var a = new Adresse
-                {
-                    Strasse = ComboBoxStrasse.Text,
-                    Hausnummer = ComboBoxHausnummer.Text,
-                    Postleitzahl = ComboBoxPostleitzahl.Text,
-                    Stadt = ComboBoxStadt.Text,
-                };
-                App.Walter.Adressen.Add(a);
-                ViewModel = new AdresseViewModel(a);
-            }
-        }
     }
 }

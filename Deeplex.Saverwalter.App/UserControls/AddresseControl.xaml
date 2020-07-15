@@ -11,50 +11,17 @@
     d:DesignWidth="400">
 
     <mtuuc:WrapPanel>
-        <Button Margin="20,20,0,0">
-            <Button.Content>
-                <TextBlock>
-                    <Run Text="{x:Bind ViewModel.Strasse}"/>
-                    <Run Text="{x:Bind ViewModel.Hausnummer}"/>
-                    <Run Text=", "/>
-                    <Run Text="{x:Bind ViewModel.Postleitzahl}"/>
-                    <Run Text="{x:Bind ViewModel.Stadt}"/>
-                </TextBlock>
-            </Button.Content>
-            <Button.Flyout>
-                <Flyout Placement="Bottom">
-                    <Flyout.FlyoutPresenterStyle>
-                        <Style TargetType="FlyoutPresenter">
-                            <Setter Property="MinWidth" Value="625" />
-                        </Style>
-                    </Flyout.FlyoutPresenterStyle>
-                    <mtuuc:WrapPanel Orientation="Horizontal">
-                        <ComboBox
-                            Header="Straße"
-                            x:Name="ComboBoxStrasse" Width="200" IsEditable="True"
-                            ItemsSource="{x:Bind ViewModel.Strassen, Mode=OneWay}"
-                            SelectedValue="{x:Bind ViewModel.Strasse}"/>
-                        <ComboBox
-                            Header="Hausnr."
-                            x:Name="ComboBoxHausnummer" IsEditable="True"
-                            ItemsSource="{x:Bind ViewModel.Hausnummern, Mode=OneWay}"
-                            SelectedValue="{x:Bind ViewModel.Hausnummer}"/>
-                        <ComboBox
-                            Header="Postleitzahl"
-                            x:Name="ComboBoxPostleitzahl"  IsEditable="True"
-                            ItemsSource="{x:Bind ViewModel.Postleitzahlen, Mode=OneWay}"
-                            SelectedValue="{x:Bind ViewModel.Postleitzahl}"/>
-                        <ComboBox
-                            Header="Stadt"
-                            x:Name="ComboBoxStadt" Width="200" IsEditable="True"
-                            ItemsSource="{x:Bind ViewModel.Staedte, Mode=OneWay}"
-                            SelectedValue="{x:Bind ViewModel.Stadt}"/>
-                        <Button Margin="0,20,0,0" Click="UpdateAdresse_Click" Background="Transparent" VerticalAlignment="Bottom">
-                            <SymbolIcon Symbol="Accept"/>
-                        </Button>
-                    </mtuuc:WrapPanel>
-                </Flyout>
-            </Button.Flyout>
-        </Button>
+        <AutoSuggestBox
+            Width="210" Header="Straße"
+            Text="{x:Bind ViewModel.Strasse, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+        <AutoSuggestBox
+            Width="70" Margin="20,0,0,0" Header="Hausnr."
+            Text="{x:Bind ViewModel.Hausnummer, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+        <AutoSuggestBox
+            Width="70" Margin="20,0,0,0" Header="Postleitzahl"
+            Text="{x:Bind ViewModel.Postleitzahl, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+        <AutoSuggestBox
+            Width="210" Margin="20,0,0,0" Header="Stadt"
+            Text="{x:Bind ViewModel.Stadt, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
     </mtuuc:WrapPanel>
 </UserControl>
