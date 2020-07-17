@@ -11,6 +11,15 @@
 
     <Page.Resources>
         <muxc:StackLayout x:Name="VerticalStackLayout" Orientation="Vertical" Spacing="8"/>
+
+        <DataTemplate x:Key="WohnungListAdresse" x:DataType="vm:WohnungListAdresse">
+            <StackPanel Orientation="Horizontal">
+                <TextBox Text="{x:Bind Strasse, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                <TextBox Text="{x:Bind Hausnummer, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                <TextBox Text="{x:Bind Postleitzahl, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                <TextBox Text="{x:Bind Stadt, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+            </StackPanel>
+        </DataTemplate>
     </Page.Resources>
 
     <ScrollViewer>
@@ -26,14 +35,8 @@
                                     <SymbolIcon Symbol="Attach"/>
                                 </Button>
                                 <StackPanel x:Name="StackWohnungen">
-                                    <TextBlock FontSize="18">
-                                        <Run Text="{Binding Key.Strasse, Mode=OneWay}"/>
-                                        <Run Text="{Binding Key.Hausnummer, Mode=OneWay}"/>
-                                        <Run Text=","/>
-                                        <Run Text="{Binding Key.Postleitzahl, Mode=OneWay}"/>
-                                        <Run Text="{Binding Key.Stadt, Mode=OneWay}"/>
-                                    </TextBlock>
-                                    <GridView
+                                <ContentControl Content="{Binding Key}" ContentTemplate="{StaticResource ResourceKey=WohnungListAdresse}"/>
+                                <GridView
                                     IsItemClickEnabled="True"
                                     SelectionMode="Single"
                                     Margin="10"

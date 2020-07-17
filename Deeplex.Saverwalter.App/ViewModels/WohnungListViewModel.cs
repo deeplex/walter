@@ -3,6 +3,7 @@ using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
@@ -93,9 +94,44 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.AdresseAnhaenge, Adresse), _ => true);
+
+            PropertyChanged += OnUpdate;
         }
 
         public AsyncRelayCommand AttachFile { get; }
+
+        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Strasse):
+                case nameof(Hausnummer):
+                case nameof(Postleitzahl):
+                case nameof(Stadt):
+                    break;
+                default:
+                    return;
+            }
+
+            if (Entity.Strasse == null ||
+                Entity.Hausnummer == null ||
+                Entity.Postleitzahl == null ||
+                Entity.Stadt == null)
+            {
+                return;
+            }
+
+            if (Entity.AdresseId != 0)
+            {
+                App.Walter.Adressen.Update(Entity);
+            }
+            else
+            {
+                App.Walter.Adressen.Add(Entity);
+            }
+
+            App.SaveWalter();
+        }
     }
 
     public sealed class WohnungListWohnung
