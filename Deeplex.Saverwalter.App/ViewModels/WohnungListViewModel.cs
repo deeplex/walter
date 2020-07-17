@@ -22,37 +22,50 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Select(w => new WohnungListWohnung(w))
                 .GroupBy(w => w.AdresseId)
                 .ToImmutableDictionary(g => new WohnungListAdresse(g.Key), g => g.ToImmutableList());
-
-            SaveEdit = new RelayCommand(_ =>
-            {
-                foreach (var address in AdresseGroup)
-                {
-                    IsInEdit.Value = false;
-                    var a = App.Walter.Adressen.Find(address.Key.Id);
-                    a.Postleitzahl = address.Key.Postleitzahl.Value;
-                    a.Hausnummer = address.Key.Hausnummer.Value;
-                    a.Strasse = address.Key.Strasse.Value;
-                    a.Stadt = address.Key.Stadt.Value;
-                    App.Walter.Adressen.Update(a);
-                    App.SaveWalter();
-                }
-            });
         }
-
-        public RelayCommand SaveEdit { get; }
     }
 
-    public sealed class WohnungListAdresse
+    public sealed class WohnungListAdresse : BindableBase
     {
         public int Id { get; }
-        public ObservableProperty<string> Postleitzahl { get; }
-            = new ObservableProperty<string>();
-        public ObservableProperty<string> Hausnummer { get; }
-            = new ObservableProperty<string>();
-        public ObservableProperty<string> Strasse { get; }
-            = new ObservableProperty<string>();
-        public ObservableProperty<string> Stadt { get; }
-            = new ObservableProperty<string>();
+        public Adresse Entity { get; }
+
+        private void update<U>(string property, U value)
+        {
+            if (Entity == null) return;
+            var type = Entity.GetType();
+            var prop = type.GetProperty(property);
+            var val = prop.GetValue(Entity, null);
+            if (!value.Equals(val))
+            {
+                prop.SetValue(Entity, value);
+                RaisePropertyChanged(property);
+            };
+        }
+
+        public string Strasse
+        {
+            get => Entity?.Strasse ?? "";
+            set => update(nameof(Entity.Strasse), value);
+        }
+
+        public string Hausnummer
+        {
+            get => Entity?.Hausnummer ?? "";
+            set => update(nameof(Entity.Hausnummer), value);
+        }
+
+        public string Postleitzahl
+        {
+            get => Entity?.Postleitzahl ?? "";
+            set => update(nameof(Entity.Postleitzahl), value);
+        }
+
+        public string Stadt
+        {
+            get => Entity?.Stadt ?? "";
+            set => update(nameof(Entity.Stadt), value);
+        }
 
         public string GesamtString
             => "Nutzeinheiten: " + GesamtNutzeinheiten
@@ -69,6 +82,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Id = id;
             var Adresse = App.Walter.Adressen.Find(Id);
+            Entity = Adresse;
             var wn = Adresse.Wohnungen;
             GesamtNutzeinheiten = wn.Sum(w => w.Nutzeinheit);
             GesamtWohnflaeche = wn.Sum(w => w.Wohnflaeche);
@@ -76,11 +90,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             GesamtBewohner = wn
                 .Select(w => w.Vertraege.FirstOrDefault(v => v.Ende == null || v.Ende >= DateTime.UtcNow.Date))
                 .Sum(v => v?.Personenzahl ?? 0);
-
-            Postleitzahl.Value = Adresse.Postleitzahl;
-            Hausnummer.Value = Adresse.Hausnummer;
-            Strasse.Value = Adresse.Strasse;
-            Stadt.Value = Adresse.Stadt;
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.AdresseAnhaenge, Adresse), _ => true);

@@ -27,6 +27,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private void update<U>(string property, U value)
         {
+            // TODO this has to be adjusted.
             if (Entity == null) return;
             var type = Entity.GetType();
             var prop = type.GetProperty(property);

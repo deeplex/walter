@@ -27,11 +27,11 @@
                                 </Button>
                                 <StackPanel x:Name="StackWohnungen">
                                     <TextBlock FontSize="18">
-                                        <Run Text="{Binding Key.Strasse.Value, Mode=OneWay}"/>
-                                        <Run Text="{Binding Key.Hausnummer.Value, Mode=OneWay}"/>
+                                        <Run Text="{Binding Key.Strasse, Mode=OneWay}"/>
+                                        <Run Text="{Binding Key.Hausnummer, Mode=OneWay}"/>
                                         <Run Text=","/>
-                                        <Run Text="{Binding Key.Postleitzahl.Value, Mode=OneWay}"/>
-                                        <Run Text="{Binding Key.Stadt.Value, Mode=OneWay}"/>
+                                        <Run Text="{Binding Key.Postleitzahl, Mode=OneWay}"/>
+                                        <Run Text="{Binding Key.Stadt, Mode=OneWay}"/>
                                     </TextBlock>
                                     <GridView
                                     IsItemClickEnabled="True"
