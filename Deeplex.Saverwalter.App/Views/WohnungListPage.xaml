@@ -12,12 +12,26 @@
     <Page.Resources>
         <muxc:StackLayout x:Name="VerticalStackLayout" Orientation="Vertical" Spacing="8"/>
 
+        <Style x:Key="TitleStyle" TargetType="TextBox">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        
         <DataTemplate x:Key="WohnungListAdresse" x:DataType="vm:WohnungListAdresse">
             <StackPanel Orientation="Horizontal">
-                <TextBox Text="{x:Bind Strasse, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                <TextBox Text="{x:Bind Hausnummer, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                <TextBox Text="{x:Bind Postleitzahl, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                <TextBox Text="{x:Bind Stadt, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                <TextBox
+                    Style="{StaticResource TitleStyle}"
+                    Text="{x:Bind Strasse, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                <TextBox
+                    Style="{StaticResource TitleStyle}"
+                    Text="{x:Bind Hausnummer, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                <TextBox
+                    Style="{StaticResource TitleStyle}"
+                    Text="{x:Bind Postleitzahl, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                <TextBox
+                    Style="{StaticResource TitleStyle}"
+                    Text="{x:Bind Stadt, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
             </StackPanel>
         </DataTemplate>
     </Page.Resources>
@@ -35,7 +49,7 @@
                                     <SymbolIcon Symbol="Attach"/>
                                 </Button>
                                 <StackPanel x:Name="StackWohnungen">
-                                <ContentControl Content="{Binding Key}" ContentTemplate="{StaticResource ResourceKey=WohnungListAdresse}"/>
+                                <ContentControl Content="{Binding Key}" Margin="5,0,0,0" ContentTemplate="{StaticResource ResourceKey=WohnungListAdresse}"/>
                                 <GridView
                                     IsItemClickEnabled="True"
                                     SelectionMode="Single"
