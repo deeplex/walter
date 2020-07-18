@@ -58,7 +58,7 @@
                 <uc:AddresseControl
                     Margin="20,20,0,0"
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                    Id="{x:Bind ViewModel.AdresseId}" />
+                    NPerson="{x:Bind ViewModel.Entity}" />
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBox

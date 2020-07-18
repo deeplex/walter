@@ -9,6 +9,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class JuristischePersonViewModel : BindableBase
     {
         private JuristischePerson Entity { get; }
+        public JuristischePerson GetEntity => Entity;
         public int Id;
 
         public void selfDestruct()

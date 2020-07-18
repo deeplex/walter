@@ -20,6 +20,21 @@ namespace Deeplex.Saverwalter.App.UserControls
             {
                 ViewModel = new AdresseViewModel(App.Walter.Adressen.Find(Id));
             });
+
+            RegisterPropertyChangedCallback(WohnungProperty, (idDepObject, idProp) =>
+            {
+                ViewModel = new AdresseViewModel(Wohnung);
+            });
+
+            RegisterPropertyChangedCallback(NPersonProperty, (idDepObject, idProp) =>
+            {
+                ViewModel = new AdresseViewModel(NPerson);
+            });
+
+            RegisterPropertyChangedCallback(JPersonProperty, (idDepObject, idProp) =>
+            {
+                ViewModel = new AdresseViewModel(JPerson);
+            });
         }
 
         public int Id
@@ -36,5 +51,44 @@ namespace Deeplex.Saverwalter.App.UserControls
                   typeof(int),
                   typeof(AddresseControl),
                   new PropertyMetadata(0));
+
+        public Wohnung Wohnung
+        {
+            get { return (Wohnung)GetValue(WohnungProperty); }
+            set { SetValue(WohnungProperty, value); }
+        }
+
+        public static readonly DependencyProperty WohnungProperty
+            = DependencyProperty.Register(
+                  "Wohnung",
+                  typeof(Wohnung),
+                  typeof(AddresseControl),
+                  new PropertyMetadata(null));
+
+        public NatuerlichePerson NPerson
+        {
+            get { return (NatuerlichePerson)GetValue(NPersonProperty); }
+            set { SetValue(NPersonProperty, value); }
+        }
+
+        public static readonly DependencyProperty NPersonProperty
+            = DependencyProperty.Register(
+                  "NPerson",
+                  typeof(NatuerlichePerson),
+                  typeof(AddresseControl),
+                  new PropertyMetadata(null));
+
+        public JuristischePerson JPerson
+        {
+            get { return (JuristischePerson)GetValue(JPersonProperty); }
+            set { SetValue(JPersonProperty, value); }
+        }
+
+        public static readonly DependencyProperty JPersonProperty
+            = DependencyProperty.Register(
+                  "JPerson",
+                  typeof(JuristischePerson),
+                  typeof(AddresseControl),
+                  new PropertyMetadata(null));
     }
 }

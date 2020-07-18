@@ -15,6 +15,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class WohnungDetailViewModel : ValidatableBase
     {
         private Wohnung Entity;
+        public Wohnung GetEntity => Entity;
         public int Id => Entity.WohnungId;
 
         public ImmutableList<WohnungDetailVermieter> AlleVermieter =>
