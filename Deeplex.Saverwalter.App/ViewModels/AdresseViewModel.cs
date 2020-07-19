@@ -62,7 +62,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             bool b(string s) => s != null && s != "";
             if (b(Strasse) && b(Hausnummer) && b(Postleitzahl) && b(Stadt))
             {
-                App.Walter.Adressen.Add(Entity);
+                if (ent == null)
+                {
+                    App.Walter.Adressen.Add(Entity);
+                }
                 if (JPerson != null)
                 {
                     JPerson.Adresse = Entity;
@@ -78,6 +81,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     Wohnung.Adresse = Entity;
                     App.Walter.Wohnungen.Update(Wohnung);
                 }
+                RemoveAllDeprecated();
                 App.SaveWalter();
             }
         }
@@ -154,6 +158,21 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 a.Strasse == Strasse && a.Hausnummer == Hausnummer &&
                 a.Postleitzahl == Postleitzahl && a.Stadt == Stadt);
         }
+
+        public static void RemoveDeprecated(Adresse a)
+        {
+            if (App.Walter.Wohnungen.Any(w => w.Adresse == a) ||
+                App.Walter.NatuerlichePersonen.Any(p => p.Adresse == a) ||
+                App.Walter.JuristischePersonen.Any(p => p.Adresse == a))
+            {
+                return;
+            }
+            App.Walter.Remove(a);
+        }
+
+        // This action does not save the database
+        public static void RemoveAllDeprecated()
+            => App.Walter.Adressen.ToList().ForEach(a => RemoveDeprecated(a));
 
         //public static Adresse GetAdresse(AdresseViewModel avm)
         //{
