@@ -166,7 +166,13 @@
                             </DataTemplate>
                         </mtuuc:DataGridTemplateColumn.CellTemplate>
                     </mtuuc:DataGridTemplateColumn>
-                    <mtuuc:DataGridTextColumn Header="Notiz" IsReadOnly="False" Binding="{Binding Notiz.Value}"/>
+                    <mtuuc:DataGridTemplateColumn Header="Notiz">
+                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:VertragDetailVersion">
+                                <TextBox Text="{x:Bind Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                            </DataTemplate>
+                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                    </mtuuc:DataGridTemplateColumn>
                 </mtuuc:DataGrid.Columns>
             </mtuuc:DataGrid>
             <StackPanel Orientation="Horizontal">
