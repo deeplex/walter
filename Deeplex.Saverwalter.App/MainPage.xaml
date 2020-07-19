@@ -165,18 +165,28 @@
                             <StackPanel>
                                 <RelativePanel Padding="10,5,10,0">
                                     <TextBlock Margin="5,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}" Text="Explorer" RelativePanel.AlignLeftWithPanel="True"/>
-                                    <Button
+                                    <StackPanel
                                         RelativePanel.AlignRightWithPanel="True"
-                                        Visibility="{x:Bind Explorer.notInSelection, Mode=OneWay}"
-                                        Command="{x:Bind Explorer.SelectionMultilple}">
-                                        <SymbolIcon Symbol="Download"/>
-                                    </Button>
-                                    <Button
+                                        Orientation="Horizontal">
+                                        <ToggleButton
+                                            Background="Transparent"
+                                            Margin="0,0,5,0"
+                                            IsChecked="{x:Bind Explorer.navigationSynced.Value}">
+                                            <SymbolIcon Symbol="Sync"/>
+                                        </ToggleButton>
+                                        <Button
+                                            Background="Transparent"
+                                            Visibility="{x:Bind Explorer.notInSelection, Mode=OneWay}"
+                                            Command="{x:Bind Explorer.SelectionMultilple}">
+                                            <SymbolIcon Symbol="Download"/>
+                                        </Button>
+                                        <Button
                                         RelativePanel.AlignRightWithPanel="True"
                                         Visibility="{x:Bind Explorer.inSelection, Mode=OneWay}"
                                         Command="{x:Bind Explorer.SaveFiles}">
-                                        <SymbolIcon Symbol="Save"/>
-                                    </Button>
+                                            <SymbolIcon Symbol="Save"/>
+                                        </Button>
+                                    </StackPanel>
                                 </RelativePanel>
                                 <MenuFlyoutSeparator/>
                                 <muxc:TreeView x:Name="ExplorerTree"/>

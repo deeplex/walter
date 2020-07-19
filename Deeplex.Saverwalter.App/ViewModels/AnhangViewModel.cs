@@ -46,6 +46,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Tree.RootNodes.ToList().ForEach(dig);
         }
 
+        public ObservableProperty<bool> navigationSynced
+            = new ObservableProperty<bool>();
         public bool inSelection => Tree.SelectionMode == TreeViewSelectionMode.Multiple;
         public bool notInSelection => Tree.SelectionMode != TreeViewSelectionMode.Multiple;
 
