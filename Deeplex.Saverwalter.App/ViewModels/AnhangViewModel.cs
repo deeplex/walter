@@ -32,6 +32,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public void raiseChange<U>(U target, Anhang file)
         {
+            void expand(TreeViewNode p)
+            {
+                p.IsExpanded = true;
+                if (p.Parent != null)
+                {
+                    expand(p.Parent);
+                }
+            }
+
             void dig(TreeViewNode n)
             {
                 n.Children.ToList().ForEach(dig);
@@ -39,7 +48,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 if (n is IAnhangTreeViewNode ax && ax.Target.Equals(target))
                 {
                     n.Children.Add(new AnhangDatei(file));
-                    n.IsExpanded = true;
+                    expand(n);
                 }
             }
 
