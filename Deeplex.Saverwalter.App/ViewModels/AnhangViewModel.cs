@@ -30,25 +30,43 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         private TreeView Tree { get; }
 
+        private void expand(TreeViewNode p)
+        {
+            p.IsExpanded = true;
+            if (p.Parent != null)
+            {
+                expand(p.Parent);
+            }
+        }
         public void raiseChange<U>(U target, Anhang file)
         {
-            void expand(TreeViewNode p)
-            {
-                p.IsExpanded = true;
-                if (p.Parent != null)
-                {
-                    expand(p.Parent);
-                }
-            }
-
             void dig(TreeViewNode n)
             {
                 n.Children.ToList().ForEach(dig);
 
                 if (n is IAnhangTreeViewNode ax && ax.Target.Equals(target))
                 {
-                    n.Children.Add(new AnhangDatei(file));
+                    var a = new AnhangDatei(file);
+                    n.Children.Add(a);
                     expand(n);
+                    Tree.SelectedItem = a;
+                }
+            }
+
+            Tree.RootNodes.ToList().ForEach(dig);
+        }
+        
+        // TODO merge raiseChange and navigate...
+        public void navigate<U>(U target)
+        {
+            void dig(TreeViewNode n)
+            {
+                n.Children.ToList().ForEach(dig);
+
+                if(n is IAnhangTreeViewNode ax && ax.Target.Equals(target))
+                {
+                    expand(n);
+                    Tree.SelectedItem = n;
                 }
             }
 

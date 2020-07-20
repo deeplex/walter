@@ -19,7 +19,9 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (e.Parameter is int jpId)
             {
-                ViewModel = new JuristischePersonViewModel(jpId);
+                JuristischePerson jp = App.Walter.JuristischePersonen.Find(jpId);
+                ViewModel = new JuristischePersonViewModel(jp);
+                App.ViewModel.Explorer.Value.navigate(jp);
             }
             else if (e.Parameter is null)
             {
@@ -27,6 +29,7 @@ namespace Deeplex.Saverwalter.App.Views
             }
 
             base.OnNavigatedTo(e);
+
             App.ViewModel.Titel.Value = ViewModel.Bezeichnung;
 
             var EditToggle = new AppBarToggleButton
