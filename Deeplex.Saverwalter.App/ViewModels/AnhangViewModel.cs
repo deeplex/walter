@@ -57,7 +57,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
         
         // TODO merge raiseChange and navigate...
-        public void navigate<U>(U target)
+        public void Navigate<U>(U target)
         {
             void dig(TreeViewNode n)
             {
@@ -235,14 +235,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public sealed class AnhangVertrag : AnhangTreeViewNode, IAnhangTreeViewNode<Vertrag>
+        public sealed class AnhangVertrag : AnhangTreeViewNode, IAnhangTreeViewNode<Guid>
         {
-            public Vertrag Target { get; }
+            public Guid Target { get; }
             object IAnhangTreeViewNode.Target => Target;
 
             public AnhangVertrag(Vertrag v)
             {
-                Target = v;
+                Target = v.VertragId;
 
                 var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
                 var cs = bs.Select(b => App.Walter.FindPerson(b.PersonId))

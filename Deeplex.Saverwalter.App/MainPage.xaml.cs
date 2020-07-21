@@ -1,8 +1,9 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.App.Views;
+using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using static Deeplex.Saverwalter.App.ViewModels.AnhangViewModel;
+using Windows.UI.Xaml.Media.Animation;
 
 namespace Deeplex.Saverwalter.App
 {
@@ -32,12 +33,20 @@ namespace Deeplex.Saverwalter.App
             }
         }
 
+        public void Navigate<U>(Type SourcePage, U SendParameter)
+        {
+            Explorer.Navigate(SendParameter);
+            AppFrame.Navigate(SourcePage, SendParameter,
+                new DrillInNavigationTransitionInfo());
+        }
+
         public MainPage()
         {
             InitializeComponent();
 
             ViewModel.SetCommandBar(MainCommandBar);
             ViewModel.SetSavedIndicator(SavedIndicator);
+            ViewModel.Navigate = Navigate;
             App.ViewModel.Explorer.Value = new AnhangViewModel(ExplorerTree);
             ExplorerTree.ItemTemplateSelector = new ExplorerItemTemplateSelector(AnhangTemplate, GroupTemplate, RootTemplate);
         }

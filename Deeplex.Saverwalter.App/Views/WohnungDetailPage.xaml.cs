@@ -19,9 +19,9 @@ namespace Deeplex.Saverwalter.App.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (e.Parameter is int wohnungId)
+            if (e.Parameter is Wohnung wohnung)
             {
-                ViewModel = new WohnungDetailViewModel(wohnungId);
+                ViewModel = new WohnungDetailViewModel(wohnung);
             }
             else if (e.Parameter is null) // New Wohnung
             {

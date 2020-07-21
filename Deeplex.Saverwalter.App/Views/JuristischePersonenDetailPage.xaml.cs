@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 JuristischePerson jp = App.Walter.JuristischePersonen.Find(jpId);
                 ViewModel = new JuristischePersonViewModel(jp);
-                App.ViewModel.Explorer.Value.navigate(jp);
+                App.ViewModel.Explorer.Value.Navigate(jp);
             }
             else if (e.Parameter is null)
             {

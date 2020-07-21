@@ -101,16 +101,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set => update(nameof(Entity.Nutzeinheit), value);
         }
 
-        public WohnungDetailViewModel(int id)
-            : this(App.Walter.Wohnungen
-                  .Include(w => w.Adresse)
-                  .Include(w => w.Zaehler)
-                  .ThenInclude(z => z.Staende)
-                  .Include(w => w.AllgemeinZaehlerGruppen)
-                  .ThenInclude(g => g.Zaehler)
-                  .ThenInclude(z => z.Staende)
-                  .First(w => w.WohnungId == id))
-        { }
+        // Deprecated, but here as a reminder if Include is still necessary.
+        //public WohnungDetailViewModel(int id)
+        //    : this(App.Walter.Wohnungen
+        //          .Include(w => w.Adresse)
+        //          .Include(w => w.Zaehler)
+        //          .ThenInclude(z => z.Staende)
+        //          .Include(w => w.AllgemeinZaehlerGruppen)
+        //          .ThenInclude(g => g.Zaehler)
+        //          .ThenInclude(z => z.Staende)
+        //          .First(w => w.WohnungId == id))
+        //{ }
 
         public WohnungDetailViewModel() : this(new Wohnung())
         {
@@ -122,7 +123,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Cast<Zaehlertyp>()
                 .ToImmutableList();
 
-        private WohnungDetailViewModel(Wohnung w)
+        public WohnungDetailViewModel(Wohnung w)
         {
             Entity = w;
 

@@ -1,5 +1,6 @@
 ﻿using Deeplex.Utils.ObjectModel;
 using Microsoft.Toolkit.Uwp.UI.Controls;
+using System;
 using System.Collections.Generic;
 using Windows.UI.Xaml.Controls;
 
@@ -12,6 +13,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private CommandBar CommandBar { get; set; }
         private InAppNotification SavedIndicator { get; set; }
+
+        public Action<Type, object> Navigate { get; set; }
 
         public void SetCommandBar(CommandBar arg)
         {

@@ -118,7 +118,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             : this(App.Walter.NatuerlichePersonen.Find(id)) { }
 
         public NatuerlichePersonViewModel() : this(new NatuerlichePerson()) { IsInEdit.Value = true; }
-        private NatuerlichePersonViewModel(NatuerlichePerson k)
+        public NatuerlichePersonViewModel(NatuerlichePerson k)
         {
             Entity = k;
             Id = k.NatuerlichePersonId;
