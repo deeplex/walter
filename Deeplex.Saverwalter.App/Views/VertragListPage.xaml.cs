@@ -27,8 +27,7 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (ViewModel.SelectedVertrag.Value != null)
             {
-                Frame.Navigate(typeof(VertragDetailViewPage), ViewModel.SelectedVertrag.Value.VertragId,
-                    new DrillInNavigationTransitionInfo());
+                App.ViewModel.Navigate(typeof(VertragDetailViewPage), ViewModel.SelectedVertrag.Value.VertragId);
             }
         }
 
