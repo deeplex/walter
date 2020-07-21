@@ -95,9 +95,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Kontakte.Children.Add(new AnhangKontakt(n));
             }
             foreach (var v in App.Walter.Vertraege
-                .Include(i => i.Wohnung).ThenInclude(w => w.Adresse))
+                .Include(i => i.Wohnung)
+                .ThenInclude(w => w.Adresse)
+                .ToList()
+                .GroupBy(g => g.VertragId))
             {
-                Vertraege.Children.Add(new AnhangVertrag(v));
+                Vertraege.Children.Add(new AnhangVertrag(v.Key));
             }
             foreach (var a in App.Walter.Adressen
                 .Include(i => i.Wohnungen).ThenInclude(w => w.Zaehler).ThenInclude(z => z.Staende))
@@ -240,11 +243,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
             public Guid Target { get; }
             object IAnhangTreeViewNode.Target => Target;
 
-            public AnhangVertrag(Vertrag v)
+            public AnhangVertrag(Guid id)
             {
-                Target = v.VertragId;
+                Target = id;
+                var v = App.Walter.Vertraege
+                    .First(i => i.VertragId == id);
 
-                var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
+                var bs = App.Walter.MieterSet.Where(m => m.VertragId == id).ToList();
                 var cs = bs.Select(b => App.Walter.FindPerson(b.PersonId))
                     .Select(p => p is NatuerlichePerson n ? n.Nachname : p.Bezeichnung);
                 var mieter = string.Join(", ", cs);
