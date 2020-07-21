@@ -33,6 +33,18 @@ namespace Deeplex.Saverwalter.App
             }
         }
 
+        public void Navigate(Type SourcePage, string s)
+        {
+            Explorer.Navigate(s);
+            AppFrame.Navigate(SourcePage);
+        }
+
+        public void Navigate(Type SourcePage)
+        {
+            Explorer.Navigate(SourcePage);
+            AppFrame.Navigate(SourcePage);
+        }
+
         public void Navigate<U>(Type SourcePage, U SendParameter)
         {
             Explorer.Navigate(SendParameter);
@@ -59,7 +71,7 @@ namespace Deeplex.Saverwalter.App
         public readonly string WohnungListLabel = "Mietobjekte";
         public readonly string BetriebskostenrechnungenListLabel = "Betr. Rechnung";
 
-        private void NavView_ItemInvoked(Windows.UI.Xaml.Controls.NavigationView sender, Windows.UI.Xaml.Controls.NavigationViewItemInvokedEventArgs args)
+        private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
         {
             var label = args.InvokedItem as string;
             var pageType =
@@ -72,7 +84,7 @@ namespace Deeplex.Saverwalter.App
 
             if (pageType != null && pageType != AppFrame.CurrentSourcePageType)
             {
-                AppFrame.Navigate(pageType);
+                Navigate(pageType, label);
             }
         }
 

@@ -59,18 +59,35 @@ namespace Deeplex.Saverwalter.App.ViewModels
         // TODO merge raiseChange and navigate...
         public void Navigate<U>(U target)
         {
+            void exp(TreeViewNode n)
+            {
+                if (n == null) return;
+                expand(n);
+                Tree.SelectedItem = n;
+                n.Children.ToList().ForEach(c => c.IsExpanded = false);
+            }
+
             void dig(TreeViewNode n)
             {
                 n.Children.ToList().ForEach(dig);
 
                 if(n is IAnhangTreeViewNode ax && ax.Target.Equals(target))
                 {
-                    expand(n);
-                    Tree.SelectedItem = n;
+                    exp(n);
                 }
             }
 
-            Tree.RootNodes.ToList().ForEach(dig);
+            // strings are used for top level elements.
+            if (target is string s)
+            {
+                Tree.RootNodes.ToList().ForEach(l => l.IsExpanded = false);
+                Tree.SelectedItem = null;
+                exp(Tree.RootNodes.FirstOrDefault(r => r.Content == s));
+            }
+            else
+            {
+                Tree.RootNodes.ToList().ForEach(dig);
+            }
         }
 
         public ObservableProperty<bool> navigationSynced
@@ -83,7 +100,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Tree = ExplorerTree;
 
             var Kontakte = new TreeViewNode { Content = "Kontakte" };
-            var Mietobjekte = new TreeViewNode { Content = "Mietobjete" };
+            var Mietobjekte = new TreeViewNode { Content = "Mietobjekte" };
             var Vertraege = new TreeViewNode { Content = "Verträge" };
 
             foreach (var j in App.Walter.JuristischePersonen)
