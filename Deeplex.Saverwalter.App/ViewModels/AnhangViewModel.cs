@@ -82,7 +82,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 Tree.RootNodes.ToList().ForEach(l => l.IsExpanded = false);
                 Tree.SelectedItem = null;
-                exp(Tree.RootNodes.FirstOrDefault(r => r.Content == s));
+                exp(Tree.RootNodes.FirstOrDefault(r => (string)r.Content == s));
             }
             else
             {
@@ -91,7 +91,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         public ObservableProperty<bool> navigationSynced
-            = new ObservableProperty<bool>();
+            = new ObservableProperty<bool>(true);
         public bool inSelection => Tree.SelectionMode == TreeViewSelectionMode.Multiple;
         public bool notInSelection => Tree.SelectionMode != TreeViewSelectionMode.Multiple;
 

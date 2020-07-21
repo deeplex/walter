@@ -36,7 +36,10 @@ namespace Deeplex.Saverwalter.App
 
         public void Navigate<U>(Type SourcePage, U SendParameter)
         {
-            Explorer.Navigate(SendParameter);
+            if (Explorer.navigationSynced.Value)
+            {
+                Explorer.Navigate(SendParameter);
+            }
             AppFrame.Navigate(SourcePage, SendParameter,
                 new DrillInNavigationTransitionInfo());
         }
