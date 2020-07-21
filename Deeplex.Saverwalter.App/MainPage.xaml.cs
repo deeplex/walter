@@ -34,18 +34,6 @@ namespace Deeplex.Saverwalter.App
             }
         }
 
-        public void Navigate(Type SourcePage, string s)
-        {
-            Explorer.Navigate(s);
-            AppFrame.Navigate(SourcePage);
-        }
-
-        public void Navigate(Type SourcePage)
-        {
-            Explorer.Navigate(SourcePage);
-            AppFrame.Navigate(SourcePage);
-        }
-
         public void Navigate<U>(Type SourcePage, U SendParameter)
         {
             Explorer.Navigate(SendParameter);
