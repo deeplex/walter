@@ -41,6 +41,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public Type Type { get; }
         public int Id { get; }
+        public Guid Guid { get; }
         public string Vorname { get; }
         public string Name { get; }
         public string Anschrift { get; }
@@ -66,6 +67,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private KontaktListEntry(IPerson p)
         {
+            Guid = p.PersonId;
             Email = p.Email ?? "";
             Telefon = p.Telefon ?? "";
             Mobil = p.Mobil ?? "";

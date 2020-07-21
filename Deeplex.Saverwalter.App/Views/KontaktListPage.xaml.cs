@@ -65,8 +65,7 @@ namespace Deeplex.Saverwalter.App.Views
                     sk.Type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailPage) :
                     null;
 
-                Frame.Navigate(target, ViewModel.SelectedKontakt.Id,
-                    new DrillInNavigationTransitionInfo());
+                App.ViewModel.Navigate(target, App.Walter.FindPerson(sk.Guid));
             }
         }
 

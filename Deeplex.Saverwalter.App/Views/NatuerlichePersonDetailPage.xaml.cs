@@ -18,9 +18,9 @@ namespace Deeplex.Saverwalter.App.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (e.Parameter is int kontaktId)
+            if (e.Parameter is NatuerlichePerson kontakt)
             {
-                ViewModel = new NatuerlichePersonViewModel(kontaktId);
+                ViewModel = new NatuerlichePersonViewModel(kontakt);
             }
             else if (e.Parameter is null) // New Contact
             {

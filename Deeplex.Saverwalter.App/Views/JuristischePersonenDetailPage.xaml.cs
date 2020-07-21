@@ -17,11 +17,9 @@ namespace Deeplex.Saverwalter.App.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (e.Parameter is int jpId)
+            if (e.Parameter is JuristischePerson jp)
             {
-                JuristischePerson jp = App.Walter.JuristischePersonen.Find(jpId);
                 ViewModel = new JuristischePersonViewModel(jp);
-                App.ViewModel.Explorer.Value.Navigate(jp);
             }
             else if (e.Parameter is null)
             {
