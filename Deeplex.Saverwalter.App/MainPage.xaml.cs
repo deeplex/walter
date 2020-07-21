@@ -4,6 +4,7 @@ using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
+using Windows.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.App
 {
@@ -87,6 +88,35 @@ namespace Deeplex.Saverwalter.App
                 Navigate(pageType, label);
             }
         }
+
+        private void OnNavigatingToPage(object sender, NavigatingCancelEventArgs e)
+        {
+            if (e.NavigationMode == NavigationMode.Back)
+            {
+                if (e.SourcePageType == typeof(KontaktListPage))
+                {
+                    NavView.SelectedItem = KontaktListMenuItem;
+                }
+                else if (e.SourcePageType == typeof(WohnungListPage))
+                {
+                    NavView.SelectedItem = WohnungListMenuItem;
+                }
+                else if (e.SourcePageType == typeof(VertragListPage))
+                {
+                    NavView.SelectedItem = VertragListMenuItem;
+                }
+                else if (e.SourcePageType == typeof(BetriebskostenRechnungenTypListViewPage))
+                {
+                    NavView.SelectedItem = BetriebskostenListMenuItem;
+                }
+                else if (e.SourcePageType == typeof(SettingsPage))
+                {
+                    NavView.SelectedItem = NavView.SettingsItem;
+                }
+                Navigate(e.SourcePageType, (NavView.SelectedItem as NavigationViewItem).Content);
+            }
+        }
+
 
         private void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {

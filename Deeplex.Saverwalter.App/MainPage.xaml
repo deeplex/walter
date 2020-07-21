@@ -148,7 +148,10 @@
                         PaneBackground="{StaticResource SystemChromeMediumColor}"
                         IsPaneOpen="False">
                     <SplitView.Content>
-                        <Frame x:Name="frame" Margin="10">
+                        <Frame
+                            Navigating="OnNavigatingToPage"
+                            x:Name="frame"
+                            Margin="10">
                             <Frame.ContentTransitions>
                                 <TransitionCollection>
                                     <NavigationThemeTransition>
