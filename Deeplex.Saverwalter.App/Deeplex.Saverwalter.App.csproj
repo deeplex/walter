@@ -137,6 +137,7 @@
     <Compile Include="ViewModels\AnhangViewModel.cs" />
     <Compile Include="ViewModels\AdresseViewModel.cs" />
     <Compile Include="ViewModels\BetriebskostenRechnungenListViewModel.cs" />
+    <Compile Include="ViewModels\BetriebskostenrechnungenViewModel.cs" />
     <Compile Include="ViewModels\JuristischePersonViewModel.cs" />
     <Compile Include="ViewModels\VertragDetailViewModel.cs" />
     <Compile Include="ViewModels\KontaktListViewModel.cs" />
