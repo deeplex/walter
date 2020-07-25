@@ -10,8 +10,15 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <ScrollViewer>
     <mtuuc:WrapPanel>
         <StackPanel>
+            <!--TODO der Button kommt in die AppBar-->
+            <Button
+                    Margin="10,0,0,0"
+                    VerticalAlignment="Bottom">
+                <SymbolIcon Symbol="Attach"/>
+            </Button>
             <TextBlock Text="Betroffene Wohneinheiten:"/>
             <muxc:TreeView
                 SelectionMode="Multiple"
@@ -35,13 +42,26 @@
                 Orientation="Horizontal">
                 <CalendarDatePicker Header="Datum"/>
                 <muxc:NumberBox Margin="10,0,0,0" Header="Betrag"/>
-                <Button
+            </StackPanel>
+            <!--{x:Bind ViewModel.isHeizung}-->
+            <StackPanel Margin="0,10,0,0" Visibility="Visible" Orientation="Horizontal">
+                <Slider
+                    Width="100"
+                    Minimum="50"
+                    Maximum="70"
+                    Header="HKVO§7"/>
+                <Slider
+                    Width="100"
+                    Minimum="50"
+                    Maximum="70"
                     Margin="10,0,0,0"
-                    VerticalAlignment="Bottom">
-                    <SymbolIcon Symbol="Attach"/>
-                </Button>
+                    Header="HKVO§8"/>
+                <ComboBox
+                    Margin="10,0,0,0"
+                    Header="HKVO§9"/>
             </StackPanel>
             <!--if heizkosten...-->
         </StackPanel>
     </mtuuc:WrapPanel>
+    </ScrollViewer>
 </Page>

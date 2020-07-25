@@ -2,6 +2,7 @@
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -19,6 +20,48 @@ namespace Deeplex.Saverwalter.App.ViewModels
             App.SaveWalter();
         }
 
+        public sealed class BetriebskostenrechnungEnum
+        {
+            public int index { get; }
+            public string text { get; }
+
+            public BetriebskostenrechnungEnum(HKVO_P9A2 S)
+            {
+                index = (int)S;
+                text = "Satz " + index.ToString();
+            }
+
+            public BetriebskostenrechnungEnum(UmlageSchluessel S)
+            {
+                index = (int)S;
+                text = S.ToDescriptionString();
+            }
+
+            public BetriebskostenrechnungEnum(Betriebskostentyp T)
+            {
+                index = (int)T;
+                text = T.ToDescriptionString();
+            }
+        }
+
+        public List<BetriebskostenrechnungEnum> HKVO_P9_List =
+            Enum.GetValues(typeof(HKVO_P9A2))
+                .Cast<HKVO_P9A2>().ToList()
+                .Select(s => new BetriebskostenrechnungEnum(s))
+                .ToList();
+
+        public List<BetriebskostenrechnungEnum> Schluessel_List =
+            Enum.GetValues(typeof(UmlageSchluessel))
+                .Cast<UmlageSchluessel>().ToList()
+                .Select(s => new BetriebskostenrechnungEnum(s))
+                .ToList();
+
+        public List<BetriebskostenrechnungEnum> Typen_List =
+            Enum.GetValues(typeof(Betriebskostentyp))
+            .Cast<Betriebskostentyp>().ToList()
+            .Select(s => new BetriebskostenrechnungEnum(s))
+            .ToList();
+
         private void update<U>(string property, U value)
         {
             if (Entity == null) return;
@@ -31,6 +74,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 RaisePropertyChanged(property);
             };
         }
+
+        public bool isHeizung => Entity?.Typ == Betriebskostentyp.Heizkosten;
 
         public double Betrag
         {
@@ -77,13 +122,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public BetriebskostenrechnungViewModel()
         {
             AdresseGroup = App.Walter.Wohnungen
-                    .Include(w => w.Adresse)
-                    .ToList()
-                    .Select(w => new BetriebskostenRechungenListWohnungListWohnung(w))
-                    .GroupBy(w => w.AdresseId)
-                    .ToImmutableDictionary(
-                        g => new BetriebskostenRechungenListWohnungListAdresse(g.Key),
-                        g => g.ToImmutableList());
+                .Include(w => w.Adresse)
+                .ToList()
+                .Select(w => new BetriebskostenRechungenListWohnungListWohnung(w))
+                .GroupBy(w => w.AdresseId)
+                .ToImmutableDictionary(
+                    g => new BetriebskostenRechungenListWohnungListAdresse(g.Key),
+                    g => g.ToImmutableList());
         }
     }
 }

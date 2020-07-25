@@ -39,7 +39,6 @@
                                                         <StackPanel  Width="250" BorderBrush="LightGray" BorderThickness="2" Padding="5">
                                                             <RelativePanel>
                                                                 <ComboBox
-                                                                    IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
                                                                     ItemsSource="{x:Bind Typen_List}"
                                                                     DisplayMemberPath="text"
                                                                     SelectedIndex="{x:Bind Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
