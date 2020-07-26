@@ -26,6 +26,13 @@ namespace Deeplex.Saverwalter.App.Views
             };
             Sortiere.Click += SortiereNachGruppen_Click;
 
+            var Add = new AppBarButton
+            {
+                Icon = new SymbolIcon(Symbol.Add),
+                Label = "Hinzufügen"
+            };
+            Add.Click += Add_Click;
+
             var EditToggle = new AppBarToggleButton
             {
                 Label = "Bearbeiten",
@@ -35,8 +42,13 @@ namespace Deeplex.Saverwalter.App.Views
 
             App.ViewModel.RefillCommandContainer(new ICommandBarElement[]
             {
-                Sortiere, AddXaml.AddBetriebskostenrechnung(ViewModel),
+                Sortiere, Add,
             }, new ICommandBarElement[] { EditToggle });
+        }
+
+        private void Add_Click(object sender, RoutedEventArgs e)
+        {
+            App.ViewModel.Navigate(typeof(BetriebskostenrechnungenDetailPage), null);
         }
 
         private void SortiereNachGruppen_Click(object sender, RoutedEventArgs e)

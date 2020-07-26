@@ -55,7 +55,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             Tree.RootNodes.ToList().ForEach(dig);
         }
-        
+
         // TODO merge raiseChange and navigate...
         public void Navigate<U>(U target)
         {
