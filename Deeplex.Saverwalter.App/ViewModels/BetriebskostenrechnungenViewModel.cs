@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -13,6 +14,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private Betriebskostenrechnung Entity { get; }
 
         public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
+
+        public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>();
 
         public void selfDestruct()
         {
@@ -117,6 +120,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             : this()
         {
             Entity = r;
+
+            AttachFile = new AsyncRelayCommand(async _ =>
+                await Utils.Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
+
         }
 
         public BetriebskostenrechnungViewModel()
@@ -129,6 +136,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ToImmutableDictionary(
                     g => new BetriebskostenRechungenListWohnungListAdresse(g.Key),
                     g => g.ToImmutableList());
+
+
+            AttachFile = new AsyncRelayCommand(async _ =>
+                /* TODO */await Task.FromResult<object>(null), _ => false);
         }
+
+        public AsyncRelayCommand AttachFile;
     }
 }

@@ -34,11 +34,47 @@ namespace Deeplex.Saverwalter.App.Views
 
             App.ViewModel.Titel.Value = ViewModel.Typ.ToDescriptionString();
 
+            var EditToggle = new AppBarToggleButton
+            {
+                Label = "Bearbeiten",
+                Icon = new SymbolIcon(Symbol.Edit),
+            };
+            EditToggle.Click += EditToggle_Click;
+
+            var Delete = new AppBarButton
+            {
+                Label = "Löschen",
+                Icon = new SymbolIcon(Symbol.Delete),
+            };
+            Delete.Click += SelfDestruct;
+
+            App.ViewModel.RefillCommandContainer(new ICommandBarElement[]
+            {
+                new AppBarButton
+                {
+                    Icon = new SymbolIcon(Symbol.Attach),
+                    Command = ViewModel.AttachFile,
+                }
+            }, new ICommandBarElement[] { EditToggle, Delete });
+
+
+
             ViewModel.AdresseGroup.Keys.ToList().ForEach(k =>
             {
                 ViewModel.AdresseGroup[k].ForEach(v => k.Children.Add(v));
                 WohnungenTree.RootNodes.Add(k);
             });
+        }
+
+        private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            ViewModel.IsInEdit.Value = (sender as AppBarToggleButton).IsChecked ?? false;
+        }
+
+        private void SelfDestruct(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            ViewModel.selfDestruct();
+            ((Frame)((NavigationView)Frame.Parent).Content).GoBack();
         }
     }
 }

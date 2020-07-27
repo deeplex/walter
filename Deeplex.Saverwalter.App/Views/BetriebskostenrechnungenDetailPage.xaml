@@ -12,14 +12,8 @@
 
     <ScrollViewer>
     <mtuuc:WrapPanel>
-        <StackPanel>
-            <!--TODO der Button kommt in die AppBar-->
-            <Button
-                    Margin="10,0,0,0"
-                    VerticalAlignment="Bottom">
-                <SymbolIcon Symbol="Attach"/>
-            </Button>
-            <TextBlock Text="Betroffene Wohneinheiten:"/>
+            <StackPanel>
+                <TextBlock Text="Betroffene Wohneinheiten:"/>
             <muxc:TreeView
                 SelectionMode="Multiple"
                 x:Name="WohnungenTree"/>
