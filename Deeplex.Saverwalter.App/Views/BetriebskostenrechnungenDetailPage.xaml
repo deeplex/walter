@@ -18,7 +18,7 @@
                 SelectionMode="Multiple"
                 x:Name="WohnungenTree"/>
             <MenuFlyoutSeparator/>
-            <TextBox Header="Beschreibung"/>
+            <TextBox Text="{x:Bind ViewModel.Beschreibung}" Header="Beschreibung"/>
             <StackPanel
                 Margin="0,10,0,0"
                 Orientation="Horizontal">
@@ -27,6 +27,7 @@
                     Margin="10,0,0,0"
                     Header="Umlageschlüssel"/>
                 <muxc:NumberBox
+                    Value="{x:Bind ViewModel.BetreffendesJahr}"
                     Margin="10,0,0,0"
                     Header="Betr. Jahr"
                     SpinButtonPlacementMode="Inline"/>
@@ -34,11 +35,15 @@
             <StackPanel
                 Margin="0,10,0,0"
                 Orientation="Horizontal">
-                <CalendarDatePicker Header="Datum"/>
-                <muxc:NumberBox Margin="10,0,0,0" Header="Betrag"/>
+                <CalendarDatePicker
+                    Date="{x:Bind ViewModel.Datum}"
+                    Header="Datum"/>
+                <muxc:NumberBox
+                    Value="{x:Bind ViewModel.Betrag}"
+                    Margin="10,0,0,0"
+                    Header="Betrag"/>
             </StackPanel>
-            <!--{x:Bind ViewModel.isHeizung}-->
-            <StackPanel Margin="0,10,0,0" Visibility="Visible" Orientation="Horizontal">
+            <StackPanel Margin="0,10,0,0" Visibility="{x:Bind ViewModel.isHeizung}" Orientation="Horizontal">
                 <Slider
                     Width="100"
                     Minimum="50"
@@ -54,7 +59,6 @@
                     Margin="10,0,0,0"
                     Header="HKVO§9"/>
             </StackPanel>
-            <!--if heizkosten...-->
         </StackPanel>
     </mtuuc:WrapPanel>
     </ScrollViewer>
