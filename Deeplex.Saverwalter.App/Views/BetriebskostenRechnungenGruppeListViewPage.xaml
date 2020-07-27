@@ -46,42 +46,12 @@
                                                                 <StackPanel
                                                                     RelativePanel.AlignRightWithPanel="True"
                                                                     Orientation="Horizontal">
-                                                                    <Button Background="Transparent">
+                                                                    <!--Test-->
+                                                                    <Button
+                                                                        Background="Transparent"
+                                                                        CommandParameter="{x:Bind Id}"
+                                                                        Click="Details_Click">
                                                                         <SymbolIcon Symbol="More"/>
-                                                                        <Button.Flyout>
-                                                                            <Flyout>
-                                                                                <StackPanel>
-                                                                                    <muxc:NumberBox
-                                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                                        Header="Ändere betreffendes Jahr:"
-                                                                                        Value="{x:Bind BetreffendesJahr, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                                                        SpinButtonPlacementMode="Compact"/>
-                                                                                    <ComboBox
-                                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                                        ItemsSource="{x:Bind Typen_List}"
-                                                                                        DisplayMemberPath="text"
-                                                                                        SelectedIndex="{x:Bind Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                                        Header="Betriebskostentyp"/>
-                                                                                    <TextBox
-                                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                                        Text="{x:Bind Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                                                        Header="Notiz"/>
-                                                                                    <TextBox
-                                                                                        IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                                        Text="{x:Bind Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                                                        Header="Beschreibung"/>
-                                                                                    <Button
-                                                                                        HorizontalContentAlignment="Left"
-                                                                                        HorizontalAlignment="Stretch"
-                                                                                        Background="Transparent" Command="{x:Bind SelfDestruct}">
-                                                                                        <StackPanel Orientation="Horizontal">
-                                                                                            <SymbolIcon Symbol="Delete"/>
-                                                                                            <TextBlock Margin="10,0,0,0" Text="Löschen"/>
-                                                                                        </StackPanel>
-                                                                                    </Button>
-                                                                                </StackPanel>
-                                                                            </Flyout>
-                                                                        </Button.Flyout>
                                                                     </Button>
                                                                     <Button
                                                                     Background="Transparent"

@@ -21,9 +21,9 @@ namespace Deeplex.Saverwalter.App.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (e.Parameter is Betriebskostenrechnung rechnung)
+            if (e.Parameter is int id)
             {
-                ViewModel = new BetriebskostenrechnungViewModel(rechnung);
+                ViewModel = new BetriebskostenrechnungViewModel(App.Walter.Betriebskostenrechnungen.Find(id));
             }
             else if (e.Parameter is null)
             {

@@ -116,8 +116,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set => update(nameof(Entity.BetreffendesJahr), value);
         }
 
-        public BetriebskostenrechnungViewModel(Betriebskostenrechnung r)
-            : this()
+        public BetriebskostenrechnungViewModel(Betriebskostenrechnung r) : this()
         {
             Entity = r;
 
