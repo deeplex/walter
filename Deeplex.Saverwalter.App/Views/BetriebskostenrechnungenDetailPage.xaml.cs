@@ -30,15 +30,15 @@ namespace Deeplex.Saverwalter.App.Views
                 ViewModel = new BetriebskostenrechnungViewModel();
             }
 
-            App.ViewModel.Titel.Value = "TODO";
+            base.OnNavigatedTo(e);
+
+            App.ViewModel.Titel.Value = ViewModel.Typ.ToDescriptionString();
 
             ViewModel.AdresseGroup.Keys.ToList().ForEach(k =>
             {
                 ViewModel.AdresseGroup[k].ForEach(v => k.Children.Add(v));
                 WohnungenTree.RootNodes.Add(k);
             });
-
-            base.OnNavigatedTo(e);
         }
     }
 }
