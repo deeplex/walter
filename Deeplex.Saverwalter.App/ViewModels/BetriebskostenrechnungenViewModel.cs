@@ -116,6 +116,18 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set => update(nameof(Entity.BetreffendesJahr), value);
         }
 
+        public double HKVO_P7
+        {
+            get => (Entity?.HKVO_P7 ?? 0.0) * 100;
+            set => update(nameof(Entity.HKVO_P7), value / 100);
+        }
+
+        public double HKVO_P8
+        {
+            get => (Entity?.HKVO_P8 ?? 0.0) * 100;
+            set => update(nameof(Entity.HKVO_P8), value / 100);
+        }
+
         public BetriebskostenrechnungViewModel(Betriebskostenrechnung r) : this()
         {
             Entity = r;
