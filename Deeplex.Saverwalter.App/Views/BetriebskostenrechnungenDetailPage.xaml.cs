@@ -57,8 +57,6 @@ namespace Deeplex.Saverwalter.App.Views
                 }
             }, new ICommandBarElement[] { EditToggle, Delete });
 
-
-
             ViewModel.AdresseGroup.Keys.ToList().ForEach(k =>
             {
                 ViewModel.AdresseGroup[k].ForEach(v => k.Children.Add(v));

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -148,11 +149,45 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     g => new BetriebskostenRechungenListWohnungListAdresse(g.Key),
                     g => g.ToImmutableList());
 
-
             AttachFile = new AsyncRelayCommand(async _ =>
                 /* TODO */await Task.FromResult<object>(null), _ => false);
         }
 
         public AsyncRelayCommand AttachFile;
+
+        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Betrag):
+                case nameof(Datum):
+                case nameof(Typ):
+                case nameof(Schluessel):
+                case nameof(Beschreibung):
+                case nameof(BetreffendesJahr):
+                case nameof(HKVO_P7):
+                case nameof(HKVO_P8):
+                    break;
+                default:
+                    return;
+            }
+
+            if (Entity.Datum == null ||
+                Entity.Typ == null ||
+                Entity.Schluessel == null)
+            {
+                return;
+            }
+
+            if (Entity.BetriebskostenrechnungId != 0)
+            {
+                App.Walter.Betriebskostenrechnungen.Update(Entity);
+            }
+            else
+            {
+                App.Walter.Betriebskostenrechnungen.Add(Entity);
+            }
+            App.SaveWalter();
+        }
     }
 }
