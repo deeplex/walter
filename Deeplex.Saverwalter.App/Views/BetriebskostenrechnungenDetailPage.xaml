@@ -18,7 +18,9 @@
                 SelectionMode="Multiple"
                 x:Name="WohnungenTree"/>
             <MenuFlyoutSeparator/>
-            <TextBox Text="{x:Bind ViewModel.Beschreibung}" Header="Beschreibung"/>
+                <TextBox
+                    Text="{x:Bind ViewModel.Beschreibung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                    Header="Beschreibung"/>
             <StackPanel
                 Margin="0,10,0,0"
                 Orientation="Horizontal">
@@ -27,7 +29,7 @@
                     Margin="10,0,0,0"
                     Header="Umlageschlüssel"/>
                 <muxc:NumberBox
-                    Value="{x:Bind ViewModel.BetreffendesJahr}"
+                    Value="{x:Bind ViewModel.BetreffendesJahr, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Margin="10,0,0,0"
                     Header="Betr. Jahr"
                     SpinButtonPlacementMode="Inline"/>
@@ -39,19 +41,19 @@
                     Date="{x:Bind ViewModel.Datum}"
                     Header="Datum"/>
                 <muxc:NumberBox
-                    Value="{x:Bind ViewModel.Betrag}"
+                    Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Margin="10,0,0,0"
                     Header="Betrag"/>
             </StackPanel>
             <StackPanel Margin="0,10,0,0" Visibility="{x:Bind ViewModel.isHeizung}" Orientation="Horizontal">
                 <Slider
-                    Value="{x:Bind ViewModel.HKVO_P7}"
+                    Value="{x:Bind ViewModel.HKVO_P7, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Width="100"
                     Minimum="50"
                     Maximum="70"
                     Header="HKVO§7"/>
                 <Slider
-                    Value="{x:Bind ViewModel.HKVO_P8}"
+                    Value="{x:Bind ViewModel.HKVO_P8, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Width="100"
                     Minimum="50"
                     Maximum="70"

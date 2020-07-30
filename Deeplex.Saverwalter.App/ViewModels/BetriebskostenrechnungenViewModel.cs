@@ -151,6 +151,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 /* TODO */await Task.FromResult<object>(null), _ => false);
+
+            PropertyChanged += OnUpdate;
         }
 
         public AsyncRelayCommand AttachFile;
@@ -172,9 +174,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     return;
             }
 
-            if (Entity.Datum == null ||
-                Entity.Typ == null ||
-                Entity.Schluessel == null)
+            if (Entity.Datum == null)
             {
                 return;
             }
