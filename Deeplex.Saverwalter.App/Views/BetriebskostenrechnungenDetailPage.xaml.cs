@@ -59,7 +59,13 @@ namespace Deeplex.Saverwalter.App.Views
 
             ViewModel.AdresseGroup.Keys.ToList().ForEach(k =>
             {
-                ViewModel.AdresseGroup[k].ForEach(v => k.Children.Add(v));
+                ViewModel.AdresseGroup[k].ForEach(v => {
+                    if (ViewModel.WohnungIds.Contains(v.Id))
+                    {
+                        WohnungenTree.SelectedNodes.Add(v);
+                    }
+                    k.Children.Add(v);
+                });
                 WohnungenTree.RootNodes.Add(k);
             });
         }

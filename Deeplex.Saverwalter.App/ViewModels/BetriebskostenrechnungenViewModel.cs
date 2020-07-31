@@ -129,9 +129,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set => update(nameof(Entity.HKVO_P8), value / 100);
         }
 
+        public List<int> WohnungIds;
+
         public BetriebskostenrechnungViewModel(Betriebskostenrechnung r) : this()
         {
             Entity = r;
+
+            WohnungIds = r.Gruppen.Select(g => g.WohnungId).ToList();
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
