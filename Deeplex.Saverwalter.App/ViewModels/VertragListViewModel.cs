@@ -106,7 +106,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public int Personenzahl { get; }
         public string Anschrift { get; }
         public Wohnung Wohnung { get; }
-        public ImmutableList<Guid> Mieter { get; } 
+        public ImmutableList<Guid> Mieter { get; }
         public DateTime Beginn { get; set; }
         public DateTime? Ende { get; set; }
         public string BeginnString => Beginn.ToString("dd.MM.yyyy");

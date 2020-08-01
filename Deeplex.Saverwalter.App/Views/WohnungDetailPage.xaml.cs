@@ -94,7 +94,7 @@ namespace Deeplex.Saverwalter.App.Views
                 Content = Anschrift;
             }
         }
-        
+
         private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             ViewModel.IsInEdit.Value = (sender as AppBarToggleButton).IsChecked ?? false;

@@ -66,7 +66,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ZaehlerViewModel(Zaehler z)
         {
             Zaehler = z;
-            
+
             LoadList();
 
             AddZaehlerstand = new RelayCommand(AddZaehlerstandPanel

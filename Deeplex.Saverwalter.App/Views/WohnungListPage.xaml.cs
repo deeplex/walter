@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.App.Views
             App.ViewModel.Navigate(typeof(WohnungDetailPage), wohnung);
         }
 
-            private void AddWohnung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private void AddWohnung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             Frame.Navigate(typeof(WohnungDetailPage), null,
                 new DrillInNavigationTransitionInfo());

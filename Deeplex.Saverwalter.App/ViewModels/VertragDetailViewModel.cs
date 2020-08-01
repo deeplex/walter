@@ -211,7 +211,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Beginn.AsUtcKind();
             set => update(nameof(Entity.Beginn), value.UtcDateTime);
         }
-    public DateTimeOffset? Ende
+        public DateTimeOffset? Ende
         {
             get => Entity.Ende?.AsUtcKind();
             set => update(nameof(Entity.Ende), value?.UtcDateTime);

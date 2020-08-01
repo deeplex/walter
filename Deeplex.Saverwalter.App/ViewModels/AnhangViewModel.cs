@@ -71,7 +71,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 n.Children.ToList().ForEach(dig);
 
-                if(n is IAnhangTreeViewNode ax && ax.Target.Equals(target))
+                if (n is IAnhangTreeViewNode ax && ax.Target.Equals(target))
                 {
                     exp(n);
                 }

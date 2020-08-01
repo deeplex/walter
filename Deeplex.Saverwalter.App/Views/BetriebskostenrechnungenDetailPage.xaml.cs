@@ -1,7 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
-using Microsoft.EntityFrameworkCore;
-using System;
 using System.Linq;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -59,7 +57,8 @@ namespace Deeplex.Saverwalter.App.Views
 
             ViewModel.AdresseGroup.Keys.ToList().ForEach(k =>
             {
-                ViewModel.AdresseGroup[k].ForEach(v => {
+                ViewModel.AdresseGroup[k].ForEach(v =>
+                {
                     if (ViewModel.WohnungIds.Contains(v.Id))
                     {
                         WohnungenTree.SelectedNodes.Add(v);
