@@ -71,11 +71,5 @@ namespace Deeplex.Saverwalter.App.Views
             //App.SaveWalter();
             //cp.isNew.Value = false;
         }
-
-        private void Details_Click(object sender, RoutedEventArgs e)
-        {
-            var id = (sender as Button).CommandParameter;
-            App.ViewModel.Navigate(typeof(BetriebskostenrechnungenDetailPage), id);
-        }
     }
 }

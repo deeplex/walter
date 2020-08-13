@@ -40,10 +40,7 @@
                             </ListView.ItemTemplate>
                         </ListView>
                     </mtuuc:Expander>
-                    <Button
-                        Background="Transparent"
-                        Click="Details_Click"
-                        CommandParameter="{x:Bind Id}">
+                    <Button Background="Transparent" Click="Details_Click">
                         <SymbolIcon Symbol="More"/>
                     </Button>
                     <Button

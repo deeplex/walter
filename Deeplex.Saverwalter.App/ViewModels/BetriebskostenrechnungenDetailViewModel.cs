@@ -13,6 +13,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class BetriebskostenrechnungDetailViewModel : BindableBase
     {
         private Betriebskostenrechnung Entity { get; }
+        public int Id { get; }
 
         public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
 
@@ -169,6 +170,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r) : this()
         {
             Entity = r;
+            Id = r.BetriebskostenrechnungId;
 
             WohnungenIds = r.Gruppen.Select(g => g.WohnungId).ToList();
 

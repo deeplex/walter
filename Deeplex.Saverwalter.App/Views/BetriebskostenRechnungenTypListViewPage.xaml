@@ -35,8 +35,8 @@
                                             <StackPanel>
                                                 <GridView Margin="0,10,0,0" ItemsSource="{Binding Value, Mode=OneWay}">
                                                     <GridView.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <uc:BetriebskostenrechnungControl Id="{Binding Value}" ByType="True"/>
+                                                        <DataTemplate x:DataType="x:Int32">
+                                                            <uc:BetriebskostenrechnungControl Id="{x:Bind}" ByType="False"/>
                                                         </DataTemplate>
                                                     </GridView.ItemTemplate>
                                                     <GridView.ItemsPanel>
