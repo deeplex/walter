@@ -1,8 +1,4 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
-using Deeplex.Saverwalter.Model;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
