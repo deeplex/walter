@@ -109,9 +109,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set => update(nameof(Entity.Notiz), value);
         }
 
-        public ObservableProperty<List<NatuerlichePersonVertrag>> Vertraege
-            = new ObservableProperty<List<NatuerlichePersonVertrag>>();
-
         public string Name => Vorname + " " + Nachname;
 
         public NatuerlichePersonViewModel(int id)
@@ -124,12 +121,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Id = k.NatuerlichePersonId;
 
             Anreden = Enum.GetValues(typeof(Anrede)).Cast<Anrede>().ToImmutableList();
-
-            Vertraege.Value = App.Walter.Vertraege
-                .Include(v => v.Wohnung).ToList()
-                .Where(v => App.Walter.MieterSet.ToList().Exists(m => m.VertragId == v.VertragId))
-                .Select(v => new NatuerlichePersonVertrag(v.VertragId))
-                .ToList();
 
             PropertyChanged += OnUpdate;
 
@@ -172,45 +163,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.Walter.NatuerlichePersonen.Add(Entity);
             }
             App.SaveWalter();
-        }
-    }
-
-    public sealed class NatuerlichePersonVertrag
-    {
-        public int Id { get; }
-        public int Version { get; }
-        public ObservableProperty<string> Anschrift { get; } = new ObservableProperty<string>();
-        public ObservableProperty<string> Wohnung { get; } = new ObservableProperty<string>();
-        public ObservableProperty<DateTimeOffset> Beginn { get; } = new ObservableProperty<DateTimeOffset>();
-        public ObservableProperty<DateTimeOffset?> Ende { get; } = new ObservableProperty<DateTimeOffset?>();
-        public ObservableProperty<string> AuflistungMieter { get; } = new ObservableProperty<string>();
-        public ObservableProperty<List<NatuerlichePersonVertrag>> Versionen { get; }
-            = new ObservableProperty<List<NatuerlichePersonVertrag>>();
-
-        public NatuerlichePersonVertrag(Guid id)
-            : this(App.Walter.Vertraege.Where(v => v.VertragId == id)) { }
-
-        private NatuerlichePersonVertrag(IEnumerable<Vertrag> v)
-            : this(v.OrderBy(vs => vs.Version).Last())
-        {
-            Versionen.Value = v.OrderBy(vs => vs.Version).Select(vs => new NatuerlichePersonVertrag(vs)).ToList();
-            Beginn.Value = Versionen.Value.First().Beginn.Value;
-            Ende.Value = Versionen.Value.Last().Ende.Value;
-        }
-
-        private NatuerlichePersonVertrag(Vertrag v)
-        {
-            Id = v.rowid;
-            Version = v.Version;
-            Anschrift.Value = v.Wohnung is Wohnung w ? AdresseViewModel.Anschrift(w) : "";
-            Wohnung.Value = v.Wohnung is Wohnung ww ? ww.Bezeichnung : "";
-
-            Beginn.Value = v.Beginn.AsUtcKind();
-            Ende.Value = v.Ende?.AsUtcKind();
-
-            var bs = App.Walter.MieterSet.Where(m => m.VertragId == v.VertragId).ToList();
-            var cs = bs.Select(b => App.Walter.FindPerson(b.PersonId).Bezeichnung);
-            AuflistungMieter.Value = string.Join(", ", cs);
         }
     }
 }

@@ -18,26 +18,6 @@
             <Setter Property="Margin" Value="20,20,0,0"/>
             <Setter Property="IsEnabled" Value="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"/>
         </Style>
-
-        <DataTemplate x:Key="BeginnGrid" x:DataType="vm:NatuerlichePersonVertrag">
-            <CalendarDatePicker
-                IsEnabled="False"
-                Width="176"
-                Date="{x:Bind Beginn.Value, Mode=OneWay}"
-                Language="de"
-                PlaceholderText="Offen"
-                DateFormat="{}{day.integer}. {month.full} {year.full}"/>
-        </DataTemplate>
-
-        <DataTemplate x:Key="EndeGrid" x:DataType="vm:NatuerlichePersonVertrag">
-            <CalendarDatePicker
-                IsEnabled="False"
-                Width="176"
-                Date="{x:Bind Ende.Value, Mode=OneWay}"
-                Language="de"
-                PlaceholderText="Offen"
-                DateFormat="{}{day.integer}. {month.full} {year.full}"/>
-        </DataTemplate>
     </Page.Resources>
     <ScrollViewer>
         <StackPanel>
