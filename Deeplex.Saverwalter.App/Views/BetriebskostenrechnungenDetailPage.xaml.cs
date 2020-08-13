@@ -30,7 +30,7 @@ namespace Deeplex.Saverwalter.App.Views
 
             base.OnNavigatedTo(e);
 
-            App.ViewModel.Titel.Value = ((Betriebskostentyp)ViewModel.Typ).ToDescriptionString();
+            App.ViewModel.Titel.Value = "Betriebskostenrechnung";
 
             var EditToggle = new AppBarToggleButton
             {
