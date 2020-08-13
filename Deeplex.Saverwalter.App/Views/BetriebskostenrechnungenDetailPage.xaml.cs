@@ -10,7 +10,7 @@ namespace Deeplex.Saverwalter.App.Views
 {
     public sealed partial class BetriebskostenrechnungenDetailPage : Page
     {
-        public BetriebskostenrechnungViewModel ViewModel { get; private set; }
+        public BetriebskostenrechnungDetailViewModel ViewModel { get; private set; }
 
         public BetriebskostenrechnungenDetailPage()
         {
@@ -21,11 +21,11 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (e.Parameter is int id)
             {
-                ViewModel = new BetriebskostenrechnungViewModel(App.Walter.Betriebskostenrechnungen.Find(id));
+                ViewModel = new BetriebskostenrechnungDetailViewModel(App.Walter.Betriebskostenrechnungen.Find(id));
             }
             else if (e.Parameter is null)
             {
-                ViewModel = new BetriebskostenrechnungViewModel();
+                ViewModel = new BetriebskostenrechnungDetailViewModel();
             }
 
             base.OnNavigatedTo(e);

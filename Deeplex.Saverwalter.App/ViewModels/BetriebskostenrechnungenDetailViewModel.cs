@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public sealed class BetriebskostenrechnungViewModel : BindableBase
+    public sealed class BetriebskostenrechnungDetailViewModel : BindableBase
     {
         private Betriebskostenrechnung Entity { get; }
 
@@ -131,7 +131,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public List<int> WohnungIds;
 
-        public BetriebskostenrechnungViewModel(Betriebskostenrechnung r) : this()
+        public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r) : this()
         {
             Entity = r;
 
@@ -142,7 +142,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         }
 
-        public BetriebskostenrechnungViewModel()
+        public BetriebskostenrechnungDetailViewModel()
         {
             AdresseGroup = App.Walter.Wohnungen
                 .Include(w => w.Adresse)
