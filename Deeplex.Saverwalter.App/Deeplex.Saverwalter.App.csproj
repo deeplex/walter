@@ -135,7 +135,6 @@
     <Compile Include="UserControls\ZaehlerstandControl.xaml.cs">
       <DependentUpon>ZaehlerstandControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Utils\AddXaml.cs" />
     <Compile Include="Utils\Files.cs" />
     <Compile Include="ViewModels\AnhangViewModel.cs" />
     <Compile Include="ViewModels\AdresseViewModel.cs" />
