@@ -66,6 +66,32 @@ namespace Deeplex.Saverwalter.App.ViewModels
             .Select(s => new BetriebskostenrechnungEnum(s))
             .ToList();
 
+        public List<BetriebskostenrechnungAllgemeinZaehler> AllgemeinZaehler_List =
+            App.Walter.AllgemeinZaehlerSet
+        .Select(a => new BetriebskostenrechnungAllgemeinZaehler(a))
+        .ToList();
+
+        public sealed class BetriebskostenrechnungAllgemeinZaehler
+        {
+            public int Id { get; }
+            public string Kennnummer { get; }
+
+            public BetriebskostenrechnungAllgemeinZaehler(AllgemeinZaehler a)
+            {
+                Id = a.AllgemeinZaehlerId;
+                Kennnummer = a.Kennnummer;
+            }
+        }
+
+        public int AllgemeinZaehler
+        {
+            get => Entity?.Allgemeinzaehler != null ?
+                AllgemeinZaehler_List.FindIndex(a => a.Id == Entity.Allgemeinzaehler.AllgemeinZaehlerId) :
+                0;
+            set => update(nameof(Entity.Allgemeinzaehler),
+                App.Walter.AllgemeinZaehlerSet.Find(AllgemeinZaehler_List[value].Id));
+        }
+
         private void update<U>(string property, U value)
         {
             if (Entity == null) return;
@@ -87,22 +113,22 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set => update(nameof(Entity.Betrag), value);
         }
 
-        public DateTime Datum
+        public DateTimeOffset? Datum
         {
-            get => Entity?.Datum ?? DateTime.Now;
-            set => update(nameof(Entity.Datum), value.Date.AsUtcKind());
+            get => Entity?.Datum ?? DateTime.Now.Date.AsUtcKind();
+            set => update(nameof(Entity.Datum), value.Value.Date.AsUtcKind());
         }
 
-        public Betriebskostentyp Typ
+        public int Typ
         {
-            get => Entity?.Typ ?? Betriebskostentyp.AllgemeinstromHausbeleuchtung;
-            set => update(nameof(Entity.Typ), value);
+            get => Typen_List.FindIndex(i => i.index == (Entity != null ? (int)Entity?.Typ : 0));
+            set => update(nameof(Entity.Typ), (Betriebskostentyp)Typen_List[value].index);
         }
 
-        public UmlageSchluessel Schluessel
+        public int Schluessel
         {
-            get => Entity?.Schluessel ?? UmlageSchluessel.NachNutzeinheit;
-            set => update(nameof(Entity.Schluessel), value);
+            get => Entity != null ? (int)Entity.Schluessel : 0;
+            set => update(nameof(Entity.Schluessel), (UmlageSchluessel)value);
         }
 
         public string Beschreibung
@@ -129,13 +155,22 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set => update(nameof(Entity.HKVO_P8), value / 100);
         }
 
-        public List<int> WohnungIds;
+        public int HKVO_P9
+        {
+            get => Entity?.Typ == Betriebskostentyp.Heizkosten ?
+                HKVO_P9_List.FindIndex(i => i.index == (int)Entity.HKVO_P9) : 0;
+            set => update(nameof(Entity.HKVO_P9), (HKVO_P9A2)HKVO_P9_List[value].index);
+        }
+
+        public List<int> WohnungenIds;
+        public List<string> Wohnungen { get; }
+
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r) : this()
         {
             Entity = r;
 
-            WohnungIds = r.Gruppen.Select(g => g.WohnungId).ToList();
+            WohnungenIds = r.Gruppen.Select(g => g.WohnungId).ToList();
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
@@ -156,10 +191,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
             AttachFile = new AsyncRelayCommand(async _ =>
                 /* TODO */await Task.FromResult<object>(null), _ => false);
 
+            dispose = new RelayCommand(_ => this.selfDestruct());
+
             PropertyChanged += OnUpdate;
         }
 
         public AsyncRelayCommand AttachFile;
+        public RelayCommand dispose;
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
         {

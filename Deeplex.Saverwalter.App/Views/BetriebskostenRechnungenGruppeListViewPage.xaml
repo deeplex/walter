@@ -8,6 +8,7 @@
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
+    xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -33,106 +34,9 @@
                                     <Pivot.ItemTemplate>
                                         <DataTemplate>
                                             <GridView Margin="0,10,0,0" ItemsSource="{Binding Value, Mode=OneWay}">
-                                                <CollectionViewSource x:Name="Wohnungen" IsSourceGrouped="True"/>
                                                 <GridView.ItemTemplate>
-                                                    <DataTemplate x:DataType="vm:BetriebskostenRechnungenRechnung">
-                                                        <StackPanel  Width="250" BorderBrush="LightGray" BorderThickness="2" Padding="5">
-                                                            <RelativePanel>
-                                                                <ComboBox
-                                                                    ItemsSource="{x:Bind Typen_List}"
-                                                                    DisplayMemberPath="text"
-                                                                    SelectedIndex="{x:Bind Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                    Header="Umlageschlüssel"/>
-                                                                <StackPanel
-                                                                    RelativePanel.AlignRightWithPanel="True"
-                                                                    Orientation="Horizontal">
-                                                                    <!--Test-->
-                                                                    <Button
-                                                                        Background="Transparent"
-                                                                        CommandParameter="{x:Bind Id}"
-                                                                        Click="Details_Click">
-                                                                        <SymbolIcon Symbol="More"/>
-                                                                    </Button>
-                                                                    <Button
-                                                                    Background="Transparent"
-                                                                    Command="{x:Bind AttachFile}">
-                                                                        <SymbolIcon Symbol="Attach"/>
-                                                                    </Button>
-                                                                </StackPanel>
-                                                                
-                                                            </RelativePanel>
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <muxc:NumberBox
-                                                                    IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                    Width="120"
-                                                                    Header="Betrag"
-                                                                    Value="{x:Bind Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                                                <ComboBox
-                                                                    IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                    Margin="10,0,0,0"
-                                                                    ItemsSource="{x:Bind Schluessel_List}"
-                                                                    DisplayMemberPath="text"
-                                                                    SelectedIndex="{x:Bind Schluessel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                    Header="Umlageschlüssel"/>
-                                                            </StackPanel>
-                                                            <CalendarDatePicker
-                                                                IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                Header="Datum"
-                                                                HorizontalAlignment="Stretch"
-                                                                Date="{x:Bind Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                                            <mtuuc:Expander Margin="0,10,0,0" Visibility="{x:Bind isHeizung, Mode=OneWay}">
-                                                                <mtuuc:Expander.Header>
-                                                                    <StackPanel Orientation="Horizontal">
-                                                                        <TextBlock VerticalAlignment="Center" Text="Heizkostenverordnung"/>
-                                                                        <HyperlinkButton NavigateUri="https://www.gesetze-im-internet.de/heizkostenv">
-                                                                            <SymbolIcon Margin="10,0,0,0" Symbol="Link"/>
-                                                                        </HyperlinkButton>
-
-                                                                    </StackPanel>
-                                                                    
-                                                                </mtuuc:Expander.Header>
-                                                                <StackPanel>
-                                                                    <StackPanel Orientation="Horizontal">
-                                                                        <Slider
-                                                                            IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                            Width="110" Header="HKVO§7" Minimum="50" Maximum="70"
-                                                                            Value="{x:Bind HKVO_P7, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                                                        <Slider
-                                                                            IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                            Width="110" Header="HKVO§8" Minimum="50" Maximum="70" Margin="10,0,0,0"
-                                                                            Value="{x:Bind HKVO_P8, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                                                    </StackPanel>
-                                                                    <StackPanel Orientation="Horizontal">
-                                                                        <ComboBox
-                                                                            IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                            ItemsSource="{x:Bind HKVO_P9_List}"
-                                                                            Width="110"
-                                                                            DisplayMemberPath="text"
-                                                                            SelectedIndex="{x:Bind HKVO_P9, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                            Header="HKVO§9(2)"/>
-                                                                        <ComboBox
-                                                                            Margin="10,0,0,0"
-                                                                            IsEnabled="{x:Bind IsInEdit.Value, Mode=OneWay}"
-                                                                            ItemsSource="{x:Bind AllgemeinZaehler_List}"
-                                                                            Width="110"
-                                                                            DisplayMemberPath="Kennnummer"
-                                                                            SelectedIndex="{x:Bind AllgemeinZaehler, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                            Header="Allgemeinzähler"/>
-                                                                    </StackPanel>
-                                                                </StackPanel>
-                                                            </mtuuc:Expander>
-                                                            <StackPanel Margin="0,10,0,0" HorizontalAlignment="Stretch" Orientation="Horizontal" Visibility="{x:Bind isNew.Value, Mode=OneWay}">
-                                                                <Button CommandParameter="{x:Bind}" Click="SaveGruppe_Click" Width="170">
-                                                                    <StackPanel Orientation="Horizontal">
-                                                                        <TextBlock Text="Speichern"/>
-                                                                        <SymbolIcon Margin="10,0,0,0" Symbol="Accept"/>
-                                                                    </StackPanel>
-                                                                </Button>
-                                                                <Button Command="{x:Bind SelfDestruct}" Margin="10,0,0,0" Width="50">
-                                                                    <SymbolIcon Symbol="Cancel"/>
-                                                                </Button>
-                                                            </StackPanel>
-                                                        </StackPanel>
+                                                    <DataTemplate>
+                                                        <uc:BetriebskostenrechnungControl Id="{Binding Value}" ByType="False"/>
                                                     </DataTemplate>
                                                 </GridView.ItemTemplate>
                                                 <GridView.ItemsPanel>

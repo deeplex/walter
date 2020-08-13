@@ -25,29 +25,8 @@ namespace Deeplex.Saverwalter.App.Views
             };
             Sortiere.Click += SortiereNachGruppen_Click;
 
-            var Add = new AppBarButton
-            {
-                Icon = new SymbolIcon(Symbol.Add),
-                Label = "Hinzufügen"
-            };
-            Add.Click += Add_Click;
 
-            var EditToggle = new AppBarToggleButton
-            {
-                Label = "Bearbeiten",
-                Icon = new SymbolIcon(Symbol.Edit),
-            };
-            EditToggle.Click += EditToggle_Click;
-
-            App.ViewModel.RefillCommandContainer(new ICommandBarElement[]
-            {
-                Sortiere, Add,
-            }, new ICommandBarElement[] { EditToggle });
-        }
-
-        private void Add_Click(object sender, RoutedEventArgs e)
-        {
-            App.ViewModel.Navigate(typeof(BetriebskostenrechnungenDetailPage), null);
+            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { Sortiere });
         }
 
         private void SortiereNachGruppen_Click(object sender, RoutedEventArgs e)
@@ -58,47 +37,42 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void NeuesJahr_Click(object sender, RoutedEventArgs e)
         {
-            var dc = (KeyValuePair<BetriebskostenRechnungenBetriebskostenTyp, BetriebskostenRechnungenListJahr>)((Button)sender).DataContext;
-            var LetztesJahr = dc.Value.Jahre.Value.First();
-            var Rechnungen = LetztesJahr.Value;
+        //    var dc = (KeyValuePair<BetriebskostenRechnungenBetriebskostenTyp, BetriebskostenRechnungenListJahr>)((Button)sender).DataContext;
+        //    var LetztesJahr = dc.Value.Jahre.Value.First();
+        //    var Rechnungen = LetztesJahr.Value;
 
-            var neueJahre = new BetriebskostenRechnungenListJahr(
-                ViewModel,
-                ViewModel.Typen.Value[dc.Key].Jahre.Value.Add(
-                LetztesJahr.Key + 1,
-                Rechnungen.Select(r => new BetriebskostenRechnungenRechnung(ViewModel, r)).ToImmutableList()));
+        //    var neueJahre = new BetriebskostenRechnungenListJahr(
+        //        ViewModel,
+        //        ViewModel.Typen.Value[dc.Key].Jahre.Value.Add(
+        //        LetztesJahr.Key + 1,
+        //        Rechnungen.Select(r => new BetriebskostenRechnungenRechnung(ViewModel, r)).ToImmutableList()));
 
-            var Typen = ViewModel.Typen.Value.Remove(dc.Key);
-            ViewModel.Typen.Value = Typen.Add(dc.Key, neueJahre);
+        //    var Typen = ViewModel.Typen.Value.Remove(dc.Key);
+        //    ViewModel.Typen.Value = Typen.Add(dc.Key, neueJahre);
         }
 
         private void SaveGruppe_Click(object sender, RoutedEventArgs e)
         {
-            var cp = (BetriebskostenRechnungenRechnung)((Button)sender).CommandParameter;
-            var r = cp.GetEntity;
-            if (r != null)
-            {
-                App.Walter.Betriebskostenrechnungen.Update(r);
-            }
-            else
-            {
-                App.Walter.Betriebskostenrechnungen.Add(r);
-            }
-            foreach (var w in cp.WohnungenIds)
-            {
-                App.Walter.Betriebskostenrechnungsgruppen.Add(new BetriebskostenrechnungsGruppe
-                {
-                    Rechnung = r,
-                    WohnungId = w
-                });
-            }
-            App.SaveWalter();
-            cp.isNew.Value = false;
-        }
-
-        private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            ViewModel.IsInEdit.Value = (sender as AppBarToggleButton).IsChecked ?? false;
+        //    var cp = (BetriebskostenRechnungenRechnung)((Button)sender).CommandParameter;
+        //    var r = cp.GetEntity;
+        //    if (r != null)
+        //    {
+        //        App.Walter.Betriebskostenrechnungen.Update(r);
+        //    }
+        //    else
+        //    {
+        //        App.Walter.Betriebskostenrechnungen.Add(r);
+        //    }
+        //    foreach (var w in cp.WohnungenIds)
+        //    {
+        //        App.Walter.Betriebskostenrechnungsgruppen.Add(new BetriebskostenrechnungsGruppe
+        //        {
+        //            Rechnung = r,
+        //            WohnungId = w
+        //        });
+        //    }
+        //    App.SaveWalter();
+        //    cp.isNew.Value = false;
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)

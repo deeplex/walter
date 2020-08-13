@@ -30,7 +30,7 @@ namespace Deeplex.Saverwalter.App.Views
 
             base.OnNavigatedTo(e);
 
-            App.ViewModel.Titel.Value = ViewModel.Typ.ToDescriptionString();
+            App.ViewModel.Titel.Value = ((Betriebskostentyp)ViewModel.Typ).ToDescriptionString();
 
             var EditToggle = new AppBarToggleButton
             {
@@ -59,7 +59,7 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 ViewModel.AdresseGroup[k].ForEach(v =>
                 {
-                    if (ViewModel.WohnungIds.Contains(v.Id))
+                    if (ViewModel.WohnungenIds.Contains(v.Id))
                     {
                         WohnungenTree.SelectedNodes.Add(v);
                     }
