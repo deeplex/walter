@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.App.UserControls
                   "Id",
                   typeof(int),
                   typeof(BetriebskostenrechnungControl),
-                  new PropertyMetadata(1));
+                  new PropertyMetadata(0));
 
         private void Details_Click(object sender, RoutedEventArgs e)
             => App.ViewModel.Navigate(typeof(BetriebskostenrechnungenDetailPage), ViewModel.Id);
