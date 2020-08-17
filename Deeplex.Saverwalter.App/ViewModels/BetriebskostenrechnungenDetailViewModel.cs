@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -25,47 +26,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
             App.SaveWalter();
         }
 
-        public sealed class BetriebskostenrechnungEnum
-        {
-            public int index { get; }
-            public string text { get; }
+        public List<HKVO9Util> HKVO_P9_List = Enums.HKVO9;
 
-            public BetriebskostenrechnungEnum(HKVO_P9A2 S)
-            {
-                index = (int)S;
-                text = "Satz " + index.ToString();
-            }
+        public List<UmlageSchluesselUtil> Schluessel_List = Enums.UmlageSchluessel;
 
-            public BetriebskostenrechnungEnum(UmlageSchluessel S)
-            {
-                index = (int)S;
-                text = S.ToDescriptionString();
-            }
-
-            public BetriebskostenrechnungEnum(Betriebskostentyp T)
-            {
-                index = (int)T;
-                text = T.ToDescriptionString();
-            }
-        }
-
-        public List<BetriebskostenrechnungEnum> HKVO_P9_List =
-            Enum.GetValues(typeof(HKVO_P9A2))
-                .Cast<HKVO_P9A2>().ToList()
-                .Select(s => new BetriebskostenrechnungEnum(s))
-                .ToList();
-
-        public List<BetriebskostenrechnungEnum> Schluessel_List =
-            Enum.GetValues(typeof(UmlageSchluessel))
-                .Cast<UmlageSchluessel>().ToList()
-                .Select(s => new BetriebskostenrechnungEnum(s))
-                .ToList();
-
-        public List<BetriebskostenrechnungEnum> Typen_List =
-            Enum.GetValues(typeof(Betriebskostentyp))
-            .Cast<Betriebskostentyp>().ToList()
-            .Select(s => new BetriebskostenrechnungEnum(s))
-            .ToList();
+        public List<BetriebskostentypUtil> Typen_List = Enums.Betriebskostentyp;
 
         public List<BetriebskostenrechnungAllgemeinZaehler> AllgemeinZaehler_List =
             App.Walter.AllgemeinZaehlerSet

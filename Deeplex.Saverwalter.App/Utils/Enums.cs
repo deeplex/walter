@@ -45,10 +45,12 @@ namespace Deeplex.Saverwalter.App.Utils
     public sealed class BetriebskostentypUtil
     {
         public Betriebskostentyp Typ { get; }
+        public int index { get; }
         public string Beschreibung { get; }
         public BetriebskostentypUtil(Betriebskostentyp t)
         {
             Typ = t;
+            index = (int)t;
             Beschreibung = t.ToDescriptionString();
         }
     }
@@ -56,11 +58,13 @@ namespace Deeplex.Saverwalter.App.Utils
     public sealed class HKVO9Util
     {
         public HKVO_P9A2 Enum { get; }
+        public int index { get; }
         public string Absatz { get; }
         public HKVO9Util(HKVO_P9A2 h)
         {
             Enum = h;
-            Absatz = "Absatz " + ((int)h).ToString();
+            index = (int)h;
+            Absatz = "Absatz " + (index).ToString();
         }
     }
 }
