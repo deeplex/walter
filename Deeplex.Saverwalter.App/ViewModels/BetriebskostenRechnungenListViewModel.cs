@@ -6,14 +6,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Deeplex.Saverwalter.App.Utils;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
 
     public sealed class BetriebskostenRechnungenListViewModel
     {
-        public ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenTyp, BetriebskostenRechnungenListJahr>> Typen
-            = new ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenTyp, BetriebskostenRechnungenListJahr>>();
+        public ObservableProperty<ImmutableSortedDictionary<BetriebskostentypUtil, BetriebskostenRechnungenListJahr>> Typen
+            = new ObservableProperty<ImmutableSortedDictionary<BetriebskostentypUtil, BetriebskostenRechnungenListJahr>>();
 
         public ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenGruppe, BetriebskostenRechnungenListJahr>> Gruppen
             = new ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenGruppe, BetriebskostenRechnungenListJahr>>();
@@ -22,26 +23,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>();
 
-        public List<BetriebskostenRechnungenBetriebskostenTyp> Betriebskostentypen =
-            Enum.GetValues(typeof(Betriebskostentyp))
-                .Cast<Betriebskostentyp>()
-                .ToList()
-                .Select(e => new BetriebskostenRechnungenBetriebskostenTyp(e))
-                .ToList();
+        public List<BetriebskostentypUtil> Betriebskostentypen = Enums.Betriebskostentyp;
 
-        public List<BetriebskostenRechnungenSchluessel> Betriebskostenschluessel =
-            Enum.GetValues(typeof(UmlageSchluessel))
-                .Cast<UmlageSchluessel>()
-                .ToList()
-                .Select(t => new BetriebskostenRechnungenSchluessel(t))
-                .ToList();
+        public List<UmlageSchluesselUtil> Betriebskostenschluessel = Enums.UmlageSchluessel;
 
-        public List<BetriebskostenRechnungenHKVO9> HKVO9 =
-            Enum.GetValues(typeof(HKVO_P9A2))
-                .Cast<HKVO_P9A2>()
-                .ToList()
-                .Select(t => new BetriebskostenRechnungenHKVO9(t))
-                .ToList();
+        public List<HKVO9Util> HKVO9 = Enums.HKVO9;
 
         public TreeViewNode AddBetriebskostenTree;
         public BetriebskostenRechnungenListViewModel()
@@ -54,9 +40,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ToList()
                 .GroupBy(g => g.Typ)
                 .ToImmutableSortedDictionary(
-                    g => new BetriebskostenRechnungenBetriebskostenTyp(g.Key),
+                    g => new BetriebskostentypUtil(g.Key),
                     g => new BetriebskostenRechnungenListJahr(this, g.ToList()),
-                    Comparer<BetriebskostenRechnungenBetriebskostenTyp>.Create((x, y)
+                    Comparer<BetriebskostentypUtil>.Create((x, y)
                         => x.Beschreibung.CompareTo(y.Beschreibung)));
 
             Gruppen.Value = App.Walter.Betriebskostenrechnungsgruppen.ToList()
@@ -108,40 +94,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 }
                 return ret;
             }));
-        }
-    }
-
-
-    public sealed class BetriebskostenRechnungenBetriebskostenTyp
-    {
-        public Betriebskostentyp Typ { get; }
-        public string Beschreibung { get; }
-        public BetriebskostenRechnungenBetriebskostenTyp(Betriebskostentyp t)
-        {
-            Typ = t;
-            Beschreibung = t.ToDescriptionString();
-        }
-    }
-
-    public sealed class BetriebskostenRechnungenSchluessel
-    {
-        public UmlageSchluessel Schluessel { get; }
-        public string Beschreibung { get; }
-        public BetriebskostenRechnungenSchluessel(UmlageSchluessel u)
-        {
-            Schluessel = u;
-            Beschreibung = u.ToDescriptionString();
-        }
-    }
-
-    public sealed class BetriebskostenRechnungenHKVO9
-    {
-        public HKVO_P9A2 Enum { get; }
-        public string Absatz { get; }
-        public BetriebskostenRechnungenHKVO9(HKVO_P9A2 h)
-        {
-            Enum = h;
-            Absatz = "Absatz " + ((int)h).ToString();
         }
     }
 
