@@ -29,6 +29,16 @@ namespace Deeplex.Saverwalter.App.Utils
                 .ToList()
                 .Select(t => new HKVO9Util(t))
                 .ToList();
+
+        public static List<Zaehlertyp> Zaehlertypen =
+            Enum.GetValues(typeof(Zaehlertyp))
+                .Cast<Zaehlertyp>()
+                .ToList();
+
+        public static List<Anrede> Anreden =
+            Enum.GetValues(typeof(Anrede))
+            .Cast<Anrede>()
+            .ToList();
     }
 
     public sealed class UmlageSchluesselUtil

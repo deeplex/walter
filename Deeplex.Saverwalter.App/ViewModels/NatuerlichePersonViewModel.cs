@@ -1,9 +1,9 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -12,7 +12,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public NatuerlichePerson Entity { get; }
         public int Id { get; }
 
-        public ImmutableList<Anrede> Anreden { get; }
+        public List<Anrede> Anreden { get; }
 
         public void selfDestruct()
         {
@@ -118,7 +118,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Entity = k;
             Id = k.NatuerlichePersonId;
 
-            Anreden = Enum.GetValues(typeof(Anrede)).Cast<Anrede>().ToImmutableList();
+            Anreden = Enums.Anreden;
 
             PropertyChanged += OnUpdate;
 

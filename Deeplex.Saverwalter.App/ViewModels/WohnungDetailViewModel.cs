@@ -1,6 +1,8 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
@@ -115,10 +117,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             IsInEdit.Value = true;
         } // Create new Wohnung
 
-        public ImmutableList<Zaehlertyp> Zaehlertypen =
-            Enum.GetValues(typeof(Zaehlertyp))
-                .Cast<Zaehlertyp>()
-                .ToImmutableList();
+        public List<Zaehlertyp> Zaehlertypen = Enums.Zaehlertypen;
 
         public WohnungDetailViewModel(Wohnung w)
         {
