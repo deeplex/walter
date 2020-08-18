@@ -13,33 +13,15 @@
     <StackPanel>
         <StackPanel Width="250" BorderBrush="LightGray" BorderThickness="2" Padding="5">
             <RelativePanel>
+                <muxc:NumberBox
+                    RelativePanel.AlignLeftWithPanel="True"
+                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    Width="120"
+                    Header="Betrag"
+                    Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                 <StackPanel
                     RelativePanel.AlignRightWithPanel="True"
                     Orientation="Horizontal">
-                    <ComboBox
-                        Visibility="{x:Bind ByGroup}"
-                        ItemsSource="{x:Bind ViewModel.Typen_List}"
-                        DisplayMemberPath="text"
-                        SelectedIndex="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Header="Umlageschlüssel"/>
-                    <mtuuc:Expander Visibility="{x:Bind ByType}">
-                        <mtuuc:Expander.Header>
-                            <TextBlock>
-                            <Run Text="Wohnungen ("/>
-                            <Run Text="{x:Bind ViewModel.Wohnungen.Count}"/>
-                            <Run Text=")"/>
-                            </TextBlock>
-                        </mtuuc:Expander.Header>
-                        <ListView
-                            SelectionMode="Single"
-                            ItemsSource="{x:Bind ViewModel.Wohnungen, Mode=OneWay}">
-                            <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="x:String">
-                                    <TextBlock Text="{x:Bind}"/>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-                    </mtuuc:Expander>
                     <Button Background="Transparent" Click="Details_Click">
                         <SymbolIcon Symbol="More"/>
                     </Button>
@@ -50,26 +32,44 @@
                     </Button>
                 </StackPanel>
             </RelativePanel>
-            <StackPanel Orientation="Horizontal">
-                <muxc:NumberBox
-                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                    Width="120"
-                    Header="Betrag"
-                    Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                <ComboBox
-                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                    Margin="10,0,0,0"
-                    ItemsSource="{x:Bind ViewModel.Schluessel_List}"
-                    DisplayMemberPath="text"
-                    SelectedIndex="{x:Bind ViewModel.Schluessel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Header="Umlageschlüssel"/>
-            </StackPanel>
             <CalendarDatePicker
+                IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                Header="Datum"
+                HorizontalAlignment="Stretch"
+                Date="{x:Bind ViewModel.Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+            <ScrollViewer>
+                <TextBox
                     IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
-                    Header="Datum"
-                    HorizontalAlignment="Stretch"
-                    Date="{x:Bind ViewModel.Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-            <mtuuc:Expander Margin="0,10,0,0" Visibility="{x:Bind ViewModel.isHeizung, Mode=OneWay}">
+                    Header="Beschreibung"
+                    Text="{x:Bind ViewModel.Beschreibung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                    TextWrapping="Wrap"/>
+            </ScrollViewer>
+            <ComboBox
+                Visibility="{x:Bind ByGroup}"
+                ItemsSource="{x:Bind ViewModel.Typen_List}"
+                DisplayMemberPath="text"
+                HorizontalAlignment="Stretch"
+                SelectedIndex="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Header="Umlageschlüssel"/>
+            <mtuuc:Expander Margin="0,5,0,0" Visibility="{x:Bind ByType}">
+                <mtuuc:Expander.Header>
+                    <TextBlock>
+                            <Run Text="Wohnungen ("/>
+                            <Run Text="{x:Bind ViewModel.Wohnungen.Count}"/>
+                            <Run Text=")"/>
+                    </TextBlock>
+                </mtuuc:Expander.Header>
+                <ListView
+                    SelectionMode="Single"
+                    ItemsSource="{x:Bind ViewModel.Wohnungen, Mode=OneWay}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <TextBlock Text="{x:Bind}"/>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </mtuuc:Expander>
+            <mtuuc:Expander Margin="0,5,0,0" Visibility="{x:Bind ViewModel.isHeizung, Mode=OneWay}">
                 <mtuuc:Expander.Header>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock VerticalAlignment="Center" Text="Heizkostenverordnung"/>
