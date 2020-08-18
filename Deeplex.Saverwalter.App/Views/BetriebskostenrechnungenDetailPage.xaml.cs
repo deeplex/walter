@@ -58,7 +58,7 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 ViewModel.AdresseGroup[k].ForEach(v =>
                 {
-                    if (ViewModel.WohnungenIds.Contains(v.Id))
+                    if (ViewModel.Wohnungen.Select(t => t.Item1).Contains(v.Id))
                     {
                         WohnungenTree.SelectedNodes.Add(v);
                     }

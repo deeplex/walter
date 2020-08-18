@@ -128,8 +128,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set => update(nameof(Entity.HKVO_P9), (HKVO_P9A2)HKVO_P9_List[value].index);
         }
 
-        public List<int> WohnungenIds;
-        public List<string> Wohnungen { get; }
+        public List<Tuple<int, string>> Wohnungen { get; }
 
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r) : this()
@@ -137,10 +136,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Entity = r;
             Id = r.BetriebskostenrechnungId;
 
-            WohnungenIds = r.Gruppen.Select(g => g.WohnungId).ToList();
+            
+            Wohnungen = r.Gruppen.Select(g => new Tuple<int, string>(g.WohnungId, AdresseViewModel.Anschrift(g.Wohnung.Adresse) + " " + g.Wohnung.Bezeichnung)).ToList();
 
             AttachFile = new AsyncRelayCommand(async _ =>
-                await Utils.Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
+                await Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
 
         }
 

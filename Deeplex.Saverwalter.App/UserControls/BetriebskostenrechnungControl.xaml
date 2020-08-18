@@ -61,10 +61,11 @@
                 </mtuuc:Expander.Header>
                 <ListView
                     SelectionMode="Single"
+                    Width="250"
                     ItemsSource="{x:Bind ViewModel.Wohnungen, Mode=OneWay}">
                     <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="x:String">
-                            <TextBlock Text="{x:Bind}"/>
+                        <DataTemplate>
+                            <TextBlock Margin="0,5,0,5" TextWrapping="Wrap" Text="{Binding Item2}"/>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
