@@ -54,21 +54,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity?.Allgemeinzaehler != null ?
                 AllgemeinZaehler_List.FindIndex(a => a.Id == Entity.Allgemeinzaehler.AllgemeinZaehlerId) :
                 0;
-            set => update(nameof(Entity.Allgemeinzaehler),
-                App.Walter.AllgemeinZaehlerSet.Find(AllgemeinZaehler_List[value].Id));
-        }
-
-        private void update<U>(string property, U value)
-        {
-            if (Entity == null) return;
-            var type = Entity.GetType();
-            var prop = type.GetProperty(property);
-            var val = prop.GetValue(Entity, null);
-            if (!value.Equals(val))
+            set
             {
-                prop.SetValue(Entity, value);
-                RaisePropertyChanged(property);
-            };
+                Entity.Allgemeinzaehler = App.Walter.AllgemeinZaehlerSet.Find(AllgemeinZaehler_List[value].Id);
+                RaisePropertyChangedAuto();
+            }
         }
 
         public bool isHeizung => Entity?.Typ == Betriebskostentyp.Heizkosten;
@@ -76,56 +66,92 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public double Betrag
         {
             get => Entity?.Betrag ?? 0.0;
-            set => update(nameof(Entity.Betrag), value);
+            set
+            {
+                Entity.Betrag = value;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public DateTimeOffset? Datum
         {
             get => Entity?.Datum ?? DateTime.Now.Date.AsUtcKind();
-            set => update(nameof(Entity.Datum), value.Value.Date.AsUtcKind());
+            set
+            {
+                Entity.Datum = value.Value.Date.AsUtcKind();
+                RaisePropertyChangedAuto();
+            }
         }
 
         public int Typ
         {
             get => Typen_List.FindIndex(i => i.index == (Entity != null ? (int)Entity?.Typ : 0));
-            set => update(nameof(Entity.Typ), (Betriebskostentyp)Typen_List[value].index);
+            set
+            {
+                Entity.Typ = (Betriebskostentyp)Typen_List[value].index;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public int Schluessel
         {
             get => Entity != null ? (int)Entity.Schluessel : 0;
-            set => update(nameof(Entity.Schluessel), (UmlageSchluessel)value);
+            set
+            {
+                Entity.Schluessel = (UmlageSchluessel)value;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public string Beschreibung
         {
             get => Entity?.Beschreibung ?? "";
-            set => update(nameof(Entity.Beschreibung), value);
+            set
+            {
+                Entity.Beschreibung = value;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public int BetreffendesJahr
         {
             get => Entity?.BetreffendesJahr ?? DateTime.Now.Year;
-            set => update(nameof(Entity.BetreffendesJahr), value);
+            set
+            {
+                Entity.BetreffendesJahr = value;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public double HKVO_P7
         {
             get => (Entity?.HKVO_P7 ?? 0.0) * 100;
-            set => update(nameof(Entity.HKVO_P7), value / 100);
+            set
+            {
+                Entity.HKVO_P7 = value / 100;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public double HKVO_P8
         {
             get => (Entity?.HKVO_P8 ?? 0.0) * 100;
-            set => update(nameof(Entity.HKVO_P8), value / 100);
+            set
+            {
+                Entity.HKVO_P8 = value / 100;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public int HKVO_P9
         {
             get => Entity?.Typ == Betriebskostentyp.Heizkosten ?
                 HKVO_P9_List.FindIndex(i => i.index == (int)Entity.HKVO_P9) : 0;
-            set => update(nameof(Entity.HKVO_P9), (HKVO_P9A2)HKVO_P9_List[value].index);
+            set
+            {
+                Entity.HKVO_P9 = (HKVO_P9A2)HKVO_P9_List[value].index;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public List<Tuple<int, string>> Wohnungen { get; }
@@ -136,7 +162,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Entity = r;
             Id = r.BetriebskostenrechnungId;
 
-            
+
             Wohnungen = r.Gruppen.Select(g => new Tuple<int, string>(g.WohnungId, AdresseViewModel.Anschrift(g.Wohnung.Adresse) + " " + g.Wohnung.Bezeichnung)).ToList();
 
             AttachFile = new AsyncRelayCommand(async _ =>

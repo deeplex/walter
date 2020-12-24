@@ -10,7 +10,6 @@ using Deeplex.Saverwalter.App.Utils;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-
     public sealed class BetriebskostenRechnungenListViewModel
     {
         public ObservableProperty<ImmutableSortedDictionary<BetriebskostentypUtil, BetriebskostenRechnungenListJahr>> Typen
