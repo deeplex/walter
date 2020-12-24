@@ -115,9 +115,8 @@ namespace Deeplex.Saverwalter.Model
 
     public interface IPerson
     {
-        public Guid PersonId { get; }
+        public Guid PersonId { get; set; }
         public string Bezeichnung { get; }
-
         public bool isVermieter { get; set; }
         public bool isMieter { get; set; }
         public bool isHandwerker { get; set; }
