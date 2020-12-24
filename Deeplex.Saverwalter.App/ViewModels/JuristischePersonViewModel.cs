@@ -17,83 +17,106 @@ namespace Deeplex.Saverwalter.App.ViewModels
             App.SaveWalter();
         }
 
-        private void update<T>(string property, T value)
-        {
-            if (Entity == null) return;
-            var type = Entity.GetType();
-            var prop = type.GetProperty(property);
-            var val = prop.GetValue(Entity, null);
-            if (!value.Equals(val))
-            {
-                prop.SetValue(Entity, value);
-                RaisePropertyChanged(property);
-            };
-        }
-
         public Guid PersonId
         {
             get => Entity.PersonId;
-            set => update(nameof(Entity.PersonId), value);
+            set
+            {
+                Entity.PersonId = value;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public string Bezeichnung
         {
             get => Entity.Bezeichnung;
-            set => update(nameof(Entity.Bezeichnung), value);
-
+            set
+            {
+                Entity.Bezeichnung = value;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public bool isVermieter
         {
             get => Entity.isVermieter;
-            set => update(nameof(Entity.isVermieter), value);
-
+            set
+            {
+                Entity.isVermieter = value;
+                RaisePropertyChangedAuto();
+            }
         }
+
         public bool isMieter
         {
             get => Entity.isMieter;
-            set => update(nameof(Entity.isMieter), value);
-
+            set
+            {
+                Entity.isMieter = value;
+                RaisePropertyChangedAuto();
+            }
         }
+
         public bool isHandwerker
         {
             get => Entity.isHandwerker;
-            set => update(nameof(Entity.isHandwerker), value);
-
+            set
+            {
+                Entity.isHandwerker = value;
+                RaisePropertyChangedAuto();
+            }
         }
+
         public int AdresseId => Entity.AdresseId ?? 0;
 
         public string Email
         {
             get => Entity.Email;
-            set => update(nameof(Entity.Email), value);
+            set
+            {
+                Entity.Email = value;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public string Telefon
         {
             get => Entity.Telefon;
-            set => update(nameof(Entity.Telefon), value);
-
+            set
+            {
+                Entity.Telefon = value;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public string Mobil
         {
             get => Entity.Mobil;
-            set => update(nameof(Entity.Mobil), value);
-
+            set
+            {
+                Entity.Mobil = value;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public string Fax
         {
             get => Entity.Fax;
-            set => update(nameof(Entity.Fax), value);
-
+            set
+            {
+                Entity.Fax = value;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public string Notiz
         {
             get => Entity.Notiz;
-            set => update(nameof(Entity.Notiz), value);
+            set
+            {
+                Entity.Notiz = value;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public override string ToString() => Bezeichnung;
