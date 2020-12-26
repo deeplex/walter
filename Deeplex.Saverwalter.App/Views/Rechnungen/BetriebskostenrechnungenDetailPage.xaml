@@ -24,9 +24,15 @@
             <StackPanel
                 Margin="0,10,0,0"
                 Orientation="Horizontal">
-                <ComboBox Header="Kostentyp"/>
                 <ComboBox
-                    Margin="10,0,0,0"
+                    ItemsSource="{x:Bind ViewModel.Typen_List}"
+                    SelectedIndex="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    DisplayMemberPath="Beschreibung"
+                    Header="Kostentyp"/>
+                <ComboBox Margin="10,0,0,0"
+                    ItemsSource="{x:Bind ViewModel.Schluessel_List}"
+                    SelectedIndex="{x:Bind ViewModel.Schluessel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    DisplayMemberPath="Beschreibung"
                     Header="Umlageschlüssel"/>
                 <muxc:NumberBox
                     Value="{x:Bind ViewModel.BetreffendesJahr, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
