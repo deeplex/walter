@@ -139,53 +139,53 @@
     <Compile Include="Utils\Files.cs" />
     <Compile Include="ViewModels\AnhangViewModel.cs" />
     <Compile Include="ViewModels\AdresseViewModel.cs" />
-    <Compile Include="ViewModels\BetriebskostenRechnungenListViewModel.cs" />
-    <Compile Include="ViewModels\BetriebskostenrechnungenDetailViewModel.cs" />
-    <Compile Include="ViewModels\JuristischePersonViewModel.cs" />
-    <Compile Include="ViewModels\PersonViewModel.cs" />
-    <Compile Include="ViewModels\VertragDetailViewModel.cs" />
-    <Compile Include="ViewModels\KontaktListViewModel.cs" />
+    <Compile Include="ViewModels\Rechnungen\BetriebskostenRechnungenListViewModel.cs" />
+    <Compile Include="ViewModels\Rechnungen\BetriebskostenrechnungenDetailViewModel.cs" />
+    <Compile Include="ViewModels\Personen\JuristischePersonViewModel.cs" />
+    <Compile Include="ViewModels\Personen\PersonViewModel.cs" />
+    <Compile Include="ViewModels\Verträge\VertragDetailViewModel.cs" />
+    <Compile Include="ViewModels\Personen\KontaktListViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="ViewModels\WohnungDetailViewModel.cs" />
-    <Compile Include="ViewModels\WohnungListViewModel.cs" />
-    <Compile Include="ViewModels\VertragListViewModel.cs" />
-    <Compile Include="ViewModels\NatuerlichePersonViewModel.cs" />
+    <Compile Include="ViewModels\Wohnungen\WohnungDetailViewModel.cs" />
+    <Compile Include="ViewModels\Wohnungen\WohnungListViewModel.cs" />
+    <Compile Include="ViewModels\Verträge\VertragListViewModel.cs" />
+    <Compile Include="ViewModels\Personen\NatuerlichePersonViewModel.cs" />
     <Compile Include="UserControls\AddresseControl.xaml.cs">
       <DependentUpon>AddresseControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModels\ZaehlerstandViewModel.cs" />
-    <Compile Include="ViewModels\ZaehlerViewModel.cs" />
-    <Compile Include="Views\BetriebskostenrechnungenDetailPage.xaml.cs">
+    <Compile Include="ViewModels\Wohnungen\ZaehlerstandViewModel.cs" />
+    <Compile Include="ViewModels\Wohnungen\ZaehlerViewModel.cs" />
+    <Compile Include="Views\Rechnungen\BetriebskostenrechnungenDetailPage.xaml.cs">
       <DependentUpon>BetriebskostenrechnungenDetailPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\BetriebskostenRechnungenGruppeListViewPage.xaml.cs">
+    <Compile Include="Views\Rechnungen\BetriebskostenRechnungenGruppeListViewPage.xaml.cs">
       <DependentUpon>BetriebskostenRechnungenGruppeListViewPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\BetriebskostenRechnungenTypListViewPage.xaml.cs">
+    <Compile Include="Views\Rechnungen\BetriebskostenRechnungenTypListViewPage.xaml.cs">
       <DependentUpon>BetriebskostenRechnungenTypListViewPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\JuristischePersonenDetailPage.xaml.cs">
+    <Compile Include="Views\Personen\JuristischePersonenDetailPage.xaml.cs">
       <DependentUpon>JuristischePersonenDetailPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\NatuerlichePersonDetailPage.xaml.cs">
+    <Compile Include="Views\Personen\NatuerlichePersonDetailPage.xaml.cs">
       <DependentUpon>NatuerlichePersonDetailPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\KontaktListPage.xaml.cs">
+    <Compile Include="Views\Personen\KontaktListPage.xaml.cs">
       <DependentUpon>KontaktListPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SettingsPage.xaml.cs">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\VertragDetailViewPage.xaml.cs">
+    <Compile Include="Views\Verträge\VertragDetailViewPage.xaml.cs">
       <DependentUpon>VertragDetailViewPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\VertragListPage.xaml.cs">
+    <Compile Include="Views\Verträge\VertragListPage.xaml.cs">
       <DependentUpon>VertragListPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\WohnungDetailPage.xaml.cs">
+    <Compile Include="Views\Wohnungen\WohnungDetailPage.xaml.cs">
       <DependentUpon>WohnungDetailPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\WohnungListPage.xaml.cs">
+    <Compile Include="Views\Wohnungen\WohnungListPage.xaml.cs">
       <DependentUpon>WohnungListPage.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
@@ -277,27 +277,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\BetriebskostenrechnungenDetailPage.xaml">
+    <Page Include="Views\Rechnungen\BetriebskostenrechnungenDetailPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\BetriebskostenRechnungenGruppeListViewPage.xaml">
+    <Page Include="Views\Rechnungen\BetriebskostenRechnungenGruppeListViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\BetriebskostenRechnungenTypListViewPage.xaml">
+    <Page Include="Views\Rechnungen\BetriebskostenRechnungenTypListViewPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\JuristischePersonenDetailPage.xaml">
+    <Page Include="Views\Personen\JuristischePersonenDetailPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\NatuerlichePersonDetailPage.xaml">
+    <Page Include="Views\Personen\NatuerlichePersonDetailPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\KontaktListPage.xaml">
+    <Page Include="Views\Personen\KontaktListPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -305,19 +305,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\VertragDetailViewPage.xaml">
+    <Page Include="Views\Verträge\VertragDetailViewPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\VertragListPage.xaml">
+    <Page Include="Views\Verträge\VertragListPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\WohnungDetailPage.xaml">
+    <Page Include="Views\Wohnungen\WohnungDetailPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\WohnungListPage.xaml">
+    <Page Include="Views\Wohnungen\WohnungListPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
