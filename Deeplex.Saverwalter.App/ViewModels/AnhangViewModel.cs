@@ -100,9 +100,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Tree = ExplorerTree;
 
             var Kontakte = new TreeViewNode { Content = "Kontakte" };
-            var Mietobjekte = new TreeViewNode { Content = "Mietobjekte" };
-            var Vertraege = new TreeViewNode { Content = "Verträge" };
-
+            ExplorerTree.RootNodes.Add(Kontakte);
             foreach (var j in App.Walter.JuristischePersonen)
             {
                 Kontakte.Children.Add(new AnhangKontakt(j));
@@ -111,6 +109,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 Kontakte.Children.Add(new AnhangKontakt(n));
             }
+
+            var Vertraege = new TreeViewNode { Content = "Verträge" };
+            ExplorerTree.RootNodes.Add(Vertraege);
             foreach (var v in App.Walter.Vertraege
                 .Include(i => i.Wohnung)
                 .ThenInclude(w => w.Adresse)
@@ -119,27 +120,31 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 Vertraege.Children.Add(new AnhangVertrag(v.Key));
             }
+
+            var Mietobjekte = new TreeViewNode { Content = "Mietobjekte" };
+            ExplorerTree.RootNodes.Add(Mietobjekte);
             foreach (var a in App.Walter.Adressen
                 .Include(i => i.Wohnungen).ThenInclude(w => w.Zaehler).ThenInclude(z => z.Staende))
             {
                 Mietobjekte.Children.Add(new AnhangAdresse(a));
             }
 
-            ExplorerTree.RootNodes.Add(Kontakte);
-            ExplorerTree.RootNodes.Add(Mietobjekte);
-            ExplorerTree.RootNodes.Add(Vertraege);
+            var BetriebskostenRechnungen = new TreeViewNode { Content = "Betr. Rechnungen" };
+            ExplorerTree.RootNodes.Add(BetriebskostenRechnungen);
 
             SelectionMultilple = new RelayCommand(_ =>
                 {
                     Tree.SelectionMode = TreeViewSelectionMode.Multiple;
-                    RaiseSelectionPropertyChangedAuto();
+                    RaisePropertyChangedAuto(nameof(inSelection));
+                    RaisePropertyChangedAuto(nameof(notInSelection));
                 }, _ => true);
             SaveFiles = new AsyncRelayCommand(async _ =>
                 {
                     if (!Tree.SelectedNodes.Any())
                     {
                         Tree.SelectionMode = TreeViewSelectionMode.Single;
-                        RaiseSelectionPropertyChangedAuto();
+                        RaisePropertyChangedAuto(nameof(inSelection));
+                        RaisePropertyChangedAuto(nameof(notInSelection));
                         return;
                     }
 
@@ -148,7 +153,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     if (root == null) return;
 
                     Tree.SelectionMode = TreeViewSelectionMode.Single;
-                    RaiseSelectionPropertyChangedAuto();
+                    RaisePropertyChangedAuto(nameof(inSelection));
+                    RaisePropertyChangedAuto(nameof(notInSelection));
 
                     var directory = await root.CreateFolderAsync("walter");
 
@@ -180,12 +186,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     await FileIO.WriteBytesAsync(file, anhang.Entity.Content);
                 }
             }
-        }
-
-        private void RaiseSelectionPropertyChangedAuto()
-        {
-            RaisePropertyChangedAuto(nameof(inSelection));
-            RaisePropertyChangedAuto(nameof(notInSelection));
         }
 
         public RelayCommand SelectionMultilple { get; }
