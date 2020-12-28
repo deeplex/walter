@@ -9,6 +9,7 @@ namespace Deeplex.Saverwalter.App.Views
     public sealed partial class BetriebskostenRechnungenGruppeListViewPage : Page
     {
         public BetriebskostenRechnungenListViewModel ViewModel = new BetriebskostenRechnungenListViewModel();
+
         public BetriebskostenRechnungenGruppeListViewPage()
         {
             InitializeComponent();
@@ -21,7 +22,24 @@ namespace Deeplex.Saverwalter.App.Views
             };
             Sortiere.Click += SortiereNachTyp_Click;
 
-            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { Sortiere });
+            var AddBetriebskostenRechnung = new AppBarButton
+            {
+                Icon = new SymbolIcon(Symbol.Add),
+                Label = "Betriebskostenrechnung hinzufügen",
+            };
+            AddBetriebskostenRechnung.Click += AddBetriebskostenWohnung_Click;
+
+            App.ViewModel.RefillCommandContainer(new ICommandBarElement[]
+            {
+                Sortiere,
+                AddBetriebskostenRechnung,
+            });
+        }
+
+        private void AddBetriebskostenWohnung_Click(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(BetriebskostenrechnungenDetailPage), null,
+                new DrillInNavigationTransitionInfo());
         }
 
         private void SortiereNachTyp_Click(object sender, RoutedEventArgs e)
