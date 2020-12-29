@@ -186,7 +186,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public BetriebskostenrechnungDetailViewModel() : this(new Betriebskostenrechnung())
         {
-            
+            Entity.BetreffendesJahr = DateTime.Now.Year;
+            Entity.Datum = DateTime.Now;
         }
 
         public AsyncRelayCommand AttachFile;
@@ -211,11 +212,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             if (Beschreibung == "" ||
                 Beschreibung == null ||
-                Entity.Datum == null ||
-                Entity.Betrag == null ||
-                Entity.Typ == null ||
-                Entity.Schluessel == null ||
-                Entity.BetreffendesJahr == null)
+                Entity.Datum == null)
             {
                 return;
             }
