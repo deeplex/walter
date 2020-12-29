@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class BetriebskostenrechnungDetailViewModel : BindableBase
     {
         private Betriebskostenrechnung Entity { get; }
-        public int Id { get; }
+        public int Id => Entity.BetriebskostenrechnungId;
 
         public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
 
@@ -75,7 +75,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public DateTimeOffset? Datum
         {
-            get => Entity?.Datum ?? DateTime.Now.Date.AsUtcKind();
+            get => Entity.Datum.AsUtcKind();
             set
             {
                 Entity.Datum = value.Value.Date.AsUtcKind();
@@ -157,21 +157,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public List<Tuple<int, string>> Wohnungen { get; }
 
 
-        public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r) : this()
+        public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r)
         {
             Entity = r;
-            Id = r.BetriebskostenrechnungId;
-
 
             Wohnungen = r.Gruppen.Select(g => new Tuple<int, string>(g.WohnungId, AdresseViewModel.Anschrift(g.Wohnung.Adresse) + " " + g.Wohnung.Bezeichnung)).ToList();
 
-            AttachFile = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
-
-        }
-
-        public BetriebskostenrechnungDetailViewModel()
-        {
             AdresseGroup = App.Walter.Wohnungen
                 .Include(w => w.Adresse)
                 .ToList()
@@ -187,6 +178,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
             dispose = new RelayCommand(_ => this.selfDestruct());
 
             PropertyChanged += OnUpdate;
+
+            AttachFile = new AsyncRelayCommand(async _ =>
+                await Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
+
+        }
+
+        public BetriebskostenrechnungDetailViewModel() : this(new Betriebskostenrechnung())
+        {
+            
         }
 
         public AsyncRelayCommand AttachFile;
@@ -209,7 +209,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     return;
             }
 
-            if (Entity.Datum == null)
+            if (Beschreibung == "" ||
+                Beschreibung == null ||
+                Entity.Datum == null ||
+                Entity.Betrag == null ||
+                Entity.Typ == null ||
+                Entity.Schluessel == null ||
+                Entity.BetreffendesJahr == null)
             {
                 return;
             }
