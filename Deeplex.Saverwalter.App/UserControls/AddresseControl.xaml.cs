@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
+using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -11,6 +12,8 @@ namespace Deeplex.Saverwalter.App.UserControls
     {
         public AdresseViewModel ViewModel { get; set; }
 
+        public Type test;
+
         public AddresseControl()
         {
             InitializeComponent();
@@ -20,21 +23,24 @@ namespace Deeplex.Saverwalter.App.UserControls
                 ViewModel = new AdresseViewModel(App.Walter.Adressen.Find(Id));
             });
 
-            RegisterPropertyChangedCallback(WohnungProperty, (idDepObject, idProp) =>
+            RegisterPropertyChangedCallback(AdresseProperty, (idDepObject, idProp) =>
             {
-                ViewModel = new AdresseViewModel<Wohnung>(Wohnung);
-            });
-
-            RegisterPropertyChangedCallback(NPersonProperty, (idDepObject, idProp) =>
-            {
-                ViewModel = new AdresseViewModel<NatuerlichePerson>(NPerson);
-            });
-
-            RegisterPropertyChangedCallback(JPersonProperty, (idDepObject, idProp) =>
-            {
-                ViewModel = new AdresseViewModel<JuristischePerson>(JPerson);
+                ViewModel = new AdresseViewModel<IAdresse>(Adresse);
             });
         }
+
+        public IAdresse Adresse
+        {
+            get { return (IAdresse)GetValue(AdresseProperty); }
+            set { SetValue(AdresseProperty, value); }
+        }
+
+        public static readonly DependencyProperty AdresseProperty
+            = DependencyProperty.Register(
+                "value",
+                typeof(IAdresse),
+                typeof(AddresseControl),
+                new PropertyMetadata(null));
 
         public int Id
         {
@@ -42,52 +48,11 @@ namespace Deeplex.Saverwalter.App.UserControls
             set { SetValue(IdProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for Property1.  
-        // This enables animation, styling, binding, etc...
         public static readonly DependencyProperty IdProperty
             = DependencyProperty.Register(
                   "Id",
                   typeof(int),
                   typeof(AddresseControl),
                   new PropertyMetadata(0));
-
-        public Wohnung Wohnung
-        {
-            get { return (Wohnung)GetValue(WohnungProperty); }
-            set { SetValue(WohnungProperty, value); }
-        }
-
-        public static readonly DependencyProperty WohnungProperty
-            = DependencyProperty.Register(
-                  "Wohnung",
-                  typeof(Wohnung),
-                  typeof(AddresseControl),
-                  new PropertyMetadata(null));
-
-        public NatuerlichePerson NPerson
-        {
-            get { return (NatuerlichePerson)GetValue(NPersonProperty); }
-            set { SetValue(NPersonProperty, value); }
-        }
-
-        public static readonly DependencyProperty NPersonProperty
-            = DependencyProperty.Register(
-                  "NPerson",
-                  typeof(NatuerlichePerson),
-                  typeof(AddresseControl),
-                  new PropertyMetadata(null));
-
-        public JuristischePerson JPerson
-        {
-            get { return (JuristischePerson)GetValue(JPersonProperty); }
-            set { SetValue(JPersonProperty, value); }
-        }
-
-        public static readonly DependencyProperty JPersonProperty
-            = DependencyProperty.Register(
-                  "JPerson",
-                  typeof(JuristischePerson),
-                  typeof(AddresseControl),
-                  new PropertyMetadata(null));
     }
 }
