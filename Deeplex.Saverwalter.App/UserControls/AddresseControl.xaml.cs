@@ -22,17 +22,17 @@ namespace Deeplex.Saverwalter.App.UserControls
 
             RegisterPropertyChangedCallback(WohnungProperty, (idDepObject, idProp) =>
             {
-                ViewModel = new AdresseViewModel(Wohnung);
+                ViewModel = new AdresseViewModel<Wohnung>(Wohnung);
             });
 
             RegisterPropertyChangedCallback(NPersonProperty, (idDepObject, idProp) =>
             {
-                ViewModel = new AdresseViewModel(NPerson);
+                ViewModel = new AdresseViewModel<NatuerlichePerson>(NPerson);
             });
 
             RegisterPropertyChangedCallback(JPersonProperty, (idDepObject, idProp) =>
             {
-                ViewModel = new AdresseViewModel(JPerson);
+                ViewModel = new AdresseViewModel<JuristischePerson>(JPerson);
             });
         }
 

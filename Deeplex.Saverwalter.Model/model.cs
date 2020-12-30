@@ -113,7 +113,7 @@ namespace Deeplex.Saverwalter.Model
     }
 
 
-    public interface IPerson
+    public interface IPerson : IAdresse
     {
         public Guid PersonId { get; set; }
         public string Bezeichnung { get; }
@@ -126,7 +126,6 @@ namespace Deeplex.Saverwalter.Model
         public string? Fax { get; set; }
         public string? Email { get; set; }
         public int? AdresseId { get; set; }
-        public Adresse? Adresse { get; set; }
         public string? Notiz { get; set; }
     }
 
@@ -222,7 +221,7 @@ namespace Deeplex.Saverwalter.Model
         public JuristischePerson JuristischePerson { get; set; } = null!;
     }
 
-    public sealed class Wohnung
+    public sealed class Wohnung : IAdresse
     {
         public int WohnungId { get; set; }
         public int AdresseId { get; set; }
@@ -248,7 +247,7 @@ namespace Deeplex.Saverwalter.Model
         public Anhang Anhang { get; set; } = null!;
     }
 
-    public sealed class Garage
+    public sealed class Garage : IAdresse
     {
         public int GarageId { get; set; }
         public Adresse Adresse { get; set; } = null!;
@@ -263,6 +262,11 @@ namespace Deeplex.Saverwalter.Model
         public Garage Target { get; set; } = null!;
         public Guid AnhangId { get; set; }
         public Anhang Anhang { get; set; } = null!;
+    }
+
+    public interface IAdresse
+    {
+        public Adresse Adresse { get; set; }
     }
 
     // An Adresse is pointed at by a Wohnung, Garage or Kontakt.

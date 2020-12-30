@@ -1,16 +1,77 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public sealed class AdresseViewModel : BindableBase
+    public sealed class AdresseViewModel<T> : AdresseViewModel where T : IAdresse
     {
-        private Adresse Entity { get; set; }
-        private NatuerlichePerson NPerson { get; }
-        private JuristischePerson JPerson { get; }
-        private Wohnung Wohnung { get; }
+        private T reference;
+
+        private void updateReference()
+        {
+            reference.Adresse = Entity;
+            App.Walter.Update(reference);
+        }
+
+        public override string Hausnummer
+        {
+            get => Entity.Hausnummer;
+            set
+            {
+                base.Hausnummer = value;
+                updateReference();
+                RaisePropertyChangedAuto();
+                App.SaveWalter();
+            }
+        }
+        public override string Strasse
+        {
+            get => Entity.Strasse;
+            set
+            {
+                base.Strasse = value;
+                updateReference();
+                RaisePropertyChangedAuto();
+                App.SaveWalter();
+            }
+        }
+
+        public override string Postleitzahl
+        {
+            get => Entity.Postleitzahl;
+            set
+            {
+                base.Postleitzahl = value;
+                updateReference();
+                RaisePropertyChangedAuto();
+                App.SaveWalter();
+            }
+        }
+
+        public override string Stadt
+        {
+            get => Entity.Stadt;
+            set
+            {
+                base.Stadt = value;
+                updateReference();
+                RaisePropertyChangedAuto();
+                App.SaveWalter();
+            }
+        }
+
+        public AdresseViewModel(T value) : base(value.Adresse)
+        {
+            reference = value;
+        }
+    }
+
+    public class AdresseViewModel : BindableBase
+    {
+        protected Adresse Entity { get; set; }
         public Adresse getEntity => Entity;
 
         private ImmutableList<Adresse> AlleAdressen = App.Walter.Adressen.ToImmutableList();
@@ -46,7 +107,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         /*
          * prop - 0: Strasse, 1: Hausnr., 2: PLZ, 3: Stadt
          */
-        private Adresse Update(string value, int prop)
+        protected Adresse Update(string value, int prop)
         {
             var a = GetAdresse(Entity, value, prop);
             if (a != null)
@@ -74,29 +135,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Entity = a;
             }
 
-            if (JPerson != null)
-            {
-                JPerson.Adresse = Entity;
-                App.Walter.JuristischePersonen.Update(JPerson);
-            }
-            if (NPerson != null)
-            {
-                NPerson.Adresse = Entity;
-                App.Walter.NatuerlichePersonen.Update(NPerson);
-            }
-            if (Wohnung != null)
-            {
-                Wohnung.Adresse = Entity;
-                App.Walter.Wohnungen.Update(Wohnung);
-            }
-            // TODO Garage
-
             App.SaveWalter();
             return a;
         }
 
         public int Id;
-        public string Strasse
+        public virtual string Strasse
         {
             get => Entity?.Strasse ?? "";
             set
@@ -107,7 +151,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             // update(nameof(Entity.Strasse), value);
         }
 
-        public string Hausnummer
+        public virtual string Hausnummer
         {
             get => Entity?.Hausnummer ?? "";
             set
@@ -117,7 +161,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public string Postleitzahl
+        public virtual string Postleitzahl
         {
             get => Entity?.Postleitzahl ?? "";
             set
@@ -127,7 +171,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public string Stadt
+        public virtual string Stadt
         {
             get => Entity?.Stadt ?? "";
             set
@@ -143,21 +187,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.AdresseAnhaenge, a), _ => true);
-        }
-
-        public AdresseViewModel(Wohnung w) : this(w?.Adresse ?? new Adresse { })
-        {
-            Wohnung = w;
-        }
-
-        public AdresseViewModel(NatuerlichePerson p) : this(p?.Adresse ?? new Adresse { })
-        {
-            NPerson = p;
-        }
-
-        public AdresseViewModel(JuristischePerson p) : this(p?.Adresse ?? new Adresse { })
-        {
-            JPerson = p;
         }
 
         public AsyncRelayCommand AttachFile;
@@ -195,47 +224,5 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 a.Strasse == Strasse && a.Hausnummer == Hausnummer &&
                 a.Postleitzahl == Postleitzahl && a.Stadt == Stadt);
         }
-
-        //public static Adresse GetAdresse(AdresseViewModel avm)
-        //{
-        //    // If one is set => all must be set.
-        //    if (avm is null ||
-        //        avm.Postleitzahl == null || avm.Postleitzahl == "" ||
-        //        avm.Hausnummer == null || avm.Hausnummer == "" ||
-        //        avm.Strasse == null || avm.Strasse == "" ||
-        //        avm.Stadt == null || avm.Stadt == "")
-        //    {
-        //        App.Walter.Adressen.Remove(avm.getEntity);
-        //        return null;
-        //    }
-
-        //    // TODO Remove deprecated Adressen
-
-        //    var adr = App.Walter.Adressen.FirstOrDefault(a =>
-        //        a.Postleitzahl == avm.Postleitzahl &&
-        //        a.Hausnummer == avm.Hausnummer &&
-        //        a.Strasse == avm.Strasse &&
-        //        a.Stadt == avm.Stadt);
-
-        //    if (adr != null)
-        //    {
-        //        App.SaveWalter();
-        //        return adr;
-        //    }
-        //    else
-        //    {
-        //        adr = new Adresse
-        //        {
-        //            Postleitzahl = avm.Postleitzahl,
-        //            Hausnummer = avm.Hausnummer,
-        //            Strasse = avm.Strasse,
-        //            Stadt = avm.Stadt
-        //        };
-
-        //        App.Walter.Adressen.Add(adr);
-        //        App.SaveWalter();
-        //        return adr;
-        //    }
-        //}
     }
 }
