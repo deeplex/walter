@@ -8,13 +8,13 @@ using Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App.UserControls
 {
-    public sealed partial class AddresseControl : UserControl
+    public sealed partial class AdresseControl : UserControl
     {
         public AdresseViewModel ViewModel { get; set; }
 
         public Type test;
 
-        public AddresseControl()
+        public AdresseControl()
         {
             InitializeComponent();
 
@@ -39,7 +39,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             = DependencyProperty.Register(
                 "value",
                 typeof(IAdresse),
-                typeof(AddresseControl),
+                typeof(AdresseControl),
                 new PropertyMetadata(null));
 
         public int Id
@@ -52,7 +52,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             = DependencyProperty.Register(
                   "Id",
                   typeof(int),
-                  typeof(AddresseControl),
+                  typeof(AdresseControl),
                   new PropertyMetadata(0));
     }
 }

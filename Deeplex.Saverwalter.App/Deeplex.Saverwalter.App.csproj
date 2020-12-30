@@ -151,8 +151,8 @@
     <Compile Include="ViewModels\Wohnungen\WohnungListViewModel.cs" />
     <Compile Include="ViewModels\Verträge\VertragListViewModel.cs" />
     <Compile Include="ViewModels\Personen\NatuerlichePersonViewModel.cs" />
-    <Compile Include="UserControls\AddresseControl.xaml.cs">
-      <DependentUpon>AddresseControl.xaml</DependentUpon>
+    <Compile Include="UserControls\AdresseControl.xaml.cs">
+      <DependentUpon>AdresseControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\Wohnungen\ZaehlerstandViewModel.cs" />
     <Compile Include="ViewModels\Wohnungen\ZaehlerViewModel.cs" />
@@ -266,7 +266,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UserControls\AddresseControl.xaml">
+    <Page Include="UserControls\AdresseControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
