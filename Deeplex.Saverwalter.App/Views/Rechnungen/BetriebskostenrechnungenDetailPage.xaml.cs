@@ -76,7 +76,7 @@ namespace Deeplex.Saverwalter.App.Views
         private void SelfDestruct(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             ViewModel.selfDestruct();
-            ((Frame)((NavigationView)Frame.Parent).Content).GoBack();
+            Frame.GoBack();
         }
     }
 }
