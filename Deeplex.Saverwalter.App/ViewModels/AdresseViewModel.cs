@@ -40,88 +40,101 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-
-        private void update(string property, string value)
+        // Update changes one value of the address.
+        // If this new address does not exist, it will be created.
+        // An Address without any references will not be deleted automatically.
+        /*
+         * prop - 0: Strasse, 1: Hausnr., 2: PLZ, 3: Stadt
+         */
+        private Adresse Update(string value, int prop)
         {
-            var type = Entity.GetType();
-            var prop = type.GetProperty(property);
-            var val = prop.GetValue(Entity, null);
-            if (value.Equals(val))
+            var a = GetAdresse(Entity, value, prop);
+            if (a != null)
             {
-                return;
-            }
-            var ent = GetAdresse(
-                property == "Strasse" ? value : Strasse,
-                property == "Hausnummer" ? value : Hausnummer,
-                property == "Postleitzahl" ? value : Postleitzahl,
-                property == "Stadt" ? value : Stadt);
-            if (ent == null)
-            {
-                Entity = new Adresse
-                {
-                    Strasse = Strasse,
-                    Hausnummer = Hausnummer,
-                    Postleitzahl = Postleitzahl,
-                    Stadt = Stadt,
-                };
-                prop.SetValue(Entity, value);
+                Entity = a;
             }
             else
             {
-                Entity = ent;
+                a = new Adresse()
+                {
+                    Hausnummer = Entity.Hausnummer,
+                    Postleitzahl = Entity.Postleitzahl,
+                    Strasse = Entity.Strasse,
+                    Stadt = Entity.Stadt
+                };
+                switch (prop)
+                {
+                    case (0): a.Strasse = value; break;
+                    case (1): a.Hausnummer = value; break;
+                    case (2): a.Postleitzahl = value; break;
+                    case (3): a.Stadt = value; break;
+                    default: return null;
+                }
+                App.Walter.Adressen.Add(a);
+                Entity = a;
             }
 
-            RaisePropertyChanged(property);
-            bool b(string s) => s != null && s != "";
-            if (b(Strasse) && b(Hausnummer) && b(Postleitzahl) && b(Stadt))
+            if (JPerson != null)
             {
-                if (ent == null)
-                {
-                    App.Walter.Adressen.Add(Entity);
-                }
-                if (JPerson != null)
-                {
-                    JPerson.Adresse = Entity;
-                    App.Walter.JuristischePersonen.Update(JPerson);
-                }
-                if (NPerson != null)
-                {
-                    NPerson.Adresse = Entity;
-                    App.Walter.NatuerlichePersonen.Update(NPerson);
-                }
-                if (Wohnung != null)
-                {
-                    Wohnung.Adresse = Entity;
-                    App.Walter.Wohnungen.Update(Wohnung);
-                }
-                RemoveAllDeprecated();
-                App.SaveWalter();
+                JPerson.Adresse = Entity;
+                App.Walter.JuristischePersonen.Update(JPerson);
             }
+            if (NPerson != null)
+            {
+                NPerson.Adresse = Entity;
+                App.Walter.NatuerlichePersonen.Update(NPerson);
+            }
+            if (Wohnung != null)
+            {
+                Wohnung.Adresse = Entity;
+                App.Walter.Wohnungen.Update(Wohnung);
+            }
+            // TODO Garage
+
+            App.SaveWalter();
+            return a;
         }
 
         public int Id;
         public string Strasse
         {
             get => Entity?.Strasse ?? "";
-            set => update(nameof(Entity.Strasse), value);
+            set
+            {
+                Update(value, 0);
+                RaisePropertyChangedAuto();
+            }
+            // update(nameof(Entity.Strasse), value);
         }
 
         public string Hausnummer
         {
             get => Entity?.Hausnummer ?? "";
-            set => update(nameof(Entity.Hausnummer), value);
+            set
+            {
+                Update(value, 1);
+                RaisePropertyChangedAuto();
+            }
         }
 
         public string Postleitzahl
         {
             get => Entity?.Postleitzahl ?? "";
-            set => update(nameof(Entity.Postleitzahl), value);
+            set
+            {
+                Update(value, 2);
+                RaisePropertyChangedAuto();
+            }
         }
 
         public string Stadt
         {
             get => Entity?.Stadt ?? "";
-            set => update(nameof(Entity.Stadt), value);
+            set
+            {
+                Update(value, 3);
+                RaisePropertyChangedAuto();
+            }
         }
 
         public AdresseViewModel(Adresse a)
@@ -165,27 +178,23 @@ namespace Deeplex.Saverwalter.App.ViewModels
             return a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
         }
 
+        private static Adresse GetAdresse(Adresse a, string value, int prop)
+        {
+            switch (prop)
+            {
+                case (0): return GetAdresse(value, a.Hausnummer, a.Postleitzahl, a.Stadt);
+                case (1): return GetAdresse(a.Strasse, value, a.Postleitzahl, a.Stadt);
+                case (2): return GetAdresse(a.Strasse, a.Hausnummer, value, a.Stadt);
+                case (3): return GetAdresse(a.Strasse, a.Hausnummer, a.Postleitzahl, value);
+                default: return null;
+            }
+        }
         public static Adresse GetAdresse(string Strasse, string Hausnummer, string Postleitzahl, string Stadt)
         {
             return App.Walter.Adressen.FirstOrDefault(a =>
                 a.Strasse == Strasse && a.Hausnummer == Hausnummer &&
                 a.Postleitzahl == Postleitzahl && a.Stadt == Stadt);
         }
-
-        public static void RemoveDeprecated(Adresse a)
-        {
-            if (App.Walter.Wohnungen.Any(w => w.Adresse == a) ||
-                App.Walter.NatuerlichePersonen.Any(p => p.Adresse == a) ||
-                App.Walter.JuristischePersonen.Any(p => p.Adresse == a))
-            {
-                return;
-            }
-            App.Walter.Remove(a);
-        }
-
-        // This action does not save the database
-        public static void RemoveAllDeprecated()
-            => App.Walter.Adressen.ToList().ForEach(a => RemoveDeprecated(a));
 
         //public static Adresse GetAdresse(AdresseViewModel avm)
         //{
