@@ -27,6 +27,20 @@ namespace Deeplex.Saverwalter.App.ViewModels
             .Where(a => Hausnummer != "" && a.Hausnummer == Entity.Hausnummer)
             .Select(a => a.Hausnummer).Distinct().ToImmutableList();
 
+        public int GetReferences
+        {
+            get
+            {
+                var count = App.Walter.JuristischePersonen.Count(j => j.Adresse == Entity);
+                count += App.Walter.NatuerlichePersonen.Count(n => n.Adresse == Entity);
+                count += App.Walter.Wohnungen.Count(w => w.Adresse == Entity);
+                count += App.Walter.Garagen.Count(g => g.Adresse == Entity);
+
+                return count;
+            }
+        }
+
+
         private void update(string property, string value)
         {
             var type = Entity.GetType();

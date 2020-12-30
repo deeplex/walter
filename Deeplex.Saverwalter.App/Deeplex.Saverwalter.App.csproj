@@ -143,6 +143,7 @@
     <Compile Include="ViewModels\Rechnungen\BetriebskostenrechnungenDetailViewModel.cs" />
     <Compile Include="ViewModels\Personen\JuristischePersonViewModel.cs" />
     <Compile Include="ViewModels\Personen\PersonViewModel.cs" />
+    <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\Verträge\VertragDetailViewModel.cs" />
     <Compile Include="ViewModels\Personen\KontaktListViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
