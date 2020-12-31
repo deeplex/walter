@@ -10,30 +10,24 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         private T reference;
 
-        private void Update(string value, int prop)
+        private void Update(string Strasse, string Hausnummer, string Postleitzahl, string Stadt)
         {
-            var a = GetAdresse(Entity, value, prop);
-
-            if (a == null)
+            var adresse = App.Walter.Adressen.FirstOrDefault(a =>
+                a.Strasse == Strasse && a.Hausnummer == Hausnummer &&
+                a.Postleitzahl == Postleitzahl && a.Stadt == Stadt);
+            if (adresse == null)
             {
-                a = new Adresse()
+                adresse = new Adresse()
                 {
-                    Hausnummer = Entity.Hausnummer,
-                    Postleitzahl = Entity.Postleitzahl,
-                    Strasse = Entity.Strasse,
-                    Stadt = Entity.Stadt
+                    Strasse = Strasse,
+                    Hausnummer = Hausnummer,
+                    Postleitzahl = Postleitzahl,
+                    Stadt = Stadt,
                 };
-                switch (prop)
-                {
-                    case (0): a.Strasse = value; break;
-                    case (1): a.Hausnummer = value; break;
-                    case (2): a.Postleitzahl = value; break;
-                    case (3): a.Stadt = value; break;
-                }
-                App.Walter.Adressen.Add(a);
+                App.Walter.Adressen.Add(adresse);
             }
 
-            reference.Adresse = a;
+            reference.Adresse = adresse;
             App.Walter.Update(reference);
 
             App.SaveWalter();
@@ -42,24 +36,24 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public override string Hausnummer
         {
             get => Entity.Hausnummer;
-            set => Update(value, 0);
+            set => Update(Entity.Strasse, value, Entity.Postleitzahl, Entity.Stadt);
         }
         public override string Strasse
         {
             get => Entity.Strasse;
-            set => Update(value, 1);
+            set => Update(value, Entity.Hausnummer, Entity.Postleitzahl, Entity.Stadt);
         }
 
         public override string Postleitzahl
         {
             get => Entity.Postleitzahl;
-            set => Update(value, 2);
+            set => Update(Entity.Strasse, Entity.Hausnummer, value, Entity.Stadt);
         }
 
         public override string Stadt
         {
             get => Entity.Stadt;
-            set => Update(value, 3);
+            set => Update(Entity.Strasse, Entity.Hausnummer, Entity.Postleitzahl, value);
         }
 
         public AdresseViewModel(T value) : base(value.Adresse)
@@ -175,24 +169,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 return "";
             }
             return a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
-        }
-
-        protected static Adresse GetAdresse(Adresse a, string value, int prop)
-        {
-            switch (prop)
-            {
-                case (0): return GetAdresse(value, a.Hausnummer, a.Postleitzahl, a.Stadt);
-                case (1): return GetAdresse(a.Strasse, value, a.Postleitzahl, a.Stadt);
-                case (2): return GetAdresse(a.Strasse, a.Hausnummer, value, a.Stadt);
-                case (3): return GetAdresse(a.Strasse, a.Hausnummer, a.Postleitzahl, value);
-                default: return null;
-            }
-        }
-        public static Adresse GetAdresse(string Strasse, string Hausnummer, string Postleitzahl, string Stadt)
-        {
-            return App.Walter.Adressen.FirstOrDefault(a =>
-                a.Strasse == Strasse && a.Hausnummer == Hausnummer &&
-                a.Postleitzahl == Postleitzahl && a.Stadt == Stadt);
         }
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
