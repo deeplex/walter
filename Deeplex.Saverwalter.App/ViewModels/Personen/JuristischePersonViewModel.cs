@@ -1,6 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
-using System;
 using System.ComponentModel;
 
 namespace Deeplex.Saverwalter.App.ViewModels

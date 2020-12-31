@@ -2,14 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.App.Utils
 {
     class Enums
     {
-        public static List<UmlageSchluesselUtil> UmlageSchluessel = 
+        public static List<UmlageSchluesselUtil> UmlageSchluessel =
             Enum.GetValues(typeof(UmlageSchluessel))
                 .Cast<UmlageSchluessel>()
                 .ToList()

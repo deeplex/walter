@@ -1,18 +1,13 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
-using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-
-// The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace Deeplex.Saverwalter.App.UserControls
 {
     public sealed partial class AdresseControl : UserControl
     {
         public AdresseViewModel ViewModel { get; set; }
-
-        public Type test;
 
         public AdresseControl()
         {

@@ -1,12 +1,11 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml.Controls;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Deeplex.Saverwalter.App.Utils;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
