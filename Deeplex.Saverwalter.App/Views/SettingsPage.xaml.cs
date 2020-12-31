@@ -1,4 +1,6 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using System.Collections.Immutable;
+using System.Linq;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
@@ -25,6 +27,15 @@ namespace Deeplex.Saverwalter.App.Views
             if (e.PropertyType != typeof(string))
             {
                 e.Cancel = true;
+            }
+        }
+
+        private void DeleteAdresse_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            if ((((Button)sender).Tag is AdresseViewModel vm))
+            {
+                vm.Dispose.Execute(null);
+                ViewModel.Adressen.Value = App.Walter.Adressen.Select(a => new AdresseViewModel(a)).ToImmutableList();
             }
         }
     }

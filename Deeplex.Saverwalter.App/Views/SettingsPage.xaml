@@ -6,6 +6,7 @@
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -16,14 +17,26 @@
                 <mtuuc:Expander.Header>
                     <TextBlock Text="Adressen"/>
                 </mtuuc:Expander.Header>
-                <mtuuc:DataGrid
-                    AutoGeneratingColumn="Adressen_AutoGeneratingColumn"
-                    ItemsSource="{x:Bind ViewModel.Adressen.Value}"
-                    AutoGenerateColumns="True">
+                    <mtuuc:DataGrid
+                        AutoGeneratingColumn="Adressen_AutoGeneratingColumn"
+                        ItemsSource="{x:Bind ViewModel.Adressen.Value, Mode=OneWay}"
+                        AutoGenerateColumns="True">
                     <mtuuc:DataGrid.Columns>
                         <mtuuc:DataGridTextColumn
                             Header="Bezüge"
                             Binding="{Binding GetReferences}"/>
+                        <mtuuc:DataGridTemplateColumn
+                            Header="Löschen">
+                            <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="vm:AdresseViewModel">
+                                    <Button
+                                        Click="DeleteAdresse_Click"
+                                        Tag="{x:Bind}">
+                                        <SymbolIcon Symbol="Delete"/>
+                                    </Button>
+                                </DataTemplate>
+                            </mtuuc:DataGridTemplateColumn.CellTemplate>
+                        </mtuuc:DataGridTemplateColumn>
                     </mtuuc:DataGrid.Columns>
                 </mtuuc:DataGrid>
             </mtuuc:Expander>

@@ -64,8 +64,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class AdresseViewModel : BindableBase
     {
-        protected Adresse Entity { get; set; }
-        public Adresse getEntity => Entity;
+        protected Adresse Entity { get; private set; }
 
         private ImmutableList<Adresse> AlleAdressen = App.Walter.Adressen.ToImmutableList();
 
@@ -93,13 +92,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 return count;
             }
         }
-
-        // Update changes one value of the address.
-        // If this new address does not exist, it will be created.
-        // An Address without any references will not be deleted automatically.
-        /*
-         * prop - 0: Strasse, 1: Hausnr., 2: PLZ, 3: Stadt
-         */
 
         public int Id;
         public virtual string Strasse
@@ -149,11 +141,18 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             PropertyChanged += OnUpdate;
 
+            Dispose = new RelayCommand(_ =>
+            {
+                App.Walter.Adressen.Remove(Entity);
+                App.SaveWalter();
+            });
+
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.AdresseAnhaenge, a), _ => true);
         }
 
         public AsyncRelayCommand AttachFile;
+        public RelayCommand Dispose;
 
         public static string Anschrift(int id) => Anschrift(App.Walter.Adressen.Find(id));
         public static string Anschrift(IPerson k) => Anschrift(k is IPerson a ? a.Adresse : null);
@@ -192,7 +191,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 return;
             }
 
-            if (getEntity.AdresseId != 0)
+            if (Entity.AdresseId != 0)
             {
                 App.Walter.Adressen.Update(Entity);
             }
