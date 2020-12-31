@@ -13,11 +13,6 @@ namespace Deeplex.Saverwalter.App.UserControls
         {
             InitializeComponent();
 
-            RegisterPropertyChangedCallback(IdProperty, (idDepObject, idProp) =>
-            {
-                ViewModel = new AdresseViewModel(App.Walter.Adressen.Find(Id));
-            });
-
             RegisterPropertyChangedCallback(AdresseProperty, (idDepObject, idProp) =>
             {
                 ViewModel = new AdresseViewModel<IAdresse>(Adresse);
@@ -36,18 +31,5 @@ namespace Deeplex.Saverwalter.App.UserControls
                 typeof(IAdresse),
                 typeof(AdresseControl),
                 new PropertyMetadata(null));
-
-        public int Id
-        {
-            get { return (int)GetValue(IdProperty); }
-            set { SetValue(IdProperty, value); }
-        }
-
-        public static readonly DependencyProperty IdProperty
-            = DependencyProperty.Register(
-                  "Id",
-                  typeof(int),
-                  typeof(AdresseControl),
-                  new PropertyMetadata(0));
     }
 }
