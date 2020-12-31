@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
@@ -9,57 +10,56 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         private T reference;
 
-        private void updateReference()
+        private void Update(string value, int prop)
         {
-            reference.Adresse = Entity;
+            var a = GetAdresse(Entity, value, prop);
+
+            if (a == null)
+            {
+                a = new Adresse()
+                {
+                    Hausnummer = Entity.Hausnummer,
+                    Postleitzahl = Entity.Postleitzahl,
+                    Strasse = Entity.Strasse,
+                    Stadt = Entity.Stadt
+                };
+                switch (prop)
+                {
+                    case (0): a.Strasse = value; break;
+                    case (1): a.Hausnummer = value; break;
+                    case (2): a.Postleitzahl = value; break;
+                    case (3): a.Stadt = value; break;
+                }
+                App.Walter.Adressen.Add(a);
+            }
+
+            reference.Adresse = a;
             App.Walter.Update(reference);
+
+            App.SaveWalter();
         }
 
         public override string Hausnummer
         {
             get => Entity.Hausnummer;
-            set
-            {
-                base.Hausnummer = value;
-                updateReference();
-                RaisePropertyChangedAuto();
-                App.SaveWalter();
-            }
+            set => Update(value, 0);
         }
         public override string Strasse
         {
             get => Entity.Strasse;
-            set
-            {
-                base.Strasse = value;
-                updateReference();
-                RaisePropertyChangedAuto();
-                App.SaveWalter();
-            }
+            set => Update(value, 1);
         }
 
         public override string Postleitzahl
         {
             get => Entity.Postleitzahl;
-            set
-            {
-                base.Postleitzahl = value;
-                updateReference();
-                RaisePropertyChangedAuto();
-                App.SaveWalter();
-            }
+            set => Update(value, 2);
         }
 
         public override string Stadt
         {
             get => Entity.Stadt;
-            set
-            {
-                base.Stadt = value;
-                updateReference();
-                RaisePropertyChangedAuto();
-                App.SaveWalter();
-            }
+            set => Update(value, 3);
         }
 
         public AdresseViewModel(T value) : base(value.Adresse)
@@ -106,37 +106,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         /*
          * prop - 0: Strasse, 1: Hausnr., 2: PLZ, 3: Stadt
          */
-        protected Adresse Update(string value, int prop)
-        {
-            var a = GetAdresse(Entity, value, prop);
-            if (a != null)
-            {
-                Entity = a;
-            }
-            else
-            {
-                a = new Adresse()
-                {
-                    Hausnummer = Entity.Hausnummer,
-                    Postleitzahl = Entity.Postleitzahl,
-                    Strasse = Entity.Strasse,
-                    Stadt = Entity.Stadt
-                };
-                switch (prop)
-                {
-                    case (0): a.Strasse = value; break;
-                    case (1): a.Hausnummer = value; break;
-                    case (2): a.Postleitzahl = value; break;
-                    case (3): a.Stadt = value; break;
-                    default: return null;
-                }
-                App.Walter.Adressen.Add(a);
-                Entity = a;
-            }
-
-            App.SaveWalter();
-            return a;
-        }
 
         public int Id;
         public virtual string Strasse
@@ -144,7 +113,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity?.Strasse ?? "";
             set
             {
-                Update(value, 0);
+                Entity.Strasse = value;
                 RaisePropertyChangedAuto();
             }
             // update(nameof(Entity.Strasse), value);
@@ -155,7 +124,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity?.Hausnummer ?? "";
             set
             {
-                Update(value, 1);
+                Entity.Hausnummer = value;
                 RaisePropertyChangedAuto();
             }
         }
@@ -165,7 +134,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity?.Postleitzahl ?? "";
             set
             {
-                Update(value, 2);
+                Entity.Postleitzahl = value;
                 RaisePropertyChangedAuto();
             }
         }
@@ -175,7 +144,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity?.Stadt ?? "";
             set
             {
-                Update(value, 3);
+                Entity.Stadt = value;
                 RaisePropertyChangedAuto();
             }
         }
@@ -183,6 +152,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public AdresseViewModel(Adresse a)
         {
             Entity = a;
+
+            PropertyChanged += OnUpdate;
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.AdresseAnhaenge, a), _ => true);
@@ -206,7 +177,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             return a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
         }
 
-        private static Adresse GetAdresse(Adresse a, string value, int prop)
+        protected static Adresse GetAdresse(Adresse a, string value, int prop)
         {
             switch (prop)
             {
@@ -222,6 +193,38 @@ namespace Deeplex.Saverwalter.App.ViewModels
             return App.Walter.Adressen.FirstOrDefault(a =>
                 a.Strasse == Strasse && a.Hausnummer == Hausnummer &&
                 a.Postleitzahl == Postleitzahl && a.Stadt == Stadt);
+        }
+
+        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Strasse):
+                case nameof(Hausnummer):
+                case nameof(Postleitzahl):
+                case nameof(Stadt):
+                    break;
+                default:
+                    return;
+            }
+
+            if (Entity.Strasse == null || Entity.Strasse == "" ||
+                Entity.Hausnummer == null || Entity.Postleitzahl == "" ||
+                Entity.Postleitzahl == null || Entity.Postleitzahl == "" ||
+                Entity.Stadt == null || Entity.Stadt == "")
+            {
+                return;
+            }
+
+            if (getEntity.AdresseId != 0)
+            {
+                App.Walter.Adressen.Update(Entity);
+            }
+            else
+            {
+                App.Walter.Adressen.Add(Entity);
+            }
+            App.SaveWalter();
         }
     }
 }
