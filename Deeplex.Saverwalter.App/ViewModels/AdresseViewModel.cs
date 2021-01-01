@@ -7,11 +7,20 @@ using System.Linq;
 namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class AdresseViewModel<T> : AdresseViewModel where T : IAdresse
+
     {
         private T reference;
 
         private void Update(string Strasse, string Hausnummer, string Postleitzahl, string Stadt)
         {
+            if (!IsValid())
+            {
+                Entity.Strasse = Strasse;
+                Entity.Hausnummer = Hausnummer;
+                Entity.Postleitzahl = Postleitzahl;
+                Entity.Stadt = Stadt;
+            }
+            if (!IsValid()) return;
             var adresse = App.Walter.Adressen.FirstOrDefault(a =>
                 a.Strasse == Strasse && a.Hausnummer == Hausnummer &&
                 a.Postleitzahl == Postleitzahl && a.Stadt == Stadt);
@@ -28,12 +37,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
 
             reference.Adresse = adresse;
-            App.Walter.Update(reference);
 
+            //Check if reference is valid.
+            if (App.Walter.Entry(reference).State != Microsoft.EntityFrameworkCore.EntityState.Detached)
+            {
+                App.Walter.Update(reference);
+            }
             App.SaveWalter();
         }
 
-        public override string Hausnummer
+    public override string Hausnummer
         {
             get => Entity.Hausnummer;
             set => Update(Entity.Strasse, value, Entity.Postleitzahl, Entity.Stadt);
@@ -56,7 +69,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set => Update(Entity.Strasse, Entity.Hausnummer, Entity.Postleitzahl, value);
         }
 
-        public AdresseViewModel(T value) : base(value.Adresse)
+        public AdresseViewModel(T value) : base(value.Adresse ?? new Adresse())
         {
             reference = value;
         }
@@ -170,7 +183,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
             return a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
         }
 
-        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        protected bool IsValid()
+        {
+            return !(Entity.Strasse == null || Entity.Strasse == "" ||
+                Entity.Hausnummer == null || Entity.Postleitzahl == "" ||
+                Entity.Postleitzahl == null || Entity.Postleitzahl == "" ||
+                Entity.Stadt == null || Entity.Stadt == "");
+        }
+
+        protected void OnUpdate(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
@@ -183,10 +204,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     return;
             }
 
-            if (Entity.Strasse == null || Entity.Strasse == "" ||
-                Entity.Hausnummer == null || Entity.Postleitzahl == "" ||
-                Entity.Postleitzahl == null || Entity.Postleitzahl == "" ||
-                Entity.Stadt == null || Entity.Stadt == "")
+            if (IsValid())
             {
                 return;
             }

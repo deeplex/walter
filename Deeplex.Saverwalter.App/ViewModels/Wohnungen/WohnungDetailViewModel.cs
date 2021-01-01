@@ -205,21 +205,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public RelayCommand AddAllgemeinZaehler { get; }
         public bool IsNotInEdit => !IsInEdit.Value;
 
-        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        public void Update()
         {
-            switch (e.PropertyName)
-            {
-                case nameof(Besitzer):
-                case nameof(Bezeichnung):
-                case nameof(Wohnflaeche):
-                case nameof(Nutzflaeche):
-                case nameof(Nutzeinheit):
-                case nameof(Notiz):
-                    break;
-                default:
-                    return;
-            }
-
             if (Entity.BesitzerId == null ||
                 (Entity.Adresse == null && Entity.AdresseId == 0) ||
                 Entity.Bezeichnung == null || Entity.Bezeichnung == "")
@@ -236,6 +223,24 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.Walter.Wohnungen.Add(Entity);
             }
             App.SaveWalter();
+        }
+
+        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Besitzer):
+                case nameof(Bezeichnung):
+                case nameof(Wohnflaeche):
+                case nameof(Nutzflaeche):
+                case nameof(Nutzeinheit):
+                case nameof(Notiz):
+                    break;
+                default:
+                    return;
+            }
+
+            Update();
         }
     }
 }
