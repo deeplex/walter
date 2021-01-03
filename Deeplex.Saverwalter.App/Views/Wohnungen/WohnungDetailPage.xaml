@@ -16,7 +16,6 @@
         <Style x:Name="Eintraege" TargetType="TextBox">
             <Setter Property="TextWrapping" Value="NoWrap"/>
             <Setter Property="Margin" Value="20,20,0,0"/>
-            <Setter Property="IsEnabled" Value="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"/>
         </Style>
     </Page.Resources>
     <ScrollViewer>
@@ -38,7 +37,6 @@
             <RelativePanel>
                 <mtuuc:WrapPanel Orientation="Horizontal">
                     <ComboBox
-                        IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                         x:Name="BesitzerCombobox"
                         SelectedItem="{x:Bind ViewModel.Besitzer, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                         Margin="20,20,0,0"
@@ -54,7 +52,6 @@
             <mtuuc:WrapPanel>
                 <uc:AdresseControl
                     Margin="20,20,0,0"
-                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Adresse="{x:Bind ViewModel.GetEntity}" />
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
@@ -88,7 +85,7 @@
                         HorizontalContentAlignment="Left">-->
                     <mtuuc:DockPanel>
                         <TextBlock Text="Zähler" Margin="20,0,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                        <Button Margin="0,0,20,0"  Background="Transparent" HorizontalAlignment="Right" Visibility="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}">
+                        <Button Margin="0,0,20,0"  Background="Transparent" HorizontalAlignment="Right">
                             <Button.Flyout>
                                 <Flyout>
                                     <Pivot>

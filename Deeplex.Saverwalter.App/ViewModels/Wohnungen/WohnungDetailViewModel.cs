@@ -119,10 +119,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         //          .First(w => w.WohnungId == id))
         //{ }
 
-        public WohnungDetailViewModel() : this(new Wohnung())
-        {
-            IsInEdit.Value = true;
-        } // Create new Wohnung
+        public WohnungDetailViewModel() : this(new Wohnung()) { }
 
         public List<Zaehlertyp> Zaehlertypen = Enums.Zaehlertypen;
 
@@ -195,15 +192,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.WohnungAnhaenge, w), _ => true);
 
-            IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
             PropertyChanged += OnUpdate;
         }
 
-        public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
         public AsyncRelayCommand AttachFile;
         public RelayCommand AddZaehler { get; }
         public RelayCommand AddAllgemeinZaehler { get; }
-        public bool IsNotInEdit => !IsInEdit.Value;
 
         public void Update()
         {

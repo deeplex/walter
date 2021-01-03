@@ -53,9 +53,8 @@ namespace Deeplex.Saverwalter.App.Views
                 Label = "Löschen",
                 IsEnabled = false, // TODO
             };
-            EditToggle.Click += EditToggle_Click;
             App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { },
-                new ICommandBarElement[] { EditToggle, Delete });
+                new ICommandBarElement[] { Delete });
 
             var AdresseGroup = App.Walter.Wohnungen
                 .Include(w => w.Adresse)
@@ -99,11 +98,6 @@ namespace Deeplex.Saverwalter.App.Views
                 Anschrift = AdresseViewModel.Anschrift(id);
                 Content = Anschrift;
             }
-        }
-
-        private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            ViewModel.IsInEdit.Value = (sender as AppBarToggleButton).IsChecked ?? false;
         }
     }
 }
