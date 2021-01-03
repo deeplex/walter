@@ -18,8 +18,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
 
-        public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>();
-
         public void selfDestruct()
         {
             App.Walter.Betriebskostenrechnungen.Remove(Entity);

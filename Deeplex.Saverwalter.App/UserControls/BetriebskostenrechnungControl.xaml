@@ -15,7 +15,6 @@
             <RelativePanel>
                 <muxc:NumberBox
                     RelativePanel.AlignLeftWithPanel="True"
-                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Width="120"
                     Header="Betrag"
                     Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
@@ -33,13 +32,11 @@
                 </StackPanel>
             </RelativePanel>
             <CalendarDatePicker
-                IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                 Header="Datum"
                 HorizontalAlignment="Stretch"
                 Date="{x:Bind ViewModel.Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
             <ScrollViewer>
                 <TextBox
-                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Header="Beschreibung"
                     Text="{x:Bind ViewModel.Beschreibung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     TextWrapping="Wrap"/>
@@ -84,17 +81,14 @@
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Slider
-                            IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                             Width="110" Header="HKVO§7" Minimum="50" Maximum="70"
                             Value="{x:Bind ViewModel.HKVO_P7, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                         <Slider
-                            IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                             Width="110" Header="HKVO§8" Minimum="50" Maximum="70" Margin="10,0,0,0"
                             Value="{x:Bind ViewModel.HKVO_P8, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <ComboBox
-                            IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                             ItemsSource="{x:Bind ViewModel.HKVO_P9_List}"
                             Width="110"
                             DisplayMemberPath="text"
@@ -102,7 +96,6 @@
                             Header="HKVO§9(2)"/>
                         <ComboBox
                             Margin="10,0,0,0"
-                            IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                             ItemsSource="{x:Bind ViewModel.AllgemeinZaehler_List}"
                             Width="110"
                             DisplayMemberPath="Kennnummer"
