@@ -16,14 +16,13 @@
             <Setter Property="Width" Value="300"/>
             <Setter Property="TextWrapping" Value="NoWrap"/>
             <Setter Property="Margin" Value="20,20,0,0"/>
-            <Setter Property="IsEnabled" Value="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"/>
         </Style>
     </Page.Resources>
     <ScrollViewer>
         <StackPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <ComboBox
-                    Margin="20,20,0,0" Header="Anrede" IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    Margin="20,20,0,0" Header="Anrede"
                     x:Name="ComboBoxAnrede" Width="80" ItemsSource="{x:Bind ViewModel.Anreden}"
                     SelectedItem="{x:Bind ViewModel.Anrede, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                 <TextBox
@@ -37,7 +36,6 @@
             <mtuuc:WrapPanel>
                 <uc:AdresseControl
                     Margin="20,20,0,0"
-                    IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
                     Adresse="{x:Bind ViewModel.GetEntity}" />
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
@@ -58,12 +56,12 @@
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <CheckBox
-                    Margin="20,20,0,0" Content="Vermieter" IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    Margin="20,20,0,0" Content="Vermieter"
                     IsChecked="{x:Bind ViewModel.isVermieter, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                <CheckBox Margin="20,20,0,0" Content="Mieter" IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                <CheckBox Margin="20,20,0,0" Content="Mieter"
                     IsChecked="{x:Bind ViewModel.isMieter, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                 <CheckBox
-                    Margin="20,20,0,0" Content="Handwerker"  IsEnabled="{x:Bind ViewModel.IsInEdit.Value, Mode=OneWay}"
+                    Margin="20,20,0,0" Content="Handwerker"
                     IsChecked="{x:Bind ViewModel.isHandwerker, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel>

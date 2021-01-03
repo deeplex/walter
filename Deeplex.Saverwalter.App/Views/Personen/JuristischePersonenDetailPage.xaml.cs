@@ -29,13 +29,6 @@ namespace Deeplex.Saverwalter.App.Views
 
             App.ViewModel.Titel.Value = ViewModel.Bezeichnung;
 
-            var EditToggle = new AppBarToggleButton
-            {
-                Label = "Bearbeiten",
-                Icon = new SymbolIcon(Symbol.Edit),
-            };
-            EditToggle.Click += EditToggle_Click;
-
             var Delete = new AppBarButton
             {
                 Label = "Löschen",
@@ -50,12 +43,7 @@ namespace Deeplex.Saverwalter.App.Views
                     Icon = new SymbolIcon(Symbol.Attach),
                     Command = ViewModel.AttachFile,
                 }
-            }, new ICommandBarElement[] { EditToggle, Delete });
-        }
-
-        private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            ViewModel.IsInEdit.Value = (sender as AppBarToggleButton).IsChecked ?? false;
+            }, new ICommandBarElement[] { Delete });
         }
 
         private void SelfDestruct(object sender, Windows.UI.Xaml.RoutedEventArgs e)

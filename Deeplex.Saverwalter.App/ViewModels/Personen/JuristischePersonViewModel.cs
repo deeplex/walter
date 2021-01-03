@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             App.SaveWalter();
         }
 
-        public JuristischePersonViewModel() : this(new JuristischePerson()) { IsInEdit.Value = true; }
+        public JuristischePersonViewModel() : this(new JuristischePerson()) { }
         public JuristischePersonViewModel(int id) : this(App.Walter.JuristischePersonen.Find(id)) { }
         public JuristischePersonViewModel(JuristischePerson j)
         {

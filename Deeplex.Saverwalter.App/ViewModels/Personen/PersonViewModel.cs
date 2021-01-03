@@ -101,8 +101,5 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         public AsyncRelayCommand AttachFile;
-
-        public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
-        public bool IsNotInEdit => !IsInEdit.Value;
     }
 }
