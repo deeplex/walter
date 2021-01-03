@@ -12,8 +12,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         public ImmutableDictionary<WohnungListAdresse, ImmutableList<WohnungListWohnung>> AdresseGroup;
 
-        public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>();
-
         public WohnungListViewModel()
         {
             AdresseGroup = App.Walter.Wohnungen

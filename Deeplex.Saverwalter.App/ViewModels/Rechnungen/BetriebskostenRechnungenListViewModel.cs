@@ -19,8 +19,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
 
-        public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>();
-
         public List<BetriebskostentypUtil> Betriebskostentypen = Enums.Betriebskostentyp;
 
         public List<UmlageSchluesselUtil> Betriebskostenschluessel = Enums.UmlageSchluessel;
