@@ -54,13 +54,6 @@ namespace Deeplex.Saverwalter.App.Views
                 }
             };
 
-            var EditToggle = new AppBarToggleButton
-            {
-                Label = "Bearbeiten",
-                Icon = new SymbolIcon(Symbol.Edit),
-            };
-            EditToggle.Click += EditToggle_Click;
-
             var Delete = new AppBarButton
             {
                 Label = "Löschen",
@@ -70,7 +63,7 @@ namespace Deeplex.Saverwalter.App.Views
 
             var Secondary = new ICommandBarElement[]
             {
-                EditToggle, Delete,
+                Delete,
             };
 
             App.ViewModel.RefillCommandContainer(Primary, Secondary);
@@ -171,11 +164,6 @@ namespace Deeplex.Saverwalter.App.Views
             var s = Jahr.ToString() + " - " + ViewModel.Wohnung.BezeichnungVoll;
 
             b.SaveAsDocx(ApplicationData.Current.LocalFolder.Path + @"\" + s + ".docx");
-        }
-
-        private void EditToggle_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            ViewModel.IsInEdit.Value = (sender as AppBarToggleButton).IsChecked ?? false;
         }
 
         private void MieterBox_TokenItemRemoved(Microsoft.Toolkit.Uwp.UI.Controls.TokenizingTextBox sender, object args)

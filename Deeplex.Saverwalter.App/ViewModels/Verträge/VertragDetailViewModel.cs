@@ -48,17 +48,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Versionen.Value.First().Ende;
         }
 
-        public VertragDetailViewModel() : this(
-            new List<Vertrag>
-            {
-                new Vertrag
-                {
-                    Beginn = DateTime.UtcNow.Date,
-                }
-            })
-        {
-            IsInEdit.Value = true;
-        }
+        public VertragDetailViewModel() : this(new List<Vertrag>
+            { new Vertrag { Beginn = DateTime.UtcNow.Date, } })
+        { }
 
         public VertragDetailViewModel(Guid id)
             : this(App.Walter.Vertraege
@@ -146,14 +138,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.SaveWalter();
             }, _ => true);
 
-            IsInEdit.PropertyChanged += (_, ev) => RaisePropertyChanged(nameof(IsNotInEdit));
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.VertragAnhaenge, guid), _ => true);
         }
-
-        public ObservableProperty<bool> IsInEdit = new ObservableProperty<bool>(false);
-        public bool IsNotInEdit => !IsInEdit.Value;
 
         public AsyncRelayCommand AttachFile { get; }
         public RelayCommand AddMiete { get; }
