@@ -1,8 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
+using System.Linq;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<NatuerlichePersonAnhang> NatuerlichePersonAnhaenge { get; set; } = null!;
         public DbSet<Vertrag> Vertraege { get; set; } = null!;
         public DbSet<VertragAnhang> VertragAnhaenge { get; set; } = null!;
-        public DbSet<Wohnung> Wohnungen { get; set; } = null!;           
+        public DbSet<Wohnung> Wohnungen { get; set; } = null!;
         public DbSet<WohnungAnhang> WohnungAnhaenge { get; set; } = null!;
         public DbSet<Zaehler> ZaehlerSet { get; set; } = null!;
         public DbSet<ZaehlerAnhang> ZaehlerAnhaenge { get; set; } = null!;

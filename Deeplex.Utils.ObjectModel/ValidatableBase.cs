@@ -18,7 +18,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Windows.ApplicationModel.VoiceCommands;
 
 namespace Deeplex.Utils.ObjectModel
 {

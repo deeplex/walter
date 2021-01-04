@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -24,7 +21,7 @@ namespace Deeplex.Utils.ObjectModel
         {
             mTask = mExecute((T)parameter);
             RaiseCanExecuteChanged(new EventArgs());
-            await mTask; 
+            await mTask;
             mTask = null;
             RaiseCanExecuteChanged(new EventArgs());
         }
