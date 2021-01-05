@@ -16,8 +16,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private Betriebskostenrechnung Entity { get; }
         public int Id => Entity.BetriebskostenrechnungId;
 
-        public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
-
         public void selfDestruct()
         {
             App.Walter.Betriebskostenrechnungen.Remove(Entity);
@@ -25,15 +23,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         public List<HKVO9Util> HKVO_P9_List = Enums.HKVO9;
-
         public List<UmlageSchluesselUtil> Schluessel_List = Enums.UmlageSchluessel;
-
         public List<BetriebskostentypUtil> Typen_List = Enums.Betriebskostentyp;
-
-        public List<BetriebskostenrechnungAllgemeinZaehler> AllgemeinZaehler_List =
-            App.Walter.AllgemeinZaehlerSet
-        .Select(a => new BetriebskostenrechnungAllgemeinZaehler(a))
-        .ToList();
+        public List<BetriebskostenrechnungAllgemeinZaehler> AllgemeinZaehler_List
+            = App.Walter.AllgemeinZaehlerSet
+            .Select(a => new BetriebskostenrechnungAllgemeinZaehler(a))
+            .ToList();
 
         public sealed class BetriebskostenrechnungAllgemeinZaehler
         {
@@ -50,8 +45,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public int AllgemeinZaehler
         {
             get => Entity?.Allgemeinzaehler != null ?
-                AllgemeinZaehler_List.FindIndex(a => a.Id == Entity.Allgemeinzaehler.AllgemeinZaehlerId) :
-                0;
+                AllgemeinZaehler_List.FindIndex(a => a.Id == Entity.Allgemeinzaehler.AllgemeinZaehlerId) : 0;
             set
             {
                 Entity.Allgemeinzaehler = App.Walter.AllgemeinZaehlerSet.Find(AllgemeinZaehler_List[value].Id);
@@ -152,23 +146,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public List<Tuple<int, string>> Wohnungen { get; }
-
+        public List<Wohnung> Wohnungen { get; }
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r)
         {
             Entity = r;
 
-            Wohnungen = r.Gruppen.Select(g => new Tuple<int, string>(g.WohnungId, AdresseViewModel.Anschrift(g.Wohnung.Adresse) + " " + g.Wohnung.Bezeichnung)).ToList();
-
-            AdresseGroup = App.Walter.Wohnungen
-                .Include(w => w.Adresse)
-                .ToList()
-                .Select(w => new BetriebskostenRechungenListWohnungListWohnung(w))
-                .GroupBy(w => w.AdresseId)
-                .ToImmutableDictionary(
-                    g => new BetriebskostenRechungenListWohnungListAdresse(g.Key),
-                    g => g.ToImmutableList());
+            Wohnungen = r.Gruppen.Select(g => g.Wohnung).ToList();
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 /* TODO */await Task.FromResult<object>(null), _ => false);

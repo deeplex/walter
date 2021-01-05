@@ -1,6 +1,10 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.Model;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using Windows.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
@@ -47,18 +51,52 @@ namespace Deeplex.Saverwalter.App.Views
                 }
             }, new ICommandBarElement[] { Delete });
 
-            ViewModel.AdresseGroup.Keys.ToList().ForEach(k =>
-            {
-                ViewModel.AdresseGroup[k].ForEach(v =>
+            App.Walter.Adressen
+                .Include(i => i.Wohnungen)
+                .ThenInclude(w => w.Betriebskostenrechnungsgruppen)
+                .ToList()
+                .ForEach(a =>
                 {
-                    if (ViewModel.Wohnungen.Select(t => t.Item1).Contains(v.Id))
+                    if (a.Wohnungen.Count == 0) return;
+
+                    var k = new Microsoft.UI.Xaml.Controls.TreeViewNode()
                     {
-                        WohnungenTree.SelectedNodes.Add(v);
-                    }
-                    k.Children.Add(v);
+                        Content = AdresseViewModel.Anschrift(a),
+                    };
+                    a.Wohnungen.ForEach(w =>
+                    {
+                        var n = new Microsoft.UI.Xaml.Controls.TreeViewNode() { Content = new BWohnung(w) };
+                        k.Children.Add(n);
+                        if (ViewModel.Wohnungen.Exists(ww => ww.WohnungId == w.WohnungId))
+                        {
+                            WohnungenTree.SelectedNodes.Add(n);
+                        }
+                    });
+                    WohnungenTree.RootNodes.Add(k);
                 });
-                WohnungenTree.RootNodes.Add(k);
-            });
+
+            WohnungenTree.Tapped += WohnungenTree_Tapped;
+        }
+
+        private sealed class BWohnung
+        {
+            private Wohnung Entity;
+
+            public override string ToString()
+            {
+                return Entity.Bezeichnung;
+            }
+
+            public BWohnung(Wohnung w)
+            {
+                Entity = w;
+            }
+        };
+
+        private void WohnungenTree_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        {
+            var a = WohnungenTree.SelectedItems.ToList();
+            //App.Walter.Betriebskostenrechnungsgruppen
         }
 
         private void SelfDestruct(object sender, Windows.UI.Xaml.RoutedEventArgs e)
