@@ -80,7 +80,9 @@ namespace Deeplex.Saverwalter.App.Views
 
         private sealed class BWohnung
         {
-            private Wohnung Entity;
+            public Wohnung Entity { get; }
+            public int Id => Entity.WohnungId;
+            public bool Same(Wohnung w) => Entity.WohnungId == w.WohnungId;
 
             public override string ToString()
             {
@@ -95,8 +97,48 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void WohnungenTree_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            var a = WohnungenTree.SelectedItems.ToList();
-            //App.Walter.Betriebskostenrechnungsgruppen
+            var flagged = false;
+
+            var selected = WohnungenTree.SelectedItems
+                .Select(s => (s as Microsoft.UI.Xaml.Controls.TreeViewNode).Content)
+                .Where(s => s is BWohnung)
+                .ToList();
+
+            // Add missing Gruppen
+            selected
+                .Where(s => !ViewModel.Wohnungen.Exists(w => (s as BWohnung).Same(w)))
+                .ToList()
+                .ForEach(s =>
+                {
+                    flagged = true;
+
+                    App.Walter.Betriebskostenrechnungsgruppen.Add(new BetriebskostenrechnungsGruppe()
+                    {
+                        Rechnung = App.Walter.Betriebskostenrechnungen.Find(ViewModel.Id),
+                        WohnungId = (s as BWohnung).Id,
+                    });
+                    ViewModel.Wohnungen.Add((s as BWohnung).Entity);
+                });
+
+            // Remove old Gruppen
+            ViewModel.Wohnungen
+                .Where(w => !selected.Exists(s => (s as BWohnung).Same(w)))
+                .ToList()
+                .ForEach(w =>
+                {
+                    flagged = true;
+
+                    App.Walter.Betriebskostenrechnungsgruppen
+                        .Where(g => g.Rechnung.BetriebskostenrechnungId == ViewModel.Id && g.WohnungId == w.WohnungId)
+                        .ToList()
+                        .ForEach(g =>
+                        {
+                            App.Walter.Betriebskostenrechnungsgruppen.Remove(g);
+                            ViewModel.Wohnungen.Remove(w);
+                        });
+                });
+
+            if (flagged) App.SaveWalter();
         }
 
         private void SelfDestruct(object sender, Windows.UI.Xaml.RoutedEventArgs e)
