@@ -175,6 +175,25 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public AsyncRelayCommand AttachFile;
         public RelayCommand dispose;
 
+        public void Update()
+        {
+            if (Beschreibung == "" || Beschreibung == null || Entity.Datum == null)
+            {
+                return;
+            }
+
+            if (Entity.BetriebskostenrechnungId != 0)
+            {
+                App.Walter.Betriebskostenrechnungen.Update(Entity);
+            }
+            else
+            {
+                App.Walter.Betriebskostenrechnungen.Add(Entity);
+            }
+            App.SaveWalter();
+        }
+            
+
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
@@ -192,22 +211,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     return;
             }
 
-            if (Beschreibung == "" ||
-                Beschreibung == null ||
-                Entity.Datum == null)
-            {
-                return;
-            }
-
-            if (Entity.BetriebskostenrechnungId != 0)
-            {
-                App.Walter.Betriebskostenrechnungen.Update(Entity);
-            }
-            else
-            {
-                App.Walter.Betriebskostenrechnungen.Add(Entity);
-            }
-            App.SaveWalter();
+            Update();
         }
     }
 }

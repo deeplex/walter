@@ -20,6 +20,12 @@ namespace Deeplex.Saverwalter.App.Views
             InitializeComponent();
         }
 
+        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
+            WohnungenTree_Tapped(null, null);
+            base.OnNavigatingFrom(e);
+        }
+
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             if (e.Parameter is int id)
@@ -97,6 +103,7 @@ namespace Deeplex.Saverwalter.App.Views
 
         private void WohnungenTree_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
+            if (ViewModel.Id == 0) return;
             var flagged = false;
 
             var selected = WohnungenTree.SelectedItems
@@ -138,7 +145,7 @@ namespace Deeplex.Saverwalter.App.Views
                         });
                 });
 
-            if (flagged) App.SaveWalter();
+            if (flagged) ViewModel.Update();
         }
 
         private void SelfDestruct(object sender, Windows.UI.Xaml.RoutedEventArgs e)
