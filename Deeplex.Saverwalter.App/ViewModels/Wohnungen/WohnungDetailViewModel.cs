@@ -17,6 +17,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public Wohnung GetEntity => Entity;
         public int Id => Entity.WohnungId;
 
+        public void selfDestruct()
+        {
+            App.Walter.Wohnungen.Remove(Entity);
+            App.SaveWalter();
+        }
+
         public ImmutableList<WohnungDetailVermieter> AlleVermieter =>
             App.Walter.JuristischePersonen.ToImmutableList()
                 .Where(j => j.isVermieter == true).Select(j => new WohnungDetailVermieter(j))
