@@ -7,15 +7,16 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+
 namespace Deeplex.Saverwalter.App.ViewModels
 {
+    using ObservableTypen = ObservableProperty<ImmutableSortedDictionary<BetriebskostentypUtil, BetriebskostenRechnungenListJahr>>;
+    using ObservableGruppen = ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenGruppe, BetriebskostenRechnungenListJahr>>;
+    
     public sealed class BetriebskostenRechnungenListViewModel
     {
-        public ObservableProperty<ImmutableSortedDictionary<BetriebskostentypUtil, BetriebskostenRechnungenListJahr>> Typen
-            = new ObservableProperty<ImmutableSortedDictionary<BetriebskostentypUtil, BetriebskostenRechnungenListJahr>>();
-
-        public ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenGruppe, BetriebskostenRechnungenListJahr>> Gruppen
-            = new ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenGruppe, BetriebskostenRechnungenListJahr>>();
+        public ObservableTypen Typen = new ObservableTypen();
+        public ObservableGruppen Gruppen = new ObservableGruppen();
 
         public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
 
