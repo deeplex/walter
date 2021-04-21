@@ -22,17 +22,16 @@
         <StackPanel>
             <RelativePanel>
                 <!--TODO Insert image -->
-                <mtuuc:ScrollHeader
+                <Grid
                     x:Name="ScrollHeader"
                     HorizontalAlignment="Stretch"
                     RelativePanel.AlignRightWithPanel="True"
-                    RelativePanel.AlignLeftWithPanel="True"
-                    Mode="Fade">
+                    RelativePanel.AlignLeftWithPanel="True">
                     <Grid
                     Background="{ThemeResource SystemChromeLowColor}"
                     MinHeight="250">
                     </Grid>
-                </mtuuc:ScrollHeader>
+                </Grid>
             </RelativePanel>
             <RelativePanel>
                 <mtuuc:WrapPanel Orientation="Horizontal">
