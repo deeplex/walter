@@ -31,10 +31,10 @@
                     </Button>
                 </StackPanel>
             </RelativePanel>
-            <CalendarDatePicker
+            <!--<CalendarDatePicker
                 Header="Datum"
                 HorizontalAlignment="Stretch"
-                Date="{x:Bind ViewModel.Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                Date="{x:Bind ViewModel.Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>-->
             <ScrollViewer>
                 <TextBox
                     Header="Beschreibung"
@@ -48,7 +48,7 @@
                 HorizontalAlignment="Stretch"
                 SelectedIndex="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Umlageschlüssel"/>
-            <mtuuc:Expander Margin="0,5,0,0" Visibility="{x:Bind ByType}">
+            <!--<mtuuc:Expander Margin="0,5,0,0" Visibility="{x:Bind ByType}">
                 <mtuuc:Expander.Header>
                     <TextBlock>
                             <Run Text="Wohnungen ("/>
@@ -66,8 +66,8 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-            </mtuuc:Expander>
-            <mtuuc:Expander Margin="0,5,0,0" Visibility="{x:Bind ViewModel.isHeizung, Mode=OneWay}">
+            </mtuuc:Expander>-->
+            <!--<mtuuc:Expander Margin="0,5,0,0" Visibility="{x:Bind ViewModel.isHeizung, Mode=OneWay}">
                 <mtuuc:Expander.Header>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock VerticalAlignment="Center" Text="Heizkostenverordnung"/>
@@ -103,7 +103,7 @@
                             Header="Allgemeinzähler"/>
                     </StackPanel>
                 </StackPanel>
-            </mtuuc:Expander>
+            </mtuuc:Expander>-->
             <!--<StackPanel Margin="0,10,0,0" HorizontalAlignment="Stretch" Orientation="Horizontal" Visibility="{x:Bind isNew.Value, Mode=OneWay}">
                 <Button CommandParameter="{x:Bind}" Click="SaveGruppe_Click" Width="170">
                     <StackPanel Orientation="Horizontal">

@@ -36,7 +36,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => mBesitzer;
             set
             {
-                if (value?.Id != Guid.Empty) return;
                 Entity.BesitzerId = value.Id;
                 mBesitzer = value;
                 RaisePropertyChangedAuto();
@@ -207,8 +206,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public void Update()
         {
-            if (Entity.BesitzerId == null ||
-                (Entity.Adresse == null && Entity.AdresseId == 0) ||
+            if ((Entity.Adresse == null && Entity.AdresseId == 0) ||
                 Entity.Bezeichnung == null || Entity.Bezeichnung == "")
             {
                 return;

@@ -137,8 +137,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public int HKVO_P9
         {
-            get => Entity?.Typ == Betriebskostentyp.Heizkosten ?
-                HKVO_P9_List.FindIndex(i => i.index == (int)Entity.HKVO_P9) : 0;
+            get
+            {
+                if (Entity == null)
+                {
+                    return 0;
+                }
+                else if (Entity.Typ == Betriebskostentyp.Heizkosten)
+                {
+                    var index = Entity.HKVO_P9 == null ? 0 : (int)Entity.HKVO_P9;
+                    return HKVO_P9_List.FindIndex(i => i.index == index);
+                }
+                return 0;
+            }
             set
             {
                 Entity.HKVO_P9 = (HKVO_P9A2)HKVO_P9_List[value].index;
