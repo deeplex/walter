@@ -10,13 +10,9 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    using ObservableTypen = ObservableProperty<ImmutableSortedDictionary<BetriebskostentypUtil, BetriebskostenRechnungenListJahr>>;
-    using ObservableGruppen = ObservableProperty<ImmutableSortedDictionary<BetriebskostenRechnungenBetriebskostenGruppe, BetriebskostenRechnungenListJahr>>;
-    
     public sealed class BetriebskostenRechnungenListViewModel
     {
-        public ObservableTypen Typen = new ObservableTypen();
-        public ObservableGruppen Gruppen = new ObservableGruppen();
+        public ObservableProperty<List<BetriebskostenrechnungDetailViewModel>> Liste = new ObservableProperty<List<BetriebskostenrechnungDetailViewModel>>();
 
         public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
 
@@ -29,26 +25,18 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public TreeViewNode AddBetriebskostenTree;
         public BetriebskostenRechnungenListViewModel()
         {
-            Typen.Value = App.Walter.Betriebskostenrechnungen
+            Liste.Value = App.Walter.Betriebskostenrechnungen
                 .Include(b => b.Gruppen)
                 .ThenInclude(g => g.Wohnung)
                 .ThenInclude(w => w.Adresse)
                 .Include(b => b.Allgemeinzaehler)
-                .ToList()
-                .GroupBy(g => g.Typ)
-                .ToImmutableSortedDictionary(
-                    g => new BetriebskostentypUtil(g.Key),
-                    g => new BetriebskostenRechnungenListJahr(this, g.ToList()),
-                    Comparer<BetriebskostentypUtil>.Create((x, y)
-                        => x.Beschreibung.CompareTo(y.Beschreibung)));
+                .Select(w => new BetriebskostenrechnungDetailViewModel(w))
+                .ToList();
 
-            Gruppen.Value = App.Walter.Betriebskostenrechnungsgruppen.ToList()
+            var Gruppen = App.Walter.Betriebskostenrechnungsgruppen.ToList()
                 .GroupBy(p => new SortedSet<int>(p.Rechnung.Gruppen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
-                .ToImmutableSortedDictionary(
-                    g => new BetriebskostenRechnungenBetriebskostenGruppe(g.Key),
-                    g => new BetriebskostenRechnungenListJahr(this, g.ToList()),
-                    Comparer<BetriebskostenRechnungenBetriebskostenGruppe>.Create((x, y)
-                        => x.Bezeichnung.CompareTo(y.Bezeichnung)));
+                .Select(g => new BetriebskostenRechnungenBetriebskostenGruppe(g.Key))
+                .ToList();
 
             AdresseGroup = App.Walter.Wohnungen
                 .Include(w => w.Adresse)

@@ -55,6 +55,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public bool isHeizung => Entity?.Typ == Betriebskostentyp.Heizkosten;
 
+        public string BetragString => Betrag.ToString() + "€";
         public double Betrag
         {
             get => Entity?.Betrag ?? 0.0;
@@ -75,6 +76,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
+        public string TypString => Typen_List[Typ].Beschreibung;
         public int Typ
         {
             get => Typen_List.FindIndex(i => i.index == (Entity != null ? (int)Entity?.Typ : 0));
@@ -105,6 +107,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
+        public string BetreffendesJahrString => BetreffendesJahr.ToString();
         public int BetreffendesJahr
         {
             get => Entity?.BetreffendesJahr ?? DateTime.Now.Year;
@@ -158,12 +161,34 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         public List<Wohnung> Wohnungen { get; }
+        public string AdressenBezeichnung { get; }
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r)
         {
             Entity = r;
-
+            
             Wohnungen = r.Gruppen.Select(g => g.Wohnung).ToList();
+
+            AdressenBezeichnung = string.Join(" — ",  App.Walter.Wohnungen
+                .Include(w => w.Adresse)
+                .Where(w => Wohnungen.Contains(w))
+                .ToList()
+                .GroupBy(w => w.Adresse)
+                .ToDictionary(g => g.Key, g => g.ToList())
+                .Select(adr =>
+                {
+                    var a = adr.Key;
+                    var ret = a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
+                    if (adr.Value.Count() != a.Wohnungen.Count)
+                    {
+                        ret += ": " + string.Join(", ", adr.Value.Select(w => w.Bezeichnung));
+                    }
+                    else
+                    {
+                        ret += " (gesamt)";
+                    }
+                    return ret;
+                }));
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 /* TODO */await Task.FromResult<object>(null), _ => false);
@@ -203,7 +228,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
             App.SaveWalter();
         }
-            
+
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
         {

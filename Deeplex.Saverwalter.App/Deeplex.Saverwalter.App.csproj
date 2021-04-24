@@ -159,11 +159,8 @@
     <Compile Include="Views\Rechnungen\BetriebskostenrechnungenDetailPage.xaml.cs">
       <DependentUpon>BetriebskostenrechnungenDetailPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Rechnungen\BetriebskostenRechnungenGruppeListViewPage.xaml.cs">
-      <DependentUpon>BetriebskostenRechnungenGruppeListViewPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Rechnungen\BetriebskostenRechnungenTypListViewPage.xaml.cs">
-      <DependentUpon>BetriebskostenRechnungenTypListViewPage.xaml</DependentUpon>
+    <Compile Include="Views\Rechnungen\BetriebskostenRechnungenListViewPage.xaml.cs">
+      <DependentUpon>BetriebskostenRechnungenListViewPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Personen\JuristischePersonenDetailPage.xaml.cs">
       <DependentUpon>JuristischePersonenDetailPage.xaml</DependentUpon>
@@ -282,13 +279,9 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Rechnungen\BetriebskostenRechnungenGruppeListViewPage.xaml">
+    <Page Include="Views\Rechnungen\BetriebskostenRechnungenListViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\Rechnungen\BetriebskostenRechnungenTypListViewPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Personen\JuristischePersonenDetailPage.xaml">
       <Generator>MSBuild:Compile</Generator>

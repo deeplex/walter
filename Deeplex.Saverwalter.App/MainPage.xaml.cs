@@ -71,7 +71,7 @@ namespace Deeplex.Saverwalter.App
                 label == KontaktListLabel ? typeof(KontaktListPage) :
                 label == WohnungListLabel ? typeof(WohnungListPage) :
                 label == VertragListLabel ? typeof(VertragListPage) :
-                label == BetriebskostenrechnungenListLabel ? typeof(BetriebskostenRechnungenTypListViewPage) :
+                label == BetriebskostenrechnungenListLabel ? typeof(BetriebskostenRechnungenListViewPage) :
                 null;
 
             if (pageType != null && pageType != AppFrame.CurrentSourcePageType)
@@ -96,7 +96,7 @@ namespace Deeplex.Saverwalter.App
                 {
                     NavView.SelectedItem = VertragListMenuItem;
                 }
-                else if (e.SourcePageType == typeof(BetriebskostenRechnungenTypListViewPage))
+                else if (e.SourcePageType == typeof(BetriebskostenRechnungenListViewPage))
                 {
                     NavView.SelectedItem = BetriebskostenListMenuItem;
                 }
