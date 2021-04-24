@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media.Animation;
@@ -23,7 +24,7 @@ namespace Deeplex.Saverwalter.App.Views
             App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { AddVertrag });
         }
 
-        private void Vertrag_Tapped(object sender, TappedRoutedEventArgs e)
+        private void Details_Click(object sender, RoutedEventArgs e)
         {
             if (ViewModel.SelectedVertrag.Value != null)
             {

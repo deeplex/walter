@@ -136,7 +136,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             AuflistungMieter = string.Join(", ", cs);
 
             Beginn = v.Beginn.AsUtcKind();
-
+            Ende = v.Ende?.AsUtcKind();
         }
     }
 
