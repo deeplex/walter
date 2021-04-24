@@ -23,7 +23,9 @@
                 CanUserReorderColumns="False"
                 CanUserResizeColumns="True"
                 AutoGenerateColumns="False"
-                ItemsSource="{x:Bind ViewModel.Liste.Value}">
+                DoubleTapped="Details_Click"
+                ItemsSource="{x:Bind ViewModel.Liste.Value}"
+                SelectedItem="{x:Bind ViewModel.SelectedRechnung, Mode=TwoWay}">
                 <mtuuc:DataGrid.Columns>
                     <mtuuc:DataGridTextColumn
                         Header="Typ"

@@ -10,17 +10,26 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public sealed class BetriebskostenRechnungenListViewModel
+    public sealed class BetriebskostenRechnungenListViewModel : BindableBase
     {
         public ObservableProperty<List<BetriebskostenrechnungDetailViewModel>> Liste = new ObservableProperty<List<BetriebskostenrechnungDetailViewModel>>();
-
         public ImmutableDictionary<BetriebskostenRechungenListWohnungListAdresse, ImmutableList<BetriebskostenRechungenListWohnungListWohnung>> AdresseGroup;
-
         public List<BetriebskostentypUtil> Betriebskostentypen = Enums.Betriebskostentyp;
-
         public List<UmlageSchluesselUtil> Betriebskostenschluessel = Enums.UmlageSchluessel;
-
         public List<HKVO9Util> HKVO9 = Enums.HKVO9;
+
+        private BetriebskostenrechnungDetailViewModel mSelectedRechnung;
+        public BetriebskostenrechnungDetailViewModel SelectedRechnung
+        {
+            get => mSelectedRechnung;
+            set
+            {
+                mSelectedRechnung = value;
+                RaisePropertyChangedAuto();
+                RaisePropertyChanged(nameof(hasSelectedKontakt));
+            }
+        }
+        public bool hasSelectedKontakt => SelectedRechnung != null;
 
         public TreeViewNode AddBetriebskostenTree;
         public BetriebskostenRechnungenListViewModel()
