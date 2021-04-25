@@ -149,6 +149,12 @@
                     </mtuuc:Expander>
                 </StackPanel>
             </RelativePanel>
+            <mtuuc:Expander
+                    Background="Transparent"
+                    Header="Betriebskostenrechnungen"
+                    HorizontalContentAlignment="Left">
+                <uc:BetriebskostenRechnungenListControl WohnungId="{x:Bind ViewModel.Id}"/>
+            </mtuuc:Expander>
         </StackPanel>
     </ScrollViewer>
 </Page>
