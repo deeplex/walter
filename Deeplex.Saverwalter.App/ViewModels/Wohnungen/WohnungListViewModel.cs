@@ -2,6 +2,7 @@
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
@@ -10,142 +11,31 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class WohnungListViewModel
     {
-        public ImmutableDictionary<WohnungListAdresse, ImmutableList<WohnungListWohnung>> AdresseGroup;
+        public List<WohnungListEntry> Liste = new List<WohnungListEntry>();
+        public ObservableProperty<WohnungListEntry> SelectedWohnung
+            = new ObservableProperty<WohnungListEntry>();
 
         public WohnungListViewModel()
         {
-            AdresseGroup = App.Walter.Wohnungen
-                .Include(w => w.Adresse)
-                .Include(w => w.Vertraege)
-                .ToList()
-                .Select(w => new WohnungListWohnung(w))
-                .GroupBy(w => w.AdresseId)
-                .ToImmutableDictionary(g => new WohnungListAdresse(g.Key), g => g.ToImmutableList());
+            Liste = App.Walter.Wohnungen
+                .Select(w => new WohnungListEntry(w))
+                .ToList();
         }
     }
 
-    public sealed class WohnungListAdresse : BindableBase
+    public sealed class WohnungListEntry
     {
         public int Id { get; }
-        public Adresse Entity { get; }
-
-        private void update<U>(string property, U value)
-        {
-            if (Entity == null) return;
-            var type = Entity.GetType();
-            var prop = type.GetProperty(property);
-            var val = prop.GetValue(Entity, null);
-            if (!value.Equals(val))
-            {
-                prop.SetValue(Entity, value);
-                RaisePropertyChanged(property);
-            };
-        }
-
-        public string Strasse
-        {
-            get => Entity?.Strasse ?? "";
-            set => update(nameof(Entity.Strasse), value);
-        }
-
-        public string Hausnummer
-        {
-            get => Entity?.Hausnummer ?? "";
-            set => update(nameof(Entity.Hausnummer), value);
-        }
-
-        public string Postleitzahl
-        {
-            get => Entity?.Postleitzahl ?? "";
-            set => update(nameof(Entity.Postleitzahl), value);
-        }
-
-        public string Stadt
-        {
-            get => Entity?.Stadt ?? "";
-            set => update(nameof(Entity.Stadt), value);
-        }
-
-        public string GesamtString
-            => "Nutzeinheiten: " + GesamtNutzeinheiten
-            + ", Wohnfläche: " + string.Format("{0:N2}", GesamtWohnflaeche)
-            + "m², Nutzfläche: " + string.Format("{0:N2}", GesamtNutzflaeche)
-            + "m², Bewohnerzahl: " + GesamtBewohner;
-
-        public double GesamtWohnflaeche;
-        public int GesamtNutzeinheiten;
-        public double GesamtNutzflaeche;
-        public int GesamtBewohner;
-
-        public WohnungListAdresse(int id)
-        {
-            Id = id;
-            var Adresse = App.Walter.Adressen.Find(Id);
-            Entity = Adresse;
-            var wn = Adresse.Wohnungen;
-            GesamtNutzeinheiten = wn.Sum(w => w.Nutzeinheit);
-            GesamtWohnflaeche = wn.Sum(w => w.Wohnflaeche);
-            GesamtNutzflaeche = wn.Sum(w => w.Nutzflaeche);
-            GesamtBewohner = wn
-                .Select(w => w.Vertraege.FirstOrDefault(v => v.Ende == null || v.Ende >= DateTime.UtcNow.Date))
-                .Sum(v => v?.Personenzahl ?? 0);
-
-            AttachFile = new AsyncRelayCommand(async _ =>
-                await Utils.Files.SaveFilesToWalter(App.Walter.AdresseAnhaenge, Adresse), _ => true);
-
-            PropertyChanged += OnUpdate;
-        }
-
-        public AsyncRelayCommand AttachFile { get; }
-
-        private void OnUpdate(object sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case nameof(Strasse):
-                case nameof(Hausnummer):
-                case nameof(Postleitzahl):
-                case nameof(Stadt):
-                    break;
-                default:
-                    return;
-            }
-
-            if (Entity.Strasse == null ||
-                Entity.Hausnummer == null ||
-                Entity.Postleitzahl == null ||
-                Entity.Stadt == null)
-            {
-                return;
-            }
-
-            if (Entity.AdresseId != 0)
-            {
-                App.Walter.Adressen.Update(Entity);
-            }
-            else
-            {
-                App.Walter.Adressen.Add(Entity);
-            }
-
-            App.SaveWalter();
-        }
-    }
-
-    public sealed class WohnungListWohnung
-    {
-        public int Id { get; }
-        public int AdresseId { get; }
+        public Wohnung Entity { get; }
         public string Bezeichnung { get; }
-        public ObservableProperty<string> Anschrift
-            = new ObservableProperty<string>();
+        public string Anschrift { get; }
 
-        public WohnungListWohnung(Wohnung w)
+        public WohnungListEntry(Wohnung w)
         {
             Id = w.WohnungId;
+            Entity = w;
             Bezeichnung = w.Bezeichnung;
-            Anschrift.Value = AdresseViewModel.Anschrift(w);
-            AdresseId = w.AdresseId;
+            Anschrift = AdresseViewModel.Anschrift(w);
         }
     }
 }
