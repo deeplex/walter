@@ -126,6 +126,9 @@
     <Compile Include="UserControls\BetriebskostenrechnungControl.xaml.cs">
       <DependentUpon>BetriebskostenrechnungControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\KontaktListControl.xaml.cs">
+      <DependentUpon>KontaktListControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\VertragListControl.xaml.cs">
       <DependentUpon>VertragListControl.xaml</DependentUpon>
     </Compile>
@@ -258,6 +261,10 @@
     <Page Include="UserControls\BetriebskostenrechnungControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\KontaktListControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UserControls\VertragListControl.xaml">
       <Generator>MSBuild:Compile</Generator>
