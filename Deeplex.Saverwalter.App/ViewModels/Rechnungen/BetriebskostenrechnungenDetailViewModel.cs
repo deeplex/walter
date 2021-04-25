@@ -161,34 +161,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         public List<Wohnung> Wohnungen { get; }
-        public string AdressenBezeichnung { get; }
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r)
         {
             Entity = r;
             
             Wohnungen = r.Gruppen.Select(g => g.Wohnung).ToList();
-
-            AdressenBezeichnung = string.Join(" — ",  App.Walter.Wohnungen
-                .Include(w => w.Adresse)
-                .Where(w => Wohnungen.Contains(w))
-                .ToList()
-                .GroupBy(w => w.Adresse)
-                .ToDictionary(g => g.Key, g => g.ToList())
-                .Select(adr =>
-                {
-                    var a = adr.Key;
-                    var ret = a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
-                    if (adr.Value.Count() != a.Wohnungen.Count)
-                    {
-                        ret += ": " + string.Join(", ", adr.Value.Select(w => w.Bezeichnung));
-                    }
-                    else
-                    {
-                        ret += " (gesamt)";
-                    }
-                    return ret;
-                }));
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 /* TODO */await Task.FromResult<object>(null), _ => false);
