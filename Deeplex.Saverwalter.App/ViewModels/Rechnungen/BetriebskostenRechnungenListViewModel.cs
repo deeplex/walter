@@ -42,17 +42,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
     {
         private readonly Betriebskostenrechnung Entity;
         public int Id => Entity.BetriebskostenrechnungId;
+        public List<Wohnung> Wohnungen { get; }
         public string TypString => Entity.Typ.ToString();
         public string BetreffendesJahrString => Entity.BetreffendesJahr.ToString();
         public string BetragString => Entity.Betrag.ToString() + "€";
-        public string AdressenBezeichnung;
+        public string AdressenBezeichnung { get; }
 
         public BetriebskostenRechnungenListEntry(Betriebskostenrechnung r)
         {
             Entity = r;
+            Wohnungen = r.Gruppen.Select(g => g.Wohnung).ToList();
             AdressenBezeichnung = string.Join(" — ", App.Walter.Wohnungen
             .Include(w => w.Adresse)
-            .Where(w => r.Gruppen.Select(g => g.Wohnung).Contains(w))
+            .Where(w => Wohnungen.Contains(w))
             .ToList()
             .GroupBy(w => w.Adresse)
             .ToDictionary(g => g.Key, g => g.ToList())

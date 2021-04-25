@@ -12,35 +12,7 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Page.Resources>
-        <muxc:StackLayout x:Name="VerticalStackLayout" Orientation="Vertical" Spacing="8"/>
-    </Page.Resources>
-
     <ScrollViewer>
-        <StackPanel>
-            <mtuuc:DataGrid
-                IsReadOnly="True"
-                CanUserReorderColumns="False"
-                CanUserResizeColumns="True"
-                AutoGenerateColumns="False"
-                DoubleTapped="Details_Click"
-                ItemsSource="{x:Bind ViewModel.Liste.Value}"
-                SelectedItem="{x:Bind ViewModel.SelectedRechnung, Mode=TwoWay}">
-                <mtuuc:DataGrid.Columns>
-                    <mtuuc:DataGridTextColumn
-                        Header="Typ"
-                        Binding="{Binding TypString}"/>
-                    <mtuuc:DataGridTextColumn
-                        Header="Jahr"
-                        Binding="{Binding BetreffendesJahrString}"/>
-                    <mtuuc:DataGridTextColumn
-                        Header="Wohnungen"
-                        Binding="{Binding AdressenBezeichnung}"/>
-                    <mtuuc:DataGridTextColumn
-                        Header="Betrag"
-                        Binding="{Binding BetragString}"/>
-                </mtuuc:DataGrid.Columns>
-            </mtuuc:DataGrid>
-        </StackPanel>
+        <uc:BetriebskostenRechnungenListControl />
     </ScrollViewer>
 </Page>

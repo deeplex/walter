@@ -34,12 +34,6 @@ namespace Deeplex.Saverwalter.App.Views
                 new DrillInNavigationTransitionInfo());
         }
 
-        private void Details_Click(object sender, RoutedEventArgs e)
-        {
-            if (ViewModel.SelectedRechnung != null)
-            {
-                App.ViewModel.Navigate(typeof(BetriebskostenrechnungenDetailPage), ViewModel.SelectedRechnung.Id);
-            }
-        }
+
     }
 }

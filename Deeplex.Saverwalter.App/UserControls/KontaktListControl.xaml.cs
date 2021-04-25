@@ -35,20 +35,9 @@ namespace Deeplex.Saverwalter.App.UserControls
             }
         }
 
-
-
         private void DataGrid_RightTapped(object sender, Windows.UI.Xaml.Input.RightTappedRoutedEventArgs e)
         {
             ViewModel.SelectedKontakt = (e.OriginalSource as FrameworkElement).DataContext as KontaktListEntry;
         }
-
-        // Using a DependencyProperty as the backing store for Property1.  
-        // This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty WohnungIdProperty
-            = DependencyProperty.Register(
-                  "WohnungId",
-                  typeof(int),
-                  typeof(VertragListControl),
-                  new PropertyMetadata(0));
     }
 }
