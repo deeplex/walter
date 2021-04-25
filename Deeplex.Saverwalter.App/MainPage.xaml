@@ -93,6 +93,10 @@
                     Content="{x:Bind WohnungListLabel}" 
                     Icon="Street"/>
                 <NavigationViewItem
+                    x:Name="ZaehlerListMenuItem"
+                    Content="{x:Bind ZaehlerListLabel}" 
+                    Icon="Clock"/>
+                <NavigationViewItem
                     x:Name="VertragListMenuItem"
                     Content="{x:Bind VertragListLabel}" 
                     Icon="Library"/>

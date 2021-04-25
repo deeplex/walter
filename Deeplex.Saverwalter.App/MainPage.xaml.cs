@@ -61,6 +61,7 @@ namespace Deeplex.Saverwalter.App
         public readonly string KontaktListLabel = "Kontakte";
         public readonly string VertragListLabel = "Verträge";
         public readonly string WohnungListLabel = "Mietobjekte";
+        public readonly string ZaehlerListLabel = "Zähler";
         public readonly string BetriebskostenrechnungenListLabel = "Betr. Rechnung";
 
         private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
@@ -71,6 +72,7 @@ namespace Deeplex.Saverwalter.App
                 label == KontaktListLabel ? typeof(KontaktListPage) :
                 label == WohnungListLabel ? typeof(WohnungListPage) :
                 label == VertragListLabel ? typeof(VertragListPage) :
+                label == ZaehlerListLabel ? typeof(ZaehlerListPage) :
                 label == BetriebskostenrechnungenListLabel ? typeof(BetriebskostenRechnungenListViewPage) :
                 null;
 
@@ -99,6 +101,10 @@ namespace Deeplex.Saverwalter.App
                 else if (e.SourcePageType == typeof(BetriebskostenRechnungenListViewPage))
                 {
                     NavView.SelectedItem = BetriebskostenListMenuItem;
+                }
+                else if (e.SourcePageType == typeof(ZaehlerListPage))
+                {
+                    NavView.SelectedItem = ZaehlerListMenuItem;
                 }
                 else if (e.SourcePageType == typeof(SettingsPage))
                 {

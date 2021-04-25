@@ -1,0 +1,47 @@
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Utils.ObjectModel;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Deeplex.Saverwalter.App.ViewModels.Zähler
+{
+    public class ZaehlerListViewModel : BindableBase
+    {
+        public ObservableProperty<List<ZaehlerListEntry>> Liste = new ObservableProperty<List<ZaehlerListEntry>>();
+        private KontaktListEntry mSelectedZaehler;
+        public KontaktListEntry SelectedZaehler
+        {
+            get => mSelectedZaehler;
+            set
+            {
+                mSelectedZaehler = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
+        public ZaehlerListViewModel()
+        {
+            Liste.Value = App.Walter.ZaehlerSet
+                .Select(z => new ZaehlerListEntry(z))
+                .ToList();
+        }
+    }
+
+    public class ZaehlerListEntry
+    {
+        private Zaehler Entity;
+        public int Id => Entity.ZaehlerId;
+        public string Kennnummer => Entity.Kennnummer;
+        public string TypString => Entity.Typ.ToString();
+        public string Wohnung => AdresseViewModel.Anschrift(Entity.Wohnung) + ", " + Entity.Wohnung.Bezeichnung;
+
+        public ZaehlerListEntry(Zaehler z)
+        {
+            Entity = z;
+        }
+
+    }
+}
