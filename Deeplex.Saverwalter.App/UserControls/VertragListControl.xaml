@@ -12,49 +12,26 @@
     d:DesignWidth="400">
 
     <mtuuc:DataGrid
-        IsReadOnly="True"
-        CanUserReorderColumns="False"
-        CanUserResizeColumns="True"
-        AutoGenerateColumns="False"
-        ItemsSource="{x:Bind ViewModel.Vertraege}">
+                IsReadOnly="True"
+                CanUserReorderColumns="False"
+                CanUserResizeColumns="True"
+                AutoGenerateColumns="False"
+                DoubleTapped="Details_Click"
+                ItemsSource="{x:Bind ViewModel.Vertraege}"
+                SelectedItem="{x:Bind ViewModel.SelectedVertrag.Value, Mode=TwoWay}">
         <mtuuc:DataGrid.Columns>
-            <mtuuc:DataGridTemplateColumn
-                Header="Beginn">
-                <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:VertragListVertrag">
-                        <CalendarDatePicker
-                        IsEnabled="False"
-                        Width="176"
-                        Date="{x:Bind Beginn, Mode=OneWay}"
-                        Language="de"
-                        PlaceholderText="Beginn"
-                        DateFormat="{}{day.integer}. {month.full} {year.full}"/>
-                    </DataTemplate>
-                </mtuuc:DataGridTemplateColumn.CellTemplate>
-            </mtuuc:DataGridTemplateColumn>
-            <mtuuc:DataGridTemplateColumn
-                Header="Ende">
-                <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:VertragListVertrag">
-                        <CalendarDatePicker
-                        IsEnabled="False"
-                        Width="176"
-                        Date="{x:Bind Ende, Mode=OneWay}"
-                        Language="de"
-                        PlaceholderText="Offen"
-                        DateFormat="{}{day.integer}. {month.full} {year.full}"/>
-                    </DataTemplate>
-                </mtuuc:DataGridTemplateColumn.CellTemplate>
-            </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTextColumn
-                Header="Mieter"
-                Binding="{Binding AuflistungMieter}"/>
+                        Header="Mieter"
+                        Binding="{Binding AuflistungMieter}"/>
             <mtuuc:DataGridTextColumn
-                Header="Anschrift"
-                Binding="{Binding Anschrift}"/>
+                        Header="Wohnung"
+                        Binding="{Binding Anschrift}"/>
             <mtuuc:DataGridTextColumn
-                Header="Wohnung"
-                Binding="{Binding Wohnung.Bezeichnung}"/>
+                        Header="Beginn"
+                        Binding="{Binding BeginnString}"/>
+            <mtuuc:DataGridTextColumn
+                        Header="Ende"
+                        Binding="{Binding EndeString}"/>
         </mtuuc:DataGrid.Columns>
     </mtuuc:DataGrid>
 </UserControl>

@@ -24,14 +24,6 @@ namespace Deeplex.Saverwalter.App.Views
             App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { AddVertrag });
         }
 
-        private void Details_Click(object sender, RoutedEventArgs e)
-        {
-            if (ViewModel.SelectedVertrag.Value != null)
-            {
-                App.ViewModel.Navigate(typeof(VertragDetailViewPage), ViewModel.SelectedVertrag.Value.VertragId);
-            }
-        }
-
         private void AddVertrag_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             Frame.Navigate(typeof(VertragDetailViewPage), null,

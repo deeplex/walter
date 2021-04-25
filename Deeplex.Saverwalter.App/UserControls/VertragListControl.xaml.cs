@@ -1,5 +1,8 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.App.Views;
 using System;
+using System.Collections.Immutable;
+using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -14,15 +17,19 @@ namespace Deeplex.Saverwalter.App.UserControls
         public VertragListControl()
         {
             InitializeComponent();
+            ViewModel = new VertragListViewModel();
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (WohnungIdDepObject, WohnungIdProp) =>
             {
-                ViewModel = new VertragListViewModel(App.Walter.Wohnungen.Find(WohnungId));
+                ViewModel.Vertraege = ViewModel.Vertraege.Where(v => v.Wohnung.WohnungId == WohnungId).ToImmutableList();
             });
 
             RegisterPropertyChangedCallback(PersonIdProperty, (PersonIddepObject, PersonIdProp) =>
             {
-                ViewModel = new VertragListViewModel(App.Walter.FindPerson(PersonId));
+                ViewModel.Vertraege = ViewModel.Vertraege.Where(v =>
+                    v.Wohnung.BesitzerId == PersonId ||
+                    v.Mieter.Contains(PersonId))
+                    .ToImmutableList();
             });
         }
 
@@ -30,6 +37,14 @@ namespace Deeplex.Saverwalter.App.UserControls
         {
             get { return (Guid)GetValue(PersonIdProperty); }
             set { SetValue(PersonIdProperty, value); }
+        }
+
+        private void Details_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.SelectedVertrag.Value != null)
+            {
+                App.ViewModel.Navigate(typeof(VertragDetailViewPage), ViewModel.SelectedVertrag.Value.VertragId);
+            }
         }
 
         public static readonly DependencyProperty PersonIdProperty

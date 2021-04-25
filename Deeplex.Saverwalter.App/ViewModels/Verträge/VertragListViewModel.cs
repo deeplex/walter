@@ -24,21 +24,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .OrderBy(v => v.Beginn).Reverse()
                 .ToImmutableList();
         }
-
-        public VertragListViewModel(Wohnung w) : this()
-        {
-            if (w == null) return;
-            Vertraege = Vertraege.Where(v => v.Wohnung == w).ToImmutableList();
-        }
-
-        public VertragListViewModel(IPerson w) : this()
-        {
-            if (w == null) return;
-            Vertraege = Vertraege.Where(v =>
-                v.Wohnung.BesitzerId == w.PersonId ||
-                v.Mieter.Contains(w.PersonId))
-                .ToImmutableList();
-        }
     }
 
     public sealed class VertragListVertrag : VertragVersionListViewModel
