@@ -11,8 +11,8 @@ namespace Deeplex.Saverwalter.App.ViewModels.Zähler
     public class ZaehlerListViewModel : BindableBase
     {
         public ObservableProperty<List<ZaehlerListEntry>> Liste = new ObservableProperty<List<ZaehlerListEntry>>();
-        private KontaktListEntry mSelectedZaehler;
-        public KontaktListEntry SelectedZaehler
+        private ZaehlerListEntry mSelectedZaehler;
+        public ZaehlerListEntry SelectedZaehler
         {
             get => mSelectedZaehler;
             set

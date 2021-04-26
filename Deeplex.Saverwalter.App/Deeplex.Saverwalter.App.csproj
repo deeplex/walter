@@ -132,14 +132,8 @@
     <Compile Include="UserControls\VertragListControl.xaml.cs">
       <DependentUpon>VertragListControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\ZaehlerControl.xaml.cs">
-      <DependentUpon>ZaehlerControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="UserControls\ZaehlerListControl.xaml.cs">
       <DependentUpon>ZaehlerListControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UserControls\ZaehlerstandControl.xaml.cs">
-      <DependentUpon>ZaehlerstandControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utils\Enums.cs" />
     <Compile Include="Utils\Files.cs" />
@@ -161,8 +155,7 @@
       <DependentUpon>AdresseControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\Zähler\ZaehlerListViewModel.cs" />
-    <Compile Include="ViewModels\Zähler\ZaehlerstandViewModel.cs" />
-    <Compile Include="ViewModels\Zähler\ZaehlerViewModel.cs" />
+    <Compile Include="ViewModels\Zähler\ZaehlerDetailViewModel.cs" />
     <Compile Include="Views\Rechnungen\BetriebskostenrechnungenDetailPage.xaml.cs">
       <DependentUpon>BetriebskostenrechnungenDetailPage.xaml</DependentUpon>
     </Compile>
@@ -192,6 +185,9 @@
     </Compile>
     <Compile Include="Views\Wohnungen\WohnungListPage.xaml.cs">
       <DependentUpon>WohnungListPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Zähler\ZaehlerDetailPage.xaml.cs">
+      <DependentUpon>ZaehlerDetailPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Zähler\ZaehlerListPage.xaml.cs">
       <DependentUpon>ZaehlerListPage.xaml</DependentUpon>
@@ -281,15 +277,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\ZaehlerControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="UserControls\ZaehlerListControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UserControls\ZaehlerstandControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -330,6 +318,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Wohnungen\WohnungListPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Zähler\ZaehlerDetailPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

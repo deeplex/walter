@@ -16,6 +16,7 @@
             CanUserReorderColumns="False"
             CanUserResizeColumns="True"
             AutoGenerateColumns="False"
+            DoubleTapped="Details_Click"
             ItemsSource="{x:Bind ViewModel.Liste.Value}"
             SelectedItem="{x:Bind ViewModel.SelectedZaehler, Mode=TwoWay}">
             <mtuuc:DataGrid.Columns>
@@ -29,7 +30,6 @@
                     Header="Wohnung"
                     Binding="{Binding Wohnung}"/>
             </mtuuc:DataGrid.Columns>
-
         </mtuuc:DataGrid>
     </Grid>
 </UserControl>

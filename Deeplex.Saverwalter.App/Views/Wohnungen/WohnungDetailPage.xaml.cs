@@ -55,21 +55,6 @@ namespace Deeplex.Saverwalter.App.Views
             };
             App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { },
                 new ICommandBarElement[] { Delete });
-
-            var AdresseGroup = App.Walter.Wohnungen
-                .Include(w => w.Adresse)
-                .ToList()
-                .Select(w => new WohnungDetailAdresseWohnung(w))
-                .GroupBy(w => w.AdresseId)
-                .ToImmutableDictionary(
-                    g => new WohnungDetailAdresse(g.Key),
-                    g => g.ToImmutableList());
-
-            AdresseGroup.Keys.ToList().ForEach(k =>
-            {
-                AdresseGroup[k].ForEach(v => k.Children.Add(v));
-                AllgemeinZaehlerTree.RootNodes.Add(k);
-            });
         }
 
         public sealed class WohnungDetailAdresseWohnung : Microsoft.UI.Xaml.Controls.TreeViewNode

@@ -42,9 +42,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public ObservableProperty<ImmutableList<ZaehlerViewModel>> Zaehler
-            = new ObservableProperty<ImmutableList<ZaehlerViewModel>>();
-
         public class WohnungDetailVermieter
         {
             public Guid Id { get; set; }
@@ -112,21 +109,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        // Deprecated, but here as a reminder if Include is still necessary.
-        //public WohnungDetailViewModel(int id)
-        //    : this(App.Walter.Wohnungen
-        //          .Include(w => w.Adresse)
-        //          .Include(w => w.Zaehler)
-        //          .ThenInclude(z => z.Staende)
-        //          .Include(w => w.AllgemeinZaehlerGruppen)
-        //          .ThenInclude(g => g.Zaehler)
-        //          .ThenInclude(z => z.Staende)
-        //          .First(w => w.WohnungId == id))
-        //{ }
-
         public WohnungDetailViewModel() : this(new Wohnung()) { }
-
-        public List<Zaehlertyp> Zaehlertypen = Enums.Zaehlertypen;
 
         public WohnungDetailViewModel(Wohnung w)
         {
@@ -137,63 +120,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Besitzer = new WohnungDetailVermieter(w.BesitzerId);
             }
 
-            Zaehler.Value = w.Zaehler
-                .Select(z => new ZaehlerViewModel(z))
-                .Concat(w.AllgemeinZaehlerGruppen
-                    .Select(g => new ZaehlerViewModel(g.Zaehler)))
-                    .ToImmutableList();
-
-            AddAllgemeinZaehler = new RelayCommand(AddAllgemeinZaehlerPanel =>
-            {
-                var Tree = (AddAllgemeinZaehlerPanel as StackPanel).Children[0] as Microsoft.UI.Xaml.Controls.TreeView;
-                var Panel = (AddAllgemeinZaehlerPanel as StackPanel).Children[1] as StackPanel;
-
-                var kn = (Panel.Children[0] as TextBox).Text;
-                var Typ = (Zaehlertyp)(Panel.Children[1] as ComboBox).SelectedItem;
-
-                var z = new AllgemeinZaehler
-                {
-                    Kennnummer = kn,
-                    Typ = Typ,
-                };
-                App.Walter.AllgemeinZaehlerSet.Add(z);
-
-                foreach (var item in Tree.SelectedNodes)
-                {
-                    if (!(item is WohnungDetailAdresseWohnung wohnung))
-                    {
-                        continue;
-                    }
-                    App.Walter.AllgemeinZaehlerGruppen.Add(new AllgemeinZaehlerGruppe
-                    {
-                        WohnungId = wohnung.Id,
-                        Zaehler = z,
-                    });
-                }
-
-                App.SaveWalter();
-                var wdz = new ZaehlerViewModel(z);
-                RaisePropertyChanged(nameof(AllgemeinZaehler));
-            }, _ => true);
-
-            AddZaehler = new RelayCommand(AddZaehlerPanel =>
-            {
-                var kn = ((TextBox)((StackPanel)AddZaehlerPanel).Children[0]).Text;
-                var Typ = (Zaehlertyp)((ComboBox)((StackPanel)AddZaehlerPanel).Children[1]).SelectedItem;
-
-                var z = new Zaehler
-                {
-                    Wohnung = w,
-                    Kennnummer = kn,
-                    Typ = Typ,
-                };
-                App.Walter.ZaehlerSet.Add(z);
-                App.SaveWalter();
-                var wdz = new ZaehlerViewModel(z);
-                Zaehler.Value = Zaehler.Value.Add(wdz);
-                RaisePropertyChanged(nameof(Zaehler));
-            }, _ => true);
-
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Utils.Files.SaveFilesToWalter(App.Walter.WohnungAnhaenge, w), _ => true);
 
@@ -201,8 +127,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         public AsyncRelayCommand AttachFile;
-        public RelayCommand AddZaehler { get; }
-        public RelayCommand AddAllgemeinZaehler { get; }
 
         public void Update()
         {
