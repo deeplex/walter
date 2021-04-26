@@ -135,6 +135,9 @@
     <Compile Include="UserControls\ZaehlerListControl.xaml.cs">
       <DependentUpon>ZaehlerListControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\ZaehlerstandListControl.xaml.cs">
+      <DependentUpon>ZaehlerstandListControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\Enums.cs" />
     <Compile Include="Utils\Files.cs" />
     <Compile Include="ViewModels\AnhangViewModel.cs" />
@@ -156,6 +159,7 @@
     </Compile>
     <Compile Include="ViewModels\Zähler\ZaehlerListViewModel.cs" />
     <Compile Include="ViewModels\Zähler\ZaehlerDetailViewModel.cs" />
+    <Compile Include="ViewModels\Zähler\ZaehlerstandListViewModel.cs" />
     <Compile Include="Views\Rechnungen\BetriebskostenrechnungenDetailPage.xaml.cs">
       <DependentUpon>BetriebskostenrechnungenDetailPage.xaml</DependentUpon>
     </Compile>
@@ -278,6 +282,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\ZaehlerListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ZaehlerstandListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

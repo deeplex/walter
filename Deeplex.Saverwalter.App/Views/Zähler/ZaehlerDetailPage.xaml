@@ -38,6 +38,11 @@
                     DisplayMemberPath="Anschrift"
                     SelectedValuePath="{x:Bind ViewModel.Wohnung}"/>
             </mtuuc:WrapPanel>
+            <TextBlock
+                Margin="20,20,0,0"
+                Style="{StaticResource SubtitleTextBlockStyle}"
+                Text="Zählerstände"/>
+            <uc:ZaehlerstandListControl ZaehlerId="{x:Bind ViewModel.Id}" />
         </StackPanel>
     </ScrollViewer>
 </Page>
