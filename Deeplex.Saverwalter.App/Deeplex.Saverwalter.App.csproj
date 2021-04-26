@@ -123,19 +123,19 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserControls\BetriebskostenRechnungenListControl.xaml.cs">
+    <Compile Include="UserControls\Lists\BetriebskostenRechnungenListControl.xaml.cs">
       <DependentUpon>BetriebskostenRechnungenListControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\KontaktListControl.xaml.cs">
+    <Compile Include="UserControls\Lists\KontaktListControl.xaml.cs">
       <DependentUpon>KontaktListControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\VertragListControl.xaml.cs">
+    <Compile Include="UserControls\Lists\VertragListControl.xaml.cs">
       <DependentUpon>VertragListControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\ZaehlerListControl.xaml.cs">
+    <Compile Include="UserControls\Lists\ZaehlerListControl.xaml.cs">
       <DependentUpon>ZaehlerListControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\ZaehlerstandListControl.xaml.cs">
+    <Compile Include="UserControls\Lists\ZaehlerstandListControl.xaml.cs">
       <DependentUpon>ZaehlerstandListControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utils\Enums.cs" />
@@ -265,15 +265,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UserControls\BetriebskostenRechnungenListControl.xaml">
+    <Page Include="UserControls\Lists\BetriebskostenRechnungenListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\KontaktListControl.xaml">
+    <Page Include="UserControls\Lists\KontaktListControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UserControls\VertragListControl.xaml">
+    <Page Include="UserControls\Lists\VertragListControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -281,11 +281,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\ZaehlerListControl.xaml">
+    <Page Include="UserControls\Lists\ZaehlerListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\ZaehlerstandListControl.xaml">
+    <Page Include="UserControls\Lists\ZaehlerstandListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
