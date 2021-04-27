@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Include(b => b.Gruppen)
                 .ThenInclude(g => g.Wohnung)
                 .ThenInclude(w => w.Adresse)
-                .Include(b => b.Allgemeinzaehler)
+                .Include(b => b.Zaehler)
                 .Select(w => new BetriebskostenRechnungenListEntry(w))
                 .ToList();
         }

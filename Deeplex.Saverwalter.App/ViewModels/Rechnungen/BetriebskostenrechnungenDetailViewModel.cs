@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public List<UmlageSchluesselUtil> Schluessel_List = Enums.UmlageSchluessel;
         public List<BetriebskostentypUtil> Typen_List = Enums.Betriebskostentyp;
         public List<BetriebskostenrechnungAllgemeinZaehler> AllgemeinZaehler_List
-            = App.Walter.AllgemeinZaehlerSet
+            = App.Walter.ZaehlerSet
             .Select(a => new BetriebskostenrechnungAllgemeinZaehler(a))
             .ToList();
 
@@ -35,20 +35,20 @@ namespace Deeplex.Saverwalter.App.ViewModels
             public int Id { get; }
             public string Kennnummer { get; }
 
-            public BetriebskostenrechnungAllgemeinZaehler(AllgemeinZaehler a)
+            public BetriebskostenrechnungAllgemeinZaehler(Zaehler a)
             {
-                Id = a.AllgemeinZaehlerId;
+                Id = a.ZaehlerId;
                 Kennnummer = a.Kennnummer;
             }
         }
 
         public int AllgemeinZaehler
         {
-            get => Entity?.Allgemeinzaehler != null ?
-                AllgemeinZaehler_List.FindIndex(a => a.Id == Entity.Allgemeinzaehler.AllgemeinZaehlerId) : 0;
+            get => Entity?.Zaehler != null ?
+                AllgemeinZaehler_List.FindIndex(a => a.Id == Entity.Zaehler.ZaehlerId) : 0;
             set
             {
-                Entity.Allgemeinzaehler = App.Walter.AllgemeinZaehlerSet.Find(AllgemeinZaehler_List[value].Id);
+                Entity.Zaehler = App.Walter.ZaehlerSet.Find(AllgemeinZaehler_List[value].Id);
                 RaisePropertyChangedAuto();
             }
         }

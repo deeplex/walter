@@ -318,6 +318,9 @@ namespace Deeplex.Saverwalter.Model
 
                 public double Kosten;
 
+                // TODO Zähler sind hier noch nicht so richtig drin. Aktuell werden einfach alle Zähler eines
+                // Typen in einen Topf geworfen, aber Zähler referenzieren jetzt jeweils die Allgemeinzähler.
+                // Man kann also auch direkt die Zähler des Allgemeinzählers der Rechnung nehmen
                 public Heizkostenberechnung(Betriebskostenrechnung r, Betriebskostenabrechnung b)
                 {
                     Betrag = r.Betrag;
@@ -334,11 +337,11 @@ namespace Deeplex.Saverwalter.Model
                     var AllgWaermeZaehler = b.db.ZaehlerSet.Where(z =>
                         z.Typ == Zaehlertyp.Gas && r.Gruppen.Select(g => g.Wohnung).Contains(z.Wohnung)).ToImmutableList();
 
-                    var AllgemeinWaermeZaehler = b.db.AllgemeinZaehlerGruppen
+                    var AllgemeinWaermeZaehler = b.db.ZaehlerSet
                         .Include(g => g.Wohnung)
-                        .Include(g => g.Zaehler).ThenInclude(z => z.Staende)
+                        .Include(g => g.EinzelZaehler).ThenInclude(z => z.Staende)
                         .Where(g => g.WohnungId == b.Wohnung.WohnungId)
-                        .Select(g => g.Zaehler)
+                        .Select(g => g.AllgemeinZaehler)
                         .Where(z => z.Typ == Zaehlertyp.Gas)
                         .ToImmutableList();
 
@@ -368,7 +371,7 @@ namespace Deeplex.Saverwalter.Model
                             .ToImmutableList();
                     }
 
-                    ImmutableList<Zaehlerstand> AllgemeinEnde(ImmutableList<AllgemeinZaehler> z, bool ganzeGruppe = false)
+                    ImmutableList<Zaehlerstand> AllgemeinEnde(ImmutableList<Zaehler> z, bool ganzeGruppe = false)
                     {
                         var ende = (ganzeGruppe ? b.Abrechnungsende : b.Nutzungsende).Date;
                         return z.Select(z => z.Staende.OrderBy(s => s.Datum)
@@ -377,7 +380,7 @@ namespace Deeplex.Saverwalter.Model
                             .ToImmutableList();
                     }
 
-                    ImmutableList<Zaehlerstand> AllgemeinBeginn(ImmutableList<AllgemeinZaehler> z, bool ganzeGruppe = false)
+                    ImmutableList<Zaehlerstand> AllgemeinBeginn(ImmutableList<Zaehler> z, bool ganzeGruppe = false)
                     {
                         var beginn = (ganzeGruppe ? b.Abrechnungsbeginn : b.Nutzungsbeginn).Date.AddDays(-1);
                         return z.Select(z => z.Staende.OrderBy(s => s.Datum)

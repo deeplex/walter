@@ -12,9 +12,6 @@ namespace Deeplex.Saverwalter.Model
 
         public DbSet<Adresse> Adressen { get; set; } = null!;
         public DbSet<AdresseAnhang> AdresseAnhaenge { get; set; } = null!;
-        public DbSet<AllgemeinZaehlerGruppe> AllgemeinZaehlerGruppen { get; set; } = null!;
-        public DbSet<AllgemeinZaehler> AllgemeinZaehlerSet { get; set; } = null!;
-        public DbSet<AllgemeinZaehlerAnhang> AllgemeinZaehlerAnhaenge { get; set; } = null!;
         public DbSet<Anhang> Anhaenge { get; set; } = null!;
         public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
         public DbSet<BetriebskostenrechnungAnhang> BetriebskostenrechnungAnhaenge { get; set; } = null!;
@@ -235,7 +232,6 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
         public List<Vertrag> Vertraege { get; private set; } = new List<Vertrag>();
         public List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
-        public List<AllgemeinZaehlerGruppe> AllgemeinZaehlerGruppen { get; private set; } = new List<AllgemeinZaehlerGruppe>();
         public List<BetriebskostenrechnungsGruppe> Betriebskostenrechnungsgruppen { get; private set; } = new List<BetriebskostenrechnungsGruppe>();
     }
 
@@ -424,7 +420,7 @@ namespace Deeplex.Saverwalter.Model
         public double? HKVO_P7 { get; set; }
         public double? HKVO_P8 { get; set; }
         public HKVO_P9A2? HKVO_P9 { get; set; }
-        public AllgemeinZaehler? Allgemeinzaehler { get; set; }
+        public Zaehler? Zaehler { get; set; }
 
         public string? Notiz { get; set; }
 
@@ -489,36 +485,13 @@ namespace Deeplex.Saverwalter.Model
         public Anhang Anhang { get; set; } = null!;
     }
 
-    public sealed class AllgemeinZaehler
-    {
-        public int AllgemeinZaehlerId { get; set; }
-        public string Kennnummer { get; set; } = null!;
-        public Zaehlertyp Typ { get; set; }
-        public List<Zaehlerstand> Staende { get; private set; } = new List<Zaehlerstand>();
-        public string? Notiz { get; set; }
-    }
-
-    public sealed class AllgemeinZaehlerAnhang : IAnhang<AllgemeinZaehler>
-    {
-        public int AllgemeinZaehlerAnhangId { get; set; }
-        public AllgemeinZaehler Target { get; set; } = null!;
-        public Guid AnhangId { get; set; }
-        public Anhang Anhang { get; set; } = null!;
-    }
-
-    public sealed class AllgemeinZaehlerGruppe
-    {
-        public int AllgemeinZaehlerGruppeId { get; set; }
-        public int WohnungId { get; set; }
-        public Wohnung Wohnung { get; set; } = null!;
-        public AllgemeinZaehler Zaehler { get; set; } = null!;
-    }
-
     public sealed class Zaehler
     {
         public int ZaehlerId { get; set; }
         public string Kennnummer { get; set; } = null!;
-        public Wohnung Wohnung { get; set; } = null!;
+        public Wohnung? Wohnung { get; set; } = null!;
+        public Zaehler? AllgemeinZaehler { get; set; } = null!;
+        public List<Zaehler> EinzelZaehler { get; private set; } = new List<Zaehler>();
         public int WohnungId { get; set; }
         public Zaehlertyp Typ { get; set; }
         public List<Zaehlerstand> Staende { get; private set; } = new List<Zaehlerstand>();
@@ -548,8 +521,7 @@ namespace Deeplex.Saverwalter.Model
     public sealed class Zaehlerstand
     {
         public int ZaehlerstandId { get; set; }
-        public Zaehler? Zaehler { get; set; }
-        public AllgemeinZaehler? AllgemeinZaehler { get; set; }
+        public Zaehler Zaehler { get; set; } = null!;
         public DateTime Datum { get; set; }
         public double Stand { get; set; }
         public string? Notiz { get; set; }
