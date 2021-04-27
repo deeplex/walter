@@ -17,12 +17,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ZaehlerstandListViewModel(Zaehler z)
         {
             ZaehlerId = z.ZaehlerId;
-            Liste.Value = z.Staende.Select(s => new ZaehlerstandListEntry(s)).ToImmutableList();
+            Liste.Value = z.Staende.Select(s => new ZaehlerstandListEntry(s, this)).ToImmutableList();
         }
 
         public void AddToList(Zaehlerstand z)
         {
-            Liste.Value = Liste.Value.Add(new ZaehlerstandListEntry(z));
+            Liste.Value = Liste.Value.Add(new ZaehlerstandListEntry(z, this));
         }
     }
 
@@ -35,9 +35,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public DateTimeOffset Datum => Entity.Datum;
         public string DatumString => Datum.ToString("dd.MM.yyyy");
 
-        public ZaehlerstandListEntry(Zaehlerstand z)
+        public ZaehlerstandListEntry(Zaehlerstand z, ZaehlerstandListViewModel vm)
         {
             Entity = z;
+            Delete = new RelayCommand(_ =>
+            {
+                App.Walter.Zaehlerstaende.Remove(Entity);
+                App.SaveWalter();
+                vm.Liste.Value = vm.Liste.Value.Remove(this);
+            }, _ => true);
         }
+
+        public RelayCommand Delete;
     }
 }

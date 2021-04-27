@@ -61,6 +61,11 @@ namespace Deeplex.Saverwalter.App.UserControls
             App.Walter.Zaehlerstaende.Add(ViewModel.Entity);
             App.SaveWalter();
             ZaehlerstandListViewModel.AddToList(ViewModel.Entity);
+            ViewModel = new ZaehlerstandDetailViewModel();
+            if (AddZaehlerButton.Flyout is Flyout f)
+            {
+                f.Hide();
+            }
         }
 
         public ZaehlerDetailViewModel ZaehlerViewModel
