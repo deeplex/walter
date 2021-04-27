@@ -67,23 +67,23 @@
                     Text="{x:Bind ViewModel.Nutzeinheit, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Header="Einheiten" Width="70" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
-            <RelativePanel>
-                <StackPanel 
-                    RelativePanel.AlignRightWithPanel="True"
-                    RelativePanel.AlignLeftWithPanel="True">
-                    <TextBox
-                        Style="{StaticResource Eintraege}"
-                        Margin="20"
-                        Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Header="Notiz"/>
-                    <mtuuc:Expander
-                        Background="Transparent"
-                        Header="Verträge"
-                        HorizontalContentAlignment="Left">
-                        <uc:VertragListControl WohnungId="{x:Bind ViewModel.Id}"/>
-                    </mtuuc:Expander>
-                </StackPanel>
-            </RelativePanel>
+            <TextBox
+                Style="{StaticResource Eintraege}"
+                Margin="20"
+                Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Header="Notiz"/>
+            <mtuuc:Expander
+                    Background="Transparent"
+                    Header="Zähler"
+                    HorizontalContentAlignment="Left">
+                <uc:ZaehlerListControl WohnungId="{x:Bind ViewModel.Id}"/>
+            </mtuuc:Expander>
+            <mtuuc:Expander
+                Background="Transparent"
+                Header="Verträge"
+                HorizontalContentAlignment="Left">
+                <uc:VertragListControl WohnungId="{x:Bind ViewModel.Id}"/>
+            </mtuuc:Expander>
             <mtuuc:Expander
                     Background="Transparent"
                     Header="Betriebskostenrechnungen"

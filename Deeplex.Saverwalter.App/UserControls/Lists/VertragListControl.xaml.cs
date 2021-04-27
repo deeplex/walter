@@ -60,8 +60,6 @@ namespace Deeplex.Saverwalter.App.UserControls
             set { SetValue(WohnungIdProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for Property1.  
-        // This enables animation, styling, binding, etc...
         public static readonly DependencyProperty WohnungIdProperty
             = DependencyProperty.Register(
                   "WohnungId",

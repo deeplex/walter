@@ -39,6 +39,7 @@ namespace Deeplex.Saverwalter.App.ViewModels.Zähler
         public string TypString => Entity.Typ.ToString();
         public string LastStandString => LastStand == null ? "Keine Angabe" : LastStand.Stand.ToString();
         public string DatumString => LastStand == null ? null : LastStand.Datum.ToString("dd.MM.yyyy");
+        public int WohnungId => Entity.WohnungId;
         public string Wohnung => AdresseViewModel.Anschrift(Entity.Wohnung) + ", " + Entity.Wohnung.Bezeichnung;
 
         public ZaehlerListEntry(Zaehler z)
