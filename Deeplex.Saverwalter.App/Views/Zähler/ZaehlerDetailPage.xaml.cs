@@ -24,6 +24,22 @@ namespace Deeplex.Saverwalter.App.Views
         public ZaehlerDetailPage()
         {
             InitializeComponent();
+
+            App.ViewModel.Titel.Value = ViewModel == null ? "Neuer Zähler" : ViewModel.Kennnummer;
+            var Delete = new AppBarButton
+            {
+                Icon = new SymbolIcon(Symbol.Delete),
+                Label = "Löschen",
+            };
+            Delete.Click += Delete_Click;
+            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { },
+                new ICommandBarElement[] { Delete });
+        }
+
+        private void Delete_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.SelfDestruct();
+            Frame.GoBack();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -37,5 +53,7 @@ namespace Deeplex.Saverwalter.App.Views
                 ViewModel = new ZaehlerDetailViewModel();
             }
         }
+
+
     }
 }

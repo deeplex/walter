@@ -171,7 +171,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             AttachFile = new AsyncRelayCommand(async _ =>
                 /* TODO */await Task.FromResult<object>(null), _ => false);
 
-            dispose = new RelayCommand(_ => this.selfDestruct());
+            dispose = new RelayCommand(_ => selfDestruct());
 
             PropertyChanged += OnUpdate;
 

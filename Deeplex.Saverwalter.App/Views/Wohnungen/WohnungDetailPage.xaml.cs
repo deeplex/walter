@@ -42,11 +42,6 @@ namespace Deeplex.Saverwalter.App.Views
             base.OnNavigatedTo(e);
 
             App.ViewModel.Titel.Value = ViewModel.Anschrift + " — " + ViewModel.Bezeichnung;
-            var EditToggle = new AppBarToggleButton
-            {
-                Icon = new SymbolIcon(Symbol.Edit),
-                Label = "Bearbeiten",
-            };
             var Delete = new AppBarButton
             {
                 Icon = new SymbolIcon(Symbol.Delete),

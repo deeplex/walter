@@ -84,6 +84,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public AsyncRelayCommand AttachFile;
 
+        public void SelfDestruct()
+        {
+            Entity.Staende.ForEach(s => App.Walter.Zaehlerstaende.Remove(s));
+            App.Walter.ZaehlerSet.Remove(Entity);
+            App.SaveWalter();
+        }
+
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
