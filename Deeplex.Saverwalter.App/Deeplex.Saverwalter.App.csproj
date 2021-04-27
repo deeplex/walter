@@ -123,6 +123,9 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UserControls\AddZaehlerstand.xaml.cs">
+      <DependentUpon>AddZaehlerstand.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Lists\BetriebskostenRechnungenListControl.xaml.cs">
       <DependentUpon>BetriebskostenRechnungenListControl.xaml</DependentUpon>
     </Compile>
@@ -159,6 +162,7 @@
     </Compile>
     <Compile Include="ViewModels\Zähler\ZaehlerListViewModel.cs" />
     <Compile Include="ViewModels\Zähler\ZaehlerDetailViewModel.cs" />
+    <Compile Include="ViewModels\Zähler\ZaehlerstandDetailViewModel.cs" />
     <Compile Include="ViewModels\Zähler\ZaehlerstandListViewModel.cs" />
     <Compile Include="Views\Rechnungen\BetriebskostenrechnungenDetailPage.xaml.cs">
       <DependentUpon>BetriebskostenrechnungenDetailPage.xaml</DependentUpon>
@@ -264,6 +268,10 @@
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UserControls\AddZaehlerstand.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\Lists\BetriebskostenRechnungenListControl.xaml">
       <SubType>Designer</SubType>

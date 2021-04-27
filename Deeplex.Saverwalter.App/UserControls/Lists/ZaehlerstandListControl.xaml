@@ -5,24 +5,30 @@
     xmlns:local="using:Deeplex.Saverwalter.App.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
 
-    <mtuuc:DataGrid
-        IsReadOnly="True"                
-        CanUserReorderColumns="False"
-        CanUserResizeColumns="True"
-        AutoGenerateColumns="False"
-        ItemsSource="{x:Bind ViewModel.Liste.Value}">
-    <mtuuc:DataGrid.Columns>
-        <mtuuc:DataGridTextColumn
-                Header="Datum"
-                Binding="{Binding DatumString}"/>
-        <mtuuc:DataGridTextColumn
-                Header="Stand"
-                Binding="{Binding Stand}"/>
-    </mtuuc:DataGrid.Columns>
-    </mtuuc:DataGrid>
+    <Grid>
+        <StackPanel>
+            <mtuuc:DataGrid
+            IsReadOnly="True"                
+            CanUserReorderColumns="False"
+            CanUserResizeColumns="True"
+            AutoGenerateColumns="False"
+            ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}">
+                <mtuuc:DataGrid.Columns>
+                    <mtuuc:DataGridTextColumn
+                    Header="Datum"
+                    Binding="{Binding DatumString}"/>
+                    <mtuuc:DataGridTextColumn
+                    Header="Stand"
+                    Binding="{Binding Stand}"/>
+                </mtuuc:DataGrid.Columns>
+            </mtuuc:DataGrid>
+            <uc:AddZaehlerstand ZaehlerstandListViewModel="{x:Bind ViewModel}" />
+        </StackPanel>
+    </Grid>
 </UserControl>

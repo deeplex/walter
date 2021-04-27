@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class ZaehlerDetailViewModel : BindableBase
     {
-        private Zaehler Entity;
+        public Zaehler Entity;
         public int Id => Entity.ZaehlerId;
 
         public List<Zaehlertyp> Typen => Enums.Zaehlertypen;
