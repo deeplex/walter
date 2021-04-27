@@ -18,7 +18,7 @@
             CanUserReorderColumns="False"
             CanUserResizeColumns="True"
             AutoGenerateColumns="False"
-            ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}">
+            ItemsSource="{x:Bind ViewModel.Value.Liste.Value, Mode=OneWay}">
                 <mtuuc:DataGrid.Columns>
                     <mtuuc:DataGridTextColumn
                     Header="Datum"
@@ -28,7 +28,7 @@
                     Binding="{Binding Stand}"/>
                 </mtuuc:DataGrid.Columns>
             </mtuuc:DataGrid>
-            <uc:AddZaehlerstand ZaehlerstandListViewModel="{x:Bind ViewModel}" />
+            <uc:AddZaehlerstand ZaehlerstandListViewModel="{x:Bind ViewModel.Value, Mode=OneWay}" />
         </StackPanel>
     </Grid>
 </UserControl>

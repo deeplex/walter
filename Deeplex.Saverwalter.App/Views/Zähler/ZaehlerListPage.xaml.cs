@@ -12,11 +12,20 @@ namespace Deeplex.Saverwalter.App.Views
         {
             InitializeComponent();
             App.ViewModel.Titel.Value = "Zähler";
-
-            App.ViewModel.RefillCommandContainer(new ICommandBarElement[]
+            var AddZaehler = new AppBarButton
             {
+                Icon = new SymbolIcon(Symbol.Add),
+                Label = "Zähler hinzufügen",
+            };
+            AddZaehler.Click += AddZaehler_Click;
 
-            });
+            App.ViewModel.RefillCommandContainer(new[] { AddZaehler });
+        }
+
+        private void AddZaehler_Click(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(ZaehlerDetailPage), null,
+                new DrillInNavigationTransitionInfo());
         }
     }
 }

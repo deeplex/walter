@@ -55,13 +55,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => mWohnung;
             set
             {
-                if (value == null) return;
+                if (value == null)
+                {
+                    value = Wohnungen.First();
+                }
 
                 Entity.Wohnung = value.Entity;
                 mWohnung = value;
                 RaisePropertyChangedAuto();
             }
         }
+
+        // Necessary to show / hide Zählerstände
+        public bool Initialized => Entity.ZaehlerId != 0;
 
         public ZaehlerDetailViewModel() : this(new Zaehler()) { }
 
@@ -73,7 +79,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             PropertyChanged += OnUpdate;
 
             AttachFile = new AsyncRelayCommand(async _ =>
-                await Utils.Files.SaveFilesToWalter(App.Walter.ZaehlerAnhaenge, z), _ => true);
+                await Files.SaveFilesToWalter(App.Walter.ZaehlerAnhaenge, z), _ => true);
         }
 
         public AsyncRelayCommand AttachFile;
@@ -105,6 +111,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.Walter.ZaehlerSet.Add(Entity);
             }
             App.SaveWalter();
+            RaisePropertyChanged(nameof(Id));
+            RaisePropertyChanged(nameof(Initialized));
         }
     }
 }

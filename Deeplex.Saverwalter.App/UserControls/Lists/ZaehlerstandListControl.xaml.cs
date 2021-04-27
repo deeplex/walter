@@ -1,4 +1,6 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.Model;
+using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,14 +22,15 @@ namespace Deeplex.Saverwalter.App.UserControls
 {
     public sealed partial class ZaehlerstandListControl : UserControl
     {
-        public ZaehlerstandListViewModel ViewModel { get; set; }
+        public ObservableProperty<ZaehlerstandListViewModel> ViewModel
+            = new ObservableProperty<ZaehlerstandListViewModel>();
 
         public ZaehlerstandListControl()
         {
             InitializeComponent();
             RegisterPropertyChangedCallback(ZaehlerIdProperty, (ZaehlerIdDepObject, ZaehlerIdProp) =>
             {
-                ViewModel = new ZaehlerstandListViewModel(App.Walter.ZaehlerSet.Find(ZaehlerId));
+                ViewModel.Value = new ZaehlerstandListViewModel(App.Walter.ZaehlerSet.Find(ZaehlerId));
             });
         }
 

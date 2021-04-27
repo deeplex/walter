@@ -43,7 +43,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             RegisterPropertyChangedCallback(ZaehlerstandListViewModelProperty, (ZaehlerIdDepObject, ZaehlerIdProp) =>
             {
                 ViewModel.Zaehler = App.Walter.ZaehlerSet.Find(ZaehlerstandListViewModel.ZaehlerId);
-                var Last = ViewModel.Zaehler.Staende.OrderBy(e => e.Datum).LastOrDefault();
+                var Last = ViewModel.Zaehler?.Staende.OrderBy(e => e.Datum).LastOrDefault();
                 if (Last == null)
                 {
                     ViewModel.Stand = 0;
