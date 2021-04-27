@@ -19,7 +19,6 @@ namespace Deeplex.Saverwalter.App.UserControls
 {
     public sealed partial class AddZaehlerstand : UserControl
     {
-        //private ZaehlerDetailViewModel ZaehlerViewModel;
         public ZaehlerstandDetailViewModel ViewModel = new ZaehlerstandDetailViewModel();
         public DateTimeOffset Datum
         {

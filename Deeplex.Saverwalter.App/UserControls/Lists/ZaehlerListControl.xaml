@@ -29,6 +29,12 @@
                 <mtuuc:DataGridTextColumn
                     Header="Wohnung"
                     Binding="{Binding Wohnung}"/>
+                <mtuuc:DataGridTextColumn
+                    Header="Letztes Ablesedatum"
+                    Binding="{Binding DatumString}"/>
+                <mtuuc:DataGridTextColumn
+                    Header="Stand"
+                    Binding="{Binding LastStandString}"/>
             </mtuuc:DataGrid.Columns>
         </mtuuc:DataGrid>
     </Grid>

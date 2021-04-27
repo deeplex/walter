@@ -33,15 +33,18 @@ namespace Deeplex.Saverwalter.App.ViewModels.Zähler
     public class ZaehlerListEntry
     {
         private Zaehler Entity;
+        private Zaehlerstand LastStand;
         public int Id => Entity.ZaehlerId;
         public string Kennnummer => Entity.Kennnummer;
         public string TypString => Entity.Typ.ToString();
+        public string LastStandString => LastStand == null ? "Keine Angabe" : LastStand.Stand.ToString();
+        public string DatumString => LastStand == null ? null : LastStand.Datum.ToString("dd.MM.yyyy");
         public string Wohnung => AdresseViewModel.Anschrift(Entity.Wohnung) + ", " + Entity.Wohnung.Bezeichnung;
 
         public ZaehlerListEntry(Zaehler z)
         {
             Entity = z;
+            LastStand = z.Staende.OrderBy(e => e.Datum).LastOrDefault();
         }
-
     }
 }
