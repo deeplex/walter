@@ -10,6 +10,6 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <ScrollViewer>
-        <uc:ZaehlerListControl />
+        <uc:ZaehlerListControl Filter="{x:Bind ViewModel.Filter.Value, Mode=OneWay}"/>
     </ScrollViewer>
 </Page>

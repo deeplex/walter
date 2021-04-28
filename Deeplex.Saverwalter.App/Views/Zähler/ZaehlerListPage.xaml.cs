@@ -1,4 +1,6 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.App.ViewModels.Zähler;
 using Deeplex.Saverwalter.Model;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -8,6 +10,8 @@ namespace Deeplex.Saverwalter.App.Views
 {
     public sealed partial class ZaehlerListPage : Page
     {
+        public ZaehlerListViewModel ViewModel = new ZaehlerListViewModel();
+
         public ZaehlerListPage()
         {
             InitializeComponent();
@@ -19,7 +23,7 @@ namespace Deeplex.Saverwalter.App.Views
             };
             AddZaehler.Click += AddZaehler_Click;
 
-            App.ViewModel.RefillCommandContainer(new[] { AddZaehler });
+            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { Elements.Filter(ViewModel), AddZaehler });
         }
 
         private void AddZaehler_Click(object sender, RoutedEventArgs e)

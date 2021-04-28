@@ -1,16 +1,18 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.App.ViewModels.Zähler
 {
-    public class ZaehlerListViewModel : BindableBase
+    public class ZaehlerListViewModel : BindableBase, IFilterViewModel
     {
-        public ObservableProperty<List<ZaehlerListEntry>> Liste = new ObservableProperty<List<ZaehlerListEntry>>();
+        public ObservableProperty<ImmutableList<ZaehlerListEntry>> Liste = new ObservableProperty<ImmutableList<ZaehlerListEntry>>();
         private ZaehlerListEntry mSelectedZaehler;
         public ZaehlerListEntry SelectedZaehler
         {
@@ -22,11 +24,15 @@ namespace Deeplex.Saverwalter.App.ViewModels.Zähler
             }
         }
 
+        public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
+        public ImmutableList<ZaehlerListEntry> AllRelevant { get; }
+
         public ZaehlerListViewModel()
         {
-            Liste.Value = App.Walter.ZaehlerSet
+            AllRelevant= App.Walter.ZaehlerSet
                 .Select(z => new ZaehlerListEntry(z))
-                .ToList();
+                .ToImmutableList();
+            Liste.Value = AllRelevant;
         }
     }
 
