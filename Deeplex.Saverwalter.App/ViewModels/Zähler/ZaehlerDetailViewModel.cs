@@ -17,16 +17,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public int Id => Entity.ZaehlerId;
 
         public List<Zaehlertyp> Typen => Enums.Zaehlertypen;
-        public List<ZaehlerWohnung> Wohnungen =>
-            App.Walter.Wohnungen.Select(w => new ZaehlerWohnung(w)).ToList();
+        public List<ZaehlerWohnung> Wohnungen = new List<ZaehlerWohnung>();
 
-        public class ZaehlerWohnung
+        public List<Zaehler> EinzelZaehler =>
+            App.Walter.ZaehlerSet.Where(z => z.ZaehlerId != Id).ToList();
+
+        public Zaehler AllgemeinZaehler
         {
-            internal Wohnung Entity;
-            internal int Id => Entity.WohnungId;
-            public string Anschrift => AdresseViewModel.Anschrift(Entity) + ", " + Entity.Bezeichnung;
-
-            public ZaehlerWohnung(Wohnung w) { Entity = w; }
+            get => Entity.AllgemeinZaehler;
+            set
+            {
+                Entity.AllgemeinZaehler = value;
+                RaisePropertyChangedAuto();
+            }
         }
 
         public Zaehlertyp Typ
@@ -55,12 +58,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => mWohnung;
             set
             {
-                if (value == null)
-                {
-                    value = Wohnungen.First();
-                }
-
-                Entity.Wohnung = value.Entity;
+                Entity.Wohnung = value?.Entity;
                 mWohnung = value;
                 RaisePropertyChangedAuto();
             }
@@ -74,15 +72,20 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ZaehlerDetailViewModel(Zaehler z)
         {
             Entity = z;
+            Wohnungen = App.Walter.Wohnungen.Select(w => new ZaehlerWohnung(w)).ToList();
             Wohnung = Wohnungen.Find(w => w.Id == z.WohnungId);
 
             PropertyChanged += OnUpdate;
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 await Files.SaveFilesToWalter(App.Walter.ZaehlerAnhaenge, z), _ => true);
+            DeleteAllgemeinZaehler = new RelayCommand(_ => AllgemeinZaehler = null);
+            DeleteZaehlerWohnung = new RelayCommand(_ => Wohnung = null);
         }
 
         public AsyncRelayCommand AttachFile;
+        public RelayCommand DeleteAllgemeinZaehler;
+        public RelayCommand DeleteZaehlerWohnung;
 
         public void SelfDestruct()
         {
@@ -98,13 +101,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 case nameof(Kennnummer):
                 case nameof(Wohnung):
                 case nameof(Typ):
+                case nameof(AllgemeinZaehler):
                     break;
                 default:
                     return;
             }
 
-            if ((Entity.Wohnung == null && Entity.WohnungId == 0) ||
-                Entity.Kennnummer == "")
+            if (Entity.Kennnummer == "")
             {
                 return;
             }
@@ -120,6 +123,20 @@ namespace Deeplex.Saverwalter.App.ViewModels
             App.SaveWalter();
             RaisePropertyChanged(nameof(Id));
             RaisePropertyChanged(nameof(Initialized));
+        }
+
+        public class ZaehlerWohnung
+        {
+            internal Wohnung Entity;
+            internal int Id => Entity.WohnungId;
+            public string Anschrift { get; }
+
+            public ZaehlerWohnung(Wohnung w)
+            {
+                Entity = w;
+                Anschrift = AdresseViewModel.Anschrift(w) + ", " + w.Bezeichnung;
+
+            }
         }
     }
 }

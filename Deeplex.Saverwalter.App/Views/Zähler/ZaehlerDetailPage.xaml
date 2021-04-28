@@ -36,7 +36,24 @@
                     Margin="20,20,0,0" Header="Wohnung"
                     Width="420" ItemsSource="{x:Bind ViewModel.Wohnungen}"
                     DisplayMemberPath="Anschrift"
-                    SelectedValuePath="{x:Bind ViewModel.Wohnung}"/>
+                    SelectedValue="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                <Button
+                    Command="{x:Bind ViewModel.DeleteZaehlerWohnung}"
+                    VerticalAlignment="Bottom">
+                    <SymbolIcon Symbol="Delete"/>
+                </Button>
+            </mtuuc:WrapPanel>
+            <mtuuc:WrapPanel Orientation="Horizontal">
+                <ComboBox
+                    Margin="20,20,0,0" Header="Allgemeinzähler"
+                    Width="420" ItemsSource="{x:Bind ViewModel.EinzelZaehler}"
+                    DisplayMemberPath="Kennnummer"
+                    SelectedValue="{x:Bind ViewModel.AllgemeinZaehler, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                <Button
+                    Command="{x:Bind ViewModel.DeleteAllgemeinZaehler}"
+                    VerticalAlignment="Bottom">
+                    <SymbolIcon Symbol="Delete"/>
+                </Button>
             </mtuuc:WrapPanel>
             <StackPanel Visibility="{x:Bind ViewModel.Initialized, Mode=OneWay}">
                 <TextBlock
