@@ -135,7 +135,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 Entity = w;
                 Anschrift = AdresseViewModel.Anschrift(w) + ", " + w.Bezeichnung;
-
             }
         }
     }

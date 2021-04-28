@@ -17,7 +17,7 @@
                 CanUserResizeColumns="True"
                 AutoGenerateColumns="False"
                 DoubleTapped="Details_Click"
-                ItemsSource="{x:Bind ViewModel.Vertraege}"
+                ItemsSource="{x:Bind ViewModel.Vertraege.Value, Mode=OneWay}"
                 SelectedItem="{x:Bind ViewModel.SelectedVertrag.Value, Mode=TwoWay}">
         <mtuuc:DataGrid.Columns>
             <mtuuc:DataGridTextColumn

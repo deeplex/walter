@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.App.ViewModels;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -20,11 +21,12 @@ namespace Deeplex.Saverwalter.App.Views
                 Icon = new SymbolIcon(Symbol.Add),
                 Label = "Vertrag hinzufügen"
             };
+
             AddVertrag.Click += AddVertrag_Click;
-            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { AddVertrag });
+            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { Elements.Filter(ViewModel), AddVertrag });
         }
 
-        private void AddVertrag_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private void AddVertrag_Click(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(VertragDetailViewPage), null,
                 new DrillInNavigationTransitionInfo());

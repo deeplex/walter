@@ -14,23 +14,37 @@ namespace Deeplex.Saverwalter.App.UserControls
     {
         public VertragListViewModel ViewModel { get; set; }
 
+        private void UpdateFilter()
+        {
+            ViewModel.Vertraege.Value = ViewModel.AllRelevant;
+            if (Filter != "")
+            {
+                bool low(string str) => str.ToLower().Contains(Filter.ToLower());
+                ViewModel.Vertraege.Value = ViewModel.Vertraege.Value.Where(v =>
+                    low(v.Wohnung.Bezeichnung) || low(v.AuflistungMieter) || low(v.Anschrift))
+                    .ToImmutableList();
+            }
+            if (PersonId != Guid.Empty)
+            {
+                ViewModel.Vertraege.Value = ViewModel.Vertraege.Value.Where(v =>
+                    v.Wohnung.BesitzerId == PersonId ||
+                    v.Mieter.Contains(PersonId))
+                    .ToImmutableList();
+            }
+            if (WohnungId != 0)
+            {
+                ViewModel.Vertraege.Value = ViewModel.Vertraege.Value.Where(v => v.Wohnung.WohnungId == WohnungId).ToImmutableList();
+            }
+        }
+
         public VertragListControl()
         {
             InitializeComponent();
             ViewModel = new VertragListViewModel();
 
-            RegisterPropertyChangedCallback(WohnungIdProperty, (WohnungIdDepObject, WohnungIdProp) =>
-            {
-                ViewModel.Vertraege = ViewModel.Vertraege.Where(v => v.Wohnung.WohnungId == WohnungId).ToImmutableList();
-            });
-
-            RegisterPropertyChangedCallback(PersonIdProperty, (PersonIddepObject, PersonIdProp) =>
-            {
-                ViewModel.Vertraege = ViewModel.Vertraege.Where(v =>
-                    v.Wohnung.BesitzerId == PersonId ||
-                    v.Mieter.Contains(PersonId))
-                    .ToImmutableList();
-            });
+            RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, Prop) => UpdateFilter());
+            RegisterPropertyChangedCallback(PersonIdProperty, (DepObj, Prop) => UpdateFilter());
+            RegisterPropertyChangedCallback(FilterProperty, (DepObj, Prop) => UpdateFilter());
         }
 
         public Guid PersonId
@@ -66,5 +80,18 @@ namespace Deeplex.Saverwalter.App.UserControls
                   typeof(int),
                   typeof(VertragListControl),
                   new PropertyMetadata(0));
+
+        public string Filter
+        {
+            get { return (string)GetValue(FilterProperty); }
+            set { SetValue(FilterProperty, value); }
+        }
+
+        public static readonly DependencyProperty FilterProperty
+            = DependencyProperty.Register(
+                  "Filter",
+                  typeof(string),
+                  typeof(VertragListControl),
+                  new PropertyMetadata(""));
     }
 }

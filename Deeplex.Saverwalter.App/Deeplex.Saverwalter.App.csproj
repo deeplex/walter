@@ -141,6 +141,7 @@
     <Compile Include="UserControls\Lists\ZaehlerstandListControl.xaml.cs">
       <DependentUpon>ZaehlerstandListControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utils\Elements.cs" />
     <Compile Include="Utils\Enums.cs" />
     <Compile Include="Utils\Files.cs" />
     <Compile Include="ViewModels\AnhangViewModel.cs" />
