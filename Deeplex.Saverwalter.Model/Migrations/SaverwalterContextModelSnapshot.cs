@@ -777,7 +777,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("Typ")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("WohnungId")
+                    b.Property<int?>("WohnungId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("ZaehlerId");
@@ -1116,9 +1116,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.HasOne("Deeplex.Saverwalter.Model.Wohnung", "Wohnung")
                         .WithMany("Zaehler")
-                        .HasForeignKey("WohnungId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("WohnungId");
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.ZaehlerAnhang", b =>
