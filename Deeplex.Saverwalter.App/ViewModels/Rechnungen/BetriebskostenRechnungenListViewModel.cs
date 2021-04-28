@@ -10,9 +10,12 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public sealed class BetriebskostenRechnungenListViewModel : BindableBase
+    public sealed class BetriebskostenRechnungenListViewModel : BindableBase, IFilterViewModel
     {
-        public ObservableProperty<List<BetriebskostenRechnungenListEntry>> Liste = new ObservableProperty<List<BetriebskostenRechnungenListEntry>>();
+        public ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>> Liste = new ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>>();
+
+        public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
+        public ImmutableList<BetriebskostenRechnungenListEntry> AllRelevant { get; set; }
 
         private BetriebskostenRechnungenListEntry mSelectedRechnung;
         public BetriebskostenRechnungenListEntry SelectedRechnung
@@ -28,13 +31,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public TreeViewNode AddBetriebskostenTree;
         public BetriebskostenRechnungenListViewModel()
         {
-            Liste.Value = App.Walter.Betriebskostenrechnungen
+            AllRelevant = App.Walter.Betriebskostenrechnungen
                 .Include(b => b.Gruppen)
                 .ThenInclude(g => g.Wohnung)
                 .ThenInclude(w => w.Adresse)
                 .Include(b => b.Zaehler)
                 .Select(w => new BetriebskostenRechnungenListEntry(w))
-                .ToList();
+                .ToImmutableList();
+            Liste.Value = AllRelevant;
         }
     }
 

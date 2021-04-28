@@ -13,6 +13,6 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <ScrollViewer>
-        <uc:BetriebskostenRechnungenListControl />
+        <uc:BetriebskostenRechnungenListControl Filter="{x:Bind ViewModel.Filter.Value, Mode=OneWay}"/>
     </ScrollViewer>
 </Page>
