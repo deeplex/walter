@@ -135,6 +135,9 @@
     <Compile Include="UserControls\Lists\VertragListControl.xaml.cs">
       <DependentUpon>VertragListControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\Lists\WohnungListControl.xaml.cs">
+      <DependentUpon>WohnungListControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Lists\ZaehlerListControl.xaml.cs">
       <DependentUpon>ZaehlerListControl.xaml</DependentUpon>
     </Compile>
@@ -287,6 +290,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="UserControls\AdresseControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Lists\WohnungListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

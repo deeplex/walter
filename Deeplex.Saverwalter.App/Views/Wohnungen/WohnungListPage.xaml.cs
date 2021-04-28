@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -24,12 +25,7 @@ namespace Deeplex.Saverwalter.App.Views
                 Label = "Wohnung hinzufügen",
             };
             AddWohnung.Click += AddWohnung_Click;
-            App.ViewModel.RefillCommandContainer(new[] { AddWohnung });
-        }
-
-        private void Details_Click(object sender, RoutedEventArgs e)
-        {
-            App.ViewModel.Navigate(typeof(WohnungDetailPage), ViewModel.SelectedWohnung.Value.Entity);
+            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { Elements.Filter(ViewModel), AddWohnung });
         }
 
         private void AddWohnung_Click(object sender, RoutedEventArgs e)

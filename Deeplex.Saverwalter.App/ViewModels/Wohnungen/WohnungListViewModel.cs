@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -9,17 +10,22 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public sealed class WohnungListViewModel
+    public sealed class WohnungListViewModel : IFilterViewModel
     {
-        public List<WohnungListEntry> Liste = new List<WohnungListEntry>();
+        public ObservableProperty<ImmutableList<WohnungListEntry>> Liste = new ObservableProperty<ImmutableList<WohnungListEntry>>();
         public ObservableProperty<WohnungListEntry> SelectedWohnung
             = new ObservableProperty<WohnungListEntry>();
 
+        public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
+        public ImmutableList<WohnungListEntry> AllRelevant { get; }
+
         public WohnungListViewModel()
         {
-            Liste = App.Walter.Wohnungen
+            AllRelevant = App.Walter.Wohnungen
                 .Select(w => new WohnungListEntry(w))
-                .ToList();
+                .ToImmutableList();
+
+            Liste.Value = AllRelevant;
         }
     }
 
