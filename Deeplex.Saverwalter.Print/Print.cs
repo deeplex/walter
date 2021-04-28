@@ -78,31 +78,35 @@ namespace Deeplex.Saverwalter.Print
                         ErmittlungKalteKosten(b, gruppe));
                 }
             }
-            body.Append(
-                Heading("Abrechnung der Nebenkosten (warme Nebenkosten)"));
-            foreach (var gruppe in b.Gruppen)
+            if (b.Gruppen.Any(g => g.GesamtBetragWarm != 0 && g.BetragWarm != 0))
             {
-                if (gruppe.GesamtEinheiten == 1)
+                body.Append(
+                Heading("Abrechnung der Nebenkosten (warme Nebenkosten)"));
+                foreach (var gruppe in b.Gruppen)
                 {
-                    body.Append(
-                        SubHeading("Direkt zugeordnet:"),
-                        ErmittlungWarmeKosten(b, gruppe, true));
-                }
-                else
-                {
-                    body.Append(
-                        SubHeading("Angaben zur Abrechnungseinheit:", true),
-                        Abrechnungsgruppe(b, gruppe),
-                        Abrechnungseinheit(b, gruppe),
-                        new Paragraph(NoSpace()),
-                        ErmittlungWarmeKosten(b, gruppe),
-                        EqHeizkostenV9_2(b, gruppe), // Only if §9(2) applies
-                        ErmittlungWarmeEinheiten(b, gruppe),
-                        SubHeading("Ermittlung der warmen Betriebskosten", true),
-                        ErmittlungWarmanteil(b, gruppe));
-                    //ErmittlungAnteilWarmWasser(b, gruppe));
+                    if (gruppe.GesamtEinheiten == 1)
+                    {
+                        body.Append(
+                            SubHeading("Direkt zugeordnet:"),
+                            ErmittlungWarmeKosten(b, gruppe, true));
+                    }
+                    else
+                    {
+                        body.Append(
+                            SubHeading("Angaben zur Abrechnungseinheit:", true),
+                            Abrechnungsgruppe(b, gruppe),
+                            Abrechnungseinheit(b, gruppe),
+                            new Paragraph(NoSpace()),
+                            ErmittlungWarmeKosten(b, gruppe),
+                            EqHeizkostenV9_2(b, gruppe), // Only if §9(2) applies
+                            ErmittlungWarmeEinheiten(b, gruppe),
+                            SubHeading("Ermittlung der warmen Betriebskosten", true),
+                            ErmittlungWarmanteil(b, gruppe));
+                        //ErmittlungAnteilWarmWasser(b, gruppe));
+                    }
                 }
             }
+                
 
             body.Append(
                 new Paragraph(),
