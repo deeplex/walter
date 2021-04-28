@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -15,10 +16,7 @@ namespace Deeplex.Saverwalter.App.Views
             InitializeComponent();
             App.ViewModel.Titel.Value = "Kontakte";
 
-            App.ViewModel.RefillCommandContainer(new ICommandBarElement[]
-            {
-                AddPerson()
-            });
+            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { Elements.Filter(ViewModel), AddPerson() });
         }
 
         private AppBarButton AddPerson()

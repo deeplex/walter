@@ -1,15 +1,17 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public sealed class KontaktListViewModel : BindableBase
+    public sealed class KontaktListViewModel : BindableBase, IFilterViewModel
     {
-        public List<KontaktListEntry> Kontakte = new List<KontaktListEntry>();
+        public ObservableProperty<ImmutableList<KontaktListEntry>> Kontakte = new ObservableProperty<ImmutableList<KontaktListEntry>>();
         private KontaktListEntry mSelectedKontakt;
         public KontaktListEntry SelectedKontakt
         {
@@ -23,17 +25,22 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
         public bool hasSelectedKontakt => SelectedKontakt != null;
 
+        public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
+        public ImmutableList<KontaktListEntry> AllRelevant { get; }
+
         public KontaktListViewModel()
         {
-            Kontakte = App.Walter.NatuerlichePersonen
+            AllRelevant = App.Walter.NatuerlichePersonen
                 .Include(k => k.Adresse)
-                .Select(k => new KontaktListEntry(k)).ToList();
+                .Select(k => new KontaktListEntry(k)).ToImmutableList();
 
             var jp = App.Walter.JuristischePersonen;
             foreach (var j in jp)
             {
-                Kontakte.Add(new KontaktListEntry(j));
+                AllRelevant = AllRelevant.Add(new KontaktListEntry(j));
             }
+
+            Kontakte.Value = AllRelevant;
         }
     }
 

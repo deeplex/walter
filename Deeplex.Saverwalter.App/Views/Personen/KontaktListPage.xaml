@@ -11,6 +11,6 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <uc:KontaktListControl />
+        <uc:KontaktListControl Filter="{x:Bind ViewModel.Filter.Value, Mode=OneWay}"/>
     </Grid>
 </Page>

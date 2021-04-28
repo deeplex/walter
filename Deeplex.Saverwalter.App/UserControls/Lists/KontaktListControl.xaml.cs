@@ -15,11 +15,41 @@ namespace Deeplex.Saverwalter.App.UserControls
     {
         public KontaktListViewModel ViewModel { get; set; }
 
+        private void UpdateFilter()
+        {
+            ViewModel.Kontakte.Value = ViewModel.AllRelevant;
+            if (Filter != "")
+            {
+                bool low(string str) => str.ToLower().Contains(Filter.ToLower());
+                ViewModel.Kontakte.Value = ViewModel.Kontakte.Value.Where(v =>
+                    low(v.Anschrift) ||
+                    low(v.Name) ||
+                    low(v.Vorname) ||
+                    low(v.Email) ||
+                    low(v.Telefon))
+                    .ToImmutableList();
+            }
+        }
+
         public KontaktListControl()
         {
             InitializeComponent();
             ViewModel = new KontaktListViewModel();
+            RegisterPropertyChangedCallback(FilterProperty, (DepObj, Prop) => UpdateFilter());
         }
+
+        public string Filter
+        {
+            get { return (string)GetValue(FilterProperty); }
+            set { SetValue(FilterProperty, value); }
+        }
+
+        public static readonly DependencyProperty FilterProperty
+            = DependencyProperty.Register(
+                  "Filter",
+                  typeof(string),
+                  typeof(VertragListControl),
+                  new PropertyMetadata(""));
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
