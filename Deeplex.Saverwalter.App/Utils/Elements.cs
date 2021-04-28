@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.App.Utils
             var Filter = new TextBox
             {
                 Text = "",
-                VerticalAlignment = VerticalAlignment.Bottom,
+                Height = 40, // Height of Bar at the top...
                 Width = 300,
                 PlaceholderText = "Filter...",
             };

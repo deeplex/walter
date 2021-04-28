@@ -17,12 +17,10 @@ namespace Deeplex.Saverwalter.App.UserControls
         private void UpdateFilter()
         {
             ViewModel.Vertraege.Value = ViewModel.AllRelevant;
-            if (Filter != "")
+            if (OnlyActive)
             {
-                bool low(string str) => str.ToLower().Contains(Filter.ToLower());
                 ViewModel.Vertraege.Value = ViewModel.Vertraege.Value.Where(v =>
-                    low(v.Wohnung.Bezeichnung) || low(v.AuflistungMieter) || low(v.Anschrift))
-                    .ToImmutableList();
+                !v.hasEnde || v.Ende > DateTime.Now).ToImmutableList();
             }
             if (PersonId != Guid.Empty)
             {
@@ -35,6 +33,13 @@ namespace Deeplex.Saverwalter.App.UserControls
             {
                 ViewModel.Vertraege.Value = ViewModel.Vertraege.Value.Where(v => v.Wohnung.WohnungId == WohnungId).ToImmutableList();
             }
+            if (Filter != "")
+            {
+                bool low(string str) => str.ToLower().Contains(Filter.ToLower());
+                ViewModel.Vertraege.Value = ViewModel.Vertraege.Value.Where(v =>
+                    low(v.Wohnung.Bezeichnung) || low(v.AuflistungMieter) || low(v.Anschrift))
+                    .ToImmutableList();
+            }
         }
 
         public VertragListControl()
@@ -45,6 +50,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(PersonIdProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, Prop) => UpdateFilter());
+            RegisterPropertyChangedCallback(OnlyActiveProperty, (DepObj, Prop) => UpdateFilter());
         }
 
         public Guid PersonId
@@ -93,5 +99,18 @@ namespace Deeplex.Saverwalter.App.UserControls
                   typeof(string),
                   typeof(VertragListControl),
                   new PropertyMetadata(""));
+
+        public bool OnlyActive
+        {
+            get { return (bool)GetValue(OnlyActiveProperty); }
+            set { SetValue(OnlyActiveProperty, value); }
+        }
+
+        public static readonly DependencyProperty OnlyActiveProperty
+            = DependencyProperty.Register(
+                  "OnlyActive",
+                  typeof(bool),
+                  typeof(VertragListControl),
+                  new PropertyMetadata(false));
     }
 }

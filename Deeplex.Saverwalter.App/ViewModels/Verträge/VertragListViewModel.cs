@@ -95,6 +95,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public int Version { get; }
         public int Personenzahl { get; }
         public string Anschrift { get; }
+        public string AnschriftMitWohnung => Anschrift + ", " + Wohnung.Bezeichnung;
         public Wohnung Wohnung { get; }
         public ImmutableList<Guid> Mieter { get; }
         public DateTime Beginn { get; set; }

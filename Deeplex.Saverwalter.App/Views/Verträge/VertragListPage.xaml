@@ -13,6 +13,8 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <ScrollViewer>
-        <uc:VertragListControl Filter="{x:Bind ViewModel.Filter.Value, Mode=OneWay}"/>
+        <uc:VertragListControl
+            OnlyActive="{x:Bind OnlyActive.Value, Mode=OneWay}"
+            Filter="{x:Bind ViewModel.Filter.Value, Mode=OneWay}"/>
     </ScrollViewer>
 </Page>
