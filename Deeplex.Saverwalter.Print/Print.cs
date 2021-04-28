@@ -106,7 +106,7 @@ namespace Deeplex.Saverwalter.Print
                     }
                 }
             }
-                
+
 
             body.Append(
                 new Paragraph(),
@@ -120,6 +120,8 @@ namespace Deeplex.Saverwalter.Print
         {
             var AnsprechpartnerBezeichnung = b.Ansprechpartner is NatuerlichePerson a ? a.Vorname + " " + a.Nachname : ""; // TODO jur. Person
 
+            var ap = b.Ansprechpartner;
+
             // TODO Ansprechpartner HAS to have a Adresse...
             var table = new Table(
                 new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
@@ -128,13 +130,14 @@ namespace Deeplex.Saverwalter.Print
                     ContentCell("", JustificationValues.Right)),
                 new TableRow(
                     ContentCell("℅ " + AnsprechpartnerBezeichnung),
-                    ContentCell("Tel.: " + b.Ansprechpartner.Telefon, JustificationValues.Right)),
+                    ContentCell(ap.Telefon != "" ? "Tel.: " + ap.Telefon : "", JustificationValues.Right)),
                 new TableRow(
                     ContentCell(b.Ansprechpartner.Adresse!.Strasse + " " + b.Ansprechpartner.Adresse.Hausnummer),
-                    ContentCell("Fax: " + b.Ansprechpartner.Fax, JustificationValues.Right)),
-                new TableRow(
+                    ContentCell(ap.Email != "" ? "E-Mail: " + ap.Email : "", JustificationValues.Right)));
+            new TableRow(
                     ContentCell(b.Ansprechpartner.Adresse.Postleitzahl + " " + b.Ansprechpartner.Adresse.Stadt),
-                    ContentCell("E-Mail: " + b.Ansprechpartner.Email, JustificationValues.Right)));
+                    ContentCell(ap.Fax != "" ? "Fax: " + ap.Fax : "", JustificationValues.Right));
+
 
             return table;
         }
@@ -382,7 +385,22 @@ namespace Deeplex.Saverwalter.Print
 
         private static Paragraph ExplainKalteBetriebskosten(Betriebskostenabrechnung b)
         {
-            var para = new Paragraph(Font());
+            var para = new Paragraph();
+
+            foreach (var g in b.Gruppen)
+            {
+                foreach (var r in g.Rechnungen)
+                {
+                    if (r.Beschreibung != null && r.Beschreibung.Trim() != "")
+                    {
+                        para.Append(
+                            new Run(
+                                new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) }),
+                                new Text(r.Typ.ToDescriptionString() + ": ") { Space = SpaceProcessingModeValues.Preserve }),
+                            new Run(new Text(r.Beschreibung), new Break()));
+                    }
+                }
+            }
 
             return para;
         }
