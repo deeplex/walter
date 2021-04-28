@@ -20,6 +20,12 @@ namespace Deeplex.Saverwalter.App.UserControls
                 ViewModel.Liste.Value = ViewModel.Liste.Value.Where(v =>
                     v.WohnungId == WohnungId).ToList();
             });
+
+            RegisterPropertyChangedCallback(ZaehlerIdProperty, (ZaehlerIdDepObject, ZaehlerIdProp) =>
+            {
+                ViewModel.Liste.Value = ViewModel.Liste.Value.Where(v =>
+                    v.AllgemeinZaehler?.ZaehlerId == ZaehlerId).ToList();
+            });
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)
@@ -44,5 +50,18 @@ namespace Deeplex.Saverwalter.App.UserControls
                   typeof(int),
                   typeof(VertragListControl),
                   new PropertyMetadata(0));
+
+        public int ZaehlerId
+        {
+            get { return (int)GetValue(ZaehlerIdProperty); }
+            set { SetValue(ZaehlerIdProperty, value); }
+        }
+
+        public static readonly DependencyProperty ZaehlerIdProperty
+            = DependencyProperty.Register(
+            "ZaehlerId",
+            typeof(int),
+            typeof(ZaehlerstandListControl),
+            new PropertyMetadata(0));
     }
 }

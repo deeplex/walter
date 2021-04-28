@@ -42,6 +42,7 @@ namespace Deeplex.Saverwalter.App.ViewModels.Zähler
         public int WohnungId => Entity.Wohnung?.WohnungId ?? 0;
         public string Wohnung => Entity.Wohnung == null ? "Keine Wohnung" :
             AdresseViewModel.Anschrift(Entity.Wohnung) + ", " + Entity.Wohnung.Bezeichnung;
+        public Zaehler AllgemeinZaehler => Entity.AllgemeinZaehler;
 
         public ZaehlerListEntry(Zaehler z)
         {
