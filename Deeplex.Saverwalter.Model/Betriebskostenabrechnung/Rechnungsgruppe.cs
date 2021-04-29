@@ -73,38 +73,6 @@ namespace Deeplex.Saverwalter.Model
         {
             Rechnungen = gruppe;
             b = _b;
-
-            for (int i = 0, count = GesamtPersonenIntervall.Count - 1; i < count; ++i)
-            {
-                if (GesamtPersonenIntervall[i].Personenzahl == GesamtPersonenIntervall[i + 1].Personenzahl)
-                {
-                    var Beginn = GesamtPersonenIntervall[i].Beginn;
-                    var Ende = GesamtPersonenIntervall[i + 1].Ende;
-
-                    GesamtPersonenIntervall[i] = (Beginn, Ende, GesamtPersonenIntervall[i].Personenzahl);
-                    GesamtPersonenIntervall.RemoveAt(1 + i--);
-                    count--;
-                }
-            }
-
-            for (int i = 0, count = PersZeitanteil.Count - 1; i < count; ++i)
-            {
-                var gpz = GesamtPersonenIntervall.Last(g => g.Beginn.Date <= PersZeitanteil[i].Beginn.Date).Personenzahl;
-                var ngpz = GesamtPersonenIntervall.Last(g => g.Beginn.Date <= PersZeitanteil[i + 1].Beginn.Date).Personenzahl;
-                var pz = PersonenIntervall.Last(p => p.Beginn.Date <= PersZeitanteil[i].Beginn).Personenzahl;
-                var npz = PersonenIntervall.Last(p => p.Beginn.Date <= PersZeitanteil[i + 1].Beginn).Personenzahl;
-
-                if (gpz == ngpz && pz == npz)
-                {
-                    PersZeitanteil[i] = (
-                        PersZeitanteil[i].Beginn,
-                        PersZeitanteil[i + 1].Ende,
-                        PersZeitanteil[i].Anteil + PersZeitanteil[i + 1].Anteil);
-
-                    PersZeitanteil.RemoveAt(1 + i--);
-                    count--;
-                }
-            }
         }
 
         private static List<(DateTime Beginn, DateTime Ende, int Personenzahl)>
