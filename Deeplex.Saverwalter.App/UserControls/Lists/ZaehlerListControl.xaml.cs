@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using static Deeplex.Saverwalter.App.Utils.Elements;
 
 namespace Deeplex.Saverwalter.App.UserControls
 {
@@ -27,9 +28,8 @@ namespace Deeplex.Saverwalter.App.UserControls
             }
             if (Filter != "")
             {
-                bool low(string str) => str.ToLower().Contains(Filter.ToLower());
                 ViewModel.Liste.Value = ViewModel.Liste.Value.Where(v =>
-                    low(v.Kennnummer) || low(v.Wohnung) || low(v.TypString))
+                    applyFilter(Filter, v.Kennnummer, v.Wohnung, v.TypString))                    
                     .ToImmutableList();
             }
         }

@@ -15,6 +15,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using static Deeplex.Saverwalter.App.Utils.Elements;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -29,9 +30,8 @@ namespace Deeplex.Saverwalter.App.UserControls
             ViewModel.Liste.Value = ViewModel.AllRelevant;
             if (Filter != "")
             {
-                bool low(string str) => str.ToLower().Contains(Filter.ToLower());
                 ViewModel.Liste.Value = ViewModel.Liste.Value.Where(v =>
-                    low(v.Bezeichnung) || low(v.Anschrift))
+                    applyFilter(Filter, v.Bezeichnung, v.Anschrift))
                     .ToImmutableList();
             }
         }

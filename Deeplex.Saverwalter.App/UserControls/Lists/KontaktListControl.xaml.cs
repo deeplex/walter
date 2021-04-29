@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using static Deeplex.Saverwalter.App.Utils.Elements;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -20,13 +21,8 @@ namespace Deeplex.Saverwalter.App.UserControls
             ViewModel.Kontakte.Value = ViewModel.AllRelevant;
             if (Filter != "")
             {
-                bool low(string str) => str.ToLower().Contains(Filter.ToLower());
                 ViewModel.Kontakte.Value = ViewModel.Kontakte.Value.Where(v =>
-                    low(v.Anschrift) ||
-                    low(v.Name) ||
-                    low(v.Vorname) ||
-                    low(v.Email) ||
-                    low(v.Telefon))
+                    applyFilter(Filter, v.Anschrift, v.Name, v.Vorname, v.Email, v.Telefon))
                     .ToImmutableList();
             }
         }

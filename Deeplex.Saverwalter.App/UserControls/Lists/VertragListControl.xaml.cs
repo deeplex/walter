@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using static Deeplex.Saverwalter.App.Utils.Elements;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -35,9 +36,8 @@ namespace Deeplex.Saverwalter.App.UserControls
             }
             if (Filter != "")
             {
-                bool low(string str) => str.ToLower().Contains(Filter.ToLower());
                 ViewModel.Vertraege.Value = ViewModel.Vertraege.Value.Where(v =>
-                    low(v.Wohnung.Bezeichnung) || low(v.AuflistungMieter) || low(v.Anschrift))
+                    applyFilter(Filter, v.Wohnung.Bezeichnung, v.AuflistungMieter, v.Anschrift))
                     .ToImmutableList();
             }
         }

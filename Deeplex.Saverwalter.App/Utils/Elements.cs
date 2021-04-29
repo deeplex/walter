@@ -30,6 +30,9 @@ namespace Deeplex.Saverwalter.App.Utils
                 ViewModel.Filter.Value = ((TextBox)sender).Text;
             }
         }
+
+        public static bool applyFilter(string filter, params string[] strings)
+            => filter.Split(' ').All(split => strings.Any(str => str.ToLower().Contains(split.ToLower())));
     }
 
     public interface IFilterViewModel
