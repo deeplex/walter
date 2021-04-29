@@ -161,7 +161,11 @@ namespace Deeplex.Saverwalter.App.Views
                 new DateTime(Jahr, 1, 1),
                 new DateTime(Jahr, 12, 31));
 
-            var s = Jahr.ToString() + " - " + ViewModel.Wohnung.BezeichnungVoll;
+            var AuflistungMieter = string.Join(", ", App.Walter.MieterSet
+                .Where(m => m.VertragId == ViewModel.guid).ToList()
+                .Select(a => App.Walter.FindPerson(a.PersonId).Bezeichnung));
+
+            var s = Jahr.ToString() + " - " + ViewModel.Wohnung.BezeichnungVoll + " - " + AuflistungMieter;
 
             b.SaveAsDocx(ApplicationData.Current.LocalFolder.Path + @"\" + s + ".docx");
         }

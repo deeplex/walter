@@ -513,7 +513,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Entity = w;
             Id = w.WohnungId;
             Besitzer = App.Walter.FindPerson(w.BesitzerId)?.Bezeichnung;
-            BezeichnungVoll = AdresseViewModel.Anschrift(w) + " - " + w.Bezeichnung;
+            BezeichnungVoll = AdresseViewModel.Anschrift(w) + ", " + w.Bezeichnung;
         }
 
         public static Wohnung GetWohnung(int id) => App.Walter.Wohnungen.Find(id);
