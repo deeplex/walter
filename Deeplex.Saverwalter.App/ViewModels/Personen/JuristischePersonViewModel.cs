@@ -14,8 +14,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Bezeichnung;
             set
             {
+                var old = GetEntity.Bezeichnung;
                 GetEntity.Bezeichnung = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
         public override string ToString() => Bezeichnung;

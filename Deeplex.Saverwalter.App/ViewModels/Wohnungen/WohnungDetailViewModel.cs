@@ -64,8 +64,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Bezeichnung;
             set
             {
+                var old = Entity.Bezeichnung;
                 Entity.Bezeichnung = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -74,8 +75,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Notiz;
             set
             {
+                var old = Entity.Notiz;
                 Entity.Notiz = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -84,8 +86,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Wohnflaeche;
             set
             {
+                var old = Entity.Wohnflaeche;
                 Entity.Wohnflaeche = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -94,8 +97,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Nutzflaeche;
             set
             {
+                var old = Entity.Nutzflaeche;
                 Entity.Nutzflaeche = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -104,8 +108,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Nutzeinheit;
             set
             {
+                var old = Entity.Nutzeinheit;
                 Entity.Nutzeinheit = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 

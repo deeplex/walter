@@ -160,8 +160,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.KaltMiete;
             set
             {
+                var old = Entity.KaltMiete;
                 Entity.KaltMiete = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -170,8 +171,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Personenzahl;
             set
             {
+                var old = Entity.Personenzahl;
                 Entity.Personenzahl = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -184,8 +186,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 if (value == null) return;
                 mWohnung = value;
                 Entity.WohnungId = mWohnung.Id;
-                RaisePropertyChangedAuto();
-                RaisePropertyChanged(nameof(Vermieter));
+                var old = mWohnung.Id;
+                if (RaisePropertyChangedAuto(old, value.Id))
+                {
+                    RaisePropertyChanged(nameof(Vermieter));
+                }
             }
         }
         public DateTimeOffset Beginn
@@ -193,8 +198,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Beginn.AsUtcKind();
             set
             {
+                var old = Entity.Beginn;
                 Entity.Beginn = value.UtcDateTime;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -203,8 +209,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Ende?.AsUtcKind();
             set
             {
+                var old = Entity.Ende;
                 Entity.Ende = value?.UtcDateTime;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value?.UtcDateTime);
             }
         }
 
@@ -213,8 +220,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Notiz;
             set
             {
+                var old = Entity.Notiz;
                 Entity.Notiz = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -299,8 +307,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Zahlungsdatum.AsUtcKind();
             set
             {
+                var old = Entity.Zahlungsdatum;
                 Entity.Zahlungsdatum = value.UtcDateTime;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value.UtcDateTime);
             }
         }
 
@@ -309,8 +318,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.BetreffenderMonat.AsUtcKind();
             set
             {
-                Entity.BetreffenderMonat = new DateTime(value.Year, value.Month, 1).AsUtcKind();
-                RaisePropertyChangedAuto();
+                var old = Entity.BetreffenderMonat;
+                Entity.Zahlungsdatum = new DateTime(value.Year, value.Month, 1).AsUtcKind();
+                RaisePropertyChangedAuto(old, Entity.Zahlungsdatum);
             }
         }
 
@@ -319,8 +329,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Notiz;
             set
             {
+                var old = Entity.Notiz;
                 Entity.Notiz = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -329,8 +340,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Betrag ?? 0;
             set
             {
+                var old = Entity.Betrag;
                 Entity.Betrag = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 

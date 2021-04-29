@@ -48,6 +48,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 AllgemeinZaehler_List.FindIndex(a => a.Id == Entity.Zaehler.ZaehlerId) : 0;
             set
             {
+                // TODO yeah...
                 Entity.Zaehler = App.Walter.ZaehlerSet.Find(AllgemeinZaehler_List[value].Id);
                 RaisePropertyChangedAuto();
             }
@@ -61,8 +62,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity?.Betrag ?? 0.0;
             set
             {
+                var old = Entity.Betrag;
                 Entity.Betrag = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -71,8 +73,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Datum.AsUtcKind();
             set
             {
+                var old = Entity.Datum;
                 Entity.Datum = value.Value.Date.AsUtcKind();
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value.Value.Date.AsUtcKind());
             }
         }
 
@@ -82,6 +85,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Typen_List.FindIndex(i => i.index == (Entity != null ? (int)Entity?.Typ : 0));
             set
             {
+                // TODO yeah...
                 Entity.Typ = (Betriebskostentyp)Typen_List[value].index;
                 RaisePropertyChangedAuto();
             }
@@ -92,6 +96,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity != null ? (int)Entity.Schluessel : 0;
             set
             {
+                // TODO yeah...
                 Entity.Schluessel = (UmlageSchluessel)value;
                 RaisePropertyChangedAuto();
             }
@@ -102,8 +107,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity?.Beschreibung ?? "";
             set
             {
+                var old = Entity.Beschreibung;
                 Entity.Beschreibung = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -113,8 +119,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity?.BetreffendesJahr ?? DateTime.Now.Year;
             set
             {
+                var old = Entity.BetreffendesJahr;
                 Entity.BetreffendesJahr = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -123,8 +130,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => (Entity?.HKVO_P7 ?? 0.0) * 100;
             set
             {
+                var old = Entity.HKVO_P7 / 100;
                 Entity.HKVO_P7 = value / 100;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -133,8 +141,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => (Entity?.HKVO_P8 ?? 0.0) * 100;
             set
             {
+                var old = Entity.HKVO_P8 / 100;
                 Entity.HKVO_P8 = value / 100;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -155,6 +164,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
             set
             {
+                // TODO yeah...
                 Entity.HKVO_P9 = (HKVO_P9A2)HKVO_P9_List[value].index;
                 RaisePropertyChangedAuto();
             }

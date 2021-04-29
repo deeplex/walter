@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App.ViewModels
@@ -27,8 +28,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.AllgemeinZaehler;
             set
             {
+                var old = Entity.AllgemeinZaehler;
                 Entity.AllgemeinZaehler = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -37,8 +39,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Typ;
             set
             {
+                var old = Entity.Typ;
                 Entity.Typ = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -47,8 +50,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Kennnummer;
             set
             {
+                var old = Entity.Kennnummer;
                 Entity.Kennnummer = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -58,9 +62,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => mWohnung;
             set
             {
+                var old = Entity.Wohnung;
                 Entity.Wohnung = value?.Entity;
                 mWohnung = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value?.Entity);
             }
         }
 

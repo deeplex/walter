@@ -25,8 +25,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Anrede;
             set
             {
-                Entity.Anrede = value;
-                RaisePropertyChangedAuto();
+                var old = GetEntity.Anrede;
+                GetEntity.Anrede = value;
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -35,8 +36,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => GetEntity.Vorname;
             set
             {
+                var old = GetEntity.Vorname;
                 GetEntity.Vorname = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
         public string Nachname
@@ -44,8 +46,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => GetEntity.Nachname;
             set
             {
+                var old = GetEntity.Nachname;
                 GetEntity.Nachname = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 

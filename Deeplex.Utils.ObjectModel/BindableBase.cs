@@ -42,5 +42,15 @@ namespace Deeplex.Utils.ObjectModel
         {
             RaisePropertyChanged(propertyName);
         }
+
+        protected bool RaisePropertyChangedAuto<T>(T old, T update, [CallerMemberName] string propertyName = "")
+        {
+            if (!Equals(old, update))
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                return true;
+            }
+            return false;
+        }
     }
 }
