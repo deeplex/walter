@@ -81,7 +81,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             = DependencyProperty.Register(
             "ZaehlerViewModel",
             typeof(ZaehlerDetailViewModel),
-            typeof(ZaehlerstandListControl),
+            typeof(AddZaehlerstand),
             new PropertyMetadata(null));
 
         public ZaehlerstandListViewModel ZaehlerstandListViewModel

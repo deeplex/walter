@@ -297,7 +297,7 @@ namespace Deeplex.Saverwalter.Model
         // But it is best tracked in as Vertrag(version). 
         public int Personenzahl { get; set; }
         // The KaltMiete may change without the Vertrag to be changed.
-        // It has to be tracked by Verions.
+        // It has to be tracked by Versions.
         public double KaltMiete { get; set; }
         public DateTime Beginn { get; set; }
         public DateTime? Ende { get; set; }

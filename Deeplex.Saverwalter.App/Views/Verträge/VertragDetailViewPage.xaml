@@ -5,6 +5,7 @@
     xmlns:local="using:Deeplex.Saverwalter.App.Views"
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
+    xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
     xmlns:s="using:System"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
@@ -195,120 +196,7 @@
                     Content="Entferne aktuelle Version"
                     Command="{x:Bind ViewModel.RemoveVersion}"/>
             </StackPanel>
-            <RelativePanel Margin="0,20,0,0">
-                <StackPanel
-                    RelativePanel.AlignRightWithPanel="True"
-                    RelativePanel.AlignLeftWithPanel="True">
-                    <mtuuc:Expander
-                        Background="Transparent"
-                        HorizontalContentAlignment="Left">
-                        <mtuuc:Expander.Header>
-                            <mtuuc:WrapPanel>
-                                <TextBlock Margin="0,7,0,0" Text="Mieten"/>
-                                <Button Background="Transparent" Margin="10,0,0,0">
-                                    <Button.Content>
-                                        <SymbolIcon Symbol="Add"/>
-                                    </Button.Content>
-                                    <Button.Flyout>
-                                        <Flyout>
-                                            <StackPanel Orientation="Horizontal">
-                                                <CalendarDatePicker
-                                                Header="Datum"
-                                                Language="de"
-                                                DateFormat="{}{day.integer}. {month.full} {year.full}"
-                                                PlaceholderText="Datum hinzufügen"
-                                                Date="{x:Bind ViewModel.AddMieteValue.Value.Zahlungsdatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                                <DatePicker
-                                                Date="{x:Bind ViewModel.AddMieteValue.Value.BetreffenderMonat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                Language="de" Width="175" Header="Betr. Monat" DayVisible="False"/>
-                                                <muxc:NumberBox
-                                                Header="Betrag"
-                                                Value="{x:Bind ViewModel.AddMieteValue.Value.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                PlaceholderText="0,00"/>
-                                                <Button
-                                                VerticalAlignment="Bottom"
-                                                IsEnabled="False"
-                                                Background="Transparent">
-                                                    <SymbolIcon Symbol="Attach"/>
-                                                </Button>
-                                                <Button
-                                                VerticalAlignment="Bottom"
-                                                Command="{x:Bind ViewModel.AddMiete}"
-                                                Background="Transparent">
-                                                    <SymbolIcon Symbol="Add"/>
-                                                </Button>
-                                            </StackPanel>
-                                        </Flyout>
-                                    </Button.Flyout>
-                                </Button>
-                            </mtuuc:WrapPanel>
-                        </mtuuc:Expander.Header>
-                        <StackPanel>
-                            <mtuuc:DataGrid
-                                CanUserReorderColumns="False"
-                                CanUserResizeColumns="True"
-                                AutoGenerateColumns="False"
-                                ItemsSource="{x:Bind ViewModel.Mieten.Value, Mode=TwoWay}">
-                                <mtuuc:DataGrid.Columns>
-                                    <mtuuc:DataGridTemplateColumn>
-                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Button
-                                                    HorizontalAlignment="Center"
-                                                    Background="Transparent"
-                                                    CommandParameter="{Binding}"
-                                                    Click="RemoveMiete_Click">
-                                                    <SymbolIcon Symbol="Delete"></SymbolIcon>
-                                                </Button>
-                                            </DataTemplate>
-                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    </mtuuc:DataGridTemplateColumn>
-                                    <mtuuc:DataGridTemplateColumn Header="Datum">
-                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="vm:VertragDetailMiete">
-                                                <CalendarDatePicker
-                                                    Date="{x:Bind Zahlungsdatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                    Language="de"
-                                                    Width="176"
-                                                    PlaceholderText="Offen"
-                                                    DateFormat="{}{day.integer}. {month.full} {year.full}"/>
-                                            </DataTemplate>
-                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    </mtuuc:DataGridTemplateColumn>
-                                    <mtuuc:DataGridTemplateColumn Header="Betr. Monat" Width="175">
-                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="vm:VertragDetailMiete">
-                                                <DatePicker
-                                                    Date="{x:Bind BetreffenderMonat, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                    Language="de" DayVisible="False"/>
-                                            </DataTemplate>
-                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    </mtuuc:DataGridTemplateColumn>
-                                    <mtuuc:DataGridTemplateColumn Header="Betrag">
-                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="vm:VertragDetailMiete">
-                                                <muxc:NumberBox
-                                                    Value="{x:Bind Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                    PlaceholderText="0,00"/>
-                                            </DataTemplate>
-                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    </mtuuc:DataGridTemplateColumn>
-                                    <mtuuc:DataGridTextColumn IsReadOnly="False" Binding="{Binding Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Header="Notiz"/>
-                                    <mtuuc:DataGridTemplateColumn>
-                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="vm:VertragDetailMiete">
-                                                <Button Background="Transparent" Command="{x:Bind AttachFile}">
-                                                    <SymbolIcon  Symbol="Attach"/>
-                                                </Button>
-                                            </DataTemplate>
-                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    </mtuuc:DataGridTemplateColumn>
-                                </mtuuc:DataGrid.Columns>
-                            </mtuuc:DataGrid>
-                        </StackPanel>
-                    </mtuuc:Expander>
-                </StackPanel>
-            </RelativePanel>
+            <uc:MietenListControl VertragGuid="{x:Bind ViewModel.guid}"/>
             <RelativePanel>
                 <StackPanel
                     RelativePanel.AlignRightWithPanel="True"

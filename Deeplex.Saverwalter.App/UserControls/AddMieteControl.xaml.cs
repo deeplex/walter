@@ -1,0 +1,70 @@
+﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.Model;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Foundation;
+using Windows.Foundation.Collections;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Controls.Primitives;
+using Windows.UI.Xaml.Data;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Navigation;
+
+namespace Deeplex.Saverwalter.App.UserControls
+{
+    public sealed partial class AddMieteControl : UserControl
+    {
+        public MietenDetailViewModel ViewModel = new MietenDetailViewModel();
+
+        public AddMieteControl()
+        {
+            InitializeComponent();
+
+            RegisterPropertyChangedCallback(MietenListViewModelProperty, (DepObj, Prop) =>
+            {
+                ViewModel.VertragId = MietenListViewModel.VertragId;
+                ViewModel.Betrag = 0;
+                ViewModel.BetreffenderMonat = DateTime.Now.AsUtcKind();
+                ViewModel.Zahlungsdatum = DateTime.Now.AsUtcKind();
+            });
+        }
+
+        public MietenListViewModel MietenListViewModel
+        {
+            get { return (MietenListViewModel)GetValue(MietenListViewModelProperty); }
+            set { SetValue(MietenListViewModelProperty, value); }
+        }
+
+        public static readonly DependencyProperty MietenListViewModelProperty
+            = DependencyProperty.Register(
+            "MietenListViewModel",
+            typeof(MietenListViewModel),
+            typeof(AddMieteControl),
+            new PropertyMetadata(null));
+
+        private void AddMiete_Click(object sender, RoutedEventArgs e)
+        {
+            App.Walter.Mieten.Add(ViewModel.Entity);
+            App.SaveWalter();
+            MietenListViewModel.AddToList(ViewModel.Entity);
+            var miete = new Miete()
+            {
+                VertragId = MietenListViewModel.VertragId,
+                Betrag = 0,
+                BetreffenderMonat = DateTime.Now.AsUtcKind(),
+                Zahlungsdatum = DateTime.Now.AsUtcKind(),
+            };
+            ViewModel = new MietenDetailViewModel(miete);
+                
+            if (AddMieteButton.Flyout is Flyout f)
+            {
+                f.Hide();
+            }
+        }
+    }
+}
