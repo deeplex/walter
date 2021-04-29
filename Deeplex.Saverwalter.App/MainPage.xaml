@@ -211,10 +211,7 @@
             x:Name="SavedIndicator"
             ShowDismissButton="False"
             HorizontalAlignment="Right">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Gespeichert"/>
-                <SymbolIcon Margin="5,0,0,0" Symbol="Accept"/>
-            </StackPanel>
+                <TextBlock x:Name="SavedIncdicatorText"/>
         </mtuuc:InAppNotification>
     </Grid>
 </Page>

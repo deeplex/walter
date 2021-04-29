@@ -121,8 +121,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             Wohnung = v.Wohnung;
 
-
-
             AuflistungMieter = string.Join(", ", App.Walter.MieterSet
                 .Where(m => m.VertragId == v.VertragId).ToList()
                 .Select(a => App.Walter.FindPerson(a.PersonId).Bezeichnung));

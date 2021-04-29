@@ -49,7 +49,7 @@ namespace Deeplex.Saverwalter.App
             InitializeComponent();
 
             ViewModel.SetCommandBar(MainCommandBar);
-            ViewModel.SetSavedIndicator(SavedIndicator);
+            ViewModel.SetSavedIndicator(SavedIndicator, SavedIncdicatorText);
             ViewModel.Navigate = Navigate;
             App.ViewModel.Explorer.Value = new AnhangViewModel(ExplorerTree);
             ExplorerTree.ItemTemplateSelector = new ExplorerItemTemplateSelector(AnhangTemplate, GroupTemplate, RootTemplate);

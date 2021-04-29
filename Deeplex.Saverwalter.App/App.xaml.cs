@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.App
         public static void SaveWalter()
         {
             Walter.SaveChanges();
-            ViewModel.ShowSavedIndicator(1000);
+            ViewModel.ShowSavedIndicator("Gespeichert", 1000);
         }
 
         /// <summary>

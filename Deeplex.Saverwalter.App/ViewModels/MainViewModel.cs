@@ -13,6 +13,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private CommandBar CommandBar { get; set; }
         private InAppNotification SavedIndicator { get; set; }
+        private TextBlock SavedIndicatorText { get; set; }
 
         public Action<Type, object> Navigate { get; set; }
 
@@ -21,11 +22,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
             CommandBar = arg;
         }
 
-        public void SetSavedIndicator(InAppNotification arg)
+        public void SetSavedIndicator(InAppNotification arg, TextBlock arg2)
         {
             SavedIndicator = arg;
+            SavedIndicatorText = arg2;
         }
-        public void ShowSavedIndicator(int ms = 500) => SavedIndicator.Show(ms);
+        public void ShowSavedIndicator(string text, int ms = 500)
+        {
+            SavedIndicatorText.Text = text;
+            SavedIndicator.Show(ms);
+        }
 
         public MainViewModel()
         {
