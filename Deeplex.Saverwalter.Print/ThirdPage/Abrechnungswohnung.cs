@@ -28,15 +28,13 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
                 var (Beginn, Ende, Personenzahl) = g.PersonenIntervall[i];
                 var f = Beginn.Date == b.Nutzungsbeginn.Date;
 
-                var timespan = ((Ende - Beginn).Days + 1).ToString();
-
                 table.Append(new TableRow(
                     ContentCell(f ? 1.ToString() : "", JustificationValues.Center), // TODO  ... 1 ? hmm...
                     ContentCell(f ? Quadrat(b.Wohnung.Wohnflaeche) : "", JustificationValues.Center),
                     ContentCell(f ? Quadrat(b.Wohnung.Nutzflaeche) : "", JustificationValues.Center),
                     ContentCell(Personenzahl.ToString(), JustificationValues.Center),
                     ContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center),
-                    ContentCell(timespan + "/" + b.Abrechnungszeitspanne, JustificationValues.Center)));
+                    ContentCell(b.Nutzungszeitspanne + "/" + b.Abrechnungszeitspanne, JustificationValues.Center)));
             };
 
             return table;

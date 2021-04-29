@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
 {
     public static partial class ThirdPage
     {
-        private static Table ErmittlungKalteKosten(Betriebskostenabrechnung b, Rechnungsgruppe g, bool direkt = false)
+        private static Table ErmittlungKalteKosten(Betriebskostenabrechnung b, Rechnungsgruppe g)
         {
             var table = new Table(
                 new TableProperties(
@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
             {
                 return new TableRow(
                     ContentCell(f ? rechnung.Typ.ToDescriptionString() : ""),
-                    ContentCell(direkt ? "Direkt" : (f ? rechnung.Schluessel.ToDescriptionString() : "")),
+                    ContentCell(g.GesamtEinheiten == 1 ? "Direkt" : (f ? rechnung.Schluessel.ToDescriptionString() : "")),
                     ContentCell(zeitraum, JustificationValues.Center),
                     ContentCell(Euro(rechnung.Betrag), JustificationValues.Right), // TODO f ? bold : normal?
                     ContentCell(Prozent(anteil), JustificationValues.Right),

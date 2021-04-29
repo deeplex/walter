@@ -21,25 +21,23 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
 
             foreach (var gruppe in b.Gruppen)
             {
-                if (gruppe.GesamtEinheiten == 1)
+                body.Append(
+                    SubHeading("Angaben zur Abrechnungseinheit:", true),
+                    Abrechnungsgruppe(b, gruppe));
+
+                if (gruppe.GesamtEinheiten > 1)
                 {
-                    body.Append(
-                        SubHeading("Direkt zugeordnet:"),
-                        ErmittlungKalteKosten(b, gruppe, true));
+                        body.Append(
+                            Abrechnungseinheit(b, gruppe),
+                            new Paragraph(NoSpace()));
                 }
-                else
-                {
-                    body.Append(
-                        SubHeading("Angaben zur Abrechnungseinheit:", true),
-                        Abrechnungsgruppe(b, gruppe),
-                        Abrechnungseinheit(b, gruppe),
-                        new Paragraph(NoSpace()),
-                        ErmittlungKalteEinheiten(b, gruppe),
-                        SubHeading("Ermittlung der kalten Betriebskosten", true),
-                        ErmittlungKalteKosten(b, gruppe));
-                }
+                body.Append(
+                    ErmittlungKalteEinheiten(b, gruppe),
+                    new Paragraph(NoSpace()),
+                    ErmittlungKalteKosten(b, gruppe));
             }
 
+            // TODO apply sleeker format like for kalte Kosten for warme Kosten.
             if (b.Gruppen.Any(g => g.GesamtBetragWarm != 0 && g.BetragWarm != 0))
             {
                 body.Append(

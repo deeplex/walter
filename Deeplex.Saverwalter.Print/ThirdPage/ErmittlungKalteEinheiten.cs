@@ -27,6 +27,18 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
                 ContentHead("1200", "Tage", JustificationValues.Center),
                 ContentHead("630", "Ihr Anteil", JustificationValues.Center)));
 
+            if (g.GesamtEinheiten == 1)
+            {
+                table.Append(
+                    new TableRow(
+                        pContentCell("Direkte Zuordnung", JustificationValues.Left, bot()),
+                        pContentCell(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende), JustificationValues.Center, bot()),
+                        pContentCell(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString(), JustificationValues.Center, bot()),
+                        pContentCell(Prozent(g.WFZeitanteil), JustificationValues.Center, bot())));
+
+                return table;
+            }
+
             if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachWohnflaeche))
             {
                 table.Append(
@@ -116,6 +128,7 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
                     }
                 }
             }
+
             return table;
         }
     }
