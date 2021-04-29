@@ -13,13 +13,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private void Update(string Strasse, string Hausnummer, string Postleitzahl, string Stadt)
         {
-            if (!IsValid())
+            if (Strasse == Entity.Strasse &&
+                Hausnummer == Entity.Hausnummer &&
+                Postleitzahl == Entity.Postleitzahl &&
+                Stadt == Entity.Stadt)
             {
-                Entity.Strasse = Strasse;
-                Entity.Hausnummer = Hausnummer;
-                Entity.Postleitzahl = Postleitzahl;
-                Entity.Stadt = Stadt;
+                return;
             }
+
+            Entity.Strasse = Strasse;
+            Entity.Hausnummer = Hausnummer;
+            Entity.Postleitzahl = Postleitzahl;
+            Entity.Stadt = Stadt;
+
             if (!IsValid()) return;
             var adresse = App.Walter.Adressen.FirstOrDefault(a =>
                 a.Strasse == Strasse && a.Hausnummer == Hausnummer &&
@@ -112,8 +118,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity?.Strasse ?? "";
             set
             {
+                var old = Entity.Strasse;
                 Entity.Strasse = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
             // update(nameof(Entity.Strasse), value);
         }
@@ -123,8 +130,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity?.Hausnummer ?? "";
             set
             {
+                var old = Entity.Hausnummer;
                 Entity.Hausnummer = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -133,8 +141,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity?.Postleitzahl ?? "";
             set
             {
+                var old = Entity.Postleitzahl;
                 Entity.Postleitzahl = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
@@ -143,8 +152,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity?.Stadt ?? "";
             set
             {
+                var old = Entity.Stadt;
                 Entity.Stadt = value;
-                RaisePropertyChangedAuto();
+                RaisePropertyChangedAuto(old, value);
             }
         }
 
