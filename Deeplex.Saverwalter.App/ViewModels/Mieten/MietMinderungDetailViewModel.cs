@@ -6,41 +6,41 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Deeplex.Saverwalter.App.ViewModels
+namespace Deeplex.Saverwalter.App.ViewModels.Mieten
 {
-    public sealed class MietenDetailViewModel : BindableBase
+    public sealed class MietMinderungDetailViewModel : BindableBase
     {
-        public Miete Entity { get; }
+        public MietMinderung Entity { get; }
 
-        public double Betrag
+        public double Minderung
         {
-            get => Entity.Betrag ?? 0;
+            get => Entity.Minderung;
             set
             {
-                var old = Entity.Betrag;
-                Entity.Betrag = value;
+                var old = Entity.Minderung;
+                Entity.Minderung = value;
                 RaisePropertyChangedAuto(old, value);
             }
         }
 
-        public DateTimeOffset BetreffenderMonat
+        public DateTimeOffset Ende
         {
-            get => Entity.BetreffenderMonat.AsMin();
+            get => Entity.Ende is DateTime d ? d.AsMin() : DateTime.Now.AsUtcKind();
             set
             {
-                var old = Entity.BetreffenderMonat.AsMin();
-                Entity.BetreffenderMonat = value.DateTime.AsUtcKind();
+                var old = Ende;
+                Entity.Ende = value.DateTime.AsMin();
                 RaisePropertyChangedAuto(old, value);
             }
         }
 
-        public DateTimeOffset Zahlungsdatum
+        public DateTimeOffset Beginn
         {
-            get => Entity.Zahlungsdatum.AsMin();
+            get => Entity.Beginn.AsMin();
             set
             {
-                var old = Entity.Zahlungsdatum.AsMin();
-                Entity.Zahlungsdatum = value.DateTime.AsMin();
+                var old = Entity.Beginn.AsMin();
+                Entity.Beginn = value.DateTime.AsMin();
                 RaisePropertyChangedAuto(old, value);
             }
         }
@@ -67,8 +67,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public MietenDetailViewModel() : this(new Miete()) { }
-        public MietenDetailViewModel(Miete m)
+        public MietMinderungDetailViewModel() : this(new MietMinderung()) { }
+        public MietMinderungDetailViewModel(MietMinderung m)
         {
             Entity = m;
         }

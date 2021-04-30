@@ -126,6 +126,9 @@
     <Compile Include="UserControls\AddMieteControl.xaml.cs">
       <DependentUpon>AddMieteControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\AddMietMinderungControl.xaml.cs">
+      <DependentUpon>AddMietMinderungControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\AddZaehlerstand.xaml.cs">
       <DependentUpon>AddZaehlerstand.xaml</DependentUpon>
     </Compile>
@@ -137,6 +140,9 @@
     </Compile>
     <Compile Include="UserControls\Lists\MietenListControl.xaml.cs">
       <DependentUpon>MietenListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Lists\MietMinderungListControl.xaml.cs">
+      <DependentUpon>MietMinderungListControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\Lists\VertragListControl.xaml.cs">
       <DependentUpon>VertragListControl.xaml</DependentUpon>
@@ -157,6 +163,8 @@
     <Compile Include="ViewModels\AdresseViewModel.cs" />
     <Compile Include="ViewModels\Mieten\MietenDetailViewModel.cs" />
     <Compile Include="ViewModels\Mieten\MietenListViewModel.cs" />
+    <Compile Include="ViewModels\Mieten\MietMinderungDetailViewModel.cs" />
+    <Compile Include="ViewModels\Mieten\MietMinderungListViewModel.cs" />
     <Compile Include="ViewModels\Rechnungen\BetriebskostenRechnungenListViewModel.cs" />
     <Compile Include="ViewModels\Rechnungen\BetriebskostenrechnungenDetailViewModel.cs" />
     <Compile Include="ViewModels\Personen\JuristischePersonViewModel.cs" />
@@ -288,6 +296,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UserControls\AddMietMinderungControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UserControls\AddZaehlerstand.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -301,6 +313,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="UserControls\Lists\MietenListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Lists\MietMinderungListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
