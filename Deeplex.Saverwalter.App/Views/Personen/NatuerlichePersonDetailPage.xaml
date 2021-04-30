@@ -11,14 +11,6 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Page.Resources>
-        <Style x:Name="Eintraege" TargetType="TextBox">
-            <Setter Property="Width" Value="300"/>
-            <Setter Property="TextWrapping" Value="NoWrap"/>
-            <Setter Property="Margin" Value="20,20,0,0"/>
-        </Style>
-    </Page.Resources>
-    
     <ScrollViewer>
         <StackPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">

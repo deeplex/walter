@@ -6,6 +6,13 @@
     xmlns:local="using:Deeplex.Saverwalter.App">
     <Application.Resources>
         <ResourceDictionary>
+            
+            <Style x:Name="Eintraege" TargetType="TextBox">
+                <Setter Property="Width" Value="300"/>
+                <Setter Property="TextWrapping" Value="NoWrap"/>
+                <Setter Property="Margin" Value="20,20,0,0"/>
+            </Style>
+            
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>

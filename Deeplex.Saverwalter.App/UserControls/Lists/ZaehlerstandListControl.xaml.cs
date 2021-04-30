@@ -32,7 +32,25 @@ namespace Deeplex.Saverwalter.App.UserControls
             {
                 ViewModel.Value = new ZaehlerstandListViewModel(App.Walter.ZaehlerSet.Find(ZaehlerId));
             });
+
+            RegisterPropertyChangedCallback(ZaehlerstandListViewModelProperty, (ZaehlerIdDepObject, ZaehlerIdProp) =>
+            {
+                ViewModel.Value = ZaehlerstandListViewModel;
+            });
         }
+
+        public ZaehlerstandListViewModel ZaehlerstandListViewModel
+        {
+            get { return (ZaehlerstandListViewModel)GetValue(ZaehlerstandListViewModelProperty); }
+            set { SetValue(ZaehlerstandListViewModelProperty, value); }
+        }
+
+        public static readonly DependencyProperty ZaehlerstandListViewModelProperty
+            = DependencyProperty.Register(
+            "ZaehlerstandListViewModel",
+            typeof(ZaehlerstandListViewModel),
+            typeof(ZaehlerstandListControl),
+            new PropertyMetadata(null));
 
         public int ZaehlerId
         {

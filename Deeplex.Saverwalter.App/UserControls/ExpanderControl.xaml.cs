@@ -21,25 +21,27 @@ namespace Deeplex.Saverwalter.App.UserControls
 {
     public sealed partial class ExpanderControl : UserControl
     {
-        //public Action ClickProp { get; set; }
+
         public void ClickWrap(object sender, RoutedEventArgs r)
         {
-            Click();
+            if (ClickAvailable)
+            {
+                Click();
+            }
         }
+
+        public bool BonusAvailable => Bonus != null;
+        public bool ClickAvailable => Click != null;
 
         public ExpanderControl()
         {
             InitializeComponent();
-            //RegisterPropertyChangedCallback(ClickProperty, (DepObj, Prop) =>
-            //{
-            //    ClickProp = Click;
-            //});
         }
 
         public static readonly DependencyProperty MainContentProperty =
             DependencyProperty.Register(
             "MainContent",
-            typeof(Action),
+            typeof(object),
             typeof(ExpanderControl),
             new PropertyMetadata(default(object)));
 
@@ -49,17 +51,42 @@ namespace Deeplex.Saverwalter.App.UserControls
             set { SetValue(MainContentProperty, value); }
         }
 
+        public static readonly DependencyProperty BonusProperty =
+            DependencyProperty.Register(
+            "Bonus",
+            typeof(object),
+            typeof(ExpanderControl),
+            new PropertyMetadata(default(object)));
+
+        public object Bonus
+        {
+            get { return GetValue(BonusProperty); }
+            set { SetValue(BonusProperty, value); }
+        }
+
+        public bool IsExpanded
+        {
+            get { return (bool)GetValue(IsExpandedProperty); }
+            set { SetValue(IsExpandedProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsExpandedProperty
+            = DependencyProperty.Register(
+                "IsExpanded",
+                typeof(bool),
+                typeof(ExpanderControl),
+                new PropertyMetadata(false));
+
         public Action Click
         {
             get { return (Action)GetValue(ClickProperty); }
             set { SetValue(ClickProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ClickProperty
             = DependencyProperty.Register(
                 "Click",
-                typeof(object),
+                typeof(Action),
                 typeof(ExpanderControl),
                 new PropertyMetadata(null));
 

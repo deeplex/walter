@@ -33,13 +33,6 @@ namespace Deeplex.Saverwalter.App.UserControls
         {
             InitializeComponent();
 
-            RegisterPropertyChangedCallback(ZaehlerViewModelProperty, (ZaehlerViewModelDepObject, ZaehlerViewModelProp) =>
-            {
-                ViewModel.Zaehler = ZaehlerViewModel.Entity;
-                ViewModel.Stand = ViewModel.Zaehler.Staende.OrderBy(e => e.Datum).Last().Stand;
-                ViewModel.Datum = DateTime.Today;
-            });
-
             RegisterPropertyChangedCallback(ZaehlerstandListViewModelProperty, (ZaehlerIdDepObject, ZaehlerIdProp) =>
             {
                 ViewModel.Zaehler = App.Walter.ZaehlerSet.Find(ZaehlerstandListViewModel.ZaehlerId);
@@ -70,19 +63,6 @@ namespace Deeplex.Saverwalter.App.UserControls
                 f.Hide();
             }
         }
-
-        public ZaehlerDetailViewModel ZaehlerViewModel
-        {
-            get { return (ZaehlerDetailViewModel)GetValue(ZaehlerViewModelProperty); }
-            set { SetValue(ZaehlerViewModelProperty, value); }
-        }
-
-        public static readonly DependencyProperty ZaehlerViewModelProperty
-            = DependencyProperty.Register(
-            "ZaehlerViewModel",
-            typeof(ZaehlerDetailViewModel),
-            typeof(AddZaehlerstandControl),
-            new PropertyMetadata(null));
 
         public ZaehlerstandListViewModel ZaehlerstandListViewModel
         {

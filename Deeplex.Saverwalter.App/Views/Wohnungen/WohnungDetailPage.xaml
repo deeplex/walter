@@ -12,12 +12,6 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Page.Resources>
-        <Style x:Name="Eintraege" TargetType="TextBox">
-            <Setter Property="TextWrapping" Value="NoWrap"/>
-            <Setter Property="Margin" Value="20,20,0,0"/>
-        </Style>
-    </Page.Resources>
     <ScrollViewer>
         <StackPanel>
             <RelativePanel>
@@ -68,12 +62,16 @@
                     Text="{x:Bind ViewModel.Nutzeinheit, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Header="Einheiten" Width="70" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
-            <TextBox
-                Style="{StaticResource Eintraege}"
-                Margin="20"
-                Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                Header="Notiz"/>
-            
+            <mtuuc:WrapPanel>
+                <TextBox
+                    TextWrapping="Wrap"
+                    Style="{StaticResource Eintraege}"
+                    Width="620"
+                    Margin="20"
+                    Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Header="Notiz"/>
+            </mtuuc:WrapPanel>
+
             <uc:ExpanderControl Header="Zähler" Click="{x:Bind AddZaehler_Click}">
                 <uc:ExpanderControl.MainContent>
                     <uc:ZaehlerListControl WohnungId="{x:Bind ViewModel.Id}"/>

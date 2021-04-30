@@ -17,6 +17,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public Zaehler Entity;
         public int Id => Entity.ZaehlerId;
 
+        public ObservableProperty<ZaehlerstandListViewModel> Staende
+            = new ObservableProperty<ZaehlerstandListViewModel>();
+
         public List<Zaehlertyp> Typen => Enums.Zaehlertypen;
         public List<ZaehlerWohnung> Wohnungen = new List<ZaehlerWohnung>();
 
@@ -77,6 +80,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ZaehlerDetailViewModel(Zaehler z)
         {
             Entity = z;
+            Staende.Value = new ZaehlerstandListViewModel(z);
             Wohnungen = App.Walter.Wohnungen.Select(w => new ZaehlerWohnung(w)).ToList();
             Wohnung = Wohnungen.Find(w => w.Id == z.WohnungId);
 

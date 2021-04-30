@@ -10,16 +10,6 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <Style x:Name="Eintraege" TargetType="TextBox">
-                <Setter Property="Width" Value="300"/>
-                <Setter Property="TextWrapping" Value="NoWrap"/>
-                <Setter Property="Margin" Value="20,20,0,0"/>
-            </Style>
-        </ResourceDictionary>
-    </UserControl.Resources>
-
     <StackPanel>
         <mtuuc:WrapPanel>
             <uc:AdresseControl

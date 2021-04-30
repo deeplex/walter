@@ -10,14 +10,6 @@
     xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Page.Resources>
-        <Style x:Name="Eintraege" TargetType="TextBox">
-            <Setter Property="Width" Value="300"/>
-            <Setter Property="TextWrapping" Value="NoWrap"/>
-            <Setter Property="Margin" Value="20,20,0,0"/>
-        </Style>
-    </Page.Resources>
-
     <ScrollViewer>
         <StackPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
@@ -55,22 +47,24 @@
                     <SymbolIcon Symbol="Delete"/>
                 </Button>
             </mtuuc:WrapPanel>
-            <StackPanel Visibility="{x:Bind ViewModel.Initialized, Mode=OneWay}">
-                <TextBlock
-                    Margin="20,20,0,0"
-                    Style="{StaticResource SubtitleTextBlockStyle}"
-                    Text="Zählerstände"/>
-                <uc:ZaehlerstandListControl
-                    ZaehlerId="{x:Bind ViewModel.Id, Mode=OneWay}"
-                    Add="true" />
+
+            <StackPanel Margin="0,20,0,0" Visibility="{x:Bind ViewModel.Initialized, Mode=OneWay}">
+                <uc:ExpanderControl IsExpanded="True" Header="Zählerstände">
+                    <uc:ExpanderControl.Bonus>
+                        <uc:AddZaehlerstandControl ZaehlerstandListViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" />
+                    </uc:ExpanderControl.Bonus>
+                    <uc:ExpanderControl.MainContent>
+                        <uc:ZaehlerstandListControl ZaehlerstandListViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" Add="true" />
+                    </uc:ExpanderControl.MainContent>
+                </uc:ExpanderControl>
             </StackPanel>
+
             <StackPanel Visibility="{x:Bind ViewModel.Initialized, Mode=OneWay}">
-                <TextBlock
-                    Margin="20,20,0,0"
-                    Style="{StaticResource SubtitleTextBlockStyle}"
-                    Text="Einzelzähler"/>
-                <uc:ZaehlerListControl
-                    ZaehlerId="{x:Bind ViewModel.Id, Mode=OneWay}"/>
+                <uc:ExpanderControl Header="Einzelzähler">
+                    <uc:ExpanderControl.MainContent>
+                        <uc:ZaehlerListControl ZaehlerId="{x:Bind ViewModel.Id, Mode=OneWay}"/>
+                    </uc:ExpanderControl.MainContent>
+                </uc:ExpanderControl>
             </StackPanel>
         </StackPanel>
     </ScrollViewer>

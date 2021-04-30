@@ -10,7 +10,10 @@
     d:DesignWidth="400">
 
     <Grid>
-        <Button x:Name="AddZaehlerButton" Content="Zählerstand hinzufügen">
+        <Button
+            Background="Transparent"
+            x:Name="AddZaehlerButton">
+            <SymbolIcon Symbol="Add"/>
             <Button.Flyout>
                 <Flyout>
                     <StackPanel Orientation="Horizontal">

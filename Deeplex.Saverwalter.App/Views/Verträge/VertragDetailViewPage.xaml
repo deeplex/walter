@@ -13,11 +13,6 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Page.Resources>
-        <Style x:Name="Eintraege" TargetType="TextBox">
-            <Setter Property="TextWrapping" Value="NoWrap"/>
-            <Setter Property="Margin" Value="20,20,0,0"/>
-        </Style>
-
         <Style x:Name="Labels" TargetType="TextBlock">
             <Setter Property="Margin" Value="20,20,0,0"/>
             <Setter Property="Width" Value="110" />
