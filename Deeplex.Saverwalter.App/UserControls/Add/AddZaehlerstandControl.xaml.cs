@@ -17,7 +17,7 @@ using Deeplex.Saverwalter.App.ViewModels;
 
 namespace Deeplex.Saverwalter.App.UserControls
 {
-    public sealed partial class AddZaehlerstand : UserControl
+    public sealed partial class AddZaehlerstandControl : UserControl
     {
         public ZaehlerstandDetailViewModel ViewModel = new ZaehlerstandDetailViewModel();
         public DateTimeOffset Datum
@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             }
         }
 
-        public AddZaehlerstand()
+        public AddZaehlerstandControl()
         {
             InitializeComponent();
 
@@ -81,7 +81,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             = DependencyProperty.Register(
             "ZaehlerViewModel",
             typeof(ZaehlerDetailViewModel),
-            typeof(AddZaehlerstand),
+            typeof(AddZaehlerstandControl),
             new PropertyMetadata(null));
 
         public ZaehlerstandListViewModel ZaehlerstandListViewModel

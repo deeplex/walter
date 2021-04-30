@@ -38,7 +38,7 @@
                     </mtuuc:DataGridTemplateColumn>
                 </mtuuc:DataGrid.Columns>
             </mtuuc:DataGrid>
-            <uc:AddZaehlerstand ZaehlerstandListViewModel="{x:Bind ViewModel.Value, Mode=OneWay}" />
+            <uc:AddZaehlerstandControl ZaehlerstandListViewModel="{x:Bind ViewModel.Value, Mode=OneWay}" />
         </StackPanel>
     </Grid>
 </UserControl>
