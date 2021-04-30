@@ -156,6 +156,9 @@
     <Compile Include="UserControls\Lists\ZaehlerstandListControl.xaml.cs">
       <DependentUpon>ZaehlerstandListControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\PersonDetailControl.xaml.cs">
+      <DependentUpon>PersonDetailControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\Elements.cs" />
     <Compile Include="Utils\Enums.cs" />
     <Compile Include="Utils\Files.cs" />
@@ -335,6 +338,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\Lists\ZaehlerstandListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\PersonDetailControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

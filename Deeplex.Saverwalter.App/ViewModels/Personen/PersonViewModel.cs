@@ -6,7 +6,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public abstract class PersonViewModel : BindableBase
     {
-        protected IPerson Entity { get; set; }
+        public IPerson Entity { get; set; }
 
         public Guid PersonId
         {

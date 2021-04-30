@@ -18,6 +18,7 @@
             <Setter Property="Margin" Value="20,20,0,0"/>
         </Style>
     </Page.Resources>
+    
     <ScrollViewer>
         <StackPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
@@ -33,53 +34,7 @@
                     Text="{x:Bind ViewModel.Nachname, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     Header="Nachname" Style="{StaticResource Eintraege}"/>
             </mtuuc:WrapPanel>
-            <mtuuc:WrapPanel>
-                <uc:AdresseControl
-                    Margin="20,20,0,0"
-                    Adresse="{x:Bind ViewModel.GetEntity}" />
-            </mtuuc:WrapPanel>
-            <mtuuc:WrapPanel Orientation="Horizontal">
-                <TextBox
-                    Text="{x:Bind ViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                    Header="E-Mail" Style="{StaticResource Eintraege}"/>
-                <TextBox
-                    Text="{x:Bind ViewModel.Fax, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                    Header="Fax" Style="{StaticResource Eintraege}"/>
-            </mtuuc:WrapPanel>
-            <mtuuc:WrapPanel Orientation="Horizontal">
-                <TextBox
-                Text="{x:Bind ViewModel.Telefon, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                Header="Telefon" Style="{StaticResource Eintraege}"/>
-                <TextBox
-                Text="{x:Bind ViewModel.Mobil, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                Header="Mobil" Style="{StaticResource Eintraege}"/>
-            </mtuuc:WrapPanel>
-            <mtuuc:WrapPanel Orientation="Horizontal">
-                <CheckBox
-                    Margin="20,20,0,0" Content="Vermieter"
-                    IsChecked="{x:Bind ViewModel.isVermieter, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                <CheckBox Margin="20,20,0,0" Content="Mieter"
-                    IsChecked="{x:Bind ViewModel.isMieter, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                <CheckBox
-                    Margin="20,20,0,0" Content="Handwerker"
-                    IsChecked="{x:Bind ViewModel.isHandwerker, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-            </mtuuc:WrapPanel>
-            <mtuuc:WrapPanel>
-                <TextBox
-                    Width="620"
-                    Style="{StaticResource Eintraege}"
-                    Margin="20"
-                    Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                    Header="Notiz"/>
-            </mtuuc:WrapPanel>
-
-
-            <mtuuc:Expander
-                        Background="Transparent"
-                        Header="Verträge"
-                        HorizontalContentAlignment="Left">
-                <uc:VertragListControl PersonId="{x:Bind ViewModel.PersonId}"/>
-            </mtuuc:Expander>
+            <uc:PersonDetailControl PersonViewModel="{x:Bind ViewModel}" />
         </StackPanel>
     </ScrollViewer>
 </Page>

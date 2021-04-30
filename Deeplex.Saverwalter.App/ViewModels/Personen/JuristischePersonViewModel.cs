@@ -6,7 +6,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class JuristischePersonViewModel : PersonViewModel
     {
-        public JuristischePerson GetEntity => (JuristischePerson)Entity;
+        private JuristischePerson GetEntity => (JuristischePerson)Entity;
         public int Id;
 
         public string Bezeichnung

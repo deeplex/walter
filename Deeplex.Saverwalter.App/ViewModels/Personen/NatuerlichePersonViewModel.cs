@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class NatuerlichePersonViewModel : PersonViewModel
     {
-        public NatuerlichePerson GetEntity => (NatuerlichePerson)Entity;
+        private NatuerlichePerson GetEntity => (NatuerlichePerson)Entity;
 
         public int Id { get; }
 
@@ -25,8 +25,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Anrede;
             set
             {
-                var old = GetEntity.Anrede;
-                GetEntity.Anrede = value;
+                var old = Entity.Anrede;
+                Entity.Anrede = value;
                 RaisePropertyChangedAuto(old, value);
             }
         }

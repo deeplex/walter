@@ -1,0 +1,87 @@
+﻿<UserControl
+    x:Class="Deeplex.Saverwalter.App.UserControls.PersonDetailControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Deeplex.Saverwalter.App.UserControls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <UserControl.Resources>
+        <Style x:Name="Eintraege" TargetType="TextBox">
+            <Setter Property="Width" Value="300"/>
+            <Setter Property="TextWrapping" Value="NoWrap"/>
+            <Setter Property="Margin" Value="20,20,0,0"/>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <mtuuc:WrapPanel>
+            <uc:AdresseControl
+                Margin="20,20,0,0"
+                Adresse="{x:Bind ViewModel.Entity, Mode=OneWay}" />
+        </mtuuc:WrapPanel>
+        <mtuuc:WrapPanel Orientation="Horizontal">
+            <TextBox
+                Text="{x:Bind ViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Header="E-Mail"
+                Style="{StaticResource Eintraege}"/>
+            <TextBox
+                Text="{x:Bind ViewModel.Fax, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Header="Fax"
+                Style="{StaticResource Eintraege}"/>
+        </mtuuc:WrapPanel>
+        <mtuuc:WrapPanel Orientation="Horizontal">
+            <TextBox
+                Text="{x:Bind ViewModel.Telefon, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Header="Telefon" Style="{StaticResource Eintraege}"/>
+            <TextBox
+                Text="{x:Bind ViewModel.Mobil, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Header="Mobil" Style="{StaticResource Eintraege}"/>
+        </mtuuc:WrapPanel>
+        <mtuuc:WrapPanel Orientation="Horizontal">
+            <CheckBox
+                Margin="20,20,0,0"
+                Content="Vermieter"
+                IsChecked="{x:Bind ViewModel.isVermieter, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+            <CheckBox
+                Margin="20,20,0,0"
+                Content="Mieter"
+                IsChecked="{x:Bind ViewModel.isMieter, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+            <CheckBox
+                Margin="20,20,0,0"
+                Content="Handwerker"
+                IsChecked="{x:Bind ViewModel.isHandwerker, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+        </mtuuc:WrapPanel>
+        <mtuuc:WrapPanel>
+            <TextBox
+                Width="620"
+                Style="{StaticResource Eintraege}"
+                Margin="20"
+                Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Header="Notiz"/>
+        </mtuuc:WrapPanel>
+
+        <mtuuc:Expander
+            Background="Transparent"
+            HorizontalContentAlignment="Left">
+            <mtuuc:Expander.HeaderTemplate>
+                <DataTemplate>
+                    <mtuuc:WrapPanel Orientation="Horizontal">
+                        <TextBlock Margin="0,7,0,0"  Text="Verträge" />
+                        <Button
+                            Background="Transparent"
+                            Margin="10,0,0,0"
+                            Click="AddVertrag_Click">
+                            <SymbolIcon Symbol="Add" />
+                        </Button>
+                    </mtuuc:WrapPanel>
+                </DataTemplate>
+            </mtuuc:Expander.HeaderTemplate>
+            <uc:VertragListControl PersonId="{x:Bind ViewModel.PersonId}"/>
+        </mtuuc:Expander>
+    </StackPanel>
+</UserControl>
