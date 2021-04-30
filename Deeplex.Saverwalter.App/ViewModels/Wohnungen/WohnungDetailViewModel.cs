@@ -132,25 +132,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public AsyncRelayCommand AttachFile;
 
-        public void Update()
-        {
-            if ((Entity.Adresse == null && Entity.AdresseId == 0) ||
-                Entity.Bezeichnung == null || Entity.Bezeichnung == "")
-            {
-                return;
-            }
-
-            if (Entity.WohnungId != 0)
-            {
-                App.Walter.Wohnungen.Update(Entity);
-            }
-            else
-            {
-                App.Walter.Wohnungen.Add(Entity);
-            }
-            App.SaveWalter();
-        }
-
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
@@ -166,7 +147,21 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     return;
             }
 
-            Update();
+            if ((Entity.Adresse == null && Entity.AdresseId == 0) ||
+                Entity.Bezeichnung == null || Entity.Bezeichnung == "")
+            {
+                return;
+            }
+
+            if (Entity.WohnungId != 0)
+            {
+                App.Walter.Wohnungen.Update(Entity);
+            }
+            else
+            {
+                App.Walter.Wohnungen.Add(Entity);
+            }
+            App.SaveWalter();
         }
     }
 }

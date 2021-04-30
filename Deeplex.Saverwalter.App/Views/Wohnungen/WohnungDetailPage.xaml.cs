@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
@@ -16,12 +17,6 @@ namespace Deeplex.Saverwalter.App.Views
         public WohnungDetailPage()
         {
             InitializeComponent();
-        }
-
-        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
-        {
-            ViewModel.Update();
-            base.OnNavigatingFrom(e);
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -70,23 +65,36 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 BesitzerCombobox.SelectedIndex = ViewModel.AlleVermieter.FindIndex(v => v.Id == ViewModel.Besitzer.Id);
             }
-            base.OnNavigatedTo(e);
 
             App.ViewModel.Titel.Value = ViewModel.Anschrift + " — " + ViewModel.Bezeichnung;
             var Delete = new AppBarButton
             {
                 Icon = new SymbolIcon(Symbol.Delete),
                 Label = "Löschen",
-                IsEnabled = false, // TODO
             };
+            Delete.Click += Delete_Click;
             App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { },
                 new ICommandBarElement[] { Delete });
+
+            base.OnNavigatedTo(e);
         }
 
         public Action AddZaehler_Click;
         public Action AddVertrag_Click;
         public Action AddBetriebskostenrechnung_Click;
 
+        private void Delete_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.selfDestruct();
+            try
+            {
+                Frame.GoBack();
+            }
+            catch
+            {
+                App.ViewModel.ShowAlert("NAAAA", 2000);
+            }
+        }
 
         public sealed class WohnungDetailAdresseWohnung : Microsoft.UI.Xaml.Controls.TreeViewNode
         {
