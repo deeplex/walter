@@ -45,7 +45,8 @@
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>
                             </mtuuc:DataGridTemplateColumn>
-                            <mtuuc:DataGridTemplateColumn Header="Beginn">
+                            <mtuuc:DataGridTextColumn Header="Beginn" Binding="{Binding BeginnString}"/>
+                            <!--<mtuuc:DataGridTemplateColumn Header="Beginn">
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
                                         <CalendarDatePicker
@@ -56,8 +57,9 @@
                                             DateFormat="{}{day.integer}. {month.full} {year.full}"/>
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>
-                            </mtuuc:DataGridTemplateColumn>
-                            <mtuuc:DataGridTemplateColumn Header="Ende">
+                            </mtuuc:DataGridTemplateColumn>-->
+                            <mtuuc:DataGridTextColumn Header="Ende" Binding="{Binding EndeString}"/>
+                            <!--<mtuuc:DataGridTemplateColumn Header="Ende">
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
                                         <CalendarDatePicker
@@ -68,8 +70,9 @@
                                             DateFormat="{}{day.integer}. {month.full} {year.full}"/>
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>
-                            </mtuuc:DataGridTemplateColumn>
-                            <mtuuc:DataGridTemplateColumn Header="Minderung">
+                            </mtuuc:DataGridTemplateColumn>-->
+                            <mtuuc:DataGridTextColumn Header="Minderung" Binding="{Binding MinderungString}"/>
+                            <!--<mtuuc:DataGridTemplateColumn Header="Minderung">
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
                                         <muxc:NumberBox
@@ -77,9 +80,9 @@
                                             PlaceholderText="0.1"/>
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>
-                            </mtuuc:DataGridTemplateColumn>
-                            <mtuuc:DataGridTextColumn IsReadOnly="False" Binding="{Binding Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Header="Notiz"/>
-                            <mtuuc:DataGridTemplateColumn>
+                            </mtuuc:DataGridTemplateColumn>-->
+                            <mtuuc:DataGridTextColumn Binding="{Binding Notiz}" Header="Notiz"/>
+                            <!--<mtuuc:DataGridTemplateColumn>
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
                                         <Button Background="Transparent" Command="{x:Bind AttachFile}">
@@ -87,7 +90,7 @@
                                         </Button>
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>
-                            </mtuuc:DataGridTemplateColumn>
+                            </mtuuc:DataGridTemplateColumn>-->
                         </mtuuc:DataGrid.Columns>
                     </mtuuc:DataGrid>
                 </StackPanel>

@@ -170,8 +170,6 @@
     <Compile Include="ViewModels\Personen\JuristischePersonViewModel.cs" />
     <Compile Include="ViewModels\Personen\PersonViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
-    <Compile Include="ViewModels\Verträge\VertragDetailMiete.cs" />
-    <Compile Include="ViewModels\Verträge\VertragDetailMietminderung.cs" />
     <Compile Include="ViewModels\Verträge\VertragDetailVersion.cs" />
     <Compile Include="ViewModels\Verträge\VertragDetailViewModel.cs" />
     <Compile Include="ViewModels\Personen\KontaktListViewModel.cs" />

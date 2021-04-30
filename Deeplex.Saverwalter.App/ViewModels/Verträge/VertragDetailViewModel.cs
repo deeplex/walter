@@ -24,16 +24,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public ObservableProperty<ImmutableList<VertragDetailVersion>> Versionen
             = new ObservableProperty<ImmutableList<VertragDetailVersion>>();
-        public ObservableProperty<VertragDetailMiete> AddMieteValue
-            = new ObservableProperty<VertragDetailMiete>();
-        public ObservableProperty<VertragDetailMietMinderung> AddMietMinderungValue
-            = new ObservableProperty<VertragDetailMietMinderung>();
         public ObservableProperty<ImmutableList<VertragDetailKontakt>> Mieter
             = new ObservableProperty<ImmutableList<VertragDetailKontakt>>();
-        public ObservableProperty<ImmutableList<VertragDetailMiete>> Mieten
-            = new ObservableProperty<ImmutableList<VertragDetailMiete>>();
-        public ObservableProperty<ImmutableList<VertragDetailMietMinderung>> MietMinderungen
-            = new ObservableProperty<ImmutableList<VertragDetailMietMinderung>>();
         public DateTimeOffset? AddVersionDatum;
         public ObservableProperty<int> BetriebskostenJahr
             = new ObservableProperty<int>();
@@ -78,16 +70,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     .Where(p => !Mieter.Value.Exists(e => p.PersonId == e.PersonId))
                     .ToImmutableList();
 
-            Mieten.Value = App.Walter.Mieten
-                .Where(m => m.VertragId == v.First().VertragId)
-                .Select(m => new VertragDetailMiete(m)).ToList()
-                .OrderBy(m => m.Zahlungsdatum).Reverse().ToImmutableList();
-
-            MietMinderungen.Value = App.Walter.MietMinderungen
-                .Where(m => m.VertragId == v.First().VertragId)
-                .Select(m => new VertragDetailMietMinderung(m)).ToList()
-                .OrderBy(m => m.Beginn).Reverse().ToImmutableList();
-
             BetriebskostenJahr.Value = DateTime.Now.Year - 1;
 
             Versionen.Value = v.Select(vs => new VertragDetailVersion(vs)).ToImmutableList();
@@ -104,30 +86,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Versionen.Value = Versionen.Value.Insert(0, nv);
                 App.Walter.Add(entity);
                 App.SaveWalter();
-            }, _ => true);
-
-            AddMieteValue.Value = new VertragDetailMiete(v.First().VertragId);
-            AddMiete = new RelayCommand(_ =>
-            {
-                var amv = AddMieteValue.Value;
-                Mieten.Value = Mieten.Value
-                    .Add(amv)
-                    .OrderBy(m => m.Zahlungsdatum)
-                    .Reverse()
-                    .ToImmutableList();
-                AddMieteValue.Value = new VertragDetailMiete(v.First().VertragId);
-            }, _ => true);
-
-            AddMietMinderungValue.Value = new VertragDetailMietMinderung(v.First().VertragId);
-            AddMietMinderung = new RelayCommand(_ =>
-            {
-                var amv = AddMietMinderungValue.Value;
-                MietMinderungen.Value = MietMinderungen.Value
-                    .Add(amv)
-                    .OrderBy(m => m.Beginn)
-                    .Reverse()
-                    .ToImmutableList();
-                AddMietMinderungValue.Value = new VertragDetailMietMinderung(v.First().VertragId);
             }, _ => true);
 
             RemoveVersion = new RelayCommand(_ =>
@@ -188,4 +146,3 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public static Wohnung GetWohnung(int id) => App.Walter.Wohnungen.Find(id);
     }
 }
-
