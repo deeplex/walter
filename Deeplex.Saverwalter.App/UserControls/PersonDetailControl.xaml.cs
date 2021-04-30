@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.App.Views;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,7 +31,21 @@ namespace Deeplex.Saverwalter.App.UserControls
 
             AddVertrag_Click = () =>
             {
-                // TODO Navigate to Addvertrag with ViewModel.
+                var vm = new VertragDetailViewModel();
+                if (ViewModel.isMieter)
+                {
+                    vm.Mieter.Value = vm.Mieter.Value.Add(new VertragDetailKontakt(ViewModel.PersonId));
+                }
+                else if (ViewModel.isVermieter)
+                {
+                    vm.Wohnung = vm.AlleWohnungen.First(v => v.Entity.BesitzerId == ViewModel.PersonId);
+                }
+                else
+                {
+                    App.ViewModel.ShowAlert("Person ist weder Mieter, noch Vermieter.", 2000);
+                    return;
+                }
+                App.ViewModel.Navigate(typeof(VertragDetailViewPage), vm);
             };
         }
 

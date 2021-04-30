@@ -26,6 +26,10 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 ViewModel = new VertragDetailViewModel(vertragId);
             }
+            if (e.Parameter is VertragDetailViewModel vm)
+            {
+                ViewModel = vm;
+            }
             else // If invoked using "Add"
             {
                 ViewModel = new VertragDetailViewModel();
@@ -155,7 +159,7 @@ namespace Deeplex.Saverwalter.App.Views
 
             var worked = b.SaveAsDocx(ApplicationData.Current.LocalFolder.Path + @"\" + s + ".docx");
             var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
-            App.ViewModel.ShowSavedIndicator(text, 5000);
+            App.ViewModel.ShowAlert(text, 5000);
         }
 
         private void MieterBox_TokenItemRemoved(Microsoft.Toolkit.Uwp.UI.Controls.TokenizingTextBox sender, object args)

@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             SavedIndicator = arg;
             SavedIndicatorText = arg2;
         }
-        public void ShowSavedIndicator(string text, int ms = 500)
+        public void ShowAlert(string text, int ms = 500)
         {
             SavedIndicatorText.Text = text;
             SavedIndicator.Show(ms);
