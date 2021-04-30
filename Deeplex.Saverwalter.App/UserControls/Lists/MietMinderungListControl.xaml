@@ -17,16 +17,11 @@
         <StackPanel
             RelativePanel.AlignRightWithPanel="True"
             RelativePanel.AlignLeftWithPanel="True">
-            <mtuuc:Expander
-                Background="Transparent"
-                HorizontalContentAlignment="Left">
-                <mtuuc:Expander.Header>
-                    <mtuuc:WrapPanel>
-                        <TextBlock Margin="0,7,0,0" Text="Mietminderungen"/>
-                        <uc:AddMietMinderungControl MietMinderungListViewModel="{x:Bind ViewModel}"/>
-                    </mtuuc:WrapPanel>
-                </mtuuc:Expander.Header>
-                <StackPanel>
+            <uc:ExpanderControl Header="Mietminderungen">
+                <uc:ExpanderControl.Bonus>
+                    <uc:AddMietMinderungControl MietMinderungListViewModel="{x:Bind ViewModel}"/>
+                </uc:ExpanderControl.Bonus>
+                <uc:ExpanderControl.MainContent>
                     <mtuuc:DataGrid
                         CanUserReorderColumns="False"
                         CanUserResizeColumns="True"
@@ -93,8 +88,8 @@
                             </mtuuc:DataGridTemplateColumn>-->
                         </mtuuc:DataGrid.Columns>
                     </mtuuc:DataGrid>
-                </StackPanel>
-            </mtuuc:Expander>
+                </uc:ExpanderControl.MainContent>
+            </uc:ExpanderControl>
         </StackPanel>
     </RelativePanel>
 </UserControl>

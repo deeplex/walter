@@ -15,35 +15,31 @@
         <StackPanel
             RelativePanel.AlignRightWithPanel="True"
             RelativePanel.AlignLeftWithPanel="True">
-            <mtuuc:Expander
-                Background="Transparent"
-                HorizontalContentAlignment="Left">
-                <mtuuc:Expander.Header>
-                    <mtuuc:WrapPanel>
-                        <TextBlock Margin="0,7,0,0" Text="Mieten"/>
-                        <uc:AddMieteControl MietenListViewModel="{x:Bind ViewModel}" />
-                    </mtuuc:WrapPanel>
-                </mtuuc:Expander.Header>
-                <mtuuc:DataGrid
+            <uc:ExpanderControl Header="Mieten">
+                <uc:ExpanderControl.Bonus>
+                    <uc:AddMieteControl MietenListViewModel="{x:Bind ViewModel}" />
+                </uc:ExpanderControl.Bonus>
+                <uc:ExpanderControl.MainContent>
+                    <mtuuc:DataGrid
                     CanUserReorderColumns="False"
                     CanUserResizeColumns="True"
                     AutoGenerateColumns="False"
                     ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}">
-                    <mtuuc:DataGrid.Columns>
-                        <mtuuc:DataGridTemplateColumn>
-                            <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate x:DataType="vm:MietenListEntry">
-                                    <Button
+                        <mtuuc:DataGrid.Columns>
+                            <mtuuc:DataGridTemplateColumn>
+                                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:MietenListEntry">
+                                        <Button
                                         HorizontalAlignment="Center"
                                         Background="Transparent"
                                         Command="{x:Bind SelfDestruct}">
-                                        <SymbolIcon Symbol="Delete"></SymbolIcon>
-                                    </Button>
-                                </DataTemplate>
-                            </mtuuc:DataGridTemplateColumn.CellTemplate>
-                        </mtuuc:DataGridTemplateColumn>
-                        <mtuuc:DataGridTextColumn Header="Datum" Binding="{Binding DatumString}"/>
-                        <!--<mtuuc:DataGridTemplateColumn Header="Datum">
+                                            <SymbolIcon Symbol="Delete"></SymbolIcon>
+                                        </Button>
+                                    </DataTemplate>
+                                </mtuuc:DataGridTemplateColumn.CellTemplate>
+                            </mtuuc:DataGridTemplateColumn>
+                            <mtuuc:DataGridTextColumn Header="Datum" Binding="{Binding DatumString}"/>
+                            <!--<mtuuc:DataGridTemplateColumn Header="Datum">
                             <mtuuc:DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="vm:MietenListEntry">
                                     <CalendarDatePicker
@@ -55,8 +51,8 @@
                                 </DataTemplate>
                             </mtuuc:DataGridTemplateColumn.CellTemplate>
                         </mtuuc:DataGridTemplateColumn>-->
-                        <mtuuc:DataGridTextColumn Header="Betr. Monat" Binding="{Binding MonatString}" />
-                        <!--<mtuuc:DataGridTemplateColumn Header="Betr. Monat" Width="175">
+                            <mtuuc:DataGridTextColumn Header="Betr. Monat" Binding="{Binding MonatString}" />
+                            <!--<mtuuc:DataGridTemplateColumn Header="Betr. Monat" Width="175">
                             <mtuuc:DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="vm:VertragDetailMiete">
                                     <DatePicker
@@ -65,8 +61,8 @@
                                 </DataTemplate>
                             </mtuuc:DataGridTemplateColumn.CellTemplate>
                         </mtuuc:DataGridTemplateColumn>-->
-                        <mtuuc:DataGridTextColumn Header="Betrag" Binding="{Binding BetragString}"/>
-                        <!--<mtuuc:DataGridTemplateColumn Header="Betrag">
+                            <mtuuc:DataGridTextColumn Header="Betrag" Binding="{Binding BetragString}"/>
+                            <!--<mtuuc:DataGridTemplateColumn Header="Betrag">
                             <mtuuc:DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="vm:VertragDetailMiete">
                                     <muxc:NumberBox
@@ -75,11 +71,11 @@
                                 </DataTemplate>
                             </mtuuc:DataGridTemplateColumn.CellTemplate>
                         </mtuuc:DataGridTemplateColumn>-->
-                        <mtuuc:DataGridTextColumn
+                            <mtuuc:DataGridTextColumn
                             IsReadOnly="True"
                             Binding="{Binding Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                             Header="Notiz"/>
-                        <!--<mtuuc:DataGridTemplateColumn>
+                            <!--<mtuuc:DataGridTemplateColumn>
                         <mtuuc:DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="vm:VertragDetailMiete">
                                 <Button Background="Transparent" Command="{x:Bind AttachFile}">
@@ -88,9 +84,10 @@
                             </DataTemplate>
                         </mtuuc:DataGridTemplateColumn.CellTemplate>
                     </mtuuc:DataGridTemplateColumn>-->
-                    </mtuuc:DataGrid.Columns>
-                </mtuuc:DataGrid>
-            </mtuuc:Expander>
+                        </mtuuc:DataGrid.Columns>
+                    </mtuuc:DataGrid>
+                </uc:ExpanderControl.MainContent>
+            </uc:ExpanderControl>
         </StackPanel>
     </RelativePanel>
 </UserControl>
