@@ -1,0 +1,32 @@
+﻿<UserControl
+    x:Class="Deeplex.Saverwalter.App.UserControls.ExpanderControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Deeplex.Saverwalter.App.UserControls"
+    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <mtuuc:Expander
+        Background="Transparent"
+        HorizontalContentAlignment="Left">
+        <mtuuc:Expander.Header>
+            <mtuuc:WrapPanel Orientation="Horizontal">
+                <TextBlock Margin="0,7,0,0" Text="{x:Bind Header}" />
+                <Button
+                Background="Transparent"
+                Margin="10,0,0,0"
+                Click="{x:Bind ClickWrap}">
+                <SymbolIcon Symbol="Add" />
+                </Button>
+            </mtuuc:WrapPanel>
+        </mtuuc:Expander.Header>
+        <ContentPresenter Content="{x:Bind MainContent}" />
+    </mtuuc:Expander>
+
+
+</UserControl>

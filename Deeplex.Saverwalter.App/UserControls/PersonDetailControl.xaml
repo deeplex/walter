@@ -11,11 +11,13 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <UserControl.Resources>
-        <Style x:Name="Eintraege" TargetType="TextBox">
-            <Setter Property="Width" Value="300"/>
-            <Setter Property="TextWrapping" Value="NoWrap"/>
-            <Setter Property="Margin" Value="20,20,0,0"/>
-        </Style>
+        <ResourceDictionary>
+            <Style x:Name="Eintraege" TargetType="TextBox">
+                <Setter Property="Width" Value="300"/>
+                <Setter Property="TextWrapping" Value="NoWrap"/>
+                <Setter Property="Margin" Value="20,20,0,0"/>
+            </Style>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <StackPanel>
@@ -65,23 +67,10 @@
                 Header="Notiz"/>
         </mtuuc:WrapPanel>
 
-        <mtuuc:Expander
-            Background="Transparent"
-            HorizontalContentAlignment="Left">
-            <mtuuc:Expander.HeaderTemplate>
-                <DataTemplate>
-                    <mtuuc:WrapPanel Orientation="Horizontal">
-                        <TextBlock Margin="0,7,0,0"  Text="Verträge" />
-                        <Button
-                            Background="Transparent"
-                            Margin="10,0,0,0"
-                            Click="AddVertrag_Click">
-                            <SymbolIcon Symbol="Add" />
-                        </Button>
-                    </mtuuc:WrapPanel>
-                </DataTemplate>
-            </mtuuc:Expander.HeaderTemplate>
-            <uc:VertragListControl PersonId="{x:Bind ViewModel.PersonId}"/>
-        </mtuuc:Expander>
+        <uc:ExpanderControl Header="Verträge" Click="{x:Bind AddVertrag_Click}">
+            <uc:ExpanderControl.MainContent>
+                <uc:VertragListControl PersonId="{x:Bind ViewModel.PersonId}"/>
+            </uc:ExpanderControl.MainContent>
+        </uc:ExpanderControl>
     </StackPanel>
 </UserControl>

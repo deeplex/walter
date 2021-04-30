@@ -27,6 +27,11 @@ namespace Deeplex.Saverwalter.App.UserControls
             {
                 ViewModel = PersonViewModel;
             });
+
+            AddVertrag_Click = () =>
+            {
+                // TODO Navigate to Addvertrag with ViewModel.
+            };
         }
 
         public PersonViewModel PersonViewModel
@@ -42,9 +47,6 @@ namespace Deeplex.Saverwalter.App.UserControls
             typeof(PersonDetailControl),
             new PropertyMetadata(null));
 
-        private void AddVertrag_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO
-        }
+        public Action AddVertrag_Click;
     }
 }
