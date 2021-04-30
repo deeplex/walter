@@ -37,17 +37,31 @@ namespace Deeplex.Saverwalter.App.Views
 
             AddZaehler_Click = () =>
             {
-                // TODO Navigate to Addvertrag with ViewModel.
+                var vm = new ZaehlerDetailViewModel(new Zaehler() { WohnungId = ViewModel.Id });
+                App.ViewModel.Navigate(typeof(ZaehlerDetailPage), vm);
             };
 
             AddVertrag_Click = () =>
             {
-                // TODO Navigate to Addvertrag with ViewModel.
+                var vm = new VertragDetailViewModel();
+                vm.Wohnung = vm.AlleWohnungen.First(v => v.Entity.WohnungId == ViewModel.Id);
+                App.ViewModel.Navigate(typeof(VertragDetailViewPage), vm);
             };
 
             AddBetriebskostenrechnung_Click = () =>
             {
-                // TODO Navigate to Addvertrag with ViewModel.
+                var r = new Betriebskostenrechnung()
+                {
+                    BetreffendesJahr = DateTime.Now.Year,
+                    Datum = DateTime.Now,
+                };
+                r.Gruppen.Add(new BetriebskostenrechnungsGruppe()
+                {
+                    Wohnung = ViewModel.Entity,
+                    Rechnung = r,
+                });
+                var vm = new BetriebskostenrechnungDetailViewModel(r);
+                App.ViewModel.Navigate(typeof(BetriebskostenrechnungenDetailPage), vm);
             };
 
 

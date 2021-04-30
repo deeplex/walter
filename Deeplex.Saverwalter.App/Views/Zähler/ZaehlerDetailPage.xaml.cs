@@ -49,6 +49,10 @@ namespace Deeplex.Saverwalter.App.Views
                 ViewModel = new ZaehlerDetailViewModel(zaehler);
                 App.ViewModel.Titel.Value = ViewModel.Kennnummer;
             }
+            else if (e.Parameter is ZaehlerDetailViewModel vm)
+            {
+                ViewModel = vm;
+            }
             else if (e.Parameter is null) // New Zaehler
             {
                 ViewModel = new ZaehlerDetailViewModel();

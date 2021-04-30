@@ -46,7 +46,7 @@
             <mtuuc:WrapPanel>
                 <uc:AdresseControl
                     Margin="20,20,0,0"
-                    Adresse="{x:Bind ViewModel.GetEntity}" />
+                    Adresse="{x:Bind ViewModel.Entity}" />
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBox

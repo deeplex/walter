@@ -13,8 +13,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class WohnungDetailViewModel : ValidatableBase
     {
-        private Wohnung Entity;
-        public Wohnung GetEntity => Entity;
+        public Wohnung Entity;
         public int Id => Entity.WohnungId;
 
         public void selfDestruct()
