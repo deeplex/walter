@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using Windows.UI.Xaml.Controls;
@@ -34,6 +35,22 @@ namespace Deeplex.Saverwalter.App.Views
                 ViewModel = new WohnungDetailViewModel();
             }
 
+            AddZaehler_Click = () =>
+            {
+                // TODO Navigate to Addvertrag with ViewModel.
+            };
+
+            AddVertrag_Click = () =>
+            {
+                // TODO Navigate to Addvertrag with ViewModel.
+            };
+
+            AddBetriebskostenrechnung_Click = () =>
+            {
+                // TODO Navigate to Addvertrag with ViewModel.
+            };
+
+
             // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
             if (ViewModel.Besitzer != null) // TODO this is an ugly way to accomplish initial loading of Besitzer in GUI
             {
@@ -51,6 +68,11 @@ namespace Deeplex.Saverwalter.App.Views
             App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { },
                 new ICommandBarElement[] { Delete });
         }
+
+        public Action AddZaehler_Click;
+        public Action AddVertrag_Click;
+        public Action AddBetriebskostenrechnung_Click;
+
 
         public sealed class WohnungDetailAdresseWohnung : Microsoft.UI.Xaml.Controls.TreeViewNode
         {

@@ -73,24 +73,25 @@
                 Margin="20"
                 Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Notiz"/>
-            <mtuuc:Expander
-                    Background="Transparent"
-                    Header="Zähler"
-                    HorizontalContentAlignment="Left">
-                <uc:ZaehlerListControl WohnungId="{x:Bind ViewModel.Id}"/>
-            </mtuuc:Expander>
-            <mtuuc:Expander
-                Background="Transparent"
-                Header="Verträge"
-                HorizontalContentAlignment="Left">
-                <uc:VertragListControl WohnungId="{x:Bind ViewModel.Id}"/>
-            </mtuuc:Expander>
-            <mtuuc:Expander
-                    Background="Transparent"
-                    Header="Betriebskostenrechnungen"
-                    HorizontalContentAlignment="Left">
-                <uc:BetriebskostenRechnungenListControl WohnungId="{x:Bind ViewModel.Id}"/>
-            </mtuuc:Expander>
+            
+            <uc:ExpanderControl Header="Zähler" Click="{x:Bind AddZaehler_Click}">
+                <uc:ExpanderControl.MainContent>
+                    <uc:ZaehlerListControl WohnungId="{x:Bind ViewModel.Id}"/>
+                </uc:ExpanderControl.MainContent>
+            </uc:ExpanderControl>
+            
+            <uc:ExpanderControl Header="Verträge" Click="{x:Bind AddVertrag_Click}">
+                <uc:ExpanderControl.MainContent>
+                    <uc:VertragListControl WohnungId="{x:Bind ViewModel.Id}"/>
+                </uc:ExpanderControl.MainContent>
+            </uc:ExpanderControl>
+            
+            <uc:ExpanderControl Header="BetriebskostenRechnungen" Click="{x:Bind AddBetriebskostenrechnung_Click}">
+                <uc:ExpanderControl.MainContent>
+                    <uc:BetriebskostenRechnungenListControl WohnungId="{x:Bind ViewModel.Id}"/>
+                </uc:ExpanderControl.MainContent>
+            </uc:ExpanderControl>
+            
         </StackPanel>
     </ScrollViewer>
 </Page>
