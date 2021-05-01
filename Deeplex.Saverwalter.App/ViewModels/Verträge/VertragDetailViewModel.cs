@@ -14,8 +14,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public Guid guid { get; }
         public ObservableProperty<ImmutableList<VertragDetailKontakt>> AlleMieter
             = new ObservableProperty<ImmutableList<VertragDetailKontakt>>();
-        public ImmutableList<VertragDetailWohnung> AlleWohnungen
-            => App.Walter.Wohnungen.Select(w => new VertragDetailWohnung(w)).ToImmutableList();
+        public List<VertragDetailWohnung> AlleWohnungen = new List<VertragDetailWohnung>();
 
         public ImmutableList<VertragDetailKontakt> AlleKontakte =>
                 App.Walter.JuristischePersonen.ToImmutableList().Select(j => new VertragDetailKontakt(j))
@@ -58,6 +57,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             guid = v.First().VertragId;
 
+            Versionen.Value = v.Select(vs => new VertragDetailVersion(vs)).ToImmutableList();
+
+            AlleWohnungen = App.Walter.Wohnungen.Select(w => new VertragDetailWohnung(w)).ToList();
+            Wohnung = AlleWohnungen.Find(w => w.Id == v.First().WohnungId);
+
             Mieter.Value = App.Walter.MieterSet
                 .Where(m => m.VertragId == v.First().VertragId)
                 .Select(m => new VertragDetailKontakt(m.PersonId))
@@ -71,8 +75,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     .ToImmutableList();
 
             BetriebskostenJahr.Value = DateTime.Now.Year - 1;
-
-            Versionen.Value = v.Select(vs => new VertragDetailVersion(vs)).ToImmutableList();
 
             AddVersion = new RelayCommand(_ =>
             {
@@ -109,7 +111,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public void SelfDestruct()
         {
-            Versionen.Value.ForEach(v => App.Walter.Vertraege.Remove(v.Entity));
+            Versionen.Value.ForEach(v =>
+            {
+                App.Walter.Mieten
+                    .Where(m => m.VertragId == guid)
+                    .ToList()
+                    .ForEach(m => App.Walter.Mieten.Remove(m));
+                App.Walter.MietMinderungen
+                    .Where(m => m.VertragId == guid)
+                    .ToList()
+                    .ForEach(m => App.Walter.MietMinderungen.Remove(m));
+
+                App.Walter.Vertraege.Remove(v.Entity);
+            });
             App.SaveWalter();
         }
     }
@@ -134,7 +148,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public sealed class VertragDetailWohnung
     {
-        public override string ToString() => BezeichnungVoll;
+        //public override string ToString() => BezeichnungVoll;
         public Wohnung Entity { get; }
 
         public int Id { get; }
@@ -148,7 +162,5 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Besitzer = App.Walter.FindPerson(w.BesitzerId)?.Bezeichnung;
             BezeichnungVoll = AdresseViewModel.Anschrift(w) + ", " + w.Bezeichnung;
         }
-
-        public static Wohnung GetWohnung(int id) => App.Walter.Wohnungen.Find(id);
     }
 }

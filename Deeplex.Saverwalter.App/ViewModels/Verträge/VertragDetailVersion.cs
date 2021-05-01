@@ -43,10 +43,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
             set
             {
                 if (value == null) return;
+
+                var old = Entity.Wohnung;
+                Entity.Wohnung = value?.Entity;
                 mWohnung = value;
-                Entity.WohnungId = mWohnung.Id;
-                var old = mWohnung.Id;
-                if (RaisePropertyChangedAuto(old, value.Id))
+                if (RaisePropertyChangedAuto(old, value.Entity))
                 {
                     RaisePropertyChanged(nameof(Vermieter));
                 }
@@ -108,10 +109,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Ansprechpartner = new VertragDetailKontakt(v.AnsprechpartnerId.Value);
             }
 
-            if (v.Wohnung != null)
-            {
-                Wohnung = new VertragDetailWohnung(v.Wohnung);
-            }
             PropertyChanged += OnUpdate;
         }
 

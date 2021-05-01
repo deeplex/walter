@@ -35,18 +35,11 @@ namespace Deeplex.Saverwalter.App.Views
                 ViewModel = new VertragDetailViewModel();
             }
 
-            // TODO this can be fixed by having the selected item be a pointer to the respecitve element in the list.
-            if (ViewModel.Wohnung != null)
-            {
-                WohnungComboBox.SelectedIndex = ViewModel.AlleWohnungen.FindIndex(w => w.Id == ViewModel.Wohnung.Id);
-            }
-            // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
             if (ViewModel.Ansprechpartner != null) // TODO this is an ugly way to accomplish initial loading of Besitzer in GUI
             {
                 AnsprechpartnerSuggest.Text = ViewModel.Ansprechpartner.Bezeichnung;
             }
             FillMieterBox();
-            base.OnNavigatedTo(e);
             App.ViewModel.Titel.Value = "Vertragdetails";
 
             var Primary = new ICommandBarElement[] {
@@ -71,6 +64,8 @@ namespace Deeplex.Saverwalter.App.Views
             };
 
             App.ViewModel.RefillCommandContainer(Primary, Secondary);
+
+            base.OnNavigatedTo(e);
         }
 
         private void Delete_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)

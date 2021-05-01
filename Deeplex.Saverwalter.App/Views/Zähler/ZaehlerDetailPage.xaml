@@ -25,10 +25,13 @@
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <ComboBox
+                    x:Name="Testibus"
                     Margin="20,20,0,0" Header="Wohnung"
-                    Width="420" ItemsSource="{x:Bind ViewModel.Wohnungen}"
+                    Width="420"
+                    ItemsSource="{x:Bind ViewModel.Wohnungen}"
+                    PlaceholderText="Wohnung hinzufügen"
                     DisplayMemberPath="Anschrift"
-                    SelectedValue="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                    SelectedItem="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                 <Button
                     Command="{x:Bind ViewModel.DeleteZaehlerWohnung}"
                     VerticalAlignment="Bottom">
