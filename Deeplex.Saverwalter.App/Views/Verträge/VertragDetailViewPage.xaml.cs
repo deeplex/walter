@@ -35,10 +35,6 @@ namespace Deeplex.Saverwalter.App.Views
                 ViewModel = new VertragDetailViewModel();
             }
 
-            if (ViewModel.Ansprechpartner != null) // TODO this is an ugly way to accomplish initial loading of Besitzer in GUI
-            {
-                AnsprechpartnerSuggest.Text = ViewModel.Ansprechpartner.ToString();
-            }
             App.ViewModel.Titel.Value = "Vertragdetails";
 
             var Primary = new ICommandBarElement[] {
@@ -103,34 +99,9 @@ namespace Deeplex.Saverwalter.App.Views
             };
         }
 
-        private void AnsprechpartnerSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
-        {
-            sender.ItemsSource = ViewModel.AlleKontakte
-                    // If Checkbox => .Where(k => k.JuristischePersonen.Contains(ViewModel.Vermieter.Id))
-                    .Where(k => k.ToString().Trim().ToLower().Contains(sender.Text.Trim().ToLower()))
-                    .ToImmutableList();
-        }
-
-        private void AnsprechpartnerSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
-        {
-            if (args.ChosenSuggestion is KontaktListEntry a)
-            {
-                var ansprechpartner = ViewModel.AlleKontakte.First(k => k.Guid == a.Guid);
-
-                ViewModel.Ansprechpartner = ansprechpartner;
-                ViewModel.Versionen.Value.ForEach(v => v.Ansprechpartner = ansprechpartner);
-                App.Walter.Vertraege.Where(vs => vs.VertragId == ViewModel.guid).ToList().ForEach(vs =>
-                {
-                    vs.AnsprechpartnerId = a.Guid;
-                });
-                App.SaveWalter();
-            }
-        }
-
         private void RemoveDate_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             ViewModel.Ende = null;
-            ViewModel.Versionen.Value.Last().Ende = null;
         }
 
         private void Betriebskostenabrechnung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)

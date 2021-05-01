@@ -27,10 +27,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public List<WohnungListEntry> AlleWohnungen = new List<WohnungListEntry>();
 
-        public ImmutableList<KontaktListEntry> AlleKontakte =>
-                App.Walter.JuristischePersonen.ToImmutableList().Select(j => new KontaktListEntry(j))
-                    .Concat(App.Walter.NatuerlichePersonen.Select(n => new KontaktListEntry(n)))
-                    .ToImmutableList();
+        public List<KontaktListEntry> AlleKontakte;
 
         public ObservableProperty<ImmutableList<VertragDetailVersion>> Versionen
             = new ObservableProperty<ImmutableList<VertragDetailVersion>>();
@@ -73,6 +70,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             AlleWohnungen = App.Walter.Wohnungen.Select(w => new WohnungListEntry(w)).ToList();
             Wohnung = AlleWohnungen.Find(w => w.Id == v.First().WohnungId);
+            
+            AlleKontakte = App.Walter.JuristischePersonen.ToList().Select(j => new KontaktListEntry(j))
+                    .Concat(App.Walter.NatuerlichePersonen.Select(n => new KontaktListEntry(n)))
+                    .ToList();
+            Ansprechpartner = AlleKontakte.Find(w => w.Guid == v.First().AnsprechpartnerId);
 
             Mieter.Value = App.Walter.MieterSet
                 .Where(m => m.VertragId == v.First().VertragId)

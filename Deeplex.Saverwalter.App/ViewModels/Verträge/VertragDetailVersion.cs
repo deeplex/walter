@@ -96,10 +96,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => mAnsprechpartner;
             set
             {
-                var old = mAnsprechpartner.Guid;
+                if (value == null && mAnsprechpartner == null)
+                {
+                    return;
+                }
+                var old = mAnsprechpartner?.Guid;
                 mAnsprechpartner = value;
-                Entity.AnsprechpartnerId = mAnsprechpartner.Guid;
-                RaisePropertyChangedAuto(old, value.Guid);
+                Entity.AnsprechpartnerId = mAnsprechpartner?.Guid;
+                RaisePropertyChangedAuto(old, value?.Guid);
             }
         }
 
