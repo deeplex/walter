@@ -26,15 +26,6 @@
             </MenuFlyout>
         </mtuuc:DataGrid.ContextFlyout>
         <mtuuc:DataGrid.Columns>
-            <mtuuc:DataGridTemplateColumn Visibility="{x:Bind VertragBool}">
-                <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                        <Button Click="RemoveMieter_Click">
-                            <SymbolIcon Symbol="Delete"/>
-                        </Button>
-                    </DataTemplate>
-                </mtuuc:DataGridTemplateColumn.CellTemplate>
-            </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTextColumn
                 Header="Name"
                 Binding="{Binding Name}"/>
@@ -55,6 +46,17 @@
                 Header="Mobil"
                 Tag="Mobil"
                 Binding="{Binding Mobil}"/>
+            <mtuuc:DataGridTemplateColumn Visibility="{x:Bind VertragBool}">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <Button
+                            Background="Transparent"
+                            Click="RemoveMieter_Click">
+                            <SymbolIcon Symbol="Delete"/>
+                        </Button>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
         </mtuuc:DataGrid.Columns>
     </mtuuc:DataGrid>
 </UserControl>

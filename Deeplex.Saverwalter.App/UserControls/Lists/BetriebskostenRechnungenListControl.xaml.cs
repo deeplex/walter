@@ -13,7 +13,6 @@ namespace Deeplex.Saverwalter.App.UserControls
     {
         public BetriebskostenRechnungenListViewModel ViewModel { get; set; }
 
-
         private void UpdateFilter()
         {
             ViewModel.Liste.Value = ViewModel.AllRelevant;
@@ -21,6 +20,12 @@ namespace Deeplex.Saverwalter.App.UserControls
             {
                 ViewModel.Liste.Value = ViewModel.Liste.Value
                     .Where(v => v.Wohnungen.Select(i => i.WohnungId).Contains(WohnungId))
+                    .ToImmutableList();
+            }
+            if (StartJahr != 0 && EndeJahr != 0)
+            {
+                ViewModel.Liste.Value = ViewModel.Liste.Value
+                    .Where(v => v.BetreffendesJahr >= StartJahr && v.BetreffendesJahr <= EndeJahr)
                     .ToImmutableList();
             }
             if (Filter != "")
@@ -54,11 +59,35 @@ namespace Deeplex.Saverwalter.App.UserControls
             set { SetValue(WohnungIdProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for Property1.  
-        // This enables animation, styling, binding, etc...
         public static readonly DependencyProperty WohnungIdProperty
             = DependencyProperty.Register(
                   "WohnungId",
+                  typeof(int),
+                  typeof(BetriebskostenRechnungenListControl),
+                  new PropertyMetadata(0));
+
+        public int StartJahr
+        {
+            get { return (int)GetValue(StartJahrProperty); }
+            set { SetValue(StartJahrProperty, value); }
+        }
+
+        public static readonly DependencyProperty StartJahrProperty
+            = DependencyProperty.Register(
+                  "StartJahr",
+                  typeof(int),
+                  typeof(BetriebskostenRechnungenListControl),
+                  new PropertyMetadata(0));
+
+        public int EndeJahr
+        {
+            get { return (int)GetValue(EndeJahrProperty); }
+            set { SetValue(EndeJahrProperty, value); }
+        }
+
+        public static readonly DependencyProperty EndeJahrProperty
+            = DependencyProperty.Register(
+                  "EndeJahr",
                   typeof(int),
                   typeof(BetriebskostenRechnungenListControl),
                   new PropertyMetadata(0));

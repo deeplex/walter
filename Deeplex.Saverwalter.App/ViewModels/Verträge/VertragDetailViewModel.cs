@@ -47,6 +47,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             get => Versionen.Value.First().Ende;
         }
+        public int StartJahr => lastBeginn.Year;
+        public int EndeJahr => firstEnde?.Year ?? 9999;
 
         public VertragDetailViewModel() : this(new List<Vertrag>
             { new Vertrag { Beginn = DateTime.UtcNow.Date, } })
@@ -70,7 +72,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             AlleWohnungen = App.Walter.Wohnungen.Select(w => new WohnungListEntry(w)).ToList();
             Wohnung = AlleWohnungen.Find(w => w.Id == v.First().WohnungId);
-            
+
             AlleKontakte = App.Walter.JuristischePersonen.ToList().Select(j => new KontaktListEntry(j))
                     .Concat(App.Walter.NatuerlichePersonen.Select(n => new KontaktListEntry(n)))
                     .ToList();

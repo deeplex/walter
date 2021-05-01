@@ -48,7 +48,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public int Id => Entity.BetriebskostenrechnungId;
         public List<Wohnung> Wohnungen { get; }
         public string TypString => Entity.Typ.ToString();
-        public string BetreffendesJahrString => Entity.BetreffendesJahr.ToString();
+        public int BetreffendesJahr => Entity.BetreffendesJahr;
+        public string BetreffendesJahrString => BetreffendesJahr.ToString();
         public string BetragString => Entity.Betrag.ToString() + "€";
         public string AdressenBezeichnung { get; }
 

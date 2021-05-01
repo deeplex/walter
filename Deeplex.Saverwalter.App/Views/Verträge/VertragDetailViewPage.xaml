@@ -188,6 +188,14 @@
 
             <uc:MietenListControl VertragGuid="{x:Bind ViewModel.guid}"/>
             <uc:MietMinderungListControl VertragGuid="{x:Bind ViewModel.guid}"/>
+            <uc:ExpanderControl Header="Betriebskostenrechnungen">
+                <uc:ExpanderControl.MainContent>
+                    <uc:BetriebskostenRechnungenListControl
+                        StartJahr="{x:Bind ViewModel.StartJahr}"
+                        EndeJahr="{x:Bind ViewModel.EndeJahr}"
+                        WohnungId="{x:Bind ViewModel.Wohnung.Id}" />
+                </uc:ExpanderControl.MainContent>
+            </uc:ExpanderControl>
         </StackPanel>
     </ScrollViewer>
 </Page>
