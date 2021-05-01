@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 ViewModel = new VertragDetailViewModel(vertragId);
             }
-            if (e.Parameter is VertragDetailViewModel vm)
+            else if (e.Parameter is VertragDetailViewModel vm)
             {
                 ViewModel = vm;
             }
@@ -62,8 +62,8 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 Label = "Löschen",
                 Icon = new SymbolIcon(Symbol.Delete),
-                IsEnabled = false, // TODO
             };
+            Delete.Click += Delete_Click;
 
             var Secondary = new ICommandBarElement[]
             {
@@ -71,6 +71,12 @@ namespace Deeplex.Saverwalter.App.Views
             };
 
             App.ViewModel.RefillCommandContainer(Primary, Secondary);
+        }
+
+        private void Delete_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            ViewModel.SelfDestruct();
+            Frame.GoBack();
         }
 
         private AppBarButton BetriebskostenAbrechnungsButton()

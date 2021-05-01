@@ -76,7 +76,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             AddVersion = new RelayCommand(_ =>
             {
-                var last = App.Walter.Vertraege.Find(Versionen.Value.First().Id);
+                var last = Versionen.Value.First().Entity;
                 var entity = new Vertrag(last, AddVersionDatum?.UtcDateTime ?? DateTime.UtcNow.Date)
                 {
                     Personenzahl = Personenzahl,
@@ -84,13 +84,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 };
                 var nv = new VertragDetailVersion(entity);
                 Versionen.Value = Versionen.Value.Insert(0, nv);
-                App.Walter.Add(entity);
+                App.Walter.Vertraege.Add(entity);
                 App.SaveWalter();
             }, _ => true);
 
             RemoveVersion = new RelayCommand(_ =>
             {
-                var vs = App.Walter.Vertraege.Find(Versionen.Value.First().Id);
+                var vs = Versionen.Value.First().Entity;
                 App.Walter.Vertraege.Remove(vs);
                 Versionen.Value = Versionen.Value.Skip(1).ToImmutableList();
                 App.SaveWalter();
@@ -106,6 +106,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public RelayCommand AddMietMinderung { get; }
         public RelayCommand AddVersion { get; }
         public RelayCommand RemoveVersion { get; }
+
+        public void SelfDestruct()
+        {
+            Versionen.Value.ForEach(v => App.Walter.Vertraege.Remove(v.Entity));
+            App.SaveWalter();
+        }
     }
 
     public sealed class VertragDetailKontakt

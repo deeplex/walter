@@ -121,76 +121,78 @@
                     </mtuuc:TokenizingTextBox.SuggestedItemTemplate>
                 </mtuuc:TokenizingTextBox>
             </mtuuc:WrapPanel>
-            <TextBlock
-                Margin="20,20,0,0"
-                Style="{StaticResource SubtitleTextBlockStyle}"
-                Text="Versionen"/>
-            <mtuuc:DataGrid
-                Margin="10"
-                CanUserReorderColumns="False"
-                CanUserResizeColumns="True"
-                AutoGenerateColumns="False"
-                ItemsSource="{x:Bind ViewModel.Versionen.Value, Mode=TwoWay}">
-                <mtuuc:DataGrid.Columns>
-                    <mtuuc:DataGridTextColumn IsReadOnly="True" Header="Version" Binding="{Binding Version}"/>
-                    <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
-                    <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
-                    <mtuuc:DataGridTemplateColumn Header="Personenzahl">
-                        <mtuuc:DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="vm:VertragDetailVersion">
-                                <muxc:NumberBox
-                                    Value="{x:Bind Personenzahl, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                    PlaceholderText="0"/>
-                            </DataTemplate>
-                        </mtuuc:DataGridTemplateColumn.CellTemplate>
-                    </mtuuc:DataGridTemplateColumn>
-                    <mtuuc:DataGridTemplateColumn Header="Kaltmiete">
-                        <mtuuc:DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="vm:VertragDetailVersion">
-                                <muxc:NumberBox
-                                    Value="{x:Bind KaltMiete, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                    PlaceholderText="0"/>
-                            </DataTemplate>
-                        </mtuuc:DataGridTemplateColumn.CellTemplate>
-                    </mtuuc:DataGridTemplateColumn>
-                    <mtuuc:DataGridTemplateColumn Header="Notiz">
-                        <mtuuc:DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="vm:VertragDetailVersion">
-                                <TextBox Text="{x:Bind Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                            </DataTemplate>
-                        </mtuuc:DataGridTemplateColumn.CellTemplate>
-                    </mtuuc:DataGridTemplateColumn>
-                </mtuuc:DataGrid.Columns>
-            </mtuuc:DataGrid>
-            <StackPanel Orientation="Horizontal">
-                <Button
-                Margin="20,20,0,20"
-                Content="Vertrag ändern">
-                    <Button.Flyout>
-                        <Flyout>
-                            <StackPanel Orientation="Horizontal">
-                                <CalendarDatePicker
+
+            <uc:ExpanderControl Margin="0,20,0,0" Header="Versionen">
+                <uc:ExpanderControl.Bonus>
+                    <Button Background="Transparent">
+                        <SymbolIcon Symbol="Add" />
+                        <Button.Flyout>
+                            <Flyout>
+                                <StackPanel Orientation="Horizontal">
+                                    <CalendarDatePicker
                                     Header="Beginn"
                                     MinDate="{x:Bind ViewModel.Beginn, Mode=TwoWay}"
                                     Language="de"
                                     DateFormat="{}{day.integer}. {month.full} {year.full}"
                                     PlaceholderText="Datum hinzufügen"
                                     Date="{x:Bind ViewModel.AddVersionDatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                <Button
-                                    VerticalAlignment="Bottom"
-                                    Command="{x:Bind ViewModel.AddVersion}"
-                                    Background="Transparent">
-                                    <SymbolIcon Symbol="Add"/>
-                                </Button>
-                            </StackPanel>
-                        </Flyout>
-                    </Button.Flyout>
-                </Button>
-                <Button
-                    Margin="20, 0, 0, 0"
-                    Content="Entferne aktuelle Version"
-                    Command="{x:Bind ViewModel.RemoveVersion}"/>
-            </StackPanel>
+                                    <Button
+                                        VerticalAlignment="Bottom"
+                                        Command="{x:Bind ViewModel.AddVersion}"
+                                        Background="Transparent">
+                                        <SymbolIcon Symbol="Add"/>
+                                    </Button>
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                </uc:ExpanderControl.Bonus>
+                <uc:ExpanderControl.MainContent>
+                    <StackPanel>
+                        <mtuuc:DataGrid
+                            CanUserReorderColumns="False"
+                            CanUserResizeColumns="True"
+                            AutoGenerateColumns="False"
+                            ItemsSource="{x:Bind ViewModel.Versionen.Value, Mode=TwoWay}">
+                            <mtuuc:DataGrid.Columns>
+                                <mtuuc:DataGridTextColumn IsReadOnly="True" Header="Version" Binding="{Binding Version}"/>
+                                <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
+                                <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
+                                <mtuuc:DataGridTemplateColumn Header="Personenzahl">
+                                    <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="vm:VertragDetailVersion">
+                                            <muxc:NumberBox
+                                            Value="{x:Bind Personenzahl, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                            PlaceholderText="0"/>
+                                        </DataTemplate>
+                                    </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                </mtuuc:DataGridTemplateColumn>
+                                <mtuuc:DataGridTemplateColumn Header="Kaltmiete">
+                                    <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="vm:VertragDetailVersion">
+                                            <muxc:NumberBox
+                                    Value="{x:Bind KaltMiete, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                    PlaceholderText="0"/>
+                                        </DataTemplate>
+                                    </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                </mtuuc:DataGridTemplateColumn>
+                                <mtuuc:DataGridTemplateColumn Header="Notiz">
+                                    <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="vm:VertragDetailVersion">
+                                            <TextBox Text="{x:Bind Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                        </DataTemplate>
+                                    </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                </mtuuc:DataGridTemplateColumn>
+                            </mtuuc:DataGrid.Columns>
+                        </mtuuc:DataGrid>
+                        <Button
+                            Margin="20, 0, 0, 0"
+                            Content="Entferne aktuelle Version"
+                            Command="{x:Bind ViewModel.RemoveVersion}"/>
+                    </StackPanel>
+                </uc:ExpanderControl.MainContent>
+            </uc:ExpanderControl>
+            
             <uc:MietenListControl VertragGuid="{x:Bind ViewModel.guid}"/>
             <uc:MietMinderungListControl VertragGuid="{x:Bind ViewModel.guid}"/>
         </StackPanel>

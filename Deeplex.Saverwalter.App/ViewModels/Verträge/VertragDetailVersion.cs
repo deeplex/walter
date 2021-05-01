@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public class VertragDetailVersion : BindableBase
     {
-        private Vertrag Entity { get; }
+        public Vertrag Entity { get; }
         public int Id => Entity.rowid;
         public int Version => Entity.Version;
         public double KaltMiete
