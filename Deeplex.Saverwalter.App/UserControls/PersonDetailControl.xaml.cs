@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.App.UserControls
                 var vm = new VertragDetailViewModel();
                 if (ViewModel.isMieter)
                 {
-                    vm.Mieter.Value = vm.Mieter.Value.Add(new VertragDetailKontakt(ViewModel.PersonId));
+                    vm.Mieter.Value = vm.Mieter.Value.Add(new KontaktListEntry(ViewModel.PersonId));
                 }
                 else if (ViewModel.isVermieter)
                 {

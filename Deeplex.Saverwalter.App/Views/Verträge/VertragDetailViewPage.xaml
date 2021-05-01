@@ -94,35 +94,27 @@
                     Content="Teil der jur. Person?"
                     Margin="15,15,0,0"/>
             </mtuuc:WrapPanel>
-            <mtuuc:WrapPanel Orientation="Horizontal">
-                <TextBlock Text="Mieter:" Style="{StaticResource Labels}"/>
-                <mtuuc:TokenizingTextBox
-                    Margin="20,15,20,0"
-                    x:Name="MieterBox"
-                    MaxHeight="104"
-                    PlaceholderText="Mieter hinzufügen…"
-                    TextChanged="MieterBox_TextChanged"
-                    SuggestedItemsSource="{x:Bind ViewModel.AlleMieter.Value, Mode=OneWay}"
-                    TokenItemAdded="MieterBox_TokenItemAdded"
-                    TokenItemRemoved="MieterBox_TokenItemRemoved">
-                    <mtuuc:TokenizingTextBox.TokenItemTemplate>
-                        <DataTemplate x:DataType="vm:VertragDetailKontakt">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{x:Bind Bezeichnung}" Padding="0,0,4,0"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </mtuuc:TokenizingTextBox.TokenItemTemplate>
-                    <mtuuc:TokenizingTextBox.SuggestedItemTemplate>
-                        <DataTemplate x:DataType="vm:VertragDetailKontakt">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{x:Bind Bezeichnung}" Padding="4,0,0,0"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </mtuuc:TokenizingTextBox.SuggestedItemTemplate>
-                </mtuuc:TokenizingTextBox>
-            </mtuuc:WrapPanel>
+            <uc:ExpanderControl Margin="0,20,0,0" IsExpanded="True" Header="Mieter">
+                <uc:ExpanderControl.Bonus>
+                    <mtuuc:WrapPanel Orientation="Horizontal">
+                        <Button Background="Transparent">
+                            <SymbolIcon Symbol="Add" />
+                            <Button.Flyout>
+                                <Flyout>
+                                    <ComboBox
+                                        PlaceholderText="Mieter hinzufügen"
+                                        ItemsSource="{x:Bind ViewModel.AlleMieter}"/>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </mtuuc:WrapPanel>
+                </uc:ExpanderControl.Bonus>
+                <uc:ExpanderControl.MainContent>
+                    <uc:KontaktListControl Kontakte="{x:Bind ViewModel.Mieter.Value, Mode=OneWay}"/>
+                </uc:ExpanderControl.MainContent>
+            </uc:ExpanderControl>
 
-            <uc:ExpanderControl Margin="0,20,0,0" Header="Versionen">
+            <uc:ExpanderControl Header="Versionen">
                 <uc:ExpanderControl.Bonus>
                     <Button Background="Transparent">
                         <SymbolIcon Symbol="Add" />
@@ -192,7 +184,7 @@
                     </StackPanel>
                 </uc:ExpanderControl.MainContent>
             </uc:ExpanderControl>
-            
+
             <uc:MietenListControl VertragGuid="{x:Bind ViewModel.guid}"/>
             <uc:MietMinderungListControl VertragGuid="{x:Bind ViewModel.guid}"/>
         </StackPanel>

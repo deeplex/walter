@@ -12,8 +12,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class VertragDetailViewModel : VertragDetailVersion
     {
         public Guid guid { get; }
-        public ObservableProperty<ImmutableList<VertragDetailKontakt>> AlleMieter
-            = new ObservableProperty<ImmutableList<VertragDetailKontakt>>();
+        public List<KontaktListEntry> AlleMieter;
         public List<WohnungCombobox> AlleWohnungen = new List<WohnungCombobox>();
 
         public ImmutableList<VertragDetailKontakt> AlleKontakte =>
@@ -23,8 +22,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public ObservableProperty<ImmutableList<VertragDetailVersion>> Versionen
             = new ObservableProperty<ImmutableList<VertragDetailVersion>>();
-        public ObservableProperty<ImmutableList<VertragDetailKontakt>> Mieter
-            = new ObservableProperty<ImmutableList<VertragDetailKontakt>>();
+
+        public ObservableProperty<ImmutableList<KontaktListEntry>> Mieter
+            = new ObservableProperty<ImmutableList<KontaktListEntry>>();
         public DateTimeOffset? AddVersionDatum;
         public ObservableProperty<int> BetriebskostenJahr
             = new ObservableProperty<int>();
@@ -64,15 +64,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             Mieter.Value = App.Walter.MieterSet
                 .Where(m => m.VertragId == v.First().VertragId)
-                .Select(m => new VertragDetailKontakt(m.PersonId))
+                .Select(m => new KontaktListEntry(m.PersonId))
                 .ToImmutableList();
 
-            AlleMieter.Value = App.Walter.JuristischePersonen.ToImmutableList()
-                    .Where(j => j.isMieter == true).Select(j => new VertragDetailKontakt(j))
+            AlleMieter = App.Walter.JuristischePersonen.ToList()
+                    .Where(j => j.isMieter == true).Select(j => new KontaktListEntry(j))
                     .Concat(App.Walter.NatuerlichePersonen
-                        .Where(n => n.isMieter == true).Select(n => new VertragDetailKontakt(n)))
-                    .Where(p => !Mieter.Value.Exists(e => p.PersonId == e.PersonId))
-                    .ToImmutableList();
+                        .Where(n => n.isMieter == true).Select(n => new KontaktListEntry(n)))
+                    .Where(p => !Mieter.Value.Exists(e => p.Id == e.Id))
+                    .ToList();
 
             BetriebskostenJahr.Value = DateTime.Now.Year - 1;
 

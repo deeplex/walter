@@ -46,6 +46,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public sealed class KontaktListEntry
     {
+        public override string ToString()
+            => Entity.Bezeichnung;
+
         public Type Type { get; }
         public int Id { get; }
         public Guid Guid { get; }
@@ -55,7 +58,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public string Email { get; }
         public string Telefon { get; }
         public string Mobil { get; }
+        private IPerson Entity { get; }
 
+        public KontaktListEntry(Guid id) : this(App.Walter.FindPerson(id)) { }
         public KontaktListEntry(JuristischePerson j) : this(j as IPerson)
         {
             Type = j.GetType();
@@ -74,6 +79,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private KontaktListEntry(IPerson p)
         {
+            Entity = p;
             Guid = p.PersonId;
             Email = p.Email ?? "";
             Telefon = p.Telefon ?? "";

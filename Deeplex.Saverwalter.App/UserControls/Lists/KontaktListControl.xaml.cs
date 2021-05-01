@@ -25,6 +25,13 @@ namespace Deeplex.Saverwalter.App.UserControls
                     applyFilter(Filter, v.Anschrift, v.Name, v.Vorname, v.Email, v.Telefon))
                     .ToImmutableList();
             }
+
+            if (Kontakte != null)
+            {
+                ViewModel.Kontakte.Value = ViewModel.Kontakte.Value.Where(v =>
+                    Kontakte.Any(k => k.Guid == v.Guid))
+                    .ToImmutableList();
+            }
         }
 
         public KontaktListControl()
@@ -32,6 +39,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             InitializeComponent();
             ViewModel = new KontaktListViewModel();
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, Prop) => UpdateFilter());
+            RegisterPropertyChangedCallback(KontakteProperty, (DepObj, Prop) => UpdateFilter());
         }
 
         public string Filter
@@ -46,6 +54,19 @@ namespace Deeplex.Saverwalter.App.UserControls
                   typeof(string),
                   typeof(VertragListControl),
                   new PropertyMetadata(""));
+
+        public ImmutableList<KontaktListEntry> Kontakte
+        {
+            get { return (ImmutableList<KontaktListEntry>)GetValue(KontakteProperty); }
+            set { SetValue(KontakteProperty, value); }
+        }
+
+        public static readonly DependencyProperty KontakteProperty
+            = DependencyProperty.Register(
+                  "KontakteProperty",
+                  typeof(ImmutableList<KontaktListEntry>),
+                  typeof(VertragListControl),
+                  new PropertyMetadata(null));
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {

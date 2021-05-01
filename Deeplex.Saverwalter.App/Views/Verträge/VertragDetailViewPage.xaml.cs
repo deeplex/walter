@@ -39,7 +39,6 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 AnsprechpartnerSuggest.Text = ViewModel.Ansprechpartner.Bezeichnung;
             }
-            FillMieterBox();
             App.ViewModel.Titel.Value = "Vertragdetails";
 
             var Primary = new ICommandBarElement[] {
@@ -104,14 +103,6 @@ namespace Deeplex.Saverwalter.App.Views
             };
         }
 
-        private void FillMieterBox()
-        {
-            foreach (var mieter in ViewModel.Mieter.Value)
-            {
-                MieterBox.AddTokenItem(mieter);
-            }
-        }
-
         private void AnsprechpartnerSuggest_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             sender.ItemsSource = ViewModel.AlleKontakte
@@ -161,50 +152,6 @@ namespace Deeplex.Saverwalter.App.Views
             var worked = b.SaveAsDocx(ApplicationData.Current.LocalFolder.Path + @"\" + s + ".docx");
             var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
             App.ViewModel.ShowAlert(text, 5000);
-        }
-
-        private void MieterBox_TokenItemRemoved(Microsoft.Toolkit.Uwp.UI.Controls.TokenizingTextBox sender, object args)
-        {
-            if (args is VertragDetailKontakt mieter)
-            {
-                ViewModel.Mieter.Value = ViewModel.Mieter.Value.Remove(mieter);
-                ViewModel.AlleMieter.Value = ViewModel.AlleMieter.Value.Add(mieter);
-                var target = App.Walter.MieterSet.FirstOrDefault(m =>
-                    m.VertragId == ViewModel.guid && m.PersonId == mieter.PersonId);
-                if (target != null)
-                {
-                    App.Walter.MieterSet.Remove(target);
-                    App.SaveWalter();
-                }
-            }
-        }
-        private void MieterBox_TokenItemAdded(Microsoft.Toolkit.Uwp.UI.Controls.TokenizingTextBox sender, object args)
-        {
-            if (args is VertragDetailKontakt mieter)
-            {
-                if (ViewModel.Mieter.Value.Exists(w => w.PersonId == mieter.PersonId))
-                {
-
-                }
-                else
-                {
-                    ViewModel.Mieter.Value = ViewModel.Mieter.Value.Add(mieter).ToImmutableList();
-                    ViewModel.AlleMieter.Value = ViewModel.AlleMieter.Value.Remove(mieter);
-                    App.Walter.MieterSet.Add(new Mieter
-                    {
-                        PersonId = mieter.PersonId,
-                        VertragId = ViewModel.guid,
-                    });
-                    App.SaveWalter();
-                }
-            }
-        }
-
-        private void MieterBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
-        {
-            sender.ItemsSource = ViewModel.AlleMieter.Value
-                .Where(k => k.Bezeichnung.Trim().ToLower().Contains(sender.Text.Trim().ToLower()))
-                .ToImmutableList();
         }
     }
 }
