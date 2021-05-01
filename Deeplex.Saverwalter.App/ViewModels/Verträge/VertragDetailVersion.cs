@@ -87,18 +87,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         public string Vermieter
-            => Wohnung?.Entity?.BesitzerId is Guid g ?
+            => Wohnung?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
                     App.Walter.FindPerson(g).Bezeichnung : "";
 
-        private VertragDetailKontakt mAnsprechpartner;
-        public VertragDetailKontakt Ansprechpartner
+        private KontaktListEntry mAnsprechpartner;
+        public KontaktListEntry Ansprechpartner
         {
             get => mAnsprechpartner;
             set
             {
+                var old = mAnsprechpartner.Guid;
                 mAnsprechpartner = value;
-                Entity.AnsprechpartnerId = mAnsprechpartner.PersonId;
-                RaisePropertyChangedAuto();
+                Entity.AnsprechpartnerId = mAnsprechpartner.Guid;
+                RaisePropertyChangedAuto(old, value.Guid);
             }
         }
 
@@ -109,7 +110,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             if (v.AnsprechpartnerId != Guid.Empty && v.AnsprechpartnerId != null)
             {
-                Ansprechpartner = new VertragDetailKontakt(v.AnsprechpartnerId.Value);
+                Ansprechpartner = new KontaktListEntry(v.AnsprechpartnerId.Value);
             }
 
             PropertyChanged += OnUpdate;

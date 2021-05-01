@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.App.Views
 
             if (ViewModel.Ansprechpartner != null) // TODO this is an ugly way to accomplish initial loading of Besitzer in GUI
             {
-                AnsprechpartnerSuggest.Text = ViewModel.Ansprechpartner.Bezeichnung;
+                AnsprechpartnerSuggest.Text = ViewModel.Ansprechpartner.ToString();
             }
             App.ViewModel.Titel.Value = "Vertragdetails";
 
@@ -107,21 +107,21 @@ namespace Deeplex.Saverwalter.App.Views
         {
             sender.ItemsSource = ViewModel.AlleKontakte
                     // If Checkbox => .Where(k => k.JuristischePersonen.Contains(ViewModel.Vermieter.Id))
-                    .Where(k => k.Bezeichnung.Trim().ToLower().Contains(sender.Text.Trim().ToLower()))
+                    .Where(k => k.ToString().Trim().ToLower().Contains(sender.Text.Trim().ToLower()))
                     .ToImmutableList();
         }
 
         private void AnsprechpartnerSuggest_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
-            if (args.ChosenSuggestion is VertragDetailKontakt a)
+            if (args.ChosenSuggestion is KontaktListEntry a)
             {
-                var ansprechpartner = ViewModel.AlleKontakte.First(k => k.PersonId == a.PersonId);
+                var ansprechpartner = ViewModel.AlleKontakte.First(k => k.Guid == a.Guid);
 
                 ViewModel.Ansprechpartner = ansprechpartner;
                 ViewModel.Versionen.Value.ForEach(v => v.Ansprechpartner = ansprechpartner);
                 App.Walter.Vertraege.Where(vs => vs.VertragId == ViewModel.guid).ToList().ForEach(vs =>
                 {
-                    vs.AnsprechpartnerId = a.PersonId;
+                    vs.AnsprechpartnerId = a.Guid;
                 });
                 App.SaveWalter();
             }

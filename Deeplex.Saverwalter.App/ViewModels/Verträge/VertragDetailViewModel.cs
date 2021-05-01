@@ -27,9 +27,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public List<WohnungListEntry> AlleWohnungen = new List<WohnungListEntry>();
 
-        public ImmutableList<VertragDetailKontakt> AlleKontakte =>
-                App.Walter.JuristischePersonen.ToImmutableList().Select(j => new VertragDetailKontakt(j))
-                    .Concat(App.Walter.NatuerlichePersonen.Select(n => new VertragDetailKontakt(n)))
+        public ImmutableList<KontaktListEntry> AlleKontakte =>
+                App.Walter.JuristischePersonen.ToImmutableList().Select(j => new KontaktListEntry(j))
+                    .Concat(App.Walter.NatuerlichePersonen.Select(n => new KontaktListEntry(n)))
                     .ToImmutableList();
 
         public ObservableProperty<ImmutableList<VertragDetailVersion>> Versionen
@@ -132,24 +132,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.Walter.Vertraege.Remove(v.Entity);
             });
             App.SaveWalter();
-        }
-    }
-
-    public sealed class VertragDetailKontakt
-    {
-        public override string ToString() => Bezeichnung;
-
-        public Guid PersonId;
-        public bool isMieter;
-        public string Bezeichnung;
-
-        public VertragDetailKontakt(Guid i) : this(App.Walter.FindPerson(i)) { }
-
-        public VertragDetailKontakt(IPerson p)
-        {
-            PersonId = p.PersonId;
-            isMieter = p.isMieter;
-            Bezeichnung = p.Bezeichnung;
         }
     }
 }
