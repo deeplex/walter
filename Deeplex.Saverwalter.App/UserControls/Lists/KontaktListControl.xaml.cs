@@ -68,6 +68,20 @@ namespace Deeplex.Saverwalter.App.UserControls
                   typeof(VertragListControl),
                   new PropertyMetadata(null));
 
+        public bool VertragBool => VertragGuid != Guid.Empty;
+        public Guid VertragGuid
+        {
+            get { return (Guid)GetValue(VertragGuidProperty); }
+            set { SetValue(VertragGuidProperty, value); }
+        }
+
+        public static readonly DependencyProperty VertragGuidProperty
+            = DependencyProperty.Register(
+                  "VertragGuid",
+                  typeof(Guid),
+                  typeof(VertragListControl),
+                  new PropertyMetadata(Guid.Empty));
+
         private void Details_Click(object sender, RoutedEventArgs e)
         {
             var sk = ViewModel.SelectedKontakt;
@@ -85,6 +99,18 @@ namespace Deeplex.Saverwalter.App.UserControls
         private void DataGrid_RightTapped(object sender, Windows.UI.Xaml.Input.RightTappedRoutedEventArgs e)
         {
             ViewModel.SelectedKontakt = (e.OriginalSource as FrameworkElement).DataContext as KontaktListEntry;
+        }
+
+        private void RemoveMieter_Click(object sender, RoutedEventArgs e)
+        {
+            var guid = ((KontaktListEntry)((Button)sender).DataContext).Guid;
+
+            ViewModel.Kontakte.Value = ViewModel.Kontakte.Value
+                .Where(k => guid != k.Guid).ToImmutableList();
+            App.Walter.MieterSet
+                .Where(m => m.PersonId == guid && m.VertragId == VertragGuid)
+                .ToList().ForEach(m => App.Walter.MieterSet.Remove(m));
+            App.SaveWalter();
         }
     }
 }

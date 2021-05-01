@@ -26,6 +26,15 @@
             </MenuFlyout>
         </mtuuc:DataGrid.ContextFlyout>
         <mtuuc:DataGrid.Columns>
+            <mtuuc:DataGridTemplateColumn Visibility="{x:Bind VertragBool}">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <Button Click="RemoveMieter_Click">
+                            <SymbolIcon Symbol="Delete"/>
+                        </Button>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTextColumn
                 Header="Name"
                 Binding="{Binding Name}"/>
