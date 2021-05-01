@@ -31,6 +31,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public sealed class WohnungListEntry
     {
+        public override string ToString() => Anschrift;
+
         public int Id { get; }
         public Wohnung Entity { get; }
         public string Bezeichnung { get; }

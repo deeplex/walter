@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     .ToImmutableList();
         }
 
-        public List<WohnungCombobox> AlleWohnungen = new List<WohnungCombobox>();
+        public List<WohnungListEntry> AlleWohnungen = new List<WohnungListEntry>();
 
         public ImmutableList<VertragDetailKontakt> AlleKontakte =>
                 App.Walter.JuristischePersonen.ToImmutableList().Select(j => new VertragDetailKontakt(j))
@@ -71,7 +71,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             Versionen.Value = v.Select(vs => new VertragDetailVersion(vs)).ToImmutableList();
 
-            AlleWohnungen = App.Walter.Wohnungen.Select(w => new WohnungCombobox(w)).ToList();
+            AlleWohnungen = App.Walter.Wohnungen.Select(w => new WohnungListEntry(w)).ToList();
             Wohnung = AlleWohnungen.Find(w => w.Id == v.First().WohnungId);
 
             Mieter.Value = App.Walter.MieterSet

@@ -180,7 +180,6 @@
     <Compile Include="ViewModels\Verträge\VertragDetailViewModel.cs" />
     <Compile Include="ViewModels\Personen\KontaktListViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="ViewModels\ComboboxViewModels.cs" />
     <Compile Include="ViewModels\Wohnungen\WohnungDetailViewModel.cs" />
     <Compile Include="ViewModels\Wohnungen\WohnungListViewModel.cs" />
     <Compile Include="ViewModels\Verträge\VertragListViewModel.cs" />

@@ -36,8 +36,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        private WohnungCombobox mWohnung;
-        public WohnungCombobox Wohnung
+        private WohnungListEntry mWohnung;
+        public WohnungListEntry Wohnung
         {
             get => mWohnung;
             set
