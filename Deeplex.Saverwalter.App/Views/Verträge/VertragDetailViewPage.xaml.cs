@@ -153,5 +153,22 @@ namespace Deeplex.Saverwalter.App.Views
             var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
             App.ViewModel.ShowAlert(text, 5000);
         }
+
+        private void AddMieter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (((KontaktListEntry)((ComboBox)sender).SelectedItem)?.Guid is Guid guid)
+            {
+                ((ComboBox)sender).SelectedItem = null;
+                ViewModel.Mieter.Value = ViewModel.Mieter.Value.Add(new KontaktListEntry(guid));
+                AddMieter_Flyout.Hide();
+                ViewModel.UpdateMieterList();
+                App.Walter.MieterSet.Add(new Mieter()
+                {
+                    VertragId = ViewModel.guid,
+                    PersonId = guid,
+                });
+                App.SaveWalter();
+            }
+        }
     }
 }

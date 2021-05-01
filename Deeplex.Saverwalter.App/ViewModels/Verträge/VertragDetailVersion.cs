@@ -86,7 +86,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public string Vermieter => App.Walter.FindPerson(Wohnung.Entity.BesitzerId).Bezeichnung;
+        public string Vermieter
+            => Wohnung?.Entity?.BesitzerId is Guid g ?
+                    App.Walter.FindPerson(g).Bezeichnung : "";
+
         private VertragDetailKontakt mAnsprechpartner;
         public VertragDetailKontakt Ansprechpartner
         {

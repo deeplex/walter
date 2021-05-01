@@ -12,7 +12,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class VertragDetailViewModel : VertragDetailVersion
     {
         public Guid guid { get; }
-        public List<KontaktListEntry> AlleMieter;
+        public ObservableProperty<ImmutableList<KontaktListEntry>> AlleMieter
+            = new ObservableProperty<ImmutableList<KontaktListEntry>>();
+
+        public void UpdateMieterList()
+        {
+            AlleMieter.Value = App.Walter.JuristischePersonen.ToImmutableList()
+                    .Where(j => j.isMieter == true).Select(j => new KontaktListEntry(j))
+                    .Concat(App.Walter.NatuerlichePersonen
+                        .Where(n => n.isMieter == true).Select(n => new KontaktListEntry(n)))
+                    .Where(p => !Mieter.Value.Exists(e => p.Id == e.Id))
+                    .ToImmutableList();
+        }
+
         public List<WohnungCombobox> AlleWohnungen = new List<WohnungCombobox>();
 
         public ImmutableList<VertragDetailKontakt> AlleKontakte =>
@@ -67,12 +79,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Select(m => new KontaktListEntry(m.PersonId))
                 .ToImmutableList();
 
-            AlleMieter = App.Walter.JuristischePersonen.ToList()
-                    .Where(j => j.isMieter == true).Select(j => new KontaktListEntry(j))
-                    .Concat(App.Walter.NatuerlichePersonen
-                        .Where(n => n.isMieter == true).Select(n => new KontaktListEntry(n)))
-                    .Where(p => !Mieter.Value.Exists(e => p.Id == e.Id))
-                    .ToList();
+            UpdateMieterList();
 
             BetriebskostenJahr.Value = DateTime.Now.Year - 1;
 

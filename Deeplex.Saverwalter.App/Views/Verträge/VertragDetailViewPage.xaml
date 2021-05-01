@@ -100,10 +100,11 @@
                         <Button Background="Transparent">
                             <SymbolIcon Symbol="Add" />
                             <Button.Flyout>
-                                <Flyout>
+                                <Flyout x:Name="AddMieter_Flyout">
                                     <ComboBox
+                                        SelectionChanged="AddMieter_SelectionChanged"
                                         PlaceholderText="Mieter hinzufügen"
-                                        ItemsSource="{x:Bind ViewModel.AlleMieter}"/>
+                                        ItemsSource="{x:Bind ViewModel.AlleMieter.Value, Mode=OneWay}"/>
                                 </Flyout>
                             </Button.Flyout>
                         </Button>
