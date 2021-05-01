@@ -156,7 +156,7 @@ namespace Deeplex.Saverwalter.App.Views
                 .Where(m => m.VertragId == ViewModel.guid).ToList()
                 .Select(a => App.Walter.FindPerson(a.PersonId).Bezeichnung));
 
-            var s = Jahr.ToString() + " - " + ViewModel.Wohnung.BezeichnungVoll + " - " + AuflistungMieter;
+            var s = Jahr.ToString() + " - " + ViewModel.Wohnung.ToString() + " - " + AuflistungMieter;
 
             var worked = b.SaveAsDocx(ApplicationData.Current.LocalFolder.Path + @"\" + s + ".docx");
             var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";

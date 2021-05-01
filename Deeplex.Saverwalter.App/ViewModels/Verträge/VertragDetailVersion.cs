@@ -36,8 +36,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        private VertragDetailWohnung mWohnung;
-        public VertragDetailWohnung Wohnung
+        private WohnungCombobox mWohnung;
+        public WohnungCombobox Wohnung
         {
             get => mWohnung;
             set
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public string Vermieter => Wohnung.Besitzer;
+        public string Vermieter => App.Walter.FindPerson(Wohnung.Entity.BesitzerId).Bezeichnung;
         private VertragDetailKontakt mAnsprechpartner;
         public VertragDetailKontakt Ansprechpartner
         {

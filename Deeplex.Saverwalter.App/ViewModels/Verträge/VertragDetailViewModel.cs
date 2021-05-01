@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public Guid guid { get; }
         public ObservableProperty<ImmutableList<VertragDetailKontakt>> AlleMieter
             = new ObservableProperty<ImmutableList<VertragDetailKontakt>>();
-        public List<VertragDetailWohnung> AlleWohnungen = new List<VertragDetailWohnung>();
+        public List<WohnungCombobox> AlleWohnungen = new List<WohnungCombobox>();
 
         public ImmutableList<VertragDetailKontakt> AlleKontakte =>
                 App.Walter.JuristischePersonen.ToImmutableList().Select(j => new VertragDetailKontakt(j))
@@ -59,7 +59,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             Versionen.Value = v.Select(vs => new VertragDetailVersion(vs)).ToImmutableList();
 
-            AlleWohnungen = App.Walter.Wohnungen.Select(w => new VertragDetailWohnung(w)).ToList();
+            AlleWohnungen = App.Walter.Wohnungen.Select(w => new WohnungCombobox(w)).ToList();
             Wohnung = AlleWohnungen.Find(w => w.Id == v.First().WohnungId);
 
             Mieter.Value = App.Walter.MieterSet
@@ -143,24 +143,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             PersonId = p.PersonId;
             isMieter = p.isMieter;
             Bezeichnung = p.Bezeichnung;
-        }
-    }
-
-    public sealed class VertragDetailWohnung
-    {
-        //public override string ToString() => BezeichnungVoll;
-        public Wohnung Entity { get; }
-
-        public int Id { get; }
-        public string Besitzer { get; }
-        public string BezeichnungVoll { get; }
-
-        public VertragDetailWohnung(Wohnung w)
-        {
-            Entity = w;
-            Id = w.WohnungId;
-            Besitzer = App.Walter.FindPerson(w.BesitzerId)?.Bezeichnung;
-            BezeichnungVoll = AdresseViewModel.Anschrift(w) + ", " + w.Bezeichnung;
         }
     }
 }

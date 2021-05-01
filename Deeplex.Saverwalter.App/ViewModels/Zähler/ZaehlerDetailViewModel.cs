@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<ZaehlerstandListViewModel>();
 
         public List<Zaehlertyp> Typen => Enums.Zaehlertypen;
-        public List<ZaehlerWohnung> Wohnungen = new List<ZaehlerWohnung>();
+        public List<WohnungCombobox> Wohnungen = new List<WohnungCombobox>();
 
         public List<Zaehler> EinzelZaehler =>
             App.Walter.ZaehlerSet.Where(z => z.ZaehlerId != Id).ToList();
@@ -59,8 +59,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        private ZaehlerWohnung mWohnung;
-        public ZaehlerWohnung Wohnung
+        private WohnungCombobox mWohnung;
+        public WohnungCombobox Wohnung
         {
             get => mWohnung;
             set
@@ -81,7 +81,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = z;
             Staende.Value = new ZaehlerstandListViewModel(z);
-            Wohnungen = App.Walter.Wohnungen.Select(w => new ZaehlerWohnung(w)).ToList();
+            Wohnungen = App.Walter.Wohnungen.Select(w => new WohnungCombobox(w)).ToList();
             Wohnung = Wohnungen.Find(w => w.Id == z.WohnungId);
 
             PropertyChanged += OnUpdate;
@@ -132,19 +132,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             App.SaveWalter();
             RaisePropertyChanged(nameof(Id));
             RaisePropertyChanged(nameof(Initialized));
-        }
-
-        public class ZaehlerWohnung
-        {
-            internal Wohnung Entity;
-            internal int Id => Entity.WohnungId;
-            public string Anschrift { get; }
-
-            public ZaehlerWohnung(Wohnung w)
-            {
-                Entity = w;
-                Anschrift = AdresseViewModel.Anschrift(w) + ", " + w.Bezeichnung;
-            }
         }
     }
 }

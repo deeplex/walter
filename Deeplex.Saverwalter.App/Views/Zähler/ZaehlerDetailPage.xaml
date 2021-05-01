@@ -30,7 +30,6 @@
                     Width="420"
                     ItemsSource="{x:Bind ViewModel.Wohnungen}"
                     PlaceholderText="Wohnung hinzufügen"
-                    DisplayMemberPath="Anschrift"
                     SelectedItem="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                 <Button
                     Command="{x:Bind ViewModel.DeleteZaehlerWohnung}"
