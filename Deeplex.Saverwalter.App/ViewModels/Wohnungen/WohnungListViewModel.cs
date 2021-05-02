@@ -22,6 +22,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public WohnungListViewModel()
         {
             AllRelevant = App.Walter.Wohnungen
+                .Include(w => w.Adresse)
                 .Select(w => new WohnungListEntry(w))
                 .ToImmutableList();
 

@@ -7,72 +7,11 @@
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
     mc:Ignorable="d"
     xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Page.Resources>
-        <DataTemplate x:Name="AnhangTemplate" x:DataType="vm:AnhangDatei">
-            <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
-                <SymbolIcon Symbol="{x:Bind Symbol}"/>
-                <TextBlock VerticalAlignment="Center" Text="{x:Bind Content}"/>
-                <Button Background="Transparent">
-                    <SymbolIcon Symbol="More"/>
-                    <Button.Flyout>
-                        <Flyout>
-                            <StackPanel>
-                                <Button
-                                    HorizontalAlignment="Stretch"
-                                    Background="Transparent"
-                                    Command="{x:Bind SaveFile}">
-                                    <StackPanel Width="100" Orientation="Horizontal">
-                                        <SymbolIcon Symbol="Save"/>
-                                        <TextBlock Text=" Speichern"/>
-                                    </StackPanel>
-                                </Button>
-                                <Button
-                                    HorizontalAlignment="Stretch"
-                                    Background="Transparent"
-                                    Command="{x:Bind DeleteFile}">
-                                    <StackPanel Width="100" Orientation="Horizontal">
-                                        <SymbolIcon Symbol="Delete"/>
-                                        <TextBlock Text=" Löschen"/>
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
-                        </Flyout>
-                    </Button.Flyout>
-                </Button>
-            </StackPanel>
-        </DataTemplate>
-
-        <DataTemplate x:Name="GroupTemplate" x:DataType="vm:AnhangTreeViewNode">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock VerticalAlignment="Center" Text="{Binding Content}"/>
-                <Button Margin="10,0,0,0" Background="Transparent">
-                    <SymbolIcon Symbol="More"></SymbolIcon>
-                    <Button.Flyout>
-                        <Flyout>
-                            <StackPanel>
-                                <Button
-                                    Command="{Binding AttachFile}"
-                                    Background="Transparent">
-                                    <StackPanel Orientation="Horizontal">
-                                        <SymbolIcon Symbol="Attach"/>
-                                        <TextBlock Text=" Datei anhängen"/>
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
-                        </Flyout>
-                    </Button.Flyout>
-                </Button>
-            </StackPanel>
-        </DataTemplate>
-
-        <DataTemplate x:Name="RootTemplate" x:DataType="muxc:TreeViewNode">
-            <TextBlock Text="{x:Bind Content}"/>
-        </DataTemplate>
-    </Page.Resources>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <NavigationView
             PaneDisplayMode="Left"
@@ -174,33 +113,22 @@
                                     <TextBlock
                                         Margin="5,0,0,0"
                                         Style="{StaticResource SubtitleTextBlockStyle}"
-                                        Text="Explorer"
+                                        Text="Dateien"
                                         RelativePanel.AlignLeftWithPanel="True"/>
-                                    <StackPanel
-                                        RelativePanel.AlignRightWithPanel="True"
-                                        Orientation="Horizontal">
-                                        <ToggleButton
-                                            Background="Transparent"
-                                            Margin="0,0,5,0"
-                                            IsChecked="{x:Bind Explorer.navigationSynced.Value, Mode=TwoWay}">
-                                            <SymbolIcon Symbol="Sync"/>
-                                        </ToggleButton>
-                                        <Button
-                                            Background="Transparent"
-                                            Visibility="{x:Bind Explorer.notInSelection, Mode=OneWay}"
-                                            Command="{x:Bind Explorer.SelectionMultilple}">
-                                            <SymbolIcon Symbol="Download"/>
-                                        </Button>
-                                        <Button
-                                            RelativePanel.AlignRightWithPanel="True"
-                                            Visibility="{x:Bind Explorer.inSelection, Mode=OneWay}"
-                                            Command="{x:Bind Explorer.SaveFiles}">
-                                            <SymbolIcon Symbol="Save"/>
-                                        </Button>
-                                    </StackPanel>
                                 </RelativePanel>
                                 <MenuFlyoutSeparator/>
-                                <muxc:TreeView x:Name="ExplorerTree"/>
+                                
+                                <ListView
+                                    SelectionMode="None"
+                                    ItemsSource="{x:Bind ViewModel.Anhaenge.Value, Mode=OneWay}">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:AnhangListViewModel">
+                                            <ListView
+                                                Width="300"
+                                                ItemsSource="{x:Bind Liste.Value, Mode=OneWay}" />
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
                             </StackPanel>
                         </ScrollViewer>
                     </SplitView.Pane>

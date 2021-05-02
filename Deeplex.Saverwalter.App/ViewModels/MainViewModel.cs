@@ -1,7 +1,10 @@
-﻿using Deeplex.Utils.ObjectModel;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App.ViewModels
@@ -9,7 +12,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class MainViewModel
     {
         public ObservableProperty<string> Titel = new ObservableProperty<string>();
-        public ObservableProperty<AnhangViewModel> Explorer = new ObservableProperty<AnhangViewModel>();
+        public ObservableProperty<ImmutableList<AnhangListViewModel>> Anhaenge
+            = new ObservableProperty<ImmutableList<AnhangListViewModel>>();
+
+        public void SetAnhaenge(AnhangListViewModel vm)
+        {
+            Anhaenge.Value = ImmutableList.Create(vm);
+        }
 
         private CommandBar CommandBar { get; set; }
         private InAppNotification SavedIndicator { get; set; }

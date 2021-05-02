@@ -10,7 +10,6 @@
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
-
     <mtuuc:Expander
         Background="Transparent"
         IsExpanded="{x:Bind IsExpanded}"
@@ -33,6 +32,4 @@
         </mtuuc:Expander.Header>
         <ContentPresenter Content="{x:Bind MainContent}" />
     </mtuuc:Expander>
-
-
 </UserControl>

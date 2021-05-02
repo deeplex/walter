@@ -4,6 +4,8 @@ using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using Windows.Storage;
@@ -11,457 +13,91 @@ using wuxc = Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
-    public class AnhangTreeViewNode : TreeViewNode
+    public sealed class AnhangListViewModel : BindableBase
     {
-        public AsyncRelayCommand AttachFile { get; set; }
-        public AnhangTreeViewNode() { }
-    }
+        public ObservableProperty<ImmutableList<AnhangListEntry>> Liste =
+            new ObservableProperty<ImmutableList<AnhangListEntry>>();
 
-    public interface IAnhangTreeViewNode
-    {
-        object Target { get; }
-    }
-    public interface IAnhangTreeViewNode<T> : IAnhangTreeViewNode
-    {
-        new T Target { get; }
-    }
-
-    public sealed class AnhangViewModel : BindableBase
-    {
-        private TreeView Tree { get; }
-
-        private void expand(TreeViewNode p)
+        private void SetList<T>(T a, IQueryable<IAnhang<T>> set)
         {
-            p.IsExpanded = true;
-            if (p.Parent != null)
-            {
-                expand(p.Parent);
-            }
-        }
-        public void raiseChange<U>(U target, Anhang file)
-        {
-            void dig(TreeViewNode n)
-            {
-                n.Children.ToList().ForEach(dig);
-
-                if (n is IAnhangTreeViewNode ax && ax.Target.Equals(target))
-                {
-                    var a = new AnhangDatei(file);
-                    n.Children.Add(a);
-                    expand(n);
-                    Tree.SelectedItem = a;
-                }
-            }
-
-            Tree.RootNodes.ToList().ForEach(dig);
-        }
-
-        // TODO merge raiseChange and navigate...
-        public void Navigate<U>(U target)
-        {
-            void exp(TreeViewNode n)
-            {
-                if (n == null) return;
-                expand(n);
-                Tree.SelectedItem = n;
-                n.Children.ToList().ForEach(c => c.IsExpanded = false);
-            }
-
-            void dig(TreeViewNode n)
-            {
-                n.Children.ToList().ForEach(dig);
-
-                if (n is IAnhangTreeViewNode ax && ax.Target.Equals(target))
-                {
-                    exp(n);
-                }
-            }
-
-            // strings are used for top level elements.
-            if (target is string s)
-            {
-                Tree.RootNodes.ToList().ForEach(l => l.IsExpanded = false);
-                Tree.SelectedItem = null;
-                exp(Tree.RootNodes.FirstOrDefault(r => (string)r.Content == s));
-            }
-            else
-            {
-                Tree.RootNodes.ToList().ForEach(dig);
-            }
-        }
-
-        public ObservableProperty<bool> navigationSynced
-            = new ObservableProperty<bool>(true);
-        public bool inSelection => Tree.SelectionMode == TreeViewSelectionMode.Multiple;
-        public bool notInSelection => Tree.SelectionMode != TreeViewSelectionMode.Multiple;
-
-        public AnhangViewModel(TreeView ExplorerTree)
-        {
-            Tree = ExplorerTree;
-
-            var Kontakte = new TreeViewNode { Content = "Kontakte" };
-            ExplorerTree.RootNodes.Add(Kontakte);
-            foreach (var j in App.Walter.JuristischePersonen)
-            {
-                Kontakte.Children.Add(new AnhangKontakt(j));
-            }
-            foreach (var n in App.Walter.NatuerlichePersonen)
-            {
-                Kontakte.Children.Add(new AnhangKontakt(n));
-            }
-
-            var Vertraege = new TreeViewNode { Content = "Verträge" };
-            ExplorerTree.RootNodes.Add(Vertraege);
-            foreach (var v in App.Walter.Vertraege
-                .Include(i => i.Wohnung)
-                .ThenInclude(w => w.Adresse)
+            Liste.Value = set.Include(e => e.Anhang)
                 .ToList()
-                .GroupBy(g => g.VertragId))
-            {
-                Vertraege.Children.Add(new AnhangVertrag(v.Key));
-            }
-
-            var Mietobjekte = new TreeViewNode { Content = "Mietobjekte" };
-            ExplorerTree.RootNodes.Add(Mietobjekte);
-            foreach (var a in App.Walter.Adressen
-                .Include(i => i.Wohnungen).ThenInclude(w => w.Zaehler).ThenInclude(z => z.Staende))
-            {
-                Mietobjekte.Children.Add(new AnhangAdresse(a));
-            }
-
-            var BetriebskostenRechnungen = new TreeViewNode { Content = "Betr. Rechnungen" };
-            ExplorerTree.RootNodes.Add(BetriebskostenRechnungen);
-
-            SelectionMultilple = new RelayCommand(_ =>
-                {
-                    Tree.SelectionMode = TreeViewSelectionMode.Multiple;
-                    RaisePropertyChangedAuto(nameof(inSelection));
-                    RaisePropertyChangedAuto(nameof(notInSelection));
-                }, _ => true);
-            SaveFiles = new AsyncRelayCommand(async _ =>
-                {
-                    if (!Tree.SelectedNodes.Any())
-                    {
-                        Tree.SelectionMode = TreeViewSelectionMode.Single;
-                        RaisePropertyChangedAuto(nameof(inSelection));
-                        RaisePropertyChangedAuto(nameof(notInSelection));
-                        return;
-                    }
-
-                    var root = await Files.SelectDirectory();
-
-                    if (root == null) return;
-
-                    Tree.SelectionMode = TreeViewSelectionMode.Single;
-                    RaisePropertyChangedAuto(nameof(inSelection));
-                    RaisePropertyChangedAuto(nameof(notInSelection));
-
-                    var directory = await root.CreateFolderAsync("walter");
-
-                    var local = ApplicationData.Current.LocalFolder;
-                    foreach (var node in Tree.RootNodes)
-                    {
-                        SaveFilesLocal(node, directory, node.Content.ToString());
-                    }
-
-                }, _ => true);
+                .Where(b => Equals(b.Target, a))
+                .ToList()
+                .Select(e => new AnhangListEntry(e))
+                .ToImmutableList();
         }
 
-        private async void SaveFilesLocal(TreeViewNode n, StorageFolder root, params string[] paths)
+        public AnhangListViewModel(Adresse a)
         {
-            foreach (var child in n.Children)
-            {
-                if (child.HasChildren)
-                {
-                    SaveFilesLocal(child, root, paths.Append(child.Content.ToString()).ToArray());
-                }
-                else if (child is AnhangDatei anhang && Tree.SelectedNodes.Contains(anhang))
-                {
-                    var dir = root;
-                    foreach (var path in paths)
-                    {
-                        dir = await dir.CreateFolderAsync(path, CreationCollisionOption.GenerateUniqueName);
-                    }
-                    var file = await dir.CreateFileAsync(anhang.DateiName);
-                    await FileIO.WriteBytesAsync(file, anhang.Entity.Content);
-                }
-            }
+            SetList(a, App.Walter.AdresseAnhaenge);
         }
-
-        public RelayCommand SelectionMultilple { get; }
-        public AsyncRelayCommand SaveFiles { get; }
-
-        public class AnhangKontakt : AnhangTreeViewNode, IAnhangTreeViewNode<IPerson>
+        public AnhangListViewModel(Betriebskostenrechnung a)
         {
-            public IPerson Target { get; }
-            object IAnhangTreeViewNode.Target => Target;
-
-            public AnhangKontakt(IPerson p)
-            {
-                Target = p;
-                Content = p.Bezeichnung;
-
-                if (p is NatuerlichePerson n)
-                {
-                    AttachFile = new AsyncRelayCommand(async _ =>
-                        await Files.SaveFilesToWalter(App.Walter.NatuerlichePersonAnhaenge, n), _ => true);
-
-                    foreach (var na in App.Walter.NatuerlichePersonAnhaenge
-                        .Include(a => a.Anhang)
-                        .Where(a => a.Target.NatuerlichePersonId == n.NatuerlichePersonId))
-                    {
-                        Children.Add(new AnhangDatei(na.Anhang));
-                    }
-                }
-                else if (p is JuristischePerson j)
-                {
-                    AttachFile = new AsyncRelayCommand(async _ =>
-                        await Files.SaveFilesToWalter(App.Walter.JuristischePersonAnhaenge, j), _ => true);
-                    foreach (var ja in App.Walter.JuristischePersonAnhaenge
-                        .Include(a => a.Anhang)
-                        .Where(a => a.Target.JuristischePersonId == j.JuristischePersonId))
-                    {
-                        Children.Add(new AnhangDatei(ja.Anhang));
-                    }
-                }
-            }
+            SetList(a, App.Walter.BetriebskostenrechnungAnhaenge);
         }
-
-        public sealed class AnhangAdresse : AnhangTreeViewNode, IAnhangTreeViewNode<Adresse>
+        public AnhangListViewModel(Erhaltungsaufwendung a)
         {
-            public Adresse Target { get; }
-            object IAnhangTreeViewNode.Target => Target;
-
-            public AnhangAdresse(Adresse a)
-            {
-                Target = a;
-
-                Content = AdresseViewModel.Anschrift(a);
-
-                foreach (var w in a.Wohnungen)
-                {
-                    Children.Add(new AnhangWohnung(w));
-                }
-
-                foreach (var aa in App.Walter.AdresseAnhaenge
-                    .Include(a2 => a2.Anhang)
-                    .Where(a2 => a2.Target.AdresseId == a.AdresseId))
-                {
-                    Children.Add(new AnhangDatei(aa.Anhang));
-                }
-
-                AttachFile = new AsyncRelayCommand(async _ =>
-                    await Files.SaveFilesToWalter(App.Walter.AdresseAnhaenge, a), _ => true);
-            }
+            SetList(a, App.Walter.ErhaltungsaufwendungAnhaenge);
         }
-
-        public sealed class AnhangVertrag : AnhangTreeViewNode, IAnhangTreeViewNode<Guid>
+        public AnhangListViewModel(Garage a)
         {
-            public Guid Target { get; }
-            object IAnhangTreeViewNode.Target => Target;
-
-            public AnhangVertrag(Guid id)
-            {
-                Target = id;
-                var v = App.Walter.Vertraege
-                    .First(i => i.VertragId == id);
-
-                var bs = App.Walter.MieterSet.Where(m => m.VertragId == id).ToList();
-                var cs = bs.Select(b => App.Walter.FindPerson(b.PersonId))
-                    .Select(p => p is NatuerlichePerson n ? n.Nachname : p.Bezeichnung);
-                var mieter = string.Join(", ", cs);
-
-                Content = mieter + " – " + v.Wohnung.Adresse.Strasse + " " + v.Wohnung.Adresse.Hausnummer;
-
-                foreach (var va in App.Walter.VertragAnhaenge
-                    .Include(a => a.Anhang)
-                    .Where(a => a.Target == v.VertragId))
-                {
-                    Children.Add(new AnhangDatei(va.Anhang));
-                }
-
-                AttachFile = new AsyncRelayCommand(async _ =>
-                    await Files.SaveFilesToWalter(App.Walter.VertragAnhaenge, v.VertragId), _ => true);
-            }
+            SetList(a, App.Walter.GarageAnhaenge);
         }
-
-        public sealed class AnhangWohnung : AnhangTreeViewNode, IAnhangTreeViewNode<Wohnung>
+        public AnhangListViewModel(JuristischePerson a)
         {
-            public Wohnung Target { get; }
-            object IAnhangTreeViewNode.Target => Target;
-
-            public AnhangWohnung(Wohnung w)
-            {
-                Target = w;
-
-                Content = w.Bezeichnung;
-
-                var zaehler = new TreeViewNode { Content = "Zähler" };
-                Children.Add(zaehler);
-                foreach (var z in w.Zaehler)
-                {
-                    zaehler.Children.Add(new AnhangZaehler(z));
-                }
-
-                var betriebskostenrechnungen = new TreeViewNode { Content = "Betriebskostenrechnungen" };
-                Children.Add(betriebskostenrechnungen);
-                foreach (var g in w.Betriebskostenrechnungsgruppen)
-                {
-                    betriebskostenrechnungen.Children.Add(new AnhangBetriebskostenrechnung(g.Rechnung));
-                }
-
-                foreach (var wa in App.Walter.WohnungAnhaenge
-                    .Include(a => a.Anhang)
-                    .Where(a => a.Target.WohnungId == w.WohnungId))
-                {
-                    Children.Add(new AnhangDatei(wa.Anhang));
-                }
-
-                AttachFile = new AsyncRelayCommand(async _ =>
-                    await Files.SaveFilesToWalter(App.Walter.WohnungAnhaenge, w), _ => true);
-            }
+            SetList(a, App.Walter.JuristischePersonAnhaenge);
         }
-
-        public sealed class AnhangBetriebskostenrechnung : AnhangTreeViewNode, IAnhangTreeViewNode<Betriebskostenrechnung>
+        public AnhangListViewModel(Konto a)
         {
-            public Betriebskostenrechnung Target { get; }
-            object IAnhangTreeViewNode.Target => Target;
-
-            public AnhangBetriebskostenrechnung(Betriebskostenrechnung r)
-            {
-                Target = r;
-                Content = r.BetreffendesJahr.ToString() + " " + r.Typ.ToDescriptionString();
-
-                foreach (var ra in App.Walter.BetriebskostenrechnungAnhaenge
-                    .Include(a => a.Anhang)
-                    .Where(a => a.Target.BetriebskostenrechnungId == r.BetriebskostenrechnungId))
-                {
-                    Children.Add(new AnhangDatei(ra.Anhang));
-                }
-
-                AttachFile = new AsyncRelayCommand(async _ =>
-                    await Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
-            }
+            SetList(a, App.Walter.KontoAnhaenge);
         }
-
-        public sealed class AnhangZaehler : AnhangTreeViewNode, IAnhangTreeViewNode<Zaehler>
+        public AnhangListViewModel(Miete a)
         {
-            public Zaehler Target { get; }
-            object IAnhangTreeViewNode.Target => Target;
-
-            public AnhangZaehler(Zaehler z)
-            {
-                Target = z;
-
-                Content = z.Kennnummer;
-
-                var zaehlerstaende = new TreeViewNode { Content = "Zählerstände" };
-                Children.Add(zaehlerstaende);
-                foreach (var s in z.Staende)
-                {
-                    zaehlerstaende.Children.Add(new AnhangZaehlerstand(s));
-                }
-
-                foreach (var za in App.Walter.ZaehlerAnhaenge
-                    .Include(a => a.Anhang)
-                    .Where(a => a.Target.ZaehlerId == z.ZaehlerId))
-                {
-                    Children.Add(new AnhangDatei(za.Anhang));
-                }
-
-                AttachFile = new AsyncRelayCommand(async _ =>
-                    await Files.SaveFilesToWalter(App.Walter.ZaehlerAnhaenge, z), _ => true);
-            }
+            SetList(a, App.Walter.MieteAnhaenge);
         }
-
-        public sealed class AnhangZaehlerstand : AnhangTreeViewNode, IAnhangTreeViewNode<Zaehlerstand>
+        public AnhangListViewModel(MietMinderung a)
         {
-            public Zaehlerstand Target { get; }
-            object IAnhangTreeViewNode.Target => Target;
-
-            public AnhangZaehlerstand(Zaehlerstand z)
-            {
-                Target = z;
-
-                Content = z.Datum.ToString("dd.MM.yyyy");
-
-                foreach (var za in App.Walter.ZaehlerstandAnhaenge
-                    .Include(a => a.Anhang)
-                    .Where(a => a.Target.ZaehlerstandId == z.ZaehlerstandId))
-                {
-                    Children.Add(new AnhangDatei(za.Anhang));
-                }
-
-                AttachFile = new AsyncRelayCommand(async _ =>
-                    await Files.SaveFilesToWalter(App.Walter.ZaehlerstandAnhaenge, z), _ => true);
-            }
+            SetList(a, App.Walter.MietMinderungAnhaenge);
         }
-
-        public sealed class AnhangMiete : AnhangTreeViewNode, IAnhangTreeViewNode<Miete>
+        public AnhangListViewModel(NatuerlichePerson a)
         {
-            public Miete Target { get; }
-            object IAnhangTreeViewNode.Target => Target;
-
-            public AnhangMiete(Miete m)
-            {
-                Target = m;
-
-                Content = m.BetreffenderMonat.ToString("MMM yyyy");
-
-                foreach (var ma in App.Walter.MieteAnhaenge
-                    .Include(a => a.Anhang)
-                    .Where(a => a.Target.MieteId == m.MieteId))
-                {
-                    Children.Add(new AnhangDatei(ma.Anhang));
-                }
-
-                AttachFile = new AsyncRelayCommand(async _ =>
-                    await Files.SaveFilesToWalter(App.Walter.MieteAnhaenge, m), _ => true);
-            }
+            SetList(a, App.Walter.NatuerlichePersonAnhaenge);
         }
-
-        public sealed class AnhangMietminderung : AnhangTreeViewNode, IAnhangTreeViewNode<MietMinderung>
+        public AnhangListViewModel(Vertrag a)
         {
-            public MietMinderung Target { get; }
-            object IAnhangTreeViewNode.Target => Target;
-
-            public AnhangMietminderung(MietMinderung m)
-            {
-                Target = m;
-
-                Content = m.Beginn.ToString("dd.MM.yyyy") + " – " +
-                    (m.Ende != null ? m.Ende.Value.ToString("dd.MM.yyyy") : "Offen");
-
-                foreach (var ma in App.Walter.MietMinderungAnhaenge
-                    .Include(a => a.Anhang)
-                    .Where(a => a.Target.MietMinderungId == m.MietMinderungId))
-                {
-                    Children.Add(new AnhangDatei(ma.Anhang));
-                }
-
-                AttachFile = new AsyncRelayCommand(async _ =>
-                    await Files.SaveFilesToWalter(App.Walter.MietMinderungAnhaenge, m), _ => true);
-            }
+            SetList(a.VertragId, App.Walter.VertragAnhaenge);
+        }
+        public AnhangListViewModel(Wohnung a)
+        {
+            SetList(a, App.Walter.WohnungAnhaenge);
+        }
+        public AnhangListViewModel(Zaehler a)
+        {
+            SetList(a, App.Walter.ZaehlerAnhaenge);
+        }
+        public AnhangListViewModel(Zaehlerstand a)
+        {
+            SetList(a, App.Walter.ZaehlerstandAnhaenge);
         }
     }
 
-    public sealed class AnhangDatei : TreeViewNode
+    public sealed class AnhangListEntry
     {
         public Anhang Entity { get; }
+        public override string ToString() => Entity.FileName;
 
-        public AnhangDatei(Anhang a)
+        public AnhangListEntry(IAnhang a)
         {
-            Entity = a;
-            Content = a.FileName;
+            Entity = a.Anhang;
 
             SaveFile = new AsyncRelayCommand(async _
-                => await Files.ExtractTo(a), _ => true);
+                => await Files.ExtractTo(Entity), _ => true);
 
             DeleteFile = new RelayCommand(_ =>
             {
                 App.Walter.Anhaenge.Remove(Entity);
                 App.SaveWalter();
-                Parent.Children.Remove(this);
             }, _ => true);
         }
 

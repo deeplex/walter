@@ -10,36 +10,8 @@ namespace Deeplex.Saverwalter.App
 {
     public sealed partial class MainPage : Page
     {
-        public AnhangViewModel Explorer => App.ViewModel.Explorer.Value;
-
-        private sealed class ExplorerItemTemplateSelector : DataTemplateSelector
-        {
-            public DataTemplate AnhangTemplate { get; private set; }
-            public DataTemplate GroupTemplate { get; private set; }
-            public DataTemplate RootTemplate { get; private set; }
-
-            public ExplorerItemTemplateSelector(DataTemplate A, DataTemplate O, DataTemplate R)
-            {
-                AnhangTemplate = A;
-                GroupTemplate = O;
-                RootTemplate = R;
-            }
-
-            protected override DataTemplate SelectTemplateCore(object item)
-            {
-                return
-                    item is AnhangDatei ? AnhangTemplate :
-                    item is AnhangTreeViewNode ? GroupTemplate :
-                    RootTemplate;
-            }
-        }
-
         public void Navigate<U>(Type SourcePage, U SendParameter)
         {
-            if (Explorer.navigationSynced.Value)
-            {
-                Explorer.Navigate(SendParameter);
-            }
             AppFrame.Navigate(SourcePage, SendParameter,
                 new DrillInNavigationTransitionInfo());
         }
@@ -51,8 +23,6 @@ namespace Deeplex.Saverwalter.App
             ViewModel.SetCommandBar(MainCommandBar);
             ViewModel.SetSavedIndicator(SavedIndicator, SavedIncdicatorText);
             ViewModel.Navigate = Navigate;
-            App.ViewModel.Explorer.Value = new AnhangViewModel(ExplorerTree);
-            ExplorerTree.ItemTemplateSelector = new ExplorerItemTemplateSelector(AnhangTemplate, GroupTemplate, RootTemplate);
         }
 
         public Frame AppFrame => frame;
