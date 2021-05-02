@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.App.Views;
+using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
@@ -112,5 +113,11 @@ namespace Deeplex.Saverwalter.App.UserControls
                   typeof(bool),
                   typeof(VertragListControl),
                   new PropertyMetadata(false));
+
+        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var a = ((VertragListVertrag)((DataGrid)sender).SelectedItem).Entity;
+            App.ViewModel.ListAnhang.Value = new AnhangListViewModel(a);
+        }
     }
 }

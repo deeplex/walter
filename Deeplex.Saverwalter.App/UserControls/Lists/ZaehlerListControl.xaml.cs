@@ -1,5 +1,7 @@
-﻿using Deeplex.Saverwalter.App.ViewModels.Zähler;
+﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.App.ViewModels.Zähler;
 using Deeplex.Saverwalter.App.Views;
+using Microsoft.Toolkit.Uwp.UI.Controls;
 using System.Collections.Immutable;
 using System.Linq;
 using Windows.UI.Xaml;
@@ -92,5 +94,11 @@ namespace Deeplex.Saverwalter.App.UserControls
             typeof(int),
             typeof(ZaehlerstandListControl),
             new PropertyMetadata(0));
+
+        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var a = ((ZaehlerListEntry)((DataGrid)sender).SelectedItem).Entity;
+            App.ViewModel.ListAnhang.Value = new AnhangListViewModel(a);
+        }
     }
 }

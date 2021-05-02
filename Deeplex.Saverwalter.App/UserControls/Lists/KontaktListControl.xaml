@@ -12,6 +12,7 @@
     d:DesignWidth="400">
 
     <mtuuc:DataGrid
+        SelectionChanged="DataGrid_SelectionChanged"
         IsReadOnly="True"
         CanUserReorderColumns="False"
         CanUserResizeColumns="True"

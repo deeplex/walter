@@ -117,18 +117,13 @@
                                         RelativePanel.AlignLeftWithPanel="True"/>
                                 </RelativePanel>
                                 <MenuFlyoutSeparator/>
-                                
+
                                 <ListView
-                                    SelectionMode="None"
-                                    ItemsSource="{x:Bind ViewModel.Anhaenge.Value, Mode=OneWay}">
-                                    <ListView.ItemTemplate>
-                                        <DataTemplate x:DataType="vm:AnhangListViewModel">
-                                            <ListView
-                                                Width="300"
-                                                ItemsSource="{x:Bind Liste.Value, Mode=OneWay}" />
-                                        </DataTemplate>
-                                    </ListView.ItemTemplate>
-                                </ListView>
+                                    ItemsSource="{x:Bind ViewModel.DetailAnhang.Value.Liste.Value, Mode=OneWay}"/>
+                                <MenuFlyoutSeparator/>
+                                <ListView
+                                    ItemsSource="{x:Bind ViewModel.ListAnhang.Value.Liste.Value, Mode=OneWay}"/>
+
                             </StackPanel>
                         </ScrollViewer>
                     </SplitView.Pane>

@@ -15,6 +15,7 @@
         CanUserResizeColumns="True"
         AutoGenerateColumns="False"
         DoubleTapped="Details_Click"
+        SelectionChanged="DataGrid_SelectionChanged"
         ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}"
         SelectedItem="{x:Bind ViewModel.SelectedWohnung.Value, Mode=TwoWay}">
         <mtuuc:DataGrid.Columns>

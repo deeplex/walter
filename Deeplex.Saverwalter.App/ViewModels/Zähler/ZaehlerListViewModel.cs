@@ -38,7 +38,7 @@ namespace Deeplex.Saverwalter.App.ViewModels.Zähler
 
     public class ZaehlerListEntry
     {
-        private Zaehler Entity;
+        public Zaehler Entity;
         private Zaehlerstand LastStand;
         public int Id => Entity.ZaehlerId;
         public string Kennnummer => Entity.Kennnummer;

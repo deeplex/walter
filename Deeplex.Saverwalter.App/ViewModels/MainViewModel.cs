@@ -12,13 +12,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class MainViewModel
     {
         public ObservableProperty<string> Titel = new ObservableProperty<string>();
-        public ObservableProperty<ImmutableList<AnhangListViewModel>> Anhaenge
-            = new ObservableProperty<ImmutableList<AnhangListViewModel>>();
-
-        public void SetAnhaenge(AnhangListViewModel vm)
-        {
-            Anhaenge.Value = ImmutableList.Create(vm);
-        }
+        public ObservableProperty<AnhangListViewModel> DetailAnhang
+            = new ObservableProperty<AnhangListViewModel>();
+        public ObservableProperty<AnhangListViewModel> ListAnhang
+            = new ObservableProperty<AnhangListViewModel>();
 
         private CommandBar CommandBar { get; set; }
         private InAppNotification SavedIndicator { get; set; }

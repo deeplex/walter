@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.App.ViewModels.Mieten
 
     public sealed class MietMinderungListEntry
     {
-        private MietMinderung Entity { get; }
+        public MietMinderung Entity { get; }
 
         public string BeginnString => Entity.Beginn.ToString("dd.MM.yyyy");
         public string EndeString => Entity.Ende is DateTime d ? d.ToString("dd.MM.yyyy") : "Offen";

@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public sealed class MietenListEntry
     {
-        private Miete Entity { get; }
+        public Miete Entity { get; }
         public string BetragString => Entity.Betrag.ToString() + "€";
         public string DatumString => Entity.Zahlungsdatum.ToString("dd.MM.yyyy");
         public string MonatString => Entity.BetreffenderMonat.Month.ToString();

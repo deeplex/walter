@@ -58,7 +58,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public string Email { get; }
         public string Telefon { get; }
         public string Mobil { get; }
-        private IPerson Entity { get; }
+        public IPerson Entity { get; }
 
         public KontaktListEntry(Guid id) : this(App.Walter.FindPerson(id)) { }
         public KontaktListEntry(JuristischePerson j) : this(j as IPerson)

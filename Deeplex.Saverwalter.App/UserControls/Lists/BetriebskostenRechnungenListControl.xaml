@@ -11,13 +11,14 @@
 
     <Grid>
         <mtuuc:DataGrid
-                IsReadOnly="True"
-                CanUserReorderColumns="False"
-                CanUserResizeColumns="True"
-                AutoGenerateColumns="False"
-                DoubleTapped="Details_Click"
-                ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}"
-                SelectedItem="{x:Bind ViewModel.SelectedRechnung, Mode=TwoWay}">
+            SelectionChanged="DataGrid_SelectionChanged"
+            IsReadOnly="True"
+            CanUserReorderColumns="False"
+            CanUserResizeColumns="True"
+            AutoGenerateColumns="False"
+            DoubleTapped="Details_Click"
+            ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}"
+            SelectedItem="{x:Bind ViewModel.SelectedRechnung, Mode=TwoWay}">
             <mtuuc:DataGrid.Columns>
                 <mtuuc:DataGridTextColumn
                         Header="Typ"

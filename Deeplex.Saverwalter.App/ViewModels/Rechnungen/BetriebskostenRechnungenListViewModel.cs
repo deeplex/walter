@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public sealed class BetriebskostenRechnungenListEntry
     {
-        private readonly Betriebskostenrechnung Entity;
+        public readonly Betriebskostenrechnung Entity;
         public int Id => Entity.BetriebskostenrechnungId;
         public List<Wohnung> Wohnungen { get; }
         public string TypString => Entity.Typ.ToString();

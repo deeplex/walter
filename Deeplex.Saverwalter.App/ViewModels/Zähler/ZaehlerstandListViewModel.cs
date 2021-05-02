@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class ZaehlerstandListEntry
     {
-        private Zaehlerstand Entity;
+        public Zaehlerstand Entity { get; }
         public int Id => Entity.ZaehlerstandId;
         public double Stand => Entity.Stand;
         public string StandString => Entity.Stand.ToString();

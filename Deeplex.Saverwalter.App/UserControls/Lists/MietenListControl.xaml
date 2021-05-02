@@ -21,10 +21,11 @@
                 </uc:ExpanderControl.Bonus>
                 <uc:ExpanderControl.MainContent>
                     <mtuuc:DataGrid
-                    CanUserReorderColumns="False"
-                    CanUserResizeColumns="True"
-                    AutoGenerateColumns="False"
-                    ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}">
+                        SelectionChanged="DataGrid_SelectionChanged"
+                        CanUserReorderColumns="False"
+                        CanUserResizeColumns="True"
+                        AutoGenerateColumns="False"
+                        ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}">
                         <mtuuc:DataGrid.Columns>
                             <mtuuc:DataGridTemplateColumn>
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>

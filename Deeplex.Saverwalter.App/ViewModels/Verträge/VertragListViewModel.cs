@@ -90,40 +90,31 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
     public class VertragVersionListViewModel : BindableBase
     {
-        public int Id { get; }
-        public Guid VertragId { get; }
-        public int Version { get; }
-        public int Personenzahl { get; }
-        public string Anschrift { get; }
+        public int Id => Entity.rowid;
+        public Guid VertragId => Entity.VertragId;
+        public int Version => Entity.Version;
+        public int Personenzahl => Entity.Personenzahl;
+        public string Anschrift => AdresseViewModel.Anschrift(Entity.Wohnung);
         public string AnschriftMitWohnung => Anschrift + ", " + Wohnung.Bezeichnung;
-        public Wohnung Wohnung { get; }
-        public ImmutableList<Guid> Mieter { get; }
+        public Wohnung Wohnung => Entity.Wohnung;
+        public ImmutableList<Guid> Mieter => App.Walter.MieterSet
+                .Where(w => w.VertragId == Entity.VertragId)
+                .Select(m => m.PersonId).ToImmutableList();
         public DateTime Beginn { get; set; }
         public DateTime? Ende { get; set; }
         public string BeginnString => Beginn.ToString("dd.MM.yyyy");
         public string EndeString => Ende is DateTime e ? e.ToString("dd.MM.yyyy") : "Offen";
-        public string AuflistungMieter { get; }
+        public string AuflistungMieter => string.Join(", ", App.Walter.MieterSet
+            .Where(m => m.VertragId == Entity.VertragId).ToList()
+            .Select(a => App.Walter.FindPerson(a.PersonId).Bezeichnung));
         public bool hasEnde => Ende != null;
-        public string Besitzer { get; }
+        public string Besitzer => App.Walter.FindPerson(Entity.Wohnung.BesitzerId)?.Bezeichnung;
+
+        public Vertrag Entity { get; }
 
         public VertragVersionListViewModel(Vertrag v)
         {
-            Id = v.rowid;
-            VertragId = v.VertragId;
-            Version = v.Version;
-            Personenzahl = v.Personenzahl;
-            Anschrift = AdresseViewModel.Anschrift(v.Wohnung);
-            Besitzer = App.Walter.FindPerson(v.Wohnung.BesitzerId)?.Bezeichnung;
-
-            Mieter = App.Walter.MieterSet
-                .Where(w => w.VertragId == v.VertragId)
-                .Select(m => m.PersonId).ToImmutableList();
-
-            Wohnung = v.Wohnung;
-
-            AuflistungMieter = string.Join(", ", App.Walter.MieterSet
-                .Where(m => m.VertragId == v.VertragId).ToList()
-                .Select(a => App.Walter.FindPerson(a.PersonId).Bezeichnung));
+            Entity = v;
 
             Beginn = v.Beginn.AsUtcKind();
             Ende = v.Ende?.AsUtcKind();

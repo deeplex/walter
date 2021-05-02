@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.App.Views;
 using Deeplex.Saverwalter.Model;
+using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
@@ -111,6 +112,19 @@ namespace Deeplex.Saverwalter.App.UserControls
                 .Where(m => m.PersonId == guid && m.VertragId == VertragGuid)
                 .ToList().ForEach(m => App.Walter.MieterSet.Remove(m));
             App.SaveWalter();
+        }
+
+        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var a = ((KontaktListEntry)((DataGrid)sender).SelectedItem).Entity;
+            if (a is NatuerlichePerson n)
+            {
+                App.ViewModel.ListAnhang.Value = new AnhangListViewModel(n);
+            }
+            else if (a is JuristischePerson j)
+            {
+                App.ViewModel.ListAnhang.Value = new AnhangListViewModel(j);
+            }
         }
     }
 }

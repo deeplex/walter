@@ -13,11 +13,12 @@
     d:DesignWidth="400">
 
     <mtuuc:DataGrid
-    IsReadOnly="True"                
-    CanUserReorderColumns="False"
-    CanUserResizeColumns="True"
-    AutoGenerateColumns="False"
-    ItemsSource="{x:Bind ViewModel.Value.Liste.Value, Mode=OneWay}">
+        SelectionChanged="DataGrid_SelectionChanged"
+        IsReadOnly="True"                
+        CanUserReorderColumns="False"
+        CanUserResizeColumns="True"
+        AutoGenerateColumns="False"
+        ItemsSource="{x:Bind ViewModel.Value.Liste.Value, Mode=OneWay}">
         <mtuuc:DataGrid.Columns>
             <mtuuc:DataGridTextColumn
             Header="Datum"
