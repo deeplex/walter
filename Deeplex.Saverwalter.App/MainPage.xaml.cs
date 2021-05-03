@@ -12,6 +12,9 @@ namespace Deeplex.Saverwalter.App
     {
         public void Navigate<U>(Type SourcePage, U SendParameter)
         {
+            ViewModel.DetailAnhang.Value = null;
+            ViewModel.ListAnhang.Value = null;
+
             AppFrame.Navigate(SourcePage, SendParameter,
                 new DrillInNavigationTransitionInfo());
         }

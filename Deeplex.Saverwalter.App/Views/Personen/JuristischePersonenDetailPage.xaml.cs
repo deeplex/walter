@@ -25,9 +25,8 @@ namespace Deeplex.Saverwalter.App.Views
                 ViewModel = new JuristischePersonViewModel();
             }
 
-            base.OnNavigatedTo(e);
-
             App.ViewModel.Titel.Value = ViewModel.Bezeichnung;
+            App.ViewModel.DetailAnhang.Value = new AnhangListViewModel(ViewModel.GetEntity);
 
             var Delete = new AppBarButton
             {
@@ -44,6 +43,8 @@ namespace Deeplex.Saverwalter.App.Views
                     Command = ViewModel.AttachFile,
                 }
             }, new ICommandBarElement[] { Delete });
+
+            base.OnNavigatedTo(e);
         }
 
         private void SelfDestruct(object sender, Windows.UI.Xaml.RoutedEventArgs e)

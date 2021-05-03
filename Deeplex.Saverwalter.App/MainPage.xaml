@@ -109,34 +109,8 @@
                     <SplitView.Pane>
                         <ScrollViewer>
                             <StackPanel>
-                                <RelativePanel Padding="10,5,10,0">
-                                    <TextBlock
-                                        Margin="5,0,0,0"
-                                        Style="{StaticResource SubtitleTextBlockStyle}"
-                                        Text="Dateien"
-                                        RelativePanel.AlignLeftWithPanel="True"/>
-                                </RelativePanel>
-                                <MenuFlyoutSeparator/>
-
-                                <ListView
-                                    ItemsSource="{x:Bind ViewModel.DetailAnhang.Value.Liste.Value, Mode=OneWay}"/>
-                                <MenuFlyoutSeparator/>
-                                <RelativePanel>
-                                    <TextBlock
-                                        RelativePanel.AlignVerticalCenterWithPanel="True"
-                                        RelativePanel.AlignLeftWithPanel="True"
-                                        Margin="10,0,0,0"
-                                        Text="{x:Bind ViewModel.ListAnhang.Value.Text.Value, Mode=OneWay}"/>
-                                    <Button
-                                        Command="{x:Bind ViewModel.ListAnhang.Value.AddAnhang, Mode=OneWay}"
-                                        RelativePanel.AlignRightWithPanel="True"
-                                        Background="Transparent">
-                                        <SymbolIcon Symbol="Attach"/>
-                                    </Button>
-                                </RelativePanel>
-                                <ListView
-                                    ItemsSource="{x:Bind ViewModel.ListAnhang.Value.Liste.Value, Mode=OneWay}"/>
-
+                                <uc:AnhangListControl AnhangViewModel="{x:Bind ViewModel.DetailAnhang.Value, Mode=OneWay}"/>
+                                <uc:AnhangListControl AnhangViewModel="{x:Bind ViewModel.ListAnhang.Value, Mode=OneWay}"/>
                             </StackPanel>
                         </ScrollViewer>
                     </SplitView.Pane>

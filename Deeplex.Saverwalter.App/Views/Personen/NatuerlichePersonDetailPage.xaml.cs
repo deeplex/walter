@@ -26,8 +26,8 @@ namespace Deeplex.Saverwalter.App.Views
                 ViewModel = new NatuerlichePersonViewModel();
             }
 
-            // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
             App.ViewModel.Titel.Value = ViewModel.Name;
+            App.ViewModel.DetailAnhang.Value = new AnhangListViewModel(ViewModel.GetEntity);
 
             var Delete = new AppBarButton
             {

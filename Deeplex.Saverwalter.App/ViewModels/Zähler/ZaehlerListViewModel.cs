@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -30,6 +31,8 @@ namespace Deeplex.Saverwalter.App.ViewModels.Zähler
         public ZaehlerListViewModel()
         {
             AllRelevant= App.Walter.ZaehlerSet
+                .Include(z => z.Wohnung)
+                .ThenInclude(w => w.Adresse)
                 .Select(z => new ZaehlerListEntry(z))
                 .ToImmutableList();
             Liste.Value = AllRelevant;

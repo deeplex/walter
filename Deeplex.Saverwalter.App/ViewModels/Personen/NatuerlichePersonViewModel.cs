@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class NatuerlichePersonViewModel : PersonViewModel
     {
-        private NatuerlichePerson GetEntity => (NatuerlichePerson)Entity;
+        public NatuerlichePerson GetEntity => (NatuerlichePerson)Entity;
 
         public int Id { get; }
 
@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             PropertyChanged += OnUpdate;
 
             AttachFile = new AsyncRelayCommand(async _ =>
-                await Utils.Files.SaveFilesToWalter(App.Walter.NatuerlichePersonAnhaenge, k), _ => true);
+                await Files.SaveFilesToWalter(App.Walter.NatuerlichePersonAnhaenge, k), _ => true);
         }
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)

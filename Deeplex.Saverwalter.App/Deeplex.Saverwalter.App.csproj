@@ -132,6 +132,9 @@
     <Compile Include="UserControls\Add\AddZaehlerstandControl.xaml.cs">
       <DependentUpon>AddZaehlerstandControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\AnhangListControl.xaml.cs">
+      <DependentUpon>AnhangListControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\ExpanderControl.xaml.cs">
       <DependentUpon>ExpanderControl.xaml</DependentUpon>
     </Compile>
@@ -305,6 +308,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\Add\AddZaehlerstandControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\AnhangListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
