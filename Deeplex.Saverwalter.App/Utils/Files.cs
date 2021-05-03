@@ -1,6 +1,8 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.Model;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -104,8 +106,6 @@ namespace Deeplex.Saverwalter.App.Utils
                     Target = target,
                 };
                 Set.Add(attachment);
-                // TODO raise change in viewmodel.liste
-                //App.ViewModel.Value.raiseChange(target, file);
             }
             App.SaveWalter();
         }
