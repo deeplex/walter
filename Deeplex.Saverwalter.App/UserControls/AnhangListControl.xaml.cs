@@ -47,15 +47,26 @@ namespace Deeplex.Saverwalter.App.UserControls
             typeof(AnhangListControl),
             new PropertyMetadata(null));
 
-        private async void ListItem_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        private async void Runterladen_Click(object sender, RoutedEventArgs e)
         {
             if (((FrameworkElement)sender).DataContext is AnhangListEntry a)
             {
                 var path = await a.SaveFile();
-                App.ViewModel.ShowAlert("Gespeichert unter " + path, 5000);
+                if (path != "")
+                {
+                    App.ViewModel.ShowAlert("Gespeichert unter " + path, 5000);
+                }
                 //var path = a.SaveFileTemp();
                 //var start = new ProcessStartInfo(path);
                 //Process.Start(start);
+            }
+        }
+
+        private void Loeschen_Click(object sender, RoutedEventArgs e)
+        {
+            if (((FrameworkElement)sender).DataContext is AnhangListEntry a)
+            {
+                a.DeleteFile();
             }
         }
     }

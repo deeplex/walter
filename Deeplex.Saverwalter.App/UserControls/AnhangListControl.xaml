@@ -5,6 +5,7 @@
     xmlns:local="using:Deeplex.Saverwalter.App.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     mc:Ignorable="d"
     d:DesignHeight="300"
@@ -27,12 +28,25 @@
             </Button>
         </RelativePanel>
         <MenuFlyoutSeparator/>
-        <ListView ItemsSource="{x:Bind ViewModel.Value.Liste.Value, Mode=OneWay}">
+        <ListView  ItemsSource="{x:Bind ViewModel.Value.Liste.Value, Mode=OneWay}">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="vm:AnhangListEntry">
-                    <StackPanel DoubleTapped="ListItem_DoubleTapped">
-                        <TextBlock Text="{x:Bind DateiName}" />
-                    </StackPanel>
+                    <RelativePanel Width="300">
+                        <TextBlock
+                            RelativePanel.AlignVerticalCenterWithPanel="True"
+                            RelativePanel.AlignLeftWithPanel="True"
+                            Text="{x:Bind DateiName}" />
+                        <CommandBar RelativePanel.AlignRightWithPanel="True">
+                            <CommandBar.SecondaryCommands>
+                                <AppBarButton
+                                    Click="Runterladen_Click"
+                                    Icon="Download" Label="Runterladen" />
+                                <AppBarButton
+                                    Click="Loeschen_Click"
+                                    Icon="Delete" Label="Löschen" />
+                            </CommandBar.SecondaryCommands>
+                        </CommandBar>
+                    </RelativePanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

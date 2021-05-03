@@ -146,12 +146,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public AnhangListEntry(IAnhang a)
         {
             Entity = a.Anhang;
+        }
 
-            DeleteFile = new RelayCommand(_ =>
-            {
-                App.Walter.Anhaenge.Remove(Entity);
-                App.SaveWalter();
-            }, _ => true);
+        public void DeleteFile()
+        {
+            // TODO update ViewModel
+            App.Walter.Anhaenge.Remove(Entity);
+            App.SaveWalter();
         }
 
         public async Task<string> SaveFile()
@@ -170,7 +171,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             return path;
         }
-        public RelayCommand DeleteFile;
         public string DateiName => Entity.FileName;
         public string Symbol
         {
