@@ -39,7 +39,7 @@ namespace Deeplex.Saverwalter.App.Utils
             return await picker.PickSingleFolderAsync(); ;
         }
 
-        public static async Task ExtractTo(Anhang a)
+        public static async Task<string> ExtractTo(Anhang a)
         {
             var picker = new Windows.Storage.Pickers.FileSavePicker()
             {
@@ -53,7 +53,10 @@ namespace Deeplex.Saverwalter.App.Utils
             if (file != null)
             {
                 await FileIO.WriteBytesAsync(file, a.Content);
+               return file.Path;
             }
+
+            return "";
         }
 
         public static Windows.Storage.Pickers.FileOpenPicker FilePicker(params string[] filters)

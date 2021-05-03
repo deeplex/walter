@@ -5,6 +5,7 @@
     xmlns:local="using:Deeplex.Saverwalter.App.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
@@ -26,6 +27,14 @@
             </Button>
         </RelativePanel>
         <MenuFlyoutSeparator/>
-        <ListView ItemsSource="{x:Bind ViewModel.Value.Liste.Value, Mode=OneWay}"/>
+        <ListView ItemsSource="{x:Bind ViewModel.Value.Liste.Value, Mode=OneWay}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="vm:AnhangListEntry">
+                    <StackPanel DoubleTapped="ListItem_DoubleTapped">
+                        <TextBlock Text="{x:Bind DateiName}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </StackPanel>
 </UserControl>

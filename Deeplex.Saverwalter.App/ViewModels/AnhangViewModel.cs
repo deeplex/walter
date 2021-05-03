@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Windows.Storage;
 using wuxc = Windows.UI.Xaml.Controls;
 
@@ -146,9 +147,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = a.Anhang;
 
-            SaveFile = new AsyncRelayCommand(async _
-                => await Files.ExtractTo(Entity), _ => true);
-
             DeleteFile = new RelayCommand(_ =>
             {
                 App.Walter.Anhaenge.Remove(Entity);
@@ -156,7 +154,22 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }, _ => true);
         }
 
-        public AsyncRelayCommand SaveFile;
+        public async Task<string> SaveFile()
+        {
+            return await Files.ExtractTo(Entity);
+        }
+
+        public string SaveFileTemp()
+        {
+            var path = Path.Combine(Path.GetTempPath(), Entity.FileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            using (FileStream fs = new FileStream(path, FileMode.Create))
+            {
+                fs.Write(Entity.Content, 0, Entity.Content.Length);
+            }
+
+            return path;
+        }
         public RelayCommand DeleteFile;
         public string DateiName => Entity.FileName;
         public string Symbol

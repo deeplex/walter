@@ -2,6 +2,7 @@
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -45,5 +46,17 @@ namespace Deeplex.Saverwalter.App.UserControls
             typeof(AnhangListViewModel),
             typeof(AnhangListControl),
             new PropertyMetadata(null));
+
+        private async void ListItem_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            if (((FrameworkElement)sender).DataContext is AnhangListEntry a)
+            {
+                var path = await a.SaveFile();
+                App.ViewModel.ShowAlert("Gespeichert unter " + path, 5000);
+                //var path = a.SaveFileTemp();
+                //var start = new ProcessStartInfo(path);
+                //Process.Start(start);
+            }
+        }
     }
 }
