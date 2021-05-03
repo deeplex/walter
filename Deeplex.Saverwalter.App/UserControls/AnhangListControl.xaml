@@ -28,16 +28,23 @@
             </Button>
         </RelativePanel>
         <MenuFlyoutSeparator/>
-        <ListView  ItemsSource="{x:Bind ViewModel.Value.Liste.Value, Mode=OneWay}">
+        <ListView
+            SelectionMode="None"
+            ItemsSource="{x:Bind ViewModel.Value.Liste.Value, Mode=OneWay}">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="vm:AnhangListEntry">
-                    <RelativePanel Width="300">
+                    <RelativePanel
+                        DoubleTapped="Oeffne_Click"
+                        Width="300">
                         <TextBlock
                             RelativePanel.AlignVerticalCenterWithPanel="True"
                             RelativePanel.AlignLeftWithPanel="True"
                             Text="{x:Bind DateiName}" />
                         <CommandBar RelativePanel.AlignRightWithPanel="True">
                             <CommandBar.SecondaryCommands>
+                                <AppBarButton
+                                    Click="Oeffne_Click"
+                                    Icon="OpenFile" Label="Datei Öffnen" />
                                 <AppBarButton
                                     Click="Runterladen_Click"
                                     Icon="Download" Label="Runterladen" />

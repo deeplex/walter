@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -56,9 +57,6 @@ namespace Deeplex.Saverwalter.App.UserControls
                 {
                     App.ViewModel.ShowAlert("Gespeichert unter " + path, 5000);
                 }
-                //var path = a.SaveFileTemp();
-                //var start = new ProcessStartInfo(path);
-                //Process.Start(start);
             }
         }
 
@@ -67,6 +65,16 @@ namespace Deeplex.Saverwalter.App.UserControls
             if (((FrameworkElement)sender).DataContext is AnhangListEntry a)
             {
                 a.DeleteFile();
+            }
+        }
+
+        private async void Oeffne_Click(object sender, RoutedEventArgs e)
+        {
+            if (((FrameworkElement)sender).DataContext is AnhangListEntry a)
+            {
+                var path = a.SaveFileTemp();
+                var file = await StorageFile.GetFileFromPathAsync(path);
+                await Windows.System.Launcher.LaunchFileAsync(file);
             }
         }
     }
