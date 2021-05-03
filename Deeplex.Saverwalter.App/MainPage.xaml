@@ -117,6 +117,15 @@
                 </SplitView>
             </RelativePanel>
         </NavigationView>
+        <ContentDialog
+            x:Name="ConfirmationDialog"
+            Title="Bist du sicher?"
+            PrimaryButtonText="Ja"
+            CloseButtonText="Nein"
+            DefaultButton="Close">
+            <TextBlock Text="Diese Änderung kann nicht rückgängig gemacht werden." />
+        </ContentDialog>
+        
         <mtuuc:InAppNotification
             x:Name="SavedIndicator"
             ShowDismissButton="False"

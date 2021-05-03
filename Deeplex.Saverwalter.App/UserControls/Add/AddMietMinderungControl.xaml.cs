@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels.Mieten;
+﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
 using System;
 using System.Collections.Generic;

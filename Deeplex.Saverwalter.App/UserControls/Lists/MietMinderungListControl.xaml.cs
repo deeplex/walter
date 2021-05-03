@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
-using Deeplex.Saverwalter.App.ViewModels.Mieten;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
 using System.Collections.Generic;
@@ -48,8 +47,14 @@ namespace Deeplex.Saverwalter.App.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var a = ((MietMinderungListEntry)((DataGrid)sender).SelectedItem).Entity;
-            App.ViewModel.ListAnhang.Value = new AnhangListViewModel(a);
+            if (((DataGrid)sender).SelectedItem is MietMinderungListEntry m)
+            {
+                App.ViewModel.ListAnhang.Value = new AnhangListViewModel(m.Entity);
+            }
+            else
+            {
+                App.ViewModel.ListAnhang.Value = null;
+            }
         }
     }
 }

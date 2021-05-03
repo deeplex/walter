@@ -38,14 +38,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ZaehlerstandListEntry(Zaehlerstand z, ZaehlerstandListViewModel vm)
         {
             Entity = z;
-            Delete = new RelayCommand(_ =>
+            Delete = new AsyncRelayCommand(async _ =>
             {
-                App.Walter.Zaehlerstaende.Remove(Entity);
-                App.SaveWalter();
-                vm.Liste.Value = vm.Liste.Value.Remove(this);
+                if (await App.ViewModel.Confirmation())
+                {
+                    App.Walter.Zaehlerstaende.Remove(Entity);
+                    App.SaveWalter();
+                    vm.Liste.Value = vm.Liste.Value.Remove(this);
+                }
             }, _ => true);
         }
 
-        public RelayCommand Delete;
+        public AsyncRelayCommand Delete;
     }
 }

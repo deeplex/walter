@@ -120,7 +120,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public RelayCommand AddVersion { get; }
         public RelayCommand RemoveVersion { get; }
 
-        public void SelfDestruct()
+        public async void SelfDestruct()
         {
             Versionen.Value.ForEach(v =>
             {

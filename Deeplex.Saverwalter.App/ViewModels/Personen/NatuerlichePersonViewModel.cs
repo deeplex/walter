@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public List<Anrede> Anreden { get; }
 
-        public void selfDestruct()
+        public async void selfDestruct()
         {
             App.Walter.NatuerlichePersonen.Remove(GetEntity);
             App.SaveWalter();

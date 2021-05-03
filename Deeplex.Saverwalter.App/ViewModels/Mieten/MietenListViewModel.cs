@@ -43,13 +43,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = m;
 
-            SelfDestruct = new RelayCommand(_ =>
+            SelfDestruct = new AsyncRelayCommand(async _ =>
             {
-                vm.Liste.Value = vm.Liste.Value.Remove(this);
-                App.Walter.Mieten.Remove(Entity);
-                App.SaveWalter();
+                if (await App.ViewModel.Confirmation())
+                {
+                    vm.Liste.Value = vm.Liste.Value.Remove(this);
+                    App.Walter.Mieten.Remove(Entity);
+                    App.SaveWalter();
+                }
+                
             }, _ => true);
         }
-        public RelayCommand SelfDestruct;
+        public AsyncRelayCommand SelfDestruct;
     }
 }

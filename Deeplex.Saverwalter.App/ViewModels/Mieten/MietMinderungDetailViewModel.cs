@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Deeplex.Saverwalter.App.ViewModels.Mieten
+namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class MietMinderungDetailViewModel : BindableBase
     {

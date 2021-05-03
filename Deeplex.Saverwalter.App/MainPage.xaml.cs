@@ -25,6 +25,7 @@ namespace Deeplex.Saverwalter.App
 
             ViewModel.SetCommandBar(MainCommandBar);
             ViewModel.SetSavedIndicator(SavedIndicator, SavedIncdicatorText);
+            ViewModel.SetConfirmationDialog(ConfirmationDialog);
             ViewModel.Navigate = Navigate;
         }
 

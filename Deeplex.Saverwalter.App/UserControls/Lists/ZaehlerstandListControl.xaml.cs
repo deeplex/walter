@@ -81,8 +81,14 @@ namespace Deeplex.Saverwalter.App.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var a = ((ZaehlerstandListEntry)((DataGrid)sender).SelectedItem).Entity;
-            App.ViewModel.ListAnhang.Value = new AnhangListViewModel(a);
+            if (((DataGrid)sender).SelectedItem is ZaehlerstandListEntry m)
+            {
+                App.ViewModel.ListAnhang.Value = new AnhangListViewModel(m.Entity);
+            }
+            else
+            {
+                App.ViewModel.ListAnhang.Value = null;
+            }
         }
     }
 }

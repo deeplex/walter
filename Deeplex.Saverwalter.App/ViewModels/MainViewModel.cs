@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 using Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App.ViewModels
@@ -20,6 +21,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private CommandBar CommandBar { get; set; }
         private InAppNotification SavedIndicator { get; set; }
         private TextBlock SavedIndicatorText { get; set; }
+        private ContentDialog ConfirmationDialog { get; set; }
+        private bool ConfirmationDialogGuard { get; set; }
 
         public Action<Type, object> Navigate { get; set; }
 
@@ -27,6 +30,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             CommandBar = arg;
         }
+        public void SetConfirmationDialog(ContentDialog arg)
+        {
+            ConfirmationDialog = arg;
+        }
+
+        public async Task<bool> Confirmation()
+            => await ConfirmationDialog.ShowAsync() == ContentDialogResult.Primary;
 
         public void SetSavedIndicator(InAppNotification arg, TextBlock arg2)
         {

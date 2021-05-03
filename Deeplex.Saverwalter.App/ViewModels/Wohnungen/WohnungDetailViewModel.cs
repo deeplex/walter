@@ -16,7 +16,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public Wohnung Entity;
         public int Id => Entity.WohnungId;
 
-        public void selfDestruct()
+        public async void selfDestruct()
         {
             App.Walter.Wohnungen.Remove(Entity);
             App.SaveWalter();

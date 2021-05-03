@@ -84,16 +84,12 @@ namespace Deeplex.Saverwalter.App.Views
         public Action AddVertrag_Click;
         public Action AddBetriebskostenrechnung_Click;
 
-        private void Delete_Click(object sender, RoutedEventArgs e)
+        private async void Delete_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.selfDestruct();
-            try
+            if (await App.ViewModel.Confirmation())
             {
+                ViewModel.selfDestruct();
                 Frame.GoBack();
-            }
-            catch
-            {
-                App.ViewModel.ShowAlert("NAAAA", 2000);
             }
         }
 

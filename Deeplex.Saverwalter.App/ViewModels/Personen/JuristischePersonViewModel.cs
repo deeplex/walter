@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
         public override string ToString() => Bezeichnung;
 
-        public void selfDestruct()
+        public async void selfDestruct()
         {
             App.Walter.JuristischePersonen.Remove(GetEntity);
             App.SaveWalter();

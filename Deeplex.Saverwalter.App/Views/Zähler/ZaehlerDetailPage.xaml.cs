@@ -26,10 +26,13 @@ namespace Deeplex.Saverwalter.App.Views
             InitializeComponent();
         }
 
-        private void Delete_Click(object sender, RoutedEventArgs e)
+        private async void Delete_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.SelfDestruct();
-            Frame.GoBack();
+            if (await App.ViewModel.Confirmation())
+            {
+                ViewModel.SelfDestruct();
+                Frame.GoBack();
+            }
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

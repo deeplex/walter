@@ -31,9 +31,9 @@
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="vm:MietenListEntry">
                                         <Button
-                                        HorizontalAlignment="Center"
-                                        Background="Transparent"
-                                        Command="{x:Bind SelfDestruct}">
+                                            HorizontalAlignment="Center"
+                                            Background="Transparent"
+                                            Command="{x:Bind SelfDestruct}">
                                             <SymbolIcon Symbol="Delete"></SymbolIcon>
                                         </Button>
                                     </DataTemplate>

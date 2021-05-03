@@ -96,7 +96,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public RelayCommand DeleteAllgemeinZaehler;
         public RelayCommand DeleteZaehlerWohnung;
 
-        public void SelfDestruct()
+        public async void SelfDestruct()
         {
             Entity.Staende.ForEach(s => App.Walter.Zaehlerstaende.Remove(s));
             App.Walter.ZaehlerSet.Remove(Entity);

@@ -20,12 +20,6 @@
         AutoGenerateColumns="False"
         ItemsSource="{x:Bind ViewModel.Value.Liste.Value, Mode=OneWay}">
         <mtuuc:DataGrid.Columns>
-            <mtuuc:DataGridTextColumn
-            Header="Datum"
-            Binding="{Binding DatumString}"/>
-            <mtuuc:DataGridTextColumn
-            Header="Stand"
-            Binding="{Binding Stand}"/>
             <mtuuc:DataGridTemplateColumn>
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                     <DataTemplate x:DataType="vm:ZaehlerstandListEntry">
@@ -35,6 +29,12 @@
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTextColumn
+            Header="Datum"
+            Binding="{Binding DatumString}"/>
+            <mtuuc:DataGridTextColumn
+            Header="Stand"
+            Binding="{Binding Stand}"/>
         </mtuuc:DataGrid.Columns>
     </mtuuc:DataGrid>
 </UserControl>

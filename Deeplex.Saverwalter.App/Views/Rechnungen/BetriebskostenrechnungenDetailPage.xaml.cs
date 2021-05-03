@@ -152,13 +152,16 @@ namespace Deeplex.Saverwalter.App.Views
             if (flagged) ViewModel.Update();
         }
 
-        private void SelfDestruct(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private async void SelfDestruct(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            if (ViewModel.Id != 0)
+            if (await App.ViewModel.Confirmation())
             {
-                ViewModel.selfDestruct();
+                if (ViewModel.Id != 0)
+                {
+                    ViewModel.selfDestruct();
+                }
+                Frame.GoBack();
             }
-            Frame.GoBack();
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Deeplex.Saverwalter.App.ViewModels.Mieten
+namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class MietMinderungListViewModel : BindableBase
     {
@@ -44,13 +44,17 @@ namespace Deeplex.Saverwalter.App.ViewModels.Mieten
         {
             Entity = m;
 
-            SelfDestruct = new RelayCommand(_ =>
+            SelfDestruct = new AsyncRelayCommand(async _ =>
             {
-                vm.Liste.Value = vm.Liste.Value.Remove(this);
-                App.Walter.MietMinderungen.Remove(Entity);
-                App.SaveWalter();
+                if (await App.ViewModel.Confirmation())
+                {
+                    vm.Liste.Value = vm.Liste.Value.Remove(this);
+                    App.Walter.MietMinderungen.Remove(Entity);
+                    App.SaveWalter();
+                }
+                
             }, _ => true);
         }
-        public RelayCommand SelfDestruct;
+        public AsyncRelayCommand SelfDestruct;
     }
 }

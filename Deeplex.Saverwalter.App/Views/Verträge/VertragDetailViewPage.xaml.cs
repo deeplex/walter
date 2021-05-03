@@ -63,10 +63,13 @@ namespace Deeplex.Saverwalter.App.Views
             base.OnNavigatedTo(e);
         }
 
-        private void Delete_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private async void Delete_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            ViewModel.SelfDestruct();
-            Frame.GoBack();
+            if (await App.ViewModel.Confirmation())
+            {
+                ViewModel.SelfDestruct();
+                Frame.GoBack();
+            }
         }
 
         private AppBarButton BetriebskostenAbrechnungsButton()

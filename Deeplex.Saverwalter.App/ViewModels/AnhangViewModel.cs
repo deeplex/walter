@@ -148,11 +148,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Entity = a.Anhang;
         }
 
-        public void DeleteFile()
+        public async void DeleteFile()
         {
             // TODO update ViewModel
-            App.Walter.Anhaenge.Remove(Entity);
-            App.SaveWalter();
+            if (await App.ViewModel.Confirmation())
+            {
+                App.Walter.Anhaenge.Remove(Entity);
+                App.SaveWalter();
+            }
         }
 
         public async Task<string> SaveFile()
