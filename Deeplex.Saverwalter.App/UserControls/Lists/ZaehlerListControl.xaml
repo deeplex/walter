@@ -2,7 +2,6 @@
     x:Class="Deeplex.Saverwalter.App.UserControls.ZaehlerListControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Deeplex.Saverwalter.App.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
@@ -10,33 +9,31 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
 
-    <Grid>
-        <mtuuc:DataGrid
-            SelectionChanged="DataGrid_SelectionChanged"
-            IsReadOnly="True"                
-            CanUserReorderColumns="False"
-            CanUserResizeColumns="True"
-            AutoGenerateColumns="False"
-            DoubleTapped="Details_Click"
-            ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}"
-            SelectedItem="{x:Bind ViewModel.SelectedZaehler, Mode=TwoWay}">
-            <mtuuc:DataGrid.Columns>
-                <mtuuc:DataGridTextColumn
-                    Header="Kennnummer"
-                    Binding="{Binding Kennnummer}"/>
-                <mtuuc:DataGridTextColumn
-                    Header="Typ"
-                    Binding="{Binding TypString}"/>
-                <mtuuc:DataGridTextColumn
-                    Header="Wohnung"
-                    Binding="{Binding Wohnung}"/>
-                <mtuuc:DataGridTextColumn
-                    Header="Letztes Ablesedatum"
-                    Binding="{Binding DatumString}"/>
-                <mtuuc:DataGridTextColumn
-                    Header="Stand"
-                    Binding="{Binding LastStandString}"/>
-            </mtuuc:DataGrid.Columns>
-        </mtuuc:DataGrid>
-    </Grid>
+    <mtuuc:DataGrid
+        SelectionChanged="DataGrid_SelectionChanged"
+        IsReadOnly="True"                
+        CanUserReorderColumns="False"
+        CanUserResizeColumns="True"
+        AutoGenerateColumns="False"
+        DoubleTapped="Details_Click"
+        ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}"
+        SelectedItem="{x:Bind ViewModel.SelectedZaehler, Mode=TwoWay}">
+        <mtuuc:DataGrid.Columns>
+            <mtuuc:DataGridTextColumn
+                Header="Kennnummer"
+                Binding="{Binding Kennnummer}"/>
+            <mtuuc:DataGridTextColumn
+                Header="Typ"
+                Binding="{Binding TypString}"/>
+            <mtuuc:DataGridTextColumn
+                Header="Wohnung"
+                Binding="{Binding Wohnung}"/>
+            <mtuuc:DataGridTextColumn
+                Header="Letztes Ablesedatum"
+                Binding="{Binding DatumString}"/>
+            <mtuuc:DataGridTextColumn
+                Header="Stand"
+                Binding="{Binding LastStandString}"/>
+        </mtuuc:DataGrid.Columns>
+    </mtuuc:DataGrid>
 </UserControl>
