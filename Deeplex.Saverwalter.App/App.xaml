@@ -1,9 +1,7 @@
 ﻿<Application
     x:Class="Deeplex.Saverwalter.App.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Deeplex.Saverwalter.App">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Resources>
         <ResourceDictionary>
             

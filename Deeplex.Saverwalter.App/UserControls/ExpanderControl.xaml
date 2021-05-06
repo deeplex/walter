@@ -11,15 +11,15 @@
 
     <mtuuc:Expander
         IsExpanded="{x:Bind IsExpanded}"
-        HorizontalContentAlignment="Left">
+        HorizontalContentAlignment="Stretch">
         <mtuuc:Expander.Header>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock VerticalAlignment="Center" Text="{x:Bind Header}" />
                 <Button
-                Visibility="{x:Bind ClickAvailable}"
-                Background="Transparent"
-                Margin="10,0,0,0"
-                Click="{x:Bind ClickWrap}">
+                    Visibility="{x:Bind ClickAvailable}"
+                    Background="Transparent"
+                    Margin="10,0,0,0"
+                    Click="{x:Bind ClickWrap}">
                     <SymbolIcon Symbol="Add" />
                 </Button>
                 <ContentPresenter
@@ -27,8 +27,6 @@
                     Content="{x:Bind Bonus}" />
             </mtuuc:WrapPanel>
         </mtuuc:Expander.Header>
-        <RelativePanel>
-            <ContentPresenter Content="{x:Bind MainContent}" />
-        </RelativePanel>
+        <ContentPresenter Content="{x:Bind MainContent}" />
     </mtuuc:Expander>
 </UserControl>
