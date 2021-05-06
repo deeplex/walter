@@ -102,16 +102,19 @@ namespace Deeplex.Saverwalter.App.UserControls
             ViewModel.SelectedKontakt = (e.OriginalSource as FrameworkElement).DataContext as KontaktListEntry;
         }
 
-        private void RemoveMieter_Click(object sender, RoutedEventArgs e)
+        private async void RemoveMieter_Click(object sender, RoutedEventArgs e)
         {
-            var guid = ((KontaktListEntry)((Button)sender).DataContext).Guid;
+            if (await App.ViewModel.Confirmation())
+            {
+                var guid = ((KontaktListEntry)((Button)sender).DataContext).Guid;
 
-            ViewModel.Kontakte.Value = ViewModel.Kontakte.Value
-                .Where(k => guid != k.Guid).ToImmutableList();
-            App.Walter.MieterSet
-                .Where(m => m.PersonId == guid && m.VertragId == VertragGuid)
-                .ToList().ForEach(m => App.Walter.MieterSet.Remove(m));
-            App.SaveWalter();
+                ViewModel.Kontakte.Value = ViewModel.Kontakte.Value
+                    .Where(k => guid != k.Guid).ToImmutableList();
+                App.Walter.MieterSet
+                    .Where(m => m.PersonId == guid && m.VertragId == VertragGuid)
+                    .ToList().ForEach(m => App.Walter.MieterSet.Remove(m));
+                App.SaveWalter();
+            }
         }
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
