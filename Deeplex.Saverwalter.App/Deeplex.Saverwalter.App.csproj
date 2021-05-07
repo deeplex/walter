@@ -181,6 +181,7 @@
     <Compile Include="ViewModels\Rechnungen\BetriebskostenrechnungenDetailViewModel.cs" />
     <Compile Include="ViewModels\Personen\JuristischePersonViewModel.cs" />
     <Compile Include="ViewModels\Personen\PersonViewModel.cs" />
+    <Compile Include="ViewModels\Rechnungen\ErhaltungsaufwendungenDetailViewModel.cs" />
     <Compile Include="ViewModels\Rechnungen\ErhaltungsaufwendungenListViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\Verträge\VertragDetailVersion.cs" />
@@ -212,6 +213,9 @@
     </Compile>
     <Compile Include="Views\Personen\KontaktListPage.xaml.cs">
       <DependentUpon>KontaktListPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Rechnungen\ErhaltungsaufwendungenDetailPage.xaml.cs">
+      <DependentUpon>ErhaltungsaufwendungenDetailPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Rechnungen\ErhaltungsaufwendungenListViewPage.xaml.cs">
       <DependentUpon>ErhaltungsaufwendungenListViewPage.xaml</DependentUpon>
@@ -387,6 +391,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Personen\KontaktListPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Rechnungen\ErhaltungsaufwendungenDetailPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

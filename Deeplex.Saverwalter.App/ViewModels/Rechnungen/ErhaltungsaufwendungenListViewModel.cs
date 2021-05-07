@@ -43,6 +43,7 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
     public sealed class ErhaltungsaufwendungenListEntry
     {
         public readonly Erhaltungsaufwendung Entity;
+        public string Aussteller => App.Walter.FindPerson(Entity.AusstellerId).Bezeichnung;
         public int Id => Entity.ErhaltungsaufwendungId;
         public string Bezeichnung => Entity.Bezeichnung;
         public string DatumString => Entity.Datum.ToString("dd.mm.yyyy");

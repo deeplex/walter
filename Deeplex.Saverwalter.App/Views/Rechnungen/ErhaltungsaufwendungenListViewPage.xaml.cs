@@ -44,8 +44,8 @@ namespace Deeplex.Saverwalter.App.Views.Rechnungen
 
         private void AddErhaltungsaufwendung_Click(object sender, RoutedEventArgs e)
         {
-            //Frame.Navigate(typeof(BetriebskostenrechnungenDetailPage), null,
-            //    new DrillInNavigationTransitionInfo());
+            Frame.Navigate(typeof(ErhaltungsaufwendungenDetailPage), null,
+                new DrillInNavigationTransitionInfo());
         }
     }
 }

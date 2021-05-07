@@ -22,8 +22,8 @@
                     RelativePanel.AlignRightWithPanel="True"
                     RelativePanel.AlignLeftWithPanel="True">
                     <Grid
-                    Background="{ThemeResource SystemChromeLowColor}"
-                    MinHeight="250">
+                        Background="{ThemeResource SystemChromeLowColor}"
+                        MinHeight="250">
                     </Grid>
                 </Grid>
             </RelativePanel>

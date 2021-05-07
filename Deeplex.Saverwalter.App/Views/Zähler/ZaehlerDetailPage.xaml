@@ -25,7 +25,6 @@
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <ComboBox
-                    x:Name="Testibus"
                     Margin="20,20,0,0" Header="Wohnung"
                     Width="420"
                     ItemsSource="{x:Bind ViewModel.Wohnungen}"

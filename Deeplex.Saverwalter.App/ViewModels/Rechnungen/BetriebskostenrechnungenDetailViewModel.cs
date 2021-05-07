@@ -16,7 +16,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private Betriebskostenrechnung Entity { get; }
         public int Id => Entity.BetriebskostenrechnungId;
 
-        public async void selfDestruct()
+        public void selfDestruct()
         {
             App.Walter.Betriebskostenrechnungen.Remove(Entity);
             App.SaveWalter();

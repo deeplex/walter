@@ -8,30 +8,28 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
-        <mtuuc:DataGrid
-            SelectionChanged="DataGrid_SelectionChanged"
-            IsReadOnly="True"
-            CanUserReorderColumns="False"
-            CanUserResizeColumns="True"
-            AutoGenerateColumns="False"
-            DoubleTapped="Details_Click"
-            ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}"
-            SelectedItem="{x:Bind ViewModel.SelectedRechnung, Mode=TwoWay}">
-            <mtuuc:DataGrid.Columns>
-                <mtuuc:DataGridTextColumn
-                        Header="Typ"
-                        Binding="{Binding TypString}"/>
-                <mtuuc:DataGridTextColumn
-                        Header="Jahr"
-                        Binding="{Binding BetreffendesJahrString}"/>
-                <mtuuc:DataGridTextColumn
-                        Header="Wohnungen"
-                        Binding="{Binding AdressenBezeichnung}"/>
-                <mtuuc:DataGridTextColumn
-                        Header="Betrag"
-                        Binding="{Binding BetragString}"/>
-            </mtuuc:DataGrid.Columns>
-        </mtuuc:DataGrid>
-    </Grid>
+    <mtuuc:DataGrid
+        SelectionChanged="DataGrid_SelectionChanged"
+        IsReadOnly="True"
+        CanUserReorderColumns="False"
+        CanUserResizeColumns="True"
+        AutoGenerateColumns="False"
+        DoubleTapped="Details_Click"
+        ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}"
+        SelectedItem="{x:Bind ViewModel.SelectedRechnung, Mode=TwoWay}">
+        <mtuuc:DataGrid.Columns>
+            <mtuuc:DataGridTextColumn
+                    Header="Typ"
+                    Binding="{Binding TypString}"/>
+            <mtuuc:DataGridTextColumn
+                    Header="Jahr"
+                    Binding="{Binding BetreffendesJahrString}"/>
+            <mtuuc:DataGridTextColumn
+                    Header="Wohnungen"
+                    Binding="{Binding AdressenBezeichnung}"/>
+            <mtuuc:DataGridTextColumn
+                    Header="Betrag"
+                    Binding="{Binding BetragString}"/>
+        </mtuuc:DataGrid.Columns>
+    </mtuuc:DataGrid>
 </UserControl>
