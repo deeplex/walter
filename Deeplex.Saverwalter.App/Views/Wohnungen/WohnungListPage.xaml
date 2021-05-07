@@ -2,17 +2,11 @@
     x:Class="Deeplex.Saverwalter.App.Views.WohnungListPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
-    xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-
-    <ScrollViewer>
-        <uc:WohnungListControl Filter="{x:Bind ViewModel.Filter.Value, Mode=OneWay}"/>
-    </ScrollViewer>
+    <uc:WohnungListControl Filter="{x:Bind ViewModel.Filter.Value, Mode=OneWay}"/>
 </Page>
