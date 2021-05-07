@@ -43,6 +43,10 @@
                     x:Name="BetriebskostenListMenuItem"
                     Content="{x:Bind BetriebskostenrechnungenListLabel}" 
                     Icon="List"/>
+                <NavigationViewItem
+                    x:Name="ErhaltungsAufwendungenListMenuItem"
+                    Content="{x:Bind ErhaltungsaufwendungenListLabel}" 
+                    Icon="List"/>
             </NavigationView.MenuItems>
 
             <NavigationView.PaneFooter>

@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.App.Views;
+using Deeplex.Saverwalter.App.Views.Rechnungen;
 using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -37,6 +38,7 @@ namespace Deeplex.Saverwalter.App
         public readonly string WohnungListLabel = "Mietobjekte";
         public readonly string ZaehlerListLabel = "Zähler";
         public readonly string BetriebskostenrechnungenListLabel = "Betr. Rechnung";
+        public readonly string ErhaltungsaufwendungenListLabel = "Erhaltungsaufw.";
 
         private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
         {
@@ -48,6 +50,7 @@ namespace Deeplex.Saverwalter.App
                 label == VertragListLabel ? typeof(VertragListPage) :
                 label == ZaehlerListLabel ? typeof(ZaehlerListPage) :
                 label == BetriebskostenrechnungenListLabel ? typeof(BetriebskostenRechnungenListViewPage) :
+                label == ErhaltungsaufwendungenListLabel ? typeof(ErhaltungsaufwendungenListViewPage) :
                 null;
 
             if (pageType != null && pageType != AppFrame.CurrentSourcePageType)
@@ -75,6 +78,10 @@ namespace Deeplex.Saverwalter.App
                 else if (e.SourcePageType == typeof(BetriebskostenRechnungenListViewPage))
                 {
                     NavView.SelectedItem = BetriebskostenListMenuItem;
+                }
+                else if (e.SourcePageType == typeof(ErhaltungsaufwendungenListViewPage))
+                {
+                    NavView.SelectedItem = ErhaltungsAufwendungenListMenuItem;
                 }
                 else if (e.SourcePageType == typeof(ZaehlerListPage))
                 {

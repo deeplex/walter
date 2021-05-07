@@ -1,6 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.App.Views;
-using Deeplex.Saverwalter.Model;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
 using System.Collections.Immutable;
@@ -104,7 +103,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             = DependencyProperty.Register(
                   "Filter",
                   typeof(string),
-                  typeof(VertragListControl),
+                  typeof(BetriebskostenRechnungenListControl),
                   new PropertyMetadata(""));
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)

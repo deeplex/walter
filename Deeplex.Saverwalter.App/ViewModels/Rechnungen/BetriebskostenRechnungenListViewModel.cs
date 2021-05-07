@@ -12,7 +12,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class BetriebskostenRechnungenListViewModel : BindableBase, IFilterViewModel
     {
-        public ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>> Liste = new ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>>();
+        public ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>> Liste =
+            new ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>>();
 
         public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
         public ImmutableList<BetriebskostenRechnungenListEntry> AllRelevant { get; set; }

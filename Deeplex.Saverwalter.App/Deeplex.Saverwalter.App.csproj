@@ -141,6 +141,9 @@
     <Compile Include="UserControls\Lists\BetriebskostenRechnungenListControl.xaml.cs">
       <DependentUpon>BetriebskostenRechnungenListControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\Lists\ErhaltungsaufwendungenListControl.xaml.cs">
+      <DependentUpon>ErhaltungsaufwendungenListControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Lists\KontaktListControl.xaml.cs">
       <DependentUpon>KontaktListControl.xaml</DependentUpon>
     </Compile>
@@ -178,6 +181,7 @@
     <Compile Include="ViewModels\Rechnungen\BetriebskostenrechnungenDetailViewModel.cs" />
     <Compile Include="ViewModels\Personen\JuristischePersonViewModel.cs" />
     <Compile Include="ViewModels\Personen\PersonViewModel.cs" />
+    <Compile Include="ViewModels\Rechnungen\ErhaltungsaufwendungenListViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\Verträge\VertragDetailVersion.cs" />
     <Compile Include="ViewModels\Verträge\VertragDetailViewModel.cs" />
@@ -208,6 +212,9 @@
     </Compile>
     <Compile Include="Views\Personen\KontaktListPage.xaml.cs">
       <DependentUpon>KontaktListPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Rechnungen\ErhaltungsaufwendungenListViewPage.xaml.cs">
+      <DependentUpon>ErhaltungsaufwendungenListViewPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SettingsPage.xaml.cs">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
@@ -323,6 +330,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UserControls\Lists\ErhaltungsaufwendungenListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UserControls\Lists\KontaktListControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -376,6 +387,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Personen\KontaktListPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Rechnungen\ErhaltungsaufwendungenListViewPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

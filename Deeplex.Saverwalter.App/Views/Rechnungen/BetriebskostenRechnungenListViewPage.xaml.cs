@@ -7,7 +7,6 @@ using Windows.UI.Xaml.Media.Animation;
 
 namespace Deeplex.Saverwalter.App.Views
 {
-
     public sealed partial class BetriebskostenRechnungenListViewPage : Page
     {
         public BetriebskostenRechnungenListViewModel ViewModel = new BetriebskostenRechnungenListViewModel();
@@ -36,7 +35,5 @@ namespace Deeplex.Saverwalter.App.Views
             Frame.Navigate(typeof(BetriebskostenrechnungenDetailPage), null,
                 new DrillInNavigationTransitionInfo());
         }
-
-
     }
 }
