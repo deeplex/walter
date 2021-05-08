@@ -108,8 +108,11 @@ namespace Deeplex.Saverwalter.App.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var a = ((BetriebskostenRechnungenListEntry)((DataGrid)sender).SelectedItem).Entity;
-            App.ViewModel.ListAnhang.Value = new AnhangListViewModel(a);
+            
+            if (((DataGrid)sender)?.SelectedItem is BetriebskostenRechnungenListEntry r)
+            {
+                App.ViewModel.ListAnhang.Value = new AnhangListViewModel(r.Entity);
+            }
         }
     }
 }

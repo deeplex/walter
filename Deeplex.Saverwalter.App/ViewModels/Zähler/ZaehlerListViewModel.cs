@@ -33,6 +33,7 @@ namespace Deeplex.Saverwalter.App.ViewModels.Zähler
             AllRelevant= App.Walter.ZaehlerSet
                 .Include(z => z.Wohnung)
                 .ThenInclude(w => w.Adresse)
+                .Include(z => z.Staende)
                 .Select(z => new ZaehlerListEntry(z))
                 .ToImmutableList();
             Liste.Value = AllRelevant;

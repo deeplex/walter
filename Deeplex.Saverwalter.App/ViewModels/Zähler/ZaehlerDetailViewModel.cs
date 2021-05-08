@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
@@ -81,7 +82,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = z;
             Staende.Value = new ZaehlerstandListViewModel(z);
-            Wohnungen = App.Walter.Wohnungen.Select(w => new WohnungListEntry(w)).ToList();
+            Wohnungen = App.Walter.Wohnungen
+                .Include(w => w.Adresse)
+                .Select(w => new WohnungListEntry(w))
+                .ToList();
             Wohnung = Wohnungen.Find(w => w.Id == z.WohnungId);
 
             PropertyChanged += OnUpdate;
@@ -116,7 +120,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     return;
             }
 
-            if (Entity.Kennnummer == "")
+            if (Entity.Kennnummer == "" || Entity.Kennnummer == null)
             {
                 return;
             }
