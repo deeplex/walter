@@ -70,7 +70,7 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
             body.Append(
                 new Paragraph(),
                 Heading("Gesamtergebnis der Abrechnung"),
-                GesamtErgebnis(b));
+                GesamtErgebnis(b));            
         }
     }
 }

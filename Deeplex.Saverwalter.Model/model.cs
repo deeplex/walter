@@ -458,6 +458,7 @@ namespace Deeplex.Saverwalter.Model
         public Guid AusstellerId { get; set; }
         public string Bezeichnung { get; set; } = null!;
         public double Betrag { get; set; }
+        public Wohnung Wohnung { get; set; } = null!;
     }
 
     public sealed class ErhaltungsaufwendungAnhang : AnhangRef, IAnhang<Erhaltungsaufwendung>

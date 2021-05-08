@@ -19,8 +19,20 @@ namespace Deeplex.Saverwalter.Print.FirstPage
                 PostalischerVermerk(b),
                 PrintDate(),
                 Betreff(b),
-                Ergebnis(b),
-                GenerischerText(),
+                Ergebnis(b));
+
+
+            var Anpassung = -b.Result / 12;
+
+            if (Anpassung > 0)
+            {
+                body.Append(new Paragraph(
+                    new Run(Font(),
+                    new Text("Wir empfehlen Ihnen die monatliche Mietzahlung um einen Betrag von " +
+                    Euro(Anpassung) + " auf " + Euro(b.Gezahlt / 12 + Anpassung) + " anzupassen."))));
+            }
+
+            body.Append(GenerischerText(),
                 new Break() { Type = BreakValues.Page });
         }
 
