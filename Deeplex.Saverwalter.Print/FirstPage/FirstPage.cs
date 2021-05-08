@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.Print.FirstPage
                     Euro(Anpassung) + " auf " + Euro(b.Gezahlt / 12 + Anpassung) + " anzupassen."))));
             }
 
-            body.Append(GenerischerText(),
+            body.Append(GenerischerText(b),
                 new Break() { Type = BreakValues.Page });
         }
 
