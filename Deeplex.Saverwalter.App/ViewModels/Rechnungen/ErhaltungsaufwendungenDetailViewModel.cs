@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
             set
             {
                 mAussteller = Personen
-                    .SingleOrDefault(e => e.Guid == value.Guid);
+                    .SingleOrDefault(e => e.Guid == value?.Guid);
                 var old = Entity.AusstellerId;
                 Entity.AusstellerId = value?.Guid ?? Guid.Empty;
                 RaisePropertyChangedAuto(old, value?.Guid);
