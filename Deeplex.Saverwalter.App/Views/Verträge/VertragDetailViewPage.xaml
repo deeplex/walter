@@ -17,12 +17,9 @@
         </Style>
 
         <DataTemplate x:Key="BeginnGrid" x:DataType="vm:VertragDetailVersion">
-            <CalendarDatePicker
+            <DatePicker
                 Date="{x:Bind Beginn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                Language="de"
-                Width="176"
-                PlaceholderText="Offen"
-                DateFormat="{}{day.integer}. {month.full} {year.full}"/>
+                Language="de"/>
         </DataTemplate>
 
         <DataTemplate x:Key="EndeGrid" x:DataType="vm:VertragDetailVersion">
@@ -121,12 +118,12 @@
                             <Flyout>
                                 <StackPanel Orientation="Horizontal">
                                     <CalendarDatePicker
-                                    Header="Beginn"
-                                    MinDate="{x:Bind ViewModel.Beginn, Mode=TwoWay}"
-                                    Language="de"
-                                    DateFormat="{}{day.integer}. {month.full} {year.full}"
-                                    PlaceholderText="Datum hinzufügen"
-                                    Date="{x:Bind ViewModel.AddVersionDatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                        Header="Beginn"
+                                        MinDate="{x:Bind ViewModel.Beginn, Mode=TwoWay}"
+                                        Language="de"
+                                        DateFormat="{}{day.integer}. {month.full} {year.full}"
+                                        PlaceholderText="Datum hinzufügen"
+                                        Date="{x:Bind ViewModel.AddVersionDatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                     <Button
                                         VerticalAlignment="Bottom"
                                         Command="{x:Bind ViewModel.AddVersion}"
