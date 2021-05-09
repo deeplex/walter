@@ -41,22 +41,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Erhaltungsaufwendungen",
-                columns: table => new
-                {
-                    ErhaltungsaufwendungId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Datum = table.Column<DateTime>(nullable: false),
-                    AusstellerId = table.Column<Guid>(nullable: false),
-                    Bezeichnung = table.Column<string>(nullable: false),
-                    Betrag = table.Column<double>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Erhaltungsaufwendungen", x => x.ErhaltungsaufwendungId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Kontos",
                 columns: table => new
                 {
@@ -189,8 +173,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     AdresseAnhangId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TargetAdresseId = table.Column<int>(nullable: false),
-                    AnhangId = table.Column<Guid>(nullable: false)
+                    AnhangId = table.Column<Guid>(nullable: false),
+                    TargetAdresseId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -215,9 +199,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     VertragAnhangId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Target = table.Column<Guid>(nullable: false),
                     AnhangId = table.Column<Guid>(nullable: false),
-                    Typ = table.Column<int>(nullable: false)
+                    Target = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -231,39 +214,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ErhaltungsaufwendungAnhaenge",
-                columns: table => new
-                {
-                    ErhaltungsaufwendungAnhangId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    TargetErhaltungsaufwendungId = table.Column<int>(nullable: false),
-                    AnhangId = table.Column<Guid>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ErhaltungsaufwendungAnhaenge", x => x.ErhaltungsaufwendungAnhangId);
-                    table.ForeignKey(
-                        name: "FK_ErhaltungsaufwendungAnhaenge_Anhaenge_AnhangId",
-                        column: x => x.AnhangId,
-                        principalTable: "Anhaenge",
-                        principalColumn: "AnhangId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ErhaltungsaufwendungAnhaenge_Erhaltungsaufwendungen_TargetErhaltungsaufwendungId",
-                        column: x => x.TargetErhaltungsaufwendungId,
-                        principalTable: "Erhaltungsaufwendungen",
-                        principalColumn: "ErhaltungsaufwendungId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "KontoAnhaenge",
                 columns: table => new
                 {
                     KontoAnhangId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TargetKontoId = table.Column<int>(nullable: false),
-                    AnhangId = table.Column<Guid>(nullable: false)
+                    AnhangId = table.Column<Guid>(nullable: false),
+                    TargetKontoId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -288,8 +245,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     MieteAnhangId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TargetMieteId = table.Column<int>(nullable: false),
-                    AnhangId = table.Column<Guid>(nullable: false)
+                    AnhangId = table.Column<Guid>(nullable: false),
+                    TargetMieteId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -314,8 +271,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     MietMinderungAnhangId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TargetMietMinderungId = table.Column<int>(nullable: false),
-                    AnhangId = table.Column<Guid>(nullable: false)
+                    AnhangId = table.Column<Guid>(nullable: false),
+                    TargetMietMinderungId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -369,8 +326,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     JuristischePersonAnhangId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TargetJuristischePersonId = table.Column<int>(nullable: false),
-                    AnhangId = table.Column<Guid>(nullable: false)
+                    AnhangId = table.Column<Guid>(nullable: false),
+                    TargetJuristischePersonId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -454,8 +411,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     NatuerlichePersonAnhangId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TargetNatuerlichePersonId = table.Column<int>(nullable: false),
-                    AnhangId = table.Column<Guid>(nullable: false)
+                    AnhangId = table.Column<Guid>(nullable: false),
+                    TargetNatuerlichePersonId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -480,8 +437,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     GarageAnhangId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TargetGarageId = table.Column<int>(nullable: false),
-                    AnhangId = table.Column<Guid>(nullable: false)
+                    AnhangId = table.Column<Guid>(nullable: false),
+                    TargetGarageId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -521,6 +478,29 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Erhaltungsaufwendungen",
+                columns: table => new
+                {
+                    ErhaltungsaufwendungId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Datum = table.Column<DateTime>(nullable: false),
+                    AusstellerId = table.Column<Guid>(nullable: false),
+                    Bezeichnung = table.Column<string>(nullable: false),
+                    Betrag = table.Column<double>(nullable: false),
+                    WohnungId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Erhaltungsaufwendungen", x => x.ErhaltungsaufwendungId);
+                    table.ForeignKey(
+                        name: "FK_Erhaltungsaufwendungen_Wohnungen_WohnungId",
+                        column: x => x.WohnungId,
+                        principalTable: "Wohnungen",
+                        principalColumn: "WohnungId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Vertraege",
                 columns: table => new
                 {
@@ -555,8 +535,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     WohnungAnhangId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TargetWohnungId = table.Column<int>(nullable: false),
-                    AnhangId = table.Column<Guid>(nullable: false)
+                    AnhangId = table.Column<Guid>(nullable: false),
+                    TargetWohnungId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -605,6 +585,32 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ErhaltungsaufwendungAnhaenge",
+                columns: table => new
+                {
+                    ErhaltungsaufwendungAnhangId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    AnhangId = table.Column<Guid>(nullable: false),
+                    TargetErhaltungsaufwendungId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ErhaltungsaufwendungAnhaenge", x => x.ErhaltungsaufwendungAnhangId);
+                    table.ForeignKey(
+                        name: "FK_ErhaltungsaufwendungAnhaenge_Anhaenge_AnhangId",
+                        column: x => x.AnhangId,
+                        principalTable: "Anhaenge",
+                        principalColumn: "AnhangId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ErhaltungsaufwendungAnhaenge_Erhaltungsaufwendungen_TargetErhaltungsaufwendungId",
+                        column: x => x.TargetErhaltungsaufwendungId,
+                        principalTable: "Erhaltungsaufwendungen",
+                        principalColumn: "ErhaltungsaufwendungId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Betriebskostenrechnungen",
                 columns: table => new
                 {
@@ -639,8 +645,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     ZaehlerAnhangId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TargetZaehlerId = table.Column<int>(nullable: false),
-                    AnhangId = table.Column<Guid>(nullable: false)
+                    AnhangId = table.Column<Guid>(nullable: false),
+                    TargetZaehlerId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -687,8 +693,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     BetriebskostenrechnungAnhangId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TargetBetriebskostenrechnungId = table.Column<int>(nullable: false),
-                    AnhangId = table.Column<Guid>(nullable: false)
+                    AnhangId = table.Column<Guid>(nullable: false),
+                    TargetBetriebskostenrechnungId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -739,8 +745,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     ZaehlerstandAnhangId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TargetZaehlerstandId = table.Column<int>(nullable: false),
-                    AnhangId = table.Column<Guid>(nullable: false)
+                    AnhangId = table.Column<Guid>(nullable: false),
+                    TargetZaehlerstandId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -803,6 +809,11 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 name: "IX_ErhaltungsaufwendungAnhaenge_TargetErhaltungsaufwendungId",
                 table: "ErhaltungsaufwendungAnhaenge",
                 column: "TargetErhaltungsaufwendungId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Erhaltungsaufwendungen_WohnungId",
+                table: "Erhaltungsaufwendungen",
+                column: "WohnungId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GarageAnhaenge_AnhangId",

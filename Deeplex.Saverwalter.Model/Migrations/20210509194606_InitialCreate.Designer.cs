@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20210428092414_InitialCreate")]
+    [Migration("20210509194606_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -205,7 +205,12 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<DateTime>("Datum")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("WohnungId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("ErhaltungsaufwendungId");
+
+                    b.HasIndex("WohnungId");
 
                     b.ToTable("Erhaltungsaufwendungen");
                 });
@@ -689,9 +694,6 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<Guid>("Target")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Typ")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("VertragAnhangId");
 
                     b.HasIndex("AnhangId");
@@ -905,6 +907,15 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.HasOne("Deeplex.Saverwalter.Model.Wohnung", "Wohnung")
                         .WithMany("Betriebskostenrechnungsgruppen")
+                        .HasForeignKey("WohnungId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Deeplex.Saverwalter.Model.Erhaltungsaufwendung", b =>
+                {
+                    b.HasOne("Deeplex.Saverwalter.Model.Wohnung", "Wohnung")
+                        .WithMany()
                         .HasForeignKey("WohnungId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
