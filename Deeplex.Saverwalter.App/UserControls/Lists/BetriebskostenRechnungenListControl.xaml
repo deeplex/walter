@@ -19,17 +19,20 @@
         SelectedItem="{x:Bind ViewModel.SelectedRechnung, Mode=TwoWay}">
         <mtuuc:DataGrid.Columns>
             <mtuuc:DataGridTextColumn
-                    Header="Typ"
-                    Binding="{Binding TypString}"/>
+                Header="Typ"
+                Binding="{Binding TypString}"/>
             <mtuuc:DataGridTextColumn
-                    Header="Jahr"
-                    Binding="{Binding BetreffendesJahrString}"/>
+                Header="Jahr"
+                Binding="{Binding BetreffendesJahrString}"/>
             <mtuuc:DataGridTextColumn
-                    Header="Wohnungen"
-                    Binding="{Binding AdressenBezeichnung}"/>
+                Header="Wohnungen"
+                Binding="{Binding AdressenBezeichnung}"/>
             <mtuuc:DataGridTextColumn
-                    Header="Betrag"
-                    Binding="{Binding BetragString}"/>
+                Header="Betrag"
+                Binding="{Binding BetragString}"/>
+            <mtuuc:DataGridTextColumn
+                Header="Beschreibung"
+                Binding="{Binding Beschreibung}"/>
         </mtuuc:DataGrid.Columns>
     </mtuuc:DataGrid>
 </UserControl>

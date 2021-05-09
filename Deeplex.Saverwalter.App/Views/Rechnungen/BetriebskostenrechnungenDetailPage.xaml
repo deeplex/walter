@@ -65,5 +65,10 @@
                 Margin="10,0,0,0"
                 Header="HKVO§9"/>
         </StackPanel>
+        <StackPanel>
+            <TextBox
+                Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Header="Notiz"/>
+        </StackPanel>
     </StackPanel>
 </Page>

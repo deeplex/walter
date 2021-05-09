@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.App.Utils
         }
 
         public static bool applyFilter(string filter, params string[] strings)
-            => filter.Split(' ').All(split => strings.Any(str => str.ToLower().Contains(split.ToLower())));
+            => filter.Split(' ').All(split => strings.Any(str => str != null && str.ToLower().Contains(split.ToLower())));
     }
 
     public interface IFilterViewModel

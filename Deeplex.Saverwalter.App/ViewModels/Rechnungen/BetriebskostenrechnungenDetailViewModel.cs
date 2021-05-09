@@ -79,6 +79,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
+        public string Notiz
+        {
+            get => Entity.Notiz;
+            set
+            {
+                var old = Entity.Notiz;
+                Entity.Notiz = value;
+                RaisePropertyChangedAuto(old, value);
+            }
+        }
+
         public string TypString => Typen_List[Typ].Beschreibung;
         public int Typ
         {
@@ -230,6 +241,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 case nameof(BetreffendesJahr):
                 case nameof(HKVO_P7):
                 case nameof(HKVO_P8):
+                case nameof(Notiz):
                     break;
                 default:
                     return;

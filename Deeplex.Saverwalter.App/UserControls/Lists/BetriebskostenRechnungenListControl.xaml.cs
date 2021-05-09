@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             if (Filter != "")
             {
                 ViewModel.Liste.Value = ViewModel.Liste.Value.Where(v =>
-                    applyFilter(Filter, v.AdressenBezeichnung, v.BetreffendesJahrString, v.TypString))
+                    applyFilter(Filter, v.AdressenBezeichnung, v.BetreffendesJahrString, v.TypString, v.Beschreibung))
                     .ToImmutableList();
             }
         }
@@ -108,7 +108,6 @@ namespace Deeplex.Saverwalter.App.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            
             if (((DataGrid)sender)?.SelectedItem is BetriebskostenRechnungenListEntry r)
             {
                 App.ViewModel.ListAnhang.Value = new AnhangListViewModel(r.Entity);
