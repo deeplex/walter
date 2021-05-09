@@ -47,6 +47,12 @@
                     <SymbolIcon Symbol="Delete"/>
                 </Button>
             </mtuuc:WrapPanel>
+            <StackPanel>
+                <TextBox
+                    Margin="20,20,0,0"
+                    Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                    Header="Notiz"/>
+            </StackPanel>
 
             <StackPanel Margin="0,20,0,0" Visibility="{x:Bind ViewModel.Initialized, Mode=OneWay}">
                 <uc:ExpanderControl IsExpanded="True" Header="Zählerstände">
@@ -54,7 +60,7 @@
                         <uc:AddZaehlerstandControl ZaehlerstandListViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" />
                     </uc:ExpanderControl.Bonus>
                     <uc:ExpanderControl.MainContent>
-                        <uc:ZaehlerstandListControl ZaehlerstandListViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" Add="true" />
+                        <uc:ZaehlerstandListControl ZaehlerstandListViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" />
                     </uc:ExpanderControl.MainContent>
                 </uc:ExpanderControl>
             </StackPanel>

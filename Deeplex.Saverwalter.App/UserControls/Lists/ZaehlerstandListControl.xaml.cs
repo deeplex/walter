@@ -66,19 +66,6 @@ namespace Deeplex.Saverwalter.App.UserControls
             typeof(ZaehlerstandListControl),
             new PropertyMetadata(0));
 
-        public bool Add
-        {
-            get { return (bool)GetValue(AddProperty); }
-            set { SetValue(AddProperty, value); }
-        }
-
-        public static readonly DependencyProperty AddProperty
-            = DependencyProperty.Register(
-            "Add",
-            typeof(bool),
-            typeof(ZaehlerstandListControl),
-            new PropertyMetadata(false));
-
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (((DataGrid)sender).SelectedItem is ZaehlerstandListEntry m)

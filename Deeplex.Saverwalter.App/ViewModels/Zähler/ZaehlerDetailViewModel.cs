@@ -16,7 +16,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class ZaehlerDetailViewModel : BindableBase
     {
         public Zaehler Entity;
-        public int Id => Entity.ZaehlerId;
+        private int mId { get; set; }
+        public int Id
+        {
+            get => mId;
+            set
+            {
+                var old = mId;
+                Entity.ZaehlerId = value;
+                mId = value;
+                RaisePropertyChangedAuto(old, value);
+                RaisePropertyChanged(nameof(Initialized));
+            }
+        }
 
         public ObservableProperty<ZaehlerstandListViewModel> Staende
             = new ObservableProperty<ZaehlerstandListViewModel>();
@@ -45,6 +57,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 var old = Entity.Typ;
                 Entity.Typ = value;
+                RaisePropertyChangedAuto(old, value);
+            }
+        }
+
+        public string Notiz
+        {
+            get => Entity.Notiz;
+            set
+            {
+                var old = Entity.Notiz;
+                Entity.Notiz = value;
                 RaisePropertyChangedAuto(old, value);
             }
         }
@@ -81,13 +104,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ZaehlerDetailViewModel(Zaehler z)
         {
             Entity = z;
-            Staende.Value = new ZaehlerstandListViewModel(z);
+            mId = Entity.ZaehlerId;
+
             Wohnungen = App.Walter.Wohnungen
                 .Include(w => w.Adresse)
                 .Select(w => new WohnungListEntry(w))
                 .ToList();
-            Wohnung = Wohnungen.Find(w => w.Id == z.WohnungId);
 
+            if (mId != 0)
+            {
+                Staende.Value = new ZaehlerstandListViewModel(z);
+                Wohnung = Wohnungen.Find(w => w.Id == z.WohnungId);
+            }
+            
             PropertyChanged += OnUpdate;
 
             AttachFile = new AsyncRelayCommand(async _ =>
@@ -134,8 +163,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.Walter.ZaehlerSet.Add(Entity);
             }
             App.SaveWalter();
-            RaisePropertyChanged(nameof(Id));
-            RaisePropertyChanged(nameof(Initialized));
+            if (mId != Entity.ZaehlerId)
+            {
+                Id = Entity.ZaehlerId;
+                Staende.Value = new ZaehlerstandListViewModel(Entity);
+            }
         }
     }
 }
