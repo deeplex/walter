@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -120,5 +121,29 @@ namespace Deeplex.Saverwalter.App.Utils
                     Anhang = file,
                     AnhangId = file.AnhangId,
                 }).ToList();
+
+        public static void SaveAnhaenge(this Betriebskostenabrechnung b, string path)
+        {
+            var RechnungIds = b.Gruppen.SelectMany(g => g.Rechnungen).Select(r => r.BetriebskostenrechnungId);
+            var temppath = Path.GetTempPath();
+
+            App.Walter.BetriebskostenrechnungAnhaenge
+                .Include(a => a.Anhang)
+                .Where(a => RechnungIds.Contains(a.Target.BetriebskostenrechnungId))
+                .ToList()
+                .ForEach(a =>
+                {
+                    if (a.Anhang != null)
+                    {
+                        var filepath = Path.Combine(temppath, a.Target.Typ.ToDescriptionString() + Path.GetExtension(a.Anhang.FileName));
+                        using (FileStream fs = new FileStream(filepath, FileMode.Create))
+                        {
+                            fs.Write(a.Anhang.Content, 0, a.Anhang.Content.Length);
+                        }
+                    }
+                });
+
+            System.IO.Compression.ZipFile.CreateFromDirectory(temppath, path + ".zip");
+        }
     }
 }

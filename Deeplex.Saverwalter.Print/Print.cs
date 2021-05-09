@@ -70,26 +70,5 @@ namespace Deeplex.Saverwalter.Print
             }
             return ok;
         }
-
-        private static Paragraph MietHeader(Betriebskostenabrechnung b)
-        {
-            var Header = string.Join(", ", b.Mieter.Select(m =>
-            {
-                if (m is NatuerlichePerson n)
-                {
-                    return (n.Anrede == Anrede.Herr ? "Herrn " :
-                        n.Anrede == Anrede.Frau ? "Frau " :
-                        n.Vorname) + " " + n.Nachname;
-                }
-                else
-                {
-                    return "";
-                }
-            })) + " (" + b.Adresse.Strasse + " " + b.Adresse.Hausnummer + ", " + b.Wohnung.Bezeichnung + ")";
-
-            return new Paragraph(Font(),
-                new ParagraphProperties(new Justification() { Val = JustificationValues.Right }),
-                new Run(Font(), new Text(Header)));
-        }
     }
 }

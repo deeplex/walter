@@ -517,15 +517,15 @@ namespace Deeplex.Saverwalter.Model
     // Odd is Warme Betriebskosten
     public enum Betriebskostentyp
     {
-        [Description("Allgemeinstrom/Hausbeleuchtung")]
+        [Description("Allgemeinstrom")]
         AllgemeinstromHausbeleuchtung = 0,
         [Description("Breitbandkabelanschluss")]
         Breitbandkabelanschluss = 2,
         [Description("Dachrinnenreinigung")]
         Dachrinnenreinigung = 4,
-        [Description("Entwässerung/Niederschlag")]
+        [Description("Entwässerung Niederschlag")]
         EntwaesserungNiederschlagswasser = 6,
-        [Description("Entwässerung/Schmutzwasser")]
+        [Description("Entwässerung Schmutzwasser")]
         EntwaesserungSchmutzwasser = 8,
         [Description("Gartenpflege")]
         Gartenpflege = 10,
@@ -547,13 +547,13 @@ namespace Deeplex.Saverwalter.Model
         SchornsteinfegerarbeitenWarm = 25,
         [Description("Straßenreinigung")]
         Strassenreinigung = 26,
-        [Description("Wartung Thermen/Speicher")]
+        [Description("Wartung Therme, Speicher")]
         WartungThermenSpeicher = 28,
         [Description("Wasserversorgung")]
         WasserversorgungKalt = 30,
         [Description("Wasserversorgung")]
         WasserversorgungWarm = 31,
-        [Description("Weitere/Sonstige Nebenkosten")]
+        [Description("Sonstige Nebenkosten")]
         WeitereSonstigeNebenkosten = 32,
         [Description("Heizkosten")]
         Heizkosten = 35,

@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Print;
 using Microsoft.UI.Xaml.Controls;
@@ -122,9 +123,13 @@ namespace Deeplex.Saverwalter.App.Views
                 .Select(a => App.Walter.FindPerson(a.PersonId).Bezeichnung));
 
             var s = Jahr.ToString() + " - " + ViewModel.Wohnung.ToString() + " - " + AuflistungMieter;
-
-            var worked = b.SaveAsDocx(ApplicationData.Current.LocalFolder.Path + @"\" + s + ".docx");
+            var path = ApplicationData.Current.LocalFolder.Path + @"\" + s;
+            
+            var worked = b.SaveAsDocx(path + ".docx");
             var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
+
+            b.SaveAnhaenge(path);
+
             App.ViewModel.ShowAlert(text, 5000);
         }
 
