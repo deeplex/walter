@@ -26,7 +26,7 @@
                Binding="{Binding Wohnung}"/>
             <mtuuc:DataGridTextColumn
                Header="Betrag"
-               Binding="{Binding Betrag}"/>
+               Binding="{Binding BetragString}"/>
             <mtuuc:DataGridTextColumn
                Header="Datum"
                Binding="{Binding DatumString}"/>

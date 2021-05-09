@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -42,13 +43,11 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
             get => mWohnung;
             set
             {
-                mWohnung = Wohnungen
-                    .SingleOrDefault(e => e.Id == value.Id);
-                // TODO
-                //var old = Entity.Wohnung;
-                //Entity.Wohnung = value?.Entity;
-                //mWohnung = value;
-                //RaisePropertyChangedAuto(old, value?.Entity);
+                mWohnung = Wohnungen.SingleOrDefault(e => e.Id == value?.Id);
+                var old = Entity.Wohnung;
+                Entity.Wohnung = value?.Entity;
+                mWohnung = value;
+                RaisePropertyChangedAuto(old, value?.Entity);
             }
         }
 
@@ -60,6 +59,17 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
             {
                 var old = Entity.Bezeichnung;
                 Entity.Bezeichnung = value;
+                RaisePropertyChangedAuto(old, value);
+            }
+        }
+
+        public double Betrag
+        {
+            get => Entity.Betrag;
+            set
+            {
+                var old = Entity.Betrag;
+                Entity.Betrag = value;
                 RaisePropertyChangedAuto(old, value);
             }
         }
@@ -80,8 +90,10 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
         {
             Entity = e;
 
-            Wohnungen = App.Walter.Wohnungen.Select(w => new WohnungListEntry(w)).ToList();
-            Wohnung = Wohnungen.First(); // TODO.Find(w => w.Id == e.WohnungId);
+            Wohnungen = App.Walter.Wohnungen
+                .Include(w => w.Adresse)
+                .Select(w => new WohnungListEntry(w)).ToList();
+            Wohnung = Wohnungen.Find(f => f.Id == e.Wohnung?.WohnungId);
 
             Personen = App.Walter.NatuerlichePersonen
                 .Where(w => w.isHandwerker)
@@ -109,6 +121,7 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
                 case nameof(Datum):
                 case nameof(Wohnung):
                 case nameof(Aussteller):
+                case nameof(Betrag):
                     break;
                 default:
                     return;

@@ -19,8 +19,8 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
         public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
         public ImmutableList<ErhaltungsaufwendungenListEntry> AllRelevant { get; set; }
 
-        private BetriebskostenRechnungenListEntry mSelectedAufwendung;
-        public BetriebskostenRechnungenListEntry SelectedAufwendung
+        private ErhaltungsaufwendungenListEntry mSelectedAufwendung;
+        public ErhaltungsaufwendungenListEntry SelectedAufwendung
         {
             get => mSelectedAufwendung;
             set
@@ -33,6 +33,8 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
         public ErhaltungsaufwendungenListViewModel()
         {
             AllRelevant = App.Walter.Erhaltungsaufwendungen
+                .Include(e => e.Wohnung)
+                .ThenInclude(w => w.Adresse)
                 .Select(w => new ErhaltungsaufwendungenListEntry(w))
                 .ToImmutableList();
 
@@ -45,6 +47,8 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
         public readonly Erhaltungsaufwendung Entity;
         public string Aussteller => App.Walter.FindPerson(Entity.AusstellerId).Bezeichnung;
         public int Id => Entity.ErhaltungsaufwendungId;
+        public string Wohnung => new WohnungListEntry(Entity.Wohnung).ToString();
+        public string BetragString => Entity.Betrag.ToString() + "€";
         public string Bezeichnung => Entity.Bezeichnung;
         public string DatumString => Entity.Datum.ToString("dd.MM.yyyy");
 

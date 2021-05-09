@@ -6,6 +6,7 @@ using Microsoft.Toolkit.Uwp.UI.Controls;
 using Deeplex.Saverwalter.App.ViewModels;
 using static Deeplex.Saverwalter.App.Utils.Elements;
 using System.Collections.Immutable;
+using Deeplex.Saverwalter.App.Views.Rechnungen;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -45,7 +46,7 @@ namespace Deeplex.Saverwalter.App.UserControls
         {
             if (ViewModel.SelectedAufwendung != null)
             {
-                // App.ViewModel.Navigate(typeof(ErhaltungsaufwendungenDetailPage), ViewModel.SelectedAufwendung.Id);
+                App.ViewModel.Navigate(typeof(ErhaltungsaufwendungenDetailPage), ViewModel.SelectedAufwendung.Id);
             }
         }
 
