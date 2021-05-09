@@ -22,8 +22,8 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
             TopBorder top() => new TopBorder() { Val = BorderValues.Single, Size = 4 };
 
             var table = new Table(new TableRow(
-                ContentHead("2050", "Ermittlung Ihrer Einheiten"),
-                ContentHead("1120", "Nutzungsintervall", JustificationValues.Center),
+                ContentHead("2000", "Ermittlung Ihrer Einheiten"),
+                ContentHead("1170", "Nutzungsintervall", JustificationValues.Center),
                 ContentHead("1200", "Tage", JustificationValues.Center),
                 ContentHead("630", "Ihr Anteil", JustificationValues.Center)));
 

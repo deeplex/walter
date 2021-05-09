@@ -40,6 +40,7 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
             // TODO apply sleeker format like for kalte Kosten for warme Kosten.
             if (b.Gruppen.Any(g => g.GesamtBetragWarm != 0 && g.BetragWarm != 0))
             {
+                new Break() { Type = BreakValues.Page }; // forth page...
                 body.Append(
                 Heading("Abrechnung der Nebenkosten (warme Nebenkosten)"));
                 foreach (var gruppe in b.Gruppen)

@@ -56,6 +56,7 @@ namespace Deeplex.Saverwalter.Model
             var AllgemeinWaermeZaehler = b.db.ZaehlerSet
                 .Include(g => g.Wohnung)
                 .Include(g => g.EinzelZaehler).ThenInclude(z => z.Staende)
+                .Include(g => g.AllgemeinZaehler).ThenInclude(z => z != null ? z.Staende : null)
                 .Where(g => g.WohnungId == b.Wohnung.WohnungId)
                 .Select(g => g.AllgemeinZaehler)
                 .Where(z => z.Typ == Zaehlertyp.Gas)
@@ -111,8 +112,8 @@ namespace Deeplex.Saverwalter.Model
             W = Ende(AllgWaermeZaehler, true).Sum(w => w.Stand) -
                 Beginn(AllgWaermeZaehler, true).Sum(w => w.Stand);
 
-            Q = AllgemeinEnde(AllgemeinWaermeZaehler, true).Sum(w => w.Stand) -
-                AllgemeinBeginn(AllgemeinWaermeZaehler, true).Sum(w => w.Stand);
+            Q = AllgemeinEnde(AllgemeinWaermeZaehler!, true).Sum(w => w.Stand) -
+                AllgemeinBeginn(AllgemeinWaermeZaehler!, true).Sum(w => w.Stand);
 
             Para9_2 = 2.5 * (V / Q) * (tw - 10); // TODO HeizkostenV §9
 
