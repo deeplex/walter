@@ -16,10 +16,10 @@ namespace Deeplex.Saverwalter.Print.FirstPage
 
             if (b.Gruppen.Any(g => g.GesamtBetragWarm != 0 && g.BetragWarm != 0))
             {
-                t += "Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses(warme Betriebskosten) " +
+                t += "Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses (warme Betriebskosten) " +
                 "werden gesondert berechnet, nach Verbrauch und Wohn -/ Nutzfläche auf die einzelnen Wohnungen " +
-                "umgelegt(= „Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der " +
-                "von Ihnen geleisteten Vorauszahlungen verrechnet.";
+                "umgelegt („Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der " +
+                "von Ihnen geleisteten Vorauszahlungen verrechnet. ";
             }
 
             t += "Bei bestehenden Mietrückständen ist das Ergebnis der Abrechnung " +

@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.Print.FirstPage
             {
                 body.Append(new Paragraph(
                     new Run(Font(),
-                    new Text("Wir empfehlen Ihnen die monatliche Mietzahlung um einen Betrag von " +
+                    new Text("Wir empfehlen Ihnen die monatliche Mietzahlung, um einen Betrag von " +
                     Euro(Anpassung) + " auf " + Euro(b.Gezahlt / 12 + Anpassung) + " anzupassen."))));
             }
 

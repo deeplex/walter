@@ -41,32 +41,33 @@ namespace Deeplex.Saverwalter.Print
             FirstPage.FirstPage.Fill(body, b);
             SecondPage.SecondPage.Fill(body, b);
             ThirdPage.ThirdPage.Fill(body, b);
-
-            bool MakeSpace(string path)
-            {
-                var ok = true;
-                if (File.Exists(path))
-                {
-                    var dirname = Path.GetDirectoryName(path);
-                    var filename = Path.GetFileNameWithoutExtension(path);
-                    var extension = Path.GetExtension(path);
-                    var newPath = Path.Combine(dirname, filename + ".old" + extension);
-                    ok = MakeSpace(newPath);
-                    try
-                    {
-                        File.Move(path, newPath);
-                    }
-                    catch
-                    {
-                        return false;
-                    }
-                }
-                return ok;
-            }
+            
             var ok = MakeSpace(filepath);
             if (ok)
             {
                 CreateWordDocument(filepath, body);
+            }
+            return ok;
+        }
+
+        public static bool MakeSpace(string path)
+        {
+            var ok = true;
+            if (File.Exists(path))
+            {
+                var dirname = Path.GetDirectoryName(path);
+                var filename = Path.GetFileNameWithoutExtension(path);
+                var extension = Path.GetExtension(path);
+                var newPath = Path.Combine(dirname, filename + ".old" + extension);
+                ok = MakeSpace(newPath);
+                try
+                {
+                    File.Move(path, newPath);
+                }
+                catch
+                {
+                    return false;
+                }
             }
             return ok;
         }

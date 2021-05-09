@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.Print.FirstPage
             {
                 if (m is NatuerlichePerson n)
                 {
-                    return (n.Anrede == Anrede.Herr ? "sehr geehrter Herr " :
+                    return r + (n.Anrede == Anrede.Herr ? "sehr geehrter Herr " :
                         n.Anrede == Anrede.Frau ? "sehr geehrte Frau " :
                         n.Vorname) + n.Nachname + ", ";
                 }
