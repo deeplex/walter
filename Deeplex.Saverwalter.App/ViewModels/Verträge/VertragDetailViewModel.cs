@@ -38,17 +38,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<int> BetriebskostenJahr
             = new ObservableProperty<int>();
 
-        // TODO Define setter
-        public DateTimeOffset lastBeginn
+        public string lastBeginn
         {
-            get => Versionen.Value.Last().Beginn;
+            get => Versionen.Value.Last().Beginn.ToString("dd.MM.yyyy");
         }
-        public DateTimeOffset? firstEnde
+        public string firstEnde
         {
-            get => Versionen.Value.First().Ende;
+            get => Versionen.Value.First().Ende is DateTimeOffset d ? d.ToString("dd.MM.yyyy") : "Offen";
         }
-        public int StartJahr => lastBeginn.Year;
-        public int EndeJahr => firstEnde?.Year ?? 9999;
+        public int StartJahr => Versionen.Value.Last().Beginn.Year;
+        public int EndeJahr => Versionen.Value.First().Ende?.Year ?? 9999;
 
         public VertragDetailViewModel() : this(new List<Vertrag>
             { new Vertrag { Beginn = DateTime.UtcNow.Date, } })

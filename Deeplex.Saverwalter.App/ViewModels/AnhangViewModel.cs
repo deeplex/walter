@@ -130,7 +130,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
         public AnhangListViewModel(Zaehlerstand a)
         {
-            Text.Value = a.Datum.ToString("dd.mm.yyyy") + ": " + a.Stand.ToString();
+            Text.Value = a.Datum.ToString("dd.MM.yyyy") + ": " + a.Stand.ToString();
             SetList(a, App.Walter.ZaehlerstandAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
                 await Files.SaveFilesToWalter(App.Walter.ZaehlerstandAnhaenge, a),

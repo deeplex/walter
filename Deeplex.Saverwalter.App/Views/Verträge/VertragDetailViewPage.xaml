@@ -23,13 +23,10 @@
         </DataTemplate>
 
         <DataTemplate x:Key="EndeGrid" x:DataType="vm:VertragDetailVersion">
-            <CalendarDatePicker
-                Date="{x:Bind Ende, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                Width="176"
+            <DatePicker
+                SelectedDate="{x:Bind Ende, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 IsEnabled="True"
-                Language="de"
-                PlaceholderText="Offen"
-                DateFormat="{}{day.integer}. {month.full} {year.full}"/>
+                Language="de"/>
         </DataTemplate>
     </Page.Resources>
 
@@ -37,24 +34,18 @@
         <StackPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Laufzeit:" Margin="20,50,0,0" Style="{StaticResource Labels}"/>
-                <CalendarDatePicker
-                    Header="Beginn"
-                    IsEnabled="False"                
-                    Margin="20,20,0,0"
-                    Date="{x:Bind ViewModel.lastBeginn, Mode=OneWay}"
-                    Width="190"
-                    Language="de"
-                    PlaceholderText="Wähle ein Datum"
-                    DateFormat="{}{day.integer}. {month.full} {year.full}"/>
-                <CalendarDatePicker
-                    Header="Ende"
-                    IsEnabled="False"
-                    Margin="20,20,0,0"
-                    Width="190"
-                    PlaceholderText="Offen"
-                    Language="de"
-                    Date="{x:Bind ViewModel.firstEnde, Mode=OneWay}"
-                    DateFormat="{}{day.integer}. {month.full} {year.full}" />
+                <TextBlock
+                    VerticalAlignment="Bottom"
+                    Margin="20,20,0,7"
+                    Text="{x:Bind ViewModel.lastBeginn, Mode=OneWay}" />
+                <TextBlock
+                    VerticalAlignment="Bottom"
+                    Margin="20,20,0,7"
+                    Text=" - "/>
+                <TextBlock
+                    VerticalAlignment="Bottom"
+                    Margin="20,20,20,7"
+                    Text="{x:Bind ViewModel.firstEnde, Mode=OneWay}" />
                 <Button
                     Margin="0,43,0,0"
                     Click="RemoveDate_Click">
@@ -110,20 +101,17 @@
                 </uc:ExpanderControl.MainContent>
             </uc:ExpanderControl>
 
-            <uc:ExpanderControl Header="Versionen">
+            <uc:ExpanderControl IsExpanded="True" Header="Versionen">
                 <uc:ExpanderControl.Bonus>
                     <Button Background="Transparent">
                         <SymbolIcon Symbol="Add" />
                         <Button.Flyout>
                             <Flyout>
                                 <StackPanel Orientation="Horizontal">
-                                    <CalendarDatePicker
+                                    <DatePicker
                                         Header="Beginn"
-                                        MinDate="{x:Bind ViewModel.Beginn, Mode=TwoWay}"
                                         Language="de"
-                                        DateFormat="{}{day.integer}. {month.full} {year.full}"
-                                        PlaceholderText="Datum hinzufügen"
-                                        Date="{x:Bind ViewModel.AddVersionDatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                        SelectedDate="{x:Bind ViewModel.AddVersionDatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                     <Button
                                         VerticalAlignment="Bottom"
                                         Command="{x:Bind ViewModel.AddVersion}"
