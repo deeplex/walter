@@ -59,7 +59,7 @@ namespace Deeplex.Saverwalter.App.Utils
         {
             Typ = t;
             index = (int)t;
-            Beschreibung = t.ToDescriptionString();
+            Beschreibung = t.ToDescriptionString() + ((int)t % 2 == 0 ? " (kalt)" : " (warm)");
         }
     }
 
