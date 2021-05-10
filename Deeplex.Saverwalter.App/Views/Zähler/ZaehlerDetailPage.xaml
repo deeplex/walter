@@ -37,13 +37,13 @@
                 </Button>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
-                <!--TODO-->
-                <ComboBox
-                    IsEditable="True"
-                    Margin="20,20,0,0" Header="Allgemeinzähler"
-                    Width="380" ItemsSource="{x:Bind ViewModel.EinzelZaehler}"
-                    DisplayMemberPath="Kennnummer"
-                    SelectedValue="{x:Bind ViewModel.AllgemeinZaehler, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                <uc:ComboControl
+                    PlaceholderText="Verbundener Allgemeinzähler..."
+                    Margin="20,20,0,0"
+                    Header="Allgemeinzähler"
+                    Width="380"
+                    ItemsSource="{x:Bind ViewModel.EinzelZaehler}"
+                    SelectedItem="{x:Bind ViewModel.AllgemeinZaehler, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                 <Button
                     Command="{x:Bind ViewModel.DeleteAllgemeinZaehler}"
                     VerticalAlignment="Bottom">
