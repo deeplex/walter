@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class BetriebskostenrechnungDetailViewModel : BindableBase
     {
-        private Betriebskostenrechnung Entity { get; }
+        public Betriebskostenrechnung Entity { get; }
         public int Id => Entity.BetriebskostenrechnungId;
 
         public void selfDestruct()
