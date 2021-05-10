@@ -49,10 +49,17 @@ namespace Deeplex.Saverwalter.App.Views
 
         private async void SelfDestruct(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            if (await App.ViewModel.Confirmation())
+            try
             {
-                ViewModel.selfDestruct();
-                Frame.GoBack();
+                if (await App.ViewModel.Confirmation())
+                {
+                    ViewModel.selfDestruct();
+                    Frame.GoBack();
+                }
+            }
+            catch
+            {
+                
             }
         }
     }

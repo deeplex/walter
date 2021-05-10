@@ -3,6 +3,7 @@ using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -21,20 +22,24 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
             App.SaveWalter();
         }
 
-        public List<KontaktListEntry> Personen { get; }
+        public ObservableProperty<ImmutableList<KontaktListEntry>> Personen
+            = new ObservableProperty<ImmutableList<KontaktListEntry>>();
         private KontaktListEntry mAussteller;
         public KontaktListEntry Aussteller
         {
             get => mAussteller;
             set
             {
-                mAussteller = Personen
+                mAussteller = Personen.Value
                     .SingleOrDefault(e => e.Guid == value?.Guid);
                 var old = Entity.AusstellerId;
                 Entity.AusstellerId = value?.Guid ?? Guid.Empty;
                 RaisePropertyChangedAuto(old, value?.Guid);
             }
         }
+
+        public ObservableProperty<string> QuickPerson
+            = new ObservableProperty<string>();
 
         public List<WohnungListEntry> Wohnungen { get; }
         private WohnungListEntry mWohnung;
@@ -95,7 +100,7 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
                 .Select(w => new WohnungListEntry(w)).ToList();
             Wohnung = Wohnungen.Find(f => f.Id == e.Wohnung?.WohnungId);
 
-            Personen = App.Walter.NatuerlichePersonen
+            Personen.Value = App.Walter.NatuerlichePersonen
                 .Where(w => w.isHandwerker)
                 .Select(k => new KontaktListEntry(k))
                 .ToList()
@@ -103,8 +108,8 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
                     .Where(w => w.isHandwerker)
                     .Select(k => new KontaktListEntry(k))
                     .ToList())
-                    .ToList();
-            Aussteller = Personen.SingleOrDefault(s => s.Guid == e.AusstellerId);
+                    .ToImmutableList();
+            Aussteller = Personen.Value.SingleOrDefault(s => s.Guid == e.AusstellerId);
 
             PropertyChanged += OnUpdate;
             AttachFile = new AsyncRelayCommand(async _ =>
