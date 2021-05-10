@@ -22,36 +22,17 @@ namespace Deeplex.Saverwalter.App.ViewModels
             App.SaveWalter();
         }
 
-        public ImmutableList<WohnungDetailVermieter> AlleVermieter =>
-            App.Walter.JuristischePersonen.ToImmutableList()
-                .Where(j => j.isVermieter == true).Select(j => new WohnungDetailVermieter(j))
-                .Concat(App.Walter.NatuerlichePersonen
-                    .Where(n => n.isVermieter == true).Select(n => new WohnungDetailVermieter(n)))
-                .ToImmutableList();
+        public ImmutableList<KontaktListEntry> AlleVermieter;
 
-        private WohnungDetailVermieter mBesitzer;
-        public WohnungDetailVermieter Besitzer
+        private KontaktListEntry mBesitzer;
+        public KontaktListEntry Besitzer
         {
             get => mBesitzer;
             set
             {
-                Entity.BesitzerId = value == null ? Guid.Empty : value.Id;
+                Entity.BesitzerId = value == null ? Guid.Empty : value.Guid;
                 mBesitzer = value;
                 RaisePropertyChangedAuto();
-            }
-        }
-
-        public class WohnungDetailVermieter
-        {
-            public Guid Id { get; set; }
-            public string Bezeichnung { get; }
-
-            public WohnungDetailVermieter(Guid g) : this(App.Walter.FindPerson(g)) { }
-
-            public WohnungDetailVermieter(IPerson p)
-            {
-                Id = p.PersonId;
-                Bezeichnung = p.Bezeichnung;
             }
         }
 
@@ -119,9 +100,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Entity = w;
 
+            AlleVermieter = App.Walter.JuristischePersonen.ToImmutableList()
+                .Where(j => j.isVermieter == true).Select(j => new KontaktListEntry(j))
+                .Concat(App.Walter.NatuerlichePersonen
+                    .Where(n => n.isVermieter == true).Select(n => new KontaktListEntry(n)))
+                .ToImmutableList();
+
             if (w.BesitzerId != Guid.Empty)
             {
-                Besitzer = new WohnungDetailVermieter(w.BesitzerId);
+                Besitzer = AlleVermieter.SingleOrDefault(e => e.Guid == w.BesitzerId);
             }
 
             AttachFile = new AsyncRelayCommand(async _ =>

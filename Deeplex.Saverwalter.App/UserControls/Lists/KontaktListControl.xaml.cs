@@ -119,7 +119,7 @@ namespace Deeplex.Saverwalter.App.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var a = ((KontaktListEntry)((DataGrid)sender).SelectedItem).Entity;
+            var a = ((KontaktListEntry)((DataGrid)sender).SelectedItem)?.Entity;
             if (a is NatuerlichePerson n)
             {
                 App.ViewModel.ListAnhang.Value = new AnhangListViewModel(n);

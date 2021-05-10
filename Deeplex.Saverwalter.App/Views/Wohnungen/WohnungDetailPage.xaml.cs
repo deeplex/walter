@@ -59,13 +59,6 @@ namespace Deeplex.Saverwalter.App.Views
                 App.ViewModel.Navigate(typeof(BetriebskostenrechnungenDetailPage), vm);
             };
 
-
-            // ViewModel.AddNewCustomerCanceled += AddNewCustomerCanceled;
-            if (ViewModel.Besitzer != null) // TODO this is an ugly way to accomplish initial loading of Besitzer in GUI
-            {
-                BesitzerCombobox.SelectedIndex = ViewModel.AlleVermieter.FindIndex(v => v.Id == ViewModel.Besitzer.Id);
-            }
-
             App.ViewModel.Titel.Value = ViewModel.Anschrift + " — " + ViewModel.Bezeichnung;
             var Delete = new AppBarButton
             {
