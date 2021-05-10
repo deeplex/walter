@@ -37,10 +37,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public List<Zaehlertyp> Typen => Enums.Zaehlertypen;
         public List<WohnungListEntry> Wohnungen = new List<WohnungListEntry>();
 
-        public List<ZaehlerListEntry> EinzelZaehler => App.Walter.ZaehlerSet
-            .Where(z => z.ZaehlerId != Id)
-            .Select(z => new ZaehlerListEntry(z))
-            .ToList();
+        public List<ZaehlerListEntry> EinzelZaehler;
 
         private ZaehlerListEntry mAllgemeinZaehler;
         public ZaehlerListEntry AllgemeinZaehler
@@ -115,6 +112,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Include(w => w.Adresse)
                 .Select(w => new WohnungListEntry(w))
                 .ToList();
+
+             EinzelZaehler = App.Walter.ZaehlerSet
+                .Where(y => y.ZaehlerId != Id)
+                .Select(y => new ZaehlerListEntry(y))
+                .ToList();
+            AllgemeinZaehler = mAllgemeinZaehler = EinzelZaehler.SingleOrDefault(y => y.Id == z.AllgemeinZaehler?.ZaehlerId);
+
 
             if (mId != 0)
             {
