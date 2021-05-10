@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.App.ViewModels.Zähler;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 {
     public sealed class BetriebskostenrechnungDetailViewModel : BindableBase
     {
-        private Betriebskostenrechnung Entity { get; }
+        public Betriebskostenrechnung Entity { get; }
         public int Id => Entity.BetriebskostenrechnungId;
 
         public void selfDestruct()
@@ -24,33 +25,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public List<HKVO9Util> HKVO_P9_List = Enums.HKVO9;
         public List<UmlageSchluesselUtil> Schluessel_List = Enums.UmlageSchluessel;
-        public List<BetriebskostentypUtil> Typen_List = Enums.Betriebskostentyp;
-        public List<BetriebskostenrechnungAllgemeinZaehler> AllgemeinZaehler_List
-            = App.Walter.ZaehlerSet
-            .Select(a => new BetriebskostenrechnungAllgemeinZaehler(a))
-            .ToList();
+        public List<BetriebskostentypUtil> Typen_List;
+        public List<ZaehlerListEntry> AllgemeinZaehler_List;
 
-        public sealed class BetriebskostenrechnungAllgemeinZaehler
+        private ZaehlerListEntry mAllgemeinZaehler;
+        public ZaehlerListEntry AllgemeinZaehler
         {
-            public int Id { get; }
-            public string Kennnummer { get; }
-
-            public BetriebskostenrechnungAllgemeinZaehler(Zaehler a)
-            {
-                Id = a.ZaehlerId;
-                Kennnummer = a.Kennnummer;
-            }
-        }
-
-        public int AllgemeinZaehler
-        {
-            get => Entity?.Zaehler != null ?
-                AllgemeinZaehler_List.FindIndex(a => a.Id == Entity.Zaehler.ZaehlerId) : 0;
+            get => mAllgemeinZaehler;
             set
             {
-                // TODO yeah...
-                Entity.Zaehler = App.Walter.ZaehlerSet.Find(AllgemeinZaehler_List[value].Id);
-                RaisePropertyChangedAuto();
+                var old = mAllgemeinZaehler?.Id;
+                mAllgemeinZaehler = AllgemeinZaehler_List.FirstOrDefault(e => e.Id == value?.Id);
+                Entity.Zaehler = mAllgemeinZaehler?.Entity;
+                RaisePropertyChangedAuto(old, value?.Id);
             }
         }
 
@@ -90,15 +77,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public string TypString => Typen_List[Typ].Beschreibung;
-        public int Typ
+        private BetriebskostentypUtil mTyp;
+        public BetriebskostentypUtil Typ
         {
-            get => Typen_List.FindIndex(i => i.index == (Entity != null ? (int)Entity?.Typ : 0));
+            get => mTyp;
             set
             {
-                // TODO yeah...
-                Entity.Typ = (Betriebskostentyp)Typen_List[value].index;
-                RaisePropertyChangedAuto();
+                mTyp = value;
+                var old = value.Typ;
+                Entity.Typ = value.Typ;
+                RaisePropertyChangedAuto(old, value.Typ);
             }
         }
 
@@ -188,6 +176,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Entity = r;
             
             Wohnungen = r.Gruppen.Select(g => g.Wohnung).ToList();
+
+            AllgemeinZaehler_List = App.Walter.ZaehlerSet
+                .Select(a => new ZaehlerListEntry(a))
+                .ToList();
+            AllgemeinZaehler = AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Zaehler?.ZaehlerId);
+
+            Typen_List = Enums.Betriebskostentyp;
+            Typ = Typen_List.FirstOrDefault(e => e.Typ == r.Typ);
 
             AttachFile = new AsyncRelayCommand(async _ =>
                 /* TODO */await Task.FromResult<object>(null), _ => false);

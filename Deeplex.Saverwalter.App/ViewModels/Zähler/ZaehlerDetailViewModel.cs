@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.App.ViewModels.Zähler;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
@@ -36,17 +37,18 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public List<Zaehlertyp> Typen => Enums.Zaehlertypen;
         public List<WohnungListEntry> Wohnungen = new List<WohnungListEntry>();
 
-        public List<Zaehler> EinzelZaehler =>
-            App.Walter.ZaehlerSet.Where(z => z.ZaehlerId != Id).ToList();
+        public List<ZaehlerListEntry> EinzelZaehler;
 
-        public Zaehler AllgemeinZaehler
+        private ZaehlerListEntry mAllgemeinZaehler;
+        public ZaehlerListEntry AllgemeinZaehler
         {
-            get => Entity.AllgemeinZaehler;
+            get => mAllgemeinZaehler;
             set
             {
-                var old = Entity.AllgemeinZaehler;
-                Entity.AllgemeinZaehler = value;
-                RaisePropertyChangedAuto(old, value);
+                var old = Entity.AllgemeinZaehler?.ZaehlerId;
+                mAllgemeinZaehler = EinzelZaehler.SingleOrDefault(z => z.Id == value?.Id);
+                Entity.AllgemeinZaehler = mAllgemeinZaehler?.Entity;
+                RaisePropertyChangedAuto(old, mAllgemeinZaehler?.Id);
             }
         }
 
@@ -110,6 +112,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Include(w => w.Adresse)
                 .Select(w => new WohnungListEntry(w))
                 .ToList();
+
+             EinzelZaehler = App.Walter.ZaehlerSet
+                .Where(y => y.ZaehlerId != Id)
+                .Select(y => new ZaehlerListEntry(y))
+                .ToList();
+            AllgemeinZaehler = mAllgemeinZaehler = EinzelZaehler.SingleOrDefault(y => y.Id == z.AllgemeinZaehler?.ZaehlerId);
+
 
             if (mId != 0)
             {

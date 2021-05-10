@@ -54,10 +54,9 @@
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Wohnung:" Style="{StaticResource Labels}"/>
-                <ComboBox
-                    x:Name="Testibus"
+                <uc:ComboControl
                     Margin="20,20,0,0"
-                    MinWidth="400"
+                    Width="400"
                     ItemsSource="{x:Bind ViewModel.AlleWohnungen}"
                     PlaceholderText="Wohnung hinzufügen"
                     SelectedItem="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
@@ -68,7 +67,7 @@
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Ansprechpartner: " Style="{StaticResource Labels}"/>
-                <ComboBox
+                <uc:ComboControl
                     Margin="20,15,0,0"
                     MinWidth="200"
                     SelectedItem="{x:Bind ViewModel.Ansprechpartner, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
@@ -85,10 +84,15 @@
                             <SymbolIcon Symbol="Add" />
                             <Button.Flyout>
                                 <Flyout x:Name="AddMieter_Flyout">
-                                    <ComboBox
-                                        SelectionChanged="AddMieter_SelectionChanged"
-                                        PlaceholderText="Mieter hinzufügen"
-                                        ItemsSource="{x:Bind ViewModel.AlleMieter.Value, Mode=OneWay}"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <uc:ComboControl
+                                            PlaceholderText="Mieter hinzufügen"
+                                            SelectedItem="{x:Bind ViewModel.AddMieter.Value, Mode=TwoWay}"
+                                            ItemsSource="{x:Bind ViewModel.AlleMieter.Value, Mode=OneWay}"/>
+                                        <Button Margin="10,0,0,0" Click="AddMieter_Click">
+                                            <SymbolIcon Symbol="Add" />
+                                        </Button>
+                                    </StackPanel>
                                 </Flyout>
                             </Button.Flyout>
                         </Button>

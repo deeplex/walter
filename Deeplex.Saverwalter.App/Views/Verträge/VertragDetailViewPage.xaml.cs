@@ -37,15 +37,7 @@ namespace Deeplex.Saverwalter.App.Views
             }
 
             App.ViewModel.Titel.Value = "Vertragdetails";
-
-            var Primary = new ICommandBarElement[] {
-                BetriebskostenAbrechnungsButton(),
-                new AppBarButton
-                {
-                    Icon = new SymbolIcon(Symbol.Attach),
-                    Command = ViewModel.AttachFile,
-                }
-            };
+            App.ViewModel.DetailAnhang.Value = new AnhangListViewModel(ViewModel.Entity);
 
             var Delete = new AppBarButton
             {
@@ -54,12 +46,9 @@ namespace Deeplex.Saverwalter.App.Views
             };
             Delete.Click += Delete_Click;
 
-            var Secondary = new ICommandBarElement[]
-            {
-                Delete,
-            };
-
-            App.ViewModel.RefillCommandContainer(Primary, Secondary);
+            App.ViewModel.RefillCommandContainer(
+                new ICommandBarElement[] {},
+                new ICommandBarElement[] { Delete });
 
             base.OnNavigatedTo(e);
         }
@@ -133,11 +122,10 @@ namespace Deeplex.Saverwalter.App.Views
             App.ViewModel.ShowAlert(text, 5000);
         }
 
-        private void AddMieter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void AddMieter_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            if (((KontaktListEntry)((ComboBox)sender).SelectedItem)?.Guid is Guid guid)
+            if (ViewModel.AddMieter.Value?.Guid is Guid guid)
             {
-                ((ComboBox)sender).SelectedItem = null;
                 ViewModel.Mieter.Value = ViewModel.Mieter.Value.Add(new KontaktListEntry(guid));
                 AddMieter_Flyout.Hide();
                 ViewModel.UpdateMieterList();

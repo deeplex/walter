@@ -23,9 +23,10 @@
                     SelectedItem="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
-                <ComboBox
-                    Margin="20,20,0,0" Header="Wohnung"
-                    Width="420"
+                <uc:ComboControl
+                    Margin="20,20,0,0"
+                    Header="Wohnung"
+                    Width="380"
                     ItemsSource="{x:Bind ViewModel.Wohnungen}"
                     PlaceholderText="Wohnung hinzufügen"
                     SelectedItem="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
@@ -36,11 +37,13 @@
                 </Button>
             </mtuuc:WrapPanel>
             <mtuuc:WrapPanel Orientation="Horizontal">
-                <ComboBox
-                    Margin="20,20,0,0" Header="Allgemeinzähler"
-                    Width="420" ItemsSource="{x:Bind ViewModel.EinzelZaehler}"
-                    DisplayMemberPath="Kennnummer"
-                    SelectedValue="{x:Bind ViewModel.AllgemeinZaehler, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                <uc:ComboControl
+                    PlaceholderText="Verbundener Allgemeinzähler..."
+                    Margin="20,20,0,0"
+                    Header="Allgemeinzähler"
+                    Width="380"
+                    ItemsSource="{x:Bind ViewModel.EinzelZaehler}"
+                    SelectedItem="{x:Bind ViewModel.AllgemeinZaehler, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                 <Button
                     Command="{x:Bind ViewModel.DeleteAllgemeinZaehler}"
                     VerticalAlignment="Bottom">

@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -20,12 +21,13 @@
         <StackPanel
             Margin="0,10,0,0"
             Orientation="Horizontal">
-            <ComboBox
+            <!--TODO-->
+            <uc:ComboControl
                 ItemsSource="{x:Bind ViewModel.Typen_List}"
-                SelectedIndex="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                DisplayMemberPath="Beschreibung"
+                SelectedItem="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Kostentyp"/>
-            <ComboBox Margin="10,0,0,0"
+            <ComboBox
+                Margin="10,0,0,0"
                 ItemsSource="{x:Bind ViewModel.Schluessel_List}"
                 SelectedIndex="{x:Bind ViewModel.Schluessel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 DisplayMemberPath="Beschreibung"
@@ -39,8 +41,9 @@
         <StackPanel
             Margin="0,10,0,0"
             Orientation="Horizontal">
-            <CalendarDatePicker
-                Date="{x:Bind ViewModel.Datum}"
+            <DatePicker
+                Language="de"
+                SelectedDate="{x:Bind ViewModel.Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                 Header="Datum"/>
             <muxc:NumberBox
                 Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"

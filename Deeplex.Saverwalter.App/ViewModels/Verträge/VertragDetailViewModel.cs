@@ -14,19 +14,20 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public Guid guid { get; }
         public ObservableProperty<ImmutableList<KontaktListEntry>> AlleMieter
             = new ObservableProperty<ImmutableList<KontaktListEntry>>();
+        public ObservableProperty<KontaktListEntry> AddMieter = new ObservableProperty<KontaktListEntry>();
 
         public void UpdateMieterList()
         {
-            AlleMieter.Value = App.Walter.JuristischePersonen.ToImmutableList()
+            AlleMieter.Value = App.Walter.JuristischePersonen
+                    .ToImmutableList()
                     .Where(j => j.isMieter == true).Select(j => new KontaktListEntry(j))
                     .Concat(App.Walter.NatuerlichePersonen
                         .Where(n => n.isMieter == true).Select(n => new KontaktListEntry(n)))
-                    .Where(p => !Mieter.Value.Exists(e => p.Id == e.Id))
+                    .Where(p => !Mieter.Value.Exists(e => p.Guid == e.Guid))
                     .ToImmutableList();
         }
 
         public List<WohnungListEntry> AlleWohnungen = new List<WohnungListEntry>();
-
         public List<KontaktListEntry> AlleKontakte;
 
         public ObservableProperty<ImmutableList<VertragDetailVersion>> Versionen

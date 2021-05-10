@@ -42,6 +42,11 @@ namespace Deeplex.Saverwalter.App.ViewModels.Zähler
 
     public class ZaehlerListEntry
     {
+        public override string ToString()
+        {
+            return Kennnummer + ", " + Wohnung;
+        }
+
         public Zaehler Entity;
         private Zaehlerstand LastStand;
         public int Id => Entity.ZaehlerId;

@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.App.ViewModels.Rechnungen;
+﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.App.ViewModels.Rechnungen;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,6 +42,7 @@ namespace Deeplex.Saverwalter.App.Views.Rechnungen
             }
 
             App.ViewModel.Titel.Value = "Erhaltungsaufwendung";
+            App.ViewModel.DetailAnhang.Value = new AnhangListViewModel(ViewModel.Entity);
 
             var Delete = new AppBarButton
             {

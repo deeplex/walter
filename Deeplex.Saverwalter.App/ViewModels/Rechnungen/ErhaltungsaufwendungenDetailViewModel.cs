@@ -132,7 +132,7 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
                     return;
             }
 
-            if (Bezeichnung == "" || Bezeichnung == null || Entity.Datum == null)
+            if (Bezeichnung == "" || Bezeichnung == null || Datum == null || Wohnung == null || Aussteller == null)
             {
                 return;
             }
