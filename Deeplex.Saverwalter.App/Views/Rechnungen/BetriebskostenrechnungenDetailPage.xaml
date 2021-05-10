@@ -22,11 +22,9 @@
             Margin="0,10,0,0"
             Orientation="Horizontal">
             <!--TODO-->
-            <ComboBox
-                IsEditable="True"
+            <uc:ComboControl
                 ItemsSource="{x:Bind ViewModel.Typen_List}"
-                SelectedIndex="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                DisplayMemberPath="Beschreibung"
+                SelectedItem="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Kostentyp"/>
             <ComboBox
                 Margin="10,0,0,0"
@@ -43,7 +41,8 @@
         <StackPanel
             Margin="0,10,0,0"
             Orientation="Horizontal">
-            <CalendarDatePicker
+            <DatePicker
+                Language="de"
                 Date="{x:Bind ViewModel.Datum}"
                 Header="Datum"/>
             <muxc:NumberBox

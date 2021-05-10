@@ -52,14 +52,17 @@ namespace Deeplex.Saverwalter.App.Utils
 
     public sealed class BetriebskostentypUtil
     {
+        public override string ToString()
+        {
+            return Typ.ToDescriptionString() + ((int)Typ % 2 == 0 ? " (kalt)" : " (warm)");
+        }
+
         public Betriebskostentyp Typ { get; }
         public int index { get; }
-        public string Beschreibung { get; }
         public BetriebskostentypUtil(Betriebskostentyp t)
         {
             Typ = t;
             index = (int)t;
-            Beschreibung = t.ToDescriptionString() + ((int)t % 2 == 0 ? " (kalt)" : " (warm)");
         }
     }
 
