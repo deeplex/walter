@@ -43,7 +43,7 @@
             Orientation="Horizontal">
             <DatePicker
                 Language="de"
-                Date="{x:Bind ViewModel.Datum}"
+                SelectedDate="{x:Bind ViewModel.Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                 Header="Datum"/>
             <muxc:NumberBox
                 Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
