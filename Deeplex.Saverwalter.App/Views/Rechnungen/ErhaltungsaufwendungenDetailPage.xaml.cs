@@ -73,5 +73,29 @@ namespace Deeplex.Saverwalter.App.Views.Rechnungen
                 Frame.GoBack();
             }
         }
+
+        private void AddQuickPerson_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.QuickPerson.Value != "" && ViewModel.QuickPerson.Value != null)
+            {
+                var j = new Model.JuristischePerson()
+                {
+                    Bezeichnung = ViewModel.QuickPerson.Value,
+                    isHandwerker = true,
+                };
+                App.Walter.JuristischePersonen.Add(j);
+                App.SaveWalter();
+
+                var kl = new ViewModels.KontaktListEntry(j);
+                ViewModel.Personen.Value = ViewModel.Personen.Value.Add(kl);
+                ViewModel.Aussteller = kl;
+                ViewModel.QuickPerson.Value = "";
+
+                if (QuickPersonFlyout.Flyout is Flyout f)
+                {
+                    f.Hide();
+                }
+            }
+        }
     }
 }

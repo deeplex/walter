@@ -27,7 +27,24 @@
             SelectedItem="{x:Bind ViewModel.Aussteller, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
             Margin="20,20,0,0"
             PlaceholderText="Aussteller..."
-            ItemsSource="{x:Bind ViewModel.Personen}"/>
+            MinWidth="300"
+            ItemsSource="{x:Bind ViewModel.Personen.Value, Mode=OneWay}"/>
+            <Button VerticalAlignment="Bottom" x:Name="QuickPersonFlyout">
+                <SymbolIcon Symbol="Add"/>
+                <Button.Flyout>
+                    <Flyout>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox
+                                Header="Bezeichnung der juristischen Person"
+                                Width="300"
+                                Text="{x:Bind ViewModel.QuickPerson.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            <Button VerticalAlignment="Bottom" Click="AddQuickPerson_Click">
+                                <SymbolIcon Symbol="Add"/>
+                            </Button>
+                        </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
         </mtuuc:WrapPanel>
         <mtuuc:WrapPanel Orientation="Horizontal">
             <DatePicker
