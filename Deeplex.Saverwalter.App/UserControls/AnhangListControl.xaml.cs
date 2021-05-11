@@ -48,6 +48,19 @@ namespace Deeplex.Saverwalter.App.UserControls
             typeof(AnhangListControl),
             new PropertyMetadata(null));
 
+        public bool List
+        {
+            get { return (bool)GetValue(ListProperty); }
+            set { SetValue(ListProperty, value); }
+        }
+
+        public static readonly DependencyProperty ListProperty
+            = DependencyProperty.Register(
+            "List",
+            typeof(bool),
+            typeof(AnhangListControl),
+            new PropertyMetadata(false));
+
         private async void Runterladen_Click(object sender, RoutedEventArgs e)
         {
             if (((FrameworkElement)sender).DataContext is AnhangListEntry a)

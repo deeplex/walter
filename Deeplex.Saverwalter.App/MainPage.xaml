@@ -111,7 +111,7 @@
                         <ScrollViewer>
                             <StackPanel>
                                 <uc:AnhangListControl AnhangViewModel="{x:Bind ViewModel.DetailAnhang.Value, Mode=OneWay}"/>
-                                <uc:AnhangListControl AnhangViewModel="{x:Bind ViewModel.ListAnhang.Value, Mode=OneWay}"/>
+                                <uc:AnhangListControl List="True"  AnhangViewModel="{x:Bind ViewModel.ListAnhang.Value, Mode=OneWay}"/>
                             </StackPanel>
                         </ScrollViewer>
                     </SplitView.Pane>

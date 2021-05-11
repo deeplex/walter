@@ -42,18 +42,18 @@ namespace Deeplex.Saverwalter.App.UserControls
             set { SetValue(MainContentProperty, value); }
         }
 
-        public static readonly DependencyProperty EntityProperty =
-            DependencyProperty.Register(
-            "Entity",
-            typeof(object),
-            typeof(FileDrop),
-            new PropertyMetadata(default(object)));
-
-        public object Entity
+        public bool List
         {
-            get { return GetValue(EntityProperty); }
-            set { SetValue(EntityProperty, value); }
+            get { return (bool)GetValue(ListProperty); }
+            set { SetValue(ListProperty, value); }
         }
+
+        public static readonly DependencyProperty ListProperty
+            = DependencyProperty.Register(
+            "List",
+            typeof(bool),
+            typeof(AnhangListControl),
+            new PropertyMetadata(false));
 
         private void Grid_DragOver(object sender, DragEventArgs e)
         {
@@ -87,10 +87,23 @@ namespace Deeplex.Saverwalter.App.UserControls
                     {
                         var a = await anhang;
                         App.Walter.Anhaenge.Add(a);
-                        App.ViewModel.DetailAnhang.Value.DropFile(a);
+                        if (List)
+                        {
+                            App.ViewModel.ListAnhang.Value.DropFile(a);
+                        }
+                        else
+                        {
+                            App.ViewModel.DetailAnhang.Value.DropFile(a);
+                        }
                     }
-
-                    App.ViewModel.DetailAnhang.Value.AddAnhang.Execute(null);
+                    if (List)
+                    {
+                        App.ViewModel.ListAnhang.Value.AddAnhang.Execute(null);
+                    }
+                    else
+                    {
+                        App.ViewModel.DetailAnhang.Value.AddAnhang.Execute(null);
+                    }
                 }
             }
 
