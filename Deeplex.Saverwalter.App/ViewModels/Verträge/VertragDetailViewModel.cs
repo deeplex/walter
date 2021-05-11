@@ -108,13 +108,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Versionen.Value = Versionen.Value.Skip(1).ToImmutableList();
                 App.SaveWalter();
             }, _ => true);
-
-
-            AttachFile = new AsyncRelayCommand(async _ =>
-                await Utils.Files.SaveFilesToWalter(App.Walter.VertragAnhaenge, guid), _ => true);
         }
 
-        public AsyncRelayCommand AttachFile { get; }
         public RelayCommand AddMiete { get; }
         public RelayCommand AddMietMinderung { get; }
         public RelayCommand AddVersion { get; }

@@ -78,14 +78,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 RaisePropertyChanged(nameof(LastMiete));
                 RaisePropertyChanged(nameof(HasLastMiete));
             }, _ => true);
-
-            AttachFile = new AsyncRelayCommand(async _ =>
-                await Utils.Files.SaveFilesToWalter(App.Walter.VertragAnhaenge, v.Key), _ => true);
         }
 
         public RelayCommand AddMiete { get; }
-        public AsyncRelayCommand AttachFile;
-
     }
 
     public class VertragVersionListViewModel : BindableBase

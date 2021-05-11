@@ -169,12 +169,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.Walter.Adressen.Remove(Entity);
                 App.SaveWalter();
             });
-
-            AttachFile = new AsyncRelayCommand(async _ =>
-                await Utils.Files.SaveFilesToWalter(App.Walter.AdresseAnhaenge, a), _ => true);
         }
 
-        public AsyncRelayCommand AttachFile;
         public RelayCommand Dispose;
 
         public static string Anschrift(int id) => Anschrift(App.Walter.Adressen.Find(id));

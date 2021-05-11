@@ -108,7 +108,5 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 RaisePropertyChangedAuto(old, value);
             }
         }
-
-        public AsyncRelayCommand AttachFile;
     }
 }

@@ -66,9 +66,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Anreden = Enums.Anreden;
 
             PropertyChanged += OnUpdate;
-
-            AttachFile = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.NatuerlichePersonAnhaenge, k), _ => true);
         }
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)

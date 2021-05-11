@@ -185,15 +185,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Typen_List = Enums.Betriebskostentyp;
             Typ = Typen_List.FirstOrDefault(e => e.Typ == r.Typ);
 
-            AttachFile = new AsyncRelayCommand(async _ =>
-                /* TODO */await Task.FromResult<object>(null), _ => false);
-
             dispose = new RelayCommand(_ => selfDestruct());
 
             PropertyChanged += OnUpdate;
-
-            AttachFile = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, r), _ => true);
 
         }
 
@@ -203,7 +197,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Entity.Datum = DateTime.Now;
         }
 
-        public AsyncRelayCommand AttachFile;
         public RelayCommand dispose;
 
         public void Update()

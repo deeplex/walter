@@ -30,6 +30,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ToImmutableList();
         }
 
+        public async Task PickFilesAndSaveToWalter<T, U>(DbSet<T> Set, U target) where T : class, IAnhang<U>, new()
+        {
+            var files = await Files.PickFiles();
+            Files.SaveFilesToWalter(Set, target, files);
+        }
+
         public AsyncRelayCommand AddAnhang;
 
         public AnhangListViewModel(Adresse a)
@@ -37,7 +43,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Text.Value = AdresseViewModel.Anschrift(a);
             SetList(a, App.Walter.AdresseAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.AdresseAnhaenge, a),
+                await PickFilesAndSaveToWalter(App.Walter.AdresseAnhaenge, a),
                 _ => true);
         }
         public AnhangListViewModel(Betriebskostenrechnung a)
@@ -45,7 +51,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Text.Value = a.BetreffendesJahr.ToString() + ", " + a.Schluessel.ToDescriptionString();
             SetList(a, App.Walter.BetriebskostenrechnungAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.BetriebskostenrechnungAnhaenge, a),
+                await PickFilesAndSaveToWalter(App.Walter.BetriebskostenrechnungAnhaenge, a),
                 _ => true);
         }
         public AnhangListViewModel(Erhaltungsaufwendung a)
@@ -53,7 +59,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Text.Value = a.Bezeichnung;
             SetList(a, App.Walter.ErhaltungsaufwendungAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.ErhaltungsaufwendungAnhaenge, a),
+                await PickFilesAndSaveToWalter(App.Walter.ErhaltungsaufwendungAnhaenge, a),
                 _ => true);
         }
         public AnhangListViewModel(Garage a)
@@ -61,7 +67,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Text.Value = AdresseViewModel.Anschrift(a.Adresse) + ", " + a.Kennung;
             SetList(a, App.Walter.GarageAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.GarageAnhaenge, a),
+                await PickFilesAndSaveToWalter(App.Walter.GarageAnhaenge, a),
                 _ => true);
         }
         public AnhangListViewModel(JuristischePerson a)
@@ -69,7 +75,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Text.Value = a.Bezeichnung;
             SetList(a, App.Walter.JuristischePersonAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.JuristischePersonAnhaenge, a),
+                await PickFilesAndSaveToWalter(App.Walter.JuristischePersonAnhaenge, a),
                 _ => true);
         }
         public AnhangListViewModel(Konto a)
@@ -77,7 +83,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Text.Value = a.Iban;
             SetList(a, App.Walter.KontoAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.KontoAnhaenge, a),
+                await PickFilesAndSaveToWalter(App.Walter.KontoAnhaenge, a),
                 _ => true);
         }
         public AnhangListViewModel(Miete a)
@@ -85,7 +91,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Text.Value = "Miete: " + a.BetreffenderMonat.ToString("mm.yyyy");
             SetList(a, App.Walter.MieteAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.MieteAnhaenge, a),
+                await PickFilesAndSaveToWalter(App.Walter.MieteAnhaenge, a),
                 _ => true);
         }
         public AnhangListViewModel(MietMinderung a)
@@ -93,7 +99,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Text.Value = "Mietminderung";
             SetList(a, App.Walter.MietMinderungAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.MietMinderungAnhaenge, a),
+                await PickFilesAndSaveToWalter(App.Walter.MietMinderungAnhaenge, a),
                 _ => true);
         }
         public AnhangListViewModel(NatuerlichePerson a)
@@ -101,7 +107,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Text.Value = a.Bezeichnung;
             SetList(a, App.Walter.NatuerlichePersonAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.NatuerlichePersonAnhaenge, a),
+                await PickFilesAndSaveToWalter(App.Walter.NatuerlichePersonAnhaenge, a),
                 _ => true);
         }
         public AnhangListViewModel(Vertrag a)
@@ -109,7 +115,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Text.Value = "Vertrag: " + AdresseViewModel.Anschrift(a.Wohnung) + ", " + a.Wohnung.Bezeichnung;
             SetList(a.VertragId, App.Walter.VertragAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.VertragAnhaenge, a.VertragId),
+                await PickFilesAndSaveToWalter(App.Walter.VertragAnhaenge, a.VertragId),
                 _ => true);
         }
         public AnhangListViewModel(Wohnung a)
@@ -117,7 +123,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Text.Value = AdresseViewModel.Anschrift(a) + ", " + a.Bezeichnung;
             SetList(a, App.Walter.WohnungAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.WohnungAnhaenge, a),
+                await PickFilesAndSaveToWalter(App.Walter.WohnungAnhaenge, a),
                 _ => true);
         }
         public AnhangListViewModel(Zaehler a)
@@ -125,7 +131,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Text.Value = a.Kennnummer;
             SetList(a, App.Walter.ZaehlerAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.ZaehlerAnhaenge, a),
+                await PickFilesAndSaveToWalter(App.Walter.ZaehlerAnhaenge, a),
                 _ => true);
         }
         public AnhangListViewModel(Zaehlerstand a)
@@ -133,7 +139,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Text.Value = a.Datum.ToString("dd.MM.yyyy") + ": " + a.Stand.ToString();
             SetList(a, App.Walter.ZaehlerstandAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.ZaehlerstandAnhaenge, a),
+                await PickFilesAndSaveToWalter(App.Walter.ZaehlerstandAnhaenge, a),
                 _ => true);
         }
     }

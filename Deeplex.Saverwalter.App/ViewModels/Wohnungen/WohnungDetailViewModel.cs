@@ -111,13 +111,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Besitzer = AlleVermieter.SingleOrDefault(e => e.Guid == w.BesitzerId);
             }
 
-            AttachFile = new AsyncRelayCommand(async _ =>
-                await Utils.Files.SaveFilesToWalter(App.Walter.WohnungAnhaenge, w), _ => true);
-
             PropertyChanged += OnUpdate;
         }
-
-        public AsyncRelayCommand AttachFile;
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
         {

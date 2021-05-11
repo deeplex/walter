@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -97,10 +98,8 @@ namespace Deeplex.Saverwalter.App.Utils
             return list;
         }
 
-        public static async Task SaveFilesToWalter<T, U>(Microsoft.EntityFrameworkCore.DbSet<T> Set, U target, params string[] filters) where T : class, IAnhang<U>, new()
+        public static void SaveFilesToWalter<T, U>(DbSet<T> Set, U target, List<Anhang> files) where T : class, IAnhang<U>, new()
         {
-            var files = await PickFiles(filters);
-
             foreach (var file in files)
             {
                 var attachment = new T
@@ -114,7 +113,7 @@ namespace Deeplex.Saverwalter.App.Utils
             App.SaveWalter();
         }
 
-        public static async Task<List<T>> PrepareFilesForWalter<T>(Microsoft.EntityFrameworkCore.DbSet<T> Set, params string[] filters) where T : class, IAnhang, new()
+        public static async Task<List<T>> PrepareFilesForWalter<T>(DbSet<T> Set, params string[] filters) where T : class, IAnhang, new()
             => (await PickFiles(filters))
                 .Select(file => new T
                 {

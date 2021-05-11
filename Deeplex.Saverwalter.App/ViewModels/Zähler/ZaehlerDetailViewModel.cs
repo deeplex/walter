@@ -128,13 +128,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             
             PropertyChanged += OnUpdate;
 
-            AttachFile = new AsyncRelayCommand(async _ =>
-                await Files.SaveFilesToWalter(App.Walter.ZaehlerAnhaenge, z), _ => true);
             DeleteAllgemeinZaehler = new RelayCommand(_ => AllgemeinZaehler = null);
             DeleteZaehlerWohnung = new RelayCommand(_ => Wohnung = null);
         }
 
-        public AsyncRelayCommand AttachFile;
         public RelayCommand DeleteAllgemeinZaehler;
         public RelayCommand DeleteZaehlerWohnung;
 

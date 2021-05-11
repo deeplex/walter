@@ -35,9 +35,6 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Id = j.JuristischePersonId;
 
             PropertyChanged += OnUpdate;
-
-            AttachFile = new AsyncRelayCommand(async _ =>
-                await Utils.Files.SaveFilesToWalter(App.Walter.JuristischePersonAnhaenge, j), _ => true);
         }
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
