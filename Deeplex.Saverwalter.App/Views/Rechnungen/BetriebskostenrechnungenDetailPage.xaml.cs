@@ -53,14 +53,9 @@ namespace Deeplex.Saverwalter.App.Views
             };
             Delete.Click += SelfDestruct;
 
-            App.ViewModel.RefillCommandContainer(new ICommandBarElement[]
-            {
-                new AppBarButton
-                {
-                    Icon = new SymbolIcon(Symbol.Attach),
-                    Command = ViewModel.AttachFile,
-                }
-            }, new ICommandBarElement[] { Delete });
+            App.ViewModel.RefillCommandContainer(
+                new ICommandBarElement[] {},
+                new ICommandBarElement[] { Delete });
 
             App.Walter.Adressen
                 .Include(i => i.Wohnungen)

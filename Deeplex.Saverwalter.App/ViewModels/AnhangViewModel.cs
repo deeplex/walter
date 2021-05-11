@@ -22,18 +22,39 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private void SetList<T>(T a, IQueryable<IAnhang<T>> set)
         {
+            var self = this;
+
             Liste.Value = set.Include(e => e.Anhang)
                 .ToList()
                 .Where(b => Equals(b.Target, a))
                 .ToList()
-                .Select(e => new AnhangListEntry(e))
+                .Select(e => new AnhangListEntry(e, self))
                 .ToImmutableList();
+        }
+
+        private ObservableProperty<ImmutableList<Anhang>> newFiles
+            = new ObservableProperty<ImmutableList<Anhang>>();
+
+        public void DropFile(Anhang a)
+        {
+            if (newFiles.Value == null)
+            {
+                newFiles.Value = ImmutableList.Create<Anhang>();
+            }
+            newFiles.Value = newFiles.Value.Add(a);
         }
 
         public async Task PickFilesAndSaveToWalter<T, U>(DbSet<T> Set, U target) where T : class, IAnhang<U>, new()
         {
-            var files = await Files.PickFiles();
-            Files.SaveFilesToWalter(Set, target, files);
+            if (newFiles.Value == null || newFiles.Value.Count == 0)
+            {
+                newFiles.Value = (await Files.PickFiles()).ToImmutableList();
+            }
+            Files.SaveFilesToWalter(Set, target, newFiles.Value.ToList());
+            var self = this;
+            newFiles.Value.ForEach(f =>
+                Liste.Value = Liste.Value.Add(new AnhangListEntry(f, self)));
+            newFiles.Value = newFiles.Value.Clear();
         }
 
         public AsyncRelayCommand AddAnhang;
@@ -42,7 +63,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Text.Value = AdresseViewModel.Anschrift(a);
             SetList(a, App.Walter.AdresseAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async _ =>
+            AddAnhang = new AsyncRelayCommand(async files =>
                 await PickFilesAndSaveToWalter(App.Walter.AdresseAnhaenge, a),
                 _ => true);
         }
@@ -50,7 +71,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Text.Value = a.BetreffendesJahr.ToString() + ", " + a.Schluessel.ToDescriptionString();
             SetList(a, App.Walter.BetriebskostenrechnungAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async _ =>
+            AddAnhang = new AsyncRelayCommand(async files =>
                 await PickFilesAndSaveToWalter(App.Walter.BetriebskostenrechnungAnhaenge, a),
                 _ => true);
         }
@@ -106,7 +127,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Text.Value = a.Bezeichnung;
             SetList(a, App.Walter.NatuerlichePersonAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async _ =>
+            AddAnhang = new AsyncRelayCommand(async files =>
                 await PickFilesAndSaveToWalter(App.Walter.NatuerlichePersonAnhaenge, a),
                 _ => true);
         }
@@ -149,10 +170,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public Anhang Entity { get; }
         public override string ToString() => Entity.FileName;
 
-        public AnhangListEntry(IAnhang a)
+        private AnhangListViewModel Container { get; }
+
+        public AnhangListEntry(Anhang a, AnhangListViewModel vm)
         {
-            Entity = a.Anhang;
+            Container = vm;
+            Entity = a;
+
         }
+        public AnhangListEntry(IAnhang a, AnhangListViewModel vm) : this(a.Anhang, vm) { }
 
         public async void DeleteFile()
         {
@@ -161,6 +187,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
             {
                 App.Walter.Anhaenge.Remove(Entity);
                 App.SaveWalter();
+            }
+            var deleted = Container.Liste.Value.Find(e => e.Entity.AnhangId == Entity.AnhangId);
+            if (deleted != null)
+            {
+                Container.Liste.Value = Container.Liste.Value.Remove(deleted);
             }
         }
 
