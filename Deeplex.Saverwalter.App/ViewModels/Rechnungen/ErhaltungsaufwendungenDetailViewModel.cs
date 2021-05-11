@@ -85,6 +85,17 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
             }
         }
 
+        public string Notiz
+        {
+            get => Entity.Notiz;
+            set
+            {
+                var old = Entity.Notiz;
+                Entity.Notiz = value;
+                RaisePropertyChangedAuto(old, value);
+            }
+        }
+
         public ErhaltungsaufwendungenDetailViewModel() : this(new Erhaltungsaufwendung()) { }
         public ErhaltungsaufwendungenDetailViewModel(Erhaltungsaufwendung e)
         {
@@ -122,6 +133,7 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
                 case nameof(Wohnung):
                 case nameof(Aussteller):
                 case nameof(Betrag):
+                case nameof(Notiz):
                     break;
                 default:
                     return;
