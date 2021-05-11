@@ -10,57 +10,61 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <StackPanel>
-        <TextBox
-            Margin="20,20,0,0"
-            Header="Bezeichnung"
-            Text="{x:Bind ViewModel.Bezeichnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-        <mtuuc:WrapPanel Orientation="Horizontal">
-            <uc:ComboControl
-               Header="Wohnung"
-                SelectedItem="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                Margin="20,20,0,0"
-                PlaceholderText="Wohnung..."
-                ItemsSource="{x:Bind ViewModel.Wohnungen}"/>
-        <uc:ComboControl
-            Header="Aussteller"
-            SelectedItem="{x:Bind ViewModel.Aussteller, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-            Margin="20,20,0,0"
-            PlaceholderText="Aussteller..."
-            MinWidth="300"
-            ItemsSource="{x:Bind ViewModel.Personen.Value, Mode=OneWay}"/>
-            <Button VerticalAlignment="Bottom" x:Name="QuickPersonFlyout">
-                <SymbolIcon Symbol="Add"/>
-                <Button.Flyout>
-                    <Flyout>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox
-                                Header="Bezeichnung der juristischen Person"
-                                Width="300"
-                                Text="{x:Bind ViewModel.QuickPerson.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                            <Button VerticalAlignment="Bottom" Click="AddQuickPerson_Click">
-                                <SymbolIcon Symbol="Add"/>
-                            </Button>
-                        </StackPanel>
-                    </Flyout>
-                </Button.Flyout>
-            </Button>
-        </mtuuc:WrapPanel>
-        <mtuuc:WrapPanel Orientation="Horizontal">
-            <DatePicker
-                Margin="20,20,0,0"
-                Header="Datum"
-                Date="{x:Bind ViewModel.Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-            <muxc:NumberBox
-                Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                Margin="20,20,0,0"
-                Header="Betrag"/>
-        </mtuuc:WrapPanel>
-        <StackPanel>
-            <TextBox
-                Margin="20,20,0,0"
-                Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                Header="Notiz"/>
-        </StackPanel>
-    </StackPanel>
+    <uc:FileDrop>
+        <uc:FileDrop.MainContent>
+            <StackPanel>
+                <TextBox
+                    Margin="20,20,0,0"
+                    Header="Bezeichnung"
+                    Text="{x:Bind ViewModel.Bezeichnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                <mtuuc:WrapPanel Orientation="Horizontal">
+                    <uc:ComboControl
+                        Header="Wohnung"
+                        SelectedItem="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Margin="20,20,0,0"
+                        PlaceholderText="Wohnung..."
+                        ItemsSource="{x:Bind ViewModel.Wohnungen}"/>
+                    <uc:ComboControl
+                        Header="Aussteller"
+                        SelectedItem="{x:Bind ViewModel.Aussteller, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Margin="20,20,0,0"
+                        PlaceholderText="Aussteller..."
+                        MinWidth="300"
+                        ItemsSource="{x:Bind ViewModel.Personen.Value, Mode=OneWay}"/>
+                    <Button VerticalAlignment="Bottom" x:Name="QuickPersonFlyout">
+                        <SymbolIcon Symbol="Add"/>
+                        <Button.Flyout>
+                            <Flyout>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox
+                                        Header="Bezeichnung der juristischen Person"
+                                        Width="300"
+                                        Text="{x:Bind ViewModel.QuickPerson.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                    <Button VerticalAlignment="Bottom" Click="AddQuickPerson_Click">
+                                        <SymbolIcon Symbol="Add"/>
+                                    </Button>
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                </mtuuc:WrapPanel>
+                <mtuuc:WrapPanel Orientation="Horizontal">
+                    <DatePicker
+                        Margin="20,20,0,0"
+                        Header="Datum"
+                        Date="{x:Bind ViewModel.Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                    <muxc:NumberBox
+                        Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Margin="20,20,0,0"
+                        Header="Betrag"/>
+                </mtuuc:WrapPanel>
+                <StackPanel>
+                    <TextBox
+                        Margin="20,20,0,0"
+                        Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Header="Notiz"/>
+                </StackPanel>
+            </StackPanel>
+        </uc:FileDrop.MainContent>
+    </uc:FileDrop>
 </Page>

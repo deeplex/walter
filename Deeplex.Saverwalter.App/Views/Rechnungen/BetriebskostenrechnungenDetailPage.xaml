@@ -9,69 +9,73 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <StackPanel>
-        <TextBlock Text="Betroffene Wohneinheiten:"/>
-        <muxc:TreeView
-            SelectionMode="Multiple"
-            x:Name="WohnungenTree"/>
-        <MenuFlyoutSeparator/>
-            <TextBox
-                Text="{x:Bind ViewModel.Beschreibung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                Header="Beschreibung"/>
-        <StackPanel
-            Margin="0,10,0,0"
-            Orientation="Horizontal">
-            <!--TODO-->
-            <uc:ComboControl
-                ItemsSource="{x:Bind ViewModel.Typen_List}"
-                SelectedItem="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                Header="Kostentyp"/>
-            <ComboBox
-                Margin="10,0,0,0"
-                ItemsSource="{x:Bind ViewModel.Schluessel_List}"
-                SelectedIndex="{x:Bind ViewModel.Schluessel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                DisplayMemberPath="Beschreibung"
-                Header="Umlageschlüssel"/>
-            <muxc:NumberBox
-                Value="{x:Bind ViewModel.BetreffendesJahr, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                Margin="10,0,0,0"
-                Header="Betr. Jahr"
-                SpinButtonPlacementMode="Inline"/>
-        </StackPanel>
-        <StackPanel
-            Margin="0,10,0,0"
-            Orientation="Horizontal">
-            <DatePicker
-                Language="de"
-                SelectedDate="{x:Bind ViewModel.Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                Header="Datum"/>
-            <muxc:NumberBox
-                Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                Margin="10,0,0,0"
-                Header="Betrag"/>
-        </StackPanel>
-        <StackPanel Margin="0,10,0,0" Visibility="{x:Bind ViewModel.isHeizung}" Orientation="Horizontal">
-            <Slider
-                Value="{x:Bind ViewModel.HKVO_P7, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                Width="100"
-                Minimum="50"
-                Maximum="70"
-                Header="HKVO§7"/>
-            <Slider
-                Value="{x:Bind ViewModel.HKVO_P8, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                Width="100"
-                Minimum="50"
-                Maximum="70"
-                Margin="10,0,0,0"
-                Header="HKVO§8"/>
-            <ComboBox
-                Margin="10,0,0,0"
-                Header="HKVO§9"/>
-        </StackPanel>
-        <StackPanel>
-            <TextBox
-                Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                Header="Notiz"/>
-        </StackPanel>
-    </StackPanel>
+    <uc:FileDrop>
+        <uc:FileDrop.MainContent>
+            <StackPanel>
+                <TextBlock Text="Betroffene Wohneinheiten:"/>
+                <muxc:TreeView
+                    SelectionMode="Multiple"
+                    x:Name="WohnungenTree"/>
+                <MenuFlyoutSeparator/>
+                <TextBox
+                    Text="{x:Bind ViewModel.Beschreibung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                    Header="Beschreibung"/>
+                <StackPanel
+                    Margin="0,10,0,0"
+                    Orientation="Horizontal">
+                    <!--TODO-->
+                    <uc:ComboControl
+                        ItemsSource="{x:Bind ViewModel.Typen_List}"
+                        SelectedItem="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Header="Kostentyp"/>
+                    <ComboBox
+                        Margin="10,0,0,0"
+                        ItemsSource="{x:Bind ViewModel.Schluessel_List}"
+                        SelectedIndex="{x:Bind ViewModel.Schluessel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        DisplayMemberPath="Beschreibung"
+                        Header="Umlageschlüssel"/>
+                    <muxc:NumberBox
+                        Value="{x:Bind ViewModel.BetreffendesJahr, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Margin="10,0,0,0"
+                        Header="Betr. Jahr"
+                        SpinButtonPlacementMode="Inline"/>
+                </StackPanel>
+                <StackPanel
+                    Margin="0,10,0,0"
+                    Orientation="Horizontal">
+                    <DatePicker
+                        Language="de"
+                        SelectedDate="{x:Bind ViewModel.Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Header="Datum"/>
+                    <muxc:NumberBox
+                        Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Margin="10,0,0,0"
+                        Header="Betrag"/>
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0" Visibility="{x:Bind ViewModel.isHeizung}" Orientation="Horizontal">
+                    <Slider
+                        Value="{x:Bind ViewModel.HKVO_P7, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Width="100"
+                        Minimum="50"
+                        Maximum="70"
+                        Header="HKVO§7"/>
+                    <Slider
+                        Value="{x:Bind ViewModel.HKVO_P8, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Width="100"
+                        Minimum="50"
+                        Maximum="70"
+                        Margin="10,0,0,0"
+                        Header="HKVO§8"/>
+                    <ComboBox
+                        Margin="10,0,0,0"
+                        Header="HKVO§9"/>
+                </StackPanel>
+                <StackPanel>
+                    <TextBox
+                        Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Header="Notiz"/>
+                </StackPanel>
+            </StackPanel>
+        </uc:FileDrop.MainContent>
+    </uc:FileDrop>
 </Page>

@@ -9,72 +9,76 @@
     xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <ScrollViewer>
-        <StackPanel>
-            <mtuuc:WrapPanel Orientation="Horizontal">
-                <TextBox
-                    Header="Kennnummer"
-                    Width="200"
-                    Style="{StaticResource Eintraege}"
-                    Text="{x:Bind ViewModel.Kennnummer, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                <ComboBox
-                    Margin="20,20,0,0" Header="Typ"
-                    Width="200" ItemsSource="{x:Bind ViewModel.Typen}"
-                    SelectedItem="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-            </mtuuc:WrapPanel>
-            <mtuuc:WrapPanel Orientation="Horizontal">
-                <uc:ComboControl
-                    Margin="20,20,0,0"
-                    Header="Wohnung"
-                    Width="380"
-                    ItemsSource="{x:Bind ViewModel.Wohnungen}"
-                    PlaceholderText="Wohnung hinzufügen"
-                    SelectedItem="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                <Button
-                    Command="{x:Bind ViewModel.DeleteZaehlerWohnung}"
-                    VerticalAlignment="Bottom">
-                    <SymbolIcon Symbol="Delete"/>
-                </Button>
-            </mtuuc:WrapPanel>
-            <mtuuc:WrapPanel Orientation="Horizontal">
-                <uc:ComboControl
-                    PlaceholderText="Verbundener Allgemeinzähler..."
-                    Margin="20,20,0,0"
-                    Header="Allgemeinzähler"
-                    Width="380"
-                    ItemsSource="{x:Bind ViewModel.EinzelZaehler}"
-                    SelectedItem="{x:Bind ViewModel.AllgemeinZaehler, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                <Button
-                    Command="{x:Bind ViewModel.DeleteAllgemeinZaehler}"
-                    VerticalAlignment="Bottom">
-                    <SymbolIcon Symbol="Delete"/>
-                </Button>
-            </mtuuc:WrapPanel>
-            <StackPanel>
-                <TextBox
-                    Margin="20,20,0,0"
-                    Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                    Header="Notiz"/>
-            </StackPanel>
+    <uc:FileDrop>
+        <uc:FileDrop.MainContent>
+            <ScrollViewer>
+                <StackPanel>
+                    <mtuuc:WrapPanel Orientation="Horizontal">
+                        <TextBox
+                            Header="Kennnummer"
+                            Width="200"
+                            Style="{StaticResource Eintraege}"
+                            Text="{x:Bind ViewModel.Kennnummer, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                        <ComboBox
+                            Margin="20,20,0,0" Header="Typ"
+                            Width="200" ItemsSource="{x:Bind ViewModel.Typen}"
+                            SelectedItem="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                    </mtuuc:WrapPanel>
+                    <mtuuc:WrapPanel Orientation="Horizontal">
+                        <uc:ComboControl
+                            Margin="20,20,0,0"
+                            Header="Wohnung"
+                            Width="380"
+                            ItemsSource="{x:Bind ViewModel.Wohnungen}"
+                            PlaceholderText="Wohnung hinzufügen"
+                            SelectedItem="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                        <Button
+                            Command="{x:Bind ViewModel.DeleteZaehlerWohnung}"
+                            VerticalAlignment="Bottom">
+                            <SymbolIcon Symbol="Delete"/>
+                        </Button>
+                    </mtuuc:WrapPanel>
+                    <mtuuc:WrapPanel Orientation="Horizontal">
+                        <uc:ComboControl
+                            PlaceholderText="Verbundener Allgemeinzähler..."
+                            Margin="20,20,0,0"
+                            Header="Allgemeinzähler"
+                            Width="380"
+                            ItemsSource="{x:Bind ViewModel.EinzelZaehler}"
+                            SelectedItem="{x:Bind ViewModel.AllgemeinZaehler, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                        <Button
+                            Command="{x:Bind ViewModel.DeleteAllgemeinZaehler}"
+                            VerticalAlignment="Bottom">
+                            <SymbolIcon Symbol="Delete"/>
+                        </Button>
+                    </mtuuc:WrapPanel>
+                    <StackPanel>
+                        <TextBox
+                            Margin="20,20,0,0"
+                            Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Header="Notiz"/>
+                    </StackPanel>
 
-            <StackPanel Margin="0,20,0,0" Visibility="{x:Bind ViewModel.Initialized, Mode=OneWay}">
-                <uc:ExpanderControl IsExpanded="True" Header="Zählerstände">
-                    <uc:ExpanderControl.Bonus>
-                        <uc:AddZaehlerstandControl ZaehlerstandListViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" />
-                    </uc:ExpanderControl.Bonus>
-                    <uc:ExpanderControl.MainContent>
-                        <uc:ZaehlerstandListControl ZaehlerstandListViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" />
-                    </uc:ExpanderControl.MainContent>
-                </uc:ExpanderControl>
-            </StackPanel>
+                    <StackPanel Margin="0,20,0,0" Visibility="{x:Bind ViewModel.Initialized, Mode=OneWay}">
+                        <uc:ExpanderControl IsExpanded="True" Header="Zählerstände">
+                            <uc:ExpanderControl.Bonus>
+                                <uc:AddZaehlerstandControl ZaehlerstandListViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" />
+                            </uc:ExpanderControl.Bonus>
+                            <uc:ExpanderControl.MainContent>
+                                <uc:ZaehlerstandListControl ZaehlerstandListViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" />
+                            </uc:ExpanderControl.MainContent>
+                        </uc:ExpanderControl>
+                    </StackPanel>
 
-            <StackPanel Visibility="{x:Bind ViewModel.Initialized, Mode=OneWay}">
-                <uc:ExpanderControl Header="Einzelzähler">
-                    <uc:ExpanderControl.MainContent>
-                        <uc:ZaehlerListControl ZaehlerId="{x:Bind ViewModel.Id, Mode=OneWay}"/>
-                    </uc:ExpanderControl.MainContent>
-                </uc:ExpanderControl>
-            </StackPanel>
-        </StackPanel>
-    </ScrollViewer>
+                    <StackPanel Visibility="{x:Bind ViewModel.Initialized, Mode=OneWay}">
+                        <uc:ExpanderControl Header="Einzelzähler">
+                            <uc:ExpanderControl.MainContent>
+                                <uc:ZaehlerListControl ZaehlerId="{x:Bind ViewModel.Id, Mode=OneWay}"/>
+                            </uc:ExpanderControl.MainContent>
+                        </uc:ExpanderControl>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </uc:FileDrop.MainContent>
+    </uc:FileDrop>
 </Page>

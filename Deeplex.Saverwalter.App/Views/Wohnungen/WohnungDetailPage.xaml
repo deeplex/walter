@@ -9,74 +9,80 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <ScrollViewer>
-        <StackPanel>
-            <RelativePanel>
-                <!--TODO Insert image -->
-                <Grid
-                    x:Name="ScrollHeader"
-                    HorizontalAlignment="Stretch"
-                    RelativePanel.AlignRightWithPanel="True"
-                    RelativePanel.AlignLeftWithPanel="True">
-                    <Grid
-                        Background="{ThemeResource SystemChromeLowColor}"
-                        MinHeight="250">
-                    </Grid>
-                </Grid>
-            </RelativePanel>
-            <uc:ComboControl
-                Header="Besitzer"
-                Margin="20,20,0,0"
-                PlaceholderText="Besitzer"
-                SelectedItem="{x:Bind ViewModel.Besitzer, Mode=TwoWay}"
-                ItemsSource="{x:Bind ViewModel.AlleVermieter, Mode=OneWay}"/>
-            <mtuuc:WrapPanel>
-                <uc:AdresseControl
-                    Margin="20,20,0,0"
-                    Adresse="{x:Bind ViewModel.Entity}" />
-            </mtuuc:WrapPanel>
-            <mtuuc:WrapPanel Orientation="Horizontal">
-                <TextBox
-                    Text="{x:Bind ViewModel.Bezeichnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                    Header="Bezeichnung" Width="210" Style="{StaticResource Eintraege}"/>
-                <TextBox
-                    Text="{x:Bind ViewModel.Wohnflaeche, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                    Header="Wohnfl." Width="70" Style="{StaticResource Eintraege}"/>
-                <TextBox
-                    Text="{x:Bind ViewModel.Nutzflaeche, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                    Header="Nutzfl." Width="70" Style="{StaticResource Eintraege}"/>
-                <TextBox
-                    Text="{x:Bind ViewModel.Nutzeinheit, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                    Header="Einheiten" Width="70" Style="{StaticResource Eintraege}"/>
-            </mtuuc:WrapPanel>
-            <mtuuc:WrapPanel>
-                <TextBox
-                    TextWrapping="Wrap"
-                    Style="{StaticResource Eintraege}"
-                    Width="620"
-                    Margin="20"
-                    Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Header="Notiz"/>
-            </mtuuc:WrapPanel>
+    <uc:FileDrop>
+        <uc:FileDrop.MainContent>
 
-            <uc:ExpanderControl Header="Zähler" Click="{x:Bind AddZaehler_Click}">
-                <uc:ExpanderControl.MainContent>
-                    <uc:ZaehlerListControl WohnungId="{x:Bind ViewModel.Id}"/>
-                </uc:ExpanderControl.MainContent>
-            </uc:ExpanderControl>
-            
-            <uc:ExpanderControl Header="Verträge" Click="{x:Bind AddVertrag_Click}">
-                <uc:ExpanderControl.MainContent>
-                    <uc:VertragListControl WohnungId="{x:Bind ViewModel.Id}"/>
-                </uc:ExpanderControl.MainContent>
-            </uc:ExpanderControl>
-            
-            <uc:ExpanderControl Header="BetriebskostenRechnungen" Click="{x:Bind AddBetriebskostenrechnung_Click}">
-                <uc:ExpanderControl.MainContent>
-                    <uc:BetriebskostenRechnungenListControl WohnungId="{x:Bind ViewModel.Id}"/>
-                </uc:ExpanderControl.MainContent>
-            </uc:ExpanderControl>
-            
-        </StackPanel>
-    </ScrollViewer>
+
+            <ScrollViewer>
+                <StackPanel>
+                    <RelativePanel>
+                        <!--TODO Insert image -->
+                        <Grid
+                            x:Name="ScrollHeader"
+                            HorizontalAlignment="Stretch"
+                            RelativePanel.AlignRightWithPanel="True"
+                            RelativePanel.AlignLeftWithPanel="True">
+                            <Grid
+                                Background="{ThemeResource SystemChromeLowColor}"
+                                MinHeight="250">
+                            </Grid>
+                        </Grid>
+                    </RelativePanel>
+                    <uc:ComboControl
+                        Header="Besitzer"
+                        Margin="20,20,0,0"
+                        PlaceholderText="Besitzer"
+                        SelectedItem="{x:Bind ViewModel.Besitzer, Mode=TwoWay}"
+                        ItemsSource="{x:Bind ViewModel.AlleVermieter, Mode=OneWay}"/>
+                    <mtuuc:WrapPanel>
+                        <uc:AdresseControl
+                            Margin="20,20,0,0"
+                            Adresse="{x:Bind ViewModel.Entity}" />
+                    </mtuuc:WrapPanel>
+                    <mtuuc:WrapPanel Orientation="Horizontal">
+                        <TextBox
+                            Text="{x:Bind ViewModel.Bezeichnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Header="Bezeichnung" Width="210" Style="{StaticResource Eintraege}"/>
+                        <TextBox
+                            Text="{x:Bind ViewModel.Wohnflaeche, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Header="Wohnfl." Width="70" Style="{StaticResource Eintraege}"/>
+                        <TextBox
+                            Text="{x:Bind ViewModel.Nutzflaeche, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Header="Nutzfl." Width="70" Style="{StaticResource Eintraege}"/>
+                        <TextBox
+                            Text="{x:Bind ViewModel.Nutzeinheit, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Header="Einheiten" Width="70" Style="{StaticResource Eintraege}"/>
+                    </mtuuc:WrapPanel>
+                    <mtuuc:WrapPanel>
+                        <TextBox
+                            TextWrapping="Wrap"
+                            Style="{StaticResource Eintraege}"
+                            Width="620"
+                            Margin="20"
+                            Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Header="Notiz"/>
+                    </mtuuc:WrapPanel>
+
+                    <uc:ExpanderControl Header="Zähler" Click="{x:Bind AddZaehler_Click}">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:ZaehlerListControl WohnungId="{x:Bind ViewModel.Id}"/>
+                        </uc:ExpanderControl.MainContent>
+                    </uc:ExpanderControl>
+
+                    <uc:ExpanderControl Header="Verträge" Click="{x:Bind AddVertrag_Click}">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:VertragListControl WohnungId="{x:Bind ViewModel.Id}"/>
+                        </uc:ExpanderControl.MainContent>
+                    </uc:ExpanderControl>
+
+                    <uc:ExpanderControl Header="BetriebskostenRechnungen" Click="{x:Bind AddBetriebskostenrechnung_Click}">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:BetriebskostenRechnungenListControl WohnungId="{x:Bind ViewModel.Id}"/>
+                        </uc:ExpanderControl.MainContent>
+                    </uc:ExpanderControl>
+
+                </StackPanel>
+            </ScrollViewer>
+        </uc:FileDrop.MainContent>
+    </uc:FileDrop>
 </Page>
