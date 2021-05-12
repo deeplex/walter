@@ -11,11 +11,8 @@
     d:DesignWidth="400">
 
     <mtuuc:DataGrid
+        Style="{StaticResource DataGridUserControl}"
         SelectionChanged="DataGrid_SelectionChanged"
-        IsReadOnly="True"                
-        CanUserReorderColumns="False"
-        CanUserResizeColumns="True"
-        AutoGenerateColumns="False"
         ItemsSource="{x:Bind ViewModel.Value.Liste.Value, Mode=OneWay}">
         <mtuuc:DataGrid.Columns>
             <mtuuc:DataGridTemplateColumn>

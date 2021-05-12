@@ -10,10 +10,7 @@
     d:DesignWidth="400">
     
     <mtuuc:DataGrid
-        IsReadOnly="True"
-        CanUserReorderColumns="False"
-        CanUserResizeColumns="True"
-        AutoGenerateColumns="False"
+        Style="{StaticResource DataGridUserControl}"
         DoubleTapped="Details_Click"
         SelectionChanged="DataGrid_SelectionChanged"
         ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}"
