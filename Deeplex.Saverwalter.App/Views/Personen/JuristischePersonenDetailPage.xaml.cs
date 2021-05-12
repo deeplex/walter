@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
+using System;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
@@ -55,6 +56,21 @@ namespace Deeplex.Saverwalter.App.Views
             catch
             {
                 
+            }
+        }
+
+        private void AddMitglied_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            if (ViewModel.AddMitglied.Value?.Guid is Guid guid)
+            {
+                AddMitglied_Flyout.Hide();
+                App.Walter.JuristischePersonenMitglieder.Add(new JuristischePersonenMitglied()
+                {
+                    JuristischePersonId = ViewModel.Id,
+                    PersonId = ViewModel.AddMitglied.Value.Guid,
+                });
+                App.SaveWalter();
+                ViewModel.UpdateMitgliedList();
             }
         }
     }

@@ -379,7 +379,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "JuristischePersonenMitglied",
+                name: "JuristischePersonenMitglieder",
                 columns: table => new
                 {
                     JuristischePersonenMitgliedId = table.Column<int>(nullable: false)
@@ -390,15 +390,15 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_JuristischePersonenMitglied", x => x.JuristischePersonenMitgliedId);
+                    table.PrimaryKey("PK_JuristischePersonenMitglieder", x => x.JuristischePersonenMitgliedId);
                     table.ForeignKey(
-                        name: "FK_JuristischePersonenMitglied_JuristischePersonen_JuristischePersonId",
+                        name: "FK_JuristischePersonenMitglieder_JuristischePersonen_JuristischePersonId",
                         column: x => x.JuristischePersonId,
                         principalTable: "JuristischePersonen",
                         principalColumn: "JuristischePersonId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_JuristischePersonenMitglied_NatuerlichePersonen_NatuerlichePersonId",
+                        name: "FK_JuristischePersonenMitglieder_NatuerlichePersonen_NatuerlichePersonId",
                         column: x => x.NatuerlichePersonId,
                         principalTable: "NatuerlichePersonen",
                         principalColumn: "NatuerlichePersonId",
@@ -487,7 +487,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     AusstellerId = table.Column<Guid>(nullable: false),
                     Bezeichnung = table.Column<string>(nullable: false),
                     Betrag = table.Column<double>(nullable: false),
-                    WohnungId = table.Column<int>(nullable: false)
+                    WohnungId = table.Column<int>(nullable: false),
+                    Notiz = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -851,13 +852,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 column: "AdresseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_JuristischePersonenMitglied_JuristischePersonId",
-                table: "JuristischePersonenMitglied",
+                name: "IX_JuristischePersonenMitglieder_JuristischePersonId",
+                table: "JuristischePersonenMitglieder",
                 column: "JuristischePersonId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_JuristischePersonenMitglied_NatuerlichePersonId",
-                table: "JuristischePersonenMitglied",
+                name: "IX_JuristischePersonenMitglieder_NatuerlichePersonId",
+                table: "JuristischePersonenMitglieder",
                 column: "NatuerlichePersonId");
 
             migrationBuilder.CreateIndex(
@@ -997,7 +998,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 name: "JuristischePersonAnhaenge");
 
             migrationBuilder.DropTable(
-                name: "JuristischePersonenMitglied");
+                name: "JuristischePersonenMitglieder");
 
             migrationBuilder.DropTable(
                 name: "KontoAnhaenge");

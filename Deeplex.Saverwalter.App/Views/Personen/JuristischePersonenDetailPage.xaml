@@ -19,6 +19,29 @@
                 Header="Bezeichnung" Style="{StaticResource Eintraege}"/>
                 </mtuuc:WrapPanel>
                 <uc:PersonDetailControl PersonViewModel="{x:Bind ViewModel}" />
+                <uc:ExpanderControl Header="Mitglieder">
+                    <uc:ExpanderControl.Bonus>
+                        <Button Margin="20,0,0,0" Background="Transparent">
+                            <SymbolIcon Symbol="Add" />
+                            <Button.Flyout>
+                                <Flyout x:Name="AddMitglied_Flyout">
+                                    <StackPanel Orientation="Horizontal">
+                                        <uc:ComboControl
+                                            PlaceholderText="Mitglied hinzufügen"
+                                            SelectedItem="{x:Bind ViewModel.AddMitglied.Value, Mode=TwoWay}"
+                                            ItemsSource="{x:Bind ViewModel.AddMitglieder.Value, Mode=OneWay}"/>
+                                        <Button Margin="10,0,0,0" Click="AddMitglied_Click">
+                                            <SymbolIcon Symbol="Add" />
+                                        </Button>
+                                    </StackPanel>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </uc:ExpanderControl.Bonus>
+                    <uc:ExpanderControl.MainContent>
+                        <uc:KontaktListControl Kontakte="{x:Bind ViewModel.Mitglieder.Value, Mode=OneWay}"/>
+                    </uc:ExpanderControl.MainContent>
+                </uc:ExpanderControl>
             </StackPanel>
         </uc:FileDrop.MainContent>
     </uc:FileDrop>

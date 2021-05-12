@@ -383,7 +383,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.HasIndex("NatuerlichePersonId");
 
-                    b.ToTable("JuristischePersonenMitglied");
+                    b.ToTable("JuristischePersonenMitglieder");
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Konto", b =>

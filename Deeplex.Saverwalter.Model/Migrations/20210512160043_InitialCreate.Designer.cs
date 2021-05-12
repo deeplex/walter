@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20210509194606_InitialCreate")]
+    [Migration("20210512160043_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -205,6 +205,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<DateTime>("Datum")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Notiz")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("WohnungId")
                         .HasColumnType("INTEGER");
 
@@ -382,7 +385,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.HasIndex("NatuerlichePersonId");
 
-                    b.ToTable("JuristischePersonenMitglied");
+                    b.ToTable("JuristischePersonenMitglieder");
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Konto", b =>

@@ -1,6 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using System.Collections.Immutable;
 using System.ComponentModel;
+using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -27,12 +29,38 @@ namespace Deeplex.Saverwalter.App.ViewModels
             App.SaveWalter();
         }
 
+        public ObservableProperty<ImmutableList<KontaktListEntry>> Mitglieder
+            = new ObservableProperty<ImmutableList<KontaktListEntry>>();
+        public ObservableProperty<ImmutableList<KontaktListEntry>> AddMitglieder
+            = new ObservableProperty<ImmutableList<KontaktListEntry>>();
+        public ObservableProperty<KontaktListEntry> AddMitglied
+            = new ObservableProperty<KontaktListEntry>();
+
+        public void UpdateMitgliedList()
+        {
+            Mitglieder.Value = App.Walter.JuristischePersonenMitglieder
+                .Where(w => w.JuristischePersonId == Id)
+                .Select(w => new KontaktListEntry(w.PersonId))
+                .ToImmutableList();
+
+            AddMitglieder.Value = App.Walter.NatuerlichePersonen
+                .Select(k => new KontaktListEntry(k))
+                .ToList()
+                .Concat(App.Walter.JuristischePersonen
+                    .Select(k => new KontaktListEntry(k))
+                    .ToList())
+                .Where(k => !Mitglieder.Value.Any(e => e.Guid == k.Guid))
+                    .ToImmutableList();
+        }
+
         public JuristischePersonViewModel() : this(new JuristischePerson()) { }
         public JuristischePersonViewModel(int id) : this(App.Walter.JuristischePersonen.Find(id)) { }
         public JuristischePersonViewModel(JuristischePerson j)
         {
             Entity = j;
             Id = j.JuristischePersonId;
+
+            UpdateMitgliedList();
 
             PropertyChanged += OnUpdate;
         }
