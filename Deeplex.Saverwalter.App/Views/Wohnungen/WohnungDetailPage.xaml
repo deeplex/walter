@@ -75,9 +75,15 @@
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
-                    <uc:ExpanderControl Header="BetriebskostenRechnungen" Click="{x:Bind AddBetriebskostenrechnung_Click}">
+                    <uc:ExpanderControl Header="Betriebskostenrechnungen" Click="{x:Bind AddBetriebskostenrechnung_Click}">
                         <uc:ExpanderControl.MainContent>
                             <uc:BetriebskostenRechnungenListControl WohnungId="{x:Bind ViewModel.Id}"/>
+                        </uc:ExpanderControl.MainContent>
+                    </uc:ExpanderControl>
+
+                    <uc:ExpanderControl Header="Erhaltungsaufwendungen" Click="{x:Bind AddErhaltungsaufwendung_Click}">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:ErhaltungsaufwendungenListControl WohnungId="{x:Bind ViewModel.Id}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 

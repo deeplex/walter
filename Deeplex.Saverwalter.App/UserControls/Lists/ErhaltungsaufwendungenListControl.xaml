@@ -16,6 +16,7 @@
         AutoGenerateColumns="False"
         DoubleTapped="Details_Click"
         ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}"
+        
         SelectedItem="{x:Bind ViewModel.SelectedAufwendung, Mode=TwoWay}">
         <mtuuc:DataGrid.Columns>
             <mtuuc:DataGridTextColumn
@@ -26,7 +27,7 @@
                 Binding="{Binding Aussteller}"/>
             <mtuuc:DataGridTextColumn
                Header="Wohnung"
-               Binding="{Binding Wohnung}"/>
+               Binding="{Binding WohnungString}"/>
             <mtuuc:DataGridTextColumn
                Header="Betrag"
                Binding="{Binding BetragString}"/>

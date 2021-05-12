@@ -1,4 +1,6 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.App.ViewModels.Rechnungen;
+using Deeplex.Saverwalter.App.Views.Rechnungen;
 using Deeplex.Saverwalter.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -59,6 +61,18 @@ namespace Deeplex.Saverwalter.App.Views
                 App.ViewModel.Navigate(typeof(BetriebskostenrechnungenDetailPage), vm);
             };
 
+            AddErhaltungsaufwendung_Click = () =>
+            {
+                var r = new Erhaltungsaufwendung()
+                {
+                    Wohnung = ViewModel.Entity,
+                    Datum = DateTime.Now,
+                };
+                
+                var vm = new ErhaltungsaufwendungenDetailViewModel(r);
+                App.ViewModel.Navigate(typeof(ErhaltungsaufwendungenDetailPage), vm);
+            };
+
             App.ViewModel.Titel.Value = ViewModel.Anschrift + " — " + ViewModel.Bezeichnung;
             var Delete = new AppBarButton
             {
@@ -76,6 +90,7 @@ namespace Deeplex.Saverwalter.App.Views
         public Action AddZaehler_Click;
         public Action AddVertrag_Click;
         public Action AddBetriebskostenrechnung_Click;
+        public Action AddErhaltungsaufwendung_Click;
 
         private async void Delete_Click(object sender, RoutedEventArgs e)
         {

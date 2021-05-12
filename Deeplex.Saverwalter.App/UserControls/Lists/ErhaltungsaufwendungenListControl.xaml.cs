@@ -19,16 +19,16 @@ namespace Deeplex.Saverwalter.App.UserControls
         private void UpdateFilter()
         {
             ViewModel.Liste.Value = ViewModel.AllRelevant;
-            //if (WohnungId != 0)
-            //{
-            //    ViewModel.Liste.Value = ViewModel.Liste.Value
-            //        .Where(v => v.Wohnungen.Select(i => i.WohnungId).Contains(WohnungId))
-            //        .ToImmutableList();
-            //}
+            if (WohnungId != 0)
+            {
+                ViewModel.Liste.Value = ViewModel.Liste.Value
+                    .Where(v => v.Wohnung.Id == WohnungId)
+                    .ToImmutableList();
+            }
             if (Filter != "")
             {
                 ViewModel.Liste.Value = ViewModel.Liste.Value.Where(v =>
-                    applyFilter(Filter, v.Aussteller, v.Bezeichnung, v.Wohnung))
+                    applyFilter(Filter, v.Aussteller, v.Bezeichnung, v.Wohnung.ToString()))
                     .ToImmutableList();
             }
         }
