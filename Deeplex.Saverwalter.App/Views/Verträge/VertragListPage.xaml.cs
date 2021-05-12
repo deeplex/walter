@@ -25,18 +25,11 @@ namespace Deeplex.Saverwalter.App.Views
             };
             AddVertrag.Click += AddVertrag_Click;
 
-            var ShowActive = new AppBarToggleButton
-            {
-                Label = "Nur aktive Verträge zeigen.",
-            };
-            ShowActive.Click += ShowActive_Click; ;
-
-            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { ShowActive, Elements.Filter(ViewModel), AddVertrag });
-        }
-
-        private void ShowActive_Click(object sender, RoutedEventArgs e)
-        {
-            OnlyActive.Value = ((AppBarToggleButton)sender).IsChecked ?? false;
+            App.ViewModel.RefillCommandContainer(
+                new ICommandBarElement[] {
+                    Elements.CheckBox(OnlyActive, "Nur Laufend"),
+                    Elements.Filter(ViewModel),
+                    AddVertrag });
         }
 
         private void AddVertrag_Click(object sender, RoutedEventArgs e)
