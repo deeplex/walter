@@ -5,10 +5,10 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using static Deeplex.Saverwalter.Model.Betriebskostenabrechnung;
-using static Deeplex.Saverwalter.Print.Utils;
 
 namespace Deeplex.Saverwalter.Print
 {
@@ -38,54 +38,45 @@ namespace Deeplex.Saverwalter.Print
                 // DIN A4
                 new PageSize() { Code = 9, Width = 11906, Height = 16838 }));
 
-        public static bool SaveAsDocx(this ErhaltungsaufwendungListe e, string filepath)
+        public static bool SaveAsDocx(this ImmutableList<ErhaltungsaufwendungWohnung> l, string filepath)
         {
             var body = DinA4();
-
-            body.Append(new Paragraph(
-                Heading(Anschrift(e.Wohnung.Adresse) + ", " + e.Wohnung.Bezeichnung)));
-
-            var table = new Table(
-                new TableProperties(
-                    new TableBorders(new InsideHorizontalBorder() { Val = BorderValues.Thick, Color = "888888" })),
-                new TableRow(
-                    ContentHead("2000", "Aussteller", JustificationValues.Center),
-                    ContentHead("750", "Datum"),
-                    ContentHead("1550", "Bezeichnung"),
-                    ContentHead("650", "Betrag", JustificationValues.Right)));
-                    
-            foreach (var a in e.Liste)
+            foreach(var e in l)
             {
-                table.Append(new TableRow(
-                    ContentCell(a.Aussteller.Bezeichnung),
-                    ContentCell(a.Datum.ToString("dd.MM.yyyy")),
-                    ContentCell(a.Bezeichnung),
-                    ContentCell(Euro(a.Betrag), JustificationValues.Right)));
+                if (!e.Liste.IsEmpty)
+                {
+                    Erhaltungsaufwendung.ErhaltungsaufwendungWohnungBody(body, e);
+                }
             }
-            table.Append(new TableRow(
-                ContentCell(""),
-                ContentCell(""),
-                ContentCell("Summe:", JustificationValues.Center),
-                ContentCell(Euro(e.Summe), JustificationValues.Right)));
 
-            body.Append(table);
+            return MakeSpaceAndCreateWordDocument(filepath, body);
+        }
 
-            var ok = MakeSpace(filepath);
-            if (ok)
+        public static bool SaveAsDocx(this ErhaltungsaufwendungWohnung e, string filepath)
+        {
+            var body = DinA4();
+            Erhaltungsaufwendung.ErhaltungsaufwendungWohnungBody(body, e);
+
+            if (e.Liste.IsEmpty)
             {
-                CreateWordDocument(filepath, body);
+                return false;
             }
-            return ok;
+
+            return MakeSpaceAndCreateWordDocument(filepath, body);
         }
 
         public static bool SaveAsDocx(this Betriebskostenabrechnung b, string filepath)
         {
             var body = DinA4();
-
             FirstPage.FirstPage.Fill(body, b);
             SecondPage.SecondPage.Fill(body, b);
             ThirdPage.ThirdPage.Fill(body, b);
-            
+
+            return MakeSpaceAndCreateWordDocument(filepath, body);
+        }
+
+        private static bool MakeSpaceAndCreateWordDocument(string filepath, Body body)
+        {
             var ok = MakeSpace(filepath);
             if (ok)
             {

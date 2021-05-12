@@ -36,15 +36,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<KontaktListEntry> AddMitglied
             = new ObservableProperty<KontaktListEntry>();
 
-        public ObservableProperty<ImmutableList<WohnungListEntry>> Wohnungen
-            = new ObservableProperty<ImmutableList<WohnungListEntry>>();
-        private bool mWohnungenInklusiveMitglieder;
         public bool WohnungenInklusiveMitglieder
         {
-            get => mWohnungenInklusiveMitglieder;
+            get => mInklusiveZusatz;
             set
             {
-                mWohnungenInklusiveMitglieder = value;
+                mInklusiveZusatz = value;
                 UpdateListen();
             }
         }

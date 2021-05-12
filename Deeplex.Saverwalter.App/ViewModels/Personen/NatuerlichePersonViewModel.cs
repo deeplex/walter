@@ -57,15 +57,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public string Name => Vorname + " " + Nachname;
 
-        public ObservableProperty<ImmutableList<WohnungListEntry>> Wohnungen
-            = new ObservableProperty<ImmutableList<WohnungListEntry>>();
-        private bool mWohnungenInklusiveJurPers;
         public bool WohnungenInklusiveJurPers
         {
-            get => mWohnungenInklusiveJurPers;
+            get => mInklusiveZusatz;
             set
             {
-                mWohnungenInklusiveJurPers = value;
+                mInklusiveZusatz = value;
                 UpdateListen();
             }
         }

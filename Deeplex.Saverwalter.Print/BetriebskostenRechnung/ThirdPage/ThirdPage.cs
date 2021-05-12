@@ -66,7 +66,6 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
                                 ErmittlungWarmeEinheiten(b, gruppe),
                                 SubHeading("Ermittlung der warmen Betriebskosten", true),
                                 ErmittlungWarmanteil(b, gruppe));
-                            //ErmittlungAnteilWarmWasser(b, gruppe));
                         }
                     }
                 }

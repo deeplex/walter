@@ -1,12 +1,46 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Model.ErhaltungsaufwendungListe;
 using Deeplex.Utils.ObjectModel;
 using System;
+using System.Collections.Immutable;
+using System.Linq;
+using Deeplex.Saverwalter.Print;
+using Windows.Storage;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
     public abstract class PersonViewModel : BindableBase
     {
         public IPerson Entity { get; set; }
+
+        public ObservableProperty<int> ErhaltungsaufwendungJahr
+            = new ObservableProperty<int>(DateTime.Now.Year - 1);
+        protected bool mInklusiveZusatz;
+        public ObservableProperty<ImmutableList<WohnungListEntry>> Wohnungen
+            = new ObservableProperty<ImmutableList<WohnungListEntry>>();
+
+        public PersonViewModel()
+        {
+            Print_Erhaltungsaufwendungen = new RelayCommand(_ =>
+            {
+                var s = ErhaltungsaufwendungJahr.Value.ToString() + " - " + Entity.Bezeichnung;
+                if (mInklusiveZusatz)
+                {
+                    s += " + Zusatz";
+                }
+                var path = ApplicationData.Current.LocalFolder.Path + @"\" + s;
+
+                var worked = Wohnungen.Value
+                    .Select(w => new ErhaltungsaufwendungWohnung(App.Walter, w.Id, ErhaltungsaufwendungJahr.Value))
+                    .ToImmutableList()
+                    .SaveAsDocx(path + ".docx");
+                var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
+                App.ViewModel.ShowAlert(text, 5000);
+
+            }, _ => Wohnungen.Value.Count > 0);
+        }
+
+        public RelayCommand Print_Erhaltungsaufwendungen;
 
         public Guid PersonId
         {

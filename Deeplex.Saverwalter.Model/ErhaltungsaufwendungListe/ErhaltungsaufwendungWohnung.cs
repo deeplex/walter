@@ -5,13 +5,13 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.Model.ErhaltungsaufwendungListe
 {
-    public sealed class ErhaltungsaufwendungListe
+    public sealed class ErhaltungsaufwendungWohnung
     {
         public ImmutableList<ErhaltungsaufwendungListeEntry> Liste { get; }
         public double Summe => Liste.Sum(e => e.Betrag);
         public Wohnung Wohnung { get; }
 
-        public ErhaltungsaufwendungListe(SaverwalterContext _db, int WohnungId, int Jahr)
+        public ErhaltungsaufwendungWohnung(SaverwalterContext _db, int WohnungId, int Jahr)
         {
             Wohnung = _db.Wohnungen.Find(WohnungId);
 

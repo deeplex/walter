@@ -67,7 +67,7 @@ namespace Deeplex.Saverwalter.App.Views
 
             AddErhaltungsaufwendung_Click = () =>
             {
-                var r = new Erhaltungsaufwendung()
+                var r = new Model.Erhaltungsaufwendung()
                 {
                     Wohnung = ViewModel.Entity,
                     Datum = DateTime.Now,
@@ -139,7 +139,7 @@ namespace Deeplex.Saverwalter.App.Views
         private void Erhaltungsaufwendung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             var Jahr = (int)((Button)sender).CommandParameter;
-            var l = new ErhaltungsaufwendungListe(App.Walter, ViewModel.Id, Jahr);
+            var l = new ErhaltungsaufwendungWohnung(App.Walter, ViewModel.Id, Jahr);
 
             var s = Jahr.ToString() + " - " + ViewModel.Anschrift;
             var path = ApplicationData.Current.LocalFolder.Path + @"\" + s;

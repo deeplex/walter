@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -46,7 +47,28 @@
                 </uc:ExpanderControl>
                 <uc:ExpanderControl Header="Wohnungen">
                     <uc:ExpanderControl.Bonus>
-                        <CheckBox Margin="10,0,0,0" IsChecked="{x:Bind ViewModel.WohnungenInklusiveMitglieder, Mode=TwoWay}" Content="Inkl. Mitglieder"/>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox Margin="10,0,0,0" IsChecked="{x:Bind ViewModel.WohnungenInklusiveMitglieder, Mode=TwoWay}" Content="Inkl. Mitglieder"/>
+                            <Button Background="Transparent">
+                                <StackPanel Orientation="Horizontal">
+                                    <SymbolIcon Symbol="PostUpdate" />
+                                    <TextBlock Margin="10,0,0,0" Text="Erhaltungsaufwendungen"/>
+                                </StackPanel>
+                                <Button.Flyout>
+                                    <Flyout>
+                                        <StackPanel Orientation="Horizontal">
+                                            <muxc:NumberBox
+                                                SpinButtonPlacementMode="Inline"
+                                                Header="Betreffendes Jahr"
+                                                Value="{x:Bind ViewModel.ErhaltungsaufwendungJahr.Value, Mode=TwoWay}"/>
+                                            <Button VerticalAlignment="Bottom" Background="Transparent" Command="{x:Bind ViewModel.Print_Erhaltungsaufwendungen}">
+                                                <SymbolIcon Symbol="PostUpdate"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                        </StackPanel>
                     </uc:ExpanderControl.Bonus>
                     <uc:ExpanderControl.MainContent>
                         <uc:WohnungListControl Liste="{x:Bind ViewModel.Wohnungen.Value, Mode=OneWay}" />
