@@ -47,6 +47,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 case nameof(Mobil):
                 case nameof(Fax):
                 case nameof(Notiz):
+                case nameof(isHandwerker):
+                case nameof(isMieter):
+                case nameof(isVermieter):
                     break;
                 default:
                     return;
