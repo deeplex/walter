@@ -12,6 +12,7 @@
         Style="{StaticResource DataGridUserControl}"
         SelectionChanged="DataGrid_SelectionChanged"
         DoubleTapped="Details_Click"
+        Sorting="DataGrid_Sorting"
         ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}"
         SelectedItem="{x:Bind ViewModel.SelectedAufwendung, Mode=TwoWay}">
         <mtuuc:DataGrid.Columns>

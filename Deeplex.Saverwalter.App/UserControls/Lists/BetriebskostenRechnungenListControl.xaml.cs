@@ -113,5 +113,10 @@ namespace Deeplex.Saverwalter.App.UserControls
                 App.ViewModel.ListAnhang.Value = new AnhangListViewModel(r.Entity);
             }
         }
+
+        private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)
+        {
+            ViewModel.Liste.Value = (sender as DataGrid).Sort(e.Column, ViewModel.Liste.Value);
+        }
     }
 }

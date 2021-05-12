@@ -1,4 +1,5 @@
 ﻿using Deeplex.Utils.ObjectModel;
+using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -13,7 +14,6 @@ namespace Deeplex.Saverwalter.App.Utils
     public static class Elements
     {
         public static AppBarElementContainer Filter(IFilterViewModel ViewModel)
-
         {
             var Filter = new TextBox
             {
@@ -33,6 +33,31 @@ namespace Deeplex.Saverwalter.App.Utils
 
         public static bool applyFilter(string filter, params string[] strings)
             => filter.Split(' ').All(split => strings.Any(str => str != null && str.ToLower().Contains(split.ToLower())));
+
+        public static ImmutableList<T> Sort<T>(this DataGrid dataGrid, DataGridColumn columnToSort, ImmutableList<T> list)
+        {
+            var lastSortedColumn = dataGrid.Columns.Where(column =>
+                column.SortDirection.HasValue).FirstOrDefault();
+            bool isSortColumnDifferentThanLast = columnToSort != lastSortedColumn;
+            bool isAscending = isSortColumnDifferentThanLast ||
+                columnToSort.SortDirection == DataGridSortDirection.Descending;
+
+            columnToSort.SortDirection = isAscending ?
+                DataGridSortDirection.Ascending : DataGridSortDirection.Descending;
+            if (isSortColumnDifferentThanLast && lastSortedColumn != null)
+            {
+                lastSortedColumn.SortDirection = null;
+            }
+
+            var propertyName = columnToSort.ClipboardContentBinding.Path.Path;
+            object sortFunc(T obj) => obj.GetType().GetProperty(propertyName).GetValue(obj);
+
+            var list2 = isAscending ?
+                list.OrderBy(sortFunc).ToImmutableList() :
+                list.OrderByDescending(sortFunc).ToImmutableList();
+
+            return list2;
+        }
     }
 
     public interface IFilterViewModel
