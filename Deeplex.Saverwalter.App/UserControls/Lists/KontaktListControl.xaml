@@ -25,12 +25,12 @@
             </MenuFlyout>
         </mtuuc:DataGrid.ContextFlyout>
         <mtuuc:DataGrid.Columns>
-            <mtuuc:DataGridTemplateColumn Visibility="{x:Bind VertragBool}">
+            <mtuuc:DataGridTemplateColumn Visibility="{x:Bind DeleteBool}">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
                         <Button
                             Background="Transparent"
-                            Click="RemoveMieter_Click">
+                            Click="RemovePerson_Click">
                             <SymbolIcon Symbol="Delete"/>
                         </Button>
                     </DataTemplate>

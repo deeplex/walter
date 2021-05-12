@@ -120,7 +120,8 @@ namespace Deeplex.Saverwalter.App.UserControls
                   typeof(KontaktListControl),
                   new PropertyMetadata(null));
 
-        public bool VertragBool => VertragGuid != Guid.Empty;
+        public bool DeleteBool => VertragGuid != Guid.Empty || JuristischePersonId != 0;
+
         public Guid VertragGuid
         {
             get { return (Guid)GetValue(VertragGuidProperty); }
@@ -133,6 +134,19 @@ namespace Deeplex.Saverwalter.App.UserControls
                   typeof(Guid),
                   typeof(KontaktListControl),
                   new PropertyMetadata(Guid.Empty));
+
+        public int JuristischePersonId
+        {
+            get { return (int)GetValue(JuristischePersonIdProperty); }
+            set { SetValue(JuristischePersonIdProperty, value); }
+        }
+
+        public static readonly DependencyProperty JuristischePersonIdProperty
+            = DependencyProperty.Register(
+                  "JuristischePersonId",
+                  typeof(int),
+                  typeof(KontaktListControl),
+                  new PropertyMetadata(0));
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
@@ -153,7 +167,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             ViewModel.SelectedKontakt = (e.OriginalSource as FrameworkElement).DataContext as KontaktListEntry;
         }
 
-        private async void RemoveMieter_Click(object sender, RoutedEventArgs e)
+        private async void RemovePerson_Click(object sender, RoutedEventArgs e)
         {
             if (await App.ViewModel.Confirmation())
             {
@@ -161,9 +175,21 @@ namespace Deeplex.Saverwalter.App.UserControls
 
                 ViewModel.Kontakte.Value = ViewModel.Kontakte.Value
                     .Where(k => guid != k.Guid).ToImmutableList();
-                App.Walter.MieterSet
-                    .Where(m => m.PersonId == guid && m.VertragId == VertragGuid)
-                    .ToList().ForEach(m => App.Walter.MieterSet.Remove(m));
+
+                if (VertragGuid != Guid.Empty)
+                {
+                    App.Walter.MieterSet
+                        .Where(m => m.PersonId == guid && m.VertragId == VertragGuid)
+                        .ToList().ForEach(m => App.Walter.MieterSet.Remove(m));
+                }
+                
+                if (JuristischePersonId != 0)
+                {
+                    App.Walter.JuristischePersonenMitglieder
+                        .Where(m => m.PersonId == guid && m.JuristischePersonId == JuristischePersonId)
+                        .ToList().ForEach(m => App.Walter.JuristischePersonenMitglieder.Remove(m));
+                }
+
                 App.SaveWalter();
             }
         }

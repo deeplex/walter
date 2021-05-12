@@ -39,7 +39,9 @@
                         </Button>
                     </uc:ExpanderControl.Bonus>
                     <uc:ExpanderControl.MainContent>
-                        <uc:KontaktListControl Kontakte="{x:Bind ViewModel.Mitglieder.Value, Mode=OneWay}"/>
+                        <uc:KontaktListControl
+                            JuristischePersonId="{x:Bind ViewModel.Id}"
+                            Kontakte="{x:Bind ViewModel.Mitglieder.Value, Mode=OneWay}"/>
                     </uc:ExpanderControl.MainContent>
                 </uc:ExpanderControl>
             </StackPanel>
