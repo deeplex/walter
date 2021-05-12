@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             if (Filter != "")
             {
                 ViewModel.Liste.Value = ViewModel.Liste.Value.Where(v =>
-                    applyFilter(Filter))
+                    applyFilter(Filter, v.Aussteller, v.Bezeichnung, v.Wohnung))
                     .ToImmutableList();
             }
         }

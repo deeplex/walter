@@ -20,6 +20,9 @@
         <mtuuc:DataGrid.Columns>
             <mtuuc:DataGridTextColumn
                 Header="Aussteller"
+                Binding="{Binding Bezeichnung}"/>
+            <mtuuc:DataGridTextColumn
+                Header="Aussteller"
                 Binding="{Binding Aussteller}"/>
             <mtuuc:DataGridTextColumn
                Header="Wohnung"
