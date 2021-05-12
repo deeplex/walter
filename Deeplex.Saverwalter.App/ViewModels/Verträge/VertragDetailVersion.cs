@@ -19,9 +19,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.KaltMiete;
             set
             {
+                var val = Double.IsNaN(value) ? 0 : value;
                 var old = Entity.KaltMiete;
-                Entity.KaltMiete = value;
-                RaisePropertyChangedAuto(old, value);
+                Entity.KaltMiete = val;
+                RaisePropertyChangedAuto(old, val);
             }
         }
 
@@ -30,9 +31,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Personenzahl;
             set
             {
+                var val = int.MinValue == value ? 0 : value;
                 var old = Entity.Personenzahl;
-                Entity.Personenzahl = value;
-                RaisePropertyChangedAuto(old, value);
+                Entity.Personenzahl = val;
+                RaisePropertyChangedAuto(old, val);
             }
         }
 

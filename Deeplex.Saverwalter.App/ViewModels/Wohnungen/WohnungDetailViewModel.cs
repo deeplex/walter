@@ -66,9 +66,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Wohnflaeche;
             set
             {
+                var val = Double.IsNaN(value) ? 0 : value;
                 var old = Entity.Wohnflaeche;
-                Entity.Wohnflaeche = value;
-                RaisePropertyChangedAuto(old, value);
+                Entity.Wohnflaeche = val;
+                RaisePropertyChangedAuto(old, val);
             }
         }
 
@@ -77,9 +78,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Nutzflaeche;
             set
             {
+                var val = Double.IsNaN(value) ? 0 : value;
                 var old = Entity.Nutzflaeche;
-                Entity.Nutzflaeche = value;
-                RaisePropertyChangedAuto(old, value);
+                Entity.Nutzflaeche = val;
+                RaisePropertyChangedAuto(old, val);
             }
         }
 
@@ -88,6 +90,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Nutzeinheit;
             set
             {
+                var val = int.MinValue == value ? 0 : value;
                 var old = Entity.Nutzeinheit;
                 Entity.Nutzeinheit = value;
                 RaisePropertyChangedAuto(old, value);

@@ -49,9 +49,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity?.Betrag ?? 0.0;
             set
             {
+                var val = Double.IsNaN(value) ? 0 : value;
                 var old = Entity.Betrag;
-                Entity.Betrag = value;
-                RaisePropertyChangedAuto(old, value);
+                Entity.Betrag = val;
+                RaisePropertyChangedAuto(old, val);
             }
         }
 
@@ -115,9 +116,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public string BetreffendesJahrString => BetreffendesJahr.ToString();
         public int BetreffendesJahr
         {
-            get => Entity?.BetreffendesJahr ?? DateTime.Now.Year;
+            get => Entity?.BetreffendesJahr ?? DateTime.Now.Year - 1;
             set
             {
+                var val = value == int.MinValue ? DateTime.Now.Year - 1 : value;
                 var old = Entity.BetreffendesJahr;
                 Entity.BetreffendesJahr = value;
                 RaisePropertyChangedAuto(old, value);

@@ -17,9 +17,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             get => Entity.Minderung;
             set
             {
+                var val = Double.IsNaN(value) ? 0 : value;
                 var old = Entity.Minderung;
-                Entity.Minderung = value;
-                RaisePropertyChangedAuto(old, value);
+                Entity.Minderung = val;
+                RaisePropertyChangedAuto(old, val);
             }
         }
 
