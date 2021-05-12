@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.App.Views
             Delete.Click += Delete_Click;
 
             App.ViewModel.RefillCommandContainer(
-                new ICommandBarElement[] {},
+                new ICommandBarElement[] { BetriebskostenAbrechnungsButton() },
                 new ICommandBarElement[] { Delete });
 
             base.OnNavigatedTo(e);

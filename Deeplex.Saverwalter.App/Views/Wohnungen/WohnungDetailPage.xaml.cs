@@ -2,10 +2,14 @@
 using Deeplex.Saverwalter.App.ViewModels.Rechnungen;
 using Deeplex.Saverwalter.App.Views.Rechnungen;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Model.ErhaltungsaufwendungListe;
+using Deeplex.Saverwalter.Print;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -80,7 +84,8 @@ namespace Deeplex.Saverwalter.App.Views
                 Label = "Löschen",
             };
             Delete.Click += Delete_Click;
-            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { },
+            App.ViewModel.RefillCommandContainer(
+                new ICommandBarElement[] { ErhaltungsaufwendungsButton() },
                 new ICommandBarElement[] { Delete });
             App.ViewModel.DetailAnhang.Value = new AnhangListViewModel(ViewModel.Entity);
 
@@ -99,6 +104,52 @@ namespace Deeplex.Saverwalter.App.Views
                 ViewModel.selfDestruct();
                 Frame.GoBack();
             }
+        }
+
+        private AppBarButton ErhaltungsaufwendungsButton()
+        {
+            var ErhAufwButtons = new StackPanel()
+            {
+                Orientation = Orientation.Horizontal,
+            };
+            ErhAufwButtons.Children.Add(new NumberBox()
+            {
+                SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline,
+                AllowFocusOnInteraction = true,
+                Value = ViewModel.ErhaltungsaufwendungJahr.Value,
+            });
+            var AddErhAufwBtn = new Button
+            {
+                CommandParameter = ViewModel.ErhaltungsaufwendungJahr.Value,
+                Content = new SymbolIcon(Symbol.SaveLocal),
+            };
+            ErhAufwButtons.Children.Add(AddErhAufwBtn);
+            AddErhAufwBtn.Click += Erhaltungsaufwendung_Click;
+            return new AppBarButton()
+            {
+                Icon = new SymbolIcon(Symbol.PostUpdate),
+                Label = "Erhaltungsaufwendungen",
+                Flyout = new Flyout()
+                {
+                    Content = ErhAufwButtons,
+                },
+            };
+        }
+
+        private void Erhaltungsaufwendung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            var Jahr = (int)((Button)sender).CommandParameter;
+            var l = new ErhaltungsaufwendungListe(App.Walter, ViewModel.Id, Jahr);
+
+            var s = Jahr.ToString() + " - " + ViewModel.Anschrift;
+            var path = ApplicationData.Current.LocalFolder.Path + @"\" + s;
+
+            var worked = l.SaveAsDocx(path + ".docx");
+            var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
+
+            // TODO e.SaveAnhaenge(path);
+
+            App.ViewModel.ShowAlert(text, 5000);
         }
 
         public sealed class WohnungDetailAdresseWohnung : Microsoft.UI.Xaml.Controls.TreeViewNode

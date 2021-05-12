@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
             foreach (var adr in adressen)
             {
                 var a = adr.Key;
-                var ret = a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
+                var ret = Anschrift(a);
 
                 if (adr.Count() != a.Wohnungen.Count)
                 {

@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml;
+﻿using Deeplex.Saverwalter.Model;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,8 @@ namespace Deeplex.Saverwalter.Print
 {
     public static class Utils
     {
+        public static string Anschrift(Adresse a) => a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
+
         public static string Prozent(double d) => string.Format("{0:N2}%", d * 100);
         public static string Euro(double d) => string.Format("{0:N2}€", d);
         public static string Unit(double d, string unit) => string.Format("{0:N2} " + unit, d);
