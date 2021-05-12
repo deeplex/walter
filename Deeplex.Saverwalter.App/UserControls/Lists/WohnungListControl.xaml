@@ -23,6 +23,9 @@
             <mtuuc:DataGridTextColumn
                 Header="Bezeichnung"
                 Binding="{Binding Bezeichnung}"/>
+            <mtuuc:DataGridTextColumn
+                Header="Besitzer"
+                Binding="{Binding Besitzer}"/>
         </mtuuc:DataGrid.Columns>
     </mtuuc:DataGrid>
 </UserControl>

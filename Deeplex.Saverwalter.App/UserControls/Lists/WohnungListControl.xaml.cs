@@ -28,7 +28,15 @@ namespace Deeplex.Saverwalter.App.UserControls
 
         private void UpdateFilter()
         {
-            ViewModel.Liste.Value = ViewModel.AllRelevant;
+            if (Liste == null)
+            {
+                ViewModel.Liste.Value = ViewModel.AllRelevant;
+            }
+            else
+            {
+                ViewModel.Liste.Value = Liste;
+            }
+
             if (Filter != "")
             {
                 ViewModel.Liste.Value = ViewModel.Liste.Value.Where(v =>
@@ -42,12 +50,26 @@ namespace Deeplex.Saverwalter.App.UserControls
             InitializeComponent();
             ViewModel = new WohnungListViewModel();
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, Prop) => UpdateFilter());
+            RegisterPropertyChangedCallback(ListeProperty, (DepObj, Prop) => UpdateFilter());
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
             App.ViewModel.Navigate(typeof(WohnungDetailPage), ViewModel.SelectedWohnung.Value.Entity);
         }
+
+        public ImmutableList<WohnungListEntry> Liste
+        {
+            get { return (ImmutableList<WohnungListEntry>)GetValue(ListeProperty); }
+            set { SetValue(ListeProperty, value); }
+        }
+
+        public static readonly DependencyProperty ListeProperty
+            = DependencyProperty.Register(
+                  "Liste",
+                  typeof(ImmutableList<WohnungListEntry>),
+                  typeof(WohnungListControl),
+                  new PropertyMetadata(null));
 
         public string Filter
         {
@@ -59,7 +81,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             = DependencyProperty.Register(
                   "Filter",
                   typeof(string),
-                  typeof(VertragListControl),
+                  typeof(WohnungListControl),
                   new PropertyMetadata(""));
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)

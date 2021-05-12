@@ -44,6 +44,14 @@
                             Kontakte="{x:Bind ViewModel.Mitglieder.Value, Mode=OneWay}"/>
                     </uc:ExpanderControl.MainContent>
                 </uc:ExpanderControl>
+                <uc:ExpanderControl Header="Wohnungen">
+                    <uc:ExpanderControl.Bonus>
+                        <CheckBox Margin="10,0,0,0" IsChecked="{x:Bind ViewModel.WohnungenInklusiveMitglieder, Mode=TwoWay}" Content="Inkl. Mitglieder"/>
+                    </uc:ExpanderControl.Bonus>
+                    <uc:ExpanderControl.MainContent>
+                        <uc:WohnungListControl Liste="{x:Bind ViewModel.Wohnungen.Value, Mode=OneWay}" />
+                    </uc:ExpanderControl.MainContent>
+                </uc:ExpanderControl>
             </StackPanel>
         </uc:FileDrop.MainContent>
     </uc:FileDrop>

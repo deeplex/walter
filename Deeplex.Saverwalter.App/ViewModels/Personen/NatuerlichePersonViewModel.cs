@@ -1,8 +1,11 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
+using System.Linq;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -54,6 +57,38 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public string Name => Vorname + " " + Nachname;
 
+        public ObservableProperty<ImmutableList<WohnungListEntry>> Wohnungen
+            = new ObservableProperty<ImmutableList<WohnungListEntry>>();
+        private bool mWohnungenInklusiveJurPers;
+        public bool WohnungenInklusiveJurPers
+        {
+            get => mWohnungenInklusiveJurPers;
+            set
+            {
+                mWohnungenInklusiveJurPers = value;
+                UpdateListen();
+            }
+        }
+
+        public ObservableProperty<ImmutableList<KontaktListEntry>> JuristischePersonen
+            = new ObservableProperty<ImmutableList<KontaktListEntry>>();
+
+        public void UpdateListen()
+        {
+            JuristischePersonen.Value = App.Walter.JuristischePersonenMitglieder
+                .Include(w => w.JuristischePerson)
+                .Where(w => w.PersonId == Entity.PersonId)
+                .Select(w => new KontaktListEntry(w.JuristischePerson.PersonId))
+                .ToImmutableList();
+
+            Wohnungen.Value = App.Walter.Wohnungen
+                .ToList()
+                .Where(w => w.BesitzerId == GetEntity.PersonId ||
+                    (WohnungenInklusiveJurPers && JuristischePersonen.Value.Any(m => m.Guid == w.BesitzerId)))
+                .Select(w => new WohnungListEntry(w))
+                .ToImmutableList();
+        }
+
         public NatuerlichePersonViewModel(int id)
             : this(App.Walter.NatuerlichePersonen.Find(id)) { }
 
@@ -64,6 +99,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Id = k.NatuerlichePersonId;
 
             Anreden = Enums.Anreden;
+            UpdateListen();
 
             PropertyChanged += OnUpdate;
         }

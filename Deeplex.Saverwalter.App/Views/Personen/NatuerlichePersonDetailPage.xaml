@@ -26,6 +26,16 @@
                     Header="Nachname" Style="{StaticResource Eintraege}"/>
                 </mtuuc:WrapPanel>
                 <uc:PersonDetailControl PersonViewModel="{x:Bind ViewModel}" />
+                <uc:ExpanderControl Header="Wohnungen">
+                    <uc:ExpanderControl.Bonus>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox Margin="10,0,0,0" IsChecked="{x:Bind ViewModel.WohnungenInklusiveJurPers, Mode=TwoWay}" Content="Inkl. juristische Personen"/>
+                        </StackPanel>
+                    </uc:ExpanderControl.Bonus>
+                    <uc:ExpanderControl.MainContent>
+                        <uc:WohnungListControl Liste="{x:Bind ViewModel.Wohnungen.Value, Mode=OneWay}" />
+                    </uc:ExpanderControl.MainContent>
+                </uc:ExpanderControl>
             </StackPanel>
         </uc:FileDrop.MainContent>
     </uc:FileDrop>

@@ -70,7 +70,7 @@ namespace Deeplex.Saverwalter.App.Views
                     PersonId = ViewModel.AddMitglied.Value.Guid,
                 });
                 App.SaveWalter();
-                ViewModel.UpdateMitgliedList();
+                ViewModel.UpdateListen();
             }
         }
     }
