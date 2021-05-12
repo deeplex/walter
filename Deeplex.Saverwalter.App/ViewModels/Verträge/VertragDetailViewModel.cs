@@ -101,19 +101,22 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 App.SaveWalter();
             }, _ => true);
 
-            RemoveVersion = new RelayCommand(_ =>
+            RemoveVersion = new AsyncRelayCommand(async _ =>
             {
-                var vs = Versionen.Value.First().Entity;
-                App.Walter.Vertraege.Remove(vs);
-                Versionen.Value = Versionen.Value.Skip(1).ToImmutableList();
-                App.SaveWalter();
+                if (await App.ViewModel.Confirmation())
+                {
+                    var vs = Versionen.Value.First().Entity;
+                    App.Walter.Vertraege.Remove(vs);
+                    Versionen.Value = Versionen.Value.Skip(1).ToImmutableList();
+                    App.SaveWalter();
+                }
             }, _ => true);
         }
 
         public RelayCommand AddMiete { get; }
         public RelayCommand AddMietMinderung { get; }
         public RelayCommand AddVersion { get; }
-        public RelayCommand RemoveVersion { get; }
+        public AsyncRelayCommand RemoveVersion { get; }
 
         public async void SelfDestruct()
         {
