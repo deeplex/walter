@@ -9,17 +9,19 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
 
-    <Grid AllowDrop="True" DragOver="Grid_DragOver" DragLeave="Grid_DragLeave" Drop="Grid_Drop">
-        <RelativePanel x:Name="AddFilePanel" Background="#44000000" Visibility="Collapsed">
-            <SymbolIcon x:Name="AddSymbol" Symbol="Add" RelativePanel.AlignVerticalCenterWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True" Foreground="White" RenderTransformOrigin="0.5,0.5">
-                <SymbolIcon.RenderTransform>
-                    <CompositeTransform ScaleX="1.5" ScaleY="1.5"/>
-                </SymbolIcon.RenderTransform>
-            </SymbolIcon>
+    <ScrollViewer>
+        <Grid AllowDrop="True" DragOver="Grid_DragOver" DragLeave="Grid_DragLeave" Drop="Grid_Drop">
+            <RelativePanel x:Name="AddFilePanel" Background="#44000000" Visibility="Collapsed">
+                <SymbolIcon x:Name="AddSymbol" Symbol="Add" RelativePanel.AlignVerticalCenterWithPanel="True" RelativePanel.AlignHorizontalCenterWithPanel="True" Foreground="White" RenderTransformOrigin="0.5,0.5">
+                    <SymbolIcon.RenderTransform>
+                        <CompositeTransform ScaleX="1.5" ScaleY="1.5"/>
+                    </SymbolIcon.RenderTransform>
+                </SymbolIcon>
 
-            <TextBlock RelativePanel.Below="AddSymbol" RelativePanel.AlignHorizontalCenterWithPanel="True" Margin="0,12,0,0" Text="Datei hinzufügen" Foreground="White" FontSize="24"></TextBlock>
-        </RelativePanel>
-        
-        <ContentPresenter Content="{x:Bind MainContent}" />
-    </Grid>
+                <TextBlock RelativePanel.Below="AddSymbol" RelativePanel.AlignHorizontalCenterWithPanel="True" Margin="0,12,0,0" Text="Datei hinzufügen" Foreground="White" FontSize="24"></TextBlock>
+            </RelativePanel>
+
+            <ContentPresenter Content="{x:Bind MainContent}" />
+        </Grid>
+    </ScrollViewer>
 </UserControl>
