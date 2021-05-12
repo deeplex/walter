@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.App.Views.Rechnungen
                 App.Walter.JuristischePersonen.Add(j);
                 App.SaveWalter();
 
-                var kl = new ViewModels.KontaktListEntry(j);
+                var kl = new KontaktListEntry(j);
                 ViewModel.Personen.Value = ViewModel.Personen.Value.Add(kl);
                 ViewModel.Aussteller = kl;
                 ViewModel.QuickPerson.Value = "";

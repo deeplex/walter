@@ -26,6 +26,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public bool hasSelectedKontakt => SelectedKontakt != null;
 
         public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
+        public ObservableProperty<bool> Vermieter { get; set; } = new ObservableProperty<bool>(true);
+        public ObservableProperty<bool> Mieter { get; set; } = new ObservableProperty<bool>(true);
+        public ObservableProperty<bool> Handwerker { get; set; } = new ObservableProperty<bool>(true);
         public ImmutableList<KontaktListEntry> AllRelevant { get; }
 
         public KontaktListViewModel()

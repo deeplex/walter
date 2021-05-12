@@ -13,6 +13,22 @@ namespace Deeplex.Saverwalter.App.Utils
 {
     public static class Elements
     {
+        public static AppBarElementContainer CheckBox(ObservableProperty<bool> check, string label)
+        {
+            void Checkbox_Click(object sender, RoutedEventArgs e)
+            {
+                check.Value = ((CheckBox)sender).IsChecked ?? false;
+            }
+
+            var checkbox = new CheckBox()
+            {
+                IsChecked = check.Value,
+                Content = label,
+            };
+            checkbox.Click += Checkbox_Click;
+            return new AppBarElementContainer() { Content = checkbox };
+        }
+
         public static AppBarElementContainer Filter(IFilterViewModel ViewModel)
         {
             var Filter = new TextBox

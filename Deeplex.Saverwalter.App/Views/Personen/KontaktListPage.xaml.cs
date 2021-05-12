@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
 using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
+using Microsoft.Toolkit.Uwp.UI.Controls;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
@@ -16,7 +17,24 @@ namespace Deeplex.Saverwalter.App.Views
             InitializeComponent();
             App.ViewModel.Titel.Value = "Kontakte";
 
-            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { Elements.Filter(ViewModel), AddPerson() });
+            var checkboxes = new StackPanel() { Orientation = Orientation.Horizontal };
+            var cv = new CheckBox() { IsChecked = ViewModel.Vermieter.Value };
+            cv.Click += Checkbox_Click;
+
+            App.ViewModel.RefillCommandContainer(
+                new ICommandBarElement[]
+                {
+                    Elements.CheckBox(ViewModel.Vermieter, "Vermieter"),
+                    Elements.CheckBox(ViewModel.Mieter, "Mieter"),
+                    Elements.CheckBox(ViewModel.Handwerker, "Handwerker"),
+                    Elements.Filter(ViewModel),
+                    AddPerson()
+                });
+        }
+
+        private void Checkbox_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.Vermieter.Value = ((CheckBox)sender).IsChecked ?? false;
         }
 
         private AppBarButton AddPerson()
