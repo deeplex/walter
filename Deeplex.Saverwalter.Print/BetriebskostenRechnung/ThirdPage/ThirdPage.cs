@@ -1,9 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml.Wordprocessing;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using static Deeplex.Saverwalter.Print.Utils;
 
 namespace Deeplex.Saverwalter.Print.ThirdPage
@@ -27,9 +24,9 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
 
                 if (gruppe.GesamtEinheiten > 1)
                 {
-                        body.Append(
-                            Abrechnungseinheit(b, gruppe),
-                            new Paragraph(NoSpace()));
+                    body.Append(
+                        Abrechnungseinheit(b, gruppe),
+                        new Paragraph(NoSpace()));
                 }
                 body.Append(
                     ErmittlungKalteEinheiten(b, gruppe),
@@ -40,7 +37,7 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
             // TODO apply sleeker format like for kalte Kosten for warme Kosten.
             if (b.Gruppen.Any(g => g.GesamtBetragWarm != 0 && g.BetragWarm != 0))
             {
-                
+
                 body.Append(
                     new Break() { Type = BreakValues.Page }, // forth page...
                     Heading("Abrechnung der Nebenkosten (warme Nebenkosten)"));
@@ -74,7 +71,7 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
             body.Append(
                 new Paragraph(),
                 Heading("Gesamtergebnis der Abrechnung"),
-                GesamtErgebnis(b));            
+                GesamtErgebnis(b));
         }
     }
 }

@@ -4,11 +4,8 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
-using static Deeplex.Saverwalter.Model.Betriebskostenabrechnung;
 
 namespace Deeplex.Saverwalter.Print
 {
@@ -41,7 +38,7 @@ namespace Deeplex.Saverwalter.Print
         public static bool SaveAsDocx(this ImmutableList<ErhaltungsaufwendungWohnung> l, string filepath)
         {
             var body = DinA4();
-            foreach(var e in l)
+            foreach (var e in l)
             {
                 if (!e.Liste.IsEmpty)
                 {

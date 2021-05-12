@@ -1,6 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
-using Deeplex.Saverwalter.Model;
-using Deeplex.Utils.ObjectModel;
+﻿using Deeplex.Saverwalter.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -55,7 +53,7 @@ namespace Deeplex.Saverwalter.App.Utils
             if (file != null)
             {
                 await FileIO.WriteBytesAsync(file, a.Content);
-               return file.Path;
+                return file.Path;
             }
 
             return "";

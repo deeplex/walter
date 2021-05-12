@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.App.Views
             Delete.Click += SelfDestruct;
 
             App.ViewModel.RefillCommandContainer(
-                new ICommandBarElement[] {},
+                new ICommandBarElement[] { },
                 new ICommandBarElement[] { Delete });
 
             base.OnNavigatedTo(e);
@@ -55,7 +55,7 @@ namespace Deeplex.Saverwalter.App.Views
             }
             catch
             {
-                
+
             }
         }
 

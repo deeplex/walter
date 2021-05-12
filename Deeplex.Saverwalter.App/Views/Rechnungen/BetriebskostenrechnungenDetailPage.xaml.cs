@@ -1,10 +1,8 @@
 ﻿using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Linq;
 using Windows.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
@@ -54,7 +52,7 @@ namespace Deeplex.Saverwalter.App.Views
             Delete.Click += SelfDestruct;
 
             App.ViewModel.RefillCommandContainer(
-                new ICommandBarElement[] {},
+                new ICommandBarElement[] { },
                 new ICommandBarElement[] { Delete });
 
             App.Walter.Adressen

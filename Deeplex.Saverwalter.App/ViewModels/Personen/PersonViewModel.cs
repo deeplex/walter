@@ -1,10 +1,10 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.ErhaltungsaufwendungListe;
+using Deeplex.Saverwalter.Print;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using Deeplex.Saverwalter.Print;
 using Windows.Storage;
 
 namespace Deeplex.Saverwalter.App.ViewModels

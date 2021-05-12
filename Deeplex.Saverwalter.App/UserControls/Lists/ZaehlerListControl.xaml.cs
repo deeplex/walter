@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             if (Filter != "")
             {
                 ViewModel.Liste.Value = ViewModel.Liste.Value.Where(v =>
-                    applyFilter(Filter, v.Kennnummer, v.Wohnung, v.TypString))                    
+                    applyFilter(Filter, v.Kennnummer, v.Wohnung, v.TypString))
                     .ToImmutableList();
             }
         }

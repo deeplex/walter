@@ -3,7 +3,6 @@ using Deeplex.Saverwalter.App.Views;
 using Deeplex.Saverwalter.Model;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Windows.UI.Xaml;
@@ -182,7 +181,7 @@ namespace Deeplex.Saverwalter.App.UserControls
                         .Where(m => m.PersonId == guid && m.VertragId == VertragGuid)
                         .ToList().ForEach(m => App.Walter.MieterSet.Remove(m));
                 }
-                
+
                 if (JuristischePersonId != 0)
                 {
                     App.Walter.JuristischePersonenMitglieder

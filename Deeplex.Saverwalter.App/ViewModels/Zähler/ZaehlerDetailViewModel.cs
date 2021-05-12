@@ -3,14 +3,10 @@ using Deeplex.Saverwalter.App.ViewModels.Zähler;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using Windows.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -113,10 +109,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .Select(w => new WohnungListEntry(w))
                 .ToList();
 
-             EinzelZaehler = App.Walter.ZaehlerSet
-                .Where(y => y.ZaehlerId != Id)
-                .Select(y => new ZaehlerListEntry(y))
-                .ToList();
+            EinzelZaehler = App.Walter.ZaehlerSet
+               .Where(y => y.ZaehlerId != Id)
+               .Select(y => new ZaehlerListEntry(y))
+               .ToList();
             AllgemeinZaehler = mAllgemeinZaehler = EinzelZaehler.SingleOrDefault(y => y.Id == z.AllgemeinZaehler?.ZaehlerId);
 
 
@@ -125,7 +121,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 Staende.Value = new ZaehlerstandListViewModel(z);
                 Wohnung = Wohnungen.Find(w => w.Id == z.WohnungId);
             }
-            
+
             PropertyChanged += OnUpdate;
 
             DeleteAllgemeinZaehler = new RelayCommand(_ => AllgemeinZaehler = null);

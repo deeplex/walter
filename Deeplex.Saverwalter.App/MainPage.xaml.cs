@@ -2,7 +2,6 @@
 using Deeplex.Saverwalter.App.Views;
 using Deeplex.Saverwalter.App.Views.Rechnungen;
 using System;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;

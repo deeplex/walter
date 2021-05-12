@@ -1,7 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.App.ViewModels.Zähler;
-using Deeplex.Saverwalter.Model;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;

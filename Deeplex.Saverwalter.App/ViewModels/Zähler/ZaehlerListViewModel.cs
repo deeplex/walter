@@ -2,12 +2,8 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.App.ViewModels.Zähler
 {
@@ -30,7 +26,7 @@ namespace Deeplex.Saverwalter.App.ViewModels.Zähler
 
         public ZaehlerListViewModel()
         {
-            AllRelevant= App.Walter.ZaehlerSet
+            AllRelevant = App.Walter.ZaehlerSet
                 .Include(z => z.Wohnung)
                 .ThenInclude(w => w.Adresse)
                 .Include(z => z.Staende)

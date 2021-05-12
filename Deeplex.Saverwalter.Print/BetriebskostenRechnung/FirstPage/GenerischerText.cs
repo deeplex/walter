@@ -1,9 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml.Wordprocessing;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using static Deeplex.Saverwalter.Print.Utils;
 
 namespace Deeplex.Saverwalter.Print.FirstPage
@@ -29,7 +26,7 @@ namespace Deeplex.Saverwalter.Print.FirstPage
                 "Gesamtkosten, die Berechnung der Kostenanteile, die Verrechnung der geleisteten Vorauszahlungen und gegebenenfalls die " +
                 "Neuberechnung der monatlichen Vorauszahlungen entnehmen Sie bitte den folgenden Seiten.";
 
-                // TODO Text auf Anwesenheit von Heizung oder so testen und anpassen.
+            // TODO Text auf Anwesenheit von Heizung oder so testen und anpassen.
             return new Paragraph(Font(),
                 new ParagraphProperties(new Justification() { Val = JustificationValues.Both, }),
                 new Run(Font(),

@@ -1,13 +1,9 @@
-﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
-using Windows.UI.Xaml.Controls;
-using static Deeplex.Saverwalter.App.Views.WohnungDetailPage;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {

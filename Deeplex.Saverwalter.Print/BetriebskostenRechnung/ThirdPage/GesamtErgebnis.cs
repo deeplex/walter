@@ -1,8 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml.Wordprocessing;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using static Deeplex.Saverwalter.Print.Utils;
 
 namespace Deeplex.Saverwalter.Print.ThirdPage

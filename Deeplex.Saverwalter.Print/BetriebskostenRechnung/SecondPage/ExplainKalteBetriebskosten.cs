@@ -1,9 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Deeplex.Saverwalter.Print.SecondPage
 {

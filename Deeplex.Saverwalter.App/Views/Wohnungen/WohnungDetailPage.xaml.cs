@@ -4,10 +4,8 @@ using Deeplex.Saverwalter.App.Views.Rechnungen;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.ErhaltungsaufwendungListe;
 using Deeplex.Saverwalter.Print;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml.Controls;
 using System;
-using System.Collections.Immutable;
 using System.Linq;
 using Windows.Storage;
 using Windows.UI.Xaml;
@@ -72,7 +70,7 @@ namespace Deeplex.Saverwalter.App.Views
                     Wohnung = ViewModel.Entity,
                     Datum = DateTime.Now,
                 };
-                
+
                 var vm = new ErhaltungsaufwendungenDetailViewModel(r);
                 App.ViewModel.Navigate(typeof(ErhaltungsaufwendungenDetailPage), vm);
             };

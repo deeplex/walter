@@ -4,7 +4,6 @@ using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Print;
 using Microsoft.UI.Xaml.Controls;
 using System;
-using System.Collections.Immutable;
 using System.Linq;
 using Windows.Storage;
 using Windows.UI.Xaml.Controls;
@@ -113,7 +112,7 @@ namespace Deeplex.Saverwalter.App.Views
 
             var s = Jahr.ToString() + " - " + ViewModel.Wohnung.ToString() + " - " + AuflistungMieter;
             var path = ApplicationData.Current.LocalFolder.Path + @"\" + s;
-            
+
             var worked = b.SaveAsDocx(path + ".docx");
             var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
 

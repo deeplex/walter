@@ -2,13 +2,10 @@
 using Deeplex.Saverwalter.App.ViewModels.Zähler;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.App.ViewModels
 {
@@ -176,7 +173,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r)
         {
             Entity = r;
-            
+
             Wohnungen = r.Gruppen.Select(g => g.Wohnung).ToList();
 
             AllgemeinZaehler_List = App.Walter.ZaehlerSet
