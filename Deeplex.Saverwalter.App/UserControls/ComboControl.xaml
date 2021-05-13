@@ -5,6 +5,7 @@
     xmlns:local="using:Deeplex.Saverwalter.App.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
@@ -12,11 +13,31 @@
     <ComboBox
         Width="{x:Bind Width, Mode=OneWay}"
         MinWidth="300"
+        HorizontalAlignment="Stretch"
         IsEditable="True"
         IsTextSearchEnabled="True"
         SelectionChanged="ComboBox_SelectionChanged"
         Header="{x:Bind Header, Mode=OneWay}"
         PlaceholderText="{x:Bind PlaceholderText, Mode=OneWay}"
         SelectedItem="{x:Bind SelectedItem, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-        ItemsSource="{x:Bind ItemsSource, Mode=OneWay}" />
+        ItemsSource="{x:Bind ItemsSource, Mode=OneWay}">
+        <ComboBox.ContextFlyout>
+            <Flyout x:Name="ContextFlyout">
+                <StackPanel>
+                    <Button Background="Transparent" Click="Anhaenge_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <SymbolIcon Symbol="Attach"/>
+                            <TextBlock Margin="10,0,0,0" Text="Anhänge anzeigen" />
+                        </StackPanel>
+                    </Button>
+                    <Button Background="Transparent" Click="Navigation_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <SymbolIcon Symbol="Forward"/>
+                            <TextBlock Margin="10,0,0,0" Text="Details anzeigen" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Flyout>
+        </ComboBox.ContextFlyout>
+    </ComboBox>
 </UserControl>
