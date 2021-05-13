@@ -96,7 +96,7 @@ namespace Deeplex.Saverwalter.App.Views
             ViewModel.Ende = null;
         }
 
-        private void Betriebskostenabrechnung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private async void Betriebskostenabrechnung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             var Jahr = (int)((Button)sender).CommandParameter;
             var b = new Betriebskostenabrechnung(
@@ -115,8 +115,21 @@ namespace Deeplex.Saverwalter.App.Views
 
             var worked = b.SaveAsDocx(path + ".docx");
             var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
+            var anhang = await Files.ExtractFrom(path + ".docx");
 
-            b.SaveAnhaenge(path);
+            if (anhang != null)
+            {
+                App.Walter.VertragAnhaenge.Add(new VertragAnhang()
+                {
+                    Anhang = anhang,
+                    Target = ViewModel.guid,
+                });
+                App.SaveWalter();
+                App.ViewModel.DetailAnhang.Value.AddAnhangToList(anhang);
+                App.ViewModel.ShowAlert(text, 5000);
+            }
+
+            // TODO b.SaveAnhaenge(path);
 
             App.ViewModel.ShowAlert(text, 5000);
         }
