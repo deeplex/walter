@@ -141,26 +141,25 @@ namespace Deeplex.Saverwalter.App.Views
             var l = new ErhaltungsaufwendungWohnung(App.Walter, ViewModel.Id, Jahr);
 
             var s = Jahr.ToString() + " - " + ViewModel.Anschrift;
-            var path = ApplicationData.Current.LocalFolder.Path + @"\" + s;
+            var path = ApplicationData.Current.TemporaryFolder.Path + @"\" + s;
 
             var worked = l.SaveAsDocx(path + ".docx");
             var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
 
             var anhang = await Files.ExtractFrom(path + ".docx");
-            var ret = Files.ExtractTo(anhang);
-            App.Walter.WohnungAnhaenge.Add(new WohnungAnhang()
+            //var ret = Files.ExtractTo(anhang);
+            if (anhang != null)
             {
-                Anhang = anhang,
-                Target = ViewModel.Entity,
-            });
-            App.SaveWalter();
-            App.ViewModel.DetailAnhang.Value.AddAnhangToList(anhang);
-
-            // TODO e.SaveAnhaenge(path);
-            if (await ret != "")
-            {
+                App.Walter.WohnungAnhaenge.Add(new WohnungAnhang()
+                {
+                    Anhang = anhang,
+                    Target = ViewModel.Entity,
+                });
+                App.SaveWalter();
+                App.ViewModel.DetailAnhang.Value.AddAnhangToList(anhang);
                 App.ViewModel.ShowAlert(text, 5000);
             }
+            // TODO e.SaveAnhaenge(path);
         }
 
         public sealed class WohnungDetailAdresseWohnung : Microsoft.UI.Xaml.Controls.TreeViewNode
