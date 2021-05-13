@@ -17,6 +17,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<ImmutableList<AnhangListEntry>> Liste =
             new ObservableProperty<ImmutableList<AnhangListEntry>>();
 
+        public void AddAnhangToList(Anhang a)
+        {
+            var self = this;
+            Liste.Value = Liste.Value.Add(new AnhangListEntry(a, self));
+        }
+
         private void SetList<T>(T a, IQueryable<IAnhang<T>> set)
         {
             var self = this;

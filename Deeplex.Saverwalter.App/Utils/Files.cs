@@ -14,6 +14,9 @@ namespace Deeplex.Saverwalter.App.Utils
 {
     public static class Files
     {
+        public static async Task<Anhang> ExtractFrom(string path)
+            => await ExtractFrom(await StorageFile.GetFileFromPathAsync(path));
+
         public static async Task<Anhang> ExtractFrom(IStorageFile stream)
         {
             var anhang = new Anhang();
