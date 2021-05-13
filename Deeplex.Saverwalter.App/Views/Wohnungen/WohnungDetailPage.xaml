@@ -69,6 +69,12 @@
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
+                    <uc:ExpanderControl Header="Adresse">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:WohnungListControl WohnungId="{x:Bind ViewModel.Id}" />
+                        </uc:ExpanderControl.MainContent>
+                    </uc:ExpanderControl>
+
                     <uc:ExpanderControl Header="Verträge" Click="{x:Bind AddVertrag_Click}">
                         <uc:ExpanderControl.MainContent>
                             <uc:VertragListControl WohnungId="{x:Bind ViewModel.Id}"/>

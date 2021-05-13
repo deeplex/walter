@@ -26,6 +26,13 @@ namespace Deeplex.Saverwalter.App.UserControls
                 ViewModel.Liste.Value = Liste;
             }
 
+            if (WohnungId != 0)
+            {
+                ViewModel.Liste.Value = ViewModel.Liste.Value.Where(v =>
+                    v.Adresse.Wohnungen.Any(w => w.WohnungId == WohnungId))
+                    .ToImmutableList();
+            }
+
             if (Filter != "")
             {
                 ViewModel.Liste.Value = ViewModel.Liste.Value.Where(v =>
@@ -40,12 +47,26 @@ namespace Deeplex.Saverwalter.App.UserControls
             ViewModel = new WohnungListViewModel();
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(ListeProperty, (DepObj, Prop) => UpdateFilter());
+            RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, Prop) => UpdateFilter());
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
             App.ViewModel.Navigate(typeof(WohnungDetailPage), ViewModel.SelectedWohnung.Value.Entity);
         }
+
+        public int WohnungId
+        {
+            get { return (int)GetValue(WohnungIdProperty); }
+            set { SetValue(WohnungIdProperty, value); }
+        }
+
+        public static readonly DependencyProperty WohnungIdProperty
+            = DependencyProperty.Register(
+                  "WohnungId",
+                  typeof(int),
+                  typeof(WohnungListControl),
+                  new PropertyMetadata(0));
 
         public ImmutableList<WohnungListEntry> Liste
         {

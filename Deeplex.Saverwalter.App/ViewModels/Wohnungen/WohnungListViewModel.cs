@@ -33,6 +33,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public int Id { get; }
         public Wohnung Entity { get; }
+        public Adresse Adresse { get; }
         public string Bezeichnung { get; }
         public string Anschrift { get; }
         public string Besitzer { get; }
@@ -41,6 +42,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Id = w.WohnungId;
             Entity = w;
+            Adresse = w.Adresse;
             Bezeichnung = w.Bezeichnung;
             Anschrift = AdresseViewModel.Anschrift(w);
             Besitzer = App.Walter.FindPerson(w.BesitzerId).Bezeichnung;
