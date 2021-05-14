@@ -9,9 +9,21 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<ImmutableList<AdresseViewModel>> Adressen =
             new ObservableProperty<ImmutableList<AdresseViewModel>>();
 
-        public SettingsViewModel()
+        public void LoadAdressen()
         {
             Adressen.Value = App.Walter.Adressen.Select(a => new AdresseViewModel(a)).ToImmutableList();
+        }
+
+        public SettingsViewModel()
+        {
+            try
+            {
+                LoadAdressen();
+            }
+            catch
+            {
+                App.ViewModel.ShowAlert("Keine Datenbank geladen.", 5000);
+            }
         }
     }
 }

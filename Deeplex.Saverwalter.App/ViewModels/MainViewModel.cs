@@ -42,6 +42,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
         public void ShowAlert(string text, int ms = 500)
         {
+            if (SavedIndicator == null)
+            {
+                return;
+            }
             SavedIndicatorText.Text = text;
             SavedIndicator.Show(ms);
         }
