@@ -138,6 +138,9 @@
     <Compile Include="UserControls\ComboControl.xaml.cs">
       <DependentUpon>ComboControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\ContextMenuControl.xaml.cs">
+      <DependentUpon>ContextMenuControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\ExpanderControl.xaml.cs">
       <DependentUpon>ExpanderControl.xaml</DependentUpon>
     </Compile>
@@ -333,6 +336,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\ComboControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ContextMenuControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

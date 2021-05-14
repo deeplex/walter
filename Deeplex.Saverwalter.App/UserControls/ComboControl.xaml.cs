@@ -65,7 +65,7 @@ namespace Deeplex.Saverwalter.App.UserControls
         public static readonly DependencyProperty PlaceholderTextProperty
             = DependencyProperty.Register(
             "PlaceholderText",
-            typeof(object),
+            typeof(string),
             typeof(ComboControl),
             new PropertyMetadata(""));
 
@@ -76,69 +76,6 @@ namespace Deeplex.Saverwalter.App.UserControls
             {
                 cb.SelectedItem = null;
             }
-        }
-
-        public bool showNavigation =>
-            SelectedItem is WohnungListEntry ||
-            SelectedItem is KontaktListEntry ||
-            SelectedItem is ZaehlerListEntry;
-
-        private void Navigation_Click(object sender, RoutedEventArgs e)
-        {
-            if (SelectedItem is WohnungListEntry w)
-            {
-                App.ViewModel.Navigate(typeof(WohnungDetailPage), w.Entity);
-            }
-            else if (SelectedItem is KontaktListEntry k)
-            {
-                var a = App.Walter.NatuerlichePersonen.SingleOrDefault(p => p.PersonId == k.Guid);
-                if (a != null)
-                {
-                    App.ViewModel.Navigate(typeof(NatuerlichePersonDetailPage), a);
-                }
-                else
-                {
-                    var b = App.Walter.JuristischePersonen.SingleOrDefault(p => p.PersonId == k.Guid);
-                    if (b != null)
-                    {
-                       App.ViewModel.Navigate(typeof(JuristischePersonenDetailPage), b);
-                    }
-                }
-            }
-            else if (SelectedItem is ZaehlerListEntry z)
-            {
-                App.ViewModel.Navigate(typeof(ZaehlerDetailPage), z.Entity);
-            }
-            ContextFlyout.Hide();
-        }
-
-        private void Anhaenge_Click(object sender, RoutedEventArgs e)
-        {
-            if (SelectedItem is WohnungListEntry w)
-            {
-                App.ViewModel.ListAnhang.Value = new AnhangListViewModel(w.Entity);
-            }
-            else if (SelectedItem is KontaktListEntry k)
-            {
-                var a = App.Walter.NatuerlichePersonen.SingleOrDefault(p => p.PersonId == k.Guid);
-                if (a != null)
-                {
-                    App.ViewModel.ListAnhang.Value = new AnhangListViewModel(a);
-                }
-                else
-                {
-                    var b = App.Walter.JuristischePersonen.SingleOrDefault(p => p.PersonId == k.Guid);
-                    if (b != null)
-                    {
-                        App.ViewModel.ListAnhang.Value = new AnhangListViewModel(b);
-                    }
-                }
-            }
-            else if (SelectedItem is ZaehlerstandListEntry z)
-            {
-                App.ViewModel.ListAnhang.Value = new AnhangListViewModel(z.Entity);
-            }
-            ContextFlyout.Hide();
         }
     }
 }

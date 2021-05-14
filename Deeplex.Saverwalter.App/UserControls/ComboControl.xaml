@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
@@ -22,21 +23,11 @@
         SelectedItem="{x:Bind SelectedItem, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
         ItemsSource="{x:Bind ItemsSource, Mode=OneWay}">
         <ComboBox.ContextFlyout>
-            <Flyout x:Name="ContextFlyout">
-                <StackPanel>
-                    <Button Background="Transparent" Click="Anhaenge_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <SymbolIcon Symbol="Attach"/>
-                            <TextBlock Margin="10,0,0,0" Text="Anhänge anzeigen" />
-                        </StackPanel>
-                    </Button>
-                    <Button Background="Transparent" Click="Navigation_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <SymbolIcon Symbol="Forward"/>
-                            <TextBlock Margin="10,0,0,0" Text="Details anzeigen" />
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
+            <Flyout>
+                <uc:ContextMenuControl
+                    Item="{x:Bind SelectedItem, Mode=OneWay}"
+                    Anhang="True"
+                    Navigation="True" />
             </Flyout>
         </ComboBox.ContextFlyout>
     </ComboBox>
