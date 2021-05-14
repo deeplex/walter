@@ -27,6 +27,6 @@
                     Content="{x:Bind Bonus}" />
             </mtuuc:WrapPanel>
         </mtuuc:Expander.Header>
-        <ContentPresenter Content="{x:Bind MainContent}" />
+        <ContentPresenter Padding="0,0,0,20" Content="{x:Bind MainContent}" />
     </mtuuc:Expander>
 </UserControl>

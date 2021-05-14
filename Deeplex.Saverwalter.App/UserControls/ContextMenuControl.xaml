@@ -25,7 +25,7 @@
         Click="Navigation_Click">
             <StackPanel Orientation="Horizontal">
                 <SymbolIcon Symbol="Forward"/>
-                <TextBlock Margin="10,0,0,0" Text="Details anzeigen" />
+                <TextBlock HorizontalAlignment="Stretch" Margin="10,0,0,0" Text="Details anzeigen" />
             </StackPanel>
         </Button>
     </StackPanel>

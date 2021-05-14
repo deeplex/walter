@@ -66,7 +66,21 @@
                     </mtuuc:WrapPanel>
                     <mtuuc:WrapPanel Orientation="Horizontal">
                         <TextBlock Text="Vermieter:" Style="{StaticResource Labels}"/>
-                        <TextBlock Width="400" Style="{StaticResource Labels}" Text="{x:Bind ViewModel.Vermieter, Mode=OneWay}"/>
+                        <Grid>
+                            <TextBlock
+                                Width="400"
+                                Style="{StaticResource Labels}"
+                                Text="{x:Bind ViewModel.Vermieter, Mode=OneWay}">
+                            </TextBlock>
+                            <Grid.ContextFlyout>
+                                <Flyout>
+                                    <uc:ContextMenuControl
+                                        Item="{x:Bind ViewModel.Vermieter, Mode=OneWay}"
+                                        Navigation="True"
+                                        Anhang="True"/>
+                                </Flyout>
+                            </Grid.ContextFlyout>
+                        </Grid>
                     </mtuuc:WrapPanel>
                     <mtuuc:WrapPanel Orientation="Horizontal">
                         <TextBlock Text="Ansprechpartner: " Style="{StaticResource Labels}"/>

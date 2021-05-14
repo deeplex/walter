@@ -84,9 +84,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public string Vermieter
+        public KontaktListEntry Vermieter
             => Wohnung?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
-                    App.Walter.FindPerson(g).Bezeichnung : "";
+                    new KontaktListEntry(g) : null;
 
         private KontaktListEntry mAnsprechpartner;
         public KontaktListEntry Ansprechpartner
