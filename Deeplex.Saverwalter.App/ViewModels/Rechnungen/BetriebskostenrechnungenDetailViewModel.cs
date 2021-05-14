@@ -4,6 +4,7 @@ using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
 
@@ -168,13 +169,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public List<Wohnung> Wohnungen { get; }
+        public ObservableProperty<ImmutableList<WohnungListEntry>> Wohnungen
+            = new ObservableProperty<ImmutableList<WohnungListEntry>>();
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r)
         {
             Entity = r;
 
-            Wohnungen = r.Gruppen.Select(g => g.Wohnung).ToList();
+            Wohnungen.Value = r.Gruppen.Select(g => new WohnungListEntry(g.Wohnung)).ToImmutableList();
 
             AllgemeinZaehler_List = App.Walter.ZaehlerSet
                 .Select(a => new ZaehlerListEntry(a))

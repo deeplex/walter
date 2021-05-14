@@ -71,7 +71,7 @@ namespace Deeplex.Saverwalter.App.Views
                     {
                         var n = new Microsoft.UI.Xaml.Controls.TreeViewNode() { Content = new WohnungListEntry(w) };
                         k.Children.Add(n);
-                        if (ViewModel.Wohnungen.Exists(ww => ww.WohnungId == w.WohnungId))
+                        if (ViewModel.Wohnungen.Value.Exists(ww => ww.Id == w.WohnungId))
                         {
                             WohnungenTree.SelectedNodes.Add(n);
                         }
@@ -94,7 +94,7 @@ namespace Deeplex.Saverwalter.App.Views
 
             // Add missing Gruppen
             selected
-                .Where(s => !ViewModel.Wohnungen.Exists(w => w.WohnungId == (s as WohnungListEntry).Id))
+                .Where(s => !ViewModel.Wohnungen.Value.Exists(w => w.Id == (s as WohnungListEntry).Id))
                 .ToList()
                 .ForEach(s =>
                 {
@@ -105,24 +105,24 @@ namespace Deeplex.Saverwalter.App.Views
                         Rechnung = App.Walter.Betriebskostenrechnungen.Find(ViewModel.Id),
                         WohnungId = (s as WohnungListEntry).Id,
                     });
-                    ViewModel.Wohnungen.Add((s as WohnungListEntry).Entity);
+                    ViewModel.Wohnungen.Value = ViewModel.Wohnungen.Value.Add(s as WohnungListEntry);
                 });
 
             // Remove old Gruppen
-            ViewModel.Wohnungen
-                .Where(w => !selected.Exists(s => w.WohnungId == (s as WohnungListEntry).Id))
+            ViewModel.Wohnungen.Value
+                .Where(w => !selected.Exists(s => w.Id == (s as WohnungListEntry).Id))
                 .ToList()
                 .ForEach(w =>
                 {
                     flagged = true;
 
                     App.Walter.Betriebskostenrechnungsgruppen
-                        .Where(g => g.Rechnung.BetriebskostenrechnungId == ViewModel.Id && g.WohnungId == w.WohnungId)
+                        .Where(g => g.Rechnung.BetriebskostenrechnungId == ViewModel.Id && g.WohnungId == w.Id)
                         .ToList()
                         .ForEach(g =>
                         {
                             App.Walter.Betriebskostenrechnungsgruppen.Remove(g);
-                            ViewModel.Wohnungen.Remove(w);
+                            ViewModel.Wohnungen.Value = ViewModel.Wohnungen.Value.Remove(w);
                         });
                 });
 

@@ -12,10 +12,11 @@
     <uc:FileDrop>
         <uc:FileDrop.MainContent>
             <StackPanel>
-                <TextBlock Text="Betroffene Wohneinheiten:"/>
-                <muxc:TreeView
-                    SelectionMode="Multiple"
-                    x:Name="WohnungenTree"/>
+                <uc:ExpanderControl IsExpanded="True" Header="Betroffene Wohneinheiten">
+                    <uc:ExpanderControl.MainContent>
+                        <muxc:TreeView SelectionMode="Multiple" x:Name="WohnungenTree"/>
+                    </uc:ExpanderControl.MainContent>    
+                </uc:ExpanderControl>
                 <MenuFlyoutSeparator/>
                 <TextBox
                     Text="{x:Bind ViewModel.Beschreibung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
@@ -75,6 +76,11 @@
                         Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                         Header="Notiz"/>
                 </StackPanel>
+                <uc:ExpanderControl Margin="0,20,0,0" Header="Wohnungen">
+                    <uc:ExpanderControl.MainContent>
+                        <uc:WohnungListControl Liste="{x:Bind ViewModel.Wohnungen.Value, Mode=OneWay}" />
+                    </uc:ExpanderControl.MainContent>
+                </uc:ExpanderControl>
             </StackPanel>
         </uc:FileDrop.MainContent>
     </uc:FileDrop>
