@@ -49,30 +49,8 @@ namespace Deeplex.Saverwalter.App.Views
 
         private async void LoadDatabase_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            var file = await Files.FilePicker(".db").PickSingleFileAsync();
-            if (file != null)
-            {
-                var path = Path.Combine(ApplicationData.Current.LocalFolder.Path, "walter.db");
-                var stream = await file.OpenStreamForReadAsync();
-                var bytes = new byte[(int)stream.Length];
-                stream.Read(bytes, 0, (int)stream.Length);
-
-                var ok = Files.MakeSpace(path);
-                if (ok)
-                {
-                    var folder = ApplicationData.Current.LocalFolder;
-                    var newFile = await folder.CreateFileAsync("walter.db");
-                    using (var writer = await newFile.OpenStreamForWriteAsync())
-                    {
-                        await writer.WriteAsync(bytes, 0, bytes.Length);
-                    }
-
-                    App.Walter.Dispose();
-                    App.LoadDataBase();
-
-                    ViewModel.LoadAdressen();
-                }
-            }
+            await App.CopyDataBase();
+            ViewModel.LoadAdressen();
         }
     }
 }

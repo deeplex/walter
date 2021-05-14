@@ -1,8 +1,10 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.App.ViewModels;
 using Deeplex.Saverwalter.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Storage;
@@ -45,7 +47,38 @@ namespace Deeplex.Saverwalter.App
             Suspending += OnSuspending;
         }
 
-        public static void LoadDataBase()
+        public static async Task CopyDataBase()
+        {
+            var picker = Files.FilePicker(".db");
+            picker.CommitButtonText = "Lade Datenbank";
+            var file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                var path = Path.Combine(ApplicationData.Current.LocalFolder.Path, "walter.db");
+                var stream = await file.OpenStreamForReadAsync();
+                var bytes = new byte[(int)stream.Length];
+                stream.Read(bytes, 0, (int)stream.Length);
+
+                var ok = Files.MakeSpace(path);
+                if (ok)
+                {
+                    var folder = ApplicationData.Current.LocalFolder;
+                    var newFile = await folder.CreateFileAsync("walter.db");
+                    using (var writer = await newFile.OpenStreamForWriteAsync())
+                    {
+                        await writer.WriteAsync(bytes, 0, bytes.Length);
+                    }
+
+                    if (Walter != null)
+                    {
+                        Walter.Dispose();
+                    }
+                }
+            }
+            LoadDataBase();
+        }
+
+        private static void LoadDataBase()
         {
             try
             {
@@ -69,10 +102,17 @@ namespace Deeplex.Saverwalter.App
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        protected override async void OnLaunched(LaunchActivatedEventArgs e)
         {
             ViewModel = new MainViewModel();
-            LoadDataBase();
+            if (File.Exists(Path.Combine(ApplicationData.Current.LocalFolder.Path, "walter.db")))
+            {
+                LoadDataBase();
+            }
+            else
+            {
+                CopyDataBase();
+            }
             var rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
