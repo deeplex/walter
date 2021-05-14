@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.App.Views
                     };
                     a.Wohnungen.ForEach(w =>
                     {
-                        var n = new Microsoft.UI.Xaml.Controls.TreeViewNode() { Content = new BWohnung(w) };
+                        var n = new Microsoft.UI.Xaml.Controls.TreeViewNode() { Content = new WohnungListEntry(w) };
                         k.Children.Add(n);
                         if (ViewModel.Wohnungen.Exists(ww => ww.WohnungId == w.WohnungId))
                         {
@@ -82,23 +82,6 @@ namespace Deeplex.Saverwalter.App.Views
             WohnungenTree.Tapped += WohnungenTree_Tapped;
         }
 
-        private sealed class BWohnung
-        {
-            public Wohnung Entity { get; }
-            public int Id => Entity.WohnungId;
-            public bool Same(Wohnung w) => Entity.WohnungId == w.WohnungId;
-
-            public override string ToString()
-            {
-                return Entity.Bezeichnung;
-            }
-
-            public BWohnung(Wohnung w)
-            {
-                Entity = w;
-            }
-        };
-
         private void WohnungenTree_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
             if (ViewModel.Id == 0) return;
@@ -106,12 +89,12 @@ namespace Deeplex.Saverwalter.App.Views
 
             var selected = WohnungenTree.SelectedItems
                 .Select(s => (s as Microsoft.UI.Xaml.Controls.TreeViewNode).Content)
-                .Where(s => s is BWohnung)
+                .Where(s => s is WohnungListEntry)
                 .ToList();
 
             // Add missing Gruppen
             selected
-                .Where(s => !ViewModel.Wohnungen.Exists(w => (s as BWohnung).Same(w)))
+                .Where(s => !ViewModel.Wohnungen.Exists(w => w.WohnungId == (s as WohnungListEntry).Id))
                 .ToList()
                 .ForEach(s =>
                 {
@@ -120,14 +103,14 @@ namespace Deeplex.Saverwalter.App.Views
                     App.Walter.Betriebskostenrechnungsgruppen.Add(new BetriebskostenrechnungsGruppe()
                     {
                         Rechnung = App.Walter.Betriebskostenrechnungen.Find(ViewModel.Id),
-                        WohnungId = (s as BWohnung).Id,
+                        WohnungId = (s as WohnungListEntry).Id,
                     });
-                    ViewModel.Wohnungen.Add((s as BWohnung).Entity);
+                    ViewModel.Wohnungen.Add((s as WohnungListEntry).Entity);
                 });
 
             // Remove old Gruppen
             ViewModel.Wohnungen
-                .Where(w => !selected.Exists(s => (s as BWohnung).Same(w)))
+                .Where(w => !selected.Exists(s => w.WohnungId == (s as WohnungListEntry).Id))
                 .ToList()
                 .ForEach(w =>
                 {
