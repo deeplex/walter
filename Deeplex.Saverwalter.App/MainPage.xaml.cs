@@ -12,10 +12,12 @@ namespace Deeplex.Saverwalter.App
 {
     public sealed partial class MainPage : Page
     {
-        public void Navigate<U>(Type SourcePage, U SendParameter)
+        public async void Navigate<U>(Type SourcePage, U SendParameter)
         {
             ViewModel.DetailAnhang.Value = null;
             ViewModel.ListAnhang.Value = null;
+
+            await App.InitializeDatabase();
 
             AppFrame.Navigate(SourcePage, SendParameter,
                 new DrillInNavigationTransitionInfo());
@@ -62,15 +64,6 @@ namespace Deeplex.Saverwalter.App
 
         private void OnNavigatingToPage(object sender, NavigatingCancelEventArgs e)
         {
-            if (File.Exists(Path.Combine(ApplicationData.Current.LocalFolder.Path, "walter.db")))
-            {
-                App.LoadDataBase();
-            }
-            else
-            {
-                App.CopyDataBase();
-            }
-
             if (e.NavigationMode == NavigationMode.Back)
             {
                 if (e.SourcePageType == typeof(KontaktListPage))

@@ -27,25 +27,34 @@ namespace Deeplex.Saverwalter.App.ViewModels
             CommandBar = arg;
         }
 
-        private ContentDialog SetConfirmationDialogText(ContentDialog dialog, string title, string content, string primary, string secondary)
+        private void SetConfirmationDialogText(string title, string content, string primary, string secondary)
         {
-            dialog.Title = title;
-            dialog.Content = content;
-            dialog.PrimaryButtonText = primary;
-            dialog.SecondaryButtonText = secondary;
-            return dialog;
+            ConfirmationDialog.Title = title;
+            ConfirmationDialog.Content = content;
+            ConfirmationDialog.PrimaryButtonText = primary;
+            ConfirmationDialog.SecondaryButtonText = secondary;
         }
 
         public void SetConfirmationDialog(ContentDialog arg)
         {
-            ConfirmationDialog = SetConfirmationDialogText(
-                arg,
+            ConfirmationDialog = arg;
+        }
+
+        public async Task<bool> Confirmation(string title, string content, string primary, string secondary)
+        {
+            SetConfirmationDialogText(title, content, primary, secondary);
+            return await ShowConfirmationDialog();
+        }
+        public async Task<bool> Confirmation()
+        {
+            SetConfirmationDialogText(
                 "Bist du sicher?",
                 "Diese Änderung kann nicht rückgängig gemacht werden.",
                 "Ja.", "Nein.");
+            return await ShowConfirmationDialog();
         }
 
-        public async Task<bool> Confirmation()
+        private async Task<bool> ShowConfirmationDialog()
             => await ConfirmationDialog.ShowAsync() == ContentDialogResult.Primary;
 
         public void SetSavedIndicator(InAppNotification arg, TextBlock arg2)
