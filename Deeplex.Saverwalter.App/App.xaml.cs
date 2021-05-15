@@ -69,8 +69,10 @@ namespace Deeplex.Saverwalter.App
 
         public static async Task InitializeDatabase()
         {
+            if (Walter != null) return;
             if (File.Exists(Path.Combine(ApplicationData.Current.LocalFolder.Path, "walter.db")))
             {
+                Walter?.Dispose();
                 LoadDataBase();
             }
             else if (await ViewModel.Confirmation(
@@ -82,6 +84,7 @@ namespace Deeplex.Saverwalter.App
             }
             else
             {
+                Walter?.Dispose();
                 LoadDataBase();
             }
         }
