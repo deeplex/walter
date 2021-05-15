@@ -1,10 +1,6 @@
-﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.App.ViewModels;
-using System;
+﻿using Deeplex.Saverwalter.App.ViewModels;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
-using Windows.Storage;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
