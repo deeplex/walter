@@ -14,14 +14,8 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.App
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
     sealed partial class App : Application
     {
-        /// <summary>
-        /// Gets the app-wide MainViewModel singleton instance.
-        /// </summary>
         public static MainViewModel ViewModel { get; private set; }
 
         public static SaverwalterContext Walter { get; private set; }
@@ -78,7 +72,7 @@ namespace Deeplex.Saverwalter.App
             LoadDataBase();
         }
 
-        private static void LoadDataBase()
+        public static void LoadDataBase()
         {
             try
             {
@@ -105,14 +99,7 @@ namespace Deeplex.Saverwalter.App
         protected override async void OnLaunched(LaunchActivatedEventArgs e)
         {
             ViewModel = new MainViewModel();
-            if (File.Exists(Path.Combine(ApplicationData.Current.LocalFolder.Path, "walter.db")))
-            {
-                LoadDataBase();
-            }
-            else
-            {
-                CopyDataBase();
-            }
+            
             var rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,

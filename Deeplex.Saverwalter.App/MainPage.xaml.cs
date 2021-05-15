@@ -2,6 +2,8 @@
 using Deeplex.Saverwalter.App.Views;
 using Deeplex.Saverwalter.App.Views.Rechnungen;
 using System;
+using System.IO;
+using Windows.Storage;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
@@ -60,6 +62,15 @@ namespace Deeplex.Saverwalter.App
 
         private void OnNavigatingToPage(object sender, NavigatingCancelEventArgs e)
         {
+            if (File.Exists(Path.Combine(ApplicationData.Current.LocalFolder.Path, "walter.db")))
+            {
+                App.LoadDataBase();
+            }
+            else
+            {
+                App.CopyDataBase();
+            }
+
             if (e.NavigationMode == NavigationMode.Back)
             {
                 if (e.SourcePageType == typeof(KontaktListPage))
