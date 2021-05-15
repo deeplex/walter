@@ -136,7 +136,9 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
         public AnhangListViewModel(Vertrag a)
         {
-            Text.Value = "Vertrag: " + AdresseViewModel.Anschrift(a.Wohnung) + ", " + a.Wohnung.Bezeichnung;
+            Text.Value = a.Wohnung != null ?
+                "Vertrag: " + AdresseViewModel.Anschrift(a.Wohnung) + ", " + a.Wohnung.Bezeichnung :
+                "Keine Wohnung";
             SetList(a.VertragId, App.Walter.VertragAnhaenge);
             AddAnhang = new AsyncRelayCommand(async _ =>
                 await PickFilesAndSaveToWalter(App.Walter.VertragAnhaenge, a.VertragId),
