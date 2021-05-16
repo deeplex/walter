@@ -28,6 +28,7 @@ namespace Deeplex.Saverwalter.App
             InitializeComponent();
 
             ViewModel.SetCommandBar(MainCommandBar);
+            ViewModel.SetAnhangPane(splitview, togglepanesymbol);
             ViewModel.SetSavedIndicator(SavedIndicator, SavedIncdicatorText);
             ViewModel.SetConfirmationDialog(ConfirmationDialog);
             ViewModel.Navigate = Navigate;
@@ -109,8 +110,7 @@ namespace Deeplex.Saverwalter.App
 
         private void togglepane_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            splitview.IsPaneOpen = !splitview.IsPaneOpen;
-            togglepanesymbol.Symbol = splitview.IsPaneOpen ? Symbol.OpenPane : Symbol.ClosePane;
+            App.ViewModel.ToggleAnhang();
         }
     }
 }

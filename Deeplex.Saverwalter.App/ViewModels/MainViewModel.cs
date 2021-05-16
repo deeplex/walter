@@ -19,8 +19,30 @@ namespace Deeplex.Saverwalter.App.ViewModels
         private InAppNotification SavedIndicator { get; set; }
         private TextBlock SavedIndicatorText { get; set; }
         private ContentDialog ConfirmationDialog { get; set; }
+        private SplitView AnhangPane { get; set; }
+        private SymbolIcon AnhangSymbol { get; set; }
 
         public Action<Type, object> Navigate { get; set; }
+
+        public void SetAnhangPane(SplitView arg, SymbolIcon arg2)
+        {
+            AnhangPane = arg;
+            AnhangSymbol = arg2;
+        }
+
+        public void OpenAnhang()
+        {
+            if (!AnhangPane.IsPaneOpen)
+            {
+                ToggleAnhang();
+            }
+        }
+
+        public void ToggleAnhang()
+        {
+            AnhangPane.IsPaneOpen = !AnhangPane.IsPaneOpen;
+            AnhangSymbol.Symbol = AnhangPane.IsPaneOpen ? Symbol.OpenPane : Symbol.ClosePane;
+        }
 
         public void SetCommandBar(CommandBar arg)
         {

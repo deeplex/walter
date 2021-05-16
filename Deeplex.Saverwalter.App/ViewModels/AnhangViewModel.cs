@@ -33,6 +33,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ToList()
                 .Select(e => new AnhangListEntry(e, self))
                 .ToImmutableList();
+
+            if (!Liste.Value.IsEmpty)
+            {
+                App.ViewModel.OpenAnhang();
+            }
         }
 
         private ObservableProperty<ImmutableList<Anhang>> newFiles
