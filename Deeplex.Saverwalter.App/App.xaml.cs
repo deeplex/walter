@@ -108,7 +108,7 @@ namespace Deeplex.Saverwalter.App
             }
         }
 
-        protected override async void OnLaunched(LaunchActivatedEventArgs e)
+        protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
             ViewModel = new MainViewModel();
             
