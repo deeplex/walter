@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
     xmlns:vm="using:Deeplex.Saverwalter.App.ViewModels"
     mc:Ignorable="d"
@@ -39,60 +40,26 @@
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>
                             </mtuuc:DataGridTemplateColumn>
                             <mtuuc:DataGridTextColumn Header="Datum" Binding="{Binding DatumString}"/>
-                            <!--<mtuuc:DataGridTemplateColumn Header="Datum">
-                            <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate x:DataType="vm:MietenListEntry">
-                                    <CalendarDatePicker
-                                        Date="{x:Bind Zahlungsdatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                        Language="de"
-                                        Width="176"
-                                        PlaceholderText="Offen"
-                                        DateFormat="{}{day.integer}. {month.full} {year.full}"/>
-                                </DataTemplate>
-                            </mtuuc:DataGridTemplateColumn.CellTemplate>
-                        </mtuuc:DataGridTemplateColumn>-->
                             <mtuuc:DataGridTemplateColumn Header="Betr. Monat">
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="vm:MietenListEntry">
                                         <DatePicker
                                             Language="de"
-                                            SelectedDate="{x:Bind Monat, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                            SelectedDate="{x:Bind Monat, Mode=TwoWay}"
                                             DayVisible="False"/>
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>
                             </mtuuc:DataGridTemplateColumn>
-                            <!--<mtuuc:DataGridTemplateColumn Header="Betr. Monat" Width="175">
-                            <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate x:DataType="vm:VertragDetailMiete">
-                                    <DatePicker
-                                        Date="{x:Bind BetreffenderMonat, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                        Language="de" DayVisible="False"/>
-                                </DataTemplate>
-                            </mtuuc:DataGridTemplateColumn.CellTemplate>
-                        </mtuuc:DataGridTemplateColumn>-->
-                            <mtuuc:DataGridTextColumn Header="Betrag" Binding="{Binding BetragString}"/>
-                            <!--<mtuuc:DataGridTemplateColumn Header="Betrag">
-                            <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate x:DataType="vm:VertragDetailMiete">
-                                    <muxc:NumberBox
-                                        Value="{x:Bind Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                        PlaceholderText="0,00"/>
-                                </DataTemplate>
-                            </mtuuc:DataGridTemplateColumn.CellTemplate>
-                        </mtuuc:DataGridTemplateColumn>-->
+                            <mtuuc:DataGridTemplateColumn Header="Betrag">
+                                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:MietenListEntry">
+                                        <muxc:NumberBox Value="{x:Bind Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                    </DataTemplate>
+                                </mtuuc:DataGridTemplateColumn.CellTemplate>
+                            </mtuuc:DataGridTemplateColumn>
                             <mtuuc:DataGridTextColumn
-                            IsReadOnly="True"
-                            Binding="{Binding Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                            Header="Notiz"/>
-                            <!--<mtuuc:DataGridTemplateColumn>
-                        <mtuuc:DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="vm:VertragDetailMiete">
-                                <Button Background="Transparent" Command="{x:Bind AttachFile}">
-                                    <SymbolIcon  Symbol="Attach"/>
-                                </Button>
-                            </DataTemplate>
-                        </mtuuc:DataGridTemplateColumn.CellTemplate>
-                    </mtuuc:DataGridTemplateColumn>-->
+                                Binding="{Binding Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                Header="Notiz"/>
                         </mtuuc:DataGrid.Columns>
                     </mtuuc:DataGrid>
                 </uc:ExpanderControl.MainContent>

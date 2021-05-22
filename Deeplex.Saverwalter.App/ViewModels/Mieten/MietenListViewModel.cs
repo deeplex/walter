@@ -31,7 +31,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
     public sealed class MietenListEntry : BindableBase
     {
         public Miete Entity { get; }
-        public string BetragString => Entity.Betrag.ToString() + "€";
+        public double Betrag
+        {
+            get => Entity.Betrag ?? 0;
+            set
+            {
+                var old = Entity.Betrag;
+                Entity.Betrag = value;
+                RaisePropertyChangedAuto(old, value);
+            }
+        }
         public string DatumString => Entity.Zahlungsdatum.ToString("dd.MM.yyyy");
         public DateTimeOffset Monat
         {
@@ -41,10 +50,18 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 var old = Entity.BetreffenderMonat;
                 Entity.BetreffenderMonat = value.UtcDateTime;
                 RaisePropertyChangedAuto(old, value);
-                // TODO update Walter.
             }
         }
-        public string Notiz => Entity.Notiz;
+        public string Notiz
+        {
+            get => Entity.Notiz;
+            set
+            {
+                var old = Entity.Notiz;
+                Entity.Notiz = value;
+                RaisePropertyChangedAuto(old, value);
+            }
+        }
 
         public MietenListEntry(Miete m, MietenListViewModel vm)
         {
@@ -58,9 +75,40 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     App.Walter.Mieten.Remove(Entity);
                     App.SaveWalter();
                 }
-
             }, _ => true);
+
+            PropertyChanged += OnUpdate;
         }
+
+        private void OnUpdate(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Monat):
+                case nameof(Betrag):
+                case nameof(Notiz):
+                    break;
+                default:
+                    return;
+            }
+
+            if (Monat == null || Entity.VertragId == Guid.Empty || Entity.VertragId == null)
+            {
+                return;
+            }
+
+
+            if (Entity.MieteId != 0)
+            {
+                App.Walter.Mieten.Update(Entity);
+            }
+            else
+            {
+                App.Walter.Mieten.Add(Entity);
+            }
+            App.SaveWalter();
+        }
+
         public AsyncRelayCommand SelfDestruct;
     }
 }
