@@ -112,6 +112,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
 
         public string BetreffendesJahrString => BetreffendesJahr.ToString();
+        public DateTimeOffset? BetreffendesJahrDatum
+        {
+            get => new DateTime(BetreffendesJahr, 1, 1);
+            set
+            {
+                BetreffendesJahr = value?.Year ?? DateTime.Now.Year - 1;
+            }
+        }
         public int BetreffendesJahr
         {
             get => Entity?.BetreffendesJahr ?? DateTime.Now.Year - 1;

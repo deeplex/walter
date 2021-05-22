@@ -35,6 +35,12 @@
                         SelectedIndex="{x:Bind ViewModel.Schluessel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         DisplayMemberPath="Beschreibung"
                         Header="Umlageschlüssel"/>
+                    <DatePicker
+                        SelectedDate="{x:Bind ViewModel.BetreffendesJahrDatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Margin="10,0,0,0"
+                        Header="Betr. Jahr"
+                        Language="de"
+                        DayVisible="False" MonthVisible="False"/>
                     <muxc:NumberBox
                         Value="{x:Bind ViewModel.BetreffendesJahr, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                         Margin="10,0,0,0"
