@@ -19,13 +19,13 @@
 
         <DataTemplate x:Key="BeginnGrid" x:DataType="vm:VertragDetailVersion">
             <DatePicker
-                Date="{x:Bind Beginn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Date="{x:Bind Beginn, Mode=TwoWay}"
                 Language="de"/>
         </DataTemplate>
 
         <DataTemplate x:Key="EndeGrid" x:DataType="vm:VertragDetailVersion">
             <DatePicker
-                SelectedDate="{x:Bind Ende, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                SelectedDate="{x:Bind Ende, Mode=TwoWay}"
                 IsEnabled="True"
                 Language="de"/>
         </DataTemplate>
@@ -131,13 +131,13 @@
                                         <Flyout>
                                             <StackPanel Orientation="Horizontal">
                                                 <DatePicker
-                                            Header="Beginn"
-                                            Language="de"
-                                            SelectedDate="{x:Bind ViewModel.AddVersionDatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                    Header="Beginn"
+                                                    Language="de"
+                                                    SelectedDate="{x:Bind ViewModel.AddVersionDatum, Mode=TwoWay}"/>
                                                 <Button
-                                            VerticalAlignment="Bottom"
-                                            Command="{x:Bind ViewModel.AddVersion}"
-                                            Background="Transparent">
+                                                    VerticalAlignment="Bottom"
+                                                    Command="{x:Bind ViewModel.AddVersion}"
+                                                    Background="Transparent">
                                                     <SymbolIcon Symbol="Add"/>
                                                 </Button>
                                             </StackPanel>

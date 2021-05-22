@@ -18,7 +18,7 @@
                 <Flyout>
                     <StackPanel>
                         <DatePicker
-                            Date="{x:Bind Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Date="{x:Bind Datum, Mode=TwoWay}"
                             Header="Datum" />
                         <TextBox
                             Text="{x:Bind ViewModel.Stand, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"

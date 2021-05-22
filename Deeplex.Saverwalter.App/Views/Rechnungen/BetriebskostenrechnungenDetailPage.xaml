@@ -36,7 +36,7 @@
                         DisplayMemberPath="Beschreibung"
                         Header="Umlageschlüssel"/>
                     <DatePicker
-                        SelectedDate="{x:Bind ViewModel.BetreffendesJahrDatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        SelectedDate="{x:Bind ViewModel.BetreffendesJahrDatum, Mode=TwoWay}"
                         Margin="10,0,0,0"
                         Header="Betr. Jahr"
                         Language="de"
@@ -52,7 +52,7 @@
                     Orientation="Horizontal">
                     <DatePicker
                         Language="de"
-                        SelectedDate="{x:Bind ViewModel.Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        SelectedDate="{x:Bind ViewModel.Datum, Mode=TwoWay}"
                         Header="Datum"/>
                     <muxc:NumberBox
                         Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"

@@ -21,11 +21,11 @@
                         <DatePicker
                             Header="Beginn"
                             Language="de"
-                            Date="{x:Bind ViewModel.Beginn, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                            Date="{x:Bind ViewModel.Beginn, Mode=TwoWay}"/>
                         <DatePicker
                             Header="Ende"
                             Language="de"
-                            Date="{x:Bind ViewModel.Ende, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                            Date="{x:Bind ViewModel.Ende, Mode=TwoWay}"/>
                         <muxc:NumberBox
                             Header="Minderung"
                             Value="{x:Bind ViewModel.Minderung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"

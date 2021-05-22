@@ -24,9 +24,9 @@
                         <DatePicker
                             Header="Datum"
                             Language="de"
-                            Date="{x:Bind ViewModel.Zahlungsdatum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                            Date="{x:Bind ViewModel.Zahlungsdatum, Mode=TwoWay}"/>
                         <DatePicker
-                            Date="{x:Bind ViewModel.BetreffenderMonat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Date="{x:Bind ViewModel.BetreffenderMonat, Mode=TwoWay}"
                             Language="de" Header="Betr. Monat" DayVisible="False"/>
                         <muxc:NumberBox
                             Header="Betrag"

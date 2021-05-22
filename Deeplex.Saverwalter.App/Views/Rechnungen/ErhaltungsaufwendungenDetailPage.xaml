@@ -52,7 +52,7 @@
                     <DatePicker
                         Margin="20,20,0,0"
                         Header="Datum"
-                        Date="{x:Bind ViewModel.Datum, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                        Date="{x:Bind ViewModel.Datum, Mode=TwoWay}" />
                     <muxc:NumberBox
                         Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                         Margin="20,20,0,0"
