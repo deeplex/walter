@@ -28,12 +28,22 @@ namespace Deeplex.Saverwalter.App.ViewModels
         }
     }
 
-    public sealed class MietenListEntry
+    public sealed class MietenListEntry : BindableBase
     {
         public Miete Entity { get; }
         public string BetragString => Entity.Betrag.ToString() + "€";
         public string DatumString => Entity.Zahlungsdatum.ToString("dd.MM.yyyy");
-        public string MonatString => Entity.BetreffenderMonat.Month.ToString();
+        public DateTimeOffset Monat
+        {
+            get => Entity.BetreffenderMonat;
+            set
+            {
+                var old = Entity.BetreffenderMonat;
+                Entity.BetreffenderMonat = value.UtcDateTime;
+                RaisePropertyChangedAuto(old, value);
+                // TODO update Walter.
+            }
+        }
         public string Notiz => Entity.Notiz;
 
         public MietenListEntry(Miete m, MietenListViewModel vm)

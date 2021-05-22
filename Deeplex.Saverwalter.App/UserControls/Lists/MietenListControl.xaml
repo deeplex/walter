@@ -51,7 +51,16 @@
                                 </DataTemplate>
                             </mtuuc:DataGridTemplateColumn.CellTemplate>
                         </mtuuc:DataGridTemplateColumn>-->
-                            <mtuuc:DataGridTextColumn Header="Betr. Monat" Binding="{Binding MonatString}" />
+                            <mtuuc:DataGridTemplateColumn Header="Betr. Monat">
+                                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:MietenListEntry">
+                                        <DatePicker
+                                            Language="de"
+                                            SelectedDate="{x:Bind Monat, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                            DayVisible="False"/>
+                                    </DataTemplate>
+                                </mtuuc:DataGridTemplateColumn.CellTemplate>
+                            </mtuuc:DataGridTemplateColumn>
                             <!--<mtuuc:DataGridTemplateColumn Header="Betr. Monat" Width="175">
                             <mtuuc:DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="vm:VertragDetailMiete">
