@@ -41,11 +41,6 @@
                         Header="Betr. Jahr"
                         Language="de"
                         DayVisible="False" MonthVisible="False"/>
-                    <muxc:NumberBox
-                        Value="{x:Bind ViewModel.BetreffendesJahr, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                        Margin="10,0,0,0"
-                        Header="Betr. Jahr"
-                        SpinButtonPlacementMode="Inline"/>
                 </StackPanel>
                 <StackPanel
                     Margin="0,10,0,0"
