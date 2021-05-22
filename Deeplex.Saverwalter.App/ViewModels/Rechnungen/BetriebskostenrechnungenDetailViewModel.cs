@@ -210,7 +210,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public void Update()
         {
-            if (Beschreibung == "" || Beschreibung == null || Entity.Datum == null)
+            if (Entity.Datum == null)
             {
                 return;
             }
