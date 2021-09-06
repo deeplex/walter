@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.App.Views.Rechnungen
             }
 
             App.ViewModel.Titel.Value = "Erhaltungsaufwendung";
-            App.ViewModel.DetailAnhang.Value = new AnhangListViewModel(ViewModel.Entity);
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity));
 
             var Delete = new AppBarButton
             {

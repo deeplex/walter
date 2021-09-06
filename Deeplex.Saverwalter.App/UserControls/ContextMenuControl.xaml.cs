@@ -87,27 +87,27 @@ namespace Deeplex.Saverwalter.App.UserControls
         {
             if (Item is WohnungListEntry w)
             {
-                App.ViewModel.ListAnhang.Value = new AnhangListViewModel(w.Entity);
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(w.Entity));
             }
             else if (Item is KontaktListEntry k)
             {
                 var a = App.Walter.NatuerlichePersonen.SingleOrDefault(p => p.PersonId == k.Guid);
                 if (a != null)
                 {
-                    App.ViewModel.ListAnhang.Value = new AnhangListViewModel(a);
+                    App.ViewModel.updateListAnhang(new AnhangListViewModel(a));
                 }
                 else
                 {
                     var b = App.Walter.JuristischePersonen.SingleOrDefault(p => p.PersonId == k.Guid);
                     if (b != null)
                     {
-                        App.ViewModel.ListAnhang.Value = new AnhangListViewModel(b);
+                        App.ViewModel.updateListAnhang(new AnhangListViewModel(b));
                     }
                 }
             }
             else if (Item is ZaehlerstandListEntry z)
             {
-                App.ViewModel.ListAnhang.Value = new AnhangListViewModel(z.Entity);
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(z.Entity));
             }
         }
     }

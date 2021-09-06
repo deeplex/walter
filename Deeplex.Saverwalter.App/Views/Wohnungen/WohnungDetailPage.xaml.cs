@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.App.Views
             App.ViewModel.RefillCommandContainer(
                 new ICommandBarElement[] { ErhaltungsaufwendungsButton() },
                 new ICommandBarElement[] { Delete });
-            App.ViewModel.DetailAnhang.Value = new AnhangListViewModel(ViewModel.Entity);
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity));
 
             base.OnNavigatedTo(e);
         }

@@ -97,7 +97,7 @@ namespace Deeplex.Saverwalter.App.UserControls
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var a = ((WohnungListEntry)((DataGrid)sender).SelectedItem).Entity;
-            App.ViewModel.ListAnhang.Value = new AnhangListViewModel(a);
+            App.ViewModel.updateListAnhang(new AnhangListViewModel(a));
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

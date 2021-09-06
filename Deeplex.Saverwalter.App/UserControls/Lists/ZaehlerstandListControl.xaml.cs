@@ -61,11 +61,11 @@ namespace Deeplex.Saverwalter.App.UserControls
         {
             if (((DataGrid)sender).SelectedItem is ZaehlerstandListEntry m)
             {
-                App.ViewModel.ListAnhang.Value = new AnhangListViewModel(m.Entity);
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(m.Entity));
             }
             else
             {
-                App.ViewModel.ListAnhang.Value = null;
+                App.ViewModel.clearAnhang();
             }
         }
     }

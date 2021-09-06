@@ -24,6 +24,19 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public Action<Type, object> Navigate { get; set; }
 
+        public void clearAnhang()
+        {
+            updateListAnhang(null);
+            updateDetailAnhang(null);
+        }
+        public void updateListAnhang(AnhangListViewModel list) => updateAnhang(ListAnhang, list);
+        public void updateDetailAnhang(AnhangListViewModel detail) => updateAnhang(DetailAnhang, detail);
+
+        private void updateAnhang(ObservableProperty<AnhangListViewModel> op, AnhangListViewModel a)
+        {
+            op.Value = a;
+        }
+
         public void SetAnhangPane(SplitView arg, SymbolIcon arg2)
         {
             AnhangPane = arg;

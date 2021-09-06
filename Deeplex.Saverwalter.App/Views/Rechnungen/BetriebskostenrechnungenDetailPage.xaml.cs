@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.App.Views
             base.OnNavigatedTo(e);
 
             App.ViewModel.Titel.Value = "Betriebskostenrechnung";
-            App.ViewModel.DetailAnhang.Value = new AnhangListViewModel(ViewModel.Entity);
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity));
 
             var Delete = new AppBarButton
             {

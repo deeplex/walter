@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.App.Views
             }
 
             App.ViewModel.Titel.Value = "Vertragdetails";
-            App.ViewModel.DetailAnhang.Value = new AnhangListViewModel(ViewModel.Entity);
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity));
 
             var Delete = new AppBarButton
             {

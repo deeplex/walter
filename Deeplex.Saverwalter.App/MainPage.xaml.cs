@@ -14,8 +14,7 @@ namespace Deeplex.Saverwalter.App
     {
         public async void Navigate<U>(Type SourcePage, U SendParameter)
         {
-            ViewModel.DetailAnhang.Value = null;
-            ViewModel.ListAnhang.Value = null;
+            ViewModel.clearAnhang();
 
             await App.InitializeDatabase();
 

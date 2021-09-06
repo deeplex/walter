@@ -49,7 +49,7 @@ namespace Deeplex.Saverwalter.App.Views
             Delete.Click += Delete_Click;
             App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { },
                 new ICommandBarElement[] { Delete });
-            App.ViewModel.DetailAnhang.Value = new AnhangListViewModel(ViewModel.Entity);
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity));
 
             base.OnNavigatedTo(e);
         }

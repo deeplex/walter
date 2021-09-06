@@ -198,11 +198,11 @@ namespace Deeplex.Saverwalter.App.UserControls
             var a = ((KontaktListEntry)((DataGrid)sender).SelectedItem)?.Entity;
             if (a is NatuerlichePerson n)
             {
-                App.ViewModel.ListAnhang.Value = new AnhangListViewModel(n);
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(n));
             }
             else if (a is JuristischePerson j)
             {
-                App.ViewModel.ListAnhang.Value = new AnhangListViewModel(j);
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(j));
             }
         }
 
