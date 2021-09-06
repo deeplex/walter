@@ -22,17 +22,32 @@ namespace Deeplex.Saverwalter.App.Views
             App.ViewModel.RefillCommandContainer(
                 new ICommandBarElement[]
                 {
-                    Elements.CheckBox(ViewModel.Vermieter, "Vermieter"),
-                    Elements.CheckBox(ViewModel.Mieter, "Mieter"),
-                    Elements.CheckBox(ViewModel.Handwerker, "Handwerker"),
+                    Filter(),
                     Elements.Filter(ViewModel),
                     AddPerson()
-                });
+                }); ;
         }
 
         private void Checkbox_Click(object sender, RoutedEventArgs e)
         {
             ViewModel.Vermieter.Value = ((CheckBox)sender).IsChecked ?? false;
+        }
+
+        private AppBarButton Filter()
+        {
+            var Panel = new StackPanel { Orientation = Orientation.Vertical };
+
+            Panel.Children.Add(Elements.CheckBox(ViewModel.Vermieter, "Vermieter"));
+            Panel.Children.Add(Elements.CheckBox(ViewModel.Mieter, "Mieter"));
+            Panel.Children.Add(Elements.CheckBox(ViewModel.Handwerker, "Handwerker"));
+
+            var Button = new AppBarButton()
+            {
+                Icon = new SymbolIcon(Symbol.Filter),
+                //Label = "Filter",
+                Flyout = new Flyout { Content = Panel },
+            };
+            return Button;
         }
 
         private AppBarButton AddPerson()
