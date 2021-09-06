@@ -98,40 +98,47 @@ namespace Deeplex.Saverwalter.App.Views
 
         private async void Betriebskostenabrechnung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            var Jahr = (int)((Button)sender).CommandParameter;
-            var b = new Betriebskostenabrechnung(
-                App.Walter,
-                ViewModel.Versionen.Value.First().Id,
-                Jahr,
-                new DateTime(Jahr, 1, 1),
-                new DateTime(Jahr, 12, 31));
-
-            var AuflistungMieter = string.Join(", ", App.Walter.MieterSet
-                .Where(m => m.VertragId == ViewModel.guid).ToList()
-                .Select(a => App.Walter.FindPerson(a.PersonId).Bezeichnung));
-
-            var s = Jahr.ToString() + " - " + ViewModel.Wohnung.ToString() + " - " + AuflistungMieter;
-            var path = ApplicationData.Current.LocalFolder.Path + @"\" + s;
-
-            var worked = b.SaveAsDocx(path + ".docx");
-            var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
-            var anhang = await Files.ExtractFrom(path + ".docx");
-
-            if (anhang != null)
+            try
             {
-                App.Walter.VertragAnhaenge.Add(new VertragAnhang()
+                var Jahr = (int)((Button)sender).CommandParameter;
+                var b = new Betriebskostenabrechnung(
+                    App.Walter,
+                    ViewModel.Versionen.Value.First().Id,
+                    Jahr,
+                    new DateTime(Jahr, 1, 1),
+                    new DateTime(Jahr, 12, 31));
+
+                var AuflistungMieter = string.Join(", ", App.Walter.MieterSet
+                    .Where(m => m.VertragId == ViewModel.guid).ToList()
+                    .Select(a => App.Walter.FindPerson(a.PersonId).Bezeichnung));
+
+                var s = Jahr.ToString() + " - " + ViewModel.Wohnung.ToString() + " - " + AuflistungMieter;
+                var path = ApplicationData.Current.LocalFolder.Path + @"\" + s;
+
+                var worked = b.SaveAsDocx(path + ".docx");
+                var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
+                var anhang = await Files.ExtractFrom(path + ".docx");
+
+                if (anhang != null)
                 {
-                    Anhang = anhang,
-                    Target = ViewModel.guid,
-                });
-                App.SaveWalter();
-                App.ViewModel.DetailAnhang.Value.AddAnhangToList(anhang);
+                    App.Walter.VertragAnhaenge.Add(new VertragAnhang()
+                    {
+                        Anhang = anhang,
+                        Target = ViewModel.guid,
+                    });
+                    App.SaveWalter();
+                    App.ViewModel.DetailAnhang.Value.AddAnhangToList(anhang);
+                    App.ViewModel.ShowAlert(text, 5000);
+                }
+
+                // TODO b.SaveAnhaenge(path);
+
                 App.ViewModel.ShowAlert(text, 5000);
             }
-
-            // TODO b.SaveAnhaenge(path);
-
-            App.ViewModel.ShowAlert(text, 5000);
+            catch (Exception ex)
+            {
+                App.ViewModel.ShowAlert(ex.Message, 5000);
+            }
         }
 
         private void AddMieter_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
