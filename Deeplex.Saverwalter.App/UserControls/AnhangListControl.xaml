@@ -42,7 +42,8 @@
                                 <TextBlock
                                     RelativePanel.AlignVerticalCenterWithPanel="True"
                                     RelativePanel.AlignLeftWithPanel="True"
-                                    Text="{x:Bind DateiName}" />
+                                    Text="{x:Bind DateiName}"
+                                    ToolTipService.ToolTip="{x:Bind CreatedString}"/>
                                 <CommandBar RelativePanel.AlignRightWithPanel="True">
                                     <CommandBar.SecondaryCommands>
                                         <AppBarButton

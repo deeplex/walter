@@ -186,6 +186,7 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public Anhang Entity { get; }
         public override string ToString() => Entity.FileName;
+        public string CreatedString => "Erstellt am: " + Entity.CreationTime.ToString("dd.MM.yyyy HH:mm:ss");
 
         private AnhangListViewModel Container { get; }
 
@@ -205,19 +206,13 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 Impl.ctx.Anhaenge.Remove(Entity);
                 Impl.SaveWalter();
-            }
-            var deleted = Container.Liste.Value.Find(e => e.Entity.AnhangId == Entity.AnhangId);
-            if (deleted != null)
-            {
-                Container.Liste.Value = Container.Liste.Value.Remove(deleted);
-            }
-        }
 
-        //public async Task<string> SaveFile()
-        public string SaveFile()
-        {
-            return "";
-            //return await Deeplex.Saverwalter.App.Utils.Files.ExtractTo(Entity);
+                var deleted = Container.Liste.Value.Find(e => e.Entity.AnhangId == Entity.AnhangId);
+                if (deleted != null)
+                {
+                    Container.Liste.Value = Container.Liste.Value.Remove(deleted);
+                }
+            }
         }
 
         public string SaveFileTemp()
