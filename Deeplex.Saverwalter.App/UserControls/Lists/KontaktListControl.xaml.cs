@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.App.Views;
 using Deeplex.Saverwalter.Model;
 using Microsoft.Toolkit.Uwp.UI.Controls;
@@ -49,7 +49,7 @@ namespace Deeplex.Saverwalter.App.UserControls
         public KontaktListControl()
         {
             InitializeComponent();
-            ViewModel = new KontaktListViewModel();
+            ViewModel = new KontaktListViewModel(App.ViewModel);
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(KontakteProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(VermieterProperty, (DepObj, Prop) => UpdateFilter());
@@ -198,11 +198,11 @@ namespace Deeplex.Saverwalter.App.UserControls
             var a = ((KontaktListEntry)((DataGrid)sender).SelectedItem)?.Entity;
             if (a is NatuerlichePerson n)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(n));
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(n, App.ViewModel));
             }
             else if (a is JuristischePerson j)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(j));
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(j, App.ViewModel));
             }
         }
 

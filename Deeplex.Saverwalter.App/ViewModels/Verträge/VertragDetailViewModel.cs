@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Deeplex.Saverwalter.App.ViewModels
+namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class VertragDetailViewModel : VertragDetailVersion
     {
@@ -17,10 +17,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public void UpdateMieterList()
         {
-            AlleMieter.Value = App.Walter.JuristischePersonen
+            AlleMieter.Value = Impl.ctx.JuristischePersonen
                     .ToImmutableList()
                     .Where(j => j.isMieter == true).Select(j => new KontaktListEntry(j))
-                    .Concat(App.Walter.NatuerlichePersonen
+                    .Concat(Impl.ctx.NatuerlichePersonen
                         .Where(n => n.isMieter == true).Select(n => new KontaktListEntry(n)))
                     .Where(p => !Mieter.Value.Exists(e => p.Guid == e.Guid))
                     .ToImmutableList();
@@ -49,37 +49,37 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public int StartJahr => Versionen.Value.Last().Beginn.Year;
         public int EndeJahr => Versionen.Value.First().Ende?.Year ?? 9999;
 
-        public VertragDetailViewModel() : this(new List<Vertrag>
-            { new Vertrag { Beginn = DateTime.UtcNow.Date, } })
+        public VertragDetailViewModel(IAppImplementation impl) : this(new List<Vertrag>
+            { new Vertrag { Beginn = DateTime.UtcNow.Date, } }, impl)
         { }
 
-        public VertragDetailViewModel(Guid id)
-            : this(App.Walter.Vertraege
+        public VertragDetailViewModel(Guid id, IAppImplementation impl)
+            : this(impl.ctx.Vertraege
                   .Where(v => v.VertragId == id)
                   .Include(v => v.Wohnung)
                   .ToList()
                   .OrderBy(v => v.Version)
                   .Reverse()
-                  .ToList())
+                  .ToList(), impl)
         { }
 
-        public VertragDetailViewModel(List<Vertrag> v) : base(v.OrderBy(vs => vs.Version).Last())
+        public VertragDetailViewModel(List<Vertrag> v, IAppImplementation impl) : base(v.OrderBy(vs => vs.Version).Last(), impl)
         {
             guid = v.First().VertragId;
 
-            Versionen.Value = v.Select(vs => new VertragDetailVersion(vs)).ToImmutableList();
+            Versionen.Value = v.Select(vs => new VertragDetailVersion(vs, Impl)).ToImmutableList();
 
-            AlleWohnungen = App.Walter.Wohnungen.Select(w => new WohnungListEntry(w)).ToList();
+            AlleWohnungen = Impl.ctx.Wohnungen.Select(w => new WohnungListEntry(w, Impl)).ToList();
             Wohnung = AlleWohnungen.Find(w => w.Id == v.First().WohnungId);
 
-            AlleKontakte = App.Walter.JuristischePersonen.ToList().Select(j => new KontaktListEntry(j))
-                    .Concat(App.Walter.NatuerlichePersonen.Select(n => new KontaktListEntry(n)))
+            AlleKontakte = Impl.ctx.JuristischePersonen.ToList().Select(j => new KontaktListEntry(j))
+                    .Concat(Impl.ctx.NatuerlichePersonen.Select(n => new KontaktListEntry(n)))
                     .ToList();
             Ansprechpartner = AlleKontakte.Find(w => w.Guid == v.First().AnsprechpartnerId);
 
-            Mieter.Value = App.Walter.MieterSet
+            Mieter.Value = Impl.ctx.MieterSet
                 .Where(m => m.VertragId == v.First().VertragId)
-                .Select(m => new KontaktListEntry(m.PersonId))
+                .Select(m => new KontaktListEntry(m.PersonId, Impl))
                 .ToImmutableList();
 
             UpdateMieterList();
@@ -94,20 +94,20 @@ namespace Deeplex.Saverwalter.App.ViewModels
                     Personenzahl = Personenzahl,
                     //KaltMiete = KaltMiete, TODO
                 };
-                var nv = new VertragDetailVersion(entity);
+                var nv = new VertragDetailVersion(entity, Impl);
                 Versionen.Value = Versionen.Value.Insert(0, nv);
-                App.Walter.Vertraege.Add(entity);
-                App.SaveWalter();
+                Impl.ctx.Vertraege.Add(entity);
+                Impl.SaveWalter();
             }, _ => true);
 
             RemoveVersion = new AsyncRelayCommand(async _ =>
             {
-                if (await App.ViewModel.Confirmation())
+                if (await Impl.Confirmation())
                 {
                     var vs = Versionen.Value.First().Entity;
-                    App.Walter.Vertraege.Remove(vs);
+                    Impl.ctx.Vertraege.Remove(vs);
                     Versionen.Value = Versionen.Value.Skip(1).ToImmutableList();
-                    App.SaveWalter();
+                    Impl.SaveWalter();
                 }
             }, _ => true);
         }
@@ -121,18 +121,18 @@ namespace Deeplex.Saverwalter.App.ViewModels
         {
             Versionen.Value.ForEach(v =>
             {
-                App.Walter.Mieten
+                Impl.ctx.Mieten
                     .Where(m => m.VertragId == guid)
                     .ToList()
-                    .ForEach(m => App.Walter.Mieten.Remove(m));
-                App.Walter.MietMinderungen
+                    .ForEach(m => Impl.ctx.Mieten.Remove(m));
+                Impl.ctx.MietMinderungen
                     .Where(m => m.VertragId == guid)
                     .ToList()
-                    .ForEach(m => App.Walter.MietMinderungen.Remove(m));
+                    .ForEach(m => Impl.ctx.MietMinderungen.Remove(m));
 
-                App.Walter.Vertraege.Remove(v.Entity);
+                Impl.ctx.Vertraege.Remove(v.Entity);
             });
-            App.SaveWalter();
+            Impl.SaveWalter();
         }
     }
 }

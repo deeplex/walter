@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.Model;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -19,15 +19,15 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (e.Parameter is NatuerlichePerson kontakt)
             {
-                ViewModel = new NatuerlichePersonViewModel(kontakt);
+                ViewModel = new NatuerlichePersonViewModel(kontakt, App.ViewModel);
             }
             else if (e.Parameter is null) // New Contact
             {
-                ViewModel = new NatuerlichePersonViewModel();
+                ViewModel = new NatuerlichePersonViewModel(App.ViewModel);
             }
 
             App.ViewModel.Titel.Value = ViewModel.Name;
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity));
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.ViewModel));
 
             var Delete = new AppBarButton
             {

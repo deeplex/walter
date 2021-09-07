@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.Model;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (e.Parameter is int id)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(App.Walter.Betriebskostenrechnungen.Find(id));
+                ViewModel = new BetriebskostenrechnungDetailViewModel(App.Walter.Betriebskostenrechnungen.Find(id), App.ViewModel);
             }
             if (e.Parameter is BetriebskostenrechnungDetailViewModel vm)
             {
@@ -36,13 +36,13 @@ namespace Deeplex.Saverwalter.App.Views
             }
             else if (e.Parameter is null)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel();
+                ViewModel = new BetriebskostenrechnungDetailViewModel(App.ViewModel);
             }
 
             base.OnNavigatedTo(e);
 
             App.ViewModel.Titel.Value = "Betriebskostenrechnung";
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity));
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.ViewModel));
 
             var Delete = new AppBarButton
             {
@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.App.Views
                     };
                     a.Wohnungen.ForEach(w =>
                     {
-                        var n = new Microsoft.UI.Xaml.Controls.TreeViewNode() { Content = new WohnungListEntry(w) };
+                        var n = new Microsoft.UI.Xaml.Controls.TreeViewNode() { Content = new WohnungListEntry(w, App.ViewModel) };
                         k.Children.Add(n);
                         if (ViewModel.Wohnungen.Value.Exists(ww => ww.Id == w.WohnungId))
                         {

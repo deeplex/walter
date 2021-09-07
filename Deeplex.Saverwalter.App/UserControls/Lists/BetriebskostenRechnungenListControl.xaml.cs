@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.App.Views;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.App.UserControls
         public BetriebskostenRechnungenListControl()
         {
             InitializeComponent();
-            ViewModel = new BetriebskostenRechnungenListViewModel();
+            ViewModel = new BetriebskostenRechnungenListViewModel(App.ViewModel);
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, IdProp) => UpdateFilter());
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, IdProp) => UpdateFilter());
@@ -110,7 +110,7 @@ namespace Deeplex.Saverwalter.App.UserControls
         {
             if (((DataGrid)sender)?.SelectedItem is BetriebskostenRechnungenListEntry r)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(r.Entity));
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(r.Entity, App.ViewModel));
             }
         }
 

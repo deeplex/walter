@@ -1,13 +1,13 @@
-﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
+using Deeplex.Saverwalter.ViewModels.Utils;
 
-namespace Deeplex.Saverwalter.App.ViewModels
+namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class NatuerlichePersonViewModel : PersonViewModel
     {
@@ -19,8 +19,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public async void selfDestruct()
         {
-            App.Walter.NatuerlichePersonen.Remove(GetEntity);
-            App.SaveWalter();
+            Impl.ctx.NatuerlichePersonen.Remove(GetEntity);
+            Impl.SaveWalter();
         }
 
         public Anrede Anrede
@@ -72,26 +72,28 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public void UpdateListen()
         {
-            JuristischePersonen.Value = App.Walter.JuristischePersonenMitglieder
+            JuristischePersonen.Value = Impl.ctx.JuristischePersonenMitglieder
                 .Include(w => w.JuristischePerson)
                 .Where(w => w.PersonId == Entity.PersonId)
-                .Select(w => new KontaktListEntry(w.JuristischePerson.PersonId))
+                .Select(w => new KontaktListEntry(w.JuristischePerson.PersonId, Impl))
                 .ToImmutableList();
 
-            Wohnungen.Value = App.Walter.Wohnungen
+            Wohnungen.Value = Impl.ctx.Wohnungen
                 .ToList()
                 .Where(w => w.BesitzerId == GetEntity.PersonId ||
                     (WohnungenInklusiveJurPers && JuristischePersonen.Value.Any(m => m.Guid == w.BesitzerId)))
-                .Select(w => new WohnungListEntry(w))
+                .Select(w => new WohnungListEntry(w, Impl))
                 .ToImmutableList();
         }
 
-        public NatuerlichePersonViewModel(int id)
-            : this(App.Walter.NatuerlichePersonen.Find(id)) { }
+        private IAppImplementation Impl;
 
-        public NatuerlichePersonViewModel() : this(new NatuerlichePerson()) { }
-        public NatuerlichePersonViewModel(NatuerlichePerson k)
+        public NatuerlichePersonViewModel(int id, IAppImplementation impl) : this(impl.ctx.NatuerlichePersonen.Find(id), impl) { }
+        public NatuerlichePersonViewModel(IAppImplementation impl) : this(new NatuerlichePerson(), impl) { }
+        public NatuerlichePersonViewModel(NatuerlichePerson k, IAppImplementation impl) : base(impl)
         {
+            Impl = impl;
+
             Entity = k;
             Id = k.NatuerlichePersonId;
 
@@ -128,13 +130,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             if (GetEntity.NatuerlichePersonId != 0)
             {
-                App.Walter.NatuerlichePersonen.Update(GetEntity);
+                Impl.ctx.NatuerlichePersonen.Update(GetEntity);
             }
             else
             {
-                App.Walter.NatuerlichePersonen.Add(GetEntity);
+                Impl.ctx.NatuerlichePersonen.Add(GetEntity);
             }
-            App.SaveWalter();
+            Impl.SaveWalter();
         }
     }
 }

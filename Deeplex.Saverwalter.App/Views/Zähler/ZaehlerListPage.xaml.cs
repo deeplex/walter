@@ -1,5 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.App.ViewModels.Zähler;
+using Deeplex.Saverwalter.ViewModels;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.App.Views
 {
     public sealed partial class ZaehlerListPage : Page
     {
-        public ZaehlerListViewModel ViewModel = new ZaehlerListViewModel();
+        public ZaehlerListViewModel ViewModel = new ZaehlerListViewModel(App.ViewModel);
 
         public ZaehlerListPage()
         {

@@ -2,13 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Windows.Storage;
+using Windows.Storage.Pickers;
 
 namespace Deeplex.Saverwalter.App.Utils
 {
@@ -32,9 +32,9 @@ namespace Deeplex.Saverwalter.App.Utils
 
         public static async Task<StorageFolder> SelectDirectory()
         {
-            var picker = new Windows.Storage.Pickers.FolderPicker()
+            var picker = new FolderPicker()
             {
-                SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop,
+                SuggestedStartLocation = PickerLocationId.Desktop,
             };
 
             picker.FileTypeFilter.Add("*");
@@ -42,11 +42,12 @@ namespace Deeplex.Saverwalter.App.Utils
             return await picker.PickSingleFolderAsync(); ;
         }
 
+
         public static async Task<string> ExtractTo(Anhang a)
         {
-            var picker = new Windows.Storage.Pickers.FileSavePicker()
+            var picker = new FileSavePicker()
             {
-                SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop,
+                SuggestedStartLocation = PickerLocationId.Desktop,
                 SuggestedFileName = a.FileName,
             };
 
@@ -62,11 +63,11 @@ namespace Deeplex.Saverwalter.App.Utils
             return "";
         }
 
-        public static Windows.Storage.Pickers.FileOpenPicker FilePicker(params string[] filters)
+        public static FileOpenPicker FilePicker(params string[] filters)
         {
-            var picker = new Windows.Storage.Pickers.FileOpenPicker();
-            picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
-            picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop;
+            var picker = new FileOpenPicker();
+            picker.ViewMode = PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation = PickerLocationId.Desktop;
             if (filters != null && filters.Length > 0)
             {
                 foreach (var filter in filters)
@@ -99,74 +100,12 @@ namespace Deeplex.Saverwalter.App.Utils
             return list;
         }
 
-        public static void SaveFilesToWalter<T, U>(DbSet<T> Set, U target, List<Anhang> files) where T : class, IAnhang<U>, new()
-        {
-            foreach (var file in files)
-            {
-                var attachment = new T
-                {
-                    Anhang = file,
-                    AnhangId = file.AnhangId,
-                    Target = target,
-                };
-                Set.Add(attachment);
-            }
-            App.SaveWalter();
-        }
-
         public static async Task<List<T>> PrepareFilesForWalter<T>(DbSet<T> Set, params string[] filters) where T : class, IAnhang, new()
-            => (await PickFiles(filters))
-                .Select(file => new T
-                {
-                    Anhang = file,
-                    AnhangId = file.AnhangId,
-                }).ToList();
-
-        public static void SaveAnhaenge(this Betriebskostenabrechnung b, string path)
+    => (await PickFiles(filters))
+        .Select(file => new T
         {
-            var RechnungIds = b.Gruppen.SelectMany(g => g.Rechnungen).Select(r => r.BetriebskostenrechnungId);
-            var temppath = Path.GetTempPath();
-
-            App.Walter.BetriebskostenrechnungAnhaenge
-                .Include(a => a.Anhang)
-                .Where(a => RechnungIds.Contains(a.Target.BetriebskostenrechnungId))
-                .ToList()
-                .ForEach(a =>
-                {
-                    if (a.Anhang != null)
-                    {
-                        var filepath = Path.Combine(temppath, a.Target.Typ.ToDescriptionString() + Path.GetExtension(a.Anhang.FileName));
-                        using (FileStream fs = new FileStream(filepath, FileMode.Create))
-                        {
-                            fs.Write(a.Anhang.Content, 0, a.Anhang.Content.Length);
-                        }
-                    }
-                });
-
-            MakeSpace(path + ".zip");
-            System.IO.Compression.ZipFile.CreateFromDirectory(temppath, path + ".zip");
-        }
-
-        public static bool MakeSpace(string path)
-        {
-            var ok = true;
-            if (File.Exists(path))
-            {
-                var dirname = Path.GetDirectoryName(path);
-                var filename = Path.GetFileNameWithoutExtension(path);
-                var extension = Path.GetExtension(path);
-                var newPath = Path.Combine(dirname, filename + ".old" + extension);
-                ok = MakeSpace(newPath);
-                try
-                {
-                    File.Move(path, newPath);
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-            return ok;
-        }
+            Anhang = file,
+            AnhangId = file.AnhangId,
+        }).ToList();
     }
 }

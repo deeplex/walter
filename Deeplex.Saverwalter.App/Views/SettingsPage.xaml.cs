@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.ViewModels;
 using System.Collections.Immutable;
 using System.Linq;
 using Windows.UI.Xaml.Controls;
@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.App.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewModel = new SettingsViewModel();
+            ViewModel = new SettingsViewModel(App.ViewModel);
         }
 
         private void Adressen_AutoGeneratingColumn(object sender, Microsoft.Toolkit.Uwp.UI.Controls.DataGridAutoGeneratingColumnEventArgs e)
@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.App.Views
                 if (((Button)sender).Tag is AdresseViewModel vm)
                 {
                     vm.Dispose.Execute(null);
-                    ViewModel.Adressen.Value = App.Walter.Adressen.Select(a => new AdresseViewModel(a)).ToImmutableList();
+                    ViewModel.Adressen.Value = App.Walter.Adressen.Select(a => new AdresseViewModel(a, App.ViewModel)).ToImmutableList();
                 }
             }
 
@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.App.Views
         private async void LoadDatabase_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             await App.CopyDataBase();
-            ViewModel.LoadAdressen();
+            ViewModel.LoadAdressen(App.ViewModel);
         }
     }
 }

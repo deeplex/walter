@@ -2,7 +2,7 @@
 using Deeplex.Utils.ObjectModel;
 using System;
 
-namespace Deeplex.Saverwalter.App.ViewModels
+namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class ZaehlerstandViewModel : BindableBase
     {
@@ -44,15 +44,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ZaehlerstandViewModel(Zaehlerstand z, ZaehlerViewModel parent)
         {
             Entity = z;
-            AttachFile = new AsyncRelayCommand(async _ =>
-                await Utils.Files.SaveFilesToWalter(App.Walter.ZaehlerstandAnhaenge, z), _ => true);
+            // TODO
+            //AttachFile = new AsyncRelayCommand(async _ =>
+            //    await Utils.Files.SaveFilesToWalter(parent.Impl.ctx.ZaehlerstandAnhaenge, z, parent.Impl), _ => true);
 
             SelfDestruct = new RelayCommand(_ =>
             {
-                App.Walter.Remove(Entity);
+                //parent.impl.Remove(Entity); TODO 
                 parent.Zaehlerstaende.Value = parent.Zaehlerstaende.Value.Remove(this);
 
-                App.SaveWalter();
+                //Impl.SaveWalter(); TODO
             }, _ => true);
         }
 

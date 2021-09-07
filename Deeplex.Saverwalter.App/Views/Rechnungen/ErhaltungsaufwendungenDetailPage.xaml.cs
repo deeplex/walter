@@ -1,5 +1,5 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
-using Deeplex.Saverwalter.App.ViewModels.Rechnungen;
+﻿using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.ViewModels.Rechnungen;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.App.Views.Rechnungen
         {
             if (e.Parameter is int id)
             {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.Walter.Erhaltungsaufwendungen.Find(id));
+                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.Walter.Erhaltungsaufwendungen.Find(id), App.ViewModel);
             }
             if (e.Parameter is ErhaltungsaufwendungenDetailViewModel vm)
             {
@@ -27,11 +27,11 @@ namespace Deeplex.Saverwalter.App.Views.Rechnungen
             }
             else if (e.Parameter is null)
             {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel();
+                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.ViewModel);
             }
 
             App.ViewModel.Titel.Value = "Erhaltungsaufwendung";
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity));
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.ViewModel));
 
             var Delete = new AppBarButton
             {

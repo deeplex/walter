@@ -1,4 +1,5 @@
-﻿using Deeplex.Utils.ObjectModel;
+﻿using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System.Collections.Immutable;
 using System.Linq;
@@ -70,10 +71,5 @@ namespace Deeplex.Saverwalter.App.Utils
 
             return list2;
         }
-    }
-
-    public interface IFilterViewModel
-    {
-        ObservableProperty<string> Filter { get; set; }
     }
 }

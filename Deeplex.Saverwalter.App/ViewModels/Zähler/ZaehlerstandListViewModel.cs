@@ -4,16 +4,19 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Deeplex.Saverwalter.App.ViewModels
+namespace Deeplex.Saverwalter.ViewModels
 {
     public class ZaehlerstandListViewModel : BindableBase
     {
         public ObservableProperty<ImmutableList<ZaehlerstandListEntry>> Liste = new ObservableProperty<ImmutableList<ZaehlerstandListEntry>>();
         public int ZaehlerId;
 
-        public ZaehlerstandListViewModel(Zaehler z)
+        public IAppImplementation Impl;
+
+        public ZaehlerstandListViewModel(Zaehler z, IAppImplementation impl)
         {
             ZaehlerId = z.ZaehlerId;
+            Impl = impl;
             Liste.Value = z.Staende.Select(s => new ZaehlerstandListEntry(s, this)).ToImmutableList();
         }
 
@@ -37,10 +40,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
             Entity = z;
             Delete = new AsyncRelayCommand(async _ =>
             {
-                if (await App.ViewModel.Confirmation())
+                if (await vm.Impl.Confirmation())
                 {
-                    App.Walter.Zaehlerstaende.Remove(Entity);
-                    App.SaveWalter();
+                    vm.Impl.ctx.Zaehlerstaende.Remove(Entity);
+                    vm.Impl.SaveWalter();
                     vm.Liste.Value = vm.Liste.Value.Remove(this);
                 }
             }, _ => true);

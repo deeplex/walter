@@ -1,5 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.App.ViewModels.Rechnungen;
+using Deeplex.Saverwalter.ViewModels.Rechnungen;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
@@ -9,7 +9,7 @@ namespace Deeplex.Saverwalter.App.Views.Rechnungen
 
     public sealed partial class ErhaltungsaufwendungenListViewPage : Page
     {
-        public ErhaltungsaufwendungenListViewModel ViewModel = new ErhaltungsaufwendungenListViewModel();
+        public ErhaltungsaufwendungenListViewModel ViewModel = new ErhaltungsaufwendungenListViewModel(App.ViewModel);
 
         public ErhaltungsaufwendungenListViewPage()
         {

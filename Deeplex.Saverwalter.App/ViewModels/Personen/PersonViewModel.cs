@@ -1,14 +1,13 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Model.ErhaltungsaufwendungListe;
-using Deeplex.Saverwalter.Print;
 using Deeplex.Utils.ObjectModel;
+using Deeplex.Saverwalter.Print;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
 using Windows.Storage;
 
-namespace Deeplex.Saverwalter.App.ViewModels
+namespace Deeplex.Saverwalter.ViewModels
 {
     public abstract class PersonViewModel : BindableBase
     {
@@ -20,7 +19,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<ImmutableList<WohnungListEntry>> Wohnungen
             = new ObservableProperty<ImmutableList<WohnungListEntry>>();
 
-        public PersonViewModel()
+        public PersonViewModel(IAppImplementation impl)
         {
             Print_Erhaltungsaufwendungen = new AsyncRelayCommand(async _ =>
             {
@@ -32,7 +31,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 var path = ApplicationData.Current.TemporaryFolder.Path + @"\" + s;
 
                 var worked = Wohnungen.Value
-                    .Select(w => new ErhaltungsaufwendungWohnung(App.Walter, w.Id, ErhaltungsaufwendungJahr.Value))
+                    .Select(w => new ErhaltungsaufwendungWohnung(impl.ctx, w.Id, ErhaltungsaufwendungJahr.Value))
                     .ToImmutableList()
                     .SaveAsDocx(path + ".docx");
                 var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
@@ -41,10 +40,10 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
                 if (anhang != null)
                 {
-                    var p = App.Walter.FindPerson(Entity.PersonId);
+                    var p = impl.ctx.FindPerson(Entity.PersonId);
                     if (p is NatuerlichePerson n)
                     {
-                        App.Walter.NatuerlichePersonAnhaenge.Add(
+                        impl.ctx.NatuerlichePersonAnhaenge.Add(
                             new NatuerlichePersonAnhang()
                             {
                                 Anhang = anhang,
@@ -52,20 +51,20 @@ namespace Deeplex.Saverwalter.App.ViewModels
                             });
                         if (mInklusiveZusatz)
                         {
-                            App.Walter.JuristischePersonenMitglieder
+                            impl.ctx.JuristischePersonenMitglieder
                                 .Where(e => e.PersonId == n.PersonId)
                                 .ToList()
-                                .ForEach(e => App.Walter.JuristischePersonAnhaenge
+                                .ForEach(e => impl.ctx.JuristischePersonAnhaenge
                                     .Add(new JuristischePersonAnhang()
                                     {
                                         Anhang = anhang,
-                                        Target = App.Walter.JuristischePersonen.Find(e.JuristischePersonId)
+                                        Target = impl.ctx.JuristischePersonen.Find(e.JuristischePersonId)
                                     }));
                         }
                     }
                     else if (p is JuristischePerson j)
                     {
-                        App.Walter.JuristischePersonAnhaenge.Add(
+                        impl.ctx.JuristischePersonAnhaenge.Add(
                             new JuristischePersonAnhang()
                             {
                                 Anhang = anhang,
@@ -74,20 +73,20 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
                         if (mInklusiveZusatz)
                         {
-                            App.Walter.JuristischePersonenMitglieder
+                            impl.ctx.JuristischePersonenMitglieder
                                 .Where(e => e.JuristischePersonId == j.JuristischePersonId)
                                 .ToList()
-                                .ForEach(e => App.Walter.NatuerlichePersonAnhaenge
+                                .ForEach(e => impl.ctx.NatuerlichePersonAnhaenge
                                     .Add(new NatuerlichePersonAnhang()
                                     {
                                         Anhang = anhang,
-                                        Target = App.Walter.NatuerlichePersonen.Single(h => h.PersonId == e.PersonId),
+                                        Target = impl.ctx.NatuerlichePersonen.Single(h => h.PersonId == e.PersonId),
                                     }));
                         }
                     }
-                    App.SaveWalter();
-                    App.ViewModel.DetailAnhang.Value.AddAnhangToList(anhang);
-                    App.ViewModel.ShowAlert(text, 5000);
+                    impl.SaveWalter();
+                    //TODOimpl.DetailAnhang.Value.AddAnhangToList(anhang);
+                    impl.ShowAlert(text, 5000);
                 }
             }, _ => Wohnungen.Value.Count > 0);
         }

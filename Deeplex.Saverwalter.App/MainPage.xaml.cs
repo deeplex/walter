@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.App.Views;
 using Deeplex.Saverwalter.App.Views.Rechnungen;
 using System;
@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.App
         }
 
         public Frame AppFrame => frame;
-        public MainViewModel ViewModel = App.ViewModel;
+        public AppViewModel ViewModel = App.ViewModel;
 
         public readonly string KontaktListLabel = "Kontakte";
         public readonly string VertragListLabel = "Verträge";

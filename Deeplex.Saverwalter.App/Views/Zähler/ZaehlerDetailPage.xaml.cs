@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.Model;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (e.Parameter is Zaehler zaehler)
             {
-                ViewModel = new ZaehlerDetailViewModel(zaehler);
+                ViewModel = new ZaehlerDetailViewModel(zaehler, App.ViewModel);
                 App.ViewModel.Titel.Value = ViewModel.Kennnummer;
             }
             else if (e.Parameter is ZaehlerDetailViewModel vm)
@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.App.Views
             }
             else if (e.Parameter is null) // New Zaehler
             {
-                ViewModel = new ZaehlerDetailViewModel();
+                ViewModel = new ZaehlerDetailViewModel(App.ViewModel);
             }
 
             App.ViewModel.Titel.Value = ViewModel == null ? "Neuer Zähler" : ViewModel.Kennnummer;
@@ -49,7 +49,7 @@ namespace Deeplex.Saverwalter.App.Views
             Delete.Click += Delete_Click;
             App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { },
                 new ICommandBarElement[] { Delete });
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity));
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.ViewModel));
 
             base.OnNavigatedTo(e);
         }

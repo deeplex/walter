@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Model.ErhaltungsaufwendungListe;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;

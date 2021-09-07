@@ -1,5 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.ViewModels;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.App.Views
 {
     public sealed partial class BetriebskostenRechnungenListViewPage : Page
     {
-        public BetriebskostenRechnungenListViewModel ViewModel = new BetriebskostenRechnungenListViewModel();
+        public BetriebskostenRechnungenListViewModel ViewModel = new BetriebskostenRechnungenListViewModel(App.ViewModel);
 
         public BetriebskostenRechnungenListViewPage()
         {

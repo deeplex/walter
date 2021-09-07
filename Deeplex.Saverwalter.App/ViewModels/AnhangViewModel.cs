@@ -1,15 +1,13 @@
-﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.ViewModels.Utils;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using wuxc = Windows.UI.Xaml.Controls;
 
-namespace Deeplex.Saverwalter.App.ViewModels
+namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class AnhangListViewModel : BindableBase
     {
@@ -17,10 +15,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<ImmutableList<AnhangListEntry>> Liste =
             new ObservableProperty<ImmutableList<AnhangListEntry>>();
 
+        private IAppImplementation Impl;
+
         public void AddAnhangToList(Anhang a)
         {
             var self = this;
-            Liste.Value = Liste.Value.Add(new AnhangListEntry(a, self));
+            Liste.Value = Liste.Value.Add(new AnhangListEntry(a, self, Impl));
         }
 
         private void SetList<T>(T a, IQueryable<IAnhang<T>> set)
@@ -31,12 +31,12 @@ namespace Deeplex.Saverwalter.App.ViewModels
                 .ToList()
                 .Where(b => Equals(b.Target, a))
                 .ToList()
-                .Select(e => new AnhangListEntry(e, self))
+                .Select(e => new AnhangListEntry(e, self, Impl))
                 .ToImmutableList();
 
             if (!Liste.Value.IsEmpty)
             {
-                App.ViewModel.OpenAnhang();
+                Impl.OpenAnhang();
             }
         }
 
@@ -52,126 +52,132 @@ namespace Deeplex.Saverwalter.App.ViewModels
             newFiles.Value = newFiles.Value.Add(a);
         }
 
+        public AsyncRelayCommand AddAnhang;
+
+        private void Initialize(string text, IAppImplementation impl)
+        {
+            Impl = impl;
+            Text.Value = text;
+        }
+
+        public AnhangListViewModel(Adresse a, IAppImplementation impl)
+        {
+            Initialize(AdresseViewModel.Anschrift(a), impl);
+            SetList(a, Impl.ctx.AdresseAnhaenge);
+            AddAnhang = new AsyncRelayCommand(async files =>
+                await PickFilesAndSaveToWalter(Impl.ctx.AdresseAnhaenge, a),
+                _ => true);
+        }
+        public AnhangListViewModel(Betriebskostenrechnung a, IAppImplementation impl)
+        {
+            Initialize(a.BetreffendesJahr.ToString() + ", " + a.Schluessel.ToDescriptionString(), impl);
+            SetList(a, Impl.ctx.BetriebskostenrechnungAnhaenge);
+            AddAnhang = new AsyncRelayCommand(async files =>
+                await PickFilesAndSaveToWalter(Impl.ctx.BetriebskostenrechnungAnhaenge, a),
+                _ => true);
+        }
+        public AnhangListViewModel(Erhaltungsaufwendung a, IAppImplementation impl)
+        {
+            Initialize(a.Bezeichnung, impl);
+            SetList(a, Impl.ctx.ErhaltungsaufwendungAnhaenge);
+            AddAnhang = new AsyncRelayCommand(async _ =>
+                await PickFilesAndSaveToWalter(Impl.ctx.ErhaltungsaufwendungAnhaenge, a),
+                _ => true);
+        }
+        public AnhangListViewModel(Garage a, IAppImplementation impl)
+        {
+            Initialize(AdresseViewModel.Anschrift(a.Adresse) + ", " + a.Kennung, impl);
+            SetList(a, Impl.ctx.GarageAnhaenge);
+            AddAnhang = new AsyncRelayCommand(async _ =>
+                await PickFilesAndSaveToWalter(Impl.ctx.GarageAnhaenge, a),
+                _ => true);
+        }
+        public AnhangListViewModel(JuristischePerson a, IAppImplementation impl)
+        {
+            Initialize(a.Bezeichnung, impl);
+            SetList(a, Impl.ctx.JuristischePersonAnhaenge);
+            AddAnhang = new AsyncRelayCommand(async _ =>
+                await PickFilesAndSaveToWalter(Impl.ctx.JuristischePersonAnhaenge, a),
+                _ => true);
+        }
+        public AnhangListViewModel(Konto a, IAppImplementation impl)
+        {
+            Initialize(a.Iban, impl);
+            SetList(a, Impl.ctx.KontoAnhaenge);
+            AddAnhang = new AsyncRelayCommand(async _ =>
+                await PickFilesAndSaveToWalter(Impl.ctx.KontoAnhaenge, a),
+                _ => true);
+        }
+        public AnhangListViewModel(Miete a, IAppImplementation impl)
+        {
+            Initialize("Miete: " + a.BetreffenderMonat.ToString("mm.yyyy"), impl);
+            SetList(a, Impl.ctx.MieteAnhaenge);
+            AddAnhang = new AsyncRelayCommand(async _ =>
+                await PickFilesAndSaveToWalter(Impl.ctx.MieteAnhaenge, a),
+                _ => true);
+        }
+        public AnhangListViewModel(MietMinderung a, IAppImplementation impl)
+        {
+            Initialize("Mietminderung", impl);
+            SetList(a, Impl.ctx.MietMinderungAnhaenge);
+            AddAnhang = new AsyncRelayCommand(async _ =>
+                await PickFilesAndSaveToWalter(Impl.ctx.MietMinderungAnhaenge, a),
+                _ => true);
+        }
+        public AnhangListViewModel(NatuerlichePerson a, IAppImplementation impl)
+        {
+            Initialize(a.Bezeichnung, impl);
+            SetList(a, Impl.ctx.NatuerlichePersonAnhaenge);
+            AddAnhang = new AsyncRelayCommand(async files =>
+                await PickFilesAndSaveToWalter(Impl.ctx.NatuerlichePersonAnhaenge, a),
+                _ => true);
+        }
+        public AnhangListViewModel(Vertrag a, IAppImplementation impl)
+        {
+            Initialize(a.Wohnung != null ?
+                "Vertrag: " + AdresseViewModel.Anschrift(a.Wohnung) + ", " + a.Wohnung.Bezeichnung :
+                "Keine Wohnung", impl);
+            SetList(a.VertragId, Impl.ctx.VertragAnhaenge);
+            AddAnhang = new AsyncRelayCommand(async _ =>
+                await PickFilesAndSaveToWalter(Impl.ctx.VertragAnhaenge, a.VertragId),
+                _ => true);
+        }
+        public AnhangListViewModel(Wohnung a, IAppImplementation impl)
+        {
+            Initialize(AdresseViewModel.Anschrift(a) + ", " + a.Bezeichnung, impl);
+            SetList(a, Impl.ctx.WohnungAnhaenge);
+            AddAnhang = new AsyncRelayCommand(async _ =>
+                await PickFilesAndSaveToWalter(Impl.ctx.WohnungAnhaenge, a),
+                _ => true);
+        }
+        public AnhangListViewModel(Zaehler a, IAppImplementation impl)
+        {
+            Initialize(a.Kennnummer, impl);
+            SetList(a, Impl.ctx.ZaehlerAnhaenge);
+            AddAnhang = new AsyncRelayCommand(async _ =>
+                await PickFilesAndSaveToWalter(Impl.ctx.ZaehlerAnhaenge, a),
+                _ => true);
+        }
+        public AnhangListViewModel(Zaehlerstand a, IAppImplementation impl)
+        {
+            Initialize(a.Datum.ToString("dd.MM.yyyy") + ": " + a.Stand.ToString(), impl);
+            SetList(a, Impl.ctx.ZaehlerstandAnhaenge);
+            AddAnhang = new AsyncRelayCommand(async _ =>
+                await PickFilesAndSaveToWalter(Impl.ctx.ZaehlerstandAnhaenge, a),
+                _ => true);
+        }
+
         public async Task PickFilesAndSaveToWalter<T, U>(DbSet<T> Set, U target) where T : class, IAnhang<U>, new()
         {
             if (newFiles.Value == null || newFiles.Value.Count == 0)
             {
-                newFiles.Value = (await Files.PickFiles()).ToImmutableList();
+                //TODO newFiles.Value = (await Files.PickFiles()).ToImmutableList();
             }
-            Files.SaveFilesToWalter(Set, target, newFiles.Value.ToList());
+            //TODO Files.SaveFilesToWalter(Set, target, newFiles.Value.ToList());
             var self = this;
             newFiles.Value.ForEach(f =>
-                Liste.Value = Liste.Value.Add(new AnhangListEntry(f, self)));
+                Liste.Value = Liste.Value.Add(new AnhangListEntry(f, self, Impl)));
             newFiles.Value = newFiles.Value.Clear();
-        }
-
-        public AsyncRelayCommand AddAnhang;
-
-        public AnhangListViewModel(Adresse a)
-        {
-            Text.Value = AdresseViewModel.Anschrift(a);
-            SetList(a, App.Walter.AdresseAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async files =>
-                await PickFilesAndSaveToWalter(App.Walter.AdresseAnhaenge, a),
-                _ => true);
-        }
-        public AnhangListViewModel(Betriebskostenrechnung a)
-        {
-            Text.Value = a.BetreffendesJahr.ToString() + ", " + a.Schluessel.ToDescriptionString();
-            SetList(a, App.Walter.BetriebskostenrechnungAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async files =>
-                await PickFilesAndSaveToWalter(App.Walter.BetriebskostenrechnungAnhaenge, a),
-                _ => true);
-        }
-        public AnhangListViewModel(Erhaltungsaufwendung a)
-        {
-            Text.Value = a.Bezeichnung;
-            SetList(a, App.Walter.ErhaltungsaufwendungAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async _ =>
-                await PickFilesAndSaveToWalter(App.Walter.ErhaltungsaufwendungAnhaenge, a),
-                _ => true);
-        }
-        public AnhangListViewModel(Garage a)
-        {
-            Text.Value = AdresseViewModel.Anschrift(a.Adresse) + ", " + a.Kennung;
-            SetList(a, App.Walter.GarageAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async _ =>
-                await PickFilesAndSaveToWalter(App.Walter.GarageAnhaenge, a),
-                _ => true);
-        }
-        public AnhangListViewModel(JuristischePerson a)
-        {
-            Text.Value = a.Bezeichnung;
-            SetList(a, App.Walter.JuristischePersonAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async _ =>
-                await PickFilesAndSaveToWalter(App.Walter.JuristischePersonAnhaenge, a),
-                _ => true);
-        }
-        public AnhangListViewModel(Konto a)
-        {
-            Text.Value = a.Iban;
-            SetList(a, App.Walter.KontoAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async _ =>
-                await PickFilesAndSaveToWalter(App.Walter.KontoAnhaenge, a),
-                _ => true);
-        }
-        public AnhangListViewModel(Miete a)
-        {
-            Text.Value = "Miete: " + a.BetreffenderMonat.ToString("mm.yyyy");
-            SetList(a, App.Walter.MieteAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async _ =>
-                await PickFilesAndSaveToWalter(App.Walter.MieteAnhaenge, a),
-                _ => true);
-        }
-        public AnhangListViewModel(MietMinderung a)
-        {
-            Text.Value = "Mietminderung";
-            SetList(a, App.Walter.MietMinderungAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async _ =>
-                await PickFilesAndSaveToWalter(App.Walter.MietMinderungAnhaenge, a),
-                _ => true);
-        }
-        public AnhangListViewModel(NatuerlichePerson a)
-        {
-            Text.Value = a.Bezeichnung;
-            SetList(a, App.Walter.NatuerlichePersonAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async files =>
-                await PickFilesAndSaveToWalter(App.Walter.NatuerlichePersonAnhaenge, a),
-                _ => true);
-        }
-        public AnhangListViewModel(Vertrag a)
-        {
-            Text.Value = a.Wohnung != null ?
-                "Vertrag: " + AdresseViewModel.Anschrift(a.Wohnung) + ", " + a.Wohnung.Bezeichnung :
-                "Keine Wohnung";
-            SetList(a.VertragId, App.Walter.VertragAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async _ =>
-                await PickFilesAndSaveToWalter(App.Walter.VertragAnhaenge, a.VertragId),
-                _ => true);
-        }
-        public AnhangListViewModel(Wohnung a)
-        {
-            Text.Value = AdresseViewModel.Anschrift(a) + ", " + a.Bezeichnung;
-            SetList(a, App.Walter.WohnungAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async _ =>
-                await PickFilesAndSaveToWalter(App.Walter.WohnungAnhaenge, a),
-                _ => true);
-        }
-        public AnhangListViewModel(Zaehler a)
-        {
-            Text.Value = a.Kennnummer;
-            SetList(a, App.Walter.ZaehlerAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async _ =>
-                await PickFilesAndSaveToWalter(App.Walter.ZaehlerAnhaenge, a),
-                _ => true);
-        }
-        public AnhangListViewModel(Zaehlerstand a)
-        {
-            Text.Value = a.Datum.ToString("dd.MM.yyyy") + ": " + a.Stand.ToString();
-            SetList(a, App.Walter.ZaehlerstandAnhaenge);
-            AddAnhang = new AsyncRelayCommand(async _ =>
-                await PickFilesAndSaveToWalter(App.Walter.ZaehlerstandAnhaenge, a),
-                _ => true);
         }
     }
 
@@ -182,21 +188,23 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         private AnhangListViewModel Container { get; }
 
-        public AnhangListEntry(Anhang a, AnhangListViewModel vm)
+        private IAppImplementation Impl;
+
+        public AnhangListEntry(Anhang a, AnhangListViewModel vm, IAppImplementation impl)
         {
             Container = vm;
             Entity = a;
-
+            Impl = impl;
         }
-        public AnhangListEntry(IAnhang a, AnhangListViewModel vm) : this(a.Anhang, vm) { }
+        public AnhangListEntry(IAnhang a, AnhangListViewModel vm, IAppImplementation impl) : this(a.Anhang, vm, impl) { }
 
         public async void DeleteFile()
         {
             // TODO update ViewModel
-            if (await App.ViewModel.Confirmation())
+            if (await Impl.Confirmation())
             {
-                App.Walter.Anhaenge.Remove(Entity);
-                App.SaveWalter();
+                Impl.ctx.Anhaenge.Remove(Entity);
+                Impl.SaveWalter();
             }
             var deleted = Container.Liste.Value.Find(e => e.Entity.AnhangId == Entity.AnhangId);
             if (deleted != null)
@@ -205,9 +213,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
-        public async Task<string> SaveFile()
+        //public async Task<string> SaveFile()
+        public string SaveFile()
         {
-            return await Files.ExtractTo(Entity);
+            return "";
+            //return await Deeplex.Saverwalter.App.Utils.Files.ExtractTo(Entity);
         }
 
         public string SaveFileTemp()
@@ -222,21 +232,24 @@ namespace Deeplex.Saverwalter.App.ViewModels
             return path;
         }
         public string DateiName => Entity.FileName;
+
+        // TODO
         public string Symbol
         {
-            get
-            {
-                var ext = Path.GetExtension(DateiName);
-                switch (ext)
-                {
-                    case "jpg":
-                    case "jpeg":
-                    case "png":
-                        return wuxc.Symbol.Camera.ToString();
-                    default:
-                        return wuxc.Symbol.Document.ToString();
-                }
-            }
+            get { return "hi"; }
+            //get
+            //{
+            //    var ext = Path.GetExtension(DateiName);
+            //    switch (ext)
+            //    {
+            //        case "jpg":
+            //        case "jpeg":
+            //        case "png":
+            //            return wuxc.Symbol.Camera.ToString();
+            //        default:
+            //            return wuxc.Symbol.Document.ToString();
+            //    }
+            //}
         }
     }
 }

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Deeplex.Saverwalter.Model.ErhaltungsaufwendungListe
+namespace Deeplex.Saverwalter.Model
 {
     public sealed class ErhaltungsaufwendungWohnung
     {

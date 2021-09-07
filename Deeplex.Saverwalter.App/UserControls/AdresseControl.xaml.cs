@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.Model;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.App.UserControls
 
             RegisterPropertyChangedCallback(AdresseProperty, (idDepObject, idProp) =>
             {
-                ViewModel = new AdresseViewModel<IAdresse>(Adresse);
+                ViewModel = new AdresseViewModel<IAdresse>(Adresse, App.ViewModel);
             });
         }
 

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Deeplex.Saverwalter.App.ViewModels
+namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class MietenListViewModel : BindableBase
     {
@@ -12,11 +12,14 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<ImmutableList<MietenListEntry>>();
         public Guid VertragId;
 
-        public MietenListViewModel(Guid VertragGuid)
+        public IAppImplementation Impl;
+
+        public MietenListViewModel(Guid VertragGuid, IAppImplementation impl)
         {
             VertragId = VertragGuid;
+            Impl = impl;
             var self = this;
-            Liste.Value = App.Walter.Mieten
+            Liste.Value = Impl.ctx.Mieten
                 .Where(m => m.VertragId == VertragGuid)
                 .Select(m => new MietenListEntry(m, self))
                 .ToImmutableList();
@@ -63,17 +66,21 @@ namespace Deeplex.Saverwalter.App.ViewModels
             }
         }
 
+        IAppImplementation Impl;
+
         public MietenListEntry(Miete m, MietenListViewModel vm)
         {
             Entity = m;
 
+            Impl = vm.Impl;
+
             SelfDestruct = new AsyncRelayCommand(async _ =>
             {
-                if (await App.ViewModel.Confirmation())
+                if (await Impl.Confirmation())
                 {
                     vm.Liste.Value = vm.Liste.Value.Remove(this);
-                    App.Walter.Mieten.Remove(Entity);
-                    App.SaveWalter();
+                    Impl.ctx.Mieten.Remove(Entity);
+                    Impl.SaveWalter();
                 }
             }, _ => true);
 
@@ -100,13 +107,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             if (Entity.MieteId != 0)
             {
-                App.Walter.Mieten.Update(Entity);
+                Impl.ctx.Mieten.Update(Entity);
             }
             else
             {
-                App.Walter.Mieten.Add(Entity);
+                Impl.ctx.Mieten.Add(Entity);
             }
-            App.SaveWalter();
+            Impl.SaveWalter();
         }
 
         public AsyncRelayCommand SelfDestruct;

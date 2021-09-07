@@ -1,11 +1,10 @@
-﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
+namespace Deeplex.Saverwalter.ViewModels.Rechnungen
 {
     public sealed class ErhaltungsaufwendungenListViewModel : BindableBase, IFilterViewModel
     {
@@ -26,12 +25,12 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
             }
         }
 
-        public ErhaltungsaufwendungenListViewModel()
+        public ErhaltungsaufwendungenListViewModel(IAppImplementation impl)
         {
-            AllRelevant = App.Walter.Erhaltungsaufwendungen
+            AllRelevant = impl.ctx.Erhaltungsaufwendungen
                 .Include(e => e.Wohnung)
                 .ThenInclude(w => w.Adresse)
-                .Select(w => new ErhaltungsaufwendungenListEntry(w))
+                .Select(w => new ErhaltungsaufwendungenListEntry(w, impl))
                 .ToImmutableList();
 
             Liste.Value = AllRelevant;
@@ -41,18 +40,20 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
     public sealed class ErhaltungsaufwendungenListEntry
     {
         public readonly Erhaltungsaufwendung Entity;
-        public string Aussteller => App.Walter.FindPerson(Entity.AusstellerId).Bezeichnung;
+        public string Aussteller => Impl.ctx.FindPerson(Entity.AusstellerId).Bezeichnung;
         public int Id => Entity.ErhaltungsaufwendungId;
         public WohnungListEntry Wohnung;
         public string WohnungString => Wohnung.ToString();
         public string BetragString => Entity.Betrag.ToString() + "€";
         public string Bezeichnung => Entity.Bezeichnung;
         public string DatumString => Entity.Datum.ToString("dd.MM.yyyy");
+        private IAppImplementation Impl;
 
-        public ErhaltungsaufwendungenListEntry(Erhaltungsaufwendung e)
+        public ErhaltungsaufwendungenListEntry(Erhaltungsaufwendung e, IAppImplementation impl)
         {
             Entity = e;
-            Wohnung = new WohnungListEntry(Entity.Wohnung);
+            Impl = impl;
+            Wohnung = new WohnungListEntry(Entity.Wohnung, Impl);
         }
     }
 }

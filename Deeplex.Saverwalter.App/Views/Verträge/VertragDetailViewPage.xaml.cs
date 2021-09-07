@@ -1,5 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Print;
 using Microsoft.UI.Xaml.Controls;
@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (e.Parameter is Guid vertragId)
             {
-                ViewModel = new VertragDetailViewModel(vertragId);
+                ViewModel = new VertragDetailViewModel(vertragId, App.ViewModel);
             }
             else if (e.Parameter is VertragDetailViewModel vm)
             {
@@ -32,11 +32,11 @@ namespace Deeplex.Saverwalter.App.Views
             }
             else // If invoked using "Add"
             {
-                ViewModel = new VertragDetailViewModel();
+                ViewModel = new VertragDetailViewModel(App.ViewModel);
             }
 
             App.ViewModel.Titel.Value = "Vertragdetails";
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity));
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.ViewModel));
 
             var Delete = new AppBarButton
             {
@@ -145,7 +145,7 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (ViewModel.AddMieter.Value?.Guid is Guid guid)
             {
-                ViewModel.Mieter.Value = ViewModel.Mieter.Value.Add(new KontaktListEntry(guid));
+                ViewModel.Mieter.Value = ViewModel.Mieter.Value.Add(new KontaktListEntry(guid, App.ViewModel));
                 AddMieter_Flyout.Hide();
                 ViewModel.UpdateMieterList();
                 App.Walter.MieterSet.Add(new Mieter()

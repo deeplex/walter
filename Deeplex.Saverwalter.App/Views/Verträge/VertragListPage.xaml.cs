@@ -1,5 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Utils.ObjectModel;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -9,7 +9,7 @@ namespace Deeplex.Saverwalter.App.Views
 {
     public sealed partial class VertragListPage : Page
     {
-        public VertragListViewModel ViewModel = new VertragListViewModel();
+        public VertragListViewModel ViewModel = new VertragListViewModel(App.ViewModel);
         public ObservableProperty<bool> OnlyActive = new ObservableProperty<bool>();
 
         public VertragListPage()

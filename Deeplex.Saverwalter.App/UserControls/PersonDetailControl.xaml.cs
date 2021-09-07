@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.App.Views;
 using System;
 using System.Linq;
@@ -21,10 +21,10 @@ namespace Deeplex.Saverwalter.App.UserControls
 
             AddVertrag_Click = () =>
             {
-                var vm = new VertragDetailViewModel();
+                var vm = new VertragDetailViewModel(App.ViewModel);
                 if (ViewModel.isMieter)
                 {
-                    vm.Mieter.Value = vm.Mieter.Value.Add(new KontaktListEntry(ViewModel.PersonId));
+                    vm.Mieter.Value = vm.Mieter.Value.Add(new KontaktListEntry(ViewModel.PersonId, App.ViewModel));
                 }
                 else if (ViewModel.isVermieter)
                 {

@@ -1,5 +1,5 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
-using Deeplex.Saverwalter.App.ViewModels.Rechnungen;
+﻿using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.ViewModels.Rechnungen;
 using Deeplex.Saverwalter.App.Views.Rechnungen;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System.Collections.Immutable;
@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.App.UserControls
         public ErhaltungsaufwendungenListControl()
         {
             InitializeComponent();
-            ViewModel = new ErhaltungsaufwendungenListViewModel();
+            ViewModel = new ErhaltungsaufwendungenListViewModel(App.ViewModel);
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, IdProp) => UpdateFilter());
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, IdProp) => UpdateFilter());
@@ -79,7 +79,7 @@ namespace Deeplex.Saverwalter.App.UserControls
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var a = ((ErhaltungsaufwendungenListEntry)((DataGrid)sender).SelectedItem).Entity;
-            App.ViewModel.updateListAnhang(new AnhangListViewModel(a));
+            App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.ViewModel));
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

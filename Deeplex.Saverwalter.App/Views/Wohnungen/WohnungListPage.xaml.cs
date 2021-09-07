@@ -1,5 +1,5 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.App.ViewModels;
+using Deeplex.Saverwalter.ViewModels;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.App.Views
 {
     public sealed partial class WohnungListPage : Page
     {
-        public WohnungListViewModel ViewModel = new WohnungListViewModel();
+        public WohnungListViewModel ViewModel = new WohnungListViewModel(App.ViewModel);
 
         public WohnungListPage()
         {

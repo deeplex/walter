@@ -1,14 +1,13 @@
-﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.App.ViewModels.Zähler;
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
+using Deeplex.Saverwalter.ViewModels.Utils;
 
-namespace Deeplex.Saverwalter.App.ViewModels
+namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class BetriebskostenrechnungDetailViewModel : BindableBase
     {
@@ -17,8 +16,8 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         public void selfDestruct()
         {
-            App.Walter.Betriebskostenrechnungen.Remove(Entity);
-            App.SaveWalter();
+            Impl.ctx.Betriebskostenrechnungen.Remove(Entity);
+            Impl.SaveWalter();
         }
 
         public List<HKVO9Util> HKVO_P9_List = Enums.HKVO9;
@@ -180,13 +179,16 @@ namespace Deeplex.Saverwalter.App.ViewModels
         public ObservableProperty<ImmutableList<WohnungListEntry>> Wohnungen
             = new ObservableProperty<ImmutableList<WohnungListEntry>>();
 
-        public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r)
+        private IAppImplementation Impl;
+
+        public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, IAppImplementation impl)
         {
             Entity = r;
+            Impl = impl;
 
-            Wohnungen.Value = r.Gruppen.Select(g => new WohnungListEntry(g.Wohnung)).ToImmutableList();
+            Wohnungen.Value = r.Gruppen.Select(g => new WohnungListEntry(g.Wohnung, Impl)).ToImmutableList();
 
-            AllgemeinZaehler_List = App.Walter.ZaehlerSet
+            AllgemeinZaehler_List = Impl.ctx.ZaehlerSet
                 .Select(a => new ZaehlerListEntry(a))
                 .ToList();
             AllgemeinZaehler = AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Zaehler?.ZaehlerId);
@@ -200,7 +202,7 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
         }
 
-        public BetriebskostenrechnungDetailViewModel() : this(new Betriebskostenrechnung())
+        public BetriebskostenrechnungDetailViewModel(IAppImplementation impl) : this(new Betriebskostenrechnung(), impl)
         {
             Entity.BetreffendesJahr = DateTime.Now.Year;
             Entity.Datum = DateTime.Now;
@@ -217,13 +219,13 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             if (Entity.BetriebskostenrechnungId != 0)
             {
-                App.Walter.Betriebskostenrechnungen.Update(Entity);
+                Impl.ctx.Betriebskostenrechnungen.Update(Entity);
             }
             else
             {
-                App.Walter.Betriebskostenrechnungen.Add(Entity);
+                Impl.ctx.Betriebskostenrechnungen.Add(Entity);
             }
-            App.SaveWalter();
+            Impl.SaveWalter();
         }
 
 

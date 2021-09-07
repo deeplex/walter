@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.App.Views;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.App.UserControls
         public VertragListControl()
         {
             InitializeComponent();
-            ViewModel = new VertragListViewModel();
+            ViewModel = new VertragListViewModel(App.ViewModel);
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(PersonIdProperty, (DepObj, Prop) => UpdateFilter());
@@ -117,7 +117,7 @@ namespace Deeplex.Saverwalter.App.UserControls
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var a = ((VertragListVertrag)((DataGrid)sender).SelectedItem).Entity;
-            App.ViewModel.updateListAnhang(new AnhangListViewModel(a));
+            App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.ViewModel));
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

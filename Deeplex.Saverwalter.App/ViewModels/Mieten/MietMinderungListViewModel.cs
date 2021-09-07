@@ -4,7 +4,7 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Deeplex.Saverwalter.App.ViewModels
+namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class MietMinderungListViewModel : BindableBase
     {
@@ -12,11 +12,15 @@ namespace Deeplex.Saverwalter.App.ViewModels
             = new ObservableProperty<ImmutableList<MietMinderungListEntry>>();
         public Guid VertragId;
 
-        public MietMinderungListViewModel(Guid VertragGuid)
+        public IAppImplementation Impl;
+
+        public MietMinderungListViewModel(Guid VertragGuid, IAppImplementation impl)
         {
             VertragId = VertragGuid;
             var self = this;
-            Liste.Value = App.Walter.MietMinderungen
+            Impl = impl;
+
+            Liste.Value = impl.ctx.MietMinderungen
                 .Where(m => m.VertragId == VertragGuid)
                 .Select(m => new MietMinderungListEntry(m, self))
                 .ToImmutableList();
@@ -43,11 +47,11 @@ namespace Deeplex.Saverwalter.App.ViewModels
 
             SelfDestruct = new AsyncRelayCommand(async _ =>
             {
-                if (await App.ViewModel.Confirmation())
+                if (await vm.Impl.Confirmation())
                 {
                     vm.Liste.Value = vm.Liste.Value.Remove(this);
-                    App.Walter.MietMinderungen.Remove(Entity);
-                    App.SaveWalter();
+                    vm.Impl.ctx.MietMinderungen.Remove(Entity);
+                    vm.Impl.SaveWalter();
                 }
 
             }, _ => true);

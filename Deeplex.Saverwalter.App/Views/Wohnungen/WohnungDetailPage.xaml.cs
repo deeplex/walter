@@ -1,9 +1,8 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.App.ViewModels;
-using Deeplex.Saverwalter.App.ViewModels.Rechnungen;
+using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.ViewModels.Rechnungen;
 using Deeplex.Saverwalter.App.Views.Rechnungen;
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Model.ErhaltungsaufwendungListe;
 using Deeplex.Saverwalter.Print;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -28,22 +27,22 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (e.Parameter is Wohnung wohnung)
             {
-                ViewModel = new WohnungDetailViewModel(wohnung);
+                ViewModel = new WohnungDetailViewModel(wohnung, App.ViewModel);
             }
             else if (e.Parameter is null) // New Wohnung
             {
-                ViewModel = new WohnungDetailViewModel();
+                ViewModel = new WohnungDetailViewModel(App.ViewModel);
             }
 
             AddZaehler_Click = () =>
             {
-                var vm = new ZaehlerDetailViewModel(new Zaehler() { WohnungId = ViewModel.Id });
+                var vm = new ZaehlerDetailViewModel(new Zaehler() { WohnungId = ViewModel.Id }, App.ViewModel);
                 App.ViewModel.Navigate(typeof(ZaehlerDetailPage), vm);
             };
 
             AddVertrag_Click = () =>
             {
-                var vm = new VertragDetailViewModel();
+                var vm = new VertragDetailViewModel(App.ViewModel);
                 vm.Wohnung = vm.AlleWohnungen.First(v => v.Entity.WohnungId == ViewModel.Id);
                 App.ViewModel.Navigate(typeof(VertragDetailViewPage), vm);
             };
@@ -60,7 +59,7 @@ namespace Deeplex.Saverwalter.App.Views
                     Wohnung = ViewModel.Entity,
                     Rechnung = r,
                 });
-                var vm = new BetriebskostenrechnungDetailViewModel(r);
+                var vm = new BetriebskostenrechnungDetailViewModel(r, App.ViewModel);
                 App.ViewModel.Navigate(typeof(BetriebskostenrechnungenDetailPage), vm);
             };
 
@@ -72,7 +71,7 @@ namespace Deeplex.Saverwalter.App.Views
                     Datum = DateTime.Now,
                 };
 
-                var vm = new ErhaltungsaufwendungenDetailViewModel(r);
+                var vm = new ErhaltungsaufwendungenDetailViewModel(r, App.ViewModel);
                 App.ViewModel.Navigate(typeof(ErhaltungsaufwendungenDetailPage), vm);
             };
 
@@ -86,7 +85,7 @@ namespace Deeplex.Saverwalter.App.Views
             App.ViewModel.RefillCommandContainer(
                 new ICommandBarElement[] { ErhaltungsaufwendungsButton() },
                 new ICommandBarElement[] { Delete });
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity));
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.ViewModel));
 
             base.OnNavigatedTo(e);
         }
@@ -185,7 +184,7 @@ namespace Deeplex.Saverwalter.App.Views
             public WohnungDetailAdresse(int id)
             {
                 Id = id;
-                Anschrift = AdresseViewModel.Anschrift(id);
+                Anschrift = AdresseViewModel.Anschrift(id, App.ViewModel);
                 Content = Anschrift;
             }
         }

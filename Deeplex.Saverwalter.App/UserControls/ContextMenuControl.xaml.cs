@@ -1,5 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
-using Deeplex.Saverwalter.App.ViewModels.Zähler;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.App.Views;
 using System.Linq;
 using Windows.UI.Xaml;
@@ -87,27 +86,27 @@ namespace Deeplex.Saverwalter.App.UserControls
         {
             if (Item is WohnungListEntry w)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(w.Entity));
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(w.Entity, App.ViewModel));
             }
             else if (Item is KontaktListEntry k)
             {
                 var a = App.Walter.NatuerlichePersonen.SingleOrDefault(p => p.PersonId == k.Guid);
                 if (a != null)
                 {
-                    App.ViewModel.updateListAnhang(new AnhangListViewModel(a));
+                    App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.ViewModel));
                 }
                 else
                 {
                     var b = App.Walter.JuristischePersonen.SingleOrDefault(p => p.PersonId == k.Guid);
                     if (b != null)
                     {
-                        App.ViewModel.updateListAnhang(new AnhangListViewModel(b));
+                        App.ViewModel.updateListAnhang(new AnhangListViewModel(b, App.ViewModel));
                     }
                 }
             }
             else if (Item is ZaehlerstandListEntry z)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(z.Entity));
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(z.Entity, App.ViewModel));
             }
         }
     }

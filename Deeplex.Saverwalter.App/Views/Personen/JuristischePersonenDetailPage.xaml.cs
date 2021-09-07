@@ -1,5 +1,5 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.ViewModels;
 using System;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -19,15 +19,15 @@ namespace Deeplex.Saverwalter.App.Views
         {
             if (e.Parameter is JuristischePerson jp)
             {
-                ViewModel = new JuristischePersonViewModel(jp);
+                ViewModel = new JuristischePersonViewModel(jp, App.ViewModel);
             }
             else if (e.Parameter is null)
             {
-                ViewModel = new JuristischePersonViewModel();
+                ViewModel = new JuristischePersonViewModel(App.ViewModel);
             }
 
             App.ViewModel.Titel.Value = ViewModel.Bezeichnung;
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity));
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.ViewModel));
 
             var Delete = new AppBarButton
             {

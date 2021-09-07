@@ -8,7 +8,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
+namespace Deeplex.Saverwalter.ViewModels.Rechnungen
 {
     public sealed class ErhaltungsaufwendungenDetailViewModel : BindableBase
     {
@@ -17,8 +17,8 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
 
         public void selfDestruct()
         {
-            App.Walter.Erhaltungsaufwendungen.Remove(Entity);
-            App.SaveWalter();
+            Impl.ctx.Erhaltungsaufwendungen.Remove(Entity);
+            Impl.SaveWalter();
         }
 
         public ObservableProperty<ImmutableList<KontaktListEntry>> Personen
@@ -101,21 +101,24 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
             }
         }
 
-        public ErhaltungsaufwendungenDetailViewModel() : this(new Erhaltungsaufwendung()) { }
-        public ErhaltungsaufwendungenDetailViewModel(Erhaltungsaufwendung e)
+        private IAppImplementation Impl;
+
+        public ErhaltungsaufwendungenDetailViewModel(IAppImplementation impl) : this(new Erhaltungsaufwendung(), impl) { }
+        public ErhaltungsaufwendungenDetailViewModel(Erhaltungsaufwendung e, IAppImplementation impl)
         {
             Entity = e;
+            Impl = impl;
 
-            Wohnungen = App.Walter.Wohnungen
+            Wohnungen = Impl.ctx.Wohnungen
                 .Include(w => w.Adresse)
-                .Select(w => new WohnungListEntry(w)).ToList();
+                .Select(w => new WohnungListEntry(w, Impl)).ToList();
             Wohnung = Wohnungen.Find(f => f.Id == e.Wohnung?.WohnungId);
 
-            Personen.Value = App.Walter.NatuerlichePersonen
+            Personen.Value = Impl.ctx.NatuerlichePersonen
                 .Where(w => w.isHandwerker)
                 .Select(k => new KontaktListEntry(k))
                 .ToList()
-                .Concat(App.Walter.JuristischePersonen
+                .Concat(Impl.ctx.JuristischePersonen
                     .Where(w => w.isHandwerker)
                     .Select(k => new KontaktListEntry(k))
                     .ToList())
@@ -151,13 +154,13 @@ namespace Deeplex.Saverwalter.App.ViewModels.Rechnungen
 
             if (Entity.ErhaltungsaufwendungId != 0)
             {
-                App.Walter.Erhaltungsaufwendungen.Update(Entity);
+                Impl.ctx.Erhaltungsaufwendungen.Update(Entity);
             }
             else
             {
-                App.Walter.Erhaltungsaufwendungen.Add(Entity);
+                Impl.ctx.Erhaltungsaufwendungen.Add(Entity);
             }
-            App.SaveWalter();
+            Impl.SaveWalter();
         }
     }
 }

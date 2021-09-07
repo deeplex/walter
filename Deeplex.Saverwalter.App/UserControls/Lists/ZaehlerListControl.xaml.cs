@@ -1,5 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
-using Deeplex.Saverwalter.App.ViewModels.Zähler;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.App.Views;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System.Collections.Immutable;
@@ -39,7 +38,7 @@ namespace Deeplex.Saverwalter.App.UserControls
         public ZaehlerListControl()
         {
             InitializeComponent();
-            ViewModel = new ZaehlerListViewModel();
+            ViewModel = new ZaehlerListViewModel(App.ViewModel);
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, IdProp) => UpdateFilter());
             RegisterPropertyChangedCallback(ZaehlerIdProperty, (DepObj, IdProp) => UpdateFilter());
@@ -98,7 +97,7 @@ namespace Deeplex.Saverwalter.App.UserControls
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var a = ((ZaehlerListEntry)((DataGrid)sender).SelectedItem).Entity;
-            App.ViewModel.updateListAnhang(new AnhangListViewModel(a));
+            App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.ViewModel));
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

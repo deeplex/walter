@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.App.ViewModels;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System.Collections.Immutable;
@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.App.UserControls
             InitializeComponent();
             RegisterPropertyChangedCallback(ZaehlerIdProperty, (ZaehlerIdDepObject, ZaehlerIdProp) =>
             {
-                ViewModel.Value = new ZaehlerstandListViewModel(App.Walter.ZaehlerSet.Find(ZaehlerId));
+                ViewModel.Value = new ZaehlerstandListViewModel(App.Walter.ZaehlerSet.Find(ZaehlerId), App.ViewModel);
                 ViewModel.Value.Liste.Value = ViewModel.Value.Liste.Value.OrderBy(v => v.Datum).ToImmutableList();
             });
 
@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.App.UserControls
         {
             if (((DataGrid)sender).SelectedItem is ZaehlerstandListEntry m)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(m.Entity));
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(m.Entity, App.ViewModel));
             }
             else
             {
