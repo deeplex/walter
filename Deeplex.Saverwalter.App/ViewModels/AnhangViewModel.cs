@@ -174,7 +174,7 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 newFiles.Value = (await Files.PickFiles()).ToImmutableList();
             }
-            Utils.Anhaenge.SaveAnhaengeToWalter(Set, target, newFiles.Value.ToList(), Impl);
+            Utils.Files.SaveAnhaengeToWalter(Set, target, newFiles.Value.ToList(), Impl);
             var self = this;
             newFiles.Value.ForEach(f =>
                 Liste.Value = Liste.Value.Add(new AnhangListEntry(f, self, Impl)));
@@ -201,7 +201,6 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public async void DeleteFile()
         {
-            // TODO update ViewModel
             if (await Impl.Confirmation())
             {
                 Impl.ctx.Anhaenge.Remove(Entity);
@@ -233,24 +232,5 @@ namespace Deeplex.Saverwalter.ViewModels
             return path;
         }
         public string DateiName => Entity.FileName;
-
-        // TODO
-        public string Symbol
-        {
-            get { return "hi"; }
-            //get
-            //{
-            //    var ext = Path.GetExtension(DateiName);
-            //    switch (ext)
-            //    {
-            //        case "jpg":
-            //        case "jpeg":
-            //        case "png":
-            //            return wuxc.Symbol.Camera.ToString();
-            //        default:
-            //            return wuxc.Symbol.Document.ToString();
-            //    }
-            //}
-        }
     }
 }

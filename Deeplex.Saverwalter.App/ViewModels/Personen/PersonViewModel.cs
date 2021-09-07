@@ -1,5 +1,4 @@
-﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Deeplex.Saverwalter.Print;
 using System;
@@ -36,7 +35,7 @@ namespace Deeplex.Saverwalter.ViewModels
                     .SaveAsDocx(path + ".docx");
                 var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
 
-                var anhang = await Files.ExtractFrom(path + ".docx");
+                var anhang = Utils.Files.ExtractFrom(path + ".docx");
 
                 if (anhang != null)
                 {

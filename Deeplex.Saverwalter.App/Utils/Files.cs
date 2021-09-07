@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -14,7 +13,7 @@ namespace Deeplex.Saverwalter.App.Utils
     public static class Files
     {
         public static async Task<Anhang> ExtractFrom(string path)
-            => await ExtractFrom(await StorageFile.GetFileFromPathAsync(path));
+    => await ExtractFrom(await StorageFile.GetFileFromPathAsync(path));
 
         public static async Task<Anhang> ExtractFrom(IStorageFile stream)
         {
@@ -29,7 +28,33 @@ namespace Deeplex.Saverwalter.App.Utils
             return anhang;
         }
 
-        public static async Task<string> ExtractTo(Anhang a)
+        public static async Task<string> GetFile(params string[] filters)
+        {
+            var picker = new FileOpenPicker();
+            picker.ViewMode = PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation = PickerLocationId.Desktop;
+            if (filters != null && filters.Length > 0)
+            {
+                foreach(var filter in filters)
+                {
+                    picker.FileTypeFilter.Add(filter);
+                }
+            }
+            else
+            {
+                picker.FileTypeFilter.Add("*");
+            }
+
+            var file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                return file.Path;
+            }
+            
+            return "";
+        }
+
+        public static async Task<string> SaveAnhang(Anhang a)
         {
             var picker = new FileSavePicker()
             {

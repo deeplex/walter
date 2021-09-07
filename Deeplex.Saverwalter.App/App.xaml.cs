@@ -14,6 +14,7 @@ using Windows.UI.Xaml.Navigation;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using Deeplex.Utils.ObjectModel;
 using System.Collections.Generic;
+using Windows.Storage.Pickers;
 
 namespace Deeplex.Saverwalter.App
 {
@@ -46,7 +47,7 @@ namespace Deeplex.Saverwalter.App
                 var bytes = new byte[(int)stream.Length];
                 stream.Read(bytes, 0, (int)stream.Length);
 
-                var ok = ViewModels.Utils.Anhaenge.MakeSpace(path);
+                var ok = ViewModels.Utils.Files.MakeSpace(path);
                 if (ok)
                 {
                     var folder = ApplicationData.Current.LocalFolder;
@@ -62,6 +63,7 @@ namespace Deeplex.Saverwalter.App
                     }
                 }
             }
+            
             LoadDataBase();
         }
 

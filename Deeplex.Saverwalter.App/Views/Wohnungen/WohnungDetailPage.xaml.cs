@@ -134,7 +134,7 @@ namespace Deeplex.Saverwalter.App.Views
             };
         }
 
-        private async void Erhaltungsaufwendung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private void Erhaltungsaufwendung_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             var Jahr = (int)((Button)sender).CommandParameter;
             var l = new ErhaltungsaufwendungWohnung(App.Walter, ViewModel.Id, Jahr);
@@ -145,8 +145,8 @@ namespace Deeplex.Saverwalter.App.Views
             var worked = l.SaveAsDocx(path + ".docx");
             var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
 
-            var anhang = await Files.ExtractFrom(path + ".docx");
-            //var ret = Files.ExtractTo(anhang);
+            var anhang = ViewModels.Utils.Files.ExtractFrom(path + ".docx");
+
             if (anhang != null)
             {
                 App.Walter.WohnungAnhaenge.Add(new WohnungAnhang()
@@ -158,7 +158,6 @@ namespace Deeplex.Saverwalter.App.Views
                 App.ViewModel.DetailAnhang.Value.AddAnhangToList(anhang);
                 App.ViewModel.ShowAlert(text, 5000);
             }
-            // TODO e.SaveAnhaenge(path);
         }
 
         public sealed class WohnungDetailAdresseWohnung : Microsoft.UI.Xaml.Controls.TreeViewNode

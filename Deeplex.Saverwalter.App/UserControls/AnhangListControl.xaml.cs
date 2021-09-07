@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.ViewModels;
+﻿using Deeplex.Saverwalter.App.Utils;
+using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Utils.ObjectModel;
 using System;
 using Windows.Storage;
@@ -53,7 +54,7 @@ namespace Deeplex.Saverwalter.App.UserControls
         {
             if (((FrameworkElement)sender).DataContext is AnhangListEntry a)
             {
-                var path = a.SaveFile(); // TODO await
+                var path = await Files.SaveAnhang(a.Entity);
                 if (path != "")
                 {
                     App.ViewModel.ShowAlert("Gespeichert unter " + path, 5000);

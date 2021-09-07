@@ -30,9 +30,4 @@ namespace Deeplex.Saverwalter.ViewModels
         void ShowAlert(string text, int time);
         ObservableProperty<string> Titel { get; set; }
     }
-
-    public class A<B> : B where B : class, IAppImplementation, new()
-    {
-
-    }
 }
