@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.App.Views;
 using Deeplex.Saverwalter.App.Views.Rechnungen;
 using System;
@@ -64,29 +64,29 @@ namespace Deeplex.Saverwalter.App
 
         private void OnNavigatingToPage(object sender, NavigatingCancelEventArgs e)
         {
-            if (e.NavigationMode == NavigationMode.Back)
-            {
-                if (e.SourcePageType == typeof(KontaktListPage))
+            if (e.SourcePageType == typeof(KontaktListPage) ||
+                e.SourcePageType == typeof(JuristischePersonenDetailPage) ||
+                e.SourcePageType == typeof(NatuerlichePersonDetailPage))
                 {
                     NavView.SelectedItem = KontaktListMenuItem;
                 }
-                else if (e.SourcePageType == typeof(WohnungListPage))
+            else if (e.SourcePageType == typeof(WohnungListPage) || e.SourcePageType == typeof(WohnungDetailPage))
                 {
                     NavView.SelectedItem = WohnungListMenuItem;
                 }
-                else if (e.SourcePageType == typeof(VertragListPage))
+            else if (e.SourcePageType == typeof(VertragListPage) || e.SourcePageType == typeof(VertragDetailViewPage))
                 {
                     NavView.SelectedItem = VertragListMenuItem;
                 }
-                else if (e.SourcePageType == typeof(BetriebskostenRechnungenListViewPage))
+            else if (e.SourcePageType == typeof(BetriebskostenRechnungenListViewPage) || e.SourcePageType == typeof(BetriebskostenrechnungenDetailPage))
                 {
                     NavView.SelectedItem = BetriebskostenListMenuItem;
                 }
-                else if (e.SourcePageType == typeof(ErhaltungsaufwendungenListViewPage))
+            else if (e.SourcePageType == typeof(ErhaltungsaufwendungenListViewPage) || e.SourcePageType == typeof(ErhaltungsaufwendungenDetailPage))
                 {
                     NavView.SelectedItem = ErhaltungsAufwendungenListMenuItem;
                 }
-                else if (e.SourcePageType == typeof(ZaehlerListPage))
+            else if (e.SourcePageType == typeof(ZaehlerListPage) || e.SourcePageType == typeof(ZaehlerDetailPage))
                 {
                     NavView.SelectedItem = ZaehlerListMenuItem;
                 }
@@ -94,6 +94,8 @@ namespace Deeplex.Saverwalter.App
                 {
                     NavView.SelectedItem = NavView.SettingsItem;
                 }
+            if (e.NavigationMode == NavigationMode.Back)
+            {
                 Navigate(e.SourcePageType, (NavView.SelectedItem as NavigationViewItem).Content);
             }
         }
