@@ -151,16 +151,35 @@ namespace Deeplex.Saverwalter.App
         }
     }
 
-    public sealed class AppViewModel : IAppImplementation
+    public abstract partial class AppImplementation : IAppImplementation
     {
         public SaverwalterContext ctx { get; set; }
         public ObservableProperty<string> Titel { get; set; } = new ObservableProperty<string>();
+        protected InAppNotification SavedIndicator { get; set; }
+        protected TextBlock SavedIndicatorText { get; set; }
+        protected ContentDialog ConfirmationDialog { get; set; }
+        protected SplitView AnhangPane { get; set; }
+        protected SymbolIcon AnhangSymbol { get; set; }
 
-        public AppViewModel()
+        public void SaveWalter()
         {
-            Titel.Value = "Walter";
+            ctx.SaveChanges();
+            ShowAlert("Gespeichert", 1000);
         }
 
+        public async Task<bool> Confirmation()
+        {
+            SetConfirmationDialogText(
+                "Bist du sicher?",
+                "Diese Änderung kann nicht rückgängig gemacht werden.",
+                "Ja", "Nein");
+            return await ShowConfirmationDialog();
+        }
+        public async Task<bool> Confirmation(string title, string content, string primary, string secondary)
+        {
+            SetConfirmationDialogText(title, content, primary, secondary);
+            return await ShowConfirmationDialog();
+        }
         public void ShowAlert(string text, int ms = 500)
         {
             if (SavedIndicator == null)
@@ -169,31 +188,6 @@ namespace Deeplex.Saverwalter.App
             }
             SavedIndicatorText.Text = text;
             SavedIndicator.Show(ms);
-        }
-
-        public async Task<bool> Confirmation()
-        {
-            SetConfirmationDialogText(
-                "Bist du sicher?",
-                "Diese Änderung kann nicht rückgängig gemacht werden.",
-                "Ja.", "Nein.");
-            return await ShowConfirmationDialog();
-        }
-        public async Task<bool> Confirmation(string title, string content, string primary, string secondary)
-        {
-            SetConfirmationDialogText(title, content, primary, secondary);
-            return await ShowConfirmationDialog();
-        }
-
-        private async Task<bool> ShowConfirmationDialog()
-            => await ConfirmationDialog.ShowAsync() == ContentDialogResult.Primary;
-
-        private void SetConfirmationDialogText(string title, string content, string primary, string secondary)
-        {
-            ConfirmationDialog.Title = title;
-            ConfirmationDialog.Content = content;
-            ConfirmationDialog.PrimaryButtonText = primary;
-            ConfirmationDialog.SecondaryButtonText = secondary;
         }
 
         public void OpenAnhang()
@@ -208,6 +202,25 @@ namespace Deeplex.Saverwalter.App
         {
             AnhangPane.IsPaneOpen = !AnhangPane.IsPaneOpen;
             AnhangSymbol.Symbol = AnhangPane.IsPaneOpen ? Symbol.OpenPane : Symbol.ClosePane;
+        }
+
+        private async Task<bool> ShowConfirmationDialog()
+     => await ConfirmationDialog.ShowAsync() == ContentDialogResult.Primary;
+
+        private void SetConfirmationDialogText(string title, string content, string primary, string secondary)
+        {
+            ConfirmationDialog.Title = title;
+            ConfirmationDialog.Content = content;
+            ConfirmationDialog.PrimaryButtonText = primary;
+            ConfirmationDialog.SecondaryButtonText = secondary;
+        }
+    }
+
+    public sealed class AppViewModel : AppImplementation
+    {
+        public AppViewModel()
+        {
+            Titel.Value = "Walter";
         }
 
         private CommandBar CommandBar { get; set; }
@@ -274,18 +287,6 @@ namespace Deeplex.Saverwalter.App
             SavedIndicatorText = arg2;
         }
 
-        private InAppNotification SavedIndicator { get; set; }
-        private TextBlock SavedIndicatorText { get; set; }
-        private ContentDialog ConfirmationDialog { get; set; }
-        private SplitView AnhangPane { get; set; }
-        private SymbolIcon AnhangSymbol { get; set; }
-
         public Action<Type, object> Navigate { get; set; }
-
-        public void SaveWalter()
-        {
-            ctx.SaveChanges();
-            ShowAlert("Gespeichert", 1000);
-        }
     }
 }

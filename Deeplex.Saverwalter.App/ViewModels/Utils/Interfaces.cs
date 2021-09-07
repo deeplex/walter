@@ -11,8 +11,8 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         Task<IList<Anhang>> PickFiles();
         Task<string> ExtractTo(Anhang a);
-        void SaveFilesToWalter<T, U>(DbSet<T> set, U target, IList<Anhang> files) where T : class, IAnhang<U>, new();
         Task<Anhang> ExtractFrom(string path);
+        void SaveFilesToWalter<T, U>(DbSet<T> set, U target, IList<Anhang> files) where T : class, IAnhang<U>, new();
     }
 
     public interface IFilterViewModel
@@ -24,15 +24,15 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         SaverwalterContext ctx { get; set; }
         void SaveWalter();
+        Task<bool> Confirmation(string title, string content, string primary, string secondary);
         Task<bool> Confirmation();
         void OpenAnhang();
         void ShowAlert(string text, int time);
         ObservableProperty<string> Titel { get; set; }
+    }
 
-        //private object SavedIndicator { get; set; }
-        //private object SavedIndicatorText { get; set; }
-        //private object ConfirmationDialog { get; set; }
-        //private object AnhangPane { get; set; }
-        //private object AnhangSymbol { get; set; }
+    public class A<B> : B where B : class, IAppImplementation, new()
+    {
+
     }
 }
