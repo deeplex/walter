@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.ViewModels.Utils;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
@@ -167,13 +166,15 @@ namespace Deeplex.Saverwalter.ViewModels
                 _ => true);
         }
 
+        IFileCommands Files;
+
         public async Task PickFilesAndSaveToWalter<T, U>(DbSet<T> Set, U target) where T : class, IAnhang<U>, new()
         {
             if (newFiles.Value == null || newFiles.Value.Count == 0)
             {
-                //TODO newFiles.Value = (await Files.PickFiles()).ToImmutableList();
+                newFiles.Value = (await Files.PickFiles()).ToImmutableList();
             }
-            //TODO Files.SaveFilesToWalter(Set, target, newFiles.Value.ToList());
+            Utils.Anhaenge.SaveAnhaengeToWalter(Set, target, newFiles.Value.ToList(), Impl);
             var self = this;
             newFiles.Value.ForEach(f =>
                 Liste.Value = Liste.Value.Add(new AnhangListEntry(f, self, Impl)));

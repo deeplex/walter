@@ -211,7 +211,6 @@
     <Compile Include="ViewModels\Zähler\ZaehlerListViewModel.cs" />
     <Compile Include="ViewModels\Zähler\ZaehlerstandDetailViewModel.cs" />
     <Compile Include="ViewModels\Zähler\ZaehlerstandListViewModel.cs" />
-    <Compile Include="ViewModels\Zähler\ZaehlerViewModel.cs" />
     <Compile Include="Views\Rechnungen\BetriebskostenrechnungenDetailPage.xaml.cs">
       <DependentUpon>BetriebskostenrechnungenDetailPage.xaml</DependentUpon>
     </Compile>

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Deeplex.Saverwalter.ViewModels.Utils
+namespace Deeplex.Saverwalter.ViewModels
 {
     class Enums
     {

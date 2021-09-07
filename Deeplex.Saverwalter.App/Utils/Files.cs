@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,19 +28,6 @@ namespace Deeplex.Saverwalter.App.Utils
 
             return anhang;
         }
-
-        public static async Task<StorageFolder> SelectDirectory()
-        {
-            var picker = new FolderPicker()
-            {
-                SuggestedStartLocation = PickerLocationId.Desktop,
-            };
-
-            picker.FileTypeFilter.Add("*");
-
-            return await picker.PickSingleFolderAsync(); ;
-        }
-
 
         public static async Task<string> ExtractTo(Anhang a)
         {
@@ -82,30 +68,5 @@ namespace Deeplex.Saverwalter.App.Utils
 
             return picker;
         }
-
-        public static async Task<Anhang> PickFile(params string[] filters)
-        {
-            var file = await FilePicker(filters).PickSingleFileAsync();
-            return await ExtractFrom(file);
-        }
-
-        public static async Task<List<Anhang>> PickFiles(params string[] filters)
-        {
-            var files = await FilePicker(filters).PickMultipleFilesAsync();
-            var list = new List<Anhang>();
-            foreach (var file in files)
-            {
-                list.Add(await ExtractFrom(file));
-            }
-            return list;
-        }
-
-        public static async Task<List<T>> PrepareFilesForWalter<T>(DbSet<T> Set, params string[] filters) where T : class, IAnhang, new()
-    => (await PickFiles(filters))
-        .Select(file => new T
-        {
-            Anhang = file,
-            AnhangId = file.AnhangId,
-        }).ToList();
     }
 }

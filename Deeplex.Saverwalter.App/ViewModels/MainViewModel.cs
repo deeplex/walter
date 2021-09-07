@@ -1,11 +1,20 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
+    public interface IFileCommands
+    {
+        Task<IList<Anhang>> PickFiles();
+        Task<string> ExtractTo(Anhang a);
+        void SaveFilesToWalter<T, U>(DbSet<T> set, U target, IList<Anhang> files) where T : class, IAnhang<U>, new();
+        Task<Anhang> ExtractFrom(string path);
+    }
+
     public interface IFilterViewModel
     {
         ObservableProperty<string> Filter { get; set; }

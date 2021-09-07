@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.App
                 var bytes = new byte[(int)stream.Length];
                 stream.Read(bytes, 0, (int)stream.Length);
 
-                var ok = ViewModels.Utils.Files.MakeSpace(path);
+                var ok = ViewModels.Utils.Anhaenge.MakeSpace(path);
                 if (ok)
                 {
                     var folder = ApplicationData.Current.LocalFolder;

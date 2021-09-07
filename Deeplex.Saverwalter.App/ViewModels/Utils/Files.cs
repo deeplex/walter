@@ -5,14 +5,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels.Utils
 {
-    public static class Files
+    public static class Anhaenge
     {
-        public static void SaveFilesToWalter<T, U>(DbSet<T> Set, U target, List<Anhang> files, IAppImplementation impl) where T : class, IAnhang<U>, new()
+        public static void SaveAnhaengeToWalter<T, U>(DbSet<T> Set, U target, List<Anhang> files, IAppImplementation impl) where T : class, IAnhang<U>, new()
         {
             foreach (var file in files)
             {

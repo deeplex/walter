@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
-using Deeplex.Saverwalter.ViewModels.Utils;
 
 namespace Deeplex.Saverwalter.ViewModels
 {

@@ -8,8 +8,6 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using static Deeplex.Saverwalter.App.Utils.Elements;
 
-// The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
-
 namespace Deeplex.Saverwalter.App.UserControls
 {
     public sealed partial class VertragListControl : UserControl
