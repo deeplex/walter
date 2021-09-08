@@ -1,7 +1,6 @@
-﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Print;
+using Deeplex.Saverwalter.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Linq;

@@ -3,7 +3,6 @@ using Deeplex.Saverwalter.App.Views;
 using Deeplex.Saverwalter.App.Views.Rechnungen;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Utils.ObjectModel;
 using System;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;

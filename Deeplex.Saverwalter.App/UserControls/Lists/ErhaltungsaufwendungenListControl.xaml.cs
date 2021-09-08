@@ -1,6 +1,6 @@
-﻿using Deeplex.Saverwalter.ViewModels;
+﻿using Deeplex.Saverwalter.App.Views.Rechnungen;
+using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.ViewModels.Rechnungen;
-using Deeplex.Saverwalter.App.Views.Rechnungen;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System.Collections.Immutable;
 using System.Linq;

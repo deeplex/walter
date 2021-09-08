@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.App.Utils
             picker.SuggestedStartLocation = PickerLocationId.Desktop;
             if (filters != null && filters.Length > 0)
             {
-                foreach(var filter in filters)
+                foreach (var filter in filters)
                 {
                     picker.FileTypeFilter.Add(filter);
                 }
@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.App.Utils
             {
                 return file.Path;
             }
-            
+
             return "";
         }
 

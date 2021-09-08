@@ -1,5 +1,5 @@
-﻿using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.App.Views;
+﻿using Deeplex.Saverwalter.App.Views;
+using Deeplex.Saverwalter.ViewModels;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
 using System.Collections.Immutable;

@@ -1,5 +1,5 @@
-﻿using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Windows.UI.Xaml.Controls;

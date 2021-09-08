@@ -163,7 +163,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Impl = impl;
             Entity = a;
-            
+
             AlleAdressen = Impl.ctx.Adressen.ToImmutableList();
 
             PropertyChanged += OnUpdate;

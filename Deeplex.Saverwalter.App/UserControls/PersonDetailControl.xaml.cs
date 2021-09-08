@@ -1,5 +1,5 @@
-﻿using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.App.Views;
+﻿using Deeplex.Saverwalter.App.Views;
+using Deeplex.Saverwalter.ViewModels;
 using System;
 using System.Linq;
 using Windows.UI.Xaml;

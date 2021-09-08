@@ -25,7 +25,8 @@
                     TextChanged="AutoSuggestBox_TextChanged"
                     TextMemberPath=""
                     UpdateTextOnSelect="False"
-                    MinWidth="500"
+                    Width="500"
+                    BorderThickness="0"
                     QuerySubmitted="AutoSuggestBox_QuerySubmitted"
                     AutoMaximizeSuggestionArea="True"
                     PlaceholderText="Suchen...">

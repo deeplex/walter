@@ -1,9 +1,14 @@
 ﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
@@ -11,11 +16,6 @@ using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using Microsoft.Toolkit.Uwp.UI.Controls;
-using Deeplex.Utils.ObjectModel;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 
 namespace Deeplex.Saverwalter.App
 {
@@ -64,7 +64,7 @@ namespace Deeplex.Saverwalter.App
                     }
                 }
             }
-            
+
             LoadDataBase();
         }
 

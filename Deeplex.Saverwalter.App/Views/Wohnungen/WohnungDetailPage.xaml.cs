@@ -1,9 +1,8 @@
-﻿using Deeplex.Saverwalter.App.Utils;
-using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.ViewModels.Rechnungen;
-using Deeplex.Saverwalter.App.Views.Rechnungen;
+﻿using Deeplex.Saverwalter.App.Views.Rechnungen;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Print;
+using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.ViewModels.Rechnungen;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Linq;
