@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:uc="using:Deeplex.Saverwalter.App.UserControls"
+    xmlns:vm="using:Deeplex.Saverwalter.App"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -13,12 +14,31 @@
         <NavigationView
             PaneDisplayMode="Left"
             x:Name="NavView"
-            OpenPaneLength="160"
             AlwaysShowHeader="False"
             IsSettingsVisible="True"
             ItemInvoked="NavView_ItemInvoked"
             BackRequested="NavView_BackRequested"
             IsBackEnabled="{x:Bind AppFrame.CanGoBack, Mode=OneWay}">
+            <NavigationView.AutoSuggestBox>
+                <AutoSuggestBox
+                    ItemsSource="{x:Bind ViewModel.AutoSuggestEntries.Value, Mode=OneWay}"
+                    TextChanged="AutoSuggestBox_TextChanged"
+                    TextMemberPath=""
+                    UpdateTextOnSelect="False"
+                    MinWidth="500"
+                    QuerySubmitted="AutoSuggestBox_QuerySubmitted"
+                    AutoMaximizeSuggestionArea="True"
+                    PlaceholderText="Suchen...">
+                    <AutoSuggestBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:AutoSuggestEntry">
+                            <StackPanel Orientation="Horizontal" ToolTipService.ToolTip="{x:Bind Bezeichnung}">
+                                <SymbolIcon Symbol="{x:Bind Icon}" Margin="0,0,10,0"/>
+                                <TextBlock Text="{x:Bind Bezeichnung}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </AutoSuggestBox.ItemTemplate>
+                </AutoSuggestBox>
+            </NavigationView.AutoSuggestBox>
             <NavigationView.MenuItems>
                 <NavigationViewItem
                     x:Name="KontaktListMenuItem"

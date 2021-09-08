@@ -14,7 +14,8 @@ using Windows.UI.Xaml.Navigation;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using Deeplex.Utils.ObjectModel;
 using System.Collections.Generic;
-using Windows.Storage.Pickers;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Deeplex.Saverwalter.App
 {
@@ -47,7 +48,7 @@ namespace Deeplex.Saverwalter.App
                 var bytes = new byte[(int)stream.Length];
                 stream.Read(bytes, 0, (int)stream.Length);
 
-                var ok = ViewModels.Utils.Files.MakeSpace(path);
+                var ok = Saverwalter.ViewModels.Utils.Files.MakeSpace(path);
                 if (ok)
                 {
                     var folder = ApplicationData.Current.LocalFolder;
@@ -138,6 +139,9 @@ namespace Deeplex.Saverwalter.App
                 }
                 Window.Current.Activate();
             }
+
+            _ = InitializeDatabase();
+            ViewModel.updateAutoSuggestEntries();
         }
 
         void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
@@ -220,6 +224,31 @@ namespace Deeplex.Saverwalter.App
 
     public sealed class AppViewModel : AppImplementation
     {
+        public void updateAutoSuggestEntries()
+        {
+            AllAutoSuggestEntries.Value = ctx.Wohnungen.Include(w => w.Adresse).Select(w => new AutoSuggestEntry(w)).ToList()
+                .Concat(ctx.NatuerlichePersonen.Select(w => new AutoSuggestEntry(w))).ToList()
+                .Concat(ctx.JuristischePersonen.Select(w => new AutoSuggestEntry(w))).ToList()
+                .Concat(ctx.Vertraege
+                    .Include(w => w.Wohnung)
+                    .Where(w => w.Ende == null || w.Ende < DateTime.Now)
+                    .Select(w => new AutoSuggestEntry(w))).ToList()
+                .Concat(ctx.ZaehlerSet.Select(w => new AutoSuggestEntry(w))).ToList()
+                .Concat(ctx.Betriebskostenrechnungen.Include(w => w.Gruppen).ThenInclude(w => w.Wohnung).Select(w => new AutoSuggestEntry(w))).ToList()
+                .Where(w => w.Bezeichnung != null).ToImmutableList();
+            AutoSuggestEntries.Value = AllAutoSuggestEntries.Value;
+        }
+
+        public void updateAutoSuggestEntries(string filter)
+        {
+            AutoSuggestEntries.Value = AllAutoSuggestEntries.Value.Where(w => w.ToString().ToLower().Contains(filter.ToLower())).ToImmutableList();
+        }
+
+        public ObservableProperty<ImmutableList<AutoSuggestEntry>> AllAutoSuggestEntries
+         = new ObservableProperty<ImmutableList<AutoSuggestEntry>>();
+        public ObservableProperty<ImmutableList<AutoSuggestEntry>> AutoSuggestEntries
+            = new ObservableProperty<ImmutableList<AutoSuggestEntry>>();
+
         public AppViewModel()
         {
             Titel.Value = "Walter";

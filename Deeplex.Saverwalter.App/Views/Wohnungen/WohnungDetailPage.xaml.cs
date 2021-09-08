@@ -145,7 +145,7 @@ namespace Deeplex.Saverwalter.App.Views
             var worked = l.SaveAsDocx(path + ".docx");
             var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
 
-            var anhang = ViewModels.Utils.Files.ExtractFrom(path + ".docx");
+            var anhang = Saverwalter.ViewModels.Utils.Files.ExtractFrom(path + ".docx");
 
             if (anhang != null)
             {

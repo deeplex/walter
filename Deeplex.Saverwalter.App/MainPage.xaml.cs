@@ -1,9 +1,10 @@
-using Deeplex.Saverwalter.ViewModels;
+﻿using Deeplex.Saverwalter.App.ViewModels.Utils;
 using Deeplex.Saverwalter.App.Views;
 using Deeplex.Saverwalter.App.Views.Rechnungen;
+using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Utils.ObjectModel;
 using System;
-using System.IO;
-using Windows.Storage;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
@@ -12,11 +13,9 @@ namespace Deeplex.Saverwalter.App
 {
     public sealed partial class MainPage : Page
     {
-        public async void Navigate<U>(Type SourcePage, U SendParameter)
+        public void Navigate<U>(Type SourcePage, U SendParameter)
         {
             ViewModel.clearAnhang();
-
-            await App.InitializeDatabase();
 
             AppFrame.Navigate(SourcePage, SendParameter,
                 new DrillInNavigationTransitionInfo());
@@ -67,33 +66,33 @@ namespace Deeplex.Saverwalter.App
             if (e.SourcePageType == typeof(KontaktListPage) ||
                 e.SourcePageType == typeof(JuristischePersonenDetailPage) ||
                 e.SourcePageType == typeof(NatuerlichePersonDetailPage))
-                {
-                    NavView.SelectedItem = KontaktListMenuItem;
-                }
+            {
+                NavView.SelectedItem = KontaktListMenuItem;
+            }
             else if (e.SourcePageType == typeof(WohnungListPage) || e.SourcePageType == typeof(WohnungDetailPage))
-                {
-                    NavView.SelectedItem = WohnungListMenuItem;
-                }
+            {
+                NavView.SelectedItem = WohnungListMenuItem;
+            }
             else if (e.SourcePageType == typeof(VertragListPage) || e.SourcePageType == typeof(VertragDetailViewPage))
-                {
-                    NavView.SelectedItem = VertragListMenuItem;
-                }
+            {
+                NavView.SelectedItem = VertragListMenuItem;
+            }
             else if (e.SourcePageType == typeof(BetriebskostenRechnungenListViewPage) || e.SourcePageType == typeof(BetriebskostenrechnungenDetailPage))
-                {
-                    NavView.SelectedItem = BetriebskostenListMenuItem;
-                }
+            {
+                NavView.SelectedItem = BetriebskostenListMenuItem;
+            }
             else if (e.SourcePageType == typeof(ErhaltungsaufwendungenListViewPage) || e.SourcePageType == typeof(ErhaltungsaufwendungenDetailPage))
-                {
-                    NavView.SelectedItem = ErhaltungsAufwendungenListMenuItem;
-                }
+            {
+                NavView.SelectedItem = ErhaltungsAufwendungenListMenuItem;
+            }
             else if (e.SourcePageType == typeof(ZaehlerListPage) || e.SourcePageType == typeof(ZaehlerDetailPage))
-                {
-                    NavView.SelectedItem = ZaehlerListMenuItem;
-                }
-                else if (e.SourcePageType == typeof(SettingsPage))
-                {
-                    NavView.SelectedItem = NavView.SettingsItem;
-                }
+            {
+                NavView.SelectedItem = ZaehlerListMenuItem;
+            }
+            else if (e.SourcePageType == typeof(SettingsPage))
+            {
+                NavView.SelectedItem = NavView.SettingsItem;
+            }
             if (e.NavigationMode == NavigationMode.Back)
             {
                 Navigate(e.SourcePageType, (NavView.SelectedItem as NavigationViewItem).Content);
@@ -112,6 +111,85 @@ namespace Deeplex.Saverwalter.App
         private void togglepane_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             App.ViewModel.ToggleAnhang();
+        }
+
+        private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            App.ViewModel.updateAutoSuggestEntries(sender.Text);
+        }
+
+        private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            var Entry = args.ChosenSuggestion as AutoSuggestEntry;
+            App.ViewModel.Navigate(Entry.getPage(), Entry.Entity);
+            sender.IsSuggestionListOpen = false;
+            sender.Text = "";
+        }
+    }
+
+
+
+    public class AutoSuggestEntry
+    {
+        public override string ToString() => Bezeichnung;
+        public string Bezeichnung;
+        public string Icon;
+        public object Entity;
+
+
+        public Type getPage()
+        {
+            return Entity is NatuerlichePerson ? typeof(NatuerlichePersonDetailPage) :
+                Entity is JuristischePerson ? typeof(JuristischePersonenDetailPage) :
+                Entity is Wohnung ? typeof(WohnungDetailPage) :
+                Entity is Zaehler ? typeof(ZaehlerDetailPage) :
+                Entity is Vertrag ? typeof(VertragDetailViewPage) :
+                Entity is Betriebskostenrechnung ? typeof(BetriebskostenrechnungenDetailPage) :
+                Entity is Erhaltungsaufwendung ? typeof(ErhaltungsaufwendungenDetailPage) :
+                null;
+        }
+
+        public AutoSuggestEntry(NatuerlichePerson a)
+        {
+            Entity = a;
+            Icon = "ContactInfo";
+            Bezeichnung = a.Bezeichnung;
+        }
+        public AutoSuggestEntry(JuristischePerson a)
+        {
+            Entity = a;
+            Icon = "ContactInfo";
+            Bezeichnung = a.Bezeichnung;
+        }
+        public AutoSuggestEntry(Wohnung a)
+        {
+            Entity = a;
+            Icon = "Street";
+            Bezeichnung = AdresseViewModel.Anschrift(a) + " - " + a.Bezeichnung;
+        }
+        public AutoSuggestEntry(Zaehler a)
+        {
+            Entity = a;
+            Icon = "Clock";
+            Bezeichnung = a.Kennnummer;
+        }
+        public AutoSuggestEntry(Vertrag a)
+        {
+            Entity = a;
+            Icon = "Library";
+            Bezeichnung = AdresseViewModel.Anschrift(a.Wohnung) + " - " + a.Wohnung.Bezeichnung;
+        }
+        public AutoSuggestEntry(Betriebskostenrechnung a)
+        {
+            Entity = a;
+            Icon = "List";
+            Bezeichnung = a.Typ.ToDescriptionString() + " - " + a.GetWohnungenBezeichnung(App.ViewModel);
+        }
+        public AutoSuggestEntry(Erhaltungsaufwendung a)
+        {
+            Entity = a;
+            Icon = "Bullets";
+            Bezeichnung = a.Bezeichnung;
         }
     }
 }

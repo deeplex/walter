@@ -184,6 +184,7 @@
     <Compile Include="Utils\Files.cs" />
     <Compile Include="ViewModels\AdresseViewModel.cs" />
     <Compile Include="ViewModels\AnhangViewModel.cs" />
+    <Compile Include="ViewModels\Utils\Extensions.cs" />
     <Compile Include="ViewModels\Utils\Interfaces.cs" />
     <Compile Include="ViewModels\Mieten\MietenDetailViewModel.cs" />
     <Compile Include="ViewModels\Mieten\MietenListViewModel.cs" />

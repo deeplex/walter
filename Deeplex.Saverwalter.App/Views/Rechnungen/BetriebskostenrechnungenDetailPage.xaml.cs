@@ -30,9 +30,13 @@ namespace Deeplex.Saverwalter.App.Views
             {
                 ViewModel = new BetriebskostenrechnungDetailViewModel(App.Walter.Betriebskostenrechnungen.Find(id), App.ViewModel);
             }
-            if (e.Parameter is BetriebskostenrechnungDetailViewModel vm)
+            else if (e.Parameter is BetriebskostenrechnungDetailViewModel vm)
             {
                 ViewModel = vm;
+            }
+            else if (e.Parameter is Betriebskostenrechnung r)
+            {
+                ViewModel = new BetriebskostenrechnungDetailViewModel(r, App.ViewModel);
             }
             else if (e.Parameter is null)
             {

@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.ViewModels;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.ViewModels.Rechnungen;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -21,9 +22,13 @@ namespace Deeplex.Saverwalter.App.Views.Rechnungen
             {
                 ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.Walter.Erhaltungsaufwendungen.Find(id), App.ViewModel);
             }
-            if (e.Parameter is ErhaltungsaufwendungenDetailViewModel vm)
+            else if (e.Parameter is ErhaltungsaufwendungenDetailViewModel vm)
             {
                 ViewModel = vm;
+            }
+            else if (e.Parameter is Erhaltungsaufwendung r)
+            {
+                ViewModel = new ErhaltungsaufwendungenDetailViewModel(r, App.ViewModel);
             }
             else if (e.Parameter is null)
             {
