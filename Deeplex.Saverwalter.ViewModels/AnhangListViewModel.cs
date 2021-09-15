@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -213,6 +214,19 @@ namespace Deeplex.Saverwalter.ViewModels
                     Container.Liste.Value = Container.Liste.Value.Remove(deleted);
                 }
             }
+        }
+
+        public void OpenFile()
+        {
+            try
+            {
+                Impl.launchFile(Entity);
+            }
+            catch (Exception e)
+            {
+                Impl.ShowAlert(e.Message);
+            }
+
         }
 
         public string SaveFileTemp()

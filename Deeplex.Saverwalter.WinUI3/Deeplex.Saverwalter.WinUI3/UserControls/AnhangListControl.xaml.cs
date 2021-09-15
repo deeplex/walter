@@ -70,13 +70,11 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             }
         }
 
-        private async void Oeffne_Click(object sender, RoutedEventArgs e)
+        private void Oeffne_Click(object sender, RoutedEventArgs e)
         {
             if (((FrameworkElement)sender).DataContext is AnhangListEntry a)
             {
-                var path = a.SaveFileTemp();
-                var file = await StorageFile.GetFileFromPathAsync(path);
-                await Windows.System.Launcher.LaunchFileAsync(file);
+                a.OpenFile();
             }
         }
     }

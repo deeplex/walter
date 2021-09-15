@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
             catch
             {
-                impl.ShowAlert("Keine Datenbank geladen.", 5000);
+                impl.ShowAlert("Keine Datenbank geladen.");
             }
         }
     }

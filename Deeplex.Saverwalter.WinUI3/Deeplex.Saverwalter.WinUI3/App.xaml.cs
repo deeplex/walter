@@ -64,13 +64,15 @@ namespace Deeplex.Saverwalter.WinUI3
         {
             try
             {
-                if (ViewModel.dbPath == null)
+                if (ViewModel.root == null)
                 {
                     var picker = Files.FilePicker(".db");
                     var file = await picker.PickSingleFileAsync();
                     if (file != null)
                     {
-                        ViewModel.dbPath = file.Path;
+                        ViewModel.root = System.IO.Path.Combine(
+                            System.IO.Path.GetDirectoryName(file.Path),
+                            System.IO.Path.GetFileNameWithoutExtension(file.Path));
 
                         if (ViewModel.ctx != null)
                         {
@@ -79,7 +81,7 @@ namespace Deeplex.Saverwalter.WinUI3
                     }
                 }
                 var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
-                optionsBuilder.UseSqlite("Data Source=" + ViewModel.dbPath);
+                optionsBuilder.UseSqlite("Data Source=" + ViewModel.root + ".db");
                 ViewModel.ctx = new SaverwalterContext(optionsBuilder.Options);
                 ViewModel.ctx.Database.Migrate();
             }
@@ -106,7 +108,7 @@ namespace Deeplex.Saverwalter.WinUI3
 
     public abstract partial class AppImplementation : IAppImplementation
     {
-        public string dbPath { get; set; }
+        public string root { get; set; }
         public SaverwalterContext ctx { get; set; }
         public ObservableProperty<string> Titel { get; set; } = new ObservableProperty<string>();
         protected CommunityToolkit.WinUI.UI.Controls.InAppNotification SavedIndicator { get; set; }
@@ -114,6 +116,20 @@ namespace Deeplex.Saverwalter.WinUI3
         protected ContentDialog ConfirmationDialog { get; set; }
         protected SplitView AnhangPane { get; set; }
         protected SymbolIcon AnhangSymbol { get; set; }
+
+        public async void launchFile(Anhang a)
+        {
+            try
+            {
+                var path = a.getPath(root);
+                var file = await StorageFile.GetFileFromPathAsync(path);
+                await Windows.System.Launcher.LaunchFileAsync(file);
+            }
+            catch (Exception e)
+            {
+                ShowAlert(e.Message);
+            }
+        }
 
         public void SaveWalter()
         {
@@ -138,7 +154,9 @@ namespace Deeplex.Saverwalter.WinUI3
             SetConfirmationDialogText(title, content, primary, secondary);
             return await ShowConfirmationDialog();
         }
-        public void ShowAlert(string text, int ms = 500)
+
+        public void ShowAlert(string text) => ShowAlert(text, 500);
+        public void ShowAlert(string text, int ms)
         {
             if (SavedIndicator == null)
             {

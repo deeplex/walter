@@ -2,6 +2,7 @@
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
@@ -21,13 +22,14 @@ namespace Deeplex.Saverwalter.ViewModels
 
     public interface IAppImplementation
     {
-        string dbPath { get; set; }
+        string root { get; set; }
         SaverwalterContext ctx { get; set; }
         void SaveWalter();
         Task<bool> Confirmation(string title, string content, string primary, string secondary);
         Task<bool> Confirmation();
         void OpenAnhang();
-        void ShowAlert(string text, int time);
+        void ShowAlert(string text);
         ObservableProperty<string> Titel { get; set; }
+        void launchFile(Anhang a);
     }
 }
