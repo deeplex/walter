@@ -77,6 +77,10 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
         public static FileOpenPicker FilePicker(params string[] filters)
         {
             var picker = new FileOpenPicker();
+
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.Window);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
             picker.ViewMode = PickerViewMode.Thumbnail;
             picker.SuggestedStartLocation = PickerLocationId.Desktop;
             if (filters != null && filters.Length > 0)

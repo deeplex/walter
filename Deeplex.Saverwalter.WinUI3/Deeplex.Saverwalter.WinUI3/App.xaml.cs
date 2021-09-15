@@ -28,6 +28,7 @@ namespace Deeplex.Saverwalter.WinUI3
 {
     sealed partial class App : Application
     {
+        public static Window Window { get; private set; }
         public static AppViewModel ViewModel { get; private set; }
 
         public static SaverwalterContext Walter => ViewModel.ctx;
@@ -119,13 +120,11 @@ namespace Deeplex.Saverwalter.WinUI3
         {
             ViewModel = new AppViewModel();
 
-            m_window = new MainWindow();
-            m_window.Activate();
+            Window = new MainWindow();
+            Window.Activate();
 
             ViewModel.updateAutoSuggestEntries();
         }
-
-        private Window m_window;
     }
 
     public abstract partial class AppImplementation : IAppImplementation
