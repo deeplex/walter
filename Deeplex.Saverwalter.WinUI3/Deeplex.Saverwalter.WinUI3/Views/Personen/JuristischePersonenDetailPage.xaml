@@ -1,0 +1,80 @@
+﻿<Page
+    x:Class="Deeplex.Saverwalter.WinUI3.Views.JuristischePersonenDetailPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:uc="using:Deeplex.Saverwalter.WinUI3.UserControls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <uc:FileDrop>
+        <uc:FileDrop.MainContent>
+            <StackPanel>
+                <mtuuc:WrapPanel Orientation="Horizontal">
+                    <TextBox
+                Width="620"
+                Text="{x:Bind ViewModel.Bezeichnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Header="Bezeichnung" Style="{StaticResource Eintraege}"/>
+                </mtuuc:WrapPanel>
+                <uc:PersonDetailControl PersonViewModel="{x:Bind ViewModel}" />
+                <uc:ExpanderControl Header="Mitglieder">
+                    <uc:ExpanderControl.Bonus>
+                        <Button Margin="20,0,0,0" Background="Transparent">
+                            <SymbolIcon Symbol="Add" />
+                            <Button.Flyout>
+                                <Flyout x:Name="AddMitglied_Flyout">
+                                    <StackPanel Orientation="Horizontal">
+                                        <uc:ComboControl
+                                            PlaceholderText="Mitglied hinzufügen"
+                                            SelectedItem="{x:Bind ViewModel.AddMitglied.Value, Mode=TwoWay}"
+                                            ItemsSource="{x:Bind ViewModel.AddMitglieder.Value, Mode=OneWay}"/>
+                                        <Button Margin="10,0,0,0" Click="AddMitglied_Click">
+                                            <SymbolIcon Symbol="Add" />
+                                        </Button>
+                                    </StackPanel>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </uc:ExpanderControl.Bonus>
+                    <uc:ExpanderControl.MainContent>
+                        <uc:KontaktListControl
+                            JuristischePersonId="{x:Bind ViewModel.Id}"
+                            Kontakte="{x:Bind ViewModel.Mitglieder.Value, Mode=OneWay}"/>
+                    </uc:ExpanderControl.MainContent>
+                </uc:ExpanderControl>
+                <uc:ExpanderControl Header="Wohnungen">
+                    <uc:ExpanderControl.Bonus>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox Margin="10,0,0,0" IsChecked="{x:Bind ViewModel.WohnungenInklusiveMitglieder, Mode=TwoWay}" Content="Inkl. Mitglieder"/>
+                            <Button Background="Transparent">
+                                <StackPanel Orientation="Horizontal">
+                                    <SymbolIcon Symbol="PostUpdate" />
+                                    <TextBlock Margin="10,0,0,0" Text="Erhaltungsaufwendungen"/>
+                                </StackPanel>
+                                <Button.Flyout>
+                                    <Flyout>
+                                        <StackPanel Orientation="Horizontal">
+                                            <muxc:NumberBox
+                                                SpinButtonPlacementMode="Inline"
+                                                Header="Betreffendes Jahr"
+                                                Value="{x:Bind ViewModel.ErhaltungsaufwendungJahr.Value, Mode=TwoWay}"/>
+                                            <Button VerticalAlignment="Bottom" Background="Transparent" Command="{x:Bind ViewModel.Print_Erhaltungsaufwendungen}">
+                                                <SymbolIcon Symbol="PostUpdate"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                        </StackPanel>
+                    </uc:ExpanderControl.Bonus>
+                    <uc:ExpanderControl.MainContent>
+                        <uc:WohnungListControl Liste="{x:Bind ViewModel.Wohnungen.Value, Mode=OneWay}" />
+                    </uc:ExpanderControl.MainContent>
+                </uc:ExpanderControl>
+            </StackPanel>
+        </uc:FileDrop.MainContent>
+    </uc:FileDrop>
+</Page>

@@ -1,0 +1,252 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>Deeplex.Saverwalter.WinUI3</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x86;x64;arm64</Platforms>
+    <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <NoWarn>1701;1702;CA1416</NoWarn>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ProjectReunion" Version="0.8.3" />
+    <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.3" />
+    <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.3" />
+    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.0.3" />
+    <Manifest Include="$(ApplicationManifest)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Deeplex.Saverwalter.Model\Deeplex.Saverwalter.Model.csproj" />
+    <ProjectReference Include="..\..\Deeplex.Saverwalter.Print\Deeplex.Saverwalter.Print.csproj" />
+    <ProjectReference Include="..\..\Deeplex.Utils.ObjectModel\Deeplex.Utils.ObjectModel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="UserControls\Add\AddMieteControl.xaml.cs">
+      <DependentUpon>AddMieteControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\Add\AddMietMinderungControl.xaml.cs">
+      <DependentUpon>AddMietMinderungControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\Add\AddZaehlerstandControl.xaml.cs">
+      <DependentUpon>AddZaehlerstandControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\AdresseControl.xaml.cs">
+      <DependentUpon>AdresseControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\AnhangListControl.xaml.cs">
+      <DependentUpon>AnhangListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\ComboControl.xaml.cs">
+      <DependentUpon>ComboControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\ContextMenuControl.xaml.cs">
+      <DependentUpon>ContextMenuControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\ExpanderControl.xaml.cs">
+      <DependentUpon>ExpanderControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\FileDrop.xaml.cs">
+      <DependentUpon>FileDrop.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\Lists\BetriebskostenRechnungenListControl.xaml.cs">
+      <DependentUpon>BetriebskostenRechnungenListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\Lists\ErhaltungsaufwendungenListControl.xaml.cs">
+      <DependentUpon>ErhaltungsaufwendungenListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\Lists\KontaktListControl.xaml.cs">
+      <DependentUpon>KontaktListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\Lists\MietenListControl.xaml.cs">
+      <DependentUpon>MietenListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\Lists\MietMinderungListControl.xaml.cs">
+      <DependentUpon>MietMinderungListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\Lists\VertragListControl.xaml.cs">
+      <DependentUpon>VertragListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\Lists\WohnungListControl.xaml.cs">
+      <DependentUpon>WohnungListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\Lists\ZaehlerListControl.xaml.cs">
+      <DependentUpon>ZaehlerListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\Lists\ZaehlerstandListControl.xaml.cs">
+      <DependentUpon>ZaehlerstandListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\PersonDetailControl.xaml.cs">
+      <DependentUpon>PersonDetailControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Personen\JuristischePersonenDetailPage.xaml.cs">
+      <DependentUpon>JuristischePersonenDetailPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Personen\KontaktListPage.xaml.cs">
+      <DependentUpon>KontaktListPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Personen\NatuerlichePersonDetailPage.xaml.cs">
+      <DependentUpon>NatuerlichePersonDetailPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Rechnungen\BetriebskostenrechnungenDetailPage.xaml.cs">
+      <DependentUpon>BetriebskostenrechnungenDetailPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Rechnungen\BetriebskostenRechnungenListViewPage.xaml.cs">
+      <DependentUpon>BetriebskostenRechnungenListViewPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Rechnungen\ErhaltungsaufwendungenDetailPage.xaml.cs">
+      <DependentUpon>ErhaltungsaufwendungenDetailPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Rechnungen\ErhaltungsaufwendungenListViewPage.xaml.cs">
+      <DependentUpon>ErhaltungsaufwendungenListViewPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\SettingsPage.xaml.cs">
+      <DependentUpon>SettingsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Verträge\VertragDetailViewPage.xaml.cs">
+      <DependentUpon>VertragDetailViewPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Verträge\VertragListPage.xaml.cs">
+      <DependentUpon>VertragListPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Wohnungen\WohnungDetailPage.xaml.cs">
+      <DependentUpon>WohnungDetailPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Wohnungen\WohnungListPage.xaml.cs">
+      <DependentUpon>WohnungListPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Zähler\ZaehlerDetailPage.xaml.cs">
+      <DependentUpon>ZaehlerDetailPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Zähler\ZaehlerListPage.xaml.cs">
+      <DependentUpon>ZaehlerListPage.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\Add\AddMieteControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\Add\AddMietMinderungControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\Add\AddZaehlerstandControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\AdresseControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\AnhangListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\ComboControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\ContextMenuControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\ExpanderControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\FileDrop.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\Lists\BetriebskostenRechnungenListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\Lists\ErhaltungsaufwendungenListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\Lists\KontaktListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\Lists\MietenListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\Lists\MietMinderungListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\Lists\VertragListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\Lists\WohnungListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\Lists\ZaehlerListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\Lists\ZaehlerstandListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\PersonDetailControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Personen\JuristischePersonenDetailPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Personen\KontaktListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Personen\NatuerlichePersonDetailPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Rechnungen\BetriebskostenrechnungenDetailPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Rechnungen\BetriebskostenRechnungenListViewPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Rechnungen\ErhaltungsaufwendungenDetailPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Rechnungen\ErhaltungsaufwendungenListViewPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\SettingsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Verträge\VertragDetailViewPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Verträge\VertragListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Wohnungen\WohnungDetailPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Wohnungen\WohnungListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Zähler\ZaehlerDetailPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Zähler\ZaehlerListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+</Project>

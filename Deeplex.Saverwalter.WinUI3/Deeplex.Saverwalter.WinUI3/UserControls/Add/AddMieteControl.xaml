@@ -1,0 +1,48 @@
+﻿<UserControl
+    x:Class="Deeplex.Saverwalter.WinUI3.UserControls.AddMieteControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Deeplex.Saverwalter.WinUI3.UserControls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <Grid>
+        <Button
+            x:Name="AddMieteButton"
+            Background="Transparent"
+            Margin="10,0,0,0">
+            <Button.Content>
+                <SymbolIcon Symbol="Add"/>
+            </Button.Content>
+            <Button.Flyout>
+                <Flyout>
+                    <StackPanel>
+                        <DatePicker
+                            Header="Datum"
+                            Language="de"
+                            Date="{x:Bind ViewModel.Zahlungsdatum, Mode=TwoWay}"/>
+                        <DatePicker
+                            Date="{x:Bind ViewModel.BetreffenderMonat, Mode=TwoWay}"
+                            Language="de" Header="Betr. Monat" DayVisible="False"/>
+                        <muxc:NumberBox
+                            Header="Betrag"
+                            Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            PlaceholderText="0,00"/>
+                        <Button
+                            HorizontalAlignment="Stretch"
+                            Margin="0,10,0,0"
+                            Click="AddMiete_Click"
+                            VerticalAlignment="Bottom"
+                            Background="Transparent">
+                            <SymbolIcon Symbol="Add"/>
+                        </Button>
+                    </StackPanel>
+                </Flyout>
+            </Button.Flyout>
+        </Button>
+    </Grid>
+</UserControl>

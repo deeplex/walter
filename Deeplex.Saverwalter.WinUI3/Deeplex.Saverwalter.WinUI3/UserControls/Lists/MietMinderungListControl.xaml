@@ -1,0 +1,94 @@
+﻿<UserControl
+    x:Class="Deeplex.Saverwalter.WinUI3.UserControls.MietMinderungListControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Deeplex.Saverwalter.WinUI3.UserControls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
+    xmlns:uc="using:Deeplex.Saverwalter.WinUI3.UserControls"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <RelativePanel>
+        <StackPanel
+            RelativePanel.AlignRightWithPanel="True"
+            RelativePanel.AlignLeftWithPanel="True">
+            <uc:ExpanderControl Header="Mietminderungen">
+                <uc:ExpanderControl.Bonus>
+                    <uc:AddMietMinderungControl MietMinderungListViewModel="{x:Bind ViewModel}"/>
+                </uc:ExpanderControl.Bonus>
+                <uc:ExpanderControl.MainContent>
+                    <mtuuc:DataGrid
+                        Style="{StaticResource DataGridUserControl}"
+                        SelectionChanged="DataGrid_SelectionChanged"
+                        ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}">
+                        <mtuuc:DataGrid.Columns>
+                            <mtuuc:DataGridTemplateColumn>
+                                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:MietMinderungListEntry">
+                                        <Button
+                                            HorizontalAlignment="Center"
+                                            Background="Transparent"
+                                            Command="{x:Bind SelfDestruct}">
+                                            <SymbolIcon Symbol="Delete"></SymbolIcon>
+                                        </Button>
+                                    </DataTemplate>
+                                </mtuuc:DataGridTemplateColumn.CellTemplate>
+                            </mtuuc:DataGridTemplateColumn>
+                            <mtuuc:DataGridTextColumn Header="Beginn" Binding="{Binding BeginnString}"/>
+                            <!--<mtuuc:DataGridTemplateColumn Header="Beginn">
+                                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
+                                        <CalendarDatePicker
+                                            Date="{x:Bind Beginn, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                            Language="de"
+                                            Width="176"
+                                            PlaceholderText="Beginn"
+                                            DateFormat="{}{day.integer}. {month.full} {year.full}"/>
+                                    </DataTemplate>
+                                </mtuuc:DataGridTemplateColumn.CellTemplate>
+                            </mtuuc:DataGridTemplateColumn>-->
+                            <mtuuc:DataGridTextColumn Header="Ende" Binding="{Binding EndeString}"/>
+                            <!--<mtuuc:DataGridTemplateColumn Header="Ende">
+                                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
+                                        <CalendarDatePicker
+                                            Date="{x:Bind Ende, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                            Language="de"
+                                            Width="176"
+                                            PlaceholderText="Offen"
+                                            DateFormat="{}{day.integer}. {month.full} {year.full}"/>
+                                    </DataTemplate>
+                                </mtuuc:DataGridTemplateColumn.CellTemplate>
+                            </mtuuc:DataGridTemplateColumn>-->
+                            <mtuuc:DataGridTextColumn Header="Minderung" Binding="{Binding MinderungString}"/>
+                            <!--<mtuuc:DataGridTemplateColumn Header="Minderung">
+                                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
+                                        <muxc:NumberBox
+                                            Value="{x:Bind Minderung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                            PlaceholderText="0.1"/>
+                                    </DataTemplate>
+                                </mtuuc:DataGridTemplateColumn.CellTemplate>
+                            </mtuuc:DataGridTemplateColumn>-->
+                            <mtuuc:DataGridTextColumn Binding="{Binding Notiz}" Header="Notiz"/>
+                            <!--<mtuuc:DataGridTemplateColumn>
+                                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
+                                        <Button Background="Transparent" Command="{x:Bind AttachFile}">
+                                            <SymbolIcon Symbol="Attach"/>
+                                        </Button>
+                                    </DataTemplate>
+                                </mtuuc:DataGridTemplateColumn.CellTemplate>
+                            </mtuuc:DataGridTemplateColumn>-->
+                        </mtuuc:DataGrid.Columns>
+                    </mtuuc:DataGrid>
+                </uc:ExpanderControl.MainContent>
+            </uc:ExpanderControl>
+        </StackPanel>
+    </RelativePanel>
+</UserControl>
