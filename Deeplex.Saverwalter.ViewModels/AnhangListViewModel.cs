@@ -188,6 +188,11 @@ namespace Deeplex.Saverwalter.ViewModels
         public Anhang Entity { get; }
         public override string ToString() => Entity.FileName;
         public string CreatedString => "Erstellt am: " + Entity.CreationTime.ToString("dd.MM.yyyy HH:mm:ss");
+        public string FileNameString => "Dateipfad: " + path;
+        public string FileSizeString => "Dateigröße: " + Math.Round(size / 1000).ToString() + "kb";
+
+        private string path => Entity.getPath(Impl.root);
+        public double size => File.Exists(path) ? new FileInfo(path).Length : 0;
 
         private AnhangListViewModel Container { get; }
 
@@ -207,6 +212,8 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 Impl.ctx.Anhaenge.Remove(Entity);
                 Impl.SaveWalter();
+
+                File.Delete(path);
 
                 var deleted = Container.Liste.Value.Find(e => e.Entity.AnhangId == Entity.AnhangId);
                 if (deleted != null)
@@ -229,17 +236,6 @@ namespace Deeplex.Saverwalter.ViewModels
 
         }
 
-        public string SaveFileTemp()
-        {
-            var path = Path.Combine(Path.GetTempPath(), Entity.FileName);
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
-            using (FileStream fs = new FileStream(path, FileMode.Create))
-            {
-                fs.Write(Entity.Content, 0, Entity.Content.Length);
-            }
-
-            return path;
-        }
         public string DateiName => Entity.FileName;
     }
 }
