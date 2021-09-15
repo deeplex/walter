@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Deeplex.Saverwalter.Model\Deeplex.Saverwalter.Model.csproj" />
     <ProjectReference Include="..\..\Deeplex.Saverwalter.Print\Deeplex.Saverwalter.Print.csproj" />
+    <ProjectReference Include="..\..\Deeplex.Saverwalter.ViewModels\Deeplex.Saverwalter.ViewModels.csproj" />
     <ProjectReference Include="..\..\Deeplex.Utils.ObjectModel\Deeplex.Utils.ObjectModel.csproj" />
   </ItemGroup>
 
