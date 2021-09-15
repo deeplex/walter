@@ -97,7 +97,6 @@ namespace Deeplex.Saverwalter.Model
         public string FileName { get; set; } = null!;
         public byte[] Sha256Hash { get; set; } = null!;
         public string? ContentType { get; set; }
-        public byte[] Content { get; set; } = null!;
         public DateTime CreationTime { get; set; }
 
         public Anhang()
