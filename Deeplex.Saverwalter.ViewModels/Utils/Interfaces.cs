@@ -21,6 +21,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
     public interface IAppImplementation
     {
+        string dbPath { get; set; }
         SaverwalterContext ctx { get; set; }
         void SaveWalter();
         Task<bool> Confirmation(string title, string content, string primary, string secondary);

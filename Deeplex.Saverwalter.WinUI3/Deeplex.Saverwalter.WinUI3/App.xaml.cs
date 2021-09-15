@@ -43,66 +43,43 @@ namespace Deeplex.Saverwalter.WinUI3
             InitializeComponent();
         }
 
-        public static async Task CopyDataBase()
-        {
-            var picker = Files.FilePicker(".db");
-            picker.CommitButtonText = "Lade Datenbank";
-            var file = await picker.PickSingleFileAsync();
-            if (file != null)
-            {
-                var path = System.IO.Path.Combine(ApplicationData.Current.LocalFolder.Path, "walter.db");
-                var stream = await file.OpenStreamForReadAsync();
-                var bytes = new byte[(int)stream.Length];
-                stream.Read(bytes, 0, (int)stream.Length);
-
-                var ok = Saverwalter.ViewModels.Utils.Files.MakeSpace(path);
-                if (ok)
-                {
-                    var folder = ApplicationData.Current.LocalFolder;
-                    var newFile = await folder.CreateFileAsync("walter.db");
-                    using (var writer = await newFile.OpenStreamForWriteAsync())
-                    {
-                        await writer.WriteAsync(bytes, 0, bytes.Length);
-                    }
-
-                    if (ViewModel.ctx != null)
-                    {
-                        ViewModel.ctx.Dispose();
-                    }
-                }
-            }
-
-            LoadDataBase();
-        }
-
         public static async Task InitializeDatabase()
         {
             if (ViewModel.ctx != null) return;
-            if (File.Exists(System.IO.Path.Combine(ApplicationData.Current.LocalFolder.Path, "walter.db")))
-            {
-                ViewModel.ctx?.Dispose();
-                LoadDataBase();
-            }
-            else if (await ViewModel.Confirmation(
-                "Keine Datenbank gefunden",
+            if (await ViewModel.Confirmation(
+                "Noch keine Datenbank ausgewählt",
                 "Datenbank suchen, oder leere Datenbank erstellen?",
                 "Existierende Datenbank auswählen", "Erstelle neue leere Datenbank"))
             {
-                await CopyDataBase();
+                await LoadDataBase();
             }
             else
             {
-                ViewModel.ctx?.Dispose();
-                LoadDataBase();
+                // TODO
+                throw new NotImplementedException();
             }
         }
 
-        public static void LoadDataBase()
+        public static async Task LoadDataBase()
         {
             try
             {
+                if (ViewModel.dbPath == null)
+                {
+                    var picker = Files.FilePicker(".db");
+                    var file = await picker.PickSingleFileAsync();
+                    if (file != null)
+                    {
+                        ViewModel.dbPath = file.Path;
+
+                        if (ViewModel.ctx != null)
+                        {
+                            ViewModel.ctx.Dispose();
+                        }
+                    }
+                }
                 var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
-                optionsBuilder.UseSqlite("Data Source=" + System.IO.Path.Combine(ApplicationData.Current.LocalFolder.Path, "walter.db"));
+                optionsBuilder.UseSqlite("Data Source=" + ViewModel.dbPath);
                 ViewModel.ctx = new SaverwalterContext(optionsBuilder.Options);
                 ViewModel.ctx.Database.Migrate();
             }
@@ -129,6 +106,7 @@ namespace Deeplex.Saverwalter.WinUI3
 
     public abstract partial class AppImplementation : IAppImplementation
     {
+        public string dbPath { get; set; }
         public SaverwalterContext ctx { get; set; }
         public ObservableProperty<string> Titel { get; set; } = new ObservableProperty<string>();
         protected CommunityToolkit.WinUI.UI.Controls.InAppNotification SavedIndicator { get; set; }
