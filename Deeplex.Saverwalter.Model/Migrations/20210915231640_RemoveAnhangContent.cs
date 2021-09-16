@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Deeplex.Saverwalter.Model.Migrations
 {
@@ -19,7 +18,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 table: "Anhaenge",
                 type: "BLOB",
                 nullable: false,
-                defaultValue: new byte[] {  });
+                defaultValue: new byte[] { });
         }
     }
 }

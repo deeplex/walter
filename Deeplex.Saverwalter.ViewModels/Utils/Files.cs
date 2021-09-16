@@ -2,10 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels.Utils
 {
@@ -40,6 +39,27 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             return anhang;
         }
 
+        public static async Task LoadDatabase(IAppImplementation impl)
+        {
+            if (impl.root == null)
+            {
+                var path = await impl.pickFile();
+                if (File.Exists(path))
+                {
+                    impl.root = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+
+                    if (impl.ctx != null)
+                    {
+                        impl.ctx.Dispose();
+                    }
+                }
+            }
+            var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
+            optionsBuilder.UseSqlite("Data Source=" + impl.root + ".db");
+            impl.ctx = new SaverwalterContext(optionsBuilder.Options);
+            impl.ctx.Database.Migrate();
+        }
+
         public static void SaveBetriebskostenabrechnung(this Betriebskostenabrechnung b, string path, IAppImplementation impl)
         {
             throw new NotImplementedException();
@@ -64,28 +84,6 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
 
             //MakeSpace(path + ".zip");
             //System.IO.Compression.ZipFile.CreateFromDirectory(temppath, path + ".zip");
-        }
-
-        public static bool MakeSpace(string path)
-        {
-            var ok = true;
-            if (File.Exists(path))
-            {
-                var dirname = Path.GetDirectoryName(path);
-                var filename = Path.GetFileNameWithoutExtension(path);
-                var extension = Path.GetExtension(path);
-                var newPath = Path.Combine(dirname, filename + ".old" + extension);
-                ok = MakeSpace(newPath);
-                try
-                {
-                    File.Move(path, newPath);
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-            return ok;
         }
     }
 }

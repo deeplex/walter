@@ -1,14 +1,12 @@
-﻿using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
-using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Print;
+﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.ViewModels.Rechnungen;
+using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Linq;
-using Windows.Storage;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
 {

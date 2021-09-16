@@ -1,8 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
@@ -23,6 +21,7 @@ namespace Deeplex.Saverwalter.ViewModels
         void ShowAlert(string text);
         ObservableProperty<string> Titel { get; set; }
         void launchFile(Anhang a);
+        Task<string> pickFile();
         Task<List<string>> pickFiles();
         Task deleteFile(Anhang a);
     }

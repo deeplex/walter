@@ -1,9 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Print;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
