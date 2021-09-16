@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
@@ -132,11 +133,14 @@ namespace Deeplex.Saverwalter.ViewModels
         public RelayCommand DeleteAllgemeinZaehler;
         public RelayCommand DeleteZaehlerWohnung;
 
-        public async void SelfDestruct()
+        public async Task SelfDestruct()
         {
-            Entity.Staende.ForEach(s => Avm.ctx.Zaehlerstaende.Remove(s));
-            Avm.ctx.ZaehlerSet.Remove(Entity);
-            Avm.SaveWalter();
+            if (await Impl.Confirmation())
+            {
+                Entity.Staende.ForEach(s => Avm.ctx.Zaehlerstaende.Remove(s));
+                Avm.ctx.ZaehlerSet.Remove(Entity);
+                Avm.SaveWalter();
+            }
         }
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)

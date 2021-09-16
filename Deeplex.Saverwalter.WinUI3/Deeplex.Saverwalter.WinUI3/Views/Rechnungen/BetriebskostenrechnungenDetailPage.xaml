@@ -14,7 +14,10 @@
             <StackPanel>
                 <uc:ExpanderControl IsExpanded="True" Header="Betroffene Wohneinheiten">
                     <uc:ExpanderControl.MainContent>
-                        <muxc:TreeView SelectionMode="Multiple" x:Name="WohnungenTree"/>
+                        <muxc:TreeView
+                            Tapped="WohnungenTree_Tapped"
+                            SelectionMode="Multiple"
+                            x:Name="WohnungenTree"/>
                     </uc:ExpanderControl.MainContent>    
                 </uc:ExpanderControl>
                 <MenuFlyoutSeparator/>

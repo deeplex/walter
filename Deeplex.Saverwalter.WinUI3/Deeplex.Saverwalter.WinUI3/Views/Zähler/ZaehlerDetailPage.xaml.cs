@@ -17,11 +17,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private async void Delete_Click(object sender, RoutedEventArgs e)
         {
-            if (await App.Impl.Confirmation())
-            {
-                ViewModel.SelfDestruct();
-                Frame.GoBack();
-            }
+            await ViewModel.SelfDestruct();
+            Frame.GoBack();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

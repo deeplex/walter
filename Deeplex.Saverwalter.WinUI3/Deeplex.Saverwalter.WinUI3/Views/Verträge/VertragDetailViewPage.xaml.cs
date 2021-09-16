@@ -49,11 +49,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private async void Delete_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            if (await App.Impl.Confirmation())
-            {
-                ViewModel.SelfDestruct();
-                Frame.GoBack();
-            }
+            await ViewModel.SelfDestruct();
+            Frame.GoBack();
         }
 
         private AppBarButton BetriebskostenAbrechnungsButton()
@@ -84,11 +81,6 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                     Content = BetrKostenAbrButtons,
                 },
             };
-        }
-
-        private void RemoveDate_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-            ViewModel.Ende = null;
         }
 
         private async void Betriebskostenabrechnung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -135,22 +127,6 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             //{
             //    App.ViewModel.ShowAlert(ex.Message, 5000);
             //}
-        }
-
-        private void AddMieter_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-            if (ViewModel.AddMieter.Value?.Guid is Guid guid)
-            {
-                ViewModel.Mieter.Value = ViewModel.Mieter.Value.Add(new KontaktListEntry(guid, App.ViewModel));
-                AddMieter_Flyout.Hide();
-                ViewModel.UpdateMieterList();
-                App.Walter.MieterSet.Add(new Mieter()
-                {
-                    VertragId = ViewModel.guid,
-                    PersonId = guid,
-                });
-                App.SaveWalter();
-            }
         }
     }
 }

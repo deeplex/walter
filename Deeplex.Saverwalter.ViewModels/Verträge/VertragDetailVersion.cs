@@ -106,18 +106,23 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
         protected AppViewModel Avm;
+        protected IAppImplementation Impl;
 
-        public VertragDetailVersion(int id, AppViewModel avm) : this(avm.ctx.Vertraege.Find(id), avm) { }
-        public VertragDetailVersion(Vertrag v, AppViewModel avm)
+        public RelayCommand RemoveDate;
+
+        public VertragDetailVersion(int id, IAppImplementation impl, AppViewModel avm) : this(avm.ctx.Vertraege.Find(id), impl, avm) { }
+        public VertragDetailVersion(Vertrag v, IAppImplementation impl, AppViewModel avm)
         {
             Entity = v;
             Avm = avm;
+            Impl = impl;
 
             if (v.AnsprechpartnerId != Guid.Empty && v.AnsprechpartnerId != null)
             {
                 Ansprechpartner = new KontaktListEntry(v.AnsprechpartnerId.Value, avm);
             }
 
+            RemoveDate = new RelayCommand(_ => Ende = null, _ => Ende != null);
             PropertyChanged += OnUpdate;
         }
 

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
@@ -12,10 +13,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public Wohnung Entity;
         public int Id => Entity.WohnungId;
 
-        public async void selfDestruct()
+        public async Task selfDestruct()
         {
-            Avm.ctx.Wohnungen.Remove(Entity);
-            Avm.SaveWalter();
+            if (await Impl.Confirmation())
+            {
+                Avm.ctx.Wohnungen.Remove(Entity);
+                Avm.SaveWalter();
+            }
         }
 
         public ObservableProperty<int> ErhaltungsaufwendungJahr
@@ -96,14 +100,15 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
+        private IAppImplementation Impl;
         private AppViewModel Avm;
 
-        public WohnungDetailViewModel(AppViewModel avm) : this(new Wohnung(), avm) { }
-
-        public WohnungDetailViewModel(Wohnung w, AppViewModel avm)
+        public WohnungDetailViewModel(IAppImplementation impl, AppViewModel avm) : this(new Wohnung(), impl, avm) { }
+        public WohnungDetailViewModel(Wohnung w, IAppImplementation impl, AppViewModel avm)
         {
             Entity = w;
             Avm = avm;
+            Impl = impl;
 
             AlleVermieter = Avm.ctx.JuristischePersonen.ToImmutableList()
                 .Where(j => j.isVermieter == true).Select(j => new KontaktListEntry(j))

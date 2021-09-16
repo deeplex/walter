@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
         {
             if (e.Parameter is int id)
             {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.Walter.Erhaltungsaufwendungen.Find(id), App.ViewModel);
+                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.Walter.Erhaltungsaufwendungen.Find(id), App.Impl, App.ViewModel);
             }
             else if (e.Parameter is ErhaltungsaufwendungenDetailViewModel vm)
             {
@@ -28,11 +28,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
             }
             else if (e.Parameter is Erhaltungsaufwendung r)
             {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel(r, App.ViewModel);
+                ViewModel = new ErhaltungsaufwendungenDetailViewModel(r, App.Impl, App.ViewModel);
             }
             else if (e.Parameter is null)
             {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.ViewModel);
+                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.Impl, App.ViewModel);
             }
 
             App.ViewModel.Titel.Value = "Erhaltungsaufwendung";
@@ -58,14 +58,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
 
         private async void SelfDestruct(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            if (await App.Impl.Confirmation())
+            if (ViewModel.Id != 0)
             {
-                if (ViewModel.Id != 0)
-                {
-                    ViewModel.selfDestruct();
-                }
-                Frame.GoBack();
+                await ViewModel.selfDestruct();
             }
+            Frame.GoBack();
         }
 
         private void AddQuickPerson_Click(object sender, RoutedEventArgs e)

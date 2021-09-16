@@ -19,11 +19,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is JuristischePerson jp)
             {
-                ViewModel = new JuristischePersonViewModel(jp, App.ViewModel);
+                ViewModel = new JuristischePersonViewModel(jp, App.Impl, App.ViewModel);
             }
             else if (e.Parameter is null)
             {
-                ViewModel = new JuristischePersonViewModel(App.ViewModel);
+                ViewModel = new JuristischePersonViewModel(App.Impl, App.ViewModel);
             }
 
             App.ViewModel.Titel.Value = ViewModel.Bezeichnung;
@@ -45,33 +45,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private async void SelfDestruct(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            try
-            {
-                if (await App.Impl.Confirmation())
-                {
-                    ViewModel.selfDestruct();
-                    Frame.GoBack();
-                }
-            }
-            catch
-            {
-
-            }
-        }
-
-        private void AddMitglied_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-            if (ViewModel.AddMitglied.Value?.Guid is Guid guid)
-            {
-                AddMitglied_Flyout.Hide();
-                App.Walter.JuristischePersonenMitglieder.Add(new JuristischePersonenMitglied()
-                {
-                    JuristischePersonId = ViewModel.Id,
-                    PersonId = ViewModel.AddMitglied.Value.Guid,
-                });
-                App.SaveWalter();
-                ViewModel.UpdateListen();
-            }
+            ViewModel.selfDestruct();
+            Frame.GoBack();
         }
     }
 }

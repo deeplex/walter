@@ -18,8 +18,11 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public async void selfDestruct()
         {
-            Avm.ctx.NatuerlichePersonen.Remove(GetEntity);
-            Avm.SaveWalter();
+            if (await Impl.Confirmation())
+            {
+                Avm.ctx.NatuerlichePersonen.Remove(GetEntity);
+                Avm.SaveWalter();
+            }
         }
 
         public Anrede Anrede
@@ -85,9 +88,9 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToImmutableList();
         }
 
-        public NatuerlichePersonViewModel(int id, AppViewModel avm) : this(avm.ctx.NatuerlichePersonen.Find(id), avm) { }
-        public NatuerlichePersonViewModel(AppViewModel avm) : this(new NatuerlichePerson(), avm) { }
-        public NatuerlichePersonViewModel(NatuerlichePerson k, AppViewModel avm) : base(avm)
+        public NatuerlichePersonViewModel(int id, IAppImplementation impl, AppViewModel avm) : this(avm.ctx.NatuerlichePersonen.Find(id), impl, avm) { }
+        public NatuerlichePersonViewModel(IAppImplementation impl, AppViewModel avm) : this(new NatuerlichePerson(), impl, avm) { }
+        public NatuerlichePersonViewModel(NatuerlichePerson k, IAppImplementation impl, AppViewModel avm) : base(impl, avm)
         {
             Entity = k;
             Id = k.NatuerlichePersonId;

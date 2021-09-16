@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using System;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
@@ -23,10 +24,13 @@ namespace Deeplex.Saverwalter.ViewModels
         }
         public override string ToString() => Bezeichnung;
 
-        public void selfDestruct()
+        public async void selfDestruct()
         {
-            Avm.ctx.JuristischePersonen.Remove(GetEntity);
-            Avm.SaveWalter();
+            if (await Impl.Confirmation())
+            {
+                Avm.ctx.JuristischePersonen.Remove(GetEntity);
+                Avm.SaveWalter();
+            }
         }
 
         public ObservableProperty<ImmutableList<KontaktListEntry>> Mitglieder
@@ -70,19 +74,31 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToImmutableList();
         }
 
-        private AppViewModel Avm;
+        public RelayCommand AddMitgliedCommand;
 
-        public JuristischePersonViewModel(AppViewModel avm) : this(new JuristischePerson(), avm) { }
-        public JuristischePersonViewModel(int id, AppViewModel avm) : this(avm.ctx.JuristischePersonen.Find(id), avm) { }
-        public JuristischePersonViewModel(JuristischePerson j, AppViewModel avm) : base(avm)
+        public JuristischePersonViewModel(IAppImplementation impl, AppViewModel avm) : this(new JuristischePerson(), impl, avm) { }
+        public JuristischePersonViewModel(int id, IAppImplementation impl, AppViewModel avm) : this(avm.ctx.JuristischePersonen.Find(id), impl, avm) { }
+        public JuristischePersonViewModel(JuristischePerson j, IAppImplementation impl, AppViewModel avm) : base(impl, avm)
         {
             Entity = j;
             Id = j.JuristischePersonId;
-            Avm = avm;
 
             UpdateListen();
 
             PropertyChanged += OnUpdate;
+            AddMitgliedCommand = new RelayCommand(_ =>
+            {
+                if (AddMitglied.Value?.Guid is Guid guid)
+                {
+                    Avm.ctx.JuristischePersonenMitglieder.Add(new JuristischePersonenMitglied()
+                    {
+                        JuristischePersonId = Id,
+                        PersonId = AddMitglied.Value.Guid,
+                    });
+                    Avm.SaveWalter();
+                    UpdateListen();
+                }
+            }, _ => true);
         }
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)

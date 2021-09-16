@@ -51,7 +51,7 @@
                             Text="{x:Bind ViewModel.firstEnde, Mode=OneWay}" />
                         <Button
                             Margin="0,43,0,0"
-                            Click="RemoveDate_Click">
+                            Command="{x:Bind ViewModel.RemoveDate}">
                             <SymbolIcon Symbol="Delete"></SymbolIcon>
                         </Button>
                     </mtuuc:WrapPanel>
@@ -106,7 +106,7 @@
                                                     PlaceholderText="Mieter hinzufügen"
                                                     SelectedItem="{x:Bind ViewModel.AddMieter.Value, Mode=TwoWay}"
                                                     ItemsSource="{x:Bind ViewModel.AlleMieter.Value, Mode=OneWay}"/>
-                                                <Button Margin="10,0,0,0" Click="AddMieter_Click">
+                                                <Button Margin="10,0,0,0" Command="{x:Bind ViewModel.AddMieterCommand}">
                                                     <SymbolIcon Symbol="Add" />
                                                 </Button>
                                             </StackPanel>

@@ -19,11 +19,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is NatuerlichePerson kontakt)
             {
-                ViewModel = new NatuerlichePersonViewModel(kontakt, App.ViewModel);
+                ViewModel = new NatuerlichePersonViewModel(kontakt, App.Impl, App.ViewModel);
             }
             else if (e.Parameter is null) // New Contact
             {
-                ViewModel = new NatuerlichePersonViewModel(App.ViewModel);
+                ViewModel = new NatuerlichePersonViewModel(App.Impl, App.ViewModel);
             }
 
             App.ViewModel.Titel.Value = ViewModel.Name;
@@ -44,11 +44,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private async void SelfDestruct(object sender, RoutedEventArgs e)
         {
-            if (await App.Impl.Confirmation())
-            {
-                ViewModel.selfDestruct();
-                Frame.GoBack();
-            }
+            ViewModel.selfDestruct();
+            Frame.GoBack();
         }
     }
 }

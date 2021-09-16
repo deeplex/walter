@@ -16,10 +16,12 @@ namespace Deeplex.Saverwalter.ViewModels
             = new ObservableProperty<ImmutableList<WohnungListEntry>>();
 
         protected AppViewModel Avm;
+        protected IAppImplementation Impl;
 
-        public PersonViewModel(AppViewModel avm)
+        public PersonViewModel(IAppImplementation impl, AppViewModel avm)
         {
             Avm = avm;
+            Impl = impl;
             Print_Erhaltungsaufwendungen = new AsyncRelayCommand(async _ =>
             {
                 // TODO

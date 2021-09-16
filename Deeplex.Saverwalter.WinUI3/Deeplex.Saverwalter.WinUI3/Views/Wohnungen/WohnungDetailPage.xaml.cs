@@ -23,11 +23,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is Wohnung wohnung)
             {
-                ViewModel = new WohnungDetailViewModel(wohnung, App.ViewModel);
+                ViewModel = new WohnungDetailViewModel(wohnung, App.Impl, App.ViewModel);
             }
             else if (e.Parameter is null) // New Wohnung
             {
-                ViewModel = new WohnungDetailViewModel(App.ViewModel);
+                ViewModel = new WohnungDetailViewModel(App.Impl, App.ViewModel);
             }
 
             AddZaehler_Click = () =>
@@ -55,7 +55,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                     Wohnung = ViewModel.Entity,
                     Rechnung = r,
                 });
-                var vm = new BetriebskostenrechnungDetailViewModel(r, App.ViewModel);
+                var vm = new BetriebskostenrechnungDetailViewModel(r, App.Impl, App.ViewModel);
                 App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), vm);
             };
 
@@ -67,7 +67,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                     Datum = DateTime.Now,
                 };
 
-                var vm = new ErhaltungsaufwendungenDetailViewModel(r, App.ViewModel);
+                var vm = new ErhaltungsaufwendungenDetailViewModel(r, App.Impl, App.ViewModel);
                 App.Window.Navigate(typeof(ErhaltungsaufwendungenDetailPage), vm);
             };
 
@@ -93,11 +93,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private async void Delete_Click(object sender, RoutedEventArgs e)
         {
-            if (await App.Impl.Confirmation())
-            {
-                ViewModel.selfDestruct();
-                Frame.GoBack();
-            }
+            await ViewModel.selfDestruct();
+            Frame.GoBack();
         }
 
         private AppBarButton ErhaltungsaufwendungsButton()

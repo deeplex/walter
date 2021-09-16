@@ -15,10 +15,13 @@ namespace Deeplex.Saverwalter.ViewModels.Rechnungen
         public Erhaltungsaufwendung Entity { get; }
         public int Id => Entity.ErhaltungsaufwendungId;
 
-        public void selfDestruct()
+        public async Task selfDestruct()
         {
-            Avm.ctx.Erhaltungsaufwendungen.Remove(Entity);
-            Avm.SaveWalter();
+            if (await Impl.Confirmation())
+            {
+                Avm.ctx.Erhaltungsaufwendungen.Remove(Entity);
+                Avm.SaveWalter();
+            }
         }
 
         public ObservableProperty<ImmutableList<KontaktListEntry>> Personen
@@ -102,12 +105,14 @@ namespace Deeplex.Saverwalter.ViewModels.Rechnungen
         }
 
         private AppViewModel Avm;
+        private IAppImplementation Impl;
 
-        public ErhaltungsaufwendungenDetailViewModel(AppViewModel avm) : this(new Erhaltungsaufwendung(), avm) { }
-        public ErhaltungsaufwendungenDetailViewModel(Erhaltungsaufwendung e, AppViewModel avm)
+        public ErhaltungsaufwendungenDetailViewModel(IAppImplementation impl, AppViewModel avm) : this(new Erhaltungsaufwendung(), impl, avm) { }
+        public ErhaltungsaufwendungenDetailViewModel(Erhaltungsaufwendung e, IAppImplementation impl, AppViewModel avm)
         {
             Entity = e;
             Avm = avm;
+            Impl = impl;
 
             Wohnungen = Avm.ctx.Wohnungen
                 .Include(w => w.Adresse)

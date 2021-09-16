@@ -5,8 +5,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System.Linq;
 
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
-
 namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class BetriebskostenrechnungenDetailPage : Page
@@ -28,7 +26,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is int id)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(App.Walter.Betriebskostenrechnungen.Find(id), App.ViewModel);
+                ViewModel = new BetriebskostenrechnungDetailViewModel(App.Walter.Betriebskostenrechnungen.Find(id), App.Impl, App.ViewModel);
             }
             else if (e.Parameter is BetriebskostenrechnungDetailViewModel vm)
             {
@@ -36,11 +34,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             }
             else if (e.Parameter is Betriebskostenrechnung r)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(r, App.ViewModel);
+                ViewModel = new BetriebskostenrechnungDetailViewModel(r, App.Impl, App.ViewModel);
             }
             else if (e.Parameter is null)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(App.ViewModel);
+                ViewModel = new BetriebskostenrechnungDetailViewModel(App.Impl, App.ViewModel);
             }
 
             base.OnNavigatedTo(e);
@@ -67,13 +65,13 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 {
                     if (a.Wohnungen.Count == 0) return;
 
-                    var k = new Microsoft.UI.Xaml.Controls.TreeViewNode()
+                    var k = new TreeViewNode()
                     {
                         Content = AdresseViewModel.Anschrift(a),
                     };
                     a.Wohnungen.ForEach(w =>
                     {
-                        var n = new Microsoft.UI.Xaml.Controls.TreeViewNode() { Content = new WohnungListEntry(w, App.ViewModel) };
+                        var n = new TreeViewNode() { Content = new WohnungListEntry(w, App.ViewModel) };
                         k.Children.Add(n);
                         if (ViewModel.Wohnungen.Value.Exists(ww => ww.Id == w.WohnungId))
                         {
@@ -82,67 +80,27 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                     });
                     WohnungenTree.RootNodes.Add(k);
                 });
-
-            WohnungenTree.Tapped += WohnungenTree_Tapped;
         }
 
         private void WohnungenTree_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
             if (ViewModel.Id == 0) return;
-            var flagged = false;
 
             var selected = WohnungenTree.SelectedItems
-                .Select(s => (s as Microsoft.UI.Xaml.Controls.TreeViewNode).Content)
+                .Select(s => (s as TreeViewNode).Content)
                 .Where(s => s is WohnungListEntry)
                 .ToList();
 
-            // Add missing Gruppen
-            selected
-                .Where(s => !ViewModel.Wohnungen.Value.Exists(w => w.Id == (s as WohnungListEntry).Id))
-                .ToList()
-                .ForEach(s =>
-                {
-                    flagged = true;
-
-                    App.Walter.Betriebskostenrechnungsgruppen.Add(new BetriebskostenrechnungsGruppe()
-                    {
-                        Rechnung = App.Walter.Betriebskostenrechnungen.Find(ViewModel.Id),
-                        WohnungId = (s as WohnungListEntry).Id,
-                    });
-                    ViewModel.Wohnungen.Value = ViewModel.Wohnungen.Value.Add(s as WohnungListEntry);
-                });
-
-            // Remove old Gruppen
-            ViewModel.Wohnungen.Value
-                .Where(w => !selected.Exists(s => w.Id == (s as WohnungListEntry).Id))
-                .ToList()
-                .ForEach(w =>
-                {
-                    flagged = true;
-
-                    App.Walter.Betriebskostenrechnungsgruppen
-                        .Where(g => g.Rechnung.BetriebskostenrechnungId == ViewModel.Id && g.WohnungId == w.Id)
-                        .ToList()
-                        .ForEach(g =>
-                        {
-                            App.Walter.Betriebskostenrechnungsgruppen.Remove(g);
-                            ViewModel.Wohnungen.Value = ViewModel.Wohnungen.Value.Remove(w);
-                        });
-                });
-
-            if (flagged) ViewModel.Update();
+            ViewModel.UpdateWohnungen(selected);
         }
 
         private async void SelfDestruct(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            if (await App.Impl.Confirmation())
+            if (ViewModel.Id != 0)
             {
-                if (ViewModel.Id != 0)
-                {
-                    ViewModel.selfDestruct();
-                }
-                Frame.GoBack();
+                await ViewModel.selfDestruct();
             }
+            Frame.GoBack();
         }
     }
 }
