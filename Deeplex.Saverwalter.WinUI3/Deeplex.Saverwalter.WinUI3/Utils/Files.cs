@@ -6,44 +6,38 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
 {
     public static class Files
     {
-        public static async Task<string> GetFile(params string[] filters)
+        private static void getWindowHandle(object picker)
         {
-            var picker = new FileOpenPicker();
-            picker.ViewMode = PickerViewMode.Thumbnail;
-            picker.SuggestedStartLocation = PickerLocationId.Desktop;
-            if (filters != null && filters.Length > 0)
-            {
-                foreach (var filter in filters)
-                {
-                    picker.FileTypeFilter.Add(filter);
-                }
-            }
-            else
-            {
-                picker.FileTypeFilter.Add("*");
-            }
-
-            var file = await picker.PickSingleFileAsync();
-            if (file != null)
-            {
-                return file.Path;
-            }
-
-            return "";
-        }
-
-        public static FileOpenPicker FilePicker(params string[] filters)
-        {
-            var picker = new FileOpenPicker();
-
             var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.Window);
             WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+        }
 
-            picker.ViewMode = PickerViewMode.Thumbnail;
-            picker.SuggestedStartLocation = PickerLocationId.Desktop;
-            if (filters != null && filters.Length > 0)
+        public static FileSavePicker FileSavePicker(string desc, string suggestedFilename, params string[] filetypes)
+        {
+            var picker = new FileSavePicker()
             {
-                foreach (var filter in filters)
+                SuggestedStartLocation = PickerLocationId.Desktop,
+                SuggestedFileName = suggestedFilename
+            };
+            picker.FileTypeChoices.Add(desc, filetypes);
+
+            getWindowHandle(picker);
+
+            return picker;
+        }
+
+        public static FileOpenPicker FileOpenPicker(params string[] filetypes)
+        {
+            var picker = new FileOpenPicker()
+            {
+                ViewMode = PickerViewMode.Thumbnail,
+                SuggestedStartLocation = PickerLocationId.Desktop
+            };
+
+            getWindowHandle(picker);
+            if (filetypes?.Length > 0)
+            {
+                foreach (var filter in filetypes)
                 {
                     picker.FileTypeFilter.Add(filter);
                 }

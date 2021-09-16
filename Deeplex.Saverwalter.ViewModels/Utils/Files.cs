@@ -33,26 +33,18 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             anhang.FileName = Path.GetFileName(file.Name);
             anhang.ContentType = "Not implemented"; // TODO
             anhang.CreationTime = info.CreationTime;
+            Directory.CreateDirectory(root);
             File.Copy(src, anhang.getPath(root));
             anhang.Sha256Hash = SHA256.Create().ComputeHash(File.Open(anhang.getPath(root), FileMode.Open));
 
             return anhang;
         }
 
-        public static async Task LoadDatabase(IAppImplementation impl)
+        public static void LoadDatabase(IAppImplementation impl)
         {
-            if (impl.root == null)
+            if (impl.ctx != null)
             {
-                var path = await impl.pickFile();
-                if (File.Exists(path))
-                {
-                    impl.root = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
-
-                    if (impl.ctx != null)
-                    {
-                        impl.ctx.Dispose();
-                    }
-                }
+                impl.ctx.Dispose();
             }
             var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
             optionsBuilder.UseSqlite("Data Source=" + impl.root + ".db");

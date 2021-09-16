@@ -43,9 +43,9 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         }
 
-        private async void LoadDatabase_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private void LoadDatabase_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            await App.LoadDataBase();
+            App.LoadDataBase();
             ViewModel.LoadAdressen(App.ViewModel);
         }
     }

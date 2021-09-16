@@ -21,6 +21,7 @@ namespace Deeplex.Saverwalter.ViewModels
         void ShowAlert(string text);
         ObservableProperty<string> Titel { get; set; }
         void launchFile(Anhang a);
+        Task<string> saveFile();
         Task<string> pickFile();
         Task<List<string>> pickFiles();
         Task deleteFile(Anhang a);

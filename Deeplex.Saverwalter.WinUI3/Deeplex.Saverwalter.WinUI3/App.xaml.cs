@@ -36,26 +36,23 @@ namespace Deeplex.Saverwalter.WinUI3
         public static async Task InitializeDatabase()
         {
             if (ViewModel.ctx != null) return;
-            if (await ViewModel.Confirmation(
+            var path = await ViewModel.Confirmation(
                 "Noch keine Datenbank ausgewählt",
                 "Datenbank suchen, oder leere Datenbank erstellen?",
-                "Existierende Datenbank auswählen", "Erstelle neue leere Datenbank"))
-            {
-                await LoadDataBase();
-            }
-            else
-            {
-                // TODO
-                throw new NotImplementedException();
-            }
+                "Existierende Datenbank auswählen", "Erstelle neue leere Datenbank") ?
+                await ViewModel.pickFile() :
+                await ViewModel.saveFile();
+
+            ViewModel.root = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+            LoadDataBase();
             ViewModel.loadAutoSuggestEntries();
         }
 
-        public static async Task LoadDataBase()
+        public static void LoadDataBase()
         {
             try
             {
-                await Saverwalter.ViewModels.Utils.Files.LoadDatabase(ViewModel);
+                Saverwalter.ViewModels.Utils.Files.LoadDatabase(ViewModel);
             }
             catch
             {
@@ -187,17 +184,26 @@ namespace Deeplex.Saverwalter.WinUI3
         private SplitView AnhangPane { get; set; }
         private SymbolIcon AnhangSymbol { get; set; }
 
+        public async Task<string> saveFile()
+        {
+            var picker = Files.FileSavePicker("Datenbank", "walter", ".db");
+            picker.SuggestedFileName = "walter";
+            var picked = await picker.PickSaveFileAsync();
+
+            return picked?.Path;
+        }
+
         public async Task<string> pickFile()
         {
-            var picker = Files.FilePicker(".db");
+            var picker = Files.FileOpenPicker(".db");
             var picked = await picker.PickSingleFileAsync();
 
-            return picked.Path;
+            return picked?.Path;
         }
 
         public async Task<List<string>> pickFiles()
         {
-            var picker = Files.FilePicker("*");
+            var picker = Files.FileOpenPicker("*");
             var files = await picker.PickMultipleFilesAsync();
 
             return files.Select(f => f.Path).ToList();
