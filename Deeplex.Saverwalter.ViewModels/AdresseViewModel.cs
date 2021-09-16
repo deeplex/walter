@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Stadt = Stadt;
 
             if (!IsValid()) return;
-            var adresse = Impl.ctx.Adressen.FirstOrDefault(a =>
+            var adresse = Avm.ctx.Adressen.FirstOrDefault(a =>
                 a.Strasse == Strasse && a.Hausnummer == Hausnummer &&
                 a.Postleitzahl == Postleitzahl && a.Stadt == Stadt);
             if (adresse == null)
@@ -39,17 +39,17 @@ namespace Deeplex.Saverwalter.ViewModels
                     Postleitzahl = Postleitzahl,
                     Stadt = Stadt,
                 };
-                Impl.ctx.Adressen.Add(adresse);
+                Avm.ctx.Adressen.Add(adresse);
             }
 
             reference.Adresse = adresse;
 
             //Check if reference is valid.
-            if (Impl.ctx.Entry(reference).State != Microsoft.EntityFrameworkCore.EntityState.Detached)
+            if (Avm.ctx.Entry(reference).State != Microsoft.EntityFrameworkCore.EntityState.Detached)
             {
-                Impl.ctx.Update(reference);
+                Avm.ctx.Update(reference);
             }
-            Impl.SaveWalter();
+            Avm.SaveWalter();
         }
 
         public override string Hausnummer
@@ -75,7 +75,7 @@ namespace Deeplex.Saverwalter.ViewModels
             set => Update(Entity.Strasse, Entity.Hausnummer, Entity.Postleitzahl, value);
         }
 
-        public AdresseViewModel(T value, IAppImplementation impl) : base(value.Adresse ?? new Adresse(), impl)
+        public AdresseViewModel(T value, AppViewModel Avm) : base(value.Adresse ?? new Adresse(), Avm)
         {
             reference = value;
         }
@@ -85,7 +85,7 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         protected Adresse Entity { get; private set; }
 
-        protected IAppImplementation Impl;
+        protected AppViewModel Avm;
 
         private ImmutableList<Adresse> AlleAdressen;
 
@@ -105,10 +105,10 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             get
             {
-                var count = Impl.ctx.JuristischePersonen.Count(j => j.Adresse == Entity);
-                count += Impl.ctx.NatuerlichePersonen.Count(n => n.Adresse == Entity);
-                count += Impl.ctx.Wohnungen.Count(w => w.Adresse == Entity);
-                count += Impl.ctx.Garagen.Count(g => g.Adresse == Entity);
+                var count = Avm.ctx.JuristischePersonen.Count(j => j.Adresse == Entity);
+                count += Avm.ctx.NatuerlichePersonen.Count(n => n.Adresse == Entity);
+                count += Avm.ctx.Wohnungen.Count(w => w.Adresse == Entity);
+                count += Avm.ctx.Garagen.Count(g => g.Adresse == Entity);
 
                 return count;
             }
@@ -159,25 +159,25 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public AdresseViewModel(Adresse a, IAppImplementation impl)
+        public AdresseViewModel(Adresse a, AppViewModel avm)
         {
-            Impl = impl;
+            Avm = avm;
             Entity = a;
 
-            AlleAdressen = Impl.ctx.Adressen.ToImmutableList();
+            AlleAdressen = Avm.ctx.Adressen.ToImmutableList();
 
             PropertyChanged += OnUpdate;
 
             Dispose = new RelayCommand(_ =>
             {
-                Impl.ctx.Adressen.Remove(Entity);
-                Impl.SaveWalter();
+                Avm.ctx.Adressen.Remove(Entity);
+                Avm.SaveWalter();
             });
         }
 
         public RelayCommand Dispose;
 
-        public static string Anschrift(int id, IAppImplementation impl) => Anschrift(impl.ctx.Adressen.Find(id));
+        public static string Anschrift(int id, AppViewModel Avm) => Anschrift(Avm.ctx.Adressen.Find(id));
         public static string Anschrift(IPerson k) => Anschrift(k is IPerson a ? a.Adresse : null);
         public static string Anschrift(Wohnung w) => Anschrift(w is Wohnung a ? a.Adresse : null);
         public static string Anschrift(Adresse a)
@@ -221,13 +221,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.AdresseId != 0)
             {
-                Impl.ctx.Adressen.Update(Entity);
+                Avm.ctx.Adressen.Update(Entity);
             }
             else
             {
-                Impl.ctx.Adressen.Add(Entity);
+                Avm.ctx.Adressen.Add(Entity);
             }
-            Impl.SaveWalter();
+            Avm.SaveWalter();
         }
     }
 }

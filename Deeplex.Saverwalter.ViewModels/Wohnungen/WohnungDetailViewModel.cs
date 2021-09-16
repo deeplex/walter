@@ -14,8 +14,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public async void selfDestruct()
         {
-            Impl.ctx.Wohnungen.Remove(Entity);
-            Impl.SaveWalter();
+            Avm.ctx.Wohnungen.Remove(Entity);
+            Avm.SaveWalter();
         }
 
         public ObservableProperty<int> ErhaltungsaufwendungJahr
@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
         public int AdresseId => Entity.AdresseId;
-        public string Anschrift => AdresseViewModel.Anschrift(AdresseId, Impl);
+        public string Anschrift => AdresseViewModel.Anschrift(AdresseId, Avm);
 
         public string Bezeichnung
         {
@@ -96,18 +96,18 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        private IAppImplementation Impl;
+        private AppViewModel Avm;
 
-        public WohnungDetailViewModel(IAppImplementation impl) : this(new Wohnung(), impl) { }
+        public WohnungDetailViewModel(AppViewModel avm) : this(new Wohnung(), avm) { }
 
-        public WohnungDetailViewModel(Wohnung w, IAppImplementation impl)
+        public WohnungDetailViewModel(Wohnung w, AppViewModel avm)
         {
             Entity = w;
-            Impl = impl;
+            Avm = avm;
 
-            AlleVermieter = Impl.ctx.JuristischePersonen.ToImmutableList()
+            AlleVermieter = Avm.ctx.JuristischePersonen.ToImmutableList()
                 .Where(j => j.isVermieter == true).Select(j => new KontaktListEntry(j))
-                .Concat(Impl.ctx.NatuerlichePersonen
+                .Concat(Avm.ctx.NatuerlichePersonen
                     .Where(n => n.isVermieter == true).Select(n => new KontaktListEntry(n)))
                 .ToImmutableList();
 
@@ -144,13 +144,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.WohnungId != 0)
             {
-                Impl.ctx.Wohnungen.Update(Entity);
+                Avm.ctx.Wohnungen.Update(Entity);
             }
             else
             {
-                Impl.ctx.Wohnungen.Add(Entity);
+                Avm.ctx.Wohnungen.Add(Entity);
             }
-            Impl.SaveWalter();
+            Avm.SaveWalter();
         }
     }
 }

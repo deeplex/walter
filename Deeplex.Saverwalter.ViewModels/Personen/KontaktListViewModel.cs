@@ -29,13 +29,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<bool> Handwerker { get; set; } = new ObservableProperty<bool>(true);
         public ImmutableList<KontaktListEntry> AllRelevant { get; }
 
-        public KontaktListViewModel(IAppImplementation impl)
+        public KontaktListViewModel(AppViewModel avm)
         {
-            AllRelevant = impl.ctx.NatuerlichePersonen
+            AllRelevant = avm.ctx.NatuerlichePersonen
                 .Include(k => k.Adresse)
                 .Select(k => new KontaktListEntry(k)).ToImmutableList();
 
-            var jp = impl.ctx.JuristischePersonen;
+            var jp = avm.ctx.JuristischePersonen;
             foreach (var j in jp)
             {
                 AllRelevant = AllRelevant.Add(new KontaktListEntry(j));
@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public string Mobil { get; }
         public IPerson Entity { get; }
 
-        public KontaktListEntry(Guid id, IAppImplementation impl) : this(impl.ctx.FindPerson(id)) { }
+        public KontaktListEntry(Guid id, AppViewModel avm) : this(avm.ctx.FindPerson(id)) { }
         public KontaktListEntry(JuristischePerson j) : this(j as IPerson)
         {
             Type = j.GetType();

@@ -23,10 +23,10 @@ namespace Deeplex.Saverwalter.ViewModels
         }
         public override string ToString() => Bezeichnung;
 
-        public async void selfDestruct()
+        public void selfDestruct()
         {
-            Impl.ctx.JuristischePersonen.Remove(GetEntity);
-            Impl.SaveWalter();
+            Avm.ctx.JuristischePersonen.Remove(GetEntity);
+            Avm.SaveWalter();
         }
 
         public ObservableProperty<ImmutableList<KontaktListEntry>> Mitglieder
@@ -48,37 +48,37 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void UpdateListen()
         {
-            Mitglieder.Value = Impl.ctx.JuristischePersonenMitglieder
+            Mitglieder.Value = Avm.ctx.JuristischePersonenMitglieder
                 .Where(w => w.JuristischePersonId == Id)
-                .Select(w => new KontaktListEntry(w.PersonId, Impl))
+                .Select(w => new KontaktListEntry(w.PersonId, Avm))
                 .ToImmutableList();
 
-            AddMitglieder.Value = Impl.ctx.NatuerlichePersonen
+            AddMitglieder.Value = Avm.ctx.NatuerlichePersonen
                 .Select(k => new KontaktListEntry(k))
                 .ToList()
-                .Concat(Impl.ctx.JuristischePersonen
+                .Concat(Avm.ctx.JuristischePersonen
                     .Select(k => new KontaktListEntry(k))
                     .ToList())
                 .Where(k => !Mitglieder.Value.Any(e => e.Guid == k.Guid))
                     .ToImmutableList();
 
-            Wohnungen.Value = Impl.ctx.Wohnungen
+            Wohnungen.Value = Avm.ctx.Wohnungen
                 .ToList()
                 .Where(w => w.BesitzerId == GetEntity.PersonId ||
                     (WohnungenInklusiveMitglieder && Mitglieder.Value.Any(m => m.Guid == w.BesitzerId)))
-                .Select(w => new WohnungListEntry(w, Impl))
+                .Select(w => new WohnungListEntry(w, Avm))
                 .ToImmutableList();
         }
 
-        private IAppImplementation Impl;
+        private AppViewModel Avm;
 
-        public JuristischePersonViewModel(IAppImplementation impl) : this(new JuristischePerson(), impl) { }
-        public JuristischePersonViewModel(int id, IAppImplementation impl) : this(impl.ctx.JuristischePersonen.Find(id), impl) { }
-        public JuristischePersonViewModel(JuristischePerson j, IAppImplementation impl) : base(impl)
+        public JuristischePersonViewModel(AppViewModel avm) : this(new JuristischePerson(), avm) { }
+        public JuristischePersonViewModel(int id, AppViewModel avm) : this(avm.ctx.JuristischePersonen.Find(id), avm) { }
+        public JuristischePersonViewModel(JuristischePerson j, AppViewModel avm) : base(avm)
         {
             Entity = j;
             Id = j.JuristischePersonId;
-            Impl = impl;
+            Avm = avm;
 
             UpdateListen();
 
@@ -110,13 +110,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (GetEntity.JuristischePersonId != 0)
             {
-                Impl.ctx.JuristischePersonen.Update(GetEntity);
+                Avm.ctx.JuristischePersonen.Update(GetEntity);
             }
             else
             {
-                Impl.ctx.JuristischePersonen.Add(GetEntity);
+                Avm.ctx.JuristischePersonen.Add(GetEntity);
             }
-            Impl.SaveWalter();
+            Avm.SaveWalter();
         }
     }
 }

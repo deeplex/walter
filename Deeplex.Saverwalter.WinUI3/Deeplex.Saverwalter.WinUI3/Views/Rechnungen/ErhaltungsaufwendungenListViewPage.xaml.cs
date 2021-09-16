@@ -23,7 +23,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
             };
             AddErhaltungsaufwendung.Click += AddErhaltungsaufwendung_Click;
 
-            App.ViewModel.RefillCommandContainer(new ICommandBarElement[]
+            App.Window.RefillCommandContainer(new ICommandBarElement[]
             {
                 Elements.Filter(ViewModel),
                 AddErhaltungsaufwendung,

@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is Guid vertragId)
             {
-                ViewModel = new VertragDetailViewModel(vertragId, App.ViewModel);
+                ViewModel = new VertragDetailViewModel(vertragId, App.Impl, App.ViewModel);
             }
             else if (e.Parameter is VertragDetailViewModel vm)
             {
@@ -27,11 +27,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             }
             else // If invoked using "Add"
             {
-                ViewModel = new VertragDetailViewModel(App.ViewModel);
+                ViewModel = new VertragDetailViewModel(App.Impl, App.ViewModel);
             }
 
             App.ViewModel.Titel.Value = "Vertragdetails";
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.ViewModel));
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
 
             var Delete = new AppBarButton
             {
@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             };
             Delete.Click += Delete_Click;
 
-            App.ViewModel.RefillCommandContainer(
+            App.Window.RefillCommandContainer(
                 new ICommandBarElement[] { BetriebskostenAbrechnungsButton() },
                 new ICommandBarElement[] { Delete });
 
@@ -49,7 +49,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private async void Delete_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            if (await App.ViewModel.Confirmation())
+            if (await App.Impl.Confirmation())
             {
                 ViewModel.SelfDestruct();
                 Frame.GoBack();

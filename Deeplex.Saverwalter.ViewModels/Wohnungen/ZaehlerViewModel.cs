@@ -26,18 +26,18 @@ namespace Deeplex.Saverwalter.ViewModels
         public double AddZaehlerstandStand => Zaehlerstaende.Value.FirstOrDefault()?.Stand ?? 0;
         public void LoadList()
         {
-            Zaehlerstaende.Value = Impl.ctx.Zaehlerstaende.ToList()
+            Zaehlerstaende.Value = Avm.ctx.Zaehlerstaende.ToList()
                 .Where(zs => Entity == zs.Zaehler)
                 .OrderBy(zs => zs.Datum).Reverse()
                 .Select(zs => new ZaehlerstandViewModel(zs, this)).ToImmutableList();
         }
 
-        public IAppImplementation Impl;
+        public AppViewModel Avm;
 
-        public ZaehlerViewModel(Zaehler z, IAppImplementation impl)
+        public ZaehlerViewModel(Zaehler z, AppViewModel avm)
         {
             Zaehler = z;
-            Impl = impl;
+            Avm = avm;
 
             LoadList();
 
@@ -45,7 +45,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 => mAddZaehlerstand(AddZaehlerstandPanel, z), _ => true);
 
             //TODO AttachFile = new AsyncRelayCommand(async _ =>
-            //    await Utils.Files.SaveFilesToWalter(Impl.ctx.ZaehlerAnhaenge, z), _ => true);
+            //    await Utils.Files.SaveFilesToWalter(Avm.ctx.ZaehlerAnhaenge, z), _ => true);
         }
 
         public AsyncRelayCommand AttachFile;

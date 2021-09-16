@@ -12,23 +12,23 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<AnhangListViewModel> Anhaenge =
             new ObservableProperty<AnhangListViewModel>();
 
-        public void LoadAdressen(IAppImplementation impl)
+        public void LoadAdressen(AppViewModel avm)
         {
-            Adressen.Value = impl.ctx.Adressen.Select(a => new AdresseViewModel(a, impl)).ToImmutableList();
+            Adressen.Value = avm.ctx.Adressen.Select(a => new AdresseViewModel(a, avm)).ToImmutableList();
         }
 
-        public void LoadAnhaenge(IAppImplementation impl)
+        public void LoadAnhaenge(IAppImplementation impl, AppViewModel avm)
         {
-            Anhaenge.Value = new AnhangListViewModel(impl);
+            Anhaenge.Value = new AnhangListViewModel(impl, avm);
         }
 
-        public SettingsViewModel(IAppImplementation impl)
+        public SettingsViewModel(IAppImplementation impl, AppViewModel avm)
         {
 
             try
             {
-                LoadAdressen(impl);
-                LoadAnhaenge(impl);
+                LoadAdressen(avm);
+                LoadAnhaenge(impl, avm);
             }
             catch (Exception e)
             {

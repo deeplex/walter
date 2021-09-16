@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             };
             AddVertrag.Click += AddVertrag_Click;
 
-            App.ViewModel.RefillCommandContainer(
+            App.Window.RefillCommandContainer(
                 new ICommandBarElement[] {
                     Elements.CheckBox(OnlyActive, "Nur Laufend"),
                     Elements.Filter(ViewModel),

@@ -17,13 +17,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
         public ImmutableList<VertragListVertrag> AllRelevant { get; set; }
 
-        public VertragListViewModel(IAppImplementation impl)
+        public VertragListViewModel(AppViewModel avm)
         {
-            AllRelevant = Vertraege.Value = impl.ctx.Vertraege
+            AllRelevant = Vertraege.Value = avm.ctx.Vertraege
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
                 .ToList()
                 .GroupBy(v => v.VertragId)
-                .Select(v => new VertragListVertrag(v, impl))
+                .Select(v => new VertragListVertrag(v, avm))
                 .OrderBy(v => v.Beginn).Reverse()
                 .ToImmutableList();
             Vertraege.Value = AllRelevant;
@@ -50,13 +50,13 @@ namespace Deeplex.Saverwalter.ViewModels
         }
         public bool HasLastMiete => LastMiete != "";
 
-        public VertragListVertrag(IGrouping<Guid, Vertrag> v, IAppImplementation impl)
-            : base(v.OrderBy(vs => vs.Version).Last(), impl)
+        public VertragListVertrag(IGrouping<Guid, Vertrag> v, AppViewModel avm)
+            : base(v.OrderBy(vs => vs.Version).Last(), avm)
         {
-            Versionen = v.OrderBy(vs => vs.Version).Select(vs => new VertragVersionListViewModel(vs, impl)).ToList();
+            Versionen = v.OrderBy(vs => vs.Version).Select(vs => new VertragVersionListViewModel(vs, avm)).ToList();
             Beginn = Versionen.First().Beginn;
 
-            Mieten = impl.ctx.Mieten
+            Mieten = avm.ctx.Mieten
                 .Where(m => m.VertragId == v.First().VertragId)
                 .Select(m => new VertragListMiete(m))
                 .ToImmutableList();
@@ -65,14 +65,14 @@ namespace Deeplex.Saverwalter.ViewModels
             AddMiete = new RelayCommand(_ =>
             {
                 Mieten = Mieten.Add(AddMieteValue.Value);
-                impl.ctx.Mieten.Add(new Miete
+                avm.ctx.Mieten.Add(new Miete
                 {
                     Zahlungsdatum = AddMieteValue.Value.Datum.Value.UtcDateTime,
                     BetreffenderMonat = AddMieteValue.Value.BetreffenderMonat.Value.UtcDateTime,
                     Betrag = AddMieteValue.Value.Betrag,
                     VertragId = Versionen.Last().VertragId,
                 });
-                impl.SaveWalter();
+                avm.SaveWalter();
                 AddMieteValue.Value = new VertragListMiete();
                 RaisePropertyChanged(nameof(LastMiete));
                 RaisePropertyChanged(nameof(HasLastMiete));
@@ -91,25 +91,25 @@ namespace Deeplex.Saverwalter.ViewModels
         public string Anschrift => AdresseViewModel.Anschrift(Entity.Wohnung);
         public string AnschriftMitWohnung => Anschrift + ", " + Wohnung.Bezeichnung;
         public Wohnung Wohnung => Entity.Wohnung;
-        public ImmutableList<Guid> Mieter => Impl.ctx.MieterSet
+        public ImmutableList<Guid> Mieter => Avm.ctx.MieterSet
                 .Where(w => w.VertragId == Entity.VertragId)
                 .Select(m => m.PersonId).ToImmutableList();
         public DateTime Beginn { get; set; }
         public DateTime? Ende { get; set; }
         public string BeginnString => Beginn.ToString("dd.MM.yyyy");
         public string EndeString => Ende is DateTime e ? e.ToString("dd.MM.yyyy") : "Offen";
-        public string AuflistungMieter => string.Join(", ", Impl.ctx.MieterSet
+        public string AuflistungMieter => string.Join(", ", Avm.ctx.MieterSet
             .Where(m => m.VertragId == Entity.VertragId).ToList()
-            .Select(a => Impl.ctx.FindPerson(a.PersonId).Bezeichnung));
+            .Select(a => Avm.ctx.FindPerson(a.PersonId).Bezeichnung));
         public bool hasEnde => Ende != null;
-        public string Besitzer => Impl.ctx.FindPerson(Entity.Wohnung.BesitzerId)?.Bezeichnung;
+        public string Besitzer => Avm.ctx.FindPerson(Entity.Wohnung.BesitzerId)?.Bezeichnung;
 
         public Vertrag Entity { get; }
-        private IAppImplementation Impl;
+        private AppViewModel Avm;
 
-        public VertragVersionListViewModel(Vertrag v, IAppImplementation impl)
+        public VertragVersionListViewModel(Vertrag v, AppViewModel avm)
         {
-            Impl = impl;
+            Avm = avm;
             Entity = v;
 
             Beginn = v.Beginn.AsUtcKind();

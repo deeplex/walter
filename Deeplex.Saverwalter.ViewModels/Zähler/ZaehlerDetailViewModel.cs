@@ -95,20 +95,22 @@ namespace Deeplex.Saverwalter.ViewModels
         public bool Initialized => Entity.ZaehlerId != 0;
 
         private IAppImplementation Impl;
+        private AppViewModel Avm;
 
-        public ZaehlerDetailViewModel(IAppImplementation ctx) : this(new Zaehler(), ctx) { }
-        public ZaehlerDetailViewModel(Zaehler z, IAppImplementation impl)
+        public ZaehlerDetailViewModel(IAppImplementation ctx, AppViewModel avm) : this(new Zaehler(), ctx, avm) { }
+        public ZaehlerDetailViewModel(Zaehler z, IAppImplementation impl, AppViewModel avm)
         {
             Impl = impl;
+            Avm = avm;
             Entity = z;
             mId = Entity.ZaehlerId;
 
-            Wohnungen = Impl.ctx.Wohnungen
+            Wohnungen = Avm.ctx.Wohnungen
                 .Include(w => w.Adresse)
-                .Select(w => new WohnungListEntry(w, Impl))
+                .Select(w => new WohnungListEntry(w, Avm))
                 .ToList();
 
-            EinzelZaehler = Impl.ctx.ZaehlerSet
+            EinzelZaehler = Avm.ctx.ZaehlerSet
                .Where(y => y.ZaehlerId != Id)
                .Select(y => new ZaehlerListEntry(y))
                .ToList();
@@ -117,7 +119,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (mId != 0)
             {
-                Staende.Value = new ZaehlerstandListViewModel(z, impl);
+                Staende.Value = new ZaehlerstandListViewModel(z, Impl, Avm);
                 Wohnung = Wohnungen.Find(w => w.Id == z.WohnungId);
             }
 
@@ -132,9 +134,9 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public async void SelfDestruct()
         {
-            Entity.Staende.ForEach(s => Impl.ctx.Zaehlerstaende.Remove(s));
-            Impl.ctx.ZaehlerSet.Remove(Entity);
-            Impl.SaveWalter();
+            Entity.Staende.ForEach(s => Avm.ctx.Zaehlerstaende.Remove(s));
+            Avm.ctx.ZaehlerSet.Remove(Entity);
+            Avm.SaveWalter();
         }
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)
@@ -157,17 +159,17 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.ZaehlerId != 0)
             {
-                Impl.ctx.ZaehlerSet.Update(Entity);
+                Avm.ctx.ZaehlerSet.Update(Entity);
             }
             else
             {
-                Impl.ctx.ZaehlerSet.Add(Entity);
+                Avm.ctx.ZaehlerSet.Add(Entity);
             }
-            Impl.SaveWalter();
+            Avm.SaveWalter();
             if (mId != Entity.ZaehlerId)
             {
                 Id = Entity.ZaehlerId;
-                Staende.Value = new ZaehlerstandListViewModel(Entity, Impl);
+                Staende.Value = new ZaehlerstandListViewModel(Entity, Impl, Avm);
             }
         }
     }

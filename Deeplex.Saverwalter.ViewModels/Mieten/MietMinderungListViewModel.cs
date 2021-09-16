@@ -13,14 +13,16 @@ namespace Deeplex.Saverwalter.ViewModels
         public Guid VertragId;
 
         public IAppImplementation Impl;
+        public AppViewModel Avm;
 
-        public MietMinderungListViewModel(Guid VertragGuid, IAppImplementation impl)
+        public MietMinderungListViewModel(Guid VertragGuid, IAppImplementation impl, AppViewModel avm)
         {
             VertragId = VertragGuid;
             var self = this;
             Impl = impl;
+            Avm = avm;
 
-            Liste.Value = impl.ctx.MietMinderungen
+            Liste.Value = Avm.ctx.MietMinderungen
                 .Where(m => m.VertragId == VertragGuid)
                 .Select(m => new MietMinderungListEntry(m, self))
                 .ToImmutableList();
@@ -50,8 +52,8 @@ namespace Deeplex.Saverwalter.ViewModels
                 if (await vm.Impl.Confirmation())
                 {
                     vm.Liste.Value = vm.Liste.Value.Remove(this);
-                    vm.Impl.ctx.MietMinderungen.Remove(Entity);
-                    vm.Impl.SaveWalter();
+                    vm.Avm.ctx.MietMinderungen.Remove(Entity);
+                    vm.Avm.SaveWalter();
                 }
 
             }, _ => true);

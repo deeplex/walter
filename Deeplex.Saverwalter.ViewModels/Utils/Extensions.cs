@@ -1,17 +1,19 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Deeplex.Saverwalter.WinUI3.ViewModels.Utils
+namespace Deeplex.Saverwalter.ViewModels
 {
-    public static class BetriebskostenExtensions
+    public static class BetriebskostenrechnungExtensions
     {
-        public static string GetWohnungenBezeichnung(this Betriebskostenrechnung r, IAppImplementation impl, IList<Wohnung> l = null)
+        public static string GetWohnungenBezeichnung(this Betriebskostenrechnung r, AppViewModel avm, IList<Wohnung> l = null)
         {
             var Wohnungen = l != null ? l : r.Gruppen.Select(g => g.Wohnung).ToList();
-            return string.Join(" — ", impl.ctx.Wohnungen
+            return string.Join(" — ", avm.ctx.Wohnungen
                 .Include(w => w.Adresse)
                 .ToList()
                 .Where(w => Wohnungen.Contains(w))
@@ -33,5 +35,6 @@ namespace Deeplex.Saverwalter.WinUI3.ViewModels.Utils
                     return ret;
                 }));
         }
+
     }
 }

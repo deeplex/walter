@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             }
 
             App.ViewModel.Titel.Value = ViewModel.Bezeichnung;
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.ViewModel));
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.Impl, App.ViewModel));
 
             var Delete = new AppBarButton
             {
@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             };
             Delete.Click += SelfDestruct;
 
-            App.ViewModel.RefillCommandContainer(
+            App.Window.RefillCommandContainer(
                 new ICommandBarElement[] { },
                 new ICommandBarElement[] { Delete });
 
@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             try
             {
-                if (await App.ViewModel.Confirmation())
+                if (await App.Impl.Confirmation())
                 {
                     ViewModel.selfDestruct();
                     Frame.GoBack();

@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 Label = "Wohnung hinzufügen",
             };
             AddWohnung.Click += AddWohnung_Click;
-            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { Elements.Filter(ViewModel), AddWohnung });
+            App.Window.RefillCommandContainer(new ICommandBarElement[] { Elements.Filter(ViewModel), AddWohnung });
         }
 
         private void AddWohnung_Click(object sender, RoutedEventArgs e)

@@ -11,12 +11,14 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<ImmutableList<ZaehlerstandListEntry>> Liste = new ObservableProperty<ImmutableList<ZaehlerstandListEntry>>();
         public int ZaehlerId;
 
+        public AppViewModel Avm;
         public IAppImplementation Impl;
 
-        public ZaehlerstandListViewModel(Zaehler z, IAppImplementation impl)
+        public ZaehlerstandListViewModel(Zaehler z, IAppImplementation impl, AppViewModel avm)
         {
             ZaehlerId = z.ZaehlerId;
             Impl = impl;
+            Avm = avm;
             Liste.Value = z.Staende.Select(s => new ZaehlerstandListEntry(s, this)).ToImmutableList();
         }
 
@@ -35,6 +37,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public DateTimeOffset Datum => Entity.Datum;
         public string DatumString => Datum.ToString("dd.MM.yyyy");
 
+        // TODO reverse injection?
         public ZaehlerstandListEntry(Zaehlerstand z, ZaehlerstandListViewModel vm)
         {
             Entity = z;
@@ -42,8 +45,8 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 if (await vm.Impl.Confirmation())
                 {
-                    vm.Impl.ctx.Zaehlerstaende.Remove(Entity);
-                    vm.Impl.SaveWalter();
+                    vm.Avm.ctx.Zaehlerstaende.Remove(Entity);
+                    vm.Avm.SaveWalter();
                     vm.Liste.Value = vm.Liste.Value.Remove(this);
                 }
             }, _ => true);

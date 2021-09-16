@@ -23,9 +23,9 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
         public ImmutableList<ZaehlerListEntry> AllRelevant { get; }
 
-        public ZaehlerListViewModel(IAppImplementation impl)
+        public ZaehlerListViewModel(AppViewModel avm)
         {
-            AllRelevant = impl.ctx.ZaehlerSet
+            AllRelevant = avm.ctx.ZaehlerSet
                 .Include(z => z.Wohnung)
                 .ThenInclude(w => w.Adresse)
                 .Include(z => z.Staende)

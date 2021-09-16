@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
 {
     public static class Files
     {
-        public static void ConnectAnhangToEntity<T, U>(DbSet<T> Set, U target, List<Anhang> files, IAppImplementation impl) where T : class, IAnhang<U>, new()
+        public static void ConnectAnhangToEntity<T, U>(DbSet<T> Set, U target, List<Anhang> files, IAppImplementation impl, AppViewModel avm) where T : class, IAnhang<U>, new()
         {
             foreach (var file in files)
             {
@@ -22,7 +23,7 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
                 };
                 Set.Add(attachment);
             }
-            impl.SaveWalter();
+            avm.SaveWalter();
         }
 
         public static Anhang SaveAnhang(string src, string root)
@@ -40,9 +41,9 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             return anhang;
         }
 
-        public static async Task InitializeDatabase(IAppImplementation impl)
+        public static async Task InitializeDatabase(IAppImplementation impl, AppViewModel avm)
         {
-            if (impl.ctx != null) return;
+            if (avm.ctx != null) return;
             var path = await impl.Confirmation(
                 "Noch keine Datenbank ausgewählt",
                 "Datenbank suchen, oder leere Datenbank erstellen?",
@@ -53,9 +54,9 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             //impl.ctx.Dispose(); // TODO dispose when overwriting used db.
             var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
             optionsBuilder.UseSqlite("Data Source=" + path);
-            impl.ctx = new SaverwalterContext(optionsBuilder.Options);
-            impl.ctx.Database.Migrate();
-            impl.root = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+            avm.ctx = new SaverwalterContext(optionsBuilder.Options);
+            avm.ctx.Database.Migrate();
+            avm.root = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
         }
 
         public static void SaveBetriebskostenabrechnung(this Betriebskostenabrechnung b, string path, IAppImplementation impl)

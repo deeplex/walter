@@ -15,8 +15,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void selfDestruct()
         {
-            Impl.ctx.Betriebskostenrechnungen.Remove(Entity);
-            Impl.SaveWalter();
+            Avm.ctx.Betriebskostenrechnungen.Remove(Entity);
+            Avm.SaveWalter();
         }
 
         public List<HKVO9Util> HKVO_P9_List = Enums.HKVO9;
@@ -178,16 +178,16 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<ImmutableList<WohnungListEntry>> Wohnungen
             = new ObservableProperty<ImmutableList<WohnungListEntry>>();
 
-        private IAppImplementation Impl;
+        private AppViewModel Avm;
 
-        public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, IAppImplementation impl)
+        public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, AppViewModel avm)
         {
             Entity = r;
-            Impl = impl;
+            Avm = avm;
 
-            Wohnungen.Value = r.Gruppen.Select(g => new WohnungListEntry(g.Wohnung, Impl)).ToImmutableList();
+            Wohnungen.Value = r.Gruppen.Select(g => new WohnungListEntry(g.Wohnung, Avm)).ToImmutableList();
 
-            AllgemeinZaehler_List = Impl.ctx.ZaehlerSet
+            AllgemeinZaehler_List = Avm.ctx.ZaehlerSet
                 .Select(a => new ZaehlerListEntry(a))
                 .ToList();
             AllgemeinZaehler = AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Zaehler?.ZaehlerId);
@@ -201,7 +201,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         }
 
-        public BetriebskostenrechnungDetailViewModel(IAppImplementation impl) : this(new Betriebskostenrechnung(), impl)
+        public BetriebskostenrechnungDetailViewModel(AppViewModel avm) : this(new Betriebskostenrechnung(), avm)
         {
             Entity.BetreffendesJahr = DateTime.Now.Year;
             Entity.Datum = DateTime.Now;
@@ -218,13 +218,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.BetriebskostenrechnungId != 0)
             {
-                Impl.ctx.Betriebskostenrechnungen.Update(Entity);
+                Avm.ctx.Betriebskostenrechnungen.Update(Entity);
             }
             else
             {
-                Impl.ctx.Betriebskostenrechnungen.Add(Entity);
+                Avm.ctx.Betriebskostenrechnungen.Add(Entity);
             }
-            Impl.SaveWalter();
+            Avm.SaveWalter();
         }
 
 

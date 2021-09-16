@@ -58,27 +58,27 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         {
             if (Item is WohnungListEntry w)
             {
-                App.ViewModel.Navigate(typeof(WohnungDetailPage), w.Entity);
+                App.Window.Navigate(typeof(WohnungDetailPage), w.Entity);
             }
             else if (Item is KontaktListEntry k)
             {
                 var a = App.Walter.NatuerlichePersonen.SingleOrDefault(p => p.PersonId == k.Guid);
                 if (a != null)
                 {
-                    App.ViewModel.Navigate(typeof(NatuerlichePersonDetailPage), a);
+                    App.Window.Navigate(typeof(NatuerlichePersonDetailPage), a);
                 }
                 else
                 {
                     var b = App.Walter.JuristischePersonen.SingleOrDefault(p => p.PersonId == k.Guid);
                     if (b != null)
                     {
-                        App.ViewModel.Navigate(typeof(JuristischePersonenDetailPage), b);
+                        App.Window.Navigate(typeof(JuristischePersonenDetailPage), b);
                     }
                 }
             }
             else if (Item is ZaehlerListEntry z)
             {
-                App.ViewModel.Navigate(typeof(ZaehlerDetailPage), z.Entity);
+                App.Window.Navigate(typeof(ZaehlerDetailPage), z.Entity);
             }
         }
 
@@ -86,27 +86,27 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         {
             if (Item is WohnungListEntry w)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(w.Entity, App.ViewModel));
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(w.Entity, App.Impl, App.ViewModel));
             }
             else if (Item is KontaktListEntry k)
             {
                 var a = App.Walter.NatuerlichePersonen.SingleOrDefault(p => p.PersonId == k.Guid);
                 if (a != null)
                 {
-                    App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.ViewModel));
+                    App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
                 }
                 else
                 {
                     var b = App.Walter.JuristischePersonen.SingleOrDefault(p => p.PersonId == k.Guid);
                     if (b != null)
                     {
-                        App.ViewModel.updateListAnhang(new AnhangListViewModel(b, App.ViewModel));
+                        App.ViewModel.updateListAnhang(new AnhangListViewModel(b, App.Impl, App.ViewModel));
                     }
                 }
             }
             else if (Item is ZaehlerstandListEntry z)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(z.Entity, App.ViewModel));
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(z.Entity, App.Impl, App.ViewModel));
             }
         }
     }

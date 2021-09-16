@@ -1,6 +1,6 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using CommunityToolkit.WinUI.UI.Controls;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.WinUI3.ViewModels.Utils;
 using Deeplex.Saverwalter.WinUI3.Views;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Microsoft.UI.Xaml;
@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System;
+using System.Collections.Generic;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -16,6 +17,10 @@ namespace Deeplex.Saverwalter.WinUI3
 {
     public sealed partial class MainWindow : Window
     {
+        public ContentDialog ConfirmationDialog => confirmationDialog;
+        public InAppNotification Alert => alert;
+        public TextBlock AlertText => alertText;
+
         public void Navigate<U>(Type SourcePage, U SendParameter)
         {
             ViewModel.clearAnhang();
@@ -29,17 +34,11 @@ namespace Deeplex.Saverwalter.WinUI3
             InitializeComponent();
 
             root.Loaded += Root_Loaded;
-
-            ViewModel.SetCommandBar(MainCommandBar);
-            ViewModel.SetAnhangPane(splitview, togglepanesymbol);
-            ViewModel.SetAlertBox(Alert, AlertText);
-            ViewModel.SetConfirmationDialog(ConfirmationDialog);
-            ViewModel.Navigate = Navigate;
         }
 
         private void Root_Loaded(object sender, RoutedEventArgs e)
         {
-            ViewModel.initializeDatabase();
+            ViewModel.initializeDatabase(App.Impl);
         }
 
         public Frame AppFrame => frame;
@@ -120,7 +119,7 @@ namespace Deeplex.Saverwalter.WinUI3
 
         private void togglepane_Click(object sender, RoutedEventArgs e)
         {
-            App.ViewModel.ToggleAnhang();
+            ToggleAnhang();
         }
 
         private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
@@ -128,78 +127,59 @@ namespace Deeplex.Saverwalter.WinUI3
             App.ViewModel.updateAutoSuggestEntries(sender.Text);
         }
 
+        private Type GetEntryPage(object Entry)
+        {
+            return Entry is NatuerlichePerson ? typeof(NatuerlichePersonDetailPage) :
+                Entry is JuristischePerson ? typeof(JuristischePersonenDetailPage) :
+                Entry is Wohnung ? typeof(WohnungDetailPage) :
+                Entry is Zaehler ? typeof(ZaehlerDetailPage) :
+                Entry is Vertrag ? typeof(VertragDetailViewPage) :
+                Entry is Betriebskostenrechnung ? typeof(BetriebskostenrechnungenDetailPage) :
+                Entry is Erhaltungsaufwendung ? typeof(ErhaltungsaufwendungenDetailPage) :
+                null;
+        }
         private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
             var Entry = args.ChosenSuggestion as AutoSuggestEntry;
-            App.ViewModel.Navigate(Entry.getPage(), Entry.Entity);
+            Navigate(GetEntryPage(Entry), Entry.Entity);
             sender.IsSuggestionListOpen = false;
             sender.Text = "";
         }
-    }
 
-
-
-    public class AutoSuggestEntry
-    {
-        public override string ToString() => Bezeichnung;
-        public string Bezeichnung;
-        public string Icon;
-        public object Entity;
-
-
-        public Type getPage()
+        public void RefillCommandContainer()
         {
-            return Entity is NatuerlichePerson ? typeof(NatuerlichePersonDetailPage) :
-                Entity is JuristischePerson ? typeof(JuristischePersonenDetailPage) :
-                Entity is Wohnung ? typeof(WohnungDetailPage) :
-                Entity is Zaehler ? typeof(ZaehlerDetailPage) :
-                Entity is Vertrag ? typeof(VertragDetailViewPage) :
-                Entity is Betriebskostenrechnung ? typeof(BetriebskostenrechnungenDetailPage) :
-                Entity is Erhaltungsaufwendung ? typeof(ErhaltungsaufwendungenDetailPage) :
-                null;
+            MainCommandBar.PrimaryCommands.Clear();
+            MainCommandBar.SecondaryCommands.Clear();
         }
 
-        public AutoSuggestEntry(NatuerlichePerson a)
+        public void RefillCommandContainer(IList<ICommandBarElement> Primary, IList<ICommandBarElement> Secondary = null)
         {
-            Entity = a;
-            Icon = "ContactInfo";
-            Bezeichnung = a.Bezeichnung;
+            RefillCommandContainer();
+            foreach (var p in Primary)
+            {
+                MainCommandBar.PrimaryCommands.Add(p);
+            }
+
+            if (Secondary == null) return;
+
+            foreach (var s in Secondary)
+            {
+                MainCommandBar.SecondaryCommands.Add(s);
+            }
         }
-        public AutoSuggestEntry(JuristischePerson a)
+
+        public void OpenAnhangPane()
         {
-            Entity = a;
-            Icon = "ContactInfo";
-            Bezeichnung = a.Bezeichnung;
+            if (!splitview.IsPaneOpen)
+            {
+                ToggleAnhang();
+            }
         }
-        public AutoSuggestEntry(Wohnung a)
+
+        public void ToggleAnhang()
         {
-            Entity = a;
-            Icon = "Street";
-            Bezeichnung = AdresseViewModel.Anschrift(a) + " - " + a.Bezeichnung;
-        }
-        public AutoSuggestEntry(Zaehler a)
-        {
-            Entity = a;
-            Icon = "Clock";
-            Bezeichnung = a.Kennnummer;
-        }
-        public AutoSuggestEntry(Vertrag a)
-        {
-            Entity = a;
-            Icon = "Library";
-            Bezeichnung = AdresseViewModel.Anschrift(a.Wohnung) + " - " + a.Wohnung.Bezeichnung;
-        }
-        public AutoSuggestEntry(Betriebskostenrechnung a)
-        {
-            Entity = a;
-            Icon = "List";
-            Bezeichnung = a.Typ.ToDescriptionString() + " - " + a.GetWohnungenBezeichnung(App.ViewModel);
-        }
-        public AutoSuggestEntry(Erhaltungsaufwendung a)
-        {
-            Entity = a;
-            Icon = "Bullets";
-            Bezeichnung = a.Bezeichnung;
+            splitview.IsPaneOpen = !splitview.IsPaneOpen;
+            togglepanesymbol.Symbol = splitview.IsPaneOpen ? Symbol.OpenPane : Symbol.ClosePane;
         }
     }
 }

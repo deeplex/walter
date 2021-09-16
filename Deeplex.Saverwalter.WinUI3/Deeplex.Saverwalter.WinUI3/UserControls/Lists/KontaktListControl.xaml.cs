@@ -155,7 +155,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                     sk.Type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailPage) :
                     null;
 
-                App.ViewModel.Navigate(target, App.Walter.FindPerson(sk.Guid));
+                App.Window.Navigate(target, App.Walter.FindPerson(sk.Guid));
             }
         }
 
@@ -166,7 +166,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private async void RemovePerson_Click(object sender, RoutedEventArgs e)
         {
-            if (await App.ViewModel.Confirmation())
+            if (await App.Impl.Confirmation())
             {
                 var guid = ((KontaktListEntry)((Button)sender).DataContext).Guid;
 
@@ -196,11 +196,11 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             var a = ((KontaktListEntry)((DataGrid)sender).SelectedItem)?.Entity;
             if (a is NatuerlichePerson n)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(n, App.ViewModel));
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(n, App.Impl, App.ViewModel));
             }
             else if (a is JuristischePerson j)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(j, App.ViewModel));
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(j, App.Impl, App.ViewModel));
             }
         }
 

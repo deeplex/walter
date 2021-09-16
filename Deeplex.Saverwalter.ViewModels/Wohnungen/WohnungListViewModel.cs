@@ -15,11 +15,11 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
         public ImmutableList<WohnungListEntry> AllRelevant { get; }
 
-        public WohnungListViewModel(IAppImplementation impl)
+        public WohnungListViewModel(AppViewModel avm)
         {
-            AllRelevant = impl.ctx.Wohnungen
+            AllRelevant = avm.ctx.Wohnungen
                 .Include(w => w.Adresse)
-                .Select(w => new WohnungListEntry(w, impl))
+                .Select(w => new WohnungListEntry(w, avm))
                 .ToImmutableList();
 
             Liste.Value = AllRelevant;
@@ -37,14 +37,14 @@ namespace Deeplex.Saverwalter.ViewModels
         public string Anschrift { get; }
         public string Besitzer { get; }
 
-        public WohnungListEntry(Wohnung w, IAppImplementation impl)
+        public WohnungListEntry(Wohnung w, AppViewModel avm)
         {
             Id = w.WohnungId;
             Entity = w;
             Adresse = w.Adresse;
             Bezeichnung = w.Bezeichnung;
             Anschrift = AdresseViewModel.Anschrift(w);
-            Besitzer = impl.ctx.FindPerson(w.BesitzerId).Bezeichnung;
+            Besitzer = avm.ctx.FindPerson(w.BesitzerId).Bezeichnung;
         }
     }
 }

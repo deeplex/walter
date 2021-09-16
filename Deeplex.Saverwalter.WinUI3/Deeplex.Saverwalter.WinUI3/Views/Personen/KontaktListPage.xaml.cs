@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             var cv = new CheckBox() { IsChecked = ViewModel.Vermieter.Value };
             cv.Click += Checkbox_Click;
 
-            App.ViewModel.RefillCommandContainer(
+            App.Window.RefillCommandContainer(
                 new ICommandBarElement[]
                 {
                     Filter(),

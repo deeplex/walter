@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private async void Delete_Click(object sender, RoutedEventArgs e)
         {
-            if (await App.ViewModel.Confirmation())
+            if (await App.Impl.Confirmation())
             {
                 ViewModel.SelfDestruct();
                 Frame.GoBack();
@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is Zaehler zaehler)
             {
-                ViewModel = new ZaehlerDetailViewModel(zaehler, App.ViewModel);
+                ViewModel = new ZaehlerDetailViewModel(zaehler, App.Impl, App.ViewModel);
                 App.ViewModel.Titel.Value = ViewModel.Kennnummer;
             }
             else if (e.Parameter is ZaehlerDetailViewModel vm)
@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             }
             else if (e.Parameter is null) // New Zaehler
             {
-                ViewModel = new ZaehlerDetailViewModel(App.ViewModel);
+                ViewModel = new ZaehlerDetailViewModel(App.Impl, App.ViewModel);
             }
 
             App.ViewModel.Titel.Value = ViewModel == null ? "Neuer Zähler" : ViewModel.Kennnummer;
@@ -47,9 +47,9 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 Label = "Löschen",
             };
             Delete.Click += Delete_Click;
-            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { },
+            App.Window.RefillCommandContainer(new ICommandBarElement[] { },
                 new ICommandBarElement[] { Delete });
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.ViewModel));
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
 
             base.OnNavigatedTo(e);
         }

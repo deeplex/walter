@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             base.OnNavigatedTo(e);
 
             App.ViewModel.Titel.Value = "Betriebskostenrechnung";
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.ViewModel));
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
 
             var Delete = new AppBarButton
             {
@@ -55,7 +55,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             };
             Delete.Click += SelfDestruct;
 
-            App.ViewModel.RefillCommandContainer(
+            App.Window.RefillCommandContainer(
                 new ICommandBarElement[] { },
                 new ICommandBarElement[] { Delete });
 
@@ -135,7 +135,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private async void SelfDestruct(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            if (await App.ViewModel.Confirmation())
+            if (await App.Impl.Confirmation())
             {
                 if (ViewModel.Id != 0)
                 {

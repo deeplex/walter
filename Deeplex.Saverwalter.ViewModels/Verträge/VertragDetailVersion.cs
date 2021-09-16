@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public KontaktListEntry Vermieter
             => Wohnung?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
-                    new KontaktListEntry(g, Impl) : null;
+                    new KontaktListEntry(g, Avm) : null;
 
         private KontaktListEntry mAnsprechpartner;
         public KontaktListEntry Ansprechpartner
@@ -105,17 +105,17 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        protected IAppImplementation Impl;
+        protected AppViewModel Avm;
 
-        public VertragDetailVersion(int id, IAppImplementation impl) : this(impl.ctx.Vertraege.Find(id), impl) { }
-        public VertragDetailVersion(Vertrag v, IAppImplementation impl)
+        public VertragDetailVersion(int id, AppViewModel avm) : this(avm.ctx.Vertraege.Find(id), avm) { }
+        public VertragDetailVersion(Vertrag v, AppViewModel avm)
         {
             Entity = v;
-            Impl = impl;
+            Avm = avm;
 
             if (v.AnsprechpartnerId != Guid.Empty && v.AnsprechpartnerId != null)
             {
-                Ansprechpartner = new KontaktListEntry(v.AnsprechpartnerId.Value, impl);
+                Ansprechpartner = new KontaktListEntry(v.AnsprechpartnerId.Value, avm);
             }
 
             PropertyChanged += OnUpdate;
@@ -148,13 +148,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.rowid != 0)
             {
-                Impl.ctx.Vertraege.Update(Entity);
+                Avm.ctx.Vertraege.Update(Entity);
             }
             else
             {
-                Impl.ctx.Vertraege.Add(Entity);
+                Avm.ctx.Vertraege.Add(Entity);
             }
-            Impl.SaveWalter();
+            Avm.SaveWalter();
         }
     }
 

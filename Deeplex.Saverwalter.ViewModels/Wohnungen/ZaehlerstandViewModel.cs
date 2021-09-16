@@ -46,14 +46,19 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity = z;
             // TODO
             //AttachFile = new AsyncRelayCommand(async _ =>
-            //    await Utils.Files.SaveFilesToWalter(parent.Impl.ctx.ZaehlerstandAnhaenge, z, parent.Impl), _ => true);
+            //    await Utils.Files.SaveFilesToWalter(parent.
+            //
+            //
+            //
+            //
+            //    ZaehlerstandAnhaenge, z, parent.Impl), _ => true);
 
             SelfDestruct = new RelayCommand(_ =>
             {
                 //parent.impl.Remove(Entity); TODO 
                 parent.Zaehlerstaende.Value = parent.Zaehlerstaende.Value.Remove(this);
 
-                //Impl.SaveWalter(); TODO
+                //Avm.SaveWalter(); TODO
             }, _ => true);
         }
 

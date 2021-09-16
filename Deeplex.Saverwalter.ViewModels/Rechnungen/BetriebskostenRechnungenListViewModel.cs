@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WinUI3.ViewModels.Utils;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -28,15 +27,15 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public BetriebskostenRechnungenListViewModel(IAppImplementation impl)
+        public BetriebskostenRechnungenListViewModel(AppViewModel avm)
         {
-            AllRelevant = impl.ctx.Betriebskostenrechnungen
+            AllRelevant = avm.ctx.Betriebskostenrechnungen
                 .Include(b => b.Gruppen)
                 .ThenInclude(g => g.Wohnung)
                 .ThenInclude(w => w.Adresse)
                 .ThenInclude(a => a.Wohnungen)
                 .Include(b => b.Zaehler)
-                .Select(w => new BetriebskostenRechnungenListEntry(w, impl))
+                .Select(w => new BetriebskostenRechnungenListEntry(w, avm))
                 .ToImmutableList();
             Liste.Value = AllRelevant;
         }
@@ -54,11 +53,11 @@ namespace Deeplex.Saverwalter.ViewModels
         public string BetragString => Entity.Betrag.ToString() + "€";
         public string AdressenBezeichnung { get; }
 
-        public BetriebskostenRechnungenListEntry(Betriebskostenrechnung r, IAppImplementation impl)
+        public BetriebskostenRechnungenListEntry(Betriebskostenrechnung r, AppViewModel avm)
         {
             Entity = r;
             Wohnungen = r.Gruppen.Select(g => g.Wohnung).ToList();
-            AdressenBezeichnung = r.GetWohnungenBezeichnung(impl, Wohnungen);
+            AdressenBezeichnung = r.GetWohnungenBezeichnung(avm, Wohnungen);
         }
     }
 }

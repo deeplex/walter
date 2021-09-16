@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         {
             if (ViewModel.SelectedRechnung != null)
             {
-                App.ViewModel.Navigate(typeof(BetriebskostenrechnungenDetailPage), ViewModel.SelectedRechnung.Id);
+                App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), ViewModel.SelectedRechnung.Id);
             }
         }
 
@@ -110,7 +110,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         {
             if (((DataGrid)sender)?.SelectedItem is BetriebskostenRechnungenListEntry r)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(r.Entity, App.ViewModel));
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(r.Entity, App.Impl, App.ViewModel));
             }
         }
 

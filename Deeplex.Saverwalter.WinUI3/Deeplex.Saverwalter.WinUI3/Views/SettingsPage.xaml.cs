@@ -15,12 +15,12 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             InitializeComponent();
             App.ViewModel.Titel.Value = "Einstellungen";
-            App.ViewModel.RefillCommandContainer();
+            App.Window.RefillCommandContainer();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewModel = new SettingsViewModel(App.ViewModel);
+            ViewModel = new SettingsViewModel(App.Impl, App.ViewModel);
         }
 
         private void Adressen_AutoGeneratingColumn(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridAutoGeneratingColumnEventArgs e)
@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private async void DeleteAdresse_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            if (await App.ViewModel.Confirmation())
+            if (await App.Impl.Confirmation())
             {
                 if (((Button)sender).Tag is AdresseViewModel vm)
                 {

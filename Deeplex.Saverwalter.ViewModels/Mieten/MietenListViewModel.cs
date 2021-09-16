@@ -12,14 +12,16 @@ namespace Deeplex.Saverwalter.ViewModels
             = new ObservableProperty<ImmutableList<MietenListEntry>>();
         public Guid VertragId;
 
+        public AppViewModel Avm;
         public IAppImplementation Impl;
 
-        public MietenListViewModel(Guid VertragGuid, IAppImplementation impl)
+        public MietenListViewModel(Guid VertragGuid, IAppImplementation impl,  AppViewModel avm)
         {
             VertragId = VertragGuid;
+            Avm = avm;
             Impl = impl;
             var self = this;
-            Liste.Value = Impl.ctx.Mieten
+            Liste.Value = Avm.ctx.Mieten
                 .Where(m => m.VertragId == VertragGuid)
                 .Select(m => new MietenListEntry(m, self))
                 .ToImmutableList();
@@ -66,21 +68,21 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        IAppImplementation Impl;
+        AppViewModel Avm;
 
         public MietenListEntry(Miete m, MietenListViewModel vm)
         {
             Entity = m;
 
-            Impl = vm.Impl;
+            Avm = vm.Avm;
 
             SelfDestruct = new AsyncRelayCommand(async _ =>
             {
-                if (await Impl.Confirmation())
+                if (await vm.Impl.Confirmation())
                 {
                     vm.Liste.Value = vm.Liste.Value.Remove(this);
-                    Impl.ctx.Mieten.Remove(Entity);
-                    Impl.SaveWalter();
+                    vm.Avm.ctx.Mieten.Remove(Entity);
+                    vm.Avm.SaveWalter();
                 }
             }, _ => true);
 
@@ -107,13 +109,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.MieteId != 0)
             {
-                Impl.ctx.Mieten.Update(Entity);
+                Avm.ctx.Mieten.Update(Entity);
             }
             else
             {
-                Impl.ctx.Mieten.Add(Entity);
+                Avm.ctx.Mieten.Add(Entity);
             }
-            Impl.SaveWalter();
+            Avm.SaveWalter();
         }
 
         public AsyncRelayCommand SelfDestruct;

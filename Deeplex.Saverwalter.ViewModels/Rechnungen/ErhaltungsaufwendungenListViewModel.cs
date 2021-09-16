@@ -25,12 +25,12 @@ namespace Deeplex.Saverwalter.ViewModels.Rechnungen
             }
         }
 
-        public ErhaltungsaufwendungenListViewModel(IAppImplementation impl)
+        public ErhaltungsaufwendungenListViewModel(AppViewModel avm)
         {
-            AllRelevant = impl.ctx.Erhaltungsaufwendungen
+            AllRelevant = avm.ctx.Erhaltungsaufwendungen
                 .Include(e => e.Wohnung)
                 .ThenInclude(w => w.Adresse)
-                .Select(w => new ErhaltungsaufwendungenListEntry(w, impl))
+                .Select(w => new ErhaltungsaufwendungenListEntry(w, avm))
                 .ToImmutableList();
 
             Liste.Value = AllRelevant;
@@ -40,20 +40,20 @@ namespace Deeplex.Saverwalter.ViewModels.Rechnungen
     public sealed class ErhaltungsaufwendungenListEntry
     {
         public readonly Erhaltungsaufwendung Entity;
-        public string Aussteller => Impl.ctx.FindPerson(Entity.AusstellerId).Bezeichnung;
+        public string Aussteller => Avm.ctx.FindPerson(Entity.AusstellerId).Bezeichnung;
         public int Id => Entity.ErhaltungsaufwendungId;
         public WohnungListEntry Wohnung;
         public string WohnungString => Wohnung.ToString();
         public string BetragString => Entity.Betrag.ToString() + "€";
         public string Bezeichnung => Entity.Bezeichnung;
         public string DatumString => Entity.Datum.ToString("dd.MM.yyyy");
-        private IAppImplementation Impl;
+        private AppViewModel Avm;
 
-        public ErhaltungsaufwendungenListEntry(Erhaltungsaufwendung e, IAppImplementation impl)
+        public ErhaltungsaufwendungenListEntry(Erhaltungsaufwendung e, AppViewModel avm)
         {
             Entity = e;
-            Impl = impl;
-            Wohnung = new WohnungListEntry(Entity.Wohnung, Impl);
+            Avm = avm;
+            Wohnung = new WohnungListEntry(Entity.Wohnung, Avm);
         }
     }
 }

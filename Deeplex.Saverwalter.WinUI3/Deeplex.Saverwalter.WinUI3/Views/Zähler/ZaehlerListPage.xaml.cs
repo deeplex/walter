@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             };
             AddZaehler.Click += AddZaehler_Click;
 
-            App.ViewModel.RefillCommandContainer(new ICommandBarElement[] { Elements.Filter(ViewModel), AddZaehler });
+            App.Window.RefillCommandContainer(new ICommandBarElement[] { Elements.Filter(ViewModel), AddZaehler });
         }
 
         private void AddZaehler_Click(object sender, RoutedEventArgs e)

@@ -22,7 +22,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             };
             AddBetriebskostenRechnung.Click += AddBetriebskostenWohnung_Click;
 
-            App.ViewModel.RefillCommandContainer(new ICommandBarElement[]
+            App.Window.RefillCommandContainer(new ICommandBarElement[]
             {
                 Elements.Filter(ViewModel),
                 AddBetriebskostenRechnung,

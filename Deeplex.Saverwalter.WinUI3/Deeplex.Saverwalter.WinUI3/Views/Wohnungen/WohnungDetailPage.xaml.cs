@@ -32,15 +32,15 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
             AddZaehler_Click = () =>
             {
-                var vm = new ZaehlerDetailViewModel(new Zaehler() { WohnungId = ViewModel.Id }, App.ViewModel);
-                App.ViewModel.Navigate(typeof(ZaehlerDetailPage), vm);
+                var vm = new ZaehlerDetailViewModel(new Zaehler() { WohnungId = ViewModel.Id }, App.Impl, App.ViewModel);
+                App.Window.Navigate(typeof(ZaehlerDetailPage), vm);
             };
 
             AddVertrag_Click = () =>
             {
-                var vm = new VertragDetailViewModel(App.ViewModel);
+                var vm = new VertragDetailViewModel(App.Impl, App.ViewModel);
                 vm.Wohnung = vm.AlleWohnungen.First(v => v.Entity.WohnungId == ViewModel.Id);
-                App.ViewModel.Navigate(typeof(VertragDetailViewPage), vm);
+                App.Window.Navigate(typeof(VertragDetailViewPage), vm);
             };
 
             AddBetriebskostenrechnung_Click = () =>
@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                     Rechnung = r,
                 });
                 var vm = new BetriebskostenrechnungDetailViewModel(r, App.ViewModel);
-                App.ViewModel.Navigate(typeof(BetriebskostenrechnungenDetailPage), vm);
+                App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), vm);
             };
 
             AddErhaltungsaufwendung_Click = () =>
@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 };
 
                 var vm = new ErhaltungsaufwendungenDetailViewModel(r, App.ViewModel);
-                App.ViewModel.Navigate(typeof(ErhaltungsaufwendungenDetailPage), vm);
+                App.Window.Navigate(typeof(ErhaltungsaufwendungenDetailPage), vm);
             };
 
             App.ViewModel.Titel.Value = ViewModel.Anschrift + " — " + ViewModel.Bezeichnung;
@@ -78,10 +78,10 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 Label = "Löschen",
             };
             Delete.Click += Delete_Click;
-            App.ViewModel.RefillCommandContainer(
+            App.Window.RefillCommandContainer(
                 new ICommandBarElement[] { ErhaltungsaufwendungsButton() },
                 new ICommandBarElement[] { Delete });
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.ViewModel));
+            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
 
             base.OnNavigatedTo(e);
         }
@@ -93,7 +93,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private async void Delete_Click(object sender, RoutedEventArgs e)
         {
-            if (await App.ViewModel.Confirmation())
+            if (await App.Impl.Confirmation())
             {
                 ViewModel.selfDestruct();
                 Frame.GoBack();

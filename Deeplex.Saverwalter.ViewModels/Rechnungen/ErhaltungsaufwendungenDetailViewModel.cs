@@ -17,8 +17,8 @@ namespace Deeplex.Saverwalter.ViewModels.Rechnungen
 
         public void selfDestruct()
         {
-            Impl.ctx.Erhaltungsaufwendungen.Remove(Entity);
-            Impl.SaveWalter();
+            Avm.ctx.Erhaltungsaufwendungen.Remove(Entity);
+            Avm.SaveWalter();
         }
 
         public ObservableProperty<ImmutableList<KontaktListEntry>> Personen
@@ -101,24 +101,24 @@ namespace Deeplex.Saverwalter.ViewModels.Rechnungen
             }
         }
 
-        private IAppImplementation Impl;
+        private AppViewModel Avm;
 
-        public ErhaltungsaufwendungenDetailViewModel(IAppImplementation impl) : this(new Erhaltungsaufwendung(), impl) { }
-        public ErhaltungsaufwendungenDetailViewModel(Erhaltungsaufwendung e, IAppImplementation impl)
+        public ErhaltungsaufwendungenDetailViewModel(AppViewModel avm) : this(new Erhaltungsaufwendung(), avm) { }
+        public ErhaltungsaufwendungenDetailViewModel(Erhaltungsaufwendung e, AppViewModel avm)
         {
             Entity = e;
-            Impl = impl;
+            Avm = avm;
 
-            Wohnungen = Impl.ctx.Wohnungen
+            Wohnungen = Avm.ctx.Wohnungen
                 .Include(w => w.Adresse)
-                .Select(w => new WohnungListEntry(w, Impl)).ToList();
+                .Select(w => new WohnungListEntry(w, avm)).ToList();
             Wohnung = Wohnungen.Find(f => f.Id == e.Wohnung?.WohnungId);
 
-            Personen.Value = Impl.ctx.NatuerlichePersonen
+            Personen.Value = Avm.ctx.NatuerlichePersonen
                 .Where(w => w.isHandwerker)
                 .Select(k => new KontaktListEntry(k))
                 .ToList()
-                .Concat(Impl.ctx.JuristischePersonen
+                .Concat(Avm.ctx.JuristischePersonen
                     .Where(w => w.isHandwerker)
                     .Select(k => new KontaktListEntry(k))
                     .ToList())
@@ -154,13 +154,13 @@ namespace Deeplex.Saverwalter.ViewModels.Rechnungen
 
             if (Entity.ErhaltungsaufwendungId != 0)
             {
-                Impl.ctx.Erhaltungsaufwendungen.Update(Entity);
+                Avm.ctx.Erhaltungsaufwendungen.Update(Entity);
             }
             else
             {
-                Impl.ctx.Erhaltungsaufwendungen.Add(Entity);
+                Avm.ctx.Erhaltungsaufwendungen.Add(Entity);
             }
-            Impl.SaveWalter();
+            Avm.SaveWalter();
         }
     }
 }
