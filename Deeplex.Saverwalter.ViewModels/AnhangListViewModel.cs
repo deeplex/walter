@@ -42,6 +42,14 @@ namespace Deeplex.Saverwalter.ViewModels
             Text.Value = text;
         }
 
+        public AnhangListViewModel(IAppImplementation impl)
+        {
+            Impl = impl;
+            Text.Value = "Anhänge";
+            var self = this;
+            Liste.Value = impl.ctx.Anhaenge.Select(a => new AnhangListEntry(a, self, impl)).ToImmutableList();
+        }
+
         public AnhangListViewModel(Adresse a, IAppImplementation impl)
         {
             Initialize(AdresseViewModel.Anschrift(a), impl);
@@ -130,7 +138,7 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 newFiles = (await Impl.pickFiles()).Select(f => Utils.Files.SaveAnhang(f, Impl.root)).ToList();
             }
-            Utils.Files.SaveAnhaengeToWalter(Set, target, newFiles, Impl);
+            Utils.Files.ConnectAnhangToEntity(Set, target, newFiles, Impl);
             var self = this;
             newFiles.ForEach(f => Liste.Value = Liste.Value.Add(new AnhangListEntry(f, self, Impl)));
         }
@@ -144,10 +152,32 @@ namespace Deeplex.Saverwalter.ViewModels
         public string FileNameString => "Dateipfad: " + path;
         public string FileSizeString => "Dateigröße: " + Math.Round(size / 1000).ToString() + "kb";
 
+        public int GetReferences
+        {
+            get
+            {
+                var count = Impl.ctx.AdresseAnhaenge.Count(j => j.Anhang == Entity);
+                count += Impl.ctx.BetriebskostenrechnungAnhaenge.Count(j => j.Anhang == Entity);
+                count += Impl.ctx.ErhaltungsaufwendungAnhaenge.Count(j => j.Anhang == Entity);
+                count += Impl.ctx.GarageAnhaenge.Count(j => j.Anhang == Entity);
+                count += Impl.ctx.JuristischePersonAnhaenge.Count(j => j.Anhang == Entity);
+                count += Impl.ctx.KontoAnhaenge.Count(j => j.Anhang == Entity);
+                count += Impl.ctx.MieteAnhaenge.Count(j => j.Anhang == Entity);
+                count += Impl.ctx.MietMinderungAnhaenge.Count(j => j.Anhang == Entity);
+                count += Impl.ctx.NatuerlichePersonAnhaenge.Count(j => j.Anhang == Entity);
+                count += Impl.ctx.VertragAnhaenge.Count(j => j.Anhang == Entity);
+                count += Impl.ctx.WohnungAnhaenge.Count(j => j.Anhang == Entity);
+                count += Impl.ctx.ZaehlerAnhaenge.Count(j => j.Anhang == Entity);
+                count += Impl.ctx.ZaehlerstandAnhaenge.Count(j => j.Anhang == Entity);
+
+                return count;
+            }
+        }
+
         private string path => Entity.getPath(Impl.root);
         public double size => File.Exists(path) ? new FileInfo(path).Length : 0;
 
-        private AnhangListViewModel Container { get; }
+        public AnhangListViewModel Container { get; }
 
         private IAppImplementation Impl;
 
@@ -163,12 +193,18 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             try
             {
-                await Impl.deleteFile(Entity);
-
-                var deleted = Container.Liste.Value.Find(e => e.Entity.AnhangId == Entity.AnhangId);
-                if (deleted != null)
+                if (await Impl.Confirmation())
                 {
-                    Container.Liste.Value = Container.Liste.Value.Remove(deleted);
+                    Impl.ctx.Anhaenge.Remove(Entity);
+                    Impl.SaveWalter();
+
+                    File.Delete(Entity.getPath(Impl.root));
+
+                    var deleted = Container.Liste.Value.Find(e => e.Entity.AnhangId == Entity.AnhangId);
+                    if (deleted != null)
+                    {
+                        Container.Liste.Value = Container.Liste.Value.Remove(deleted);
+                    }
                 }
             }
             catch (Exception e)

@@ -6,6 +6,7 @@
     xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:uc="using:Deeplex.Saverwalter.WinUI3.UserControls"
     xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -18,35 +19,60 @@
                     <TextBlock Text="Lade Datenbank" />
                 </StackPanel>
             </Button>
-            
-            <mtuuc:Expander
-                HorizontalContentAlignment="Left">
-                <mtuuc:Expander.Header>
-                    <TextBlock Text="Adressen"/>
-                </mtuuc:Expander.Header>
+
+            <uc:ExpanderControl Header="Adresse">
+                <uc:ExpanderControl.MainContent>
                     <mtuuc:DataGrid
                         AutoGeneratingColumn="Adressen_AutoGeneratingColumn"
                         ItemsSource="{x:Bind ViewModel.Adressen.Value, Mode=OneWay}"
                         AutoGenerateColumns="True">
-                    <mtuuc:DataGrid.Columns>
-                        <mtuuc:DataGridTemplateColumn>
-                            <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate x:DataType="vm:AdresseViewModel">
-                                    <Button
-                                        Background="Transparent"
-                                        Click="DeleteAdresse_Click"
-                                        Tag="{x:Bind}">
-                                        <SymbolIcon Symbol="Delete"/>
-                                    </Button>
-                                </DataTemplate>
-                            </mtuuc:DataGridTemplateColumn.CellTemplate>
-                        </mtuuc:DataGridTemplateColumn>
-                        <mtuuc:DataGridTextColumn
+                        <mtuuc:DataGrid.Columns>
+                            <mtuuc:DataGridTemplateColumn>
+                                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:AdresseViewModel">
+                                        <Button
+                                            Background="Transparent"
+                                            Click="DeleteAdresse_Click"
+                                            Tag="{x:Bind}">
+                                            <SymbolIcon Symbol="Delete"/>
+                                        </Button>
+                                    </DataTemplate>
+                                </mtuuc:DataGridTemplateColumn.CellTemplate>
+                            </mtuuc:DataGridTemplateColumn>
+                            <mtuuc:DataGridTextColumn
                             Header="Bezüge"
                             Binding="{Binding GetReferences}"/>
-                    </mtuuc:DataGrid.Columns>
-                </mtuuc:DataGrid>
-            </mtuuc:Expander>
+                        </mtuuc:DataGrid.Columns>
+                    </mtuuc:DataGrid>
+                </uc:ExpanderControl.MainContent>
+            </uc:ExpanderControl>
+
+            <uc:ExpanderControl Header="Anhänge">
+                <uc:ExpanderControl.MainContent>
+                    <mtuuc:DataGrid
+                        AutoGeneratingColumn="Anhaenge_AutoGeneratingColumn"
+                        ItemsSource="{x:Bind ViewModel.Anhaenge.Value.Liste.Value, Mode=OneWay}"
+                        AutoGenerateColumns="True">
+                        <mtuuc:DataGrid.Columns>
+                            <mtuuc:DataGridTemplateColumn>
+                                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:AnhangListEntry">
+                                        <Button
+                                            Background="Transparent"
+                                            Click="DeleteAnhang_Click"
+                                            Tag="{x:Bind}">
+                                            <SymbolIcon Symbol="Delete"/>
+                                        </Button>
+                                    </DataTemplate>
+                                </mtuuc:DataGridTemplateColumn.CellTemplate>
+                            </mtuuc:DataGridTemplateColumn>
+                            <mtuuc:DataGridTextColumn
+                            Header="Bezüge"
+                            Binding="{Binding GetReferences}"/>
+                        </mtuuc:DataGrid.Columns>
+                    </mtuuc:DataGrid>
+                </uc:ExpanderControl.MainContent>
+            </uc:ExpanderControl>
         </StackPanel>
     </Grid>
 </Page>

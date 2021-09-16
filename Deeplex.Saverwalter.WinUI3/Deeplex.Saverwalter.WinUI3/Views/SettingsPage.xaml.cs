@@ -31,6 +31,14 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             }
         }
 
+        private void Anhaenge_AutoGeneratingColumn(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridAutoGeneratingColumnEventArgs e)
+        {
+            if (e.PropertyType != typeof(string))
+            {
+                e.Cancel = true;
+            }
+        }
+
         private async void DeleteAdresse_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             if (await App.ViewModel.Confirmation())
@@ -41,7 +49,14 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                     ViewModel.Adressen.Value = App.Walter.Adressen.Select(a => new AdresseViewModel(a, App.ViewModel)).ToImmutableList();
                 }
             }
+        }
 
+        private void DeleteAnhang_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            if (((Button)sender).Tag is AnhangListEntry vm)
+            {
+                vm.DeleteFile();
+            }
         }
 
         private void LoadDatabase_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

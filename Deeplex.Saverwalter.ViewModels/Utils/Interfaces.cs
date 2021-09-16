@@ -24,6 +24,5 @@ namespace Deeplex.Saverwalter.ViewModels
         Task<string> saveFile();
         Task<string> pickFile();
         Task<List<string>> pickFiles();
-        Task deleteFile(Anhang a);
     }
 }

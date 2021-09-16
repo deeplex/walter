@@ -10,7 +10,7 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
 {
     public static class Files
     {
-        public static void SaveAnhaengeToWalter<T, U>(DbSet<T> Set, U target, List<Anhang> files, IAppImplementation impl) where T : class, IAnhang<U>, new()
+        public static void ConnectAnhangToEntity<T, U>(DbSet<T> Set, U target, List<Anhang> files, IAppImplementation impl) where T : class, IAnhang<U>, new()
         {
             foreach (var file in files)
             {

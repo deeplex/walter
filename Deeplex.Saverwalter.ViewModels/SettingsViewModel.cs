@@ -1,4 +1,5 @@
 ﻿using Deeplex.Utils.ObjectModel;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -8,13 +9,18 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public ObservableProperty<ImmutableList<AdresseViewModel>> Adressen =
             new ObservableProperty<ImmutableList<AdresseViewModel>>();
+        public ObservableProperty<AnhangListViewModel> Anhaenge =
+            new ObservableProperty<AnhangListViewModel>();
 
         public void LoadAdressen(IAppImplementation impl)
         {
             Adressen.Value = impl.ctx.Adressen.Select(a => new AdresseViewModel(a, impl)).ToImmutableList();
         }
 
-
+        public void LoadAnhaenge(IAppImplementation impl)
+        {
+            Anhaenge.Value = new AnhangListViewModel(impl);
+        }
 
         public SettingsViewModel(IAppImplementation impl)
         {
@@ -22,10 +28,11 @@ namespace Deeplex.Saverwalter.ViewModels
             try
             {
                 LoadAdressen(impl);
+                LoadAnhaenge(impl);
             }
-            catch
+            catch (Exception e)
             {
-                impl.ShowAlert("Keine Datenbank geladen.");
+                impl.ShowAlert(e.Message);
             }
         }
     }

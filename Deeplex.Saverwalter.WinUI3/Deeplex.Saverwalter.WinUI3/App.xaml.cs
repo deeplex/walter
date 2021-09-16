@@ -190,16 +190,6 @@ namespace Deeplex.Saverwalter.WinUI3
             return files.Select(f => f.Path).ToList();
         }
 
-        public async Task deleteFile(Anhang a)
-        {
-            if (await Confirmation())
-            {
-                ctx.Anhaenge.Remove(a);
-                SaveWalter();
-
-                File.Delete(a.getPath(root));
-            }
-        }
 
         public async void launchFile(Anhang a)
         {
