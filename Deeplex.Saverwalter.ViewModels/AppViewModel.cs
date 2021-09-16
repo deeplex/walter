@@ -50,7 +50,8 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             try
             {
-                await Utils.Files.InitializeDatabase(impl, this);
+                var self = this;
+                await Utils.Files.InitializeDatabase(impl, self);
                 AllAutoSuggestEntries = ctx.Wohnungen.Include(w => w.Adresse).Select(w => new AutoSuggestEntry(w)).ToList()
                         .Concat(ctx.NatuerlichePersonen.Select(w => new AutoSuggestEntry(w))).ToList()
                         .Concat(ctx.JuristischePersonen.Select(w => new AutoSuggestEntry(w))).ToList()
@@ -60,7 +61,7 @@ namespace Deeplex.Saverwalter.ViewModels
                             .Select(w => new AutoSuggestEntry(w))).ToList()
                         .Concat(ctx.ZaehlerSet.Select(w => new AutoSuggestEntry(w))).ToList()
                         .Concat(ctx.Betriebskostenrechnungen.Include(w => w.Gruppen)
-                            .ThenInclude(w => w.Wohnung).Select(w => new AutoSuggestEntry(w, this))).ToList()
+                            .ThenInclude(w => w.Wohnung).Select(w => new AutoSuggestEntry(w, self))).ToList()
                         .Where(w => w.Bezeichnung != null).ToImmutableList();
                 AutoSuggestEntries.Value = AllAutoSuggestEntries;
             }

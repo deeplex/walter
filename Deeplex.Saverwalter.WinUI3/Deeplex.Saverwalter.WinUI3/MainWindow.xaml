@@ -144,9 +144,8 @@
             DefaultButton="Close"/>
         <mtuuc:InAppNotification
             x:Name="alert"
-            ShowDismissButton="False"
             HorizontalAlignment="Right">
-            <TextBlock x:Name="alertText"/>
+            <TextBlock x:Name="alertText" TextWrapping="Wrap"/>
         </mtuuc:InAppNotification>
     </Grid>
 </Window>

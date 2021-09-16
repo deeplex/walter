@@ -36,7 +36,8 @@ namespace Deeplex.Saverwalter.WinUI3
 
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
-            ViewModel = new AppViewModel(this);
+            var self = this;
+            ViewModel = new AppViewModel(self);
 
             Window = new MainWindow();
             Window.Activate();
@@ -81,7 +82,7 @@ namespace Deeplex.Saverwalter.WinUI3
             }
         }
 
-        public void ShowAlert(string text) => ShowAlert(text, 500);
+        public void ShowAlert(string text) =>ShowAlert(text, text.Length > 20 ? 0 : 500);
         public void ShowAlert(string text, int ms)
         {
             if (Window.Alert == null)
