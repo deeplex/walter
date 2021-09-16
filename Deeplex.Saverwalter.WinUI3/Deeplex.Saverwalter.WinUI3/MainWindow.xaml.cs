@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WinUI3
 
             ViewModel.SetCommandBar(MainCommandBar);
             ViewModel.SetAnhangPane(splitview, togglepanesymbol);
-            //ViewModel.SetSavedIndicator(SavedIndicator, SavedIncdicatorText);
+            ViewModel.SetAlertBox(Alert, AlertText);
             ViewModel.SetConfirmationDialog(ConfirmationDialog);
             ViewModel.Navigate = Navigate;
         }

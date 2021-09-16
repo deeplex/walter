@@ -69,7 +69,7 @@
 
             <NavigationView.PaneFooter>
                 <StackPanel>
-    <!--TODO about?-->
+                    <!--TODO about?-->
                 </StackPanel>
             </NavigationView.PaneFooter>
             <RelativePanel>
@@ -142,11 +142,11 @@
         <ContentDialog
             x:Name="ConfirmationDialog"
             DefaultButton="Close"/>
-        <!--<TODO mtuuc:InAppNotification
-            x:Name="SavedIndicator"
+        <mtuuc:InAppNotification
+            x:Name="Alert"
             ShowDismissButton="False"
             HorizontalAlignment="Right">
-            <TextBlock x:Name="SavedIncdicatorText"/>
-        </mtuuc:InAppNotification>-->
+            <TextBlock x:Name="AlertText"/>
+        </mtuuc:InAppNotification>
     </Grid>
 </Window>

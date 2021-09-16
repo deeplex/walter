@@ -65,9 +65,9 @@ namespace Deeplex.Saverwalter.WinUI3
                     AutoSuggestEntries.Value = AllAutoSuggestEntries;
                 }
             }
-            catch
+            catch (Exception e)
             {
-                ShowAlert("Konnte Datenbank nicht laden.");
+                ShowAlert(e.Message);
             }
         }
         
@@ -146,7 +146,7 @@ namespace Deeplex.Saverwalter.WinUI3
             ConfirmationDialog = arg;
         }
 
-        public void SetSavedIndicator(CommunityToolkit.WinUI.UI.Controls.InAppNotification arg, TextBlock arg2)
+        public void SetAlertBox(CommunityToolkit.WinUI.UI.Controls.InAppNotification arg, TextBlock arg2)
         {
             SavedIndicator = arg;
             SavedIndicatorText = arg2;
