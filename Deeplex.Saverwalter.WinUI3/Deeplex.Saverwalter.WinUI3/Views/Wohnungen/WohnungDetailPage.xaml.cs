@@ -134,28 +134,29 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private void Erhaltungsaufwendung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            var Jahr = (int)((Button)sender).CommandParameter;
-            var l = new ErhaltungsaufwendungWohnung(App.Walter, ViewModel.Id, Jahr);
+            throw new NotImplementedException();
+            //var Jahr = (int)((Button)sender).CommandParameter;
+            //var l = new ErhaltungsaufwendungWohnung(App.Walter, ViewModel.Id, Jahr);
 
-            var s = Jahr.ToString() + " - " + ViewModel.Anschrift;
-            var path = ApplicationData.Current.TemporaryFolder.Path + @"\" + s;
+            //var s = Jahr.ToString() + " - " + ViewModel.Anschrift;
+            //var path = ApplicationData.Current.TemporaryFolder.Path + @"\" + s;
 
-            var worked = l.SaveAsDocx(path + ".docx");
-            var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
+            //var worked = l.SaveAsDocx(path + ".docx");
+            //var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
 
-            var anhang = Saverwalter.ViewModels.Utils.Files.ExtractFrom(path + ".docx");
+            //var anhang = Saverwalter.ViewModels.Utils.Files.ExtractFrom(path + ".docx");
 
-            if (anhang != null)
-            {
-                App.Walter.WohnungAnhaenge.Add(new WohnungAnhang()
-                {
-                    Anhang = anhang,
-                    Target = ViewModel.Entity,
-                });
-                App.SaveWalter();
-                App.ViewModel.DetailAnhang.Value.AddAnhangToList(anhang);
-                App.ViewModel.ShowAlert(text, 5000);
-            }
+            //if (anhang != null)
+            //{
+            //    App.Walter.WohnungAnhaenge.Add(new WohnungAnhang()
+            //    {
+            //        Anhang = anhang,
+            //        Target = ViewModel.Entity,
+            //    });
+            //    App.SaveWalter();
+            //    App.ViewModel.DetailAnhang.Value.AddAnhangToList(anhang);
+            //    App.ViewModel.ShowAlert(text, 5000);
+            //}
         }
 
         public sealed class WohnungDetailAdresseWohnung : Microsoft.UI.Xaml.Controls.TreeViewNode

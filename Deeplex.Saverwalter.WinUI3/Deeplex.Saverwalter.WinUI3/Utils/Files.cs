@@ -12,22 +12,6 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
 {
     public static class Files
     {
-        public static async Task<Anhang> ExtractFrom(string path)
-    => await ExtractFrom(await StorageFile.GetFileFromPathAsync(path));
-
-        public static async Task<Anhang> ExtractFrom(IStorageFile stream)
-        {
-            var anhang = new Anhang();
-            anhang.FileName = stream.Name;
-            anhang.ContentType = stream.ContentType;
-            anhang.CreationTime = stream.DateCreated.UtcDateTime;
-            var b = await FileIO.ReadBufferAsync(stream);
-            anhang.Content = b.ToArray();
-            anhang.Sha256Hash = SHA256.Create().ComputeHash(anhang.Content);
-
-            return anhang;
-        }
-
         public static async Task<string> GetFile(params string[] filters)
         {
             var picker = new FileOpenPicker();
@@ -48,26 +32,6 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
             var file = await picker.PickSingleFileAsync();
             if (file != null)
             {
-                return file.Path;
-            }
-
-            return "";
-        }
-
-        public static async Task<string> SaveAnhang(Anhang a)
-        {
-            var picker = new FileSavePicker()
-            {
-                SuggestedStartLocation = PickerLocationId.Desktop,
-                SuggestedFileName = a.FileName,
-            };
-
-            picker.FileTypeChoices.Add("", new List<string> { Path.GetExtension(a.FileName) });
-
-            var file = await picker.PickSaveFileAsync();
-            if (file != null)
-            {
-                await FileIO.WriteBytesAsync(file, a.Content);
                 return file.Path;
             }
 

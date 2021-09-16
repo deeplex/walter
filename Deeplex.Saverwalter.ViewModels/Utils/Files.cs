@@ -26,29 +26,44 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             impl.SaveWalter();
         }
 
+        public static Anhang SaveAnhang(string src, string root)
+        {
+            var file = File.OpenRead(src);
+            var info = new FileInfo(src);
+            var anhang = new Anhang();
+            anhang.FileName = Path.GetFileName(file.Name);
+            anhang.ContentType = "Not implemented"; // TODO
+            anhang.CreationTime = info.CreationTime;
+            File.Copy(src, anhang.getPath(root));
+            anhang.Sha256Hash = SHA256.Create().ComputeHash(File.Open(anhang.getPath(root), FileMode.Open));
+
+            return anhang;
+        }
+
         public static void SaveBetriebskostenabrechnung(this Betriebskostenabrechnung b, string path, IAppImplementation impl)
         {
-            var RechnungIds = b.Gruppen.SelectMany(g => g.Rechnungen).Select(r => r.BetriebskostenrechnungId);
-            var temppath = Path.GetTempPath();
+            throw new NotImplementedException();
+            //var RechnungIds = b.Gruppen.SelectMany(g => g.Rechnungen).Select(r => r.BetriebskostenrechnungId);
+            //var temppath = Path.GetTempPath();
 
-            impl.ctx.BetriebskostenrechnungAnhaenge
-                .Include(a => a.Anhang)
-                .Where(a => RechnungIds.Contains(a.Target.BetriebskostenrechnungId))
-                .ToList()
-                .ForEach(a =>
-                {
-                    if (a.Anhang != null)
-                    {
-                        var filepath = Path.Combine(temppath, a.Target.Typ.ToDescriptionString() + Path.GetExtension(a.Anhang.FileName));
-                        using (FileStream fs = new FileStream(filepath, FileMode.Create))
-                        {
-                            fs.Write(a.Anhang.Content, 0, a.Anhang.Content.Length);
-                        }
-                    }
-                });
+            //impl.ctx.BetriebskostenrechnungAnhaenge
+            //    .Include(a => a.Anhang)
+            //    .Where(a => RechnungIds.Contains(a.Target.BetriebskostenrechnungId))
+            //    .ToList()
+            //    .ForEach(a =>
+            //    {
+            //        if (a.Anhang != null)
+            //        {
+            //            var filepath = Path.Combine(temppath, a.Target.Typ.ToDescriptionString() + Path.GetExtension(a.Anhang.FileName));
+            //            using (FileStream fs = new FileStream(filepath, FileMode.Create))
+            //            {
+            //                fs.Write(a.Anhang.Content, 0, a.Anhang.Content.Length);
+            //            }
+            //        }
+            //    });
 
-            MakeSpace(path + ".zip");
-            System.IO.Compression.ZipFile.CreateFromDirectory(temppath, path + ".zip");
+            //MakeSpace(path + ".zip");
+            //System.IO.Compression.ZipFile.CreateFromDirectory(temppath, path + ".zip");
         }
 
         public static bool MakeSpace(string path)
@@ -71,20 +86,6 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
                 }
             }
             return ok;
-        }
-
-        public static Anhang ExtractFrom(string path)
-            => ExtractFrom(File.ReadAllBytes(path), Path.GetFileName(path), File.GetCreationTime(path));
-
-        public static Anhang ExtractFrom(byte[] bytes, string name, DateTime creationTime)
-        {
-            return new Anhang()
-            {
-                CreationTime = creationTime,
-                FileName = name,
-                Content = bytes,
-                Sha256Hash = SHA256.Create().ComputeHash(bytes)
-            };
         }
     }
 }

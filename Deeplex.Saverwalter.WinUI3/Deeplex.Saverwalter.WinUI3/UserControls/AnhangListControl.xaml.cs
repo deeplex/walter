@@ -52,14 +52,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private async void Runterladen_Click(object sender, RoutedEventArgs e)
         {
-            if (((FrameworkElement)sender).DataContext is AnhangListEntry a)
-            {
-                var path = await Files.SaveAnhang(a.Entity);
-                if (path != "")
-                {
-                    App.ViewModel.ShowAlert("Gespeichert unter " + path, 5000);
-                }
-            }
+            throw new NotImplementedException();
         }
 
         private void Loeschen_Click(object sender, RoutedEventArgs e)

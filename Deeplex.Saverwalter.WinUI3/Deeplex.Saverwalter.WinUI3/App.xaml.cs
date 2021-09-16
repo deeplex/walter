@@ -117,6 +117,25 @@ namespace Deeplex.Saverwalter.WinUI3
         protected SplitView AnhangPane { get; set; }
         protected SymbolIcon AnhangSymbol { get; set; }
 
+        public async Task<List<string>> pickFiles()
+        {
+            var picker = Files.FilePicker("*");
+            var files = await picker.PickMultipleFilesAsync();
+
+            return files.Select(f => f.Path).ToList();
+        }
+
+        public async Task deleteFile(Anhang a)
+        {
+            if (await Confirmation())
+            {
+                ctx.Anhaenge.Remove(a);
+                SaveWalter();
+
+                File.Delete(a.getPath(root));
+            }
+        }
+
         public async void launchFile(Anhang a)
         {
             try
@@ -166,7 +185,7 @@ namespace Deeplex.Saverwalter.WinUI3
             SavedIndicator.Show(ms);
         }
 
-        public void OpenAnhang()
+        public void OpenAnhangPane()
         {
             if (!AnhangPane.IsPaneOpen)
             {

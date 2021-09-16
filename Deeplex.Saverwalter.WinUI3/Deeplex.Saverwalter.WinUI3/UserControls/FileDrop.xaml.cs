@@ -1,10 +1,10 @@
-﻿using Deeplex.Saverwalter.WinUI3.Utils;
-using System;
+﻿using System;
 using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Deeplex.Saverwalter.ViewModels.Utils;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -69,28 +69,15 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                 if (items.Count > 0)
                 {
                     var anhaenge = items.OfType<StorageFile>()
-                        .Select(async storageFile => await Files.ExtractFrom(storageFile));
+                        .Select(storageFile => Files.SaveAnhang(storageFile.Path, App.ViewModel.root)).ToList();
 
-                    foreach (var anhang in anhaenge)
-                    {
-                        var a = await anhang;
-                        App.Walter.Anhaenge.Add(a);
-                        if (List)
-                        {
-                            App.ViewModel.ListAnhang.Value.DropFile(a);
-                        }
-                        else
-                        {
-                            App.ViewModel.DetailAnhang.Value.DropFile(a);
-                        }
-                    }
                     if (List)
                     {
-                        App.ViewModel.ListAnhang.Value.AddAnhang.Execute(null);
+                        App.ViewModel.ListAnhang.Value.AddAnhang.Execute(anhaenge);
                     }
                     else
                     {
-                        App.ViewModel.DetailAnhang.Value.AddAnhang.Execute(null);
+                        App.ViewModel.DetailAnhang.Value.AddAnhang.Execute(anhaenge);
                     }
                 }
             }
