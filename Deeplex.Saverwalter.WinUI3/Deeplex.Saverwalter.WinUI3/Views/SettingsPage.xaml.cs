@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -45,8 +46,9 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private void LoadDatabase_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            App.LoadDataBase();
-            ViewModel.LoadAdressen(App.ViewModel);
+            throw new NotImplementedException();
+            //App.LoadDataBase();
+            //ViewModel.LoadAdressen(App.ViewModel);
         }
     }
 }

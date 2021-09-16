@@ -33,33 +33,6 @@ namespace Deeplex.Saverwalter.WinUI3
             InitializeComponent();
         }
 
-        public static async Task InitializeDatabase()
-        {
-            if (ViewModel.ctx != null) return;
-            var path = await ViewModel.Confirmation(
-                "Noch keine Datenbank ausgewählt",
-                "Datenbank suchen, oder leere Datenbank erstellen?",
-                "Existierende Datenbank auswählen", "Erstelle neue leere Datenbank") ?
-                await ViewModel.pickFile() :
-                await ViewModel.saveFile();
-
-            ViewModel.root = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
-            LoadDataBase();
-            ViewModel.loadAutoSuggestEntries();
-        }
-
-        public static void LoadDataBase()
-        {
-            try
-            {
-                Saverwalter.ViewModels.Utils.Files.LoadDatabase(ViewModel);
-            }
-            catch
-            {
-                ViewModel?.ShowAlert("Konnte Datenbank nicht laden.");
-            }
-        }
-
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
             ViewModel = new AppViewModel();
@@ -71,25 +44,33 @@ namespace Deeplex.Saverwalter.WinUI3
 
     public sealed class AppViewModel : IAppImplementation
     {
-        public void loadAutoSuggestEntries()
+        public async void initializeDatabase()
         {
-            if (ctx != null)
+            try
             {
-                AllAutoSuggestEntries = ctx.Wohnungen.Include(w => w.Adresse).Select(w => new AutoSuggestEntry(w)).ToList()
-                        .Concat(ctx.NatuerlichePersonen.Select(w => new AutoSuggestEntry(w))).ToList()
-                        .Concat(ctx.JuristischePersonen.Select(w => new AutoSuggestEntry(w))).ToList()
-                        .Concat(ctx.Vertraege
-                            .Include(w => w.Wohnung)
-                            .Where(w => w.Ende == null || w.Ende < DateTime.Now)
-                            .Select(w => new AutoSuggestEntry(w))).ToList()
-                        .Concat(ctx.ZaehlerSet.Select(w => new AutoSuggestEntry(w))).ToList()
-                        .Concat(ctx.Betriebskostenrechnungen.Include(w => w.Gruppen)
-                            .ThenInclude(w => w.Wohnung).Select(w => new AutoSuggestEntry(w))).ToList()
-                        .Where(w => w.Bezeichnung != null).ToImmutableList();
-                AutoSuggestEntries.Value = AllAutoSuggestEntries;
+                await Saverwalter.ViewModels.Utils.Files.InitializeDatabase(this);
+                if (ctx != null)
+                {
+                    AllAutoSuggestEntries = ctx.Wohnungen.Include(w => w.Adresse).Select(w => new AutoSuggestEntry(w)).ToList()
+                            .Concat(ctx.NatuerlichePersonen.Select(w => new AutoSuggestEntry(w))).ToList()
+                            .Concat(ctx.JuristischePersonen.Select(w => new AutoSuggestEntry(w))).ToList()
+                            .Concat(ctx.Vertraege
+                                .Include(w => w.Wohnung)
+                                .Where(w => w.Ende == null || w.Ende < DateTime.Now)
+                                .Select(w => new AutoSuggestEntry(w))).ToList()
+                            .Concat(ctx.ZaehlerSet.Select(w => new AutoSuggestEntry(w))).ToList()
+                            .Concat(ctx.Betriebskostenrechnungen.Include(w => w.Gruppen)
+                                .ThenInclude(w => w.Wohnung).Select(w => new AutoSuggestEntry(w))).ToList()
+                            .Where(w => w.Bezeichnung != null).ToImmutableList();
+                    AutoSuggestEntries.Value = AllAutoSuggestEntries;
+                }
+            }
+            catch
+            {
+                ShowAlert("Konnte Datenbank nicht laden.");
             }
         }
-
+        
         public void updateAutoSuggestEntries(string filter)
         {
             if (AllAutoSuggestEntries != null)

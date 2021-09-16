@@ -39,7 +39,7 @@ namespace Deeplex.Saverwalter.WinUI3
 
         private void Root_Loaded(object sender, RoutedEventArgs e)
         {
-            _ = App.InitializeDatabase();
+            ViewModel.initializeDatabase();
         }
 
         public Frame AppFrame => frame;
