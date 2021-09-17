@@ -10,11 +10,12 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
             WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
         }
 
-        public static FileSavePicker FileSavePicker(params string[] filetypes)
+        public static FileSavePicker FileSavePicker(string filename, params string[] filetypes)
         {
             var picker = new FileSavePicker()
             {
                 SuggestedStartLocation = PickerLocationId.Desktop,
+                SuggestedFileName = filename
             };
             picker.FileTypeChoices.Add("Datei", filetypes);
 

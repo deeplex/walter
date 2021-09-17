@@ -2,6 +2,7 @@
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
@@ -24,72 +25,12 @@ namespace Deeplex.Saverwalter.ViewModels
             Impl = impl;
             Print_Erhaltungsaufwendungen = new AsyncRelayCommand(async _ =>
             {
-                // TODO
-                //var s = ErhaltungsaufwendungJahr.Value.ToString() + " - " + Entity.Bezeichnung;
-                //if (mInklusiveZusatz)
-                //{
-                //    s += " + Zusatz";
-                //}
-                //var path = ApplicationData.Current.TemporaryFolder.Path + @"\" + s;
-
-                //var worked = Wohnungen.Value
-                //    .Select(w => new ErhaltungsaufwendungWohnung(impl.ctx, w.Id, ErhaltungsaufwendungJahr.Value))
-                //    .ToImmutableList()
-                //    .SaveAsDocx(path + ".docx");
-                //var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
-
-                //var anhang = Utils.Files.ExtractFrom(path + ".docx");
-
-                //if (anhang != null)
-                //{
-                //    var p = impl.ctx.FindPerson(Entity.PersonId);
-                //    if (p is NatuerlichePerson n)
-                //    {
-                //        impl.ctx.NatuerlichePersonAnhaenge.Add(
-                //            new NatuerlichePersonAnhang()
-                //            {
-                //                Anhang = anhang,
-                //                Target = n,
-                //            });
-                //        if (mInklusiveZusatz)
-                //        {
-                //            impl.ctx.JuristischePersonenMitglieder
-                //                .Where(e => e.PersonId == n.PersonId)
-                //                .ToList()
-                //                .ForEach(e => impl.ctx.JuristischePersonAnhaenge
-                //                    .Add(new JuristischePersonAnhang()
-                //                    {
-                //                        Anhang = anhang,
-                //                        Target = impl.ctx.JuristischePersonen.Find(e.JuristischePersonId)
-                //                    }));
-                //        }
-                //    }
-                //    else if (p is JuristischePerson j)
-                //    {
-                //        impl.ctx.JuristischePersonAnhaenge.Add(
-                //            new JuristischePersonAnhang()
-                //            {
-                //                Anhang = anhang,
-                //                Target = j,
-                //            });
-
-                //        if (mInklusiveZusatz)
-                //        {
-                //            impl.ctx.JuristischePersonenMitglieder
-                //                .Where(e => e.JuristischePersonId == j.JuristischePersonId)
-                //                .ToList()
-                //                .ForEach(e => impl.ctx.NatuerlichePersonAnhaenge
-                //                    .Add(new NatuerlichePersonAnhang()
-                //                    {
-                //                        Anhang = anhang,
-                //                        Target = impl.ctx.NatuerlichePersonen.Single(h => h.PersonId == e.PersonId),
-                //                    }));
-                //        }
-                //    }
-                //    impl.SaveWalter();
-                //    //TODOimpl.DetailAnhang.Value.AddAnhangToList(anhang);
-                //    impl.ShowAlert(text, 5000);
-                //}
+                await Utils.Files.PrintErhaltungsaufwendungen(
+                    Wohnungen.Value.Select(w => w.Entity).ToList(),
+                    mInklusiveZusatz,
+                    ErhaltungsaufwendungJahr.Value,
+                    Avm,
+                    Impl);
             }, _ => Wohnungen.Value.Count > 0);
         }
 

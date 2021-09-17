@@ -39,25 +39,29 @@ namespace Deeplex.Saverwalter.WinUI3
             Window.Activate();
         }
 
-        public async Task<string> saveFile(string[] ext)
+
+        public async Task<string> saveFile(string filename, string[] ext)
         {
-            var picker = Files.FileSavePicker(ext);
+            var filetypes = ext.Length == 0 ? new string[] { "*" } : ext;
+            var picker = Files.FileSavePicker(filename, filetypes);
             var picked = await picker.PickSaveFileAsync();
 
             return picked?.Path;
         }
 
-        public async Task<string> pickFile()
+        public async Task<string> pickFile(params string[] ext)
         {
-            var picker = Files.FileOpenPicker(".db");
+            var filetypes = ext.Length == 0 ? new string[] { "*" } : ext;
+            var picker = Files.FileOpenPicker(filetypes);
             var picked = await picker.PickSingleFileAsync();
 
             return picked?.Path;
         }
 
-        public async Task<List<string>> pickFiles()
+        public async Task<List<string>> pickFiles(params string[] ext)
         {
-            var picker = Files.FileOpenPicker("*");
+            var filetypes = ext.Length == 0 ? new string[] { "*" } : ext;
+            var picker = Files.FileOpenPicker(filetypes);
             var files = await picker.PickMultipleFilesAsync();
 
             return files.Select(f => f.Path).ToList();

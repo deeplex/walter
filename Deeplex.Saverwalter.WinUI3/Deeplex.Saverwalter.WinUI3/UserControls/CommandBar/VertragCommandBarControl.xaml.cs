@@ -43,26 +43,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             try
             {
                 var Jahr = (int)((Button)sender).CommandParameter;
-                var b = new Betriebskostenabrechnung(
-                    App.ViewModel.ctx,
-                    ViewModel.Versionen.Value.First().Id,
-                    Jahr,
-                    new DateTime(Jahr, 1, 1),
-                    new DateTime(Jahr, 12, 31));
-
-                var AuflistungMieter = string.Join(", ", App.Walter.MieterSet
-                    .Where(m => m.VertragId == ViewModel.guid).ToList()
-                    .Select(a => App.Walter.FindPerson(a.PersonId).Bezeichnung));
-
-                var picker = Utils.Files.FileSavePicker(Path.GetExtension(".docx"));
-                picker.SuggestedFileName = Jahr.ToString() + " - " + ViewModel.Wohnung.ToString() + " - " + AuflistungMieter;
-                var file = await picker.PickSaveFileAsync();
-                var path = Path.Combine(Path.GetDirectoryName(file.Path), Path.GetFileNameWithoutExtension(file.Path));
-
-                b.SaveAsDocx(file.Path);
-                b.SaveBetriebskostenabrechnung(path, App.ViewModel);
-
-                App.Impl.ShowAlert("Datei gespeichert unter " + path);
+                await Files.PrintBetriebskostenabrechnung(ViewModel.Entity, Jahr, App.ViewModel, App.Impl);
             }
             catch (Exception ex)
             {

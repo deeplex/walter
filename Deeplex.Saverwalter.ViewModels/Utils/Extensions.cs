@@ -7,10 +7,14 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public static class BetriebskostenrechnungExtensions
     {
-        public static string GetWohnungenBezeichnung(this Betriebskostenrechnung r, AppViewModel avm, IList<Wohnung> l = null)
+        public static string GetWohnungenBezeichnung(this Betriebskostenrechnung r, AppViewModel avm)
         {
-            var Wohnungen = l != null ? l : r.Gruppen.Select(g => g.Wohnung).ToList();
-            return string.Join(" — ", avm.ctx.Wohnungen
+            var Wohnungen = r.Gruppen.Select(g => g.Wohnung).ToList();
+            return Wohnungen.GetWohnungenBezeichnung(avm);
+        }
+
+        public static string GetWohnungenBezeichnung(this List<Wohnung> Wohnungen, AppViewModel avm)
+            => string.Join(" — ", avm.ctx.Wohnungen
                 .Include(w => w.Adresse)
                 .ToList()
                 .Where(w => Wohnungen.Contains(w))
@@ -31,7 +35,6 @@ namespace Deeplex.Saverwalter.ViewModels
                     }
                     return ret;
                 }));
-        }
 
     }
 }

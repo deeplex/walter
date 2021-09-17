@@ -46,17 +46,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             try
             {
                 var Jahr = (int)((Button)sender).CommandParameter;
-                var l = new ErhaltungsaufwendungWohnung(App.ViewModel.ctx, ViewModel.Id, Jahr);
-
-                var picker = Utils.Files.FileSavePicker(Path.GetExtension(".docx"));
-                picker.SuggestedFileName = Jahr.ToString() + " - " + ViewModel.Anschrift;
-                var file = await picker.PickSaveFileAsync();
-                var path = Path.Combine(Path.GetDirectoryName(file.Path), Path.GetFileNameWithoutExtension(file.Path));
-
-                l.SaveAsDocx(path + ".docx");
-                // TODO Implement saving the Erhaltungsaufwendunganhänge.
-
-                App.Impl.ShowAlert("Datei gespeichert unter " + path);
+                await Files.PrintErhaltungsaufwendungen(ViewModel.Entity, Jahr, App.ViewModel, App.Impl);
             }
             catch (Exception ex)
             {

@@ -29,7 +29,6 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             App.Window.CommandBar.MainContent = new NatuerlichePersonCommandBarControl { ViewModel = ViewModel };
             App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.Impl, App.ViewModel));
 
-
             base.OnNavigatedTo(e);
         }
     }

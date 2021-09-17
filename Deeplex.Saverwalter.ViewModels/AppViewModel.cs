@@ -57,8 +57,8 @@ namespace Deeplex.Saverwalter.ViewModels
                         "Noch keine Datenbank ausgewählt",
                         "Datenbank suchen, oder leere Datenbank erstellen?",
                         "Existierende Datenbank auswählen", "Erstelle neue leere Datenbank") ?
-                        await impl.pickFile() :
-                        await impl.saveFile();
+                        await impl.pickFile(".db") :
+                        await impl.saveFile("walter", ".db");
                     root = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
                 }
 

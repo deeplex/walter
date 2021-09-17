@@ -1,10 +1,13 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Print;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels.Utils
 {
@@ -66,6 +69,53 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             {
                 System.IO.Compression.ZipFile.CreateFromDirectory(temppath, path + ".zip");
             }
+        }
+
+        public static async Task PrintBetriebskostenabrechnung(Vertrag v, int Jahr, AppViewModel avm, IAppImplementation impl)
+        {
+            var b = new Betriebskostenabrechnung(avm.ctx, v.rowid, Jahr, new DateTime(Jahr, 1, 1), new DateTime(Jahr, 12, 31));
+
+            var AuflistungMieter = string.Join(", ", avm.ctx.MieterSet
+                .Where(m => m.VertragId == v.VertragId).ToList()
+                .Select(a => avm.ctx.FindPerson(a.PersonId).Bezeichnung));
+
+            var filename = Jahr.ToString() + " - " + v.Wohnung.ToString() + " - " + AuflistungMieter;
+            var path = await impl.saveFile(filename, ".docx");
+
+            b.SaveAsDocx(path);
+            b.SaveBetriebskostenabrechnung(path, avm);
+
+            impl.ShowAlert("Datei gespeichert unter " + path);
+        }
+
+        public static async Task PrintErhaltungsaufwendungen(Wohnung w, int Jahr, AppViewModel avm, IAppImplementation impl)
+        {
+            var filename = Jahr.ToString() + " - " + AdresseViewModel.Anschrift(w) + " " + w.Bezeichnung;
+            var path = await impl.saveFile(filename, ".docx");
+
+            var l = new ErhaltungsaufwendungWohnung(avm.ctx, w.WohnungId, Jahr);
+            
+            l.SaveAsDocx(path);
+            // TODO Implement saving the Erhaltungsaufwendunganhänge.
+
+            impl.ShowAlert("Datei gespeichert unter " + path);
+        }
+
+        public static async Task PrintErhaltungsaufwendungen(List<Wohnung> Wohnungen, bool extended, int Jahr, AppViewModel avm, IAppImplementation impl)
+        {
+            var filename = Jahr.ToString() + " - " + Wohnungen.GetWohnungenBezeichnung(avm);
+            if (extended)
+            {
+                filename += " + Zusatz";
+            }
+            var path = await impl.saveFile(filename, ".docx");
+
+            var l = Wohnungen.Select(w => new ErhaltungsaufwendungWohnung(avm.ctx, w.WohnungId, Jahr)).ToImmutableList();
+            
+            l.SaveAsDocx(path);
+            // TODO Implement saving the Erhaltungsaufwendunganhänge.
+
+            impl.ShowAlert("Datei gespeichert unter " + path);
         }
     }
 }
