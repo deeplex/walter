@@ -10,9 +10,6 @@ using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace Deeplex.Saverwalter.WinUI3
 {
     public sealed partial class MainWindow : Window
@@ -36,9 +33,20 @@ namespace Deeplex.Saverwalter.WinUI3
             root.Loaded += Root_Loaded;
         }
 
-        private void Root_Loaded(object sender, RoutedEventArgs e)
+        private async void Root_Loaded(object sender, RoutedEventArgs e)
         {
-            ViewModel.initializeDatabase(App.Impl);
+            var Settings = Windows.Storage.ApplicationData.Current.LocalSettings;
+            var str = Settings.Values["root"] as string;
+            App.ViewModel.root = str;
+            await ViewModel.initializeDatabase(App.Impl);
+            if (str != App.ViewModel.root)
+            {
+                if (await App.Impl.Confirmation("Als Standard festlegen", "Die Datenbank: " + App.ViewModel.root + " als Standard festlegen?", "Ja", "Nein"))
+                {
+                    Settings.Values["root"] = App.ViewModel.root;
+                };
+            }
+
         }
 
         public Frame AppFrame => frame;

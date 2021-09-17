@@ -2,10 +2,9 @@
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
@@ -13,7 +12,7 @@ namespace Deeplex.Saverwalter.ViewModels
     public sealed class AppViewModel : BindableBase
     {
         public ObservableProperty<string> Titel { get; set; } = new ObservableProperty<string>();
-        
+
         public ObservableProperty<AnhangListViewModel> DetailAnhang
             = new ObservableProperty<AnhangListViewModel>();
         public ObservableProperty<AnhangListViewModel> ListAnhang
@@ -46,12 +45,30 @@ namespace Deeplex.Saverwalter.ViewModels
             Titel.Value = "Walter";
         }
 
-        public async void initializeDatabase(IAppImplementation impl)
+        public async Task initializeDatabase(IAppImplementation impl)
         {
             try
             {
                 var self = this;
-                await Utils.Files.InitializeDatabase(impl, self);
+                if (ctx != null) return;
+
+                if (root == null || !File.Exists(root + ".db"))
+                {
+                    var path = await impl.Confirmation(
+                        "Noch keine Datenbank ausgewählt",
+                        "Datenbank suchen, oder leere Datenbank erstellen?",
+                        "Existierende Datenbank auswählen", "Erstelle neue leere Datenbank") ?
+                        await impl.pickFile() :
+                        await impl.saveFile();
+                    root = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+                }
+
+                //impl.ctx.Dispose(); // TODO dispose when overwriting used db.
+                var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
+                optionsBuilder.UseSqlite("Data Source=" + root + ".db");
+                ctx = new SaverwalterContext(optionsBuilder.Options);
+                ctx.Database.Migrate();
+
                 AllAutoSuggestEntries = ctx.Wohnungen.Include(w => w.Adresse).Select(w => new AutoSuggestEntry(w)).ToList()
                         .Concat(ctx.NatuerlichePersonen.Select(w => new AutoSuggestEntry(w))).ToList()
                         .Concat(ctx.JuristischePersonen.Select(w => new AutoSuggestEntry(w))).ToList()

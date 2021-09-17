@@ -41,24 +41,6 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             return anhang;
         }
 
-        public static async Task InitializeDatabase(IAppImplementation impl, AppViewModel avm)
-        {
-            if (avm.ctx != null) return;
-            var path = await impl.Confirmation(
-                "Noch keine Datenbank ausgewählt",
-                "Datenbank suchen, oder leere Datenbank erstellen?",
-                "Existierende Datenbank auswählen", "Erstelle neue leere Datenbank") ?
-                await impl.pickFile() :
-                await impl.saveFile();
-
-            //impl.ctx.Dispose(); // TODO dispose when overwriting used db.
-            var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
-            optionsBuilder.UseSqlite("Data Source=" + path);
-            avm.ctx = new SaverwalterContext(optionsBuilder.Options);
-            avm.ctx.Database.Migrate();
-            avm.root = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
-        }
-
         public static void SaveBetriebskostenabrechnung(this Betriebskostenabrechnung b, string path, IAppImplementation impl)
         {
             throw new NotImplementedException();
