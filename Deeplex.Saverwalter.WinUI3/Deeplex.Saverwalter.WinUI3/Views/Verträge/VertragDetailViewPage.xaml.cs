@@ -1,5 +1,4 @@
-﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.ViewModels;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System;

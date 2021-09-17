@@ -1,14 +1,10 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.Utils;
-using Deeplex.Utils.ObjectModel;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
@@ -82,7 +78,7 @@ namespace Deeplex.Saverwalter.WinUI3
             }
         }
 
-        public void ShowAlert(string text) =>ShowAlert(text, text.Length > 20 ? 0 : 500);
+        public void ShowAlert(string text) => ShowAlert(text, text.Length > 20 ? 0 : 500);
         public void ShowAlert(string text, int ms)
         {
             if (Window.Alert == null)

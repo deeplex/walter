@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public AppViewModel Avm;
         public IAppImplementation Impl;
 
-        public MietenListViewModel(Guid VertragGuid, IAppImplementation impl,  AppViewModel avm)
+        public MietenListViewModel(Guid VertragGuid, IAppImplementation impl, AppViewModel avm)
         {
             VertragId = VertragGuid;
             Avm = avm;

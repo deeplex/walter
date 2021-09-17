@@ -1,6 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -22,5 +21,5 @@ namespace Deeplex.Saverwalter.ViewModels
         Task<List<string>> pickFiles();
     }
 
-    
+
 }

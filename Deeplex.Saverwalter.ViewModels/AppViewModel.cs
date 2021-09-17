@@ -50,7 +50,6 @@ namespace Deeplex.Saverwalter.ViewModels
             try
             {
                 var self = this;
-                if (ctx != null) return;
 
                 if (root == null || !File.Exists(root + ".db"))
                 {
@@ -63,7 +62,11 @@ namespace Deeplex.Saverwalter.ViewModels
                     root = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
                 }
 
-                //impl.ctx.Dispose(); // TODO dispose when overwriting used db.
+                if (ctx != null)
+                {
+                    ctx.Dispose();
+                }
+
                 var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
                 optionsBuilder.UseSqlite("Data Source=" + root + ".db");
                 ctx = new SaverwalterContext(optionsBuilder.Options);

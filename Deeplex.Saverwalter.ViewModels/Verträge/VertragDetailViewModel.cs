@@ -153,7 +153,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 });
                 Avm.SaveWalter();
             }
-            
+
         }
     }
 }

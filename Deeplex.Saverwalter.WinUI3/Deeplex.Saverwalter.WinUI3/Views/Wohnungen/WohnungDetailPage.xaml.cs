@@ -2,7 +2,6 @@
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.ViewModels.Rechnungen;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System;
@@ -72,7 +71,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             };
 
             App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
-            
+
             base.OnNavigatedTo(e);
         }
 

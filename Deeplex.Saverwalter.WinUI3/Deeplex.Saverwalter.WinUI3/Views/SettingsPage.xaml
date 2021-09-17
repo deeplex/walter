@@ -2,7 +2,6 @@
     x:Class="Deeplex.Saverwalter.WinUI3.Views.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Deeplex.Saverwalter.App"
     xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -13,12 +12,17 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <StackPanel>
-            <Button Margin="10" Click="LoadDatabase_Click">
-                <StackPanel Orientation="Horizontal">
-                    <SymbolIcon Symbol="Upload"/>
-                    <TextBlock Text="Lade Datenbank" />
-                </StackPanel>
-            </Button>
+            <StackPanel Orientation="Horizontal">
+                <Button Margin="10" Click="LoadDatabase_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <SymbolIcon Symbol="Upload"/>
+                        <TextBlock Text="Lade Datenbank" />
+                    </StackPanel>
+                </Button>
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Text="{x:Bind ViewModel.rootPath.Value, Mode=OneWay}"/>
+            </StackPanel>
 
             <uc:ExpanderControl Header="Adresse">
                 <uc:ExpanderControl.MainContent>

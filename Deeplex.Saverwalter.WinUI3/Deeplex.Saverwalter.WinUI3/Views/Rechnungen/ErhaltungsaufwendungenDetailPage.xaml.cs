@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
             }
 
             App.Window.CommandBar.MainContent = new ErhaltungsaufwendungenCommandBarControl { ViewModel = ViewModel };
-        
+
             base.OnNavigatedTo(e);
         }
 

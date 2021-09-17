@@ -4,13 +4,11 @@ using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Saverwalter.WinUI3.Views;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
-using Deeplex.Utils.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
 
 namespace Deeplex.Saverwalter.WinUI3
 {
@@ -44,14 +42,11 @@ namespace Deeplex.Saverwalter.WinUI3
             var str = Settings.Values["root"] as string;
             App.ViewModel.root = str;
             await ViewModel.initializeDatabase(App.Impl);
+
             if (str != App.ViewModel.root)
             {
-                if (await App.Impl.Confirmation("Als Standard festlegen", "Die Datenbank: " + App.ViewModel.root + " als Standard festlegen?", "Ja", "Nein"))
-                {
-                    Settings.Values["root"] = App.ViewModel.root;
-                };
+                Utils.Elements.SetDatabaseAsDefault();
             }
-
         }
 
         public Frame AppFrame => frame;

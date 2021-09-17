@@ -2,10 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels.Utils
 {

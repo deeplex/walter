@@ -1,8 +1,4 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
-using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Utils.ObjectModel;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -10,38 +6,13 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
 {
     public static class Elements
     {
-        public static AppBarElementContainer CheckBox(ObservableProperty<bool> check, string label)
+        public static async void SetDatabaseAsDefault()
         {
-            void Checkbox_Click(object sender, RoutedEventArgs e)
+            if (await App.Impl.Confirmation("Als Standard festlegen", "Die Datenbank: " + App.ViewModel.root + " als Standard festlegen?", "Ja", "Nein"))
             {
-                check.Value = ((CheckBox)sender).IsChecked ?? false;
-            }
-
-            var checkbox = new CheckBox()
-            {
-                IsChecked = check.Value,
-                Content = label,
+                var Settings = Windows.Storage.ApplicationData.Current.LocalSettings;
+                Settings.Values["root"] = App.ViewModel.root;
             };
-            checkbox.Click += Checkbox_Click;
-            return new AppBarElementContainer() { Content = checkbox };
-        }
-
-        public static AppBarElementContainer Filter(IFilterViewModel ViewModel)
-        {
-            var Filter = new TextBox
-            {
-                Text = "",
-                Height = 40, // Height of Bar at the top...
-                Width = 300,
-                PlaceholderText = "Filter...",
-            };
-            Filter.TextChanged += Filter_TextChanged;
-            return new AppBarElementContainer() { Content = Filter };
-
-            void Filter_TextChanged(object sender, TextChangedEventArgs e)
-            {
-                ViewModel.Filter.Value = ((TextBox)sender).Text;
-            }
         }
 
         public static bool applyFilter(string filter, params string[] strings)
