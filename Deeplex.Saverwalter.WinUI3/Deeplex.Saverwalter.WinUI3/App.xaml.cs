@@ -39,10 +39,9 @@ namespace Deeplex.Saverwalter.WinUI3
             Window.Activate();
         }
 
-        public async Task<string> saveFile()
+        public async Task<string> saveFile(string[] ext)
         {
-            var picker = Files.FileSavePicker("Datenbank", "walter", ".db");
-            picker.SuggestedFileName = "walter";
+            var picker = Files.FileSavePicker(ext);
             var picked = await picker.PickSaveFileAsync();
 
             return picked?.Path;

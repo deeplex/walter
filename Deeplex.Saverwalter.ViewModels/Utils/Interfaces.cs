@@ -16,7 +16,7 @@ namespace Deeplex.Saverwalter.ViewModels
         Task<bool> Confirmation(string title, string content, string primary, string secondary);
         void ShowAlert(string text);
         void launchFile(Anhang a);
-        Task<string> saveFile();
+        Task<string> saveFile(params string[] ext);
         Task<string> pickFile();
         Task<List<string>> pickFiles();
     }

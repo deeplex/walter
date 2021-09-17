@@ -1,8 +1,10 @@
 ﻿using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.WinUI3.Utils;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.IO;
 
 namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
@@ -50,7 +52,12 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private async void Runterladen_Click(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            if (((FrameworkElement)sender).DataContext is AnhangListEntry a)
+            {
+                var picker = Files.FileSavePicker(Path.GetExtension(a.DateiName));
+                picker.SuggestedFileName = a.DateiName;
+                await picker.PickSaveFileAsync();
+            }
         }
 
         private void Loeschen_Click(object sender, RoutedEventArgs e)
