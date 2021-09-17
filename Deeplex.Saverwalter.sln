@@ -9,15 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.CLI", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.Print", "Deeplex.Saverwalter.Print\Deeplex.Saverwalter.Print.csproj", "{54CAB3F2-F07C-4D88-B50C-D140C0F799E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deeplex.Saverwalter.App", "Deeplex.Saverwalter.App\Deeplex.Saverwalter.App.csproj", "{4473AA85-2FF1-4F00-93F6-81B653DBDA30}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Utils.ObjectModel", "Deeplex.Utils.ObjectModel\Deeplex.Utils.ObjectModel.csproj", "{81840D1D-EB12-40CE-BCD1-84E2B2E12ED9}"
 EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Deeplex.Saverwalter.WinUI3 (Package)", "Deeplex.Saverwalter.WinUI3\Deeplex.Saverwalter.WinUI3 (Package)\Deeplex.Saverwalter.WinUI3 (Package).wapproj", "{8CCC5D0C-C01A-424C-B122-DA249DE1AF44}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.WinUI3", "Deeplex.Saverwalter.WinUI3\Deeplex.Saverwalter.WinUI3\Deeplex.Saverwalter.WinUI3.csproj", "{FDB87E39-FAC6-4F86-9F11-3CCDA4E0DE60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deeplex.Saverwalter.ViewModels", "Deeplex.Saverwalter.ViewModels\Deeplex.Saverwalter.ViewModels.csproj", "{03CE0472-164C-4D00-8228-945B693DE4DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.ViewModels", "Deeplex.Saverwalter.ViewModels\Deeplex.Saverwalter.ViewModels.csproj", "{03CE0472-164C-4D00-8228-945B693DE4DA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -93,33 +91,6 @@ Global
 		{54CAB3F2-F07C-4D88-B50C-D140C0F799E0}.Release|x64.Build.0 = Release|Any CPU
 		{54CAB3F2-F07C-4D88-B50C-D140C0F799E0}.Release|x86.ActiveCfg = Release|Any CPU
 		{54CAB3F2-F07C-4D88-B50C-D140C0F799E0}.Release|x86.Build.0 = Release|Any CPU
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Debug|Any CPU.Build.0 = Debug|x64
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Debug|ARM.ActiveCfg = Debug|ARM
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Debug|ARM.Build.0 = Debug|ARM
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Debug|ARM.Deploy.0 = Debug|ARM
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Debug|ARM64.ActiveCfg = Debug|ARM64
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Debug|ARM64.Build.0 = Debug|ARM64
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Debug|ARM64.Deploy.0 = Debug|ARM64
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Debug|x64.ActiveCfg = Debug|x64
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Debug|x64.Build.0 = Debug|x64
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Debug|x64.Deploy.0 = Debug|x64
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Debug|x86.ActiveCfg = Debug|x86
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Debug|x86.Build.0 = Debug|x86
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Debug|x86.Deploy.0 = Debug|x86
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Release|Any CPU.ActiveCfg = Release|x86
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Release|ARM.ActiveCfg = Release|ARM
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Release|ARM.Build.0 = Release|ARM
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Release|ARM.Deploy.0 = Release|ARM
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Release|ARM64.ActiveCfg = Release|ARM64
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Release|ARM64.Build.0 = Release|ARM64
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Release|ARM64.Deploy.0 = Release|ARM64
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Release|x64.ActiveCfg = Release|x64
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Release|x64.Build.0 = Release|x64
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Release|x64.Deploy.0 = Release|x64
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Release|x86.ActiveCfg = Release|x86
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Release|x86.Build.0 = Release|x86
-		{4473AA85-2FF1-4F00-93F6-81B653DBDA30}.Release|x86.Deploy.0 = Release|x86
 		{81840D1D-EB12-40CE-BCD1-84E2B2E12ED9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{81840D1D-EB12-40CE-BCD1-84E2B2E12ED9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81840D1D-EB12-40CE-BCD1-84E2B2E12ED9}.Debug|ARM.ActiveCfg = Debug|ARM
