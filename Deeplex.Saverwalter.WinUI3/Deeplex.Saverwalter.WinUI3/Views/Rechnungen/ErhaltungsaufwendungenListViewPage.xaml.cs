@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.ViewModels.Rechnungen;
+using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Saverwalter.WinUI3.Utils;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -14,26 +15,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
         public ErhaltungsaufwendungenListViewPage()
         {
             InitializeComponent();
-            App.ViewModel.Titel.Value = "Erhaltungsaufwendungen";
 
-            var AddErhaltungsaufwendung = new AppBarButton
-            {
-                Icon = new SymbolIcon(Symbol.Add),
-                Label = "Erhaltungsaufwendung hinzufügen",
-            };
-            AddErhaltungsaufwendung.Click += AddErhaltungsaufwendung_Click;
-
-            App.Window.RefillCommandContainer(new ICommandBarElement[]
-            {
-                Elements.Filter(ViewModel),
-                AddErhaltungsaufwendung,
-            });
-        }
-
-        private void AddErhaltungsaufwendung_Click(object sender, RoutedEventArgs e)
-        {
-            Frame.Navigate(typeof(ErhaltungsaufwendungenDetailPage), null,
-                new DrillInNavigationTransitionInfo());
+            App.Window.CommandBar.MainContent = new ErhaltungsaufwendungenListCommandBarControl { ViewModel = ViewModel };
         }
     }
 }

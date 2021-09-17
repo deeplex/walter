@@ -73,39 +73,15 @@
                 </StackPanel>
             </NavigationView.PaneFooter>
             <RelativePanel>
-                <RelativePanel
-                        RelativePanel.AlignRightWithPanel="True"
-                        RelativePanel.AlignLeftWithPanel="True"
-                        Background="{ThemeResource SystemChromeMediumColor}" x:Name="CommandBarPanel">
-                    <TextBlock x:Name="MainTitel"
-                            Style="{StaticResource TitleTextBlockStyle}"
-                            Margin="10,0,0,0"
-                            Text="{x:Bind ViewModel.Titel.Value, Mode=TwoWay}" />
-                    <CommandBar
-                            Height="40"
-                            x:Name="MainCommandBar"
-                            DefaultLabelPosition="Right"
-                            RelativePanel.LeftOf="MainPermaCommands">
-                    </CommandBar>
-                    <CommandBar
-                            RelativePanel.AlignRightWithPanel="True"
-                            x:Name="MainPermaCommands"
-                            Background="Transparent"
-                            IsOpen="False"
-                            HorizontalAlignment="Stretch"
-                            DefaultLabelPosition="Right">
-                        <AppBarToggleButton
-                                RelativePanel.AlignRightWithPanel="True"
-                                x:Name="togglepane"
-                                Click="togglepane_Click">
-                            <SymbolIcon x:Name="togglepanesymbol" Symbol="ClosePane"/>
-                        </AppBarToggleButton>
-                    </CommandBar>
-                </RelativePanel>
+                <uc:CommandBarControl
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignLeftWithPanel="True"
+                    Title="TODO"
+                    x:Name="commandBar"/>
                 <SplitView
                     RelativePanel.AlignRightWithPanel="True"
                     RelativePanel.AlignLeftWithPanel="True"
-                    RelativePanel.Below="CommandBarPanel"
+                    RelativePanel.Below="commandBar"
                     RelativePanel.AlignBottomWithPanel="True"
                     x:Name="splitview"
                     DisplayMode="Inline"

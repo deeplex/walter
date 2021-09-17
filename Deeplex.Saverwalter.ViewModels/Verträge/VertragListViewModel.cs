@@ -13,6 +13,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<ImmutableList<VertragListVertrag>> Vertraege = new ObservableProperty<ImmutableList<VertragListVertrag>>();
         public ObservableProperty<VertragListVertrag> SelectedVertrag
             = new ObservableProperty<VertragListVertrag>();
+        public ObservableProperty<bool> OnlyActive = new ObservableProperty<bool>();
 
         public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
         public ImmutableList<VertragListVertrag> AllRelevant { get; set; }

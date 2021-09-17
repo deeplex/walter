@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
             AddErhaltungsaufwendung_Click = () =>
             {
-                var r = new Model.Erhaltungsaufwendung()
+                var r = new Erhaltungsaufwendung()
                 {
                     Wohnung = ViewModel.Entity,
                     Datum = DateTime.Now,
@@ -71,18 +71,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 App.Window.Navigate(typeof(ErhaltungsaufwendungenDetailPage), vm);
             };
 
-            App.ViewModel.Titel.Value = ViewModel.Anschrift + " — " + ViewModel.Bezeichnung;
-            var Delete = new AppBarButton
-            {
-                Icon = new SymbolIcon(Symbol.Delete),
-                Label = "Löschen",
-            };
-            Delete.Click += Delete_Click;
-            App.Window.RefillCommandContainer(
-                new ICommandBarElement[] { ErhaltungsaufwendungsButton() },
-                new ICommandBarElement[] { Delete });
             App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
-
+            
             base.OnNavigatedTo(e);
         }
 
@@ -91,70 +81,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         public Action AddBetriebskostenrechnung_Click;
         public Action AddErhaltungsaufwendung_Click;
 
-        private async void Delete_Click(object sender, RoutedEventArgs e)
-        {
-            await ViewModel.selfDestruct();
-            Frame.GoBack();
-        }
-
-        private AppBarButton ErhaltungsaufwendungsButton()
-        {
-            var ErhAufwButtons = new StackPanel()
-            {
-                Orientation = Orientation.Horizontal,
-            };
-            ErhAufwButtons.Children.Add(new NumberBox()
-            {
-                SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline,
-                AllowFocusOnInteraction = true,
-                Value = ViewModel.ErhaltungsaufwendungJahr.Value,
-            });
-            var AddErhAufwBtn = new Button
-            {
-                CommandParameter = ViewModel.ErhaltungsaufwendungJahr.Value,
-                Content = new SymbolIcon(Symbol.SaveLocal),
-            };
-            ErhAufwButtons.Children.Add(AddErhAufwBtn);
-            AddErhAufwBtn.Click += Erhaltungsaufwendung_Click;
-            return new AppBarButton()
-            {
-                Icon = new SymbolIcon(Symbol.PostUpdate),
-                Label = "Erhaltungsaufwendungen",
-                Flyout = new Flyout()
-                {
-                    Content = ErhAufwButtons,
-                },
-            };
-        }
-
-        private void Erhaltungsaufwendung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-            //var Jahr = (int)((Button)sender).CommandParameter;
-            //var l = new ErhaltungsaufwendungWohnung(App.Walter, ViewModel.Id, Jahr);
-
-            //var s = Jahr.ToString() + " - " + ViewModel.Anschrift;
-            //var path = ApplicationData.Current.TemporaryFolder.Path + @"\" + s;
-
-            //var worked = l.SaveAsDocx(path + ".docx");
-            //var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
-
-            //var anhang = Saverwalter.ViewModels.Utils.Files.ExtractFrom(path + ".docx");
-
-            //if (anhang != null)
-            //{
-            //    App.Walter.WohnungAnhaenge.Add(new WohnungAnhang()
-            //    {
-            //        Anhang = anhang,
-            //        Target = ViewModel.Entity,
-            //    });
-            //    App.SaveWalter();
-            //    App.ViewModel.DetailAnhang.Value.AddAnhangToList(anhang);
-            //    App.ViewModel.ShowAlert(text, 5000);
-            //}
-        }
-
-        public sealed class WohnungDetailAdresseWohnung : Microsoft.UI.Xaml.Controls.TreeViewNode
+        public sealed class WohnungDetailAdresseWohnung : TreeViewNode
         {
             public int Id { get; }
             public int AdresseId { get; }
@@ -169,7 +96,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             }
         }
 
-        private sealed class WohnungDetailAdresse : Microsoft.UI.Xaml.Controls.TreeViewNode
+        private sealed class WohnungDetailAdresse : TreeViewNode
         {
             public int Id { get; }
             public string Anschrift { get; }

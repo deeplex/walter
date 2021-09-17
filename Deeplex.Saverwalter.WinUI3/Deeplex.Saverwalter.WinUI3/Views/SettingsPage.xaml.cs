@@ -14,8 +14,10 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         public SettingsPage()
         {
             InitializeComponent();
-            App.ViewModel.Titel.Value = "Einstellungen";
-            App.Window.RefillCommandContainer();
+
+            // TODO
+            //App.ViewModel.Titel.Value = "Einstellungen";
+            //App.Window.RefillCommandContainer();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

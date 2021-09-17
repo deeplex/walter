@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Saverwalter.WinUI3.Utils;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -15,24 +16,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             InitializeComponent();
             App.ViewModel.Titel.Value = "Betriebskostenrechnungen";
 
-            var AddBetriebskostenRechnung = new AppBarButton
-            {
-                Icon = new SymbolIcon(Symbol.Add),
-                Label = "Betriebskostenrechnung hinzufügen",
-            };
-            AddBetriebskostenRechnung.Click += AddBetriebskostenWohnung_Click;
-
-            App.Window.RefillCommandContainer(new ICommandBarElement[]
-            {
-                Elements.Filter(ViewModel),
-                AddBetriebskostenRechnung,
-            });
-        }
-
-        private void AddBetriebskostenWohnung_Click(object sender, RoutedEventArgs e)
-        {
-            Frame.Navigate(typeof(BetriebskostenrechnungenDetailPage), null,
-                new DrillInNavigationTransitionInfo());
+            App.Window.CommandBar.MainContent = new BetriebskostenRechnungenListCommandBarControl { ViewModel = ViewModel };
         }
     }
 }

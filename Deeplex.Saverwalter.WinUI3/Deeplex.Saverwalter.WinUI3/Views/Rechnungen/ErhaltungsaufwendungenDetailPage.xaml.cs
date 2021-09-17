@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.ViewModels.Rechnungen;
+using Deeplex.Saverwalter.WinUI3.UserControls;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -35,34 +36,9 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
                 ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.Impl, App.ViewModel);
             }
 
-            App.ViewModel.Titel.Value = "Erhaltungsaufwendung";
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
-
-            var Delete = new AppBarButton
-            {
-                Label = "Löschen",
-                Icon = new SymbolIcon(Symbol.Delete),
-            };
-            Delete.Click += SelfDestruct;
-
-            App.Window.RefillCommandContainer(new ICommandBarElement[]
-{
-                new AppBarButton
-                {
-                    Icon = new SymbolIcon(Symbol.Attach),
-                    Command = ViewModel.AttachFile,
-                }
-            }, new ICommandBarElement[] { Delete });
+            App.Window.CommandBar.MainContent = new ErhaltungsaufwendungenCommandBarControl { ViewModel = ViewModel };
+        
             base.OnNavigatedTo(e);
-        }
-
-        private async void SelfDestruct(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-            if (ViewModel.Id != 0)
-            {
-                await ViewModel.selfDestruct();
-            }
-            Frame.GoBack();
         }
 
         private void AddQuickPerson_Click(object sender, RoutedEventArgs e)

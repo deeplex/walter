@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Saverwalter.WinUI3.Utils;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -13,21 +14,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         public ZaehlerListPage()
         {
             InitializeComponent();
-            App.ViewModel.Titel.Value = "Zähler";
-            var AddZaehler = new AppBarButton
-            {
-                Icon = new SymbolIcon(Symbol.Add),
-                Label = "Zähler hinzufügen",
-            };
-            AddZaehler.Click += AddZaehler_Click;
 
-            App.Window.RefillCommandContainer(new ICommandBarElement[] { Elements.Filter(ViewModel), AddZaehler });
-        }
-
-        private void AddZaehler_Click(object sender, RoutedEventArgs e)
-        {
-            Frame.Navigate(typeof(ZaehlerDetailPage), null,
-                new DrillInNavigationTransitionInfo());
+            App.Window.CommandBar.MainContent = new ZaehlerListCommandBarControl { ViewModel = ViewModel };
         }
     }
 }

@@ -9,6 +9,6 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <uc:VertragListControl
-        OnlyActive="{x:Bind OnlyActive.Value, Mode=OneWay}"
+        OnlyActive="{x:Bind ViewModel.OnlyActive.Value, Mode=OneWay}"
         Filter="{x:Bind ViewModel.Filter.Value, Mode=OneWay}"/>
 </Page>

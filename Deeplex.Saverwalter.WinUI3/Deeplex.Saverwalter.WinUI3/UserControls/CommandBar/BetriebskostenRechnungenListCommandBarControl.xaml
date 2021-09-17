@@ -1,0 +1,22 @@
+﻿<UserControl
+    x:Class="Deeplex.Saverwalter.WinUI3.UserControls.BetriebskostenRechnungenListCommandBarControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Deeplex.Saverwalter.WinUI3.UserControls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <CommandBar>
+        <CommandBar.PrimaryCommands>
+            <!-- TODO This could be made a usercontrol... -->
+            <AppBarElementContainer>
+                <TextBox TextChanged="Filter_TextChanged" Text="" Height="40" Width="300" PlaceholderText="Filter..."/>
+            </AppBarElementContainer>
+            <AppBarButton
+                Label="Betriebskostenrechnung hinzufügen"
+                Icon="Add"
+                Click="AddBetriebskostenrechnung_Click"/>
+        </CommandBar.PrimaryCommands>
+    </CommandBar>
+</UserControl>

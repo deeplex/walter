@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Saverwalter.WinUI3.Utils;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.UI.Xaml;
@@ -10,31 +11,12 @@ namespace Deeplex.Saverwalter.WinUI3.Views
     public sealed partial class VertragListPage : Page
     {
         public VertragListViewModel ViewModel = new VertragListViewModel(App.ViewModel);
-        public ObservableProperty<bool> OnlyActive = new ObservableProperty<bool>();
 
         public VertragListPage()
         {
             InitializeComponent();
 
-            App.ViewModel.Titel.Value = "Verträge";
-            var AddVertrag = new AppBarButton
-            {
-                Icon = new SymbolIcon(Symbol.Add),
-                Label = "Vertrag hinzufügen"
-            };
-            AddVertrag.Click += AddVertrag_Click;
-
-            App.Window.RefillCommandContainer(
-                new ICommandBarElement[] {
-                    Elements.CheckBox(OnlyActive, "Nur Laufend"),
-                    Elements.Filter(ViewModel),
-                    AddVertrag });
-        }
-
-        private void AddVertrag_Click(object sender, RoutedEventArgs e)
-        {
-            Frame.Navigate(typeof(VertragDetailViewPage), null,
-                new DrillInNavigationTransitionInfo());
+            App.Window.CommandBar.MainContent = new VertragListCommandBarControl { ViewModel = ViewModel };
         }
     }
 }

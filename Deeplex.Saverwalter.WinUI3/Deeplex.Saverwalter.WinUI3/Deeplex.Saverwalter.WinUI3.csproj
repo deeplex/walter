@@ -12,6 +12,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <NoWarn>1701;1702;CA1416</NoWarn>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="UserControls\CommandBar\BetriebskostenRechnungenCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\BetriebskostenrechnungenListCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\CommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\ErhaltungsaufwendungenCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\ErhaltungsaufwendungenListCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\JuristischePersonCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\KontaktListCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\NatuerlichePersonCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\VertragCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\VertragListCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\WohnungDetailCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\WohnungListCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\ZaehlerCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\ZaehlerListCommandBarControl.xaml" />
+  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="Microsoft.ProjectReunion" Version="0.8.3" />
@@ -46,6 +62,9 @@
     </Compile>
     <Compile Update="UserControls\ComboControl.xaml.cs">
       <DependentUpon>ComboControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\CommandBar\BetriebskostenrechnungenListCommandBarControl - Copy.xaml.cs">
+      <DependentUpon>BetriebskostenrechnungenListCommandBarControl.xaml.cs</DependentUpon>
     </Compile>
     <Compile Update="UserControls\ContextMenuControl.xaml.cs">
       <DependentUpon>ContextMenuControl.xaml</DependentUpon>
@@ -128,6 +147,84 @@
     <Compile Update="Views\Zähler\ZaehlerListPage.xaml.cs">
       <DependentUpon>ZaehlerListPage.xaml</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\CommandBar\WohnungDetailCommandBarControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\CommandBar\WohnungListCommandBarControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\CommandBar\ZaehlerCommandBarControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\CommandBar\ZaehlerListCommandBarControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\CommandBar\VertragListCommandBarControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\CommandBar\ErhaltungsaufwendungenListCommandBarControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\CommandBar\ErhaltungsaufwendungenCommandBarControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\CommandBar\BetriebskostenRechnungenListCommandBarControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\CommandBar\BetriebskostenRechnungenCommandBarControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\CommandBar\KontaktListCommandBarControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\CommandBar\NatuerlichePersonCommandBarControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\CommandBar\JuristischePersonCommandBarControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\CommandBar\CommandBarControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>
@@ -247,6 +344,12 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Update="Views\Zähler\ZaehlerListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\CommandBar\VertragCommandBarControl.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

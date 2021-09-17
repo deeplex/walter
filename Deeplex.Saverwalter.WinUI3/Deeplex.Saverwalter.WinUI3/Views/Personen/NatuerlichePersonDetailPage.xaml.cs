@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.WinUI3.UserControls;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -26,26 +27,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 ViewModel = new NatuerlichePersonViewModel(App.Impl, App.ViewModel);
             }
 
-            App.ViewModel.Titel.Value = ViewModel.Name;
+            App.Window.CommandBar.MainContent = new NatuerlichePersonCommandBarControl { ViewModel = ViewModel };
             App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.Impl, App.ViewModel));
 
-            var Delete = new AppBarButton
-            {
-                Label = "Löschen",
-                Icon = new SymbolIcon(Symbol.Delete),
-            };
-            Delete.Click += SelfDestruct;
 
-            App.Window.RefillCommandContainer(
-                new ICommandBarElement[] { },
-                new ICommandBarElement[] { Delete });
             base.OnNavigatedTo(e);
-        }
-
-        private async void SelfDestruct(object sender, RoutedEventArgs e)
-        {
-            ViewModel.selfDestruct();
-            Frame.GoBack();
         }
     }
 }

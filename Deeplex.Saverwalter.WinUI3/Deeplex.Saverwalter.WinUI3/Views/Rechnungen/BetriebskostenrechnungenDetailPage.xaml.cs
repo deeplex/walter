@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.WinUI3.UserControls;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -43,19 +44,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
             base.OnNavigatedTo(e);
 
-            App.ViewModel.Titel.Value = "Betriebskostenrechnung";
+            App.Window.CommandBar.MainContent = new BetriebskostenRechnungenCommandBarControl() { ViewModel = ViewModel };
             App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
-
-            var Delete = new AppBarButton
-            {
-                Label = "Löschen",
-                Icon = new SymbolIcon(Symbol.Delete),
-            };
-            Delete.Click += SelfDestruct;
-
-            App.Window.RefillCommandContainer(
-                new ICommandBarElement[] { },
-                new ICommandBarElement[] { Delete });
 
             App.Walter.Adressen
                 .Include(i => i.Wohnungen)
@@ -92,15 +82,6 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 .ToList();
 
             ViewModel.UpdateWohnungen(selected);
-        }
-
-        private async void SelfDestruct(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-            if (ViewModel.Id != 0)
-            {
-                await ViewModel.selfDestruct();
-            }
-            Frame.GoBack();
         }
     }
 }

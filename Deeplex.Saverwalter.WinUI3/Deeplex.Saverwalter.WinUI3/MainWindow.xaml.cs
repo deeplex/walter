@@ -1,8 +1,10 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Saverwalter.WinUI3.Views;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -17,6 +19,8 @@ namespace Deeplex.Saverwalter.WinUI3
         public ContentDialog ConfirmationDialog => confirmationDialog;
         public InAppNotification Alert => alert;
         public TextBlock AlertText => alertText;
+
+        public CommandBarControl CommandBar => commandBar;
 
         public void Navigate<U>(Type SourcePage, U SendParameter)
         {
@@ -125,11 +129,6 @@ namespace Deeplex.Saverwalter.WinUI3
             }
         }
 
-        private void togglepane_Click(object sender, RoutedEventArgs e)
-        {
-            ToggleAnhang();
-        }
-
         private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             App.ViewModel.updateAutoSuggestEntries(sender.Text);
@@ -154,27 +153,6 @@ namespace Deeplex.Saverwalter.WinUI3
             sender.Text = "";
         }
 
-        public void RefillCommandContainer()
-        {
-            MainCommandBar.PrimaryCommands.Clear();
-            MainCommandBar.SecondaryCommands.Clear();
-        }
-
-        public void RefillCommandContainer(IList<ICommandBarElement> Primary, IList<ICommandBarElement> Secondary = null)
-        {
-            RefillCommandContainer();
-            foreach (var p in Primary)
-            {
-                MainCommandBar.PrimaryCommands.Add(p);
-            }
-
-            if (Secondary == null) return;
-
-            foreach (var s in Secondary)
-            {
-                MainCommandBar.SecondaryCommands.Add(s);
-            }
-        }
 
         public void OpenAnhangPane()
         {
@@ -187,7 +165,8 @@ namespace Deeplex.Saverwalter.WinUI3
         public void ToggleAnhang()
         {
             splitview.IsPaneOpen = !splitview.IsPaneOpen;
-            togglepanesymbol.Symbol = splitview.IsPaneOpen ? Symbol.OpenPane : Symbol.ClosePane;
+            // TODO
+            //togglepanesymbol.Symbol = splitview.IsPaneOpen ? Symbol.OpenPane : Symbol.ClosePane;
         }
     }
 }

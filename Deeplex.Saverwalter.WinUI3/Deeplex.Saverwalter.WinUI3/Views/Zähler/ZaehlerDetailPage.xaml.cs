@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.WinUI3.UserControls;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -13,12 +14,6 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         public ZaehlerDetailPage()
         {
             InitializeComponent();
-        }
-
-        private async void Delete_Click(object sender, RoutedEventArgs e)
-        {
-            await ViewModel.SelfDestruct();
-            Frame.GoBack();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -37,15 +32,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 ViewModel = new ZaehlerDetailViewModel(App.Impl, App.ViewModel);
             }
 
-            App.ViewModel.Titel.Value = ViewModel == null ? "Neuer Zähler" : ViewModel.Kennnummer;
-            var Delete = new AppBarButton
-            {
-                Icon = new SymbolIcon(Symbol.Delete),
-                Label = "Löschen",
-            };
-            Delete.Click += Delete_Click;
-            App.Window.RefillCommandContainer(new ICommandBarElement[] { },
-                new ICommandBarElement[] { Delete });
+            App.Window.CommandBar.MainContent = new ZaehlerCommandBarControl { ViewModel = ViewModel };
             App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
 
             base.OnNavigatedTo(e);

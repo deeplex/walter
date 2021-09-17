@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Saverwalter.WinUI3.Utils;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -14,20 +15,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             InitializeComponent();
 
-            App.ViewModel.Titel.Value = "Mietobjekte";
-            var AddWohnung = new AppBarButton
-            {
-                Icon = new SymbolIcon(Symbol.Add),
-                Label = "Wohnung hinzufügen",
-            };
-            AddWohnung.Click += AddWohnung_Click;
-            App.Window.RefillCommandContainer(new ICommandBarElement[] { Elements.Filter(ViewModel), AddWohnung });
-        }
-
-        private void AddWohnung_Click(object sender, RoutedEventArgs e)
-        {
-            Frame.Navigate(typeof(WohnungDetailPage), null,
-                new DrillInNavigationTransitionInfo());
+            App.Window.CommandBar.MainContent = new WohnungListCommandBarControl { ViewModel = ViewModel };
         }
     }
 }
