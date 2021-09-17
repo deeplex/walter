@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.ViewModels
             get => Entity.KaltMiete;
             set
             {
-                var val = Double.IsNaN(value) ? 0 : value;
+                var val = double.IsNaN(value) ? 0 : value;
                 var old = Entity.KaltMiete;
                 Entity.KaltMiete = val;
                 RaisePropertyChangedAuto(old, val);

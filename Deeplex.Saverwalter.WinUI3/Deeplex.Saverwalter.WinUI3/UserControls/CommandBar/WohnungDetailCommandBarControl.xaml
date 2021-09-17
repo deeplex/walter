@@ -19,7 +19,9 @@
                                 SpinButtonPlacementMode="Inline"
                                 AllowFocusOnInteraction="True"
                                 Value="{x:Bind ViewModel.ErhaltungsaufwendungJahr.Value, Mode=TwoWay}"/>
-                            <Button Click="Erhaltungsaufwendung_Click">
+                            <Button
+                                Click="Erhaltungsaufwendung_Click"
+                                CommandParameter="{x:Bind ViewModel.ErhaltungsaufwendungJahr.Value}">
                                 <SymbolIcon Symbol="SaveLocal"/>
                             </Button>
                         </StackPanel>

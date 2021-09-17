@@ -1,7 +1,13 @@
-﻿using Deeplex.Saverwalter.ViewModels;
+﻿using ABI.Windows.Storage;
+using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.ViewModels.Utils;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Deeplex.Saverwalter.Print;
 using System;
+using System.IO;
+using System.Linq;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -35,31 +41,27 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             App.Window.AppFrame.GoBack();
         }
 
-        private void Erhaltungsaufwendung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private async void Erhaltungsaufwendung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            throw new NotImplementedException();
-            //var Jahr = (int)((Button)sender).CommandParameter;
-            //var l = new ErhaltungsaufwendungWohnung(App.Walter, ViewModel.Id, Jahr);
+            try
+            {
+                var Jahr = (int)((Button)sender).CommandParameter;
+                var l = new ErhaltungsaufwendungWohnung(App.ViewModel.ctx, ViewModel.Id, Jahr);
 
-            //var s = Jahr.ToString() + " - " + ViewModel.Anschrift;
-            //var path = ApplicationData.Current.TemporaryFolder.Path + @"\" + s;
+                var picker = Utils.Files.FileSavePicker(Path.GetExtension(".docx"));
+                picker.SuggestedFileName = Jahr.ToString() + " - " + ViewModel.Anschrift;
+                var file = await picker.PickSaveFileAsync();
+                var path = Path.Combine(Path.GetDirectoryName(file.Path), Path.GetFileNameWithoutExtension(file.Path));
 
-            //var worked = l.SaveAsDocx(path + ".docx");
-            //var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
+                l.SaveAsDocx(path + ".docx");
+                // TODO Implement saving the Erhaltungsaufwendunganhänge.
 
-            //var anhang = Saverwalter.ViewModels.Utils.Files.ExtractFrom(path + ".docx");
-
-            //if (anhang != null)
-            //{
-            //    App.Walter.WohnungAnhaenge.Add(new WohnungAnhang()
-            //    {
-            //        Anhang = anhang,
-            //        Target = ViewModel.Entity,
-            //    });
-            //    App.SaveWalter();
-            //    App.ViewModel.DetailAnhang.Value.AddAnhangToList(anhang);
-            //    App.ViewModel.ShowAlert(text, 5000);
-            //}
+                App.Impl.ShowAlert("Datei gespeichert unter " + path);
+            }
+            catch (Exception ex)
+            {
+                App.Impl.ShowAlert(ex.Message);
+            }
         }
     }
 }

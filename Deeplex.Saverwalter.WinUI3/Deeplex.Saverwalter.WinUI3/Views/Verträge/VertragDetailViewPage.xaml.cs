@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             {
                 ViewModel = vm;
             }
-            else // If invoked using "Add"
+            else
             {
                 ViewModel = new VertragDetailViewModel(App.Impl, App.ViewModel);
             }

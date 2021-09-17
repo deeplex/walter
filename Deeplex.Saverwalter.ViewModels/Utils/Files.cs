@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace Deeplex.Saverwalter.ViewModels.Utils
@@ -39,30 +40,32 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             return anhang;
         }
 
-        public static void SaveBetriebskostenabrechnung(this Betriebskostenabrechnung b, string path, IAppImplementation impl)
+        public static void SaveBetriebskostenabrechnung(this Betriebskostenabrechnung b, string path, AppViewModel avm)
         {
-            throw new NotImplementedException();
-            //var RechnungIds = b.Gruppen.SelectMany(g => g.Rechnungen).Select(r => r.BetriebskostenrechnungId);
-            //var temppath = Path.GetTempPath();
+            var RechnungIds = b.Gruppen.SelectMany(g => g.Rechnungen).Select(r => r.BetriebskostenrechnungId);
+            var temppath = Path.GetTempPath();
 
-            //impl.ctx.BetriebskostenrechnungAnhaenge
-            //    .Include(a => a.Anhang)
-            //    .Where(a => RechnungIds.Contains(a.Target.BetriebskostenrechnungId))
-            //    .ToList()
-            //    .ForEach(a =>
-            //    {
-            //        if (a.Anhang != null)
-            //        {
-            //            var filepath = Path.Combine(temppath, a.Target.Typ.ToDescriptionString() + Path.GetExtension(a.Anhang.FileName));
-            //            using (FileStream fs = new FileStream(filepath, FileMode.Create))
-            //            {
-            //                fs.Write(a.Anhang.Content, 0, a.Anhang.Content.Length);
-            //            }
-            //        }
-            //    });
+            var atLeastOne = false;
 
-            //MakeSpace(path + ".zip");
-            //System.IO.Compression.ZipFile.CreateFromDirectory(temppath, path + ".zip");
+            avm.ctx.BetriebskostenrechnungAnhaenge
+                .Include(a => a.Anhang)
+                .Where(a => RechnungIds.Contains(a.Target.BetriebskostenrechnungId))
+                .ToList()
+                .ForEach(a =>
+                {
+                    if (a.Anhang != null)
+                    {
+                        atLeastOne = true;
+                        var src = Path.Combine(avm.root, a.AnhangId.ToString() + Path.GetExtension(a.Anhang.FileName));
+                        var tar = Path.Combine(temppath, a.Anhang.FileName);
+                        File.Copy(src, tar);
+                    }
+                });
+
+            if (atLeastOne)
+            {
+                System.IO.Compression.ZipFile.CreateFromDirectory(temppath, path + ".zip");
+            }
         }
     }
 }

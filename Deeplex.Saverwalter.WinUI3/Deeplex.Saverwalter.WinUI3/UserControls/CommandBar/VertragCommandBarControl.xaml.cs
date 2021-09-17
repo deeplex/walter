@@ -1,8 +1,12 @@
-﻿using Deeplex.Saverwalter.ViewModels;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.ViewModels.Utils;
+using Deeplex.Saverwalter.Print;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
-
+using System.Linq;
+using System.IO;
 
 namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
@@ -36,48 +40,34 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private async void Betriebskostenabrechnung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            throw new NotImplementedException();
-            //try
-            //{
-            //    var Jahr = (int)((Button)sender).CommandParameter;
-            //    var b = new Betriebskostenabrechnung(
-            //        App.Walter,
-            //        ViewModel.Versionen.Value.First().Id,
-            //        Jahr,
-            //        new DateTime(Jahr, 1, 1),
-            //        new DateTime(Jahr, 12, 31));
+            try
+            {
+                var Jahr = (int)((Button)sender).CommandParameter;
+                var b = new Betriebskostenabrechnung(
+                    App.ViewModel.ctx,
+                    ViewModel.Versionen.Value.First().Id,
+                    Jahr,
+                    new DateTime(Jahr, 1, 1),
+                    new DateTime(Jahr, 12, 31));
 
-            //    var AuflistungMieter = string.Join(", ", App.Walter.MieterSet
-            //        .Where(m => m.VertragId == ViewModel.guid).ToList()
-            //        .Select(a => App.Walter.FindPerson(a.PersonId).Bezeichnung));
+                var AuflistungMieter = string.Join(", ", App.Walter.MieterSet
+                    .Where(m => m.VertragId == ViewModel.guid).ToList()
+                    .Select(a => App.Walter.FindPerson(a.PersonId).Bezeichnung));
 
-            //    var s = Jahr.ToString() + " - " + ViewModel.Wohnung.ToString() + " - " + AuflistungMieter;
-            //    var path = ApplicationData.Current.LocalFolder.Path + @"\" + s;
+                var picker = Utils.Files.FileSavePicker(Path.GetExtension(".docx"));
+                picker.SuggestedFileName = Jahr.ToString() + " - " + ViewModel.Wohnung.ToString() + " - " + AuflistungMieter;
+                var file = await picker.PickSaveFileAsync();
+                var path = Path.Combine(Path.GetDirectoryName(file.Path), Path.GetFileNameWithoutExtension(file.Path));
 
-            //    var worked = b.SaveAsDocx(path + ".docx");
-            //    var text = worked ? "Datei gespeichert als: " + s : "Datei konnte nicht gespeichert werden.";
-            //    var anhang = Saverwalter.ViewModels.Utils.Files.ExtractFrom(path + ".docx");
+                b.SaveAsDocx(file.Path);
+                b.SaveBetriebskostenabrechnung(path, App.ViewModel);
 
-            //    if (anhang != null)
-            //    {
-            //        App.Walter.VertragAnhaenge.Add(new VertragAnhang()
-            //        {
-            //            Anhang = anhang,
-            //            Target = ViewModel.guid,
-            //        });
-            //        App.SaveWalter();
-            //        App.ViewModel.DetailAnhang.Value.AddAnhangToList(anhang);
-            //        App.ViewModel.ShowAlert(text, 5000);
-            //    }
-
-            //    // TODO b.SaveAnhaenge(path);
-
-            //    App.ViewModel.ShowAlert(text, 5000);
-            //}
-            //catch (Exception ex)
-            //{
-            //    App.ViewModel.ShowAlert(ex.Message, 5000);
-            //}
+                App.Impl.ShowAlert("Datei gespeichert unter " + path);
+            }
+            catch (Exception ex)
+            {
+                App.Impl.ShowAlert(ex.Message);
+            }
         }
     }
 }
