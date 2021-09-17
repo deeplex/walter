@@ -94,7 +94,7 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             var path = await impl.saveFile(filename, ".docx");
 
             var l = new ErhaltungsaufwendungWohnung(avm.ctx, w.WohnungId, Jahr);
-            
+
             l.SaveAsDocx(path);
             // TODO Implement saving the Erhaltungsaufwendunganhänge.
 
@@ -111,7 +111,7 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             var path = await impl.saveFile(filename, ".docx");
 
             var l = Wohnungen.Select(w => new ErhaltungsaufwendungWohnung(avm.ctx, w.WohnungId, Jahr)).ToImmutableList();
-            
+
             l.SaveAsDocx(path);
             // TODO Implement saving the Erhaltungsaufwendunganhänge.
 

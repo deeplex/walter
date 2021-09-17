@@ -1,12 +1,8 @@
-﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.ViewModels;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.ViewModels.Utils;
-using Deeplex.Saverwalter.Print;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
-using System.Linq;
-using System.IO;
 
 namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
