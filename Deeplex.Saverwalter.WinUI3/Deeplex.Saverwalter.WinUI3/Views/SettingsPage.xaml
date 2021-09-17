@@ -49,6 +49,15 @@
                         </mtuuc:DataGrid.Columns>
                     </mtuuc:DataGrid>
                 </uc:ExpanderControl.MainContent>
+                <uc:ExpanderControl.Bonus>
+                    <Button
+                        Background="Transparent"
+                        Margin="20,0,0,0"
+                        Command="{x:Bind ViewModel.LoadAdressen}"
+                        ToolTipService.ToolTip="Lade Adressen">
+                        <SymbolIcon Symbol="AllApps" />
+                    </Button>
+                </uc:ExpanderControl.Bonus>
             </uc:ExpanderControl>
 
             <uc:ExpanderControl Header="Anhänge">
@@ -76,6 +85,15 @@
                         </mtuuc:DataGrid.Columns>
                     </mtuuc:DataGrid>
                 </uc:ExpanderControl.MainContent>
+                <uc:ExpanderControl.Bonus>
+                    <Button
+                        Background="Transparent"
+                        Margin="20,0,0,0"
+                        Command="{x:Bind ViewModel.LoadAnhaenge}"
+                        ToolTipService.ToolTip="Lade Anhänge">
+                        <SymbolIcon Symbol="AllApps" />
+                    </Button>
+                </uc:ExpanderControl.Bonus>
             </uc:ExpanderControl>
         </StackPanel>
     </Grid>

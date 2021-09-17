@@ -24,15 +24,8 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
 
-        public void LoadAdressen()
-        {
-            Adressen.Value = Avm.ctx.Adressen.Select(a => new AdresseViewModel(a, Avm)).ToImmutableList();
-        }
-
-        public void LoadAnhaenge()
-        {
-            Anhaenge.Value = new AnhangListViewModel(Impl, Avm);
-        }
+        public RelayCommand LoadAdressen;
+        public RelayCommand LoadAnhaenge;
 
         public IAppImplementation Impl;
         public AppViewModel Avm;
@@ -44,8 +37,15 @@ namespace Deeplex.Saverwalter.ViewModels
                 Impl = impl;
                 Avm = avm;
                 rootPath.Value = avm.root;
-                LoadAdressen();
-                LoadAnhaenge();
+
+                LoadAnhaenge = new RelayCommand(_ =>
+                {
+                    Anhaenge.Value = new AnhangListViewModel(Impl, Avm);
+                }, _ => true);
+                LoadAdressen = new RelayCommand(_ =>
+                {
+                    Adressen.Value = Avm.ctx.Adressen.Select(a => new AdresseViewModel(a, Avm)).ToImmutableList();
+                }, _ => true);
             }
             catch (Exception e)
             {
