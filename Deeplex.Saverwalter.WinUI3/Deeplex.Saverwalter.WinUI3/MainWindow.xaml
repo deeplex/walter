@@ -76,7 +76,7 @@
                 <uc:CommandBarControl
                     RelativePanel.AlignRightWithPanel="True"
                     RelativePanel.AlignLeftWithPanel="True"
-                    Title="TODO"
+                    Title="Walter"
                     x:Name="commandBar"/>
                 <SplitView
                     RelativePanel.AlignRightWithPanel="True"

@@ -21,6 +21,7 @@ namespace Deeplex.Saverwalter.WinUI3
         public TextBlock AlertText => alertText;
 
         public CommandBarControl CommandBar => commandBar;
+        public SplitView SplitView => splitview;
 
         public void Navigate<U>(Type SourcePage, U SendParameter)
         {
@@ -151,22 +152,6 @@ namespace Deeplex.Saverwalter.WinUI3
             Navigate(GetEntryPage(Entry), Entry.Entity);
             sender.IsSuggestionListOpen = false;
             sender.Text = "";
-        }
-
-
-        public void OpenAnhangPane()
-        {
-            if (!splitview.IsPaneOpen)
-            {
-                ToggleAnhang();
-            }
-        }
-
-        public void ToggleAnhang()
-        {
-            splitview.IsPaneOpen = !splitview.IsPaneOpen;
-            // TODO
-            //togglepanesymbol.Symbol = splitview.IsPaneOpen ? Symbol.OpenPane : Symbol.ClosePane;
         }
     }
 }

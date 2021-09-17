@@ -38,7 +38,8 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void togglepane_Click(object sender, RoutedEventArgs e)
         {
-            App.Window.ToggleAnhang();
+            App.Window.SplitView.IsPaneOpen = !App.Window.SplitView.IsPaneOpen;
+            togglepanesymbol.Symbol = App.Window.SplitView.IsPaneOpen ? Symbol.OpenPane : Symbol.ClosePane;
         }
     }
 }
