@@ -15,9 +15,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             InitializeComponent();
 
-            // TODO
-            //App.ViewModel.Titel.Value = "Einstellungen";
-            //App.Window.RefillCommandContainer();
+            App.Window.CommandBar.Title = "Einstellungen";
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

@@ -54,25 +54,25 @@
     <Compile Update="UserControls\Add\AddZaehlerstandControl.xaml.cs">
       <DependentUpon>AddZaehlerstandControl.xaml</DependentUpon>
     </Compile>
-    <Compile Update="UserControls\AdresseControl.xaml.cs">
+    <Compile Update="UserControls\Utils\AdresseControl.xaml.cs">
       <DependentUpon>AdresseControl.xaml</DependentUpon>
     </Compile>
-    <Compile Update="UserControls\AnhangListControl.xaml.cs">
+    <Compile Update="UserControls\Utils\AnhangListControl.xaml.cs">
       <DependentUpon>AnhangListControl.xaml</DependentUpon>
     </Compile>
-    <Compile Update="UserControls\ComboControl.xaml.cs">
+    <Compile Update="UserControls\Utils\ComboControl.xaml.cs">
       <DependentUpon>ComboControl.xaml</DependentUpon>
     </Compile>
     <Compile Update="UserControls\CommandBar\BetriebskostenrechnungenListCommandBarControl - Copy.xaml.cs">
       <DependentUpon>BetriebskostenrechnungenListCommandBarControl.xaml.cs</DependentUpon>
     </Compile>
-    <Compile Update="UserControls\ContextMenuControl.xaml.cs">
+    <Compile Update="UserControls\Utils\ContextMenuControl.xaml.cs">
       <DependentUpon>ContextMenuControl.xaml</DependentUpon>
     </Compile>
-    <Compile Update="UserControls\ExpanderControl.xaml.cs">
+    <Compile Update="UserControls\Utils\ExpanderControl.xaml.cs">
       <DependentUpon>ExpanderControl.xaml</DependentUpon>
     </Compile>
-    <Compile Update="UserControls\FileDrop.xaml.cs">
+    <Compile Update="UserControls\Utils\FileDrop.xaml.cs">
       <DependentUpon>FileDrop.xaml</DependentUpon>
     </Compile>
     <Compile Update="UserControls\Lists\BetriebskostenRechnungenListControl.xaml.cs">
@@ -102,7 +102,7 @@
     <Compile Update="UserControls\Lists\ZaehlerstandListControl.xaml.cs">
       <DependentUpon>ZaehlerstandListControl.xaml</DependentUpon>
     </Compile>
-    <Compile Update="UserControls\PersonDetailControl.xaml.cs">
+    <Compile Update="UserControls\Utils\PersonDetailControl.xaml.cs">
       <DependentUpon>PersonDetailControl.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Personen\JuristischePersonenDetailPage.xaml.cs">
@@ -240,27 +240,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="UserControls\AdresseControl.xaml">
+    <Page Update="UserControls\Utils\AdresseControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="UserControls\AnhangListControl.xaml">
+    <Page Update="UserControls\Utils\AnhangListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="UserControls\ComboControl.xaml">
+    <Page Update="UserControls\Utils\ComboControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="UserControls\ContextMenuControl.xaml">
+    <Page Update="UserControls\Utils\ContextMenuControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="UserControls\ExpanderControl.xaml">
+    <Page Update="UserControls\Utils\ExpanderControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="UserControls\FileDrop.xaml">
+    <Page Update="UserControls\Utils\FileDrop.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -300,7 +300,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="UserControls\PersonDetailControl.xaml">
+    <Page Update="UserControls\Utils\PersonDetailControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
