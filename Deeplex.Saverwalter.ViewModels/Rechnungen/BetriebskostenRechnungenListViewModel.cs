@@ -56,6 +56,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public BetriebskostenRechnungenListEntry(Betriebskostenrechnung r, AppViewModel avm)
         {
             Entity = r;
+            Wohnungen = r.Gruppen.Select(g => g.Wohnung).ToList();
             AdressenBezeichnung = Entity.GetWohnungenBezeichnung(avm);
         }
     }
