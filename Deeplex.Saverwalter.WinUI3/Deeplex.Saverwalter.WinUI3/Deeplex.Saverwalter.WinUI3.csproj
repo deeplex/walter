@@ -27,6 +27,7 @@
     <None Remove="UserControls\CommandBar\WohnungListCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ZaehlerCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ZaehlerListCommandBarControl.xaml" />
+    <None Remove="Views\Rechnungen\ErhaltungsaufwendungenPrintPage.xaml" />
   </ItemGroup>
   
   <ItemGroup>
@@ -119,6 +120,9 @@
     </Compile>
     <Compile Update="Views\Rechnungen\BetriebskostenRechnungenListViewPage.xaml.cs">
       <DependentUpon>BetriebskostenRechnungenListViewPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Rechnungen\ErhaltungsaufwendungenDetailPage - Copy.xaml.cs">
+      <DependentUpon>ErhaltungsaufwendungenDetailPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Rechnungen\ErhaltungsaufwendungenDetailPage.xaml.cs">
       <DependentUpon>ErhaltungsaufwendungenDetailPage.xaml</DependentUpon>
@@ -318,6 +322,9 @@
     </Page>
     <Page Update="Views\Rechnungen\BetriebskostenRechnungenListViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Rechnungen\ErhaltungsaufwendungenPrintPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="Views\Rechnungen\ErhaltungsaufwendungenDetailPage.xaml">
       <Generator>MSBuild:Compile</Generator>
