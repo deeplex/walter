@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Deeplex.Saverwalter.ViewModels.Rechnungen
+namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class ErhaltungsaufwendungenListViewModel : BindableBase, IFilterViewModel
     {

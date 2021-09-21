@@ -18,6 +18,7 @@
     <None Remove="UserControls\CommandBar\CommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ErhaltungsaufwendungenCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ErhaltungsaufwendungenListCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\ErhaltungsaufwendungenPrintCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\JuristischePersonCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\KontaktListCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\NatuerlichePersonCommandBarControl.xaml" />
@@ -54,6 +55,18 @@
     </Compile>
     <Compile Update="UserControls\Add\AddZaehlerstandControl.xaml.cs">
       <DependentUpon>AddZaehlerstandControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\CommandBar\ErhaltungsaufwendungenCommandBarControl - Copy - Copy.xaml.cs">
+      <DependentUpon>ErhaltungsaufwendungenCommandBarControl - Copy.xaml.cs</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\CommandBar\ErhaltungsaufwendungenCommandBarControl - Copy.xaml.cs">
+      <DependentUpon>ErhaltungsaufwendungenCommandBarControl.xaml.cs</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\CommandBar\ErhaltungsaufwendungenPrintCommandBarControl - Copy - Copy.xaml.cs">
+      <DependentUpon>ErhaltungsaufwendungenPrintCommandBarControl - Copy.xaml.cs</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\CommandBar\ErhaltungsaufwendungenPrintCommandBarControl - Copy.xaml.cs">
+      <DependentUpon>ErhaltungsaufwendungenPrintCommandBarControl.xaml.cs</DependentUpon>
     </Compile>
     <Compile Update="UserControls\Utils\AdresseControl.xaml.cs">
       <DependentUpon>AdresseControl.xaml</DependentUpon>
@@ -154,6 +167,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="UserControls\CommandBar\ErhaltungsaufwendungenPrintCommandBarControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
     <Page Update="UserControls\CommandBar\WohnungDetailCommandBarControl.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

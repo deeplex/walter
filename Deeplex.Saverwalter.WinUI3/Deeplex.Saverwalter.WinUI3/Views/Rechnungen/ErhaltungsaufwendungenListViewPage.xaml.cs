@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.ViewModels.Rechnungen;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.UserControls;
 using Microsoft.UI.Xaml.Controls;
 

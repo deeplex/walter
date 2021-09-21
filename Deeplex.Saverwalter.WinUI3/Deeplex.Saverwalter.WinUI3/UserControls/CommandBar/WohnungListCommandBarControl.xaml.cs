@@ -14,6 +14,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public WohnungListCommandBarControl()
         {
             InitializeComponent();
+            App.Window.CommandBar.Title = "Mietobjekte";
         }
 
         public WohnungListViewModel ViewModel

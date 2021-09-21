@@ -1,7 +1,9 @@
 ﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.ViewModels.Utils;
+using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 using System;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -36,17 +38,21 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             App.Window.AppFrame.GoBack();
         }
 
-        private async void Erhaltungsaufwendung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private void Erhaltungsaufwendung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            try
-            {
-                var Jahr = (int)((Button)sender).CommandParameter;
-                await Files.PrintErhaltungsaufwendungen(ViewModel.Entity, Jahr, App.ViewModel, App.Impl);
-            }
-            catch (Exception ex)
-            {
-                App.Impl.ShowAlert(ex.Message);
-            }
+            App.Window.AppFrame.Navigate(
+                typeof(ErhaltungsaufwendungenPrintPage),
+                ViewModel.Entity,
+                new DrillInNavigationTransitionInfo());
+            //try
+            //{
+            //    var Jahr = (int)((Button)sender).CommandParameter;
+            //    await Files.PrintErhaltungsaufwendungen(ViewModel.Entity, Jahr, App.ViewModel, App.Impl);
+            //}
+            //catch (Exception ex)
+            //{
+            //    App.Impl.ShowAlert(ex.Message);
+            //}
         }
     }
 }

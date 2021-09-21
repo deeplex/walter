@@ -6,9 +6,22 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
     xmlns:uc="using:Deeplex.Saverwalter.WinUI3.UserControls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    
+    <ItemsRepeater ItemsSource="{x:Bind ViewModel.Wohnungen.Value}">
+        <ItemsRepeater.ItemTemplate>
+            <DataTemplate x:DataType="vm:ErhaltungsaufwendungenPrintEntry">
+                <StackPanel>
+                    <TextBlock
+                        Text="{x:Bind Bezeichnung}"
+                        Style="{StaticResource SubtitleTextBlockStyle}"
+                        Margin="10,0,0,10"/>
+                    <uc:ErhaltungsaufwendungenListControl WohnungId="{x:Bind Id}" />
+                </StackPanel>
+            </DataTemplate>
+        </ItemsRepeater.ItemTemplate>
+    </ItemsRepeater>
 </Page>

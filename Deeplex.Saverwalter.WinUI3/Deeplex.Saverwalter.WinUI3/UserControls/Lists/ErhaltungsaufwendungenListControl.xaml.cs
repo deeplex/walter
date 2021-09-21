@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
 using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.ViewModels.Rechnungen;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;

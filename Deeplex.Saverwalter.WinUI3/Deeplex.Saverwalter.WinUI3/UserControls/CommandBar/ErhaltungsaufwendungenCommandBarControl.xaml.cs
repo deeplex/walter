@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.ViewModels.Rechnungen;
+﻿using Deeplex.Saverwalter.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
