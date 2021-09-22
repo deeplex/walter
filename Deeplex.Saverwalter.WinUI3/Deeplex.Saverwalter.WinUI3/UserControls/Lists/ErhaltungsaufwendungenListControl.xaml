@@ -22,9 +22,9 @@
             <mtuuc:DataGridTextColumn
                 Header="Aussteller"
                 Binding="{Binding Aussteller}"/>
-            <mtuuc:DataGridTextColumn
+            <!-- TODO make this optional <mtuuc:DataGridTextColumn
                Header="Wohnung"
-               Binding="{Binding WohnungString}"/>
+               Binding="{Binding WohnungString}"/>-->
             <mtuuc:DataGridTextColumn
                Header="Betrag"
                Binding="{Binding BetragString}"/>
