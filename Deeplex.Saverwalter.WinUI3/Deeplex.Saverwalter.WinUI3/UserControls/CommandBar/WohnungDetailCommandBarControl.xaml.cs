@@ -44,15 +44,6 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                 typeof(ErhaltungsaufwendungenPrintPage),
                 ViewModel.Entity,
                 new DrillInNavigationTransitionInfo());
-            //try
-            //{
-            //    var Jahr = (int)((Button)sender).CommandParameter;
-            //    await Files.PrintErhaltungsaufwendungen(ViewModel.Entity, Jahr, App.ViewModel, App.Impl);
-            //}
-            //catch (Exception ex)
-            //{
-            //    App.Impl.ShowAlert(ex.Message);
-            //}
         }
     }
 }

@@ -22,9 +22,6 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<int> ErhaltungsaufwendungJahr
-            = new ObservableProperty<int>();
-
         public ImmutableList<KontaktListEntry> AlleVermieter;
 
         private KontaktListEntry mBesitzer;
@@ -69,7 +66,7 @@ namespace Deeplex.Saverwalter.ViewModels
             get => Entity.Wohnflaeche;
             set
             {
-                var val = Double.IsNaN(value) ? 0 : value;
+                var val = double.IsNaN(value) ? 0 : value;
                 var old = Entity.Wohnflaeche;
                 Entity.Wohnflaeche = val;
                 RaisePropertyChangedAuto(old, val);
@@ -81,7 +78,7 @@ namespace Deeplex.Saverwalter.ViewModels
             get => Entity.Nutzflaeche;
             set
             {
-                var val = Double.IsNaN(value) ? 0 : value;
+                var val = double.IsNaN(value) ? 0 : value;
                 var old = Entity.Nutzflaeche;
                 Entity.Nutzflaeche = val;
                 RaisePropertyChangedAuto(old, val);
@@ -115,8 +112,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Concat(Avm.ctx.NatuerlichePersonen
                     .Where(n => n.isVermieter == true).Select(n => new KontaktListEntry(n)))
                 .ToImmutableList();
-
-            ErhaltungsaufwendungJahr.Value = DateTime.Now.Year - 1;
 
             if (w.BesitzerId != Guid.Empty)
             {

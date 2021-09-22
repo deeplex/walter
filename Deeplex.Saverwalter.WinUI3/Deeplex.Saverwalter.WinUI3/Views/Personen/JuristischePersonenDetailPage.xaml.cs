@@ -1,7 +1,9 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.UserControls;
+using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
@@ -30,6 +32,14 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.Impl, App.ViewModel));
 
             base.OnNavigatedTo(e);
+        }
+
+        private void Erhaltungsaufwendung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            App.Window.AppFrame.Navigate(
+                typeof(ErhaltungsaufwendungenPrintPage),
+                ViewModel.Entity,
+                new DrillInNavigationTransitionInfo());
         }
     }
 }

@@ -28,6 +28,12 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                     applyFilter(Filter, v.Aussteller, v.Bezeichnung, v.Wohnung.ToString()))
                     .ToImmutableList();
             }
+            if (Jahr != 0)
+            {
+                ViewModel.Liste.Value = ViewModel.Liste.Value
+                    .Where(v => v.Entity.Datum.Year == Jahr)
+                    .ToImmutableList();
+            }
         }
 
         public ErhaltungsaufwendungenListControl()
@@ -37,6 +43,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, IdProp) => UpdateFilter());
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, IdProp) => UpdateFilter());
+            RegisterPropertyChangedCallback(JahrProperty, (DepObj, IdProp) => UpdateFilter());
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)
@@ -46,6 +53,20 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                 App.Window.Navigate(typeof(ErhaltungsaufwendungenDetailPage), ViewModel.SelectedAufwendung.Id);
             }
         }
+
+        public int Jahr
+        {
+            get { return (int)GetValue(JahrProperty); }
+            set { SetValue(JahrProperty, value); }
+        }
+
+        public static readonly DependencyProperty JahrProperty
+            = DependencyProperty.Register(
+                  "Jahr",
+                  typeof(int),
+                  typeof(ErhaltungsaufwendungenListControl),
+                  new PropertyMetadata(0));
+
 
         public int WohnungId
         {

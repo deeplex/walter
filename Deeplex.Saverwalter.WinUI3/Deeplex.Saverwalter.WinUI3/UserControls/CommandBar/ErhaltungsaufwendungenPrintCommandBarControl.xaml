@@ -8,6 +8,11 @@
     mc:Ignorable="d">
 
     <CommandBar>
+        <AppBarElementContainer>
+            <NumberBox
+                SpinButtonPlacementMode="Inline"
+                Value="{x:Bind ViewModel.Jahr.Value, Mode=TwoWay}"/>
+        </AppBarElementContainer>
         <CommandBar.SecondaryCommands>
         </CommandBar.SecondaryCommands>
     </CommandBar>

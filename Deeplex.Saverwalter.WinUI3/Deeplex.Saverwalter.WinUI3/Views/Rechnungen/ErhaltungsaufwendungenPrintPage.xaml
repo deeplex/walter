@@ -18,8 +18,12 @@
                     <TextBlock
                         Text="{x:Bind Bezeichnung}"
                         Style="{StaticResource SubtitleTextBlockStyle}"
-                        Margin="10,0,0,10"/>
-                    <uc:ErhaltungsaufwendungenListControl WohnungId="{x:Bind Id}" />
+                        Margin="10,0,0,0"/>
+                    <uc:ErhaltungsaufwendungenListControl
+                        Margin="0, 10, 0, 10"
+                        Filter="{x:Bind Jahr.Value, Mode=OneWay}"
+                        WohnungId="{x:Bind Id}" />
+                    <MenuFlyoutSeparator/>
                 </StackPanel>
             </DataTemplate>
         </ItemsRepeater.ItemTemplate>

@@ -25,6 +25,10 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
             {
                 ViewModel = new ErhaltungsaufwendungenPrintViewModel(w);
             }
+            else if (e.Parameter is IPerson p)
+            {
+                ViewModel = new ErhaltungsaufwendungenPrintViewModel(p, App.ViewModel.ctx);
+            }
 
             App.Window.CommandBar.MainContent = new ErhaltungsaufwendungenPrintCommandBarControl { ViewModel = ViewModel };
 

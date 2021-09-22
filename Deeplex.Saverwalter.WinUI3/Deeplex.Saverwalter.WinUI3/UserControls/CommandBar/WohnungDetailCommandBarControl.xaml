@@ -11,23 +11,8 @@
         <CommandBar.PrimaryCommands>
             <AppBarButton
                 Label="Erhaltungsaufwendung hinzufügen"
-                Icon="PostUpdate">
-                <AppBarButton.Flyout>
-                    <Flyout>
-                        <StackPanel Orientation="Horizontal">
-                            <NumberBox
-                                SpinButtonPlacementMode="Inline"
-                                AllowFocusOnInteraction="True"
-                                Value="{x:Bind ViewModel.ErhaltungsaufwendungJahr.Value, Mode=TwoWay}"/>
-                            <Button
-                                Click="Erhaltungsaufwendung_Click"
-                                CommandParameter="{x:Bind ViewModel.ErhaltungsaufwendungJahr.Value}">
-                                <SymbolIcon Symbol="SaveLocal"/>
-                            </Button>
-                        </StackPanel>
-                    </Flyout>
-                </AppBarButton.Flyout>
-            </AppBarButton>
+                Icon="PostUpdate"
+                Click="Erhaltungsaufwendung_Click" />
         </CommandBar.PrimaryCommands>
         <CommandBar.SecondaryCommands>
             <AppBarButton Label="Löschen" Icon="Delete" Click="Delete_Click"/>

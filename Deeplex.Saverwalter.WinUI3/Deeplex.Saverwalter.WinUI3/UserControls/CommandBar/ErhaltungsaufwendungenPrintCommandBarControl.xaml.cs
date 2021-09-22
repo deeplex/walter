@@ -11,23 +11,13 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public ErhaltungsaufwendungenPrintCommandBarControl()
         {
             InitializeComponent();
-            App.Window.CommandBar.Title = "Erhaltungsaufwendung"; // TODO Bezeichnung...
+            App.Window.CommandBar.Title = "Erhaltungsaufwendungen"; // TODO Bezeichnung...
         }
-
-        private string setTitle(ErhaltungsaufwendungenPrintViewModel vm)
-            => vm.Wohnungen.Value
-                .Select(w => App.ViewModel.ctx.Wohnungen.Find(w.Id))
-                .ToList()
-                .GetWohnungenBezeichnung(App.ViewModel);
 
         public ErhaltungsaufwendungenPrintViewModel ViewModel
         {
             get { return (ErhaltungsaufwendungenPrintViewModel)GetValue(ViewModelProperty); }
-            set
-            {
-                App.Window.CommandBar.Title = setTitle(value);
-                SetValue(ViewModelProperty, value);
-            }
+            set { SetValue(ViewModelProperty, value); }
         }
 
         public static readonly DependencyProperty ViewModelProperty

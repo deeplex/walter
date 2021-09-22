@@ -10,8 +10,6 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public IPerson Entity { get; set; }
 
-        public ObservableProperty<int> ErhaltungsaufwendungJahr
-            = new ObservableProperty<int>(DateTime.Now.Year - 1);
         protected bool mInklusiveZusatz;
         public ObservableProperty<ImmutableList<WohnungListEntry>> Wohnungen
             = new ObservableProperty<ImmutableList<WohnungListEntry>>();
@@ -23,18 +21,16 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Avm = avm;
             Impl = impl;
-            Print_Erhaltungsaufwendungen = new AsyncRelayCommand(async _ =>
-            {
-                await Utils.Files.PrintErhaltungsaufwendungen(
-                    Wohnungen.Value.Select(w => w.Entity).ToList(),
-                    mInklusiveZusatz,
-                    ErhaltungsaufwendungJahr.Value,
-                    Avm,
-                    Impl);
-            }, _ => Wohnungen.Value.Count > 0);
+            //Print_Erhaltungsaufwendungen = new AsyncRelayCommand(async _ =>
+            //{
+            //    await Utils.Files.PrintErhaltungsaufwendungen(
+            //        Wohnungen.Value.Select(w => w.Entity).ToList(),
+            //        mInklusiveZusatz,
+            //        ErhaltungsaufwendungJahr.Value,
+            //        Avm,
+            //        Impl);
+            //}, _ => Wohnungen.Value.Count > 0);
         }
-
-        public AsyncRelayCommand Print_Erhaltungsaufwendungen;
 
         public Guid PersonId
         {
