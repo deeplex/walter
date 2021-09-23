@@ -8,6 +8,9 @@
     mc:Ignorable="d">
 
     <CommandBar>
+        <AppBarButton Content="Print" Icon="Print" Click="Print_Click"/>
+
+
         <AppBarElementContainer>
             <NumberBox
                 SpinButtonPlacementMode="Inline"

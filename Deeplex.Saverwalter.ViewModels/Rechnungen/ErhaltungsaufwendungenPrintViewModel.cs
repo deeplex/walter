@@ -46,6 +46,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
     public sealed class ErhaltungsaufwendungenPrintEntry
     {
+        public Wohnung Entity { get; }
         public int Id { get; }
         public string Bezeichnung { get; }
         public ObservableProperty<int> Jahr => parent.Jahr;
@@ -54,6 +55,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public ErhaltungsaufwendungenPrintEntry(Wohnung w, ErhaltungsaufwendungenPrintViewModel vm)
         {
+            Entity = w;
             parent = vm;
             Id = w.WohnungId;
             Bezeichnung = AdresseViewModel.Anschrift(w) + " - " + w.Bezeichnung;
