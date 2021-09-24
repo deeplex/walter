@@ -4,6 +4,7 @@ using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
@@ -110,8 +111,8 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
     public class IsDisabledConverter : IValueConverter
     {
-        public Style enabled => App.Window.AppFrame.Resources["AppBarItemForegroundThemeBrush"] as Style;
-        public Style disabled => App.Window.AppFrame.Resources["AppBarItemDisabledForegroundThemeBrush"] as Style;
+        public SolidColorBrush enabled => Application.Current.Resources["enabled"] as SolidColorBrush;
+        public SolidColorBrush disabled => Application.Current.Resources["disabled"] as SolidColorBrush;
 
         public object Convert(object value, Type targetType, object parameter, string language)
         {
@@ -120,12 +121,12 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             {
                 return disabled;
             }
-            return enabled;
+            return disabled;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
-            return enabled;
+            return disabled;
         }
     }
 }
