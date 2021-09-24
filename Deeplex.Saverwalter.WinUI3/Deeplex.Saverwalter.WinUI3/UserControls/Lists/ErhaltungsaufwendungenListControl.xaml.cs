@@ -3,6 +3,8 @@ using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Data;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using static Deeplex.Saverwalter.WinUI3.Utils.Elements;
@@ -103,6 +105,27 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)
         {
             ViewModel.Liste.Value = (sender as DataGrid).Sort(e.Column, ViewModel.Liste.Value);
+        }
+    }
+
+    public class IsDisabledConverter : IValueConverter
+    {
+        public Style enabled => App.Window.AppFrame.Resources["AppBarItemForegroundThemeBrush"] as Style;
+        public Style disabled => App.Window.AppFrame.Resources["AppBarItemDisabledForegroundThemeBrush"] as Style;
+
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            bool? isDisabled = (bool)value;
+            if (isDisabled.HasValue && isDisabled.Value == true)
+            {
+                return disabled;
+            }
+            return enabled;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            return enabled;
         }
     }
 }

@@ -34,6 +34,8 @@ namespace Deeplex.Saverwalter.Model
         public string Bezeichnung => Entity.Bezeichnung;
         public DateTimeOffset Datum => Entity.Datum;
         public double Betrag => Entity.Betrag;
+        public bool active = true;
+        //public string color => active ? "
 
         public ErhaltungsaufwendungListeEntry(Erhaltungsaufwendung e, SaverwalterContext _db)
         {

@@ -10,6 +10,7 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public ObservableProperty<ImmutableList<ErhaltungsaufwendungenListEntry>> Liste
             = new ObservableProperty<ImmutableList<ErhaltungsaufwendungenListEntry>>();
+        public ObservableProperty<bool> disabled = new ObservableProperty<bool>();
 
         public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
         public ImmutableList<ErhaltungsaufwendungenListEntry> AllRelevant { get; set; }
@@ -34,6 +35,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToImmutableList();
 
             Liste.Value = AllRelevant;
+            disabled.Value = false;
         }
     }
 
