@@ -11,8 +11,8 @@
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
             <!-- Other app resources here -->
-            <SolidColorBrush x:Key="enabled" Color="Red" />
-            <SolidColorBrush x:Key="disabled" Color="Blue" />
+            <SolidColorBrush x:Key="enabled" Color="{StaticResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="disabled" Color="{StaticResource SystemColorDisabledTextColor}" />
             
             <Style x:Name="Eintraege" TargetType="TextBox">
                 <Setter Property="Width" Value="300"/>

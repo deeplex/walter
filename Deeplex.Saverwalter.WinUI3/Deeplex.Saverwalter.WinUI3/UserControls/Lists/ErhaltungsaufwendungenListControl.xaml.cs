@@ -121,12 +121,12 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             {
                 return disabled;
             }
-            return disabled;
+            return enabled;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
-            return disabled;
+            return enabled;
         }
     }
 }
