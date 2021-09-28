@@ -97,6 +97,19 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                   typeof(ErhaltungsaufwendungenListControl),
                   new PropertyMetadata(""));
 
+        public bool Enabled
+        {
+            get { return (bool)GetValue(EnabledProperty); }
+            set { SetValue(EnabledProperty, value); }
+        }
+
+        public static readonly DependencyProperty EnabledProperty
+            = DependencyProperty.Register(
+                  "Enabled",
+                  typeof(bool),
+                  typeof(ErhaltungsaufwendungenListControl),
+                  new PropertyMetadata(true));
+
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var a = ((ErhaltungsaufwendungenListEntry)((DataGrid)sender).SelectedItem).Entity;
@@ -109,19 +122,19 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         }
     }
 
-    public class IsDisabledConverter : IValueConverter
+    public class IsEnabledConverter : IValueConverter
     {
         public SolidColorBrush enabled => Application.Current.Resources["enabled"] as SolidColorBrush;
         public SolidColorBrush disabled => Application.Current.Resources["disabled"] as SolidColorBrush;
 
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            bool? isDisabled = (bool)value;
-            if (isDisabled.HasValue && isDisabled.Value == true)
+            bool? isEnabled = (bool)value;
+            if (isEnabled.HasValue && isEnabled.Value == true)
             {
-                return disabled;
+                return enabled;
             }
-            return enabled;
+            return disabled;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)

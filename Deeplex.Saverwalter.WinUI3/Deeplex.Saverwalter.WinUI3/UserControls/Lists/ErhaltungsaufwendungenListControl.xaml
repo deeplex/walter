@@ -10,14 +10,14 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <UserControl.Resources>
-        <local:IsDisabledConverter x:Key="IsDisabledConverterKey"/>
+        <local:IsEnabledConverter x:Key="IsEnabledConverterKey"/>
     </UserControl.Resources>
 
     <mtuuc:DataGrid
         Style="{StaticResource DataGridUserControl}"
         SelectionChanged="DataGrid_SelectionChanged"
         DoubleTapped="Details_Click"
-        Foreground="{x:Bind ViewModel.disabled.Value, Mode=OneWay, Converter={StaticResource IsDisabledConverterKey}}"
+        Foreground="{x:Bind Enabled, Mode=OneWay, Converter={StaticResource IsEnabledConverterKey}}"
         Sorting="DataGrid_Sorting"
         ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}"
         SelectedItem="{x:Bind ViewModel.SelectedAufwendung, Mode=TwoWay}">

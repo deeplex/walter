@@ -50,7 +50,8 @@ namespace Deeplex.Saverwalter.ViewModels
         public int Id { get; }
         public string Bezeichnung { get; }
         public ObservableProperty<int> Jahr => parent.Jahr;
-           
+        public ObservableProperty<bool> Enabled = new ObservableProperty<bool>(true);
+
         private ErhaltungsaufwendungenPrintViewModel parent { get; }
 
         public ErhaltungsaufwendungenPrintEntry(Wohnung w, ErhaltungsaufwendungenPrintViewModel vm)
