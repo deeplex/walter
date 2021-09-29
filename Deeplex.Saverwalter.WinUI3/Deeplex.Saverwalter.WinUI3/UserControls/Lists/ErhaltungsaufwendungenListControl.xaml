@@ -5,12 +5,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
-    xmlns:local="using:Deeplex.Saverwalter.WinUI3.UserControls"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3.Utils"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <UserControl.Resources>
-        <local:IsEnabledConverter x:Key="IsEnabledConverterKey"/>
+        <conv:IsEnabledConverter x:Key="IsEnabledConverterKey"/>
     </UserControl.Resources>
 
     <mtuuc:DataGrid
