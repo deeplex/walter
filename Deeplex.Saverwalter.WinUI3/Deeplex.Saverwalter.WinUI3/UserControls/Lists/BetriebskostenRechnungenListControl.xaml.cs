@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.Views;
 using Microsoft.UI.Xaml;
@@ -32,7 +33,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             if (Filter != "")
             {
                 ViewModel.Liste.Value = ViewModel.Liste.Value.Where(v =>
-                    applyFilter(Filter, v.AdressenBezeichnung, v.BetreffendesJahrString, v.TypString, v.Beschreibung))
+                    applyFilter(Filter, v.AdressenBezeichnung, v.BetreffendesJahr.ToString("dd.mm.yyyy"), v.Typ.ToDescriptionString(), v.Beschreibung))
                     .ToImmutableList();
             }
         }

@@ -54,6 +54,7 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString()
         {
+            // TODO i18n out of viewmodel...
             return Typ.ToDescriptionString() + ((int)Typ % 2 == 0 ? " (kalt)" : " (warm)");
         }
 
@@ -75,7 +76,8 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Enum = h;
             index = (int)h;
-            Absatz = "Absatz " + (index).ToString();
+            // TODO i18n out of viewmodel...
+            Absatz = "Absatz " + index.ToString();
         }
     }
 }

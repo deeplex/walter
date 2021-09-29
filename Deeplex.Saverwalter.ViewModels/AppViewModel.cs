@@ -94,6 +94,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public void SaveWalter()
         {
             ctx.SaveChanges();
+            // TODO i18n out of viewmodels...
             Impl.ShowAlert("Gespeichert");
         }
 

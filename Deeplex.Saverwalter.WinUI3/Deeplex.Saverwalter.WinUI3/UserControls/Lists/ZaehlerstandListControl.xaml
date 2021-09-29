@@ -7,8 +7,13 @@
     xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3.Utils"
     d:DesignHeight="300"
     d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <conv:DateStringConverter x:Key="DateStringConverterKey" />
+    </UserControl.Resources>
 
     <mtuuc:DataGrid
         Style="{StaticResource DataGridUserControl}"
@@ -26,7 +31,7 @@
             </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTextColumn
             Header="Datum"
-            Binding="{Binding DatumString}"/>
+            Binding="{Binding Datum, Converter={StaticResource DateStringConverterKey}}"/>
             <mtuuc:DataGridTextColumn
             Header="Stand"
             Binding="{Binding Stand}"/>

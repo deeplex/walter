@@ -9,9 +9,15 @@
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
     xmlns:uc="using:Deeplex.Saverwalter.WinUI3.UserControls"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3.Utils"
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <conv:DateStringConverter x:Key="DateStringConverterKey" />
+        <conv:ToStringConverter x:Key="ToStringConverterKey" />
+    </UserControl.Resources>
 
     <RelativePanel>
         <StackPanel
@@ -39,7 +45,7 @@
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>
                             </mtuuc:DataGridTemplateColumn>
-                            <mtuuc:DataGridTextColumn Header="Beginn" Binding="{Binding BeginnString}"/>
+                            <mtuuc:DataGridTextColumn Header="Beginn" Binding="{Binding Beginn, Converter={StaticResource DateStringConverterKey}}"/>
                             <!--<mtuuc:DataGridTemplateColumn Header="Beginn">
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
@@ -52,7 +58,7 @@
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>
                             </mtuuc:DataGridTemplateColumn>-->
-                            <mtuuc:DataGridTextColumn Header="Ende" Binding="{Binding EndeString}"/>
+                            <mtuuc:DataGridTextColumn Header="Ende" Binding="{Binding Ende, Converter={StaticResource DateStringConverterKey}}"/>
                             <!--<mtuuc:DataGridTemplateColumn Header="Ende">
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
@@ -65,7 +71,7 @@
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>
                             </mtuuc:DataGridTemplateColumn>-->
-                            <mtuuc:DataGridTextColumn Header="Minderung" Binding="{Binding MinderungString}"/>
+                            <mtuuc:DataGridTextColumn Header="Minderung" Binding="{Binding MinderungString, Converter={StaticResource ToStringConverterKey}}"/>
                             <!--<mtuuc:DataGridTemplateColumn Header="Minderung">
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="vm:VertragDetailMietMinderung">

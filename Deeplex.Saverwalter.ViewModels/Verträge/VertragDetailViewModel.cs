@@ -39,14 +39,8 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<int> BetriebskostenJahr
             = new ObservableProperty<int>();
 
-        public string lastBeginn
-        {
-            get => Versionen.Value.Last().Beginn.ToString("dd.MM.yyyy");
-        }
-        public string firstEnde
-        {
-            get => Versionen.Value.First().Ende is DateTimeOffset d ? d.ToString("dd.MM.yyyy") : "Offen";
-        }
+        public DateTimeOffset lastBeginn => Versionen.Value.Last().Beginn;
+        public DateTimeOffset? firstEnde => Versionen.Value.First().Ende;
         public int StartJahr => Versionen.Value.Last().Beginn.Year;
         public int EndeJahr => Versionen.Value.First().Ende?.Year ?? 9999;
 

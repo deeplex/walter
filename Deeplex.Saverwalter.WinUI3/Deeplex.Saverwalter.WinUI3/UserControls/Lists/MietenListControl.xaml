@@ -9,9 +9,14 @@
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:uc="using:Deeplex.Saverwalter.WinUI3.UserControls"
     xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3.Utils"
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <conv:DateStringConverter x:Key="DateStringConverterKey" />
+    </UserControl.Resources>
     
     <RelativePanel>
         <StackPanel
@@ -39,7 +44,7 @@
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>
                             </mtuuc:DataGridTemplateColumn>
-                            <mtuuc:DataGridTextColumn Header="Datum" Binding="{Binding DatumString}"/>
+                            <mtuuc:DataGridTextColumn Header="Datum" Binding="{Binding Datum, Converter={StaticResource DateStringConverterKey}}"/>
                             <mtuuc:DataGridTemplateColumn Header="Betr. Monat">
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="vm:MietenListEntry">

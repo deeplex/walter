@@ -7,7 +7,14 @@
     xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
     mc:Ignorable="d"
     d:DesignHeight="300"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3.Utils"
     d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <conv:DateStringConverter x:Key="DateStringConverterKey" />
+        <conv:ToStringConverter x:Key="ToStringConverterKey" />
+        <conv:ToDescriptionStringConverter x:Key="ToDescriptionStringConverterKey" />
+    </UserControl.Resources>
 
     <mtuuc:DataGrid
         Style="{StaticResource DataGridUserControl}"
@@ -22,13 +29,13 @@
                 Binding="{Binding Kennnummer}"/>
             <mtuuc:DataGridTextColumn
                 Header="Typ"
-                Binding="{Binding TypString}"/>
+                Binding="{Binding Typ, Converter={StaticResource ToDescriptionStringConverterKey}}"/>
             <mtuuc:DataGridTextColumn
                 Header="Wohnung"
                 Binding="{Binding Wohnung}"/>
             <mtuuc:DataGridTextColumn
                 Header="Letztes Ablesedatum"
-                Binding="{Binding DatumString}"/>
+                Binding="{Binding Datum, Converter={StaticResource DateStringConverterKey}}"/>
             <mtuuc:DataGridTextColumn
                 Header="Stand"
                 Binding="{Binding LastStandString}"/>

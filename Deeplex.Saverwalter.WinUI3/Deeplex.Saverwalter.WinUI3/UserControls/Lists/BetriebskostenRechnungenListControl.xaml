@@ -5,8 +5,15 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3.Utils"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <UserControl.Resources>
+        <conv:ToDescriptionStringConverter x:Key="ToDescriptionStringConverterKey" />
+        <conv:ToStringConverter x:Key="ToStringConverterKey" />
+        <conv:EuroStringConverter x:Key="EuroStringConverterKey" />
+    </UserControl.Resources>
 
     <mtuuc:DataGrid
         Style="{StaticResource DataGridUserControl}"
@@ -18,16 +25,16 @@
         <mtuuc:DataGrid.Columns>
             <mtuuc:DataGridTextColumn
                 Header="Typ"
-                Binding="{Binding TypString}"/>
+                Binding="{Binding Typ, Converter={StaticResource ToDescriptionStringConverterKey}}"/>
             <mtuuc:DataGridTextColumn
                 Header="Jahr"
-                Binding="{Binding BetreffendesJahrString}"/>
+                Binding="{Binding BetreffendesJahr, Converter={StaticResource ToStringConverterKey}}"/>
             <mtuuc:DataGridTextColumn
                 Header="Wohnungen"
                 Binding="{Binding AdressenBezeichnung}"/>
             <mtuuc:DataGridTextColumn
                 Header="Betrag"
-                Binding="{Binding BetragString}"/>
+                Binding="{Binding Betrag, Converter={StaticResource EuroStringConverterKey}}"/>
             <mtuuc:DataGridTextColumn
                 Header="Beschreibung"
                 Binding="{Binding Beschreibung}"/>

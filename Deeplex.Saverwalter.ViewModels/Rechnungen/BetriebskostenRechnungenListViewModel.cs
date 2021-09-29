@@ -47,10 +47,9 @@ namespace Deeplex.Saverwalter.ViewModels
         public int Id => Entity.BetriebskostenrechnungId;
         public string Beschreibung => Entity.Beschreibung;
         public List<Wohnung> Wohnungen { get; }
-        public string TypString => Entity.Typ.ToDescriptionString();
+        public Betriebskostentyp Typ => Entity.Typ;
         public int BetreffendesJahr => Entity.BetreffendesJahr;
-        public string BetreffendesJahrString => BetreffendesJahr.ToString();
-        public string BetragString => Entity.Betrag.ToString() + "€";
+        public double Betrag => Entity.Betrag;
         public string AdressenBezeichnung { get; }
 
         public BetriebskostenRechnungenListEntry(Betriebskostenrechnung r, AppViewModel avm)

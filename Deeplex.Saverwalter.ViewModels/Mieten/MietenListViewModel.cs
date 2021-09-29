@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 RaisePropertyChangedAuto(old, value);
             }
         }
-        public string DatumString => Entity.Zahlungsdatum.ToString("dd.MM.yyyy");
+        public DateTime Zahlungsdatum => Entity.Zahlungsdatum;
         public DateTimeOffset Monat
         {
             get => Entity.BetreffenderMonat;
@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.ViewModels
                     return;
             }
 
-            if (Monat == null || Entity.VertragId == Guid.Empty || Entity.VertragId == null)
+            if (Entity.VertragId == Guid.Empty)
             {
                 return;
             }

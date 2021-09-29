@@ -11,6 +11,8 @@
 
     <UserControl.Resources>
         <conv:IsEnabledConverter x:Key="IsEnabledConverterKey"/>
+        <conv:DateStringConverter x:Key="DateStringConverterKey" />
+        <conv:EuroStringConverter x:Key="EuroStringConverterKey" />
     </UserControl.Resources>
 
     <mtuuc:DataGrid
@@ -33,10 +35,10 @@
                Binding="{Binding WohnungString}"/>-->
             <mtuuc:DataGridTextColumn
                Header="Betrag"
-               Binding="{Binding BetragString}"/>
+               Binding="{Binding Betrag, Converter={StaticResource EuroStringConverterKey}}"/>
             <mtuuc:DataGridTextColumn
                Header="Datum"
-               Binding="{Binding DatumString}"/>
+               Binding="{Binding Datum, Converter={StaticResource DateStringConverterKey}}"/>
         </mtuuc:DataGrid.Columns>
     </mtuuc:DataGrid>
 </UserControl>

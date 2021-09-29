@@ -43,7 +43,6 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public bool isHeizung => Entity?.Typ == Betriebskostentyp.Heizkosten;
 
-        public string BetragString => Betrag.ToString() + "€";
         public double Betrag
         {
             get => Entity?.Betrag ?? 0.0;
@@ -113,7 +112,6 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public string BetreffendesJahrString => BetreffendesJahr.ToString();
         public DateTimeOffset? BetreffendesJahrDatum
         {
             get => new DateTime(BetreffendesJahr, 1, 1);

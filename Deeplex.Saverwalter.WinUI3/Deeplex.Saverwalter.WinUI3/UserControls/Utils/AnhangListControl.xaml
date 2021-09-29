@@ -9,8 +9,15 @@
     xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
     xmlns:uc="using:Deeplex.Saverwalter.WinUI3.UserControls"
     mc:Ignorable="d"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3.Utils"
     d:DesignHeight="300"
     d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <conv:FileSizeConverter x:Key="FileSizeConverterKey" />
+        <conv:PathConverter x:Key="PathConverterKey" />
+        <conv:ErstelltAmConverter x:Key="ErstelltAmConverterKey" />
+    </UserControl.Resources>
 
     <uc:FileDrop List="{x:Bind List}">
         <uc:FileDrop.MainContent>
@@ -45,9 +52,9 @@
                                     Text="{x:Bind DateiName}">
                                     <ToolTipService.ToolTip>
                                         <StackPanel>
-                                            <TextBlock Text="{x:Bind FileNameString}" />
-                                            <TextBlock Text="{x:Bind FileSizeString}" />
-                                            <TextBlock Text="{x:Bind CreatedString}" />
+                                            <TextBlock Text="{x:Bind path, Converter={StaticResource PathConverter}}" />
+                                            <TextBlock Text="{x:Bind size, Converter={StaticResource FileSizeConverterKey}}" />
+                                            <TextBlock Text="{x:Bind CreationTime, Converter={StaticResource ErstelltAmConverter}}" />
                                         </StackPanel>
                                     </ToolTipService.ToolTip>
                                 </TextBlock>

@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -43,10 +44,9 @@ namespace Deeplex.Saverwalter.ViewModels
         public string Aussteller => Avm.ctx.FindPerson(Entity.AusstellerId).Bezeichnung;
         public int Id => Entity.ErhaltungsaufwendungId;
         public WohnungListEntry Wohnung;
-        public string WohnungString => Wohnung.ToString();
-        public string BetragString => Entity.Betrag.ToString() + "€";
         public string Bezeichnung => Entity.Bezeichnung;
-        public string DatumString => Entity.Datum.ToString("dd.MM.yyyy");
+        public double Betrag => Entity.Betrag;
+        public DateTime Datum => Entity.Datum;
         private AppViewModel Avm;
 
         public ErhaltungsaufwendungenListEntry(Erhaltungsaufwendung e, AppViewModel avm)

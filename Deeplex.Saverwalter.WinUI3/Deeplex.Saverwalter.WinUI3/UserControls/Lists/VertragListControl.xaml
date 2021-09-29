@@ -5,9 +5,15 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3.Utils"
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <conv:DateStringConverter x:Key="DateStringConverterKey" />
+        <conv:ToStringConverter x:Key="ToStringConverterKey" />
+    </UserControl.Resources>
 
     <mtuuc:DataGrid
         Style="{StaticResource DataGridUserControl}"
@@ -25,10 +31,10 @@
                         Binding="{Binding AnschriftMitWohnung}"/>
             <mtuuc:DataGridTextColumn
                         Header="Beginn"
-                        Binding="{Binding BeginnString}"/>
+                        Binding="{Binding Beginn, Converter={StaticResource DateStringConverterKey}}"/>
             <mtuuc:DataGridTextColumn
                         Header="Ende"
-                        Binding="{Binding EndeString}"/>
+                        Binding="{Binding Ende, Converter={StaticResource DateStringConverterKey}}"/>
         </mtuuc:DataGrid.Columns>
     </mtuuc:DataGrid>
 </UserControl>

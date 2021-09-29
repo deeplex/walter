@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -47,9 +48,11 @@ namespace Deeplex.Saverwalter.ViewModels
         public int Id => Entity.ZaehlerId;
         public string Kennnummer => Entity.Kennnummer;
         public string TypString => Entity.Typ.ToString();
+        // TODO remove i18n from viewmodels
         public string LastStandString => LastStand == null ? "Keine Angabe" : LastStand.Stand.ToString();
-        public string DatumString => LastStand == null ? null : LastStand.Datum.ToString("dd.MM.yyyy");
+        public DateTime? Datum => LastStand == null ? null : LastStand.Datum;
         public int WohnungId => Entity.Wohnung?.WohnungId ?? 0;
+        // TODO remove i18n from viewmodels
         public string Wohnung => Entity.Wohnung == null ? "Keine Wohnung" :
             AdresseViewModel.Anschrift(Entity.Wohnung) + ", " + Entity.Wohnung.Bezeichnung;
         public Zaehler AllgemeinZaehler => Entity.AllgemeinZaehler;

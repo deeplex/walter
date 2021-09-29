@@ -9,6 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
+    // TODO i18n out of viewmodels...
     public sealed class AnhangListViewModel : BindableBase
     {
         public ObservableProperty<string> Text = new ObservableProperty<string>();
@@ -144,9 +145,7 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public Anhang Entity { get; }
         public override string ToString() => Entity.FileName;
-        public string CreatedString => "Erstellt am: " + Entity.CreationTime.ToString("dd.MM.yyyy HH:mm:ss");
-        public string FileNameString => "Dateipfad: " + path;
-        public string FileSizeString => "Dateigröße: " + Math.Round(size / 1000).ToString() + "kb";
+        public DateTime CreationTime => Entity.CreationTime;
 
         public int GetReferences
         {
@@ -170,7 +169,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        private string path => Entity.getPath(Container.Avm.root);
+        public string path => Entity.getPath(Container.Avm.root);
         public double size => File.Exists(path) ? new FileInfo(path).Length : 0;
 
         public AnhangListViewModel Container { get; }

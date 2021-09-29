@@ -38,9 +38,9 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public MietMinderung Entity { get; }
 
-        public string BeginnString => Entity.Beginn.ToString("dd.MM.yyyy");
-        public string EndeString => Entity.Ende is DateTime d ? d.ToString("dd.MM.yyyy") : "Offen";
-        public string MinderungString => Entity.Minderung.ToString();
+        public DateTime Beginn => Entity.Beginn;
+        public DateTime? Ende => Entity.Ende;
+        public double Minderung => Entity.Minderung;
         public string Notiz => Entity.Notiz;
 
         public MietMinderungListEntry(MietMinderung m, MietMinderungListViewModel vm)
