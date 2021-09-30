@@ -8,14 +8,12 @@
     mc:Ignorable="d">
 
     <CommandBar>
-        <AppBarButton Content="Print" Icon="Print" Click="Print_Click"/>
-
-
         <AppBarElementContainer>
             <NumberBox
                 SpinButtonPlacementMode="Inline"
                 Value="{x:Bind ViewModel.Jahr.Value, Mode=TwoWay}"/>
         </AppBarElementContainer>
+        <AppBarButton Icon="Print" Command="{x:Bind ViewModel.Print}"/>
         <CommandBar.SecondaryCommands>
         </CommandBar.SecondaryCommands>
     </CommandBar>

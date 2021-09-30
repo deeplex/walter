@@ -21,15 +21,6 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Avm = avm;
             Impl = impl;
-            //Print_Erhaltungsaufwendungen = new AsyncRelayCommand(async _ =>
-            //{
-            //    await Utils.Files.PrintErhaltungsaufwendungen(
-            //        Wohnungen.Value.Select(w => w.Entity).ToList(),
-            //        mInklusiveZusatz,
-            //        ErhaltungsaufwendungJahr.Value,
-            //        Avm,
-            //        Impl);
-            //}, _ => Wohnungen.Value.Count > 0);
         }
 
         public Guid PersonId

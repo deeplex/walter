@@ -13,11 +13,17 @@ namespace Deeplex.Saverwalter.ViewModels
             new ObservableProperty<ImmutableList<ErhaltungsaufwendungenPrintEntry>>();
         public ObservableProperty<int> Jahr = new ObservableProperty<int>();
 
-        private ErhaltungsaufwendungenPrintViewModel()
+        public AsyncRelayCommand Print;
+        private ErhaltungsaufwendungenPrintViewModel(AppViewModel avm, IAppImplementation impl)
         {
+            Print = new AsyncRelayCommand( async _ =>
+            {
+                var w = Wohnungen.Value.Where(w => w.Enabled.Value).Select(w => w.Entity).ToList();
+                await Utils.Files.PrintErhaltungsaufwendungen(w, false, Jahr.Value, avm, impl);
+            }, _ => true);
             Jahr.Value = DateTime.Now.Year - 1;
         }
-        public ErhaltungsaufwendungenPrintViewModel(Wohnung w) : this()
+        public ErhaltungsaufwendungenPrintViewModel(Wohnung w, AppViewModel avm, IAppImplementation impl) : this(avm, impl)
         {
             var self = this;
 
@@ -26,14 +32,15 @@ namespace Deeplex.Saverwalter.ViewModels
                 new ErhaltungsaufwendungenPrintEntry(w, self)
             }.ToImmutableList();
         }
-        public ErhaltungsaufwendungenPrintViewModel(IPerson p, SaverwalterContext ctx) : this()
+
+        public ErhaltungsaufwendungenPrintViewModel(IPerson p, AppViewModel avm, IAppImplementation impl) : this(avm, impl)
         {
             var self = this;
-            var Personen = ctx.JuristischePersonen.ToList()
+            var Personen = avm.ctx.JuristischePersonen.ToList()
                 .Where(j => j.Mitglieder.Exists(m => m.PersonId == p.PersonId))
                 .ToList();
             
-            Wohnungen.Value = ctx.Wohnungen
+            Wohnungen.Value = avm.ctx.Wohnungen
                 .ToList()
                 .Where(w =>
                     w.BesitzerId == p.PersonId ||
