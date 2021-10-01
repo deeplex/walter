@@ -99,6 +99,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         private IAppImplementation Impl;
         private AppViewModel Avm;
+        public RelayCommand RemoveBesitzer;
 
         public WohnungDetailViewModel(IAppImplementation impl, AppViewModel avm) : this(new Wohnung(), impl, avm) { }
         public WohnungDetailViewModel(Wohnung w, IAppImplementation impl, AppViewModel avm)
@@ -119,6 +120,8 @@ namespace Deeplex.Saverwalter.ViewModels
             }
 
             PropertyChanged += OnUpdate;
+
+            RemoveBesitzer = new RelayCommand(_ => { Besitzer = null; }, _ => true);
         }
 
         private void OnUpdate(object sender, PropertyChangedEventArgs e)

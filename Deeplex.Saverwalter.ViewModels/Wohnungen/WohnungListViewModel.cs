@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -44,7 +45,9 @@ namespace Deeplex.Saverwalter.ViewModels
             Adresse = w.Adresse;
             Bezeichnung = w.Bezeichnung;
             Anschrift = AdresseViewModel.Anschrift(w);
-            Besitzer = avm.ctx.FindPerson(w.BesitzerId).Bezeichnung;
+            Besitzer = w.BesitzerId != Guid.Empty ?
+                avm.ctx.FindPerson(w.BesitzerId).Bezeichnung :
+                "";
         }
     }
 }
