@@ -143,6 +143,10 @@ namespace Deeplex.Saverwalter.WinUI3
         }
         private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
+            if (args.ChosenSuggestion == null)
+            {
+                return;
+            }
             var Entity = (args.ChosenSuggestion as AutoSuggestEntry).Entity;
             Navigate(GetEntryPage(Entity), Entity);
             sender.IsSuggestionListOpen = false;
