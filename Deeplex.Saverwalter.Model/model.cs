@@ -233,6 +233,7 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
         public List<Vertrag> Vertraege { get; private set; } = new List<Vertrag>();
         public List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
+        public List<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; private set; } = new List<Erhaltungsaufwendung>();
         public List<BetriebskostenrechnungsGruppe> Betriebskostenrechnungsgruppen { get; private set; } = new List<BetriebskostenrechnungsGruppe>();
     }
 

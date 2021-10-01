@@ -24,7 +24,7 @@
                     <uc:ErhaltungsaufwendungenListControl
                         Margin="0, 10, 0, 10"
                         Enabled="{x:Bind Enabled.Value, Mode=OneWay}"
-                        Filter="{x:Bind Jahr.Value, Mode=OneWay}"
+                        Jahr="{x:Bind Jahr.Value, Mode=OneWay}"
                         WohnungId="{x:Bind Id}" />
                     <MenuFlyoutSeparator/>
                 </StackPanel>

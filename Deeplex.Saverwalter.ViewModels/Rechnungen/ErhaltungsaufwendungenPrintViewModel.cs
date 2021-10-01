@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -36,7 +37,8 @@ namespace Deeplex.Saverwalter.ViewModels
         public ErhaltungsaufwendungenPrintViewModel(IPerson p, AppViewModel avm, IAppImplementation impl) : this(avm, impl)
         {
             var self = this;
-            var Personen = avm.ctx.JuristischePersonen.ToList()
+            var Personen = avm.ctx.JuristischePersonen
+                .ToList()
                 .Where(j => j.Mitglieder.Exists(m => m.PersonId == p.PersonId))
                 .ToList();
             
