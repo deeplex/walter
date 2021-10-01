@@ -60,6 +60,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public string Bezeichnung { get; }
         public ObservableProperty<int> Jahr => parent.Jahr;
         public ObservableProperty<bool> Enabled = new ObservableProperty<bool>(true);
+        public double Summe => Entity.Erhaltungsaufwendungen.Sum(w => w.Betrag);
 
         private ErhaltungsaufwendungenPrintViewModel parent { get; }
 

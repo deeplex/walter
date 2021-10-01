@@ -8,9 +8,14 @@
     xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
     xmlns:uc="using:Deeplex.Saverwalter.WinUI3.UserControls"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3.Utils"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.Resources>
+        <conv:EuroStringConverter x:Key="EuroStringConverterKey" />
+    </Page.Resources>
+    
     <ScrollViewer>
         <ItemsRepeater ItemsSource="{x:Bind ViewModel.Wohnungen.Value}">
             <ItemsRepeater.ItemTemplate>
@@ -23,10 +28,18 @@
                             Content="{x:Bind Bezeichnung}"  IsChecked="{x:Bind Enabled.Value, Mode=TwoWay}"/>
                         </StackPanel>
                         <uc:ErhaltungsaufwendungenListControl
-                        Margin="0, 10, 0, 10"
-                        Enabled="{x:Bind Enabled.Value, Mode=OneWay}"
-                        Jahr="{x:Bind Jahr.Value, Mode=OneWay}"
-                        WohnungId="{x:Bind Id}" />
+                            Margin="0, 10, 0, 10"
+                            Enabled="{x:Bind Enabled.Value, Mode=OneWay}"
+                            Jahr="{x:Bind Jahr.Value, Mode=OneWay}"
+                            WohnungId="{x:Bind Id}" />
+                        <StackPanel Margin="0,-10,20,10" HorizontalAlignment="Right" Orientation="Horizontal">
+                            <TextBlock
+                                FontSize="18"
+                                Text="Summe: "/>
+                            <TextBlock
+                                FontSize="18"
+                                Text="{x:Bind Summe, Mode=OneWay, Converter={StaticResource EuroStringConverterKey}}" />
+                        </StackPanel>
                         <MenuFlyoutSeparator/>
                     </StackPanel>
                 </DataTemplate>
