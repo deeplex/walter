@@ -11,24 +11,26 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <ItemsRepeater ItemsSource="{x:Bind ViewModel.Wohnungen.Value}">
-        <ItemsRepeater.ItemTemplate>
-            <DataTemplate x:DataType="vm:ErhaltungsaufwendungenPrintEntry">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <CheckBox
+    <ScrollViewer>
+        <ItemsRepeater ItemsSource="{x:Bind ViewModel.Wohnungen.Value}">
+            <ItemsRepeater.ItemTemplate>
+                <DataTemplate x:DataType="vm:ErhaltungsaufwendungenPrintEntry">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox
                             Style="{StaticResource PivotTitleContentControlStyle}"
                             Margin="10,0,0,0"
                             Content="{x:Bind Bezeichnung}"  IsChecked="{x:Bind Enabled.Value, Mode=TwoWay}"/>
-                    </StackPanel>
-                    <uc:ErhaltungsaufwendungenListControl
+                        </StackPanel>
+                        <uc:ErhaltungsaufwendungenListControl
                         Margin="0, 10, 0, 10"
                         Enabled="{x:Bind Enabled.Value, Mode=OneWay}"
                         Jahr="{x:Bind Jahr.Value, Mode=OneWay}"
                         WohnungId="{x:Bind Id}" />
-                    <MenuFlyoutSeparator/>
-                </StackPanel>
-            </DataTemplate>
-        </ItemsRepeater.ItemTemplate>
-    </ItemsRepeater>
+                        <MenuFlyoutSeparator/>
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsRepeater.ItemTemplate>
+        </ItemsRepeater>
+    </ScrollViewer>
 </Page>
