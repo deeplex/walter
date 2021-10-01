@@ -3,6 +3,7 @@ using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Linq;
@@ -107,6 +108,14 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 Anschrift = AdresseViewModel.Anschrift(id, App.ViewModel);
                 Content = Anschrift;
             }
+        }
+
+        private void Erhaltungsaufwendung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            App.Window.AppFrame.Navigate(
+                typeof(ErhaltungsaufwendungenPrintPage),
+                ViewModel.Entity,
+                new DrillInNavigationTransitionInfo());
         }
     }
 }

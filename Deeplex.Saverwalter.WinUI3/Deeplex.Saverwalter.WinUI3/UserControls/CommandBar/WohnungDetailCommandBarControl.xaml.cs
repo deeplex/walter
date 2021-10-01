@@ -37,13 +37,5 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             await ViewModel.selfDestruct();
             App.Window.AppFrame.GoBack();
         }
-
-        private void Erhaltungsaufwendung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-            App.Window.AppFrame.Navigate(
-                typeof(ErhaltungsaufwendungenPrintPage),
-                ViewModel.Entity,
-                new DrillInNavigationTransitionInfo());
-        }
     }
 }

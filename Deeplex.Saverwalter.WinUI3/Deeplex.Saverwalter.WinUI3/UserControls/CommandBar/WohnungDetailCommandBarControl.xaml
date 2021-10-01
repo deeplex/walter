@@ -8,12 +8,6 @@
     mc:Ignorable="d">
 
     <CommandBar>
-        <CommandBar.PrimaryCommands>
-            <AppBarButton
-                Label="Erhaltungsaufwendung hinzufügen"
-                Icon="PostUpdate"
-                Click="Erhaltungsaufwendung_Click" />
-        </CommandBar.PrimaryCommands>
         <CommandBar.SecondaryCommands>
             <AppBarButton Label="Löschen" Icon="Delete" Click="Delete_Click"/>
         </CommandBar.SecondaryCommands>

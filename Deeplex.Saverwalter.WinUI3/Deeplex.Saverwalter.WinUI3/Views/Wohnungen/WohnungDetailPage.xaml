@@ -89,6 +89,16 @@
                         <uc:ExpanderControl.MainContent>
                             <uc:ErhaltungsaufwendungenListControl WohnungId="{x:Bind ViewModel.Id}"/>
                         </uc:ExpanderControl.MainContent>
+                        <uc:ExpanderControl.Bonus>
+                            <Button
+                                Click="Erhaltungsaufwendung_Click"
+                                Background="Transparent">
+                                <StackPanel Orientation="Horizontal">
+                                    <SymbolIcon Symbol="PostUpdate" />
+                                    <TextBlock Margin="10,0,0,0" Text="Erhaltungsaufwendungen"/>
+                                </StackPanel>
+                            </Button>
+                        </uc:ExpanderControl.Bonus>
                     </uc:ExpanderControl>
 
                 </StackPanel>
