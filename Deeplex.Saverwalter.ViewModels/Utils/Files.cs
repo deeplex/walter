@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.Print;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -101,17 +102,39 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             impl.ShowAlert("Datei gespeichert unter " + path);
         }
 
-        public static async Task PrintErhaltungsaufwendungen(List<Wohnung> Wohnungen, bool extended, int Jahr, AppViewModel avm, IAppImplementation impl)
+        public static async Task PrintErhaltungsaufwendungen(
+            List<Wohnung> Wohnungen,
+            bool extended,
+            int Jahr,
+            AppViewModel avm,
+            IAppImplementation impl,
+            List<Model.Erhaltungsaufwendung> filter = null)
         {
             var filename = Jahr.ToString() + " - " + Wohnungen.GetWohnungenBezeichnung(avm);
             if (extended)
             {
                 filename += " + Zusatz";
             }
-            var path = await impl.saveFile(filename, ".docx");
+            if (filter is IList e && e.Count > 0)
+            {
+                filename += " (anteilig)";
+            }
+
+                var path = await impl.saveFile(filename, ".docx");
+
+            if (path == null)
+            {
+                return;
+            }
 
             var l = Wohnungen.Select(w => new ErhaltungsaufwendungWohnung(avm.ctx, w.WohnungId, Jahr)).ToImmutableList();
 
+            if (filter is IList i && i.Count > 0)
+            {
+                l.ForEach(w => w.Liste = w.Liste
+                 .Where(e => !filter.Contains(e.Entity))
+                 .ToImmutableList());
+            }
             l.SaveAsDocx(path);
             // TODO Implement saving the Erhaltungsaufwendunganhänge.
 

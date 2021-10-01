@@ -14,13 +14,24 @@ namespace Deeplex.Saverwalter.ViewModels
             new ObservableProperty<ImmutableList<ErhaltungsaufwendungenPrintEntry>>();
         public ObservableProperty<int> Jahr = new ObservableProperty<int>();
 
+        public AppViewModel Avm { get; }
+
         public AsyncRelayCommand Print;
         private ErhaltungsaufwendungenPrintViewModel(AppViewModel avm, IAppImplementation impl)
         {
+            Avm = avm;
+
             Print = new AsyncRelayCommand( async _ =>
             {
-                var w = Wohnungen.Value.Where(w => w.Enabled.Value).Select(w => w.Entity).ToList();
-                await Utils.Files.PrintErhaltungsaufwendungen(w, false, Jahr.Value, avm, impl);
+                var w = Wohnungen.Value.Where(w => w.Enabled.Value)
+                    .Select(w => w.Entity)
+                    .ToList();
+                var filtered = Wohnungen.Value
+                    .SelectMany(w => w.Liste)
+                    .Where(w => !w.Enabled.Value)
+                    .Select(w => w.Entity)
+                    .ToList();
+                await Utils.Files.PrintErhaltungsaufwendungen(w, false, Jahr.Value, avm, impl, filtered);
             }, _ => true);
             Jahr.Value = DateTime.Now.Year - 1;
         }
@@ -61,6 +72,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<int> Jahr => parent.Jahr;
         public ObservableProperty<bool> Enabled = new ObservableProperty<bool>(true);
         public double Summe => Entity.Erhaltungsaufwendungen.Sum(w => w.Betrag);
+        public ImmutableList<ErhaltungsaufwendungenListEntry> Liste;
 
         private ErhaltungsaufwendungenPrintViewModel parent { get; }
 
@@ -70,6 +82,9 @@ namespace Deeplex.Saverwalter.ViewModels
             parent = vm;
             Id = w.WohnungId;
             Bezeichnung = AdresseViewModel.Anschrift(w) + " - " + w.Bezeichnung;
+            Liste = Entity.Erhaltungsaufwendungen
+                .Select(e => new ErhaltungsaufwendungenListEntry(e, vm.Avm))
+                .ToImmutableList();
         }
     }
 }

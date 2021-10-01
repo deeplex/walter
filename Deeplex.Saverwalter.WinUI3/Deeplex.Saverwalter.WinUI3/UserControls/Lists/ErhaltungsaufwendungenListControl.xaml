@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
     xmlns:conv="using:Deeplex.Saverwalter.WinUI3.Utils"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -19,26 +20,68 @@
         Style="{StaticResource DataGridUserControl}"
         SelectionChanged="DataGrid_SelectionChanged"
         DoubleTapped="Details_Click"
-        Foreground="{x:Bind Enabled, Mode=OneWay, Converter={StaticResource IsEnabledConverterKey}}"
+        IsEnabled="{x:Bind Enabled, Mode=OneWay}"
         Sorting="DataGrid_Sorting"
         ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}"
         SelectedItem="{x:Bind ViewModel.SelectedAufwendung, Mode=TwoWay}">
         <mtuuc:DataGrid.Columns>
-            <mtuuc:DataGridTextColumn
-                Header="Bezeichnung"
-                Binding="{Binding Bezeichnung}"/>
-            <mtuuc:DataGridTextColumn
-                Header="Aussteller"
-                Binding="{Binding Aussteller}"/>
-            <!-- TODO make this optional <mtuuc:DataGridTextColumn
-               Header="Wohnung"
-               Binding="{Binding WohnungString}"/>-->
-            <mtuuc:DataGridTextColumn
-               Header="Betrag"
-               Binding="{Binding Betrag, Converter={StaticResource EuroStringConverterKey}}"/>
-            <mtuuc:DataGridTextColumn
-               Header="Datum"
-               Binding="{Binding Datum, Converter={StaticResource DateStringConverterKey}}"/>
+            <mtuuc:DataGridTemplateColumn
+                Tag="Enabled"
+                Width="40"
+                Visibility="{x:Bind Selectable, Mode=OneWay}">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListEntry">
+                        <CheckBox
+                            VerticalAlignment="Center"
+                            Margin="10,0,0,0"
+                            IsChecked="{x:Bind Enabled.Value, Mode=TwoWay}" />
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Bezeichnung">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListEntry">
+                        <TextBlock
+                            Margin="10,0,10,0"
+                            VerticalAlignment="Center"
+                            Foreground="{x:Bind Enabled.Value, Mode=OneWay, Converter={StaticResource IsEnabledConverterKey}}"
+                            Text="{x:Bind Bezeichnung, Mode=OneWay}" />
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Aussteller">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListEntry">
+                        <TextBlock
+                            Margin="10,0,10,0"
+                            VerticalAlignment="Center"
+                            Foreground="{x:Bind Enabled.Value, Mode=OneWay, Converter={StaticResource IsEnabledConverterKey}}"
+                            Text="{x:Bind Aussteller, Mode=OneWay}" />
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Betrag">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListEntry">
+                        <TextBlock
+                            Margin="10,0,10,0"
+                            VerticalAlignment="Center"
+                            Foreground="{x:Bind Enabled.Value, Mode=OneWay, Converter={StaticResource IsEnabledConverterKey}}"
+                            Text="{x:Bind Betrag, Mode=OneWay, Converter={StaticResource EuroStringConverterKey}}" />
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Datum">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListEntry">
+                        <TextBlock
+                            Margin="10,0,10,0"
+                            VerticalAlignment="Center"
+                            Foreground="{x:Bind Enabled.Value, Mode=OneWay, Converter={StaticResource IsEnabledConverterKey}}"
+                            Text="{x:Bind Datum, Mode=OneWay, Converter={StaticResource DateStringConverterKey}}" />
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
         </mtuuc:DataGrid.Columns>
     </mtuuc:DataGrid>
 </UserControl>

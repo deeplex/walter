@@ -19,6 +19,10 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         private void UpdateFilter()
         {
             ViewModel.Liste.Value = ViewModel.AllRelevant;
+            if (Liste != null)
+            {
+                ViewModel.Liste.Value = Liste;
+            }
             if (WohnungId != 0)
             {
                 ViewModel.Liste.Value = ViewModel.Liste.Value
@@ -45,6 +49,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             ViewModel = new ErhaltungsaufwendungenListViewModel(App.ViewModel);
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, IdProp) => UpdateFilter());
+            RegisterPropertyChangedCallback(ListeProperty, (DepObj, IdProp) => UpdateFilter());
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, IdProp) => UpdateFilter());
             RegisterPropertyChangedCallback(JahrProperty, (DepObj, IdProp) => UpdateFilter());
         }
@@ -84,6 +89,20 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                   typeof(ErhaltungsaufwendungenListControl),
                   new PropertyMetadata(0));
 
+        public ImmutableList<ErhaltungsaufwendungenListEntry> Liste
+        {
+            get { return (ImmutableList<ErhaltungsaufwendungenListEntry>)GetValue(ListeProperty); }
+            set { SetValue(ListeProperty, value); }
+        }
+
+        public static readonly DependencyProperty ListeProperty
+            = DependencyProperty.Register(
+                  "Liste",
+                  typeof(ImmutableList<ErhaltungsaufwendungenListEntry>),
+                  typeof(ErhaltungsaufwendungenListControl),
+                  new PropertyMetadata(null));
+
+
         public string Filter
         {
             get { return (string)GetValue(FilterProperty); }
@@ -110,10 +129,31 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                   typeof(ErhaltungsaufwendungenListControl),
                   new PropertyMetadata(true));
 
+        public bool Selectable
+        {
+            get { return (bool)GetValue(SelectableProperty); }
+            set { SetValue(SelectableProperty, value); }
+        }
+
+        public static readonly DependencyProperty SelectableProperty
+            = DependencyProperty.Register(
+                  "Selectable",
+                  typeof(bool),
+                  typeof(ErhaltungsaufwendungenListControl),
+                  new PropertyMetadata(false));
+
+
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var a = ((ErhaltungsaufwendungenListEntry)((DataGrid)sender).SelectedItem).Entity;
-            App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
+            if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungenListEntry entry)
+            {
+                var a = entry.Entity;
+                App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
+            }
+            else
+            {
+                App.ViewModel.updateListAnhang(null);
+            }
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

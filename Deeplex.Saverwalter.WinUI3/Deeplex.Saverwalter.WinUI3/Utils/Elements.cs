@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
         public static ImmutableList<T> Sort<T>(this DataGrid dataGrid, DataGridColumn columnToSort, ImmutableList<T> list)
         {
             var lastSortedColumn = dataGrid.Columns.Where(column =>
-                column.SortDirection.HasValue).FirstOrDefault();
+                    column.SortDirection.HasValue).FirstOrDefault();
             bool isSortColumnDifferentThanLast = columnToSort != lastSortedColumn;
             bool isAscending = isSortColumnDifferentThanLast ||
                 columnToSort.SortDirection == DataGridSortDirection.Descending;
@@ -33,12 +33,13 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
                 lastSortedColumn.SortDirection = null;
             }
 
-            var propertyName = columnToSort.ClipboardContentBinding.Path.Path;
-            object sortFunc(T obj) => obj.GetType().GetProperty(propertyName).GetValue(obj);
-
+            var propertyName = (string)columnToSort.Tag ??
+                columnToSort.ClipboardContentBinding?.Path?.Path ??
+                (string)columnToSort.Header;
+            object sortFunc(T obj) => obj.GetType().GetProperty(propertyName)?.GetValue(obj);
             var list2 = isAscending ?
-                list.OrderBy(sortFunc).ToImmutableList() :
-                list.OrderByDescending(sortFunc).ToImmutableList();
+                    list.OrderBy(sortFunc).ToImmutableList() :
+                    list.OrderByDescending(sortFunc).ToImmutableList();
 
             return list2;
         }
