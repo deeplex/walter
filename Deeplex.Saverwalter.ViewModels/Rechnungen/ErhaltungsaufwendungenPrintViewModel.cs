@@ -70,7 +70,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public int Id { get; }
         public string Bezeichnung { get; }
         public ObservableProperty<int> Jahr => parent.Jahr;
-        public ObservableProperty<bool> Enabled = new ObservableProperty<bool>(true);
+        public ObservableProperty<bool> Enabled = new ObservableProperty<bool>();
         public ObservableProperty<double> Summe = new ObservableProperty<double>();
         public ImmutableList<ErhaltungsaufwendungenListEntry> Liste;
 
@@ -87,7 +87,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToImmutableList();
             Liste.ForEach(e => e.Enabled.PropertyChanged += updateSumme);
             updateSumme(null, null);
-
+            Enabled.Value = Liste.Count > 0;
         }
 
         private void updateSumme(object sender, System.ComponentModel.PropertyChangedEventArgs e)

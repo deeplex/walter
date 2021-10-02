@@ -27,17 +27,17 @@
                             Content="{x:Bind Bezeichnung}"  IsChecked="{x:Bind Enabled.Value, Mode=TwoWay}"/>
                         <StackPanel Visibility="{x:Bind Enabled.Value, Mode=OneWay}">
                             <uc:ErhaltungsaufwendungenListControl
-                            Margin="0, 10, 0, 10"
-                            Enabled="{x:Bind Enabled.Value, Mode=OneWay}"
-                            Selectable="True"
-                            Jahr="{x:Bind Jahr.Value, Mode=OneWay}"
-                            Liste="{x:Bind Liste}" />
+                                Margin="0, 10, 0, 10"
+                                Enabled="{x:Bind Enabled.Value, Mode=OneWay}"
+                                Selectable="True"
+                                Jahr="{x:Bind Jahr.Value, Mode=OneWay}"
+                                Liste="{x:Bind Liste}" />
                             <StackPanel Margin="0,-10,20,10" HorizontalAlignment="Right" Orientation="Horizontal">
                                 <TextBlock FontSize="18" Text="Summe: "/>
                                 <TextBlock
-                                Margin="10,0,0,0"
-                                FontSize="18"
-                                Text="{x:Bind Summe.Value, Mode=OneWay, Converter={StaticResource EuroStringConverterKey}}" />
+                                    Margin="10,0,0,0"
+                                    FontSize="18"
+                                    Text="{x:Bind Summe.Value, Mode=OneWay, Converter={StaticResource EuroStringConverterKey}}" />
                             </StackPanel>
                         </StackPanel>
                         <MenuFlyoutSeparator/>
