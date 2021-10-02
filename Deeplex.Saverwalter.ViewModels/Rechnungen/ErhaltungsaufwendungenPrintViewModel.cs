@@ -86,13 +86,16 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Select(e => new ErhaltungsaufwendungenListEntry(e, vm.Avm))
                 .ToImmutableList();
             Liste.ForEach(e => e.Enabled.PropertyChanged += updateSumme);
+            parent.Jahr.PropertyChanged += updateSumme;
             updateSumme(null, null);
-            Enabled.Value = Liste.Count > 0;
         }
 
         private void updateSumme(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Summe.Value = Liste.Where(w => w.Enabled.Value).Sum(w => w.Betrag);
+            Summe.Value = Liste
+                .Where(w => w.Enabled.Value && w.Datum.Year == parent.Jahr.Value)
+                .Sum(w => w.Betrag);
+            Enabled.Value = Summe.Value > 0;
         }
     }
 }
