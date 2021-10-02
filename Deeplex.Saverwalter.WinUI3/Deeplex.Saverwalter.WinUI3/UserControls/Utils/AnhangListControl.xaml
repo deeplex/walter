@@ -52,9 +52,9 @@
                                     Text="{x:Bind DateiName}">
                                     <ToolTipService.ToolTip>
                                         <StackPanel>
-                                            <TextBlock Text="{x:Bind path, Converter={StaticResource PathConverter}}" />
+                                            <TextBlock Text="{x:Bind path, Converter={StaticResource PathConverterKey}}" />
                                             <TextBlock Text="{x:Bind size, Converter={StaticResource FileSizeConverterKey}}" />
-                                            <TextBlock Text="{x:Bind CreationTime, Converter={StaticResource ErstelltAmConverter}}" />
+                                            <TextBlock Text="{x:Bind CreationTime, Converter={StaticResource ErstelltAmConverterKey}}" />
                                         </StackPanel>
                                     </ToolTipService.ToolTip>
                                 </TextBlock>
