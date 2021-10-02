@@ -24,15 +24,31 @@ namespace Deeplex.Saverwalter.ViewModels
             Avm = avm;
 
             Print = new AsyncRelayCommand(async _ =>
-           {
-               var w = Wohnungen.Where(w => w.Enabled.Value)
-                   .Select(w => w.Entity)
-                   .ToList();
-               var filtered = Wohnungen
+            {
+                var w = Wohnungen.Where(w => w.Enabled.Value)
+                    .Select(w => w.Entity)
+                    .ToList();
+                var filtered = Wohnungen
                    .SelectMany(w => w.Liste)
                    .Where(w => !w.Enabled.Value)
                    .Select(w => w.Entity)
                    .ToList();
+
+                var ww = Zusatz.Where(z => z.Enabled.Value)
+                    .SelectMany(w => w.Wohnungen)
+                    .Where(w => w.Enabled.Value)
+                    .Select(w => w.Entity)
+                    .ToList();
+                var filterered = Zusatz.Where(z => z.Enabled.Value)
+                    .SelectMany(w => w.Wohnungen)
+                    .SelectMany(w => w.Liste)
+                    .Where(w => !w.Enabled.Value)
+                    .Select(w => w.Entity)
+                    .ToList();
+
+                w = w.Concat(ww).ToList();
+                filtered = filtered.Concat(filterered).ToList();
+
                await Utils.Files.PrintErhaltungsaufwendungen(w, false, Jahr.Value, avm, impl, filtered);
            }, _ => true);
             Jahr.Value = DateTime.Now.Year - 1;
