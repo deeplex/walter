@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         {
             try
             {
-                var Wohnungen = ViewModel.Wohnungen.Value.Select(w => w.Entity).ToList();
+                var Wohnungen = ViewModel.Wohnungen.Select(w => w.Entity).ToList();
                 await Files.PrintErhaltungsaufwendungen(Wohnungen, false, ViewModel.Jahr.Value, App.ViewModel, App.Impl);
             }
             catch (Exception ex)

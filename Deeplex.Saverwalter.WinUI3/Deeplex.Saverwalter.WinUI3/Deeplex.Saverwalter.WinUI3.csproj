@@ -28,6 +28,7 @@
     <None Remove="UserControls\CommandBar\WohnungListCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ZaehlerCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ZaehlerListCommandBarControl.xaml" />
+    <None Remove="UserControls\Utils\ErhaltungsaufwendungWohnungenControl.xaml" />
     <None Remove="Views\Rechnungen\ErhaltungsaufwendungenPrintPage.xaml" />
   </ItemGroup>
   
@@ -115,6 +116,9 @@
     </Compile>
     <Compile Update="UserControls\Lists\ZaehlerstandListControl.xaml.cs">
       <DependentUpon>ZaehlerstandListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\Utils\PersonDetailControl - Copy.xaml.cs">
+      <DependentUpon>PersonDetailControl.xaml</DependentUpon>
     </Compile>
     <Compile Update="UserControls\Utils\PersonDetailControl.xaml.cs">
       <DependentUpon>PersonDetailControl.xaml</DependentUpon>
@@ -319,6 +323,10 @@
     <Page Update="UserControls\Lists\ZaehlerstandListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UserControls\Utils\ErhaltungsaufwendungWohnungenControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\Utils\PersonDetailControl.xaml">
       <SubType>Designer</SubType>

@@ -10,9 +10,11 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class ErhaltungsaufwendungenPrintViewModel
     {
-        public ObservableProperty<ImmutableList<ErhaltungsaufwendungenPrintEntry>> Wohnungen =
-            new ObservableProperty<ImmutableList<ErhaltungsaufwendungenPrintEntry>>();
         public ObservableProperty<int> Jahr = new ObservableProperty<int>();
+        public ImmutableList<ErhaltungsaufwendungenPrintEntry> Wohnungen { get; }
+        public ImmutableList<ErhaltungsaufwendungenPrintViewModel> Zusatz;
+        public string Titel { get; }
+        public ObservableProperty<bool> Enabled = new ObservableProperty<bool>(true);
 
         public AppViewModel Avm { get; }
 
@@ -21,39 +23,39 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Avm = avm;
 
-            Print = new AsyncRelayCommand( async _ =>
-            {
-                var w = Wohnungen.Value.Where(w => w.Enabled.Value)
-                    .Select(w => w.Entity)
-                    .ToList();
-                var filtered = Wohnungen.Value
-                    .SelectMany(w => w.Liste)
-                    .Where(w => !w.Enabled.Value)
-                    .Select(w => w.Entity)
-                    .ToList();
-                await Utils.Files.PrintErhaltungsaufwendungen(w, false, Jahr.Value, avm, impl, filtered);
-            }, _ => true);
+            Print = new AsyncRelayCommand(async _ =>
+           {
+               var w = Wohnungen.Where(w => w.Enabled.Value)
+                   .Select(w => w.Entity)
+                   .ToList();
+               var filtered = Wohnungen
+                   .SelectMany(w => w.Liste)
+                   .Where(w => !w.Enabled.Value)
+                   .Select(w => w.Entity)
+                   .ToList();
+               await Utils.Files.PrintErhaltungsaufwendungen(w, false, Jahr.Value, avm, impl, filtered);
+           }, _ => true);
             Jahr.Value = DateTime.Now.Year - 1;
         }
         public ErhaltungsaufwendungenPrintViewModel(Wohnung w, AppViewModel avm, IAppImplementation impl) : this(avm, impl)
         {
             var self = this;
 
-            Wohnungen.Value = new List<ErhaltungsaufwendungenPrintEntry>
+            Wohnungen = new List<ErhaltungsaufwendungenPrintEntry>
             {
                 new ErhaltungsaufwendungenPrintEntry(w, self)
             }.ToImmutableList();
         }
 
-        public ErhaltungsaufwendungenPrintViewModel(IPerson p, AppViewModel avm, IAppImplementation impl) : this(avm, impl)
+        public ErhaltungsaufwendungenPrintViewModel(IPerson p, AppViewModel avm, IAppImplementation impl, params Guid[] g) : this(avm, impl)
         {
             var self = this;
             var Personen = avm.ctx.JuristischePersonen
                 .ToList()
                 .Where(j => j.Mitglieder.Exists(m => m.PersonId == p.PersonId))
                 .ToList();
-            
-            Wohnungen.Value = avm.ctx.Wohnungen
+
+            Wohnungen = avm.ctx.Wohnungen
                 .ToList()
                 .Where(w =>
                     w.BesitzerId == p.PersonId ||
@@ -61,6 +63,21 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Select(w => new ErhaltungsaufwendungenPrintEntry(w, self))
                 .ToImmutableList();
 
+            Titel = p.Bezeichnung;
+            Enabled.Value = g.Length == 0;
+
+            Zusatz = avm.ctx.JuristischePersonenMitglieder
+                .Include(j => j.JuristischePerson)
+                .Where(j => j.PersonId == p.PersonId && !g.Contains(j.PersonId))
+                .Select(z => new ErhaltungsaufwendungenPrintViewModel(
+                    z.JuristischePerson, avm, impl, g.Append(z.PersonId).ToArray()))
+                .ToList()
+                .Concat(avm.ctx.JuristischePersonenMitglieder
+                    .Where(j => j.JuristischePerson.PersonId == p.PersonId && !g.Contains(j.PersonId))
+                    .Select(z => new ErhaltungsaufwendungenPrintViewModel(
+                        avm.ctx.FindPerson(z.PersonId), avm, impl, g.Append(z.PersonId).ToArray()))
+                    .ToList())
+                .ToImmutableList();
         }
     }
 
