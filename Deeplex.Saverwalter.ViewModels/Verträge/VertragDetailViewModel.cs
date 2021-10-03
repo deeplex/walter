@@ -36,8 +36,6 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<ImmutableList<KontaktListEntry>> Mieter
             = new ObservableProperty<ImmutableList<KontaktListEntry>>();
         public DateTimeOffset? AddVersionDatum;
-        public ObservableProperty<int> BetriebskostenJahr
-            = new ObservableProperty<int>();
 
         public DateTimeOffset lastBeginn => Versionen.Value.Last().Beginn;
         public DateTimeOffset? firstEnde => Versionen.Value.First().Ende;
@@ -78,8 +76,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToImmutableList();
 
             UpdateMieterList();
-
-            BetriebskostenJahr.Value = DateTime.Now.Year - 1;
 
             AddMieterCommand = new RelayCommand(_ =>
             {

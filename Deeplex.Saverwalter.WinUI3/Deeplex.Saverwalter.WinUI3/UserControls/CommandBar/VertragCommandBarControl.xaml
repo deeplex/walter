@@ -10,22 +10,10 @@
     <CommandBar>
         <CommandBar.PrimaryCommands>
             <AppBarButton Label="Löschen" Icon="Delete" Click="Delete_Click"/>
-            <AppBarButton Label="Betriebskostenabrechnung" Icon="PostUpdate">
-                <AppBarButton.Flyout>
-                    <Flyout>
-                        <StackPanel Orientation="Horizontal">
-                            <NumberBox
-                        SpinButtonPlacementMode="Inline"
-                        AllowFocusOnInteraction="True"
-                        Value="{x:Bind ViewModel.BetriebskostenJahr.Value}"/>
-                            <Button
-                                Click="Betriebskostenabrechnung_Click"
-                                CommandParameter="{x:Bind ViewModel.BetriebskostenJahr.Value}">
-                                <SymbolIcon Symbol="SaveLocal"/>
-                            </Button>
-                        </StackPanel>
-                    </Flyout>
-                </AppBarButton.Flyout>
+            <AppBarButton
+                Click="Betriebskostenabrechnung_Click"
+                Label="Betriebskostenabrechnung"
+                Icon="PostUpdate">
             </AppBarButton>
         </CommandBar.PrimaryCommands>
     </CommandBar>

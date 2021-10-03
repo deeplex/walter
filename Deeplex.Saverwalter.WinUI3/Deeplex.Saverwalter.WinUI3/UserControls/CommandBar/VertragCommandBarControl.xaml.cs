@@ -1,7 +1,9 @@
 ﻿using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.ViewModels.Utils;
+using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 using System;
 
 namespace Deeplex.Saverwalter.WinUI3.UserControls
@@ -36,15 +38,9 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private async void Betriebskostenabrechnung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            try
-            {
-                var Jahr = (int)((Button)sender).CommandParameter;
-                await Files.PrintBetriebskostenabrechnung(ViewModel.Entity, Jahr, App.ViewModel, App.Impl);
-            }
-            catch (Exception ex)
-            {
-                App.Impl.ShowAlert(ex.Message);
-            }
+
+            App.Window.AppFrame.Navigate(typeof(BetriebskostenrechnungPrintPage), ViewModel.Entity,
+                new DrillInNavigationTransitionInfo());
         }
     }
 }

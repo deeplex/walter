@@ -15,6 +15,7 @@
   <ItemGroup>
     <None Remove="UserControls\CommandBar\BetriebskostenRechnungenCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\BetriebskostenrechnungenListCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\BetriebskostenrechnungPrintCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\CommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ErhaltungsaufwendungenCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ErhaltungsaufwendungenListCommandBarControl.xaml" />
@@ -29,6 +30,7 @@
     <None Remove="UserControls\CommandBar\ZaehlerCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ZaehlerListCommandBarControl.xaml" />
     <None Remove="UserControls\Utils\ErhaltungsaufwendungWohnungenControl.xaml" />
+    <None Remove="Views\Rechnungen\BetriebskostenrechnungPrintPage.xaml" />
     <None Remove="Views\Rechnungen\ErhaltungsaufwendungenPrintPage.xaml" />
   </ItemGroup>
   
@@ -171,6 +173,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="UserControls\CommandBar\BetriebskostenrechnungPrintCommandBarControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="UserControls\CommandBar\ErhaltungsaufwendungenPrintCommandBarControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
@@ -346,6 +352,10 @@
     </Page>
     <Page Update="Views\Rechnungen\BetriebskostenRechnungenListViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Rechnungen\BetriebskostenrechnungPrintPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\Rechnungen\ErhaltungsaufwendungenPrintPage.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
