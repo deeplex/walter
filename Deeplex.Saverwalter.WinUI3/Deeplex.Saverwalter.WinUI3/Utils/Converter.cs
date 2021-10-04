@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Print;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
@@ -66,6 +67,17 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
     {
         public object Convert(object value, Type targetType, object parameter, string language)
             => value.ToString();
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class GetBriefAnredeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+            => App.ViewModel.ctx.FindPerson((Guid)value).GetBriefAnrede();
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {

@@ -16,15 +16,7 @@ namespace Deeplex.Saverwalter.Print.FirstPage
 
             foreach (var m in b.Mieter)
             {
-                if (m is JuristischePerson j)
-                {
-                    run.Append(new Text(m.Bezeichnung));
-                }
-                else
-                {
-                    var Anrede = m.Anrede == Model.Anrede.Herr ? "Herrn " : m.Anrede == Model.Anrede.Frau ? "Frau " : "";
-                    run.Append(new Text(Anrede + m.Bezeichnung));
-                }
+                run.Append(new Text(m.GetBriefAnrede()));
                 run.Append(new Break());
                 counter--;
             }

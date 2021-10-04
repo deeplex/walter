@@ -7,6 +7,20 @@ namespace Deeplex.Saverwalter.Print
 {
     public static class Utils
     {
+        public static string GetBriefAnrede(this IPerson p)
+        {
+            var ret = "";
+            if (p is NatuerlichePerson n)
+            {
+                ret += n.Anrede == Anrede.Herr ? "Herrn " :
+                    n.Anrede == Anrede.Frau ? "Frau " :
+                    "";
+            }
+            ret += p.Bezeichnung;
+
+            return ret;
+        }
+
         public static string Anschrift(Adresse a) => a.Strasse + " " + a.Hausnummer + ", " + a.Postleitzahl + " " + a.Stadt;
 
         public static string Prozent(double d) => string.Format("{0:N2}%", d * 100);

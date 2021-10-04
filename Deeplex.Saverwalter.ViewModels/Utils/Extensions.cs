@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public static class BetriebskostenrechnungExtensions
+    public static class Extensions
     {
         public static string GetWohnungenBezeichnung(this Betriebskostenrechnung r, AppViewModel avm)
         {
@@ -35,6 +35,5 @@ namespace Deeplex.Saverwalter.ViewModels
                     }
                     return ret;
                 }));
-
     }
 }

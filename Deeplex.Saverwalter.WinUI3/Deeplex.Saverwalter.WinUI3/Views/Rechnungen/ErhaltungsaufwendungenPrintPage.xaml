@@ -8,7 +8,12 @@
     xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
     xmlns:model="using:Deeplex.Saverwalter.Model"
     mc:Ignorable="d"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3.Utils"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <conv:GetBriefAnredeConverter x:Key="GetBriefAnredeConverterKey" />
+    </Page.Resources>
 
     <StackPanel>
         <RelativePanel>
@@ -42,11 +47,8 @@
         <MenuFlyoutSeparator Margin="20"/>
         <ItemsRepeater ItemsSource="{x:Bind ViewModel.Betriebskostenabrechnung.Mieter}">
             <ItemsRepeater.ItemTemplate>
-                <DataTemplate x:DataType="model:NatuerlichePerson">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{x:Bind Anrede}" />
-                        <TextBlock Text="{x:Bind Bezeichnung}" />
-                    </StackPanel>
+                <DataTemplate x:DataType="model:IPerson">
+                    <TextBlock Text="{x:Bind PersonId, Converter={StaticResource GetBriefAnredeConverterKey}}" />
                 </DataTemplate>
             </ItemsRepeater.ItemTemplate>
         </ItemsRepeater>
