@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
             {
                 ViewModel = new BetriebskostenrechnungPrintViewModel(v, App.ViewModel, App.Impl);
             }
-           
+
             App.Window.CommandBar.MainContent = new BetriebskostenrechnungPrintCommandBarControl { ViewModel = ViewModel };
 
             base.OnNavigatedTo(e);

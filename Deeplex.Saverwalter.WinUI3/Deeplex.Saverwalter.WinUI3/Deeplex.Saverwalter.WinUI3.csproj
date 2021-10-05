@@ -353,11 +353,11 @@
     <Page Update="Views\Rechnungen\BetriebskostenRechnungenListViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="Views\Rechnungen\BetriebskostenrechnungPrintPage.xaml">
+    <Page Update="Views\Rechnungen\ErhaltungsaufwendungenPrintPage.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Views\Rechnungen\ErhaltungsaufwendungenPrintPage.xaml">
+    <Page Update="Views\Rechnungen\BetriebskostenrechnungPrintPage.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="Views\Rechnungen\ErhaltungsaufwendungenDetailPage.xaml">

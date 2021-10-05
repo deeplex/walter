@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Print;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
