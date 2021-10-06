@@ -27,6 +27,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public string Result => Betriebskostenabrechnung.Result.ToString() + "€"; // TODO
         public string RefundDemand => Betriebskostenabrechnung.RefundDemand();
         public string GenerischerText => Betriebskostenabrechnung.GenerischerText();
+        public bool dir => Betriebskostenabrechnung.dir();
+        public bool nWF => Betriebskostenabrechnung.nWF();
+        public bool nNF => Betriebskostenabrechnung.nNF();
+        public bool nNE => Betriebskostenabrechnung.nNE();
+        public bool nPZ => Betriebskostenabrechnung.nPZ();
+        public bool nVb => Betriebskostenabrechnung.nVb();
+        public string Anmerkung => Betriebskostenabrechnung.Anmerkung();
 
         public AsyncRelayCommand Print;
         public BetriebskostenrechnungPrintViewModel(Vertrag v, AppViewModel avm, IAppImplementation impl)

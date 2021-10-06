@@ -9,12 +9,12 @@ namespace Deeplex.Saverwalter.Print.SecondPage
     {
         private static Table ExplainUmlageschluessel(Betriebskostenabrechnung b)
         {
-            var dir = b.Gruppen.Any(g => g.Rechnungen.Any(r => r.Gruppen.Count == 1));
-            var nWF = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachWohnflaeche));
-            var nNF = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachNutzflaeche));
-            var nNE = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachNutzeinheit));
-            var nPZ = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachPersonenzahl));
-            var nVb = b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachVerbrauch));
+            var dir = b.dir();
+            var nWF = b.nWF();
+            var nNF = b.nNF();
+            var nNE = b.nNE();
+            var nPZ = b.nPZ();
+            var nVb = b.nVb();
             // There is a Umlage nach Nutzfläche in the Heizkostenberechnung:
             if (!nNF)
             {
@@ -108,7 +108,7 @@ namespace Deeplex.Saverwalter.Print.SecondPage
 
             t.Append(new TableRow(ContentCell(""), ContentCell("")),
                     ContentCellEnd("Anmerkung: "),
-                    ContentCellEnd("Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger) Kostenanteil"));
+                    ContentCellEnd(b.Anmerkung()));
 
             return t;
         }

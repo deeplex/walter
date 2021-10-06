@@ -14,89 +14,185 @@
     <Page.Resources>
         <conv:GetBriefAnredeConverter x:Key="GetBriefAnredeConverterKey" />
         <conv:DateStringConverter x:Key="DateStringConverterKey" />
+        <conv:ToDescriptionStringConverter x:Key="ToDescriptionStringConverterKey" />
     </Page.Resources>
 
     <ScrollViewer>
-    <StackPanel>
-        <RelativePanel>
-            <StackPanel RelativePanel.AlignLeftWithPanel="True">
-                <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Bezeichnung}" />
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Adresse.Strasse}" />
-                    <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Adresse.Hausnummer}" Margin="5,0,0,0"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Adresse.Postleitzahl}" />
-                    <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Adresse.Stadt}" Margin="5,0,0,0"/>
-                </StackPanel>
-            </StackPanel>
-            <StackPanel RelativePanel.AlignRightWithPanel="True">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="E-Mail: "/>
-                    <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Email}" Margin="5,0,0,0"  />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Tel.: " />
-                    <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Telefon}" Margin="5,0,0,0"  />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Mobil: "/>
-                    <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Mobil}" Margin="5,0,0,0"  />
-                </StackPanel>
-            </StackPanel>
-        </RelativePanel>
-
-        <MenuFlyoutSeparator Margin="20"/>
-        
-        <ItemsRepeater ItemsSource="{x:Bind ViewModel.Betriebskostenabrechnung.Mieter}">
-            <ItemsRepeater.ItemTemplate>
-                <DataTemplate x:DataType="model:IPerson">
-                    <TextBlock Text="{x:Bind PersonId, Converter={StaticResource GetBriefAnredeConverterKey}}" />
-                </DataTemplate>
-            </ItemsRepeater.ItemTemplate>
-        </ItemsRepeater>
         <StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{x:Bind ViewModel.FirstMieter.Adresse.Strasse}" />
-                <TextBlock Text="{x:Bind ViewModel.FirstMieter.Adresse.Hausnummer}" Margin="5,0,0,0"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{x:Bind ViewModel.FirstMieter.Adresse.Postleitzahl}" />
-                <TextBlock Text="{x:Bind ViewModel.FirstMieter.Adresse.Stadt}" Margin="5,0,0,0"/>
-            </StackPanel>
-        </StackPanel>
+            <RelativePanel>
+                <StackPanel RelativePanel.AlignLeftWithPanel="True">
+                    <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Bezeichnung}" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Adresse.Strasse}" />
+                        <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Adresse.Hausnummer}" Margin="5,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Adresse.Postleitzahl}" />
+                        <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Adresse.Stadt}" Margin="5,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel RelativePanel.AlignRightWithPanel="True">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="E-Mail: "/>
+                        <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Email}" Margin="5,0,0,0"  />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Tel.: " />
+                        <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Telefon}" Margin="5,0,0,0"  />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Mobil: "/>
+                        <TextBlock Text="{x:Bind ViewModel.Betriebskostenabrechnung.Ansprechpartner.Mobil}" Margin="5,0,0,0"  />
+                    </StackPanel>
+                </StackPanel>
+            </RelativePanel>
 
-        <MenuFlyoutSeparator Margin="20"/>
+            <MenuFlyoutSeparator Margin="20"/>
 
-        <RelativePanel>
-            <TextBlock
+            <ItemsRepeater ItemsSource="{x:Bind ViewModel.Betriebskostenabrechnung.Mieter}">
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="model:IPerson">
+                        <TextBlock Text="{x:Bind PersonId, Converter={StaticResource GetBriefAnredeConverterKey}}" />
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{x:Bind ViewModel.FirstMieter.Adresse.Strasse}" />
+                    <TextBlock Text="{x:Bind ViewModel.FirstMieter.Adresse.Hausnummer}" Margin="5,0,0,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{x:Bind ViewModel.FirstMieter.Adresse.Postleitzahl}" />
+                    <TextBlock Text="{x:Bind ViewModel.FirstMieter.Adresse.Stadt}" Margin="5,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <MenuFlyoutSeparator Margin="20"/>
+
+            <RelativePanel>
+                <TextBlock
                 RelativePanel.AlignRightWithPanel="True"
                 Text="{x:Bind ViewModel.Today, Converter={StaticResource DateStringConverterKey}}" />
-        </RelativePanel>
-        
-        <TextBlock Text="{x:Bind ViewModel.Title}" FontWeight="Bold"/>
-        <TextBlock Text="{x:Bind ViewModel.Mieterliste}"/>
-        <TextBlock Text="{x:Bind ViewModel.Mietobjekt}"/>
-        <RelativePanel Width="300" HorizontalAlignment="Left">
-            <TextBlock Text="Abrechnungszeitraum: "/>
-            <TextBlock Text="{x:Bind ViewModel.Abrechnungszeitraum}" RelativePanel.AlignRightWithPanel="True"/>
-        </RelativePanel>
-        <RelativePanel Width="300" HorizontalAlignment="Left">
-            <TextBlock Text="Nutzungszeitraum: "/>
-            <TextBlock Text="{x:Bind ViewModel.Nutzungszeitraum}" RelativePanel.AlignRightWithPanel="True"/>
-        </RelativePanel>
-        <TextBlock Margin="0,10,0,0" Text="{x:Bind ViewModel.Gruss}" />
-        <RelativePanel>
-            <TextBlock Text="{x:Bind ViewModel.ResultTxt}" TextWrapping="WrapWholeWords"/>
-            <TextBlock
+            </RelativePanel>
+
+            <TextBlock Text="{x:Bind ViewModel.Title}" FontWeight="Bold"/>
+            <TextBlock Text="{x:Bind ViewModel.Mieterliste}"/>
+            <TextBlock Text="{x:Bind ViewModel.Mietobjekt}"/>
+            <RelativePanel Width="300" HorizontalAlignment="Left">
+                <TextBlock Text="Abrechnungszeitraum: "/>
+                <TextBlock Text="{x:Bind ViewModel.Abrechnungszeitraum}" RelativePanel.AlignRightWithPanel="True"/>
+            </RelativePanel>
+            <RelativePanel Width="300" HorizontalAlignment="Left">
+                <TextBlock Text="Nutzungszeitraum: "/>
+                <TextBlock Text="{x:Bind ViewModel.Nutzungszeitraum}" RelativePanel.AlignRightWithPanel="True"/>
+            </RelativePanel>
+            <TextBlock Margin="0,10,0,0" Text="{x:Bind ViewModel.Gruss}" />
+            <RelativePanel>
+                <TextBlock Text="{x:Bind ViewModel.ResultTxt}" TextWrapping="WrapWholeWords"/>
+                <TextBlock
                 Text="{x:Bind ViewModel.Result}"
                 FontWeight="Bold"
                 RelativePanel.AlignBottomWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True"/>
-        </RelativePanel>
-        <TextBlock Margin="0,10,0,0" Text="{x:Bind ViewModel.RefundDemand}" />
+            </RelativePanel>
+            <TextBlock Margin="0,10,0,0" Text="{x:Bind ViewModel.RefundDemand}" />
 
-        <TextBlock Margin="0,10,0,0" Text="{x:Bind ViewModel.GenerischerText}" TextWrapping="WrapWholeWords"/>
-    </StackPanel>
+            <TextBlock Margin="0,10,0,0" Text="{x:Bind ViewModel.GenerischerText}" TextWrapping="WrapWholeWords"/>
+
+            <MenuFlyoutSeparator Margin="20"/>
+
+            <TextBlock Margin="0,0,0,10" Text="Abrechnung der Nebenkosten" FontStyle="Italic" FontWeight="Bold"/>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Umlageschlüssel" FontWeight="Bold" Width="200"/>
+                <TextBlock Text="Bedeutung" FontWeight="Bold"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Visibility="{x:Bind ViewModel.dir}">
+                <TextBlock Text="Direkt" Width="200"/>
+                <TextBlock Text="Direkte Zuordnung"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Visibility="{x:Bind ViewModel.nWF}">
+                <TextBlock Text="n. WF." Width="200"/>
+                <TextBlock Text="nach Wohnfläche in m²"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Visibility="{x:Bind ViewModel.nNF}">
+                <TextBlock Text="n. NF." Width="200"/>
+                <TextBlock Text="nach Nutzfläche in m²"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Visibility="{x:Bind ViewModel.nNE}">
+                <TextBlock Text="n. NE." Width="200"/>
+                <TextBlock Text="nach Anzahl der Wohn-/Nutzeinheiten"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Visibility="{x:Bind ViewModel.nPZ}">
+                <TextBlock Text="n. Pers." Width="200"/>
+                <TextBlock Text="nach Personenzahl/Anzahl der Bewohner"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Visibility="{x:Bind ViewModel.nVb}">
+                <TextBlock Text="n. Verb." Width="200"/>
+                <TextBlock Text="nach Verbrauch (in m³ oder in kWh)"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Umlageweg" FontWeight="Bold" Width="200"/>
+                <TextBlock Text="Beschreibung" FontWeight="Bold"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Visibility="{x:Bind ViewModel.dir}">
+                <TextBlock Text="Direkt" Width="200"/>
+                <TextBlock Text="Kostenanteil = Kosten werden Einheit direkt zugeordnet."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Visibility="{x:Bind ViewModel.nWF}">
+                <TextBlock Text="n. WF." Width="200"/>
+                <TextBlock Text="Kostenanteil = Kosten je Quadratmeter Wohnfläche mal Anteil Fläche je Wohnung."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Visibility="{x:Bind ViewModel.nNF}">
+                <TextBlock Text="n. NF." Width="200"/>
+                <TextBlock Text="Kostenanteil = Kosten je Quadratmeter Nutzfläche mal Anteil Fläche je Wohnung."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Visibility="{x:Bind ViewModel.nNE}">
+                <TextBlock Text="n. NE." Width="200"/>
+                <TextBlock Text="Kostenanteil = Kosten je Wohn-/Nutzeinheit."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Visibility="{x:Bind ViewModel.nPZ}">
+                <TextBlock Text="n. Pers." Width="200"/>
+                <TextBlock Text="Kostenanteil = Kosten je Hausbewohner mal Anzahl Bewohner je Wohnung."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Visibility="{x:Bind ViewModel.nVb}">
+                <TextBlock Text="n. Verb." Width="200"/>
+                <TextBlock
+                    TextWrapping="WrapWholeWords"
+                    Text="Kostenanteil = Kosten je Verbrauchseinheit mal individuelle Verbrauchsmenge in Kubikmetern oder Kilowattstunden."/>
+            </StackPanel>
+
+            <TextBlock Margin="0,10,0,0" Text="Anmerkung:" />
+            <TextBlock Margin="0,10,0,0" TextWrapping="WrapWholeWords" Text="{x:Bind ViewModel.Anmerkung}" />
+
+            <TextBlock
+                Margin="0,10,0,0"
+                Text="Erläuterungen zu einzelnen Betriebskostenarten"
+                FontStyle="Italic"
+                FontWeight="Bold" />
+
+            <ItemsRepeater Margin="0,10,0,0" ItemsSource="{x:Bind ViewModel.Betriebskostenabrechnung.Gruppen}">
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="model:Rechnungsgruppe">
+                        <ItemsRepeater ItemsSource="{x:Bind Rechnungen}">
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="model:Betriebskostenrechnung">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock
+                                            FontWeight="Bold"
+                                            Text="{x:Bind Typ, Converter={StaticResource ToDescriptionStringConverterKey}}"/>
+                                        <TextBlock Text=":" Margin="0,0,5,0" FontWeight="Bold" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{x:Bind Beschreibung}" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+            
+            <MenuFlyoutSeparator Margin="20"/>
+        </StackPanel>
     </ScrollViewer>
 </Page>

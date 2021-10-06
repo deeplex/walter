@@ -24,6 +24,7 @@ namespace Deeplex.Saverwalter.Print.FirstPage
 
             if (Anpassung > 0)
             {
+                // TODO this is missing in viewmodel => move...
                 body.Append(new Paragraph(
                     new Run(Font(),
                     new Text("Wir empfehlen Ihnen die monatliche Mietzahlung, um einen Betrag von " +
