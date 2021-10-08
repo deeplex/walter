@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.Model
         private IEnumerable<Vertrag> alleVertraegeDieserWohnungen => gr.SelectMany(w => w.Wohnung.Vertraege.Where(v =>
                 v.Beginn <= b.Abrechnungsende && (v.Ende is null || v.Ende >= b.Abrechnungsbeginn)));
 
-
+        public string Bezeichnung => Rechnungen.First().GetWohnungenBezeichnung();
         public double GesamtWohnflaeche => gr.Sum(w => w.Wohnung.Wohnflaeche);
         public double WFZeitanteil => b.Wohnung.Wohnflaeche / GesamtWohnflaeche * b.Zeitanteil;
         public double NFZeitanteil => b.Wohnung.Nutzflaeche / GesamtNutzflaeche * b.Zeitanteil;

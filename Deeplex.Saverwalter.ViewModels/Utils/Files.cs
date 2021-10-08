@@ -110,7 +110,7 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             IAppImplementation impl,
             List<Model.Erhaltungsaufwendung> filter = null)
         {
-            var filename = Jahr.ToString() + " - " + Wohnungen.GetWohnungenBezeichnung(avm);
+            var filename = Jahr.ToString() + " - " + Wohnungen.GetWohnungenBezeichnung();
             if (extended)
             {
                 filename += " + Zusatz";

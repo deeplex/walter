@@ -81,7 +81,7 @@ namespace Deeplex.Saverwalter.ViewModels
                             .Select(w => new AutoSuggestEntry(w))).ToList()
                         .Concat(ctx.ZaehlerSet.Select(w => new AutoSuggestEntry(w))).ToList()
                         .Concat(ctx.Betriebskostenrechnungen.Include(w => w.Gruppen)
-                            .ThenInclude(w => w.Wohnung).Select(w => new AutoSuggestEntry(w, self))).ToList()
+                            .ThenInclude(w => w.Wohnung).Select(w => new AutoSuggestEntry(w))).ToList()
                         .Where(w => w.Bezeichnung != null).ToImmutableList();
                 AutoSuggestEntries.Value = AllAutoSuggestEntries;
             }
@@ -144,11 +144,11 @@ namespace Deeplex.Saverwalter.ViewModels
             Icon = "Library";
             Bezeichnung = AdresseViewModel.Anschrift(a.Wohnung) + " - " + a.Wohnung.Bezeichnung;
         }
-        public AutoSuggestEntry(Betriebskostenrechnung a, AppViewModel avm)
+        public AutoSuggestEntry(Betriebskostenrechnung a)
         {
             Entity = a;
             Icon = "List";
-            Bezeichnung = a.Typ.ToDescriptionString() + " - " + a.GetWohnungenBezeichnung(avm);
+            Bezeichnung = a.Typ.ToDescriptionString() + " - " + a.GetWohnungenBezeichnung();
         }
         public AutoSuggestEntry(Erhaltungsaufwendung a)
         {
