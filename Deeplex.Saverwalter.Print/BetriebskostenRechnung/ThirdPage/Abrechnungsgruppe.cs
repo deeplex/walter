@@ -10,6 +10,7 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
         private static Paragraph Abrechnungsgruppe(Betriebskostenabrechnung b, Rechnungsgruppe g)
         {
             var p = new Paragraph(Font());
+
             var adressen = g.Rechnungen.First().Gruppen.Select(w => w.Wohnung).GroupBy(w => w.Adresse);
 
             foreach (var adr in adressen)

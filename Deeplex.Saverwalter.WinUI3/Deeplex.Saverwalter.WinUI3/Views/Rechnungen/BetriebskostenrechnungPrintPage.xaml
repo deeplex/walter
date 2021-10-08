@@ -194,12 +194,12 @@
                     </DataTemplate>
                 </ItemsRepeater.ItemTemplate>
             </ItemsRepeater>
-            
+
             <MenuFlyoutSeparator Margin="20"/>
 
 
             <TextBlock Margin="0,10,0,0" Text="Angaben zu Ihrer Einheit:" FontWeight="Bold" />
-            
+
             <mtuuc:DataGrid
                 Style="{StaticResource DataGridUserControl}"
                 ItemsSource="{x:Bind ViewModel.Betriebskostenabrechnung.Vertragsversionen}">
@@ -264,6 +264,24 @@
                     </mtuuc:DataGridTemplateColumn>
                 </mtuuc:DataGrid.Columns>
             </mtuuc:DataGrid>
+
+            <TextBlock
+                Text="Abrechnung der Nebenkosten (kalte Betriebskosten)"
+                FontStyle="Italic" />
+            
+            <ItemsRepeater
+                ItemsSource="{x:Bind ViewModel.Betriebskostenabrechnung.Gruppen}">
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="model:Rechnungsgruppe">
+                        <StackPanel>
+                            <TextBlock
+                                Text="Angaben zur Abrechnungseinheit:"
+                                FontWeight="Bold" />
+                            <!--<TextBlock Text="{x:Bind }"-->
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
         </StackPanel>
     </ScrollViewer>
 </Page>
