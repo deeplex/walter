@@ -20,17 +20,17 @@ namespace Deeplex.Saverwalter.Print.ThirdPage
 
             for (var i = 0; i < g.GesamtPersonenIntervall.Count(); ++i)
             {
-                var (Beginn, Ende, Personenzahl) = g.GesamtPersonenIntervall[i];
-                var f = Beginn.Date == b.Abrechnungsbeginn.Date;
+                var z = g.GesamtPersonenIntervall[i];
+                var f = z.Beginn.Date == b.Abrechnungsbeginn.Date;
 
-                var timespan = ((Ende - Beginn).Days + 1).ToString();
+                var timespan = ((z.Ende - z.Beginn).Days + 1).ToString();
 
                 table.Append(new TableRow( // TODO check for duplicates...
                     ContentCell(f ? g.GesamtEinheiten.ToString() : "", JustificationValues.Center),
                     ContentCell(f ? Quadrat(g.GesamtWohnflaeche) : "", JustificationValues.Center),
                     ContentCell(f ? Quadrat(g.GesamtNutzflaeche) : "", JustificationValues.Center),
-                    ContentCell(Personenzahl.ToString(), JustificationValues.Center),
-                    ContentCell(Datum(Beginn) + " - " + Datum(Ende), JustificationValues.Center),
+                    ContentCell(z.Personenzahl.ToString(), JustificationValues.Center),
+                    ContentCell(Datum(z.Beginn) + " - " + Datum(z.Ende), JustificationValues.Center),
                     ContentCell(timespan + "/" + b.Abrechnungszeitspanne, JustificationValues.Center)));
             };
 

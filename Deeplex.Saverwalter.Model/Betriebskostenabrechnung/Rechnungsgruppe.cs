@@ -22,13 +22,24 @@ namespace Deeplex.Saverwalter.Model
         public double GesamtNutzflaeche => gr.Sum(w => w.Wohnung.Nutzflaeche);
         public int GesamtEinheiten => gr.Sum(w => w.Wohnung.Nutzeinheit);
         public double NEZeitanteil => (double)b.Wohnung.Nutzeinheit / GesamtEinheiten * b.Zeitanteil;
-        public List<(DateTime Beginn, DateTime Ende, int Personenzahl)> GesamtPersonenIntervall =>
-            VertraegeIntervallPersonenzahl(alleVertraegeDieserWohnungen, b.Abrechnungsbeginn, b.Abrechnungsende).ToList();
+        public List<PersonenZeitIntervall> GesamtPersonenIntervall
+        {
+            get {
+                var self = this;
+                return VertraegeIntervallPersonenzahl(alleVertraegeDieserWohnungen, b.Abrechnungsbeginn, b.Abrechnungsende, self).ToList();
+            }
+        }
 
-        public List<(DateTime Beginn, DateTime Ende, int Personenzahl)> PersonenIntervall =>
-            VertraegeIntervallPersonenzahl(b.Vertragsversionen, b.Nutzungsbeginn, b.Nutzungsende).ToList();
+        public List<PersonenZeitIntervall> PersonenIntervall
+        {
+            get
+            {
+                var self = this;
+                return VertraegeIntervallPersonenzahl(b.Vertragsversionen, b.Nutzungsbeginn, b.Nutzungsende, self).ToList();
+            }
+        }
 
-        public List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil => GesamtPersonenIntervall
+    public List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil => GesamtPersonenIntervall
                 .Where(g => g.Beginn < b.Nutzungsende && g.Ende >= b.Nutzungsbeginn)
                 .Select((w, i) =>
                     (w.Beginn, w.Ende, Anteil:
@@ -74,8 +85,8 @@ namespace Deeplex.Saverwalter.Model
             b = _b;
         }
 
-        private static List<(DateTime Beginn, DateTime Ende, int Personenzahl)>
-            VertraegeIntervallPersonenzahl(IEnumerable<Vertrag> vertraege, DateTime Beginn, DateTime Ende)
+        private static List<PersonenZeitIntervall>
+            VertraegeIntervallPersonenzahl(IEnumerable<Vertrag> vertraege, DateTime Beginn, DateTime Ende, Rechnungsgruppe parent)
         {
             var merged = vertraege
                 .Where(v => v.Beginn <= Ende && (v.Ende is null || v.Ende >= Beginn))
@@ -98,8 +109,24 @@ namespace Deeplex.Saverwalter.Model
             }
             merged.RemoveAt(merged.Count - 1);
 
-            return merged;
+            // TODO refactor function to switch from tuple to class - or replace this function by constructor
+            return merged.Select(m => new PersonenZeitIntervall(m, parent)).ToList();
         }
     }
 
+    public class PersonenZeitIntervall
+    {
+        public DateTime Beginn { get; }
+        public DateTime Ende { get; }
+        public int Personenzahl { get; }
+        public Rechnungsgruppe Parent { get; }
+
+        public PersonenZeitIntervall((DateTime b, DateTime e, int p) i, Rechnungsgruppe parent)
+        {
+            Beginn = i.b;
+            Ende = i.e;
+            Personenzahl = i.p;
+            Parent = parent;
+        }
+    }
 }

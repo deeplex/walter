@@ -277,7 +277,70 @@
                             <TextBlock
                                 Text="Angaben zur Abrechnungseinheit:"
                                 FontWeight="Bold" />
-                            <!--<TextBlock Text="{x:Bind }"-->
+                            <TextBlock Text="{x:Bind Bezeichnung}" />
+
+                            <mtuuc:DataGrid
+                                Style="{StaticResource DataGridUserControl}"
+                                ItemsSource="{x:Bind GesamtPersonenIntervall}">
+                                <mtuuc:DataGrid.Columns>
+                                    <mtuuc:DataGridTemplateColumn Header="Nutzeinheiten">
+                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="model:PersonenZeitIntervall">
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    Text="{x:Bind Parent.GesamtEinheiten}" />
+                                            </DataTemplate>
+                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    </mtuuc:DataGridTemplateColumn>
+                                    <mtuuc:DataGridTemplateColumn Header="Wohnfläche">
+                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="model:PersonenZeitIntervall">
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    Text="{x:Bind Parent.GesamtWohnflaeche, Converter={StaticResource ToStringConverterKey}}" />
+                                            </DataTemplate>
+                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    </mtuuc:DataGridTemplateColumn>
+                                    <mtuuc:DataGridTemplateColumn Header="Nutzfläche">
+                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="model:PersonenZeitIntervall">
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    Text="{x:Bind Parent.GesamtNutzflaeche, Converter={StaticResource ToStringConverterKey}}" />
+                                            </DataTemplate>
+                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    </mtuuc:DataGridTemplateColumn>
+                                    <mtuuc:DataGridTemplateColumn Header="Bewohner">
+                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="model:PersonenZeitIntervall">
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    Text="{x:Bind Personenzahl, Converter={StaticResource ToStringConverterKey}}" />
+                                            </DataTemplate>
+                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    </mtuuc:DataGridTemplateColumn>
+                                    <mtuuc:DataGridTemplateColumn Header="Nutzungsintervall">
+                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="model:PersonenZeitIntervall">
+                                                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                                    <TextBlock Text="{x:Bind Beginn, Converter={StaticResource DateStringConverterKey}}" />
+                                                    <TextBlock Text="-" Margin="5,0,5,0"/>
+                                                    <TextBlock Text="{x:Bind Ende, Converter={StaticResource DateStringConverterKey}}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    </mtuuc:DataGridTemplateColumn>
+                                    <mtuuc:DataGridTemplateColumn Header="Tage">
+                                        <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="model:PersonenZeitIntervall">
+                                                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                                    <TextBlock Text="TODO" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    </mtuuc:DataGridTemplateColumn>
+                                </mtuuc:DataGrid.Columns>
+                            </mtuuc:DataGrid>
                         </StackPanel>
                     </DataTemplate>
                 </ItemsRepeater.ItemTemplate>
