@@ -268,9 +268,8 @@
             <TextBlock
                 Text="Abrechnung der Nebenkosten (kalte Betriebskosten)"
                 FontStyle="Italic" />
-            
-            <ItemsRepeater
-                ItemsSource="{x:Bind ViewModel.Betriebskostenabrechnung.Gruppen}">
+
+            <ItemsRepeater ItemsSource="{x:Bind ViewModel.Betriebskostenabrechnung.Gruppen}">
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate x:DataType="model:Rechnungsgruppe">
                         <StackPanel>
@@ -334,7 +333,9 @@
                                         <mtuuc:DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate x:DataType="model:PersonenZeitIntervall">
                                                 <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                                                    <TextBlock Text="TODO" />
+                                                    <TextBlock Text="{x:Bind Tage, Converter={StaticResource ToStringConverterKey}}" />
+                                                    <TextBlock Text="/" />
+                                                    <TextBlock Text="{x:Bind GesamtTage, Converter={StaticResource ToStringConverterKey}}" />
                                                 </StackPanel>
                                             </DataTemplate>
                                         </mtuuc:DataGridTemplateColumn.CellTemplate>
