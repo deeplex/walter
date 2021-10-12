@@ -101,16 +101,14 @@ namespace Deeplex.Saverwalter.Model
         public static bool dir(this Betriebskostenabrechnung b)
             => b.Gruppen.Any(g => g.Rechnungen.Any(r => r.Gruppen.Count == 1));
 
-        public static bool nWF(this Betriebskostenabrechnung b)
-            => b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachWohnflaeche));
-        public static bool nNF(this Betriebskostenabrechnung b)
-            => b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachNutzflaeche));
-        public static bool nNE(this Betriebskostenabrechnung b)
-            => b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachNutzeinheit));
-        public static bool nPZ(this Betriebskostenabrechnung b)
-            => b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachPersonenzahl));
-        public static bool nVb(this Betriebskostenabrechnung b)
-            => b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == UmlageSchluessel.NachVerbrauch));
+        private static bool uml(this Betriebskostenabrechnung b, UmlageSchluessel k) =>
+            b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == k));
+
+        public static bool nWF(this Betriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachWohnflaeche);
+        public static bool nNF(this Betriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachNutzflaeche);
+        public static bool nNE(this Betriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachNutzeinheit);
+        public static bool nPZ(this Betriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachPersonenzahl);
+        public static bool nVb(this Betriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachVerbrauch);
 
         public static string Anmerkung(this Betriebskostenabrechnung b)
             => "Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger)Kostenanteil";
