@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.Model
             => "Betriebskostenabrechnung " + b.Jahr.ToString();
 
         public static string Mieterliste(this Betriebskostenabrechnung b)
-            => "Mieter " + string.Join(", ", b.Mieter.Select(m => m.Bezeichnung));
+            => "Mieter: " + string.Join(", ", b.Mieter.Select(m => m.Bezeichnung));
 
         public static string Mietobjekt(this Betriebskostenabrechnung b)
             => "Mietobjekt: " + b.Adresse.Strasse + " " + b.Adresse.Hausnummer + ", " + b.Wohnung.Bezeichnung;
@@ -111,7 +111,7 @@ namespace Deeplex.Saverwalter.Model
         public static bool nVb(this Betriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachVerbrauch);
 
         public static string Anmerkung(this Betriebskostenabrechnung b)
-            => "Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger)Kostenanteil";
+            => "Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger) Kostenanteil";
 
     }
 }
