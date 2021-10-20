@@ -33,6 +33,25 @@ namespace Deeplex.Saverwalter.Print
 
         public void Table(int[] widths, int[] justification, bool[] bold, bool[] underlined, string[][] cols)
         {
+            TableCell ContentCell(string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
+                => new TableCell(
+                    new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
+                    new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
+                    new Run(Font(), new Text(str))));
+
+            TableCell ContentHeadWidth(string pct, string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
+                => new TableCell(
+                    new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
+                    new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = pct },
+                    new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
+                    new Run(Font(), Bold(), new Text(str))));
+
+            TableCell ContentHead(string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
+                => new TableCell(
+                    new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
+                    new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
+                    new Run(Font(), Bold(), new Text(str))));
+            
             if (widths.Count() != cols.Count() || widths.Count() != justification.Count())
             {
                 throw new Exception("Table parameters are not properly specified");
@@ -49,7 +68,7 @@ namespace Deeplex.Saverwalter.Print
             var heads = cols.Select(w => w.First()).ToList();
             for (var i = 0; i < widths.Count(); ++i)
             {
-                headrow.Append(ContentHead((widths[i] * 50).ToString(), heads[i] ?? "", j[i], underlined[0] ? BorderValues.Single : BorderValues.None));
+                headrow.Append(ContentHeadWidth((widths[i] * 50).ToString(), heads[i] ?? "", j[i], underlined[0] ? BorderValues.Single : BorderValues.None));
             }
             table.Append(headrow);
 
@@ -894,6 +913,7 @@ namespace Deeplex.Saverwalter.Print
             var bold = Enumerable.Repeat(false, col1.Count).ToArray();
             bold[bold.Length - 1] = true;
             var underlined = Enumerable.Repeat(true, col1.Count).ToArray();
+            underlined[underlined.Length - 1] = false;
 
             p.Table(widths, justification, bold, underlined, cols);
         }
@@ -970,6 +990,41 @@ namespace Deeplex.Saverwalter.Print
 
             return p.body;
         }
+
+        public static T Print(ErhaltungsaufwendungWohnung e, IPrint<T> p)
+        {
+            p.Heading(Anschrift(e.Wohnung.Adresse) + ", " + e.Wohnung.Bezeichnung);
+
+            var widths = new int[] { 40, 15, 31, 13 };
+            var col1 = new List<string> { "Aussteller" };
+            var col2 = new List<string> { "Datum" };
+            var col3 = new List<string> { "Bezeichnung" };
+            var col4 = new List<string> { "Betrag" };
+            var bold = new List<bool> { true };
+            var underlined = new List<bool> { true };
+
+            foreach (var a in e.Liste)
+            {
+                col1.Add(a.Aussteller.Bezeichnung);
+                col2.Add(a.Datum.ToString("dd.MM.yyyy"));
+                col3.Add(a.Bezeichnung);
+                col4.Add(Euro(a.Betrag));
+                bold.Add(false);
+                underlined.Add(false);
+            }
+
+            col1.Add("");
+            col2.Add("");
+            col3.Add("Summe:");
+            col4.Add(Euro(e.Summe));
+
+            var justification = new int[] { 0, 1, 1, 2 };
+            var cols = new List<List<string>> { col1, col2, col3, col4 }.Select(w => w.ToArray()).ToArray();
+
+            p.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
+
+            return p.body;
+        }
     }
 
     public static class OpenXMLIntegration
@@ -1006,7 +1061,7 @@ namespace Deeplex.Saverwalter.Print
             {
                 if (!e.Liste.IsEmpty)
                 {
-                    Erhaltungsaufwendung.ErhaltungsaufwendungWohnungBody(body, e);
+                    TPrint<Body>.Print(e, new WordPrint());
                 }
             }
 
@@ -1018,7 +1073,7 @@ namespace Deeplex.Saverwalter.Print
             var body = DinA4();
             if (!e.Liste.IsEmpty)
             {
-                Erhaltungsaufwendung.ErhaltungsaufwendungWohnungBody(body, e);
+                TPrint<Body>.Print(e, new WordPrint());
             }
 
             CreateWordDocument(filepath, body);
@@ -1027,10 +1082,6 @@ namespace Deeplex.Saverwalter.Print
         public static void SaveAsDocx(this Betriebskostenabrechnung b, string filepath)
         {
             var body = TPrint<Body>.Print(b, new WordPrint());
-
-            //FirstPage.FirstPage.Fill(body, b);
-            //SecondPage.SecondPage.Fill(body, b);
-            //ThirdPage.ThirdPage.Fill(body, b);
 
             CreateWordDocument(filepath, body);
         }

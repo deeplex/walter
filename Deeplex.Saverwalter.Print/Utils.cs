@@ -33,31 +33,5 @@ namespace Deeplex.Saverwalter.Print
                 new Bold() { Val = OnOffValue.FromBoolean(true) },
                 new Italic() { Val = OnOffValue.FromBoolean(true) }),
                 new Text(str)));
-
-        public static TableCell ContentCell(string str) => new TableCell(new Paragraph(Font(), NoSpace(), new Run(Font(), new Text(str))));
-        public static TableCell ContentCell(string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
-            => new TableCell(
-                new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
-                new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
-                new Run(Font(), new Text(str))));
-
-        public static TableCell ContentHead(string str) => new TableCell(new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Text(str))));
-        public static TableCell ContentHead(string pct, string str)
-            => new TableCell(
-                new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = pct },
-                new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Text(str))));
-        public static TableCell ContentHead(string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
-            => new TableCell(
-                new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
-                new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
-                new Run(Font(), Bold(), new Text(str))));
-        public static TableCell ContentHead(string pct, string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
-            => new TableCell(
-                new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
-                new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = pct },
-                new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
-                new Run(Font(), Bold(), new Text(str))));
-
-        public static TableCell ContentCellEnd(string str) => new TableCell(new Paragraph(Font(), new Run(Font(), new Text(str))));
     }
 }
