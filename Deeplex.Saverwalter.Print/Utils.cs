@@ -35,8 +35,9 @@ namespace Deeplex.Saverwalter.Print
                 new Text(str)));
 
         public static TableCell ContentCell(string str) => new TableCell(new Paragraph(Font(), NoSpace(), new Run(Font(), new Text(str))));
-        public static TableCell ContentCell(string str, JustificationValues value)
+        public static TableCell ContentCell(string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
             => new TableCell(
+                new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
                 new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
                 new Run(Font(), new Text(str))));
 
@@ -45,12 +46,14 @@ namespace Deeplex.Saverwalter.Print
             => new TableCell(
                 new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = pct },
                 new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Text(str))));
-        public static TableCell ContentHead(string str, JustificationValues value)
+        public static TableCell ContentHead(string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
             => new TableCell(
+                new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
                 new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
                 new Run(Font(), Bold(), new Text(str))));
-        public static TableCell ContentHead(string pct, string str, JustificationValues value)
+        public static TableCell ContentHead(string pct, string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
             => new TableCell(
+                new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
                 new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = pct },
                 new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
                 new Run(Font(), Bold(), new Text(str))));
