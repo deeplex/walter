@@ -130,8 +130,7 @@ namespace Deeplex.Saverwalter.Print
             var p3 = new Paragraph(Font(),
                 new ParagraphProperties(new Justification() { Val = JustificationValues.Both, }),
                 new Run(Font(),
-                new Text(b.GenerischerText())),
-                new Break() { Type = BreakValues.Page });
+                new Text(b.GenerischerText())));
 
             body.Append(p1);
             body.Append(p2);
@@ -383,7 +382,7 @@ namespace Deeplex.Saverwalter.Print
         {
             p.SubHeading("Angaben zu Ihrer Einheit:");
 
-            var widths = new int[] { 14, 21, 19, 12, 28, 6 };
+            var widths = new int[] { 14, 19, 19, 12, 28, 8 };
             var col1 = new List<string> { "Nutzeinheiten" };
             var col2 = new List<string> { "Wohnfläche" };
             var col3 = new List<string> { "Nutzfläche" };
@@ -406,6 +405,7 @@ namespace Deeplex.Saverwalter.Print
 
             var cols = new List<List<string>> { col1, col2, col3, col4, col5, col6 }.Select(w => w.ToArray()).ToArray();
             var bold = Enumerable.Repeat(false, widths.Length).ToArray();
+            bold[0] = true;
             var underlined = Enumerable.Repeat(false, widths.Length).ToArray();
             var justification = Enumerable.Repeat(1, widths.Length).ToArray();
 
@@ -416,7 +416,7 @@ namespace Deeplex.Saverwalter.Print
             p.SubHeading("Angaben zur Abrechnungseinheit:");
             p.Text(g.Bezeichnung);
 
-            var widths = new int[] { 14, 21, 19, 12, 28, 6 };
+            var widths = new int[] { 14, 19, 19, 12, 28, 8 };
             var col1 = new List<string> { "Nutzeinheiten" };
             var col2 = new List<string> { "Wohnfläche" };
             var col3 = new List<string> { "Nutzfläche" };
@@ -444,13 +444,14 @@ namespace Deeplex.Saverwalter.Print
 
             var justification = Enumerable.Repeat(1, widths.Length).ToArray();
             var bold = Enumerable.Repeat(false, col1.Count).ToArray();
+            bold[0] = true;
             var underlined = Enumerable.Repeat(false, col1.Count).ToArray();
 
             p.Table(widths, justification, bold, underlined, cols);
         }
         private static void ErmittlungKalteEinheiten(Betriebskostenabrechnung b, Rechnungsgruppe g, IPrint<T> p)
         {
-            var widths = new int[] { 39, 24, 24, 13 };
+            var widths = new int[] { 41, 22, 24, 13 };
             var col1 = new List<string> { "Ermittlung Ihrer Einheiten" };
             var col2 = new List<string> { "Nutzungsintervall" };
             var col3 = new List<string> { "Tage" };
@@ -696,7 +697,7 @@ namespace Deeplex.Saverwalter.Print
         }
         private static void ErmittlungWarmeEinheiten(Betriebskostenabrechnung b, Rechnungsgruppe g, IPrint<T> p)
         {
-            var widths = new int[] { 39, 24, 24, 13 };
+            var widths = new int[] { 41, 22, 24, 13 };
             var col1 = new List<string> { "Ermittlung Ihrer Einheiten" };
             var col2 = new List<string> { "Nutzungsintervall" };
             var col3 = new List<string> { "Tage" };
@@ -922,6 +923,7 @@ namespace Deeplex.Saverwalter.Print
         {
             Header(b, p);
             p.Introtext(b);
+            p.PageBreak();
 
             p.Heading("Abrechnung der Nebenkosten");
             ExplainUmlageSchluessel(b, p);
