@@ -9,6 +9,8 @@ namespace Deeplex.Saverwalter.Model
 {
     public sealed class Betriebskostenabrechnung
     {
+        public List<Note> notes = new List<Note>();
+
         public SaverwalterContext db { get; }
         public int Jahr { get; set; }
         public DateTime Abrechnungsbeginn { get; set; }
@@ -103,7 +105,7 @@ namespace Deeplex.Saverwalter.Model
             // If Ansprechpartner or Besitzer is null => throw
         }
 
-        public List<(Betriebskostentyp bTyp, string Kennnummer, Zaehlertyp zTyp, double Delta)>
+        public List<Verbrauch>
             GetVerbrauch(Betriebskostenrechnung r, bool ganzeGruppe = false)
         {
             var Zaehler = r.Typ switch
@@ -134,19 +136,45 @@ namespace Deeplex.Saverwalter.Model
                 .Where(zs => zs != null)
                 .ToImmutableList();
 
-            if (Ende.IsEmpty) throw new Exception("Kein Zähler für Nutzungsbeginn gefunden.");
-            if (Beginn.IsEmpty) throw new Exception("Kein Zähler für Nutzungsende gefunden.");
-            if (Ende.Count() != Beginn.Count()) throw new Exception("Zählerstände sind nicht korrekt...");
+            List<Verbrauch> Deltas = new List<Verbrauch>();
 
-            List<(Betriebskostentyp bTyp, string Kennnummer, Zaehlertyp zTyp, double Delta)> Deltas
-                = new List<(Betriebskostentyp bTyp, string Kennnummer, Zaehlertyp zTyp, double Delta)>();
-
-            for (var i = 0; i < Ende.Count(); ++i)
+            if (Ende.IsEmpty)
             {
-                Deltas.Add((r.Typ, Ende[i].Zaehler.Kennnummer, Ende[i].Zaehler.Typ, Ende[i].Stand - Beginn[i].Stand));
+                notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
+            }
+            else if (Beginn.IsEmpty)
+            {
+                notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
+            }
+            else if (Ende.Count() != Beginn.Count())
+            {
+                notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
+            }
+            else
+            {
+                for (var i = 0; i < Ende.Count(); ++i)
+                {
+                    Deltas.Add(new Verbrauch(r.Typ, Ende[i].Zaehler.Kennnummer, Ende[i].Zaehler.Typ, Ende[i].Stand - Beginn[i].Stand));
+                }
             }
 
             return Deltas;
+        }
+    }
+
+    public sealed class Verbrauch
+    {
+        public Betriebskostentyp Betriebskostentyp;
+        public Zaehlertyp Zaehlertyp;
+        public string Kennnummer;
+        public double Delta;
+
+        public Verbrauch(Betriebskostentyp bTyp, string kennnummer, Zaehlertyp zTyp, double delta)
+        {
+            Betriebskostentyp = bTyp;
+            Zaehlertyp = zTyp;
+            Kennnummer = kennnummer;
+            Delta = delta;
         }
     }
 }

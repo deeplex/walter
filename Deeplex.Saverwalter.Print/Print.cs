@@ -433,7 +433,11 @@ namespace Deeplex.Saverwalter.Print
                         break;
                     case UmlageSchluessel.NachVerbrauch:
                         zeitraum = Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende);
-                        kostenPunkt(rechnung, zeitraum, b.Jahr, g.VerbrauchAnteil[rechnung.Typ]);
+                        kostenPunkt(
+                            rechnung,
+                            zeitraum,
+                            b.Jahr,
+                            g.VerbrauchAnteil.ContainsKey(rechnung.Typ) ? g.VerbrauchAnteil[rechnung.Typ] : 0);
                         break;
                     default:
                         break; // TODO or throw something...

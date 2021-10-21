@@ -11,6 +11,8 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class BetriebskostenrechnungPrintViewModel
     {
+        public bool HasNotes => Betriebskostenabrechnung.notes.Count() > 0;
+
         public ObservableProperty<int> Jahr = new ObservableProperty<int>();
         public Betriebskostenabrechnung Betriebskostenabrechnung { get; }
         public IPerson FirstMieter => Betriebskostenabrechnung.Mieter.First();

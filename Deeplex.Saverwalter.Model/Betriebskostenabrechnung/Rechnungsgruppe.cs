@@ -24,7 +24,8 @@ namespace Deeplex.Saverwalter.Model
         public double NEZeitanteil => (double)b.Wohnung.Nutzeinheit / GesamtEinheiten * b.Zeitanteil;
         public List<PersonenZeitIntervall> GesamtPersonenIntervall
         {
-            get {
+            get
+            {
                 var self = this;
                 return VertraegeIntervallPersonenzahl(alleVertraegeDieserWohnungen, b.Abrechnungsbeginn, b.Abrechnungsende, self).ToList();
             }
@@ -39,26 +40,55 @@ namespace Deeplex.Saverwalter.Model
             }
         }
 
-    public List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil => GesamtPersonenIntervall
-                .Where(g => g.Beginn < b.Nutzungsende && g.Ende >= b.Nutzungsbeginn)
-                .Select((w, i) =>
-                    (w.Beginn, w.Ende, Anteil:
-                        (double)PersonenIntervall.Where(p => p.Beginn <= w.Beginn).First().Personenzahl / w.Personenzahl *
-                        (((double)(w.Ende - w.Beginn).Days + 1) / b.Abrechnungszeitspanne))).ToList();
+        public List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil => GesamtPersonenIntervall
+            .Where(g => g.Beginn < b.Nutzungsende && g.Ende >= b.Nutzungsbeginn)
+            .Select((w, i) =>
+                (w.Beginn, w.Ende, Anteil:
+                    (double)PersonenIntervall.Where(p => p.Beginn <= w.Beginn).First().Personenzahl / w.Personenzahl *
+                    (((double)(w.Ende - w.Beginn).Days + 1) / b.Abrechnungszeitspanne))).ToList();
 
-        public Dictionary<Betriebskostentyp, List<(string Kennnummer, Zaehlertyp Typ, double Delta, double Anteil)>> Verbrauch => Rechnungen
-            .Where(g => g.Schluessel == UmlageSchluessel.NachVerbrauch)
-            .Select(r => b.GetVerbrauch(r))
-            .ToDictionary(r => r.First().bTyp, r => r
-                .Select(rr => (rr.Kennnummer, rr.zTyp, rr.Delta, rr.Delta / GesamtVerbrauch[r.First().bTyp]
-                    .First(rrr => rrr.Typ == rr.zTyp).Delta))
-                    .ToList());
+        public Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch
+        {
+            get
+            {
+                var VerbrauchList = Rechnungen
+                    .Where(g => g.Schluessel == UmlageSchluessel.NachVerbrauch)
+                    .Select(r => b.GetVerbrauch(r));
+
+                if (VerbrauchList.Any(w => w.Count() == 0))
+                {
+                    // TODO this can be made even more explicit.
+                    b.notes.Add(new Note("Für eine Rechnung konnte keine Zuordnung erstellt werden.", Severity.Error));
+                    return new Dictionary<Betriebskostentyp, List<VerbrauchAnteil>>();
+                }
+
+                return VerbrauchList.ToDictionary(r =>
+                    r.First().Betriebskostentyp,
+                    r => r.Select(rr => new VerbrauchAnteil(rr.Kennnummer, rr.Zaehlertyp, rr.Delta, rr.Delta / GesamtVerbrauch[r.First().Betriebskostentyp]
+                        .First(rrr => rrr.Typ == rr.Zaehlertyp).Delta))
+                        .ToList());
+            }
+        }
+
 
         public Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch => Rechnungen
-            .Where(g => g.Schluessel == UmlageSchluessel.NachVerbrauch)
-            .Select(r => b.GetVerbrauch(r, true))
-            .ToDictionary(g => g.First().bTyp, g => g.GroupBy(gg => gg.zTyp)
-            .Select(gg => (gg.Key, gg.Sum(ggg => ggg.Delta))).ToList());
+        .Where(g => g.Schluessel == UmlageSchluessel.NachVerbrauch)
+        .Select(r => b.GetVerbrauch(r, true))
+        .ToDictionary(g => g.First().Betriebskostentyp, g => g.GroupBy(gg => gg.Zaehlertyp)
+        .Select(gg => (gg.Key, gg.Sum(ggg => ggg.Delta))).ToList());
+
+        private double checkVerbrauch(Betriebskostentyp t)
+        {
+            if (VerbrauchAnteil.ContainsKey(t))
+            {
+                return VerbrauchAnteil[t];
+            }
+            else
+            {
+                b.notes.Add(new Note("Konnte keinen Anteil für " + t.ToDescriptionString() + " feststellen.", Severity.Error));
+                return 0;
+            }
+        }
 
         public Dictionary<Betriebskostentyp, double> VerbrauchAnteil => Verbrauch
             .Select(v => (v.Key, v.Value.Sum(vv => vv.Delta), v.Value.Sum(vv => vv.Delta / vv.Anteil)))
@@ -72,7 +102,7 @@ namespace Deeplex.Saverwalter.Model
                 UmlageSchluessel.NachWohnflaeche => a + r.Betrag * WFZeitanteil,
                 UmlageSchluessel.NachNutzeinheit => a + r.Betrag * NEZeitanteil,
                 UmlageSchluessel.NachPersonenzahl => a + PersZeitanteil.Aggregate(0.0, (a2, z) => a2 += z.Anteil * r.Betrag),
-                UmlageSchluessel.NachVerbrauch => a + r.Betrag * VerbrauchAnteil[r.Typ],
+                UmlageSchluessel.NachVerbrauch => a + r.Betrag * checkVerbrauch(r.Typ),
                 _ => a + 0, // TODO or throw something...
             });
         public double GesamtBetragWarm => Heizkosten.Sum(h => h.PauschalBetrag);
@@ -129,6 +159,22 @@ namespace Deeplex.Saverwalter.Model
             Ende = i.e;
             Personenzahl = i.p;
             Parent = parent;
+        }
+    }
+
+    public sealed class VerbrauchAnteil
+    {
+        public string Kennnummer;
+        public Zaehlertyp Typ;
+        public double Delta;
+        public double Anteil;
+
+        public VerbrauchAnteil(string kennnummer, Zaehlertyp typ, double delta, double anteil)
+        {
+            Kennnummer = kennnummer;
+            Typ = typ;
+            Delta = delta;
+            Anteil = anteil;
         }
     }
 }

@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
+    xmlns:vm="using:Deeplex.Saverwalter.Model"
     xmlns:conv="using:Deeplex.Saverwalter.WinUI3.Utils"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -20,8 +21,22 @@
         IsScrollInertiaEnabled="True"
         HorizontalScrollMode="Auto"
         Background="{StaticResource SystemChromeHighColor}">
-        <StackPanel
-            Margin="10"
-            Padding="101.19, 68.404, 40.476, 68.404" x:Name="Panel" Width="850" Background="{StaticResource SystemAltHighColor}" />
+        <StackPanel>
+            <ListView Visibility="{x:Bind ViewModel.HasNotes}" Width="850" ItemsSource="{x:Bind ViewModel.Betriebskostenabrechnung.notes}">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:Note">
+                        <TextBlock Text="{x:Bind Message}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <StackPanel
+                Margin="10"
+                Padding="101.19, 68.404, 40.476, 68.404"
+                x:Name="Panel"
+                Width="850"
+                Background="{StaticResource SystemAltHighColor}" />
+        </StackPanel>
+        
     </ScrollViewer>
 </Page>
