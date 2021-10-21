@@ -1,0 +1,292 @@
+﻿using Deeplex.Saverwalter.Model;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.IO;
+using System.Linq;
+using System.Text;
+
+namespace Deeplex.Saverwalter.Print
+{
+    public static class OpenXMLIntegration
+    {
+        private static void CreateWordDocument(string filepath, Body body)
+        {
+            using var wordDocument = WordprocessingDocument.Create(filepath, WordprocessingDocumentType.Document);
+            try
+            {
+                MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
+                mainPart.Document = new Document();
+            }
+            catch (Exception)
+            {
+                wordDocument.Dispose();
+                File.Delete(filepath);
+                throw;
+            }
+            wordDocument.MainDocumentPart.Document.AppendChild(body);
+        }
+
+        public static Body DinA4()
+            => new Body(
+                new SectionProperties(
+                // Margins after DIN5008
+                new PageMargin() { Left = 1418, Right = 567, Top = 958, Bottom = 958, },
+                // DIN A4
+                new PageSize() { Code = 9, Width = 11906, Height = 16838 }));
+
+        public static void SaveAsDocx(this ImmutableList<ErhaltungsaufwendungWohnung> l, string filepath)
+        {
+            var body = DinA4();
+            foreach (var e in l)
+            {
+                if (!e.Liste.IsEmpty)
+                {
+                    TPrint<Body>.Print(e, new WordPrint());
+                }
+            }
+
+            CreateWordDocument(filepath, body);
+        }
+
+        public static void SaveAsDocx(this ErhaltungsaufwendungWohnung e, string filepath)
+        {
+            var body = DinA4();
+            if (!e.Liste.IsEmpty)
+            {
+                TPrint<Body>.Print(e, new WordPrint());
+            }
+
+            CreateWordDocument(filepath, body);
+        }
+
+        public static void SaveAsDocx(this Betriebskostenabrechnung b, string filepath)
+        {
+            var body = TPrint<Body>.Print(b, new WordPrint());
+
+            CreateWordDocument(filepath, body);
+        }
+    }
+
+    public sealed class WordPrint : IPrint<Body>
+    {
+        public Body body { get; } = OpenXMLIntegration.DinA4();
+
+        public void Table(int[] widths, int[] justification, bool[] bold, bool[] underlined, string[][] cols)
+        {
+            TableCell ContentCell(string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
+                => new TableCell(
+                    new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
+                    new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
+                    new Run(Font(), new Text(str))));
+
+            TableCell ContentHeadWidth(string pct, string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
+                => new TableCell(
+                    new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
+                    new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = pct },
+                    new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
+                    new Run(Font(), Bold(), new Text(str))));
+
+            TableCell ContentHead(string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
+                => new TableCell(
+                    new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
+                    new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
+                    new Run(Font(), Bold(), new Text(str))));
+
+            if (widths.Count() != cols.Count() || widths.Count() != justification.Count())
+            {
+                throw new Exception("Table parameters are not properly specified");
+            }
+
+            var j = justification.Select(w => w == 0 ?
+                JustificationValues.Left : w == 1 ?
+                JustificationValues.Center :
+                JustificationValues.Right).ToList();
+
+            var table = new Table(new TableWidth() { Width = (widths.Sum() * 50).ToString(), Type = TableWidthUnitValues.Pct });
+            var headrow = new TableRow();
+
+            var heads = cols.Select(w => w.First()).ToList();
+            for (var i = 0; i < widths.Count(); ++i)
+            {
+                headrow.Append(ContentHeadWidth((widths[i] * 50).ToString(), heads[i] ?? "", j[i], underlined[0] ? BorderValues.Single : BorderValues.None));
+            }
+            table.Append(headrow);
+
+            var max = cols.Max(w => w.Length);
+
+            for (var i = 1; i < max; ++i)
+            {
+                var cellrow = new TableRow();
+                var row = cols.Select(w => w.Skip(i).FirstOrDefault()).ToList();
+                for (var k = 0; k < row.Count(); ++k)
+                {
+                    if (bold[i])
+                    {
+                        cellrow.Append(ContentHead(row[k], j[k], underlined[i] ? BorderValues.Single : BorderValues.None));
+                    }
+                    else
+                    {
+                        cellrow.Append(ContentCell(row[k], j[k], underlined[i] ? BorderValues.Single : BorderValues.None));
+                    }
+                }
+                table.Append(cellrow);
+            }
+            body.Append(table);
+        }
+        public void Introtext(Betriebskostenabrechnung b)
+        {
+            var p1 = new Paragraph(Font(),
+                new Run(Font(),
+                    new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) }),
+                    new Text(b.Title()),
+                    new Break()),
+                new Run(Font(),
+                    new Text(b.Mieterliste()),
+                    new Break(),
+                    new Text(b.Mietobjekt()),
+                    new Break(),
+                    new Text("Abrechnungszeitraum: "),
+                    new TabChar(),
+                    new Text(b.Abrechnungszeitraum()),
+                    new Break(),
+                    new Text("Nutzungszeitraum: "),
+                    new TabChar(),
+                    new Text(b.Nutzungszeitraum())));
+
+            var p2 = new Paragraph(Font(),
+                new Run(Font(),
+                new Text(b.Gruss()),
+                new Break(),
+                new Text(b.ResultTxt()),
+                new TabChar()),
+                new Run(Font(),
+                new RunProperties(
+                new Bold() { Val = OnOffValue.FromBoolean(true), },
+                new Underline() { Val = UnderlineValues.Single, }),
+                new Text(Utils.Euro(Math.Abs(b.Result))),
+                new Break()),
+                new Run(Font(), new Text(b.RefundDemand())));
+
+            var p3 = new Paragraph(Font(),
+                new ParagraphProperties(new Justification() { Val = JustificationValues.Both, }),
+                new Run(Font(),
+                new Text(b.GenerischerText())));
+
+            body.Append(p1);
+            body.Append(p2);
+
+            var Anpassung = -b.Result / 12;
+
+            if (Anpassung > 0)
+            {
+                // TODO this is missing in viewmodel => move...
+                body.Append(new Paragraph(
+                    new Run(Font(),
+                    new Text("Wir empfehlen Ihnen die monatliche Mietzahlung, um einen Betrag von " +
+                    Utils.Euro(Anpassung) + " auf " + Utils.Euro(b.Gezahlt / 12 + Anpassung) + " anzupassen."))));
+            }
+
+            body.Append(p3);
+        }
+        public void Explanation(IEnumerable<Tuple<string, string>> t)
+        {
+            var para = new Paragraph();
+
+            foreach (var i in t)
+            {
+                para.Append(
+                    new Run(
+                        new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) }),
+                        new Text(i.Item1 + ": ") { Space = SpaceProcessingModeValues.Preserve }),
+                    new Run(new Text(i.Item2), new Break()));
+            }
+
+            body.Append(para);
+        }
+        public void Text(string s)
+        {
+            body.Append(new Paragraph(Font(), new Run(Font(), new Text(s))));
+        }
+        public void PageBreak()
+        {
+            body.Append(new Break() { Type = BreakValues.Page });
+        }
+        public void EqHeizkostenV9_2(Rechnungsgruppe gruppe)
+        {
+            RunProperties rp() => new RunProperties(new RunFonts() { Ascii = "Cambria Math", HighAnsi = "Cambria Math" });
+            DocumentFormat.OpenXml.Math.Run t(string str) => new DocumentFormat.OpenXml.Math.Run(rp(), new DocumentFormat.OpenXml.Math.Text(str));
+            Run r(string str) => new Run(Font(), new Text(str) { Space = SpaceProcessingModeValues.Preserve });
+
+            DocumentFormat.OpenXml.Math.OfficeMath om(string str) => new DocumentFormat.OpenXml.Math.OfficeMath(t(str));
+            DocumentFormat.OpenXml.Math.OfficeMath omtw() => new DocumentFormat.OpenXml.Math.OfficeMath(tw());
+
+            DocumentFormat.OpenXml.Math.ParagraphProperties justifyLeft
+                () => new DocumentFormat.OpenXml.Math.ParagraphProperties(
+                    new DocumentFormat.OpenXml.Math.Justification()
+                    { Val = DocumentFormat.OpenXml.Math.JustificationValues.Left });
+
+            DocumentFormat.OpenXml.Math.Base tw()
+                => new DocumentFormat.OpenXml.Math.Base(
+                        new DocumentFormat.OpenXml.Math.Subscript(
+                        new DocumentFormat.OpenXml.Math.SubscriptProperties(
+                        new DocumentFormat.OpenXml.Math.ControlProperties(rp())),
+                        new DocumentFormat.OpenXml.Math.Base(t("t")),
+                        new DocumentFormat.OpenXml.Math.SubArgument(t("w"))));
+
+            DocumentFormat.OpenXml.Math.Fraction frac(string num, string den)
+                => new DocumentFormat.OpenXml.Math.Fraction(new DocumentFormat.OpenXml.Math.FractionProperties(
+                    new DocumentFormat.OpenXml.Math.ControlProperties(rp())),
+                    new DocumentFormat.OpenXml.Math.Numerator(t(num)),
+                    new DocumentFormat.OpenXml.Math.Denominator(t(den)));
+
+            DocumentFormat.OpenXml.Math.Fraction units() => frac("kWh", "m³ x K");
+
+            var p = new Paragraph(Font(), new Run(Font(), new Break(), new Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):"), new Break(), new Break()));
+
+            foreach (var hk in gruppe.Heizkosten)
+            {
+                p.Append(new DocumentFormat.OpenXml.Math.Paragraph(justifyLeft(),
+                    new DocumentFormat.OpenXml.Math.OfficeMath(
+                    t("2,5 ×"), frac("V", "Q"), t(" × ("), tw(), t("-10°C)"), units(), t(" ⟹ "),
+                    t("2,5 ×"), frac(Utils.Unit(hk.V, "m³"), Utils.Unit(hk.Q, "kWh")), t(" × ("), t(Utils.Celsius((int)hk.tw)), t("-10°C)"), units(), t(" = "), t(Utils.Prozent(hk.Para9_2)))));
+            }
+            p.Append(new Break(), new Break(),
+                new Run(Font(), r("Wobei "), om("V"), r(" die Menge des Warmwassers, die im Abrechnungszeitraum gemessen wurde, "),
+                om("Q"), r(" die gemessene Wärmemenge am Allgemeinzähler und "), omtw(), r("die geschätzte mittlere Temperatur des Warmwassers darstellt.")));
+
+            body.Append(p);
+        }
+        public void Break()
+        {
+            body.Append(new Paragraph(NoSpace()));
+        }
+        public void Heading(string str)
+        {
+            var para = new Paragraph(Font(), new Run(Font(), new RunProperties(
+                new Bold() { Val = OnOffValue.FromBoolean(true) },
+                new Italic() { Val = OnOffValue.FromBoolean(true) }),
+                new Text(str)));
+
+            body.Append(para);
+        }
+        public void SubHeading(string str)
+        {
+            var para = new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Text(str)));
+            body.Append(para);
+        }
+
+        public static RunProperties Font()
+        {
+            var font = "Times New Roman";
+            return new RunProperties(
+                new RunFonts() { Ascii = font, HighAnsi = font, ComplexScript = font, },
+                new FontSize() { Val = "22" }); // Size = 11
+        }
+        public static RunProperties Bold() => new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) });
+        public static ParagraphProperties NoSpace() => new ParagraphProperties(new SpacingBetweenLines() { After = "0" });
+    }
+}

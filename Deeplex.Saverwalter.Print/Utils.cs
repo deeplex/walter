@@ -16,22 +16,5 @@ namespace Deeplex.Saverwalter.Print
         public static string Celsius(int d) => d.ToString() + "°C";
         public static string Quadrat(double d) => string.Format("{0:N2} m²", d);
         public static string Datum(DateTime d) => d.ToString("dd.MM.yyyy");
-
-        public static RunProperties Font()
-        {
-            var font = "Times New Roman";
-            return new RunProperties(
-                new RunFonts() { Ascii = font, HighAnsi = font, ComplexScript = font, },
-                new FontSize() { Val = "22" }); // Size = 11
-        }
-        public static RunProperties Bold() => new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) });
-        public static ParagraphProperties NoSpace() => new ParagraphProperties(new SpacingBetweenLines() { After = "0" });
-        public static Paragraph SubHeading(string str) => new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Text(str)));
-        public static Paragraph SubHeading(string str, bool _) => new Paragraph(Font(), NoSpace(), new Run(Font(), Bold(), new Break(), new Text(str)));
-        public static Paragraph Heading(string str)
-            => new Paragraph(Font(), new Run(Font(), new RunProperties(
-                new Bold() { Val = OnOffValue.FromBoolean(true) },
-                new Italic() { Val = OnOffValue.FromBoolean(true) }),
-                new Text(str)));
     }
 }
