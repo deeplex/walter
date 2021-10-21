@@ -21,6 +21,7 @@
         HorizontalScrollMode="Auto"
         Background="{StaticResource SystemChromeHighColor}">
         <StackPanel
-            Padding="50" x:Name="Panel" Width="850" Background="{StaticResource SystemAltHighColor}" />
+            Margin="10"
+            Padding="101.19, 68.404, 40.476, 68.404" x:Name="Panel" Width="850" Background="{StaticResource SystemAltHighColor}" />
     </ScrollViewer>
 </Page>

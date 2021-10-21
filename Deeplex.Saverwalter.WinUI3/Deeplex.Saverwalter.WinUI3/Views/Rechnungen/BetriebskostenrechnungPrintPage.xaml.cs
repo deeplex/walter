@@ -110,11 +110,13 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
                 stack.Children.Add(text(b.Mieterliste()));
                 stack.Children.Add(text(b.Mietobjekt()));
                 var h1 = new StackPanel() { Orientation = Orientation.Horizontal };
-                h1.Children.Add(text("Abrechnungszeitraum: "));
+                h1.Children.Add(new TextBlock() { Text = "Abrechnungszeitraum: ", Width = 150 });
                 h1.Children.Add(text(b.Abrechnungszeitraum()));
                 var h2 = new StackPanel() { Orientation = Orientation.Horizontal };
-                h2.Children.Add(text("Nutzunngszeitraum: "));
+                h2.Children.Add(new TextBlock() { Text = "Nutzungszeitraum: ", Width = 150 });
                 h2.Children.Add(text(b.Nutzungszeitraum()));
+                stack.Children.Add(h1);
+                stack.Children.Add(h2);
                 stack.Children.Add(new Grid() { Height = 10 });
 
                 stack.Children.Add(text(b.Gruss()));
