@@ -117,7 +117,7 @@ namespace Deeplex.Saverwalter.Model
 
             if (Para9_2 > 1)
             {
-                throw new Exception("no.");
+                b.notes.Add(new Note("Heizkostenverteilung nach §9 ist falsch", Severity.Error));
             }
 
             GesamtNutzflaeche = r.Gruppen.Sum(w => w.Wohnung.Nutzflaeche);
