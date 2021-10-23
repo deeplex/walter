@@ -94,7 +94,9 @@ namespace Deeplex.Saverwalter.Model
             .Select(v => (v.Key, v.Value.Sum(vv => vv.Delta), v.Value.Sum(vv => vv.Delta / vv.Anteil)))
             .ToDictionary(v => v.Key, v => v.Item2 / v.Item3);
         public List<Heizkostenberechnung> Heizkosten => Rechnungen
-            .Where(r => (int)r.Typ % 2 == 1).Select(r => new Heizkostenberechnung(r, b)).ToList();
+            .Where(r => (int)r.Typ % 2 == 1)
+            .Select(r => new Heizkostenberechnung(r, b))
+            .ToList();
         public double GesamtBetragKalt => Rechnungen.Where(r => (int)r.Typ % 2 == 0).Sum(r => r.Betrag);
         public double BetragKalt => Rechnungen.Where(r => (int)r.Typ % 2 == 0).Aggregate(0.0, (a, r) =>
             r.Schluessel switch
@@ -108,11 +110,24 @@ namespace Deeplex.Saverwalter.Model
         public double GesamtBetragWarm => Heizkosten.Sum(h => h.PauschalBetrag);
         public double BetragWarm => Heizkosten.Sum(h => h.Kosten);
 
-
         public Rechnungsgruppe(Betriebskostenabrechnung _b, List<Betriebskostenrechnung> gruppe)
         {
             Rechnungen = gruppe;
             b = _b;
+
+            // Remove 5% of Heizkosten to allgStrom (they are added there)
+            var allgStrom = Rechnungen.Find(r => r.Typ == Betriebskostentyp.AllgemeinstromHausbeleuchtung);
+            // TODO this 0.05 has to be variable.
+            // TODO make sure this only happens only 1 time only.
+            if (allgStrom != null && !b.AllgStromVerrechnetMitHeizkosten)
+            {
+                allgStrom.Betrag -= b.Vertrag.Wohnung.Betriebskostenrechnungsgruppen
+                    .Select(g => g.Rechnung)
+                    .Where(g => g.BetreffendesJahr == b.Jahr && (int)g.Typ % 2 == 1)
+                    .Select(r => r.Betrag)
+                    .Sum() * 0.05;
+                b.AllgStromVerrechnetMitHeizkosten = true;
+            }
         }
 
         private static List<PersonenZeitIntervall>

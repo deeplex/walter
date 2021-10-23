@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.Model
             .ToList();
         // TODO juristische
 
-        private Vertrag Vertrag { get; }
+        public Vertrag Vertrag { get; }
 
         public Wohnung Wohnung => Vertrag.Wohnung!;
         public Adresse Adresse => Wohnung.Adresse;
@@ -69,6 +69,8 @@ namespace Deeplex.Saverwalter.Model
             .ToList();
 
         public double Result => BezahltNebenkosten - BetragNebenkosten + KaltMinderung + NebenkostenMinderung;
+
+        public bool AllgStromVerrechnetMitHeizkosten = false;
 
         public Betriebskostenabrechnung(SaverwalterContext _db, int rowid, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
         {
