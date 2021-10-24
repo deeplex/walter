@@ -17,7 +17,6 @@ namespace Deeplex.Saverwalter.Print
         public T body { get; }
 
         public void Table(int[] widths, int[] justification, bool[] bold, bool[] underlined, string[][] cols);
-        public void Explanation(IEnumerable<Tuple<string, string>> t);
         public void Text(string s);
         public void PageBreak();
         public void Break();
@@ -33,12 +32,14 @@ namespace Deeplex.Saverwalter.Print
         public bool Bold;
         public bool Underlined;
         public bool NoBreak;
-        public PrintRun(string text, bool bold = false, bool underlined = false, bool noBreak = false)
+        public bool Tab;
+        public PrintRun(string text, bool bold = false, bool underlined = false, bool noBreak = false, bool tab = false)
         {
             Text = text;
             Bold = bold;
             Underlined = underlined;
             NoBreak = noBreak;
+            Tab = tab;
         }
     }
 
@@ -179,10 +180,16 @@ namespace Deeplex.Saverwalter.Print
         }
         private static void ExplainKalteBetriebskosten(Betriebskostenabrechnung b, IPrint<T> p)
         {
-            var a = b.Gruppen
-                .SelectMany(g => g.Rechnungen.Where(r => r.Beschreibung != null && r.Beschreibung.Trim() != "")
-                .Select(t => new Tuple<string, string>(t.Typ.ToDescriptionString(), t.Beschreibung!)));
-            p.Explanation(a);
+            var runs = b.Gruppen
+                .SelectMany(g => g.Rechnungen.Where(r => r.Beschreibung != null && r.Beschreibung.Trim() != ""))
+                .SelectMany(t => new List<PrintRun>()
+                {
+                    new PrintRun(t.Typ.ToDescriptionString() + ": ", true, false, true),
+                    new PrintRun(t.Beschreibung ?? "")
+                })
+                .ToArray();
+
+            p.Paragraph(runs);
         }
         private static void AbrechnungWohnung(Betriebskostenabrechnung b, Rechnungsgruppe g, IPrint<T> p)
         {
@@ -735,14 +742,14 @@ namespace Deeplex.Saverwalter.Print
                 new PrintRun(b.Title(), true),
                 new PrintRun(b.Mieterliste()),
                 new PrintRun(b.Mietobjekt()),
-                new PrintRun("Abrechnungszeitraum: ", false, false, true),
+                new PrintRun("Abrechnungszeitraum: ", false, false, true, true),
                 new PrintRun(b.Abrechnungszeitraum()),
-                new PrintRun("Nutzungszeitraum: ", false, false, true),
+                new PrintRun("Nutzungszeitraum: ", false, false, true, true),
                 new PrintRun(b.Nutzungszeitraum()));
 
             p.Paragraph(
                 new PrintRun(b.Gruss()),
-                new PrintRun(b.ResultTxt(), false, false, true),
+                new PrintRun(b.ResultTxt(), false, false, true, true),
                 new PrintRun(Euro(Math.Abs(b.Result)), true, true),
                 new PrintRun(b.RefundDemand()));
 

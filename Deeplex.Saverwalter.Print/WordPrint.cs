@@ -148,13 +148,13 @@ namespace Deeplex.Saverwalter.Print
                     new RunProperties(
                         new Bold() { Val = OnOffValue.FromBoolean(run.Bold) },
                         new Underline() { Val = run.Underlined ? UnderlineValues.Single : UnderlineValues.None }),
-                    new Text(run.Text));
+                    new Text(run.Text) { Space = SpaceProcessingModeValues.Preserve });
 
-                if (run.NoBreak)
+                if (run.Tab)
                 {
                     r.Append(new TabChar());
                 }
-                else
+                if (!run.NoBreak)
                 {
                     if (i != runs.Length - 1)
                     {
@@ -167,21 +167,6 @@ namespace Deeplex.Saverwalter.Print
             body.Append(para);
         }
 
-        public void Explanation(IEnumerable<Tuple<string, string>> t)
-        {
-            var para = new Paragraph();
-
-            foreach (var i in t)
-            {
-                para.Append(
-                    new Run(
-                        new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) }),
-                        new Text(i.Item1 + ": ") { Space = SpaceProcessingModeValues.Preserve }),
-                    new Run(new Text(i.Item2), new Break()));
-            }
-
-            body.Append(para);
-        }
         public void Text(string s)
         {
             body.Append(new Paragraph(Font(), new Run(Font(), new Text(s))));

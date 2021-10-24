@@ -84,13 +84,13 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
                             Windows.UI.Text.TextDecorations.None
                     };
                     para.Inlines.Add(r);
-                    if (run.NoBreak)
+                    if (run.Tab)
                     {
                         // TODO tab does not really work..
                         var number = 8 - r.Text.Length % 8;
-                        r.Text +=string.Concat(Enumerable.Repeat(" ", number));
+                        r.Text += string.Concat(Enumerable.Repeat(" ", number));
                     }
-                    else
+                    if (!run.NoBreak)
                     {
                         if (i != runs.Length - 1)
                         {
@@ -103,31 +103,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
                 Parent.Panel.Children.Add(rtb);
             }
 
-            public void Explanation(IEnumerable<Tuple<string, string>> tuple)
-            {
-                foreach (var t in tuple)
-                {
-                    var stack = new StackPanel()
-                    {
-                        Orientation = Orientation.Horizontal,
-                        MaxWidth = panelWidth,
-                        Width = panelWidth,
-                    };
-                    stack.Children.Add(new TextBlock()
-                    {
-                        Text = t.Item1 + ": ",
-                        FontWeight = FontWeights.Bold,
-                        Margin = new Thickness(0, 0, 5, 0),
-                    });
-                    stack.Children.Add(new TextBlock() { Text = t.Item2, TextWrapping = TextWrapping.WrapWholeWords });
-                    Parent.Panel.Children.Add(stack);
-                }
-            }
-
             public void Heading(string str)
             {
                 Parent.Panel.Children.Add(new TextBlock
                 {
+                    Margin = new Thickness(0, 5, 0, 5),
                     Text = str,
                     FontWeight = FontWeights.Bold,
                     FontStyle = Windows.UI.Text.FontStyle.Italic,
@@ -245,7 +225,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
 
             public void Text(string s)
             {
-                Parent.Panel.Children.Add(new TextBlock { Text = s });
+                Parent.Panel.Children.Add(new TextBlock { Text = s, TextWrapping = TextWrapping.WrapWholeWords });
             }
         }
     }
