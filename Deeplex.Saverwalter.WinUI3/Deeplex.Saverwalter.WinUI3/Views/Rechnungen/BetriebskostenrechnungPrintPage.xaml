@@ -10,13 +10,6 @@
     xmlns:conv="using:Deeplex.Saverwalter.WinUI3.Utils"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Page.Resources>
-        <conv:GetBriefAnredeConverter x:Key="GetBriefAnredeConverterKey" />
-        <conv:DateStringConverter x:Key="DateStringConverterKey" />
-        <conv:ToDescriptionStringConverter x:Key="ToDescriptionStringConverterKey" />
-        <conv:ToStringConverter x:Key="ToStringConverterKey" />
-    </Page.Resources>
-
     <ScrollViewer
         HorizontalScrollBarVisibility="Visible"
         IsScrollInertiaEnabled="True"
@@ -45,6 +38,5 @@
                 Width="850"
                 Background="{StaticResource SystemAltHighColor}" />
         </StackPanel>
-
     </ScrollViewer>
 </Page>

@@ -17,7 +17,6 @@ namespace Deeplex.Saverwalter.Print
         public T body { get; }
 
         public void Table(int[] widths, int[] justification, bool[] bold, bool[] underlined, string[][] cols);
-        public void Introtext(Betriebskostenabrechnung b);
         public void Explanation(IEnumerable<Tuple<string, string>> t);
         public void Text(string s);
         public void PageBreak();
@@ -25,6 +24,22 @@ namespace Deeplex.Saverwalter.Print
         public void EqHeizkostenV9_2(Rechnungsgruppe gruppe);
         public void Heading(string str);
         public void SubHeading(string str);
+        public void Paragraph(params PrintRun[] runs);
+    }
+
+    public class PrintRun
+    {
+        public string Text;
+        public bool Bold;
+        public bool Underlined;
+        public bool NoBreak;
+        public PrintRun(string text, bool bold = false, bool underlined = false, bool noBreak = false)
+        {
+            Text = text;
+            Bold = bold;
+            Underlined = underlined;
+            NoBreak = noBreak;
+        }
     }
 
     public static class TPrint<T>
@@ -714,10 +729,30 @@ namespace Deeplex.Saverwalter.Print
             p.Table(widths, justification, bold, underlined, cols);
         }
 
+        private static void Introtext(Betriebskostenabrechnung b, IPrint<T> p)
+        {
+            p.Paragraph(
+                new PrintRun(b.Title(), true),
+                new PrintRun(b.Mieterliste()),
+                new PrintRun(b.Mietobjekt()),
+                new PrintRun("Abrechnungszeitraum: ", false, false, true),
+                new PrintRun(b.Abrechnungszeitraum()),
+                new PrintRun("Nutzungszeitraum: ", false, false, true),
+                new PrintRun(b.Nutzungszeitraum()));
+
+            p.Paragraph(
+                new PrintRun(b.Gruss()),
+                new PrintRun(b.ResultTxt(), false, false, true),
+                new PrintRun(Euro(Math.Abs(b.Result)), true, true),
+                new PrintRun(b.RefundDemand()));
+
+            p.Paragraph(new PrintRun(b.GenerischerText()));
+        }
+
         public static T Print(Betriebskostenabrechnung b, IPrint<T> p)
         {
             Header(b, p);
-            p.Introtext(b);
+            Introtext(b, p);
             p.PageBreak();
 
             p.Heading("Abrechnung der Nebenkosten");

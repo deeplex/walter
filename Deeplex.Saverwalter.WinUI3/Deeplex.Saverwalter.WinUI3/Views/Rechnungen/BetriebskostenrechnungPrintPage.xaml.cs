@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
@@ -65,6 +66,41 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
             public void EqHeizkostenV9_2(Rechnungsgruppe gruppe)
             {
                 // TODO
+            }
+
+            public void Paragraph(params PrintRun[] runs)
+            {
+                var rtb = new RichTextBlock();
+                var para = new Paragraph();
+                for (var i = 0; i < runs.Length; ++i)
+                {
+                    var run = runs[i];
+                    var r = new Run()
+                    {
+                        Text = run.Text,
+                        FontWeight = run.Bold ? FontWeights.Bold : FontWeights.Normal,
+                        TextDecorations = run.Underlined ?
+                            Windows.UI.Text.TextDecorations.Underline :
+                            Windows.UI.Text.TextDecorations.None
+                    };
+                    para.Inlines.Add(r);
+                    if (run.NoBreak)
+                    {
+                        // TODO tab does not really work..
+                        var number = 8 - r.Text.Length % 8;
+                        r.Text +=string.Concat(Enumerable.Repeat(" ", number));
+                    }
+                    else
+                    {
+                        if (i != runs.Length - 1)
+                        {
+                            para.Inlines.Add(new LineBreak());
+                        }
+                    }
+                }
+                rtb.Blocks.Add(para);
+
+                Parent.Panel.Children.Add(rtb);
             }
 
             public void Explanation(IEnumerable<Tuple<string, string>> tuple)

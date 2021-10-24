@@ -137,61 +137,36 @@ namespace Deeplex.Saverwalter.Print
             }
             body.Append(table);
         }
-        public void Introtext(Betriebskostenabrechnung b)
+
+        public void Paragraph(PrintRun[] runs)
         {
-            var p1 = new Paragraph(Font(),
-                new Run(Font(),
-                    new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) }),
-                    new Text(b.Title()),
-                    new Break()),
-                new Run(Font(),
-                    new Text(b.Mieterliste()),
-                    new Break(),
-                    new Text(b.Mietobjekt()),
-                    new Break(),
-                    new Text("Abrechnungszeitraum: "),
-                    new TabChar(),
-                    new Text(b.Abrechnungszeitraum()),
-                    new Break(),
-                    new Text("Nutzungszeitraum: "),
-                    new TabChar(),
-                    new Text(b.Nutzungszeitraum())));
-
-            var p2 = new Paragraph(Font(),
-                new Run(Font(),
-                new Text(b.Gruss()),
-                new Break(),
-                new Text(b.ResultTxt()),
-                new TabChar()),
-                new Run(Font(),
-                new RunProperties(
-                new Bold() { Val = OnOffValue.FromBoolean(true), },
-                new Underline() { Val = UnderlineValues.Single, }),
-                new Text(Utils.Euro(Math.Abs(b.Result))),
-                new Break()),
-                new Run(Font(), new Text(b.RefundDemand())));
-
-            var p3 = new Paragraph(Font(),
-                new ParagraphProperties(new Justification() { Val = JustificationValues.Both, }),
-                new Run(Font(),
-                new Text(b.GenerischerText())));
-
-            body.Append(p1);
-            body.Append(p2);
-
-            var Anpassung = -b.Result / 12;
-
-            if (Anpassung > 0)
+            var para = new Paragraph();
+            for (var i = 0; i < runs.Length; ++i)
             {
-                // TODO this is missing in viewmodel => move...
-                body.Append(new Paragraph(
-                    new Run(Font(),
-                    new Text("Wir empfehlen Ihnen die monatliche Mietzahlung, um einen Betrag von " +
-                    Utils.Euro(Anpassung) + " auf " + Utils.Euro(b.Gezahlt / 12 + Anpassung) + " anzupassen."))));
+                var run = runs[i];
+                var r = new Run(Font(),
+                    new RunProperties(
+                        new Bold() { Val = OnOffValue.FromBoolean(run.Bold) },
+                        new Underline() { Val = run.Underlined ? UnderlineValues.Single : UnderlineValues.None }),
+                    new Text(run.Text));
+
+                if (run.NoBreak)
+                {
+                    r.Append(new TabChar());
+                }
+                else
+                {
+                    if (i != runs.Length - 1)
+                    {
+                        r.Append(new Break());
+                    }
+                }
+                para.Append(r);
             }
 
-            body.Append(p3);
+            body.Append(para);
         }
+
         public void Explanation(IEnumerable<Tuple<string, string>> t)
         {
             var para = new Paragraph();
