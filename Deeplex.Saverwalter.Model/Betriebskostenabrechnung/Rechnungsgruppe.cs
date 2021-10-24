@@ -118,7 +118,6 @@ namespace Deeplex.Saverwalter.Model
             // Remove 5% of Heizkosten to allgStrom (they are added there)
             var allgStrom = Rechnungen.Find(r => r.Typ == Betriebskostentyp.AllgemeinstromHausbeleuchtung);
             // TODO this 0.05 has to be variable.
-            // TODO make sure this only happens only 1 time only.
             if (allgStrom != null && !b.AllgStromVerrechnetMitHeizkosten)
             {
                 allgStrom.Betrag -= b.Vertrag.Wohnung.Betriebskostenrechnungsgruppen
