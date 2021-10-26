@@ -201,6 +201,17 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
                 {
                     for (var j = 0; j < cols[i].Length; ++j)
                     {
+                        var container = new Grid();
+
+                        if (underlined[j])
+                        {
+                            container.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush()
+                            {
+                                Color = Microsoft.UI.Colors.Black,
+                            };
+                            container.BorderThickness = new Thickness(0,0,0,1);
+                        }
+                        
                         var tb = new TextBlock()
                         {
                             TextWrapping = TextWrapping.WrapWholeWords,
@@ -208,15 +219,12 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
                             TextAlignment = jst[i],
                             FontWeight = bold[j] ? FontWeights.Bold : FontWeights.Normal,
                         };
-                        grid.Children.Add(tb);
 
-                        //grid.BorderBrush = Microsoft.UI.Xaml.Media.Brush;
-                        grid.BorderThickness = new Thickness()
-                        {
-                            Bottom = underlined[j] ? 4 : 0,
-                        };
-                        Grid.SetRow(tb, j);
-                        Grid.SetColumn(tb, i);
+                        container.Children.Add(tb);
+                        grid.Children.Add(container);
+
+                        Grid.SetRow(container, j);
+                        Grid.SetColumn(container, i);
                     }
                 }
 
