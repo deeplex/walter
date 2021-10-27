@@ -126,6 +126,10 @@ namespace Deeplex.Saverwalter.Model
                     .Select(r => r.Betrag)
                     .Sum() * 0.05;
                 b.AllgStromVerrechnetMitHeizkosten = true;
+                if (allgStrom.Betrag < 0)
+                {
+                    b.notes.Add(new Note("Allgemeinstrom hat einen Betrag von " + string.Format("{0:N2}€", allgStrom.Betrag), Severity.Error));
+                }
             }
         }
 
