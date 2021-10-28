@@ -397,6 +397,11 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class Betriebskostenrechnung
     {
+        public Betriebskostenrechnung ShallowCopy()
+        {
+            return (Betriebskostenrechnung)MemberwiseClone();
+        }
+
         public int BetriebskostenrechnungId { get; set; }
         public Betriebskostentyp Typ { get; set; }
         public double Betrag { get; set; }

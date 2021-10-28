@@ -120,16 +120,22 @@ namespace Deeplex.Saverwalter.Model
             // TODO this 0.05 has to be variable.
             if (allgStrom != null && !b.AllgStromVerrechnetMitHeizkosten)
             {
-                allgStrom.Betrag -= b.Vertrag.Wohnung.Betriebskostenrechnungsgruppen
+                var copy = allgStrom.ShallowCopy();
+                var idx = Rechnungen.IndexOf(allgStrom);
+
+                copy.Betrag -= b.Vertrag.Wohnung.Betriebskostenrechnungsgruppen
                     .Select(g => g.Rechnung)
                     .Where(g => g.BetreffendesJahr == b.Jahr && (int)g.Typ % 2 == 1)
                     .Select(r => r.Betrag)
                     .Sum() * 0.05;
                 b.AllgStromVerrechnetMitHeizkosten = true;
-                if (allgStrom.Betrag < 0)
+                if (copy.Betrag < 0)
                 {
-                    b.notes.Add(new Note("Allgemeinstrom hat einen Betrag von " + string.Format("{0:N2}€", allgStrom.Betrag), Severity.Error));
+                    b.notes.Add(new Note("Allgemeinstrom hat einen Betrag von " + string.Format("{0:N2}€", copy.Betrag), Severity.Error));
                 }
+
+                Rechnungen.Remove(allgStrom);
+                Rechnungen.Insert(idx, copy);
             }
         }
 

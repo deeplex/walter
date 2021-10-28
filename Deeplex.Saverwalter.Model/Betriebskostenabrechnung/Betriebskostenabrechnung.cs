@@ -62,11 +62,7 @@ namespace Deeplex.Saverwalter.Model
         public int Nutzungszeitspanne => (Nutzungsende - Nutzungsbeginn).Days + 1;
         public double Zeitanteil => (double)Nutzungszeitspanne / Abrechnungszeitspanne;
 
-        public List<Rechnungsgruppe> Gruppen => Vertrag.Wohnung.Betriebskostenrechnungsgruppen
-            .Where(g => g.Rechnung.BetreffendesJahr == Jahr)
-            .GroupBy(p => new SortedSet<int>(p.Rechnung.Gruppen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
-            .Select(g => new Rechnungsgruppe(this, g.Select(i => i.Rechnung).ToList()))
-            .ToList();
+        public List<Rechnungsgruppe> Gruppen { get; }
 
         public double Result => BezahltNebenkosten - BetragNebenkosten + KaltMinderung + NebenkostenMinderung;
 
@@ -103,6 +99,12 @@ namespace Deeplex.Saverwalter.Model
                                     .ThenInclude(w => w.Zaehler)
                                         .ThenInclude(z => z.Staende)
                 .First();
+
+            Gruppen = Vertrag.Wohnung.Betriebskostenrechnungsgruppen
+                .Where(g => g.Rechnung.BetreffendesJahr == Jahr)
+                .GroupBy(p => new SortedSet<int>(p.Rechnung.Gruppen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
+                .Select(g => new Rechnungsgruppe(this, g.Select(i => i.Rechnung).ToList()))
+                .ToList();
 
             // If Ansprechpartner or Besitzer is null => throw
         }
