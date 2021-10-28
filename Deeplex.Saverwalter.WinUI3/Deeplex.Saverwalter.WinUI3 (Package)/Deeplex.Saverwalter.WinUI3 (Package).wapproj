@@ -49,13 +49,6 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="BetriebskostenrechnungenDetailPage.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <Generator>MSBuild:Compile</Generator>
-    </Content>
-    <Content Include="BetriebskostenrechnungenDetailPage.xaml.cs">
-      <DependentUpon>BetriebskostenrechnungenDetailPage.xaml</DependentUpon>
-    </Content>
     <Content Include="Images\SplashScreen.scale-200.png" />
     <Content Include="Images\LockScreenLogo.scale-200.png" />
     <Content Include="Images\Square150x150Logo.scale-200.png" />
