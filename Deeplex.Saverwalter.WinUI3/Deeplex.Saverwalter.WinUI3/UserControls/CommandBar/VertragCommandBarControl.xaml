@@ -9,12 +9,14 @@
 
     <CommandBar>
         <CommandBar.PrimaryCommands>
-            <AppBarButton Label="Löschen" Icon="Delete" Click="Delete_Click"/>
             <AppBarButton
                 Click="Betriebskostenabrechnung_Click"
                 Label="Betriebskostenabrechnung"
                 Icon="PostUpdate">
             </AppBarButton>
         </CommandBar.PrimaryCommands>
+        <CommandBar.SecondaryCommands>
+            <AppBarButton Label="Löschen" Icon="Delete" Click="Delete_Click"/>
+        </CommandBar.SecondaryCommands>
     </CommandBar>
 </UserControl>
