@@ -43,7 +43,11 @@ namespace Deeplex.Saverwalter.ViewModels
                 if (value == null) return;
 
                 var old = Entity.Wohnung;
-                Entity.Wohnung = value?.Entity;
+                Entity.Wohnung = value.Entity;
+                if (Ansprechpartner == null)
+                {
+                    Ansprechpartner = new KontaktListEntry(value.Entity.BesitzerId, Avm);
+                }
                 mWohnung = value;
                 if (RaisePropertyChangedAuto(old, value.Entity))
                 {
