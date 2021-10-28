@@ -79,14 +79,14 @@ namespace Deeplex.Saverwalter.ViewModels
 
             AddMieterCommand = new RelayCommand(_ =>
             {
-                if (AddMieter.Value?.Guid is Guid guid)
+                if (AddMieter.Value?.Guid is Guid mieterGuid)
                 {
-                    Mieter.Value = Mieter.Value.Add(new KontaktListEntry(guid, Avm));
+                    Mieter.Value = Mieter.Value.Add(new KontaktListEntry(mieterGuid, Avm));
                     UpdateMieterList();
                     Avm.ctx.MieterSet.Add(new Mieter()
                     {
                         VertragId = guid,
-                        PersonId = guid,
+                        PersonId = mieterGuid,
                     });
                     Avm.SaveWalter();
                 }
