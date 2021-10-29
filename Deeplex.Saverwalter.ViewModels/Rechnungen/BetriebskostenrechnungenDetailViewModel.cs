@@ -238,10 +238,9 @@ namespace Deeplex.Saverwalter.ViewModels
             Typen_List = Enums.Betriebskostentyp;
             Typ = Typen_List.FirstOrDefault(e => e.Typ == r.Typ);
 
-            dispose = new RelayCommand(_ => selfDestruct());
+            dispose = new AsyncRelayCommand(_ => selfDestruct());
 
             PropertyChanged += OnUpdate;
-
         }
 
         public BetriebskostenrechnungDetailViewModel(IList<WohnungListEntry> l, int betreffendesJahr, IAppImplementation impl, AppViewModel avm) : this(new Betriebskostenrechnung(), impl, avm)
@@ -257,15 +256,10 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Datum = DateTime.Now;
         }
 
-        public RelayCommand dispose;
+        public AsyncRelayCommand dispose;
 
         public void Update()
         {
-            if (Entity.Datum == null)
-            {
-                return;
-            }
-
             if (Entity.BetriebskostenrechnungId != 0)
             {
                 Avm.ctx.Betriebskostenrechnungen.Update(Entity);
