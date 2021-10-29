@@ -8,6 +8,9 @@
     mc:Ignorable="d">
 
     <CommandBar>
+        <CommandBar.PrimaryCommands>
+            <AppBarButton Label="Nächste Rechnung" Icon="Next" Click="Next_Click"/>
+        </CommandBar.PrimaryCommands>
         <CommandBar.SecondaryCommands>
             <AppBarButton Label="Löschen" Icon="Delete" Click="Delete_Click"/>
         </CommandBar.SecondaryCommands>

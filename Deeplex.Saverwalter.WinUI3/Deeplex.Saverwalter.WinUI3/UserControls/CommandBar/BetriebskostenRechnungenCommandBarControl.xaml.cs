@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.WinUI3.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -35,6 +36,19 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                 await ViewModel.selfDestruct();
             }
             App.Window.AppFrame.GoBack();
+        }
+
+        private void Next_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.Id != 0)
+            {
+                var next = new BetriebskostenrechnungDetailViewModel(
+                    ViewModel.Wohnungen.Value,
+                    ViewModel.BetreffendesJahr,
+                    ViewModel.Impl,
+                    ViewModel.Avm);
+                App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), next);
+            }
         }
     }
 }

@@ -180,8 +180,8 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<ImmutableList<WohnungListEntry>> Wohnungen
             = new ObservableProperty<ImmutableList<WohnungListEntry>>();
 
-        private AppViewModel Avm;
-        private IAppImplementation Impl;
+        public AppViewModel Avm;
+        public IAppImplementation Impl;
         public void UpdateWohnungen(List<object> selected)
         {
             var flagged = false;
@@ -242,6 +242,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             PropertyChanged += OnUpdate;
 
+        }
+
+        public BetriebskostenrechnungDetailViewModel(IList<WohnungListEntry> l, int betreffendesJahr, IAppImplementation impl, AppViewModel avm) : this(new Betriebskostenrechnung(), impl, avm)
+        {
+            Wohnungen.Value = l.ToImmutableList();
+            BetreffendesJahr = betreffendesJahr;
+            Entity.Datum = DateTime.Now;
         }
 
         public BetriebskostenrechnungDetailViewModel(IAppImplementation impl, AppViewModel avm) : this(new Betriebskostenrechnung(), impl, avm)
