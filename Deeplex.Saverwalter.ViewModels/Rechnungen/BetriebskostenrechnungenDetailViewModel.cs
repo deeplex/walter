@@ -79,14 +79,11 @@ namespace Deeplex.Saverwalter.ViewModels
 
         private async void fromLastYear()
         {
-            var lastYear = Avm.ctx.Betriebskostenrechnungen
-                .ToList()
-                .Where(r =>
-                    r.BetreffendesJahr == BetreffendesJahr - 1 &&
-                    r.Gruppen.Count == Wohnungen.Value.Count &&
-                    Wohnungen.Value.All(e => r.Gruppen.Exists(r => r.WohnungId == e.Id)))
-                .ToList()
-                .Find(f => f.Typ == mTyp.Typ);
+            var lastYear = Avm.ctx.Betriebskostenrechnungen.ToList().Where(r =>
+                r.BetreffendesJahr == BetreffendesJahr - 1 &&
+                r.Gruppen.Count == Wohnungen.Value.Count &&
+                Wohnungen.Value.All(e => r.Gruppen.Exists(r => r.WohnungId == e.Id)))
+            .ToList().Find(f => f.Typ == mTyp.Typ);
 
             if (lastYear == null ||
                 !await Impl.Confirmation(
@@ -103,9 +100,11 @@ namespace Deeplex.Saverwalter.ViewModels
             Betrag = lastYear.Betrag;
             Schluessel = (int)lastYear.Schluessel;
             Notiz = lastYear.Notiz;
+            Datum = lastYear.Datum.AddYears(1);
             if (lastYear.HKVO_P7 is double p7) HKVO_P7 = p7;
             if (lastYear.HKVO_P8 is double p8) HKVO_P8 = p8;
             if (lastYear.HKVO_P9 is HKVO_P9A2 p9) HKVO_P9 = (int)p9;
+            if (lastYear.Zaehler is Zaehler z) AllgemeinZaehler = new ZaehlerListEntry(z);
         }
 
         private BetriebskostentypUtil mTyp;
@@ -226,7 +225,8 @@ namespace Deeplex.Saverwalter.ViewModels
         public void SaveWohnungen(ImmutableList<WohnungListEntry> before)
         {
             // Add missing Gruppen
-            before.Where(s => !Wohnungen.Value.Exists(w => w.Id == (s as WohnungListEntry).Id))
+            before
+                .Where(s => !Wohnungen.Value.Exists(w => w.Id == (s as WohnungListEntry).Id))
                 .ToList()
                 .ForEach(s =>
                 {
@@ -238,7 +238,8 @@ namespace Deeplex.Saverwalter.ViewModels
                 });
 
             // Remove old Gruppen
-            Wohnungen.Value.Where(w => !before.Exists(s => w.Id == (s as WohnungListEntry).Id))
+            Wohnungen.Value
+                .Where(w => !before.Exists(s => w.Id == (s as WohnungListEntry).Id))
                 .ToList()
                 .ForEach(w =>
                 {
