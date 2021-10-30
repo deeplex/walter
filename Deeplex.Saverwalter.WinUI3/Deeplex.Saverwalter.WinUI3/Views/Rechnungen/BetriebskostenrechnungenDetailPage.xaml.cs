@@ -4,6 +4,7 @@ using Deeplex.Saverwalter.WinUI3.UserControls;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
@@ -74,12 +75,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private void WohnungenTree_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            if (ViewModel.Id == 0) return;
-
             var selected = WohnungenTree.SelectedItems
                 .Select(s => (s as TreeViewNode).Content)
                 .Where(s => s is WohnungListEntry)
-                .ToList();
+                .Select(s => (WohnungListEntry)s)
+                .ToImmutableList();
 
             ViewModel.UpdateWohnungen(selected);
         }
