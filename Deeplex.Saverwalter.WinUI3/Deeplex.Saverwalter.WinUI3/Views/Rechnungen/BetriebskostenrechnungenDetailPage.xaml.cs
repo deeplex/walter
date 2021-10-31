@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            WohnungenTree_Tapped(null, null);
+            ViewModel.SaveWohnungen();
             base.OnNavigatingFrom(e);
         }
 
