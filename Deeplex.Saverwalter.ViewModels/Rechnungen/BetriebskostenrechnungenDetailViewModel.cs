@@ -222,10 +222,11 @@ namespace Deeplex.Saverwalter.ViewModels
         public IAppImplementation Impl;
         public void UpdateWohnungen(ImmutableList<WohnungListEntry> list)
         {
+            var flagged = Wohnungen.Value.Count != list.Count;
             Wohnungen.Value = list
                 .Select(e => new WohnungListEntry(e.Entity, Avm))
                 .ToImmutableList();
-            Update();
+            if (flagged) Update();
         }
         public void SaveWohnungen()
         {
