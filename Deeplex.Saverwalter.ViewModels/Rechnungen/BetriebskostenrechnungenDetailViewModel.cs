@@ -292,7 +292,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Wohnungen.Value = l.ToImmutableList();
             BetreffendesJahr = betreffendesJahr;
-         
+
             if (missing.Count > 0)
             {
                 Typ = Typen_List.FirstOrDefault(w => w.Typ == missing.First().Typ);

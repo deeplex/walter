@@ -1,11 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using static Deeplex.Saverwalter.Model.Utils;
 using static Deeplex.Saverwalter.Print.Utils;

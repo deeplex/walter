@@ -49,8 +49,8 @@ namespace Deeplex.Saverwalter.ViewModels
                 w = w.Concat(ww).ToList();
                 filtered = filtered.Concat(filterered).ToList();
 
-               await Utils.Files.PrintErhaltungsaufwendungen(w, false, Jahr.Value, avm, impl, filtered);
-           }, _ => true);
+                await Utils.Files.PrintErhaltungsaufwendungen(w, false, Jahr.Value, avm, impl, filtered);
+            }, _ => true);
             Jahr.Value = DateTime.Now.Year - 1;
         }
         public ErhaltungsaufwendungenPrintViewModel(Wohnung w, AppViewModel avm, IAppImplementation impl) : this(avm, impl)

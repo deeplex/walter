@@ -1,12 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.UserControls;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
 {

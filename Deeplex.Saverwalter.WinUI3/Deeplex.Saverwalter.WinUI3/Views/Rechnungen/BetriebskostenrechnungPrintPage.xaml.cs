@@ -2,14 +2,12 @@
 using Deeplex.Saverwalter.Print;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.UserControls;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
@@ -177,7 +175,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
 
             public void Table(int[] widths, int[] justification, bool[] bold, bool[] underlined, string[][] cols)
             {
-                var grid = new Grid() {
+                var grid = new Grid()
+                {
                     HorizontalAlignment = HorizontalAlignment.Left,
                     Width = widths.Sum() * panelWidth / 100
                 };
@@ -209,9 +208,9 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
                             {
                                 Color = Microsoft.UI.Colors.Black,
                             };
-                            container.BorderThickness = new Thickness(0,0,0,1);
+                            container.BorderThickness = new Thickness(0, 0, 0, 1);
                         }
-                        
+
                         var tb = new TextBlock()
                         {
                             TextWrapping = TextWrapping.WrapWholeWords,

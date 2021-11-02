@@ -120,7 +120,7 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
                 filename += " (anteilig)";
             }
 
-                var path = await impl.saveFile(filename, ".docx");
+            var path = await impl.saveFile(filename, ".docx");
 
             if (path == null)
             {
