@@ -92,13 +92,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public ImmutableList<string> Staedte => AlleAdressen
             .Select(a => a.Stadt).Distinct().ToImmutableList();
         public ImmutableList<string> Postleitzahlen => AlleAdressen
-            .Where(a => Stadt != "" && a.Stadt == Stadt)
+            //.Where(a => Stadt == "" || a.Stadt == Stadt)
             .Select(a => a.Postleitzahl).Distinct().ToImmutableList();
         public ImmutableList<string> Strassen => AlleAdressen
-            .Where(a => Postleitzahl != "" && a.Postleitzahl == Entity.Postleitzahl)
+            //.Where(a => Postleitzahl == "" || a.Postleitzahl == Entity.Postleitzahl)
             .Select(a => a.Strasse).Distinct().ToImmutableList();
         public ImmutableList<string> Hausnummern => AlleAdressen
-            .Where(a => Hausnummer != "" && a.Hausnummer == Entity.Hausnummer)
+            //.Where(a => Hausnummer == "" || a.Hausnummer == Entity.Hausnummer)
             .Select(a => a.Hausnummer).Distinct().ToImmutableList();
 
         public int GetReferences
@@ -115,6 +115,7 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
         public int Id;
+
         public virtual string Strasse
         {
             get => Entity?.Strasse ?? "";
