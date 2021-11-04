@@ -28,7 +28,7 @@
                 <uc:ExpanderControl.MainContent>
                     <mtuuc:DataGrid
                         AutoGeneratingColumn="Adressen_AutoGeneratingColumn"
-                        ItemsSource="{x:Bind ViewModel.Adressen.Value, Mode=OneWay}"
+                        ItemsSource="{x:Bind ViewModel.Adressen.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                         AutoGenerateColumns="True">
                         <mtuuc:DataGrid.Columns>
                             <mtuuc:DataGridTemplateColumn>

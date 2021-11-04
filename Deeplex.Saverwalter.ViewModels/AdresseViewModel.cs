@@ -40,23 +40,6 @@ namespace Deeplex.Saverwalter.ViewModels
             reference.Adresse = adresse;
             Entity = adresse;
 
-            if (base.Strasse != Strasse)
-            {
-                base.Strasse = Strasse;
-            }
-            if (base.Hausnummer != Hausnummer)
-            {
-                base.Hausnummer = Hausnummer;
-            }
-            if (base.Postleitzahl != Postleitzahl)
-            {
-                base.Postleitzahl = Postleitzahl;
-            }
-            if (base.Stadt != Stadt)
-            {
-                base.Stadt = Stadt;
-            }
-
             //Check if reference is valid.
             if (Avm.ctx.Entry(reference).State != Microsoft.EntityFrameworkCore.EntityState.Detached)
             {
@@ -179,25 +162,49 @@ namespace Deeplex.Saverwalter.ViewModels
         public virtual string Strasse
         {
             get => Entity?.Strasse ?? "";
-            set => RaisePropertyChangedAuto(Entity.Strasse, value);
+            set
+            {
+                if (value == Strasse) return;
+                Entity.Strasse = value;
+                RaisePropertyChangedAuto(Entity.Strasse, value);
+                update();
+            }
         }
 
         public virtual string Hausnummer
         {
             get => Entity?.Hausnummer ?? "";
-            set => RaisePropertyChangedAuto(Entity.Hausnummer, value);
+            set
+            {
+                if (value == Hausnummer) return;
+                Entity.Hausnummer = value;
+                RaisePropertyChangedAuto(Entity.Hausnummer, value);
+                update();
+            }
         }
 
         public virtual string Postleitzahl
         {
             get => Entity?.Postleitzahl ?? "";
-            set => RaisePropertyChangedAuto(Entity.Postleitzahl, value);
+            set
+            {
+                if (value == Postleitzahl) return;
+                Entity.Postleitzahl = value;
+                RaisePropertyChangedAuto(Entity.Postleitzahl, value);
+                update();
+            }
         }
 
         public virtual string Stadt
         {
             get => Entity?.Stadt ?? "";
-            set => RaisePropertyChangedAuto(Entity.Stadt, value);
+            set
+            {
+                if (value == Stadt) return;
+                Entity.Stadt = value;
+                RaisePropertyChangedAuto(Entity.Stadt, value);
+                update();
+            }
         }
 
         public AdresseViewModel(Adresse a, AppViewModel avm)
@@ -239,6 +246,18 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Hausnummer == null || Entity.Postleitzahl == "" ||
                 Entity.Postleitzahl == null || Entity.Postleitzahl == "" ||
                 Entity.Stadt == null || Entity.Stadt == "");
+        }
+
+        // Only used for update. No adding here.
+        private void update()
+        {
+            if (!IsValid() || Entity.AdresseId == 0)
+            {
+                return;
+            }
+
+            Avm.ctx.Adressen.Update(Entity);
+            Avm.SaveWalter();
         }
     }
 }
