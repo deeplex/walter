@@ -31,5 +31,10 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                 typeof(IAdresse),
                 typeof(AdresseControl),
                 new PropertyMetadata(null));
+
+        private void TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            ViewModel.updateAdressen(Strasse.Text, Hausnr.Text, Postleitzahl.Text, Stadt.Text);
+        }
     }
 }

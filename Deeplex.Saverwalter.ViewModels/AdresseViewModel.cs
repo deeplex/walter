@@ -88,18 +88,36 @@ namespace Deeplex.Saverwalter.ViewModels
         protected AppViewModel Avm;
 
         private ImmutableList<Adresse> AlleAdressen;
+        public void updateAdressen(string strasse = null, string hausnr = null, string plz = null, string stadt = null)
+        {
+            Staedte.Value = AlleAdressen.Select(a => a.Stadt)
+                .Where(s => stadt == null || s.ToLower().Contains(stadt.ToLower()))
+                .Distinct().ToImmutableList();
+            Postleitzahlen.Value = AlleAdressen
+                .Where(a => Stadt == "" || a.Stadt == Stadt)
+                .Select(a => a.Postleitzahl)
+                .Where(s => plz == null || s.ToLower().Contains(plz.ToLower()))
+                .Distinct().ToImmutableList();
+            Strassen.Value = AlleAdressen
+                .Where(a => Postleitzahl == "" || a.Postleitzahl == Entity.Postleitzahl)
+                .Select(a => a.Strasse)
+                .Where(s => strasse == null || s.ToLower().Contains(strasse.ToLower()))
+                .Distinct().ToImmutableList();
+            Hausnummern.Value = AlleAdressen
+                .Where(a => Hausnummer == "" || a.Hausnummer == Entity.Hausnummer)
+                .Select(a => a.Hausnummer)
+                .Where(s => hausnr == null || s.ToLower().Contains(hausnr.ToLower()))
+                .Distinct().ToImmutableList();
+        }
 
-        public ImmutableList<string> Staedte => AlleAdressen
-            .Select(a => a.Stadt).Distinct().ToImmutableList();
-        public ImmutableList<string> Postleitzahlen => AlleAdressen
-            //.Where(a => Stadt == "" || a.Stadt == Stadt)
-            .Select(a => a.Postleitzahl).Distinct().ToImmutableList();
-        public ImmutableList<string> Strassen => AlleAdressen
-            //.Where(a => Postleitzahl == "" || a.Postleitzahl == Entity.Postleitzahl)
-            .Select(a => a.Strasse).Distinct().ToImmutableList();
-        public ImmutableList<string> Hausnummern => AlleAdressen
-            //.Where(a => Hausnummer == "" || a.Hausnummer == Entity.Hausnummer)
-            .Select(a => a.Hausnummer).Distinct().ToImmutableList();
+        public ObservableProperty<ImmutableList<string>> Staedte
+            = new ObservableProperty<ImmutableList<string>>();
+        public ObservableProperty<ImmutableList<string>> Postleitzahlen
+            = new ObservableProperty<ImmutableList<string>>();
+        public ObservableProperty<ImmutableList<string>> Strassen
+            = new ObservableProperty<ImmutableList<string>>();
+        public ObservableProperty<ImmutableList<string>> Hausnummern
+            = new ObservableProperty<ImmutableList<string>>();
 
         public int GetReferences
         {
@@ -166,6 +184,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity = a;
 
             AlleAdressen = Avm.ctx.Adressen.ToImmutableList();
+            updateAdressen();
 
             PropertyChanged += OnUpdate;
 
