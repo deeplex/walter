@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            ViewModel.updateAdressen(Strasse.Text, Hausnr.Text, Postleitzahl.Text, Stadt.Text);
+            ViewModel.updateAdressen(Strasse.Text.Trim(), Hausnr.Text.Trim(), Postleitzahl.Text.Trim(), Stadt.Text.Trim());
         }
 
         private void QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)

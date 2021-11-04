@@ -21,6 +21,23 @@ namespace Deeplex.Saverwalter.ViewModels
                 return;
             }
 
+            if (base.Strasse != Strasse)
+            {
+                base.Strasse = Strasse;
+            }
+            if (base.Hausnummer != Hausnummer)
+            {
+                base.Hausnummer = Hausnummer;
+            }
+            if (base.Postleitzahl != Postleitzahl)
+            {
+                base.Postleitzahl = Postleitzahl;
+            }
+            if (base.Stadt != Stadt)
+            {
+                base.Stadt = Stadt;
+            }
+
             Entity.Strasse = Strasse;
             Entity.Hausnummer = Hausnummer;
             Entity.Postleitzahl = Postleitzahl;
@@ -97,7 +114,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Distinct().ToImmutableList();
 
             Hausnummern.Value = AlleAdressen
-                .Where(a => a.Strasse == null || a.Strasse == "" || hausnr == a.Strasse)
+                .Where(a => strasse == null || strasse == "" || strasse == a.Strasse)
                 .Select(a => a.Hausnummer)
                 .Where(s => hausnr == null || hausnr == "" || s.ToLower().Contains(hausnr.ToLower()))
                 .Distinct().ToImmutableList();
@@ -113,6 +130,30 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Select(a => a.Stadt)
                 .Where(s => stadt == null || stadt == "" || s.ToLower().Contains(stadt.ToLower()))
                 .Distinct().ToImmutableList();
+
+            var updated = false;
+            if (Hausnummern.Value.Count == 1 && (hausnr == null || hausnr == ""))
+            {
+                updated = true;
+                Hausnummer = Hausnummern.Value.First();
+            }
+
+            if (Postleitzahlen.Value.Count == 1 && (plz == null || plz == ""))
+            {
+                updated = true;
+                Postleitzahl = Postleitzahlen.Value.First();
+            }
+
+            if (Staedte.Value.Count == 1 && (stadt == null || stadt == ""))
+            {
+                updated = true;
+                Stadt = Staedte.Value.First();
+            }
+
+            if (updated == true && (strasse != Strasse || hausnr != Hausnummer || plz != Postleitzahl || stadt != Stadt))
+            {
+                updateAdressen(Strasse, Hausnummer, Postleitzahl, Stadt);
+            }
         }
 
         public ObservableProperty<ImmutableList<string>> Staedte
