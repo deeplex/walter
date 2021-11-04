@@ -10,6 +10,7 @@
     d:DesignWidth="400">
 
     <mtuuc:Expander
+        Expanded="Expander_Expanded"
         IsExpanded="{x:Bind IsExpanded}"
         HorizontalContentAlignment="Stretch">
         <mtuuc:Expander.Header>

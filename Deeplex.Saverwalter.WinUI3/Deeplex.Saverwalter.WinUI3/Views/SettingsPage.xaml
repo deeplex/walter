@@ -24,7 +24,9 @@
                     Text="{x:Bind ViewModel.rootPath.Value, Mode=OneWay}"/>
             </StackPanel>
 
-            <uc:ExpanderControl Header="Adresse">
+            <uc:ExpanderControl
+                Expanded="{x:Bind ViewModel.LoadAdressen}"
+                Header="Adresse">
                 <uc:ExpanderControl.MainContent>
                     <mtuuc:DataGrid
                         AutoGeneratingColumn="Adressen_AutoGeneratingColumn"
@@ -53,18 +55,11 @@
                         </mtuuc:DataGrid.Columns>
                     </mtuuc:DataGrid>
                 </uc:ExpanderControl.MainContent>
-                <uc:ExpanderControl.Bonus>
-                    <Button
-                        Background="Transparent"
-                        Margin="20,0,0,0"
-                        Command="{x:Bind ViewModel.LoadAdressen}"
-                        ToolTipService.ToolTip="Lade Adressen">
-                        <SymbolIcon Symbol="AllApps" />
-                    </Button>
-                </uc:ExpanderControl.Bonus>
             </uc:ExpanderControl>
 
-            <uc:ExpanderControl Header="Anhänge">
+            <uc:ExpanderControl
+                Expanded="{x:Bind ViewModel.LoadAnhaenge}"
+                Header="Anhänge">
                 <uc:ExpanderControl.MainContent>
                     <mtuuc:DataGrid
                         AutoGeneratingColumn="Anhaenge_AutoGeneratingColumn"
@@ -93,15 +88,6 @@
                         </mtuuc:DataGrid.Columns>
                     </mtuuc:DataGrid>
                 </uc:ExpanderControl.MainContent>
-                <uc:ExpanderControl.Bonus>
-                    <Button
-                        Background="Transparent"
-                        Margin="20,0,0,0"
-                        Command="{x:Bind ViewModel.LoadAnhaenge}"
-                        ToolTipService.ToolTip="Lade Anhänge">
-                        <SymbolIcon Symbol="AllApps" />
-                    </Button>
-                </uc:ExpanderControl.Bonus>
             </uc:ExpanderControl>
         </StackPanel>
     </Grid>

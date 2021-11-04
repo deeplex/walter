@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml;
+﻿using Deeplex.Utils.ObjectModel;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 
@@ -89,5 +90,26 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             typeof(string),
             typeof(ExpanderControl),
             new PropertyMetadata(null));
+
+        public RelayCommand Expanded
+        {
+            get { return (RelayCommand)GetValue(ExpandedProperty); }
+            set { SetValue(ExpandedProperty, value); }
+        }
+
+        public static readonly DependencyProperty ExpandedProperty
+            = DependencyProperty.Register(
+                "Expanded",
+                typeof(RelayCommand),
+                typeof(ExpanderControl),
+                new PropertyMetadata(null));
+
+        private void Expander_Expanded(object sender, EventArgs e)
+        {
+            if (Expanded is RelayCommand r)
+            {
+                r.Execute(e);
+            }
+        }
     }
 }
