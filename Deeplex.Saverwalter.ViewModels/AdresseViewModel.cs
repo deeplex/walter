@@ -90,23 +90,28 @@ namespace Deeplex.Saverwalter.ViewModels
         private ImmutableList<Adresse> AlleAdressen;
         public void updateAdressen(string strasse = null, string hausnr = null, string plz = null, string stadt = null)
         {
-            Staedte.Value = AlleAdressen.Select(a => a.Stadt)
-                .Where(s => stadt == null || s.ToLower().Contains(stadt.ToLower()))
-                .Distinct().ToImmutableList();
-            Postleitzahlen.Value = AlleAdressen
-                .Where(a => Stadt == "" || a.Stadt == Stadt)
-                .Select(a => a.Postleitzahl)
-                .Where(s => plz == null || s.ToLower().Contains(plz.ToLower()))
-                .Distinct().ToImmutableList();
             Strassen.Value = AlleAdressen
-                .Where(a => Postleitzahl == "" || a.Postleitzahl == Entity.Postleitzahl)
+                .Where(a => plz == null || plz == "" || a.Postleitzahl == plz)
                 .Select(a => a.Strasse)
-                .Where(s => strasse == null || s.ToLower().Contains(strasse.ToLower()))
+                .Where(s => strasse == null || strasse == "" || s.ToLower().Contains(strasse.ToLower()))
                 .Distinct().ToImmutableList();
+
             Hausnummern.Value = AlleAdressen
-                .Where(a => Hausnummer == "" || a.Hausnummer == Entity.Hausnummer)
+                .Where(a => a.Strasse == null || a.Strasse == "" || hausnr == a.Strasse)
                 .Select(a => a.Hausnummer)
-                .Where(s => hausnr == null || s.ToLower().Contains(hausnr.ToLower()))
+                .Where(s => hausnr == null || hausnr == "" || s.ToLower().Contains(hausnr.ToLower()))
+                .Distinct().ToImmutableList();
+
+            Postleitzahlen.Value = AlleAdressen
+                .Where(a => strasse == null || strasse == "" || a.Strasse == strasse)
+                .Select(a => a.Postleitzahl)
+                .Where(s => plz == null || plz == "" || s.ToLower().Contains(plz.ToLower()))
+                .Distinct().ToImmutableList();
+
+            Staedte.Value = AlleAdressen
+                .Where(a => plz == null || plz == "" || plz == a.Postleitzahl)
+                .Select(a => a.Stadt)
+                .Where(s => stadt == null || stadt == "" || s.ToLower().Contains(stadt.ToLower()))
                 .Distinct().ToImmutableList();
         }
 
@@ -186,8 +191,6 @@ namespace Deeplex.Saverwalter.ViewModels
             AlleAdressen = Avm.ctx.Adressen.ToImmutableList();
             updateAdressen();
 
-            PropertyChanged += OnUpdate;
-
             Dispose = new RelayCommand(_ =>
             {
                 Avm.ctx.Adressen.Remove(Entity);
@@ -219,35 +222,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Hausnummer == null || Entity.Postleitzahl == "" ||
                 Entity.Postleitzahl == null || Entity.Postleitzahl == "" ||
                 Entity.Stadt == null || Entity.Stadt == "");
-        }
-
-        protected void OnUpdate(object sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case nameof(Strasse):
-                case nameof(Hausnummer):
-                case nameof(Postleitzahl):
-                case nameof(Stadt):
-                    break;
-                default:
-                    return;
-            }
-
-            if (IsValid())
-            {
-                return;
-            }
-
-            if (Entity.AdresseId != 0)
-            {
-                Avm.ctx.Adressen.Update(Entity);
-            }
-            else
-            {
-                Avm.ctx.Adressen.Add(Entity);
-            }
-            Avm.SaveWalter();
         }
     }
 }

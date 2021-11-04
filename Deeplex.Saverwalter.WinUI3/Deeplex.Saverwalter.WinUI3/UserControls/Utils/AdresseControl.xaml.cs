@@ -36,5 +36,35 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         {
             ViewModel.updateAdressen(Strasse.Text, Hausnr.Text, Postleitzahl.Text, Stadt.Text);
         }
+
+        private void QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            updateAdresse(sender, args.QueryText);
+        }
+
+        private void lostFocus(object sender, RoutedEventArgs e)
+        {
+            updateAdresse((AutoSuggestBox)sender, ((TextBox)e.OriginalSource).Text);
+        }
+
+        private void updateAdresse(AutoSuggestBox sender, string text)
+        {
+            if (sender == Strasse)
+            {
+                ViewModel.Strasse = text;
+            }
+            if (sender == Hausnr)
+            {
+                ViewModel.Hausnummer = text;
+            }
+            if (sender == Postleitzahl)
+            {
+                ViewModel.Postleitzahl = text;
+            }
+            if (sender == Stadt)
+            {
+                ViewModel.Stadt = text;
+            }
+        }
     }
 }

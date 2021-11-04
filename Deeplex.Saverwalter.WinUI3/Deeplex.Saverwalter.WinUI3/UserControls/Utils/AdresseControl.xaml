@@ -13,23 +13,31 @@
     <mtuuc:WrapPanel>
         <AutoSuggestBox
             TextChanged="TextChanged"
+            QuerySubmitted="QuerySubmitted"
+            LostFocus="lostFocus"
             Width="210" Header="Straße" x:Name="Strasse"
             ItemsSource="{x:Bind ViewModel.Strassen.Value, Mode=OneWay}"
-            Text="{x:Bind ViewModel.Strasse, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+            Text="{x:Bind ViewModel.Strasse, Mode=OneWay}"/>
         <AutoSuggestBox
             TextChanged="TextChanged"
+            QuerySubmitted="QuerySubmitted"
+            LostFocus="lostFocus"
             ItemsSource="{x:Bind ViewModel.Hausnummern.Value, Mode=OneWay}"
             Width="70" Margin="20,0,0,0" Header="Hausnr." x:Name="Hausnr"
-            Text="{x:Bind ViewModel.Hausnummer, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+            Text="{x:Bind ViewModel.Hausnummer, Mode=OneWay}"/>
         <AutoSuggestBox
             TextChanged="TextChanged"
+            QuerySubmitted="QuerySubmitted"
+            LostFocus="lostFocus"
             ItemsSource="{x:Bind ViewModel.Postleitzahlen.Value, Mode=OneWay}"
             Width="70" Margin="20,0,0,0" Header="Postleitzahl" x:Name="Postleitzahl"
-            Text="{x:Bind ViewModel.Postleitzahl, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+            Text="{x:Bind ViewModel.Postleitzahl, Mode=OneWay}"/>
         <AutoSuggestBox
             TextChanged="TextChanged"
+            QuerySubmitted="QuerySubmitted"
+            LostFocus="lostFocus"
             ItemsSource="{x:Bind ViewModel.Staedte.Value, Mode=OneWay}"
             Width="210" Margin="20,0,0,0" Header="Stadt" x:Name="Stadt"
-            Text="{x:Bind ViewModel.Stadt, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+            Text="{x:Bind ViewModel.Stadt, Mode=OneWay}"/>
     </mtuuc:WrapPanel>
 </UserControl>
