@@ -1,7 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Utils.ObjectModel;
 using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
@@ -21,6 +20,26 @@ namespace Deeplex.Saverwalter.ViewModels
                 return;
             }
 
+            if (!IsValid()) return;
+            var adresse = Avm.ctx.Adressen.FirstOrDefault(a =>
+                a.Strasse == Strasse && a.Hausnummer == Hausnummer &&
+                a.Postleitzahl == Postleitzahl && a.Stadt == Stadt);
+            if (adresse == null)
+            {
+                adresse = new Adresse()
+                {
+                    Strasse = Strasse,
+                    Hausnummer = Hausnummer,
+                    Postleitzahl = Postleitzahl,
+                    Stadt = Stadt,
+                };
+                AlleAdressen = AlleAdressen.Add(adresse);
+                Avm.ctx.Adressen.Add(adresse);
+            }
+
+            reference.Adresse = adresse;
+            Entity = adresse;
+
             if (base.Strasse != Strasse)
             {
                 base.Strasse = Strasse;
@@ -37,29 +56,6 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 base.Stadt = Stadt;
             }
-
-            Entity.Strasse = Strasse;
-            Entity.Hausnummer = Hausnummer;
-            Entity.Postleitzahl = Postleitzahl;
-            Entity.Stadt = Stadt;
-
-            if (!IsValid()) return;
-            var adresse = Avm.ctx.Adressen.FirstOrDefault(a =>
-                a.Strasse == Strasse && a.Hausnummer == Hausnummer &&
-                a.Postleitzahl == Postleitzahl && a.Stadt == Stadt);
-            if (adresse == null)
-            {
-                adresse = new Adresse()
-                {
-                    Strasse = Strasse,
-                    Hausnummer = Hausnummer,
-                    Postleitzahl = Postleitzahl,
-                    Stadt = Stadt,
-                };
-                Avm.ctx.Adressen.Add(adresse);
-            }
-
-            reference.Adresse = adresse;
 
             //Check if reference is valid.
             if (Avm.ctx.Entry(reference).State != Microsoft.EntityFrameworkCore.EntityState.Detached)
@@ -100,11 +96,11 @@ namespace Deeplex.Saverwalter.ViewModels
 
     public class AdresseViewModel : BindableBase
     {
-        protected Adresse Entity { get; private set; }
+        protected Adresse Entity { get; set; }
 
         protected AppViewModel Avm;
 
-        private ImmutableList<Adresse> AlleAdressen;
+        protected ImmutableList<Adresse> AlleAdressen;
         public void updateAdressen(string strasse = null, string hausnr = null, string plz = null, string stadt = null)
         {
             Strassen.Value = AlleAdressen
@@ -183,45 +179,25 @@ namespace Deeplex.Saverwalter.ViewModels
         public virtual string Strasse
         {
             get => Entity?.Strasse ?? "";
-            set
-            {
-                var old = Entity.Strasse;
-                Entity.Strasse = value;
-                RaisePropertyChangedAuto(old, value);
-            }
+            set => RaisePropertyChangedAuto(Entity.Strasse, value);
         }
 
         public virtual string Hausnummer
         {
             get => Entity?.Hausnummer ?? "";
-            set
-            {
-                var old = Entity.Hausnummer;
-                Entity.Hausnummer = value;
-                RaisePropertyChangedAuto(old, value);
-            }
+            set => RaisePropertyChangedAuto(Entity.Hausnummer, value);
         }
 
         public virtual string Postleitzahl
         {
             get => Entity?.Postleitzahl ?? "";
-            set
-            {
-                var old = Entity.Postleitzahl;
-                Entity.Postleitzahl = value;
-                RaisePropertyChangedAuto(old, value);
-            }
+            set => RaisePropertyChangedAuto(Entity.Postleitzahl, value);
         }
 
         public virtual string Stadt
         {
             get => Entity?.Stadt ?? "";
-            set
-            {
-                var old = Entity.Stadt;
-                Entity.Stadt = value;
-                RaisePropertyChangedAuto(old, value);
-            }
+            set => RaisePropertyChangedAuto(Entity.Stadt, value);
         }
 
         public AdresseViewModel(Adresse a, AppViewModel avm)
