@@ -43,9 +43,13 @@
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>
                             </mtuuc:DataGridTemplateColumn>
-                            <mtuuc:DataGridTextColumn
-                            Header="Bezüge"
-                            Binding="{Binding GetReferences}"/>
+                            <mtuuc:DataGridTemplateColumn Header="Bezüge">
+                                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:AdresseViewModel">
+                                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{x:Bind GetReferences}"/>
+                                    </DataTemplate>
+                                </mtuuc:DataGridTemplateColumn.CellTemplate>
+                            </mtuuc:DataGridTemplateColumn>
                         </mtuuc:DataGrid.Columns>
                     </mtuuc:DataGrid>
                 </uc:ExpanderControl.MainContent>
@@ -79,9 +83,13 @@
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>
                             </mtuuc:DataGridTemplateColumn>
-                            <mtuuc:DataGridTextColumn
-                            Header="Bezüge"
-                            Binding="{Binding GetReferences}"/>
+                            <mtuuc:DataGridTemplateColumn Header="Bezüge">
+                                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:AnhangListEntry">
+                                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{x:Bind GetReferences}"/>
+                                    </DataTemplate>
+                                </mtuuc:DataGridTemplateColumn.CellTemplate>
+                            </mtuuc:DataGridTemplateColumn>
                         </mtuuc:DataGrid.Columns>
                     </mtuuc:DataGrid>
                 </uc:ExpanderControl.MainContent>
