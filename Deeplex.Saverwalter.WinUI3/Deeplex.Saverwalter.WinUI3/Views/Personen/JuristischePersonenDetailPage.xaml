@@ -15,9 +15,9 @@
             <StackPanel>
                 <mtuuc:WrapPanel Orientation="Horizontal">
                     <TextBox
-                Width="620"
-                Text="{x:Bind ViewModel.Bezeichnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                Header="Bezeichnung" Style="{StaticResource Eintraege}"/>
+                        Width="620"
+                        Text="{x:Bind ViewModel.Bezeichnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Header="Bezeichnung" Style="{StaticResource Eintraege}"/>
                 </mtuuc:WrapPanel>
                 <uc:PersonDetailControl PersonViewModel="{x:Bind ViewModel}" />
                 <uc:ExpanderControl Header="Mitglieder">
