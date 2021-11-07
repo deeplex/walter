@@ -14,7 +14,7 @@
         HorizontalScrollBarVisibility="Visible"
         IsScrollInertiaEnabled="True"
         HorizontalScrollMode="Auto"
-        Background="{StaticResource SystemChromeHighColor}">
+        Background="{StaticResource SystemChromeLowColor}">
         <StackPanel>
             <uc:ExpanderControl
                 Visibility="{x:Bind ViewModel.HasNotes}"
@@ -35,8 +35,8 @@
                 Margin="10"
                 Padding="101.19, 68.404, 40.476, 68.404"
                 x:Name="Panel"
-                Width="850"
-                Background="{StaticResource SystemAltHighColor}" />
+                Background="{ThemeResource SystemAltHighColor}"
+                Width="850" />
         </StackPanel>
     </ScrollViewer>
 </Page>
