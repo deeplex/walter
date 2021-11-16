@@ -81,6 +81,13 @@ namespace Deeplex.Saverwalter.Print
                     new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
                     new Run(Font(), new Text(str))));
 
+            TableCell ContentCellWidth(string pct, string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
+                => new TableCell(
+                    new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
+                    new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = pct },
+                    new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
+                    new Run(Font(), new Text(str))));
+
             TableCell ContentHeadWidth(string pct, string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
                 => new TableCell(
                     new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
@@ -110,7 +117,14 @@ namespace Deeplex.Saverwalter.Print
             var heads = cols.Select(w => w.First()).ToList();
             for (var i = 0; i < widths.Count(); ++i)
             {
-                headrow.Append(ContentHeadWidth((widths[i] * 50).ToString(), heads[i] ?? "", j[i], underlined[0] ? BorderValues.Single : BorderValues.None));
+                if (bold[0])
+                {
+                    headrow.Append(ContentHeadWidth((widths[i] * 50).ToString(), heads[i] ?? "", j[i], underlined[0] ? BorderValues.Single : BorderValues.None));
+                }
+                else
+                {
+                    headrow.Append(ContentCellWidth((widths[i] * 50).ToString(), heads[i] ?? "", j[i], underlined[0] ? BorderValues.Single : BorderValues.None));
+                }
             }
             table.Append(headrow);
 

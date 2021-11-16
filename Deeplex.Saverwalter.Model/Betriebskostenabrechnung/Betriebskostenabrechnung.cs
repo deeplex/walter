@@ -136,7 +136,7 @@ namespace Deeplex.Saverwalter.Model
                 .Where(zs => zs != null)
                 .ToImmutableList();
             var Beginn = fZaehler
-                .Select(z => z.Staende.OrderBy(s => s.Datum).LastOrDefault(l => l.Datum.Date <= beginn && (beginn - l.Datum.Date).Days < 30))
+                .Select(z => z.Staende.OrderBy(s => s.Datum).LastOrDefault(l => l.Datum.Date.AddDays(-30) <= beginn && Math.Abs((beginn - l.Datum.Date).Days) < 30))
                 .Where(zs => zs != null)
                 .ToImmutableList();
 
