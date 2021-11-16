@@ -23,10 +23,6 @@ namespace Deeplex.Saverwalter.WinUI3
 
         public App()
         {
-            // TODO: remove... This is to check where Walter has to go... Check todo in Model.cs aswell.
-            var a = Package.Current.InstalledLocation.Path;
-            var b = ApplicationData.Current.LocalFolder.Path;
-
             InitializeComponent();
         }
 
