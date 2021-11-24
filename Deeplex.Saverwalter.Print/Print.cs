@@ -43,7 +43,7 @@ namespace Deeplex.Saverwalter.Print
     {
         private static void Header(Betriebskostenabrechnung b, IPrint<T> p)
         {
-            var AnsprechpartnerBezeichnung = b.Ansprechpartner is NatuerlichePerson a ? a.Vorname + " " + a.Nachname : ""; // TODO jur. Person
+            var AnsprechpartnerBezeichnung = b.Ansprechpartner is IPerson a ? a.Bezeichnung : "";
 
             var ap = b.Ansprechpartner;
 
