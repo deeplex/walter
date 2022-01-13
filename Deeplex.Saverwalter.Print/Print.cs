@@ -189,6 +189,8 @@ namespace Deeplex.Saverwalter.Print
         }
         private static void AbrechnungWohnung(Betriebskostenabrechnung b, Rechnungsgruppe g, IPrint<T> p)
         {
+            if (g == null) return;
+
             p.SubHeading("Angaben zu Ihrer Einheit:");
 
             var widths = new int[] { 14, 19, 19, 12, 28, 8 };
