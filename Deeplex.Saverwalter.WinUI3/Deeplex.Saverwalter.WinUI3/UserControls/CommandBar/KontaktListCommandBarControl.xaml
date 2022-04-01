@@ -21,8 +21,8 @@
                 </AppBarButton.Flyout>
             </AppBarButton>
             <!-- TODO This could be made a usercontrol... -->
-            <AppBarElementContainer>
-                <TextBox TextChanged="Filter_TextChanged" Text="" Height="40" Width="300" PlaceholderText="Filter..."/>
+            <AppBarElementContainer VerticalContentAlignment="Center">
+                <TextBox TextChanged="Filter_TextChanged" Text="" Width="300" PlaceholderText="Filter..."/>
             </AppBarElementContainer>
             <AppBarButton Label="Kontakt hinzufügen" Icon="Add">
                 <AppBarButton.Flyout>
