@@ -13,6 +13,8 @@ namespace Deeplex.Saverwalter.ViewModels
         public Wohnung Entity;
         public int Id => Entity.WohnungId;
 
+        public ObservableProperty<int> BetriebskostenrechnungsJahr = new ObservableProperty<int>(DateTime.Now.Year);
+
         public async Task selfDestruct()
         {
             if (await Impl.Confirmation())

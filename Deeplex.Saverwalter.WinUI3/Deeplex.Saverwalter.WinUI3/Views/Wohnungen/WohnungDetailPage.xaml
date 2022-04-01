@@ -88,8 +88,15 @@
 
                     <uc:ExpanderControl Header="Betriebskostenrechnungen" Click="{x:Bind AddBetriebskostenrechnung_Click}">
                         <uc:ExpanderControl.MainContent>
-                            <uc:BetriebskostenRechnungenListControl WohnungId="{x:Bind ViewModel.Id}"/>
+                            <uc:BetriebskostenRechnungenListControl
+                                BetreffendesJahr="{x:Bind ViewModel.BetriebskostenrechnungsJahr.Value, Mode=OneWay}"
+                                WohnungId="{x:Bind ViewModel.Id}"/>
                         </uc:ExpanderControl.MainContent>
+                        <uc:ExpanderControl.Bonus>
+                            <NumberBox
+                                SpinButtonPlacementMode="Inline"
+                                Value="{x:Bind ViewModel.BetriebskostenrechnungsJahr.Value, Mode=TwoWay}" />
+                        </uc:ExpanderControl.Bonus>
                     </uc:ExpanderControl>
 
                     <uc:ExpanderControl Header="Erhaltungsaufwendungen" Click="{x:Bind AddErhaltungsaufwendung_Click}">
