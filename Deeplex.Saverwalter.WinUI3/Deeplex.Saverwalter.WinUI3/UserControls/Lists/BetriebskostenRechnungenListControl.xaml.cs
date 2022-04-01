@@ -36,6 +36,11 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                     applyFilter(Filter, v.AdressenBezeichnung, v.BetreffendesJahr.ToString("dd.mm.yyyy"), v.Typ.ToDescriptionString(), v.Beschreibung))
                     .ToImmutableList();
             }
+
+            if (BetreffendesJahr > 0)
+            {
+                ViewModel.Liste.Value = ViewModel.Liste.Value.Where(v => v.BetreffendesJahr == BetreffendesJahr).ToImmutableList();
+            }
         }
 
         public BetriebskostenRechnungenListControl()
@@ -45,6 +50,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, IdProp) => UpdateFilter());
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, IdProp) => UpdateFilter());
+            RegisterPropertyChangedCallback(BetreffendesJahrProperty, (DepObj, IdProp) => UpdateFilter());
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)
@@ -106,6 +112,19 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                   typeof(string),
                   typeof(BetriebskostenRechnungenListControl),
                   new PropertyMetadata(""));
+
+        public int BetreffendesJahr
+        {
+            get { return (int)GetValue(BetreffendesJahrProperty); }
+            set { SetValue(BetreffendesJahrProperty, value); }
+        }
+
+        public static readonly DependencyProperty BetreffendesJahrProperty
+            = DependencyProperty.Register(
+                  "BetreffendesJahr",
+                  typeof(int),
+                  typeof(BetriebskostenRechnungenListControl),
+                  new PropertyMetadata(0));
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

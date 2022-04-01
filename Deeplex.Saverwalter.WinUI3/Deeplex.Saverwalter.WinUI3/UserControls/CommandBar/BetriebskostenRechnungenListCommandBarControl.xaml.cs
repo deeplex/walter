@@ -33,9 +33,27 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                 new DrillInNavigationTransitionInfo());
         }
 
+        // If object is directly set to be TextBox it throws with:
+        // Error CS0123  No overload for 'Filter_TextChanged' matches delegate 'TextChangedEventHandler'
         void Filter_TextChanged(object sender, TextChangedEventArgs e)
         {
             ViewModel.Filter.Value = ((TextBox)sender).Text;
+        }
+
+        private void NumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+        {
+            // System.Math.Max to avoid negative numbers.
+            ViewModel.JahrFilter.Value = System.Math.Max((int)sender.Value, 0);
+        }
+
+        private void Now_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.JahrFilter.Value = System.DateTime.Now.Year;
+        }
+
+        private void All_Years_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.JahrFilter.Value = 0;
         }
     }
 }

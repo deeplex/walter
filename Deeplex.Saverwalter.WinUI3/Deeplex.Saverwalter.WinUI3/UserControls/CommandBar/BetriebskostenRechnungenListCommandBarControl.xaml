@@ -10,8 +10,21 @@
     <CommandBar>
         <CommandBar.PrimaryCommands>
             <!-- TODO This could be made a usercontrol... -->
-            <AppBarElementContainer>
-                <TextBox TextChanged="Filter_TextChanged" Text="" Height="40" Width="300" PlaceholderText="Filter..."/>
+            <AppBarElementContainer VerticalContentAlignment="Center">
+                <NumberBox
+                    ValueChanged="NumberBox_ValueChanged"
+                    SpinButtonPlacementMode="Inline"
+                    Value="{x:Bind ViewModel.JahrFilter.Value, Mode=OneWay}"/>
+            </AppBarElementContainer>
+            <AppBarButton
+                Click="Now_Click"
+                ToolTipService.ToolTip="Aktuelles Jahr"
+                Icon="GoToToday" />
+            <AppBarButton
+                ToolTipService.ToolTip="Alle Jahre ansehen"
+                Click="All_Years_Click" Icon="Calendar" />
+            <AppBarElementContainer VerticalContentAlignment="Center">
+                <TextBox TextChanged="Filter_TextChanged"  Text="" Width="300" PlaceholderText="Filter..."/>
             </AppBarElementContainer>
             <AppBarButton
                 Label="Betriebskostenrechnung hinzufügen"
