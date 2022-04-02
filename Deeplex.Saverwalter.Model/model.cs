@@ -408,6 +408,7 @@ namespace Deeplex.Saverwalter.Model
             copy.BetreffendesJahr += 1;
             copy.Betrag = 0;
             copy.BetriebskostenrechnungId = 0;
+            copy.Gruppen = new List<BetriebskostenrechnungsGruppe>();
 
             return copy;
         }

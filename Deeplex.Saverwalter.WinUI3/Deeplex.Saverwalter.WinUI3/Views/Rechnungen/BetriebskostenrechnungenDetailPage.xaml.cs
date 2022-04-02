@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -32,11 +33,15 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             //{
             //    ViewModel = new BetriebskostenrechnungDetailViewModel(App.Walter.Betriebskostenrechnungen.Find(id), App.Impl, App.ViewModel);
             //}
-            if (e.Parameter is Tuple<Betriebskostenrechnung, int> t)
+            if (e.Parameter is Tuple<Betriebskostenrechnung, int, List<Wohnung>> t)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(t.Item1, t.Item2, App.Impl, App.ViewModel);
+                ViewModel = new BetriebskostenrechnungDetailViewModel(t.Item1, t.Item2, t.Item3, App.Impl, App.ViewModel);
             }
-            if (e.Parameter is BetriebskostenrechnungDetailViewModel vm)
+            else if (e.Parameter is Tuple<Betriebskostenrechnung, int> u)
+            {
+                ViewModel = new BetriebskostenrechnungDetailViewModel(u.Item1, u.Item2, App.Impl, App.ViewModel);
+            }
+            else if (e.Parameter is BetriebskostenrechnungDetailViewModel vm)
             {
                 ViewModel = vm;
             }

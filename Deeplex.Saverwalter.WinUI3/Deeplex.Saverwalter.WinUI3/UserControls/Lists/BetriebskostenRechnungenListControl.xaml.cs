@@ -6,6 +6,7 @@ using Deeplex.Utils.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using static Deeplex.Saverwalter.WinUI3.Utils.Elements;
@@ -31,7 +32,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                 {
                     Templates.Value = ViewModel.Liste.Value.Where(w => !ViewModel.Liste.Value.Exists(r =>
                         r.Typ == w.Typ && r.BetreffendesJahr == w.BetreffendesJahr + 1))
-                            .Select(e => new BetriebskostenRechnungenListEntry(e.Entity.NewYear(), true))
+                            .Select(e => new BetriebskostenRechnungenListEntry(e.Entity.NewYear(), e.Id))
                             .ToImmutableList();
 
                 ViewModel.Liste.Value = ViewModel.Liste.Value.Concat(Templates.Value).ToImmutableList();
@@ -73,7 +74,15 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             {
                 if (WohnungId != 0)
                 {
-                    App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), new Tuple<Betriebskostenrechnung, int>(ViewModel.SelectedRechnung.Entity, WohnungId));
+                    if (ViewModel.SelectedRechnung.Tmpl != 0)
+                    {
+                        var Wohnungen = App.Walter.Betriebskostenrechnungen.Find(ViewModel.SelectedRechnung.Tmpl).Gruppen.Select(g => g.Wohnung).ToList();
+                        App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), new Tuple<Betriebskostenrechnung, int, List<Wohnung>>(ViewModel.SelectedRechnung.Entity, WohnungId, Wohnungen));
+                    }
+                    else
+                    {
+                        App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), new Tuple<Betriebskostenrechnung, int>(ViewModel.SelectedRechnung.Entity, WohnungId));
+                    }
                 }
                 else
                 {

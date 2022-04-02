@@ -14,6 +14,7 @@
         <conv:ToDescriptionStringConverter x:Key="ToDescriptionStringConverterKey" />
         <conv:ToStringConverter x:Key="ToStringConverterKey" />
         <conv:EuroStringConverter x:Key="EuroStringConverterKey" />
+        <conv:IntToBoolConverter x:Key="IntToBoolConverterKey" />
     </UserControl.Resources>
 
     <mtuuc:DataGrid
@@ -32,7 +33,7 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Symbol="Cancel"
-                            Visibility="{x:Bind Tmpl}"/>
+                            Visibility="{x:Bind Tmpl, Converter={StaticResource IntToBoolConverterKey}}"/>
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>

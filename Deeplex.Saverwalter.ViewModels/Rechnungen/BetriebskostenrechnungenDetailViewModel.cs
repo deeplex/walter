@@ -198,8 +198,11 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (Entity == null) return;
 
+            var added = new List<BetriebskostenrechnungsGruppe>();
+            var removed = new List<BetriebskostenrechnungsGruppe>();
+
+            // Wohnungen that were in through groups before
             var beforeEntity = Entity.Gruppen.Select(g => g.Wohnung);
-            var beforeWohnung = Wohnungen.Value.Select(w => w.Entity);
 
             // Add missing Gruppen
             Wohnungen.Value
@@ -207,23 +210,30 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToList()
                 .ForEach(s =>
                 {
-                    Avm.ctx.Betriebskostenrechnungsgruppen.Add(new BetriebskostenrechnungsGruppe()
+                    var a = new BetriebskostenrechnungsGruppe()
                     {
                         Rechnung = Entity,
                         WohnungId = s.Id,
-                    });
+                    };
+                    added.Add(a);
+                    Avm.ctx.Betriebskostenrechnungsgruppen.Add(a);
                 });
 
+            var beforeWohnung = Wohnungen.Value.Select(w => w.Entity);
+            
             // Remove old Gruppen
-            beforeEntity.Where(w => beforeWohnung.Contains(w))
-                .ToList()
-                .ForEach(w =>
-                {
-                    Avm.ctx.Betriebskostenrechnungsgruppen
-                        .Where(g => g.Rechnung.BetriebskostenrechnungId == Id && g.WohnungId == w.WohnungId)
-                        .ToList()
-                        .ForEach(g => Avm.ctx.Betriebskostenrechnungsgruppen.Remove(g));
-                });
+            beforeEntity.ToList().ForEach(w => 
+                Avm.ctx.Betriebskostenrechnungsgruppen
+                    .ToList()
+                    .Where(g =>
+                        g.Rechnung.BetriebskostenrechnungId == Id &&
+                        g.WohnungId == w.WohnungId &&
+                        !Wohnungen.Value.Exists(e => e.Id == g.WohnungId))
+                    .ToList()
+                    .ForEach(g => {
+                        removed.Add(g);
+                        Avm.ctx.Betriebskostenrechnungsgruppen.Remove(g);
+                    }));
         }
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, IAppImplementation impl, AppViewModel avm)
@@ -249,6 +259,11 @@ namespace Deeplex.Saverwalter.ViewModels
             dispose = new AsyncRelayCommand(_ => selfDestruct());
 
             PropertyChanged += OnUpdate;
+        }
+
+        public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, int w, List<Wohnung> l, IAppImplementation impl, AppViewModel avm) : this(r, w, impl, avm)
+        {
+            Wohnungen.Value = l.Select(e => new WohnungListEntry(e, avm)).ToImmutableList();
         }
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, int w, IAppImplementation impl, AppViewModel avm) : this(r, impl, avm)

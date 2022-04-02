@@ -53,7 +53,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public double Betrag => Entity.Betrag;
         public string AdressenBezeichnung { get; }
 
-        public bool Tmpl { get; } = false;
+        public int Tmpl { get; } = 0;
 
         public BetriebskostenRechnungenListEntry(Betriebskostenrechnung r)
         {
@@ -62,7 +62,7 @@ namespace Deeplex.Saverwalter.ViewModels
             AdressenBezeichnung = Entity.GetWohnungenBezeichnung();
         }
 
-        public BetriebskostenRechnungenListEntry(Betriebskostenrechnung r, bool tmpl)
+        public BetriebskostenRechnungenListEntry(Betriebskostenrechnung r, int tmpl)
             : this(r)
         {
             Tmpl = tmpl;

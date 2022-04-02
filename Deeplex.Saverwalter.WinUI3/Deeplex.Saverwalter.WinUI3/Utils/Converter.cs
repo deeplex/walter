@@ -38,6 +38,17 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
         }
     }
 
+    public class IntToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+            => (int)value > 0;
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class DateStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
