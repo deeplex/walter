@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.Views;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -14,6 +15,8 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
     public sealed partial class BetriebskostenRechnungenListControl : UserControl
     {
         public BetriebskostenRechnungenListViewModel ViewModel { get; set; }
+        public ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>> Templates =
+            new ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>>();
 
         private void UpdateFilter()
         {
@@ -23,6 +26,16 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                 ViewModel.Liste.Value = ViewModel.Liste.Value
                     .Where(v => v.Wohnungen.Select(i => i.WohnungId).Contains(WohnungId))
                     .ToImmutableList();
+
+                if (ZeigeVorlagen)
+                {
+                    Templates.Value = ViewModel.Liste.Value.Where(w => !ViewModel.Liste.Value.Exists(r =>
+                        r.Typ == w.Typ && r.BetreffendesJahr == w.BetreffendesJahr + 1))
+                            .Select(e => new BetriebskostenRechnungenListEntry(e.Entity.NewYear(), true))
+                            .ToImmutableList();
+
+                ViewModel.Liste.Value = ViewModel.Liste.Value.Concat(Templates.Value).ToImmutableList();
+                }
             }
             if (StartJahr != 0 && EndeJahr != 0)
             {
@@ -50,6 +63,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, IdProp) => UpdateFilter());
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, IdProp) => UpdateFilter());
+            RegisterPropertyChangedCallback(ZeigeVorlagenProperty, (DepObj, IdProp) => UpdateFilter());
             RegisterPropertyChangedCallback(BetreffendesJahrProperty, (DepObj, IdProp) => UpdateFilter());
         }
 
@@ -57,7 +71,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         {
             if (ViewModel.SelectedRechnung != null)
             {
-                App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), ViewModel.SelectedRechnung.Id);
+                App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), ViewModel.SelectedRechnung.Entity);
             }
         }
 
@@ -125,6 +139,19 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                   typeof(int),
                   typeof(BetriebskostenRechnungenListControl),
                   new PropertyMetadata(0));
+
+        public bool ZeigeVorlagen
+        {
+            get { return (bool)GetValue(ZeigeVorlagenProperty); }
+            set { SetValue(ZeigeVorlagenProperty, value); }
+        }
+
+        public static readonly DependencyProperty ZeigeVorlagenProperty
+            = DependencyProperty.Register(
+                "ZeigeVorlagen",
+                typeof(bool),
+                typeof(BetriebskostenRechnungenListControl),
+                new PropertyMetadata(false));
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

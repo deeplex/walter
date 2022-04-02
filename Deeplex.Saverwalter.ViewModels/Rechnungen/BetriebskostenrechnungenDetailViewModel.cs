@@ -77,43 +77,6 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        private List<Betriebskostenrechnung> lastYear =>
-            Avm.ctx.Betriebskostenrechnungen.ToList().Where(r =>
-               r.BetreffendesJahr == BetreffendesJahr - 1 &&
-               r.Gruppen.Count == Wohnungen.Value.Count &&
-               Wohnungen.Value.All(e => r.Gruppen.Exists(r => r.WohnungId == e.Id)))
-            .ToList();
-
-        private async void fromLastYear()
-        {
-            if (Wohnungen.Value.Count == 0) return;
-
-            var before = lastYear.Find(f => f.Typ == mTyp.Typ);
-
-            if (before == null ||
-                !await Impl.Confirmation(
-                    "Daten aus dem Vorjahr übernehmen?",
-                    "Sollen für die Betriebskostenrechnung " +
-                    Typ.Typ.ToDescriptionString() +
-                    " für die Wohnungsgruppe " +
-                    Wohnungen.Value.Select(w => w.Entity).ToList().GetWohnungenBezeichnung() +
-                    " die Werte aus dem Vorjahr (" + (BetreffendesJahr - 1).ToString() + ") übernommen werden?",
-                    "Ja", "Nein"))
-            {
-                return;
-            }
-
-            Beschreibung = before.Beschreibung;
-            Betrag = before.Betrag;
-            Schluessel = (int)before.Schluessel;
-            Notiz = before.Notiz;
-            Datum = before.Datum.AddYears(1);
-            if (before.HKVO_P7 is double p7) HKVO_P7 = p7;
-            if (before.HKVO_P8 is double p8) HKVO_P8 = p8;
-            if (before.HKVO_P9 is HKVO_P9A2 p9) HKVO_P9 = (int)p9;
-            if (before.Zaehler is Zaehler z) AllgemeinZaehler = new ZaehlerListEntry(z);
-        }
-
         private BetriebskostentypUtil mTyp;
         public BetriebskostentypUtil Typ
         {
@@ -124,7 +87,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 var old = value.Typ;
                 Entity.Typ = value.Typ;
                 RaisePropertyChangedAuto(old, value.Typ);
-                fromLastYear();
             }
         }
 
@@ -288,15 +250,9 @@ namespace Deeplex.Saverwalter.ViewModels
                r.Gruppen.Count == Wohnungen.Value.Count &&
                Wohnungen.Value.All(e => r.Gruppen.Exists(r => r.WohnungId == e.Id)))
                 .ToList();
-            var missing = lastYear.Where(l => !thisYear.Exists(t => t.Typ == l.Typ)).ToList();
 
             Wohnungen.Value = l.ToImmutableList();
             BetreffendesJahr = betreffendesJahr;
-
-            if (missing.Count > 0)
-            {
-                Typ = Typen_List.FirstOrDefault(w => w.Typ == missing.First().Typ);
-            }
         }
 
         public BetriebskostenrechnungDetailViewModel(IAppImplementation impl, AppViewModel avm) : this(new Betriebskostenrechnung(), impl, avm)

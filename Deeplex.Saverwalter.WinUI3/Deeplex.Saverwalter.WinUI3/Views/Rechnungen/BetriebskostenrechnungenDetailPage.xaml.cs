@@ -26,11 +26,12 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (e.Parameter is int id)
-            {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(App.Walter.Betriebskostenrechnungen.Find(id), App.Impl, App.ViewModel);
-            }
-            else if (e.Parameter is BetriebskostenrechnungDetailViewModel vm)
+            // Seems to be unnecessary. Uncomment if needed
+            //if (e.Parameter is int id)
+            //{
+            //    ViewModel = new BetriebskostenrechnungDetailViewModel(App.Walter.Betriebskostenrechnungen.Find(id), App.Impl, App.ViewModel);
+            //}
+            if (e.Parameter is BetriebskostenrechnungDetailViewModel vm)
             {
                 ViewModel = vm;
             }

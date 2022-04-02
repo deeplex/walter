@@ -402,6 +402,16 @@ namespace Deeplex.Saverwalter.Model
             return (Betriebskostenrechnung)MemberwiseClone();
         }
 
+        public Betriebskostenrechnung NewYear()
+        {
+            var copy = ShallowCopy();
+            copy.BetreffendesJahr += 1;
+            copy.Betrag = 0;
+            copy.BetriebskostenrechnungId = 0;
+
+            return copy;
+        }
+
         public int BetriebskostenrechnungId { get; set; }
         public Betriebskostentyp Typ { get; set; }
         public double Betrag { get; set; }

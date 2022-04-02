@@ -89,13 +89,22 @@
                     <uc:ExpanderControl Header="Betriebskostenrechnungen" Click="{x:Bind AddBetriebskostenrechnung_Click}">
                         <uc:ExpanderControl.MainContent>
                             <uc:BetriebskostenRechnungenListControl
+                                ZeigeVorlagen="{x:Bind ViewModel.ZeigeVorlagen.Value, Mode=OneWay}"
                                 BetreffendesJahr="{x:Bind ViewModel.BetriebskostenrechnungsJahr.Value, Mode=OneWay}"
                                 WohnungId="{x:Bind ViewModel.Id}"/>
                         </uc:ExpanderControl.MainContent>
                         <uc:ExpanderControl.Bonus>
+                            <StackPanel Orientation="Horizontal">
                             <NumberBox
+                                Margin="10,0,10,0"
                                 SpinButtonPlacementMode="Inline"
                                 Value="{x:Bind ViewModel.BetriebskostenrechnungsJahr.Value, Mode=TwoWay}" />
+                            <CheckBox
+                                ToolTipService.ToolTip="Zeige Vorlagen für das neue Jahr, basierend auf den Eingaben aus dem Vorjahr."
+                                IsChecked="{x:Bind ViewModel.ZeigeVorlagen.Value, Mode=TwoWay}"
+                                Content="Zeige Vorlagen" />
+                            </StackPanel>
+
                         </uc:ExpanderControl.Bonus>
                     </uc:ExpanderControl>
 
