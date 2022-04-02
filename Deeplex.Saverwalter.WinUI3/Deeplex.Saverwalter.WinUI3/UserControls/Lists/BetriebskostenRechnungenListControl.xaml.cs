@@ -71,7 +71,14 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         {
             if (ViewModel.SelectedRechnung != null)
             {
-                App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), ViewModel.SelectedRechnung.Entity);
+                if (WohnungId != 0)
+                {
+                    App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), new Tuple<Betriebskostenrechnung, int>(ViewModel.SelectedRechnung.Entity, WohnungId));
+                }
+                else
+                {
+                    App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), ViewModel.SelectedRechnung.Entity);
+                }
             }
         }
 

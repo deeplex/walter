@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.ViewModels
             new ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>>();
 
         public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
-        public ObservableProperty<int> JahrFilter { get; set; } = new ObservableProperty<int>(System.DateTime.Now.Year);
+        public ObservableProperty<int> JahrFilter { get; set; } = new ObservableProperty<int>();
         public ImmutableList<BetriebskostenRechnungenListEntry> AllRelevant { get; set; }
 
         private BetriebskostenRechnungenListEntry mSelectedRechnung;

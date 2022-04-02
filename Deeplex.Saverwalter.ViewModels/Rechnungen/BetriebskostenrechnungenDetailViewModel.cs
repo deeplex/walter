@@ -14,6 +14,10 @@ namespace Deeplex.Saverwalter.ViewModels
         public Betriebskostenrechnung Entity { get; }
         public int Id => Entity.BetriebskostenrechnungId;
 
+        public ObservableProperty<int> BetriebskostenrechnungsJahr = new ObservableProperty<int>();
+        public ObservableProperty<bool> ZeigeVorlagen = new ObservableProperty<bool>();
+        public ObservableProperty<WohnungListEntry> BetriebskostenrechnungsWohnung = new ObservableProperty<WohnungListEntry>();
+
         public async Task selfDestruct()
         {
             if (await Impl.Confirmation())
@@ -229,6 +233,10 @@ namespace Deeplex.Saverwalter.ViewModels
             Impl = impl;
 
             Wohnungen.Value = r.Gruppen.Select(g => new WohnungListEntry(g.Wohnung, Avm)).ToImmutableList();
+            if (BetriebskostenrechnungsWohnung.Value == null)
+            {
+                BetriebskostenrechnungsWohnung.Value = Wohnungen.Value.FirstOrDefault();
+            }
 
             AllgemeinZaehler_List = Avm.ctx.ZaehlerSet
                 .Select(a => new ZaehlerListEntry(a))
@@ -241,6 +249,11 @@ namespace Deeplex.Saverwalter.ViewModels
             dispose = new AsyncRelayCommand(_ => selfDestruct());
 
             PropertyChanged += OnUpdate;
+        }
+
+        public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, int w, IAppImplementation impl, AppViewModel avm) : this(r, impl, avm)
+        {
+            BetriebskostenrechnungsWohnung.Value = Wohnungen.Value.Find(e => e.Id == w);
         }
 
         public BetriebskostenrechnungDetailViewModel(IList<WohnungListEntry> l, int betreffendesJahr, IAppImplementation impl, AppViewModel avm) : this(new Betriebskostenrechnung(), impl, avm)

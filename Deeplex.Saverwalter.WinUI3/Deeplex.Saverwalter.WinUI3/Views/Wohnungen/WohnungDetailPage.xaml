@@ -104,7 +104,6 @@
                                 IsChecked="{x:Bind ViewModel.ZeigeVorlagen.Value, Mode=TwoWay}"
                                 Content="Zeige Vorlagen" />
                             </StackPanel>
-
                         </uc:ExpanderControl.Bonus>
                     </uc:ExpanderControl>
 
