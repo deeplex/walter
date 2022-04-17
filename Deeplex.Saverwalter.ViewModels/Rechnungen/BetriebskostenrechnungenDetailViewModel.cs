@@ -220,9 +220,9 @@ namespace Deeplex.Saverwalter.ViewModels
                 });
 
             var beforeWohnung = Wohnungen.Value.Select(w => w.Entity);
-            
+
             // Remove old Gruppen
-            beforeEntity.ToList().ForEach(w => 
+            beforeEntity.ToList().ForEach(w =>
                 Avm.ctx.Betriebskostenrechnungsgruppen
                     .ToList()
                     .Where(g =>
@@ -230,7 +230,8 @@ namespace Deeplex.Saverwalter.ViewModels
                         g.WohnungId == w.WohnungId &&
                         !Wohnungen.Value.Exists(e => e.Id == g.WohnungId))
                     .ToList()
-                    .ForEach(g => {
+                    .ForEach(g =>
+                    {
                         removed.Add(g);
                         Avm.ctx.Betriebskostenrechnungsgruppen.Remove(g);
                     }));
