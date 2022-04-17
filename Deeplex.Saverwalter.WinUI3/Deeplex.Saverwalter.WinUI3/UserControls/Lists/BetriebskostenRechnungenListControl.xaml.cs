@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                             .Select(e => new BetriebskostenRechnungenListEntry(e.Entity.NewYear(), e.Id))
                             .ToImmutableList();
 
-                ViewModel.Liste.Value = ViewModel.Liste.Value.Concat(Templates.Value).ToImmutableList();
+                    ViewModel.Liste.Value = ViewModel.Liste.Value.Concat(Templates.Value).ToImmutableList();
                 }
             }
             if (StartJahr != 0 && EndeJahr != 0)
