@@ -6,16 +6,10 @@ using System.Text;
 
 namespace Deeplex.Saverwalter.Model.Tests
 {
-    public class SaverwalterContextTests
+    public class VertragTests
     {
         [Fact()]
-        public void SaverwalterContextTest()
-        {
-            Assert.True(false, "This test needs an implementation");
-        }
-
-        [Fact()]
-        public void FindPersonTest()
+        public void VertragTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
