@@ -6,7 +6,6 @@ using System.Linq;
 namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class AdresseViewModel<T> : AdresseViewModel where T : IAdresse
-
     {
         private T reference;
 

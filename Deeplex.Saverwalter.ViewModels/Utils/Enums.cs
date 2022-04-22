@@ -38,46 +38,4 @@ namespace Deeplex.Saverwalter.ViewModels
             .Cast<Anrede>()
             .ToList();
     }
-
-    public sealed class UmlageSchluesselUtil
-    {
-        public UmlageSchluessel Schluessel { get; }
-        public string Beschreibung { get; }
-        public UmlageSchluesselUtil(UmlageSchluessel u)
-        {
-            Schluessel = u;
-            Beschreibung = u.ToDescriptionString();
-        }
-    }
-
-    public sealed class BetriebskostentypUtil
-    {
-        public override string ToString()
-        {
-            // TODO i18n out of viewmodel...
-            return Typ.ToDescriptionString() + ((int)Typ % 2 == 0 ? " (kalt)" : " (warm)");
-        }
-
-        public Betriebskostentyp Typ { get; }
-        public int index { get; }
-        public BetriebskostentypUtil(Betriebskostentyp t)
-        {
-            Typ = t;
-            index = (int)t;
-        }
-    }
-
-    public sealed class HKVO9Util
-    {
-        public HKVO_P9A2 Enum { get; }
-        public int index { get; }
-        public string Absatz { get; }
-        public HKVO9Util(HKVO_P9A2 h)
-        {
-            Enum = h;
-            index = (int)h;
-            // TODO i18n out of viewmodel...
-            Absatz = "Absatz " + index.ToString();
-        }
-    }
 }

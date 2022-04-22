@@ -52,7 +52,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private void DeleteAnhang_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            if (((Button)sender).Tag is AnhangListEntry vm)
+            if (((Button)sender).Tag is AnhangListViewModelEntry vm)
             {
                 vm.DeleteFile();
             }

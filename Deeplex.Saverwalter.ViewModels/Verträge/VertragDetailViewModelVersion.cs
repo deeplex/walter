@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class VertragDetailVersion : BindableBase
+    public class VertragDetailViewModelVersion : BindableBase
     {
         public Vertrag Entity { get; }
         public int Id => Entity.rowid;
@@ -34,8 +34,8 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        private WohnungListEntry mWohnung;
-        public WohnungListEntry Wohnung
+        private WohnungListViewModelEntry mWohnung;
+        public WohnungListViewModelEntry Wohnung
         {
             get => mWohnung;
             set
@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Wohnung = value.Entity;
                 if (Ansprechpartner == null)
                 {
-                    Ansprechpartner = new KontaktListEntry(value.Entity.BesitzerId, Avm);
+                    Ansprechpartner = new KontaktListViewModelEntry(value.Entity.BesitzerId, Avm);
                 }
                 mWohnung = value;
                 if (RaisePropertyChangedAuto(old, value.Entity))
@@ -88,12 +88,12 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public KontaktListEntry Vermieter
+        public KontaktListViewModelEntry Vermieter
             => Wohnung?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
-                    new KontaktListEntry(g, Avm) : null;
+                    new KontaktListViewModelEntry(g, Avm) : null;
 
-        private KontaktListEntry mAnsprechpartner;
-        public KontaktListEntry Ansprechpartner
+        private KontaktListViewModelEntry mAnsprechpartner;
+        public KontaktListViewModelEntry Ansprechpartner
         {
             get => mAnsprechpartner;
             set
@@ -114,8 +114,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public RelayCommand RemoveDate;
 
-        public VertragDetailVersion(int id, IAppImplementation impl, AppViewModel avm) : this(avm.ctx.Vertraege.Find(id), impl, avm) { }
-        public VertragDetailVersion(Vertrag v, IAppImplementation impl, AppViewModel avm)
+        public VertragDetailViewModelVersion(int id, IAppImplementation impl, AppViewModel avm) : this(avm.ctx.Vertraege.Find(id), impl, avm) { }
+        public VertragDetailViewModelVersion(Vertrag v, IAppImplementation impl, AppViewModel avm)
         {
             Entity = v;
             Avm = avm;
@@ -123,7 +123,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (v.AnsprechpartnerId != Guid.Empty && v.AnsprechpartnerId != null)
             {
-                Ansprechpartner = new KontaktListEntry(v.AnsprechpartnerId.Value, avm);
+                Ansprechpartner = new KontaktListViewModelEntry(v.AnsprechpartnerId.Value, avm);
             }
 
             RemoveDate = new RelayCommand(_ => Ende = null, _ => Ende != null);

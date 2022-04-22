@@ -114,7 +114,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var a = ((VertragListVertrag)((DataGrid)sender).SelectedItem).Entity;
+            var a = ((VertragListViewModelVertrag)((DataGrid)sender).SelectedItem).Entity;
             App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
         }
 

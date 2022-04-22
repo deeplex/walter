@@ -9,32 +9,32 @@ using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class VertragDetailViewModel : VertragDetailVersion
+    public sealed class VertragDetailViewModel : VertragDetailViewModelVersion
     {
         public Guid guid { get; }
-        public ObservableProperty<ImmutableList<KontaktListEntry>> AlleMieter
-            = new ObservableProperty<ImmutableList<KontaktListEntry>>();
-        public ObservableProperty<KontaktListEntry> AddMieter = new ObservableProperty<KontaktListEntry>();
+        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> AlleMieter
+            = new ObservableProperty<ImmutableList<KontaktListViewModelEntry>>();
+        public ObservableProperty<KontaktListViewModelEntry> AddMieter = new ObservableProperty<KontaktListViewModelEntry>();
 
         public void UpdateMieterList()
         {
             AlleMieter.Value = Avm.ctx.JuristischePersonen
                     .ToImmutableList()
-                    .Where(j => j.isMieter == true).Select(j => new KontaktListEntry(j))
+                    .Where(j => j.isMieter == true).Select(j => new KontaktListViewModelEntry(j))
                     .Concat(Avm.ctx.NatuerlichePersonen
-                        .Where(n => n.isMieter == true).Select(n => new KontaktListEntry(n)))
+                        .Where(n => n.isMieter == true).Select(n => new KontaktListViewModelEntry(n)))
                     .Where(p => !Mieter.Value.Exists(e => p.Guid == e.Guid))
                     .ToImmutableList();
         }
 
-        public List<WohnungListEntry> AlleWohnungen = new List<WohnungListEntry>();
-        public List<KontaktListEntry> AlleKontakte;
+        public List<WohnungListViewModelEntry> AlleWohnungen = new List<WohnungListViewModelEntry>();
+        public List<KontaktListViewModelEntry> AlleKontakte;
 
-        public ObservableProperty<ImmutableList<VertragDetailVersion>> Versionen
-            = new ObservableProperty<ImmutableList<VertragDetailVersion>>();
+        public ObservableProperty<ImmutableList<VertragDetailViewModelVersion>> Versionen
+            = new ObservableProperty<ImmutableList<VertragDetailViewModelVersion>>();
 
-        public ObservableProperty<ImmutableList<KontaktListEntry>> Mieter
-            = new ObservableProperty<ImmutableList<KontaktListEntry>>();
+        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Mieter
+            = new ObservableProperty<ImmutableList<KontaktListViewModelEntry>>();
         public DateTimeOffset? AddVersionDatum;
 
         public DateTimeOffset lastBeginn => Versionen.Value.Last().Beginn;
@@ -60,19 +60,19 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             guid = v.First().VertragId;
 
-            Versionen.Value = v.Select(vs => new VertragDetailVersion(vs, impl, avm)).ToImmutableList();
+            Versionen.Value = v.Select(vs => new VertragDetailViewModelVersion(vs, impl, avm)).ToImmutableList();
 
-            AlleWohnungen = avm.ctx.Wohnungen.Select(w => new WohnungListEntry(w, avm)).ToList();
+            AlleWohnungen = avm.ctx.Wohnungen.Select(w => new WohnungListViewModelEntry(w, avm)).ToList();
             Wohnung = AlleWohnungen.Find(w => w.Id == v.First().WohnungId);
 
-            AlleKontakte = avm.ctx.JuristischePersonen.ToList().Select(j => new KontaktListEntry(j))
-                    .Concat(avm.ctx.NatuerlichePersonen.Select(n => new KontaktListEntry(n)))
+            AlleKontakte = avm.ctx.JuristischePersonen.ToList().Select(j => new KontaktListViewModelEntry(j))
+                    .Concat(avm.ctx.NatuerlichePersonen.Select(n => new KontaktListViewModelEntry(n)))
                     .ToList();
             Ansprechpartner = AlleKontakte.Find(w => w.Guid == v.First().AnsprechpartnerId);
 
             Mieter.Value = avm.ctx.MieterSet
                 .Where(m => m.VertragId == v.First().VertragId)
-                .Select(m => new KontaktListEntry(m.PersonId, avm))
+                .Select(m => new KontaktListViewModelEntry(m.PersonId, avm))
                 .ToImmutableList();
 
             UpdateMieterList();
@@ -81,7 +81,7 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 if (AddMieter.Value?.Guid is Guid mieterGuid)
                 {
-                    Mieter.Value = Mieter.Value.Add(new KontaktListEntry(mieterGuid, Avm));
+                    Mieter.Value = Mieter.Value.Add(new KontaktListViewModelEntry(mieterGuid, Avm));
                     UpdateMieterList();
                     Avm.ctx.MieterSet.Add(new Mieter()
                     {
@@ -100,7 +100,7 @@ namespace Deeplex.Saverwalter.ViewModels
                     Personenzahl = Personenzahl,
                     //KaltMiete = KaltMiete, TODO
                 };
-                var nv = new VertragDetailVersion(entity, impl, avm);
+                var nv = new VertragDetailViewModelVersion(entity, impl, avm);
                 Versionen.Value = Versionen.Value.Insert(0, nv);
                 avm.ctx.Vertraege.Add(entity);
                 avm.SaveWalter();

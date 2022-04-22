@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                     };
                     a.Wohnungen.ForEach(w =>
                     {
-                        var n = new TreeViewNode() { Content = new WohnungListEntry(w, App.ViewModel) };
+                        var n = new TreeViewNode() { Content = new WohnungListViewModelEntry(w, App.ViewModel) };
                         k.Children.Add(n);
                         if (ViewModel.Wohnungen.Value.Exists(ww => ww.Id == w.WohnungId))
                         {
@@ -83,8 +83,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             var selected = WohnungenTree.SelectedItems
                 .Select(s => (s as TreeViewNode).Content)
-                .Where(s => s is WohnungListEntry)
-                .Select(s => (WohnungListEntry)s)
+                .Where(s => s is WohnungListViewModelEntry)
+                .Select(s => (WohnungListViewModelEntry)s)
                 .ToImmutableList();
 
             ViewModel.UpdateWohnungen(selected);

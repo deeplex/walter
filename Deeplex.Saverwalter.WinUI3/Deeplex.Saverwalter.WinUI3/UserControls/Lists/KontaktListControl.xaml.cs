@@ -104,16 +104,16 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                   typeof(KontaktListControl),
                   new PropertyMetadata(true));
 
-        public ImmutableList<KontaktListEntry> Kontakte
+        public ImmutableList<KontaktListViewModelEntry> Kontakte
         {
-            get { return (ImmutableList<KontaktListEntry>)GetValue(KontakteProperty); }
+            get { return (ImmutableList<KontaktListViewModelEntry>)GetValue(KontakteProperty); }
             set { SetValue(KontakteProperty, value); }
         }
 
         public static readonly DependencyProperty KontakteProperty
             = DependencyProperty.Register(
                   "KontakteProperty",
-                  typeof(ImmutableList<KontaktListEntry>),
+                  typeof(ImmutableList<KontaktListViewModelEntry>),
                   typeof(KontaktListControl),
                   new PropertyMetadata(null));
 
@@ -161,14 +161,14 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_RightTapped(object sender, Microsoft.UI.Xaml.Input.RightTappedRoutedEventArgs e)
         {
-            ViewModel.SelectedKontakt = (e.OriginalSource as FrameworkElement).DataContext as KontaktListEntry;
+            ViewModel.SelectedKontakt = (e.OriginalSource as FrameworkElement).DataContext as KontaktListViewModelEntry;
         }
 
         private async void RemovePerson_Click(object sender, RoutedEventArgs e)
         {
             if (await App.Impl.Confirmation())
             {
-                var guid = ((KontaktListEntry)((Button)sender).DataContext).Guid;
+                var guid = ((KontaktListViewModelEntry)((Button)sender).DataContext).Guid;
 
                 ViewModel.Kontakte.Value = ViewModel.Kontakte.Value
                     .Where(k => guid != k.Guid).ToImmutableList();
@@ -193,7 +193,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var a = ((KontaktListEntry)((DataGrid)sender).SelectedItem)?.Entity;
+            var a = ((KontaktListViewModelEntry)((DataGrid)sender).SelectedItem)?.Entity;
             if (a is NatuerlichePerson n)
             {
                 App.ViewModel.updateListAnhang(new AnhangListViewModel(n, App.Impl, App.ViewModel));

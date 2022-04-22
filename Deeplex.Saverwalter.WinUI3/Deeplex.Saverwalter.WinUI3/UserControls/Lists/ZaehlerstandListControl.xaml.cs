@@ -57,7 +57,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (((DataGrid)sender).SelectedItem is ZaehlerstandListEntry m)
+            if (((DataGrid)sender).SelectedItem is ZaehlerstandListViewModelEntry m)
             {
                 App.ViewModel.updateListAnhang(new AnhangListViewModel(m.Entity, App.Impl, App.ViewModel));
             }

@@ -33,12 +33,12 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<ImmutableList<KontaktListEntry>> Mitglieder
-            = new ObservableProperty<ImmutableList<KontaktListEntry>>();
-        public ObservableProperty<ImmutableList<KontaktListEntry>> AddMitglieder
-            = new ObservableProperty<ImmutableList<KontaktListEntry>>();
-        public ObservableProperty<KontaktListEntry> AddMitglied
-            = new ObservableProperty<KontaktListEntry>();
+        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Mitglieder
+            = new ObservableProperty<ImmutableList<KontaktListViewModelEntry>>();
+        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> AddMitglieder
+            = new ObservableProperty<ImmutableList<KontaktListViewModelEntry>>();
+        public ObservableProperty<KontaktListViewModelEntry> AddMitglied
+            = new ObservableProperty<KontaktListViewModelEntry>();
 
         public bool WohnungenInklusiveMitglieder
         {
@@ -54,14 +54,14 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Mitglieder.Value = Avm.ctx.JuristischePersonenMitglieder
                 .Where(w => w.JuristischePersonId == Id)
-                .Select(w => new KontaktListEntry(w.PersonId, Avm))
+                .Select(w => new KontaktListViewModelEntry(w.PersonId, Avm))
                 .ToImmutableList();
 
             AddMitglieder.Value = Avm.ctx.NatuerlichePersonen
-                .Select(k => new KontaktListEntry(k))
+                .Select(k => new KontaktListViewModelEntry(k))
                 .ToList()
                 .Concat(Avm.ctx.JuristischePersonen
-                    .Select(k => new KontaktListEntry(k))
+                    .Select(k => new KontaktListViewModelEntry(k))
                     .ToList())
                 .Where(k => !Mitglieder.Value.Any(e => e.Guid == k.Guid))
                     .ToImmutableList();
@@ -70,7 +70,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToList()
                 .Where(w => w.BesitzerId == GetEntity.PersonId ||
                     (WohnungenInklusiveMitglieder && Mitglieder.Value.Any(m => m.Guid == w.BesitzerId)))
-                .Select(w => new WohnungListEntry(w, Avm))
+                .Select(w => new WohnungListViewModelEntry(w, Avm))
                 .ToImmutableList();
         }
 

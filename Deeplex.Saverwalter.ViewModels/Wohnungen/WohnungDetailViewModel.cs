@@ -25,10 +25,10 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ImmutableList<KontaktListEntry> AlleVermieter;
+        public ImmutableList<KontaktListViewModelEntry> AlleVermieter;
 
-        private KontaktListEntry mBesitzer;
-        public KontaktListEntry Besitzer
+        private KontaktListViewModelEntry mBesitzer;
+        public KontaktListViewModelEntry Besitzer
         {
             get => mBesitzer;
             set
@@ -112,9 +112,9 @@ namespace Deeplex.Saverwalter.ViewModels
             Impl = impl;
 
             AlleVermieter = Avm.ctx.JuristischePersonen.ToImmutableList()
-                .Where(j => j.isVermieter == true).Select(j => new KontaktListEntry(j))
+                .Where(j => j.isVermieter == true).Select(j => new KontaktListViewModelEntry(j))
                 .Concat(Avm.ctx.NatuerlichePersonen
-                    .Where(n => n.isVermieter == true).Select(n => new KontaktListEntry(n)))
+                    .Where(n => n.isVermieter == true).Select(n => new KontaktListViewModelEntry(n)))
                 .ToImmutableList();
 
             if (w.BesitzerId != Guid.Empty)

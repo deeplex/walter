@@ -96,7 +96,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var a = ((ZaehlerListEntry)((DataGrid)sender).SelectedItem).Entity;
+            var a = ((ZaehlerListViewModelEntry)((DataGrid)sender).SelectedItem).Entity;
             App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
         }
 

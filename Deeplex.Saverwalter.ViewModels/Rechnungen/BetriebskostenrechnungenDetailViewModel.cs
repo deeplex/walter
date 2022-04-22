@@ -16,7 +16,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public ObservableProperty<int> BetriebskostenrechnungsJahr = new ObservableProperty<int>();
         public ObservableProperty<bool> ZeigeVorlagen = new ObservableProperty<bool>();
-        public ObservableProperty<WohnungListEntry> BetriebskostenrechnungsWohnung = new ObservableProperty<WohnungListEntry>();
+        public ObservableProperty<WohnungListViewModelEntry> BetriebskostenrechnungsWohnung = new ObservableProperty<WohnungListViewModelEntry>();
 
         public async Task selfDestruct()
         {
@@ -30,10 +30,10 @@ namespace Deeplex.Saverwalter.ViewModels
         public List<HKVO9Util> HKVO_P9_List = Enums.HKVO9;
         public List<UmlageSchluesselUtil> Schluessel_List = Enums.UmlageSchluessel;
         public List<BetriebskostentypUtil> Typen_List;
-        public List<ZaehlerListEntry> AllgemeinZaehler_List;
+        public List<ZaehlerListViewModelEntry> AllgemeinZaehler_List;
 
-        private ZaehlerListEntry mAllgemeinZaehler;
-        public ZaehlerListEntry AllgemeinZaehler
+        private ZaehlerListViewModelEntry mAllgemeinZaehler;
+        public ZaehlerListViewModelEntry AllgemeinZaehler
         {
             get => mAllgemeinZaehler;
             set
@@ -181,16 +181,16 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<ImmutableList<WohnungListEntry>> Wohnungen
-            = new ObservableProperty<ImmutableList<WohnungListEntry>>();
+        public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen
+            = new ObservableProperty<ImmutableList<WohnungListViewModelEntry>>();
 
         public AppViewModel Avm;
         public IAppImplementation Impl;
-        public void UpdateWohnungen(ImmutableList<WohnungListEntry> list)
+        public void UpdateWohnungen(ImmutableList<WohnungListViewModelEntry> list)
         {
             var flagged = Wohnungen.Value.Count != list.Count;
             Wohnungen.Value = list
-                .Select(e => new WohnungListEntry(e.Entity, Avm))
+                .Select(e => new WohnungListViewModelEntry(e.Entity, Avm))
                 .ToImmutableList();
             if (flagged) Update();
         }
@@ -243,14 +243,14 @@ namespace Deeplex.Saverwalter.ViewModels
             Avm = avm;
             Impl = impl;
 
-            Wohnungen.Value = r.Gruppen.Select(g => new WohnungListEntry(g.Wohnung, Avm)).ToImmutableList();
+            Wohnungen.Value = r.Gruppen.Select(g => new WohnungListViewModelEntry(g.Wohnung, Avm)).ToImmutableList();
             if (BetriebskostenrechnungsWohnung.Value == null)
             {
                 BetriebskostenrechnungsWohnung.Value = Wohnungen.Value.FirstOrDefault();
             }
 
             AllgemeinZaehler_List = Avm.ctx.ZaehlerSet
-                .Select(a => new ZaehlerListEntry(a))
+                .Select(a => new ZaehlerListViewModelEntry(a))
                 .ToList();
             AllgemeinZaehler = AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Zaehler?.ZaehlerId);
 
@@ -264,7 +264,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, int w, List<Wohnung> l, IAppImplementation impl, AppViewModel avm) : this(r, w, impl, avm)
         {
-            Wohnungen.Value = l.Select(e => new WohnungListEntry(e, avm)).ToImmutableList();
+            Wohnungen.Value = l.Select(e => new WohnungListViewModelEntry(e, avm)).ToImmutableList();
         }
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, int w, IAppImplementation impl, AppViewModel avm) : this(r, impl, avm)
@@ -272,7 +272,7 @@ namespace Deeplex.Saverwalter.ViewModels
             BetriebskostenrechnungsWohnung.Value = Wohnungen.Value.Find(e => e.Id == w);
         }
 
-        public BetriebskostenrechnungDetailViewModel(IList<WohnungListEntry> l, int betreffendesJahr, IAppImplementation impl, AppViewModel avm) : this(new Betriebskostenrechnung(), impl, avm)
+        public BetriebskostenrechnungDetailViewModel(IList<WohnungListViewModelEntry> l, int betreffendesJahr, IAppImplementation impl, AppViewModel avm) : this(new Betriebskostenrechnung(), impl, avm)
         {
             var thisYear = Avm.ctx.Betriebskostenrechnungen.ToList().Where(r =>
                r.BetreffendesJahr == BetreffendesJahr - 1 &&

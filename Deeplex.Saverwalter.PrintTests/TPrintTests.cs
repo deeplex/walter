@@ -1,8 +1,4 @@
 ﻿using Xunit;
-using Deeplex.Saverwalter.Print;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Deeplex.Saverwalter.Print.Tests
 {

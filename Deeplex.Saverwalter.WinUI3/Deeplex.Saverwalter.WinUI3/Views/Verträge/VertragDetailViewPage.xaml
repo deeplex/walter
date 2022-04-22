@@ -17,13 +17,13 @@
             <Setter Property="Width" Value="110" />
         </Style>
 
-        <DataTemplate x:Key="BeginnGrid" x:DataType="vm:VertragDetailVersion">
+        <DataTemplate x:Key="BeginnGrid" x:DataType="vm:VertragDetailViewModelVersion">
             <DatePicker
                 Date="{x:Bind Beginn, Mode=TwoWay}"
                 Language="de"/>
         </DataTemplate>
 
-        <DataTemplate x:Key="EndeGrid" x:DataType="vm:VertragDetailVersion">
+        <DataTemplate x:Key="EndeGrid" x:DataType="vm:VertragDetailViewModelVersion">
             <DatePicker
                 SelectedDate="{x:Bind Ende, Mode=TwoWay}"
                 IsEnabled="True"
@@ -166,7 +166,7 @@
                                         <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
                                         <mtuuc:DataGridTemplateColumn Header="Personenzahl">
                                             <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate x:DataType="vm:VertragDetailVersion">
+                                                <DataTemplate x:DataType="vm:VertragDetailViewModelVersion">
                                                     <muxc:NumberBox
                                                         Value="{x:Bind Personenzahl, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                                         PlaceholderText="0"/>
@@ -175,7 +175,7 @@
                                         </mtuuc:DataGridTemplateColumn>
                                         <mtuuc:DataGridTemplateColumn Header="Kaltmiete">
                                             <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate x:DataType="vm:VertragDetailVersion">
+                                                <DataTemplate x:DataType="vm:VertragDetailViewModelVersion">
                                                     <muxc:NumberBox
                                                         Value="{x:Bind KaltMiete, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                                         PlaceholderText="0"/>
@@ -184,7 +184,7 @@
                                         </mtuuc:DataGridTemplateColumn>
                                         <mtuuc:DataGridTemplateColumn Header="Notiz">
                                             <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate x:DataType="vm:VertragDetailVersion">
+                                                <DataTemplate x:DataType="vm:VertragDetailViewModelVersion">
                                                     <TextBox Text="{x:Bind Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                                 </DataTemplate>
                                             </mtuuc:DataGridTemplateColumn.CellTemplate>

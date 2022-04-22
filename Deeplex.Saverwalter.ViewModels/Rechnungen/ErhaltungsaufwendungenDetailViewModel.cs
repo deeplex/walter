@@ -24,10 +24,10 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<ImmutableList<KontaktListEntry>> Personen
-            = new ObservableProperty<ImmutableList<KontaktListEntry>>();
-        private KontaktListEntry mAussteller;
-        public KontaktListEntry Aussteller
+        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Personen
+            = new ObservableProperty<ImmutableList<KontaktListViewModelEntry>>();
+        private KontaktListViewModelEntry mAussteller;
+        public KontaktListViewModelEntry Aussteller
         {
             get => mAussteller;
             set
@@ -43,9 +43,9 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<string> QuickPerson
             = new ObservableProperty<string>();
 
-        public List<WohnungListEntry> Wohnungen { get; }
-        private WohnungListEntry mWohnung;
-        public WohnungListEntry Wohnung
+        public List<WohnungListViewModelEntry> Wohnungen { get; }
+        private WohnungListViewModelEntry mWohnung;
+        public WohnungListViewModelEntry Wohnung
         {
             get => mWohnung;
             set
@@ -116,16 +116,16 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Wohnungen = Avm.ctx.Wohnungen
                 .Include(w => w.Adresse)
-                .Select(w => new WohnungListEntry(w, avm)).ToList();
+                .Select(w => new WohnungListViewModelEntry(w, avm)).ToList();
             Wohnung = Wohnungen.Find(f => f.Id == e.Wohnung?.WohnungId);
 
             Personen.Value = Avm.ctx.NatuerlichePersonen
                 .Where(w => w.isHandwerker)
-                .Select(k => new KontaktListEntry(k))
+                .Select(k => new KontaktListViewModelEntry(k))
                 .ToList()
                 .Concat(Avm.ctx.JuristischePersonen
                     .Where(w => w.isHandwerker)
-                    .Select(k => new KontaktListEntry(k))
+                    .Select(k => new KontaktListViewModelEntry(k))
                     .ToList())
                     .ToImmutableList();
             Aussteller = Personen.Value.SingleOrDefault(s => s.Guid == e.AusstellerId);

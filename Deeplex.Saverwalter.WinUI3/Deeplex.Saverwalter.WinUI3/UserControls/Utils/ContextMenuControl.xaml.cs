@@ -56,11 +56,11 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Navigation_Click(object sender, RoutedEventArgs e)
         {
-            if (Item is WohnungListEntry w)
+            if (Item is WohnungListViewModelEntry w)
             {
                 App.Window.Navigate(typeof(WohnungDetailPage), w.Entity);
             }
-            else if (Item is KontaktListEntry k)
+            else if (Item is KontaktListViewModelEntry k)
             {
                 var a = App.Walter.NatuerlichePersonen.SingleOrDefault(p => p.PersonId == k.Guid);
                 if (a != null)
@@ -76,7 +76,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                     }
                 }
             }
-            else if (Item is ZaehlerListEntry z)
+            else if (Item is ZaehlerListViewModelEntry z)
             {
                 App.Window.Navigate(typeof(ZaehlerDetailPage), z.Entity);
             }
@@ -84,11 +84,11 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Anhaenge_Click(object sender, RoutedEventArgs e)
         {
-            if (Item is WohnungListEntry w)
+            if (Item is WohnungListViewModelEntry w)
             {
                 App.ViewModel.updateListAnhang(new AnhangListViewModel(w.Entity, App.Impl, App.ViewModel));
             }
-            else if (Item is KontaktListEntry k)
+            else if (Item is KontaktListViewModelEntry k)
             {
                 var a = App.Walter.NatuerlichePersonen.SingleOrDefault(p => p.PersonId == k.Guid);
                 if (a != null)
@@ -104,7 +104,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                     }
                 }
             }
-            else if (Item is ZaehlerstandListEntry z)
+            else if (Item is ZaehlerstandListViewModelEntry z)
             {
                 App.ViewModel.updateListAnhang(new AnhangListViewModel(z.Entity, App.Impl, App.ViewModel));
             }

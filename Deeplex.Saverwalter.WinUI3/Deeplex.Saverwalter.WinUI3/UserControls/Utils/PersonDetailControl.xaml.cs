@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                 var vm = new VertragDetailViewModel(App.Impl, App.ViewModel);
                 if (ViewModel.isMieter)
                 {
-                    vm.Mieter.Value = vm.Mieter.Value.Add(new KontaktListEntry(ViewModel.PersonId, App.ViewModel));
+                    vm.Mieter.Value = vm.Mieter.Value.Add(new KontaktListViewModelEntry(ViewModel.PersonId, App.ViewModel));
                 }
                 else if (ViewModel.isVermieter)
                 {

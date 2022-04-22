@@ -1,8 +1,6 @@
-﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Utils.ObjectModel;
+﻿using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -10,13 +8,13 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class VertragListViewModel : IFilterViewModel
     {
-        public ObservableProperty<ImmutableList<VertragListVertrag>> Vertraege = new ObservableProperty<ImmutableList<VertragListVertrag>>();
-        public ObservableProperty<VertragListVertrag> SelectedVertrag
-            = new ObservableProperty<VertragListVertrag>();
+        public ObservableProperty<ImmutableList<VertragListViewModelVertrag>> Vertraege = new ObservableProperty<ImmutableList<VertragListViewModelVertrag>>();
+        public ObservableProperty<VertragListViewModelVertrag> SelectedVertrag
+            = new ObservableProperty<VertragListViewModelVertrag>();
         public ObservableProperty<bool> OnlyActive = new ObservableProperty<bool>();
 
         public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
-        public ImmutableList<VertragListVertrag> AllRelevant { get; set; }
+        public ImmutableList<VertragListViewModelVertrag> AllRelevant { get; set; }
 
         public VertragListViewModel(AppViewModel avm)
         {
@@ -24,157 +22,10 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
                 .ToList()
                 .GroupBy(v => v.VertragId)
-                .Select(v => new VertragListVertrag(v, avm))
+                .Select(v => new VertragListViewModelVertrag(v, avm))
                 .OrderBy(v => v.Beginn).Reverse()
                 .ToImmutableList();
             Vertraege.Value = AllRelevant;
-        }
-    }
-
-    public sealed class VertragListVertrag : VertragVersionListViewModel
-    {
-        public List<VertragVersionListViewModel> Versionen { get; }
-            = new List<VertragVersionListViewModel>();
-        public ObservableProperty<VertragListMiete> AddMieteValue
-            = new ObservableProperty<VertragListMiete>();
-
-        public ImmutableList<VertragListMiete> Mieten { get; set; }
-        public string LastMiete
-        {
-            get
-            {
-                var mieten = Mieten.OrderBy(m => m.Datum.Value);
-                var last = mieten.Any() ? mieten.Last() : null;
-                return last != null ? last.Datum.Value.ToString("dd.MM.yyyy") +
-                    " - Betrag: " + string.Format("{0:F2}€", last.Betrag) : "";
-            }
-        }
-        public bool HasLastMiete => LastMiete != "";
-
-        public VertragListVertrag(IGrouping<Guid, Vertrag> v, AppViewModel avm)
-            : base(v.OrderBy(vs => vs.Version).Last(), avm)
-        {
-            Versionen = v.OrderBy(vs => vs.Version).Select(vs => new VertragVersionListViewModel(vs, avm)).ToList();
-            Beginn = Versionen.First().Beginn;
-
-            Mieten = avm.ctx.Mieten
-                .Where(m => m.VertragId == v.First().VertragId)
-                .Select(m => new VertragListMiete(m))
-                .ToImmutableList();
-
-            AddMieteValue.Value = new VertragListMiete();
-            AddMiete = new RelayCommand(_ =>
-            {
-                Mieten = Mieten.Add(AddMieteValue.Value);
-                avm.ctx.Mieten.Add(new Miete
-                {
-                    Zahlungsdatum = AddMieteValue.Value.Datum.Value.UtcDateTime,
-                    BetreffenderMonat = AddMieteValue.Value.BetreffenderMonat.Value.UtcDateTime,
-                    Betrag = AddMieteValue.Value.Betrag,
-                    VertragId = Versionen.Last().VertragId,
-                });
-                avm.SaveWalter();
-                AddMieteValue.Value = new VertragListMiete();
-                RaisePropertyChanged(nameof(LastMiete));
-                RaisePropertyChanged(nameof(HasLastMiete));
-            }, _ => true);
-        }
-
-        public RelayCommand AddMiete { get; }
-    }
-
-    public class VertragVersionListViewModel : BindableBase
-    {
-        public int Id => Entity.rowid;
-        public Guid VertragId => Entity.VertragId;
-        public int Version => Entity.Version;
-        public int Personenzahl => Entity.Personenzahl;
-        public string Anschrift => AdresseViewModel.Anschrift(Entity.Wohnung);
-        public string AnschriftMitWohnung => Anschrift + ", " + Wohnung.Bezeichnung;
-        public Wohnung Wohnung => Entity.Wohnung;
-        public ImmutableList<Guid> Mieter => Avm.ctx.MieterSet
-                .Where(w => w.VertragId == Entity.VertragId)
-                .Select(m => m.PersonId).ToImmutableList();
-        public DateTime Beginn { get; set; }
-        public DateTime? Ende { get; set; }
-        public string BeginnString => Beginn.ToString("dd.MM.yyyy");
-        public string EndeString => Ende is DateTime e ? e.ToString("dd.MM.yyyy") : "Offen";
-        public string AuflistungMieter => string.Join(", ", Avm.ctx.MieterSet
-            .Where(m => m.VertragId == Entity.VertragId).ToList()
-            .Select(a => Avm.ctx.FindPerson(a.PersonId).Bezeichnung));
-        public bool hasEnde => Ende != null;
-        public string Besitzer => Avm.ctx.FindPerson(Entity.Wohnung.BesitzerId)?.Bezeichnung;
-
-        public Vertrag Entity { get; }
-        private AppViewModel Avm;
-
-        public VertragVersionListViewModel(Vertrag v, AppViewModel avm)
-        {
-            Avm = avm;
-            Entity = v;
-
-            Beginn = v.Beginn.AsUtcKind();
-            Ende = v.Ende?.AsUtcKind();
-        }
-    }
-
-    public sealed class VertragListMiete : BindableBase
-    {
-        public int Id;
-        public ObservableProperty<DateTimeOffset> Datum = new ObservableProperty<DateTimeOffset>();
-        public ObservableProperty<DateTimeOffset> BetreffenderMonat = new ObservableProperty<DateTimeOffset>();
-        public double Kalt;
-        public string KaltString
-        {
-            get => Kalt > 0 ? string.Format("{0:F2}", Kalt) : "";
-            set
-            {
-                if (double.TryParse(value, out double result))
-                {
-                    SetProperty(ref Kalt, result);
-                }
-                else
-                {
-                    SetProperty(ref Kalt, 0.0);
-                }
-                RaisePropertyChanged(nameof(Kalt));
-            }
-        }
-        public double Betrag;
-        public string BetragString
-        {
-            get => Betrag > 0 ? string.Format("{0:F2}", Betrag) : "";
-            set
-            {
-                if (double.TryParse(value, out double result))
-                {
-                    SetProperty(ref Betrag, result);
-                }
-                else
-                {
-                    SetProperty(ref Betrag, 0.0);
-                }
-                RaisePropertyChanged(nameof(Betrag));
-            }
-        }
-
-        public ObservableProperty<string> Notiz = new ObservableProperty<string>();
-
-        public VertragListMiete()
-        {
-            Datum.Value = DateTime.UtcNow.Date;
-            BetreffenderMonat.Value = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1).AsUtcKind();
-            Betrag = 0;
-            Notiz.Value = "";
-        }
-
-        public VertragListMiete(Miete m)
-        {
-            Id = m.MieteId;
-            Datum.Value = m.Zahlungsdatum.AsUtcKind();
-            BetreffenderMonat.Value = m.BetreffenderMonat.AsUtcKind();
-            Betrag = m.Betrag ?? 0;
-            Notiz.Value = m.Notiz ?? "";
         }
     }
 }

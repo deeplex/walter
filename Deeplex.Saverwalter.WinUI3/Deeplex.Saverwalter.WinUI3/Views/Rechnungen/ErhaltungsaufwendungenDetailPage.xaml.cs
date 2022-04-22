@@ -52,7 +52,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
                 App.Walter.JuristischePersonen.Add(j);
                 App.SaveWalter();
 
-                var kl = new KontaktListEntry(j);
+                var kl = new KontaktListViewModelEntry(j);
                 ViewModel.Personen.Value = ViewModel.Personen.Value.Add(kl);
                 ViewModel.Aussteller = kl;
                 ViewModel.QuickPerson.Value = "";

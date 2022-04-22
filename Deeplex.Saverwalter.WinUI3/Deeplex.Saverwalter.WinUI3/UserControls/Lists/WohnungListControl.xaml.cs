@@ -66,16 +66,16 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                   typeof(WohnungListControl),
                   new PropertyMetadata(0));
 
-        public ImmutableList<WohnungListEntry> Liste
+        public ImmutableList<WohnungListViewModelEntry> Liste
         {
-            get { return (ImmutableList<WohnungListEntry>)GetValue(ListeProperty); }
+            get { return (ImmutableList<WohnungListViewModelEntry>)GetValue(ListeProperty); }
             set { SetValue(ListeProperty, value); }
         }
 
         public static readonly DependencyProperty ListeProperty
             = DependencyProperty.Register(
                   "Liste",
-                  typeof(ImmutableList<WohnungListEntry>),
+                  typeof(ImmutableList<WohnungListViewModelEntry>),
                   typeof(WohnungListControl),
                   new PropertyMetadata(null));
 
@@ -94,7 +94,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var a = ((WohnungListEntry)((DataGrid)sender).SelectedItem).Entity;
+            var a = ((WohnungListViewModelEntry)((DataGrid)sender).SelectedItem).Entity;
             App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
         }
 

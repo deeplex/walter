@@ -1,12 +1,4 @@
-﻿using Deeplex.Saverwalter.Model;
-using DocumentFormat.OpenXml;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using static Deeplex.Saverwalter.Model.Utils;
-using static Deeplex.Saverwalter.Print.Utils;
-
-namespace Deeplex.Saverwalter.Print
+﻿namespace Deeplex.Saverwalter.Print
 {
     public class PrintRun
     {

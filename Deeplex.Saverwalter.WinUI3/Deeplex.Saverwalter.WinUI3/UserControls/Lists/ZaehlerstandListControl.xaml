@@ -22,7 +22,7 @@
         <mtuuc:DataGrid.Columns>
             <mtuuc:DataGridTemplateColumn>
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:ZaehlerstandListEntry">
+                    <DataTemplate x:DataType="vm:ZaehlerstandListViewModelEntry">
                         <Button Command="{x:Bind Delete}">
                             <SymbolIcon Symbol="Delete"/>
                         </Button>

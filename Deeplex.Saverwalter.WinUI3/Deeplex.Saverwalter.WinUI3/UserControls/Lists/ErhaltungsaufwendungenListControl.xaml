@@ -30,7 +30,7 @@
                 Width="40"
                 Visibility="{x:Bind Selectable, Mode=OneWay}">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListEntry">
+                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListViewModelEntry">
                         <CheckBox
                             VerticalAlignment="Center"
                             Margin="10,0,0,0"
@@ -40,7 +40,7 @@
             </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTemplateColumn Header="Bezeichnung">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListEntry">
+                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListViewModelEntry">
                         <TextBlock
                             Margin="10,0,10,0"
                             VerticalAlignment="Center"
@@ -51,7 +51,7 @@
             </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTemplateColumn Header="Aussteller">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListEntry">
+                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListViewModelEntry">
                         <TextBlock
                             Margin="10,0,10,0"
                             VerticalAlignment="Center"
@@ -62,7 +62,7 @@
             </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTemplateColumn Header="Betrag">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListEntry">
+                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListViewModelEntry">
                         <TextBlock
                             Margin="10,0,10,0"
                             VerticalAlignment="Center"
@@ -73,7 +73,7 @@
             </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTemplateColumn Header="Datum">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListEntry">
+                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenListViewModelEntry">
                         <TextBlock
                             Margin="10,0,10,0"
                             VerticalAlignment="Center"

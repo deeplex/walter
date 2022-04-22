@@ -68,7 +68,7 @@
                         <mtuuc:DataGrid.Columns>
                             <mtuuc:DataGridTemplateColumn>
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="vm:AnhangListEntry">
+                                    <DataTemplate x:DataType="vm:AnhangListViewModelEntry">
                                         <Button
                                             Background="Transparent"
                                             Click="DeleteAnhang_Click"
@@ -80,7 +80,7 @@
                             </mtuuc:DataGridTemplateColumn>
                             <mtuuc:DataGridTemplateColumn Header="Bezüge">
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="vm:AnhangListEntry">
+                                    <DataTemplate x:DataType="vm:AnhangListViewModelEntry">
                                         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{x:Bind GetReferences}"/>
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>

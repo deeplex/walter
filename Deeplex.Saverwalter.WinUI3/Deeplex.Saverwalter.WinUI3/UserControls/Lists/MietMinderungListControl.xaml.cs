@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (((DataGrid)sender).SelectedItem is MietMinderungListEntry m)
+            if (((DataGrid)sender).SelectedItem is MietminderungListViewModelEntry m)
             {
                 App.ViewModel.updateListAnhang(new AnhangListViewModel(m.Entity, App.Impl, App.ViewModel));
             }

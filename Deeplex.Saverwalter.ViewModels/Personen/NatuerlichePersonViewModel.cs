@@ -69,22 +69,22 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<ImmutableList<KontaktListEntry>> JuristischePersonen
-            = new ObservableProperty<ImmutableList<KontaktListEntry>>();
+        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> JuristischePersonen
+            = new ObservableProperty<ImmutableList<KontaktListViewModelEntry>>();
 
         public void UpdateListen()
         {
             JuristischePersonen.Value = Avm.ctx.JuristischePersonenMitglieder
                 .Include(w => w.JuristischePerson)
                 .Where(w => w.PersonId == Entity.PersonId)
-                .Select(w => new KontaktListEntry(w.JuristischePerson.PersonId, Avm))
+                .Select(w => new KontaktListViewModelEntry(w.JuristischePerson.PersonId, Avm))
                 .ToImmutableList();
 
             Wohnungen.Value = Avm.ctx.Wohnungen
                 .ToList()
                 .Where(w => w.BesitzerId == GetEntity.PersonId ||
                     (WohnungenInklusiveJurPers && JuristischePersonen.Value.Any(m => m.Guid == w.BesitzerId)))
-                .Select(w => new WohnungListEntry(w, Avm))
+                .Select(w => new WohnungListViewModelEntry(w, Avm))
                 .ToImmutableList();
         }
 

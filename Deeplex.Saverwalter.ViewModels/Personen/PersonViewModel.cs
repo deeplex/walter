@@ -10,8 +10,8 @@ namespace Deeplex.Saverwalter.ViewModels
         public IPerson Entity { get; set; }
 
         protected bool mInklusiveZusatz;
-        public ObservableProperty<ImmutableList<WohnungListEntry>> Wohnungen
-            = new ObservableProperty<ImmutableList<WohnungListEntry>>();
+        public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen
+            = new ObservableProperty<ImmutableList<WohnungListViewModelEntry>>();
 
         protected AppViewModel Avm;
         protected IAppImplementation Impl;

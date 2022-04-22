@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Deeplex.Saverwalter.Model
+﻿namespace Deeplex.Saverwalter.Model
 {
     // JOIN_TABLE
     // Many Wohnungen may share a Betriebskostenrechnung. The calculation is done by the
