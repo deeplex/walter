@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.WinUI3"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.ViewModels", "Deeplex.Saverwalter.ViewModels\Deeplex.Saverwalter.ViewModels.csproj", "{03CE0472-164C-4D00-8228-945B693DE4DA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deeplex.Saverwalter.ModelTests", "Deeplex.Saverwalter.ModelTests\Deeplex.Saverwalter.ModelTests.csproj", "{3BA86835-873B-4E2C-9EE4-390A32E10678}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -172,6 +174,26 @@ Global
 		{03CE0472-164C-4D00-8228-945B693DE4DA}.Release|x64.Build.0 = Release|Any CPU
 		{03CE0472-164C-4D00-8228-945B693DE4DA}.Release|x86.ActiveCfg = Release|Any CPU
 		{03CE0472-164C-4D00-8228-945B693DE4DA}.Release|x86.Build.0 = Release|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Debug|ARM.Build.0 = Debug|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Debug|x64.Build.0 = Debug|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Debug|x86.Build.0 = Debug|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Release|ARM.ActiveCfg = Release|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Release|ARM.Build.0 = Release|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Release|ARM64.Build.0 = Release|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Release|x64.ActiveCfg = Release|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Release|x64.Build.0 = Release|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Release|x86.ActiveCfg = Release|Any CPU
+		{3BA86835-873B-4E2C-9EE4-390A32E10678}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
