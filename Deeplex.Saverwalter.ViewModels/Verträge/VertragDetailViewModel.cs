@@ -23,7 +23,7 @@ namespace Deeplex.Saverwalter.ViewModels
                     .Where(j => j.isMieter == true).Select(j => new KontaktListViewModelEntry(j))
                     .Concat(Avm.ctx.NatuerlichePersonen
                         .Where(n => n.isMieter == true).Select(n => new KontaktListViewModelEntry(n)))
-                    .Where(p => !Mieter.Value.Exists(e => p.Guid == e.Guid))
+                    .Where(p => !Mieter.Value.Exists(e => p.Entity.PersonId == e.Entity.PersonId))
                     .ToImmutableList();
         }
 
@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.ViewModels
             AlleKontakte = avm.ctx.JuristischePersonen.ToList().Select(j => new KontaktListViewModelEntry(j))
                     .Concat(avm.ctx.NatuerlichePersonen.Select(n => new KontaktListViewModelEntry(n)))
                     .ToList();
-            Ansprechpartner = AlleKontakte.Find(w => w.Guid == v.First().AnsprechpartnerId);
+            Ansprechpartner = AlleKontakte.Find(w => w.Entity.PersonId == v.First().AnsprechpartnerId);
 
             Mieter.Value = avm.ctx.MieterSet
                 .Where(m => m.VertragId == v.First().VertragId)
@@ -79,7 +79,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             AddMieterCommand = new RelayCommand(_ =>
             {
-                if (AddMieter.Value?.Guid is Guid mieterGuid)
+                if (AddMieter.Value?.Entity.PersonId is Guid mieterGuid)
                 {
                     Mieter.Value = Mieter.Value.Add(new KontaktListViewModelEntry(mieterGuid, Avm));
                     UpdateMieterList();

@@ -102,10 +102,10 @@ namespace Deeplex.Saverwalter.ViewModels
                 {
                     return;
                 }
-                var old = mAnsprechpartner?.Guid;
+                var old = mAnsprechpartner?.Entity.PersonId;
                 mAnsprechpartner = value;
-                Entity.AnsprechpartnerId = mAnsprechpartner?.Guid;
-                RaisePropertyChangedAuto(old, value?.Guid);
+                Entity.AnsprechpartnerId = mAnsprechpartner?.Entity.PersonId;
+                RaisePropertyChangedAuto(old, value?.Entity.PersonId);
             }
         }
 
