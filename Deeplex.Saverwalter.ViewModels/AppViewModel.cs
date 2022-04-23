@@ -9,14 +9,37 @@ using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
+    // TODO necessary to fake AppViewModel... have to think about a suitable design pattern...
+    //public interface IAppViewModel
+    //{
+    //    ObservableProperty<string> Titel { get; set; }
+    //    ObservableProperty<AnhangListViewModel> DetailAnhang { get; }
+    //    ObservableProperty<AnhangListViewModel> ListAnhang { get; }
+
+    //    void clearAnhang();
+    //    void updateListAnhang(AnhangListViewModel list);
+    //    void updateDetailAnhang(AnhangListViewModel detail);
+
+    //    //private void updateAnhang(ObservableProperty<AnhangListViewModel> op, AnhangListViewModel a);
+
+    //    ImmutableList<AutoSuggestEntry> AllAutoSuggestEntries { get; set; }
+    //    ObservableProperty<ImmutableList<AutoSuggestEntry>> AutoSuggestEntries { get; }
+    //    void updateAutoSuggestEntries(string filter);
+
+    //    string root { get; set; }
+    //    SaverwalterContext ctx { get; set; }
+    //    Task initializeDatabase(IAppImplementation impl);
+    //    void SaveWalter();
+
+    //    IAppImplementation Impl { get; }
+    //}
+
     public sealed class AppViewModel : BindableBase
     {
-        public ObservableProperty<string> Titel { get; set; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Titel { get; set; } = new();
 
-        public ObservableProperty<AnhangListViewModel> DetailAnhang
-            = new ObservableProperty<AnhangListViewModel>();
-        public ObservableProperty<AnhangListViewModel> ListAnhang
-            = new ObservableProperty<AnhangListViewModel>();
+        public ObservableProperty<AnhangListViewModel> DetailAnhang { get; } = new();
+        public ObservableProperty<AnhangListViewModel> ListAnhang { get; } = new();
 
         public void clearAnhang()
         {
@@ -30,14 +53,13 @@ namespace Deeplex.Saverwalter.ViewModels
             op.Value = a;
         }
 
-        public ImmutableList<AutoSuggestEntry> AllAutoSuggestEntries;
-        public ObservableProperty<ImmutableList<AutoSuggestEntry>> AutoSuggestEntries
-            = new ObservableProperty<ImmutableList<AutoSuggestEntry>>();
+        public ImmutableList<AutoSuggestEntry> AllAutoSuggestEntries { get; set; }
+        public ObservableProperty<ImmutableList<AutoSuggestEntry>> AutoSuggestEntries { get; } = new();
 
         public string root { get; set; }
         public SaverwalterContext ctx { get; set; }
 
-        IAppImplementation Impl;
+        public IAppImplementation Impl { get; }
 
         public AppViewModel(IAppImplementation impl)
         {
