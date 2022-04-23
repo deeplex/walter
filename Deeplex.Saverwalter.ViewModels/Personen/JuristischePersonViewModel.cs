@@ -63,13 +63,13 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Concat(Avm.ctx.JuristischePersonen
                     .Select(k => new KontaktListViewModelEntry(k))
                     .ToList())
-                .Where(k => !Mitglieder.Value.Any(e => e.Guid == k.Guid))
+                .Where(k => !Mitglieder.Value.Any(e => e.Entity.PersonId == k.Entity.PersonId))
                     .ToImmutableList();
 
             Wohnungen.Value = Avm.ctx.Wohnungen
                 .ToList()
                 .Where(w => w.BesitzerId == GetEntity.PersonId ||
-                    (WohnungenInklusiveMitglieder && Mitglieder.Value.Any(m => m.Guid == w.BesitzerId)))
+                    (WohnungenInklusiveMitglieder && Mitglieder.Value.Any(m => m.Entity.PersonId == w.BesitzerId)))
                 .Select(w => new WohnungListViewModelEntry(w, Avm))
                 .ToImmutableList();
         }
@@ -88,12 +88,12 @@ namespace Deeplex.Saverwalter.ViewModels
             PropertyChanged += OnUpdate;
             AddMitgliedCommand = new RelayCommand(_ =>
             {
-                if (AddMitglied.Value?.Guid is Guid guid)
+                if (AddMitglied.Value?.Entity.PersonId is Guid guid)
                 {
                     Avm.ctx.JuristischePersonenMitglieder.Add(new JuristischePersonenMitglied()
                     {
                         JuristischePersonId = Id,
-                        PersonId = AddMitglied.Value.Guid,
+                        PersonId = AddMitglied.Value.Entity.PersonId,
                     });
                     Avm.SaveWalter();
                     UpdateListen();

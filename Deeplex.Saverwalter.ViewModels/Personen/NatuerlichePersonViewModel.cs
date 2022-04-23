@@ -83,7 +83,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Wohnungen.Value = Avm.ctx.Wohnungen
                 .ToList()
                 .Where(w => w.BesitzerId == GetEntity.PersonId ||
-                    (WohnungenInklusiveJurPers && JuristischePersonen.Value.Any(m => m.Guid == w.BesitzerId)))
+                    (WohnungenInklusiveJurPers && JuristischePersonen.Value.Any(m => m.Entity.PersonId == w.BesitzerId)))
                 .Select(w => new WohnungListViewModelEntry(w, Avm))
                 .ToImmutableList();
         }

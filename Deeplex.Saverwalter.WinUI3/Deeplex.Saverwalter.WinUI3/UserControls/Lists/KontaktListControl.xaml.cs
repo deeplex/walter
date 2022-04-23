@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             if (Kontakte != null)
             {
                 ViewModel.Kontakte.Value = ViewModel.Kontakte.Value.Where(v =>
-                    Kontakte.Any(k => k.Guid == v.Guid))
+                    Kontakte.Any(k => k.Entity.PersonId == v.Entity.PersonId))
                     .ToImmutableList();
             }
 
@@ -155,7 +155,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                     sk.Type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailPage) :
                     null;
 
-                App.Window.Navigate(target, App.Walter.FindPerson(sk.Guid));
+                App.Window.Navigate(target, App.Walter.FindPerson(sk.Entity.PersonId));
             }
         }
 
@@ -168,10 +168,10 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         {
             if (await App.Impl.Confirmation())
             {
-                var guid = ((KontaktListViewModelEntry)((Button)sender).DataContext).Guid;
+                var guid = ((KontaktListViewModelEntry)((Button)sender).DataContext).Entity.PersonId;
 
                 ViewModel.Kontakte.Value = ViewModel.Kontakte.Value
-                    .Where(k => guid != k.Guid).ToImmutableList();
+                    .Where(k => guid != k.Entity.PersonId).ToImmutableList();
 
                 if (VertragGuid != Guid.Empty)
                 {
