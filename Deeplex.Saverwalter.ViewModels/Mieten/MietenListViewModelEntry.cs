@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
         public DateTime Zahlungsdatum => Entity.Zahlungsdatum;
-        public DateTimeOffset Monat
+        public DateTimeOffset BetreffenderMonat
         {
             get => Entity.BetreffenderMonat;
             set
@@ -64,7 +64,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             switch (e.PropertyName)
             {
-                case nameof(Monat):
+                case nameof(BetreffenderMonat):
                 case nameof(Betrag):
                 case nameof(Notiz):
                     break;

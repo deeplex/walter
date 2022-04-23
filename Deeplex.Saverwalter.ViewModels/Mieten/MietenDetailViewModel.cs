@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.ViewModels
             get => Entity.Betrag ?? 0;
             set
             {
-                var val = Double.IsNaN(value) ? 0 : value;
+                var val = double.IsNaN(value) ? 0 : value;
                 var old = Entity.Betrag;
                 Entity.Betrag = val;
                 RaisePropertyChangedAuto(old, val);

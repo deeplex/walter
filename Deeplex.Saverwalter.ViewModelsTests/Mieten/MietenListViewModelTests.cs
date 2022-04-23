@@ -4,13 +4,13 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
 {
     public class MietenListViewModelTests
     {
-        [Fact()]
-        public void MietenListViewModelTest()
+        [Fact(Skip = "TODO Mock impl, avm")]
+        public void MietenListEntryTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            // var stub = new MietenListViewModel(new Guid(), guid, avm);
         }
 
-        [Fact()]
+        [Fact(Skip = "Stub MietenListViewModel first")]
         public void AddToListTest()
         {
             Assert.True(false, "This test needs an implementation");

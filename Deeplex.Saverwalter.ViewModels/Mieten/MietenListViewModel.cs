@@ -8,8 +8,7 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class MietenListViewModel : BindableBase
     {
-        public ObservableProperty<ImmutableList<MietenListViewModelEntry>> Liste
-            = new ObservableProperty<ImmutableList<MietenListViewModelEntry>>();
+        public ObservableProperty<ImmutableList<MietenListViewModelEntry>> Liste = new();
         public Guid VertragId;
 
         public AppViewModel Avm;
