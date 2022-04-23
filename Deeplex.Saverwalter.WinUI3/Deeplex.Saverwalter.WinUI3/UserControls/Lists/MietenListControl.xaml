@@ -50,7 +50,7 @@
                                     <DataTemplate x:DataType="vm:MietenListViewModelEntry">
                                         <DatePicker
                                             Language="de"
-                                            SelectedDate="{x:Bind Monat, Mode=TwoWay}"
+                                            SelectedDate="{x:Bind BetreffenderMonat, Mode=TwoWay}"
                                             DayVisible="False"/>
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>

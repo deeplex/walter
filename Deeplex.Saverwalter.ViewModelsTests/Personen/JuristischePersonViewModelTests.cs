@@ -1,5 +1,4 @@
-﻿using Deeplex.Saverwalter.ViewModels;
-using Xunit;
+﻿using Xunit;
 
 namespace Deeplex.Saverwalter.ViewModels.Tests
 {

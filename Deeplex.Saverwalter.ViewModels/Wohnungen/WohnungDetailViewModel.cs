@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.ViewModels
             get => mBesitzer;
             set
             {
-                Entity.BesitzerId = value == null ? Guid.Empty : value.Guid;
+                Entity.BesitzerId = value == null ? Guid.Empty : value.Entity.PersonId;
                 mBesitzer = value;
                 RaisePropertyChangedAuto();
             }
@@ -119,7 +119,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (w.BesitzerId != Guid.Empty)
             {
-                Besitzer = AlleVermieter.SingleOrDefault(e => e.Guid == w.BesitzerId);
+                Besitzer = AlleVermieter.SingleOrDefault(e => e.Entity.PersonId == w.BesitzerId);
             }
 
             PropertyChanged += OnUpdate;

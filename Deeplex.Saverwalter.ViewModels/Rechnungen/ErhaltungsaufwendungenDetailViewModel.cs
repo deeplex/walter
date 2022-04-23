@@ -33,10 +33,10 @@ namespace Deeplex.Saverwalter.ViewModels
             set
             {
                 mAussteller = Personen.Value
-                    .SingleOrDefault(e => e.Guid == value?.Guid);
+                    .SingleOrDefault(e => e.Entity.PersonId == value?.Entity.PersonId);
                 var old = Entity.AusstellerId;
-                Entity.AusstellerId = value?.Guid ?? Guid.Empty;
-                RaisePropertyChangedAuto(old, value?.Guid);
+                Entity.AusstellerId = value?.Entity.PersonId ?? Guid.Empty;
+                RaisePropertyChangedAuto(old, value?.Entity.PersonId);
             }
         }
 
@@ -128,7 +128,7 @@ namespace Deeplex.Saverwalter.ViewModels
                     .Select(k => new KontaktListViewModelEntry(k))
                     .ToList())
                     .ToImmutableList();
-            Aussteller = Personen.Value.SingleOrDefault(s => s.Guid == e.AusstellerId);
+            Aussteller = Personen.Value.SingleOrDefault(s => s.Entity.PersonId == e.AusstellerId);
 
             PropertyChanged += OnUpdate;
             AttachFile = new AsyncRelayCommand(async _ =>

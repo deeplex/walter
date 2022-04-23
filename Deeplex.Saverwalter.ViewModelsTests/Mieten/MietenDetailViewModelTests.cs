@@ -1,7 +1,7 @@
-﻿using Xunit;
+﻿using Deeplex.Saverwalter.Model;
 using FluentAssertions;
-using Deeplex.Saverwalter.Model;
 using System;
+using Xunit;
 
 namespace Deeplex.Saverwalter.ViewModels.Tests
 {
@@ -15,14 +15,14 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
             stub.Should().BeOfType(typeof(MietenDetailViewModel));
 
             stub.Entity.Should().BeOfType(typeof(Miete));
-            
+
             stub.Betrag.Should().Be(0);
             stub.BetreffenderMonat.Should().BeSameDateAs(DateTime.Now.AsUtcKind());
             stub.Zahlungsdatum.Should().BeSameDateAs(DateTime.Now.AsUtcKind());
             stub.Notiz.Should().BeNull();
             stub.VertragId.Should().Be(Guid.Empty);
         }
-        
+
         [Theory]
         [InlineData(100, "June 06, 2015", "Jan 15, 2016", "Dies ist eine Notiz")]
         [InlineData(0, "December 31, 3000", "Jan 15, 1000", "")]
