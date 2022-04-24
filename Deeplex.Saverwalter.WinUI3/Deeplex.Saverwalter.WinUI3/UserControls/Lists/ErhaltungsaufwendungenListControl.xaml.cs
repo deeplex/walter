@@ -146,7 +146,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungenListViewModelEntry entry)
             {
                 var a = entry.Entity;
-                App.Window.ListAnhang.Value = new AnhangListViewModel(a, App.Impl, App.WalterService);
+                App.Window.ListAnhang.Value = new AnhangListViewModel(a, App.FileService, App.NotificationService, App.WalterService);
             }
             else
             {

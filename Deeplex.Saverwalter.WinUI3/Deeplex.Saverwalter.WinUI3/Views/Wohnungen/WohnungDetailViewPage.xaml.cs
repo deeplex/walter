@@ -23,22 +23,22 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is Wohnung wohnung)
             {
-                ViewModel = new WohnungDetailViewModel(wohnung, App.Impl, App.WalterService);
+                ViewModel = new WohnungDetailViewModel(wohnung, App.NotificationService, App.WalterService);
             }
             else if (e.Parameter is null) // New Wohnung
             {
-                ViewModel = new WohnungDetailViewModel(App.Impl, App.WalterService);
+                ViewModel = new WohnungDetailViewModel(App.NotificationService, App.WalterService);
             }
 
             AddZaehler_Click = () =>
             {
-                var vm = new ZaehlerDetailViewModel(new Zaehler() { WohnungId = ViewModel.Id }, App.Impl, App.WalterService);
+                var vm = new ZaehlerDetailViewModel(new Zaehler() { WohnungId = ViewModel.Id }, App.NotificationService, App.WalterService);
                 App.Window.Navigate(typeof(ZaehlerDetailViewPage), vm);
             };
 
             AddVertrag_Click = () =>
             {
-                var vm = new VertragDetailViewModel(App.Impl, App.WalterService);
+                var vm = new VertragDetailViewModel(App.NotificationService, App.WalterService);
                 vm.Wohnung = vm.AlleWohnungen.First(v => v.Entity.WohnungId == ViewModel.Id);
                 App.Window.Navigate(typeof(VertragDetailViewPage), vm);
             };
@@ -55,7 +55,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                     Wohnung = ViewModel.Entity,
                     Rechnung = r,
                 });
-                var vm = new BetriebskostenrechnungDetailViewModel(r, App.Impl, App.WalterService);
+                var vm = new BetriebskostenrechnungDetailViewModel(r, App.NotificationService, App.WalterService);
                 App.Window.Navigate(typeof(BetriebskostenrechnungenDetailViewPage), vm);
             };
 
@@ -67,7 +67,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                     Datum = DateTime.Now,
                 };
 
-                var vm = new ErhaltungsaufwendungenDetailViewModel(r, App.Impl, App.WalterService);
+                var vm = new ErhaltungsaufwendungenDetailViewModel(r, App.NotificationService, App.WalterService);
                 App.Window.Navigate(typeof(ErhaltungsaufwendungenDetailViewPage), vm);
             };
 

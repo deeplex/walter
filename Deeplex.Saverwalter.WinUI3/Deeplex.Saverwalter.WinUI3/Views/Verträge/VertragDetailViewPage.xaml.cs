@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is Guid vertragId)
             {
-                ViewModel = new VertragDetailViewModel(vertragId, App.Impl, App.WalterService);
+                ViewModel = new VertragDetailViewModel(vertragId, App.NotificationService, App.WalterService);
             }
             else if (e.Parameter is VertragDetailViewModel vm)
             {
@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             }
             else
             {
-                ViewModel = new VertragDetailViewModel(App.Impl, App.WalterService);
+                ViewModel = new VertragDetailViewModel(App.NotificationService, App.WalterService);
             }
 
             App.Window.CommandBar.MainContent = new UserControls.VertragCommandBarControl() { ViewModel = ViewModel };

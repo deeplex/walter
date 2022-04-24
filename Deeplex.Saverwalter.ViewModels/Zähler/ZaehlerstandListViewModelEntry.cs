@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity = z;
             Delete = new AsyncRelayCommand(async _ =>
             {
-                if (await vm.Impl.Confirmation())
+                if (await vm.NotificationService.Confirmation())
                 {
                     vm.Db.ctx.Zaehlerstaende.Remove(Entity);
                     vm.Db.SaveWalter();

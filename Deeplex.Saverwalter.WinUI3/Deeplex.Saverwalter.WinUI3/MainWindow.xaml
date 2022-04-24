@@ -10,7 +10,7 @@
     xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
     mc:Ignorable="d">
 
-    <Grid x:Name="root" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid x:Name="MainGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <NavigationView
             PaneDisplayMode="Left"
             x:Name="NavView"

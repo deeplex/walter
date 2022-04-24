@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public async Task selfDestruct()
         {
-            if (await Impl.Confirmation())
+            if (await NotificationService.Confirmation())
             {
                 Db.ctx.Erhaltungsaufwendungen.Remove(Entity);
                 Db.SaveWalter();
@@ -106,14 +106,14 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
         private IWalterDbService Db;
-        private IAppImplementation Impl;
+        private INotificationService NotificationService;
 
-        public ErhaltungsaufwendungenDetailViewModel(IAppImplementation impl, IWalterDbService db) : this(new Erhaltungsaufwendung(), impl, db) { }
-        public ErhaltungsaufwendungenDetailViewModel(Erhaltungsaufwendung e, IAppImplementation impl, IWalterDbService db)
+        public ErhaltungsaufwendungenDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Erhaltungsaufwendung(), ns, db) { }
+        public ErhaltungsaufwendungenDetailViewModel(Erhaltungsaufwendung e, INotificationService ns, IWalterDbService db)
         {
             Entity = e;
             Db = db;
-            Impl = impl;
+            NotificationService = ns;
 
             Wohnungen = Db.ctx.Wohnungen
                 .Include(w => w.Adresse)

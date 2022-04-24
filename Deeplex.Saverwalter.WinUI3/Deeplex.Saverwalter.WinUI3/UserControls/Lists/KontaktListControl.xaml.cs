@@ -166,7 +166,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private async void RemovePerson_Click(object sender, RoutedEventArgs e)
         {
-            if (await App.Impl.Confirmation())
+            if (await App.NotificationService.Confirmation())
             {
                 var guid = ((KontaktListViewModelEntry)((Button)sender).DataContext).Entity.PersonId;
 
@@ -196,11 +196,11 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             var a = ((KontaktListViewModelEntry)((DataGrid)sender).SelectedItem)?.Entity;
             if (a is NatuerlichePerson n)
             {
-                App.Window.ListAnhang.Value = new AnhangListViewModel(n, App.Impl, App.WalterService);
+                App.Window.ListAnhang.Value = new AnhangListViewModel(n, App.FileService, App.NotificationService, App.WalterService);
             }
             else if (a is JuristischePerson j)
             {
-                App.Window.ListAnhang.Value = new AnhangListViewModel(j, App.Impl, App.WalterService);
+                App.Window.ListAnhang.Value = new AnhangListViewModel(j, App.FileService, App.NotificationService, App.WalterService);
             }
         }
 

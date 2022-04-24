@@ -13,14 +13,14 @@ namespace Deeplex.Saverwalter.ViewModels
             = new ObservableProperty<ImmutableList<MietminderungListViewModelEntry>>();
         public Guid VertragId;
 
-        public IAppImplementation Impl;
         public IWalterDbService Db;
+        public INotificationService NotificationService;
 
-        public MietMinderungListViewModel(Guid VertragGuid, IAppImplementation impl, IWalterDbService db)
+        public MietMinderungListViewModel(Guid VertragGuid, INotificationService ns, IWalterDbService db)
         {
             VertragId = VertragGuid;
             var self = this;
-            Impl = impl;
+            NotificationService = ns;
             Db = db;
 
             Liste.Value = Db.ctx.MietMinderungen

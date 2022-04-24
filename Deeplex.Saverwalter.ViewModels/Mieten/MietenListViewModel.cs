@@ -13,13 +13,12 @@ namespace Deeplex.Saverwalter.ViewModels
         public Guid VertragId;
 
         public IWalterDbService Db;
-        public IAppImplementation Impl;
+        public INotificationService NotificationService;
 
-        public MietenListViewModel(Guid VertragGuid, IAppImplementation impl, IWalterDbService db)
+        public MietenListViewModel(Guid VertragGuid, INotificationService ns, IWalterDbService db)
         {
             VertragId = VertragGuid;
             Db = db;
-            Impl = impl;
             var self = this;
             Liste.Value = Db.ctx.Mieten
                 .Where(m => m.VertragId == VertragGuid)

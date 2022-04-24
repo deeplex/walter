@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is Zaehler zaehler)
             {
-                ViewModel = new ZaehlerDetailViewModel(zaehler, App.Impl, App.WalterService);
+                ViewModel = new ZaehlerDetailViewModel(zaehler, App.NotificationService, App.WalterService);
                 App.Window.Titel.Value = ViewModel.Kennnummer;
             }
             else if (e.Parameter is ZaehlerDetailViewModel vm)
@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             }
             else if (e.Parameter is null) // New Zaehler
             {
-                ViewModel = new ZaehlerDetailViewModel(App.Impl, App.WalterService);
+                ViewModel = new ZaehlerDetailViewModel(App.NotificationService, App.WalterService);
             }
 
             App.Window.CommandBar.MainContent = new ZaehlerCommandBarControl { ViewModel = ViewModel };

@@ -43,25 +43,25 @@ namespace Deeplex.Saverwalter.ViewModels
         public int StartJahr => Versionen.Value.Last().Beginn.Year;
         public int EndeJahr => Versionen.Value.First().Ende?.Year ?? 9999;
 
-        public VertragDetailViewModel(IAppImplementation impl, IWalterDbService db) : this(new List<Vertrag>
-            { new Vertrag { Beginn = DateTime.UtcNow.Date, } }, impl, db)
+        public VertragDetailViewModel(INotificationService ns, IWalterDbService db) : this(
+            new List<Vertrag> { new Vertrag { Beginn = DateTime.UtcNow.Date, } }, ns, db)
         { }
 
-        public VertragDetailViewModel(Guid id, IAppImplementation impl, IWalterDbService db)
+        public VertragDetailViewModel(Guid id, INotificationService ns, IWalterDbService db)
             : this(db.ctx.Vertraege
                   .Where(v => v.VertragId == id)
                   .Include(v => v.Wohnung)
                   .ToList()
                   .OrderBy(v => v.Version)
                   .Reverse()
-                  .ToList(), impl, db)
+                  .ToList(), ns, db)
         { }
 
-        public VertragDetailViewModel(List<Vertrag> v, IAppImplementation impl, IWalterDbService db) : base(v.OrderBy(vs => vs.Version).Last(), impl, db)
+        public VertragDetailViewModel(List<Vertrag> v, INotificationService ns, IWalterDbService db) : base(v.OrderBy(vs => vs.Version).Last(), ns, db)
         {
             guid = v.First().VertragId;
 
-            Versionen.Value = v.Select(vs => new VertragDetailViewModelVersion(vs, impl, db)).ToImmutableList();
+            Versionen.Value = v.Select(vs => new VertragDetailViewModelVersion(vs, ns, db)).ToImmutableList();
 
             AlleWohnungen = db.ctx.Wohnungen.Select(w => new WohnungListViewModelEntry(w, db)).ToList();
             Wohnung = AlleWohnungen.Find(w => w.Id == v.First().WohnungId);
@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.ViewModels
                     Personenzahl = Personenzahl,
                     //KaltMiete = KaltMiete, TODO
                 };
-                var nv = new VertragDetailViewModelVersion(entity, impl, db);
+                var nv = new VertragDetailViewModelVersion(entity, ns, db);
                 Versionen.Value = Versionen.Value.Insert(0, nv);
                 db.ctx.Vertraege.Add(entity);
                 db.SaveWalter();
@@ -109,7 +109,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             RemoveVersion = new AsyncRelayCommand(async _ =>
             {
-                if (await impl.Confirmation())
+                if (await NotificationService.Confirmation())
                 {
                     var vs = Versionen.Value.First().Entity;
                     db.ctx.Vertraege.Remove(vs);
@@ -127,7 +127,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public async Task SelfDestruct()
         {
-            if (await Impl.Confirmation())
+            if (await NotificationService.Confirmation())
             {
                 Versionen.Value.ForEach(v =>
                 {

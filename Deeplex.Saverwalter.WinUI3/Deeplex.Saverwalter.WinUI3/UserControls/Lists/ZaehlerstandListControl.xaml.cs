@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             InitializeComponent();
             RegisterPropertyChangedCallback(ZaehlerIdProperty, (ZaehlerIdDepObject, ZaehlerIdProp) =>
             {
-                ViewModel.Value = new ZaehlerstandListViewModel(App.WalterService.ctx.ZaehlerSet.Find(ZaehlerId), App.Impl, App.WalterService);
+                ViewModel.Value = new ZaehlerstandListViewModel(App.WalterService.ctx.ZaehlerSet.Find(ZaehlerId), App.NotificationService, App.WalterService);
                 ViewModel.Value.Liste.Value = ViewModel.Value.Liste.Value.OrderBy(v => v.Datum).ToImmutableList();
             });
 
@@ -59,7 +59,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         {
             if (((DataGrid)sender).SelectedItem is ZaehlerstandListViewModelEntry m)
             {
-                App.Window.ListAnhang.Value = new AnhangListViewModel(m.Entity, App.Impl, App.WalterService);
+                App.Window.ListAnhang.Value = new AnhangListViewModel(m.Entity, App.FileService, App.NotificationService, App.WalterService);
             }
             else
             {

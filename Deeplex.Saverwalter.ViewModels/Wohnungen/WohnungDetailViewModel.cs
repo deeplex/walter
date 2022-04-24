@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public async Task selfDestruct()
         {
-            if (await Impl.Confirmation())
+            if (await NotificationService.Confirmation())
             {
                 Db.ctx.Wohnungen.Remove(Entity);
                 Db.SaveWalter();
@@ -101,16 +101,16 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        private IAppImplementation Impl;
+        private INotificationService NotificationService;
         private IWalterDbService Db;
         public RelayCommand RemoveBesitzer;
 
-        public WohnungDetailViewModel(IAppImplementation impl, IWalterDbService db) : this(new Wohnung(), impl, db) { }
-        public WohnungDetailViewModel(Wohnung w, IAppImplementation impl, IWalterDbService db)
+        public WohnungDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Wohnung(), ns, db) { }
+        public WohnungDetailViewModel(Wohnung w, INotificationService ns, IWalterDbService db)
         {
             Entity = w;
             Db = db;
-            Impl = impl;
+            NotificationService = ns;
 
             AlleVermieter = Db.ctx.JuristischePersonen.ToImmutableList()
                 .Where(j => j.isVermieter == true).Select(j => new KontaktListViewModelEntry(j))

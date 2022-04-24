@@ -96,13 +96,13 @@ namespace Deeplex.Saverwalter.ViewModels
         // Necessary to show / hide Zählerstände
         public bool Initialized => Entity.ZaehlerId != 0;
 
-        private IAppImplementation Impl;
+        private INotificationService NotificationService;
         private IWalterDbService Db;
 
-        public ZaehlerDetailViewModel(IAppImplementation ctx, IWalterDbService db) : this(new Zaehler(), ctx, db) { }
-        public ZaehlerDetailViewModel(Zaehler z, IAppImplementation impl, IWalterDbService db)
+        public ZaehlerDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Zaehler(), ns, db) { }
+        public ZaehlerDetailViewModel(Zaehler z, INotificationService ns, IWalterDbService db)
         {
-            Impl = impl;
+            NotificationService = ns;
             Db = db;
             Entity = z;
             mId = Entity.ZaehlerId;
@@ -121,7 +121,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (mId != 0)
             {
-                Staende.Value = new ZaehlerstandListViewModel(z, Impl, Db);
+                Staende.Value = new ZaehlerstandListViewModel(z, NotificationService, Db);
                 Wohnung = Wohnungen.Find(w => w.Id == z.WohnungId);
             }
 
@@ -136,7 +136,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public async Task SelfDestruct()
         {
-            if (await Impl.Confirmation())
+            if (await NotificationService.Confirmation())
             {
                 Entity.Staende.ForEach(s => Db.ctx.Zaehlerstaende.Remove(s));
                 Db.ctx.ZaehlerSet.Remove(Entity);
@@ -174,7 +174,7 @@ namespace Deeplex.Saverwalter.ViewModels
             if (mId != Entity.ZaehlerId)
             {
                 Id = Entity.ZaehlerId;
-                Staende.Value = new ZaehlerstandListViewModel(Entity, Impl, Db);
+                Staende.Value = new ZaehlerstandListViewModel(Entity, NotificationService, Db);
             }
         }
     }

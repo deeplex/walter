@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public string Anmerkung => Betriebskostenabrechnung.Anmerkung();
 
         public AsyncRelayCommand Print;
-        public BetriebskostenrechnungPrintViewModel(Vertrag v, IWalterDbService db, IAppImplementation impl)
+        public BetriebskostenrechnungPrintViewModel(Vertrag v, IWalterDbService db, IFileService fs)
         {
             Entity = v;
             Jahr.Value = DateTime.Now.Year - 1;
@@ -53,12 +53,12 @@ namespace Deeplex.Saverwalter.ViewModels
                 try
                 {
                     await Files.PrintBetriebskostenabrechnung(
-                        Entity, Jahr.Value, db, impl);
+                        Entity, Jahr.Value, db, fs);
                 }
                 catch (Exception ex)
                 {
-                    // TODO Better error handling
-                    impl.ShowAlert(ex.Message);
+                    // TODO Show that on call
+                    // impl.ShowAlert(ex.Message);
                 }
             }, _ => true);
         }

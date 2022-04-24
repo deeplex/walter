@@ -16,29 +16,30 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public async Task LoadDatabase()
         {
-            rootPath.Value = await Impl.pickFile();
+            rootPath.Value = await FileService.pickFile();
             Db.root = Path.Combine(Path.GetDirectoryName(rootPath.Value), Path.GetFileNameWithoutExtension(rootPath.Value));
-            await Db.initializeDatabase(Impl);
+            // TODO this has to be implemented somehow.
+            //await App.initializeDatabase(Impl);
         }
 
 
         public RelayCommand LoadAdressen;
         public RelayCommand LoadAnhaenge;
 
-        public IAppImplementation Impl;
+        public IFileService FileService;
         public IWalterDbService Db;
 
-        public SettingsViewModel(IAppImplementation impl, IWalterDbService db)
+        public SettingsViewModel(IFileService fs, INotificationService ns, IWalterDbService db)
         {
             try
             {
-                Impl = impl;
+                FileService = fs;
                 Db = db;
                 rootPath.Value = db.root;
 
                 LoadAnhaenge = new RelayCommand(_ =>
                 {
-                    Anhaenge.Value = new AnhangListViewModel(Impl, Db);
+                    Anhaenge.Value = new AnhangListViewModel(fs, ns, Db);
                 }, _ => true);
                 LoadAdressen = new RelayCommand(_ =>
                 {
@@ -47,7 +48,8 @@ namespace Deeplex.Saverwalter.ViewModels
             }
             catch (Exception e)
             {
-                impl.ShowAlert(e.Message);
+                // TODO
+                //impl.ShowAlert(e.Message);
             }
         }
     }

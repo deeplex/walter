@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             try
             {
-                if (await Container.Impl.Confirmation())
+                if (await Container.NotificationService.Confirmation())
                 {
                     ctx.Anhaenge.Remove(Entity);
                     Container.Db.SaveWalter();
@@ -66,7 +66,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
             catch (Exception e)
             {
-                Container.Impl.ShowAlert(e.Message);
+                Container.NotificationService.ShowAlert(e.Message);
             }
         }
 
@@ -74,11 +74,11 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             try
             {
-                Container.Impl.launchFile(Entity);
+                Container.fs.launchFile(Entity);
             }
             catch (Exception e)
             {
-                Container.Impl.ShowAlert(e.Message);
+                Container.NotificationService.ShowAlert(e.Message);
             }
 
         }

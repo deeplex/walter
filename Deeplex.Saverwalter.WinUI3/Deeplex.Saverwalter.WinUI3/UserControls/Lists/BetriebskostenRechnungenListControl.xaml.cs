@@ -173,7 +173,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         {
             if (((DataGrid)sender)?.SelectedItem is BetriebskostenRechnungenListEntry r)
             {
-                App.Window.ListAnhang.Value = new AnhangListViewModel(r.Entity, App.Impl, App.WalterService);
+                App.Window.ListAnhang.Value = new AnhangListViewModel(r.Entity, App.FileService, App.NotificationService, App.WalterService);
             }
         }
 

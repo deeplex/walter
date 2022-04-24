@@ -19,10 +19,10 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public async void selfDestruct()
         {
-            if (await Impl.Confirmation())
+            if (await NotificationService.Confirmation())
             {
-                Avm.ctx.NatuerlichePersonen.Remove(Entity);
-                Avm.SaveWalter();
+                Db.ctx.NatuerlichePersonen.Remove(Entity);
+                Db.SaveWalter();
             }
         }
 
@@ -75,23 +75,23 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void UpdateListen()
         {
-            JuristischePersonen.Value = Avm.ctx.JuristischePersonenMitglieder
+            JuristischePersonen.Value = Db.ctx.JuristischePersonenMitglieder
                 .Include(w => w.JuristischePerson)
                 .Where(w => w.PersonId == Entity.PersonId)
-                .Select(w => new KontaktListViewModelEntry(w.JuristischePerson.PersonId, Avm))
+                .Select(w => new KontaktListViewModelEntry(w.JuristischePerson.PersonId, Db))
                 .ToImmutableList();
 
-            Wohnungen.Value = Avm.ctx.Wohnungen
+            Wohnungen.Value = Db.ctx.Wohnungen
                 .ToList()
                 .Where(w => w.BesitzerId == Entity.PersonId ||
                     (WohnungenInklusiveJurPers && JuristischePersonen.Value.Any(m => m.Entity.PersonId == w.BesitzerId)))
-                .Select(w => new WohnungListViewModelEntry(w, Avm))
+                .Select(w => new WohnungListViewModelEntry(w, Db))
                 .ToImmutableList();
         }
 
-        public NatuerlichePersonViewModel(int id, IAppImplementation impl, IWalterDbService db) : this(db.ctx.NatuerlichePersonen.Find(id), impl, db) { }
-        public NatuerlichePersonViewModel(IAppImplementation impl, IWalterDbService db) : this(new NatuerlichePerson(), impl, db) { }
-        public NatuerlichePersonViewModel(NatuerlichePerson k, IAppImplementation impl, IWalterDbService db) : base(impl, db)
+        public NatuerlichePersonViewModel(int id, INotificationService ns, IWalterDbService db) : this(db.ctx.NatuerlichePersonen.Find(id), ns, db) { }
+        public NatuerlichePersonViewModel(INotificationService ns, IWalterDbService db) : this(new NatuerlichePerson(), ns, db) { }
+        public NatuerlichePersonViewModel(NatuerlichePerson k, INotificationService ns, IWalterDbService db) : base(ns, db)
         {
             base.Entity = k;
             Id = k.NatuerlichePersonId;
@@ -129,13 +129,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.NatuerlichePersonId != 0)
             {
-                Avm.ctx.NatuerlichePersonen.Update(Entity);
+                Db.ctx.NatuerlichePersonen.Update(Entity);
             }
             else
             {
-                Avm.ctx.NatuerlichePersonen.Add(Entity);
+                Db.ctx.NatuerlichePersonen.Add(Entity);
             }
-            Avm.SaveWalter();
+            Db.SaveWalter();
         }
     }
 }

@@ -111,16 +111,16 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
         protected IWalterDbService Db;
-        protected IAppImplementation Impl;
+        protected INotificationService NotificationService;
 
         public RelayCommand RemoveDate;
 
-        public VertragDetailViewModelVersion(int id, IAppImplementation impl, IWalterDbService db) : this(db.ctx.Vertraege.Find(id), impl, db) { }
-        public VertragDetailViewModelVersion(Vertrag v, IAppImplementation impl, IWalterDbService db)
+        public VertragDetailViewModelVersion(int id, INotificationService ns, IWalterDbService db) : this(db.ctx.Vertraege.Find(id), ns, db) { }
+        public VertragDetailViewModelVersion(Vertrag v, INotificationService ns, IWalterDbService db)
         {
             Entity = v;
             Db = db;
-            Impl = impl;
+            NotificationService = ns;
 
             if (v.AnsprechpartnerId != Guid.Empty && v.AnsprechpartnerId != null)
             {

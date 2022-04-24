@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
         {
             if (e.Parameter is int id)
             {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.WalterService.ctx.Erhaltungsaufwendungen.Find(id), App.Impl, App.WalterService);
+                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.WalterService.ctx.Erhaltungsaufwendungen.Find(id), App.NotificationService, App.WalterService);
             }
             else if (e.Parameter is ErhaltungsaufwendungenDetailViewModel vm)
             {
@@ -28,11 +28,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
             }
             else if (e.Parameter is Erhaltungsaufwendung r)
             {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel(r, App.Impl, App.WalterService);
+                ViewModel = new ErhaltungsaufwendungenDetailViewModel(r, App.NotificationService, App.WalterService);
             }
             else if (e.Parameter is null)
             {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.Impl, App.WalterService);
+                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.NotificationService, App.WalterService);
             }
 
             App.Window.CommandBar.MainContent = new ErhaltungsaufwendungenCommandBarControl { ViewModel = ViewModel };

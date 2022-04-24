@@ -95,7 +95,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var a = ((WohnungListViewModelEntry)((DataGrid)sender).SelectedItem).Entity;
-            App.Window.ListAnhang.Value = new AnhangListViewModel(a, App.Impl, App.WalterService);
+            App.Window.ListAnhang.Value = new AnhangListViewModel(a, App.FileService, App.NotificationService, App.WalterService);
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

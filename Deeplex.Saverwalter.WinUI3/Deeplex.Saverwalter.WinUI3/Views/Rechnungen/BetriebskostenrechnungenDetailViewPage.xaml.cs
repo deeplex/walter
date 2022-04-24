@@ -30,11 +30,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is Tuple<Betriebskostenrechnung, int, List<Wohnung>> t)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(t.Item1, t.Item2, t.Item3, App.Impl, App.WalterService);
+                ViewModel = new BetriebskostenrechnungDetailViewModel(t.Item1, t.Item2, t.Item3, App.NotificationService, App.WalterService);
             }
             else if (e.Parameter is Tuple<Betriebskostenrechnung, int> u)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(u.Item1, u.Item2, App.Impl, App.WalterService);
+                ViewModel = new BetriebskostenrechnungDetailViewModel(u.Item1, u.Item2, App.NotificationService, App.WalterService);
             }
             else if (e.Parameter is BetriebskostenrechnungDetailViewModel vm)
             {
@@ -42,11 +42,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             }
             else if (e.Parameter is Betriebskostenrechnung r)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(r, App.Impl, App.WalterService);
+                ViewModel = new BetriebskostenrechnungDetailViewModel(r, App.NotificationService, App.WalterService);
             }
             else if (e.Parameter is null)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(App.Impl, App.WalterService);
+                ViewModel = new BetriebskostenrechnungDetailViewModel(App.NotificationService, App.WalterService);
             }
 
             base.OnNavigatedTo(e);

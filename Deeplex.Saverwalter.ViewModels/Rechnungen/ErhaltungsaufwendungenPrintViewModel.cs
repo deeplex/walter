@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public IWalterDbService Db { get; }
 
         public AsyncRelayCommand Print;
-        private ErhaltungsaufwendungenPrintViewModel(IWalterDbService db, IAppImplementation impl)
+        private ErhaltungsaufwendungenPrintViewModel(IWalterDbService db, IFileService fs)
         {
             Db = db;
 
@@ -50,11 +50,11 @@ namespace Deeplex.Saverwalter.ViewModels
                 w = w.Concat(ww).ToList();
                 filtered = filtered.Concat(filterered).ToList();
 
-                await Utils.Files.PrintErhaltungsaufwendungen(w, false, Jahr.Value, db, impl, filtered);
+                await Utils.Files.PrintErhaltungsaufwendungen(w, false, Jahr.Value, db, fs, filtered);
             }, _ => true);
             Jahr.Value = DateTime.Now.Year - 1;
         }
-        public ErhaltungsaufwendungenPrintViewModel(Wohnung w, IWalterDbService db, IAppImplementation impl) : this(db, impl)
+        public ErhaltungsaufwendungenPrintViewModel(Wohnung w, IWalterDbService db, IFileService fs) : this(db, fs)
         {
             var self = this;
 
@@ -64,7 +64,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }.ToImmutableList();
         }
 
-        public ErhaltungsaufwendungenPrintViewModel(IPerson p, IWalterDbService db, IAppImplementation impl, params Guid[] g) : this(db, impl)
+        public ErhaltungsaufwendungenPrintViewModel(IPerson p, IWalterDbService db, IFileService fs, params Guid[] g) : this(db, fs)
         {
             var self = this;
             var Personen = db.ctx.JuristischePersonen
@@ -87,12 +87,12 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Include(j => j.JuristischePerson)
                 .Where(j => j.PersonId == p.PersonId && !g.Contains(j.PersonId))
                 .Select(z => new ErhaltungsaufwendungenPrintViewModel(
-                    z.JuristischePerson, db, impl, g.Append(z.PersonId).ToArray()))
+                    z.JuristischePerson, db, fs, g.Append(z.PersonId).ToArray()))
                 .ToList()
                 .Concat(db.ctx.JuristischePersonenMitglieder
                     .Where(j => j.JuristischePerson.PersonId == p.PersonId && !g.Contains(j.PersonId))
                     .Select(z => new ErhaltungsaufwendungenPrintViewModel(
-                        db.ctx.FindPerson(z.PersonId), db, impl, g.Append(z.PersonId).ToArray()))
+                        db.ctx.FindPerson(z.PersonId), db, fs, g.Append(z.PersonId).ToArray()))
                     .ToList())
                 .ToImmutableList();
         }

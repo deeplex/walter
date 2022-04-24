@@ -21,11 +21,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is JuristischePerson jp)
             {
-                ViewModel = new JuristischePersonViewModel(jp, App.Impl, App.WalterService);
+                ViewModel = new JuristischePersonViewModel(jp, App.NotificationService, App.WalterService);
             }
             else if (e.Parameter is null)
             {
-                ViewModel = new JuristischePersonViewModel(App.Impl, App.WalterService);
+                ViewModel = new JuristischePersonViewModel(App.NotificationService, App.WalterService);
             }
 
             App.Window.CommandBar.MainContent = new JuristischePersonCommandBarControl { ViewModel = ViewModel };

@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             SelfDestruct = new AsyncRelayCommand(async _ =>
             {
-                if (await vm.Impl.Confirmation())
+                if (await vm.NotificationService.Confirmation())
                 {
                     vm.Liste.Value = vm.Liste.Value.Remove(this);
                     vm.Db.ctx.Mieten.Remove(Entity);

@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
 {
     public static class Files
     {
-        public static void ConnectAnhangToEntity<T, U>(DbSet<T> Set, U target, List<Anhang> files, IAppImplementation impl, Services.IWalterDbService db) where T : class, IAnhang<U>, new()
+        public static void ConnectAnhangToEntity<T, U>(DbSet<T> Set, U target, List<Anhang> files, IWalterDbService db) where T : class, IAnhang<U>, new()
         {
             foreach (var file in files)
             {
@@ -73,7 +73,7 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             }
         }
 
-        public static async Task PrintBetriebskostenabrechnung(Vertrag v, int Jahr, Services.IWalterDbService db, IAppImplementation impl)
+        public static async Task<string> PrintBetriebskostenabrechnung(Vertrag v, int Jahr, IWalterDbService db, IFileService fs)
         {
             var b = new Betriebskostenabrechnung(db.ctx, v.rowid, Jahr, new DateTime(Jahr, 1, 1), new DateTime(Jahr, 12, 31));
 
@@ -82,25 +82,27 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
                 .Select(a => db.ctx.FindPerson(a.PersonId).Bezeichnung));
 
             var filename = Jahr.ToString() + " - " + v.Wohnung.ToString() + " - " + AuflistungMieter;
-            var path = await impl.saveFile(filename, ".docx");
+            var path = await fs.saveFile(filename, new string[] { ".docx" });
 
             b.SaveAsDocx(path);
             b.SaveBetriebskostenabrechnung(path, db);
 
-            impl.ShowAlert("Datei gespeichert unter " + path);
+            // TODO print when called
+            return path;
         }
 
-        public static async Task PrintErhaltungsaufwendungen(Wohnung w, int Jahr, IWalterDbService db, IAppImplementation impl)
+        public static async Task<string> PrintErhaltungsaufwendungen(Wohnung w, int Jahr, IWalterDbService db, IFileService fs)
         {
             var filename = Jahr.ToString() + " - " + AdresseViewModel.Anschrift(w) + " " + w.Bezeichnung;
-            var path = await impl.saveFile(filename, ".docx");
+            var path = await fs.saveFile(filename, new string[] { ".docx" });
 
             var l = new ErhaltungsaufwendungWohnung(db.ctx, w.WohnungId, Jahr);
 
             l.SaveAsDocx(path);
             // TODO Implement saving the Erhaltungsaufwendunganhänge.
 
-            impl.ShowAlert("Datei gespeichert unter " + path);
+            // TODO print when called
+            return path;
         }
 
         public static async Task PrintErhaltungsaufwendungen(
@@ -108,7 +110,7 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             bool extended,
             int Jahr,
             IWalterDbService db,
-            IAppImplementation impl,
+            IFileService fs,
             List<Model.Erhaltungsaufwendung> filter = null)
         {
             var filename = Jahr.ToString() + " - " + Wohnungen.GetWohnungenBezeichnung();
@@ -121,7 +123,7 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
                 filename += " (anteilig)";
             }
 
-            var path = await impl.saveFile(filename, ".docx");
+            var path = await fs.saveFile(filename, new string[] { ".docx" });
 
             if (path == null)
             {
@@ -139,7 +141,8 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             l.SaveAsDocx(path);
             // TODO Implement saving the Erhaltungsaufwendunganhänge.
 
-            impl.ShowAlert("Datei gespeichert unter " + path);
+            // TODO alert when called.
+            //fs.ShowAlert("Datei gespeichert unter " + path);
         }
     }
 }

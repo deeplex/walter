@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
             AddVertrag_Click = () =>
             {
-                var vm = new VertragDetailViewModel(App.Impl, App.WalterService);
+                var vm = new VertragDetailViewModel(App.NotificationService, App.WalterService);
                 if (ViewModel.isMieter)
                 {
                     vm.Mieter.Value = vm.Mieter.Value.Add(new KontaktListViewModelEntry(ViewModel.PersonId, App.WalterService));
@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                 }
                 else
                 {
-                    App.Impl.ShowAlert("Person ist weder Mieter, noch Vermieter.");
+                    App.NotificationService.ShowAlert("Person ist weder Mieter, noch Vermieter.");
                     return;
                 }
                 App.Window.Navigate(typeof(VertragDetailViewPage), vm);

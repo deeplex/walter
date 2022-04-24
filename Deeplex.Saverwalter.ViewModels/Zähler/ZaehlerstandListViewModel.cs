@@ -12,13 +12,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<ImmutableList<ZaehlerstandListViewModelEntry>> Liste = new ObservableProperty<ImmutableList<ZaehlerstandListViewModelEntry>>();
         public int ZaehlerId;
 
-        public Services.IWalterDbService Db;
-        public IAppImplementation Impl;
+        public IWalterDbService Db;
+        public INotificationService NotificationService;
 
-        public ZaehlerstandListViewModel(Zaehler z, IAppImplementation impl, Services.IWalterDbService db)
+        public ZaehlerstandListViewModel(Zaehler z, INotificationService ns, IWalterDbService db)
         {
             ZaehlerId = z.ZaehlerId;
-            Impl = impl;
+            NotificationService = ns;
             Db = db;
             Liste.Value = z.Staende.Select(s => new ZaehlerstandListViewModelEntry(s, this)).ToImmutableList();
         }

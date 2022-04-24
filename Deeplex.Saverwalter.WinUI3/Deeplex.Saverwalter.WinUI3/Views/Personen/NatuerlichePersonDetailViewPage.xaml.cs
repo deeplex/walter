@@ -21,11 +21,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is NatuerlichePerson kontakt)
             {
-                ViewModel = new NatuerlichePersonViewModel(kontakt, App.Impl, App.WalterService);
+                ViewModel = new NatuerlichePersonViewModel(kontakt, App.NotificationService, App.WalterService);
             }
             else if (e.Parameter is null) // New Contact
             {
-                ViewModel = new NatuerlichePersonViewModel(App.Impl, App.WalterService);
+                ViewModel = new NatuerlichePersonViewModel(App.NotificationService, App.WalterService);
             }
 
             App.Window.CommandBar.MainContent = new NatuerlichePersonCommandBarControl { ViewModel = ViewModel };
