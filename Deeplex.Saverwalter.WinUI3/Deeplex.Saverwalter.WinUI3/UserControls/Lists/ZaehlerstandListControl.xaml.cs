@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             InitializeComponent();
             RegisterPropertyChangedCallback(ZaehlerIdProperty, (ZaehlerIdDepObject, ZaehlerIdProp) =>
             {
-                ViewModel.Value = new ZaehlerstandListViewModel(App.Walter.ZaehlerSet.Find(ZaehlerId), App.Impl, App.ViewModel);
+                ViewModel.Value = new ZaehlerstandListViewModel(App.WalterService.ctx.ZaehlerSet.Find(ZaehlerId), App.Impl, App.ViewModel);
                 ViewModel.Value.Liste.Value = ViewModel.Value.Liste.Value.OrderBy(v => v.Datum).ToImmutableList();
             });
 

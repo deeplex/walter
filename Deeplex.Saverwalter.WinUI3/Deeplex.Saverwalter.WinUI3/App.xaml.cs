@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.Utils;
+using Deeplex.SaverWalter.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -11,14 +12,12 @@ using Windows.Storage;
 
 namespace Deeplex.Saverwalter.WinUI3
 {
-    sealed partial class App : Application, IAppImplementation
+    sealed partial class App : Application, IAppImplementationService
     {
         public static MainWindow Window { get; private set; }
         public static AppViewModel ViewModel { get; private set; }
-
-        public static IAppImplementation Impl => Current as IAppImplementation;
-        public static SaverwalterContext Walter => ViewModel.ctx;
-        public static void SaveWalter() => ViewModel.SaveWalter();
+        public static WalterDbService WalterService { get; private set; }
+        public static IAppImplementationService Impl => Current as IAppImplementationService;
 
         public App()
         {
@@ -29,11 +28,11 @@ namespace Deeplex.Saverwalter.WinUI3
         {
             var self = this;
             ViewModel = new AppViewModel(self);
+            WalterService = new WalterDbService(self);
 
             Window = new MainWindow();
             Window.Activate();
         }
-
 
         public async Task<string> saveFile(string filename, string[] ext)
         {
@@ -66,7 +65,7 @@ namespace Deeplex.Saverwalter.WinUI3
         {
             try
             {
-                var path = a.getPath(ViewModel.root);
+                var path = a.getPath(WalterService.root);
                 var file = await StorageFile.GetFileFromPathAsync(path);
                 await Windows.System.Launcher.LaunchFileAsync(file);
             }

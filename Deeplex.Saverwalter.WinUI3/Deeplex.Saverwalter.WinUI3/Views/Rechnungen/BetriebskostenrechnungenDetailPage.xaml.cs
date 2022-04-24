@@ -54,7 +54,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             App.Window.CommandBar.MainContent = new BetriebskostenRechnungenCommandBarControl() { ViewModel = ViewModel };
             App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
 
-            App.Walter.Adressen
+            App.WalterService.ctx.Adressen
                 .Include(i => i.Wohnungen)
                 .ThenInclude(w => w.Betriebskostenrechnungsgruppen)
                 .ToList()

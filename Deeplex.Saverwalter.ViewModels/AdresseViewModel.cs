@@ -2,6 +2,7 @@
 using Deeplex.Utils.ObjectModel;
 using System.Collections.Immutable;
 using System.Linq;
+using static Deeplex.SaverWalter.Services.WalterDbService;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
@@ -20,7 +21,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
 
             if (!IsValid()) return;
-            var adresse = Avm.ctx.Adressen.FirstOrDefault(a =>
+            var adresse = Db.ctx.Adressen.FirstOrDefault(a =>
                 a.Strasse == Strasse && a.Hausnummer == Hausnummer &&
                 a.Postleitzahl == Postleitzahl && a.Stadt == Stadt);
             if (adresse == null)
@@ -33,18 +34,18 @@ namespace Deeplex.Saverwalter.ViewModels
                     Stadt = Stadt,
                 };
                 AlleAdressen = AlleAdressen.Add(adresse);
-                Avm.ctx.Adressen.Add(adresse);
+                Db.ctx.Adressen.Add(adresse);
             }
 
             reference.Adresse = adresse;
             Entity = adresse;
 
             //Check if reference is valid.
-            if (Avm.ctx.Entry(reference).State != Microsoft.EntityFrameworkCore.EntityState.Detached)
+            if (Db.ctx.Entry(reference).State != Microsoft.EntityFrameworkCore.EntityState.Detached)
             {
-                Avm.ctx.Update(reference);
+                Db.ctx.Update(reference);
             }
-            Avm.SaveWalter();
+            Db.SaveWalter();
         }
 
         public override string Hausnummer
@@ -70,7 +71,7 @@ namespace Deeplex.Saverwalter.ViewModels
             set => Update(Entity.Strasse, Entity.Hausnummer, Entity.Postleitzahl, value);
         }
 
-        public AdresseViewModel(T value, AppViewModel Avm) : base(value.Adresse ?? new Adresse(), Avm)
+        public AdresseViewModel(T value, IWalterDbService db) : base(value.Adresse ?? new Adresse(), db)
         {
             reference = value;
         }
@@ -80,7 +81,7 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         protected Adresse Entity { get; set; }
 
-        protected AppViewModel Avm;
+        protected IWalterDbService Db;
 
         protected ImmutableList<Adresse> AlleAdressen;
         public void updateAdressen(string strasse = null, string hausnr = null, string plz = null, string stadt = null)
@@ -147,10 +148,10 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             get
             {
-                var count = Avm.ctx.JuristischePersonen.Count(j => j.Adresse == Entity);
-                count += Avm.ctx.NatuerlichePersonen.Count(n => n.Adresse == Entity);
-                count += Avm.ctx.Wohnungen.Count(w => w.Adresse == Entity);
-                count += Avm.ctx.Garagen.Count(g => g.Adresse == Entity);
+                var count = Db.ctx.JuristischePersonen.Count(j => j.Adresse == Entity);
+                count += Db.ctx.NatuerlichePersonen.Count(n => n.Adresse == Entity);
+                count += Db.ctx.Wohnungen.Count(w => w.Adresse == Entity);
+                count += Db.ctx.Garagen.Count(g => g.Adresse == Entity);
 
                 return count;
             }
@@ -206,18 +207,18 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public AdresseViewModel(Adresse a, AppViewModel avm)
+        public AdresseViewModel(Adresse a, IWalterDbService db)
         {
-            Avm = avm;
+            Db = db;
             Entity = a;
 
-            AlleAdressen = Avm.ctx.Adressen.ToImmutableList();
+            AlleAdressen = Db.ctx.Adressen.ToImmutableList();
             updateAdressen();
 
             Dispose = new RelayCommand(_ =>
             {
-                Avm.ctx.Adressen.Remove(Entity);
-                Avm.SaveWalter();
+                Db.ctx.Adressen.Remove(Entity);
+                Db.SaveWalter();
             });
         }
 
@@ -255,8 +256,8 @@ namespace Deeplex.Saverwalter.ViewModels
                 return;
             }
 
-            Avm.ctx.Adressen.Update(Entity);
-            Avm.SaveWalter();
+            Db.ctx.Adressen.Update(Entity);
+            Db.SaveWalter();
         }
     }
 }

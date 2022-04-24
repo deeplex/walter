@@ -64,7 +64,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             {
                 App.Window.Navigate(
                     typeof(ZaehlerDetailPage),
-                    App.Walter.ZaehlerSet.Find(ViewModel.SelectedZaehler.Id));
+                    App.WalterService.ctx.ZaehlerSet.Find(ViewModel.SelectedZaehler.Id));
             }
         }
 

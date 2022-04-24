@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
             RegisterPropertyChangedCallback(ZaehlerstandListViewModelProperty, (ZaehlerIdDepObject, ZaehlerIdProp) =>
             {
-                ViewModel.Zaehler = App.Walter.ZaehlerSet.Find(ZaehlerstandListViewModel.ZaehlerId);
+                ViewModel.Zaehler = App.WalterService.ctx.ZaehlerSet.Find(ZaehlerstandListViewModel.ZaehlerId);
                 var Last = ViewModel.Zaehler?.Staende.OrderBy(e => e.Datum).LastOrDefault();
                 if (Last == null)
                 {
@@ -40,8 +40,8 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void AddZaehlerstand_Click(object sender, RoutedEventArgs e)
         {
-            App.Walter.Zaehlerstaende.Add(ViewModel.Entity);
-            App.SaveWalter();
+            App.WalterService.ctx.Zaehlerstaende.Add(ViewModel.Entity);
+            App.WalterService.SaveWalter();
             ZaehlerstandListViewModel.AddToList(ViewModel.Entity);
             ViewModel = new ZaehlerstandDetailViewModel()
             {

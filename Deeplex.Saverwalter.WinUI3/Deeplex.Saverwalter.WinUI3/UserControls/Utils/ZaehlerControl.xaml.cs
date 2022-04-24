@@ -18,8 +18,8 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             RegisterPropertyChangedCallback(IdProperty, (idDepObject, idProp) =>
             {
                 ViewModel = Allgemein ?
-                    new ZaehlerViewModel(App.Walter.ZaehlerSet.Find(Id), App.ViewModel) :
-                    new ZaehlerViewModel(App.Walter.ZaehlerSet.Find(Id), App.ViewModel);
+                    new ZaehlerViewModel(App.WalterService.ctx.ZaehlerSet.Find(Id), App.ViewModel) :
+                    new ZaehlerViewModel(App.WalterService.ctx.ZaehlerSet.Find(Id), App.ViewModel);
             });
 
             RegisterPropertyChangedCallback(vmProperty, (vmDepObject, vmProp) =>

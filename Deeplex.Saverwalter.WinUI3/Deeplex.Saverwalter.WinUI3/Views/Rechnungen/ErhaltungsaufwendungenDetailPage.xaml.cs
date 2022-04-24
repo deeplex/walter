@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
         {
             if (e.Parameter is int id)
             {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.Walter.Erhaltungsaufwendungen.Find(id), App.Impl, App.ViewModel);
+                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.WalterService.ctx.Erhaltungsaufwendungen.Find(id), App.Impl, App.ViewModel);
             }
             else if (e.Parameter is ErhaltungsaufwendungenDetailViewModel vm)
             {
@@ -49,8 +49,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
                     Bezeichnung = ViewModel.QuickPerson.Value,
                     isHandwerker = true,
                 };
-                App.Walter.JuristischePersonen.Add(j);
-                App.SaveWalter();
+                App.WalterService.ctx.JuristischePersonen.Add(j);
+                App.WalterService.SaveWalter();
 
                 var kl = new KontaktListViewModelEntry(j);
                 ViewModel.Personen.Value = ViewModel.Personen.Value.Add(kl);

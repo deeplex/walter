@@ -155,7 +155,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                     sk.Type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailPage) :
                     null;
 
-                App.Window.Navigate(target, App.Walter.FindPerson(sk.Entity.PersonId));
+                App.Window.Navigate(target, App.WalterService.ctx.FindPerson(sk.Entity.PersonId));
             }
         }
 
@@ -175,19 +175,19 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
                 if (VertragGuid != Guid.Empty)
                 {
-                    App.Walter.MieterSet
+                    App.WalterService.ctx.MieterSet
                         .Where(m => m.PersonId == guid && m.VertragId == VertragGuid)
-                        .ToList().ForEach(m => App.Walter.MieterSet.Remove(m));
+                        .ToList().ForEach(m => App.WalterService.ctx.MieterSet.Remove(m));
                 }
 
                 if (JuristischePersonId != 0)
                 {
-                    App.Walter.JuristischePersonenMitglieder
+                    App.WalterService.ctx.JuristischePersonenMitglieder
                         .Where(m => m.PersonId == guid && m.JuristischePersonId == JuristischePersonId)
-                        .ToList().ForEach(m => App.Walter.JuristischePersonenMitglieder.Remove(m));
+                        .ToList().ForEach(m => App.WalterService.ctx.JuristischePersonenMitglieder.Remove(m));
                 }
 
-                App.SaveWalter();
+                App.WalterService.SaveWalter();
             }
         }
 
