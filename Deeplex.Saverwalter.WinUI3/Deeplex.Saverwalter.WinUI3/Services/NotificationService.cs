@@ -7,7 +7,7 @@ namespace Deeplex.Saverwalter.WinUI3.Services
 {
     public sealed class NotificationService: INotificationService
     {
-        public void ShowAlert(string text) => ShowAlert(text, text.Length > 20 ? 0 : 500);
+        public void ShowAlert(string text) => ShowAlert(text, text.Length > 20 ? 0 : 3000);
         public void ShowAlert(string text, int ms)
         {
             if (App.Window.Alert == null)

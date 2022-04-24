@@ -72,7 +72,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             };
 
             App.Window.CommandBar.MainContent = new WohnungDetailCommandBarControl { ViewModel = ViewModel };
-            //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
+            App.Window.DetailAnhang.Value = new AnhangListViewModel(ViewModel.Entity, App.FileService, App.NotificationService, App.WalterService);
 
             base.OnNavigatedTo(e);
         }

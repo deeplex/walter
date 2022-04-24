@@ -28,9 +28,9 @@ namespace Deeplex.Saverwalter.WinUI3
 
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
-            WalterService = new WalterDbService();
-            FileService = new FileService(WalterService);
             NotificationService = new NotificationService();
+            WalterService = new WalterDbService(NotificationService);
+            FileService = new FileService(WalterService);
 
             Window = new MainWindow();
             Window.Activate();

@@ -11,20 +11,32 @@ namespace Deeplex.Saverwalter.Services
         SaverwalterContext ctx { get; set; }
         public void SaveWalter();
         string root { get; set; }
+        public INotificationService NotificationService { get; }
     }
 
     public sealed class WalterDbService : IWalterDbService
     {
         public string root { get; set; }
+        public INotificationService NotificationService { get; }
 
         public SaverwalterContext ctx { get; set; }
 
+        public WalterDbService(INotificationService ns)
+        {
+            NotificationService = ns;
+        }
 
         public void SaveWalter()
         {
-            ctx.SaveChanges();
-            // TODO this should have an own Service
-            //Impl.ShowAlert("Gespeichert");
+            try
+            {
+                ctx.SaveChanges();
+                NotificationService.ShowAlert("Gespeichert");
+            }
+            catch (Exception e)
+            {
+                NotificationService.ShowAlert(e.Message);
+            }
         }
     }
 }
