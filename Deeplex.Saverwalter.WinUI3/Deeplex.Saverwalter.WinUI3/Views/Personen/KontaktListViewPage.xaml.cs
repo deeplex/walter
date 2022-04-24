@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         public KontaktListViewPage()
         {
             InitializeComponent();
-            App.Titel.Value = "Kontakte";
+            App.Window.Titel.Value = "Kontakte";
 
             App.Window.CommandBar.MainContent = new KontaktListCommandBarControl { ViewModel = ViewModel };
         }

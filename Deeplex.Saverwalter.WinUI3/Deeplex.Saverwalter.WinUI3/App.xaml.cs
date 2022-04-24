@@ -17,10 +17,6 @@ namespace Deeplex.Saverwalter.WinUI3
     {
         public static MainWindow Window { get; private set; }
         public static WalterDbService WalterService { get; private set; }
-        public static ObservableProperty<string> Titel = new();
-
-        public static AnhangListViewModel ListAnhang { get; private set; }
-        public static AnhangListViewModel DetailAnhang { get; private set; }
 
         public static IAppImplementation Impl => Current as IAppImplementation;
 

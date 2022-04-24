@@ -13,7 +13,6 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public int GetReferences
         {
-
             get
             {
                 var count = ctx.AdresseAnhaenge.Count(j => j.Anhang == Entity);

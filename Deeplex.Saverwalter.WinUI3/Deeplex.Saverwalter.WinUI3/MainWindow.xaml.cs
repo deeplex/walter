@@ -1,9 +1,11 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
+using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Saverwalter.WinUI3.Views;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -20,6 +22,11 @@ namespace Deeplex.Saverwalter.WinUI3
 
         public CommandBarControl CommandBar => commandBar;
         public SplitView SplitView => splitview;
+
+        public ObservableProperty<string> Titel = new();
+        public AutoSuggestListViewModel AutoSuggest { get; private set; }
+        public AnhangListViewModel ListAnhang { get; private set; }
+        public AnhangListViewModel DetailAnhang { get; private set; }
 
         public void Navigate<U>(Type SourcePage, U SendParameter)
         {
@@ -48,6 +55,8 @@ namespace Deeplex.Saverwalter.WinUI3
             {
                 Utils.Elements.SetDatabaseAsDefault();
             }
+
+            AutoSuggest = new AutoSuggestListViewModel(App.WalterService);
         }
 
         public Frame AppFrame => frame;
@@ -125,12 +134,6 @@ namespace Deeplex.Saverwalter.WinUI3
             }
         }
 
-        private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
-        {
-            // TODO
-            //App.ViewModel.updateAutoSuggestEntries(sender.Text);
-        }
-
         private Type GetEntryPage(object Entry)
         {
             return Entry is NatuerlichePerson ? typeof(NatuerlichePersonDetailViewPage) :
@@ -142,13 +145,20 @@ namespace Deeplex.Saverwalter.WinUI3
                 Entry is Erhaltungsaufwendung ? typeof(ErhaltungsaufwendungenDetailViewPage) :
                 null;
         }
+
+        private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            AutoSuggest.update(sender.Text);
+            sender.IsSuggestionListOpen = true;
+        }
+
         private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
             if (args.ChosenSuggestion == null)
             {
                 return;
             }
-            var Entity = (args.ChosenSuggestion as AutoSuggestEntry).Entity;
+            var Entity = (args.ChosenSuggestion as AutoSuggestListViewModelEntry).Entity;
             Navigate(GetEntryPage(Entity), Entity);
             sender.IsSuggestionListOpen = false;
             sender.Text = "";

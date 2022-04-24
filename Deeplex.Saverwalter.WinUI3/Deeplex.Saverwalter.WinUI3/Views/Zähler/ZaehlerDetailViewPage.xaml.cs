@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             if (e.Parameter is Zaehler zaehler)
             {
                 ViewModel = new ZaehlerDetailViewModel(zaehler, App.Impl, App.WalterService);
-                App.Titel.Value = ViewModel.Kennnummer;
+                App.Window.Titel.Value = ViewModel.Kennnummer;
             }
             else if (e.Parameter is ZaehlerDetailViewModel vm)
             {

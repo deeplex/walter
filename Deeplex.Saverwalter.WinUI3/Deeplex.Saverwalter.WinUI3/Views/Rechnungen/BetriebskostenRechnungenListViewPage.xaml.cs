@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         public BetriebskostenRechnungenListViewPage()
         {
             InitializeComponent();
-            App.Titel.Value = "Betriebskostenrechnungen";
+            App.Window.Titel.Value = "Betriebskostenrechnungen";
 
             App.Window.CommandBar.MainContent = new BetriebskostenRechnungenListCommandBarControl { ViewModel = ViewModel };
         }

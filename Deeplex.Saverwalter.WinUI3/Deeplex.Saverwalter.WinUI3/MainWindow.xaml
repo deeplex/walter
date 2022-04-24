@@ -19,20 +19,17 @@
             ItemInvoked="NavView_ItemInvoked"
             BackRequested="NavView_BackRequested"
             IsBackEnabled="{x:Bind AppFrame.CanGoBack, Mode=OneWay}">
-            <!--TODO-->
-            <!--<NavigationView.AutoSuggestBox>
+            <NavigationView.AutoSuggestBox>
                 <AutoSuggestBox
-                    ItemsSource="{x:Bind ViewModel.AutoSuggestEntries.Value, Mode=OneWay}"
+                    ItemsSource="{x:Bind AutoSuggest.Entries.Value, Mode=OneWay}"
                     TextChanged="AutoSuggestBox_TextChanged"
-                    TextMemberPath=""
                     UpdateTextOnSelect="False"
-                    Width="500"
                     BorderThickness="0"
                     QuerySubmitted="AutoSuggestBox_QuerySubmitted"
                     AutoMaximizeSuggestionArea="True"
                     PlaceholderText="Suchen...">
                     <AutoSuggestBox.ItemTemplate>
-                        <DataTemplate x:DataType="vm:AutoSuggestEntry">
+                        <DataTemplate x:DataType="vm:AutoSuggestListViewModelEntry">
                             <StackPanel Orientation="Horizontal" ToolTipService.ToolTip="{x:Bind Bezeichnung}">
                                 <SymbolIcon Symbol="{x:Bind Icon}" Margin="0,0,10,0"/>
                                 <TextBlock Text="{x:Bind Bezeichnung}"/>
@@ -40,7 +37,7 @@
                         </DataTemplate>
                     </AutoSuggestBox.ItemTemplate>
                 </AutoSuggestBox>
-            </NavigationView.AutoSuggestBox>-->
+            </NavigationView.AutoSuggestBox>
             <NavigationView.MenuItems>
                 <NavigationViewItem
                     x:Name="KontaktListMenuItem"
@@ -107,7 +104,7 @@
                     </SplitView.Content>
                     <SplitView.Pane>
                         <ScrollViewer>
-                            <!--TODO-->
+                            <!--TODOANHANG-->
                             <!--<StackPanel>
                                 <uc:AnhangListControl AnhangViewModel="{x:Bind ViewModel.DetailAnhang.Value, Mode=OneWay}"/>
                                 <uc:AnhangListControl List="True"  AnhangViewModel="{x:Bind ViewModel.ListAnhang.Value, Mode=OneWay}"/>
