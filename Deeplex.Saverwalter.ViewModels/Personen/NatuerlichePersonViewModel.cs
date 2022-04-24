@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -88,9 +89,9 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToImmutableList();
         }
 
-        public NatuerlichePersonViewModel(int id, IAppImplementation impl, AppViewModel avm) : this(avm.ctx.NatuerlichePersonen.Find(id), impl, avm) { }
-        public NatuerlichePersonViewModel(IAppImplementation impl, AppViewModel avm) : this(new NatuerlichePerson(), impl, avm) { }
-        public NatuerlichePersonViewModel(NatuerlichePerson k, IAppImplementation impl, AppViewModel avm) : base(impl, avm)
+        public NatuerlichePersonViewModel(int id, IAppImplementation impl, IWalterDbService db) : this(db.ctx.NatuerlichePersonen.Find(id), impl, db) { }
+        public NatuerlichePersonViewModel(IAppImplementation impl, IWalterDbService db) : this(new NatuerlichePerson(), impl, db) { }
+        public NatuerlichePersonViewModel(NatuerlichePerson k, IAppImplementation impl, IWalterDbService db) : base(impl, db)
         {
             Entity = k;
             Id = k.NatuerlichePersonId;

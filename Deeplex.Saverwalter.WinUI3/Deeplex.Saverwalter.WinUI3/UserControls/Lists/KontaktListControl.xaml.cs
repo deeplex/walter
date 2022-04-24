@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public KontaktListControl()
         {
             InitializeComponent();
-            ViewModel = new KontaktListViewModel(App.ViewModel);
+            ViewModel = new KontaktListViewModel(App.WalterService);
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(KontakteProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(VermieterProperty, (DepObj, Prop) => UpdateFilter());
@@ -151,8 +151,8 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             if (sk != null)
             {
                 var target =
-                    sk.Type == typeof(NatuerlichePerson) ? typeof(NatuerlichePersonDetailPage) :
-                    sk.Type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailPage) :
+                    sk.Type == typeof(NatuerlichePerson) ? typeof(NatuerlichePersonDetailViewPage) :
+                    sk.Type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailViewPage) :
                     null;
 
                 App.Window.Navigate(target, App.WalterService.ctx.FindPerson(sk.Entity.PersonId));
@@ -193,15 +193,16 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var a = ((KontaktListViewModelEntry)((DataGrid)sender).SelectedItem)?.Entity;
-            if (a is NatuerlichePerson n)
-            {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(n, App.Impl, App.ViewModel));
-            }
-            else if (a is JuristischePerson j)
-            {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(j, App.Impl, App.ViewModel));
-            }
+            // TODO
+            //var a = ((KontaktListViewModelEntry)((DataGrid)sender).SelectedItem)?.Entity;
+            //if (a is NatuerlichePerson n)
+            //{
+            //    App.ViewModel.updateListAnhang(new AnhangListViewModel(n, App.Impl, App.ViewModel));
+            //}
+            //else if (a is JuristischePerson j)
+            //{
+            //    App.ViewModel.updateListAnhang(new AnhangListViewModel(j, App.Impl, App.ViewModel));
+            //}
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
@@ -15,25 +16,25 @@ namespace Deeplex.Saverwalter.ViewModels
         public string Anschrift => AdresseViewModel.Anschrift(Entity.Wohnung);
         public string AnschriftMitWohnung => Anschrift + ", " + Wohnung.Bezeichnung;
         public Wohnung Wohnung => Entity.Wohnung;
-        public ImmutableList<Guid> Mieter => Avm.ctx.MieterSet
+        public ImmutableList<Guid> Mieter => Db.ctx.MieterSet
                 .Where(w => w.VertragId == Entity.VertragId)
                 .Select(m => m.PersonId).ToImmutableList();
         public DateTime Beginn { get; set; }
         public DateTime? Ende { get; set; }
         public string BeginnString => Beginn.ToString("dd.MM.yyyy");
         public string EndeString => Ende is DateTime e ? e.ToString("dd.MM.yyyy") : "Offen";
-        public string AuflistungMieter => string.Join(", ", Avm.ctx.MieterSet
+        public string AuflistungMieter => string.Join(", ", Db.ctx.MieterSet
             .Where(m => m.VertragId == Entity.VertragId).ToList()
-            .Select(a => Avm.ctx.FindPerson(a.PersonId).Bezeichnung));
+            .Select(a => Db.ctx.FindPerson(a.PersonId).Bezeichnung));
         public bool hasEnde => Ende != null;
-        public string Besitzer => Avm.ctx.FindPerson(Entity.Wohnung.BesitzerId)?.Bezeichnung;
+        public string Besitzer => Db.ctx.FindPerson(Entity.Wohnung.BesitzerId)?.Bezeichnung;
 
         public Vertrag Entity { get; }
-        private AppViewModel Avm;
+        private IWalterDbService Db;
 
-        public VertragListViewModelVertragVersion(Vertrag v, AppViewModel avm)
+        public VertragListViewModelVertragVersion(Vertrag v, IWalterDbService db)
         {
-            Avm = avm;
+            Db = db;
             Entity = v;
 
             Beginn = v.Beginn.AsUtcKind();

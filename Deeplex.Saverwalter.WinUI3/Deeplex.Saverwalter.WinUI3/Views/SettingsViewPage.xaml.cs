@@ -6,11 +6,11 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
 {
-    public sealed partial class SettingsPage : Page
+    public sealed partial class SettingsViewPage : Page
     {
         public SettingsViewModel ViewModel { get; set; }
 
-        public SettingsPage()
+        public SettingsViewPage()
         {
             InitializeComponent();
 
@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewModel = new SettingsViewModel(App.Impl, App.ViewModel);
+            ViewModel = new SettingsViewModel(App.Impl, App.WalterService);
         }
 
         private void Adressen_AutoGeneratingColumn(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridAutoGeneratingColumnEventArgs e)
@@ -45,7 +45,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 if (((Button)sender).Tag is AdresseViewModel vm)
                 {
                     vm.Dispose.Execute(null);
-                    ViewModel.Adressen.Value = App.WalterService.ctx.Adressen.Select(a => new AdresseViewModel(a, App.ViewModel)).ToImmutableList();
+                    ViewModel.Adressen.Value = App.WalterService.ctx.Adressen.Select(a => new AdresseViewModel(a, App.WalterService)).ToImmutableList();
                 }
             }
         }

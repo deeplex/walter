@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
@@ -26,18 +27,18 @@ namespace Deeplex.Saverwalter.ViewModels
         public double AddZaehlerstandStand => Zaehlerstaende.Value.FirstOrDefault()?.Stand ?? 0;
         public void LoadList()
         {
-            Zaehlerstaende.Value = Avm.ctx.Zaehlerstaende.ToList()
+            Zaehlerstaende.Value = Db.ctx.Zaehlerstaende.ToList()
                 .Where(zs => Entity == zs.Zaehler)
                 .OrderBy(zs => zs.Datum).Reverse()
                 .Select(zs => new ZaehlerstandViewModel(zs, this)).ToImmutableList();
         }
 
-        public AppViewModel Avm;
+        public IWalterDbService Db;
 
-        public ZaehlerViewModel(Zaehler z, AppViewModel avm)
+        public ZaehlerViewModel(Zaehler z, IWalterDbService db)
         {
             Zaehler = z;
-            Avm = avm;
+            Db = db;
 
             LoadList();
 

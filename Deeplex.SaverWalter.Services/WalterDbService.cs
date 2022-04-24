@@ -4,24 +4,25 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Deeplex.SaverWalter.Services
+namespace Deeplex.Saverwalter.Services
 {
-    public sealed class WalterDbService
+    public interface IWalterDbService
     {
-        public interface IWalterDbService
-        {
-            SaverwalterContext ctx { get; set; }
-            Task initializeDatabase(IAppImplementationService impl);
-            void SaveWalter();
-        }
+        SaverwalterContext ctx { get; set; }
+        Task initializeDatabase(IAppImplementation impl);
+        public void SaveWalter();
+        string root { get; set; }
+    }
 
+    public sealed class WalterDbService : IWalterDbService
+    {
         public string root { get; set; }
 
-        IAppImplementationService AppImplementation;
+        IAppImplementation AppImplementation;
         public SaverwalterContext ctx { get; set; }
 
 
-        public WalterDbService(IAppImplementationService impl)
+        public WalterDbService(IAppImplementation impl)
         {
             AppImplementation = impl;
         }
@@ -34,7 +35,7 @@ namespace Deeplex.SaverWalter.Services
         }
 
 
-        public async Task initializeDatabase(IAppImplementationService impl)
+        public async Task initializeDatabase(IAppImplementation impl)
         {
             try
             {

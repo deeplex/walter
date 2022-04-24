@@ -6,11 +6,11 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
 {
-    public sealed partial class ErhaltungsaufwendungenPrintPage : Page
+    public sealed partial class ErhaltungsaufwendungenPrintViewPage : Page
     {
         public ErhaltungsaufwendungenPrintViewModel ViewModel { get; set; }
 
-        public ErhaltungsaufwendungenPrintPage()
+        public ErhaltungsaufwendungenPrintViewPage()
         {
             InitializeComponent();
         }
@@ -19,11 +19,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
         {
             if (e.Parameter is Wohnung w)
             {
-                ViewModel = new ErhaltungsaufwendungenPrintViewModel(w, App.ViewModel, App.Impl);
+                ViewModel = new ErhaltungsaufwendungenPrintViewModel(w, App.WalterService, App.Impl);
             }
             else if (e.Parameter is IPerson p)
             {
-                ViewModel = new ErhaltungsaufwendungenPrintViewModel(p, App.ViewModel, App.Impl);
+                ViewModel = new ErhaltungsaufwendungenPrintViewModel(p, App.WalterService, App.Impl);
             }
 
             App.Window.CommandBar.MainContent = new ErhaltungsaufwendungenPrintCommandBarControl { ViewModel = ViewModel };

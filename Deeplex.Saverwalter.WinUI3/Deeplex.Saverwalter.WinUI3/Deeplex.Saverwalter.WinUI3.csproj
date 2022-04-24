@@ -30,8 +30,8 @@
     <None Remove="UserControls\CommandBar\ZaehlerCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ZaehlerListCommandBarControl.xaml" />
     <None Remove="UserControls\Utils\ErhaltungsaufwendungWohnungenControl.xaml" />
-    <None Remove="Views\Rechnungen\BetriebskostenrechnungPrintPage.xaml" />
-    <None Remove="Views\Rechnungen\ErhaltungsaufwendungenPrintPage.xaml" />
+    <None Remove="Views\Rechnungen\BetriebskostenrechnungPrintViewPage.xaml" />
+    <None Remove="Views\Rechnungen\ErhaltungsaufwendungenPrintViewPage.xaml" />
   </ItemGroup>
   
   <ItemGroup>
@@ -125,17 +125,17 @@
     <Compile Update="UserControls\Utils\PersonDetailControl.xaml.cs">
       <DependentUpon>PersonDetailControl.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Personen\JuristischePersonenDetailPage.xaml.cs">
-      <DependentUpon>JuristischePersonenDetailPage.xaml</DependentUpon>
+    <Compile Update="Views\Personen\JuristischePersonenDetailViewPage.xaml.cs">
+      <DependentUpon>JuristischePersonenDetailViewPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Personen\KontaktListPage.xaml.cs">
-      <DependentUpon>KontaktListPage.xaml</DependentUpon>
+    <Compile Update="Views\Personen\KontaktListViewPage.xaml.cs">
+      <DependentUpon>KontaktListViewPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Personen\NatuerlichePersonDetailPage.xaml.cs">
-      <DependentUpon>NatuerlichePersonDetailPage.xaml</DependentUpon>
+    <Compile Update="Views\Personen\NatuerlichePersonDetailViewPage.xaml.cs">
+      <DependentUpon>NatuerlichePersonDetailViewPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Rechnungen\BetriebskostenrechnungenDetailPage.xaml.cs">
-      <DependentUpon>BetriebskostenrechnungenDetailPage.xaml</DependentUpon>
+    <Compile Update="Views\Rechnungen\BetriebskostenrechnungenDetailViewPage.xaml.cs">
+      <DependentUpon>BetriebskostenrechnungenDetailViewPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Rechnungen\BetriebskostenRechnungenListViewPage.xaml.cs">
       <DependentUpon>BetriebskostenRechnungenListViewPage.xaml</DependentUpon>
@@ -143,32 +143,32 @@
     <Compile Update="Views\Rechnungen\ErhaltungsaufwendungenDetailPage - Copy.xaml.cs">
       <DependentUpon>ErhaltungsaufwendungenDetailPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Rechnungen\ErhaltungsaufwendungenDetailPage.xaml.cs">
-      <DependentUpon>ErhaltungsaufwendungenDetailPage.xaml</DependentUpon>
+    <Compile Update="Views\Rechnungen\ErhaltungsaufwendungenDetailViewPage.xaml.cs">
+      <DependentUpon>ErhaltungsaufwendungenDetailViewPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Rechnungen\ErhaltungsaufwendungenListViewPage.xaml.cs">
       <DependentUpon>ErhaltungsaufwendungenListViewPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\SettingsPage.xaml.cs">
-      <DependentUpon>SettingsPage.xaml</DependentUpon>
+    <Compile Update="Views\SettingsViewPage.xaml.cs">
+      <DependentUpon>SettingsViewPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Verträge\VertragDetailViewPage.xaml.cs">
       <DependentUpon>VertragDetailViewPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Verträge\VertragListPage.xaml.cs">
-      <DependentUpon>VertragListPage.xaml</DependentUpon>
+    <Compile Update="Views\Verträge\VertragListViewPage.xaml.cs">
+      <DependentUpon>VertragListViewPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Wohnungen\WohnungDetailPage.xaml.cs">
-      <DependentUpon>WohnungDetailPage.xaml</DependentUpon>
+    <Compile Update="Views\Wohnungen\WohnungDetailViewPage.xaml.cs">
+      <DependentUpon>WohnungDetailViewPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Wohnungen\WohnungListPage.xaml.cs">
-      <DependentUpon>WohnungListPage.xaml</DependentUpon>
+    <Compile Update="Views\Wohnungen\WohnungListViewPage.xaml.cs">
+      <DependentUpon>WohnungListViewPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Zähler\ZaehlerDetailPage.xaml.cs">
-      <DependentUpon>ZaehlerDetailPage.xaml</DependentUpon>
+    <Compile Update="Views\Zähler\ZaehlerDetailViewPage.xaml.cs">
+      <DependentUpon>ZaehlerDetailViewPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Zähler\ZaehlerListPage.xaml.cs">
-      <DependentUpon>ZaehlerListPage.xaml</DependentUpon>
+    <Compile Update="Views\Zähler\ZaehlerListViewPage.xaml.cs">
+      <DependentUpon>ZaehlerListViewPage.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -338,53 +338,53 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="Views\Personen\JuristischePersonenDetailPage.xaml">
+    <Page Update="Views\Personen\JuristischePersonenDetailViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="Views\Personen\KontaktListPage.xaml">
+    <Page Update="Views\Personen\KontaktListViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="Views\Personen\NatuerlichePersonDetailPage.xaml">
+    <Page Update="Views\Personen\NatuerlichePersonDetailViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="Views\Rechnungen\BetriebskostenrechnungenDetailPage.xaml">
+    <Page Update="Views\Rechnungen\BetriebskostenrechnungenDetailViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Update="Views\Rechnungen\BetriebskostenRechnungenListViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="Views\Rechnungen\ErhaltungsaufwendungenPrintPage.xaml">
+    <Page Update="Views\Rechnungen\ErhaltungsaufwendungenPrintViewPage.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Views\Rechnungen\BetriebskostenrechnungPrintPage.xaml">
+    <Page Update="Views\Rechnungen\BetriebskostenrechnungPrintViewPage.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
-    <Page Update="Views\Rechnungen\ErhaltungsaufwendungenDetailPage.xaml">
+    <Page Update="Views\Rechnungen\ErhaltungsaufwendungenDetailViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Update="Views\Rechnungen\ErhaltungsaufwendungenListViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="Views\SettingsPage.xaml">
+    <Page Update="Views\SettingsViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Update="Views\Verträge\VertragDetailViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="Views\Verträge\VertragListPage.xaml">
+    <Page Update="Views\Verträge\VertragListViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="Views\Wohnungen\WohnungDetailPage.xaml">
+    <Page Update="Views\Wohnungen\WohnungDetailViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="Views\Wohnungen\WohnungListPage.xaml">
+    <Page Update="Views\Wohnungen\WohnungListViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="Views\Zähler\ZaehlerDetailPage.xaml">
+    <Page Update="Views\Zähler\ZaehlerDetailViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="Views\Zähler\ZaehlerListPage.xaml">
+    <Page Update="Views\Zähler\ZaehlerListViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

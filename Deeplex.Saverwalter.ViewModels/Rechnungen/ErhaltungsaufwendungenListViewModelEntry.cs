@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 
@@ -8,19 +9,19 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public readonly Erhaltungsaufwendung Entity;
         public ObservableProperty<bool> Enabled = new ObservableProperty<bool>(true);
-        public string Aussteller => Avm.ctx.FindPerson(Entity.AusstellerId).Bezeichnung;
+        public string Aussteller => Db.ctx.FindPerson(Entity.AusstellerId).Bezeichnung;
         public int Id => Entity.ErhaltungsaufwendungId;
         public WohnungListViewModelEntry Wohnung;
         public string Bezeichnung => Entity.Bezeichnung;
         public double Betrag => Entity.Betrag;
         public DateTime Datum => Entity.Datum;
-        private AppViewModel Avm;
+        private IWalterDbService Db;
 
-        public ErhaltungsaufwendungenListViewModelEntry(Erhaltungsaufwendung e, AppViewModel avm)
+        public ErhaltungsaufwendungenListViewModelEntry(Erhaltungsaufwendung e, IWalterDbService db)
         {
             Entity = e;
-            Avm = avm;
-            Wohnung = new WohnungListViewModelEntry(Entity.Wohnung, Avm);
+            Db = db;
+            Wohnung = new WohnungListViewModelEntry(Entity.Wohnung, Db);
         }
     }
 }

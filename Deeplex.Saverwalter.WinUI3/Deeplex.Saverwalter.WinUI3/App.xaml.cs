@@ -1,7 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.Utils;
-using Deeplex.SaverWalter.Services;
+using Deeplex.Saverwalter.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -9,15 +9,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
+using Deeplex.Utils.ObjectModel;
 
 namespace Deeplex.Saverwalter.WinUI3
 {
-    sealed partial class App : Application, IAppImplementationService
+    sealed partial class App : Application, IAppImplementation
     {
         public static MainWindow Window { get; private set; }
-        public static AppViewModel ViewModel { get; private set; }
         public static WalterDbService WalterService { get; private set; }
-        public static IAppImplementationService Impl => Current as IAppImplementationService;
+        public static ObservableProperty<string> Titel = new();
+
+        public static AnhangListViewModel ListAnhang { get; private set; }
+        public static AnhangListViewModel DetailAnhang { get; private set; }
+
+        public static IAppImplementation Impl => Current as IAppImplementation;
 
         public App()
         {
@@ -27,7 +32,6 @@ namespace Deeplex.Saverwalter.WinUI3
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
             var self = this;
-            ViewModel = new AppViewModel(self);
             WalterService = new WalterDbService(self);
 
             Window = new MainWindow();

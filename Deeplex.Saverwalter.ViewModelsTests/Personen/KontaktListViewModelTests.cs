@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using FakeItEasy;
 using FakeItEasy.Sdk;
 using FluentAssertions;
@@ -24,7 +25,7 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
         public void KontaktListViewModelTest(int countOfNatuerlichePersonen, int countOfJuristischePersonen)
         {
             // TODO can't fake sealed classes.
-            var avm = A.Fake<AppViewModel>();
+            var avm = A.Fake<IWalterDbService>();
 
             avm.ctx.NatuerlichePersonen = CreateDbFake<NatuerlichePerson>(countOfNatuerlichePersonen);
             avm.ctx.JuristischePersonen = CreateDbFake<JuristischePerson>(countOfJuristischePersonen);

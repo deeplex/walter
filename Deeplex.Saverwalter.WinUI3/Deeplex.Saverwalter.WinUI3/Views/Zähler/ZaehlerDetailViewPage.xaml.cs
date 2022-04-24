@@ -6,11 +6,11 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
 {
-    public sealed partial class ZaehlerDetailPage : Page
+    public sealed partial class ZaehlerDetailViewPage : Page
     {
         public ZaehlerDetailViewModel ViewModel { get; set; }
 
-        public ZaehlerDetailPage()
+        public ZaehlerDetailViewPage()
         {
             InitializeComponent();
         }
@@ -19,8 +19,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is Zaehler zaehler)
             {
-                ViewModel = new ZaehlerDetailViewModel(zaehler, App.Impl, App.ViewModel);
-                App.ViewModel.Titel.Value = ViewModel.Kennnummer;
+                ViewModel = new ZaehlerDetailViewModel(zaehler, App.Impl, App.WalterService);
+                App.Titel.Value = ViewModel.Kennnummer;
             }
             else if (e.Parameter is ZaehlerDetailViewModel vm)
             {
@@ -28,11 +28,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             }
             else if (e.Parameter is null) // New Zaehler
             {
-                ViewModel = new ZaehlerDetailViewModel(App.Impl, App.ViewModel);
+                ViewModel = new ZaehlerDetailViewModel(App.Impl, App.WalterService);
             }
 
             App.Window.CommandBar.MainContent = new ZaehlerCommandBarControl { ViewModel = ViewModel };
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
+            //App.DetailAnhang.update(ViewModel.Entity, App.WalterService.ctx.ZaehlerAnhaenge);
 
             base.OnNavigatedTo(e);
         }

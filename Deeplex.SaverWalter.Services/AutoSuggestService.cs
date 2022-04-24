@@ -1,11 +1,9 @@
-﻿using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Utils.ObjectModel;
-using System;
+﻿using Deeplex.Utils.ObjectModel;
 using System.Collections.Immutable;
 
-namespace Deeplex.SaverWalter.Services
+namespace Deeplex.Saverwalter.Services
 {
-    public interface IAutoSuggestService
+    public interface AutoSuggestService
     {
         ImmutableList<AutoSuggestEntry> AllAutoSuggestEntries { get; set; }
         ObservableProperty<ImmutableList<AutoSuggestEntry>> AutoSuggestEntries { get; }

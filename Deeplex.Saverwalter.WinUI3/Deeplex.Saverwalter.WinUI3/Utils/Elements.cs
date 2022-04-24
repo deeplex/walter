@@ -8,10 +8,10 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
     {
         public static async void SetDatabaseAsDefault()
         {
-            if (await App.Impl.Confirmation("Als Standard festlegen", "Die Datenbank: " + App.ViewModel.root + " als Standard festlegen?", "Ja", "Nein"))
+            if (await App.Impl.Confirmation("Als Standard festlegen", "Die Datenbank: " + App.WalterService.root + " als Standard festlegen?", "Ja", "Nein"))
             {
                 var Settings = Windows.Storage.ApplicationData.Current.LocalSettings;
-                Settings.Values["root"] = App.ViewModel.root;
+                Settings.Values["root"] = App.WalterService.root;
             };
         }
 

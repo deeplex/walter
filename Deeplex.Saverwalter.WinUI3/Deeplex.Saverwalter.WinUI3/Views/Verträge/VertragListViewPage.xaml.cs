@@ -4,11 +4,11 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
 {
-    public sealed partial class VertragListPage : Page
+    public sealed partial class VertragListViewPage : Page
     {
-        public VertragListViewModel ViewModel = new VertragListViewModel(App.ViewModel);
+        public VertragListViewModel ViewModel = new VertragListViewModel(App.WalterService);
 
-        public VertragListPage()
+        public VertragListViewPage()
         {
             InitializeComponent();
 

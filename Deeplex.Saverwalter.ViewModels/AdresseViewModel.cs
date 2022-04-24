@@ -1,8 +1,9 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System.Collections.Immutable;
 using System.Linq;
-using static Deeplex.SaverWalter.Services.WalterDbService;
+using static Deeplex.Saverwalter.Services.WalterDbService;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
@@ -224,7 +225,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public RelayCommand Dispose;
 
-        public static string Anschrift(int id, AppViewModel Avm) => Anschrift(Avm.ctx.Adressen.Find(id));
+        public static string Anschrift(int id, IWalterDbService Avm) => Anschrift(Avm.ctx.Adressen.Find(id));
         public static string Anschrift(IPerson k) => Anschrift(k is IPerson a ? a.Adresse : null);
         public static string Anschrift(Wohnung w) => Anschrift(w is Wohnung a ? a.Adresse : null);
         public static string Anschrift(Adresse a)

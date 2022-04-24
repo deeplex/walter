@@ -4,14 +4,14 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
 {
-    public sealed partial class KontaktListPage : Page
+    public sealed partial class KontaktListViewPage : Page
     {
-        public KontaktListViewModel ViewModel = new KontaktListViewModel(App.ViewModel);
+        public KontaktListViewModel ViewModel = new KontaktListViewModel(App.WalterService);
 
-        public KontaktListPage()
+        public KontaktListViewPage()
         {
             InitializeComponent();
-            App.ViewModel.Titel.Value = "Kontakte";
+            App.Titel.Value = "Kontakte";
 
             App.Window.CommandBar.MainContent = new KontaktListCommandBarControl { ViewModel = ViewModel };
         }

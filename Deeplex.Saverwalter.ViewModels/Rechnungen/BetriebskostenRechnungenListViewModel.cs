@@ -1,4 +1,5 @@
-﻿using Deeplex.Utils.ObjectModel;
+﻿using Deeplex.Saverwalter.Services;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using System.Linq;
@@ -26,9 +27,9 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public BetriebskostenRechnungenListViewModel(AppViewModel avm)
+        public BetriebskostenRechnungenListViewModel(IWalterDbService db)
         {
-            AllRelevant = avm.ctx.Betriebskostenrechnungen
+            AllRelevant = db.ctx.Betriebskostenrechnungen
                 .Include(b => b.Gruppen)
                 .ThenInclude(g => g.Wohnung)
                 .ThenInclude(w => w.Adresse)

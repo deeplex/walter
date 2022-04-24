@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public ErhaltungsaufwendungenListControl()
         {
             InitializeComponent();
-            ViewModel = new ErhaltungsaufwendungenListViewModel(App.ViewModel);
+            ViewModel = new ErhaltungsaufwendungenListViewModel(App.WalterService);
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, IdProp) => UpdateFilter());
             RegisterPropertyChangedCallback(ListeProperty, (DepObj, IdProp) => UpdateFilter());
@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         {
             if (ViewModel.SelectedAufwendung != null)
             {
-                App.Window.Navigate(typeof(ErhaltungsaufwendungenDetailPage), ViewModel.SelectedAufwendung.Id);
+                App.Window.Navigate(typeof(ErhaltungsaufwendungenDetailViewPage), ViewModel.SelectedAufwendung.Id);
             }
         }
 
@@ -143,15 +143,16 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungenListViewModelEntry entry)
-            {
-                var a = entry.Entity;
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
-            }
-            else
-            {
-                App.ViewModel.updateListAnhang(null);
-            }
+            // TODO
+            //if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungenListViewModelEntry entry)
+            //{
+            //    var a = entry.Entity;
+            //    App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
+            //}
+            //else
+            //{
+            //    App.ViewModel.updateListAnhang(null);
+            //}
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

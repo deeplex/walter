@@ -1,14 +1,11 @@
 ﻿using Deeplex.Saverwalter.Model;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace Deeplex.SaverWalter.Services
+namespace Deeplex.Saverwalter.Services
 {
     // TODO add attribute or sth to give instructions how to implement (sphinx documentation)
-    public interface IAppImplementationService
+    public interface IAppImplementation
     {
         Task<bool> Confirmation();
         Task<bool> Confirmation(string title, string content, string primary, string secondary);

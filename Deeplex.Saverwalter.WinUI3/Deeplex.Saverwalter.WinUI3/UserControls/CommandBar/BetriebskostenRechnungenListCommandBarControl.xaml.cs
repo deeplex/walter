@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void AddBetriebskostenrechnung_Click(object sender, RoutedEventArgs e)
         {
-            App.Window.AppFrame.Navigate(typeof(BetriebskostenrechnungenDetailPage), null,
+            App.Window.AppFrame.Navigate(typeof(BetriebskostenrechnungenDetailViewPage), null,
                 new DrillInNavigationTransitionInfo());
         }
 

@@ -1,4 +1,5 @@
-﻿using Deeplex.Utils.ObjectModel;
+﻿using Deeplex.Saverwalter.Services;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using System.Linq;
@@ -27,13 +28,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<bool> Handwerker { get; set; } = new (true);
         public ImmutableList<KontaktListViewModelEntry> AllRelevant { get; }
 
-        public KontaktListViewModel(AppViewModel avm)
+        public KontaktListViewModel(IWalterDbService db)
         {
-            AllRelevant = avm.ctx.NatuerlichePersonen
+            AllRelevant = db.ctx.NatuerlichePersonen
                 .Include(k => k.Adresse)
                 .Select(k => new KontaktListViewModelEntry(k)).ToImmutableList();
 
-            var jp = avm.ctx.JuristischePersonen;
+            var jp = db.ctx.JuristischePersonen;
             foreach (var j in jp)
             {
                 AllRelevant = AllRelevant.Add(new KontaktListViewModelEntry(j));

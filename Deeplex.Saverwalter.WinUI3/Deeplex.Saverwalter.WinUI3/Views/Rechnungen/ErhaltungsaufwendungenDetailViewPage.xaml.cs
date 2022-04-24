@@ -7,11 +7,11 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
 {
-    public sealed partial class ErhaltungsaufwendungenDetailPage : Page
+    public sealed partial class ErhaltungsaufwendungenDetailViewPage : Page
     {
         public ErhaltungsaufwendungenDetailViewModel ViewModel { get; set; }
 
-        public ErhaltungsaufwendungenDetailPage()
+        public ErhaltungsaufwendungenDetailViewPage()
         {
             InitializeComponent();
         }
@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
         {
             if (e.Parameter is int id)
             {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.WalterService.ctx.Erhaltungsaufwendungen.Find(id), App.Impl, App.ViewModel);
+                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.WalterService.ctx.Erhaltungsaufwendungen.Find(id), App.Impl, App.WalterService);
             }
             else if (e.Parameter is ErhaltungsaufwendungenDetailViewModel vm)
             {
@@ -28,11 +28,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
             }
             else if (e.Parameter is Erhaltungsaufwendung r)
             {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel(r, App.Impl, App.ViewModel);
+                ViewModel = new ErhaltungsaufwendungenDetailViewModel(r, App.Impl, App.WalterService);
             }
             else if (e.Parameter is null)
             {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.Impl, App.ViewModel);
+                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.Impl, App.WalterService);
             }
 
             App.Window.CommandBar.MainContent = new ErhaltungsaufwendungenCommandBarControl { ViewModel = ViewModel };

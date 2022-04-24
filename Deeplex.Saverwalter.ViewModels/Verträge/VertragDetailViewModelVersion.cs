@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.ComponentModel;
@@ -46,7 +47,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Wohnung = value.Entity;
                 if (Ansprechpartner == null)
                 {
-                    Ansprechpartner = new KontaktListViewModelEntry(value.Entity.BesitzerId, Avm);
+                    Ansprechpartner = new KontaktListViewModelEntry(value.Entity.BesitzerId, Db);
                 }
                 mWohnung = value;
                 if (RaisePropertyChangedAuto(old, value.Entity))
@@ -90,7 +91,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public KontaktListViewModelEntry Vermieter
             => Wohnung?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
-                    new KontaktListViewModelEntry(g, Avm) : null;
+                    new KontaktListViewModelEntry(g, Db) : null;
 
         private KontaktListViewModelEntry mAnsprechpartner;
         public KontaktListViewModelEntry Ansprechpartner
@@ -109,21 +110,21 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        protected AppViewModel Avm;
+        protected IWalterDbService Db;
         protected IAppImplementation Impl;
 
         public RelayCommand RemoveDate;
 
-        public VertragDetailViewModelVersion(int id, IAppImplementation impl, AppViewModel avm) : this(avm.ctx.Vertraege.Find(id), impl, avm) { }
-        public VertragDetailViewModelVersion(Vertrag v, IAppImplementation impl, AppViewModel avm)
+        public VertragDetailViewModelVersion(int id, IAppImplementation impl, IWalterDbService db) : this(db.ctx.Vertraege.Find(id), impl, db) { }
+        public VertragDetailViewModelVersion(Vertrag v, IAppImplementation impl, IWalterDbService db)
         {
             Entity = v;
-            Avm = avm;
+            Db = db;
             Impl = impl;
 
             if (v.AnsprechpartnerId != Guid.Empty && v.AnsprechpartnerId != null)
             {
-                Ansprechpartner = new KontaktListViewModelEntry(v.AnsprechpartnerId.Value, avm);
+                Ansprechpartner = new KontaktListViewModelEntry(v.AnsprechpartnerId.Value, db);
             }
 
             RemoveDate = new RelayCommand(_ => Ende = null, _ => Ende != null);
@@ -157,13 +158,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.rowid != 0)
             {
-                Avm.ctx.Vertraege.Update(Entity);
+                Db.ctx.Vertraege.Update(Entity);
             }
             else
             {
-                Avm.ctx.Vertraege.Add(Entity);
+                Db.ctx.Vertraege.Add(Entity);
             }
-            Avm.SaveWalter();
+            Db.SaveWalter();
         }
     }
 

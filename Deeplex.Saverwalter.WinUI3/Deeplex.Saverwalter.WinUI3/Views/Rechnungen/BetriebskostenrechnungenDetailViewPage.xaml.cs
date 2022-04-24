@@ -11,11 +11,11 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
 {
-    public sealed partial class BetriebskostenrechnungenDetailPage : Page
+    public sealed partial class BetriebskostenrechnungenDetailViewPage : Page
     {
         public BetriebskostenrechnungDetailViewModel ViewModel { get; private set; }
 
-        public BetriebskostenrechnungenDetailPage()
+        public BetriebskostenrechnungenDetailViewPage()
         {
             InitializeComponent();
         }
@@ -30,11 +30,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is Tuple<Betriebskostenrechnung, int, List<Wohnung>> t)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(t.Item1, t.Item2, t.Item3, App.Impl, App.ViewModel);
+                ViewModel = new BetriebskostenrechnungDetailViewModel(t.Item1, t.Item2, t.Item3, App.Impl, App.WalterService);
             }
             else if (e.Parameter is Tuple<Betriebskostenrechnung, int> u)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(u.Item1, u.Item2, App.Impl, App.ViewModel);
+                ViewModel = new BetriebskostenrechnungDetailViewModel(u.Item1, u.Item2, App.Impl, App.WalterService);
             }
             else if (e.Parameter is BetriebskostenrechnungDetailViewModel vm)
             {
@@ -42,17 +42,18 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             }
             else if (e.Parameter is Betriebskostenrechnung r)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(r, App.Impl, App.ViewModel);
+                ViewModel = new BetriebskostenrechnungDetailViewModel(r, App.Impl, App.WalterService);
             }
             else if (e.Parameter is null)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(App.Impl, App.ViewModel);
+                ViewModel = new BetriebskostenrechnungDetailViewModel(App.Impl, App.WalterService);
             }
 
             base.OnNavigatedTo(e);
 
             App.Window.CommandBar.MainContent = new BetriebskostenRechnungenCommandBarControl() { ViewModel = ViewModel };
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
+            // TODO
+            //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.WalterService));
 
             App.WalterService.ctx.Adressen
                 .Include(i => i.Wohnungen)
@@ -68,7 +69,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                     };
                     a.Wohnungen.ForEach(w =>
                     {
-                        var n = new TreeViewNode() { Content = new WohnungListViewModelEntry(w, App.ViewModel) };
+                        var n = new TreeViewNode() { Content = new WohnungListViewModelEntry(w, App.WalterService) };
                         k.Children.Add(n);
                         if (ViewModel.Wohnungen.Value.Exists(ww => ww.Id == w.WohnungId))
                         {

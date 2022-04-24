@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public WohnungListControl()
         {
             InitializeComponent();
-            ViewModel = new WohnungListViewModel(App.ViewModel);
+            ViewModel = new WohnungListViewModel(App.WalterService);
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(ListeProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, Prop) => UpdateFilter());
@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            App.Window.Navigate(typeof(WohnungDetailPage), ViewModel.SelectedWohnung.Value.Entity);
+            App.Window.Navigate(typeof(WohnungDetailViewPage), ViewModel.SelectedWohnung.Value.Entity);
         }
 
         public int WohnungId
@@ -94,8 +94,9 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var a = ((WohnungListViewModelEntry)((DataGrid)sender).SelectedItem).Entity;
-            App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
+            // TODO
+            //var a = ((WohnungListViewModelEntry)((DataGrid)sender).SelectedItem).Entity;
+            //App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

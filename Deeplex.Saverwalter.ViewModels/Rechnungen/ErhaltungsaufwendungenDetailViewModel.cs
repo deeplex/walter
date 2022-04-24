@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -19,8 +20,8 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (await Impl.Confirmation())
             {
-                Avm.ctx.Erhaltungsaufwendungen.Remove(Entity);
-                Avm.SaveWalter();
+                Db.ctx.Erhaltungsaufwendungen.Remove(Entity);
+                Db.SaveWalter();
             }
         }
 
@@ -104,26 +105,26 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        private AppViewModel Avm;
+        private IWalterDbService Db;
         private IAppImplementation Impl;
 
-        public ErhaltungsaufwendungenDetailViewModel(IAppImplementation impl, AppViewModel avm) : this(new Erhaltungsaufwendung(), impl, avm) { }
-        public ErhaltungsaufwendungenDetailViewModel(Erhaltungsaufwendung e, IAppImplementation impl, AppViewModel avm)
+        public ErhaltungsaufwendungenDetailViewModel(IAppImplementation impl, IWalterDbService db) : this(new Erhaltungsaufwendung(), impl, db) { }
+        public ErhaltungsaufwendungenDetailViewModel(Erhaltungsaufwendung e, IAppImplementation impl, IWalterDbService db)
         {
             Entity = e;
-            Avm = avm;
+            Db = db;
             Impl = impl;
 
-            Wohnungen = Avm.ctx.Wohnungen
+            Wohnungen = Db.ctx.Wohnungen
                 .Include(w => w.Adresse)
-                .Select(w => new WohnungListViewModelEntry(w, avm)).ToList();
+                .Select(w => new WohnungListViewModelEntry(w, db)).ToList();
             Wohnung = Wohnungen.Find(f => f.Id == e.Wohnung?.WohnungId);
 
-            Personen.Value = Avm.ctx.NatuerlichePersonen
+            Personen.Value = Db.ctx.NatuerlichePersonen
                 .Where(w => w.isHandwerker)
                 .Select(k => new KontaktListViewModelEntry(k))
                 .ToList()
-                .Concat(Avm.ctx.JuristischePersonen
+                .Concat(Db.ctx.JuristischePersonen
                     .Where(w => w.isHandwerker)
                     .Select(k => new KontaktListViewModelEntry(k))
                     .ToList())
@@ -159,13 +160,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.ErhaltungsaufwendungId != 0)
             {
-                Avm.ctx.Erhaltungsaufwendungen.Update(Entity);
+                Db.ctx.Erhaltungsaufwendungen.Update(Entity);
             }
             else
             {
-                Avm.ctx.Erhaltungsaufwendungen.Add(Entity);
+                Db.ctx.Erhaltungsaufwendungen.Add(Entity);
             }
-            Avm.SaveWalter();
+            Db.SaveWalter();
         }
     }
 }

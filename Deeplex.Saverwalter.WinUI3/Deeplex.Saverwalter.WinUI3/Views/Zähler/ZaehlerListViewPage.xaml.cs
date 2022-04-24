@@ -4,11 +4,11 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
 {
-    public sealed partial class ZaehlerListPage : Page
+    public sealed partial class ZaehlerListViewPage : Page
     {
-        public ZaehlerListViewModel ViewModel = new ZaehlerListViewModel(App.ViewModel);
+        public ZaehlerListViewModel ViewModel = new ZaehlerListViewModel(App.WalterService);
 
-        public ZaehlerListPage()
+        public ZaehlerListViewPage()
         {
             InitializeComponent();
 

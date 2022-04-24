@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Saverwalter.WinUI3.Views;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
@@ -23,7 +23,8 @@ namespace Deeplex.Saverwalter.WinUI3
 
         public void Navigate<U>(Type SourcePage, U SendParameter)
         {
-            ViewModel.clearAnhang();
+            // TODO this is where it is actually called...
+            //App.Impl.clearAnhang();
 
             AppFrame.Navigate(SourcePage, SendParameter,
                 new DrillInNavigationTransitionInfo());
@@ -40,17 +41,16 @@ namespace Deeplex.Saverwalter.WinUI3
         {
             var Settings = Windows.Storage.ApplicationData.Current.LocalSettings;
             var str = Settings.Values["root"] as string;
-            App.ViewModel.root = str;
-            await ViewModel.initializeDatabase(App.Impl);
+            App.WalterService.root = str;
+            await App.WalterService.initializeDatabase(App.Impl);
 
-            if (str != App.ViewModel.root)
+            if (str != App.WalterService.root)
             {
                 Utils.Elements.SetDatabaseAsDefault();
             }
         }
 
         public Frame AppFrame => frame;
-        public AppViewModel ViewModel = App.ViewModel;
 
         public readonly string KontaktListLabel = "Kontakte";
         public readonly string VertragListLabel = "Verträge";
@@ -63,11 +63,11 @@ namespace Deeplex.Saverwalter.WinUI3
         {
             var label = args.InvokedItem as string;
             var pageType =
-                args.IsSettingsInvoked ? typeof(SettingsPage) :
-                label == KontaktListLabel ? typeof(KontaktListPage) :
-                label == WohnungListLabel ? typeof(WohnungListPage) :
-                label == VertragListLabel ? typeof(VertragListPage) :
-                label == ZaehlerListLabel ? typeof(ZaehlerListPage) :
+                args.IsSettingsInvoked ? typeof(SettingsViewPage) :
+                label == KontaktListLabel ? typeof(KontaktListViewPage) :
+                label == WohnungListLabel ? typeof(WohnungListViewPage) :
+                label == VertragListLabel ? typeof(VertragListViewPage) :
+                label == ZaehlerListLabel ? typeof(ZaehlerListViewPage) :
                 label == BetriebskostenrechnungenListLabel ? typeof(BetriebskostenRechnungenListViewPage) :
                 label == ErhaltungsaufwendungenListLabel ? typeof(ErhaltungsaufwendungenListViewPage) :
                 null;
@@ -80,33 +80,33 @@ namespace Deeplex.Saverwalter.WinUI3
 
         private void OnNavigatingToPage(object sender, NavigatingCancelEventArgs e)
         {
-            if (e.SourcePageType == typeof(KontaktListPage) ||
-                e.SourcePageType == typeof(JuristischePersonenDetailPage) ||
-                e.SourcePageType == typeof(NatuerlichePersonDetailPage))
+            if (e.SourcePageType == typeof(KontaktListViewPage) ||
+                e.SourcePageType == typeof(JuristischePersonenDetailViewPage) ||
+                e.SourcePageType == typeof(NatuerlichePersonDetailViewPage))
             {
                 NavView.SelectedItem = KontaktListMenuItem;
             }
-            else if (e.SourcePageType == typeof(WohnungListPage) || e.SourcePageType == typeof(WohnungDetailPage))
+            else if (e.SourcePageType == typeof(WohnungListViewPage) || e.SourcePageType == typeof(WohnungDetailViewPage))
             {
                 NavView.SelectedItem = WohnungListMenuItem;
             }
-            else if (e.SourcePageType == typeof(VertragListPage) || e.SourcePageType == typeof(VertragDetailViewPage))
+            else if (e.SourcePageType == typeof(VertragListViewPage) || e.SourcePageType == typeof(VertragDetailViewPage))
             {
                 NavView.SelectedItem = VertragListMenuItem;
             }
-            else if (e.SourcePageType == typeof(BetriebskostenRechnungenListViewPage) || e.SourcePageType == typeof(BetriebskostenrechnungenDetailPage))
+            else if (e.SourcePageType == typeof(BetriebskostenRechnungenListViewPage) || e.SourcePageType == typeof(BetriebskostenrechnungenDetailViewPage))
             {
                 NavView.SelectedItem = BetriebskostenListMenuItem;
             }
-            else if (e.SourcePageType == typeof(ErhaltungsaufwendungenListViewPage) || e.SourcePageType == typeof(ErhaltungsaufwendungenDetailPage))
+            else if (e.SourcePageType == typeof(ErhaltungsaufwendungenListViewPage) || e.SourcePageType == typeof(ErhaltungsaufwendungenDetailViewPage))
             {
                 NavView.SelectedItem = ErhaltungsAufwendungenListMenuItem;
             }
-            else if (e.SourcePageType == typeof(ZaehlerListPage) || e.SourcePageType == typeof(ZaehlerDetailPage))
+            else if (e.SourcePageType == typeof(ZaehlerListViewPage) || e.SourcePageType == typeof(ZaehlerDetailViewPage))
             {
                 NavView.SelectedItem = ZaehlerListMenuItem;
             }
-            else if (e.SourcePageType == typeof(SettingsPage))
+            else if (e.SourcePageType == typeof(SettingsViewPage))
             {
                 NavView.SelectedItem = NavView.SettingsItem;
             }
@@ -127,18 +127,19 @@ namespace Deeplex.Saverwalter.WinUI3
 
         private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            App.ViewModel.updateAutoSuggestEntries(sender.Text);
+            // TODO
+            //App.ViewModel.updateAutoSuggestEntries(sender.Text);
         }
 
         private Type GetEntryPage(object Entry)
         {
-            return Entry is NatuerlichePerson ? typeof(NatuerlichePersonDetailPage) :
-                Entry is JuristischePerson ? typeof(JuristischePersonenDetailPage) :
-                Entry is Wohnung ? typeof(WohnungDetailPage) :
-                Entry is Zaehler ? typeof(ZaehlerDetailPage) :
+            return Entry is NatuerlichePerson ? typeof(NatuerlichePersonDetailViewPage) :
+                Entry is JuristischePerson ? typeof(JuristischePersonenDetailViewPage) :
+                Entry is Wohnung ? typeof(WohnungDetailViewPage) :
+                Entry is Zaehler ? typeof(ZaehlerDetailViewPage) :
                 Entry is Vertrag ? typeof(VertragDetailViewPage) :
-                Entry is Betriebskostenrechnung ? typeof(BetriebskostenrechnungenDetailPage) :
-                Entry is Erhaltungsaufwendung ? typeof(ErhaltungsaufwendungenDetailPage) :
+                Entry is Betriebskostenrechnung ? typeof(BetriebskostenrechnungenDetailViewPage) :
+                Entry is Erhaltungsaufwendung ? typeof(ErhaltungsaufwendungenDetailViewPage) :
                 null;
         }
         private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)

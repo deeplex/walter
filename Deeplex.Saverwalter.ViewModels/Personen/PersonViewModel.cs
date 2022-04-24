@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
@@ -12,10 +13,10 @@ namespace Deeplex.Saverwalter.ViewModels
         protected bool mInklusiveZusatz;
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 
-        protected AppViewModel Avm;
+        protected IWalterDbService Avm;
         protected IAppImplementation Impl;
 
-        public PersonViewModel(IAppImplementation impl, AppViewModel avm)
+        public PersonViewModel(IAppImplementation impl, IWalterDbService avm)
         {
             Avm = avm;
             Impl = impl;

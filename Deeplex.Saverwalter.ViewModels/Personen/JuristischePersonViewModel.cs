@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
@@ -76,9 +77,9 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public RelayCommand AddMitgliedCommand;
 
-        public JuristischePersonViewModel(IAppImplementation impl, AppViewModel avm) : this(new JuristischePerson(), impl, avm) { }
-        public JuristischePersonViewModel(int id, IAppImplementation impl, AppViewModel avm) : this(avm.ctx.JuristischePersonen.Find(id), impl, avm) { }
-        public JuristischePersonViewModel(JuristischePerson j, IAppImplementation impl, AppViewModel avm) : base(impl, avm)
+        public JuristischePersonViewModel(IAppImplementation impl, IWalterDbService avm) : this(new JuristischePerson(), impl, avm) { }
+        public JuristischePersonViewModel(int id, IAppImplementation impl, IWalterDbService avm) : this(avm.ctx.JuristischePersonen.Find(id), impl, avm) { }
+        public JuristischePersonViewModel(JuristischePerson j, IAppImplementation impl, IWalterDbService avm) : base(impl, avm)
         {
             Entity = j;
             Id = j.JuristischePersonId;

@@ -1,6 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 
-namespace Deeplex.Saverwalter.ViewModels
+namespace Deeplex.Saverwalter.Services
 {
     public sealed class AutoSuggestEntry
     {
@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Entity = a;
             Icon = "Street";
-            Bezeichnung = AdresseViewModel.Anschrift(a) + " - " + a.Bezeichnung;
+            Bezeichnung = a.Adresse.Anschrift + " - " + a.Bezeichnung;
         }
         public AutoSuggestEntry(Zaehler a)
         {
@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Entity = a;
             Icon = "Library";
-            Bezeichnung = AdresseViewModel.Anschrift(a.Wohnung) + " - " + a.Wohnung.Bezeichnung;
+            Bezeichnung = a.Wohnung.Adresse.Anschrift + " - " + a.Wohnung.Bezeichnung;
         }
         public AutoSuggestEntry(Betriebskostenrechnung a)
         {

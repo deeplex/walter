@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Deeplex.SaverWalter.Services
+namespace Deeplex.Saverwalter.Services
 {
     public interface IAnhangService<AnhangListViewModel> where AnhangListViewModel: class
     {

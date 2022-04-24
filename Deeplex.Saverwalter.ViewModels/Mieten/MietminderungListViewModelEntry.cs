@@ -22,8 +22,8 @@ namespace Deeplex.Saverwalter.ViewModels
                 if (await vm.Impl.Confirmation())
                 {
                     vm.Liste.Value = vm.Liste.Value.Remove(this);
-                    vm.Avm.ctx.MietMinderungen.Remove(Entity);
-                    vm.Avm.SaveWalter();
+                    vm.Db.ctx.MietMinderungen.Remove(Entity);
+                    vm.Db.SaveWalter();
                 }
 
             }, _ => true);

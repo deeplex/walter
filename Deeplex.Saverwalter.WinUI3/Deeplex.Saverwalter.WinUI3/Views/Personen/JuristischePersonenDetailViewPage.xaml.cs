@@ -8,11 +8,11 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
 {
-    public sealed partial class JuristischePersonenDetailPage : Page
+    public sealed partial class JuristischePersonenDetailViewPage : Page
     {
         public JuristischePersonViewModel ViewModel { get; set; }
 
-        public JuristischePersonenDetailPage()
+        public JuristischePersonenDetailViewPage()
         {
             InitializeComponent();
         }
@@ -21,15 +21,16 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is JuristischePerson jp)
             {
-                ViewModel = new JuristischePersonViewModel(jp, App.Impl, App.ViewModel);
+                ViewModel = new JuristischePersonViewModel(jp, App.Impl, App.WalterService);
             }
             else if (e.Parameter is null)
             {
-                ViewModel = new JuristischePersonViewModel(App.Impl, App.ViewModel);
+                ViewModel = new JuristischePersonViewModel(App.Impl, App.WalterService);
             }
 
             App.Window.CommandBar.MainContent = new JuristischePersonCommandBarControl { ViewModel = ViewModel };
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.Impl, App.ViewModel));
+            // TODO
+            //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.Impl, App.ViewModel));
 
             base.OnNavigatedTo(e);
         }
@@ -37,7 +38,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         private void Erhaltungsaufwendung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             App.Window.AppFrame.Navigate(
-                typeof(ErhaltungsaufwendungenPrintPage),
+                typeof(ErhaltungsaufwendungenPrintViewPage),
                 ViewModel.Entity,
                 new DrillInNavigationTransitionInfo());
         }

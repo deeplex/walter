@@ -21,10 +21,10 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
             AddVertrag_Click = () =>
             {
-                var vm = new VertragDetailViewModel(App.Impl, App.ViewModel);
+                var vm = new VertragDetailViewModel(App.Impl, App.WalterService);
                 if (ViewModel.isMieter)
                 {
-                    vm.Mieter.Value = vm.Mieter.Value.Add(new KontaktListViewModelEntry(ViewModel.PersonId, App.ViewModel));
+                    vm.Mieter.Value = vm.Mieter.Value.Add(new KontaktListViewModelEntry(ViewModel.PersonId, App.WalterService));
                 }
                 else if (ViewModel.isVermieter)
                 {

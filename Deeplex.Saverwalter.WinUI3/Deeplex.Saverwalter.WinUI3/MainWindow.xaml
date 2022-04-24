@@ -19,7 +19,8 @@
             ItemInvoked="NavView_ItemInvoked"
             BackRequested="NavView_BackRequested"
             IsBackEnabled="{x:Bind AppFrame.CanGoBack, Mode=OneWay}">
-            <NavigationView.AutoSuggestBox>
+            <!--TODO-->
+            <!--<NavigationView.AutoSuggestBox>
                 <AutoSuggestBox
                     ItemsSource="{x:Bind ViewModel.AutoSuggestEntries.Value, Mode=OneWay}"
                     TextChanged="AutoSuggestBox_TextChanged"
@@ -39,7 +40,7 @@
                         </DataTemplate>
                     </AutoSuggestBox.ItemTemplate>
                 </AutoSuggestBox>
-            </NavigationView.AutoSuggestBox>
+            </NavigationView.AutoSuggestBox>-->
             <NavigationView.MenuItems>
                 <NavigationViewItem
                     x:Name="KontaktListMenuItem"
@@ -106,10 +107,11 @@
                     </SplitView.Content>
                     <SplitView.Pane>
                         <ScrollViewer>
-                            <StackPanel>
+                            <!--TODO-->
+                            <!--<StackPanel>
                                 <uc:AnhangListControl AnhangViewModel="{x:Bind ViewModel.DetailAnhang.Value, Mode=OneWay}"/>
                                 <uc:AnhangListControl List="True"  AnhangViewModel="{x:Bind ViewModel.ListAnhang.Value, Mode=OneWay}"/>
-                            </StackPanel>
+                            </StackPanel>-->
                         </ScrollViewer>
                     </SplitView.Pane>
                 </SplitView>

@@ -12,11 +12,11 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
 {
-    public sealed partial class BetriebskostenrechnungPrintPage : Page
+    public sealed partial class BetriebskostenrechnungPrintViewPage : Page
     {
         public BetriebskostenrechnungPrintViewModel ViewModel { get; set; }
 
-        public BetriebskostenrechnungPrintPage()
+        public BetriebskostenrechnungPrintViewPage()
         {
             InitializeComponent();
         }
@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
         {
             if (e.Parameter is Vertrag v)
             {
-                ViewModel = new BetriebskostenrechnungPrintViewModel(v, App.ViewModel, App.Impl);
+                ViewModel = new BetriebskostenrechnungPrintViewModel(v, App.WalterService, App.Impl);
             }
 
             App.Window.CommandBar.MainContent = new BetriebskostenrechnungPrintCommandBarControl { ViewModel = ViewModel };
@@ -48,8 +48,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
                 get => Parent.Panel.Width - Parent.Panel.Padding.Right - Parent.Panel.Padding.Left;
             }
 
-            private BetriebskostenrechnungPrintPage Parent { get; }
-            public BetriebskostenPrintImpl(BetriebskostenrechnungPrintPage parent)
+            private BetriebskostenrechnungPrintViewPage Parent { get; }
+            public BetriebskostenPrintImpl(BetriebskostenrechnungPrintViewPage parent)
             {
                 Parent = parent;
             }

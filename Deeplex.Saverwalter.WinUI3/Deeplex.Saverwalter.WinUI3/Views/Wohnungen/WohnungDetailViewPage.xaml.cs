@@ -10,11 +10,11 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
 {
-    public sealed partial class WohnungDetailPage : Page
+    public sealed partial class WohnungDetailViewPage : Page
     {
         public WohnungDetailViewModel ViewModel { get; set; }
 
-        public WohnungDetailPage()
+        public WohnungDetailViewPage()
         {
             InitializeComponent();
         }
@@ -23,22 +23,22 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is Wohnung wohnung)
             {
-                ViewModel = new WohnungDetailViewModel(wohnung, App.Impl, App.ViewModel);
+                ViewModel = new WohnungDetailViewModel(wohnung, App.Impl, App.WalterService);
             }
             else if (e.Parameter is null) // New Wohnung
             {
-                ViewModel = new WohnungDetailViewModel(App.Impl, App.ViewModel);
+                ViewModel = new WohnungDetailViewModel(App.Impl, App.WalterService);
             }
 
             AddZaehler_Click = () =>
             {
-                var vm = new ZaehlerDetailViewModel(new Zaehler() { WohnungId = ViewModel.Id }, App.Impl, App.ViewModel);
-                App.Window.Navigate(typeof(ZaehlerDetailPage), vm);
+                var vm = new ZaehlerDetailViewModel(new Zaehler() { WohnungId = ViewModel.Id }, App.Impl, App.WalterService);
+                App.Window.Navigate(typeof(ZaehlerDetailViewPage), vm);
             };
 
             AddVertrag_Click = () =>
             {
-                var vm = new VertragDetailViewModel(App.Impl, App.ViewModel);
+                var vm = new VertragDetailViewModel(App.Impl, App.WalterService);
                 vm.Wohnung = vm.AlleWohnungen.First(v => v.Entity.WohnungId == ViewModel.Id);
                 App.Window.Navigate(typeof(VertragDetailViewPage), vm);
             };
@@ -55,8 +55,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                     Wohnung = ViewModel.Entity,
                     Rechnung = r,
                 });
-                var vm = new BetriebskostenrechnungDetailViewModel(r, App.Impl, App.ViewModel);
-                App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), vm);
+                var vm = new BetriebskostenrechnungDetailViewModel(r, App.Impl, App.WalterService);
+                App.Window.Navigate(typeof(BetriebskostenrechnungenDetailViewPage), vm);
             };
 
             AddErhaltungsaufwendung_Click = () =>
@@ -67,12 +67,12 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                     Datum = DateTime.Now,
                 };
 
-                var vm = new ErhaltungsaufwendungenDetailViewModel(r, App.Impl, App.ViewModel);
-                App.Window.Navigate(typeof(ErhaltungsaufwendungenDetailPage), vm);
+                var vm = new ErhaltungsaufwendungenDetailViewModel(r, App.Impl, App.WalterService);
+                App.Window.Navigate(typeof(ErhaltungsaufwendungenDetailViewPage), vm);
             };
 
             App.Window.CommandBar.MainContent = new WohnungDetailCommandBarControl { ViewModel = ViewModel };
-            App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
+            //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
 
             base.OnNavigatedTo(e);
         }
@@ -105,7 +105,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             public WohnungDetailAdresse(int id)
             {
                 Id = id;
-                Anschrift = AdresseViewModel.Anschrift(id, App.ViewModel);
+                Anschrift = AdresseViewModel.Anschrift(id, App.WalterService);
                 Content = Anschrift;
             }
         }
@@ -113,7 +113,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         private void Erhaltungsaufwendung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             App.Window.AppFrame.Navigate(
-                typeof(ErhaltungsaufwendungenPrintPage),
+                typeof(ErhaltungsaufwendungenPrintViewPage),
                 ViewModel.Entity,
                 new DrillInNavigationTransitionInfo());
         }

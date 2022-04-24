@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
@@ -20,8 +21,8 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (await Impl.Confirmation())
             {
-                Avm.ctx.Wohnungen.Remove(Entity);
-                Avm.SaveWalter();
+                Db.ctx.Wohnungen.Remove(Entity);
+                Db.SaveWalter();
             }
         }
 
@@ -40,7 +41,7 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
         public int AdresseId => Entity.AdresseId;
-        public string Anschrift => AdresseViewModel.Anschrift(AdresseId, Avm);
+        public string Anschrift => AdresseViewModel.Anschrift(AdresseId, Db);
 
         public string Bezeichnung
         {
@@ -101,19 +102,19 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
         private IAppImplementation Impl;
-        private AppViewModel Avm;
+        private IWalterDbService Db;
         public RelayCommand RemoveBesitzer;
 
-        public WohnungDetailViewModel(IAppImplementation impl, AppViewModel avm) : this(new Wohnung(), impl, avm) { }
-        public WohnungDetailViewModel(Wohnung w, IAppImplementation impl, AppViewModel avm)
+        public WohnungDetailViewModel(IAppImplementation impl, IWalterDbService db) : this(new Wohnung(), impl, db) { }
+        public WohnungDetailViewModel(Wohnung w, IAppImplementation impl, IWalterDbService db)
         {
             Entity = w;
-            Avm = avm;
+            Db = db;
             Impl = impl;
 
-            AlleVermieter = Avm.ctx.JuristischePersonen.ToImmutableList()
+            AlleVermieter = Db.ctx.JuristischePersonen.ToImmutableList()
                 .Where(j => j.isVermieter == true).Select(j => new KontaktListViewModelEntry(j))
-                .Concat(Avm.ctx.NatuerlichePersonen
+                .Concat(Db.ctx.NatuerlichePersonen
                     .Where(n => n.isVermieter == true).Select(n => new KontaktListViewModelEntry(n)))
                 .ToImmutableList();
 
@@ -150,13 +151,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.WohnungId != 0)
             {
-                Avm.ctx.Wohnungen.Update(Entity);
+                Db.ctx.Wohnungen.Update(Entity);
             }
             else
             {
-                Avm.ctx.Wohnungen.Add(Entity);
+                Db.ctx.Wohnungen.Add(Entity);
             }
-            Avm.SaveWalter();
+            Db.SaveWalter();
         }
     }
 }

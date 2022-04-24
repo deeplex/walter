@@ -1,9 +1,9 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.SaverWalter.Services;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System.Collections.Immutable;
 using System.Linq;
-using static Deeplex.SaverWalter.Services.WalterDbService;
+using static Deeplex.Saverwalter.Services.WalterDbService;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
@@ -12,10 +12,10 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<ImmutableList<ZaehlerstandListViewModelEntry>> Liste = new ObservableProperty<ImmutableList<ZaehlerstandListViewModelEntry>>();
         public int ZaehlerId;
 
-        public IWalterDbService Db;
-        public IAppImplementationService Impl;
+        public Services.IWalterDbService Db;
+        public IAppImplementation Impl;
 
-        public ZaehlerstandListViewModel(Zaehler z, IAppImplementationService impl, IWalterDbService db)
+        public ZaehlerstandListViewModel(Zaehler z, IAppImplementation impl, Services.IWalterDbService db)
         {
             ZaehlerId = z.ZaehlerId;
             Impl = impl;

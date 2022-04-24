@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.PrintTe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.ViewModelsTests", "Deeplex.Saverwalter.ViewModelsTests\Deeplex.Saverwalter.ViewModelsTests.csproj", "{E98B1E1D-8A27-4D87-B3DE-95E9FFA216A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deeplex.SaverWalter.Services", "Deeplex.SaverWalter.Services\Deeplex.SaverWalter.Services.csproj", "{00080445-D5B6-4E16-A43E-E8DEED032A1F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.Services", "Deeplex.SaverWalter.Services\Deeplex.Saverwalter.Services.csproj", "{00080445-D5B6-4E16-A43E-E8DEED032A1F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,4 +1,5 @@
-﻿using Deeplex.Utils.ObjectModel;
+﻿using Deeplex.Saverwalter.Services;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Immutable;
@@ -16,13 +17,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
         public ImmutableList<VertragListViewModelVertrag> AllRelevant { get; set; }
 
-        public VertragListViewModel(AppViewModel avm)
+        public VertragListViewModel(IWalterDbService db)
         {
-            AllRelevant = Vertraege.Value = avm.ctx.Vertraege
+            AllRelevant = Vertraege.Value = db.ctx.Vertraege
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
                 .ToList()
                 .GroupBy(v => v.VertragId)
-                .Select(v => new VertragListViewModelVertrag(v, avm))
+                .Select(v => new VertragListViewModelVertrag(v, db))
                 .OrderBy(v => v.Beginn).Reverse()
                 .ToImmutableList();
             Vertraege.Value = AllRelevant;
