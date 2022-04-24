@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
@@ -10,7 +11,7 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class WohnungDetailViewModel : ValidatableBase
     {
-        public Wohnung Entity;
+        public Wohnung Entity { get; }
         public int Id => Entity.WohnungId;
 
         public ObservableProperty<int> BetriebskostenrechnungsJahr = new ObservableProperty<int>(DateTime.Now.Year - 1);
@@ -18,10 +19,10 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public async Task selfDestruct()
         {
-            if (await Impl.Confirmation())
+            if (await NotificationService.Confirmation())
             {
-                Avm.ctx.Wohnungen.Remove(Entity);
-                Avm.SaveWalter();
+                Db.ctx.Wohnungen.Remove(Entity);
+                Db.SaveWalter();
             }
         }
 
@@ -40,7 +41,7 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
         public int AdresseId => Entity.AdresseId;
-        public string Anschrift => AdresseViewModel.Anschrift(AdresseId, Avm);
+        public string Anschrift => AdresseViewModel.Anschrift(AdresseId, Db);
 
         public string Bezeichnung
         {
@@ -100,20 +101,20 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        private IAppImplementation Impl;
-        private AppViewModel Avm;
+        private INotificationService NotificationService;
+        private IWalterDbService Db;
         public RelayCommand RemoveBesitzer;
 
-        public WohnungDetailViewModel(IAppImplementation impl, AppViewModel avm) : this(new Wohnung(), impl, avm) { }
-        public WohnungDetailViewModel(Wohnung w, IAppImplementation impl, AppViewModel avm)
+        public WohnungDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Wohnung(), ns, db) { }
+        public WohnungDetailViewModel(Wohnung w, INotificationService ns, IWalterDbService db)
         {
             Entity = w;
-            Avm = avm;
-            Impl = impl;
+            Db = db;
+            NotificationService = ns;
 
-            AlleVermieter = Avm.ctx.JuristischePersonen.ToImmutableList()
+            AlleVermieter = Db.ctx.JuristischePersonen.ToImmutableList()
                 .Where(j => j.isVermieter == true).Select(j => new KontaktListViewModelEntry(j))
-                .Concat(Avm.ctx.NatuerlichePersonen
+                .Concat(Db.ctx.NatuerlichePersonen
                     .Where(n => n.isVermieter == true).Select(n => new KontaktListViewModelEntry(n)))
                 .ToImmutableList();
 
@@ -150,13 +151,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.WohnungId != 0)
             {
-                Avm.ctx.Wohnungen.Update(Entity);
+                Db.ctx.Wohnungen.Update(Entity);
             }
             else
             {
-                Avm.ctx.Wohnungen.Add(Entity);
+                Db.ctx.Wohnungen.Add(Entity);
             }
-            Avm.SaveWalter();
+            Db.SaveWalter();
         }
     }
 }

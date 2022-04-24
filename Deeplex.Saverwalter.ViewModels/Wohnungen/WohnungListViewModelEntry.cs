@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using System;
 
 namespace Deeplex.Saverwalter.ViewModels
@@ -14,7 +15,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public string Anschrift { get; }
         public string Besitzer { get; }
 
-        public WohnungListViewModelEntry(Wohnung w, AppViewModel avm)
+        public WohnungListViewModelEntry(Wohnung w, IWalterDbService db)
         {
             Id = w.WohnungId;
             Entity = w;
@@ -22,8 +23,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Bezeichnung = w.Bezeichnung;
             Anschrift = AdresseViewModel.Anschrift(w);
             Besitzer = w.BesitzerId != Guid.Empty ?
-                avm.ctx.FindPerson(w.BesitzerId).Bezeichnung :
-                "";
+                db.ctx.FindPerson(w.BesitzerId).Bezeichnung : "";
         }
     }
 }

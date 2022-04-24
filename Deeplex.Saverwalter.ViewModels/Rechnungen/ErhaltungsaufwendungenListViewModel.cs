@@ -1,4 +1,5 @@
-﻿using Deeplex.Utils.ObjectModel;
+﻿using Deeplex.Saverwalter.Services;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using System.Linq;
@@ -24,12 +25,12 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ErhaltungsaufwendungenListViewModel(AppViewModel avm)
+        public ErhaltungsaufwendungenListViewModel(IWalterDbService db)
         {
-            AllRelevant = avm.ctx.Erhaltungsaufwendungen
+            AllRelevant = db.ctx.Erhaltungsaufwendungen
                 .Include(e => e.Wohnung)
                 .ThenInclude(w => w.Adresse)
-                .Select(w => new ErhaltungsaufwendungenListViewModelEntry(w, avm))
+                .Select(w => new ErhaltungsaufwendungenListViewModelEntry(w, db))
                 .ToImmutableList();
 
             Liste.Value = AllRelevant;

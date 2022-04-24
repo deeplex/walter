@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Generic;
@@ -27,13 +28,13 @@ namespace Deeplex.Saverwalter.ViewModels
         }
         public bool HasLastMiete => LastMiete != "";
 
-        public VertragListViewModelVertrag(IGrouping<Guid, Vertrag> v, AppViewModel avm)
-            : base(v.OrderBy(vs => vs.Version).Last(), avm)
+        public VertragListViewModelVertrag(IGrouping<Guid, Vertrag> v, IWalterDbService db)
+            : base(v.OrderBy(vs => vs.Version).Last(), db)
         {
-            Versionen = v.OrderBy(vs => vs.Version).Select(vs => new VertragListViewModelVertragVersion(vs, avm)).ToList();
+            Versionen = v.OrderBy(vs => vs.Version).Select(vs => new VertragListViewModelVertragVersion(vs, db)).ToList();
             Beginn = Versionen.First().Beginn;
 
-            Mieten = avm.ctx.Mieten
+            Mieten = db.ctx.Mieten
                 .Where(m => m.VertragId == v.First().VertragId)
                 .Select(m => new VertragListViewModelMiete(m))
                 .ToImmutableList();
@@ -42,14 +43,14 @@ namespace Deeplex.Saverwalter.ViewModels
             AddMiete = new RelayCommand(_ =>
             {
                 Mieten = Mieten.Add(AddMieteValue.Value);
-                avm.ctx.Mieten.Add(new Miete
+                db.ctx.Mieten.Add(new Miete
                 {
                     Zahlungsdatum = AddMieteValue.Value.Datum.Value.UtcDateTime,
                     BetreffenderMonat = AddMieteValue.Value.BetreffenderMonat.Value.UtcDateTime,
                     Betrag = AddMieteValue.Value.Betrag,
                     VertragId = Versionen.Last().VertragId,
                 });
-                avm.SaveWalter();
+                db.SaveWalter();
                 AddMieteValue.Value = new VertragListViewModelMiete();
                 RaisePropertyChanged(nameof(LastMiete));
                 RaisePropertyChanged(nameof(HasLastMiete));

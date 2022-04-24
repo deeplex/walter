@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public VertragListControl()
         {
             InitializeComponent();
-            ViewModel = new VertragListViewModel(App.ViewModel);
+            ViewModel = new VertragListViewModel(App.WalterService);
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(PersonIdProperty, (DepObj, Prop) => UpdateFilter());
@@ -115,7 +115,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var a = ((VertragListViewModelVertrag)((DataGrid)sender).SelectedItem).Entity;
-            App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
+            App.Window.ListAnhang.Value = new AnhangListViewModel(a, App.FileService, App.NotificationService, App.WalterService);
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

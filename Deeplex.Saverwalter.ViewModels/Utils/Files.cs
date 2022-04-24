@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Print;
+using Deeplex.Saverwalter.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
@@ -14,7 +15,7 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
 {
     public static class Files
     {
-        public static void ConnectAnhangToEntity<T, U>(DbSet<T> Set, U target, List<Anhang> files, IAppImplementation impl, AppViewModel avm) where T : class, IAnhang<U>, new()
+        public static void ConnectAnhangToEntity<T, U>(DbSet<T> Set, U target, List<Anhang> files, IWalterDbService db) where T : class, IAnhang<U>, new()
         {
             foreach (var file in files)
             {
@@ -26,7 +27,7 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
                 };
                 Set.Add(attachment);
             }
-            avm.SaveWalter();
+            db.SaveWalter();
         }
 
         public static Anhang SaveAnhang(string src, string root)
@@ -44,14 +45,14 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             return anhang;
         }
 
-        public static void SaveBetriebskostenabrechnung(this Betriebskostenabrechnung b, string path, AppViewModel avm)
+        public static void SaveBetriebskostenabrechnung(this Betriebskostenabrechnung b, string path, Services.IWalterDbService db)
         {
             var RechnungIds = b.Gruppen.SelectMany(g => g.Rechnungen).Select(r => r.BetriebskostenrechnungId);
             var temppath = Path.GetTempPath();
 
             var atLeastOne = false;
 
-            avm.ctx.BetriebskostenrechnungAnhaenge
+            db.ctx.BetriebskostenrechnungAnhaenge
                 .Include(a => a.Anhang)
                 .Where(a => RechnungIds.Contains(a.Target.BetriebskostenrechnungId))
                 .ToList()
@@ -60,7 +61,7 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
                     if (a.Anhang != null)
                     {
                         atLeastOne = true;
-                        var src = Path.Combine(avm.root, a.AnhangId.ToString() + Path.GetExtension(a.Anhang.FileName));
+                        var src = Path.Combine(db.root, a.AnhangId.ToString() + Path.GetExtension(a.Anhang.FileName));
                         var tar = Path.Combine(temppath, a.Anhang.FileName);
                         File.Copy(src, tar);
                     }
@@ -72,42 +73,44 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             }
         }
 
-        public static async Task PrintBetriebskostenabrechnung(Vertrag v, int Jahr, AppViewModel avm, IAppImplementation impl)
+        public static async Task<string> PrintBetriebskostenabrechnung(Vertrag v, int Jahr, IWalterDbService db, IFileService fs)
         {
-            var b = new Betriebskostenabrechnung(avm.ctx, v.rowid, Jahr, new DateTime(Jahr, 1, 1), new DateTime(Jahr, 12, 31));
+            var b = new Betriebskostenabrechnung(db.ctx, v.rowid, Jahr, new DateTime(Jahr, 1, 1), new DateTime(Jahr, 12, 31));
 
-            var AuflistungMieter = string.Join(", ", avm.ctx.MieterSet
+            var AuflistungMieter = string.Join(", ", db.ctx.MieterSet
                 .Where(m => m.VertragId == v.VertragId).ToList()
-                .Select(a => avm.ctx.FindPerson(a.PersonId).Bezeichnung));
+                .Select(a => db.ctx.FindPerson(a.PersonId).Bezeichnung));
 
             var filename = Jahr.ToString() + " - " + v.Wohnung.ToString() + " - " + AuflistungMieter;
-            var path = await impl.saveFile(filename, ".docx");
+            var path = await fs.saveFile(filename, new string[] { ".docx" });
 
             b.SaveAsDocx(path);
-            b.SaveBetriebskostenabrechnung(path, avm);
+            b.SaveBetriebskostenabrechnung(path, db);
 
-            impl.ShowAlert("Datei gespeichert unter " + path);
+            // TODO print when called
+            return path;
         }
 
-        public static async Task PrintErhaltungsaufwendungen(Wohnung w, int Jahr, AppViewModel avm, IAppImplementation impl)
+        public static async Task<string> PrintErhaltungsaufwendungen(Wohnung w, int Jahr, IWalterDbService db, IFileService fs)
         {
             var filename = Jahr.ToString() + " - " + AdresseViewModel.Anschrift(w) + " " + w.Bezeichnung;
-            var path = await impl.saveFile(filename, ".docx");
+            var path = await fs.saveFile(filename, new string[] { ".docx" });
 
-            var l = new ErhaltungsaufwendungWohnung(avm.ctx, w.WohnungId, Jahr);
+            var l = new ErhaltungsaufwendungWohnung(db.ctx, w.WohnungId, Jahr);
 
             l.SaveAsDocx(path);
             // TODO Implement saving the Erhaltungsaufwendunganhänge.
 
-            impl.ShowAlert("Datei gespeichert unter " + path);
+            // TODO print when called
+            return path;
         }
 
         public static async Task PrintErhaltungsaufwendungen(
             List<Wohnung> Wohnungen,
             bool extended,
             int Jahr,
-            AppViewModel avm,
-            IAppImplementation impl,
+            IWalterDbService db,
+            IFileService fs,
             List<Model.Erhaltungsaufwendung> filter = null)
         {
             var filename = Jahr.ToString() + " - " + Wohnungen.GetWohnungenBezeichnung();
@@ -120,14 +123,14 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
                 filename += " (anteilig)";
             }
 
-            var path = await impl.saveFile(filename, ".docx");
+            var path = await fs.saveFile(filename, new string[] { ".docx" });
 
             if (path == null)
             {
                 return;
             }
 
-            var l = Wohnungen.Select(w => new ErhaltungsaufwendungWohnung(avm.ctx, w.WohnungId, Jahr)).ToImmutableList();
+            var l = Wohnungen.Select(w => new ErhaltungsaufwendungWohnung(db.ctx, w.WohnungId, Jahr)).ToImmutableList();
 
             if (filter is IList i && i.Count > 0)
             {
@@ -138,7 +141,8 @@ namespace Deeplex.Saverwalter.ViewModels.Utils
             l.SaveAsDocx(path);
             // TODO Implement saving the Erhaltungsaufwendunganhänge.
 
-            impl.ShowAlert("Datei gespeichert unter " + path);
+            // TODO alert when called.
+            //fs.ShowAlert("Datei gespeichert unter " + path);
         }
     }
 }

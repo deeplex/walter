@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
@@ -12,17 +13,17 @@ namespace Deeplex.Saverwalter.ViewModels
             = new ObservableProperty<ImmutableList<MietminderungListViewModelEntry>>();
         public Guid VertragId;
 
-        public IAppImplementation Impl;
-        public AppViewModel Avm;
+        public IWalterDbService Db;
+        public INotificationService NotificationService;
 
-        public MietMinderungListViewModel(Guid VertragGuid, IAppImplementation impl, AppViewModel avm)
+        public MietMinderungListViewModel(Guid VertragGuid, INotificationService ns, IWalterDbService db)
         {
             VertragId = VertragGuid;
             var self = this;
-            Impl = impl;
-            Avm = avm;
+            NotificationService = ns;
+            Db = db;
 
-            Liste.Value = Avm.ctx.MietMinderungen
+            Liste.Value = Db.ctx.MietMinderungen
                 .Where(m => m.VertragId == VertragGuid)
                 .Select(m => new MietminderungListViewModelEntry(m, self))
                 .ToImmutableList();

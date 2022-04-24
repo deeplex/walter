@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Betriebskostenabrechnung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            App.Window.AppFrame.Navigate(typeof(BetriebskostenrechnungPrintPage), ViewModel.Entity,
+            App.Window.AppFrame.Navigate(typeof(BetriebskostenrechnungPrintViewPage), ViewModel.Entity,
                 new DrillInNavigationTransitionInfo());
         }
     }

@@ -1,4 +1,5 @@
-﻿using Deeplex.Utils.ObjectModel;
+﻿using Deeplex.Saverwalter.Services;
+using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
 using System.IO;
@@ -9,47 +10,46 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class SettingsViewModel
     {
-        public ObservableProperty<ImmutableList<AdresseViewModel>> Adressen =
-            new ObservableProperty<ImmutableList<AdresseViewModel>>();
-        public ObservableProperty<AnhangListViewModel> Anhaenge =
-            new ObservableProperty<AnhangListViewModel>();
-        public ObservableProperty<string> rootPath
-            = new ObservableProperty<string>();
+        public ObservableProperty<ImmutableList<AdresseViewModel>> Adressen = new();
+        public ObservableProperty<AnhangListViewModel> Anhaenge = new();
+        public ObservableProperty<string> rootPath = new();
 
         public async Task LoadDatabase()
         {
-            rootPath.Value = await Impl.pickFile();
-            Avm.root = Path.Combine(Path.GetDirectoryName(rootPath.Value), Path.GetFileNameWithoutExtension(rootPath.Value));
-            await Avm.initializeDatabase(Impl);
+            rootPath.Value = await FileService.pickFile();
+            Db.root = Path.Combine(Path.GetDirectoryName(rootPath.Value), Path.GetFileNameWithoutExtension(rootPath.Value));
+            // TODO this has to be implemented somehow.
+            //await App.initializeDatabase(Impl);
         }
 
 
         public RelayCommand LoadAdressen;
         public RelayCommand LoadAnhaenge;
 
-        public IAppImplementation Impl;
-        public AppViewModel Avm;
+        public IFileService FileService;
+        public IWalterDbService Db;
 
-        public SettingsViewModel(IAppImplementation impl, AppViewModel avm)
+        public SettingsViewModel(IFileService fs, INotificationService ns, IWalterDbService db)
         {
             try
             {
-                Impl = impl;
-                Avm = avm;
-                rootPath.Value = avm.root;
+                FileService = fs;
+                Db = db;
+                rootPath.Value = db.root;
 
                 LoadAnhaenge = new RelayCommand(_ =>
                 {
-                    Anhaenge.Value = new AnhangListViewModel(Impl, Avm);
+                    Anhaenge.Value = new AnhangListViewModel(fs, ns, Db);
                 }, _ => true);
                 LoadAdressen = new RelayCommand(_ =>
                 {
-                    Adressen.Value = Avm.ctx.Adressen.Select(a => new AdresseViewModel(a, Avm)).ToImmutableList();
+                    Adressen.Value = Db.ctx.Adressen.Select(a => new AdresseViewModel(a, Db)).ToImmutableList();
                 }, _ => true);
             }
             catch (Exception e)
             {
-                impl.ShowAlert(e.Message);
+                // TODO
+                //impl.ShowAlert(e.Message);
             }
         }
     }

@@ -29,13 +29,13 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void AddNatuerlichePerson_Click(object sender, RoutedEventArgs e)
         {
-            App.Window.AppFrame.Navigate(typeof(NatuerlichePersonDetailPage), null,
+            App.Window.AppFrame.Navigate(typeof(NatuerlichePersonDetailViewPage), null,
                 new DrillInNavigationTransitionInfo());
         }
 
         private void AddJuristischePerson_Click(object sender, RoutedEventArgs e)
         {
-            App.Window.AppFrame.Navigate(typeof(JuristischePersonenDetailPage), null,
+            App.Window.AppFrame.Navigate(typeof(JuristischePersonenDetailViewPage), null,
                 new DrillInNavigationTransitionInfo());
         }
 

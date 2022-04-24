@@ -38,8 +38,8 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void AddMiete_Click(object sender, RoutedEventArgs e)
         {
-            App.Walter.Mieten.Add(ViewModel.Entity);
-            App.SaveWalter();
+            App.WalterService.ctx.Mieten.Add(ViewModel.Entity);
+            App.WalterService.SaveWalter();
             MietenListViewModel.AddToList(ViewModel.Entity);
             var miete = new Miete()
             {

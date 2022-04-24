@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
             RegisterPropertyChangedCallback(AdresseProperty, (idDepObject, idProp) =>
             {
-                ViewModel = new AdresseViewModel<IAdresse>(Adresse, App.ViewModel);
+                ViewModel = new AdresseViewModel<IAdresse>(Adresse, App.WalterService);
             });
         }
 

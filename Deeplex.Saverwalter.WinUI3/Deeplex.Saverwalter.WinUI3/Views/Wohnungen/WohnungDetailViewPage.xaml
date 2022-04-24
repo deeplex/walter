@@ -1,0 +1,130 @@
+﻿<Page
+    x:Class="Deeplex.Saverwalter.WinUI3.Views.WohnungDetailViewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:uc="using:Deeplex.Saverwalter.WinUI3.UserControls"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <uc:FileDrop>
+        <uc:FileDrop.MainContent>
+            <ScrollViewer>
+                <StackPanel>
+                    <RelativePanel>
+                        <!--TODO Insert image -->
+                        <Grid
+                            x:Name="ScrollHeader"
+                            HorizontalAlignment="Stretch"
+                            RelativePanel.AlignRightWithPanel="True"
+                            RelativePanel.AlignLeftWithPanel="True">
+                            <Grid
+                                Background="{ThemeResource SystemChromeLowColor}"
+                                MinHeight="250">
+                            </Grid>
+                        </Grid>
+                    </RelativePanel>
+                    <StackPanel Orientation="Horizontal">
+                        <uc:ComboControl
+                            Header="Besitzer"
+                            Margin="20,20,0,0"
+                            PlaceholderText="Besitzer"
+                            SelectedItem="{x:Bind ViewModel.Besitzer, Mode=TwoWay}"
+                            ItemsSource="{x:Bind ViewModel.AlleVermieter, Mode=OneWay}"/>
+                        <Button
+                            VerticalAlignment="Bottom"
+                            Command="{x:Bind ViewModel.RemoveBesitzer}">
+                            <SymbolIcon Symbol="Delete" />
+                        </Button>
+                    </StackPanel>
+                    <mtuuc:WrapPanel>
+                        <uc:AdresseControl
+                            Margin="20,20,0,0"
+                            Adresse="{x:Bind ViewModel.Entity}" />
+                    </mtuuc:WrapPanel>
+                    <mtuuc:WrapPanel Orientation="Horizontal">
+                        <TextBox
+                            Text="{x:Bind ViewModel.Bezeichnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Header="Bezeichnung" Width="210" Style="{StaticResource Eintraege}"/>
+                        <TextBox
+                            Text="{x:Bind ViewModel.Wohnflaeche, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Header="Wohnfl." Width="70" Style="{StaticResource Eintraege}"/>
+                        <TextBox
+                            Text="{x:Bind ViewModel.Nutzflaeche, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Header="Nutzfl." Width="70" Style="{StaticResource Eintraege}"/>
+                        <TextBox
+                            Text="{x:Bind ViewModel.Nutzeinheit, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Header="Einheiten" Width="70" Style="{StaticResource Eintraege}"/>
+                    </mtuuc:WrapPanel>
+                    <mtuuc:WrapPanel>
+                        <TextBox
+                            TextWrapping="Wrap"
+                            Style="{StaticResource Eintraege}"
+                            Width="620"
+                            Margin="20"
+                            Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Header="Notiz"/>
+                    </mtuuc:WrapPanel>
+
+                    <uc:ExpanderControl Header="Zähler" Click="{x:Bind AddZaehler_Click}">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:ZaehlerListControl WohnungId="{x:Bind ViewModel.Id}"/>
+                        </uc:ExpanderControl.MainContent>
+                    </uc:ExpanderControl>
+
+                    <uc:ExpanderControl Header="Adresse">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:WohnungListControl WohnungId="{x:Bind ViewModel.Id}" />
+                        </uc:ExpanderControl.MainContent>
+                    </uc:ExpanderControl>
+
+                    <uc:ExpanderControl Header="Verträge" Click="{x:Bind AddVertrag_Click}">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:VertragListControl WohnungId="{x:Bind ViewModel.Id}"/>
+                        </uc:ExpanderControl.MainContent>
+                    </uc:ExpanderControl>
+
+                    <uc:ExpanderControl Header="Betriebskostenrechnungen" Click="{x:Bind AddBetriebskostenrechnung_Click}">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:BetriebskostenRechnungenListControl
+                                ZeigeVorlagen="{x:Bind ViewModel.ZeigeVorlagen.Value, Mode=OneWay}"
+                                BetreffendesJahr="{x:Bind ViewModel.BetriebskostenrechnungsJahr.Value, Mode=OneWay}"
+                                WohnungId="{x:Bind ViewModel.Id}"/>
+                        </uc:ExpanderControl.MainContent>
+                        <uc:ExpanderControl.Bonus>
+                            <StackPanel Orientation="Horizontal">
+                            <NumberBox
+                                Margin="10,0,10,0"
+                                SpinButtonPlacementMode="Inline"
+                                Value="{x:Bind ViewModel.BetriebskostenrechnungsJahr.Value, Mode=TwoWay}" />
+                            <CheckBox
+                                ToolTipService.ToolTip="Zeige Vorlagen für das neue Jahr, basierend auf den Eingaben aus dem Vorjahr."
+                                IsChecked="{x:Bind ViewModel.ZeigeVorlagen.Value, Mode=TwoWay}"
+                                Content="Zeige Vorlagen" />
+                            </StackPanel>
+                        </uc:ExpanderControl.Bonus>
+                    </uc:ExpanderControl>
+
+                    <uc:ExpanderControl Header="Erhaltungsaufwendungen" Click="{x:Bind AddErhaltungsaufwendung_Click}">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:ErhaltungsaufwendungenListControl WohnungId="{x:Bind ViewModel.Id}"/>
+                        </uc:ExpanderControl.MainContent>
+                        <uc:ExpanderControl.Bonus>
+                            <Button
+                                Click="Erhaltungsaufwendung_Click"
+                                Background="Transparent">
+                                <StackPanel Orientation="Horizontal">
+                                    <SymbolIcon Symbol="PostUpdate" />
+                                    <TextBlock Margin="10,0,0,0" Text="Erhaltungsaufwendungen"/>
+                                </StackPanel>
+                            </Button>
+                        </uc:ExpanderControl.Bonus>
+                    </uc:ExpanderControl>
+
+                </StackPanel>
+            </ScrollViewer>
+        </uc:FileDrop.MainContent>
+    </uc:FileDrop>
+</Page>

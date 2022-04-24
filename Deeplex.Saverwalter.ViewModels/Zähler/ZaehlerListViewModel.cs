@@ -1,4 +1,5 @@
-﻿using Deeplex.Utils.ObjectModel;
+﻿using Deeplex.Saverwalter.Services;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using System.Linq;
@@ -22,9 +23,9 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
         public ImmutableList<ZaehlerListViewModelEntry> AllRelevant { get; }
 
-        public ZaehlerListViewModel(AppViewModel avm)
+        public ZaehlerListViewModel(IWalterDbService db)
         {
-            AllRelevant = avm.ctx.ZaehlerSet
+            AllRelevant = db.ctx.ZaehlerSet
                 .Include(z => z.Wohnung)
                 .ThenInclude(w => w.Adresse)
                 .Include(z => z.Staende)

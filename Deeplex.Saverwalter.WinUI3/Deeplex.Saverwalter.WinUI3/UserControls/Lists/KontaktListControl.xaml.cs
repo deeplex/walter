@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public KontaktListControl()
         {
             InitializeComponent();
-            ViewModel = new KontaktListViewModel(App.ViewModel);
+            ViewModel = new KontaktListViewModel(App.WalterService);
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(KontakteProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(VermieterProperty, (DepObj, Prop) => UpdateFilter());
@@ -151,11 +151,11 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             if (sk != null)
             {
                 var target =
-                    sk.Type == typeof(NatuerlichePerson) ? typeof(NatuerlichePersonDetailPage) :
-                    sk.Type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailPage) :
+                    sk.Type == typeof(NatuerlichePerson) ? typeof(NatuerlichePersonDetailViewPage) :
+                    sk.Type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailViewPage) :
                     null;
 
-                App.Window.Navigate(target, App.Walter.FindPerson(sk.Entity.PersonId));
+                App.Window.Navigate(target, App.WalterService.ctx.FindPerson(sk.Entity.PersonId));
             }
         }
 
@@ -166,7 +166,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private async void RemovePerson_Click(object sender, RoutedEventArgs e)
         {
-            if (await App.Impl.Confirmation())
+            if (await App.NotificationService.Confirmation())
             {
                 var guid = ((KontaktListViewModelEntry)((Button)sender).DataContext).Entity.PersonId;
 
@@ -175,19 +175,19 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
                 if (VertragGuid != Guid.Empty)
                 {
-                    App.Walter.MieterSet
+                    App.WalterService.ctx.MieterSet
                         .Where(m => m.PersonId == guid && m.VertragId == VertragGuid)
-                        .ToList().ForEach(m => App.Walter.MieterSet.Remove(m));
+                        .ToList().ForEach(m => App.WalterService.ctx.MieterSet.Remove(m));
                 }
 
                 if (JuristischePersonId != 0)
                 {
-                    App.Walter.JuristischePersonenMitglieder
+                    App.WalterService.ctx.JuristischePersonenMitglieder
                         .Where(m => m.PersonId == guid && m.JuristischePersonId == JuristischePersonId)
-                        .ToList().ForEach(m => App.Walter.JuristischePersonenMitglieder.Remove(m));
+                        .ToList().ForEach(m => App.WalterService.ctx.JuristischePersonenMitglieder.Remove(m));
                 }
 
-                App.SaveWalter();
+                App.WalterService.SaveWalter();
             }
         }
 
@@ -196,11 +196,11 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             var a = ((KontaktListViewModelEntry)((DataGrid)sender).SelectedItem)?.Entity;
             if (a is NatuerlichePerson n)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(n, App.Impl, App.ViewModel));
+                App.Window.ListAnhang.Value = new AnhangListViewModel(n, App.FileService, App.NotificationService, App.WalterService);
             }
             else if (a is JuristischePerson j)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(j, App.Impl, App.ViewModel));
+                App.Window.ListAnhang.Value = new AnhangListViewModel(j, App.FileService, App.NotificationService, App.WalterService);
             }
         }
 

@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void AddZaehler_Click(object sender, RoutedEventArgs e)
         {
-            App.Window.AppFrame.Navigate(typeof(ZaehlerDetailPage), null,
+            App.Window.AppFrame.Navigate(typeof(ZaehlerDetailViewPage), null,
                 new DrillInNavigationTransitionInfo());
         }
 

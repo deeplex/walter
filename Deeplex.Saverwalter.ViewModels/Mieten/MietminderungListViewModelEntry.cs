@@ -19,11 +19,11 @@ namespace Deeplex.Saverwalter.ViewModels
 
             SelfDestruct = new AsyncRelayCommand(async _ =>
             {
-                if (await vm.Impl.Confirmation())
+                if (await vm.NotificationService.Confirmation())
                 {
                     vm.Liste.Value = vm.Liste.Value.Remove(this);
-                    vm.Avm.ctx.MietMinderungen.Remove(Entity);
-                    vm.Avm.SaveWalter();
+                    vm.Db.ctx.MietMinderungen.Remove(Entity);
+                    vm.Db.SaveWalter();
                 }
 
             }, _ => true);

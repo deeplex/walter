@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Deeplex.Saverwalter.Model\Deeplex.Saverwalter.Model.csproj" />
+    <ProjectReference Include="..\Deeplex.Utils.ObjectModel\Deeplex.Utils.ObjectModel.csproj" />
+  </ItemGroup>
+
+</Project>

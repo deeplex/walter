@@ -6,12 +6,12 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class BetriebskostenRechnungenListViewPage : Page
     {
-        public BetriebskostenRechnungenListViewModel ViewModel = new BetriebskostenRechnungenListViewModel(App.ViewModel);
+        public BetriebskostenRechnungenListViewModel ViewModel { get; } = new BetriebskostenRechnungenListViewModel(App.WalterService);
 
         public BetriebskostenRechnungenListViewPage()
         {
             InitializeComponent();
-            App.ViewModel.Titel.Value = "Betriebskostenrechnungen";
+            App.Window.Titel.Value = "Betriebskostenrechnungen";
 
             App.Window.CommandBar.MainContent = new BetriebskostenRechnungenListCommandBarControl { ViewModel = ViewModel };
         }

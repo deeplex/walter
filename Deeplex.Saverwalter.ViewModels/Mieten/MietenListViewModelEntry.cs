@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 
@@ -39,21 +40,21 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        AppViewModel Avm;
+        IWalterDbService Db;
 
         public MietenListViewModelEntry(Miete m, MietenListViewModel vm)
         {
             Entity = m;
 
-            Avm = vm.Avm;
+            Db = vm.Db;
 
             SelfDestruct = new AsyncRelayCommand(async _ =>
             {
-                if (await vm.Impl.Confirmation())
+                if (await vm.NotificationService.Confirmation())
                 {
                     vm.Liste.Value = vm.Liste.Value.Remove(this);
-                    vm.Avm.ctx.Mieten.Remove(Entity);
-                    vm.Avm.SaveWalter();
+                    vm.Db.ctx.Mieten.Remove(Entity);
+                    vm.Db.SaveWalter();
                 }
             }, _ => true);
 
@@ -80,13 +81,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.MieteId != 0)
             {
-                Avm.ctx.Mieten.Update(Entity);
+                Db.ctx.Mieten.Update(Entity);
             }
             else
             {
-                Avm.ctx.Mieten.Add(Entity);
+                Db.ctx.Mieten.Add(Entity);
             }
-            Avm.SaveWalter();
+            Db.SaveWalter();
         }
 
         public AsyncRelayCommand SelfDestruct;

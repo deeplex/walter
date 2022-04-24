@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using FakeItEasy;
 using FluentAssertions;
 using System;
 using Xunit;
@@ -24,41 +25,37 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
         {
             var name = "TestName";
 
-            var stub = new KontaktListViewModelEntry(new NatuerlichePerson()
+            var pers = new NatuerlichePerson()
             {
-                Nachname = name // Nachname is the only required field.
-            });
+                Nachname = name
+            };
 
-            stub.ToString().Should().Be(stub.Entity.Bezeichnung);
+            var stub = new KontaktListViewModelEntry(pers);
+
             stub.Type.Should().BeOfType<NatuerlichePerson>();
-            stub.Entity.PersonId.Should().Be(Guid.Empty);
-            stub.Vorname.Should().Be("");
-            stub.Name.Should().Be(null); // TODO has to have a value.
-            stub.Anschrift.Should().Be("");
-            stub.Email.Should().Be("");
-            stub.Telefon.Should().Be("");
-            stub.Mobil.Should().Be("");
+            stub.Vorname.Should().Be(pers.Vorname);
+            stub.Name.Should().Be(name);
+
+            PersonViewModelTests.PersonViewModelTest(stub, pers);
         }
 
         [Fact()]
         public void KontaktListViewModelEntryFromJuristischePerson()
         {
-            var name = "Test GmbH";
+            var name = "TestName GmbH";
 
-            var stub = new KontaktListViewModelEntry(new JuristischePerson()
+            var pers = new JuristischePerson()
             {
-                Bezeichnung = name // Bezeichnung ist die einzig notwendige Angabe.
-            });
+                Bezeichnung = name
+            };
 
-            stub.ToString().Should().Be(stub.Entity.Bezeichnung);
-            stub.Type.Should().BeOfType<NatuerlichePerson>();
-            stub.Entity.PersonId.Should().Be(Guid.Empty);
-            stub.Vorname.Should().Be("");
-            stub.Name.Should().Be(name); // TODO has to have a value.
-            stub.Anschrift.Should().Be("");
-            stub.Email.Should().Be("");
-            stub.Telefon.Should().Be("");
-            stub.Mobil.Should().Be("");
+            var stub = new KontaktListViewModelEntry(pers);
+
+            stub.Vorname.Should().BeNull();
+            stub.Type.Should().BeOfType<JuristischePerson>();
+            stub.Name.Should().Be(name);
+
+            PersonViewModelTests.PersonViewModelTest(stub, pers);
         }
     }
 }

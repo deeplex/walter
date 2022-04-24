@@ -87,7 +87,7 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
     public class GetBriefAnredeConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
-            => App.ViewModel.ctx.FindPerson((Guid)value).GetBriefAnrede();
+            => App.WalterService.ctx.FindPerson((Guid)value).GetBriefAnrede();
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {

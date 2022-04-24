@@ -10,6 +10,10 @@ namespace Deeplex.Saverwalter.Model
     // An Adresse is pointed at by a Wohnung, Garage or Kontakt.
     public sealed class Adresse
     {
+        public string Anschrift => string.Join(", ",
+            string.Join(" ", Strasse, Hausnummer),
+            string.Join(" ", Postleitzahl, Stadt));
+
         public int AdresseId { get; set; }
         public string Hausnummer { get; set; } = null!;
         public string Strasse { get; set; } = null!;

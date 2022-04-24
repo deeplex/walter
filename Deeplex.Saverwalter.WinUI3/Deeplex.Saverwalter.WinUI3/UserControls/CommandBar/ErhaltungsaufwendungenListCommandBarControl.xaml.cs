@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void AddErhaltungsaufwendung_Click(object sender, RoutedEventArgs e)
         {
-            App.Window.AppFrame.Navigate(typeof(ErhaltungsaufwendungenDetailPage), null,
+            App.Window.AppFrame.Navigate(typeof(ErhaltungsaufwendungenDetailViewPage), null,
                 new DrillInNavigationTransitionInfo());
         }
 

@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using System;
 
 namespace Deeplex.Saverwalter.ViewModels
@@ -18,7 +19,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public string Mobil { get; }
         public IPerson Entity { get; }
 
-        public KontaktListViewModelEntry(Guid id, AppViewModel avm) : this(avm.ctx.FindPerson(id)) { }
+        public KontaktListViewModelEntry(Guid id, IWalterDbService avm) : this(avm.ctx.FindPerson(id)) { }
         public KontaktListViewModelEntry(JuristischePerson j) : this(j as IPerson)
         {
             Entity = j;
