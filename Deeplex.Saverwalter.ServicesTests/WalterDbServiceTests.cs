@@ -1,10 +1,8 @@
 ﻿using Xunit;
-using Deeplex.Saverwalter.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FakeItEasy;
+using FluentAssertions;
+using Deeplex.Saverwalter.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.Services.Tests
 {
@@ -13,13 +11,26 @@ namespace Deeplex.Saverwalter.Services.Tests
         [Fact()]
         public void WalterDbServiceTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            var fake = A.Fake<INotificationService>();
+            var stub = new WalterDbService(fake);
+
+            stub.Should().BeOfType<WalterDbService>();
+            stub.root.Should().BeNull();
+            stub.ctx.Should().BeNull();
+
+            stub.root = "test";
+
+            stub.root.Should().Be("test");
         }
 
-        [Fact()]
+        [Fact(Skip = "TODO How to fake saving to db?")]
         public void SaveWalterTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            var fake = A.Fake<INotificationService>();
+            var stub = new WalterDbService(fake);
+            stub.ctx = A.Fake<SaverwalterContext>();
+
+            stub.SaveWalter();
         }
     }
 }

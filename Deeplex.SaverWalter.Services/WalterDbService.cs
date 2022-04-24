@@ -1,9 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.IO;
-using System.Threading.Tasks;
-
 namespace Deeplex.Saverwalter.Services
 {
     public interface IWalterDbService
