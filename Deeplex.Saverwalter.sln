@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.ViewMod
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.Services", "Deeplex.SaverWalter.Services\Deeplex.Saverwalter.Services.csproj", "{00080445-D5B6-4E16-A43E-E8DEED032A1F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deeplex.Saverwalter.ServicesTests", "Deeplex.Saverwalter.ServicesTests\Deeplex.Saverwalter.ServicesTests.csproj", "{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -260,6 +262,26 @@ Global
 		{00080445-D5B6-4E16-A43E-E8DEED032A1F}.Release|x64.Build.0 = Release|Any CPU
 		{00080445-D5B6-4E16-A43E-E8DEED032A1F}.Release|x86.ActiveCfg = Release|Any CPU
 		{00080445-D5B6-4E16-A43E-E8DEED032A1F}.Release|x86.Build.0 = Release|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Debug|ARM.Build.0 = Debug|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Debug|x64.Build.0 = Debug|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Debug|x86.Build.0 = Debug|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Release|ARM.ActiveCfg = Release|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Release|ARM.Build.0 = Release|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Release|ARM64.Build.0 = Release|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Release|x64.ActiveCfg = Release|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Release|x64.Build.0 = Release|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Release|x86.ActiveCfg = Release|Any CPU
+		{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
