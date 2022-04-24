@@ -49,7 +49,7 @@ namespace Deeplex.Saverwalter.Print
             CreateWordDocument(filepath, body);
         }
 
-        public static void SaveAsDocx(this ErhaltungsaufwendungWohnung e, string filepath)
+        public static void SaveAsDocx(this IErhaltungsaufwendungWohnung e, string filepath)
         {
             var body = DinA4();
             if (!e.Liste.IsEmpty)
@@ -60,7 +60,7 @@ namespace Deeplex.Saverwalter.Print
             CreateWordDocument(filepath, body);
         }
 
-        public static void SaveAsDocx(this Betriebskostenabrechnung b, string filepath)
+        public static void SaveAsDocx(this IBetriebskostenabrechnung b, string filepath)
         {
             var body = TPrint<Body>.Print(b, new WordPrint());
 

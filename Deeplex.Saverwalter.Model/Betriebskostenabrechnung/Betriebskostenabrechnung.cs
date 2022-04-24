@@ -7,7 +7,30 @@ using static Deeplex.Saverwalter.Model.Utils;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public sealed class Betriebskostenabrechnung
+    public interface IBetriebskostenabrechnung
+    {
+        IPerson? Ansprechpartner { get; }
+        List<Rechnungsgruppe> Gruppen { get; }
+        Wohnung Wohnung { get; }
+        DateTime Nutzungsbeginn { get; }
+        int Nutzungszeitspanne { get; }
+        int Abrechnungszeitspanne { get; }
+        DateTime Nutzungsende { get; }
+        int Jahr { get; }
+        IPerson Vermieter { get; }
+        List<IPerson> Mieter { get; }
+        double Gezahlt { get; }
+        double KaltMinderung { get; }
+        double KaltMiete { get; }
+        double Minderung { get; }
+        double NebenkostenMinderung { get; }
+        double Result { get; }
+        Adresse Adresse { get; }
+        DateTime Abrechnungsbeginn { get; }
+        DateTime Abrechnungsende { get; }
+    }
+
+    public sealed class Betriebskostenabrechnung: IBetriebskostenabrechnung
     {
         public List<Note> notes = new List<Note>();
 

@@ -4,10 +4,16 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public sealed class ErhaltungsaufwendungWohnung
+    public interface IErhaltungsaufwendungWohnung
+    {
+        ImmutableList<ErhaltungsaufwendungListeEntry> Liste { get; set; }
+        Wohnung Wohnung { get; }
+        double Summe => Liste.Sum(e => e.Betrag);
+    }
+
+    public sealed class ErhaltungsaufwendungWohnung : IErhaltungsaufwendungWohnung
     {
         public ImmutableList<ErhaltungsaufwendungListeEntry> Liste { get; set; }
-        public double Summe => Liste.Sum(e => e.Betrag);
         public Wohnung Wohnung { get; }
 
         public ErhaltungsaufwendungWohnung(SaverwalterContext _db, int WohnungId, int Jahr)

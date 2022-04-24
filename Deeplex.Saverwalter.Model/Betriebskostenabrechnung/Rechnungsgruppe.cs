@@ -5,10 +5,29 @@ using static Deeplex.Saverwalter.Model.Utils;
 
 namespace Deeplex.Saverwalter.Model
 {
-
-    public sealed class Rechnungsgruppe
+    public interface IRechnungsgruppe
     {
-        public List<Betriebskostenrechnung> Rechnungen;
+        string Bezeichnung { get; }
+        List<PersonenZeitIntervall> PersonenIntervall { get; }
+        List<PersonenZeitIntervall> GesamtPersonenIntervall { get; }
+        double GesamtWohnflaeche { get; }
+        double GesamtNutzflaeche { get; }
+        int GesamtEinheiten { get; }
+        double WFZeitanteil { get; }
+        double NFZeitanteil { get; }
+        double NEZeitanteil { get; }
+        List<Betriebskostenrechnung> Rechnungen { get; }
+        List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil { get; }
+        Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch { get; }
+        Dictionary<Betriebskostentyp, double> VerbrauchAnteil { get; }
+        double BetragKalt { get; }
+        List<Heizkostenberechnung> Heizkosten { get; }
+        double BetragWarm { get; }
+    }
+
+    public sealed class Rechnungsgruppe: IRechnungsgruppe
+    {
+        public List<Betriebskostenrechnung> Rechnungen { get; }
 
         private Betriebskostenabrechnung b { get; }
         private List<BetriebskostenrechnungsGruppe> gr => Rechnungen.First().Gruppen;
