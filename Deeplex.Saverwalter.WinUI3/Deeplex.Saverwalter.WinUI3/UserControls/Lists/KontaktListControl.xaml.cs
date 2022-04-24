@@ -193,16 +193,15 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // TODO
-            //var a = ((KontaktListViewModelEntry)((DataGrid)sender).SelectedItem)?.Entity;
-            //if (a is NatuerlichePerson n)
-            //{
-            //    App.ViewModel.updateListAnhang(new AnhangListViewModel(n, App.Impl, App.ViewModel));
-            //}
-            //else if (a is JuristischePerson j)
-            //{
-            //    App.ViewModel.updateListAnhang(new AnhangListViewModel(j, App.Impl, App.ViewModel));
-            //}
+            var a = ((KontaktListViewModelEntry)((DataGrid)sender).SelectedItem)?.Entity;
+            if (a is NatuerlichePerson n)
+            {
+                App.Window.ListAnhang.Value = new AnhangListViewModel(n, App.Impl, App.WalterService);
+            }
+            else if (a is JuristischePerson j)
+            {
+                App.Window.ListAnhang.Value = new AnhangListViewModel(j, App.Impl, App.WalterService);
+            }
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

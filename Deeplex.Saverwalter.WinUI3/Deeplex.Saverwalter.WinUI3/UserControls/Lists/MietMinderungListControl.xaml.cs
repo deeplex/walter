@@ -34,15 +34,14 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // TODO Remove or...?
-            //if (((DataGrid)sender).SelectedItem is MietminderungListViewModelEntry m)
-            //{
-            //    App.ViewModel.updateListAnhang(new AnhangListViewModel(m.Entity, App.Impl, App.ViewModel));
-            //}
-            //else
-            //{
-            //    App.ViewModel.clearAnhang();
-            //}
+            if (((DataGrid)sender).SelectedItem is MietminderungListViewModelEntry m)
+            {
+                App.Window.ListAnhang.Value = new AnhangListViewModel(m.Entity, App.Impl, App.WalterService);
+            }
+            else
+            {
+                App.Window.ListAnhang.Value = null;
+            }
         }
     }
 }

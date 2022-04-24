@@ -6,7 +6,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class VertragListViewPage : Page
     {
-        public VertragListViewModel ViewModel = new VertragListViewModel(App.WalterService);
+        public VertragListViewModel ViewModel { get; } = new VertragListViewModel(App.WalterService);
 
         public VertragListViewPage()
         {

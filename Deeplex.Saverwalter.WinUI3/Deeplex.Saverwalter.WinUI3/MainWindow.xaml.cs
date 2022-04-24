@@ -25,13 +25,13 @@ namespace Deeplex.Saverwalter.WinUI3
 
         public ObservableProperty<string> Titel = new();
         public AutoSuggestListViewModel AutoSuggest { get; private set; }
-        public AnhangListViewModel ListAnhang { get; private set; }
-        public AnhangListViewModel DetailAnhang { get; private set; }
+        public ObservableProperty<AnhangListViewModel> ListAnhang { get; private set; } = new();
+        public ObservableProperty<AnhangListViewModel> DetailAnhang { get; private set; } = new();
 
         public void Navigate<U>(Type SourcePage, U SendParameter)
         {
-            // TODO this is where it is actually called...
-            //App.Impl.clearAnhang();
+            DetailAnhang.Value = AnhangListViewModel.create(SendParameter, App.Impl, App.WalterService);
+            ListAnhang.Value = null;
 
             AppFrame.Navigate(SourcePage, SendParameter,
                 new DrillInNavigationTransitionInfo());

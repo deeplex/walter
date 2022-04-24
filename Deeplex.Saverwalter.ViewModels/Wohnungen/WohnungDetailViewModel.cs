@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class WohnungDetailViewModel : ValidatableBase
     {
-        public Wohnung Entity;
+        public Wohnung Entity { get; }
         public int Id => Entity.WohnungId;
 
         public ObservableProperty<int> BetriebskostenrechnungsJahr = new ObservableProperty<int>(DateTime.Now.Year - 1);

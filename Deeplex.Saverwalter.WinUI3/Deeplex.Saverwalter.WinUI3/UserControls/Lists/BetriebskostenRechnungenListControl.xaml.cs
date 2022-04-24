@@ -171,11 +171,10 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // TODO
-            //if (((DataGrid)sender)?.SelectedItem is BetriebskostenRechnungenListEntry r)
-            //{
-            //    App.ViewModel.updateListAnhang(new AnhangListViewModel(r.Entity, App.Impl, App.ViewModel));
-            //}
+            if (((DataGrid)sender)?.SelectedItem is BetriebskostenRechnungenListEntry r)
+            {
+                App.Window.ListAnhang.Value = new AnhangListViewModel(r.Entity, App.Impl, App.WalterService);
+            }
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

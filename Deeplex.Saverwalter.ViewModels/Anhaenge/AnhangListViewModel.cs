@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -36,6 +37,71 @@ namespace Deeplex.Saverwalter.ViewModels
             Db = db;
             Impl = impl;
             Text.Value = text;
+        }
+
+        public AnhangListViewModel(string text, ImmutableList<AnhangListViewModelEntry> liste, IAppImplementation impl, IWalterDbService db)
+        {
+            Text.Value = text;
+            Liste.Value = liste;
+            Impl = impl;
+            Db = db;
+        }
+
+        public static AnhangListViewModel create<T>(T entity, IAppImplementation impl, IWalterDbService db)
+        {
+            if (entity is Adresse a)
+            {
+                return new AnhangListViewModel(a, impl, db);
+            }
+            else if (entity is Betriebskostenrechnung b)
+            {
+                return new AnhangListViewModel(b, impl, db);
+            }
+            else if (entity is Erhaltungsaufwendung e)
+            {
+                return new AnhangListViewModel(e, impl, db);
+            }
+            else if (entity is Garage g)
+            {
+                return new AnhangListViewModel(g, impl, db);
+            }
+            else if (entity is JuristischePerson j)
+            {
+                return new AnhangListViewModel(j, impl, db);
+            }
+            else if (entity is Konto k)
+            {
+                return new AnhangListViewModel(k, impl, db);
+            }
+            else if (entity is Miete m)
+            {
+                return new AnhangListViewModel(m, impl, db);
+            }
+            else if (entity is MietMinderung mm)
+            {
+                return new AnhangListViewModel(mm, impl, db);
+            }
+            else if (entity is NatuerlichePerson n)
+            {
+                return new AnhangListViewModel(n, impl, db);
+            }
+            else if (entity is Guid guid && db.ctx.Vertraege.FirstOrDefault(e => e.VertragId == guid) is Vertrag v)
+            {
+                return new AnhangListViewModel(v, impl, db);
+            }
+            else if (entity is Wohnung w)
+            {
+                return new AnhangListViewModel(w, impl, db);
+            }
+            else if (entity is Zaehler z)
+            {
+                return new AnhangListViewModel(z, impl, db);
+            }
+            else if (entity is Zaehlerstand zs)
+            {
+                return new AnhangListViewModel(zs, impl, db);
+            }
+            return null;
         }
 
         public AnhangListViewModel(IAppImplementation impl, IWalterDbService db)

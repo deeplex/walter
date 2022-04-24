@@ -104,11 +104,10 @@
                     </SplitView.Content>
                     <SplitView.Pane>
                         <ScrollViewer>
-                            <!--TODOANHANG-->
-                            <!--<StackPanel>
-                                <uc:AnhangListControl AnhangViewModel="{x:Bind ViewModel.DetailAnhang.Value, Mode=OneWay}"/>
-                                <uc:AnhangListControl List="True"  AnhangViewModel="{x:Bind ViewModel.ListAnhang.Value, Mode=OneWay}"/>
-                            </StackPanel>-->
+                            <StackPanel>
+                                <uc:AnhangListControl AnhangViewModel="{x:Bind DetailAnhang.Value, Mode=OneWay}"/>
+                                <uc:AnhangListControl List="True"  AnhangViewModel="{x:Bind ListAnhang.Value, Mode=OneWay}"/>
+                            </StackPanel>
                         </ScrollViewer>
                     </SplitView.Pane>
                 </SplitView>

@@ -10,16 +10,16 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class JuristischePersonViewModel : PersonViewModel
     {
-        public JuristischePerson GetEntity => (JuristischePerson)Entity;
+        public new JuristischePerson Entity => (JuristischePerson)base.Entity;
         public int Id;
 
         public string Bezeichnung
         {
-            get => Entity.Bezeichnung;
+            get => base.Entity.Bezeichnung;
             set
             {
-                var old = GetEntity.Bezeichnung;
-                GetEntity.Bezeichnung = value;
+                var old = Entity.Bezeichnung;
+                Entity.Bezeichnung = value;
                 RaisePropertyChangedAuto(old, value);
             }
         }
@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (await Impl.Confirmation())
             {
-                Avm.ctx.JuristischePersonen.Remove(GetEntity);
+                Avm.ctx.JuristischePersonen.Remove(Entity);
                 Avm.SaveWalter();
             }
         }
@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Wohnungen.Value = Avm.ctx.Wohnungen
                 .ToList()
-                .Where(w => w.BesitzerId == GetEntity.PersonId ||
+                .Where(w => w.BesitzerId == Entity.PersonId ||
                     (WohnungenInklusiveMitglieder && Mitglieder.Value.Any(m => m.Entity.PersonId == w.BesitzerId)))
                 .Select(w => new WohnungListViewModelEntry(w, Avm))
                 .ToImmutableList();
@@ -81,7 +81,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public JuristischePersonViewModel(int id, IAppImplementation impl, IWalterDbService avm) : this(avm.ctx.JuristischePersonen.Find(id), impl, avm) { }
         public JuristischePersonViewModel(JuristischePerson j, IAppImplementation impl, IWalterDbService avm) : base(impl, avm)
         {
-            Entity = j;
+            base.Entity = j;
             Id = j.JuristischePersonId;
 
             UpdateListen();
@@ -120,18 +120,18 @@ namespace Deeplex.Saverwalter.ViewModels
                     return;
             }
 
-            if (Entity.Bezeichnung == null)
+            if (base.Entity.Bezeichnung == null)
             {
                 return;
             }
 
-            if (GetEntity.JuristischePersonId != 0)
+            if (Entity.JuristischePersonId != 0)
             {
-                Avm.ctx.JuristischePersonen.Update(GetEntity);
+                Avm.ctx.JuristischePersonen.Update(Entity);
             }
             else
             {
-                Avm.ctx.JuristischePersonen.Add(GetEntity);
+                Avm.ctx.JuristischePersonen.Add(Entity);
             }
             Avm.SaveWalter();
         }

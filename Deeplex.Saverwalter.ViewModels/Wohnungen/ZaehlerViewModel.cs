@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public ZaehlerViewModel self => this;
 
-        private Zaehler Entity;
+        public Zaehler Entity { get; }
 
         public int Id => Entity.ZaehlerId;
 

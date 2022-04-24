@@ -143,16 +143,15 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // TODO
-            //if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungenListViewModelEntry entry)
-            //{
-            //    var a = entry.Entity;
-            //    App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
-            //}
-            //else
-            //{
-            //    App.ViewModel.updateListAnhang(null);
-            //}
+            if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungenListViewModelEntry entry)
+            {
+                var a = entry.Entity;
+                App.Window.ListAnhang.Value = new AnhangListViewModel(a, App.Impl, App.WalterService);
+            }
+            else
+            {
+                App.Window.ListAnhang.Value = null;
+            }
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)
