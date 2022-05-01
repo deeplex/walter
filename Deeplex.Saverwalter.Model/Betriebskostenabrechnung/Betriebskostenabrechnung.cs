@@ -28,11 +28,18 @@ namespace Deeplex.Saverwalter.Model
         Adresse Adresse { get; }
         DateTime Abrechnungsbeginn { get; }
         DateTime Abrechnungsende { get; }
+        SaverwalterContext db { get; }
+        double Zeitanteil { get; }
+        List<Note> notes { get; }
+        Vertrag Vertrag { get; }
+        List<Vertrag> Vertragsversionen { get; }
+        List<Verbrauch> GetVerbrauch(Betriebskostenrechnung r, bool ganzeGruppe = false);
+        bool AllgStromVerrechnetMitHeizkosten { get; set; }
     }
 
     public sealed class Betriebskostenabrechnung: IBetriebskostenabrechnung
     {
-        public List<Note> notes = new List<Note>();
+        public List<Note> notes { get; } = new List<Note>();
 
         public SaverwalterContext db { get; }
         public int Jahr { get; set; }
@@ -89,7 +96,7 @@ namespace Deeplex.Saverwalter.Model
 
         public double Result => BezahltNebenkosten - BetragNebenkosten + KaltMinderung + NebenkostenMinderung;
 
-        public bool AllgStromVerrechnetMitHeizkosten = false;
+        public bool AllgStromVerrechnetMitHeizkosten { get; set; } = false;
 
         public Betriebskostenabrechnung(SaverwalterContext _db, int rowid, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
         {
@@ -123,11 +130,11 @@ namespace Deeplex.Saverwalter.Model
                                         .ThenInclude(z => z.Staende)
                 .First();
 
-            Gruppen = Vertrag.Wohnung.Betriebskostenrechnungsgruppen
-                .Where(g => g.Rechnung.BetreffendesJahr == Jahr)
-                .GroupBy(p => new SortedSet<int>(p.Rechnung.Gruppen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
-                .Select(g => new Rechnungsgruppe(this, g.Select(i => i.Rechnung).ToList()))
-                .ToList();
+                Gruppen = Vertrag.Wohnung.Betriebskostenrechnungsgruppen
+                    .Where(g => g.Rechnung.BetreffendesJahr == Jahr)
+                    .GroupBy(p => new SortedSet<int>(p.Rechnung.Gruppen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
+                    .Select(g => new Rechnungsgruppe(this, g.Select(i => i.Rechnung).ToList()))
+                    .ToList();
 
             // If Ansprechpartner or Besitzer is null => throw
         }
@@ -188,22 +195,6 @@ namespace Deeplex.Saverwalter.Model
             }
 
             return Deltas;
-        }
-    }
-
-    public sealed class Verbrauch
-    {
-        public Betriebskostentyp Betriebskostentyp;
-        public Zaehlertyp Zaehlertyp;
-        public string Kennnummer;
-        public double Delta;
-
-        public Verbrauch(Betriebskostentyp bTyp, string kennnummer, Zaehlertyp zTyp, double delta)
-        {
-            Betriebskostentyp = bTyp;
-            Zaehlertyp = zTyp;
-            Kennnummer = kennnummer;
-            Delta = delta;
         }
     }
 }

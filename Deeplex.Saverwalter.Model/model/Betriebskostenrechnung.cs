@@ -6,6 +6,7 @@ namespace Deeplex.Saverwalter.Model
 {
     public sealed class Betriebskostenrechnung
     {
+        // TODO this should be in extensions...
         public Betriebskostenrechnung ShallowCopy()
         {
             return (Betriebskostenrechnung)MemberwiseClone();
@@ -13,7 +14,7 @@ namespace Deeplex.Saverwalter.Model
 
         public Betriebskostenrechnung NewYear()
         {
-            var copy = ShallowCopy();
+            var copy = (Betriebskostenrechnung)ShallowCopy();
             copy.BetreffendesJahr += 1;
             copy.Betrag = 0;
             copy.BetriebskostenrechnungId = 0;

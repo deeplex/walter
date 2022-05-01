@@ -1,13 +1,18 @@
-﻿using Xunit;
+﻿using FakeItEasy;
+using FluentAssertions;
+using Xunit;
 
 namespace Deeplex.Saverwalter.Model.Tests
 {
     public class NoteTests
     {
-        [Fact()]
+        [Fact]
         public void NoteTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            var testMessage = "This is a test";
+            var severity = Severity.Error;
+            var stub = new Note(testMessage, severity);
+            stub.Should().BeOfType<Note>();
         }
     }
 }

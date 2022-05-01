@@ -1,13 +1,20 @@
-﻿using Xunit;
+﻿using FakeItEasy;
+using FluentAssertions;
+using System.Collections.Generic;
+using Xunit;
 
 namespace Deeplex.Saverwalter.Model.Tests
 {
     public class RechnungsgruppeTests
     {
-        [Fact()]
+        [Fact (Skip = "How to fake Betriebskostenrechnung")]
         public void RechnungsgruppeTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            var fake1 = A.Fake<IBetriebskostenabrechnung>();
+            var fake2 = A.Fake<List<Betriebskostenrechnung>>();
+            var stub = new Rechnungsgruppe(fake1, fake2);
+
+            stub.Should().BeOfType<Rechnungsgruppe>();
         }
     }
 }

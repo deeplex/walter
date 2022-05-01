@@ -25,7 +25,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.ViewMod
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.Services", "Deeplex.SaverWalter.Services\Deeplex.Saverwalter.Services.csproj", "{00080445-D5B6-4E16-A43E-E8DEED032A1F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deeplex.Saverwalter.ServicesTests", "Deeplex.Saverwalter.ServicesTests\Deeplex.Saverwalter.ServicesTests.csproj", "{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.ServicesTests", "Deeplex.Saverwalter.ServicesTests\Deeplex.Saverwalter.ServicesTests.csproj", "{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -117,8 +117,8 @@ Global
 		{81840D1D-EB12-40CE-BCD1-84E2B2E12ED9}.Release|ARM.Build.0 = Release|ARM
 		{81840D1D-EB12-40CE-BCD1-84E2B2E12ED9}.Release|ARM64.ActiveCfg = Release|ARM64
 		{81840D1D-EB12-40CE-BCD1-84E2B2E12ED9}.Release|ARM64.Build.0 = Release|ARM64
-		{81840D1D-EB12-40CE-BCD1-84E2B2E12ED9}.Release|x64.ActiveCfg = Release|x64
-		{81840D1D-EB12-40CE-BCD1-84E2B2E12ED9}.Release|x64.Build.0 = Release|x64
+		{81840D1D-EB12-40CE-BCD1-84E2B2E12ED9}.Release|x64.ActiveCfg = Release|Any CPU
+		{81840D1D-EB12-40CE-BCD1-84E2B2E12ED9}.Release|x64.Build.0 = Release|Any CPU
 		{81840D1D-EB12-40CE-BCD1-84E2B2E12ED9}.Release|x86.ActiveCfg = Release|x86
 		{81840D1D-EB12-40CE-BCD1-84E2B2E12ED9}.Release|x86.Build.0 = Release|x86
 		{8CCC5D0C-C01A-424C-B122-DA249DE1AF44}.Debug|Any CPU.ActiveCfg = Debug|x86

@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.Model
         // TODO Zähler sind hier noch nicht so richtig drin. Aktuell werden einfach alle Zähler eines
         // Typen in einen Topf geworfen, aber Zähler referenzieren jetzt jeweils die Allgemeinzähler.
         // Man kann also auch direkt die Zähler des Allgemeinzählers der Rechnung nehmen
-        public Heizkostenberechnung(Betriebskostenrechnung r, Betriebskostenabrechnung b)
+        public Heizkostenberechnung(Betriebskostenrechnung r, IBetriebskostenabrechnung b)
         {
             Betrag = r.Betrag;
             PauschalBetrag = r.Betrag * 1.05;
