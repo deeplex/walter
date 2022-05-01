@@ -39,11 +39,9 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
             stub.Vermieter.Value.Should().BeTrue();
             stub.Mieter.Value.Should().BeFalse();
             stub.Handwerker.Value.Should().BeFalse();
-            stub.AllRelevant.Should()
-                .BeOfType<ImmutableList<KontaktListViewModelEntry>>().And
+            stub.AllRelevant.Should().NotBeNull().And
                 .HaveCount(countOfNatuerlichePersonen + countOfJuristischePersonen);
-            stub.Kontakte.Value.Should()
-                .BeOfType<ImmutableList<KontaktListViewModelEntry>>().And
+            stub.Kontakte.Value.Should().NotBeNull().And
                 .HaveCount(stub.AllRelevant.Count);
         }
     }

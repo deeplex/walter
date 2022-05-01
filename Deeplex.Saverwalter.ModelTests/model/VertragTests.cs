@@ -1,13 +1,15 @@
-﻿using Xunit;
+﻿using FluentAssertions;
+using Xunit;
 
 namespace Deeplex.Saverwalter.Model.Tests
 {
     public class VertragTests
     {
-        [Fact()]
+        [Fact]
         public void VertragTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            var mock = new Vertrag();
+            mock.Should().NotBeNull();
         }
     }
 }

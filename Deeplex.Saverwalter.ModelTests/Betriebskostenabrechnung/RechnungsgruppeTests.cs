@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.Model.Tests
             var fake2 = A.Fake<List<Betriebskostenrechnung>>();
             var stub = new Rechnungsgruppe(fake1, fake2);
 
-            stub.Should().BeOfType<Rechnungsgruppe>();
+            stub.Should().NotBeNull();
         }
     }
 }

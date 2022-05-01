@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.Services.Tests
             var fake = A.Fake<INotificationService>();
             var stub = new WalterDbService(fake);
 
-            stub.Should().BeOfType<WalterDbService>();
+            stub.Should().NotBeNull();
             stub.root.Should().BeNull();
             stub.ctx.Should().BeNull();
 

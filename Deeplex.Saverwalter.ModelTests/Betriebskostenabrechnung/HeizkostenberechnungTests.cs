@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.Model.Tests
 
             var stub = new Heizkostenberechnung(fake1, fake2);
 
-            stub.Should().BeOfType<Heizkostenberechnung>();
+            stub.Should().NotBeNull();
         }
     }
 }

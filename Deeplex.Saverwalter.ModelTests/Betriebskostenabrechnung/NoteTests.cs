@@ -12,7 +12,7 @@ namespace Deeplex.Saverwalter.Model.Tests
             var testMessage = "This is a test";
             var severity = Severity.Error;
             var stub = new Note(testMessage, severity);
-            stub.Should().BeOfType<Note>();
+            stub.Should().NotBeNull();
         }
     }
 }

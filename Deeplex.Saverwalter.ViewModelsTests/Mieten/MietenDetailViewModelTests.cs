@@ -12,9 +12,9 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
         {
             var stub = new MietenDetailViewModel();
 
-            stub.Should().BeOfType(typeof(MietenDetailViewModel));
+            stub.Should().NotBeNull();
 
-            stub.Entity.Should().BeOfType(typeof(Miete));
+            stub.Entity.Should().NotBeNull();
 
             stub.Betrag.Should().Be(0);
             stub.BetreffenderMonat.Should().BeSameDateAs(DateTime.Now.AsUtcKind());
@@ -44,9 +44,9 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
             };
             var stub = new MietenDetailViewModel(mock);
 
-            stub.Should().BeOfType(typeof(MietenDetailViewModel));
+            stub.Should().NotBeNull();
 
-            stub.Entity.Should().BeOfType(typeof(Miete));
+            stub.Entity.Should().NotBeNull();
 
             stub.Betrag.Should().Be(betrag);
             stub.BetreffenderMonat.Should().BeSameDateAs(betreffenderMonat);
@@ -76,9 +76,9 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
             stub.Zahlungsdatum = zahlungsDatum;
             stub.Notiz = notiz;
 
-            stub.Should().BeOfType(typeof(MietenDetailViewModel));
+            stub.Should().NotBeNull();
 
-            stub.Entity.Should().BeOfType(typeof(Miete));
+            stub.Entity.Should().NotBeNull();
 
             stub.Betrag.Should().Be(betrag);
             stub.BetreffenderMonat.Should().BeSameDateAs(betreffenderMonat);

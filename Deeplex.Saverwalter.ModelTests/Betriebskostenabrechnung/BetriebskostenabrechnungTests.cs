@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.Model.Tests
             var stub = new Betriebskostenabrechnung(
                 dfake, vfake.rowid, jahr, beginn, ende);
 
-            stub.Should().BeOfType<Betriebskostenabrechnung>();
+            stub.Should().NotBeNull();
         }
     }
 }

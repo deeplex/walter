@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using FluentAssertions;
+using Xunit;
 
 namespace Deeplex.Saverwalter.Model.Tests
 {
@@ -7,7 +8,9 @@ namespace Deeplex.Saverwalter.Model.Tests
         [Fact()]
         public void AnhangTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            var stub = new Anhang();
+            stub.Should().NotBeNull();
+            stub.AnhangId.Should().NotBeEmpty();
         }
     }
 }

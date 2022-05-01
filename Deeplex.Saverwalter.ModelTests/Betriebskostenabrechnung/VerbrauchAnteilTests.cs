@@ -19,8 +19,7 @@ namespace Deeplex.Saverwalter.Model.Tests
             var typ = Zaehlertyp.Gas;
 
             var stub = new VerbrauchAnteil(kennnummer, typ, delta, anteil);
-
-            stub.Should().BeOfType<VerbrauchAnteil>();
+            stub.Should().NotBeNull();
         }
     }
 }

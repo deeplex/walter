@@ -22,7 +22,7 @@ namespace Deeplex.Saverwalter.Model.Tests
             var fake = A.Fake<Rechnungsgruppe>();
             var stub = new PersonenZeitIntervall((mockB, mockE, p), fake);
 
-            stub.Should().BeOfType<PersonenZeitIntervall>();
+            stub.Should().NotBeNull();
         }
     }
 }

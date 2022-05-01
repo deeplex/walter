@@ -14,9 +14,9 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
             //var mockList = new MietenListViewModel();
             var stub = new MietenListViewModelEntry(mockMiete, null); // should be called with mockList
 
-            stub.Should().BeOfType(typeof(MietenListViewModelEntry));
+            stub.Should().NotBeNull();
 
-            stub.Entity.Should().BeOfType(typeof(Miete));
+            stub.Entity.Should().NotBeNull();
 
             stub.Betrag.Should().Be(0);
             stub.BetreffenderMonat.Should().BeSameDateAs(DateTime.Now.AsUtcKind());
@@ -47,9 +47,9 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
             //var mockList = new MietenListViewModel();
             var stub = new MietenListViewModelEntry(mockMiete, null); // should be called with mockList
 
-            stub.Should().BeOfType(typeof(MietenListViewModelEntry));
+            stub.Should().NotBeNull();
 
-            stub.Entity.Should().BeOfType(typeof(Miete));
+            stub.Entity.Should().NotBeNull();
 
             stub.Betrag.Should().Be(betrag);
             stub.BetreffenderMonat.Should().BeSameDateAs(betreffenderMonat);
@@ -79,9 +79,9 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
             // stub.Zahlungsdatum = zahlungsDatum;
             stub.Notiz = notiz;
 
-            stub.Should().BeOfType(typeof(MietenDetailViewModel));
+            stub.Should().NotBeNull();
 
-            stub.Entity.Should().BeOfType(typeof(Miete));
+            stub.Entity.Should().NotBeNull();
 
             stub.Betrag.Should().Be(betrag);
             stub.BetreffenderMonat.Should().BeSameDateAs(betreffenderMonat);

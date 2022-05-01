@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
 
             var stub = new KontaktListViewModelEntry(pers);
 
-            stub.Type.Should().BeOfType<NatuerlichePerson>();
+            stub.Type.Should().NotBeNull();
             stub.Vorname.Should().Be(pers.Vorname);
             stub.Name.Should().Be(name);
 
@@ -52,7 +52,7 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
             var stub = new KontaktListViewModelEntry(pers);
 
             stub.Vorname.Should().BeNull();
-            stub.Type.Should().BeOfType<JuristischePerson>();
+            stub.Should().NotBeNull();
             stub.Name.Should().Be(name);
 
             PersonViewModelTests.PersonViewModelTest(stub, pers);

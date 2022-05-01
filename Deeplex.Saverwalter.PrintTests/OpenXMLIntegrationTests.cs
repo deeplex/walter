@@ -16,10 +16,10 @@ namespace Deeplex.Saverwalter.Print.Tests
             var stub = OpenXMLIntegration.DinA4();
 
             var sectionProperties = stub.ChildElements[0];
-            sectionProperties.Should().BeOfType<SectionProperties>();
+            sectionProperties.Should().NotBeNull();
             var pageMargin = sectionProperties.ChildElements[0];
             var pageSize = sectionProperties.ChildElements[1];
-            pageMargin.Should().BeOfType<PageMargin>();
+            pageMargin.Should().NotBeNull();
             if (pageMargin is PageMargin m)
             {
                 m.Left.Should().Be(1418);
@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.Print.Tests
                 m.Top.Should().Be(958);
                 m.Bottom.Should().Be(958);
             }
-            pageSize.ChildElements[1].Should().BeOfType<PageSize>();
+            pageSize.ChildElements[1].Should().NotBeNull();
             if (pageSize is PageSize s)
             {
                 s.Code.Should().Be(9);
