@@ -6,7 +6,7 @@ namespace Deeplex.Saverwalter.Model
     public static class KalteBetriebskostenExtensions
     {
         public static DateTime AsMin(this DateTime t)
-            => t.Ticks == 0 ? DateTime.Now.AsUtcKind() : t;
+            => (t.Ticks == 0 ? DateTime.Now : t).AsUtcKind();
 
         public static DateTime AsUtcKind(this DateTime dt)
             => new DateTime(dt.Ticks, DateTimeKind.Utc);

@@ -1,13 +1,17 @@
-﻿using Xunit;
+﻿using FakeItEasy;
+using FluentAssertions;
+using Xunit;
 
 namespace Deeplex.Saverwalter.Model.Tests
 {
     public class AnhangExtensionsTests
     {
-        [Fact()]
+        [Fact]
         public void getPathTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            var mock = new Anhang();
+            var path = mock.getPath("some string");
+            path.Should().NotBeNull();
         }
     }
 }
