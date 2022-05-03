@@ -22,7 +22,7 @@ namespace Deeplex.Saverwalter.Model.Tests
             var btyp = Betriebskostentyp.Breitbandkabelanschluss;
             var ztyp = Zaehlertyp.Kaltwasser;
 
-            var kennnummer = A.Fake<string>();
+            var kennnummer = "mockKennnummer";
             var stub = new Verbrauch(btyp, kennnummer, ztyp, delta);
 
             stub.Should().NotBeNull();

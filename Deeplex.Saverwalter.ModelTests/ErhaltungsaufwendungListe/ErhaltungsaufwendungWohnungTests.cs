@@ -1,13 +1,17 @@
-﻿using Xunit;
+﻿using FakeItEasy;
+using FluentAssertions;
+using Xunit;
 
 namespace Deeplex.Saverwalter.Model.Tests
 {
     public class ErhaltungsaufwendungWohnungTests
     {
-        [Fact()]
+        [Fact(Skip = "Fake SaverwalterContext")]
         public void ErhaltungsaufwendungWohnungTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            var fake = A.Fake<SaverwalterContext>();
+            var stub = new ErhaltungsaufwendungWohnung(fake, 0, 0);
+            stub.Should().NotBeNull();
         }
     }
 }

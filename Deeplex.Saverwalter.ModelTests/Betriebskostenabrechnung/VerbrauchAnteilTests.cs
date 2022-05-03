@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.Model.Tests
         [InlineData(102, 100)]
         public void VerbrauchAnteilTest(double delta, double anteil)
         {
-            var kennnummer = A.Fake<string>();
+            var kennnummer = "mockKennummer";
             var typ = Zaehlertyp.Gas;
 
             var stub = new VerbrauchAnteil(kennnummer, typ, delta, anteil);
