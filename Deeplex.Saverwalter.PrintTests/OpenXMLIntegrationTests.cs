@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Deeplex.Saverwalter.Print;
-using Xunit;
+﻿using Xunit;
 using FluentAssertions;
 using DocumentFormat.OpenXml.Wordprocessing;
 using FakeItEasy;
@@ -22,37 +20,38 @@ namespace Deeplex.Saverwalter.Print.Tests
             pageMargin.Should().NotBeNull();
             if (pageMargin is PageMargin m)
             {
-                m.Left.Should().Be(1418);
-                m.Right.Should().Be(567);
-                m.Top.Should().Be(958);
-                m.Bottom.Should().Be(958);
+                m.Left.Value.Should().Be(1418);
+                m.Right.Value.Should().Be(567);
+                m.Top.Value.Should().Be(958);
+                m.Bottom.Value.Should().Be(958);
             }
-            pageSize.ChildElements[1].Should().NotBeNull();
+            pageSize.Should().NotBeNull();
             if (pageSize is PageSize s)
             {
-                s.Code.Should().Be(9);
-                s.Width.Should().Be(11906);
-                s.Height.Should().Be(16838);
+                s.Code.Value.Should().Be(9);
+                s.Width.Value.Should().Be(11906);
+                s.Height.Value.Should().Be(16838);
             }
         }
 
-        [Fact()]
+        // https://stackoverflow.com/questions/9064566/is-it-possible-to-mock-fake-an-extension-method
+        [Fact(Skip = "Can't fake extension methods see comment.")]
         public void SaveAsDocxTest()
         {
             var fake = A.Fake<IErhaltungsaufwendungWohnung>();
             var mockPath = "test";
 
             fake.SaveAsDocx(mockPath);
-            //Assert.True(false, "This test needs an implementation");
+            A.CallTo(() => fake.SaveAsDocx(mockPath)).MustHaveHappened();
         }
 
-        [Fact()]
+        [Fact(Skip = "Can't fake extension methods see comment.")]
         public void SaveAsDocxTest1()
         {
             //Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Can't fake extension methods see comment.")]
         public void SaveAsDocxTest2()
         {
             //Assert.True(false, "This test needs an implementation");
