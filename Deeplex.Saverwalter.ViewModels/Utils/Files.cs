@@ -11,7 +11,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace Deeplex.Saverwalter.ViewModels.Utils
+namespace Deeplex.Saverwalter.ViewModels
 {
     public static class Files
     {

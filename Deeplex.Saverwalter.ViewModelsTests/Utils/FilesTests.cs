@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace Deeplex.Saverwalter.ViewModels.Utils.Tests
+namespace Deeplex.Saverwalter.ViewModels.Tests
 {
     public class FilesTests
     {

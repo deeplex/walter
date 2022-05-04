@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 w = w.Concat(ww).ToList();
                 filtered = filtered.Concat(filterered).ToList();
 
-                await Utils.Files.PrintErhaltungsaufwendungen(w, false, Jahr.Value, db, fs, filtered);
+                await Files.PrintErhaltungsaufwendungen(w, false, Jahr.Value, db, fs, filtered);
             }, _ => true);
             Jahr.Value = DateTime.Now.Year - 1;
         }

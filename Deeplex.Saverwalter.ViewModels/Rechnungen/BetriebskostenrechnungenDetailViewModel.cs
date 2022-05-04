@@ -23,8 +23,8 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (await NotifcationService.Confirmation())
             {
-                Avm.ctx.Betriebskostenrechnungen.Remove(Entity);
-                Avm.SaveWalter();
+                Db.ctx.Betriebskostenrechnungen.Remove(Entity);
+                Db.SaveWalter();
             }
         }
 
@@ -185,13 +185,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen
             = new ObservableProperty<ImmutableList<WohnungListViewModelEntry>>();
 
-        public IWalterDbService Avm;
+        public IWalterDbService Db;
         public INotificationService NotifcationService;
         public void UpdateWohnungen(ImmutableList<WohnungListViewModelEntry> list)
         {
             var flagged = Wohnungen.Value.Count != list.Count;
             Wohnungen.Value = list
-                .Select(e => new WohnungListViewModelEntry(e.Entity, Avm))
+                .Select(e => new WohnungListViewModelEntry(e.Entity, Db))
                 .ToImmutableList();
             if (flagged) Update();
         }
@@ -217,14 +217,14 @@ namespace Deeplex.Saverwalter.ViewModels
                         WohnungId = s.Id,
                     };
                     added.Add(a);
-                    Avm.ctx.Betriebskostenrechnungsgruppen.Add(a);
+                    Db.ctx.Betriebskostenrechnungsgruppen.Add(a);
                 });
 
             var beforeWohnung = Wohnungen.Value.Select(w => w.Entity);
 
             // Remove old Gruppen
             beforeEntity.ToList().ForEach(w =>
-                Avm.ctx.Betriebskostenrechnungsgruppen
+                Db.ctx.Betriebskostenrechnungsgruppen
                     .ToList()
                     .Where(g =>
                         g.Rechnung.BetriebskostenrechnungId == Id &&
@@ -234,23 +234,23 @@ namespace Deeplex.Saverwalter.ViewModels
                     .ForEach(g =>
                     {
                         removed.Add(g);
-                        Avm.ctx.Betriebskostenrechnungsgruppen.Remove(g);
+                        Db.ctx.Betriebskostenrechnungsgruppen.Remove(g);
                     }));
         }
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, INotificationService ns, IWalterDbService db)
         {
             Entity = r;
-            Avm = db;
+            Db = db;
             NotifcationService = ns;
 
-            Wohnungen.Value = r.Gruppen.Select(g => new WohnungListViewModelEntry(g.Wohnung, Avm)).ToImmutableList();
+            Wohnungen.Value = r.Gruppen.Select(g => new WohnungListViewModelEntry(g.Wohnung, Db)).ToImmutableList();
             if (BetriebskostenrechnungsWohnung.Value == null)
             {
                 BetriebskostenrechnungsWohnung.Value = Wohnungen.Value.FirstOrDefault();
             }
 
-            AllgemeinZaehler_List = Avm.ctx.ZaehlerSet
+            AllgemeinZaehler_List = Db.ctx.ZaehlerSet
                 .Select(a => new ZaehlerListViewModelEntry(a))
                 .ToList();
             AllgemeinZaehler = AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Zaehler?.ZaehlerId);
@@ -275,7 +275,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public BetriebskostenrechnungDetailViewModel(IList<WohnungListViewModelEntry> l, int betreffendesJahr, INotificationService ns, IWalterDbService avm) : this(new Betriebskostenrechnung(), ns, avm)
         {
-            var thisYear = Avm.ctx.Betriebskostenrechnungen.ToList().Where(r =>
+            var thisYear = Db.ctx.Betriebskostenrechnungen.ToList().Where(r =>
                r.BetreffendesJahr == BetreffendesJahr - 1 &&
                r.Gruppen.Count == Wohnungen.Value.Count &&
                Wohnungen.Value.All(e => r.Gruppen.Exists(r => r.WohnungId == e.Id)))
@@ -302,14 +302,14 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.BetriebskostenrechnungId != 0)
             {
-                Avm.ctx.Betriebskostenrechnungen.Update(Entity);
+                Db.ctx.Betriebskostenrechnungen.Update(Entity);
             }
             else
             {
-                Avm.ctx.Betriebskostenrechnungen.Add(Entity);
+                Db.ctx.Betriebskostenrechnungen.Add(Entity);
             }
             SaveWohnungen();
-            Avm.SaveWalter();
+            Db.SaveWalter();
         }
 
 

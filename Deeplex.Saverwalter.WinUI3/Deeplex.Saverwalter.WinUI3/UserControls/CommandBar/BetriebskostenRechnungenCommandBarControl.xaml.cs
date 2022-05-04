@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                     ViewModel.Wohnungen.Value,
                     ViewModel.BetreffendesJahr,
                     ViewModel.NotifcationService,
-                    ViewModel.Avm);
+                    ViewModel.Db);
                 App.Window.Navigate(typeof(BetriebskostenrechnungenDetailViewPage), next);
             }
         }
