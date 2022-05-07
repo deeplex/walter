@@ -38,7 +38,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public ZaehlerListControl()
         {
             InitializeComponent();
-            ViewModel = new ZaehlerListViewModel(App.ViewModel);
+            ViewModel = new ZaehlerListViewModel(App.WalterService);
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, IdProp) => UpdateFilter());
             RegisterPropertyChangedCallback(ZaehlerIdProperty, (DepObj, IdProp) => UpdateFilter());
@@ -63,8 +63,8 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             if (ViewModel.SelectedZaehler != null)
             {
                 App.Window.Navigate(
-                    typeof(ZaehlerDetailPage),
-                    App.Walter.ZaehlerSet.Find(ViewModel.SelectedZaehler.Id));
+                    typeof(ZaehlerDetailViewPage),
+                    App.WalterService.ctx.ZaehlerSet.Find(ViewModel.SelectedZaehler.Id));
             }
         }
 
@@ -96,8 +96,8 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var a = ((ZaehlerListEntry)((DataGrid)sender).SelectedItem).Entity;
-            App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
+            var a = ((ZaehlerListViewModelEntry)((DataGrid)sender).SelectedItem).Entity;
+            App.Window.ListAnhang.Value = new AnhangListViewModel(a, App.FileService, App.NotificationService, App.WalterService);
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

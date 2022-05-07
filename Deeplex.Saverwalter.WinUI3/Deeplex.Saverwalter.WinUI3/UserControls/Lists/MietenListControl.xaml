@@ -34,7 +34,7 @@
                         <mtuuc:DataGrid.Columns>
                             <mtuuc:DataGridTemplateColumn>
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="vm:MietenListEntry">
+                                    <DataTemplate x:DataType="vm:MietenListViewModelEntry">
                                         <Button
                                             HorizontalAlignment="Center"
                                             Background="Transparent"
@@ -47,17 +47,17 @@
                             <mtuuc:DataGridTextColumn Header="Datum" Binding="{Binding Datum, Converter={StaticResource DateStringConverterKey}}"/>
                             <mtuuc:DataGridTemplateColumn Header="Betr. Monat">
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="vm:MietenListEntry">
+                                    <DataTemplate x:DataType="vm:MietenListViewModelEntry">
                                         <DatePicker
                                             Language="de"
-                                            SelectedDate="{x:Bind Monat, Mode=TwoWay}"
+                                            SelectedDate="{x:Bind BetreffenderMonat, Mode=TwoWay}"
                                             DayVisible="False"/>
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>
                             </mtuuc:DataGridTemplateColumn>
                             <mtuuc:DataGridTemplateColumn Header="Betrag">
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="vm:MietenListEntry">
+                                    <DataTemplate x:DataType="vm:MietenListViewModelEntry">
                                         <muxc:NumberBox Value="{x:Bind Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                     </DataTemplate>
                                 </mtuuc:DataGridTemplateColumn.CellTemplate>

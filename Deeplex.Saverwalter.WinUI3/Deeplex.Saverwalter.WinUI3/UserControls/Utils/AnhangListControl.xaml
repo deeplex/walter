@@ -42,7 +42,7 @@
                     SelectionMode="None"
                     ItemsSource="{x:Bind ViewModel.Value.Liste.Value, Mode=OneWay}">
                     <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="vm:AnhangListEntry">
+                        <DataTemplate x:DataType="vm:AnhangListViewModelEntry">
                             <RelativePanel
                                 DoubleTapped="Oeffne_Click"
                                 Width="300">

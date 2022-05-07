@@ -1,14 +1,19 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Saverwalter.WinUI3.Views;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
+using Deeplex.Utils.ObjectModel;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.WinUI3
 {
@@ -21,9 +26,18 @@ namespace Deeplex.Saverwalter.WinUI3
         public CommandBarControl CommandBar => commandBar;
         public SplitView SplitView => splitview;
 
+        public ObservableProperty<string> Titel = new();
+        public AutoSuggestListViewModel AutoSuggest { get; private set; }
+        
+        // DetailAnhang is the list of Anhaenge for a View which is the current Main Window
+        public ObservableProperty<AnhangListViewModel> DetailAnhang { get; private set; } = new();
+        // ListAnhang is to be filled using GridViews. TODO #17
+        public ObservableProperty<AnhangListViewModel> ListAnhang { get; private set; } = new();
+
         public void Navigate<U>(Type SourcePage, U SendParameter)
         {
-            ViewModel.clearAnhang();
+            DetailAnhang.Value = AnhangListViewModel.create(SendParameter, App.FileService, App.NotificationService, App.WalterService);
+            ListAnhang.Value = null;
 
             AppFrame.Navigate(SourcePage, SendParameter,
                 new DrillInNavigationTransitionInfo());
@@ -33,24 +47,49 @@ namespace Deeplex.Saverwalter.WinUI3
         {
             InitializeComponent();
 
-            root.Loaded += Root_Loaded;
+            MainGrid.Loaded += Root_Loaded;
+        }
+
+        private async Task initializeDatabase()
+        {
+            if (App.WalterService.root == null || !File.Exists(App.WalterService.root + ".db"))
+            {
+                var path = await App.NotificationService.Confirmation(
+                        "Noch keine Datenbank ausgewählt",
+                        "Datenbank suchen, oder leere Datenbank erstellen?",
+                        "Existierende Datenbank auswählen", "Erstelle neue leere Datenbank") ?
+                        await App.FileService.pickFile(".db") :
+                        await App.FileService.saveFile("walter", new string[] { ".db" });
+                App.WalterService.root = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+            }
+
+            if (App.WalterService.ctx != null)
+            {
+                App.WalterService.ctx.Dispose();
+            }
+            var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
+            optionsBuilder.UseSqlite("Data Source=" + App.WalterService.root + ".db");
+            App.WalterService.ctx = new SaverwalterContext(optionsBuilder.Options);
+            App.WalterService.ctx.Database.Migrate();
+
         }
 
         private async void Root_Loaded(object sender, RoutedEventArgs e)
         {
             var Settings = Windows.Storage.ApplicationData.Current.LocalSettings;
             var str = Settings.Values["root"] as string;
-            App.ViewModel.root = str;
-            await ViewModel.initializeDatabase(App.Impl);
+            App.WalterService.root = str;
+            await initializeDatabase();
 
-            if (str != App.ViewModel.root)
+            if (str != App.WalterService.root)
             {
                 Utils.Elements.SetDatabaseAsDefault();
             }
+
+            AutoSuggest = new AutoSuggestListViewModel(App.WalterService);
         }
 
         public Frame AppFrame => frame;
-        public AppViewModel ViewModel = App.ViewModel;
 
         public readonly string KontaktListLabel = "Kontakte";
         public readonly string VertragListLabel = "Verträge";
@@ -63,11 +102,11 @@ namespace Deeplex.Saverwalter.WinUI3
         {
             var label = args.InvokedItem as string;
             var pageType =
-                args.IsSettingsInvoked ? typeof(SettingsPage) :
-                label == KontaktListLabel ? typeof(KontaktListPage) :
-                label == WohnungListLabel ? typeof(WohnungListPage) :
-                label == VertragListLabel ? typeof(VertragListPage) :
-                label == ZaehlerListLabel ? typeof(ZaehlerListPage) :
+                args.IsSettingsInvoked ? typeof(SettingsViewPage) :
+                label == KontaktListLabel ? typeof(KontaktListViewPage) :
+                label == WohnungListLabel ? typeof(WohnungListViewPage) :
+                label == VertragListLabel ? typeof(VertragListViewPage) :
+                label == ZaehlerListLabel ? typeof(ZaehlerListViewPage) :
                 label == BetriebskostenrechnungenListLabel ? typeof(BetriebskostenRechnungenListViewPage) :
                 label == ErhaltungsaufwendungenListLabel ? typeof(ErhaltungsaufwendungenListViewPage) :
                 null;
@@ -80,33 +119,33 @@ namespace Deeplex.Saverwalter.WinUI3
 
         private void OnNavigatingToPage(object sender, NavigatingCancelEventArgs e)
         {
-            if (e.SourcePageType == typeof(KontaktListPage) ||
-                e.SourcePageType == typeof(JuristischePersonenDetailPage) ||
-                e.SourcePageType == typeof(NatuerlichePersonDetailPage))
+            if (e.SourcePageType == typeof(KontaktListViewPage) ||
+                e.SourcePageType == typeof(JuristischePersonenDetailViewPage) ||
+                e.SourcePageType == typeof(NatuerlichePersonDetailViewPage))
             {
                 NavView.SelectedItem = KontaktListMenuItem;
             }
-            else if (e.SourcePageType == typeof(WohnungListPage) || e.SourcePageType == typeof(WohnungDetailPage))
+            else if (e.SourcePageType == typeof(WohnungListViewPage) || e.SourcePageType == typeof(WohnungDetailViewPage))
             {
                 NavView.SelectedItem = WohnungListMenuItem;
             }
-            else if (e.SourcePageType == typeof(VertragListPage) || e.SourcePageType == typeof(VertragDetailViewPage))
+            else if (e.SourcePageType == typeof(VertragListViewPage) || e.SourcePageType == typeof(VertragDetailViewPage))
             {
                 NavView.SelectedItem = VertragListMenuItem;
             }
-            else if (e.SourcePageType == typeof(BetriebskostenRechnungenListViewPage) || e.SourcePageType == typeof(BetriebskostenrechnungenDetailPage))
+            else if (e.SourcePageType == typeof(BetriebskostenRechnungenListViewPage) || e.SourcePageType == typeof(BetriebskostenrechnungenDetailViewPage))
             {
                 NavView.SelectedItem = BetriebskostenListMenuItem;
             }
-            else if (e.SourcePageType == typeof(ErhaltungsaufwendungenListViewPage) || e.SourcePageType == typeof(ErhaltungsaufwendungenDetailPage))
+            else if (e.SourcePageType == typeof(ErhaltungsaufwendungenListViewPage) || e.SourcePageType == typeof(ErhaltungsaufwendungenDetailViewPage))
             {
                 NavView.SelectedItem = ErhaltungsAufwendungenListMenuItem;
             }
-            else if (e.SourcePageType == typeof(ZaehlerListPage) || e.SourcePageType == typeof(ZaehlerDetailPage))
+            else if (e.SourcePageType == typeof(ZaehlerListViewPage) || e.SourcePageType == typeof(ZaehlerDetailViewPage))
             {
                 NavView.SelectedItem = ZaehlerListMenuItem;
             }
-            else if (e.SourcePageType == typeof(SettingsPage))
+            else if (e.SourcePageType == typeof(SettingsViewPage))
             {
                 NavView.SelectedItem = NavView.SettingsItem;
             }
@@ -116,7 +155,6 @@ namespace Deeplex.Saverwalter.WinUI3
             }
         }
 
-
         private void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {
             if (AppFrame.CanGoBack)
@@ -125,29 +163,31 @@ namespace Deeplex.Saverwalter.WinUI3
             }
         }
 
-        private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
-        {
-            App.ViewModel.updateAutoSuggestEntries(sender.Text);
-        }
-
         private Type GetEntryPage(object Entry)
         {
-            return Entry is NatuerlichePerson ? typeof(NatuerlichePersonDetailPage) :
-                Entry is JuristischePerson ? typeof(JuristischePersonenDetailPage) :
-                Entry is Wohnung ? typeof(WohnungDetailPage) :
-                Entry is Zaehler ? typeof(ZaehlerDetailPage) :
+            return Entry is NatuerlichePerson ? typeof(NatuerlichePersonDetailViewPage) :
+                Entry is JuristischePerson ? typeof(JuristischePersonenDetailViewPage) :
+                Entry is Wohnung ? typeof(WohnungDetailViewPage) :
+                Entry is Zaehler ? typeof(ZaehlerDetailViewPage) :
                 Entry is Vertrag ? typeof(VertragDetailViewPage) :
-                Entry is Betriebskostenrechnung ? typeof(BetriebskostenrechnungenDetailPage) :
-                Entry is Erhaltungsaufwendung ? typeof(ErhaltungsaufwendungenDetailPage) :
+                Entry is Betriebskostenrechnung ? typeof(BetriebskostenrechnungenDetailViewPage) :
+                Entry is Erhaltungsaufwendung ? typeof(ErhaltungsaufwendungenDetailViewPage) :
                 null;
         }
+
+        private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            AutoSuggest.update(sender.Text);
+            sender.IsSuggestionListOpen = true;
+        }
+
         private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
             if (args.ChosenSuggestion == null)
             {
                 return;
             }
-            var Entity = (args.ChosenSuggestion as AutoSuggestEntry).Entity;
+            var Entity = (args.ChosenSuggestion as AutoSuggestListViewModelEntry).Entity;
             Navigate(GetEntryPage(Entity), Entity);
             sender.IsSuggestionListOpen = false;
             sender.Text = "";

@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
@@ -8,116 +9,26 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class MietenListViewModel : BindableBase
     {
-        public ObservableProperty<ImmutableList<MietenListEntry>> Liste
-            = new ObservableProperty<ImmutableList<MietenListEntry>>();
+        public ObservableProperty<ImmutableList<MietenListViewModelEntry>> Liste = new();
         public Guid VertragId;
 
-        public AppViewModel Avm;
-        public IAppImplementation Impl;
+        public IWalterDbService Db;
+        public INotificationService NotificationService;
 
-        public MietenListViewModel(Guid VertragGuid, IAppImplementation impl, AppViewModel avm)
+        public MietenListViewModel(Guid VertragGuid, INotificationService ns, IWalterDbService db)
         {
             VertragId = VertragGuid;
-            Avm = avm;
-            Impl = impl;
+            Db = db;
             var self = this;
-            Liste.Value = Avm.ctx.Mieten
+            Liste.Value = Db.ctx.Mieten
                 .Where(m => m.VertragId == VertragGuid)
-                .Select(m => new MietenListEntry(m, self))
+                .Select(m => new MietenListViewModelEntry(m, self))
                 .ToImmutableList();
         }
 
         public void AddToList(Miete z)
         {
-            Liste.Value = Liste.Value.Add(new MietenListEntry(z, this));
+            Liste.Value = Liste.Value.Add(new MietenListViewModelEntry(z, this));
         }
-    }
-
-    public sealed class MietenListEntry : BindableBase
-    {
-        public Miete Entity { get; }
-        public double Betrag
-        {
-            get => Entity.Betrag ?? 0;
-            set
-            {
-                var old = Entity.Betrag;
-                Entity.Betrag = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-        public DateTime Zahlungsdatum => Entity.Zahlungsdatum;
-        public DateTimeOffset Monat
-        {
-            get => Entity.BetreffenderMonat;
-            set
-            {
-                var old = Entity.BetreffenderMonat;
-                Entity.BetreffenderMonat = value.UtcDateTime;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-        public string Notiz
-        {
-            get => Entity.Notiz;
-            set
-            {
-                var old = Entity.Notiz;
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        AppViewModel Avm;
-
-        public MietenListEntry(Miete m, MietenListViewModel vm)
-        {
-            Entity = m;
-
-            Avm = vm.Avm;
-
-            SelfDestruct = new AsyncRelayCommand(async _ =>
-            {
-                if (await vm.Impl.Confirmation())
-                {
-                    vm.Liste.Value = vm.Liste.Value.Remove(this);
-                    vm.Avm.ctx.Mieten.Remove(Entity);
-                    vm.Avm.SaveWalter();
-                }
-            }, _ => true);
-
-            PropertyChanged += OnUpdate;
-        }
-
-        private void OnUpdate(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case nameof(Monat):
-                case nameof(Betrag):
-                case nameof(Notiz):
-                    break;
-                default:
-                    return;
-            }
-
-            if (Entity.VertragId == Guid.Empty)
-            {
-                return;
-            }
-
-
-            if (Entity.MieteId != 0)
-            {
-                Avm.ctx.Mieten.Update(Entity);
-            }
-            else
-            {
-                Avm.ctx.Mieten.Add(Entity);
-            }
-            Avm.SaveWalter();
-        }
-
-        public AsyncRelayCommand SelfDestruct;
     }
 }

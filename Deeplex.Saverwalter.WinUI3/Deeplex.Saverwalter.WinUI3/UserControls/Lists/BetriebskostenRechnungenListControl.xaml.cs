@@ -60,7 +60,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public BetriebskostenRechnungenListControl()
         {
             InitializeComponent();
-            ViewModel = new BetriebskostenRechnungenListViewModel(App.ViewModel);
+            ViewModel = new BetriebskostenRechnungenListViewModel(App.WalterService);
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, IdProp) => UpdateFilter());
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, IdProp) => UpdateFilter());
@@ -76,17 +76,17 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                 {
                     if (ViewModel.SelectedRechnung.Tmpl != 0)
                     {
-                        var Wohnungen = App.Walter.Betriebskostenrechnungen.Find(ViewModel.SelectedRechnung.Tmpl).Gruppen.Select(g => g.Wohnung).ToList();
-                        App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), new Tuple<Betriebskostenrechnung, int, List<Wohnung>>(ViewModel.SelectedRechnung.Entity, WohnungId, Wohnungen));
+                        var Wohnungen = App.WalterService.ctx.Betriebskostenrechnungen.Find(ViewModel.SelectedRechnung.Tmpl).Gruppen.Select(g => g.Wohnung).ToList();
+                        App.Window.Navigate(typeof(BetriebskostenrechnungenDetailViewPage), new Tuple<Betriebskostenrechnung, int, List<Wohnung>>(ViewModel.SelectedRechnung.Entity, WohnungId, Wohnungen));
                     }
                     else
                     {
-                        App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), new Tuple<Betriebskostenrechnung, int>(ViewModel.SelectedRechnung.Entity, WohnungId));
+                        App.Window.Navigate(typeof(BetriebskostenrechnungenDetailViewPage), new Tuple<Betriebskostenrechnung, int>(ViewModel.SelectedRechnung.Entity, WohnungId));
                     }
                 }
                 else
                 {
-                    App.Window.Navigate(typeof(BetriebskostenrechnungenDetailPage), ViewModel.SelectedRechnung.Entity);
+                    App.Window.Navigate(typeof(BetriebskostenrechnungenDetailViewPage), ViewModel.SelectedRechnung.Entity);
                 }
             }
         }
@@ -173,7 +173,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         {
             if (((DataGrid)sender)?.SelectedItem is BetriebskostenRechnungenListEntry r)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(r.Entity, App.Impl, App.ViewModel));
+                App.Window.ListAnhang.Value = new AnhangListViewModel(r.Entity, App.FileService, App.NotificationService, App.WalterService);
             }
         }
 

@@ -30,22 +30,22 @@ namespace Deeplex.Saverwalter.Model
             return ret;
         }
 
-        public static string Title(this Betriebskostenabrechnung b)
+        public static string Title(this IBetriebskostenabrechnung b)
             => "Betriebskostenabrechnung " + b.Jahr.ToString();
 
-        public static string Mieterliste(this Betriebskostenabrechnung b)
+        public static string Mieterliste(this IBetriebskostenabrechnung b)
             => "Mieter: " + string.Join(", ", b.Mieter.Select(m => m.Bezeichnung));
 
-        public static string Mietobjekt(this Betriebskostenabrechnung b)
+        public static string Mietobjekt(this IBetriebskostenabrechnung b)
             => "Mietobjekt: " + b.Adresse.Strasse + " " + b.Adresse.Hausnummer + ", " + b.Wohnung.Bezeichnung;
 
-        public static string Abrechnungszeitraum(this Betriebskostenabrechnung b)
+        public static string Abrechnungszeitraum(this IBetriebskostenabrechnung b)
             => b.Abrechnungsbeginn.ToString("dd.MM.yyyy") + " - " + b.Abrechnungsende.ToString("dd.MM.yyyy");
 
-        public static string Nutzungszeitraum(this Betriebskostenabrechnung b)
+        public static string Nutzungszeitraum(this IBetriebskostenabrechnung b)
             => b.Nutzungsbeginn.ToString("dd.MM.yyyy") + " - " + b.Nutzungsende.ToString("dd.MM.yyyy");
 
-        public static string Gruss(this Betriebskostenabrechnung b)
+        public static string Gruss(this IBetriebskostenabrechnung b)
         {
             var gruss = b.Mieter.Aggregate("", (r, m) =>
             {
@@ -64,17 +64,17 @@ namespace Deeplex.Saverwalter.Model
             return gruss.Remove(1).ToUpper() + gruss.Substring(1);
         }
 
-        public static string ResultTxt(this Betriebskostenabrechnung b)
+        public static string ResultTxt(this IBetriebskostenabrechnung b)
             => "wir haben die Kosten, die im Abrechnungszeitraum angefallen sind, berechnet. " +
                 "Die Abrechnung schließt mit " + (b.Result > 0 ?
                 "einem Guthaben" : "einer Nachforderung") + " in Höhe von: ";
 
-        public static string RefundDemand(this Betriebskostenabrechnung b)
+        public static string RefundDemand(this IBetriebskostenabrechnung b)
             => b.Result > 0 ?
             "Dieser Betrag wird über die von Ihnen angegebene Bankverbindung erstattet." :
             "Bitte überweisen Sie diesen Betrag auf das Ihnen bekannte Konto.";
 
-        public static string GenerischerText(this Betriebskostenabrechnung b)
+        public static string GenerischerText(this IBetriebskostenabrechnung b)
         {
             // TODO Text auf Anwesenheit von Heizung oder so testen und anpassen.
 
@@ -98,19 +98,19 @@ namespace Deeplex.Saverwalter.Model
             return t;
         }
 
-        public static bool dir(this Betriebskostenabrechnung b)
+        public static bool dir(this IBetriebskostenabrechnung b)
             => b.Gruppen.Any(g => g.Rechnungen.Any(r => r.Gruppen.Count == 1));
 
-        private static bool uml(this Betriebskostenabrechnung b, UmlageSchluessel k) =>
+        private static bool uml(this IBetriebskostenabrechnung b, UmlageSchluessel k) =>
             b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => r.Schluessel == k));
 
-        public static bool nWF(this Betriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachWohnflaeche);
-        public static bool nNF(this Betriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachNutzflaeche);
-        public static bool nNE(this Betriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachNutzeinheit);
-        public static bool nPZ(this Betriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachPersonenzahl);
-        public static bool nVb(this Betriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachVerbrauch);
+        public static bool nWF(this IBetriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachWohnflaeche);
+        public static bool nNF(this IBetriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachNutzflaeche);
+        public static bool nNE(this IBetriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachNutzeinheit);
+        public static bool nPZ(this IBetriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachPersonenzahl);
+        public static bool nVb(this IBetriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachVerbrauch);
 
-        public static string Anmerkung(this Betriebskostenabrechnung b)
+        public static string Anmerkung(this IBetriebskostenabrechnung b)
             => "Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger) Kostenanteil";
 
     }

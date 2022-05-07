@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public WohnungListControl()
         {
             InitializeComponent();
-            ViewModel = new WohnungListViewModel(App.ViewModel);
+            ViewModel = new WohnungListViewModel(App.WalterService);
             RegisterPropertyChangedCallback(FilterProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(ListeProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, Prop) => UpdateFilter());
@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            App.Window.Navigate(typeof(WohnungDetailPage), ViewModel.SelectedWohnung.Value.Entity);
+            App.Window.Navigate(typeof(WohnungDetailViewPage), ViewModel.SelectedWohnung.Value.Entity);
         }
 
         public int WohnungId
@@ -66,16 +66,16 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                   typeof(WohnungListControl),
                   new PropertyMetadata(0));
 
-        public ImmutableList<WohnungListEntry> Liste
+        public ImmutableList<WohnungListViewModelEntry> Liste
         {
-            get { return (ImmutableList<WohnungListEntry>)GetValue(ListeProperty); }
+            get { return (ImmutableList<WohnungListViewModelEntry>)GetValue(ListeProperty); }
             set { SetValue(ListeProperty, value); }
         }
 
         public static readonly DependencyProperty ListeProperty
             = DependencyProperty.Register(
                   "Liste",
-                  typeof(ImmutableList<WohnungListEntry>),
+                  typeof(ImmutableList<WohnungListViewModelEntry>),
                   typeof(WohnungListControl),
                   new PropertyMetadata(null));
 
@@ -94,8 +94,8 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var a = ((WohnungListEntry)((DataGrid)sender).SelectedItem).Entity;
-            App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
+            var a = ((WohnungListViewModelEntry)((DataGrid)sender).SelectedItem).Entity;
+            App.Window.ListAnhang.Value = new AnhangListViewModel(a, App.FileService, App.NotificationService, App.WalterService);
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

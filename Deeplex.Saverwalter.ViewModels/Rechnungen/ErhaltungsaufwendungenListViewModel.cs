@@ -1,7 +1,6 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -9,14 +8,14 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class ErhaltungsaufwendungenListViewModel : BindableBase, IFilterViewModel
     {
-        public ObservableProperty<ImmutableList<ErhaltungsaufwendungenListEntry>> Liste
-            = new ObservableProperty<ImmutableList<ErhaltungsaufwendungenListEntry>>();
+        public ObservableProperty<ImmutableList<ErhaltungsaufwendungenListViewModelEntry>> Liste
+            = new ObservableProperty<ImmutableList<ErhaltungsaufwendungenListViewModelEntry>>();
 
         public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
-        public ImmutableList<ErhaltungsaufwendungenListEntry> AllRelevant { get; set; }
+        public ImmutableList<ErhaltungsaufwendungenListViewModelEntry> AllRelevant { get; set; }
 
-        private ErhaltungsaufwendungenListEntry mSelectedAufwendung;
-        public ErhaltungsaufwendungenListEntry SelectedAufwendung
+        private ErhaltungsaufwendungenListViewModelEntry mSelectedAufwendung;
+        public ErhaltungsaufwendungenListViewModelEntry SelectedAufwendung
         {
             get => mSelectedAufwendung;
             set
@@ -26,35 +25,15 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ErhaltungsaufwendungenListViewModel(AppViewModel avm)
+        public ErhaltungsaufwendungenListViewModel(IWalterDbService db)
         {
-            AllRelevant = avm.ctx.Erhaltungsaufwendungen
+            AllRelevant = db.ctx.Erhaltungsaufwendungen
                 .Include(e => e.Wohnung)
                 .ThenInclude(w => w.Adresse)
-                .Select(w => new ErhaltungsaufwendungenListEntry(w, avm))
+                .Select(w => new ErhaltungsaufwendungenListViewModelEntry(w, db))
                 .ToImmutableList();
 
             Liste.Value = AllRelevant;
-        }
-    }
-
-    public sealed class ErhaltungsaufwendungenListEntry
-    {
-        public readonly Erhaltungsaufwendung Entity;
-        public ObservableProperty<bool> Enabled = new ObservableProperty<bool>(true);
-        public string Aussteller => Avm.ctx.FindPerson(Entity.AusstellerId).Bezeichnung;
-        public int Id => Entity.ErhaltungsaufwendungId;
-        public WohnungListEntry Wohnung;
-        public string Bezeichnung => Entity.Bezeichnung;
-        public double Betrag => Entity.Betrag;
-        public DateTime Datum => Entity.Datum;
-        private AppViewModel Avm;
-
-        public ErhaltungsaufwendungenListEntry(Erhaltungsaufwendung e, AppViewModel avm)
-        {
-            Entity = e;
-            Avm = avm;
-            Wohnung = new WohnungListEntry(Entity.Wohnung, Avm);
         }
     }
 }

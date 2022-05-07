@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public ErhaltungsaufwendungenListControl()
         {
             InitializeComponent();
-            ViewModel = new ErhaltungsaufwendungenListViewModel(App.ViewModel);
+            ViewModel = new ErhaltungsaufwendungenListViewModel(App.WalterService);
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, IdProp) => UpdateFilter());
             RegisterPropertyChangedCallback(ListeProperty, (DepObj, IdProp) => UpdateFilter());
@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         {
             if (ViewModel.SelectedAufwendung != null)
             {
-                App.Window.Navigate(typeof(ErhaltungsaufwendungenDetailPage), ViewModel.SelectedAufwendung.Id);
+                App.Window.Navigate(typeof(ErhaltungsaufwendungenDetailViewPage), ViewModel.SelectedAufwendung.Id);
             }
         }
 
@@ -87,16 +87,16 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                   typeof(ErhaltungsaufwendungenListControl),
                   new PropertyMetadata(0));
 
-        public ImmutableList<ErhaltungsaufwendungenListEntry> Liste
+        public ImmutableList<ErhaltungsaufwendungenListViewModelEntry> Liste
         {
-            get { return (ImmutableList<ErhaltungsaufwendungenListEntry>)GetValue(ListeProperty); }
+            get { return (ImmutableList<ErhaltungsaufwendungenListViewModelEntry>)GetValue(ListeProperty); }
             set { SetValue(ListeProperty, value); }
         }
 
         public static readonly DependencyProperty ListeProperty
             = DependencyProperty.Register(
                   "Liste",
-                  typeof(ImmutableList<ErhaltungsaufwendungenListEntry>),
+                  typeof(ImmutableList<ErhaltungsaufwendungenListViewModelEntry>),
                   typeof(ErhaltungsaufwendungenListControl),
                   new PropertyMetadata(null));
 
@@ -143,14 +143,14 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungenListEntry entry)
+            if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungenListViewModelEntry entry)
             {
                 var a = entry.Entity;
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(a, App.Impl, App.ViewModel));
+                App.Window.ListAnhang.Value = new AnhangListViewModel(a, App.FileService, App.NotificationService, App.WalterService);
             }
             else
             {
-                App.ViewModel.updateListAnhang(null);
+                App.Window.ListAnhang.Value = null;
             }
         }
 

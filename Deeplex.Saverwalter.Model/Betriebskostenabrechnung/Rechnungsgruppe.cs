@@ -5,12 +5,32 @@ using static Deeplex.Saverwalter.Model.Utils;
 
 namespace Deeplex.Saverwalter.Model
 {
-
-    public sealed class Rechnungsgruppe
+    public interface IRechnungsgruppe
     {
-        public List<Betriebskostenrechnung> Rechnungen;
+        string Bezeichnung { get; }
+        List<PersonenZeitIntervall> PersonenIntervall { get; }
+        List<PersonenZeitIntervall> GesamtPersonenIntervall { get; }
+        double GesamtWohnflaeche { get; }
+        double GesamtNutzflaeche { get; }
+        int GesamtEinheiten { get; }
+        double WFZeitanteil { get; }
+        double NFZeitanteil { get; }
+        double NEZeitanteil { get; }
+        List<Betriebskostenrechnung> Rechnungen { get; }
+        List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil { get; }
+        Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch { get; }
+        Dictionary<Betriebskostentyp, double> VerbrauchAnteil { get; }
+        double BetragKalt { get; }
+        List<Heizkostenberechnung> Heizkosten { get; }
+        double BetragWarm { get; }
+        double GesamtBetragWarm { get; }
+    }
 
-        private Betriebskostenabrechnung b { get; }
+    public sealed class Rechnungsgruppe: IRechnungsgruppe
+    {
+        public List<Betriebskostenrechnung> Rechnungen { get; }
+
+        private IBetriebskostenabrechnung b { get; }
         private List<BetriebskostenrechnungsGruppe> gr => Rechnungen.First().Gruppen;
         private IEnumerable<Vertrag> alleVertraegeDieserWohnungen => gr.SelectMany(w => w.Wohnung.Vertraege.Where(v =>
                 v.Beginn <= b.Abrechnungsende && (v.Ende is null || v.Ende >= b.Abrechnungsbeginn)));
@@ -110,7 +130,7 @@ namespace Deeplex.Saverwalter.Model
         public double GesamtBetragWarm => Heizkosten.Sum(h => h.PauschalBetrag);
         public double BetragWarm => Heizkosten.Sum(h => h.Kosten);
 
-        public Rechnungsgruppe(Betriebskostenabrechnung _b, List<Betriebskostenrechnung> gruppe)
+        public Rechnungsgruppe(IBetriebskostenabrechnung _b, List<Betriebskostenrechnung> gruppe)
         {
             Rechnungen = gruppe;
             b = _b;
@@ -165,40 +185,6 @@ namespace Deeplex.Saverwalter.Model
 
             // TODO refactor function to switch from tuple to class - or replace this function by constructor
             return merged.Select(m => new PersonenZeitIntervall(m, parent)).ToList();
-        }
-    }
-
-    public class PersonenZeitIntervall
-    {
-        public DateTime Beginn { get; }
-        public DateTime Ende { get; }
-        public int Tage => (Ende - Beginn).Days + 1;
-        public int GesamtTage => (new DateTime(Ende.Year, 12, 31) - new DateTime(Ende.Year, 1, 1)).Days + 1;
-        public int Personenzahl { get; }
-        public Rechnungsgruppe Parent { get; }
-
-        public PersonenZeitIntervall((DateTime b, DateTime e, int p) i, Rechnungsgruppe parent)
-        {
-            Beginn = i.b;
-            Ende = i.e;
-            Personenzahl = i.p;
-            Parent = parent;
-        }
-    }
-
-    public sealed class VerbrauchAnteil
-    {
-        public string Kennnummer;
-        public Zaehlertyp Typ;
-        public double Delta;
-        public double Anteil;
-
-        public VerbrauchAnteil(string kennnummer, Zaehlertyp typ, double delta, double anteil)
-        {
-            Kennnummer = kennnummer;
-            Typ = typ;
-            Delta = delta;
-            Anteil = anteil;
         }
     }
 }

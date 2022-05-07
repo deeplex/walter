@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             InitializeComponent();
             RegisterPropertyChangedCallback(VertragGuidProperty, (DepObj, Prop) =>
             {
-                ViewModel = new MietenListViewModel(VertragGuid, App.Impl, App.ViewModel);
+                ViewModel = new MietenListViewModel(VertragGuid, App.NotificationService, App.WalterService);
             });
         }
 
@@ -34,13 +34,13 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (((DataGrid)sender).SelectedItem is MietenListEntry m)
+            if (((DataGrid)sender).SelectedItem is MietenListViewModelEntry m)
             {
-                App.ViewModel.updateListAnhang(new AnhangListViewModel(m.Entity, App.Impl, App.ViewModel));
+                App.Window.ListAnhang.Value = new AnhangListViewModel(m.Entity, App.FileService, App.NotificationService, App.WalterService);
             }
             else
             {
-                App.ViewModel.clearAnhang();
+                App.Window.ListAnhang.Value = null;
             }
         }
     }

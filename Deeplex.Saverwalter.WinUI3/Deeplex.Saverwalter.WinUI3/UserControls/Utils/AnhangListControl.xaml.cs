@@ -52,9 +52,9 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private async void Runterladen_Click(object sender, RoutedEventArgs e)
         {
-            if (((FrameworkElement)sender).DataContext is AnhangListEntry a)
+            if (((FrameworkElement)sender).DataContext is AnhangListViewModelEntry a)
             {
-                var picker = Files.FileSavePicker(Path.GetExtension(a.DateiName));
+                var picker = Utils.Files.FileSavePicker(Path.GetExtension(a.DateiName));
                 picker.SuggestedFileName = a.DateiName;
                 await picker.PickSaveFileAsync();
             }
@@ -62,7 +62,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Loeschen_Click(object sender, RoutedEventArgs e)
         {
-            if (((FrameworkElement)sender).DataContext is AnhangListEntry a)
+            if (((FrameworkElement)sender).DataContext is AnhangListViewModelEntry a)
             {
                 a.DeleteFile();
             }
@@ -70,7 +70,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Oeffne_Click(object sender, RoutedEventArgs e)
         {
-            if (((FrameworkElement)sender).DataContext is AnhangListEntry a)
+            if (((FrameworkElement)sender).DataContext is AnhangListViewModelEntry a)
             {
                 a.OpenFile();
             }

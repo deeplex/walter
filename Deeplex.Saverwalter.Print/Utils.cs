@@ -9,10 +9,10 @@ namespace Deeplex.Saverwalter.Print
 
         public static string Prozent(double d) => string.Format("{0:N2}%", d * 100);
         public static string Euro(double d) => string.Format("{0:N2}€", d);
-        public static string Unit(double d, string unit) => string.Format("{0:N2} " + unit, d);
+        public static string Unit(double d, string unit) => string.Format("{0:N2}" + unit, d);
         public static string Celsius(double d) => string.Format("{0:N2}°C", d);
-        public static string Celsius(int d) => d.ToString() + "°C";
-        public static string Quadrat(double d) => string.Format("{0:N2} m²", d);
+        public static string Celsius(int d) => Celsius((double)d);
+        public static string Quadrat(double d) => string.Format("{0:N2}m²", d);
         public static string Datum(DateTime d) => d.ToString("dd.MM.yyyy");
     }
 }

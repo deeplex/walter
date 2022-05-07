@@ -35,7 +35,7 @@
                         <mtuuc:DataGrid.Columns>
                             <mtuuc:DataGridTemplateColumn>
                                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="vm:MietMinderungListEntry">
+                                    <DataTemplate x:DataType="vm:MietminderungListViewModelEntry">
                                         <Button
                                             HorizontalAlignment="Center"
                                             Background="Transparent"
