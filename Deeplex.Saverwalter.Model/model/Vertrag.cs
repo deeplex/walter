@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -20,6 +21,7 @@ namespace Deeplex.Saverwalter.Model
         public Guid? AnsprechpartnerId { get; set; }
         public string? VersionsNotiz { get; set; }
         public string? Notiz { get; set; }
+        public List<Garage> Garagen { get; private set; } = new List<Garage>();
 
         public Vertrag()
         {
