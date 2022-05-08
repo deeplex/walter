@@ -31,16 +31,16 @@ namespace Deeplex.Saverwalter.Model
         public List<Betriebskostenrechnung> Rechnungen { get; }
 
         private IBetriebskostenabrechnung b { get; }
-        private List<BetriebskostenrechnungsGruppe> gr => Rechnungen.First().Gruppen;
-        private IEnumerable<Vertrag> alleVertraegeDieserWohnungen => gr.SelectMany(w => w.Wohnung.Vertraege.Where(v =>
+        private List<Wohnung> gr => Rechnungen.First().Wohnungen.ToList();
+        private IEnumerable<Vertrag> alleVertraegeDieserWohnungen => gr.SelectMany(w => w.Vertraege.Where(v =>
                 v.Beginn <= b.Abrechnungsende && (v.Ende is null || v.Ende >= b.Abrechnungsbeginn)));
 
         public string Bezeichnung => Rechnungen.First().GetWohnungenBezeichnung();
-        public double GesamtWohnflaeche => gr.Sum(w => w.Wohnung.Wohnflaeche);
+        public double GesamtWohnflaeche => gr.Sum(w => w.Wohnflaeche);
         public double WFZeitanteil => b.Wohnung.Wohnflaeche / GesamtWohnflaeche * b.Zeitanteil;
         public double NFZeitanteil => b.Wohnung.Nutzflaeche / GesamtNutzflaeche * b.Zeitanteil;
-        public double GesamtNutzflaeche => gr.Sum(w => w.Wohnung.Nutzflaeche);
-        public int GesamtEinheiten => gr.Sum(w => w.Wohnung.Nutzeinheit);
+        public double GesamtNutzflaeche => gr.Sum(w => w.Nutzflaeche);
+        public int GesamtEinheiten => gr.Sum(w => w.Nutzeinheit);
         public double NEZeitanteil => (double)b.Wohnung.Nutzeinheit / GesamtEinheiten * b.Zeitanteil;
         public List<PersonenZeitIntervall> GesamtPersonenIntervall
         {
@@ -143,8 +143,7 @@ namespace Deeplex.Saverwalter.Model
                 var copy = allgStrom.ShallowCopy();
                 var idx = Rechnungen.IndexOf(allgStrom);
 
-                copy.Betrag -= b.Vertrag.Wohnung.Betriebskostenrechnungsgruppen
-                    .Select(g => g.Rechnung)
+                copy.Betrag -= b.Vertrag.Wohnung.Betriebskostenrechnungen
                     .Where(g => g.BetreffendesJahr == b.Jahr && (int)g.Typ % 2 == 1)
                     .Select(r => r.Betrag)
                     .Sum() * 0.05;

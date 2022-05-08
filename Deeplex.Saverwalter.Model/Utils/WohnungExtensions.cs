@@ -6,7 +6,7 @@ namespace Deeplex.Saverwalter.Model
     public static class WohnungExtensions
     {
         public static string GetWohnungenBezeichnung(this Betriebskostenrechnung r)
-            => r.Gruppen.Select(g => g.Wohnung).ToList().GetWohnungenBezeichnung();
+            => r.Wohnungen.ToList().GetWohnungenBezeichnung();
 
         public static string GetWohnungenBezeichnung(this List<Wohnung> Wohnungen)
             => string.Join(" — ", Wohnungen

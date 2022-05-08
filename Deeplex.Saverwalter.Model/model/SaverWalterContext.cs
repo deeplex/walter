@@ -13,7 +13,6 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Anhang> Anhaenge { get; set; } = null!;
         public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
         public DbSet<BetriebskostenrechnungAnhang> BetriebskostenrechnungAnhaenge { get; set; } = null!;
-        public DbSet<BetriebskostenrechnungsGruppe> Betriebskostenrechnungsgruppen { get; set; } = null!;
         public DbSet<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; set; } = null!;
         public DbSet<ErhaltungsaufwendungAnhang> ErhaltungsaufwendungAnhaenge { get; set; } = null!;
         public DbSet<Garage> Garagen { get; set; } = null!;

@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.Model.Tests
             newYear.BetreffendesJahr.Should().Be(jahr + 1);
             newYear.Betrag.Should().Be(0);
             newYear.BetriebskostenrechnungId.Should().Be(0);
-            newYear.Gruppen.Should().BeEmpty();
+            newYear.Wohnungen.Should().BeEmpty();
         }
     }
 }

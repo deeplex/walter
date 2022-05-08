@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.Model
             copy.BetreffendesJahr += 1;
             copy.Betrag = 0;
             copy.BetriebskostenrechnungId = 0;
-            copy.Gruppen = new List<BetriebskostenrechnungsGruppe>();
+            //copy.Wohnungen = new List<Wohnung>(); // TODO15
 
             return copy;
         }
@@ -38,7 +38,7 @@ namespace Deeplex.Saverwalter.Model
 
         public string? Notiz { get; set; }
 
-        public List<BetriebskostenrechnungsGruppe> Gruppen { get; private set; } = new List<BetriebskostenrechnungsGruppe>();
+        public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
     }
 
     public enum HKVO_P9A2

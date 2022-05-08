@@ -76,7 +76,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                 {
                     if (ViewModel.SelectedRechnung.Tmpl != 0)
                     {
-                        var Wohnungen = App.WalterService.ctx.Betriebskostenrechnungen.Find(ViewModel.SelectedRechnung.Tmpl).Gruppen.Select(g => g.Wohnung).ToList();
+                        var Wohnungen = App.WalterService.ctx.Betriebskostenrechnungen.Find(ViewModel.SelectedRechnung.Tmpl).Wohnungen.ToList();
                         App.Window.Navigate(typeof(BetriebskostenrechnungenDetailViewPage), new Tuple<Betriebskostenrechnung, int, List<Wohnung>>(ViewModel.SelectedRechnung.Entity, WohnungId, Wohnungen));
                     }
                     else

@@ -36,8 +36,8 @@ namespace Deeplex.Saverwalter.ViewModels
                         .Where(w => w.Ende == null || w.Ende < DateTime.Now)
                         .Select(w => new AutoSuggestListViewModelEntry(w))).ToList()
                 .Concat(ctx.ZaehlerSet.Select(w => new AutoSuggestListViewModelEntry(w))).ToList()
-                .Concat(ctx.Betriebskostenrechnungen.Include(w => w.Gruppen)
-                    .ThenInclude(w => w.Wohnung).Select(w => new AutoSuggestListViewModelEntry(w))).ToList()
+                .Concat(ctx.Betriebskostenrechnungen.Include(w => w.Wohnungen)
+                .Select(w => new AutoSuggestListViewModelEntry(w))).ToList()
                     .Where(w => w.Bezeichnung != null).ToImmutableList();
             Entries.Value = AllEntries;
         }

@@ -57,7 +57,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
             App.WalterService.ctx.Adressen
                 .Include(i => i.Wohnungen)
-                .ThenInclude(w => w.Betriebskostenrechnungsgruppen)
+                .ThenInclude(w => w.Betriebskostenrechnungen)
                 .ToList()
                 .ForEach(a =>
                 {

@@ -199,43 +199,43 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (Entity == null) return;
 
-            var added = new List<BetriebskostenrechnungsGruppe>();
-            var removed = new List<BetriebskostenrechnungsGruppe>();
+            var added = new List<Wohnung>();
+            var removed = new List<Wohnung>();
 
             // Wohnungen that were in through groups before
-            var beforeEntity = Entity.Gruppen.Select(g => g.Wohnung);
+            var beforeEntity = Entity.Wohnungen;
 
-            // Add missing Gruppen
-            Wohnungen.Value
-                .Where(w => !beforeEntity.Contains(w.Entity))
-                .ToList()
-                .ForEach(s =>
-                {
-                    var a = new BetriebskostenrechnungsGruppe()
-                    {
-                        Rechnung = Entity,
-                        WohnungId = s.Id,
-                    };
-                    added.Add(a);
-                    Db.ctx.Betriebskostenrechnungsgruppen.Add(a);
-                });
+            // Add missing Gruppen // TODO15 Refactor.
+            //Wohnungen.Value
+            //    .Where(w => !beforeEntity.Contains(w.Entity))
+            //    .ToList()
+            //    .ForEach(s =>
+            //    {
+            //        var a = new BetriebskostenrechnungsGruppe()
+            //        {
+            //            Rechnung = Entity,
+            //            WohnungId = s.Id,
+            //        };
+            //        added.Add(a);
+            //        Db.ctx.Betriebskostenrechnungsgruppen.Add(a);
+            //    });
 
             var beforeWohnung = Wohnungen.Value.Select(w => w.Entity);
 
             // Remove old Gruppen
-            beforeEntity.ToList().ForEach(w =>
-                Db.ctx.Betriebskostenrechnungsgruppen
-                    .ToList()
-                    .Where(g =>
-                        g.Rechnung.BetriebskostenrechnungId == Id &&
-                        g.WohnungId == w.WohnungId &&
-                        !Wohnungen.Value.Exists(e => e.Id == g.WohnungId))
-                    .ToList()
-                    .ForEach(g =>
-                    {
-                        removed.Add(g);
-                        Db.ctx.Betriebskostenrechnungsgruppen.Remove(g);
-                    }));
+            //beforeEntity.ToList().ForEach(w => // TODO15 refactor
+            //    Db.ctx.Betriebskostenrechnungsgruppen
+            //        .ToList()
+            //        .Where(g =>
+            //            g.Rechnung.BetriebskostenrechnungId == Id &&
+            //            g.WohnungId == w.WohnungId &&
+            //            !Wohnungen.Value.Exists(e => e.Id == g.WohnungId))
+            //        .ToList()
+            //        .ForEach(g =>
+            //        {
+            //            removed.Add(g);
+            //            Db.ctx.Betriebskostenrechnungsgruppen.Remove(g);
+            //        }));
         }
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, INotificationService ns, IWalterDbService db)
@@ -244,7 +244,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Db = db;
             NotifcationService = ns;
 
-            Wohnungen.Value = r.Gruppen.Select(g => new WohnungListViewModelEntry(g.Wohnung, Db)).ToImmutableList();
+            Wohnungen.Value = r.Wohnungen.Select(g => new WohnungListViewModelEntry(g, Db)).ToImmutableList();
             if (BetriebskostenrechnungsWohnung.Value == null)
             {
                 BetriebskostenrechnungsWohnung.Value = Wohnungen.Value.FirstOrDefault();
@@ -277,8 +277,8 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             var thisYear = Db.ctx.Betriebskostenrechnungen.ToList().Where(r =>
                r.BetreffendesJahr == BetreffendesJahr - 1 &&
-               r.Gruppen.Count == Wohnungen.Value.Count &&
-               Wohnungen.Value.All(e => r.Gruppen.Exists(r => r.WohnungId == e.Id)))
+               r.Wohnungen.Count == Wohnungen.Value.Count &&
+               Wohnungen.Value.All(e => r.Wohnungen.ToList().Exists(r => r.WohnungId == e.Id)))
                 .ToList();
 
             Wohnungen.Value = l.ToImmutableList();

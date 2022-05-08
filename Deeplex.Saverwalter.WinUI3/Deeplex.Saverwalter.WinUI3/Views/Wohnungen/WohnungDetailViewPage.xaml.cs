@@ -50,11 +50,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                     BetreffendesJahr = DateTime.Now.Year,
                     Datum = DateTime.Now,
                 };
-                r.Gruppen.Add(new BetriebskostenrechnungsGruppe()
-                {
-                    Wohnung = ViewModel.Entity,
-                    Rechnung = r,
-                });
+                ViewModel.Entity.Betriebskostenrechnungen.Add(r); // TODO15 check
+                
                 var vm = new BetriebskostenrechnungDetailViewModel(r, App.NotificationService, App.WalterService);
                 App.Window.Navigate(typeof(BetriebskostenrechnungenDetailViewPage), vm);
             };
