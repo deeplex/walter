@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -16,6 +17,7 @@ namespace Deeplex.Saverwalter.Model
         public string? Email { get; set; }
         public int? AdresseId { get; set; }
         public string? Notiz { get; set; }
+        public List<JuristischePerson> JuristischePersonen { get; set; }
     }
 
 }

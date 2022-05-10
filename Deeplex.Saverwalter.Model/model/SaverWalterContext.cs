@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.Model
@@ -18,7 +19,6 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Garage> Garagen { get; set; } = null!;
         public DbSet<GarageAnhang> GarageAnhaenge { get; set; } = null!;
         public DbSet<JuristischePerson> JuristischePersonen { get; set; } = null!;
-        public DbSet<JuristischePersonenMitglied> JuristischePersonenMitglieder { get; set; } = null!;
         public DbSet<JuristischePersonAnhang> JuristischePersonAnhaenge { get; set; } = null!;
         public DbSet<Konto> Kontos { get; set; } = null!;
         public DbSet<KontoAnhang> KontoAnhaenge { get; set; } = null!;

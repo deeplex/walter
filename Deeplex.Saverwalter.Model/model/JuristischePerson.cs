@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -20,9 +21,14 @@ namespace Deeplex.Saverwalter.Model
         public Adresse? Adresse { get; set; }
         public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
         public List<Garage> Garagen { get; private set; } = new List<Garage>();
-        public List<JuristischePersonenMitglied> Mitglieder { get; private set; } = new List<JuristischePersonenMitglied>();
+        public List<JuristischePerson> JuristischeMitglieder { get; private set; } = new List<JuristischePerson>();
+        public List<NatuerlichePerson> NatuerlicheMitglieder { get; private set; } = new List<NatuerlichePerson>();
+        public List<JuristischePerson> JuristischePersonen { get; set; } = new List<JuristischePerson>();
         public string? Notiz { get; set; }
         public Anrede Anrede { get; set; }
+
+        public List<IPerson> Mitglieder => JuristischeMitglieder.Select(w => (IPerson)w)
+            .Concat(NatuerlicheMitglieder.Select(w => (IPerson)w)).ToList();
 
         public JuristischePerson()
         {

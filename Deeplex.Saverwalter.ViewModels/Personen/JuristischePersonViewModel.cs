@@ -53,8 +53,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void UpdateListen()
         {
-            Mitglieder.Value = Db.ctx.JuristischePersonenMitglieder
-                .Where(w => w.JuristischePersonId == Id)
+            Mitglieder.Value = Entity.Mitglieder
                 .Select(w => new KontaktListViewModelEntry(w.PersonId, Db))
                 .ToImmutableList();
 
@@ -91,11 +90,14 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 if (AddMitglied.Value?.Entity.PersonId is Guid guid)
                 {
-                    Db.ctx.JuristischePersonenMitglieder.Add(new JuristischePersonenMitglied()
+                    if (AddMitglied.Value.Entity is NatuerlichePerson n)
                     {
-                        JuristischePersonId = Id,
-                        PersonId = AddMitglied.Value.Entity.PersonId,
-                    });
+                        n.JuristischePersonen.Add(Entity);
+                    }
+                    else if (AddMitglied.Value.Entity is JuristischePerson j)
+                    {
+                        j.JuristischePersonen.Add(Entity);
+                    }
                     Db.SaveWalter();
                     UpdateListen();
                 }
