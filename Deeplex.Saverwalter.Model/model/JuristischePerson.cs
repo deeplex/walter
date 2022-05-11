@@ -5,7 +5,7 @@ using System.Linq;
 namespace Deeplex.Saverwalter.Model
 {
     // JuristischePerson is a Name. Kontakte may subscribe to this and is used for dashboards and stuff... nothing wild really.
-    public sealed class JuristischePerson : IPerson
+    public sealed class JuristischePerson : IPerson, IAnhang
     {
         public Guid PersonId { get; set; }
         public int JuristischePersonId { get; set; }
@@ -26,6 +26,7 @@ namespace Deeplex.Saverwalter.Model
         public List<JuristischePerson> JuristischePersonen { get; set; } = new List<JuristischePerson>();
         public string? Notiz { get; set; }
         public Anrede Anrede { get; set; }
+        public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
 
         public List<IPerson> Mitglieder => JuristischeMitglieder.Select(w => (IPerson)w)
             .Concat(NatuerlicheMitglieder.Select(w => (IPerson)w)).ToList();

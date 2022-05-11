@@ -37,9 +37,11 @@ namespace Deeplex.Saverwalter.ViewModels
                 Db = db;
                 rootPath.Value = db.root;
 
+                // TODO refactor
                 LoadAnhaenge = new RelayCommand(_ =>
                 {
-                    Anhaenge.Value = new AnhangListViewModel(fs, ns, Db);
+                    ns.ShowAlert("Not implemented"); // TODO
+                //    Anhaenge.Value = new AnhangListViewModel(fs, ns, Db);
                 }, _ => true);
                 LoadAdressen = new RelayCommand(_ =>
                 {

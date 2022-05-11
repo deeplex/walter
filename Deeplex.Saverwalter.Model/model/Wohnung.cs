@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public sealed class Wohnung : IAdresse
+    public sealed class Wohnung : IAdresse, IAnhang
     {
         public int WohnungId { get; set; }
         public int AdresseId { get; set; }
@@ -19,5 +19,6 @@ namespace Deeplex.Saverwalter.Model
         public List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
         public List<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; private set; } = new List<Erhaltungsaufwendung>();
         public List<Betriebskostenrechnung> Betriebskostenrechnungen { get; private set; } = new List<Betriebskostenrechnung>();
+        public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
     }
 }

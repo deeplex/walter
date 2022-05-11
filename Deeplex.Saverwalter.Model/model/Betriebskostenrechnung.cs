@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public sealed class Betriebskostenrechnung
+    public sealed class Betriebskostenrechnung : IAnhang
     {
         // TODO this should be in extensions...
         public Betriebskostenrechnung ShallowCopy()
@@ -30,6 +30,7 @@ namespace Deeplex.Saverwalter.Model
         public int BetreffendesJahr { get; set; }
         public UmlageSchluessel Schluessel { get; set; }
         public string? Beschreibung { get; set; }
+        public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
 
         public double? HKVO_P7 { get; set; }
         public double? HKVO_P8 { get; set; }

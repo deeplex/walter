@@ -12,6 +12,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System;
+using System.Collections.Immutable;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -36,7 +37,14 @@ namespace Deeplex.Saverwalter.WinUI3
 
         public void Navigate<U>(Type SourcePage, U SendParameter)
         {
-            DetailAnhang.Value = AnhangListViewModel.create(SendParameter, App.FileService, App.NotificationService, App.WalterService);
+            if (SendParameter is IAnhang a)
+            {
+                DetailAnhang.Value = new AnhangListViewModel(a, App.FileService, App.NotificationService, App.WalterService); // TODO15
+            }
+            else
+            {
+                DetailAnhang.Value = null;
+            }
             ListAnhang.Value = null;
 
             AppFrame.Navigate(SourcePage, SendParameter,
