@@ -20,7 +20,9 @@ namespace Deeplex.Saverwalter.ViewModels
         public VertragListViewModel(IWalterDbService db)
         {
             AllRelevant = Vertraege.Value = db.ctx.Vertraege
-                .Include(v => v.Wohnung).ThenInclude(w => w.Adresse)
+                .Include(v => v.Wohnung).ThenInclude(w => w.Adresse).ThenInclude(a => a.Anhaenge)
+                .Include(v => v.Wohnung).ThenInclude(w => w.Anhaenge)
+                .Include(v => v.Anhaenge)
                 .ToList()
                 .GroupBy(v => v.VertragId)
                 .Select(v => new VertragListViewModelVertrag(v, db))

@@ -43,15 +43,7 @@ namespace Deeplex.Saverwalter.ViewModels
                     .Include(w => w.JuristischeMitglieder)
                     .Select(w => new AutoSuggestListViewModelEntry(w)))
                 .ToList()
-                .Concat(ctx.Vertraege.Include(w => w.Wohnung)
-                        .Where(w => w.Ende == null || w.Ende < DateTime.Now)
-                        .Select(w => new AutoSuggestListViewModelEntry(w)))
-                .ToList()
                 .Concat(ctx.ZaehlerSet
-                    .Select(w => new AutoSuggestListViewModelEntry(w)))
-                .ToList()
-                .Concat(ctx.Betriebskostenrechnungen
-                    .Include(w => w.Wohnungen)
                     .Select(w => new AutoSuggestListViewModelEntry(w)))
                 .ToList()
                 .Where(w => w.Bezeichnung != null)

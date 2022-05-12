@@ -31,10 +31,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public KontaktListViewModel(IWalterDbService db)
         {
             AllRelevant = db.ctx.NatuerlichePersonen
-                .Include(k => k.Adresse)
+                .Include(k => k.Anhaenge)
+                .Include(k => k.Adresse).ThenInclude(a => a.Anhaenge)
                 .Select(k => new KontaktListViewModelEntry(k)).ToImmutableList();
 
-            var jp = db.ctx.JuristischePersonen;
+            var jp = db.ctx.JuristischePersonen
+                .Include(j => j.Anhaenge)
+                .Include(j => j.Adresse).ThenInclude(a => a.Anhaenge);
             foreach (var j in jp)
             {
                 AllRelevant = AllRelevant.Add(new KontaktListViewModelEntry(j));

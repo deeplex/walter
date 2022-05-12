@@ -30,10 +30,10 @@ namespace Deeplex.Saverwalter.ViewModels
         public BetriebskostenRechnungenListViewModel(IWalterDbService db)
         {
             AllRelevant = db.ctx.Betriebskostenrechnungen
-                .Include(g => g.Wohnungen)
-                .ThenInclude(w => w.Adresse)
-                .ThenInclude(a => a.Wohnungen)
-                .Include(b => b.Zaehler)
+                .Include(b => b.Anhaenge)
+                .Include(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Anhaenge)
+                .Include(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Wohnungen).ThenInclude(w => w.Anhaenge)
+                .Include(b => b.Zaehler).ThenInclude(b => b.Anhaenge)
                 .Select(w => new BetriebskostenRechnungenListEntry(w))
                 .ToImmutableList();
             Liste.Value = AllRelevant;

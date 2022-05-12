@@ -50,7 +50,8 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 newFiles = (await FileService.pickFiles()).Select(f => Files.SaveAnhang(f, Db.root)).ToList();
             }
-            newFiles.ForEach(e => Entity.Anhaenge.Add(e));
+            Entity.Anhaenge.AddRange(newFiles);
+            Db.ctx.Anhaenge.AddRange(newFiles);
             Db.SaveWalter();
             var self = this;
             newFiles.ForEach(f => Liste.Value = Liste.Value.Add(new AnhangListViewModelEntry(f, self)));
