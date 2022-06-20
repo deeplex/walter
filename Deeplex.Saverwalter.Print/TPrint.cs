@@ -316,7 +316,7 @@ namespace Deeplex.Saverwalter.Print
                         var Beginn = g.PersZeitanteil[i].Beginn;
                         var Ende = g.PersZeitanteil[i].Ende;
                         var GesamtPersonenzahl = g.GesamtPersonenIntervall.Last(gs => gs.Beginn.Date <= g.PersZeitanteil[i].Beginn.Date).Personenzahl;
-                        var Personenzahl = g.PersonenIntervall.Last(p => p.Beginn.Date <= g.PersZeitanteil[i].Beginn).Personenzahl;
+                        var Personenzahl = g.PersonenIntervall.LastOrDefault(p => p.Beginn.Date <= g.PersZeitanteil[i].Beginn)?.Personenzahl ?? 0;
                         var timespan = ((Ende - Beginn).Days + 1).ToString();
 
                         col1.Add(PersonEn(Personenzahl) + " / " + PersonEn(GesamtPersonenzahl));

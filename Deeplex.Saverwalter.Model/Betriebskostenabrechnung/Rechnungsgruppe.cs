@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.Model
         double GesamtBetragWarm { get; }
     }
 
-    public sealed class Rechnungsgruppe: IRechnungsgruppe
+    public sealed class Rechnungsgruppe : IRechnungsgruppe
     {
         public List<Betriebskostenrechnung> Rechnungen { get; }
 
@@ -61,11 +61,11 @@ namespace Deeplex.Saverwalter.Model
         }
 
         public List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil => GesamtPersonenIntervall
-            .Where(g => g.Beginn < b.Nutzungsende && g.Ende >= b.Nutzungsbeginn)
-            .Select((w, i) =>
-                (w.Beginn, w.Ende, Anteil:
-                    (double)PersonenIntervall.Where(p => p.Beginn <= w.Beginn).First().Personenzahl / w.Personenzahl *
-                    (((double)(w.Ende - w.Beginn).Days + 1) / b.Abrechnungszeitspanne))).ToList();
+                .Where(g => g.Beginn < b.Nutzungsende && g.Ende >= b.Nutzungsbeginn)
+                    .Select((w, i) =>
+                        (w.Beginn, w.Ende, Anteil:
+                            (double)(PersonenIntervall.FirstOrDefault(p => p.Beginn <= w.Beginn)?.Personenzahl ?? 0) / w.Personenzahl *
+                            (((double)(w.Ende - w.Beginn).Days + 1) / b.Abrechnungszeitspanne))).ToList();
 
         public Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch
         {
@@ -183,7 +183,9 @@ namespace Deeplex.Saverwalter.Model
             merged.RemoveAt(merged.Count - 1);
 
             // TODO refactor function to switch from tuple to class - or replace this function by constructor
-            return merged.Select(m => new PersonenZeitIntervall(m, parent)).ToList();
+            var ret = merged.Select(m => new PersonenZeitIntervall(m, parent)).ToList();
+
+            return ret;
         }
     }
 }

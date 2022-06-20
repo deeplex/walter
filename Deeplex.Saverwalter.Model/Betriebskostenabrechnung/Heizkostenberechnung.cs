@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.Model
                 .Include(g => g.EinzelZaehler).ThenInclude(z => z.Staende)
                 .Include(g => g.AllgemeinZaehler).ThenInclude(z => z != null ? z.Staende : null)
                 .Where(g => g.WohnungId == b.Wohnung.WohnungId)
-                .Select(g => g.AllgemeinZaehler)
+                //.Select(g => g.AllgemeinZaehler)
                 .Where(z => z.Typ == Zaehlertyp.Gas)
                 .ToImmutableList();
 
@@ -71,19 +71,23 @@ namespace Deeplex.Saverwalter.Model
             ImmutableList<Zaehlerstand> Ende(ImmutableList<Zaehler> z, bool ganzeGruppe = false)
             {
                 var ende = (ganzeGruppe ? b.Abrechnungsende : b.Nutzungsende).Date;
-                return z.Select(z => z.Staende.OrderBy(s => s.Datum)
+                var ret = z.Select(z => z.Staende.OrderBy(s => s.Datum)
                     .LastOrDefault(l => l.Datum.Date <= ende && (ende - l.Datum.Date).Days < 30))
                     .Where(zs => zs != null)
                     .ToImmutableList();
+
+                return ret;
             }
 
             ImmutableList<Zaehlerstand> Beginn(ImmutableList<Zaehler> z, bool ganzeGruppe = false)
             {
                 var beginn = (ganzeGruppe ? b.Abrechnungsbeginn : b.Nutzungsbeginn).Date.AddDays(-1);
-                return z.Select(z => z.Staende.OrderBy(s => s.Datum)
+                var ret = z.Select(z => z.Staende.OrderBy(s => s.Datum)
                     .LastOrDefault(l => l.Datum.Date <= beginn && (beginn - l.Datum.Date).Days < 30))
                     .Where(zs => zs != null)
                     .ToImmutableList();
+
+                return ret;
             }
 
             ImmutableList<Zaehlerstand> AllgemeinEnde(ImmutableList<Zaehler> z, bool ganzeGruppe = false)
@@ -113,11 +117,16 @@ namespace Deeplex.Saverwalter.Model
             Q = AllgemeinEnde(AllgemeinWaermeZaehler!, true).Sum(w => w.Stand) -
                 AllgemeinBeginn(AllgemeinWaermeZaehler!, true).Sum(w => w.Stand);
 
+            if (Q == 0)
+            {
+                b.notes.Add(new Note("Gesamtzähler steht auf 0.", Severity.Error));
+            }
+
             Para9_2 = 2.5 * (V / Q) * (tw - 10); // TODO HeizkostenV §9
 
             if (Para9_2 > 1)
             {
-                b.notes.Add(new Note("Heizkostenverteilung nach §9 ist falsch", Severity.Error));
+                b.notes.Add(new Note("Heizkostenverteilung nach §9 ist über 100%.", Severity.Error));
             }
 
             GesamtNutzflaeche = r.Wohnungen.Sum(w => w.Nutzflaeche);

@@ -68,7 +68,8 @@ namespace Deeplex.Saverwalter.Model
             .Where(m => m.BetreffenderMonat >= Abrechnungsbeginn && m.BetreffenderMonat < Abrechnungsende)
             .Sum(z => z.Betrag ?? 0);
 
-        public double KaltMiete => Vertragsversionen.Sum(v => (Min(v.Ende ?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);
+        public double KaltMiete => Vertragsversionen.Sum(v => v.Ende != null && v.Ende < Abrechnungsbeginn ? 0 :
+            (Min(v.Ende ?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);
         public double BetragNebenkosten => Gruppen.Sum(g => g.BetragKalt + g.BetragWarm);
         public double BezahltNebenkosten => Gezahlt - KaltMiete;
 
