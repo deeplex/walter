@@ -81,24 +81,6 @@ namespace Deeplex.Saverwalter.Model
                 return ret;
             }
 
-            ImmutableList<Zaehlerstand> AllgemeinEnde(ImmutableList<Zaehler> z, bool ganzeGruppe = false)
-            {
-                var ende = (ganzeGruppe ? b.Abrechnungsende : b.Nutzungsende).Date;
-                return z.Select(z => z.Staende.OrderBy(s => s.Datum)
-                    .LastOrDefault(l => l.Datum.Date <= ende && (ende - l.Datum.Date).Days < 30))
-                    .Where(zs => zs != null)
-                    .ToImmutableList();
-            }
-
-            ImmutableList<Zaehlerstand> AllgemeinBeginn(ImmutableList<Zaehler> z, bool ganzeGruppe = false)
-            {
-                var beginn = (ganzeGruppe ? b.Abrechnungsbeginn : b.Nutzungsbeginn).Date.AddDays(-1);
-                return z.Select(z => z.Staende.OrderBy(s => s.Datum)
-                    .LastOrDefault(l => l.Datum.Date <= beginn && (beginn - l.Datum.Date).Days < 30))
-                    .Where(zs => zs != null)
-                    .ToImmutableList();
-            }
-
             V = Ende(AllgWarmwasserZaehler, true).Sum(w => w.Stand) -
                 Beginn(AllgWarmwasserZaehler, true).Sum(w => w.Stand);
 
