@@ -12,7 +12,7 @@ namespace Deeplex.Saverwalter.Model
 
         public double tw;
         public double V;
-        public double W;
+        //public double W;
         public double Q;
 
         public double Para7;
@@ -50,15 +50,6 @@ namespace Deeplex.Saverwalter.Model
 
             var AllgWaermeZaehler = b.db.ZaehlerSet.Where(z =>
                 z.Typ == Zaehlertyp.Gas && r.Wohnungen.Contains(z.Wohnung!)).ToImmutableList(); // TODO15 !
-
-            var AllgemeinWaermeZaehler = b.db.ZaehlerSet
-                .Include(g => g.Wohnung)
-                .Include(g => g.EinzelZaehler).ThenInclude(z => z.Staende)
-                .Include(g => g.AllgemeinZaehler).ThenInclude(z => z != null ? z.Staende : null)
-                .Where(g => g.WohnungId == b.Wohnung.WohnungId)
-                //.Select(g => g.AllgemeinZaehler)
-                .Where(z => z.Typ == Zaehlertyp.Gas)
-                .ToImmutableList();
 
             var WaermeZaehler = AllgWaermeZaehler
                 .Where(z => z.Wohnung == b.Wohnung)
@@ -111,11 +102,8 @@ namespace Deeplex.Saverwalter.Model
             V = Ende(AllgWarmwasserZaehler, true).Sum(w => w.Stand) -
                 Beginn(AllgWarmwasserZaehler, true).Sum(w => w.Stand);
 
-            W = Ende(AllgWaermeZaehler, true).Sum(w => w.Stand) -
+            Q = Ende(AllgWaermeZaehler, true).Sum(w => w.Stand) -
                 Beginn(AllgWaermeZaehler, true).Sum(w => w.Stand);
-
-            Q = AllgemeinEnde(AllgemeinWaermeZaehler!, true).Sum(w => w.Stand) -
-                AllgemeinBeginn(AllgemeinWaermeZaehler!, true).Sum(w => w.Stand);
 
             if (Q == 0)
             {
@@ -132,7 +120,7 @@ namespace Deeplex.Saverwalter.Model
             GesamtNutzflaeche = r.Wohnungen.Sum(w => w.Nutzflaeche);
             NFZeitanteil = b.Wohnung.Nutzflaeche / GesamtNutzflaeche * b.Zeitanteil;
 
-            HeizkostenVerbrauchAnteil = (Ende(WaermeZaehler).Sum(w => w.Stand) - Beginn(WaermeZaehler).Sum(w => w.Stand)) / W;
+            HeizkostenVerbrauchAnteil = (Ende(WaermeZaehler).Sum(w => w.Stand) - Beginn(WaermeZaehler).Sum(w => w.Stand)) / Q;
             WarmwasserVerbrauchAnteil = (Ende(WarmwasserZaehler).Sum(w => w.Stand) - Beginn(WarmwasserZaehler).Sum(w => w.Stand)) / V;
 
             WaermeAnteilNF = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * NFZeitanteil;
