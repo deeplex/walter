@@ -199,43 +199,12 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (Entity == null) return;
 
-            var added = new List<Wohnung>();
-            var removed = new List<Wohnung>();
-
-            // Wohnungen that were in through groups before
-            var beforeEntity = Entity.Wohnungen;
-
-            // Add missing Gruppen // TODO15 Refactor.
-            //Wohnungen.Value
-            //    .Where(w => !beforeEntity.Contains(w.Entity))
-            //    .ToList()
-            //    .ForEach(s =>
-            //    {
-            //        var a = new BetriebskostenrechnungsGruppe()
-            //        {
-            //            Rechnung = Entity,
-            //            WohnungId = s.Id,
-            //        };
-            //        added.Add(a);
-            //        Db.ctx.Betriebskostenrechnungsgruppen.Add(a);
-            //    });
-
-            var beforeWohnung = Wohnungen.Value.Select(w => w.Entity);
-
-            // Remove old Gruppen
-            //beforeEntity.ToList().ForEach(w => // TODO15 refactor
-            //    Db.ctx.Betriebskostenrechnungsgruppen
-            //        .ToList()
-            //        .Where(g =>
-            //            g.Rechnung.BetriebskostenrechnungId == Id &&
-            //            g.WohnungId == w.WohnungId &&
-            //            !Wohnungen.Value.Exists(e => e.Id == g.WohnungId))
-            //        .ToList()
-            //        .ForEach(g =>
-            //        {
-            //            removed.Add(g);
-            //            Db.ctx.Betriebskostenrechnungsgruppen.Remove(g);
-            //        }));
+            // Add missing Wohnungen
+            Entity.Wohnungen
+                .AddRange(Wohnungen.Value.Where(w => !Entity.Wohnungen.Contains(w.Entity))
+                .Select(w => w.Entity));
+            // Remove old Wohnungen
+            Entity.Wohnungen.RemoveAll(w => !Wohnungen.Value.Exists(v => v.Entity == w));
         }
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, INotificationService ns, IWalterDbService db)
