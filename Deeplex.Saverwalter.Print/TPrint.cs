@@ -27,6 +27,7 @@ namespace Deeplex.Saverwalter.Print
                 left.Add("℅ " + AnsprechpartnerBezeichnung);
                 rows++;
             }
+
             left.Add(b.Ansprechpartner.Adresse!.Strasse + " " + b.Ansprechpartner.Adresse.Hausnummer);
             left.Add(b.Ansprechpartner.Adresse!.Postleitzahl + " " + b.Ansprechpartner.Adresse.Stadt);
 
@@ -647,15 +648,14 @@ namespace Deeplex.Saverwalter.Print
 
             var col1 = new List<string>
             {
-                "Sie haben gezahlt:",
-                "Abzüglich Ihrer Kaltmiete:",
+                "Sie haben vorausgezahlt:"
             };
 
             var col2 = new List<string>
             {
-                Euro(b.Gezahlt),
-                "-" + Euro(b.KaltMiete),
+                Euro(b.Gezahlt - b.KaltMiete)
             };
+
 
             if (b.Minderung > 0)
             {
