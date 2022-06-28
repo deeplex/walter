@@ -212,7 +212,7 @@ namespace Deeplex.Saverwalter.Print
 
                 var timespan = ((z.Ende - z.Beginn).Days + 1).ToString();
 
-                col1.Add(f ? 1.ToString() : "");
+                col1.Add(f ? g.GesamtEinheiten.ToString() : "");
                 col2.Add(f ? Quadrat(g.GesamtWohnflaeche) : "");
                 col3.Add(f ? Quadrat(g.GesamtNutzflaeche) : "");
                 col4.Add(z.Personenzahl.ToString());
@@ -287,14 +287,14 @@ namespace Deeplex.Saverwalter.Print
 
                 if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachNutzeinheit))
                 {
-                    col1.Add("bei Umlage nach Nutzfläche (n. NE)");
+                    col1.Add("bei Umlage nach Nutzeinheiten (n. NE)");
                     col2.Add("");
                     col3.Add("");
                     col4.Add("");
                     bold.Add(true);
                     underlined.Add(false);
 
-                    col1.Add(Quadrat(b.Wohnung.Nutzeinheit) + " / " + Quadrat(g.GesamtEinheiten));
+                    col1.Add(Quadrat(b.Wohnung.Nutzeinheit) + " / " + g.GesamtEinheiten);
                     col2.Add(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende));
                     col3.Add(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString());
                     col4.Add(Prozent(g.NEZeitanteil));
