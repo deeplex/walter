@@ -39,7 +39,7 @@ namespace Deeplex.Saverwalter.WinUI3
         {
             if (SendParameter is IAnhang a)
             {
-                DetailAnhang.Value = new AnhangListViewModel(a, App.FileService, App.NotificationService, App.WalterService); // TODO15
+                DetailAnhang.Value = new AnhangListViewModel(a, App.FileService, App.NotificationService, App.WalterService);
             }
             else
             {

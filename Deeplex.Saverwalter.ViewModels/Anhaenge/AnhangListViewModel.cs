@@ -40,7 +40,6 @@ namespace Deeplex.Saverwalter.ViewModels
             FileService = fs;
             Text.Value = "Anhänge"; // TODO Hard code?
             SetList(a);
-            // TODO15
             AddAnhang = new RelayCommand(f => SaveAnhang(f as List<Anhang>), _ => true);
         }
 

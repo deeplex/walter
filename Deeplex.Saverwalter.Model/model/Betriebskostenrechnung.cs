@@ -14,11 +14,11 @@ namespace Deeplex.Saverwalter.Model
 
         public Betriebskostenrechnung NewYear()
         {
-            var copy = (Betriebskostenrechnung)ShallowCopy();
+            var copy = ShallowCopy();
             copy.BetreffendesJahr += 1;
             copy.Betrag = 0;
             copy.BetriebskostenrechnungId = 0;
-            //copy.Wohnungen = new List<Wohnung>(); // TODO15
+            copy.Wohnungen = new List<Wohnung>();
 
             return copy;
         }

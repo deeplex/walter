@@ -46,10 +46,10 @@ namespace Deeplex.Saverwalter.Model
             Para8 = r.HKVO_P8 ?? 0.5; // HeizkostenV §8
 
             var AllgWarmwasserZaehler = b.db.ZaehlerSet.Where(z =>
-                z.Typ == Zaehlertyp.Warmwasser && r.Wohnungen.Contains(z.Wohnung!)).ToImmutableList(); // TODO15 !
+                z.Typ == Zaehlertyp.Warmwasser && r.Wohnungen.Contains(z.Wohnung!)).ToImmutableList();
 
             var AllgWaermeZaehler = b.db.ZaehlerSet.Where(z =>
-                z.Typ == Zaehlertyp.Gas && r.Wohnungen.Contains(z.Wohnung!)).ToImmutableList(); // TODO15 !
+                z.Typ == Zaehlertyp.Gas && r.Wohnungen.Contains(z.Wohnung!)).ToImmutableList();
 
             var WaermeZaehler = AllgWaermeZaehler
                 .Where(z => z.Wohnung == b.Wohnung)

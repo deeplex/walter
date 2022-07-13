@@ -150,7 +150,7 @@ namespace Deeplex.Saverwalter.Model
 
             var fZaehler = Zaehler.Where(z =>
                 ganzeGruppe ?
-                    r.Wohnungen.Contains(z.Wohnung!) : // TODO15 !
+                    r.Wohnungen.Contains(z.Wohnung!) :
                     z.WohnungId == Wohnung.WohnungId);
 
             var ende = (ganzeGruppe ? Abrechnungsende : Nutzungsende).Date;

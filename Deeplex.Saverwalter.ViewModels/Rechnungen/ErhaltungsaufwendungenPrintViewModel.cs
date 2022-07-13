@@ -83,7 +83,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Titel = p.Bezeichnung;
             Enabled.Value = g.Length == 0;
 
-            Zusatz = p.JuristischePersonen // TODO15 check if okay
+            Zusatz = p.JuristischePersonen // TODO check if okay
                 .Where(j => j.PersonId == p.PersonId && !g.Contains(j.PersonId))
                 .Select(z => new ErhaltungsaufwendungenPrintViewModel(
                     z, db, fs, g.Append(z.PersonId).ToArray()))
