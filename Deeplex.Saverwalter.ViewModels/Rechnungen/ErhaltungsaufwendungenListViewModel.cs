@@ -28,8 +28,9 @@ namespace Deeplex.Saverwalter.ViewModels
         public ErhaltungsaufwendungenListViewModel(IWalterDbService db)
         {
             AllRelevant = db.ctx.Erhaltungsaufwendungen
-                .Include(e => e.Wohnung)
-                .ThenInclude(w => w.Adresse)
+                .Include(e => e.Anhaenge)
+                .Include(e => e.Wohnung).ThenInclude(w => w.Anhaenge)
+                .Include(e => e.Wohnung).ThenInclude(w => w.Adresse).ThenInclude(w => w.Anhaenge)
                 .Select(w => new ErhaltungsaufwendungenListViewModelEntry(w, db))
                 .ToImmutableList();
 

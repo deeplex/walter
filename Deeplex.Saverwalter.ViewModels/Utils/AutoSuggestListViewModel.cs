@@ -29,16 +29,25 @@ namespace Deeplex.Saverwalter.ViewModels
         public AutoSuggestListViewModel(IWalterDbService db)
         {
             var ctx = db.ctx;
-            AllEntries = ctx.Wohnungen.Include(w => w.Adresse).Select(w => new AutoSuggestListViewModelEntry(w)).ToList()
-                .Concat(ctx.NatuerlichePersonen.Select(w => new AutoSuggestListViewModelEntry(w))).ToList()
-                .Concat(ctx.JuristischePersonen.Select(w => new AutoSuggestListViewModelEntry(w))).ToList()
-                .Concat(ctx.Vertraege.Include(w => w.Wohnung)
-                        .Where(w => w.Ende == null || w.Ende < DateTime.Now)
-                        .Select(w => new AutoSuggestListViewModelEntry(w))).ToList()
-                .Concat(ctx.ZaehlerSet.Select(w => new AutoSuggestListViewModelEntry(w))).ToList()
-                .Concat(ctx.Betriebskostenrechnungen.Include(w => w.Gruppen)
-                    .ThenInclude(w => w.Wohnung).Select(w => new AutoSuggestListViewModelEntry(w))).ToList()
-                    .Where(w => w.Bezeichnung != null).ToImmutableList();
+            AllEntries = ctx.Wohnungen
+                    .Include(w => w.Adresse)
+                    .Select(w => new AutoSuggestListViewModelEntry(w))
+                .ToList()
+                .Concat(ctx.NatuerlichePersonen
+                    .Include(w => w.JuristischePersonen)
+                    .Select(w => new AutoSuggestListViewModelEntry(w)))
+                .ToList()
+                .Concat(ctx.JuristischePersonen
+                    .Include(w => w.JuristischePersonen)
+                    .Include(w => w.NatuerlicheMitglieder)
+                    .Include(w => w.JuristischeMitglieder)
+                    .Select(w => new AutoSuggestListViewModelEntry(w)))
+                .ToList()
+                .Concat(ctx.ZaehlerSet
+                    .Select(w => new AutoSuggestListViewModelEntry(w)))
+                .ToList()
+                .Where(w => w.Bezeichnung != null)
+                .ToImmutableList();
             Entries.Value = AllEntries;
         }
     }

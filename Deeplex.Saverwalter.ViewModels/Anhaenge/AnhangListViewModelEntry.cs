@@ -11,35 +11,14 @@ namespace Deeplex.Saverwalter.ViewModels
         public override string ToString() => Entity.FileName;
         public DateTime CreationTime => Entity.CreationTime;
 
-        public int GetReferences
-        {
-            get
-            {
-                var count = ctx.AdresseAnhaenge.Count(j => j.Anhang == Entity);
-                count += ctx.BetriebskostenrechnungAnhaenge.Count(j => j.Anhang == Entity);
-                count += ctx.ErhaltungsaufwendungAnhaenge.Count(j => j.Anhang == Entity);
-                count += ctx.GarageAnhaenge.Count(j => j.Anhang == Entity);
-                count += ctx.JuristischePersonAnhaenge.Count(j => j.Anhang == Entity);
-                count += ctx.KontoAnhaenge.Count(j => j.Anhang == Entity);
-                count += ctx.MieteAnhaenge.Count(j => j.Anhang == Entity);
-                count += ctx.MietMinderungAnhaenge.Count(j => j.Anhang == Entity);
-                count += ctx.NatuerlichePersonAnhaenge.Count(j => j.Anhang == Entity);
-                count += ctx.VertragAnhaenge.Count(j => j.Anhang == Entity);
-                count += ctx.WohnungAnhaenge.Count(j => j.Anhang == Entity);
-                count += ctx.ZaehlerAnhaenge.Count(j => j.Anhang == Entity);
-                count += ctx.ZaehlerstandAnhaenge.Count(j => j.Anhang == Entity);
-
-                return count;
-            }
-        }
-
         public string path => Entity.getPath(Container.Db.root);
         public double size => File.Exists(path) ? new FileInfo(path).Length : 0;
+
+        public int GetReferences => Entity.getReferences();
 
         public AnhangListViewModel Container { get; }
         private SaverwalterContext ctx => Container.Db.ctx;
 
-        public AnhangListViewModelEntry(IAnhang a, AnhangListViewModel vm) : this(a.Anhang, vm) { }
         public AnhangListViewModelEntry(Anhang a, AnhangListViewModel vm)
         {
             Container = vm;
@@ -74,7 +53,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             try
             {
-                Container.fs.launchFile(Entity);
+                Container.FileService.launchFile(Entity);
             }
             catch (Exception e)
             {

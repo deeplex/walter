@@ -75,10 +75,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void UpdateListen()
         {
-            JuristischePersonen.Value = Db.ctx.JuristischePersonenMitglieder
-                .Include(w => w.JuristischePerson)
-                .Where(w => w.PersonId == Entity.PersonId)
-                .Select(w => new KontaktListViewModelEntry(w.JuristischePerson.PersonId, Db))
+            JuristischePersonen.Value = Entity.JuristischePersonen
+                .Select(w => new KontaktListViewModelEntry(w.PersonId, Db))
                 .ToImmutableList();
 
             Wohnungen.Value = Db.ctx.Wohnungen

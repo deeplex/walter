@@ -27,6 +27,7 @@ namespace Deeplex.Saverwalter.Print
                 left.Add("℅ " + AnsprechpartnerBezeichnung);
                 rows++;
             }
+
             left.Add(b.Ansprechpartner.Adresse!.Strasse + " " + b.Ansprechpartner.Adresse.Hausnummer);
             left.Add(b.Ansprechpartner.Adresse!.Postleitzahl + " " + b.Ansprechpartner.Adresse.Stadt);
 
@@ -100,7 +101,7 @@ namespace Deeplex.Saverwalter.Print
             }
 
             // There is a Umlage nach Nutzfläche in the Heizkostenberechnung:
-            if (b.nNF() || b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Gruppen.Count > 1).Any(r => (int)r.Typ % 2 == 1)))
+            if (b.nNF() || b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Wohnungen.Count > 1).Any(r => (int)r.Typ % 2 == 1)))
             {
                 left1.Add("n. NF");
                 left2.Add("n. NF");
@@ -211,7 +212,7 @@ namespace Deeplex.Saverwalter.Print
 
                 var timespan = ((z.Ende - z.Beginn).Days + 1).ToString();
 
-                col1.Add(f ? 1.ToString() : "");
+                col1.Add(f ? g.GesamtEinheiten.ToString() : "");
                 col2.Add(f ? Quadrat(g.GesamtWohnflaeche) : "");
                 col3.Add(f ? Quadrat(g.GesamtNutzflaeche) : "");
                 col4.Add(z.Personenzahl.ToString());
@@ -286,14 +287,14 @@ namespace Deeplex.Saverwalter.Print
 
                 if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachNutzeinheit))
                 {
-                    col1.Add("bei Umlage nach Nutzfläche (n. NE)");
+                    col1.Add("bei Umlage nach Nutzeinheiten (n. NE)");
                     col2.Add("");
                     col3.Add("");
                     col4.Add("");
                     bold.Add(true);
                     underlined.Add(false);
 
-                    col1.Add(Quadrat(b.Wohnung.Nutzeinheit) + " / " + Quadrat(g.GesamtEinheiten));
+                    col1.Add(Quadrat(b.Wohnung.Nutzeinheit) + " / " + g.GesamtEinheiten);
                     col2.Add(Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende));
                     col3.Add(b.Nutzungszeitspanne.ToString() + " / " + b.Abrechnungszeitspanne.ToString());
                     col4.Add(Prozent(g.NEZeitanteil));
@@ -316,7 +317,7 @@ namespace Deeplex.Saverwalter.Print
                         var Beginn = g.PersZeitanteil[i].Beginn;
                         var Ende = g.PersZeitanteil[i].Ende;
                         var GesamtPersonenzahl = g.GesamtPersonenIntervall.Last(gs => gs.Beginn.Date <= g.PersZeitanteil[i].Beginn.Date).Personenzahl;
-                        var Personenzahl = g.PersonenIntervall.Last(p => p.Beginn.Date <= g.PersZeitanteil[i].Beginn).Personenzahl;
+                        var Personenzahl = g.PersonenIntervall.LastOrDefault(p => p.Beginn.Date <= g.PersZeitanteil[i].Beginn)?.Personenzahl ?? 0;
                         var timespan = ((Ende - Beginn).Days + 1).ToString();
 
                         col1.Add(PersonEn(Personenzahl) + " / " + PersonEn(GesamtPersonenzahl));
@@ -647,15 +648,14 @@ namespace Deeplex.Saverwalter.Print
 
             var col1 = new List<string>
             {
-                "Sie haben gezahlt:",
-                "Abzüglich Ihrer Kaltmiete:",
+                "Sie haben vorausgezahlt:"
             };
 
             var col2 = new List<string>
             {
-                Euro(b.Gezahlt),
-                "-" + Euro(b.KaltMiete),
+                Euro(b.Gezahlt - b.KaltMiete)
             };
+
 
             if (b.Minderung > 0)
             {

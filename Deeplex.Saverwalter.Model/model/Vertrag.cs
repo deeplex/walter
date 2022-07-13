@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public sealed class Vertrag
+    public sealed class Vertrag : IAnhang
     {
         public int rowid { get; set; }
         public Guid VertragId { get; set; }
@@ -20,6 +21,8 @@ namespace Deeplex.Saverwalter.Model
         public Guid? AnsprechpartnerId { get; set; }
         public string? VersionsNotiz { get; set; }
         public string? Notiz { get; set; }
+        public List<Garage> Garagen { get; private set; } = new List<Garage>();
+        public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
 
         public Vertrag()
         {

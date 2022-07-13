@@ -16,12 +16,7 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
         [Fact(Skip = "AnhangListViewModelEntry is sealed")]
         public void AnhangListViewModelTest()
         {
-            var mockText = "mockText";
-            var fakeList = A.Fake<ImmutableList<AnhangListViewModelEntry>>();
-            var fakeFS = A.Fake<IFileService>();
-            var fakeNS = A.Fake<INotificationService>();
-            var fakeDB = A.Fake<IWalterDbService>();
-            var stub = new AnhangListViewModel(mockText, fakeList, fakeFS, fakeNS, fakeDB);
+            Assert.True(false, "This test needs an implementation");
         }
 
         [Fact(Skip = "TODO")]

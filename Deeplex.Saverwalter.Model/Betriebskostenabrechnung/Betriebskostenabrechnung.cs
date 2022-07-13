@@ -68,7 +68,8 @@ namespace Deeplex.Saverwalter.Model
             .Where(m => m.BetreffenderMonat >= Abrechnungsbeginn && m.BetreffenderMonat < Abrechnungsende)
             .Sum(z => z.Betrag ?? 0);
 
-        public double KaltMiete => Vertragsversionen.Sum(v => (Min(v.Ende ?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);
+        public double KaltMiete => Vertragsversionen.Sum(v => v.Ende != null && v.Ende < Abrechnungsbeginn ? 0 :
+            (Min(v.Ende ?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);
         public double BetragNebenkosten => Gruppen.Sum(g => g.BetragKalt + g.BetragWarm);
         public double BezahltNebenkosten => Gezahlt - KaltMiete;
 
@@ -110,30 +111,24 @@ namespace Deeplex.Saverwalter.Model
                 .Include(v => v.Wohnung)
                     .ThenInclude(w => w.Adresse)
                 .Include(v => v.Wohnung)
-                    .ThenInclude(w => w.Betriebskostenrechnungsgruppen)
-                        .ThenInclude(b => b.Rechnung)
-                            .ThenInclude(r => r.Gruppen)
-                                .ThenInclude(g => g.Wohnung)
-                                    .ThenInclude(w => w.Adresse)
+                    .ThenInclude(w => w.Betriebskostenrechnungen)
+                        .ThenInclude(w => w.Wohnungen)
+                            .ThenInclude(w => w.Adresse)
                 .Include(v => v.Wohnung)
-                    .ThenInclude(w => w.Betriebskostenrechnungsgruppen)
-                        .ThenInclude(b => b.Rechnung)
-                            .ThenInclude(r => r.Gruppen)
-                                .ThenInclude(g => g.Wohnung)
-                                    .ThenInclude(w => w.Vertraege)
+                    .ThenInclude(w => w.Betriebskostenrechnungen)
+                        .ThenInclude(g => g.Wohnungen)
+                            .ThenInclude(w => w.Vertraege)
                 .Include(v => v.Wohnung)
-                    .ThenInclude(w => w.Betriebskostenrechnungsgruppen)
-                        .ThenInclude(b => b.Rechnung)
-                            .ThenInclude(r => r.Gruppen)
-                                .ThenInclude(g => g.Wohnung)
-                                    .ThenInclude(w => w.Zaehler)
-                                        .ThenInclude(z => z.Staende)
+                    .ThenInclude(b => b.Betriebskostenrechnungen)
+                        .ThenInclude(g => g.Wohnungen)
+                            .ThenInclude(w => w.Zaehler)
+                                .ThenInclude(z => z.Staende)
                 .First();
 
-                Gruppen = Vertrag.Wohnung.Betriebskostenrechnungsgruppen
-                    .Where(g => g.Rechnung.BetreffendesJahr == Jahr)
-                    .GroupBy(p => new SortedSet<int>(p.Rechnung.Gruppen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
-                    .Select(g => new Rechnungsgruppe(this, g.Select(i => i.Rechnung).ToList()))
+                Gruppen = Vertrag.Wohnung.Betriebskostenrechnungen
+                    .Where(g => g.BetreffendesJahr == Jahr)
+                    .GroupBy(p => new SortedSet<int>(p.Wohnungen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
+                    .Select(g => new Rechnungsgruppe(this, g.ToList()))
                     .ToList();
 
             // If Ansprechpartner or Besitzer is null => throw
@@ -155,7 +150,7 @@ namespace Deeplex.Saverwalter.Model
 
             var fZaehler = Zaehler.Where(z =>
                 ganzeGruppe ?
-                    r.Gruppen.Select(g => g.Wohnung).Contains(z.Wohnung) :
+                    r.Wohnungen.Contains(z.Wohnung!) :
                     z.WohnungId == Wohnung.WohnungId);
 
             var ende = (ganzeGruppe ? Abrechnungsende : Nutzungsende).Date;

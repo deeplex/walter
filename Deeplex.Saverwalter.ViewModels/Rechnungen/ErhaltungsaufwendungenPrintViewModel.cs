@@ -83,14 +83,13 @@ namespace Deeplex.Saverwalter.ViewModels
             Titel = p.Bezeichnung;
             Enabled.Value = g.Length == 0;
 
-            Zusatz = db.ctx.JuristischePersonenMitglieder
-                .Include(j => j.JuristischePerson)
+            Zusatz = p.JuristischePersonen // TODO check if okay
                 .Where(j => j.PersonId == p.PersonId && !g.Contains(j.PersonId))
                 .Select(z => new ErhaltungsaufwendungenPrintViewModel(
-                    z.JuristischePerson, db, fs, g.Append(z.PersonId).ToArray()))
+                    z, db, fs, g.Append(z.PersonId).ToArray()))
                 .ToList()
-                .Concat(db.ctx.JuristischePersonenMitglieder
-                    .Where(j => j.JuristischePerson.PersonId == p.PersonId && !g.Contains(j.PersonId))
+                    .Concat(p.JuristischePersonen
+                    .Where(j => j.PersonId == p.PersonId && !g.Contains(j.PersonId))
                     .Select(z => new ErhaltungsaufwendungenPrintViewModel(
                         db.ctx.FindPerson(z.PersonId), db, fs, g.Append(z.PersonId).ToArray()))
                     .ToList())

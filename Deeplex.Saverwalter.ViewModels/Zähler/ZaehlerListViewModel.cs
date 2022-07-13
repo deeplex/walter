@@ -26,9 +26,10 @@ namespace Deeplex.Saverwalter.ViewModels
         public ZaehlerListViewModel(IWalterDbService db)
         {
             AllRelevant = db.ctx.ZaehlerSet
-                .Include(z => z.Wohnung)
-                .ThenInclude(w => w.Adresse)
-                .Include(z => z.Staende)
+                .Include(z => z.Anhaenge)
+                .Include(z => z.Wohnung).ThenInclude(w => w.Adresse).ThenInclude(a => a.Anhaenge)
+                .Include(z => z.Wohnung).ThenInclude(w => w.Anhaenge)
+                .Include(z => z.Staende).ThenInclude(s => s.Anhaenge)
                 .Select(z => new ZaehlerListViewModelEntry(z))
                 .ToImmutableList();
             Liste.Value = AllRelevant;

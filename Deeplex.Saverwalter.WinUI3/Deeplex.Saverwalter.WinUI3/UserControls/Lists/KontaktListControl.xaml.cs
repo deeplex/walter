@@ -166,27 +166,14 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private async void RemovePerson_Click(object sender, RoutedEventArgs e)
         {
+            // TODO No Person is removed here?
+
             if (await App.NotificationService.Confirmation())
             {
                 var guid = ((KontaktListViewModelEntry)((Button)sender).DataContext).Entity.PersonId;
 
                 ViewModel.Kontakte.Value = ViewModel.Kontakte.Value
                     .Where(k => guid != k.Entity.PersonId).ToImmutableList();
-
-                if (VertragGuid != Guid.Empty)
-                {
-                    App.WalterService.ctx.MieterSet
-                        .Where(m => m.PersonId == guid && m.VertragId == VertragGuid)
-                        .ToList().ForEach(m => App.WalterService.ctx.MieterSet.Remove(m));
-                }
-
-                if (JuristischePersonId != 0)
-                {
-                    App.WalterService.ctx.JuristischePersonenMitglieder
-                        .Where(m => m.PersonId == guid && m.JuristischePersonId == JuristischePersonId)
-                        .ToList().ForEach(m => App.WalterService.ctx.JuristischePersonenMitglieder.Remove(m));
-                }
-
                 App.WalterService.SaveWalter();
             }
         }

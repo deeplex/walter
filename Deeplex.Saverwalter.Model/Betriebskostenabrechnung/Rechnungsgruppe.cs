@@ -26,21 +26,21 @@ namespace Deeplex.Saverwalter.Model
         double GesamtBetragWarm { get; }
     }
 
-    public sealed class Rechnungsgruppe: IRechnungsgruppe
+    public sealed class Rechnungsgruppe : IRechnungsgruppe
     {
         public List<Betriebskostenrechnung> Rechnungen { get; }
 
         private IBetriebskostenabrechnung b { get; }
-        private List<BetriebskostenrechnungsGruppe> gr => Rechnungen.First().Gruppen;
-        private IEnumerable<Vertrag> alleVertraegeDieserWohnungen => gr.SelectMany(w => w.Wohnung.Vertraege.Where(v =>
+        private List<Wohnung> gr => Rechnungen.First().Wohnungen.ToList();
+        private IEnumerable<Vertrag> alleVertraegeDieserWohnungen => gr.SelectMany(w => w.Vertraege.Where(v =>
                 v.Beginn <= b.Abrechnungsende && (v.Ende is null || v.Ende >= b.Abrechnungsbeginn)));
 
         public string Bezeichnung => Rechnungen.First().GetWohnungenBezeichnung();
-        public double GesamtWohnflaeche => gr.Sum(w => w.Wohnung.Wohnflaeche);
+        public double GesamtWohnflaeche => gr.Sum(w => w.Wohnflaeche);
         public double WFZeitanteil => b.Wohnung.Wohnflaeche / GesamtWohnflaeche * b.Zeitanteil;
         public double NFZeitanteil => b.Wohnung.Nutzflaeche / GesamtNutzflaeche * b.Zeitanteil;
-        public double GesamtNutzflaeche => gr.Sum(w => w.Wohnung.Nutzflaeche);
-        public int GesamtEinheiten => gr.Sum(w => w.Wohnung.Nutzeinheit);
+        public double GesamtNutzflaeche => gr.Sum(w => w.Nutzflaeche);
+        public int GesamtEinheiten => gr.Sum(w => w.Nutzeinheit);
         public double NEZeitanteil => (double)b.Wohnung.Nutzeinheit / GesamtEinheiten * b.Zeitanteil;
         public List<PersonenZeitIntervall> GesamtPersonenIntervall
         {
@@ -61,11 +61,11 @@ namespace Deeplex.Saverwalter.Model
         }
 
         public List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil => GesamtPersonenIntervall
-            .Where(g => g.Beginn < b.Nutzungsende && g.Ende >= b.Nutzungsbeginn)
-            .Select((w, i) =>
-                (w.Beginn, w.Ende, Anteil:
-                    (double)PersonenIntervall.Where(p => p.Beginn <= w.Beginn).First().Personenzahl / w.Personenzahl *
-                    (((double)(w.Ende - w.Beginn).Days + 1) / b.Abrechnungszeitspanne))).ToList();
+                .Where(g => g.Beginn < b.Nutzungsende && g.Ende >= b.Nutzungsbeginn)
+                    .Select((w, i) =>
+                        (w.Beginn, w.Ende, Anteil:
+                            (double)(PersonenIntervall.FirstOrDefault(p => p.Beginn <= w.Beginn)?.Personenzahl ?? 0) / w.Personenzahl *
+                            (((double)(w.Ende - w.Beginn).Days + 1) / b.Abrechnungszeitspanne))).ToList();
 
         public Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch
         {
@@ -143,8 +143,7 @@ namespace Deeplex.Saverwalter.Model
                 var copy = allgStrom.ShallowCopy();
                 var idx = Rechnungen.IndexOf(allgStrom);
 
-                copy.Betrag -= b.Vertrag.Wohnung.Betriebskostenrechnungsgruppen
-                    .Select(g => g.Rechnung)
+                copy.Betrag -= b.Vertrag.Wohnung.Betriebskostenrechnungen
                     .Where(g => g.BetreffendesJahr == b.Jahr && (int)g.Typ % 2 == 1)
                     .Select(r => r.Betrag)
                     .Sum() * 0.05;
@@ -184,7 +183,9 @@ namespace Deeplex.Saverwalter.Model
             merged.RemoveAt(merged.Count - 1);
 
             // TODO refactor function to switch from tuple to class - or replace this function by constructor
-            return merged.Select(m => new PersonenZeitIntervall(m, parent)).ToList();
+            var ret = merged.Select(m => new PersonenZeitIntervall(m, parent)).ToList();
+
+            return ret;
         }
     }
 }

@@ -15,20 +15,15 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public static class Files
     {
-        public static void ConnectAnhangToEntity<T, U>(DbSet<T> Set, U target, List<Anhang> files, IWalterDbService db) where T : class, IAnhang<U>, new()
-        {
-            foreach (var file in files)
-            {
-                var attachment = new T
-                {
-                    Anhang = file,
-                    AnhangId = file.AnhangId,
-                    Target = target,
-                };
-                Set.Add(attachment);
-            }
-            db.SaveWalter();
-        }
+        // TODO needs rework
+        //public static void ConnectAnhangToEntity<T, U>(DbSet<T> Set, U target, List<Anhang> files, IWalterDbService db) where T : class, Anhang a, new()
+        //{
+        //    foreach (var file in files)
+        //    {
+        //        Set.Add(Anhang);
+        //    }
+        //    db.SaveWalter();
+        //}
 
         public static Anhang SaveAnhang(string src, string root)
         {
@@ -47,22 +42,21 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public static void SaveBetriebskostenabrechnung(this Betriebskostenabrechnung b, string path, Services.IWalterDbService db)
         {
-            var RechnungIds = b.Gruppen.SelectMany(g => g.Rechnungen).Select(r => r.BetriebskostenrechnungId);
+            var Rechnungen = b.Gruppen.SelectMany(g => g.Rechnungen);
             var temppath = Path.GetTempPath();
 
             var atLeastOne = false;
 
-            db.ctx.BetriebskostenrechnungAnhaenge
-                .Include(a => a.Anhang)
-                .Where(a => RechnungIds.Contains(a.Target.BetriebskostenrechnungId))
+            db.ctx.Anhaenge
+                .Where(a => Rechnungen.Any(r => r.Anhaenge.Contains(a)))
                 .ToList()
                 .ForEach(a =>
                 {
-                    if (a.Anhang != null)
+                    if (a != null)
                     {
                         atLeastOne = true;
-                        var src = Path.Combine(db.root, a.AnhangId.ToString() + Path.GetExtension(a.Anhang.FileName));
-                        var tar = Path.Combine(temppath, a.Anhang.FileName);
+                        var src = Path.Combine(db.root, a.AnhangId.ToString() + Path.GetExtension(a.FileName));
+                        var tar = Path.Combine(temppath, a.FileName);
                         File.Copy(src, tar);
                     }
                 });
