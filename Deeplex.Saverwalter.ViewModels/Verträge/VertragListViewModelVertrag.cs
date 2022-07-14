@@ -12,8 +12,7 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public List<VertragListViewModelVertragVersion> Versionen { get; }
             = new List<VertragListViewModelVertragVersion>();
-        public ObservableProperty<VertragListViewModelMiete> AddMieteValue
-            = new ObservableProperty<VertragListViewModelMiete>();
+        public ObservableProperty<VertragListViewModelMiete> AddMieteValue = new();
 
         public ImmutableList<VertragListViewModelMiete> Mieten { get; set; }
         public string LastMiete

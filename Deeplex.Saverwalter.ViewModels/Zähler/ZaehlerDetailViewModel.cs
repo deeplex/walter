@@ -26,8 +26,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<ZaehlerstandListViewModel> Staende
-            = new ObservableProperty<ZaehlerstandListViewModel>();
+        public ObservableProperty<ZaehlerstandListViewModel> Staende = new();
 
         public List<Zaehlertyp> Typen => Enums.Zaehlertypen;
         public List<WohnungListViewModelEntry> Wohnungen = new List<WohnungListViewModelEntry>();

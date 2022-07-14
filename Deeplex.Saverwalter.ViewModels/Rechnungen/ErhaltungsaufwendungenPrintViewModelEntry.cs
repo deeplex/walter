@@ -11,8 +11,8 @@ namespace Deeplex.Saverwalter.ViewModels
         public int Id { get; }
         public string Bezeichnung { get; }
         public ObservableProperty<int> Jahr => parent.Jahr;
-        public ObservableProperty<bool> Enabled = new ObservableProperty<bool>();
-        public ObservableProperty<double> Summe = new ObservableProperty<double>();
+        public ObservableProperty<bool> Enabled = new();
+        public ObservableProperty<double> Summe = new();
         public ImmutableList<ErhaltungsaufwendungenListViewModelEntry> Liste;
 
         private ErhaltungsaufwendungenPrintViewModel parent { get; }

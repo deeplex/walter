@@ -11,11 +11,11 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class ErhaltungsaufwendungenPrintViewModel
     {
-        public ObservableProperty<int> Jahr = new ObservableProperty<int>();
+        public ObservableProperty<int> Jahr = new();
         public ImmutableList<ErhaltungsaufwendungenPrintEntry> Wohnungen { get; }
         public ImmutableList<ErhaltungsaufwendungenPrintViewModel> Zusatz;
         public string Titel { get; }
-        public ObservableProperty<bool> Enabled = new ObservableProperty<bool>(true);
+        public ObservableProperty<bool> Enabled = new(true);
 
         public IWalterDbService Db { get; }
 

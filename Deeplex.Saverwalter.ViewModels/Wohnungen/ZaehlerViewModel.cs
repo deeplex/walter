@@ -21,8 +21,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public string Typ => Entity.Typ.ToString();
 
-        public ObservableProperty<ImmutableList<ZaehlerstandViewModel>> Zaehlerstaende
-            = new ObservableProperty<ImmutableList<ZaehlerstandViewModel>>();
+        public ObservableProperty<ImmutableList<ZaehlerstandViewModel>> Zaehlerstaende = new();
         public DateTimeOffset AddZaehlerstandDatum => DateTime.UtcNow.Date.AsUtcKind();
         public double AddZaehlerstandStand => Zaehlerstaende.Value.FirstOrDefault()?.Stand ?? 0;
         public void LoadList()

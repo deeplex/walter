@@ -13,9 +13,8 @@ namespace Deeplex.Saverwalter.ViewModels
     public sealed class VertragDetailViewModel : VertragDetailViewModelVersion
     {
         public Guid guid { get; }
-        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> AlleMieter
-            = new ObservableProperty<ImmutableList<KontaktListViewModelEntry>>();
-        public ObservableProperty<KontaktListViewModelEntry> AddMieter = new ObservableProperty<KontaktListViewModelEntry>();
+        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> AlleMieter = new();
+        public ObservableProperty<KontaktListViewModelEntry> AddMieter = new();
 
         public void UpdateMieterList()
         {
@@ -31,11 +30,8 @@ namespace Deeplex.Saverwalter.ViewModels
         public List<WohnungListViewModelEntry> AlleWohnungen = new List<WohnungListViewModelEntry>();
         public List<KontaktListViewModelEntry> AlleKontakte;
 
-        public ObservableProperty<ImmutableList<VertragDetailViewModelVersion>> Versionen
-            = new ObservableProperty<ImmutableList<VertragDetailViewModelVersion>>();
-
-        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Mieter
-            = new ObservableProperty<ImmutableList<KontaktListViewModelEntry>>();
+        public ObservableProperty<ImmutableList<VertragDetailViewModelVersion>> Versionen = new();
+        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Mieter = new();
         public DateTimeOffset? AddVersionDatum;
 
         public DateTimeOffset lastBeginn => Versionen.Value.Last().Beginn;

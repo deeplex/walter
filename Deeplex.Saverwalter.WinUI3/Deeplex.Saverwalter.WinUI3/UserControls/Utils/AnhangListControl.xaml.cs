@@ -10,9 +10,8 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
     public sealed partial class AnhangListControl : UserControl
     {
-        public ObservableProperty<AnhangListViewModel> ViewModel
-            = new ObservableProperty<AnhangListViewModel>();
-        public ObservableProperty<bool> active = new ObservableProperty<bool>();
+        public ObservableProperty<AnhangListViewModel> ViewModel = new();
+        public ObservableProperty<bool> active = new();
 
         public AnhangListControl()
         {

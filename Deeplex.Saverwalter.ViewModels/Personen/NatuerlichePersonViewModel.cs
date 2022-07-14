@@ -70,8 +70,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> JuristischePersonen
-            = new ObservableProperty<ImmutableList<KontaktListViewModelEntry>>();
+        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> JuristischePersonen = new();
 
         public void UpdateListen()
         {

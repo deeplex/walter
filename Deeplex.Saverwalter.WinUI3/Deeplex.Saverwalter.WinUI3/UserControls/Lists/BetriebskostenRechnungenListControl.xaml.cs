@@ -16,8 +16,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
     public sealed partial class BetriebskostenRechnungenListControl : UserControl
     {
         public BetriebskostenRechnungenListViewModel ViewModel { get; set; }
-        public ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>> Templates =
-            new ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>>();
+        public ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>> Templates = new();
 
         private void UpdateFilter()
         {

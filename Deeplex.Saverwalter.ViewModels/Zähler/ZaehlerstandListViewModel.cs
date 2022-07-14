@@ -9,7 +9,7 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public class ZaehlerstandListViewModel : BindableBase
     {
-        public ObservableProperty<ImmutableList<ZaehlerstandListViewModelEntry>> Liste = new ObservableProperty<ImmutableList<ZaehlerstandListViewModelEntry>>();
+        public ObservableProperty<ImmutableList<ZaehlerstandListViewModelEntry>> Liste = new();
         public int ZaehlerId;
 
         public IWalterDbService Db;

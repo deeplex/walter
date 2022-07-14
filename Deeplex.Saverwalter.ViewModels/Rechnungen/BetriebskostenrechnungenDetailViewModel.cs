@@ -15,9 +15,9 @@ namespace Deeplex.Saverwalter.ViewModels
         public Betriebskostenrechnung Entity { get; }
         public int Id => Entity.BetriebskostenrechnungId;
 
-        public ObservableProperty<int> BetriebskostenrechnungsJahr = new ObservableProperty<int>();
-        public ObservableProperty<bool> ZeigeVorlagen = new ObservableProperty<bool>();
-        public ObservableProperty<WohnungListViewModelEntry> BetriebskostenrechnungsWohnung = new ObservableProperty<WohnungListViewModelEntry>();
+        public ObservableProperty<int> BetriebskostenrechnungsJahr = new();
+        public ObservableProperty<bool> ZeigeVorlagen = new();
+        public ObservableProperty<WohnungListViewModelEntry> BetriebskostenrechnungsWohnung = new();
 
         public async Task selfDestruct()
         {
@@ -182,8 +182,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen
-            = new ObservableProperty<ImmutableList<WohnungListViewModelEntry>>();
+        public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 
         public IWalterDbService Db;
         public INotificationService NotifcationService;

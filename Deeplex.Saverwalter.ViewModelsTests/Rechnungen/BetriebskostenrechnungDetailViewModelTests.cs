@@ -7,7 +7,6 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
         [Fact()]
         public void selfDestructTest()
         {
-
             Assert.True(false, "This test needs an implementation");
         }
 
