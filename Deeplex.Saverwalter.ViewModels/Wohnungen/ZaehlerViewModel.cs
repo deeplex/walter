@@ -15,7 +15,6 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public int Id => Entity.ZaehlerId;
 
-        private Zaehler Zaehler { get; }
 
         public string Kennnummer => Entity.Kennnummer;
 
@@ -36,43 +35,15 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public ZaehlerViewModel(Zaehler z, IWalterDbService db)
         {
-            Zaehler = z;
+            Entity = z;
             Db = db;
 
             LoadList();
-
-            AddZaehlerstand = new RelayCommand(AddZaehlerstandPanel
-                => mAddZaehlerstand(AddZaehlerstandPanel, z), _ => true);
 
             //TODO AttachFile = new AsyncRelayCommand(async _ =>
             //    await Utils.Files.SaveFilesToWalter(Avm.ctx.ZaehlerAnhaenge, z), _ => true);
         }
 
         public AsyncRelayCommand AttachFile;
-        public RelayCommand AddZaehlerstand { get; }
-
-        private void mAddZaehlerstand(object AddZaehlerstandPanel, Zaehler z)
-        {
-            // TODO 
-            //var dtp = ((CalendarDatePicker)((StackPanel)AddZaehlerstandPanel).Children[0]).Date;
-            //var datum = (dtp.HasValue ? dtp.Value.UtcDateTime : DateTime.UtcNow.Date).AsUtcKind();
-            //var stand = Convert.ToDouble(((NumberBox)((StackPanel)AddZaehlerstandPanel).Children[1]).Text);
-
-            //var zs = new Zaehlerstand
-            //{
-            //    AllgemeinZaehler = az,
-            //    Zaehler = z,
-            //    Datum = datum,
-            //    Stand = stand,
-            //};
-            //App.Walter.Zaehlerstaende.Add(zs);
-            //App.SaveWalter();
-            //var wdzs = new ZaehlerstandViewModel(zs, this);
-            //Zaehlerstaende.Value = Zaehlerstaende.Value
-            //    .Add(wdzs)
-            //    .OrderBy(nzs => nzs.Datum).Reverse()
-            //    .ToImmutableList();
-            //RaisePropertyChanged(nameof(Zaehlerstaende));
-        }
     }
 }
