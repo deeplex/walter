@@ -25,8 +25,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Personen
-            = new ObservableProperty<ImmutableList<KontaktListViewModelEntry>>();
+        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Personen = new();
         private KontaktListViewModelEntry mAussteller;
         public KontaktListViewModelEntry Aussteller
         {
@@ -41,8 +40,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<string> QuickPerson
-            = new ObservableProperty<string>();
+        public ObservableProperty<string> QuickPerson = new();
 
         public List<WohnungListViewModelEntry> Wohnungen { get; }
         private WohnungListViewModelEntry mWohnung;

@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.ViewModels
     public sealed class ErhaltungsaufwendungenListViewModelEntry
     {
         public Erhaltungsaufwendung Entity { get; }
-        public ObservableProperty<bool> Enabled = new ObservableProperty<bool>(true);
+        public ObservableProperty<bool> Enabled = new(true);
         public string Aussteller => Db.ctx.FindPerson(Entity.AusstellerId).Bezeichnung;
         public int Id => Entity.ErhaltungsaufwendungId;
         public WohnungListViewModelEntry Wohnung;

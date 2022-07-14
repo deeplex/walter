@@ -7,8 +7,8 @@ namespace Deeplex.Saverwalter.ViewModels
     public sealed class VertragListViewModelMiete : BindableBase
     {
         public int Id;
-        public ObservableProperty<DateTimeOffset> Datum = new ObservableProperty<DateTimeOffset>();
-        public ObservableProperty<DateTimeOffset> BetreffenderMonat = new ObservableProperty<DateTimeOffset>();
+        public ObservableProperty<DateTimeOffset> Datum = new();
+        public ObservableProperty<DateTimeOffset> BetreffenderMonat = new();
         public double Kalt;
         public string KaltString
         {
@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<string> Notiz = new ObservableProperty<string>();
+        public ObservableProperty<string> Notiz = new();
 
         public VertragListViewModelMiete()
         {

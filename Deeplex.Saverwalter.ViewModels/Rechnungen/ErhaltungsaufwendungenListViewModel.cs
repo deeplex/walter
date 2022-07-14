@@ -8,10 +8,9 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class ErhaltungsaufwendungenListViewModel : BindableBase, IFilterViewModel
     {
-        public ObservableProperty<ImmutableList<ErhaltungsaufwendungenListViewModelEntry>> Liste
-            = new ObservableProperty<ImmutableList<ErhaltungsaufwendungenListViewModelEntry>>();
+        public ObservableProperty<ImmutableList<ErhaltungsaufwendungenListViewModelEntry>> Liste = new();
 
-        public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Filter { get; set; } = new();
         public ImmutableList<ErhaltungsaufwendungenListViewModelEntry> AllRelevant { get; set; }
 
         private ErhaltungsaufwendungenListViewModelEntry mSelectedAufwendung;

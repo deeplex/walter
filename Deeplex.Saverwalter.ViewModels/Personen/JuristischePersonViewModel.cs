@@ -34,12 +34,9 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Mitglieder
-            = new ObservableProperty<ImmutableList<KontaktListViewModelEntry>>();
-        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> AddMitglieder
-            = new ObservableProperty<ImmutableList<KontaktListViewModelEntry>>();
-        public ObservableProperty<KontaktListViewModelEntry> AddMitglied
-            = new ObservableProperty<KontaktListViewModelEntry>();
+        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Mitglieder = new();
+        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> AddMitglieder = new();
+        public ObservableProperty<KontaktListViewModelEntry> AddMitglied = new();
 
         public bool WohnungenInklusiveMitglieder
         {

@@ -8,11 +8,10 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class WohnungListViewModel : IFilterViewModel
     {
-        public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Liste = new ObservableProperty<ImmutableList<WohnungListViewModelEntry>>();
-        public ObservableProperty<WohnungListViewModelEntry> SelectedWohnung
-            = new ObservableProperty<WohnungListViewModelEntry>();
+        public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Liste = new();
+        public ObservableProperty<WohnungListViewModelEntry> SelectedWohnung = new();
 
-        public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Filter { get; set; } = new();
         public ImmutableList<WohnungListViewModelEntry> AllRelevant { get; }
 
         public WohnungListViewModel(IWalterDbService db)

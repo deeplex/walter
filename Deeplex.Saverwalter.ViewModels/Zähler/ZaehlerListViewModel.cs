@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public class ZaehlerListViewModel : BindableBase, IFilterViewModel
     {
-        public ObservableProperty<ImmutableList<ZaehlerListViewModelEntry>> Liste = new ObservableProperty<ImmutableList<ZaehlerListViewModelEntry>>();
+        public ObservableProperty<ImmutableList<ZaehlerListViewModelEntry>> Liste = new();
         private ZaehlerListViewModelEntry mSelectedZaehler;
         public ZaehlerListViewModelEntry SelectedZaehler
         {
@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Filter { get; set; } = new();
         public ImmutableList<ZaehlerListViewModelEntry> AllRelevant { get; }
 
         public ZaehlerListViewModel(IWalterDbService db)

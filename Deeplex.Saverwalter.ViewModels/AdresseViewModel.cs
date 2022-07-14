@@ -135,14 +135,10 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<ImmutableList<string>> Staedte
-            = new ObservableProperty<ImmutableList<string>>();
-        public ObservableProperty<ImmutableList<string>> Postleitzahlen
-            = new ObservableProperty<ImmutableList<string>>();
-        public ObservableProperty<ImmutableList<string>> Strassen
-            = new ObservableProperty<ImmutableList<string>>();
-        public ObservableProperty<ImmutableList<string>> Hausnummern
-            = new ObservableProperty<ImmutableList<string>>();
+        public ObservableProperty<ImmutableList<string>> Staedte = new();
+        public ObservableProperty<ImmutableList<string>> Postleitzahlen = new();
+        public ObservableProperty<ImmutableList<string>> Strassen = new();
+        public ObservableProperty<ImmutableList<string>> Hausnummern = new();
 
         public int GetReferences
         {

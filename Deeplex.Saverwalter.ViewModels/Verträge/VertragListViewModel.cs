@@ -9,12 +9,11 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class VertragListViewModel : IFilterViewModel
     {
-        public ObservableProperty<ImmutableList<VertragListViewModelVertrag>> Vertraege = new ObservableProperty<ImmutableList<VertragListViewModelVertrag>>();
-        public ObservableProperty<VertragListViewModelVertrag> SelectedVertrag
-            = new ObservableProperty<VertragListViewModelVertrag>();
-        public ObservableProperty<bool> OnlyActive = new ObservableProperty<bool>();
+        public ObservableProperty<ImmutableList<VertragListViewModelVertrag>> Vertraege = new();
+        public ObservableProperty<VertragListViewModelVertrag> SelectedVertrag = new();
+        public ObservableProperty<bool> OnlyActive = new();
 
-        public ObservableProperty<string> Filter { get; set; } = new ObservableProperty<string>();
+        public ObservableProperty<string> Filter { get; set; } = new();
         public ImmutableList<VertragListViewModelVertrag> AllRelevant { get; set; }
 
         public VertragListViewModel(IWalterDbService db)

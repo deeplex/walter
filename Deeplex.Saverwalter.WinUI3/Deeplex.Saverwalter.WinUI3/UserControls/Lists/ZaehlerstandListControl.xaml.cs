@@ -10,8 +10,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
     public sealed partial class ZaehlerstandListControl : UserControl
     {
-        public ObservableProperty<ZaehlerstandListViewModel> ViewModel
-            = new ObservableProperty<ZaehlerstandListViewModel>();
+        public ObservableProperty<ZaehlerstandListViewModel> ViewModel = new();
 
         public ZaehlerstandListControl()
         {
