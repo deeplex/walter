@@ -3,7 +3,6 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -28,82 +27,21 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public ImmutableList<KontaktListViewModelEntry> AlleVermieter;
 
-        private KontaktListViewModelEntry mBesitzer;
-        public KontaktListViewModelEntry Besitzer
-        {
-            get => mBesitzer;
-            set
-            {
-                Entity.BesitzerId = value == null ? Guid.Empty : value.Entity.PersonId;
-                mBesitzer = value;
-                RaisePropertyChangedAuto();
-            }
-        }
-
         public int AdresseId => Entity.AdresseId;
         public string Anschrift => AdresseViewModel.Anschrift(AdresseId, Db);
 
-        public string Bezeichnung
-        {
-            get => Entity.Bezeichnung;
-            set
-            {
-                var old = Entity.Bezeichnung;
-                Entity.Bezeichnung = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
+        public KontaktListViewModelEntry Besitzer { get; set; }
 
-        public string Notiz
-        {
-            get => Entity.Notiz;
-            set
-            {
-                var old = Entity.Notiz;
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public double Wohnflaeche
-        {
-            get => Entity.Wohnflaeche;
-            set
-            {
-                var val = double.IsNaN(value) ? 0 : value;
-                var old = Entity.Wohnflaeche;
-                Entity.Wohnflaeche = val;
-                RaisePropertyChangedAuto(old, val);
-            }
-        }
-
-        public double Nutzflaeche
-        {
-            get => Entity.Nutzflaeche;
-            set
-            {
-                var val = double.IsNaN(value) ? 0 : value;
-                var old = Entity.Nutzflaeche;
-                Entity.Nutzflaeche = val;
-                RaisePropertyChangedAuto(old, val);
-            }
-        }
-
-        public int Nutzeinheit
-        {
-            get => Entity.Nutzeinheit;
-            set
-            {
-                var val = int.MinValue == value ? 0 : value;
-                var old = Entity.Nutzeinheit;
-                Entity.Nutzeinheit = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
+        public ObservableProperty<string> Bezeichnung { get; set; } = new();
+        public ObservableProperty<string> Notiz { get; set; } = new();
+        public ObservableProperty<double> Wohnflaeche { get; set; } = new();
+        public ObservableProperty<double> Nutzflaeche { get; set; } = new();
+        public ObservableProperty<int> Nutzeinheit { get; set; } = new();
 
         private INotificationService NotificationService;
         private IWalterDbService Db;
         public RelayCommand RemoveBesitzer;
+        public RelayCommand Save;
 
         public WohnungDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Wohnung(), ns, db) { }
         public WohnungDetailViewModel(Wohnung w, INotificationService ns, IWalterDbService db)
@@ -122,32 +60,23 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 Besitzer = AlleVermieter.SingleOrDefault(e => e.Entity.PersonId == w.BesitzerId);
             }
+            Bezeichnung.Value = w.Bezeichnung;
+            Notiz.Value = w.Notiz;
+            Wohnflaeche.Value = w.Wohnflaeche;
+            Nutzflaeche.Value = w.Nutzflaeche;
+            Nutzeinheit.Value = w.Nutzeinheit;
 
-            PropertyChanged += OnUpdate;
-
+            Save = new RelayCommand(_ => save(), _ => true); // Should be NotificationService.outOfSync
             RemoveBesitzer = new RelayCommand(_ => { Besitzer = null; }, _ => true);
         }
 
-        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        private void save()
         {
-            switch (e.PropertyName)
-            {
-                case nameof(Besitzer):
-                case nameof(Bezeichnung):
-                case nameof(Wohnflaeche):
-                case nameof(Nutzflaeche):
-                case nameof(Nutzeinheit):
-                case nameof(Notiz):
-                    break;
-                default:
-                    return;
-            }
-
-            if ((Entity.Adresse == null && Entity.AdresseId == 0) ||
-                Entity.Bezeichnung == null || Entity.Bezeichnung == "")
-            {
-                return;
-            }
+            Entity.Bezeichnung = Bezeichnung.Value;
+            Entity.Wohnflaeche = Wohnflaeche.Value;
+            Entity.Nutzflaeche = Nutzflaeche.Value;
+            Entity.Nutzeinheit = Nutzeinheit.Value;
+            Entity.Notiz = Notiz.Value;
 
             if (Entity.WohnungId != 0)
             {
@@ -158,6 +87,17 @@ namespace Deeplex.Saverwalter.ViewModels
                 Db.ctx.Wohnungen.Add(Entity);
             }
             Db.SaveWalter();
+            checkForChanges();
+        }
+
+        public void checkForChanges()
+        {
+            NotificationService.outOfSync =
+                Entity.Bezeichnung != Bezeichnung.Value ||
+                Entity.Wohnflaeche != Wohnflaeche.Value ||
+                Entity.Nutzflaeche != Nutzflaeche.Value ||
+                Entity.Nutzeinheit != Nutzeinheit.Value ||
+                Entity.Notiz != Notiz.Value;
         }
     }
 }

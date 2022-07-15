@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Saverwalter.WinUI3.Views;
@@ -12,7 +11,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Immutable;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -35,8 +33,13 @@ namespace Deeplex.Saverwalter.WinUI3
         // ListAnhang is to be filled using GridViews. TODO #17
         public ObservableProperty<AnhangListViewModel> ListAnhang { get; private set; } = new();
 
-        public void Navigate<U>(Type SourcePage, U SendParameter)
+        public async void Navigate<U>(Type SourcePage, U SendParameter)
         {
+            if (await checkOutOfSync())
+            {
+                return;
+            }
+
             if (SendParameter is IAnhang a)
             {
                 DetailAnhang.Value = new AnhangListViewModel(a, App.FileService, App.NotificationService, App.WalterService);
@@ -163,9 +166,34 @@ namespace Deeplex.Saverwalter.WinUI3
             }
         }
 
-        private void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
+        private async Task<bool> checkOutOfSync()
         {
-            if (AppFrame.CanGoBack)
+            if (App.NotificationService.outOfSync)
+            {
+                if (!await App.NotificationService.Confirmation(
+                    "Sind Sie sicher?",
+                    "Sie haben ungespeicherte Änderungen.",
+                    "Ja", "Nein"))
+                {
+                    return true;
+                }
+                else
+                {
+                    App.NotificationService.outOfSync = false;
+                }
+            }
+
+            return false;
+        }
+
+        private async void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
+        {
+            if (await checkOutOfSync())
+            {
+                return;
+            }
+
+            if (AppFrame.CanGoBack && !App.NotificationService.outOfSync)
             {
                 AppFrame.GoBack();
             }

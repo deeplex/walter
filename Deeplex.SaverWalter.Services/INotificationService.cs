@@ -10,5 +10,6 @@ namespace Deeplex.Saverwalter.Services
     {
         Task<bool> Confirmation();
         void ShowAlert(string text);
+        bool outOfSync { get; set; }
     }
 }
