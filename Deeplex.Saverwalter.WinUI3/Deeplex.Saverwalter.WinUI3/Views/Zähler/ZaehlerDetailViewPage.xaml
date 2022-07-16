@@ -17,11 +17,9 @@
                         <TextBox
                             Header="Kennnummer"
                             Width="200"
-                            TextChanged="TextBox_TextChanged"
                             Style="{StaticResource Eintraege}"
                             Text="{x:Bind ViewModel.Kennnummer.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <ComboBox
-                            SelectionChanged="ComboBox_SelectionChanged"
                             Margin="20,20,0,0" Header="Typ"
                             Width="200" ItemsSource="{x:Bind ViewModel.Typen}"
                             SelectedItem="{x:Bind ViewModel.Typ.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
@@ -57,7 +55,6 @@
                     <StackPanel>
                         <TextBox
                             Margin="20,20,0,0"
-                            TextChanged="TextBox_TextChanged"
                             Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             Header="Notiz"/>
                     </StackPanel>

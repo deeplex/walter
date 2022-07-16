@@ -48,11 +48,11 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public ObservableProperty<Zaehlertyp> Typ = new();
-        public ObservableProperty<string> Notiz = new();
-        public ObservableProperty<string> Kennnummer = new();
-        public ObservableProperty<WohnungListViewModelEntry> Wohnung = new();
-        
+        public SavableProperty<Zaehlertyp> Typ { get; }
+        public SavableProperty<string> Notiz { get; }
+        public SavableProperty<string> Kennnummer { get; }
+        public SavableProperty<WohnungListViewModelEntry> Wohnung { get; }
+
         // Necessary to show / hide Zählerstände
         public bool Initialized => Entity.ZaehlerId != 0;
 
@@ -62,12 +62,16 @@ namespace Deeplex.Saverwalter.ViewModels
         public ZaehlerDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Zaehler(), ns, db) { }
         public ZaehlerDetailViewModel(Zaehler z, INotificationService ns, IWalterDbService db)
         {
-            Typ.Value = z.Typ;
-            Notiz.Value = z.Notiz;
-            Kennnummer.Value = z.Kennnummer;
+            Typ = new(this, z.Typ);
+            Notiz = new(this, z.Notiz);
+            Kennnummer = new(this, z.Kennnummer);
             if (z.Wohnung != null)
             {
-                Wohnung.Value = new WohnungListViewModelEntry(z.Wohnung, db);
+                Wohnung = new(this, new WohnungListViewModelEntry(z.Wohnung, db));
+            }
+            else
+            {
+                Wohnung = new(this);
             }
 
             NotificationService = ns;
@@ -89,7 +93,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Staende.Value = new ZaehlerstandListViewModel(z, NotificationService, Db);
 
             DeleteAllgemeinZaehler = new RelayCommand(_ => AllgemeinZaehler = null);
-            DeleteZaehlerWohnung = new RelayCommand(_ => Wohnung = null);
+            DeleteZaehlerWohnung = new RelayCommand(_ => Wohnung.Value = null);
 
             Delete = new AsyncRelayCommand(async _ =>
             {
