@@ -13,13 +13,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public Vertrag Entity { get; }
         public int Id => Entity.rowid;
         public int Version => Entity.Version;
-        public ObservableProperty<double> KaltMiete = new();
-        public ObservableProperty<int> Personenzahl = new();
-        public ObservableProperty<WohnungListViewModelEntry?> Wohnung = new();
-        public ObservableProperty<DateTimeOffset> Beginn = new();
-        public ObservableProperty<DateTimeOffset?> Ende = new();
-        public ObservableProperty<string> Notiz = new();
-        public ObservableProperty<KontaktListViewModelEntry> Ansprechpartner = new();
+        public SavableProperty<double> KaltMiete;
+        public SavableProperty<int> Personenzahl;
+        public SavableProperty<WohnungListViewModelEntry?> Wohnung;
+        public SavableProperty<DateTimeOffset> Beginn;
+        public SavableProperty<DateTimeOffset?> Ende;
+        public SavableProperty<string> Notiz;
+        public SavableProperty<KontaktListViewModelEntry> Ansprechpartner;
 
         public KontaktListViewModelEntry Vermieter
             => Wohnung.Value?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
@@ -39,16 +39,20 @@ namespace Deeplex.Saverwalter.ViewModels
             Db = db;
             NotificationService = ns;
 
-            KaltMiete.Value = v.KaltMiete;
-            Personenzahl.Value = v.Personenzahl;
-            Wohnung.Value = new WohnungListViewModelEntry(v.Wohnung, db);
-            Beginn.Value = v.Beginn;
-            Ende.Value = v.Ende;
-            Notiz.Value = v.Notiz;
+            KaltMiete = new(this, v.KaltMiete);
+            Personenzahl = new(this, v.Personenzahl);
+            Wohnung = new(this, new(v.Wohnung, db));
+            Beginn = new(this, v.Beginn);
+            Ende = new(this, v.Ende);
+            Notiz = new(this, v.Notiz);
 
             if (v.AnsprechpartnerId != Guid.Empty && v.AnsprechpartnerId != null)
             {
-                Ansprechpartner.Value = new KontaktListViewModelEntry(v.AnsprechpartnerId.Value, db);
+                Ansprechpartner = new(this, new(v.AnsprechpartnerId.Value, db));
+            }
+            else
+            {
+                Ansprechpartner = new(this, null);
             }
 
             RemoveDate = new RelayCommand(_ => Ende = null, _ => Ende != null);
@@ -64,13 +68,9 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void checkForChanges()
         {
-            if (Ansprechpartner.Value == null && Entity.AnsprechpartnerId != Guid.Empty)
+            if (!(Ansprechpartner.Value == null && Entity.AnsprechpartnerId == Guid.Empty))
             {
-                NotificationService.outOfSync = true;
-            }
-            else if (Ansprechpartner.Value?.Guid != Entity.AnsprechpartnerId)
-            {
-                NotificationService.outOfSync = true;
+                NotificationService.outOfSync = Ansprechpartner.Value?.Guid != Entity.AnsprechpartnerId;
             }
 
             NotificationService.outOfSync =

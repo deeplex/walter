@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
@@ -138,6 +137,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Versionen.Value.ForEach(v => v.versionSave());
             Db.SaveWalter();
+            NotificationService.outOfSync = false;
         }
 
         public RelayCommand AddMiete { get; }
