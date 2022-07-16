@@ -116,10 +116,5 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 ViewModel.Entity,
                 new DrillInNavigationTransitionInfo());
         }
-
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ViewModel.checkForChanges();
-        }
     }
 }

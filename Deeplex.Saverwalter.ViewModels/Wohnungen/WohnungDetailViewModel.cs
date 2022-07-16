@@ -25,11 +25,11 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public KontaktListViewModelEntry Besitzer { get; set; }
 
-        public ObservableProperty<string> Bezeichnung { get; set; } = new();
-        public ObservableProperty<string> Notiz { get; set; } = new();
-        public ObservableProperty<double> Wohnflaeche { get; set; } = new();
-        public ObservableProperty<double> Nutzflaeche { get; set; } = new();
-        public ObservableProperty<int> Nutzeinheit { get; set; } = new();
+        public SavableProperty<string> Bezeichnung { get; set; }
+        public SavableProperty<string> Notiz { get; set; }
+        public SavableProperty<double> Wohnflaeche { get; set; }
+        public SavableProperty<double> Nutzflaeche { get; set; }
+        public SavableProperty<int> Nutzeinheit { get; set; }
 
         private INotificationService NotificationService;
         private IWalterDbService Db;
@@ -54,11 +54,11 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 Besitzer = AlleVermieter.SingleOrDefault(e => e.Entity.PersonId == w.BesitzerId);
             }
-            Bezeichnung.Value = w.Bezeichnung;
-            Notiz.Value = w.Notiz;
-            Wohnflaeche.Value = w.Wohnflaeche;
-            Nutzflaeche.Value = w.Nutzflaeche;
-            Nutzeinheit.Value = w.Nutzeinheit;
+            Bezeichnung = new(this, w.Bezeichnung);
+            Notiz = new(this, w.Notiz);
+            Wohnflaeche = new(this, w.Wohnflaeche);
+            Nutzflaeche = new(this, w.Nutzflaeche);
+            Nutzeinheit = new(this, w.Nutzeinheit);
 
             Save = new RelayCommand(_ => save(), _ => true); // Should be NotificationService.outOfSync
             RemoveBesitzer = new RelayCommand(_ => { Besitzer = null; }, _ => true);

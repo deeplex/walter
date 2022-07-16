@@ -42,15 +42,5 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 ViewModel.Entity,
                 new DrillInNavigationTransitionInfo());
         }
-
-        private void ComboBoxAnrede_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ViewModel.checkForChanges();
-        }
-
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ViewModel.checkForChanges();
-        }
     }
 }

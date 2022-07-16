@@ -17,16 +17,13 @@
                     <ComboBox
                         Margin="20,20,0,0" Header="Anrede"
                         x:Name="ComboBoxAnrede" Width="80" ItemsSource="{x:Bind ViewModel.Anreden}"
-                        SelectionChanged="ComboBoxAnrede_SelectionChanged"
                         SelectedItem="{x:Bind ViewModel.Anrede.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBox
                         Width="200"
-                        TextChanged="TextBox_TextChanged"
                         Text="{x:Bind ViewModel.Vorname.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Header="Vorname" Style="{StaticResource Eintraege}"/>
                     <TextBox
                         Text="{x:Bind ViewModel.Nachname.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        TextChanged="TextBox_TextChanged"
                         Header="Nachname" Style="{StaticResource Eintraege}"/>
                 </mtuuc:WrapPanel>
                 <uc:PersonDetailControl PersonViewModel="{x:Bind ViewModel}" />

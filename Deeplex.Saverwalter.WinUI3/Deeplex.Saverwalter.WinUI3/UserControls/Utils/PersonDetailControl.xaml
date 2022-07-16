@@ -20,38 +20,31 @@
             <TextBox
                 Text="{x:Bind ViewModel.Email.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="E-Mail"
-                TextChanged="TextBox_TextChanged"
                 Style="{StaticResource Eintraege}"/>
             <TextBox
                 Text="{x:Bind ViewModel.Fax.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Fax"
-                TextChanged="TextBox_TextChanged"
                 Style="{StaticResource Eintraege}"/>
         </mtuuc:WrapPanel>
         <mtuuc:WrapPanel Orientation="Horizontal">
             <TextBox
                 Text="{x:Bind ViewModel.Telefon.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                TextChanged="TextBox_TextChanged"
                 Header="Telefon" Style="{StaticResource Eintraege}"/>
             <TextBox
                 Text="{x:Bind ViewModel.Mobil.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                TextChanged="TextBox_TextChanged"
                 Header="Mobil" Style="{StaticResource Eintraege}"/>
         </mtuuc:WrapPanel>
         <mtuuc:WrapPanel Orientation="Horizontal">
             <CheckBox
                 Margin="20,20,0,0"
-                IsEnabledChanged="CheckBox_IsEnabledChanged"
                 Content="Vermieter"
                 IsChecked="{x:Bind ViewModel.isVermieter.Value, Mode=TwoWay}"/>
             <CheckBox
                 Margin="20,20,0,0"
-                IsEnabledChanged="CheckBox_IsEnabledChanged"
                 Content="Mieter"
                 IsChecked="{x:Bind ViewModel.isMieter.Value, Mode=TwoWay}"/>
             <CheckBox
                 Margin="20,20,0,0"
-                IsEnabledChanged="CheckBox_IsEnabledChanged"
                 Content="Handwerker"
                 IsChecked="{x:Bind ViewModel.isHandwerker.Value, Mode=TwoWay}"/>
         </mtuuc:WrapPanel>
@@ -60,7 +53,6 @@
                 Width="620"
                 Style="{StaticResource Eintraege}"
                 Margin="20"
-                TextChanged="TextBox_TextChanged"
                 Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Notiz"/>
         </mtuuc:WrapPanel>

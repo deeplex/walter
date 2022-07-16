@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public new JuristischePerson Entity => (JuristischePerson)base.Entity;
         public int Id;
 
-        public ObservableProperty<string> Bezeichnung = new();
+        public SavableProperty<string> Bezeichnung { get; }
         public override string ToString() => Bezeichnung.Value;
 
         public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Mitglieder = new();
@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             base.Entity = j;
             Id = j.JuristischePersonId;
-            Bezeichnung.Value = j.Bezeichnung;
+            Bezeichnung = new(this, j.Bezeichnung);
 
             UpdateListen();
 

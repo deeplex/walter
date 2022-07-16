@@ -17,9 +17,9 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public List<Anrede> Anreden { get; }
 
-        public ObservableProperty<Anrede> Anrede = new();
-        public ObservableProperty<string> Vorname = new();
-        public ObservableProperty<string> Nachname = new();
+        public SavableProperty<Anrede> Anrede { get; }
+        public SavableProperty<string> Vorname { get; }
+        public SavableProperty<string> Nachname { get; }
 
         public override string ToString() => Vorname + " " + Nachname;
 
@@ -55,9 +55,9 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             base.Entity = k;
             Id = k.NatuerlichePersonId;
-            Anrede.Value = k.Anrede;
-            Vorname.Value = k.Vorname;
-            Nachname.Value = k.Nachname;
+            Anrede = new(this, k.Anrede);
+            Vorname = new(this, k.Vorname);
+            Nachname = new(this, k.Nachname);
 
             Anreden = Enums.Anreden;
             UpdateListen();

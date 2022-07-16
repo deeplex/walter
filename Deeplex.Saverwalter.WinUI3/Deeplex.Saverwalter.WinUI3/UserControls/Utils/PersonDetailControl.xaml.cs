@@ -53,15 +53,5 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             new PropertyMetadata(null));
 
         public Action AddVertrag_Click;
-
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ViewModel.checkForChanges();
-        }
-
-        private void CheckBox_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            ViewModel.checkForChanges();
-        }
     }
 }

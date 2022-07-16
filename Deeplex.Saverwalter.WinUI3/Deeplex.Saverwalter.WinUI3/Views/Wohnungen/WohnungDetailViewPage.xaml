@@ -47,19 +47,15 @@
                     <mtuuc:WrapPanel Orientation="Horizontal">
                         <TextBox
                             Text="{x:Bind ViewModel.Bezeichnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            TextChanged="TextBox_TextChanged"
                             Header="Bezeichnung" Width="210" Style="{StaticResource Eintraege}"/>
                         <TextBox
                             Text="{x:Bind ViewModel.Wohnflaeche.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            TextChanged="TextBox_TextChanged"
                             Header="Wohnfl." Width="70" Style="{StaticResource Eintraege}"/>
                         <TextBox
                             Text="{x:Bind ViewModel.Nutzflaeche.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            TextChanged="TextBox_TextChanged"
                             Header="Nutzfl." Width="70" Style="{StaticResource Eintraege}"/>
                         <TextBox
                             Text="{x:Bind ViewModel.Nutzeinheit.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            TextChanged="TextBox_TextChanged"
                             Header="Einheiten" Width="70" Style="{StaticResource Eintraege}"/>
                     </mtuuc:WrapPanel>
                     <mtuuc:WrapPanel>
@@ -69,7 +65,6 @@
                             Width="620"
                             Margin="20"
                             Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            TextChanged="TextBox_TextChanged"
                             Header="Notiz"/>
                     </mtuuc:WrapPanel>
 

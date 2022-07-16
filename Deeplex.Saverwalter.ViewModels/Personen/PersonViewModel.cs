@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public abstract class PersonViewModel : BindableBase
+    public abstract class PersonViewModel : BindableBase, ISingleItem
     {
         public IPerson Entity { get; set; }
 
@@ -21,14 +21,14 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public PersonViewModel(IPerson p, INotificationService ns, IWalterDbService db)
         {
-            Email.Value = p.Email;
-            Telefon.Value = p.Telefon;
-            Mobil.Value = p.Mobil;
-            Fax.Value = p.Fax;
-            Notiz.Value = p.Notiz;
-            isHandwerker.Value = p.isHandwerker;
-            isMieter.Value = p.isMieter;
-            isVermieter.Value = p.isVermieter;
+            Email = new(this, p.Email);
+            Telefon = new(this, p.Telefon);
+            Mobil = new(this, p.Mobil);
+            Fax = new(this, p.Fax);
+            Notiz = new(this, p.Notiz);
+            isHandwerker = new(this, p.isHandwerker);
+            isMieter = new(this, p.isMieter);
+            isVermieter = new(this, p.isVermieter);
 
             Db = db;
             NotificationService = ns;
@@ -47,14 +47,14 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
         public Guid PersonId;
-        public ObservableProperty<string> Notiz = new();
-        public ObservableProperty<bool> isVermieter = new();
-        public ObservableProperty<bool> isMieter = new();
-        public ObservableProperty<bool> isHandwerker = new();
-        public ObservableProperty<string> Email = new();
-        public ObservableProperty<string> Telefon = new();
-        public ObservableProperty<string> Mobil = new();
-        public ObservableProperty<string> Fax = new();
+        public SavableProperty<string> Notiz { get; }
+        public SavableProperty<bool> isVermieter { get; }
+        public SavableProperty<bool> isMieter { get; }
+        public SavableProperty<bool> isHandwerker { get; }
+        public SavableProperty<string> Email { get; }
+        public SavableProperty<string> Telefon { get; }
+        public SavableProperty<string> Mobil { get; }
+        public SavableProperty<string> Fax { get; }
 
         public int AdresseId => Entity.AdresseId ?? 0;
 
