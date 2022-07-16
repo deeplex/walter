@@ -19,13 +19,13 @@
 
         <DataTemplate x:Key="BeginnGrid" x:DataType="vm:VertragDetailViewModelVersion">
             <DatePicker
-                Date="{x:Bind Beginn, Mode=TwoWay}"
+                Date="{x:Bind Beginn.Value, Mode=TwoWay}"
                 Language="de"/>
         </DataTemplate>
 
         <DataTemplate x:Key="EndeGrid" x:DataType="vm:VertragDetailViewModelVersion">
             <DatePicker
-                SelectedDate="{x:Bind Ende, Mode=TwoWay}"
+                SelectedDate="{x:Bind Ende.Value, Mode=TwoWay}"
                 IsEnabled="True"
                 Language="de"/>
         </DataTemplate>
@@ -62,7 +62,7 @@
                             Width="400"
                             ItemsSource="{x:Bind ViewModel.AlleWohnungen}"
                             PlaceholderText="Wohnung hinzufügen"
-                            SelectedItem="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                            SelectedItem="{x:Bind ViewModel.Wohnung.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                     </mtuuc:WrapPanel>
                     <mtuuc:WrapPanel Orientation="Horizontal">
                         <TextBlock Text="Vermieter:" Style="{StaticResource Labels}"/>
@@ -87,7 +87,7 @@
                         <uc:ComboControl
                             Margin="20,15,0,0"
                             MinWidth="200"
-                            SelectedItem="{x:Bind ViewModel.Ansprechpartner, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            SelectedItem="{x:Bind ViewModel.Ansprechpartner.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                             ItemsSource="{x:Bind ViewModel.AlleKontakte}"
                             PlaceholderText="Ansprechpartner..."/>
                         <CheckBox
@@ -168,7 +168,7 @@
                                             <mtuuc:DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate x:DataType="vm:VertragDetailViewModelVersion">
                                                     <muxc:NumberBox
-                                                        Value="{x:Bind Personenzahl, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                        Value="{x:Bind Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                                         PlaceholderText="0"/>
                                                 </DataTemplate>
                                             </mtuuc:DataGridTemplateColumn.CellTemplate>
@@ -177,7 +177,7 @@
                                             <mtuuc:DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate x:DataType="vm:VertragDetailViewModelVersion">
                                                     <muxc:NumberBox
-                                                        Value="{x:Bind KaltMiete, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                        Value="{x:Bind KaltMiete.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                                         PlaceholderText="0"/>
                                                 </DataTemplate>
                                             </mtuuc:DataGridTemplateColumn.CellTemplate>
@@ -185,7 +185,7 @@
                                         <mtuuc:DataGridTemplateColumn Header="Notiz">
                                             <mtuuc:DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate x:DataType="vm:VertragDetailViewModelVersion">
-                                                    <TextBox Text="{x:Bind Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                    <TextBox Text="{x:Bind Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                                 </DataTemplate>
                                             </mtuuc:DataGridTemplateColumn.CellTemplate>
                                         </mtuuc:DataGridTemplateColumn>
@@ -202,7 +202,7 @@
                             <uc:BetriebskostenRechnungenListControl
                                 StartJahr="{x:Bind ViewModel.StartJahr}"
                                 EndeJahr="{x:Bind ViewModel.EndeJahr}"
-                                WohnungId="{x:Bind ViewModel.Wohnung.Id}" />
+                                WohnungId="{x:Bind ViewModel.Wohnung.Value.Id}" />
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
                 </StackPanel>

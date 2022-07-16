@@ -16,7 +16,8 @@
                 <mtuuc:WrapPanel Orientation="Horizontal">
                     <TextBox
                         Width="620"
-                        Text="{x:Bind ViewModel.Bezeichnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Text="{x:Bind ViewModel.Bezeichnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        TextChanged="TextBox_TextChanged"
                         Header="Bezeichnung" Style="{StaticResource Eintraege}"/>
                 </mtuuc:WrapPanel>
                 <uc:PersonDetailControl PersonViewModel="{x:Bind ViewModel}" />

@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class NatuerlichePersonViewModel : PersonViewModel
+    public sealed class NatuerlichePersonViewModel : PersonViewModel, ISingleItem
     {
         public new NatuerlichePerson Entity => (NatuerlichePerson)base.Entity;
 
@@ -17,48 +17,11 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public List<Anrede> Anreden { get; }
 
-        public async void selfDestruct()
-        {
-            if (await NotificationService.Confirmation())
-            {
-                Db.ctx.NatuerlichePersonen.Remove(Entity);
-                Db.SaveWalter();
-            }
-        }
+        public ObservableProperty<Anrede> Anrede = new();
+        public ObservableProperty<string> Vorname = new();
+        public ObservableProperty<string> Nachname = new();
 
-        public Anrede Anrede
-        {
-            get => base.Entity.Anrede;
-            set
-            {
-                var old = base.Entity.Anrede;
-                base.Entity.Anrede = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public string Vorname
-        {
-            get => Entity.Vorname;
-            set
-            {
-                var old = Entity.Vorname;
-                Entity.Vorname = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-        public string Nachname
-        {
-            get => Entity.Nachname;
-            set
-            {
-                var old = Entity.Nachname;
-                Entity.Nachname = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public string Name => Vorname + " " + Nachname;
+        public override string ToString() => Vorname + " " + Nachname;
 
         public bool WohnungenInklusiveJurPers
         {
@@ -88,51 +51,52 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public NatuerlichePersonViewModel(int id, INotificationService ns, IWalterDbService db) : this(db.ctx.NatuerlichePersonen.Find(id), ns, db) { }
         public NatuerlichePersonViewModel(INotificationService ns, IWalterDbService db) : this(new NatuerlichePerson(), ns, db) { }
-        public NatuerlichePersonViewModel(NatuerlichePerson k, INotificationService ns, IWalterDbService db) : base(ns, db)
+        public NatuerlichePersonViewModel(NatuerlichePerson k, INotificationService ns, IWalterDbService db) : base(k, ns, db)
         {
             base.Entity = k;
             Id = k.NatuerlichePersonId;
+            Anrede.Value = k.Anrede;
+            Vorname.Value = k.Vorname;
+            Nachname.Value = k.Nachname;
 
             Anreden = Enums.Anreden;
             UpdateListen();
 
-            PropertyChanged += OnUpdate;
+            Save = new RelayCommand(_ =>
+            {
+                save();
+                Entity.Nachname = Nachname.Value;
+                Entity.Vorname = Vorname.Value;
+                Entity.Anrede = Anrede.Value;
+
+                if (Entity.NatuerlichePersonId != 0)
+                {
+                    Db.ctx.NatuerlichePersonen.Update(Entity);
+                }
+                else
+                {
+                    Db.ctx.NatuerlichePersonen.Add(Entity);
+                }
+                Db.SaveWalter();
+            }, _ => true);
+
+            Delete = new AsyncRelayCommand(async _ =>
+            {
+                if (await NotificationService.Confirmation())
+                {
+                    Db.ctx.NatuerlichePersonen.Remove(Entity);
+                    Db.SaveWalter();
+                }
+            }, _ => true);
         }
 
-        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        public override void checkForChanges()
         {
-            switch (e.PropertyName)
-            {
-                case nameof(Anrede):
-                case nameof(Vorname):
-                case nameof(Nachname):
-                case nameof(Email):
-                case nameof(Telefon):
-                case nameof(Mobil):
-                case nameof(Fax):
-                case nameof(Notiz):
-                case nameof(isHandwerker):
-                case nameof(isMieter):
-                case nameof(isVermieter):
-                    break;
-                default:
-                    return;
-            }
-
-            if (Entity.Nachname == null)
-            {
-                return;
-            }
-
-            if (Entity.NatuerlichePersonId != 0)
-            {
-                Db.ctx.NatuerlichePersonen.Update(Entity);
-            }
-            else
-            {
-                Db.ctx.NatuerlichePersonen.Add(Entity);
-            }
-            Db.SaveWalter();
+            NotificationService.outOfSync =
+                BaseCheckForChanges() ||
+                    Entity.Anrede != Anrede.Value ||
+                    Entity.Vorname != Vorname.Value ||
+                    Entity.Nachname != Nachname.Value;
         }
     }
 }

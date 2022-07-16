@@ -8,22 +8,15 @@ using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class WohnungDetailViewModel : ValidatableBase
+    public sealed class WohnungDetailViewModel : ValidatableBase, ISingleItem
     {
         public Wohnung Entity { get; }
         public int Id => Entity.WohnungId;
 
+        public override string ToString() => Bezeichnung.Value;
+
         public ObservableProperty<int> BetriebskostenrechnungsJahr = new(DateTime.Now.Year - 1);
         public ObservableProperty<bool> ZeigeVorlagen = new();
-
-        public async Task selfDestruct()
-        {
-            if (await NotificationService.Confirmation())
-            {
-                Db.ctx.Wohnungen.Remove(Entity);
-                Db.SaveWalter();
-            }
-        }
 
         public ImmutableList<KontaktListViewModelEntry> AlleVermieter;
 
@@ -41,7 +34,8 @@ namespace Deeplex.Saverwalter.ViewModels
         private INotificationService NotificationService;
         private IWalterDbService Db;
         public RelayCommand RemoveBesitzer;
-        public RelayCommand Save;
+        public RelayCommand Save { get; }
+        public AsyncRelayCommand Delete { get; }
 
         public WohnungDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Wohnung(), ns, db) { }
         public WohnungDetailViewModel(Wohnung w, INotificationService ns, IWalterDbService db)
@@ -68,6 +62,14 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Save = new RelayCommand(_ => save(), _ => true); // Should be NotificationService.outOfSync
             RemoveBesitzer = new RelayCommand(_ => { Besitzer = null; }, _ => true);
+            Delete = new AsyncRelayCommand(async _ =>
+            {
+                if (await NotificationService.Confirmation())
+                {
+                    Db.ctx.Wohnungen.Remove(Entity);
+                    Db.SaveWalter();
+                }
+            }, _ => true);
         }
 
         private void save()

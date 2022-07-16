@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 ViewModel = new NatuerlichePersonViewModel(App.NotificationService, App.WalterService);
             }
 
-            App.Window.CommandBar.MainContent = new NatuerlichePersonCommandBarControl { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new SingleItemCommandBarControl { ViewModel = ViewModel };
             // TODO
             //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.Impl, App.ViewModel));
 
@@ -41,6 +41,16 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 typeof(ErhaltungsaufwendungenPrintViewPage),
                 ViewModel.Entity,
                 new DrillInNavigationTransitionInfo());
+        }
+
+        private void ComboBoxAnrede_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ViewModel.checkForChanges();
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ViewModel.checkForChanges();
         }
     }
 }

@@ -13,21 +13,15 @@
     <NoWarn>1701;1702;CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="UserControls\CommandBar\BetriebskostenRechnungenCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\BetriebskostenrechnungenListCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\BetriebskostenrechnungPrintCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\CommandBarControl.xaml" />
-    <None Remove="UserControls\CommandBar\ErhaltungsaufwendungenCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ErhaltungsaufwendungenListCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ErhaltungsaufwendungenPrintCommandBarControl.xaml" />
-    <None Remove="UserControls\CommandBar\JuristischePersonCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\KontaktListCommandBarControl.xaml" />
-    <None Remove="UserControls\CommandBar\NatuerlichePersonCommandBarControl.xaml" />
-    <None Remove="UserControls\CommandBar\VertragCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\SingleItemCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\VertragListCommandBarControl.xaml" />
-    <None Remove="UserControls\CommandBar\WohnungDetailCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\WohnungListCommandBarControl.xaml" />
-    <None Remove="UserControls\CommandBar\ZaehlerCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ZaehlerListCommandBarControl.xaml" />
     <None Remove="UserControls\Utils\ErhaltungsaufwendungWohnungenControl.xaml" />
     <None Remove="Views\Rechnungen\BetriebskostenrechnungPrintViewPage.xaml" />
@@ -180,19 +174,13 @@
     <Page Update="UserControls\CommandBar\ErhaltungsaufwendungenPrintCommandBarControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
-    <Page Update="UserControls\CommandBar\WohnungDetailCommandBarControl.xaml">
+    <Page Update="UserControls\CommandBar\SingleItemCommandBarControl.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
 
   <ItemGroup>
     <Page Update="UserControls\CommandBar\WohnungListCommandBarControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="UserControls\CommandBar\ZaehlerCommandBarControl.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
@@ -216,37 +204,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="UserControls\CommandBar\ErhaltungsaufwendungenCommandBarControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
     <Page Update="UserControls\CommandBar\BetriebskostenRechnungenListCommandBarControl.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="UserControls\CommandBar\BetriebskostenRechnungenCommandBarControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
     <Page Update="UserControls\CommandBar\KontaktListCommandBarControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="UserControls\CommandBar\NatuerlichePersonCommandBarControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="UserControls\CommandBar\JuristischePersonCommandBarControl.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
@@ -385,12 +349,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Update="Views\Zähler\ZaehlerListViewPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="UserControls\CommandBar\VertragCommandBarControl.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

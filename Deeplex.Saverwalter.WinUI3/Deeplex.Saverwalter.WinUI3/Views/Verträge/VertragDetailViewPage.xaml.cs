@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 ViewModel = new VertragDetailViewModel(App.NotificationService, App.WalterService);
             }
 
-            App.Window.CommandBar.MainContent = new UserControls.VertragCommandBarControl() { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new UserControls.SingleItemCommandBarControl() { ViewModel = ViewModel };
             // TODO
             //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
 

@@ -39,7 +39,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             AddVertrag_Click = () =>
             {
                 var vm = new VertragDetailViewModel(App.NotificationService, App.WalterService);
-                vm.Wohnung = vm.AlleWohnungen.First(v => v.Entity.WohnungId == ViewModel.Id);
+                vm.Wohnung.Value = vm.AlleWohnungen.First(v => v.Entity.WohnungId == ViewModel.Id);
                 App.Window.Navigate(typeof(VertragDetailViewPage), vm);
             };
 
@@ -68,7 +68,9 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 App.Window.Navigate(typeof(ErhaltungsaufwendungenDetailViewPage), vm);
             };
 
-            App.Window.CommandBar.MainContent = new WohnungDetailCommandBarControl { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new SingleItemCommandBarControl { ViewModel = ViewModel };
+            App.Window.CommandBar.Title = ViewModel.Bezeichnung.Value;
+
             App.Window.DetailAnhang.Value = new AnhangListViewModel(ViewModel.Entity, App.FileService, App.NotificationService, App.WalterService);
 
             base.OnNavigatedTo(e);

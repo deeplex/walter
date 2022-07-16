@@ -22,13 +22,13 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             AddVertrag_Click = () =>
             {
                 var vm = new VertragDetailViewModel(App.NotificationService, App.WalterService);
-                if (ViewModel.isMieter)
+                if (ViewModel.isMieter.Value)
                 {
                     vm.Mieter.Value = vm.Mieter.Value.Add(new KontaktListViewModelEntry(ViewModel.PersonId, App.WalterService));
                 }
-                else if (ViewModel.isVermieter)
+                else if (ViewModel.isVermieter.Value)
                 {
-                    vm.Wohnung = vm.AlleWohnungen.First(v => v.Entity.BesitzerId == ViewModel.PersonId);
+                    vm.Wohnung.Value = vm.AlleWohnungen.First(v => v.Entity.BesitzerId == ViewModel.PersonId);
                 }
                 else
                 {
@@ -53,5 +53,15 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             new PropertyMetadata(null));
 
         public Action AddVertrag_Click;
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ViewModel.checkForChanges();
+        }
+
+        private void CheckBox_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            ViewModel.checkForChanges();
+        }
     }
 }
