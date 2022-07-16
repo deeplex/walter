@@ -39,6 +39,13 @@ namespace Deeplex.Saverwalter.ViewModels
             Db = db;
             NotificationService = ns;
 
+            KaltMiete.Value = v.KaltMiete;
+            Personenzahl.Value = v.Personenzahl;
+            Wohnung.Value = new WohnungListViewModelEntry(v.Wohnung, db);
+            Beginn.Value = v.Beginn;
+            Ende.Value = v.Ende;
+            Notiz.Value = v.Notiz;
+
             if (v.AnsprechpartnerId != Guid.Empty && v.AnsprechpartnerId != null)
             {
                 Ansprechpartner.Value = new KontaktListViewModelEntry(v.AnsprechpartnerId.Value, db);
@@ -57,8 +64,16 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void checkForChanges()
         {
+            if (Ansprechpartner.Value == null && Entity.AnsprechpartnerId != Guid.Empty)
+            {
+                NotificationService.outOfSync = true;
+            }
+            else if (Ansprechpartner.Value?.Guid != Entity.AnsprechpartnerId)
+            {
+                NotificationService.outOfSync = true;
+            }
+
             NotificationService.outOfSync =
-                Ansprechpartner.Value.Guid != Entity.AnsprechpartnerId ||
                 Wohnung.Value.Entity.WohnungId != Entity.Wohnung.WohnungId ||
                 Personenzahl.Value != Entity.Personenzahl ||
                 KaltMiete.Value != Entity.KaltMiete ||
@@ -75,7 +90,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Notiz = Notiz.Value;
             Entity.Personenzahl = Personenzahl.Value;
             Entity.KaltMiete = KaltMiete.Value;
-            Entity.AnsprechpartnerId = Ansprechpartner.Value.Guid;
+            Entity.AnsprechpartnerId = Ansprechpartner.Value?.Guid ?? Guid.Empty;
 
             if (Entity.rowid != 0)
             {

@@ -19,12 +19,14 @@
 
         <DataTemplate x:Key="BeginnGrid" x:DataType="vm:VertragDetailViewModelVersion">
             <DatePicker
+                DateChanged="DatePicker_DateChanged"
                 Date="{x:Bind Beginn.Value, Mode=TwoWay}"
                 Language="de"/>
         </DataTemplate>
 
         <DataTemplate x:Key="EndeGrid" x:DataType="vm:VertragDetailViewModelVersion">
             <DatePicker
+                DateChanged="DatePicker_DateChanged"
                 SelectedDate="{x:Bind Ende.Value, Mode=TwoWay}"
                 IsEnabled="True"
                 Language="de"/>
@@ -162,13 +164,18 @@
                                     ItemsSource="{x:Bind ViewModel.Versionen.Value, Mode=TwoWay}">
                                     <mtuuc:DataGrid.Columns>
                                         <mtuuc:DataGridTextColumn IsReadOnly="True" Header="Version" Binding="{Binding Version}"/>
-                                        <mtuuc:DataGridTemplateColumn Header="Beginn" CellTemplate="{StaticResource BeginnGrid}"/>
-                                        <mtuuc:DataGridTemplateColumn Header="Ende" CellTemplate="{StaticResource EndeGrid}"/>
+                                        <mtuuc:DataGridTemplateColumn
+                                            Header="Beginn"
+                                            CellTemplate="{StaticResource BeginnGrid}"/>
+                                        <mtuuc:DataGridTemplateColumn
+                                            Header="Ende"
+                                            CellTemplate="{StaticResource EndeGrid}"/>
                                         <mtuuc:DataGridTemplateColumn Header="Personenzahl">
                                             <mtuuc:DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate x:DataType="vm:VertragDetailViewModelVersion">
                                                     <muxc:NumberBox
-                                                        Value="{x:Bind Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                        Value="{x:Bind Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                        ValueChanged="NumberBox_ValueChanged"
                                                         PlaceholderText="0"/>
                                                 </DataTemplate>
                                             </mtuuc:DataGridTemplateColumn.CellTemplate>
@@ -177,7 +184,8 @@
                                             <mtuuc:DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate x:DataType="vm:VertragDetailViewModelVersion">
                                                     <muxc:NumberBox
-                                                        Value="{x:Bind KaltMiete.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                        ValueChanged="NumberBox_ValueChanged"
+                                                        Value="{x:Bind KaltMiete.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                         PlaceholderText="0"/>
                                                 </DataTemplate>
                                             </mtuuc:DataGridTemplateColumn.CellTemplate>
@@ -185,7 +193,9 @@
                                         <mtuuc:DataGridTemplateColumn Header="Notiz">
                                             <mtuuc:DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate x:DataType="vm:VertragDetailViewModelVersion">
-                                                    <TextBox Text="{x:Bind Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                    <TextBox
+                                                        TextChanged="TextBox_TextChanged"
+                                                        Text="{x:Bind Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                                 </DataTemplate>
                                             </mtuuc:DataGridTemplateColumn.CellTemplate>
                                         </mtuuc:DataGridTemplateColumn>

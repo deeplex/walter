@@ -19,12 +19,12 @@ namespace Deeplex.Saverwalter.ViewModels
         public void UpdateMieterList()
         {
             AlleMieter.Value = Db.ctx.JuristischePersonen
-                    .ToImmutableList()
-                    .Where(j => j.isMieter == true).Select(j => new KontaktListViewModelEntry(j))
-                    .Concat(Db.ctx.NatuerlichePersonen
-                        .Where(n => n.isMieter == true).Select(n => new KontaktListViewModelEntry(n)))
-                    .Where(p => !Mieter.Value.Exists(e => p.Entity.PersonId == e.Entity.PersonId))
-                    .ToImmutableList();
+                .ToImmutableList()
+                .Where(j => j.isMieter == true).Select(j => new KontaktListViewModelEntry(j))
+                .Concat(Db.ctx.NatuerlichePersonen
+                    .Where(n => n.isMieter == true).Select(n => new KontaktListViewModelEntry(n)))
+                 .Where(p => !Mieter.Value.Exists(e => p.Entity.PersonId == e.Entity.PersonId))
+                .ToImmutableList();
         }
 
         public List<WohnungListViewModelEntry> AlleWohnungen = new List<WohnungListViewModelEntry>();
@@ -127,6 +127,11 @@ namespace Deeplex.Saverwalter.ViewModels
                     db.SaveWalter();
                 }
             }, _ => true);
+        }
+
+        public new void checkForChanges()
+        {
+            Versionen.Value.ForEach(v => v.checkForChanges());
         }
 
         private void save()

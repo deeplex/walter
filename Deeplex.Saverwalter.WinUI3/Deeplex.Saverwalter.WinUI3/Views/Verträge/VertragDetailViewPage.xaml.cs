@@ -35,5 +35,20 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
             base.OnNavigatedTo(e);
         }
+
+        private void NumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+        {
+            ViewModel.checkForChanges();
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ViewModel.checkForChanges();
+        }
+
+        private void DatePicker_DateChanged(object sender, DatePickerValueChangedEventArgs e)
+        {
+            ViewModel.checkForChanges();
+        }
     }
 }
