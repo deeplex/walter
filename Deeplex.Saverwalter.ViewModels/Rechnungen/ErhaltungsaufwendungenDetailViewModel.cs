@@ -11,100 +11,30 @@ using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ErhaltungsaufwendungenDetailViewModel : BindableBase
+    public sealed class ErhaltungsaufwendungenDetailViewModel : BindableBase, ISingleItem
     {
+        public override string ToString() => Entity.Bezeichnung;
+
         public Erhaltungsaufwendung Entity { get; }
         public int Id => Entity.ErhaltungsaufwendungId;
 
-        public async Task selfDestruct()
-        {
-            if (await NotificationService.Confirmation())
-            {
-                Db.ctx.Erhaltungsaufwendungen.Remove(Entity);
-                Db.SaveWalter();
-            }
-        }
-
         public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Personen = new();
-        private KontaktListViewModelEntry mAussteller;
-        public KontaktListViewModelEntry Aussteller
-        {
-            get => mAussteller;
-            set
-            {
-                mAussteller = Personen.Value
-                    .SingleOrDefault(e => e.Entity.PersonId == value?.Entity.PersonId);
-                var old = Entity.AusstellerId;
-                Entity.AusstellerId = value?.Entity.PersonId ?? Guid.Empty;
-                RaisePropertyChangedAuto(old, value?.Entity.PersonId);
-            }
-        }
-
         public ObservableProperty<string> QuickPerson = new();
 
         public List<WohnungListViewModelEntry> Wohnungen { get; }
-        private WohnungListViewModelEntry mWohnung;
-        public WohnungListViewModelEntry Wohnung
-        {
-            get => mWohnung;
-            set
-            {
-                mWohnung = Wohnungen.SingleOrDefault(e => e.Id == value?.Id);
-                var old = Entity.Wohnung;
-                Entity.Wohnung = value?.Entity;
-                mWohnung = value;
-                RaisePropertyChangedAuto(old, value?.Entity);
-            }
-        }
 
-
-        public string Bezeichnung
-        {
-            get => Entity.Bezeichnung;
-            set
-            {
-                var old = Entity.Bezeichnung;
-                Entity.Bezeichnung = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public double Betrag
-        {
-            get => Entity.Betrag;
-            set
-            {
-                var val = Double.IsNaN(value) ? 0 : value;
-                var old = Entity.Betrag;
-                Entity.Betrag = val;
-                RaisePropertyChangedAuto(old, val);
-            }
-        }
-
-        public DateTimeOffset Datum
-        {
-            get => Entity.Datum.AsMin();
-            set
-            {
-                var old = Entity.Datum;
-                Entity.Datum = value.Date.AsMin();
-                RaisePropertyChangedAuto(old, value.Date.AsMin());
-            }
-        }
-
-        public string Notiz
-        {
-            get => Entity.Notiz;
-            set
-            {
-                var old = Entity.Notiz;
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
+        public SavableProperty<WohnungListViewModelEntry> Wohnung { get; }
+        public SavableProperty<KontaktListViewModelEntry> Aussteller { get; }
+        public SavableProperty<string> Bezeichnung { get; }
+        public SavableProperty<double> Betrag { get;}
+        public SavableProperty<DateTimeOffset> Datum { get;}
+        public SavableProperty<string> Notiz { get;}
 
         private IWalterDbService Db;
         private INotificationService NotificationService;
+
+        public AsyncRelayCommand Delete { get; }
+        public RelayCommand Save { get; }
 
         public ErhaltungsaufwendungenDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Erhaltungsaufwendung(), ns, db) { }
         public ErhaltungsaufwendungenDetailViewModel(Erhaltungsaufwendung e, INotificationService ns, IWalterDbService db)
@@ -113,10 +43,26 @@ namespace Deeplex.Saverwalter.ViewModels
             Db = db;
             NotificationService = ns;
 
+            Bezeichnung = new(this, e.Bezeichnung);
+            Betrag = new(this, e.Betrag);
+            Datum = new (this, e.Datum.AsUtcKind());
+            Notiz = new(this, e.Notiz);
+
+            Delete = new AsyncRelayCommand(async _ =>
+            {
+                if (await NotificationService.Confirmation())
+                {
+                    Db.ctx.Erhaltungsaufwendungen.Remove(Entity);
+                    Db.SaveWalter();
+                }
+            }, _ => true);
+
+            Save = new RelayCommand(_ => save(), _ => true);
+
             Wohnungen = Db.ctx.Wohnungen
                 .Include(w => w.Adresse)
                 .Select(w => new WohnungListViewModelEntry(w, db)).ToList();
-            Wohnung = Wohnungen.Find(f => f.Id == e.Wohnung?.WohnungId);
+            Wohnung = new(this, Wohnungen.Find(f => f.Id == e.Wohnung?.WohnungId));
 
             Personen.Value = Db.ctx.NatuerlichePersonen
                 .Where(w => w.isHandwerker)
@@ -127,34 +73,33 @@ namespace Deeplex.Saverwalter.ViewModels
                     .Select(k => new KontaktListViewModelEntry(k))
                     .ToList())
                     .ToImmutableList();
-            Aussteller = Personen.Value.SingleOrDefault(s => s.Entity.PersonId == e.AusstellerId);
+            Aussteller = new(this, Personen.Value.SingleOrDefault(s => s.Entity.PersonId == e.AusstellerId));
 
-            PropertyChanged += OnUpdate;
             AttachFile = new AsyncRelayCommand(async _ =>
                /* TODO */await Task.FromResult<object>(null), _ => false);
         }
 
         public AsyncRelayCommand AttachFile;
 
-        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        public void checkForChanges()
         {
-            switch (e.PropertyName)
-            {
-                case nameof(Bezeichnung):
-                case nameof(Datum):
-                case nameof(Wohnung):
-                case nameof(Aussteller):
-                case nameof(Betrag):
-                case nameof(Notiz):
-                    break;
-                default:
-                    return;
-            }
+            NotificationService.outOfSync = 
+                Entity.Betrag != Betrag.Value ||
+                Entity.Bezeichnung != Bezeichnung.Value ||
+                Entity.Datum != Datum.Value.UtcDateTime ||
+                Entity.Notiz != Notiz.Value ||
+                Entity.AusstellerId != Aussteller.Value.Entity.PersonId ||
+                Entity.Wohnung != Wohnung.Value.Entity;
+        }
 
-            if (Bezeichnung == "" || Bezeichnung == null || Datum == null || Wohnung == null || Aussteller == null)
-            {
-                return;
-            }
+        private void save()
+        {
+            Entity.Betrag = Betrag.Value;
+            Entity.Bezeichnung = Bezeichnung.Value;
+            Entity.Datum = Datum.Value.UtcDateTime;
+            Entity.Notiz = Notiz.Value;
+            Entity.AusstellerId = Aussteller.Value.Entity.PersonId;
+            Entity.Wohnung = Wohnung.Value.Entity;
 
             if (Entity.ErhaltungsaufwendungId != 0)
             {
@@ -165,6 +110,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 Db.ctx.Erhaltungsaufwendungen.Add(Entity);
             }
             Db.SaveWalter();
+            NotificationService.outOfSync = false;
         }
     }
 }

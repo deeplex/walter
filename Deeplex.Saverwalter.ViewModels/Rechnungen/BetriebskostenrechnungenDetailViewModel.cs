@@ -12,6 +12,8 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class BetriebskostenrechnungDetailViewModel : BindableBase, ISingleItem
     {
+        public override string ToString() => Entity.Typ.ToDescriptionString() + " - " + Entity.GetWohnungenBezeichnung();
+
         public Betriebskostenrechnung Entity { get; }
         public int Id => Entity.BetriebskostenrechnungId;
 
@@ -78,7 +80,7 @@ namespace Deeplex.Saverwalter.ViewModels
             NotifcationService = ns;
 
             Betrag = new(this, r.Betrag);
-            Datum = new(this, r.Datum);
+            Datum = new(this, r.Datum.AsUtcKind());
             Notiz = new(this, r.Notiz);
             Typ = new(this, new(r.Typ));
             Beschreibung = new(this, r.Beschreibung);
@@ -161,22 +163,35 @@ namespace Deeplex.Saverwalter.ViewModels
             }
             SaveWohnungen();
             Db.SaveWalter();
+            NotifcationService.outOfSync = false;
+        }
+
+        public bool checkNullable<T>(object a, T b)
+        {
+            if (a == null && b.Equals(default(T)))
+            {
+                return false;
+            }
+            else
+            {
+                return a.Equals(b);
+            }
+
         }
 
         public void checkForChanges()
         {
-
             NotifcationService.outOfSync =
                 Entity.Betrag != Betrag.Value ||
-                Entity.Datum.AsUtcKind() != Datum.Value.UtcDateTime ||
+                Entity.Datum.AsUtcKind() != Datum.Value ||
                 Entity.Notiz != Notiz.Value ||
                 Entity.Typ != Typ.Value.Typ ||
                 Entity.Schluessel != Schluessel.Value.Schluessel ||
                 Entity.Beschreibung != Beschreibung.Value ||
                 Entity.BetreffendesJahr != BetreffendesJahr.Value ||
-                Entity.HKVO_P7 != HKVO_P7.Value ||
-                Entity.HKVO_P8 != HKVO_P8.Value ||
-                Entity.HKVO_P9 != HKVO_P9.Value;
+                checkNullable(Entity.HKVO_P7, HKVO_P7.Value) ||
+                checkNullable(Entity.HKVO_P8, HKVO_P8.Value) ||
+                checkNullable(Entity.HKVO_P9, HKVO_P9.Value);
         }
 
         private void save()

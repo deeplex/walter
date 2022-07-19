@@ -69,7 +69,6 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             };
 
             App.Window.CommandBar.MainContent = new SingleItemCommandBarControl { ViewModel = ViewModel };
-            App.Window.CommandBar.Title = ViewModel.Bezeichnung.Value;
 
             App.Window.DetailAnhang.Value = new AnhangListViewModel(ViewModel.Entity, App.FileService, App.NotificationService, App.WalterService);
 
