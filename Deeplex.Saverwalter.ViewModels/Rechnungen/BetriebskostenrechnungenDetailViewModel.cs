@@ -203,9 +203,18 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Schluessel = Schluessel.Value.Schluessel;
             Entity.Beschreibung = Beschreibung.Value;
             Entity.BetreffendesJahr = BetreffendesJahr.Value;
-            Entity.HKVO_P7 = HKVO_P7.Value;
-            Entity.HKVO_P8 = HKVO_P8.Value;
-            Entity.HKVO_P9 = HKVO_P9.Value;
+            if (Entity.HKVO_P7 != null && HKVO_P7.Value != 0)
+            {
+                Entity.HKVO_P7 = HKVO_P7.Value;
+            }
+            if (Entity.HKVO_P8 != null && HKVO_P8.Value != 0)
+            {
+                Entity.HKVO_P8 = HKVO_P8.Value;
+            }
+            if (Entity.HKVO_P9 != null && HKVO_P9.Value != 0)
+            {
+                Entity.HKVO_P9 = HKVO_P9.Value;
+            }
 
             Update();
         }
