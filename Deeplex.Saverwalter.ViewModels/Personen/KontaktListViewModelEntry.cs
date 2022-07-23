@@ -6,11 +6,10 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class KontaktListViewModelEntry
     {
-        public override string ToString()
-            => Entity.Bezeichnung;
+        public override string ToString() => Entity.Bezeichnung;
 
         public Type Type { get; }
-        public Guid Guid { get; }
+        public Guid Guid => Entity.PersonId;
         public string Vorname { get; }
         public string Name { get; }
         public string Anschrift => AdresseViewModel.Anschrift(Entity);

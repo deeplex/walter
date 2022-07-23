@@ -1,12 +1,14 @@
 ﻿using Deeplex.Saverwalter.Services;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.WinUI3.Services
 {
-    public sealed class NotificationService: INotificationService
+    public sealed class NotificationService: BindableBase, INotificationService
     {
+        public bool outOfSync { get; set; }
         public void ShowAlert(string text) => ShowAlert(text, text.Length > 20 ? 0 : 3000);
         public void ShowAlert(string text, int ms)
         {
@@ -26,7 +28,7 @@ namespace Deeplex.Saverwalter.WinUI3.Services
         public async Task<bool> Confirmation()
         {
             SetConfirmationDialogText(
-                "Bist du sicher?",
+                "Sind Sie sicher?",
                 "Diese Änderung kann nicht rückgängig gemacht werden.",
                 "Ja", "Nein");
             return await ShowConfirmationDialog();

@@ -2,32 +2,35 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
+// To learn more about WinUI, the WinUI project structure,
+// and more about our project templates, see: http://aka.ms/winui-project-info.
+
 namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
-    public sealed partial class NatuerlichePersonCommandBarControl : UserControl
+    public sealed partial class SingleItemCommandBarControl : UserControl
     {
-        public NatuerlichePersonCommandBarControl()
+        public SingleItemCommandBarControl()
         {
             InitializeComponent();
-            App.Window.CommandBar.Title = "Persondetails"; // TODO Bezeichnung...
         }
 
-        public NatuerlichePersonViewModel ViewModel
+
+        public ISingleItem ViewModel
         {
-            get { return (NatuerlichePersonViewModel)GetValue(ViewModelProperty); }
+            get { return (ISingleItem)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
 
         public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
             "ViewModel",
-            typeof(NatuerlichePersonViewModel),
-            typeof(NatuerlichePersonCommandBarControl),
+            typeof(ISingleItem),
+            typeof(SingleItemCommandBarControl),
             new PropertyMetadata(null));
 
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.selfDestruct();
+            ViewModel.Delete.Execute(null); // Should be awaited?
             App.Window.AppFrame.GoBack();
         }
     }

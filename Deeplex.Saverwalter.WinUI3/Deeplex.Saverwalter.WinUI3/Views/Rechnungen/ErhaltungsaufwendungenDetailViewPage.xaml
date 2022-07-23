@@ -16,17 +16,17 @@
                 <TextBox
                     Margin="20,20,0,0"
                     Header="Bezeichnung"
-                    Text="{x:Bind ViewModel.Bezeichnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                    Text="{x:Bind ViewModel.Bezeichnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <mtuuc:WrapPanel Orientation="Horizontal">
                     <uc:ComboControl
                         Header="Wohnung"
-                        SelectedItem="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        SelectedItem="{x:Bind ViewModel.Wohnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Margin="20,20,0,0"
                         PlaceholderText="Wohnung..."
                         ItemsSource="{x:Bind ViewModel.Wohnungen}"/>
                     <uc:ComboControl
                         Header="Aussteller"
-                        SelectedItem="{x:Bind ViewModel.Aussteller, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        SelectedItem="{x:Bind ViewModel.Aussteller.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Margin="20,20,0,0"
                         PlaceholderText="Aussteller..."
                         MinWidth="300"
@@ -39,7 +39,7 @@
                                     <TextBox
                                         Header="Bezeichnung der juristischen Person"
                                         Width="300"
-                                        Text="{x:Bind ViewModel.QuickPerson.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                        Text="{x:Bind ViewModel.QuickPerson.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                     <Button VerticalAlignment="Bottom" Click="AddQuickPerson_Click">
                                         <SymbolIcon Symbol="Add"/>
                                     </Button>
@@ -52,16 +52,16 @@
                     <DatePicker
                         Margin="20,20,0,0"
                         Header="Datum"
-                        Date="{x:Bind ViewModel.Datum, Mode=TwoWay}" />
+                        Date="{x:Bind ViewModel.Datum.Value, Mode=TwoWay}" />
                     <muxc:NumberBox
-                        Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Value="{x:Bind ViewModel.Betrag.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Margin="20,20,0,0"
                         Header="Betrag"/>
                 </mtuuc:WrapPanel>
                 <StackPanel>
                     <TextBox
                         Margin="20,20,0,0"
-                        Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Header="Notiz"/>
                 </StackPanel>
             </StackPanel>

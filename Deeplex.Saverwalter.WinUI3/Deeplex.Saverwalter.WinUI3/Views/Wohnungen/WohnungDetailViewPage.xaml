@@ -46,16 +46,16 @@
                     </mtuuc:WrapPanel>
                     <mtuuc:WrapPanel Orientation="Horizontal">
                         <TextBox
-                            Text="{x:Bind ViewModel.Bezeichnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Text="{x:Bind ViewModel.Bezeichnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             Header="Bezeichnung" Width="210" Style="{StaticResource Eintraege}"/>
                         <TextBox
-                            Text="{x:Bind ViewModel.Wohnflaeche, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Text="{x:Bind ViewModel.Wohnflaeche.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             Header="Wohnfl." Width="70" Style="{StaticResource Eintraege}"/>
                         <TextBox
-                            Text="{x:Bind ViewModel.Nutzflaeche, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Text="{x:Bind ViewModel.Nutzflaeche.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             Header="Nutzfl." Width="70" Style="{StaticResource Eintraege}"/>
                         <TextBox
-                            Text="{x:Bind ViewModel.Nutzeinheit, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Text="{x:Bind ViewModel.Nutzeinheit.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             Header="Einheiten" Width="70" Style="{StaticResource Eintraege}"/>
                     </mtuuc:WrapPanel>
                     <mtuuc:WrapPanel>
@@ -64,7 +64,7 @@
                             Style="{StaticResource Eintraege}"
                             Width="620"
                             Margin="20"
-                            Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             Header="Notiz"/>
                     </mtuuc:WrapPanel>
 
@@ -122,7 +122,6 @@
                             </Button>
                         </uc:ExpanderControl.Bonus>
                     </uc:ExpanderControl>
-
                 </StackPanel>
             </ScrollViewer>
         </uc:FileDrop.MainContent>

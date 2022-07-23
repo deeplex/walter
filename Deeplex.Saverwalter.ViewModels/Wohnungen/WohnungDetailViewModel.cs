@@ -3,107 +3,39 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class WohnungDetailViewModel : ValidatableBase
+    public sealed class WohnungDetailViewModel : ValidatableBase, ISingleItem
     {
         public Wohnung Entity { get; }
         public int Id => Entity.WohnungId;
 
+        public override string ToString() => Bezeichnung.Value;
+
         public ObservableProperty<int> BetriebskostenrechnungsJahr = new(DateTime.Now.Year - 1);
         public ObservableProperty<bool> ZeigeVorlagen = new();
 
-        public async Task selfDestruct()
-        {
-            if (await NotificationService.Confirmation())
-            {
-                Db.ctx.Wohnungen.Remove(Entity);
-                Db.SaveWalter();
-            }
-        }
-
         public ImmutableList<KontaktListViewModelEntry> AlleVermieter;
-
-        private KontaktListViewModelEntry mBesitzer;
-        public KontaktListViewModelEntry Besitzer
-        {
-            get => mBesitzer;
-            set
-            {
-                Entity.BesitzerId = value == null ? Guid.Empty : value.Entity.PersonId;
-                mBesitzer = value;
-                RaisePropertyChangedAuto();
-            }
-        }
 
         public int AdresseId => Entity.AdresseId;
         public string Anschrift => AdresseViewModel.Anschrift(AdresseId, Db);
 
-        public string Bezeichnung
-        {
-            get => Entity.Bezeichnung;
-            set
-            {
-                var old = Entity.Bezeichnung;
-                Entity.Bezeichnung = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
+        public KontaktListViewModelEntry Besitzer { get; set; }
 
-        public string Notiz
-        {
-            get => Entity.Notiz;
-            set
-            {
-                var old = Entity.Notiz;
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public double Wohnflaeche
-        {
-            get => Entity.Wohnflaeche;
-            set
-            {
-                var val = double.IsNaN(value) ? 0 : value;
-                var old = Entity.Wohnflaeche;
-                Entity.Wohnflaeche = val;
-                RaisePropertyChangedAuto(old, val);
-            }
-        }
-
-        public double Nutzflaeche
-        {
-            get => Entity.Nutzflaeche;
-            set
-            {
-                var val = double.IsNaN(value) ? 0 : value;
-                var old = Entity.Nutzflaeche;
-                Entity.Nutzflaeche = val;
-                RaisePropertyChangedAuto(old, val);
-            }
-        }
-
-        public int Nutzeinheit
-        {
-            get => Entity.Nutzeinheit;
-            set
-            {
-                var val = int.MinValue == value ? 0 : value;
-                var old = Entity.Nutzeinheit;
-                Entity.Nutzeinheit = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
+        public SavableProperty<string> Bezeichnung { get; set; }
+        public SavableProperty<string> Notiz { get; set; }
+        public SavableProperty<double> Wohnflaeche { get; set; }
+        public SavableProperty<double> Nutzflaeche { get; set; }
+        public SavableProperty<int> Nutzeinheit { get; set; }
 
         private INotificationService NotificationService;
         private IWalterDbService Db;
         public RelayCommand RemoveBesitzer;
+        public RelayCommand Save { get; }
+        public AsyncRelayCommand Delete { get; }
 
         public WohnungDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Wohnung(), ns, db) { }
         public WohnungDetailViewModel(Wohnung w, INotificationService ns, IWalterDbService db)
@@ -122,32 +54,31 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 Besitzer = AlleVermieter.SingleOrDefault(e => e.Entity.PersonId == w.BesitzerId);
             }
+            Bezeichnung = new(this, w.Bezeichnung);
+            Notiz = new(this, w.Notiz);
+            Wohnflaeche = new(this, w.Wohnflaeche);
+            Nutzflaeche = new(this, w.Nutzflaeche);
+            Nutzeinheit = new(this, w.Nutzeinheit);
 
-            PropertyChanged += OnUpdate;
-
+            Save = new RelayCommand(_ => save(), _ => true); // Should be NotificationService.outOfSync
             RemoveBesitzer = new RelayCommand(_ => { Besitzer = null; }, _ => true);
+            Delete = new AsyncRelayCommand(async _ =>
+            {
+                if (await NotificationService.Confirmation())
+                {
+                    Db.ctx.Wohnungen.Remove(Entity);
+                    Db.SaveWalter();
+                }
+            }, _ => true);
         }
 
-        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        private void save()
         {
-            switch (e.PropertyName)
-            {
-                case nameof(Besitzer):
-                case nameof(Bezeichnung):
-                case nameof(Wohnflaeche):
-                case nameof(Nutzflaeche):
-                case nameof(Nutzeinheit):
-                case nameof(Notiz):
-                    break;
-                default:
-                    return;
-            }
-
-            if ((Entity.Adresse == null && Entity.AdresseId == 0) ||
-                Entity.Bezeichnung == null || Entity.Bezeichnung == "")
-            {
-                return;
-            }
+            Entity.Bezeichnung = Bezeichnung.Value;
+            Entity.Wohnflaeche = Wohnflaeche.Value;
+            Entity.Nutzflaeche = Nutzflaeche.Value;
+            Entity.Nutzeinheit = Nutzeinheit.Value;
+            Entity.Notiz = Notiz.Value;
 
             if (Entity.WohnungId != 0)
             {
@@ -158,6 +89,17 @@ namespace Deeplex.Saverwalter.ViewModels
                 Db.ctx.Wohnungen.Add(Entity);
             }
             Db.SaveWalter();
+            checkForChanges();
+        }
+
+        public void checkForChanges()
+        {
+            NotificationService.outOfSync =
+                Entity.Bezeichnung != Bezeichnung.Value ||
+                Entity.Wohnflaeche != Wohnflaeche.Value ||
+                Entity.Nutzflaeche != Nutzflaeche.Value ||
+                Entity.Nutzeinheit != Nutzeinheit.Value ||
+                Entity.Notiz != Notiz.Value;
         }
     }
 }

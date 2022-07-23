@@ -10,8 +10,10 @@ using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class BetriebskostenrechnungDetailViewModel : BindableBase
+    public sealed class BetriebskostenrechnungDetailViewModel : BindableBase, ISingleItem
     {
+        public override string ToString() => Entity.Typ.ToDescriptionString() + " - " + Entity.GetWohnungenBezeichnung();
+
         public Betriebskostenrechnung Entity { get; }
         public int Id => Entity.BetriebskostenrechnungId;
 
@@ -19,169 +21,34 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<bool> ZeigeVorlagen = new();
         public ObservableProperty<WohnungListViewModelEntry> BetriebskostenrechnungsWohnung = new();
 
-        public async Task selfDestruct()
-        {
-            if (await NotifcationService.Confirmation())
-            {
-                Db.ctx.Betriebskostenrechnungen.Remove(Entity);
-                Db.SaveWalter();
-            }
-        }
-
         public List<HKVO9Util> HKVO_P9_List = Enums.HKVO9;
         public List<UmlageSchluesselUtil> Schluessel_List = Enums.UmlageSchluessel;
-        public List<BetriebskostentypUtil> Typen_List;
+        public List<BetriebskostentypUtil> Typen_List = Enums.Betriebskostentyp;
         public List<ZaehlerListViewModelEntry> AllgemeinZaehler_List;
 
-        private ZaehlerListViewModelEntry mAllgemeinZaehler;
-        public ZaehlerListViewModelEntry AllgemeinZaehler
-        {
-            get => mAllgemeinZaehler;
-            set
-            {
-                var old = mAllgemeinZaehler?.Id;
-                mAllgemeinZaehler = AllgemeinZaehler_List.FirstOrDefault(e => e.Id == value?.Id);
-                Entity.Zaehler = mAllgemeinZaehler?.Entity;
-                RaisePropertyChangedAuto(old, value?.Id);
-            }
-        }
+        public SavableProperty<ZaehlerListViewModelEntry> AllgemeinZaehler { get; }
 
         public bool isHeizung => Entity?.Typ == Betriebskostentyp.Heizkosten;
 
-        public double Betrag
-        {
-            get => Entity?.Betrag ?? 0.0;
-            set
-            {
-                var val = double.IsNaN(value) ? 0 : value;
-                var old = Entity.Betrag;
-                Entity.Betrag = val;
-                RaisePropertyChangedAuto(old, val);
-            }
-        }
-
-        public DateTimeOffset? Datum
-        {
-            get => Entity.Datum.AsUtcKind();
-            set
-            {
-                var old = Entity.Datum;
-                Entity.Datum = value.Value.Date.AsUtcKind();
-                RaisePropertyChangedAuto(old, value.Value.Date.AsUtcKind());
-            }
-        }
-
-        public string Notiz
-        {
-            get => Entity.Notiz;
-            set
-            {
-                var old = Entity.Notiz;
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        private BetriebskostentypUtil mTyp;
-        public BetriebskostentypUtil Typ
-        {
-            get => mTyp;
-            set
-            {
-                mTyp = value;
-                var old = value.Typ;
-                Entity.Typ = value.Typ;
-                RaisePropertyChangedAuto(old, value.Typ);
-            }
-        }
-
-        public int Schluessel
-        {
-            get => Entity != null ? (int)Entity.Schluessel : 0;
-            set
-            {
-                // TODO yeah...
-                Entity.Schluessel = (UmlageSchluessel)value;
-                RaisePropertyChangedAuto();
-            }
-        }
-
-        public string Beschreibung
-        {
-            get => Entity?.Beschreibung ?? "";
-            set
-            {
-                var old = Entity.Beschreibung;
-                Entity.Beschreibung = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
+        public SavableProperty<double> Betrag { get; }
+        public SavableProperty<DateTimeOffset> Datum { get; }
+        public SavableProperty<string> Notiz { get; }
+        public SavableProperty<BetriebskostentypUtil> Typ { get; }
+        public SavableProperty<UmlageSchluesselUtil> Schluessel { get; }
+        public SavableProperty<string> Beschreibung { get; }
         public DateTimeOffset? BetreffendesJahrDatum
         {
-            get => new DateTime(BetreffendesJahr, 1, 1);
+            get => new DateTime(BetreffendesJahr.Value, 1, 1);
             set
             {
-                BetreffendesJahr = value?.Year ?? DateTime.Now.Year - 1;
+                BetreffendesJahr.Value = value?.Year ?? DateTime.Now.Year - 1;
             }
         }
-        public int BetreffendesJahr
-        {
-            get => Entity?.BetreffendesJahr ?? DateTime.Now.Year - 1;
-            set
-            {
-                var val = value == int.MinValue ? DateTime.Now.Year - 1 : value;
-                var old = Entity.BetreffendesJahr;
-                Entity.BetreffendesJahr = val;
-                RaisePropertyChangedAuto(old, val);
-            }
-        }
-
-        public double HKVO_P7
-        {
-            get => (Entity?.HKVO_P7 ?? 0.0) * 100;
-            set
-            {
-                var old = Entity.HKVO_P7 / 100;
-                Entity.HKVO_P7 = value / 100;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public double HKVO_P8
-        {
-            get => (Entity?.HKVO_P8 ?? 0.0) * 100;
-            set
-            {
-                var old = Entity.HKVO_P8 / 100;
-                Entity.HKVO_P8 = value / 100;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public int HKVO_P9
-        {
-            get
-            {
-                if (Entity == null)
-                {
-                    return 0;
-                }
-                else if (Entity.Typ == Betriebskostentyp.Heizkosten)
-                {
-                    var index = Entity.HKVO_P9 == null ? 0 : (int)Entity.HKVO_P9;
-                    return HKVO_P9_List.FindIndex(i => i.index == index);
-                }
-                return 0;
-            }
-            set
-            {
-                // TODO yeah...
-                Entity.HKVO_P9 = (HKVO_P9A2)HKVO_P9_List[value].index;
-                RaisePropertyChangedAuto();
-            }
-        }
-
+        public SavableProperty<int> BetreffendesJahr { get; }
+        public SavableProperty<double> HKVO_P7 { get; }
+        public SavableProperty<double> HKVO_P8 { get; }
+        public SavableProperty<HKVO_P9A2?> HKVO_P9 { get; }
+        
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 
         public IWalterDbService Db;
@@ -212,6 +79,19 @@ namespace Deeplex.Saverwalter.ViewModels
             Db = db;
             NotifcationService = ns;
 
+            Betrag = new(this, r.Betrag);
+            Datum = new(this, r.Datum.AsUtcKind());
+            Notiz = new(this, r.Notiz);
+            Typ = new(this, new(r.Typ));
+            Beschreibung = new(this, r.Beschreibung);
+            BetreffendesJahr = new(this, r.BetreffendesJahr);
+            HKVO_P7 = new(this, r.HKVO_P7 ?? 0);
+            HKVO_P8 = new(this, r.HKVO_P8 ?? 0);
+            HKVO_P9 = new(this, r.HKVO_P9);
+            Schluessel = new(this, new(r.Schluessel));
+            Schluessel.Value = Schluessel_List.FirstOrDefault(e => e.Schluessel == r.Schluessel);
+            Typ.Value = Typen_List.FirstOrDefault(e => e.Typ == r.Typ);
+
             Wohnungen.Value = r.Wohnungen.Select(g => new WohnungListViewModelEntry(g, Db)).ToImmutableList();
             if (BetriebskostenrechnungsWohnung.Value == null)
             {
@@ -221,14 +101,18 @@ namespace Deeplex.Saverwalter.ViewModels
             AllgemeinZaehler_List = Db.ctx.ZaehlerSet
                 .Select(a => new ZaehlerListViewModelEntry(a))
                 .ToList();
-            AllgemeinZaehler = AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Zaehler?.ZaehlerId);
+            AllgemeinZaehler = new(this, AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Zaehler?.ZaehlerId));
+            
+            Delete = new AsyncRelayCommand(async _ =>
+            {
+                if (await NotifcationService.Confirmation())
+                {
+                    Db.ctx.Betriebskostenrechnungen.Remove(Entity);
+                    Db.SaveWalter();
+                }
+            });
 
-            Typen_List = Enums.Betriebskostentyp;
-            Typ = Typen_List.FirstOrDefault(e => e.Typ == r.Typ);
-
-            dispose = new AsyncRelayCommand(_ => selfDestruct());
-
-            PropertyChanged += OnUpdate;
+            Save = new RelayCommand(_ => save(), _ => true);
         }
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, int w, List<Wohnung> l, INotificationService ns, IWalterDbService db) : this(r, w, ns, db)
@@ -244,13 +128,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public BetriebskostenrechnungDetailViewModel(IList<WohnungListViewModelEntry> l, int betreffendesJahr, INotificationService ns, IWalterDbService avm) : this(new Betriebskostenrechnung(), ns, avm)
         {
             var thisYear = Db.ctx.Betriebskostenrechnungen.ToList().Where(r =>
-               r.BetreffendesJahr == BetreffendesJahr - 1 &&
+               r.BetreffendesJahr == BetreffendesJahr.Value - 1 &&
                r.Wohnungen.Count == Wohnungen.Value.Count &&
                Wohnungen.Value.All(e => r.Wohnungen.ToList().Exists(r => r.WohnungId == e.Id)))
                 .ToList();
 
             Wohnungen.Value = l.ToImmutableList();
-            BetreffendesJahr = betreffendesJahr;
+            BetreffendesJahr.Value = betreffendesJahr;
         }
 
         public BetriebskostenrechnungDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Betriebskostenrechnung(), ns, db)
@@ -259,11 +143,12 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Datum = DateTime.Now;
         }
 
-        public AsyncRelayCommand dispose;
+        public RelayCommand Save { get; }
+        public AsyncRelayCommand Delete { get; }
 
         public void Update()
         {
-            if (Beschreibung == null || Beschreibung.Trim() == "")
+            if (Beschreibung == null || Beschreibung.Value.Trim() == "")
             {
                 return;
             }
@@ -278,25 +163,57 @@ namespace Deeplex.Saverwalter.ViewModels
             }
             SaveWohnungen();
             Db.SaveWalter();
+            NotifcationService.outOfSync = false;
         }
 
-
-        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        public bool checkNullable<T>(object a, T b)
         {
-            switch (e.PropertyName)
+            if (a == null && b.Equals(default(T)))
             {
-                case nameof(Betrag):
-                case nameof(Datum):
-                case nameof(Typ):
-                case nameof(Schluessel):
-                case nameof(Beschreibung):
-                case nameof(BetreffendesJahr):
-                case nameof(HKVO_P7):
-                case nameof(HKVO_P8):
-                case nameof(Notiz):
-                    break;
-                default:
-                    return;
+                return false;
+            }
+            else
+            {
+                return a.Equals(b);
+            }
+
+        }
+
+        public void checkForChanges()
+        {
+            NotifcationService.outOfSync =
+                Entity.Betrag != Betrag.Value ||
+                Entity.Datum.AsUtcKind() != Datum.Value ||
+                Entity.Notiz != Notiz.Value ||
+                Entity.Typ != Typ.Value.Typ ||
+                Entity.Schluessel != Schluessel.Value.Schluessel ||
+                Entity.Beschreibung != Beschreibung.Value ||
+                Entity.BetreffendesJahr != BetreffendesJahr.Value ||
+                checkNullable(Entity.HKVO_P7, HKVO_P7.Value) ||
+                checkNullable(Entity.HKVO_P8, HKVO_P8.Value) ||
+                checkNullable(Entity.HKVO_P9, HKVO_P9.Value);
+        }
+
+        private void save()
+        {
+            Entity.Betrag = Betrag.Value;
+            Entity.Datum = Datum.Value.UtcDateTime;
+            Entity.Notiz = Notiz.Value;
+            Entity.Typ = Typ.Value.Typ;
+            Entity.Schluessel = Schluessel.Value.Schluessel;
+            Entity.Beschreibung = Beschreibung.Value;
+            Entity.BetreffendesJahr = BetreffendesJahr.Value;
+            if (Entity.HKVO_P7 != null && HKVO_P7.Value != 0)
+            {
+                Entity.HKVO_P7 = HKVO_P7.Value;
+            }
+            if (Entity.HKVO_P8 != null && HKVO_P8.Value != 0)
+            {
+                Entity.HKVO_P8 = HKVO_P8.Value;
+            }
+            if (Entity.HKVO_P9 != null && HKVO_P9.Value != 0)
+            {
+                Entity.HKVO_P9 = HKVO_P9.Value;
             }
 
             Update();

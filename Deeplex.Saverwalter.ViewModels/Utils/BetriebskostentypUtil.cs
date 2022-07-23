@@ -11,11 +11,9 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
         public Betriebskostentyp Typ { get; }
-        public int index { get; }
         public BetriebskostentypUtil(Betriebskostentyp t)
         {
             Typ = t;
-            index = (int)t;
         }
     }
 }

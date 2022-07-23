@@ -18,11 +18,11 @@
                             Header="Kennnummer"
                             Width="200"
                             Style="{StaticResource Eintraege}"
-                            Text="{x:Bind ViewModel.Kennnummer, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            Text="{x:Bind ViewModel.Kennnummer.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <ComboBox
                             Margin="20,20,0,0" Header="Typ"
                             Width="200" ItemsSource="{x:Bind ViewModel.Typen}"
-                            SelectedItem="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                            SelectedItem="{x:Bind ViewModel.Typ.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </mtuuc:WrapPanel>
                     <mtuuc:WrapPanel Orientation="Horizontal">
                         <uc:ComboControl
@@ -31,7 +31,7 @@
                             Width="380"
                             ItemsSource="{x:Bind ViewModel.Wohnungen}"
                             PlaceholderText="Wohnung hinzufügen"
-                            SelectedItem="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                            SelectedItem="{x:Bind ViewModel.Wohnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Button
                             Command="{x:Bind ViewModel.DeleteZaehlerWohnung}"
                             VerticalAlignment="Bottom">
@@ -45,7 +45,7 @@
                             Header="Allgemeinzähler"
                             Width="380"
                             ItemsSource="{x:Bind ViewModel.EinzelZaehler}"
-                            SelectedItem="{x:Bind ViewModel.AllgemeinZaehler, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                            SelectedItem="{x:Bind ViewModel.AllgemeinZaehler, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Button
                             Command="{x:Bind ViewModel.DeleteAllgemeinZaehler}"
                             VerticalAlignment="Bottom">
@@ -55,7 +55,7 @@
                     <StackPanel>
                         <TextBox
                             Margin="20,20,0,0"
-                            Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             Header="Notiz"/>
                     </StackPanel>
 

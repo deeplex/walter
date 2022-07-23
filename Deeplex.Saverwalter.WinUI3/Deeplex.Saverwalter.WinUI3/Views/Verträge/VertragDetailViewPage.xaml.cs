@@ -1,5 +1,7 @@
 ﻿using Deeplex.Saverwalter.ViewModels;
+using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 
@@ -29,11 +31,17 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 ViewModel = new VertragDetailViewModel(App.NotificationService, App.WalterService);
             }
 
-            App.Window.CommandBar.MainContent = new UserControls.VertragCommandBarControl() { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new UserControls.SingleItemCommandBarControl() { ViewModel = ViewModel };
             // TODO
             //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
 
             base.OnNavigatedTo(e);
+        }
+
+        private void Betriebskostenabrechnung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            App.Window.AppFrame.Navigate(typeof(BetriebskostenrechnungPrintViewPage), ViewModel.Entity,
+                new DrillInNavigationTransitionInfo());
         }
     }
 }

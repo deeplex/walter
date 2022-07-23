@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public abstract class PersonViewModel : BindableBase
+    public abstract class PersonViewModel : BindableBase, ISingleItem
     {
         public IPerson Entity { get; set; }
 
@@ -16,111 +16,57 @@ namespace Deeplex.Saverwalter.ViewModels
         protected IWalterDbService Db;
         protected INotificationService NotificationService;
 
-        public PersonViewModel(INotificationService ns, IWalterDbService db)
+        public RelayCommand Save { get; protected set; }
+        public AsyncRelayCommand Delete { get; protected set; }
+
+        public PersonViewModel(IPerson p, INotificationService ns, IWalterDbService db)
         {
+            Email = new(this, p.Email);
+            Telefon = new(this, p.Telefon);
+            Mobil = new(this, p.Mobil);
+            Fax = new(this, p.Fax);
+            Notiz = new(this, p.Notiz);
+            isHandwerker = new(this, p.isHandwerker);
+            isMieter = new(this, p.isMieter);
+            isVermieter = new(this, p.isVermieter);
+
             Db = db;
             NotificationService = ns;
         }
 
-        public Guid PersonId
+        protected void save()
         {
-            get => Entity.PersonId;
-            set
-            {
-                var old = Entity.PersonId;
-                Entity.PersonId = value;
-                RaisePropertyChangedAuto(old, value);
-            }
+            Entity.Email = Email.Value;
+            Entity.Telefon = Telefon.Value;
+            Entity.Mobil = Mobil.Value;
+            Entity.Fax = Fax.Value;
+            Entity.Notiz = Notiz.Value;
+            Entity.isHandwerker = isHandwerker.Value;
+            Entity.isMieter = isMieter.Value;
+            Entity.isVermieter = isVermieter.Value;
         }
 
-        public string Notiz
-        {
-            get => Entity.Notiz;
-            set
-            {
-                var old = Entity.Notiz;
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public bool isVermieter
-        {
-            get => Entity.isVermieter;
-            set
-            {
-                var old = Entity.isVermieter;
-                Entity.isVermieter = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public bool isMieter
-        {
-            get => Entity.isMieter;
-            set
-            {
-                var old = Entity.isMieter;
-                Entity.isMieter = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public bool isHandwerker
-        {
-            get => Entity.isHandwerker;
-            set
-            {
-                var old = Entity.isHandwerker;
-                Entity.isHandwerker = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
+        public Guid PersonId;
+        public SavableProperty<string> Notiz { get; }
+        public SavableProperty<bool> isVermieter { get; }
+        public SavableProperty<bool> isMieter { get; }
+        public SavableProperty<bool> isHandwerker { get; }
+        public SavableProperty<string> Email { get; }
+        public SavableProperty<string> Telefon { get; }
+        public SavableProperty<string> Mobil { get; }
+        public SavableProperty<string> Fax { get; }
 
         public int AdresseId => Entity.AdresseId ?? 0;
 
-        public string Email
-        {
-            get => Entity.Email;
-            set
-            {
-                var old = Entity.Email;
-                Entity.Email = value;
-                RaisePropertyChangedAuto(old, value);
-            }
+        public abstract void checkForChanges();
+        protected bool BaseCheckForChanges() =>
+            Entity.Notiz != Notiz.Value ||
+            Entity.isVermieter != isVermieter.Value ||
+            Entity.isMieter != isMieter.Value ||
+            Entity.isHandwerker != isHandwerker.Value ||
+            Entity.Email != Email.Value ||
+            Entity.Telefon != Telefon.Value ||
+            Entity.Mobil != Mobil.Value ||
+            Entity.Fax != Fax.Value;
         }
-
-        public string Telefon
-        {
-            get => Entity.Telefon;
-            set
-            {
-                var old = Entity.Telefon;
-                Entity.Telefon = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public string Mobil
-        {
-            get => Entity.Mobil;
-            set
-            {
-                var old = Entity.Mobil;
-                Entity.Mobil = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public string Fax
-        {
-            get => Entity.Fax;
-            set
-            {
-                var old = Entity.Fax;
-                Entity.Fax = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-    }
 }

@@ -18,42 +18,42 @@
         </mtuuc:WrapPanel>
         <mtuuc:WrapPanel Orientation="Horizontal">
             <TextBox
-                Text="{x:Bind ViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Text="{x:Bind ViewModel.Email.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="E-Mail"
                 Style="{StaticResource Eintraege}"/>
             <TextBox
-                Text="{x:Bind ViewModel.Fax, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Text="{x:Bind ViewModel.Fax.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Fax"
                 Style="{StaticResource Eintraege}"/>
         </mtuuc:WrapPanel>
         <mtuuc:WrapPanel Orientation="Horizontal">
             <TextBox
-                Text="{x:Bind ViewModel.Telefon, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Text="{x:Bind ViewModel.Telefon.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Telefon" Style="{StaticResource Eintraege}"/>
             <TextBox
-                Text="{x:Bind ViewModel.Mobil, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Text="{x:Bind ViewModel.Mobil.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Mobil" Style="{StaticResource Eintraege}"/>
         </mtuuc:WrapPanel>
         <mtuuc:WrapPanel Orientation="Horizontal">
             <CheckBox
                 Margin="20,20,0,0"
                 Content="Vermieter"
-                IsChecked="{x:Bind ViewModel.isVermieter, Mode=TwoWay}"/>
+                IsChecked="{x:Bind ViewModel.isVermieter.Value, Mode=TwoWay}"/>
             <CheckBox
                 Margin="20,20,0,0"
                 Content="Mieter"
-                IsChecked="{x:Bind ViewModel.isMieter, Mode=TwoWay}"/>
+                IsChecked="{x:Bind ViewModel.isMieter.Value, Mode=TwoWay}"/>
             <CheckBox
                 Margin="20,20,0,0"
                 Content="Handwerker"
-                IsChecked="{x:Bind ViewModel.isHandwerker, Mode=TwoWay}"/>
+                IsChecked="{x:Bind ViewModel.isHandwerker.Value, Mode=TwoWay}"/>
         </mtuuc:WrapPanel>
         <mtuuc:WrapPanel>
             <TextBox
                 Width="620"
                 Style="{StaticResource Eintraege}"
                 Margin="20"
-                Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Notiz"/>
         </mtuuc:WrapPanel>
 

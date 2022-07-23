@@ -6,114 +6,31 @@ using System.ComponentModel;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class VertragDetailViewModelVersion : BindableBase
+    public class VertragDetailViewModelVersion : BindableBase, ISingleItem
     {
+        public override string ToString() => "Vertrag"; // TODO
+
         public Vertrag Entity { get; }
         public int Id => Entity.rowid;
         public int Version => Entity.Version;
-        public double KaltMiete
-        {
-            get => Entity.KaltMiete;
-            set
-            {
-                var val = double.IsNaN(value) ? 0 : value;
-                var old = Entity.KaltMiete;
-                Entity.KaltMiete = val;
-                RaisePropertyChangedAuto(old, val);
-            }
-        }
-
-        public int Personenzahl
-        {
-            get => Entity.Personenzahl;
-            set
-            {
-                var val = int.MinValue == value ? 0 : value;
-                var old = Entity.Personenzahl;
-                Entity.Personenzahl = val;
-                RaisePropertyChangedAuto(old, val);
-            }
-        }
-
-        private WohnungListViewModelEntry mWohnung;
-        public WohnungListViewModelEntry Wohnung
-        {
-            get => mWohnung;
-            set
-            {
-                if (value == null) return;
-
-                var old = Entity.Wohnung;
-                Entity.Wohnung = value.Entity;
-                if (Ansprechpartner == null)
-                {
-                    Ansprechpartner = new KontaktListViewModelEntry(value.Entity.BesitzerId, Db);
-                }
-                mWohnung = value;
-                if (RaisePropertyChangedAuto(old, value.Entity))
-                {
-                    RaisePropertyChanged(nameof(Vermieter));
-                }
-            }
-        }
-        public DateTimeOffset Beginn
-        {
-            get => Entity.Beginn.AsUtcKind();
-            set
-            {
-                var old = Entity.Beginn;
-                Entity.Beginn = value.UtcDateTime;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public DateTimeOffset? Ende
-        {
-            get => Entity.Ende?.AsUtcKind();
-            set
-            {
-                var old = Entity.Ende;
-                Entity.Ende = value?.UtcDateTime;
-                RaisePropertyChangedAuto(old, value?.UtcDateTime);
-            }
-        }
-
-        public string Notiz
-        {
-            get => Entity.Notiz;
-            set
-            {
-                var old = Entity.Notiz;
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
+        public SavableProperty<double> KaltMiete;
+        public SavableProperty<int> Personenzahl;
+        public SavableProperty<WohnungListViewModelEntry?> Wohnung;
+        public SavableProperty<DateTimeOffset> Beginn;
+        public SavableProperty<DateTimeOffset?> Ende;
+        public SavableProperty<string> Notiz;
+        public SavableProperty<KontaktListViewModelEntry> Ansprechpartner { get; }
 
         public KontaktListViewModelEntry Vermieter
-            => Wohnung?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
+            => Wohnung.Value?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
                     new KontaktListViewModelEntry(g, Db) : null;
-
-        private KontaktListViewModelEntry mAnsprechpartner;
-        public KontaktListViewModelEntry Ansprechpartner
-        {
-            get => mAnsprechpartner;
-            set
-            {
-                if (value == null && mAnsprechpartner == null)
-                {
-                    return;
-                }
-                var old = mAnsprechpartner?.Entity.PersonId;
-                mAnsprechpartner = value;
-                Entity.AnsprechpartnerId = mAnsprechpartner?.Entity.PersonId;
-                RaisePropertyChangedAuto(old, value?.Entity.PersonId);
-            }
-        }
 
         protected IWalterDbService Db;
         protected INotificationService NotificationService;
 
         public RelayCommand RemoveDate;
+        public RelayCommand Save { get; protected set; }
+        public AsyncRelayCommand Delete { get; protected set; }
 
         public VertragDetailViewModelVersion(int id, INotificationService ns, IWalterDbService db) : this(db.ctx.Vertraege.Find(id), ns, db) { }
         public VertragDetailViewModelVersion(Vertrag v, INotificationService ns, IWalterDbService db)
@@ -122,39 +39,58 @@ namespace Deeplex.Saverwalter.ViewModels
             Db = db;
             NotificationService = ns;
 
+            KaltMiete = new(this, v.KaltMiete);
+            Personenzahl = new(this, v.Personenzahl);
+            Wohnung = new(this, new(v.Wohnung, db));
+            Beginn = new(this, v.Beginn);
+            Ende = new(this, v.Ende);
+            Notiz = new(this, v.Notiz);
+
             if (v.AnsprechpartnerId != Guid.Empty && v.AnsprechpartnerId != null)
             {
-                Ansprechpartner = new KontaktListViewModelEntry(v.AnsprechpartnerId.Value, db);
+                Ansprechpartner = new(this, new(v.AnsprechpartnerId.Value, db));
+            }
+            else
+            {
+                Ansprechpartner = new(this, null);
             }
 
             RemoveDate = new RelayCommand(_ => Ende = null, _ => Ende != null);
-            PropertyChanged += OnUpdate;
+            Delete = new AsyncRelayCommand(async _ =>
+            {
+                if (await NotificationService.Confirmation())
+                {
+                    Db.ctx.Vertraege.Remove(Entity);
+                    Db.SaveWalter();
+                }
+            }, _ => true);
         }
 
-        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        public void checkForChanges()
         {
-            switch (e.PropertyName)
+            if (!(Ansprechpartner.Value == null && Entity.AnsprechpartnerId == Guid.Empty))
             {
-                case nameof(Wohnung):
-                case nameof(Beginn):
-                case nameof(Ende):
-                case nameof(Notiz):
-                case nameof(Personenzahl):
-                case nameof(KaltMiete):
-                // case nameof(VersionsNotiz):
-                case nameof(Ansprechpartner):
-                    break;
-                default:
-                    return;
+                NotificationService.outOfSync = Ansprechpartner.Value?.Guid != Entity.AnsprechpartnerId;
             }
 
-            if (Entity.VertragId == null ||
-                Entity.Beginn == null ||
-                (Entity.Wohnung == null && Entity.WohnungId == 0) ||
-                Entity.AnsprechpartnerId == null)
-            {
-                return;
-            }
+            NotificationService.outOfSync =
+                Wohnung.Value.Entity.WohnungId != Entity.Wohnung.WohnungId ||
+                Personenzahl.Value != Entity.Personenzahl ||
+                KaltMiete.Value != Entity.KaltMiete ||
+                Beginn.Value != Entity.Beginn ||
+                Ende.Value != Entity.Ende ||
+                Notiz.Value != Entity.Notiz;
+        }
+
+        public void versionSave()
+        {
+            Entity.Wohnung = Wohnung.Value.Entity;
+            Entity.Beginn = Beginn.Value.DateTime;
+            Entity.Ende = Ende.Value?.DateTime;
+            Entity.Notiz = Notiz.Value;
+            Entity.Personenzahl = Personenzahl.Value;
+            Entity.KaltMiete = KaltMiete.Value;
+            Entity.AnsprechpartnerId = Ansprechpartner.Value?.Guid ?? Guid.Empty;
 
             if (Entity.rowid != 0)
             {
@@ -164,7 +100,6 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 Db.ctx.Vertraege.Add(Entity);
             }
-            Db.SaveWalter();
         }
     }
 

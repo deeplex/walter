@@ -8,31 +8,13 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class JuristischePersonViewModel : PersonViewModel
+    public sealed class JuristischePersonViewModel : PersonViewModel, ISingleItem
     {
         public new JuristischePerson Entity => (JuristischePerson)base.Entity;
         public int Id;
 
-        public string Bezeichnung
-        {
-            get => base.Entity.Bezeichnung;
-            set
-            {
-                var old = Entity.Bezeichnung;
-                Entity.Bezeichnung = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-        public override string ToString() => Bezeichnung;
-
-        public async void selfDestruct()
-        {
-            if (await NotificationService.Confirmation())
-            {
-                Db.ctx.JuristischePersonen.Remove(Entity);
-                Db.SaveWalter();
-            }
-        }
+        public SavableProperty<string> Bezeichnung { get; }
+        public override string ToString() => Bezeichnung.Value;
 
         public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Mitglieder = new();
         public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> AddMitglieder = new();
@@ -75,14 +57,14 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public JuristischePersonViewModel(INotificationService ns, IWalterDbService db) : this(new JuristischePerson(), ns, db) { }
         public JuristischePersonViewModel(int id, INotificationService ns, IWalterDbService db) : this(db.ctx.JuristischePersonen.Find(id), ns, db) { }
-        public JuristischePersonViewModel(JuristischePerson j, INotificationService ns, IWalterDbService db) : base(ns, db)
+        public JuristischePersonViewModel(JuristischePerson j, INotificationService ns, IWalterDbService db) : base(j, ns, db)
         {
             base.Entity = j;
             Id = j.JuristischePersonId;
+            Bezeichnung = new(this, j.Bezeichnung);
 
             UpdateListen();
 
-            PropertyChanged += OnUpdate;
             AddMitgliedCommand = new RelayCommand(_ =>
             {
                 if (AddMitglied.Value?.Entity.PersonId is Guid guid)
@@ -99,40 +81,38 @@ namespace Deeplex.Saverwalter.ViewModels
                     UpdateListen();
                 }
             }, _ => true);
+
+            Delete = new AsyncRelayCommand(async _ =>
+            {
+                if (await NotificationService.Confirmation())
+                {
+                    Db.ctx.JuristischePersonen.Remove(Entity);
+                    Db.SaveWalter();
+                }
+            }, _ => true);
+
+            Save = new RelayCommand(_ =>
+            {
+                save();
+                Entity.Bezeichnung = Bezeichnung.Value;
+
+                if (Entity.JuristischePersonId != 0)
+                {
+                    Db.ctx.JuristischePersonen.Update(Entity);
+                }
+                else
+                {
+                    Db.ctx.JuristischePersonen.Add(Entity);
+                }
+                Db.SaveWalter();
+            }, _ => true);
         }
 
-        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        public override void checkForChanges()
         {
-            switch (e.PropertyName)
-            {
-                case nameof(Bezeichnung):
-                case nameof(Email):
-                case nameof(Telefon):
-                case nameof(Mobil):
-                case nameof(Fax):
-                case nameof(Notiz):
-                case nameof(isHandwerker):
-                case nameof(isMieter):
-                case nameof(isVermieter):
-                    break;
-                default:
-                    return;
-            }
-
-            if (base.Entity.Bezeichnung == null)
-            {
-                return;
-            }
-
-            if (Entity.JuristischePersonId != 0)
-            {
-                Db.ctx.JuristischePersonen.Update(Entity);
-            }
-            else
-            {
-                Db.ctx.JuristischePersonen.Add(Entity);
-            }
-            Db.SaveWalter();
+            NotificationService.outOfSync =
+                BaseCheckForChanges() ||
+                Entity.Bezeichnung != Bezeichnung.Value;
         }
     }
 }

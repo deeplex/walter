@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ZaehlerDetailViewModel : BindableBase
+    public sealed class ZaehlerDetailViewModel : BindableBase, ISingleItem
     {
         public Zaehler Entity;
         private int mId { get; set; }
@@ -25,6 +25,8 @@ namespace Deeplex.Saverwalter.ViewModels
                 RaisePropertyChanged(nameof(Initialized));
             }
         }
+
+        public override string ToString() => Kennnummer.Value;
 
         public ObservableProperty<ZaehlerstandListViewModel> Staende = new();
 
@@ -46,51 +48,10 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public Zaehlertyp Typ
-        {
-            get => Entity.Typ;
-            set
-            {
-                var old = Entity.Typ;
-                Entity.Typ = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public string Notiz
-        {
-            get => Entity.Notiz;
-            set
-            {
-                var old = Entity.Notiz;
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        public string Kennnummer
-        {
-            get => Entity.Kennnummer;
-            set
-            {
-                var old = Entity.Kennnummer;
-                Entity.Kennnummer = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-
-        private WohnungListViewModelEntry mWohnung;
-        public WohnungListViewModelEntry Wohnung
-        {
-            get => mWohnung;
-            set
-            {
-                var old = Entity.Wohnung;
-                Entity.Wohnung = value?.Entity;
-                mWohnung = value;
-                RaisePropertyChangedAuto(old, value?.Entity);
-            }
-        }
+        public SavableProperty<Zaehlertyp> Typ { get; }
+        public SavableProperty<string> Notiz { get; }
+        public SavableProperty<string> Kennnummer { get; }
+        public SavableProperty<WohnungListViewModelEntry> Wohnung { get; }
 
         // Necessary to show / hide Zählerstände
         public bool Initialized => Entity.ZaehlerId != 0;
@@ -101,6 +62,18 @@ namespace Deeplex.Saverwalter.ViewModels
         public ZaehlerDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Zaehler(), ns, db) { }
         public ZaehlerDetailViewModel(Zaehler z, INotificationService ns, IWalterDbService db)
         {
+            Typ = new(this, z.Typ);
+            Notiz = new(this, z.Notiz);
+            Kennnummer = new(this, z.Kennnummer);
+            if (z.Wohnung != null)
+            {
+                Wohnung = new(this, new WohnungListViewModelEntry(z.Wohnung, db));
+            }
+            else
+            {
+                Wohnung = new(this);
+            }
+
             NotificationService = ns;
             Db = db;
             Entity = z;
@@ -117,49 +90,46 @@ namespace Deeplex.Saverwalter.ViewModels
                .ToList();
             AllgemeinZaehler = mAllgemeinZaehler = EinzelZaehler.SingleOrDefault(y => y.Id == z.AllgemeinZaehler?.ZaehlerId);
 
-
-            if (mId != 0)
-            {
-                Staende.Value = new ZaehlerstandListViewModel(z, NotificationService, Db);
-                Wohnung = Wohnungen.Find(w => w.Id == z.WohnungId);
-            }
-
-            PropertyChanged += OnUpdate;
+            Staende.Value = new ZaehlerstandListViewModel(z, NotificationService, Db);
 
             DeleteAllgemeinZaehler = new RelayCommand(_ => AllgemeinZaehler = null);
-            DeleteZaehlerWohnung = new RelayCommand(_ => Wohnung = null);
+            DeleteZaehlerWohnung = new RelayCommand(_ => Wohnung.Value = null);
+
+            Delete = new AsyncRelayCommand(async _ =>
+            {
+                if (await NotificationService.Confirmation())
+                {
+                    Entity.Staende.ForEach(s => Db.ctx.Zaehlerstaende.Remove(s));
+                    Db.ctx.ZaehlerSet.Remove(Entity);
+                    Db.SaveWalter();
+                }
+            });
+
+            Save = new RelayCommand(_ => save(), _ => true);
         }
 
         public RelayCommand DeleteAllgemeinZaehler;
         public RelayCommand DeleteZaehlerWohnung;
+        public AsyncRelayCommand Delete { get; }
+        public RelayCommand Save { get; }
 
-        public async Task SelfDestruct()
+        public void checkForChanges()
         {
-            if (await NotificationService.Confirmation())
-            {
-                Entity.Staende.ForEach(s => Db.ctx.Zaehlerstaende.Remove(s));
-                Db.ctx.ZaehlerSet.Remove(Entity);
-                Db.SaveWalter();
-            }
+            NotificationService.outOfSync =
+                Kennnummer.Value != Entity.Kennnummer ||
+                Wohnung.Value?.Id != Entity.Wohnung?.WohnungId ||
+                Typ.Value != Entity.Typ ||
+                Notiz.Value != Entity.Notiz ||
+                AllgemeinZaehler?.Id != Entity.AllgemeinZaehler?.ZaehlerId;
         }
 
-        private void OnUpdate(object sender, PropertyChangedEventArgs e)
+        private void save()
         {
-            switch (e.PropertyName)
-            {
-                case nameof(Kennnummer):
-                case nameof(Wohnung):
-                case nameof(Typ):
-                case nameof(AllgemeinZaehler):
-                    break;
-                default:
-                    return;
-            }
-
-            if (Entity.Kennnummer == "" || Entity.Kennnummer == null)
-            {
-                return;
-            }
+            Entity.Kennnummer = Kennnummer.Value;
+            Entity.Wohnung = Wohnung.Value?.Entity;
+            Entity.Typ = Typ.Value;
+            Entity.AllgemeinZaehler = AllgemeinZaehler?.Entity;
+            Entity.Notiz = Notiz.Value;
 
             if (Entity.ZaehlerId != 0)
             {
@@ -175,6 +145,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 Id = Entity.ZaehlerId;
                 Staende.Value = new ZaehlerstandListViewModel(Entity, NotificationService, Db);
             }
+            checkForChanges();
         }
     }
 }

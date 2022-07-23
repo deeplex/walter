@@ -15,7 +15,7 @@
                 <uc:ComboControl
                         Margin="10,10,10,10"
                         ItemsSource="{x:Bind ViewModel.Typen_List}"
-                        SelectedItem="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        SelectedItem="{x:Bind ViewModel.Typ.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Header="Kostentyp"/>
                 <uc:ExpanderControl IsExpanded="True" Header="Betroffene Wohneinheiten">
                     <uc:ExpanderControl.MainContent>
@@ -27,16 +27,15 @@
                 </uc:ExpanderControl>
                 <MenuFlyoutSeparator/>
                 <TextBox
-                    Text="{x:Bind ViewModel.Beschreibung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                    Text="{x:Bind ViewModel.Beschreibung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Header="Beschreibung"/>
                 <StackPanel
                     Margin="0,10,0,0"
                     Orientation="Horizontal">
                     <!--TODO-->
-                    <ComboBox
+                    <uc:ComboControl
                         ItemsSource="{x:Bind ViewModel.Schluessel_List}"
-                        SelectedIndex="{x:Bind ViewModel.Schluessel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        DisplayMemberPath="Beschreibung"
+                        SelectedItem="{x:Bind ViewModel.Schluessel.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Header="Umlageschlüssel"/>
                     <DatePicker
                         SelectedDate="{x:Bind ViewModel.BetreffendesJahrDatum, Mode=TwoWay}"
@@ -46,22 +45,22 @@
                         DayVisible="False" MonthVisible="False"/>
                     <DatePicker
                         Language="de"
-                        SelectedDate="{x:Bind ViewModel.Datum, Mode=TwoWay}"
+                        SelectedDate="{x:Bind ViewModel.Datum.Value, Mode=TwoWay}"
                         Header="Datum"/>
                     <muxc:NumberBox
-                        Value="{x:Bind ViewModel.Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Value="{x:Bind ViewModel.Betrag.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Margin="10,0,0,0"
                         Header="Betrag"/>
                 </StackPanel>
                 <StackPanel Margin="0,10,0,0" Visibility="{x:Bind ViewModel.isHeizung}" Orientation="Horizontal">
                     <Slider
-                        Value="{x:Bind ViewModel.HKVO_P7, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Value="{x:Bind ViewModel.HKVO_P7.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Width="100"
                         Minimum="50"
                         Maximum="70"
                         Header="HKVO§7"/>
                     <Slider
-                        Value="{x:Bind ViewModel.HKVO_P8, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Value="{x:Bind ViewModel.HKVO_P8.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Width="100"
                         Minimum="50"
                         Maximum="70"
@@ -73,7 +72,7 @@
                 </StackPanel>
                 <StackPanel>
                     <TextBox
-                        Text="{x:Bind ViewModel.Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                        Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Header="Notiz"/>
                 </StackPanel>
                 <uc:ExpanderControl Margin="0,20,0,0" Header="Wohnungen">
