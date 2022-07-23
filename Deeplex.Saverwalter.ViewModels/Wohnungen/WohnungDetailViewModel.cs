@@ -4,11 +4,10 @@ using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class WohnungDetailViewModel : ValidatableBase, ISingleItem
+    public sealed class WohnungDetailViewModel : ValidatableBase, IDetail
     {
         public Wohnung Entity { get; }
         public int Id => Entity.WohnungId;

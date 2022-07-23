@@ -3,12 +3,11 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class JuristischePersonViewModel : PersonViewModel, ISingleItem
+    public sealed class JuristischePersonViewModel : PersonViewModel, IDetail
     {
         public new JuristischePerson Entity => (JuristischePerson)base.Entity;
         public int Id;

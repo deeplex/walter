@@ -4,13 +4,11 @@ using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class BetriebskostenrechnungDetailViewModel : BindableBase, ISingleItem
+    public sealed class BetriebskostenrechnungDetailViewModel : BindableBase, IDetail
     {
         public override string ToString() => Entity.Typ.ToDescriptionString() + " - " + Entity.GetWohnungenBezeichnung();
 
@@ -48,7 +46,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<double> HKVO_P7 { get; }
         public SavableProperty<double> HKVO_P8 { get; }
         public SavableProperty<HKVO_P9A2?> HKVO_P9 { get; }
-        
+
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 
         public IWalterDbService Db;
@@ -102,7 +100,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Select(a => new ZaehlerListViewModelEntry(a))
                 .ToList();
             AllgemeinZaehler = new(this, AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Zaehler?.ZaehlerId));
-            
+
             Delete = new AsyncRelayCommand(async _ =>
             {
                 if (await NotifcationService.Confirmation())

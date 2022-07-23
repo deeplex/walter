@@ -7,7 +7,7 @@ namespace Deeplex.Saverwalter.Model.Tests
 {
     public class BetriebskostenabrechnungTests
     {
-        [Theory (Skip = "How to fake SaverwalterContext and Vertrag?")]
+        [Theory(Skip = "How to fake SaverwalterContext and Vertrag?")]
         [InlineData(2020)]
         public void BetriebskostenabrechnungTest(int jahr)
         {

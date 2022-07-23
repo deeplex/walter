@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.WinUI3.Services
 {
-    public sealed class NotificationService: BindableBase, INotificationService
+    public sealed class NotificationService : BindableBase, INotificationService
     {
         public bool outOfSync { get; set; }
         public void ShowAlert(string text) => ShowAlert(text, text.Length > 20 ? 0 : 3000);

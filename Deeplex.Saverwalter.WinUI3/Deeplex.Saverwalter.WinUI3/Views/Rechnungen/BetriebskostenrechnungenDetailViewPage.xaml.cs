@@ -51,7 +51,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
             base.OnNavigatedTo(e);
 
-            App.Window.CommandBar.MainContent = new SingleItemCommandBarControl() { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl() { ViewModel = ViewModel };
             // TODO
             //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.WalterService));
 

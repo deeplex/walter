@@ -6,7 +6,7 @@ namespace Deeplex.Saverwalter.Model.Tests
 {
     public class HeizkostenberechnungTests
     {
-        [Fact (Skip = "Can't fake Betriebskostenrechnung (Sealed)")]
+        [Fact(Skip = "Can't fake Betriebskostenrechnung (Sealed)")]
         public void HeizkostenberechnungTest()
         {
             var fake1 = A.Fake<Betriebskostenrechnung>();

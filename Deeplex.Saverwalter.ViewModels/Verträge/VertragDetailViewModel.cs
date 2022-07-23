@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class VertragDetailViewModel : VertragDetailViewModelVersion, ISingleItem
+    public sealed class VertragDetailViewModel : VertragDetailViewModelVersion, IDetail
     {
         public Guid guid { get; }
         public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> AlleMieter = new();

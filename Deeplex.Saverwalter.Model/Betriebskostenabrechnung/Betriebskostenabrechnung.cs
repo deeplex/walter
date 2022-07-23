@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.Model
         bool AllgStromVerrechnetMitHeizkosten { get; set; }
     }
 
-    public sealed class Betriebskostenabrechnung: IBetriebskostenabrechnung
+    public sealed class Betriebskostenabrechnung : IBetriebskostenabrechnung
     {
         public List<Note> notes { get; } = new List<Note>();
 
@@ -125,11 +125,11 @@ namespace Deeplex.Saverwalter.Model
                                 .ThenInclude(z => z.Staende)
                 .First();
 
-                Gruppen = Vertrag.Wohnung.Betriebskostenrechnungen
-                    .Where(g => g.BetreffendesJahr == Jahr)
-                    .GroupBy(p => new SortedSet<int>(p.Wohnungen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
-                    .Select(g => new Rechnungsgruppe(this, g.ToList()))
-                    .ToList();
+            Gruppen = Vertrag.Wohnung.Betriebskostenrechnungen
+                .Where(g => g.BetreffendesJahr == Jahr)
+                .GroupBy(p => new SortedSet<int>(p.Wohnungen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
+                .Select(g => new Rechnungsgruppe(this, g.ToList()))
+                .ToList();
 
             // If Ansprechpartner or Besitzer is null => throw
         }

@@ -16,8 +16,8 @@
         Sorting="DataGrid_Sorting"
         SelectionChanged="DataGrid_SelectionChanged"
         DoubleTapped="Details_Click"
-        SelectedItem="{x:Bind ViewModel.SelectedKontakt, Mode=TwoWay}"
-        ItemsSource="{x:Bind ViewModel.Kontakte.Value, Mode=OneWay}"
+        SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}"
+        ItemsSource="{x:Bind ViewModel.List.Value, Mode=OneWay}"
         RightTapped="DataGrid_RightTapped">
         <mtuuc:DataGrid.ContextFlyout>
             <MenuFlyout>

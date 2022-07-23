@@ -1,6 +1,5 @@
 ﻿using FakeItEasy;
 using FluentAssertions;
-using System.Collections.Generic;
 using Xunit;
 using static Deeplex.Saverwalter.Model.Utils;
 
@@ -52,7 +51,7 @@ namespace Deeplex.Saverwalter.Model.Tests
             mock.GetBriefAnrede().Should().Be(s);
         }
 
-        [Theory (Skip = "Find a way to inject year")]
+        [Theory(Skip = "Find a way to inject year")]
         [InlineData("Betriebskostenabrechnung 0", 0)]
         [InlineData("Betriebskostenabrechnung 1", 1)]
         [InlineData("Betriebskostenabrechnung 2022", 2022)]
@@ -63,7 +62,7 @@ namespace Deeplex.Saverwalter.Model.Tests
             fake.Title().Should().Be(title);
         }
 
-        [Theory (Skip = "How to set Mieterliste to fake?")]
+        [Theory(Skip = "How to set Mieterliste to fake?")]
         [InlineData("Mieter: Erika Mustermann, Max Mustermann")]
         public void MieterlisteTest(string s)
         {
@@ -86,7 +85,7 @@ namespace Deeplex.Saverwalter.Model.Tests
             fake.Mieterliste().Should().Be(s);
         }
 
-        [Theory (Skip = "How to set Mietobjekt to fake?")]
+        [Theory(Skip = "How to set Mietobjekt to fake?")]
         [InlineData("Mietobjekt: Musterstraße 3, 12345 Musterstadt - Musterwohnung")]
         public void MietobjektTest(string s)
         {

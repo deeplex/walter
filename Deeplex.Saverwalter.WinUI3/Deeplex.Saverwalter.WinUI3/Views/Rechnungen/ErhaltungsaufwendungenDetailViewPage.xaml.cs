@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
                 ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.NotificationService, App.WalterService);
             }
 
-            App.Window.CommandBar.MainContent = new SingleItemCommandBarControl { ViewModel = ViewModel }; // TODO123
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel }; // TODO123
 
             base.OnNavigatedTo(e);
         }

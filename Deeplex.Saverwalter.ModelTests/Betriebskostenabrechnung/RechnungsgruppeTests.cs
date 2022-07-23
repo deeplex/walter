@@ -7,7 +7,7 @@ namespace Deeplex.Saverwalter.Model.Tests
 {
     public class RechnungsgruppeTests
     {
-        [Fact (Skip = "How to fake Betriebskostenrechnung")]
+        [Fact(Skip = "How to fake Betriebskostenrechnung")]
         public void RechnungsgruppeTest()
         {
             var fake1 = A.Fake<IBetriebskostenabrechnung>();

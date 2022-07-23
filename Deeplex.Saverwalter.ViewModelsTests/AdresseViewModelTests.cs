@@ -1,6 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
-using Deeplex.Saverwalter.ViewModels;
 using FakeItEasy;
 using FluentAssertions;
 using Xunit;

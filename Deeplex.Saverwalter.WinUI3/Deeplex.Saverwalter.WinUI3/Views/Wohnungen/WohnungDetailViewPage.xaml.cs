@@ -51,7 +51,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                     Datum = DateTime.Now,
                 };
                 ViewModel.Entity.Betriebskostenrechnungen.Add(r);
-                
+
                 var vm = new BetriebskostenrechnungDetailViewModel(r, App.NotificationService, App.WalterService);
                 App.Window.Navigate(typeof(BetriebskostenrechnungenDetailViewPage), vm);
             };
@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 App.Window.Navigate(typeof(ErhaltungsaufwendungenDetailViewPage), vm);
             };
 
-            App.Window.CommandBar.MainContent = new SingleItemCommandBarControl { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel };
 
             App.Window.DetailAnhang.Value = new AnhangListViewModel(ViewModel.Entity, App.FileService, App.NotificationService, App.WalterService);
 

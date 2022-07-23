@@ -9,7 +9,7 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class BetriebskostenRechnungenListViewModel : BindableBase, IFilterViewModel
     {
-        public ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>> Liste = new();            
+        public ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>> Liste = new();
 
         public ObservableProperty<string> Filter { get; set; } = new();
         public ObservableProperty<int> JahrFilter { get; set; } = new();

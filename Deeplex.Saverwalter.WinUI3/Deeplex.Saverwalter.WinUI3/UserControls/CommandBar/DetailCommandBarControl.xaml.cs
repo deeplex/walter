@@ -7,25 +7,24 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
-    public sealed partial class SingleItemCommandBarControl : UserControl
+    public sealed partial class DetailCommandBarControl : UserControl
     {
-        public SingleItemCommandBarControl()
+        public DetailCommandBarControl()
         {
             InitializeComponent();
         }
 
-
-        public ISingleItem ViewModel
+        public IDetail ViewModel
         {
-            get { return (ISingleItem)GetValue(ViewModelProperty); }
+            get { return (IDetail)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
 
         public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
             "ViewModel",
-            typeof(ISingleItem),
-            typeof(SingleItemCommandBarControl),
+            typeof(IDetail),
+            typeof(DetailCommandBarControl),
             new PropertyMetadata(null));
 
         private void Delete_Click(object sender, RoutedEventArgs e)

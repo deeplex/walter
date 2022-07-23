@@ -1,10 +1,5 @@
-﻿using Xunit;
-using Deeplex.Saverwalter.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using FakeItEasy;
-using FluentAssertions;
+﻿using FluentAssertions;
+using Xunit;
 
 namespace Deeplex.Saverwalter.Model.Tests
 {

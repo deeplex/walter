@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public abstract class PersonViewModel : BindableBase, ISingleItem
+    public abstract class PersonViewModel : BindableBase, IDetail
     {
         public IPerson Entity { get; set; }
 
@@ -68,5 +68,5 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Telefon != Telefon.Value ||
             Entity.Mobil != Mobil.Value ||
             Entity.Fax != Fax.Value;
-        }
+    }
 }

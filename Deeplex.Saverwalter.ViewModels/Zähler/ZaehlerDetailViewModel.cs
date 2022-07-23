@@ -3,13 +3,11 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ZaehlerDetailViewModel : BindableBase, ISingleItem
+    public sealed class ZaehlerDetailViewModel : BindableBase, IDetail
     {
         public Zaehler Entity;
         private int mId { get; set; }

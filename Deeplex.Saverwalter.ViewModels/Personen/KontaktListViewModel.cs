@@ -6,27 +6,12 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class KontaktListViewModel : BindableBase, IFilterViewModel
+    public sealed class KontaktListViewModel : ListViewModel<KontaktListViewModelEntry>, IListViewModel
     {
-        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Kontakte = new();
-        private KontaktListViewModelEntry mSelectedKontakt;
-        public KontaktListViewModelEntry SelectedKontakt
-        {
-            get => mSelectedKontakt;
-            set
-            {
-                mSelectedKontakt = value;
-                RaisePropertyChangedAuto();
-                RaisePropertyChanged(nameof(hasSelectedKontakt));
-            }
-        }
-        public bool hasSelectedKontakt => SelectedKontakt != null;
+        public override string ToString() => "Kontakte";
 
-        public ObservableProperty<string> Filter { get; set; } = new();
-        public ObservableProperty<bool> Vermieter { get; set; } = new (true);
-        public ObservableProperty<bool> Mieter { get; set; } = new (true);
-        public ObservableProperty<bool> Handwerker { get; set; } = new (true);
-        public ImmutableList<KontaktListViewModelEntry> AllRelevant { get; }
+        protected override ImmutableList<KontaktListViewModelEntry> updateList(string value)
+            => List.Value.Where(v => applyFilter(value, v.Name, v.Vorname, v.Email, v.Telefon)).ToImmutableList();
 
         public KontaktListViewModel(IWalterDbService db)
         {
@@ -43,7 +28,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 AllRelevant = AllRelevant.Add(new KontaktListViewModelEntry(j));
             }
 
-            Kontakte.Value = AllRelevant;
+            List.Value = AllRelevant;
         }
     }
 }

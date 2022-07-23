@@ -1,5 +1,4 @@
-﻿using Deeplex.Saverwalter.Print;
-using Xunit;
+﻿using Xunit;
 
 namespace Deeplex.Saverwalter.Print.Tests
 {

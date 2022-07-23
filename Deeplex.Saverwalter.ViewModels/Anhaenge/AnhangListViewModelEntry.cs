@@ -1,7 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using System;
 using System.IO;
-using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {

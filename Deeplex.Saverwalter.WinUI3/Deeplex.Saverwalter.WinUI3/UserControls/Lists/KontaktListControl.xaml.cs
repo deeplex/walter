@@ -17,11 +17,11 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void UpdateFilter()
         {
-            ViewModel.Kontakte.Value = ViewModel.AllRelevant;
+            ViewModel.List.Value = ViewModel.AllRelevant;
 
             if (Handwerker == false || Vermieter == false || Mieter == false)
             {
-                ViewModel.Kontakte.Value = ViewModel.Kontakte.Value.Where(v =>
+                ViewModel.List.Value = ViewModel.List.Value.Where(v =>
                     v.Entity.isHandwerker && Handwerker ||
                     v.Entity.isVermieter && Vermieter ||
                     v.Entity.isMieter && Mieter ||
@@ -31,16 +31,16 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
             if (Kontakte != null)
             {
-                ViewModel.Kontakte.Value = ViewModel.Kontakte.Value.Where(v =>
+                ViewModel.List.Value = ViewModel.List.Value.Where(v =>
                     Kontakte.Any(k => k.Entity.PersonId == v.Entity.PersonId))
                     .ToImmutableList();
             }
 
             if (Filter != "")
             {
-                ViewModel.Kontakte.Value = ViewModel.Kontakte.Value.Where(v =>
+                ViewModel.List.Value = ViewModel.List.Value.Where(v =>
                     applyFilter(Filter, v.Anschrift, v.Name, v.Vorname, v.Email, v.Telefon))
-                    .ToImmutableList();
+                        .ToImmutableList();
             }
         }
 
@@ -147,7 +147,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            var sk = ViewModel.SelectedKontakt;
+            var sk = ViewModel.Selected;
             if (sk != null)
             {
                 var target =
@@ -161,7 +161,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_RightTapped(object sender, Microsoft.UI.Xaml.Input.RightTappedRoutedEventArgs e)
         {
-            ViewModel.SelectedKontakt = (e.OriginalSource as FrameworkElement).DataContext as KontaktListViewModelEntry;
+            ViewModel.Selected = (e.OriginalSource as FrameworkElement).DataContext as KontaktListViewModelEntry;
         }
 
         private async void RemovePerson_Click(object sender, RoutedEventArgs e)
@@ -172,7 +172,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             {
                 var guid = ((KontaktListViewModelEntry)((Button)sender).DataContext).Entity.PersonId;
 
-                ViewModel.Kontakte.Value = ViewModel.Kontakte.Value
+                ViewModel.List.Value = ViewModel.List.Value
                     .Where(k => guid != k.Entity.PersonId).ToImmutableList();
                 App.WalterService.SaveWalter();
             }
@@ -193,7 +193,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)
         {
-            ViewModel.Kontakte.Value = (sender as DataGrid).Sort(e.Column, ViewModel.Kontakte.Value);
+            ViewModel.List.Value = (sender as DataGrid).Sort(e.Column, ViewModel.List.Value);
         }
     }
 }

@@ -3,7 +3,6 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System.Collections.Immutable;
 using System.Linq;
-using static Deeplex.Saverwalter.Services.WalterDbService;
 
 namespace Deeplex.Saverwalter.ViewModels
 {

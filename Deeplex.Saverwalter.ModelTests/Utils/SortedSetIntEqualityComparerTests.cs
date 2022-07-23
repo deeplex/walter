@@ -2,7 +2,6 @@
 using FluentAssertions;
 using System.Collections.Generic;
 using Xunit;
-using Deeplex.Saverwalter.Model;
 
 namespace Deeplex.Saverwalter.Model.Tests
 {
@@ -11,8 +10,8 @@ namespace Deeplex.Saverwalter.Model.Tests
         [Fact]
         public void EqualsTest()
         {
-            var mock1 = new SortedSet<int>() { 1, 14, 15, 17};
-            var mock2 = new SortedSet<int>() { 1, 14, 15, 17};
+            var mock1 = new SortedSet<int>() { 1, 14, 15, 17 };
+            var mock2 = new SortedSet<int>() { 1, 14, 15, 17 };
             var stub = new SortedSetIntEqualityComparer();
 
             stub.Equals(mock1, mock2).Should().BeTrue();

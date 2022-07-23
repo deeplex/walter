@@ -1,8 +1,7 @@
-﻿using Xunit;
+﻿using Deeplex.Saverwalter.Model;
 using FakeItEasy;
 using FluentAssertions;
-using Deeplex.Saverwalter.Model;
-using Microsoft.EntityFrameworkCore;
+using Xunit;
 
 namespace Deeplex.Saverwalter.Services.Tests
 {

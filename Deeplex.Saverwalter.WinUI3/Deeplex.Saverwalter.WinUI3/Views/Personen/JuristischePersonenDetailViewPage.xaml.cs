@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 ViewModel = new JuristischePersonViewModel(App.NotificationService, App.WalterService);
             }
 
-            App.Window.CommandBar.MainContent = new SingleItemCommandBarControl { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel };
             // TODO
             //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.Impl, App.ViewModel));
 

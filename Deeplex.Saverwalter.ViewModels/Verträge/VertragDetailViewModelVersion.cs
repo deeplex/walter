@@ -2,11 +2,10 @@
 using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
-using System.ComponentModel;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class VertragDetailViewModelVersion : BindableBase, ISingleItem
+    public class VertragDetailViewModelVersion : BindableBase, IDetail
     {
         public override string ToString() => "Vertrag"; // TODO
 

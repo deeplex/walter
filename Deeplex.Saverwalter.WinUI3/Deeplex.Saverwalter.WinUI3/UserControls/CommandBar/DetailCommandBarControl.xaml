@@ -1,5 +1,5 @@
 ﻿<UserControl
-    x:Class="Deeplex.Saverwalter.WinUI3.UserControls.SingleItemCommandBarControl"
+    x:Class="Deeplex.Saverwalter.WinUI3.UserControls.DetailCommandBarControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Deeplex.Saverwalter.WinUI3.UserControls"
