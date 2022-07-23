@@ -36,26 +36,61 @@
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>
-            <mtuuc:DataGridTextColumn
-                Header="Name"
-                Binding="{Binding Name}"/>
-            <mtuuc:DataGridTextColumn
-                Header="Vorname"
-                Binding="{Binding Vorname}"/>
-            <mtuuc:DataGridTextColumn
-                Header="Anschrift"
-                Binding="{Binding Anschrift}"/>
-            <mtuuc:DataGridTextColumn
-                Header="E-Mail"
-                Binding="{Binding Email}"/>
-            <mtuuc:DataGridTextColumn
-                Header="Telefon"
-                Tag="Telefon"
-                Binding="{Binding Telefon}"/>
-            <mtuuc:DataGridTextColumn
-                Header="Mobil"
-                Tag="Mobil"
-                Binding="{Binding Mobil}"/>
+            <mtuuc:DataGridTemplateColumn Header="Name">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:KontaktListViewModelEntry">
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Margin="5,0,0,0" 
+                            Text="{x:Bind Name}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Vorname">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:KontaktListViewModelEntry">
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Margin="5,0,0,0" 
+                            Text="{x:Bind Vorname}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="E-Mail">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:KontaktListViewModelEntry">
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Margin="5,0,0,0" 
+                            Text="{x:Bind Email}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Telefon">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:KontaktListViewModelEntry">
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Margin="5,0,0,0"
+                            Text="{x:Bind Telefon}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Mobil">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:KontaktListViewModelEntry">
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Margin="5,0,0,0"
+                            Text="{x:Bind Mobil}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
         </mtuuc:DataGrid.Columns>
     </mtuuc:DataGrid>
 </UserControl>

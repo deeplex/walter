@@ -15,58 +15,11 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
     {
         public KontaktListViewModel ViewModel { get; set; }
 
-        private void UpdateFilter()
-        {
-            ViewModel.List.Value = ViewModel.AllRelevant;
-
-            if (Handwerker == false || Vermieter == false || Mieter == false)
-            {
-                ViewModel.List.Value = ViewModel.List.Value.Where(v =>
-                    v.Entity.isHandwerker && Handwerker ||
-                    v.Entity.isVermieter && Vermieter ||
-                    v.Entity.isMieter && Mieter ||
-                    !v.Entity.isMieter && !v.Entity.isVermieter && !v.Entity.isHandwerker)
-                    .ToImmutableList();
-            }
-
-            if (Kontakte != null)
-            {
-                ViewModel.List.Value = ViewModel.List.Value.Where(v =>
-                    Kontakte.Any(k => k.Entity.PersonId == v.Entity.PersonId))
-                    .ToImmutableList();
-            }
-
-            if (Filter != "")
-            {
-                ViewModel.List.Value = ViewModel.List.Value.Where(v =>
-                    applyFilter(Filter, v.Anschrift, v.Name, v.Vorname, v.Email, v.Telefon))
-                        .ToImmutableList();
-            }
-        }
-
         public KontaktListControl()
         {
             InitializeComponent();
             ViewModel = new KontaktListViewModel(App.WalterService);
-            RegisterPropertyChangedCallback(FilterProperty, (DepObj, Prop) => UpdateFilter());
-            RegisterPropertyChangedCallback(KontakteProperty, (DepObj, Prop) => UpdateFilter());
-            RegisterPropertyChangedCallback(VermieterProperty, (DepObj, Prop) => UpdateFilter());
-            RegisterPropertyChangedCallback(MieterProperty, (DepObj, Prop) => UpdateFilter());
-            RegisterPropertyChangedCallback(HandwerkerProperty, (DepObj, Prop) => UpdateFilter());
         }
-
-        public string Filter
-        {
-            get { return (string)GetValue(FilterProperty); }
-            set { SetValue(FilterProperty, value); }
-        }
-
-        public static readonly DependencyProperty FilterProperty
-            = DependencyProperty.Register(
-                  "Filter",
-                  typeof(string),
-                  typeof(KontaktListControl),
-                  new PropertyMetadata(""));
 
         public bool Vermieter
         {
@@ -79,31 +32,6 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                   typeof(bool),
                   typeof(KontaktListControl),
                   new PropertyMetadata(true));
-
-        public bool Mieter
-        {
-            get { return (bool)GetValue(MieterProperty); }
-            set { SetValue(MieterProperty, value); }
-        }
-        public static readonly DependencyProperty MieterProperty
-            = DependencyProperty.Register(
-                  "Mieter",
-                  typeof(bool),
-                  typeof(KontaktListControl),
-                  new PropertyMetadata(true));
-
-        public bool Handwerker
-        {
-            get { return (bool)GetValue(HandwerkerProperty); }
-            set { SetValue(HandwerkerProperty, value); }
-        }
-        public static readonly DependencyProperty HandwerkerProperty
-            = DependencyProperty.Register(
-                  "Handwerker",
-                  typeof(bool),
-                  typeof(KontaktListControl),
-                  new PropertyMetadata(true));
-
         public ImmutableList<KontaktListViewModelEntry> Kontakte
         {
             get { return (ImmutableList<KontaktListViewModelEntry>)GetValue(KontakteProperty); }
