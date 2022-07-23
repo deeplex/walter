@@ -35,6 +35,12 @@
         <uc:FileDrop.MainContent>
             <ScrollViewer>
                 <StackPanel>
+                    <Button Click="Betriebskostenabrechnung_Click" HorizontalAlignment="Right">
+                        <StackPanel Orientation="Horizontal">
+                            <SymbolIcon Symbol="PostUpdate" />
+                            <TextBlock Margin="10,0,0,0" Text="Betriebskostenrechnung"/>
+                        </StackPanel>
+                    </Button>
                     <mtuuc:WrapPanel Orientation="Horizontal">
                         <TextBlock Text="Laufzeit:" Margin="20,50,0,0" Style="{StaticResource Labels}"/>
                         <TextBlock
@@ -87,7 +93,7 @@
                         <uc:ComboControl
                             Margin="20,15,0,0"
                             MinWidth="200"
-                            SelectedItem="{x:Bind ViewModel.Ansprechpartner.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                            SelectedItem="{x:Bind ViewModel.Ansprechpartner, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             ItemsSource="{x:Bind ViewModel.AlleKontakte}"
                             PlaceholderText="Ansprechpartner..."/>
                         <CheckBox

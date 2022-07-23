@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<DateTimeOffset> Beginn;
         public SavableProperty<DateTimeOffset?> Ende;
         public SavableProperty<string> Notiz;
-        public SavableProperty<KontaktListViewModelEntry> Ansprechpartner;
+        public SavableProperty<KontaktListViewModelEntry> Ansprechpartner { get; }
 
         public KontaktListViewModelEntry Vermieter
             => Wohnung.Value?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?

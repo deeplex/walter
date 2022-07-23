@@ -38,6 +38,16 @@ namespace Deeplex.Saverwalter.ViewModels
         public int StartJahr => Versionen.Value.Last().Beginn.Value.Year;
         public int EndeJahr => Versionen.Value.First().Ende.Value?.Year ?? 9999;
 
+        public new KontaktListViewModelEntry Ansprechpartner
+        {
+            get => Versionen.Value.Last().Ansprechpartner.Value;
+            set
+            {
+                Versionen.Value.Last().Ansprechpartner.Value = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
         public VertragDetailViewModel(INotificationService ns, IWalterDbService db) : this(
             new List<Vertrag> { new Vertrag { Beginn = DateTime.UtcNow.Date, } }, ns, db)
         { }
@@ -64,7 +74,10 @@ namespace Deeplex.Saverwalter.ViewModels
             AlleKontakte = db.ctx.JuristischePersonen.ToList().Select(j => new KontaktListViewModelEntry(j))
                     .Concat(db.ctx.NatuerlichePersonen.Select(n => new KontaktListViewModelEntry(n)))
                     .ToList();
-            Ansprechpartner.Value = AlleKontakte.Find(w => w.Entity.PersonId == v.First().AnsprechpartnerId);
+            if (Versionen.Value.Last().Ansprechpartner.Value is KontaktListViewModelEntry partner)
+            {
+                Ansprechpartner = AlleKontakte.Find(e => e.Entity.PersonId == partner.Guid);
+            }
 
             Mieter.Value = db.ctx.MieterSet
                 .Where(m => m.VertragId == v.First().VertragId)
