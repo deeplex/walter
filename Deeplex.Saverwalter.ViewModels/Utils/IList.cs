@@ -1,5 +1,4 @@
 ﻿using Deeplex.Utils.ObjectModel;
-using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
