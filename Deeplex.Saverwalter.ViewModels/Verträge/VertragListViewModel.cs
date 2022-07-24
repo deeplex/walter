@@ -7,18 +7,16 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class VertragListViewModel : IFilterViewModel
+    public sealed class VertragListViewModel : ListViewModel<VertragListViewModelVertrag>, IListViewModel
     {
-        public ObservableProperty<ImmutableList<VertragListViewModelVertrag>> Vertraege = new();
-        public ObservableProperty<VertragListViewModelVertrag> SelectedVertrag = new();
-        public ObservableProperty<bool> OnlyActive = new();
+        public override string ToString() => "Verträge";
 
-        public ObservableProperty<string> Filter { get; set; } = new();
-        public ImmutableList<VertragListViewModelVertrag> AllRelevant { get; set; }
+        protected override ImmutableList<VertragListViewModelVertrag> updateList(string filter)
+            => List.Value.Where(v => applyFilter(filter, v.AnschriftMitWohnung, v.AuflistungMieter)).ToImmutableList();
 
         public VertragListViewModel(IWalterDbService db)
         {
-            AllRelevant = Vertraege.Value = db.ctx.Vertraege
+            AllRelevant = db.ctx.Vertraege
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse).ThenInclude(a => a.Anhaenge)
                 .Include(v => v.Wohnung).ThenInclude(w => w.Anhaenge)
                 .Include(v => v.Anhaenge)
@@ -27,7 +25,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Select(v => new VertragListViewModelVertrag(v, db))
                 .OrderBy(v => v.Beginn).Reverse()
                 .ToImmutableList();
-            Vertraege.Value = AllRelevant;
+            List.Value = AllRelevant;
         }
     }
 }

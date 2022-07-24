@@ -16,26 +16,26 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void UpdateFilter()
         {
-            ViewModel.Vertraege.Value = ViewModel.AllRelevant;
+            ViewModel.List.Value = ViewModel.AllRelevant;
             if (OnlyActive)
             {
-                ViewModel.Vertraege.Value = ViewModel.Vertraege.Value.Where(v =>
+                ViewModel.List.Value = ViewModel.List.Value.Where(v =>
                 !v.hasEnde || v.Ende > DateTime.Now).ToImmutableList();
             }
             if (PersonId != Guid.Empty)
             {
-                ViewModel.Vertraege.Value = ViewModel.Vertraege.Value.Where(v =>
+                ViewModel.List.Value = ViewModel.List.Value.Where(v =>
                     v.Wohnung.BesitzerId == PersonId ||
                     v.Mieter.Contains(PersonId))
                     .ToImmutableList();
             }
             if (WohnungId != 0)
             {
-                ViewModel.Vertraege.Value = ViewModel.Vertraege.Value.Where(v => v.Wohnung.WohnungId == WohnungId).ToImmutableList();
+                ViewModel.List.Value = ViewModel.List.Value.Where(v => v.Wohnung.WohnungId == WohnungId).ToImmutableList();
             }
             if (Filter != "")
             {
-                ViewModel.Vertraege.Value = ViewModel.Vertraege.Value.Where(v =>
+                ViewModel.List.Value = ViewModel.List.Value.Where(v =>
                     applyFilter(Filter, v.Wohnung.Bezeichnung, v.AuflistungMieter, v.Anschrift))
                     .ToImmutableList();
             }
@@ -60,9 +60,9 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.SelectedVertrag.Value != null)
+            if (ViewModel.Selected != null)
             {
-                App.Window.Navigate(typeof(VertragDetailViewPage), ViewModel.SelectedVertrag.Value.VertragId);
+                App.Window.Navigate(typeof(VertragDetailViewPage), ViewModel.Selected.VertragId);
             }
         }
 
@@ -120,7 +120,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)
         {
-            ViewModel.Vertraege.Value = (sender as DataGrid).Sort(e.Column, ViewModel.Vertraege.Value);
+            ViewModel.List.Value = (sender as DataGrid).Sort(e.Column, ViewModel.List.Value);
         }
     }
 }
