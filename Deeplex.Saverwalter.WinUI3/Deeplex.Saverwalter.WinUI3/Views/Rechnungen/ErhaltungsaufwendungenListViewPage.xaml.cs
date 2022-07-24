@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
         {
             InitializeComponent();
 
-            App.Window.CommandBar.MainContent = new ErhaltungsaufwendungenListCommandBarControl { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new ListCommandBarControl { ViewModel = ViewModel };
         }
     }
 }
