@@ -7,7 +7,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
 
     public sealed partial class ErhaltungsaufwendungenListViewPage : Page
     {
-        public ErhaltungsaufwendungenListViewModel ViewModel { get; } = new ErhaltungsaufwendungenListViewModel(App.WalterService);
+        public ErhaltungsaufwendungenListViewModel ViewModel { get; } = new ErhaltungsaufwendungenListViewModel(App.WalterService, App.NotificationService);
 
         public ErhaltungsaufwendungenListViewPage()
         {

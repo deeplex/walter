@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using System.Linq;
@@ -14,8 +15,10 @@ namespace Deeplex.Saverwalter.ViewModels
         protected override ImmutableList<BetriebskostenRechnungenListEntry> updateList(string filter)
             => List.Value.Where(v => applyFilter(filter, v.Typ.ToDescriptionString(), v.AdressenBezeichnung, v.BetreffendesJahr.ToString())).ToImmutableList();
 
-        public BetriebskostenRechnungenListViewModel(IWalterDbService db)
+        public BetriebskostenRechnungenListViewModel(IWalterDbService db, INotificationService ns)
         {
+            Add = new RelayCommand(_ => ns.Navigation<Betriebskostenrechnung>(null), _ => true);
+
             AllRelevant = db.ctx.Betriebskostenrechnungen
                 .Include(b => b.Anhaenge)
                 .Include(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Anhaenge)

@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public ZaehlerListControl()
         {
             InitializeComponent();
-            ViewModel = new ZaehlerListViewModel(App.WalterService);
+            ViewModel = new ZaehlerListViewModel(App.WalterService, App.NotificationService);
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)

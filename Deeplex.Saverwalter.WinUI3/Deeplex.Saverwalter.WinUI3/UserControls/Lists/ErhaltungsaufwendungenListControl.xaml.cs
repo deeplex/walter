@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
 using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
+using Deeplex.Saverwalter.WinUI3.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public ErhaltungsaufwendungenListControl()
         {
             InitializeComponent();
-            ViewModel = new ErhaltungsaufwendungenListViewModel(App.WalterService);
+            ViewModel = new ErhaltungsaufwendungenListViewModel(App.WalterService, App.NotificationService);
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)

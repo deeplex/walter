@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public KontaktListControl()
         {
             InitializeComponent();
-            ViewModel = new KontaktListViewModel(App.WalterService);
+            ViewModel = new KontaktListViewModel(App.WalterService, App.NotificationService);
         }
 
         public bool Vermieter

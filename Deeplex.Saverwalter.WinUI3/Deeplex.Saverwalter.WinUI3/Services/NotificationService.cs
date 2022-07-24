@@ -1,4 +1,6 @@
-﻿using Deeplex.Saverwalter.Services;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
+using Deeplex.Saverwalter.WinUI3.Views;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -8,6 +10,23 @@ namespace Deeplex.Saverwalter.WinUI3.Services
 {
     public sealed class NotificationService : BindableBase, INotificationService
     {
+        public void Navigation<T>(T Element)
+        {
+            App.Window.Navigate(getDetailViewPage(typeof(T)), Element);
+        }
+
+        private Type getDetailViewPage(Type type)
+        {
+            return
+                type == typeof(Wohnung) ? typeof(WohnungDetailViewPage) :
+                type == typeof(NatuerlichePerson) ? typeof(NatuerlichePersonDetailViewPage) :
+                type == typeof(Vertrag) ? typeof(VertragDetailViewPage) :
+                type == typeof(Zaehler) ? typeof(ZaehlerDetailViewPage) :
+                type == typeof(Betriebskostenrechnung) ? typeof(BetriebskostenrechnungenDetailViewPage) :
+                type == typeof(Erhaltungsaufwendung) ? typeof(ErhaltungsaufwendungenDetailViewPage) :
+                null;
+        }
+
         public bool outOfSync { get; set; }
         public void ShowAlert(string text) => ShowAlert(text, text.Length > 20 ? 0 : 3000);
         public void ShowAlert(string text, int ms)

@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 str != null && str.ToLower().Contains(split.ToLower())));
 
 
-        public RelayCommand Add { get; }
+        public RelayCommand Add { get; protected set; }
 
         private string mFilter;
         public string Filter

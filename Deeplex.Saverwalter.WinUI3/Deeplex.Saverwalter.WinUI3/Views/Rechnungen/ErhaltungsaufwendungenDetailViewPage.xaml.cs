@@ -5,7 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 
-namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
+namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class ErhaltungsaufwendungenDetailViewPage : Page
     {

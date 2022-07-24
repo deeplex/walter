@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public VertragListControl()
         {
             InitializeComponent();
-            ViewModel = new VertragListViewModel(App.WalterService);
+            ViewModel = new VertragListViewModel(App.WalterService, App.NotificationService);
 
             RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, Prop) => UpdateFilter());
             RegisterPropertyChangedCallback(PersonIdProperty, (DepObj, Prop) => UpdateFilter());

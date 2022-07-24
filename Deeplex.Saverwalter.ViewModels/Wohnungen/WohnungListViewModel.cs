@@ -1,4 +1,6 @@
-﻿using Deeplex.Saverwalter.Services;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using System.Linq;
@@ -12,8 +14,10 @@ namespace Deeplex.Saverwalter.ViewModels
         protected override ImmutableList<WohnungListViewModelEntry> updateList(string filter)
             => List.Value.Where(v => applyFilter(filter, v.Bezeichnung, v.Anschrift)).ToImmutableList();
 
-        public WohnungListViewModel(IWalterDbService db)
+        public WohnungListViewModel(IWalterDbService db, INotificationService ns)
         {
+            Add = new RelayCommand(_ => ns.Navigation<Wohnung>(null), _ => true);
+
             AllRelevant = db.ctx.Wohnungen
                 .Include(w => w.Anhaenge)
                 .Include(w => w.Adresse)

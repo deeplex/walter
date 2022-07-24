@@ -1,4 +1,6 @@
-﻿using Deeplex.Saverwalter.Services;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using System.Linq;
@@ -12,8 +14,10 @@ namespace Deeplex.Saverwalter.ViewModels
         protected override ImmutableList<ErhaltungsaufwendungenListViewModelEntry> updateList(string filter)
             => List.Value.Where(v => applyFilter(filter, v.Wohnung.Anschrift, v.Bezeichnung)).ToImmutableList();
 
-        public ErhaltungsaufwendungenListViewModel(IWalterDbService db)
+        public ErhaltungsaufwendungenListViewModel(IWalterDbService db, INotificationService ns)
         {
+            Add = new RelayCommand(_ => ns.Navigation<Erhaltungsaufwendung>(null), _ => true);
+
             AllRelevant = db.ctx.Erhaltungsaufwendungen
                 .Include(e => e.Anhaenge)
                 .Include(e => e.Wohnung).ThenInclude(w => w.Anhaenge)

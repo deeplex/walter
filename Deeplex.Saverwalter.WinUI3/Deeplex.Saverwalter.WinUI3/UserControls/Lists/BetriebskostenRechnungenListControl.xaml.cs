@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public BetriebskostenRechnungenListControl()
         {
             InitializeComponent();
-            ViewModel = new BetriebskostenRechnungenListViewModel(App.WalterService);
+            ViewModel = new BetriebskostenRechnungenListViewModel(App.WalterService, App.NotificationService);
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)

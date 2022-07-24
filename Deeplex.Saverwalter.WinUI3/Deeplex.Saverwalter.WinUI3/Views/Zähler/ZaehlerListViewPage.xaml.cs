@@ -6,7 +6,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class ZaehlerListViewPage : Page
     {
-        public ZaehlerListViewModel ViewModel { get; } = new ZaehlerListViewModel(App.WalterService);
+        public ZaehlerListViewModel ViewModel { get; } = new ZaehlerListViewModel(App.WalterService, App.NotificationService);
 
         public ZaehlerListViewPage()
         {
