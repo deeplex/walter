@@ -7,6 +7,7 @@
     xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
     mc:Ignorable="d"
     d:DesignHeight="300"
+    xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
     xmlns:conv="using:Deeplex.Saverwalter.WinUI3.Utils"
     d:DesignWidth="400">
 
@@ -21,24 +22,64 @@
         Sorting="DataGrid_Sorting"
         SelectionChanged="DataGrid_SelectionChanged"
         DoubleTapped="Details_Click"
-        ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}"
-        SelectedItem="{x:Bind ViewModel.SelectedZaehler, Mode=TwoWay}">
+        ItemsSource="{x:Bind ViewModel.List.Value, Mode=OneWay}"
+        SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}">
         <mtuuc:DataGrid.Columns>
-            <mtuuc:DataGridTextColumn
-                Header="Kennnummer"
-                Binding="{Binding Kennnummer}"/>
-            <mtuuc:DataGridTextColumn
-                Header="Typ"
-                Binding="{Binding Typ, Converter={StaticResource ToDescriptionStringConverterKey}}"/>
-            <mtuuc:DataGridTextColumn
-                Header="Wohnung"
-                Binding="{Binding Wohnung}"/>
-            <mtuuc:DataGridTextColumn
-                Header="Letztes Ablesedatum"
-                Binding="{Binding Datum, Converter={StaticResource DateStringConverterKey}}"/>
-            <mtuuc:DataGridTextColumn
-                Header="Stand"
-                Binding="{Binding LastStandString}"/>
+            <mtuuc:DataGridTemplateColumn Header="Zählernummer">
+                <mtuuc:DataGridTemplateColumn.CellEditingTemplate>
+                    <DataTemplate x:DataType="vm:ZaehlerListViewModelEntry">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left"
+                            Margin="5,0,0,0"
+                            Text="{x:Bind Kennnummer}" />
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellEditingTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Typ">
+                <mtuuc:DataGridTemplateColumn.CellEditingTemplate>
+                    <DataTemplate x:DataType="vm:ZaehlerListViewModelEntry">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left"
+                            Margin="5,0,0,0"
+                            Text="{x:Bind TypString}" />
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellEditingTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Wohnung">
+                <mtuuc:DataGridTemplateColumn.CellEditingTemplate>
+                    <DataTemplate x:DataType="vm:ZaehlerListViewModelEntry">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left"
+                            Margin="5,0,0,0"
+                            Text="{x:Bind Wohnung}" />
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellEditingTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Letztes Ablesedatum">
+                <mtuuc:DataGridTemplateColumn.CellEditingTemplate>
+                    <DataTemplate x:DataType="vm:ZaehlerListViewModelEntry">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left"
+                            Margin="5,0,0,0"
+                            Text="{x:Bind Datum, Converter={StaticResource DateStringConverterKey}}" />
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellEditingTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Letzter Stand">
+                <mtuuc:DataGridTemplateColumn.CellEditingTemplate>
+                    <DataTemplate x:DataType="vm:ZaehlerListViewModelEntry">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left"
+                            Margin="5,0,0,0"
+                            Text="{x:Bind LastStandString}" />
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellEditingTemplate>
+            </mtuuc:DataGridTemplateColumn>
         </mtuuc:DataGrid.Columns>
     </mtuuc:DataGrid>
 </UserControl>

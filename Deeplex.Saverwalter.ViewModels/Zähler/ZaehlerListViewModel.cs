@@ -6,22 +6,12 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class ZaehlerListViewModel : BindableBase, IFilterViewModel
+    public class ZaehlerListViewModel : ListViewModel<ZaehlerListViewModelEntry>, IListViewModel
     {
-        public ObservableProperty<ImmutableList<ZaehlerListViewModelEntry>> Liste = new();
-        private ZaehlerListViewModelEntry mSelectedZaehler;
-        public ZaehlerListViewModelEntry SelectedZaehler
-        {
-            get => mSelectedZaehler;
-            set
-            {
-                mSelectedZaehler = value;
-                RaisePropertyChangedAuto();
-            }
-        }
+        public override string ToString() => "Zähler";
 
-        public ObservableProperty<string> Filter { get; set; } = new();
-        public ImmutableList<ZaehlerListViewModelEntry> AllRelevant { get; }
+        protected override ImmutableList<ZaehlerListViewModelEntry> updateList(string filter)
+            => List.Value.Where(v => applyFilter(filter, v.Kennnummer, v.TypString, v.Wohnung)).ToImmutableList();
 
         public ZaehlerListViewModel(IWalterDbService db)
         {
@@ -32,7 +22,8 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Include(z => z.Staende).ThenInclude(s => s.Anhaenge)
                 .Select(z => new ZaehlerListViewModelEntry(z))
                 .ToImmutableList();
-            Liste.Value = AllRelevant;
+
+            List.Value = AllRelevant;
         }
     }
 }
