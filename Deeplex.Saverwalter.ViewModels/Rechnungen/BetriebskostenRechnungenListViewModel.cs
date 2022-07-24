@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.Services;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
@@ -7,24 +8,12 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class BetriebskostenRechnungenListViewModel : BindableBase, IFilterViewModel
+    public sealed class BetriebskostenRechnungenListViewModel : ListViewModel<BetriebskostenRechnungenListEntry>, IListViewModel
     {
-        public ObservableProperty<ImmutableList<BetriebskostenRechnungenListEntry>> Liste = new();
+        public override string ToString() => "Betriebskostenrechnungen";
 
-        public ObservableProperty<string> Filter { get; set; } = new();
-        public ObservableProperty<int> JahrFilter { get; set; } = new();
-        public ImmutableList<BetriebskostenRechnungenListEntry> AllRelevant { get; set; }
-
-        private BetriebskostenRechnungenListEntry mSelectedRechnung;
-        public BetriebskostenRechnungenListEntry SelectedRechnung
-        {
-            get => mSelectedRechnung;
-            set
-            {
-                mSelectedRechnung = value;
-                RaisePropertyChangedAuto();
-            }
-        }
+        protected override ImmutableList<BetriebskostenRechnungenListEntry> updateList(string filter)
+            => List.Value.Where(v => applyFilter(filter, v.Typ.ToDescriptionString(), v.AdressenBezeichnung, v.BetreffendesJahr.ToString())).ToImmutableList();
 
         public BetriebskostenRechnungenListViewModel(IWalterDbService db)
         {
@@ -35,7 +24,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Include(b => b.Zaehler).ThenInclude(b => b.Anhaenge)
                 .Select(w => new BetriebskostenRechnungenListEntry(w))
                 .ToImmutableList();
-            Liste.Value = AllRelevant;
+            List.Value = AllRelevant;
         }
     }
 }

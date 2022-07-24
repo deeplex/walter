@@ -13,7 +13,6 @@
     <NoWarn>1701;1702;CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="UserControls\CommandBar\BetriebskostenrechnungenListCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\BetriebskostenrechnungPrintCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\CommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\DetailCommandBarControl.xaml" />
@@ -191,12 +190,6 @@
 
   <ItemGroup>
     <Page Update="UserControls\CommandBar\ErhaltungsaufwendungenListCommandBarControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="UserControls\CommandBar\BetriebskostenRechnungenListCommandBarControl.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
