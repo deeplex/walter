@@ -6,13 +6,12 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class WohnungListViewModel : IFilterViewModel
+    public sealed class WohnungListViewModel : ListViewModel<WohnungListViewModelEntry>, IListViewModel
     {
-        public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Liste = new();
-        public ObservableProperty<WohnungListViewModelEntry> SelectedWohnung = new();
+        public override string ToString() => "Wohnungen";
 
-        public ObservableProperty<string> Filter { get; set; } = new();
-        public ImmutableList<WohnungListViewModelEntry> AllRelevant { get; }
+        protected override ImmutableList<WohnungListViewModelEntry> updateList(string filter)
+            => List.Value.Where(v => applyFilter(filter, v.Bezeichnung, v.Anschrift)).ToImmutableList();
 
         public WohnungListViewModel(IWalterDbService db)
         {
@@ -23,7 +22,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Select(w => new WohnungListViewModelEntry(w, db))
                 .ToImmutableList();
 
-            Liste.Value = AllRelevant;
+            List.Value = AllRelevant;
         }
     }
 }
