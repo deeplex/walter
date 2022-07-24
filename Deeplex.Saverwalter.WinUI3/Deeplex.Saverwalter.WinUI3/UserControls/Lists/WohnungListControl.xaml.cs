@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            App.Window.Navigate(typeof(WohnungDetailViewPage), ViewModel.Selected.Entity);
+            ViewModel.Add.Execute(ViewModel.Selected.Entity);
         }
 
         public WohnungListViewModel ViewModel

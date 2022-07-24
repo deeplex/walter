@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public BetriebskostenRechnungenListViewModel(IWalterDbService db, INotificationService ns)
         {
-            Add = new RelayCommand(_ => ns.Navigation<Betriebskostenrechnung>(null), _ => true);
+            Add = new RelayCommand(el => ns.Navigation((Betriebskostenrechnung)el), _ => true);
 
             AllRelevant = db.ctx.Betriebskostenrechnungen
                 .Include(b => b.Anhaenge)

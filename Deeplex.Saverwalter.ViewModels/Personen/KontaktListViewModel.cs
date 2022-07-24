@@ -16,7 +16,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public KontaktListViewModel(IWalterDbService db, INotificationService ns)
         {
-            Add = new RelayCommand(_ => ns.Navigation<NatuerlichePerson>(null), _ => true);
+            Add = new RelayCommand(el => ns.Navigation((NatuerlichePerson)el), _ => true);
 
             AllRelevant = db.ctx.NatuerlichePersonen
                 .Include(k => k.Anhaenge)

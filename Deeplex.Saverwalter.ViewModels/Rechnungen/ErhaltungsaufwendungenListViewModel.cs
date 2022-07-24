@@ -16,7 +16,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public ErhaltungsaufwendungenListViewModel(IWalterDbService db, INotificationService ns)
         {
-            Add = new RelayCommand(_ => ns.Navigation<Erhaltungsaufwendung>(null), _ => true);
+            Add = new RelayCommand(el => ns.Navigation((Erhaltungsaufwendung)el), _ => true);
 
             AllRelevant = db.ctx.Erhaltungsaufwendungen
                 .Include(e => e.Anhaenge)

@@ -16,7 +16,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public WohnungListViewModel(IWalterDbService db, INotificationService ns)
         {
-            Add = new RelayCommand(_ => ns.Navigation<Wohnung>(null), _ => true);
+            Add = new RelayCommand(el => ns.Navigation((Wohnung)el), _ => true);
 
             AllRelevant = db.ctx.Wohnungen
                 .Include(w => w.Anhaenge)

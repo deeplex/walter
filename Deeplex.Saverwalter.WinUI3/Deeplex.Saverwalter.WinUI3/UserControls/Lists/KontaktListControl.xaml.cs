@@ -75,16 +75,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            var sk = ViewModel.Selected;
-            if (sk != null)
-            {
-                var target =
-                    sk.Type == typeof(NatuerlichePerson) ? typeof(NatuerlichePersonDetailViewPage) :
-                    sk.Type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailViewPage) :
-                    null;
-
-                App.Window.Navigate(target, App.WalterService.ctx.FindPerson(sk.Entity.PersonId));
-            }
+            ViewModel.Add.Execute(ViewModel.Selected.Entity);
         }
 
         private void DataGrid_RightTapped(object sender, Microsoft.UI.Xaml.Input.RightTappedRoutedEventArgs e)

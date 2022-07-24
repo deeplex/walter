@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.ViewModels;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -21,6 +22,10 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             if (e.Parameter is Guid vertragId)
             {
                 ViewModel = new VertragDetailViewModel(vertragId, App.NotificationService, App.WalterService);
+            }
+            else if (e.Parameter is Vertrag v)
+            {
+                ViewModel = new VertragDetailViewModel(v.VertragId, App.NotificationService, App.WalterService);
             }
             else if (e.Parameter is VertragDetailViewModel vm)
             {

@@ -26,25 +26,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.Selected != null)
-            {
-                if (WohnungId != 0)
-                {
-                    if (ViewModel.Selected.Tmpl != 0)
-                    {
-                        var Wohnungen = App.WalterService.ctx.Betriebskostenrechnungen.Find(ViewModel.Selected.Tmpl).Wohnungen.ToList();
-                        App.Window.Navigate(typeof(BetriebskostenrechnungenDetailViewPage), new Tuple<Betriebskostenrechnung, int, List<Wohnung>>(ViewModel.Selected.Entity, WohnungId, Wohnungen));
-                    }
-                    else
-                    {
-                        App.Window.Navigate(typeof(BetriebskostenrechnungenDetailViewPage), new Tuple<Betriebskostenrechnung, int>(ViewModel.Selected.Entity, WohnungId));
-                    }
-                }
-                else
-                {
-                    App.Window.Navigate(typeof(BetriebskostenrechnungenDetailViewPage), ViewModel.Selected.Entity);
-                }
-            }
+            ViewModel.Add.Execute(ViewModel.Selected.Entity);
         }
 
         public int WohnungId

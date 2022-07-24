@@ -16,7 +16,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public ZaehlerListViewModel(IWalterDbService db, INotificationService ns)
         {
-            Add = new RelayCommand(_ => ns.Navigation<Zaehler>(null), _ => true);
+            Add = new RelayCommand(el => ns.Navigation((Zaehler)el), _ => true);
 
             AllRelevant = db.ctx.ZaehlerSet
                 .Include(z => z.Anhaenge)

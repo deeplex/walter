@@ -14,42 +14,10 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
     {
         public VertragListViewModel ViewModel { get; set; }
 
-        private void UpdateFilter()
-        {
-            ViewModel.List.Value = ViewModel.AllRelevant;
-            if (OnlyActive)
-            {
-                ViewModel.List.Value = ViewModel.List.Value.Where(v =>
-                !v.hasEnde || v.Ende > DateTime.Now).ToImmutableList();
-            }
-            if (PersonId != Guid.Empty)
-            {
-                ViewModel.List.Value = ViewModel.List.Value.Where(v =>
-                    v.Wohnung.BesitzerId == PersonId ||
-                    v.Mieter.Contains(PersonId))
-                    .ToImmutableList();
-            }
-            if (WohnungId != 0)
-            {
-                ViewModel.List.Value = ViewModel.List.Value.Where(v => v.Wohnung.WohnungId == WohnungId).ToImmutableList();
-            }
-            if (Filter != "")
-            {
-                ViewModel.List.Value = ViewModel.List.Value.Where(v =>
-                    applyFilter(Filter, v.Wohnung.Bezeichnung, v.AuflistungMieter, v.Anschrift))
-                    .ToImmutableList();
-            }
-        }
-
         public VertragListControl()
         {
             InitializeComponent();
             ViewModel = new VertragListViewModel(App.WalterService, App.NotificationService);
-
-            RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, Prop) => UpdateFilter());
-            RegisterPropertyChangedCallback(PersonIdProperty, (DepObj, Prop) => UpdateFilter());
-            RegisterPropertyChangedCallback(FilterProperty, (DepObj, Prop) => UpdateFilter());
-            RegisterPropertyChangedCallback(OnlyActiveProperty, (DepObj, Prop) => UpdateFilter());
         }
 
         public Guid PersonId
@@ -60,10 +28,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.Selected != null)
-            {
-                App.Window.Navigate(typeof(VertragDetailViewPage), ViewModel.Selected.VertragId);
-            }
+            ViewModel.Add.Execute(ViewModel.Selected.Entity);
         }
 
         public static readonly DependencyProperty PersonIdProperty
