@@ -6,11 +6,11 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class BetriebskostenrechnungPrintViewModel
+    public sealed class BetriebskostenrechnungPrintViewModel : IPrint
     {
         public bool HasNotes => Betriebskostenabrechnung.notes.Count() > 0;
 
-        public ObservableProperty<int> Jahr = new();
+        public ObservableProperty<int> Jahr { get; } = new();
         public Betriebskostenabrechnung Betriebskostenabrechnung { get; }
         public IPerson FirstMieter => Betriebskostenabrechnung.Mieter.First();
         public DateTime Today => DateTime.Now;
@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public bool nVb => Betriebskostenabrechnung.nVb();
         public string Anmerkung => Betriebskostenabrechnung.Anmerkung();
 
-        public AsyncRelayCommand Print;
+        public AsyncRelayCommand Print { get; }
         public BetriebskostenrechnungPrintViewModel(Vertrag v, IWalterDbService db, IFileService fs)
         {
             Entity = v;

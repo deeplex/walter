@@ -13,11 +13,10 @@
     <NoWarn>1701;1702;CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="UserControls\CommandBar\BetriebskostenrechnungPrintCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\CommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\DetailCommandBarControl.xaml" />
-    <None Remove="UserControls\CommandBar\ErhaltungsaufwendungenPrintCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ListCommandBarControl.xaml" />
+    <None Remove="UserControls\CommandBar\PrintCommandBarControl.xaml" />
     <None Remove="UserControls\Utils\ErhaltungsaufwendungWohnungenControl.xaml" />
     <None Remove="Views\Rechnungen\BetriebskostenrechnungPrintViewPage.xaml" />
     <None Remove="Views\Rechnungen\ErhaltungsaufwendungenPrintViewPage.xaml" />
@@ -165,14 +164,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="UserControls\CommandBar\ListCommandBarControl.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="UserControls\CommandBar\BetriebskostenrechnungPrintCommandBarControl.xaml">
+    <Page Update="UserControls\CommandBar\PrintCommandBarControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UserControls\CommandBar\ErhaltungsaufwendungenPrintCommandBarControl.xaml">
+    <Page Update="UserControls\CommandBar\ListCommandBarControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="UserControls\CommandBar\DetailCommandBarControl.xaml">

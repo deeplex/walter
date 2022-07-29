@@ -8,9 +8,9 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ErhaltungsaufwendungenPrintViewModel
+    public sealed class ErhaltungsaufwendungenPrintViewModel : IPrint
     {
-        public ObservableProperty<int> Jahr = new();
+        public ObservableProperty<int> Jahr { get; } = new();
         public ImmutableList<ErhaltungsaufwendungenPrintEntry> Wohnungen { get; }
         public ImmutableList<ErhaltungsaufwendungenPrintViewModel> Zusatz;
         public string Titel { get; }
@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public IWalterDbService Db { get; }
 
-        public AsyncRelayCommand Print;
+        public AsyncRelayCommand Print { get; }
         private ErhaltungsaufwendungenPrintViewModel(IWalterDbService db, IFileService fs)
         {
             Db = db;
