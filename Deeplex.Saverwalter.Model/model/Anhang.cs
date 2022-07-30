@@ -25,6 +25,7 @@ namespace Deeplex.Saverwalter.Model
         public List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
         public List<Zaehler> Zaehler { get; set; } = new List<Zaehler>();
         public List<Zaehlerstand> Zaehlerstaende { get; set; } = new List<Zaehlerstand>();
+        public List<Umlage> Umlagen { get; set; } = new List<Umlage>();
 
         public Anhang()
         {
