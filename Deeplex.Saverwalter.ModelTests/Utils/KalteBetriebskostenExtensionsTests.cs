@@ -1,5 +1,4 @@
-﻿using FakeItEasy;
-using FluentAssertions;
+﻿using FluentAssertions;
 using System;
 using Xunit;
 
@@ -34,7 +33,7 @@ namespace Deeplex.Saverwalter.Model.Tests
         [Fact]
         public void ToDescriptionStringTest()
         {
-            for (int i = 0; i <= 32; i+=2)
+            for (int i = 0; i <= 32; i += 2)
             {
                 ((Betriebskostentyp)i).ToDescriptionString().Should().NotBeNull();
             }

@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
                 ViewModel = new ErhaltungsaufwendungenPrintViewModel(p, App.WalterService, App.FileService);
             }
 
-            App.Window.CommandBar.MainContent = new ErhaltungsaufwendungenPrintCommandBarControl { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new PrintCommandBarControl { ViewModel = ViewModel };
 
             base.OnNavigatedTo(e);
         }

@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.Model
             };
             // TODO check for length == 14
             return counts.Sum();
-            
+
         }
 
         public static Type getType(this IAnhang a)

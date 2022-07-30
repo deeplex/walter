@@ -11,6 +11,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
     public sealed partial class JuristischePersonenDetailViewPage : Page
     {
         public JuristischePersonViewModel ViewModel { get; set; }
+        public VertragListViewModel VertragListViewModel { get; set; }
+        public KontaktListViewModel MitgliederListViewModel { get; set; }
 
         public JuristischePersonenDetailViewPage()
         {
@@ -21,26 +23,20 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is JuristischePerson jp)
             {
-                ViewModel = new JuristischePersonViewModel(jp, App.NotificationService, App.WalterService);
+                ViewModel = new(jp, App.NotificationService, App.WalterService);
+                VertragListViewModel = new(App.WalterService, App.NotificationService, jp);
+                MitgliederListViewModel = new(App.WalterService, App.NotificationService, jp);
             }
             else if (e.Parameter is null)
             {
                 ViewModel = new JuristischePersonViewModel(App.NotificationService, App.WalterService);
             }
 
-            App.Window.CommandBar.MainContent = new SingleItemCommandBarControl { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel };
             // TODO
             //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.Impl, App.ViewModel));
 
             base.OnNavigatedTo(e);
-        }
-
-        private void Erhaltungsaufwendung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-            App.Window.AppFrame.Navigate(
-                typeof(ErhaltungsaufwendungenPrintViewPage),
-                ViewModel.Entity,
-                new DrillInNavigationTransitionInfo());
         }
     }
 }

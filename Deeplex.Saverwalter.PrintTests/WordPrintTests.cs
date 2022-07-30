@@ -53,7 +53,7 @@ namespace Deeplex.Saverwalter.Print.Tests
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact (Skip = "Check for properties")]
+        [Fact(Skip = "Check for properties")]
         public void FontTest()
         {
             var stub = WordPrint.Font();

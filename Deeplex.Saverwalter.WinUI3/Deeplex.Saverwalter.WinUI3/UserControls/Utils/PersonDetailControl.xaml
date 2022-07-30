@@ -57,10 +57,36 @@
                 Header="Notiz"/>
         </mtuuc:WrapPanel>
 
-        <uc:ExpanderControl Header="Verträge" Click="{x:Bind AddVertrag_Click}">
+        <uc:ExpanderControl Header="Verträge">
             <uc:ExpanderControl.MainContent>
-                <uc:VertragListControl PersonId="{x:Bind ViewModel.PersonId}"/>
+                <uc:VertragListControl ViewModel="{x:Bind VertragListViewModel.Value, Mode=OneWay}"/>
             </uc:ExpanderControl.MainContent>
         </uc:ExpanderControl>
+
+        <uc:ExpanderControl Header="Wohnungen">
+            <uc:ExpanderControl.Bonus>
+                <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                    <Button
+                        Visibility="{x:Bind ViewModel.isVermieter.Value}"
+                        Click="Erhaltungsaufwendung_Click"
+                        Background="Transparent">
+                        <StackPanel Orientation="Horizontal">
+                            <SymbolIcon Symbol="PostUpdate" />
+                            <TextBlock Margin="10,0,0,0" Text="Erhaltungsaufwendungen"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </uc:ExpanderControl.Bonus>
+            <uc:ExpanderControl.MainContent>
+                <uc:WohnungListControl ViewModel="{x:Bind WohnungListViewModel.Value, Mode=OneWay}" />
+            </uc:ExpanderControl.MainContent>
+        </uc:ExpanderControl>
+
+        <uc:ExpanderControl Header="Juristische Personen">
+            <uc:ExpanderControl.MainContent>
+                <uc:KontaktListControl ViewModel="{x:Bind JuristischePersonenViewModel.Value}"/>
+            </uc:ExpanderControl.MainContent>
+        </uc:ExpanderControl>
+
     </StackPanel>
 </UserControl>

@@ -5,7 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 
-namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
+namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class ErhaltungsaufwendungenDetailViewPage : Page
     {
@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
                 ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.NotificationService, App.WalterService);
             }
 
-            App.Window.CommandBar.MainContent = new SingleItemCommandBarControl { ViewModel = ViewModel }; // TODO123
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel }; // TODO123
 
             base.OnNavigatedTo(e);
         }

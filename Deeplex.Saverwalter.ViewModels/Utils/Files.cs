@@ -1,7 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Print;
 using Deeplex.Saverwalter.Services;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
 using System.Collections.Generic;

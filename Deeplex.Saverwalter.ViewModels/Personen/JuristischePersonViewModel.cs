@@ -3,12 +3,11 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class JuristischePersonViewModel : PersonViewModel, ISingleItem
+    public sealed class JuristischePersonViewModel : PersonViewModel, IDetail
     {
         public new JuristischePerson Entity => (JuristischePerson)base.Entity;
         public int Id;
@@ -33,7 +32,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public void UpdateListen()
         {
             Mitglieder.Value = Entity.Mitglieder
-                .Select(w => new KontaktListViewModelEntry(w.PersonId, Db))
+                .Select(w => new KontaktListViewModelEntry(Db, w.PersonId))
                 .ToImmutableList();
 
             AddMitglieder.Value = Db.ctx.NatuerlichePersonen

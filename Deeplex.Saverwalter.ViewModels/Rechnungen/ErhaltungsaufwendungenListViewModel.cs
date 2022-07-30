@@ -1,39 +1,55 @@
-﻿using Deeplex.Saverwalter.Services;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ErhaltungsaufwendungenListViewModel : BindableBase, IFilterViewModel
+    public sealed class ErhaltungsaufwendungenListViewModel : ListViewModel<ErhaltungsaufwendungenListViewModelEntry>, IListViewModel
     {
-        public ObservableProperty<ImmutableList<ErhaltungsaufwendungenListViewModelEntry>> Liste = new();
+        public override string ToString() => "Erhaltungsaufwendungen";
 
-        public ObservableProperty<string> Filter { get; set; } = new();
-        public ImmutableList<ErhaltungsaufwendungenListViewModelEntry> AllRelevant { get; set; }
+        protected override ImmutableList<ErhaltungsaufwendungenListViewModelEntry> updateList(string filter)
+            => List.Value.Where(v => applyFilter(filter, v.Wohnung.Anschrift, v.Bezeichnung)).ToImmutableList();
 
-        private ErhaltungsaufwendungenListViewModelEntry mSelectedAufwendung;
-        public ErhaltungsaufwendungenListViewModelEntry SelectedAufwendung
+        public ErhaltungsaufwendungenListViewModel(IWalterDbService db, INotificationService ns): this(ns)
         {
-            get => mSelectedAufwendung;
-            set
-            {
-                mSelectedAufwendung = value;
-                RaisePropertyChangedAuto();
-            }
+            AllRelevant = transform(db, include(db));
+            List.Value = AllRelevant;
         }
 
-        public ErhaltungsaufwendungenListViewModel(IWalterDbService db)
+        public ErhaltungsaufwendungenListViewModel(IWalterDbService db, INotificationService ns, Vertrag v) : this(db, ns, v.Wohnung) { }
+
+        public ErhaltungsaufwendungenListViewModel(IWalterDbService db, INotificationService ns, Wohnung w) : this(ns)
         {
-            AllRelevant = db.ctx.Erhaltungsaufwendungen
+            AllRelevant = transform(db,
+                include(db)
+                    .Where(e => w.Erhaltungsaufwendungen
+                    .Exists(i => i.ErhaltungsaufwendungId == e.ErhaltungsaufwendungId))
+                    .ToList());
+            List.Value = AllRelevant;
+        }
+
+        private List<Erhaltungsaufwendung> include(IWalterDbService db)
+        {
+            return db.ctx.Erhaltungsaufwendungen
                 .Include(e => e.Anhaenge)
                 .Include(e => e.Wohnung).ThenInclude(w => w.Anhaenge)
                 .Include(e => e.Wohnung).ThenInclude(w => w.Adresse).ThenInclude(w => w.Anhaenge)
-                .Select(w => new ErhaltungsaufwendungenListViewModelEntry(w, db))
-                .ToImmutableList();
+                .ToList();
+        }
+        private ImmutableList<ErhaltungsaufwendungenListViewModelEntry> transform(IWalterDbService db, List<Erhaltungsaufwendung> list)
+        {
+            return list.Select(w => new ErhaltungsaufwendungenListViewModelEntry(w, db)).ToImmutableList();
+        }
 
-            Liste.Value = AllRelevant;
+        private ErhaltungsaufwendungenListViewModel(INotificationService ns)
+        {
+            Navigate = new RelayCommand(el => ns.Navigation((Erhaltungsaufwendung)el), _ => true);
+
         }
     }
 }

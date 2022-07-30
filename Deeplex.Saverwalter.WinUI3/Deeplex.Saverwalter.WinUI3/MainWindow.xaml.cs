@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.WinUI3
 
         public ObservableProperty<string> Titel = new();
         public AutoSuggestListViewModel AutoSuggest { get; private set; }
-        
+
         // DetailAnhang is the list of Anhaenge for a View which is the current Main Window
         public ObservableProperty<AnhangListViewModel> DetailAnhang { get; private set; } = new();
         // ListAnhang is to be filled using GridViews. TODO #17

@@ -29,7 +29,6 @@
                             Margin="0, 10, 0, 10"
                             Enabled="{x:Bind Enabled.Value, Mode=OneWay}"
                             Selectable="True"
-                            Jahr="{x:Bind Jahr.Value, Mode=OneWay}"
                             Liste="{x:Bind Liste}" />
                         <StackPanel Margin="0,-10,20,10" HorizontalAlignment="Right" Orientation="Horizontal">
                             <TextBlock FontSize="18" Text="Summe: "/>

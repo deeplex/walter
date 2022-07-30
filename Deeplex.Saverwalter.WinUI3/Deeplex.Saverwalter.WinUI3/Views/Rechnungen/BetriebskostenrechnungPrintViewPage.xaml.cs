@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
                 ViewModel = new BetriebskostenrechnungPrintViewModel(v, App.WalterService, App.FileService);
             }
 
-            App.Window.CommandBar.MainContent = new BetriebskostenrechnungPrintCommandBarControl { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new PrintCommandBarControl { ViewModel = ViewModel };
             var self = this;
             TPrint<Page>.Print(ViewModel.Betriebskostenabrechnung, new BetriebskostenPrintImpl(self));
 

@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class VertragDetailViewModel : VertragDetailViewModelVersion, ISingleItem
+    public sealed class VertragDetailViewModel : VertragDetailViewModelVersion, IDetail
     {
         public Guid guid { get; }
         public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> AlleMieter = new();
@@ -81,7 +81,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Mieter.Value = db.ctx.MieterSet
                 .Where(m => m.VertragId == v.First().VertragId)
-                .Select(m => new KontaktListViewModelEntry(m.PersonId, db))
+                .Select(m => new KontaktListViewModelEntry(db, m.PersonId))
                 .ToImmutableList();
 
             UpdateMieterList();
@@ -104,7 +104,7 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 if (AddMieter.Value?.Entity.PersonId is Guid mieterGuid)
                 {
-                    Mieter.Value = Mieter.Value.Add(new KontaktListViewModelEntry(mieterGuid, Db));
+                    Mieter.Value = Mieter.Value.Add(new KontaktListViewModelEntry(Db, mieterGuid));
                     UpdateMieterList();
                     Db.ctx.MieterSet.Add(new Mieter()
                     {

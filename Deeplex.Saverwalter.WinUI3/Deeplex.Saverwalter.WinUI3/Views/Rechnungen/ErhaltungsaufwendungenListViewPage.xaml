@@ -8,5 +8,5 @@
     xmlns:uc="using:Deeplex.Saverwalter.WinUI3.UserControls"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <uc:ErhaltungsaufwendungenListControl Filter="{x:Bind ViewModel.Filter.Value, Mode=OneWay}"/>
+    <uc:ErhaltungsaufwendungenListControl ViewModel="{x:Bind ViewModel}"/>
 </Page>

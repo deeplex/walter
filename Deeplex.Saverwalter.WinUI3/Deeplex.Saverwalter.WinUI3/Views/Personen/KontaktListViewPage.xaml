@@ -8,9 +8,5 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <uc:KontaktListControl
-        Vermieter="{x:Bind ViewModel.Vermieter.Value, Mode=TwoWay}"
-        Mieter="{x:Bind ViewModel.Mieter.Value, Mode=TwoWay}"
-        Handwerker="{x:Bind ViewModel.Handwerker.Value, Mode=TwoWay}"
-        Filter="{x:Bind ViewModel.Filter.Value, Mode=OneWay}"/>
+    <uc:KontaktListControl ViewModel="{x:Bind ViewModel}"/>
 </Page>

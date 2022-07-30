@@ -5,13 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ErhaltungsaufwendungenDetailViewModel : BindableBase, ISingleItem
+    public sealed class ErhaltungsaufwendungenDetailViewModel : BindableBase, IDetail
     {
         public override string ToString() => Entity.Bezeichnung;
 
@@ -26,9 +25,9 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<WohnungListViewModelEntry> Wohnung { get; }
         public SavableProperty<KontaktListViewModelEntry> Aussteller { get; }
         public SavableProperty<string> Bezeichnung { get; }
-        public SavableProperty<double> Betrag { get;}
-        public SavableProperty<DateTimeOffset> Datum { get;}
-        public SavableProperty<string> Notiz { get;}
+        public SavableProperty<double> Betrag { get; }
+        public SavableProperty<DateTimeOffset> Datum { get; }
+        public SavableProperty<string> Notiz { get; }
 
         private IWalterDbService Db;
         private INotificationService NotificationService;
@@ -45,7 +44,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Bezeichnung = new(this, e.Bezeichnung);
             Betrag = new(this, e.Betrag);
-            Datum = new (this, e.Datum.AsUtcKind());
+            Datum = new(this, e.Datum.AsUtcKind());
             Notiz = new(this, e.Notiz);
 
             Delete = new AsyncRelayCommand(async _ =>
@@ -83,7 +82,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void checkForChanges()
         {
-            NotificationService.outOfSync = 
+            NotificationService.outOfSync =
                 Entity.Betrag != Betrag.Value ||
                 Entity.Bezeichnung != Bezeichnung.Value ||
                 Entity.Datum != Datum.Value.UtcDateTime ||

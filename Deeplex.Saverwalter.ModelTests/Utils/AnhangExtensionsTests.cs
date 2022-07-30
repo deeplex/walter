@@ -1,5 +1,4 @@
-﻿using FakeItEasy;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Xunit;
 
 namespace Deeplex.Saverwalter.Model.Tests

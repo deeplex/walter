@@ -1,16 +1,6 @@
-﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.WinUI3.Utils;
-using Deeplex.Saverwalter.Services;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Windows.Storage;
-using Deeplex.Utils.ObjectModel;
+﻿using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WinUI3.Services;
+using Microsoft.UI.Xaml;
 
 namespace Deeplex.Saverwalter.WinUI3
 {

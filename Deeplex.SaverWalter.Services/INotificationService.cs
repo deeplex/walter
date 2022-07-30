@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.Services
 {
@@ -11,5 +7,7 @@ namespace Deeplex.Saverwalter.Services
         Task<bool> Confirmation();
         void ShowAlert(string text);
         bool outOfSync { get; set; }
+
+        public void Navigation<T>(T Element);
     }
 }

@@ -1,49 +1,103 @@
-﻿using Deeplex.Saverwalter.Services;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class KontaktListViewModel : BindableBase, IFilterViewModel
+    public sealed class KontaktListViewModel : ListViewModel<KontaktListViewModelEntry>, IListViewModel
     {
-        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Kontakte = new();
-        private KontaktListViewModelEntry mSelectedKontakt;
-        public KontaktListViewModelEntry SelectedKontakt
+        public override string ToString() => "Kontakte";
+
+        protected override ImmutableList<KontaktListViewModelEntry> updateList(string value)
+            => List.Value.Where(v => applyFilter(value, v.Name, v.Vorname, v.Email, v.Telefon)).ToImmutableList();
+
+        public KontaktListViewModel(IWalterDbService db, INotificationService ns): this(ns)
         {
-            get => mSelectedKontakt;
-            set
-            {
-                mSelectedKontakt = value;
-                RaisePropertyChangedAuto();
-                RaisePropertyChanged(nameof(hasSelectedKontakt));
-            }
+            AllRelevant = transform(db, includeNP(db), includeJP(db));
+            List.Value = AllRelevant;
         }
-        public bool hasSelectedKontakt => SelectedKontakt != null;
 
-        public ObservableProperty<string> Filter { get; set; } = new();
-        public ObservableProperty<bool> Vermieter { get; set; } = new (true);
-        public ObservableProperty<bool> Mieter { get; set; } = new (true);
-        public ObservableProperty<bool> Handwerker { get; set; } = new (true);
-        public ImmutableList<KontaktListViewModelEntry> AllRelevant { get; }
-
-        public KontaktListViewModel(IWalterDbService db)
+        public KontaktListViewModel(IWalterDbService db, INotificationService ns, Vertrag v): this(ns)
         {
-            AllRelevant = db.ctx.NatuerlichePersonen
+            var mieter = db.ctx.MieterSet.Where(m => m.VertragId == v.VertragId).Select(m => m.PersonId).ToList();
+            var np = new List<NatuerlichePerson> { };
+            var jp = new List<JuristischePerson> { };
+
+            mieter.ForEach(e =>
+            {
+                var a = db.ctx.FindPerson(e);
+                if (a is NatuerlichePerson n)
+                {
+                    np.Add(n);
+                }
+                else if (a is JuristischePerson j)
+                {
+                    jp.Add(j);
+                }
+            });
+            AllRelevant = transform(db, np, jp);
+        }
+
+        public KontaktListViewModel(IWalterDbService db, INotificationService ns, JuristischePerson jp): this(ns)
+        {
+            AllRelevant = transform(db, jp.NatuerlicheMitglieder, jp.JuristischeMitglieder);
+            List.Value = AllRelevant;
+        }
+
+        public KontaktListViewModel(IWalterDbService db, INotificationService ns, IPerson jp) : this(ns)
+        {
+            AllRelevant = transform(db, new List<NatuerlichePerson> {}, jp.JuristischePersonen);
+            List.Value = AllRelevant;
+        }
+
+        private KontaktListViewModel(INotificationService ns)
+        {
+            Navigate = new RelayCommand(el =>
+            {
+                if (el is NatuerlichePerson n)
+                {
+                    ns.Navigation(n);
+                }
+                else if (el is JuristischePerson j)
+                {
+                    ns.Navigation(j);
+                }
+                else if (el == null)
+                {
+                    ns.Navigation((NatuerlichePerson)el);
+                }
+            }, _ => true);
+        }
+
+        private List<NatuerlichePerson> includeNP(IWalterDbService db)
+        {
+            return db.ctx.NatuerlichePersonen
                 .Include(k => k.Anhaenge)
-                .Include(k => k.Adresse).ThenInclude(a => a.Anhaenge)
-                .Select(k => new KontaktListViewModelEntry(k)).ToImmutableList();
-
-            var jp = db.ctx.JuristischePersonen
-                .Include(j => j.Anhaenge)
-                .Include(j => j.Adresse).ThenInclude(a => a.Anhaenge);
-            foreach (var j in jp)
-            {
-                AllRelevant = AllRelevant.Add(new KontaktListViewModelEntry(j));
-            }
-
-            Kontakte.Value = AllRelevant;
+                .Include(k => k.Adresse)
+                .ThenInclude(a => a.Anhaenge)
+                .ToList();
         }
+        private List<JuristischePerson> includeJP(IWalterDbService db)
+        {
+            return db.ctx.JuristischePersonen
+                .Include(j => j.Anhaenge)
+                .Include(j => j.Adresse)
+                .ThenInclude(a => a.Anhaenge)
+                .ToList();
+        }
+
+        private ImmutableList<KontaktListViewModelEntry> transform(IWalterDbService db, List<NatuerlichePerson> np, List<JuristischePerson> jp)
+        {
+            return
+                np.Select(p => new KontaktListViewModelEntry(p))
+             .Concat(
+                jp.Select(p => new KontaktListViewModelEntry(p)))
+             .ToImmutableList();
+        }
+
     }
 }

@@ -1,8 +1,8 @@
-﻿using Xunit;
-using FluentAssertions;
+﻿using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml.Wordprocessing;
 using FakeItEasy;
-using Deeplex.Saverwalter.Model;
+using FluentAssertions;
+using Xunit;
 
 namespace Deeplex.Saverwalter.Print.Tests
 {

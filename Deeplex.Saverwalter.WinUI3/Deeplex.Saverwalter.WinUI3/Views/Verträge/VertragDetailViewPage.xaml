@@ -122,9 +122,7 @@
                             </mtuuc:WrapPanel>
                         </uc:ExpanderControl.Bonus>
                         <uc:ExpanderControl.MainContent>
-                            <uc:KontaktListControl
-                                VertragGuid="{x:Bind ViewModel.guid}"
-                                Kontakte="{x:Bind ViewModel.Mieter.Value, Mode=OneWay}"/>
+                            <uc:KontaktListControl ViewModel="{x:Bind MieterListViewModel}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
@@ -209,10 +207,7 @@
                     <uc:MietMinderungListControl VertragGuid="{x:Bind ViewModel.guid}"/>
                     <uc:ExpanderControl Header="Betriebskostenrechnungen">
                         <uc:ExpanderControl.MainContent>
-                            <uc:BetriebskostenRechnungenListControl
-                                StartJahr="{x:Bind ViewModel.StartJahr}"
-                                EndeJahr="{x:Bind ViewModel.EndeJahr}"
-                                WohnungId="{x:Bind ViewModel.Wohnung.Value.Id}" />
+                            <uc:BetriebskostenRechnungenListControl ViewModel="{x:Bind BetriebskostenListViewModel}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
                 </StackPanel>

@@ -11,6 +11,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
     public sealed partial class NatuerlichePersonDetailViewPage : Page
     {
         public NatuerlichePersonViewModel ViewModel { get; set; }
+        public VertragListViewModel VertragListViewModel { get; set; }
 
         public NatuerlichePersonDetailViewPage()
         {
@@ -22,25 +23,18 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             if (e.Parameter is NatuerlichePerson kontakt)
             {
                 ViewModel = new NatuerlichePersonViewModel(kontakt, App.NotificationService, App.WalterService);
+                VertragListViewModel = new VertragListViewModel(App.WalterService, App.NotificationService, kontakt);
             }
             else if (e.Parameter is null) // New Contact
             {
                 ViewModel = new NatuerlichePersonViewModel(App.NotificationService, App.WalterService);
             }
 
-            App.Window.CommandBar.MainContent = new SingleItemCommandBarControl { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel };
             // TODO
             //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.Impl, App.ViewModel));
 
             base.OnNavigatedTo(e);
-        }
-
-        private void Erhaltungsaufwendung_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-            App.Window.AppFrame.Navigate(
-                typeof(ErhaltungsaufwendungenPrintViewPage),
-                ViewModel.Entity,
-                new DrillInNavigationTransitionInfo());
         }
     }
 }

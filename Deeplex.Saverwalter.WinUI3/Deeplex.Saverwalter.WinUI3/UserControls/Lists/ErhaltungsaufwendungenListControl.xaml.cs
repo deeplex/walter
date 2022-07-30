@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
 using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
+using Deeplex.Saverwalter.WinUI3.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -12,67 +12,29 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
     public sealed partial class ErhaltungsaufwendungenListControl : UserControl
     {
-        public ErhaltungsaufwendungenListViewModel ViewModel { get; set; }
-
-        private void UpdateFilter()
-        {
-            ViewModel.Liste.Value = ViewModel.AllRelevant;
-            if (Liste != null)
-            {
-                ViewModel.Liste.Value = Liste;
-            }
-            if (WohnungId != 0)
-            {
-                ViewModel.Liste.Value = ViewModel.Liste.Value
-                    .Where(v => v.Wohnung.Id == WohnungId)
-                    .ToImmutableList();
-            }
-            if (Filter != "")
-            {
-                ViewModel.Liste.Value = ViewModel.Liste.Value.Where(v =>
-                    applyFilter(Filter, v.Aussteller, v.Bezeichnung, v.Wohnung.ToString()))
-                    .ToImmutableList();
-            }
-            if (Jahr != 0)
-            {
-                ViewModel.Liste.Value = ViewModel.Liste.Value
-                    .Where(v => v.Entity.Datum.Year == Jahr)
-                    .ToImmutableList();
-            }
-        }
-
         public ErhaltungsaufwendungenListControl()
         {
             InitializeComponent();
-            ViewModel = new ErhaltungsaufwendungenListViewModel(App.WalterService);
-
-            RegisterPropertyChangedCallback(WohnungIdProperty, (DepObj, IdProp) => UpdateFilter());
-            RegisterPropertyChangedCallback(ListeProperty, (DepObj, IdProp) => UpdateFilter());
-            RegisterPropertyChangedCallback(FilterProperty, (DepObj, IdProp) => UpdateFilter());
-            RegisterPropertyChangedCallback(JahrProperty, (DepObj, IdProp) => UpdateFilter());
+            ViewModel = new ErhaltungsaufwendungenListViewModel(App.WalterService, App.NotificationService);
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.SelectedAufwendung != null)
-            {
-                App.Window.Navigate(typeof(ErhaltungsaufwendungenDetailViewPage), ViewModel.SelectedAufwendung.Id);
-            }
+            ViewModel.Navigate.Execute(ViewModel.Selected.Entity);
         }
 
-        public int Jahr
+        public ErhaltungsaufwendungenListViewModel ViewModel
         {
-            get { return (int)GetValue(JahrProperty); }
-            set { SetValue(JahrProperty, value); }
+            get { return (ErhaltungsaufwendungenListViewModel)GetValue(ViewModelProperty); }
+            set { SetValue(ViewModelProperty, value); }
         }
 
-        public static readonly DependencyProperty JahrProperty
+        public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
-                  "Jahr",
-                  typeof(int),
-                  typeof(ErhaltungsaufwendungenListControl),
-                  new PropertyMetadata(0));
-
+                "ViewModel",
+                typeof(ErhaltungsaufwendungenListViewModel),
+                typeof(ErhaltungsaufwendungenListControl),
+                new PropertyMetadata(null));
 
         public int WohnungId
         {
@@ -99,20 +61,6 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                   typeof(ImmutableList<ErhaltungsaufwendungenListViewModelEntry>),
                   typeof(ErhaltungsaufwendungenListControl),
                   new PropertyMetadata(null));
-
-
-        public string Filter
-        {
-            get { return (string)GetValue(FilterProperty); }
-            set { SetValue(FilterProperty, value); }
-        }
-
-        public static readonly DependencyProperty FilterProperty
-            = DependencyProperty.Register(
-                  "Filter",
-                  typeof(string),
-                  typeof(ErhaltungsaufwendungenListControl),
-                  new PropertyMetadata(""));
 
         public bool Enabled
         {
@@ -156,7 +104,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)
         {
-            ViewModel.Liste.Value = (sender as DataGrid).Sort(e.Column, ViewModel.Liste.Value);
+            ViewModel.List.Value = (sender as DataGrid).Sort(e.Column, ViewModel.List.Value);
         }
     }
 }

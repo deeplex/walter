@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 ViewModel = new ZaehlerDetailViewModel(App.NotificationService, App.WalterService);
             }
 
-            App.Window.CommandBar.MainContent = new SingleItemCommandBarControl { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel };
             //App.DetailAnhang.update(ViewModel.Entity, App.WalterService.ctx.ZaehlerAnhaenge);
 
             base.OnNavigatedTo(e);
