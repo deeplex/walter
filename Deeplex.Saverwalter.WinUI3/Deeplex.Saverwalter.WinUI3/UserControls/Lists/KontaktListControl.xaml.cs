@@ -13,88 +13,27 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
     public sealed partial class KontaktListControl : UserControl
     {
-        public KontaktListViewModel ViewModel { get; set; }
-
         public KontaktListControl()
         {
             InitializeComponent();
-            ViewModel = new KontaktListViewModel(App.WalterService, App.NotificationService);
         }
 
-        public bool Vermieter
+        public KontaktListViewModel ViewModel
         {
-            get { return (bool)GetValue(VermieterProperty); }
-            set { SetValue(VermieterProperty, value); }
-        }
-        public static readonly DependencyProperty VermieterProperty
-            = DependencyProperty.Register(
-                  "Vermieter",
-                  typeof(bool),
-                  typeof(KontaktListControl),
-                  new PropertyMetadata(true));
-        public ImmutableList<KontaktListViewModelEntry> Kontakte
-        {
-            get { return (ImmutableList<KontaktListViewModelEntry>)GetValue(KontakteProperty); }
-            set { SetValue(KontakteProperty, value); }
+            get { return (KontaktListViewModel)GetValue(ViewModelProperty); }
+            set { SetValue(ViewModelProperty, value); }
         }
 
-        public static readonly DependencyProperty KontakteProperty
+        public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
-                  "KontakteProperty",
-                  typeof(ImmutableList<KontaktListViewModelEntry>),
-                  typeof(KontaktListControl),
-                  new PropertyMetadata(null));
-
-        public bool DeleteBool => VertragGuid != Guid.Empty || JuristischePersonId != 0;
-
-        public Guid VertragGuid
-        {
-            get { return (Guid)GetValue(VertragGuidProperty); }
-            set { SetValue(VertragGuidProperty, value); }
-        }
-
-        public static readonly DependencyProperty VertragGuidProperty
-            = DependencyProperty.Register(
-                  "VertragGuid",
-                  typeof(Guid),
-                  typeof(KontaktListControl),
-                  new PropertyMetadata(Guid.Empty));
-
-        public int JuristischePersonId
-        {
-            get { return (int)GetValue(JuristischePersonIdProperty); }
-            set { SetValue(JuristischePersonIdProperty, value); }
-        }
-
-        public static readonly DependencyProperty JuristischePersonIdProperty
-            = DependencyProperty.Register(
-                  "JuristischePersonId",
-                  typeof(int),
-                  typeof(KontaktListControl),
-                  new PropertyMetadata(0));
+                "ViewModel",
+                typeof(KontaktListViewModel),
+                typeof(VertragListControl),
+                new PropertyMetadata(null));
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.Add.Execute(ViewModel.Selected.Entity);
-        }
-
-        private void DataGrid_RightTapped(object sender, Microsoft.UI.Xaml.Input.RightTappedRoutedEventArgs e)
-        {
-            ViewModel.Selected = (e.OriginalSource as FrameworkElement).DataContext as KontaktListViewModelEntry;
-        }
-
-        private async void RemovePerson_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO No Person is removed here?
-
-            if (await App.NotificationService.Confirmation())
-            {
-                var guid = ((KontaktListViewModelEntry)((Button)sender).DataContext).Entity.PersonId;
-
-                ViewModel.List.Value = ViewModel.List.Value
-                    .Where(k => guid != k.Entity.PersonId).ToImmutableList();
-                App.WalterService.SaveWalter();
-            }
+            ViewModel.Navigate.Execute(ViewModel.Selected.Entity);
         }
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)

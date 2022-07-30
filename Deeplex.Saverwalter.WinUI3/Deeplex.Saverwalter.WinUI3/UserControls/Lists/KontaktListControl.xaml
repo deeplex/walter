@@ -17,25 +17,8 @@
         SelectionChanged="DataGrid_SelectionChanged"
         DoubleTapped="Details_Click"
         SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}"
-        ItemsSource="{x:Bind ViewModel.List.Value, Mode=OneWay}"
-        RightTapped="DataGrid_RightTapped">
-        <mtuuc:DataGrid.ContextFlyout>
-            <MenuFlyout>
-                <MenuFlyoutItem Icon="ContactInfo" Text="Details" Click="Details_Click"/>
-            </MenuFlyout>
-        </mtuuc:DataGrid.ContextFlyout>
+        ItemsSource="{x:Bind ViewModel.List.Value, Mode=OneWay}">
         <mtuuc:DataGrid.Columns>
-            <mtuuc:DataGridTemplateColumn Visibility="{x:Bind DeleteBool}">
-                <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                        <Button
-                            Background="Transparent"
-                            Click="RemovePerson_Click">
-                            <SymbolIcon Symbol="Delete"/>
-                        </Button>
-                    </DataTemplate>
-                </mtuuc:DataGridTemplateColumn.CellTemplate>
-            </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTemplateColumn Header="Name">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                     <DataTemplate x:DataType="vm:KontaktListViewModelEntry">
@@ -43,18 +26,7 @@
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
                             Margin="5,0,0,0" 
-                            Text="{x:Bind Name}"/>
-                    </DataTemplate>
-                </mtuuc:DataGridTemplateColumn.CellTemplate>
-            </mtuuc:DataGridTemplateColumn>
-            <mtuuc:DataGridTemplateColumn Header="Vorname">
-                <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:KontaktListViewModelEntry">
-                        <TextBlock
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Center"
-                            Margin="5,0,0,0" 
-                            Text="{x:Bind Vorname}"/>
+                            Text="{x:Bind Entity.Bezeichnung}"/>
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>

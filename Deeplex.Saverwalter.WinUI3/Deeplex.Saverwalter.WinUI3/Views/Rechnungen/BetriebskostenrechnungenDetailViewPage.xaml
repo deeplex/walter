@@ -77,32 +77,8 @@
                 </StackPanel>
                 <uc:ExpanderControl Margin="0,20,0,0" Header="Wohnungen">
                     <uc:ExpanderControl.MainContent>
-                        <uc:WohnungListControl Liste="{x:Bind ViewModel.Wohnungen.Value, Mode=OneWay}" />
+                        <uc:WohnungListControl ViewModel="{x:Bind WohnungListViewModel}"/>
                     </uc:ExpanderControl.MainContent>
-                </uc:ExpanderControl>
-                <uc:ExpanderControl Header="Betriebskostenrechnungen">
-                    <uc:ExpanderControl.MainContent>
-                        <uc:BetriebskostenRechnungenListControl
-                                ZeigeVorlagen="{x:Bind ViewModel.ZeigeVorlagen.Value, Mode=OneWay}"
-                                BetreffendesJahr="{x:Bind ViewModel.BetriebskostenrechnungsJahr.Value, Mode=OneWay}"
-                                WohnungId="{x:Bind ViewModel.BetriebskostenrechnungsWohnung.Value.Id, Mode=OneWay}"/>
-                    </uc:ExpanderControl.MainContent>
-                    <uc:ExpanderControl.Bonus>
-                        <StackPanel Orientation="Horizontal">
-                            <NumberBox
-                                Margin="10,0,10,0"
-                                SpinButtonPlacementMode="Inline"
-                                Value="{x:Bind ViewModel.BetriebskostenrechnungsJahr.Value, Mode=TwoWay}" />
-                            <CheckBox
-                                ToolTipService.ToolTip="Zeige Vorlagen für das neue Jahr, basierend auf den Eingaben aus dem Vorjahr."
-                                IsChecked="{x:Bind ViewModel.ZeigeVorlagen.Value, Mode=TwoWay}"
-                                Content="Zeige Vorlagen" />
-                            <ComboBox
-                                Margin="10,0,0,0"
-                                ItemsSource="{x:Bind ViewModel.Wohnungen.Value, Mode=OneWay}"
-                                SelectedItem="{x:Bind ViewModel.BetriebskostenrechnungsWohnung.Value, Mode=TwoWay}" />
-                        </StackPanel>
-                    </uc:ExpanderControl.Bonus>
                 </uc:ExpanderControl>
             </StackPanel>
         </uc:FileDrop.MainContent>

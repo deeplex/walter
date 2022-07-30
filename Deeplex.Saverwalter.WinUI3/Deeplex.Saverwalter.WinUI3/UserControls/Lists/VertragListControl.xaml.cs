@@ -12,70 +12,28 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
     public sealed partial class VertragListControl : UserControl
     {
-        public VertragListViewModel ViewModel { get; set; }
-
         public VertragListControl()
         {
             InitializeComponent();
-            ViewModel = new VertragListViewModel(App.WalterService, App.NotificationService);
         }
 
-        public Guid PersonId
+        public VertragListViewModel ViewModel
         {
-            get { return (Guid)GetValue(PersonIdProperty); }
-            set { SetValue(PersonIdProperty, value); }
+            get { return (VertragListViewModel)GetValue(ViewModelProperty); }
+            set { SetValue(ViewModelProperty, value); }
         }
+
+        public static readonly DependencyProperty ViewModelProperty
+            = DependencyProperty.Register(
+                "ViewModel",
+                typeof(VertragListViewModel),
+                typeof(VertragListControl),
+                new PropertyMetadata(null));
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.Add.Execute(ViewModel.Selected.Entity);
+            ViewModel.Navigate.Execute(ViewModel.Selected.Entity);
         }
-
-        public static readonly DependencyProperty PersonIdProperty
-            = DependencyProperty.Register(
-                "PersonId",
-                typeof(Guid),
-                typeof(VertragListControl),
-                new PropertyMetadata(Guid.Empty));
-
-        public int WohnungId
-        {
-            get { return (int)GetValue(WohnungIdProperty); }
-            set { SetValue(WohnungIdProperty, value); }
-        }
-
-        public static readonly DependencyProperty WohnungIdProperty
-            = DependencyProperty.Register(
-                  "WohnungId",
-                  typeof(int),
-                  typeof(VertragListControl),
-                  new PropertyMetadata(0));
-
-        public string Filter
-        {
-            get { return (string)GetValue(FilterProperty); }
-            set { SetValue(FilterProperty, value); }
-        }
-
-        public static readonly DependencyProperty FilterProperty
-            = DependencyProperty.Register(
-                  "Filter",
-                  typeof(string),
-                  typeof(VertragListControl),
-                  new PropertyMetadata(""));
-
-        public bool OnlyActive
-        {
-            get { return (bool)GetValue(OnlyActiveProperty); }
-            set { SetValue(OnlyActiveProperty, value); }
-        }
-
-        public static readonly DependencyProperty OnlyActiveProperty
-            = DependencyProperty.Register(
-                  "OnlyActive",
-                  typeof(bool),
-                  typeof(VertragListControl),
-                  new PropertyMetadata(false));
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

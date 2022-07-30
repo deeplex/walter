@@ -5,7 +5,7 @@ namespace Deeplex.Saverwalter.ViewModels
     public interface IListViewModel
     {
         string ToString();
-        RelayCommand Add { get; }
+        RelayCommand Navigate { get; }
         string Filter { get; set; }
     }
 }

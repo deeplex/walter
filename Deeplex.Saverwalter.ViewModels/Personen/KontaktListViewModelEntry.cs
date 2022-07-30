@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public string Mobil { get; }
         public IPerson Entity { get; }
 
-        public KontaktListViewModelEntry(Guid id, IWalterDbService avm) : this(avm.ctx.FindPerson(id)) { }
+        public KontaktListViewModelEntry(IWalterDbService db, Guid personId) : this(db.ctx.FindPerson(personId)) { }
         public KontaktListViewModelEntry(JuristischePerson j) : this(j as IPerson)
         {
             Entity = j;

@@ -13,6 +13,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
     public sealed partial class WohnungDetailViewPage : Page
     {
         public WohnungDetailViewModel ViewModel { get; set; }
+        public VertragListViewModel VertragListViewModel { get; private set; }
+        public WohnungListViewModel WohnungAdresseViewModel { get; private set; }
+        public BetriebskostenRechnungenListViewModel BetriebskostenrechnungViewModel { get; private set; }
+        public ErhaltungsaufwendungenListViewModel ErhaltungsaufwendungViewModel { get; private set; }
+        public ZaehlerListViewModel ZaehlerListViewModel { get; private set; }
 
         public WohnungDetailViewPage()
         {
@@ -23,7 +28,12 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is Wohnung wohnung)
             {
-                ViewModel = new WohnungDetailViewModel(wohnung, App.NotificationService, App.WalterService);
+                ViewModel = new(wohnung, App.NotificationService, App.WalterService);
+                VertragListViewModel = new(App.WalterService, App.NotificationService, wohnung);
+                WohnungAdresseViewModel = new(App.WalterService, App.NotificationService, wohnung.Adresse);
+                BetriebskostenrechnungViewModel = new(App.WalterService, App.NotificationService, wohnung);
+                ErhaltungsaufwendungViewModel = new(App.WalterService, App.NotificationService, wohnung);
+                ZaehlerListViewModel = new(App.WalterService, App.NotificationService, wohnung);
             }
             else if (e.Parameter is null) // New Wohnung
             {

@@ -22,7 +22,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public KontaktListViewModelEntry Vermieter
             => Wohnung.Value?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
-                    new KontaktListViewModelEntry(g, Db) : null;
+                    new KontaktListViewModelEntry(Db, g) : null;
 
         protected IWalterDbService Db;
         protected INotificationService NotificationService;
@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (v.AnsprechpartnerId != Guid.Empty && v.AnsprechpartnerId != null)
             {
-                Ansprechpartner = new(this, new(v.AnsprechpartnerId.Value, db));
+                Ansprechpartner = new(this, new(db, v.AnsprechpartnerId.Value));
             }
             else
             {

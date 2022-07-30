@@ -19,7 +19,8 @@
                         Text="{x:Bind ViewModel.Bezeichnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Header="Bezeichnung" Style="{StaticResource Eintraege}"/>
                 </mtuuc:WrapPanel>
-                <uc:PersonDetailControl PersonViewModel="{x:Bind ViewModel}" />
+                <uc:PersonDetailControl ViewModel="{x:Bind ViewModel}" />
+
                 <uc:ExpanderControl Header="Mitglieder">
                     <uc:ExpanderControl.Bonus>
                         <Button Margin="20,0,0,0" Background="Transparent">
@@ -40,29 +41,10 @@
                         </Button>
                     </uc:ExpanderControl.Bonus>
                     <uc:ExpanderControl.MainContent>
-                        <uc:KontaktListControl
-                            JuristischePersonId="{x:Bind ViewModel.Id}"
-                            Kontakte="{x:Bind ViewModel.Mitglieder.Value, Mode=OneWay}"/>
+                        <uc:KontaktListControl ViewModel="{x:Bind MitgliederListViewModel}"/>
                     </uc:ExpanderControl.MainContent>
                 </uc:ExpanderControl>
-                <uc:ExpanderControl Header="Wohnungen">
-                    <uc:ExpanderControl.Bonus>
-                        <StackPanel Orientation="Horizontal">
-                            <CheckBox Margin="10,0,0,0" IsChecked="{x:Bind ViewModel.WohnungenInklusiveMitglieder, Mode=TwoWay}" Content="Inkl. Mitglieder"/>
-                            <Button
-                                Click="Erhaltungsaufwendung_Click"
-                                Background="Transparent">
-                                <StackPanel Orientation="Horizontal">
-                                    <SymbolIcon Symbol="PostUpdate" />
-                                    <TextBlock Margin="10,0,0,0" Text="Erhaltungsaufwendungen"/>
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-                    </uc:ExpanderControl.Bonus>
-                    <uc:ExpanderControl.MainContent>
-                        <uc:WohnungListControl Liste="{x:Bind ViewModel.Wohnungen.Value, Mode=OneWay}" />
-                    </uc:ExpanderControl.MainContent>
-                </uc:ExpanderControl>
+                
             </StackPanel>
         </uc:FileDrop.MainContent>
     </uc:FileDrop>

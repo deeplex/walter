@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public abstract class ListViewModel<T> : BindableBase
+    public abstract class ListViewModel<T> : BindableBase, IListViewModel
     {
         public ObservableProperty<ImmutableList<T>> List = new();
         public ImmutableList<T> AllRelevant;
@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 str != null && str.ToLower().Contains(split.ToLower())));
 
 
-        public RelayCommand Add { get; protected set; }
+        public RelayCommand Navigate { get; protected set; }
 
         private string mFilter;
         public string Filter

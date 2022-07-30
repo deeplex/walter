@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.Add.Execute(ViewModel.Selected.Entity);
+            ViewModel.Navigate.Execute(ViewModel.Selected.Entity);
         }
 
         public ErhaltungsaufwendungenListViewModel ViewModel

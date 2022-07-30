@@ -20,6 +20,7 @@ namespace Deeplex.Saverwalter.WinUI3.Services
             return
                 type == typeof(Wohnung) ? typeof(WohnungDetailViewPage) :
                 type == typeof(NatuerlichePerson) ? typeof(NatuerlichePersonDetailViewPage) :
+                type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailViewPage) :
                 type == typeof(Vertrag) ? typeof(VertragDetailViewPage) :
                 type == typeof(Zaehler) ? typeof(ZaehlerDetailViewPage) :
                 type == typeof(Betriebskostenrechnung) ? typeof(BetriebskostenrechnungenDetailViewPage) :

@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.Add.Execute(ViewModel.Selected.Entity);
+            ViewModel.Navigate.Execute(ViewModel.Selected.Entity);
         }
 
         public WohnungListViewModel ViewModel
@@ -33,32 +33,6 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                 typeof(WohnungListViewModel),
                 typeof(WohnungListControl),
                 new PropertyMetadata(null));
-
-        public int WohnungId
-        {
-            get { return (int)GetValue(WohnungIdProperty); }
-            set { SetValue(WohnungIdProperty, value); }
-        }
-
-        public static readonly DependencyProperty WohnungIdProperty
-            = DependencyProperty.Register(
-                  "WohnungId",
-                  typeof(int),
-                  typeof(WohnungListControl),
-                  new PropertyMetadata(0));
-
-        public ImmutableList<WohnungListViewModelEntry> Liste
-        {
-            get { return (ImmutableList<WohnungListViewModelEntry>)GetValue(ListeProperty); }
-            set { SetValue(ListeProperty, value); }
-        }
-
-        public static readonly DependencyProperty ListeProperty
-            = DependencyProperty.Register(
-                  "Liste",
-                  typeof(ImmutableList<WohnungListViewModelEntry>),
-                  typeof(WohnungListControl),
-                  new PropertyMetadata(null));
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

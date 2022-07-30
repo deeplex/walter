@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.UserControls;
+using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -14,6 +15,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
     public sealed partial class BetriebskostenrechnungenDetailViewPage : Page
     {
         public BetriebskostenrechnungDetailViewModel ViewModel { get; private set; }
+        public WohnungListViewModel WohnungListViewModel { get; private set; }
 
         public BetriebskostenrechnungenDetailViewPage()
         {
@@ -28,21 +30,10 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (e.Parameter is Tuple<Betriebskostenrechnung, int, List<Wohnung>> t)
+            if (e.Parameter is Betriebskostenrechnung r)
             {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(t.Item1, t.Item2, t.Item3, App.NotificationService, App.WalterService);
-            }
-            else if (e.Parameter is Tuple<Betriebskostenrechnung, int> u)
-            {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(u.Item1, u.Item2, App.NotificationService, App.WalterService);
-            }
-            else if (e.Parameter is BetriebskostenrechnungDetailViewModel vm)
-            {
-                ViewModel = vm;
-            }
-            else if (e.Parameter is Betriebskostenrechnung r)
-            {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(r, App.NotificationService, App.WalterService);
+                ViewModel = new(r, App.NotificationService, App.WalterService);
+                WohnungListViewModel = new(App.WalterService, App.NotificationService, r);
             }
             else if (e.Parameter is null)
             {

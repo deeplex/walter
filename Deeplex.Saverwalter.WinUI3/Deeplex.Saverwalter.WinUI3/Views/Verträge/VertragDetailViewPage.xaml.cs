@@ -11,6 +11,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
     public sealed partial class VertragDetailViewPage : Page
     {
         public VertragDetailViewModel ViewModel { get; set; }
+        public KontaktListViewModel MieterListViewModel { get; private set; }
+        public BetriebskostenRechnungenListViewModel BetriebskostenListViewModel { get; private set; }
 
         public VertragDetailViewPage()
         {
@@ -19,17 +21,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (e.Parameter is Guid vertragId)
+            if (e.Parameter is Vertrag v)
             {
-                ViewModel = new VertragDetailViewModel(vertragId, App.NotificationService, App.WalterService);
-            }
-            else if (e.Parameter is Vertrag v)
-            {
-                ViewModel = new VertragDetailViewModel(v.VertragId, App.NotificationService, App.WalterService);
-            }
-            else if (e.Parameter is VertragDetailViewModel vm)
-            {
-                ViewModel = vm;
+                ViewModel = new(v.VertragId, App.NotificationService, App.WalterService);
+                MieterListViewModel = new(App.WalterService, App.NotificationService, v);
+                BetriebskostenListViewModel = new(App.WalterService, App.NotificationService, v);
             }
             else
             {

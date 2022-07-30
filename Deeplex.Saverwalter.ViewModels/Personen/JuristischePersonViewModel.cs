@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public void UpdateListen()
         {
             Mitglieder.Value = Entity.Mitglieder
-                .Select(w => new KontaktListViewModelEntry(w.PersonId, Db))
+                .Select(w => new KontaktListViewModelEntry(Db, w.PersonId))
                 .ToImmutableList();
 
             AddMitglieder.Value = Db.ctx.NatuerlichePersonen

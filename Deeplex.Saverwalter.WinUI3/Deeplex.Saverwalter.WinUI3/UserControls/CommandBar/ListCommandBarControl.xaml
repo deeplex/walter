@@ -14,7 +14,7 @@
                     Text="{x:Bind ViewModel.Filter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                     Width="300" PlaceholderText="Filter..."/>
             </AppBarElementContainer>
-            <AppBarButton Label="Element hinzufügen" Icon="Add" Command="{x:Bind ViewModel.Add, Mode=OneWay}"/>
+            <AppBarButton Label="Element hinzufügen" Icon="Add" Command="{x:Bind ViewModel.Navigate, Mode=OneWay}"/>
         </CommandBar.PrimaryCommands>
     </CommandBar>
 </UserControl>
