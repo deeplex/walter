@@ -63,6 +63,10 @@
                     x:Name="ErhaltungsAufwendungenListMenuItem"
                     Content="{x:Bind ErhaltungsaufwendungenListLabel}" 
                     Icon="Bullets"/>
+                <NavigationViewItem
+                    x:Name="UmlageListMenuItem"
+                    Content="{x:Bind UmlageListLabel}" 
+                    Icon="Library"/>
             </NavigationView.MenuItems>
 
             <NavigationView.PaneFooter>

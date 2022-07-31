@@ -25,6 +25,7 @@ namespace Deeplex.Saverwalter.WinUI3.Services
                 type == typeof(Zaehler) ? typeof(ZaehlerDetailViewPage) :
                 type == typeof(Betriebskostenrechnung) ? typeof(BetriebskostenrechnungenDetailViewPage) :
                 type == typeof(Erhaltungsaufwendung) ? typeof(ErhaltungsaufwendungenDetailViewPage) :
+                type == typeof(Umlage) ? typeof(UmlageDetailViewPage) :
                 null;
         }
 
