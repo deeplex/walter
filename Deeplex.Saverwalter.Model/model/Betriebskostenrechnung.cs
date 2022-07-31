@@ -30,6 +30,7 @@ namespace Deeplex.Saverwalter.Model
         public int BetreffendesJahr { get; set; }
         public UmlageSchluessel Schluessel { get; set; }
         public string? Beschreibung { get; set; }
+        public Umlage Umlage { get; set; } = null!;
         public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
 
         public double? HKVO_P7 { get; set; }

@@ -3,14 +3,16 @@ using System;
 using Deeplex.Saverwalter.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    partial class SaverwalterContextModelSnapshot : ModelSnapshot
+    [Migration("20220730130521_AddUmlagenToBetriebskostenrechnung")]
+    partial class AddUmlagenToBetriebskostenrechnung
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -347,15 +349,10 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("Typ")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("UmlageId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int?>("ZaehlerId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("BetriebskostenrechnungId");
-
-                    b.HasIndex("UmlageId");
 
                     b.HasIndex("ZaehlerId");
 
@@ -1144,15 +1141,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Betriebskostenrechnung", b =>
                 {
-                    b.HasOne("Deeplex.Saverwalter.Model.Umlage", "Umlage")
-                        .WithMany()
-                        .HasForeignKey("UmlageId");
-
                     b.HasOne("Deeplex.Saverwalter.Model.Zaehler", "Zaehler")
                         .WithMany()
                         .HasForeignKey("ZaehlerId");
-
-                    b.Navigation("Umlage");
 
                     b.Navigation("Zaehler");
                 });
