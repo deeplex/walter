@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -22,6 +23,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public List<HKVO9Util> HKVO_P9_List = Enums.HKVO9;
         public List<UmlageSchluesselUtil> Schluessel_List = Enums.UmlageSchluessel;
         public List<BetriebskostentypUtil> Typen_List = Enums.Betriebskostentyp;
+        public List<UmlageListViewModelEntry> Umlagen_List { get; }
         public List<ZaehlerListViewModelEntry> AllgemeinZaehler_List;
 
         public SavableProperty<ZaehlerListViewModelEntry> AllgemeinZaehler { get; }
@@ -31,9 +33,9 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<double> Betrag { get; }
         public SavableProperty<DateTimeOffset> Datum { get; }
         public SavableProperty<string> Notiz { get; }
+        public SavableProperty<UmlageListViewModelEntry> Umlage { get; }
         public SavableProperty<BetriebskostentypUtil> Typ { get; }
         public SavableProperty<UmlageSchluesselUtil> Schluessel { get; }
-        public SavableProperty<string> Beschreibung { get; }
         public DateTimeOffset? BetreffendesJahrDatum
         {
             get => new DateTime(BetreffendesJahr.Value, 1, 1);
@@ -80,15 +82,12 @@ namespace Deeplex.Saverwalter.ViewModels
             Betrag = new(this, r.Betrag);
             Datum = new(this, r.Datum.AsUtcKind());
             Notiz = new(this, r.Notiz);
-            Typ = new(this, new(r.Typ));
-            Beschreibung = new(this, r.Beschreibung);
+            Typ = new(this, Typen_List.FirstOrDefault(e => e.Typ == r.Typ));
             BetreffendesJahr = new(this, r.BetreffendesJahr);
             HKVO_P7 = new(this, r.HKVO_P7 ?? 0);
             HKVO_P8 = new(this, r.HKVO_P8 ?? 0);
             HKVO_P9 = new(this, r.HKVO_P9);
-            Schluessel = new(this, new(r.Schluessel));
-            Schluessel.Value = Schluessel_List.FirstOrDefault(e => e.Schluessel == r.Schluessel);
-            Typ.Value = Typen_List.FirstOrDefault(e => e.Typ == r.Typ);
+            Schluessel = new(this, Schluessel_List.FirstOrDefault(e => e.Schluessel == r.Schluessel));
 
             Wohnungen.Value = r.Wohnungen.Select(g => new WohnungListViewModelEntry(g, Db)).ToImmutableList();
             if (BetriebskostenrechnungsWohnung.Value == null)
@@ -100,6 +99,14 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Select(a => new ZaehlerListViewModelEntry(a))
                 .ToList();
             AllgemeinZaehler = new(this, AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Zaehler?.ZaehlerId));
+
+            Umlagen_List = Db.ctx.Umlagen
+                .Include(u => u.Wohnungen).ThenInclude(w => w.Adresse)
+                .Where(u => u.Typ == r.Typ || u.UmlageId == r.Umlage.UmlageId)
+                .ToList()
+                .Select(e => new UmlageListViewModelEntry(e))
+                .ToList();
+            Umlage = new(this, Umlagen_List.FirstOrDefault(e => e.Id == r.Umlage.UmlageId));
 
             Delete = new AsyncRelayCommand(async _ =>
             {
@@ -146,11 +153,6 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void Update()
         {
-            if (Beschreibung == null || Beschreibung.Value.Trim() == "")
-            {
-                return;
-            }
-
             if (Entity.BetriebskostenrechnungId != 0)
             {
                 Db.ctx.Betriebskostenrechnungen.Update(Entity);
@@ -179,13 +181,19 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void checkForChanges()
         {
+            if (Umlage.Value == null)
+            {
+                NotifcationService.outOfSync = true;
+                return;
+            }
+
             NotifcationService.outOfSync =
+                Entity.Umlage.UmlageId != Umlage.Value.Entity.UmlageId ||
                 Entity.Betrag != Betrag.Value ||
                 Entity.Datum.AsUtcKind() != Datum.Value ||
                 Entity.Notiz != Notiz.Value ||
                 Entity.Typ != Typ.Value.Typ ||
                 Entity.Schluessel != Schluessel.Value.Schluessel ||
-                Entity.Beschreibung != Beschreibung.Value ||
                 Entity.BetreffendesJahr != BetreffendesJahr.Value ||
                 checkNullable(Entity.HKVO_P7, HKVO_P7.Value) ||
                 checkNullable(Entity.HKVO_P8, HKVO_P8.Value) ||
@@ -199,8 +207,8 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Notiz = Notiz.Value;
             Entity.Typ = Typ.Value.Typ;
             Entity.Schluessel = Schluessel.Value.Schluessel;
-            Entity.Beschreibung = Beschreibung.Value;
             Entity.BetreffendesJahr = BetreffendesJahr.Value;
+            Entity.Umlage = Umlage.Value.Entity;
             if (Entity.HKVO_P7 != null && HKVO_P7.Value != 0)
             {
                 Entity.HKVO_P7 = HKVO_P7.Value;

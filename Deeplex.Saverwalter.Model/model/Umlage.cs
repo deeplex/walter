@@ -11,10 +11,12 @@ namespace Deeplex.Saverwalter.Model
         public UmlageSchluessel Schluessel { get; set; }
         public string? Beschreibung { get; set; }
         public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
-        public HKVO? HKVO { get; set; }
         public string? Notiz { get; set; }
+        public HKVO? HKVO { get; set; }
+        public Zaehler? Zaehler { get; set; }
 
         public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
+        public List<Betriebskostenrechnung> Betriebskostenrechnungen { get; private set; } = new List<Betriebskostenrechnung>();
     }
 
     public sealed class HKVO

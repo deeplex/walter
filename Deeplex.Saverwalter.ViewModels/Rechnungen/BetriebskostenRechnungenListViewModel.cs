@@ -44,9 +44,10 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             return db.ctx.Betriebskostenrechnungen
                 .Include(b => b.Anhaenge)
-                .Include(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Anhaenge)
-                .Include(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Wohnungen).ThenInclude(w => w.Anhaenge)
+                .Include(b => b.Umlage).ThenInclude(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Anhaenge)
+                .Include(b => b.Umlage).ThenInclude(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Wohnungen).ThenInclude(w => w.Anhaenge)
                 .Include(b => b.Zaehler).ThenInclude(b => b.Anhaenge)
+                .Include(b => b.Wohnungen).ThenInclude(g => g.Adresse).ThenInclude(a => a.Anhaenge)
                 .ToList();
         }
         private ImmutableList<BetriebskostenRechnungenListEntry> transform(IWalterDbService db, List<Betriebskostenrechnung> list)

@@ -100,11 +100,6 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void Update()
         {
-            if (Beschreibung == null || Beschreibung.Value.Trim() == "")
-            {
-                return;
-            }
-
             if (Entity.UmlageId != 0)
             {
                 Db.ctx.Umlagen.Update(Entity);

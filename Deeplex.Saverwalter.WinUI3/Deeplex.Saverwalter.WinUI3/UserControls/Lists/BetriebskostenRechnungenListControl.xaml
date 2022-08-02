@@ -25,6 +25,16 @@
         ItemsSource="{x:Bind ViewModel.List.Value, Mode=OneWay}"
         SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}">
         <mtuuc:DataGrid.Columns>
+            <mtuuc:DataGridTemplateColumn Header="Id" IsReadOnly="True">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:BetriebskostenRechnungenListEntry">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Padding="10,0,10,0"
+                            Text="{x:Bind Id, Mode=OneWay}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTemplateColumn Header="Typ" IsReadOnly="True">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                     <DataTemplate x:DataType="vm:BetriebskostenRechnungenListEntry">
@@ -65,16 +75,6 @@
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>
-            <mtuuc:DataGridTemplateColumn Header="Beschreibung">
-                <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:BetriebskostenRechnungenListEntry">
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            Padding="10,0,10,0"
-                            Text="{x:Bind Beschreibung, Mode=OneWay}"/>
-                    </DataTemplate>
-                </mtuuc:DataGridTemplateColumn.CellTemplate>
-            </mtuuc:DataGridTemplateColumn>
-        </mtuuc:DataGrid.Columns>
+            </mtuuc:DataGrid.Columns>
     </mtuuc:DataGrid>
 </UserControl>

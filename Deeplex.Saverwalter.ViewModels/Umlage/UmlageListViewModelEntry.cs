@@ -7,6 +7,8 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class UmlageListViewModelEntry
     {
+        public override string ToString() => Typ.ToDescriptionString() + " - " + Wohnungen.GetWohnungenBezeichnung();
+
         public Umlage Entity { get; }
         public int Id => Entity.UmlageId;
         public string Beschreibung => Entity.Beschreibung;

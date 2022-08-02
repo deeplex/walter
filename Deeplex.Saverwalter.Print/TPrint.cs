@@ -146,8 +146,8 @@ namespace Deeplex.Saverwalter.Print
         }
         private static void ExplainKalteBetriebskosten(IBetriebskostenabrechnung b, IPrint<T> p)
         {
-            var runs = b.Gruppen
-                .SelectMany(g => g.Rechnungen.Where(r => r.Beschreibung != null && r.Beschreibung.Trim() != ""))
+            var runs = b.Wohnung.Umlagen
+                .Where(r => r.Beschreibung != null && r.Beschreibung.Trim() != "")
                 .SelectMany(t => new List<PrintRun>()
                 {
                     new PrintRun(t.Typ.ToDescriptionString() + ": ", true, false, true),
