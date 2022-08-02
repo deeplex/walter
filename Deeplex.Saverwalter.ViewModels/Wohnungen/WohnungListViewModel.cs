@@ -33,17 +33,6 @@ namespace Deeplex.Saverwalter.ViewModels
             List.Value = AllRelevant;
         }
 
-
-        public WohnungListViewModel(IWalterDbService db, INotificationService ns, Betriebskostenrechnung r): this(ns)
-        {
-            AllRelevant = transform(db,
-                include(db)
-                    .Where(w => w.Betriebskostenrechnungen
-                    .Exists(b => b.BetriebskostenrechnungId == r.BetriebskostenrechnungId))
-                    .ToList());
-            List.Value = AllRelevant;
-        }
-
         public WohnungListViewModel(IWalterDbService db, INotificationService ns, IPerson p)
         {
             var vertragIds = db.ctx.MieterSet

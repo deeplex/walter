@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             AllRelevant = transform(db,
                 include(db)
-                    .Where(b => b.Wohnungen.Exists(w => v.Wohnung.WohnungId == w.WohnungId))
+                    .Where(b => b.Umlage.Wohnungen.Exists(w => v.Wohnung.WohnungId == w.WohnungId))
                     .ToList());
             List.Value = AllRelevant;
         }
@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             AllRelevant = transform(db,
                 include(db)
-                    .Where(b => b.Wohnungen.Exists(i => i.WohnungId == w.WohnungId))
+                    .Where(b => b.Umlage.Wohnungen.Exists(i => i.WohnungId == w.WohnungId))
                     .ToList());
             List.Value = AllRelevant;
         }
@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Include(b => b.Umlage).ThenInclude(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Anhaenge)
                 .Include(b => b.Umlage).ThenInclude(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Wohnungen).ThenInclude(w => w.Anhaenge)
                 .Include(b => b.Umlage.Zaehler).ThenInclude(b => b.Anhaenge)
-                .Include(b => b.Wohnungen).ThenInclude(g => g.Adresse).ThenInclude(a => a.Anhaenge)
+                .Include(b => b.Umlage.Wohnungen).ThenInclude(g => g.Adresse).ThenInclude(a => a.Anhaenge)
                 .ToList();
         }
         private ImmutableList<BetriebskostenRechnungenListEntry> transform(IWalterDbService db, List<Betriebskostenrechnung> list)

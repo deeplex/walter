@@ -44,10 +44,10 @@ namespace Deeplex.Saverwalter.Model
             Para8 = r.Umlage.HKVO?.HKVO_P8 ?? 0.5; // HeizkostenV §8
 
             var AllgWarmwasserZaehler = b.db.ZaehlerSet.Where(z =>
-                z.Typ == Zaehlertyp.Warmwasser && r.Wohnungen.Contains(z.Wohnung!)).ToImmutableList();
+                z.Typ == Zaehlertyp.Warmwasser && r.Umlage.Wohnungen.Contains(z.Wohnung!)).ToImmutableList();
 
             var AllgWaermeZaehler = b.db.ZaehlerSet.Where(z =>
-                z.Typ == Zaehlertyp.Gas && r.Wohnungen.Contains(z.Wohnung!)).ToImmutableList();
+                z.Typ == Zaehlertyp.Gas && r.Umlage.Wohnungen.Contains(z.Wohnung!)).ToImmutableList();
 
             var WaermeZaehler = AllgWaermeZaehler
                 .Where(z => z.Wohnung == b.Wohnung)
@@ -97,7 +97,7 @@ namespace Deeplex.Saverwalter.Model
                 b.notes.Add(new Note("Heizkostenverteilung nach §9 ist über 100%.", Severity.Error));
             }
 
-            GesamtNutzflaeche = r.Wohnungen.Sum(w => w.Nutzflaeche);
+            GesamtNutzflaeche = r.Umlage.Wohnungen.Sum(w => w.Nutzflaeche);
             NFZeitanteil = b.Wohnung.Nutzflaeche / GesamtNutzflaeche * b.Zeitanteil;
 
             HeizkostenVerbrauchAnteil = (Ende(WaermeZaehler).Sum(w => w.Stand) - Beginn(WaermeZaehler).Sum(w => w.Stand)) / Q;

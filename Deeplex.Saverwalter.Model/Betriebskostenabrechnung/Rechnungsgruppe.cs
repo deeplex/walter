@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.Model
         public List<Betriebskostenrechnung> Rechnungen { get; }
 
         private IBetriebskostenabrechnung b { get; }
-        private List<Wohnung> gr => Rechnungen.First().Wohnungen.ToList();
+        private List<Wohnung> gr => Rechnungen.First().Umlage.Wohnungen.ToList();
         private IEnumerable<Vertrag> alleVertraegeDieserWohnungen => gr.SelectMany(w => w.Vertraege.Where(v =>
                 v.Beginn <= b.Abrechnungsende && (v.Ende is null || v.Ende >= b.Abrechnungsbeginn)));
 
@@ -143,7 +143,7 @@ namespace Deeplex.Saverwalter.Model
                 var copy = allgStrom.ShallowCopy();
                 var idx = Rechnungen.IndexOf(allgStrom);
 
-                copy.Betrag -= b.Vertrag.Wohnung.Betriebskostenrechnungen
+                copy.Betrag -= b.Vertrag.Wohnung.Umlagen.SelectMany(u => u.Betriebskostenrechnungen)
                     .Where(g => g.BetreffendesJahr == b.Jahr && (int)g.Umlage.Typ % 2 == 1)
                     .Select(r => r.Betrag)
                     .Sum() * 0.05;

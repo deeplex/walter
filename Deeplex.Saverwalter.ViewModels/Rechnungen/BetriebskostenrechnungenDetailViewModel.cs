@@ -59,11 +59,11 @@ namespace Deeplex.Saverwalter.ViewModels
             if (Entity == null) return;
 
             // Add missing Wohnungen
-            Entity.Wohnungen
-                .AddRange(Wohnungen.Value.Where(w => !Entity.Wohnungen.Contains(w.Entity))
+            Entity.Umlage.Wohnungen
+                .AddRange(Wohnungen.Value.Where(w => !Entity.Umlage.Wohnungen.Contains(w.Entity))
                 .Select(w => w.Entity));
             // Remove old Wohnungen
-            Entity.Wohnungen.RemoveAll(w => !Wohnungen.Value.Exists(v => v.Entity == w));
+            Entity.Umlage.Wohnungen.RemoveAll(w => !Wohnungen.Value.Exists(v => v.Entity == w));
         }
 
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, INotificationService ns, IWalterDbService db)
@@ -72,12 +72,22 @@ namespace Deeplex.Saverwalter.ViewModels
             Db = db;
             NotifcationService = ns;
 
-            Betrag = new(this, r.Betrag);
-            Datum = new(this, r.Datum.AsUtcKind());
-            Notiz = new(this, r.Notiz);
-            BetreffendesJahr = new(this, r.BetreffendesJahr);
+            var datum = r.Datum == default ? DateTime.Now : r.Datum;
 
-            Wohnungen.Value = r.Wohnungen.Select(g => new WohnungListViewModelEntry(g, Db)).ToImmutableList();
+            Betrag = new(this, r.Betrag);
+
+            Datum = new(this, datum.AsUtcKind());
+            Notiz = new(this, r.Notiz);
+            BetreffendesJahr = new(this, datum.Year);
+
+            if (r.Umlage != null)
+            {
+                Wohnungen.Value = r.Umlage.Wohnungen.Select(g => new WohnungListViewModelEntry(g, Db)).ToImmutableList();
+            }
+            else
+            {
+                Wohnungen.Value = new List<WohnungListViewModelEntry>().ToImmutableList();
+            }
             if (BetriebskostenrechnungsWohnung.Value == null)
             {
                 BetriebskostenrechnungsWohnung.Value = Wohnungen.Value.FirstOrDefault();
@@ -86,12 +96,13 @@ namespace Deeplex.Saverwalter.ViewModels
             AllgemeinZaehler_List = Db.ctx.ZaehlerSet
                 .Select(a => new ZaehlerListViewModelEntry(a))
                 .ToList();
-            AllgemeinZaehler = new(this, AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Umlage.Zaehler?.ZaehlerId));
+            AllgemeinZaehler = new(this, AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Umlage?.Zaehler?.ZaehlerId));
 
             Umlagen_List = Db.ctx.Umlagen
                 .Include(u => u.Wohnungen).ThenInclude(w => w.Adresse)
-                .Where(u => u.Typ == r.Umlage.Typ || u.UmlageId == r.Umlage.UmlageId)
                 .ToList()
+                //.Where(u => u.Typ == r.Umlage?.Typ)
+                //.ToList()
                 .Select(e => new UmlageListViewModelEntry(e))
                 .ToList();
             Umlage = new(this, Umlagen_List.FirstOrDefault(e => e.Id == r.Umlage.UmlageId));
@@ -122,8 +133,8 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             var thisYear = Db.ctx.Betriebskostenrechnungen.ToList().Where(r =>
                r.BetreffendesJahr == BetreffendesJahr.Value - 1 &&
-               r.Wohnungen.Count == Wohnungen.Value.Count &&
-               Wohnungen.Value.All(e => r.Wohnungen.ToList().Exists(r => r.WohnungId == e.Id)))
+               r.Umlage.Wohnungen.Count == Wohnungen.Value.Count &&
+               Wohnungen.Value.All(e => r.Umlage.Wohnungen.ToList().Exists(r => r.WohnungId == e.Id)))
                 .ToList();
 
             Wohnungen.Value = l.ToImmutableList();

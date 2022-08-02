@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.Print
             }
 
             // There is a Umlage nach Nutzfläche in the Heizkostenberechnung:
-            if (b.nNF() || b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Wohnungen.Count > 1).Any(r => (int)r.Umlage.Typ % 2 == 1)))
+            if (b.nNF() || b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Umlage.Wohnungen.Count > 1).Any(r => (int)r.Umlage.Typ % 2 == 1)))
             {
                 left1.Add("n. NF");
                 left2.Add("n. NF");

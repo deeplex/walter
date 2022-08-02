@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public BetriebskostenRechnungenListEntry(Betriebskostenrechnung r)
         {
             Entity = r;
-            Wohnungen = r.Wohnungen.ToList();
+            Wohnungen = r.Umlage.Wohnungen.ToList();
             AdressenBezeichnung = Entity.GetWohnungenBezeichnung();
         }
 

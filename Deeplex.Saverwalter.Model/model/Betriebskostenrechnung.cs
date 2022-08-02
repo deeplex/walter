@@ -20,8 +20,6 @@ namespace Deeplex.Saverwalter.Model
         public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
 
         public string? Notiz { get; set; }
-
-        public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
     }
 
     public enum HKVO_P9A2
