@@ -13,7 +13,6 @@ namespace Deeplex.Saverwalter.Model
         }
 
         public int BetriebskostenrechnungId { get; set; }
-        public Betriebskostentyp Typ { get; set; }
         public double Betrag { get; set; }
         public DateTime Datum { get; set; }
         public int BetreffendesJahr { get; set; }

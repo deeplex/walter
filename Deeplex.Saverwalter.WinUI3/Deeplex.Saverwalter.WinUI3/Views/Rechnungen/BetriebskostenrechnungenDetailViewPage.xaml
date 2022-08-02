@@ -54,24 +54,6 @@
                         Margin="10,0,0,0"
                         Header="Betrag"/>
                 </StackPanel>
-                <StackPanel Margin="0,10,0,0" Visibility="{x:Bind ViewModel.isHeizung}" Orientation="Horizontal">
-                    <Slider
-                        Value="{x:Bind ViewModel.HKVO_P7.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Width="100"
-                        Minimum="50"
-                        Maximum="70"
-                        Header="HKVO§7"/>
-                    <Slider
-                        Value="{x:Bind ViewModel.HKVO_P8.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Width="100"
-                        Minimum="50"
-                        Maximum="70"
-                        Margin="10,0,0,0"
-                        Header="HKVO§8"/>
-                    <ComboBox
-                        Margin="10,0,0,0"
-                        Header="HKVO§9"/>
-                </StackPanel>
                 <StackPanel>
                     <TextBox
                         Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

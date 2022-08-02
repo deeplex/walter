@@ -137,7 +137,7 @@ namespace Deeplex.Saverwalter.Model
         public List<Verbrauch>
             GetVerbrauch(Betriebskostenrechnung r, bool ganzeGruppe = false)
         {
-            var Zaehler = r.Typ switch
+            var Zaehler = r.Umlage.Typ switch
             {
                 Betriebskostentyp.EntwaesserungSchmutzwasser =>
                     db.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
@@ -185,7 +185,7 @@ namespace Deeplex.Saverwalter.Model
             {
                 for (var i = 0; i < Ende.Count(); ++i)
                 {
-                    Deltas.Add(new Verbrauch(r.Typ, Ende[i].Zaehler.Kennnummer, Ende[i].Zaehler.Typ, Ende[i].Stand - Beginn[i].Stand));
+                    Deltas.Add(new Verbrauch(r.Umlage.Typ, Ende[i].Zaehler.Kennnummer, Ende[i].Zaehler.Typ, Ende[i].Stand - Beginn[i].Stand));
                 }
             }
 

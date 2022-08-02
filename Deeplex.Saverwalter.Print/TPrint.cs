@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.Print
             }
 
             // There is a Umlage nach Nutzfläche in the Heizkostenberechnung:
-            if (b.nNF() || b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Wohnungen.Count > 1).Any(r => (int)r.Typ % 2 == 1)))
+            if (b.nNF() || b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Wohnungen.Count > 1).Any(r => (int)r.Umlage.Typ % 2 == 1)))
             {
                 left1.Add("n. NF");
                 left2.Add("n. NF");
@@ -389,7 +389,7 @@ namespace Deeplex.Saverwalter.Print
 
             void kostenPunkt(Betriebskostenrechnung rechnung, string zeitraum, int Jahr, double anteil, bool f = true)
             {
-                col1.Add(f ? rechnung.Typ.ToDescriptionString() : "");
+                col1.Add(f ? rechnung.Umlage.Typ.ToDescriptionString() : "");
                 col2.Add(g.GesamtEinheiten == 1 ? "Direkt" : (f ? rechnung.Schluessel.ToDescriptionString() : ""));
                 col3.Add(zeitraum);
                 col4.Add(Euro(rechnung.Betrag));
@@ -399,7 +399,7 @@ namespace Deeplex.Saverwalter.Print
                 underlined.Add(true);
             }
 
-            foreach (var rechnung in g.Rechnungen.Where(r => (int)r.Typ % 2 == 0)) // Kalte Betriebskosten
+            foreach (var rechnung in g.Rechnungen.Where(r => (int)r.Umlage.Typ % 2 == 0)) // Kalte Betriebskosten
             {
                 string zeitraum;
                 switch (rechnung.Schluessel)
@@ -427,7 +427,7 @@ namespace Deeplex.Saverwalter.Print
                             rechnung,
                             zeitraum,
                             b.Jahr,
-                            g.VerbrauchAnteil.ContainsKey(rechnung.Typ) ? g.VerbrauchAnteil[rechnung.Typ] : 0);
+                            g.VerbrauchAnteil.ContainsKey(rechnung.Umlage.Typ) ? g.VerbrauchAnteil[rechnung.Umlage.Typ] : 0);
                         break;
                     default:
                         break; // TODO or throw something...
@@ -455,11 +455,11 @@ namespace Deeplex.Saverwalter.Print
         {
             var widths = new int[] { 50, 10 };
 
-            foreach (var rechnung in g.Rechnungen.Where(r => (int)r.Typ % 2 == 1)) // Warme Betriebskosten
+            foreach (var rechnung in g.Rechnungen.Where(r => (int)r.Umlage.Typ % 2 == 1)) // Warme Betriebskosten
             {
                 var col1 = new List<string>
                 {
-                    rechnung.Typ.ToDescriptionString(),
+                    rechnung.Umlage.Typ.ToDescriptionString(),
                     "Kosten für Brennstoffe",
                     "Betriebskosten der Anlage (5% pauschal)",
                     "Gesamt",
@@ -501,7 +501,7 @@ namespace Deeplex.Saverwalter.Print
             var bold = new List<bool> { true, true, false };
             var underlined = new List<bool> { false, false, true };
 
-            var warmeRechnungen = g.Rechnungen.Where(r => (int)r.Typ % 2 == 1).ToList();
+            var warmeRechnungen = g.Rechnungen.Where(r => (int)r.Umlage.Typ % 2 == 1).ToList();
 
             if (warmeRechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachPersonenzahl))
             {

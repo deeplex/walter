@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class BetriebskostenrechnungDetailViewModel : BindableBase, IDetail
     {
-        public override string ToString() => Entity.Typ.ToDescriptionString() + " - " + Entity.GetWohnungenBezeichnung();
+        public override string ToString() => Entity.Umlage.Typ.ToDescriptionString() + " - " + Entity.GetWohnungenBezeichnung();
 
         public Betriebskostenrechnung Entity { get; }
         public int Id => Entity.BetriebskostenrechnungId;
@@ -27,8 +27,6 @@ namespace Deeplex.Saverwalter.ViewModels
         public List<ZaehlerListViewModelEntry> AllgemeinZaehler_List;
 
         public SavableProperty<ZaehlerListViewModelEntry> AllgemeinZaehler { get; }
-
-        public bool isHeizung => Entity?.Typ == Betriebskostentyp.Heizkosten;
 
         public SavableProperty<double> Betrag { get; }
         public SavableProperty<DateTimeOffset> Datum { get; }
@@ -82,7 +80,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Betrag = new(this, r.Betrag);
             Datum = new(this, r.Datum.AsUtcKind());
             Notiz = new(this, r.Notiz);
-            Typ = new(this, Typen_List.FirstOrDefault(e => e.Typ == r.Typ));
+            Typ = new(this, Typen_List.FirstOrDefault(e => e.Typ == r.Umlage.Typ));
             BetreffendesJahr = new(this, r.BetreffendesJahr);
             HKVO_P7 = new(this, r.HKVO_P7 ?? 0);
             HKVO_P8 = new(this, r.HKVO_P8 ?? 0);
@@ -102,7 +100,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Umlagen_List = Db.ctx.Umlagen
                 .Include(u => u.Wohnungen).ThenInclude(w => w.Adresse)
-                .Where(u => u.Typ == r.Typ || u.UmlageId == r.Umlage.UmlageId)
+                .Where(u => u.Typ == r.Umlage.Typ || u.UmlageId == r.Umlage.UmlageId)
                 .ToList()
                 .Select(e => new UmlageListViewModelEntry(e))
                 .ToList();
@@ -192,7 +190,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Betrag != Betrag.Value ||
                 Entity.Datum.AsUtcKind() != Datum.Value ||
                 Entity.Notiz != Notiz.Value ||
-                Entity.Typ != Typ.Value.Typ ||
                 Entity.Schluessel != Schluessel.Value.Schluessel ||
                 Entity.BetreffendesJahr != BetreffendesJahr.Value ||
                 checkNullable(Entity.HKVO_P7, HKVO_P7.Value) ||
@@ -205,7 +202,6 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Betrag = Betrag.Value;
             Entity.Datum = Datum.Value.UtcDateTime;
             Entity.Notiz = Notiz.Value;
-            Entity.Typ = Typ.Value.Typ;
             Entity.Schluessel = Schluessel.Value.Schluessel;
             Entity.BetreffendesJahr = BetreffendesJahr.Value;
             Entity.Umlage = Umlage.Value.Entity;

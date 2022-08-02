@@ -43,7 +43,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Entity = a;
             Icon = "List";
-            Bezeichnung = a.Typ.ToDescriptionString() + " - " + a.GetWohnungenBezeichnung();
+            Bezeichnung = a.Umlage.Typ.ToDescriptionString() + " - " + a.GetWohnungenBezeichnung();
         }
         public AutoSuggestListViewModelEntry(Erhaltungsaufwendung a)
         {
