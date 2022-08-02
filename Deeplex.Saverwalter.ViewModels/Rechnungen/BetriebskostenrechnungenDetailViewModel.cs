@@ -82,9 +82,6 @@ namespace Deeplex.Saverwalter.ViewModels
             Notiz = new(this, r.Notiz);
             Typ = new(this, Typen_List.FirstOrDefault(e => e.Typ == r.Umlage.Typ));
             BetreffendesJahr = new(this, r.BetreffendesJahr);
-            HKVO_P7 = new(this, r.HKVO_P7 ?? 0);
-            HKVO_P8 = new(this, r.HKVO_P8 ?? 0);
-            HKVO_P9 = new(this, r.HKVO_P9);
             Schluessel = new(this, Schluessel_List.FirstOrDefault(e => e.Schluessel == r.Schluessel));
 
             Wohnungen.Value = r.Wohnungen.Select(g => new WohnungListViewModelEntry(g, Db)).ToImmutableList();
@@ -191,10 +188,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Datum.AsUtcKind() != Datum.Value ||
                 Entity.Notiz != Notiz.Value ||
                 Entity.Schluessel != Schluessel.Value.Schluessel ||
-                Entity.BetreffendesJahr != BetreffendesJahr.Value ||
-                checkNullable(Entity.HKVO_P7, HKVO_P7.Value) ||
-                checkNullable(Entity.HKVO_P8, HKVO_P8.Value) ||
-                checkNullable(Entity.HKVO_P9, HKVO_P9.Value);
+                Entity.BetreffendesJahr != BetreffendesJahr.Value;
         }
 
         private void save()
@@ -205,19 +199,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Schluessel = Schluessel.Value.Schluessel;
             Entity.BetreffendesJahr = BetreffendesJahr.Value;
             Entity.Umlage = Umlage.Value.Entity;
-            if (Entity.HKVO_P7 != null && HKVO_P7.Value != 0)
-            {
-                Entity.HKVO_P7 = HKVO_P7.Value;
-            }
-            if (Entity.HKVO_P8 != null && HKVO_P8.Value != 0)
-            {
-                Entity.HKVO_P8 = HKVO_P8.Value;
-            }
-            if (Entity.HKVO_P9 != null && HKVO_P9.Value != 0)
-            {
-                Entity.HKVO_P9 = HKVO_P9.Value;
-            }
-
+            
             Update();
         }
     }

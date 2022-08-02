@@ -40,8 +40,8 @@ namespace Deeplex.Saverwalter.Model
 
             // TODO These should be variable
             tw = 60;
-            Para7 = r.HKVO_P7 ?? 0.5; // HeizkostenV §7
-            Para8 = r.HKVO_P8 ?? 0.5; // HeizkostenV §8
+            Para7 = r.Umlage.HKVO?.HKVO_P7 ?? 0.5; // HeizkostenV §7
+            Para8 = r.Umlage.HKVO?.HKVO_P8 ?? 0.5; // HeizkostenV §8
 
             var AllgWarmwasserZaehler = b.db.ZaehlerSet.Where(z =>
                 z.Typ == Zaehlertyp.Warmwasser && r.Wohnungen.Contains(z.Wohnung!)).ToImmutableList();
