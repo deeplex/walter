@@ -32,8 +32,6 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<DateTimeOffset> Datum { get; }
         public SavableProperty<string> Notiz { get; }
         public SavableProperty<UmlageListViewModelEntry> Umlage { get; }
-        public SavableProperty<BetriebskostentypUtil> Typ { get; }
-        public SavableProperty<UmlageSchluesselUtil> Schluessel { get; }
         public DateTimeOffset? BetreffendesJahrDatum
         {
             get => new DateTime(BetreffendesJahr.Value, 1, 1);
@@ -43,9 +41,6 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
         public SavableProperty<int> BetreffendesJahr { get; }
-        public SavableProperty<double> HKVO_P7 { get; }
-        public SavableProperty<double> HKVO_P8 { get; }
-        public SavableProperty<HKVO_P9A2?> HKVO_P9 { get; }
 
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 
@@ -80,9 +75,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Betrag = new(this, r.Betrag);
             Datum = new(this, r.Datum.AsUtcKind());
             Notiz = new(this, r.Notiz);
-            Typ = new(this, Typen_List.FirstOrDefault(e => e.Typ == r.Umlage.Typ));
             BetreffendesJahr = new(this, r.BetreffendesJahr);
-            Schluessel = new(this, Schluessel_List.FirstOrDefault(e => e.Schluessel == r.Schluessel));
 
             Wohnungen.Value = r.Wohnungen.Select(g => new WohnungListViewModelEntry(g, Db)).ToImmutableList();
             if (BetriebskostenrechnungsWohnung.Value == null)
@@ -187,7 +180,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Betrag != Betrag.Value ||
                 Entity.Datum.AsUtcKind() != Datum.Value ||
                 Entity.Notiz != Notiz.Value ||
-                Entity.Schluessel != Schluessel.Value.Schluessel ||
                 Entity.BetreffendesJahr != BetreffendesJahr.Value;
         }
 
@@ -196,7 +188,6 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Betrag = Betrag.Value;
             Entity.Datum = Datum.Value.UtcDateTime;
             Entity.Notiz = Notiz.Value;
-            Entity.Schluessel = Schluessel.Value.Schluessel;
             Entity.BetreffendesJahr = BetreffendesJahr.Value;
             Entity.Umlage = Umlage.Value.Entity;
             

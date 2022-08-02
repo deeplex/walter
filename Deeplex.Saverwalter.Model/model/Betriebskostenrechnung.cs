@@ -16,7 +16,6 @@ namespace Deeplex.Saverwalter.Model
         public double Betrag { get; set; }
         public DateTime Datum { get; set; }
         public int BetreffendesJahr { get; set; }
-        public UmlageSchluessel Schluessel { get; set; }
         public Umlage Umlage { get; set; } = null!;
         public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
 

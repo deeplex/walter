@@ -72,7 +72,7 @@ namespace Deeplex.Saverwalter.Model
             get
             {
                 var VerbrauchList = Rechnungen
-                    .Where(g => g.Schluessel == UmlageSchluessel.NachVerbrauch)
+                    .Where(g => g.Umlage.Schluessel == UmlageSchluessel.NachVerbrauch)
                     .Select(r => b.GetVerbrauch(r));
 
                 if (VerbrauchList.Any(w => w.Count() == 0))
@@ -92,7 +92,7 @@ namespace Deeplex.Saverwalter.Model
 
 
         public Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch => Rechnungen
-        .Where(g => g.Schluessel == UmlageSchluessel.NachVerbrauch)
+        .Where(g => g.Umlage.Schluessel == UmlageSchluessel.NachVerbrauch)
         .Select(r => b.GetVerbrauch(r, true))
         .ToDictionary(g => g.First().Betriebskostentyp, g => g.GroupBy(gg => gg.Zaehlertyp)
         .Select(gg => (gg.Key, gg.Sum(ggg => ggg.Delta))).ToList());
@@ -119,7 +119,7 @@ namespace Deeplex.Saverwalter.Model
             .ToList();
         public double GesamtBetragKalt => Rechnungen.Where(r => (int)r.Umlage.Typ % 2 == 0).Sum(r => r.Betrag);
         public double BetragKalt => Rechnungen.Where(r => (int)r.Umlage.Typ % 2 == 0).Aggregate(0.0, (a, r) =>
-            r.Schluessel switch
+            r.Umlage.Schluessel switch
             {
                 UmlageSchluessel.NachWohnflaeche => a + r.Betrag * WFZeitanteil,
                 UmlageSchluessel.NachNutzeinheit => a + r.Betrag * NEZeitanteil,
