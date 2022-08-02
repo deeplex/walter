@@ -96,7 +96,7 @@ namespace Deeplex.Saverwalter.ViewModels
             AllgemeinZaehler_List = Db.ctx.ZaehlerSet
                 .Select(a => new ZaehlerListViewModelEntry(a))
                 .ToList();
-            AllgemeinZaehler = new(this, AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Zaehler?.ZaehlerId));
+            AllgemeinZaehler = new(this, AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Umlage.Zaehler?.ZaehlerId));
 
             Umlagen_List = Db.ctx.Umlagen
                 .Include(u => u.Wohnungen).ThenInclude(w => w.Adresse)

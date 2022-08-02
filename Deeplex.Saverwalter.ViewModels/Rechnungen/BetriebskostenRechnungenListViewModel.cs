@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Include(b => b.Anhaenge)
                 .Include(b => b.Umlage).ThenInclude(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Anhaenge)
                 .Include(b => b.Umlage).ThenInclude(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Wohnungen).ThenInclude(w => w.Anhaenge)
-                .Include(b => b.Zaehler).ThenInclude(b => b.Anhaenge)
+                .Include(b => b.Umlage.Zaehler).ThenInclude(b => b.Anhaenge)
                 .Include(b => b.Wohnungen).ThenInclude(g => g.Adresse).ThenInclude(a => a.Anhaenge)
                 .ToList();
         }
