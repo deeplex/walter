@@ -40,6 +40,14 @@ namespace Deeplex.Saverwalter.ViewModels
             List.Value = AllRelevant;
         }
 
+        public BetriebskostenRechnungenListViewModel(IWalterDbService db, INotificationService ns, Umlage u) : this(ns)
+        {
+            AllRelevant = transform(db, include(db)
+                .Where(e => u.Betriebskostenrechnungen.Exists(i => i.BetriebskostenrechnungId == e.BetriebskostenrechnungId))
+                .ToList());
+            List.Value = AllRelevant;
+        }
+
         private List<Betriebskostenrechnung> include(IWalterDbService db)
         {
             return db.ctx.Betriebskostenrechnungen

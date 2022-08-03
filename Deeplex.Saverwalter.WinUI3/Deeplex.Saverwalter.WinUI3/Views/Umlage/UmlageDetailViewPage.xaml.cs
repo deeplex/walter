@@ -16,6 +16,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
     {
         public UmlageDetailViewModel ViewModel { get; private set; }
         public WohnungListViewModel WohnungListViewModel { get; private set; }
+        public BetriebskostenRechnungenListViewModel BetriebskostenRechnungenListViewModel { get; private set; }
 
         public UmlageDetailViewPage()
         {
@@ -34,6 +35,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             {
                 ViewModel = new(r, App.NotificationService, App.WalterService);
                 WohnungListViewModel = new(App.WalterService, App.NotificationService, r);
+                BetriebskostenRechnungenListViewModel = new(App.WalterService, App.NotificationService, r);
             }
             else if (e.Parameter is null)
             {

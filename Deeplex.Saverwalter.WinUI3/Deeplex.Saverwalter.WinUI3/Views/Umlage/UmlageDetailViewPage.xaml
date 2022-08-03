@@ -66,6 +66,11 @@
                         <uc:WohnungListControl ViewModel="{x:Bind WohnungListViewModel}"/>
                     </uc:ExpanderControl.MainContent>
                 </uc:ExpanderControl>
+                <uc:ExpanderControl Margin="0,20,0,0" Header="Betriebskostenrechnungen">
+                    <uc:ExpanderControl.MainContent>
+                        <uc:BetriebskostenRechnungenListControl ViewModel="{x:Bind BetriebskostenRechnungenListViewModel}"/>
+                    </uc:ExpanderControl.MainContent>
+                </uc:ExpanderControl>
             </StackPanel>
         </uc:FileDrop.MainContent>
     </uc:FileDrop>
