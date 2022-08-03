@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public override string ToString() => "Betriebskostenrechnungen";
 
         protected override ImmutableList<BetriebskostenRechnungenListEntry> updateList(string filter)
-            => List.Value.Where(v => applyFilter(filter, v.Typ.ToDescriptionString(), v.AdressenBezeichnung, v.BetreffendesJahr.ToString())).ToImmutableList();
+            => List.Value.Where(v => applyFilter(filter, v.Typ.ToDescriptionString(), v.ToString(), v.BetreffendesJahr.ToString())).ToImmutableList();
 
         public BetriebskostenRechnungenListViewModel(IWalterDbService db, INotificationService ns): this(ns)
         {
@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             AllRelevant = transform(db,
                 include(db)
-                    .Where(b => b.Wohnungen.Exists(w => v.Wohnung.WohnungId == w.WohnungId))
+                    .Where(b => b.Umlage.Wohnungen.Exists(w => v.Wohnung.WohnungId == w.WohnungId))
                     .ToList());
             List.Value = AllRelevant;
         }
@@ -35,8 +35,16 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             AllRelevant = transform(db,
                 include(db)
-                    .Where(b => b.Wohnungen.Exists(i => i.WohnungId == w.WohnungId))
+                    .Where(b => b.Umlage.Wohnungen.Exists(i => i.WohnungId == w.WohnungId))
                     .ToList());
+            List.Value = AllRelevant;
+        }
+
+        public BetriebskostenRechnungenListViewModel(IWalterDbService db, INotificationService ns, Umlage u) : this(ns)
+        {
+            AllRelevant = transform(db, include(db)
+                .Where(e => u.Betriebskostenrechnungen.Exists(i => i.BetriebskostenrechnungId == e.BetriebskostenrechnungId))
+                .ToList());
             List.Value = AllRelevant;
         }
 
@@ -44,9 +52,10 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             return db.ctx.Betriebskostenrechnungen
                 .Include(b => b.Anhaenge)
-                .Include(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Anhaenge)
-                .Include(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Wohnungen).ThenInclude(w => w.Anhaenge)
-                .Include(b => b.Zaehler).ThenInclude(b => b.Anhaenge)
+                .Include(b => b.Umlage).ThenInclude(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Anhaenge)
+                .Include(b => b.Umlage).ThenInclude(g => g.Wohnungen).ThenInclude(w => w.Adresse).ThenInclude(a => a.Wohnungen).ThenInclude(w => w.Anhaenge)
+                .Include(b => b.Umlage.Zaehler).ThenInclude(b => b.Anhaenge)
+                .Include(b => b.Umlage.Wohnungen).ThenInclude(g => g.Adresse).ThenInclude(a => a.Anhaenge)
                 .ToList();
         }
         private ImmutableList<BetriebskostenRechnungenListEntry> transform(IWalterDbService db, List<Betriebskostenrechnung> list)

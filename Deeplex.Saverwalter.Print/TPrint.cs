@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.Print
             }
 
             // There is a Umlage nach Nutzfläche in the Heizkostenberechnung:
-            if (b.nNF() || b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Wohnungen.Count > 1).Any(r => (int)r.Typ % 2 == 1)))
+            if (b.nNF() || b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Umlage.Wohnungen.Count > 1).Any(r => (int)r.Umlage.Typ % 2 == 1)))
             {
                 left1.Add("n. NF");
                 left2.Add("n. NF");
@@ -146,8 +146,8 @@ namespace Deeplex.Saverwalter.Print
         }
         private static void ExplainKalteBetriebskosten(IBetriebskostenabrechnung b, IPrint<T> p)
         {
-            var runs = b.Gruppen
-                .SelectMany(g => g.Rechnungen.Where(r => r.Beschreibung != null && r.Beschreibung.Trim() != ""))
+            var runs = b.Wohnung.Umlagen
+                .Where(r => r.Beschreibung != null && r.Beschreibung.Trim() != "")
                 .SelectMany(t => new List<PrintRun>()
                 {
                     new PrintRun(t.Typ.ToDescriptionString() + ": ", true, false, true),
@@ -251,7 +251,7 @@ namespace Deeplex.Saverwalter.Print
             }
             else
             {
-                if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachWohnflaeche))
+                if (g.Rechnungen.Exists(r => r.Umlage.Schluessel == UmlageSchluessel.NachWohnflaeche))
                 {
                     col1.Add("bei Umlage nach Wohnfläche (n. WF)");
                     col2.Add("");
@@ -268,7 +268,7 @@ namespace Deeplex.Saverwalter.Print
                     underlined.Add(true);
                 }
 
-                if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachNutzflaeche))
+                if (g.Rechnungen.Exists(r => r.Umlage.Schluessel == UmlageSchluessel.NachNutzflaeche))
                 {
                     col1.Add("bei Umlage nach Nutzfläche (n. NF)");
                     col2.Add("");
@@ -285,7 +285,7 @@ namespace Deeplex.Saverwalter.Print
                     underlined.Add(true);
                 }
 
-                if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachNutzeinheit))
+                if (g.Rechnungen.Exists(r => r.Umlage.Schluessel == UmlageSchluessel.NachNutzeinheit))
                 {
                     col1.Add("bei Umlage nach Nutzeinheiten (n. NE)");
                     col2.Add("");
@@ -302,7 +302,7 @@ namespace Deeplex.Saverwalter.Print
                     underlined.Add(true);
                 }
 
-                if (g.Rechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachPersonenzahl))
+                if (g.Rechnungen.Exists(r => r.Umlage.Schluessel == UmlageSchluessel.NachPersonenzahl))
                 {
                     col1.Add("bei Umlage nach Personenzahl (n. Pers.)");
                     col2.Add("");
@@ -389,8 +389,8 @@ namespace Deeplex.Saverwalter.Print
 
             void kostenPunkt(Betriebskostenrechnung rechnung, string zeitraum, int Jahr, double anteil, bool f = true)
             {
-                col1.Add(f ? rechnung.Typ.ToDescriptionString() : "");
-                col2.Add(g.GesamtEinheiten == 1 ? "Direkt" : (f ? rechnung.Schluessel.ToDescriptionString() : ""));
+                col1.Add(f ? rechnung.Umlage.Typ.ToDescriptionString() : "");
+                col2.Add(g.GesamtEinheiten == 1 ? "Direkt" : (f ? rechnung.Umlage.Schluessel.ToDescriptionString() : ""));
                 col3.Add(zeitraum);
                 col4.Add(Euro(rechnung.Betrag));
                 col5.Add(Prozent(anteil));
@@ -399,10 +399,10 @@ namespace Deeplex.Saverwalter.Print
                 underlined.Add(true);
             }
 
-            foreach (var rechnung in g.Rechnungen.Where(r => (int)r.Typ % 2 == 0)) // Kalte Betriebskosten
+            foreach (var rechnung in g.Rechnungen.Where(r => (int)r.Umlage.Typ % 2 == 0)) // Kalte Betriebskosten
             {
                 string zeitraum;
-                switch (rechnung.Schluessel)
+                switch (rechnung.Umlage.Schluessel)
                 {
                     case UmlageSchluessel.NachWohnflaeche:
                         zeitraum = Datum(b.Nutzungsbeginn) + " - " + Datum(b.Nutzungsende);
@@ -427,7 +427,7 @@ namespace Deeplex.Saverwalter.Print
                             rechnung,
                             zeitraum,
                             b.Jahr,
-                            g.VerbrauchAnteil.ContainsKey(rechnung.Typ) ? g.VerbrauchAnteil[rechnung.Typ] : 0);
+                            g.VerbrauchAnteil.ContainsKey(rechnung.Umlage.Typ) ? g.VerbrauchAnteil[rechnung.Umlage.Typ] : 0);
                         break;
                     default:
                         break; // TODO or throw something...
@@ -455,11 +455,11 @@ namespace Deeplex.Saverwalter.Print
         {
             var widths = new int[] { 50, 10 };
 
-            foreach (var rechnung in g.Rechnungen.Where(r => (int)r.Typ % 2 == 1)) // Warme Betriebskosten
+            foreach (var rechnung in g.Rechnungen.Where(r => (int)r.Umlage.Typ % 2 == 1)) // Warme Betriebskosten
             {
                 var col1 = new List<string>
                 {
-                    rechnung.Typ.ToDescriptionString(),
+                    rechnung.Umlage.Typ.ToDescriptionString(),
                     "Kosten für Brennstoffe",
                     "Betriebskosten der Anlage (5% pauschal)",
                     "Gesamt",
@@ -501,9 +501,9 @@ namespace Deeplex.Saverwalter.Print
             var bold = new List<bool> { true, true, false };
             var underlined = new List<bool> { false, false, true };
 
-            var warmeRechnungen = g.Rechnungen.Where(r => (int)r.Typ % 2 == 1).ToList();
+            var warmeRechnungen = g.Rechnungen.Where(r => (int)r.Umlage.Typ % 2 == 1).ToList();
 
-            if (warmeRechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachPersonenzahl))
+            if (warmeRechnungen.Exists(r => r.Umlage.Schluessel == UmlageSchluessel.NachPersonenzahl))
             {
                 col1.Add("bei Umlage nach Personenzahl (n. Pers.)");
                 col2.Add("");
@@ -542,7 +542,7 @@ namespace Deeplex.Saverwalter.Print
                 }
             }
 
-            if (warmeRechnungen.Exists(r => r.Schluessel == UmlageSchluessel.NachVerbrauch))
+            if (warmeRechnungen.Exists(r => r.Umlage.Schluessel == UmlageSchluessel.NachVerbrauch))
             {
                 col1.Add("bei Umlage nach Verbrauch (n. Verb.)");
                 col2.Add("");

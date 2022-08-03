@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.Model
         public List<Vertrag> Vertraege { get; private set; } = new List<Vertrag>();
         public List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
         public List<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; private set; } = new List<Erhaltungsaufwendung>();
-        public List<Betriebskostenrechnung> Betriebskostenrechnungen { get; private set; } = new List<Betriebskostenrechnung>();
+        public List<Umlage> Umlagen { get; private set; } = new List<Umlage>();
         public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
     }
 }

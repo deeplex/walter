@@ -111,33 +111,35 @@ namespace Deeplex.Saverwalter.Model
                 .Include(v => v.Wohnung)
                     .ThenInclude(w => w.Adresse)
                 .Include(v => v.Wohnung)
-                    .ThenInclude(w => w.Betriebskostenrechnungen)
+                    .ThenInclude(w => w.Umlagen)
                         .ThenInclude(w => w.Wohnungen)
                             .ThenInclude(w => w.Adresse)
                 .Include(v => v.Wohnung)
-                    .ThenInclude(w => w.Betriebskostenrechnungen)
+                    .ThenInclude(w => w.Umlagen)
                         .ThenInclude(g => g.Wohnungen)
                             .ThenInclude(w => w.Vertraege)
                 .Include(v => v.Wohnung)
-                    .ThenInclude(b => b.Betriebskostenrechnungen)
+                    .ThenInclude(b => b.Umlagen)
                         .ThenInclude(g => g.Wohnungen)
                             .ThenInclude(w => w.Zaehler)
                                 .ThenInclude(z => z.Staende)
+                .Include(v => v.Wohnung)
+                    .ThenInclude(u => u.Umlagen)
+                        .ThenInclude(w => w.Betriebskostenrechnungen)
                 .First();
 
-            Gruppen = Vertrag.Wohnung.Betriebskostenrechnungen
+            Gruppen = Vertrag.Wohnung.Umlagen.SelectMany(u => u.Betriebskostenrechnungen)
                 .Where(g => g.BetreffendesJahr == Jahr)
-                .GroupBy(p => new SortedSet<int>(p.Wohnungen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
+                .GroupBy(p => new SortedSet<int>(p.Umlage.Wohnungen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
                 .Select(g => new Rechnungsgruppe(this, g.ToList()))
                 .ToList();
 
             // If Ansprechpartner or Besitzer is null => throw
         }
 
-        public List<Verbrauch>
-            GetVerbrauch(Betriebskostenrechnung r, bool ganzeGruppe = false)
+        public List<Verbrauch> GetVerbrauch(Betriebskostenrechnung r, bool ganzeGruppe = false)
         {
-            var Zaehler = r.Typ switch
+            var Zaehler = r.Umlage.Typ switch
             {
                 Betriebskostentyp.EntwaesserungSchmutzwasser =>
                     db.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
@@ -150,7 +152,7 @@ namespace Deeplex.Saverwalter.Model
 
             var fZaehler = Zaehler.Where(z =>
                 ganzeGruppe ?
-                    r.Wohnungen.Contains(z.Wohnung!) :
+                    r.Umlage.Wohnungen.Contains(z.Wohnung!) :
                     z.WohnungId == Wohnung.WohnungId);
 
             var ende = (ganzeGruppe ? Abrechnungsende : Nutzungsende).Date;
@@ -185,7 +187,7 @@ namespace Deeplex.Saverwalter.Model
             {
                 for (var i = 0; i < Ende.Count(); ++i)
                 {
-                    Deltas.Add(new Verbrauch(r.Typ, Ende[i].Zaehler.Kennnummer, Ende[i].Zaehler.Typ, Ende[i].Stand - Beginn[i].Stand));
+                    Deltas.Add(new Verbrauch(r.Umlage.Typ, Ende[i].Zaehler.Kennnummer, Ende[i].Zaehler.Typ, Ende[i].Stand - Beginn[i].Stand));
                 }
             }
 

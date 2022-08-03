@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.Model
         public List<Betriebskostenrechnung> Rechnungen { get; }
 
         private IBetriebskostenabrechnung b { get; }
-        private List<Wohnung> gr => Rechnungen.First().Wohnungen.ToList();
+        private List<Wohnung> gr => Rechnungen.First().Umlage.Wohnungen.ToList();
         private IEnumerable<Vertrag> alleVertraegeDieserWohnungen => gr.SelectMany(w => w.Vertraege.Where(v =>
                 v.Beginn <= b.Abrechnungsende && (v.Ende is null || v.Ende >= b.Abrechnungsbeginn)));
 
@@ -72,7 +72,7 @@ namespace Deeplex.Saverwalter.Model
             get
             {
                 var VerbrauchList = Rechnungen
-                    .Where(g => g.Schluessel == UmlageSchluessel.NachVerbrauch)
+                    .Where(g => g.Umlage.Schluessel == UmlageSchluessel.NachVerbrauch)
                     .Select(r => b.GetVerbrauch(r));
 
                 if (VerbrauchList.Any(w => w.Count() == 0))
@@ -92,7 +92,7 @@ namespace Deeplex.Saverwalter.Model
 
 
         public Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch => Rechnungen
-        .Where(g => g.Schluessel == UmlageSchluessel.NachVerbrauch)
+        .Where(g => g.Umlage.Schluessel == UmlageSchluessel.NachVerbrauch)
         .Select(r => b.GetVerbrauch(r, true))
         .ToDictionary(g => g.First().Betriebskostentyp, g => g.GroupBy(gg => gg.Zaehlertyp)
         .Select(gg => (gg.Key, gg.Sum(ggg => ggg.Delta))).ToList());
@@ -114,17 +114,17 @@ namespace Deeplex.Saverwalter.Model
             .Select(v => (v.Key, v.Value.Sum(vv => vv.Delta), v.Value.Sum(vv => vv.Delta / vv.Anteil)))
             .ToDictionary(v => v.Key, v => v.Item2 / v.Item3);
         public List<Heizkostenberechnung> Heizkosten => Rechnungen
-            .Where(r => (int)r.Typ % 2 == 1)
+            .Where(r => (int)r.Umlage.Typ % 2 == 1)
             .Select(r => new Heizkostenberechnung(r, b))
             .ToList();
-        public double GesamtBetragKalt => Rechnungen.Where(r => (int)r.Typ % 2 == 0).Sum(r => r.Betrag);
-        public double BetragKalt => Rechnungen.Where(r => (int)r.Typ % 2 == 0).Aggregate(0.0, (a, r) =>
-            r.Schluessel switch
+        public double GesamtBetragKalt => Rechnungen.Where(r => (int)r.Umlage.Typ % 2 == 0).Sum(r => r.Betrag);
+        public double BetragKalt => Rechnungen.Where(r => (int)r.Umlage.Typ % 2 == 0).Aggregate(0.0, (a, r) =>
+            r.Umlage.Schluessel switch
             {
                 UmlageSchluessel.NachWohnflaeche => a + r.Betrag * WFZeitanteil,
                 UmlageSchluessel.NachNutzeinheit => a + r.Betrag * NEZeitanteil,
                 UmlageSchluessel.NachPersonenzahl => a + PersZeitanteil.Aggregate(0.0, (a2, z) => a2 += z.Anteil * r.Betrag),
-                UmlageSchluessel.NachVerbrauch => a + r.Betrag * checkVerbrauch(r.Typ),
+                UmlageSchluessel.NachVerbrauch => a + r.Betrag * checkVerbrauch(r.Umlage.Typ),
                 _ => a + 0, // TODO or throw something...
             });
         public double GesamtBetragWarm => Heizkosten.Sum(h => h.PauschalBetrag);
@@ -136,15 +136,15 @@ namespace Deeplex.Saverwalter.Model
             b = _b;
 
             // Remove 5% of Heizkosten to allgStrom (they are added there)
-            var allgStrom = Rechnungen.Find(r => r.Typ == Betriebskostentyp.AllgemeinstromHausbeleuchtung);
+            var allgStrom = Rechnungen.Find(r => r.Umlage.Typ == Betriebskostentyp.AllgemeinstromHausbeleuchtung);
             // TODO this 0.05 has to be variable.
             if (allgStrom != null && !b.AllgStromVerrechnetMitHeizkosten)
             {
                 var copy = allgStrom.ShallowCopy();
                 var idx = Rechnungen.IndexOf(allgStrom);
 
-                copy.Betrag -= b.Vertrag.Wohnung.Betriebskostenrechnungen
-                    .Where(g => g.BetreffendesJahr == b.Jahr && (int)g.Typ % 2 == 1)
+                copy.Betrag -= b.Vertrag.Wohnung.Umlagen.SelectMany(u => u.Betriebskostenrechnungen)
+                    .Where(g => g.BetreffendesJahr == b.Jahr && (int)g.Umlage.Typ % 2 == 1)
                     .Select(r => r.Betrag)
                     .Sum() * 0.05;
                 b.AllgStromVerrechnetMitHeizkosten = true;

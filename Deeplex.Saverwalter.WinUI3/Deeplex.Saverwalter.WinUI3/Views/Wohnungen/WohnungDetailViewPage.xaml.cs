@@ -53,19 +53,6 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 App.Window.Navigate(typeof(VertragDetailViewPage), vm);
             };
 
-            AddBetriebskostenrechnung_Click = () =>
-            {
-                var r = new Betriebskostenrechnung()
-                {
-                    BetreffendesJahr = DateTime.Now.Year,
-                    Datum = DateTime.Now,
-                };
-                ViewModel.Entity.Betriebskostenrechnungen.Add(r);
-
-                var vm = new BetriebskostenrechnungDetailViewModel(r, App.NotificationService, App.WalterService);
-                App.Window.Navigate(typeof(BetriebskostenrechnungenDetailViewPage), vm);
-            };
-
             AddErhaltungsaufwendung_Click = () =>
             {
                 var r = new Erhaltungsaufwendung()

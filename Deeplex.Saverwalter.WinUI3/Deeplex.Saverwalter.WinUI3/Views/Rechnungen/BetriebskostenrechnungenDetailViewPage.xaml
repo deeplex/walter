@@ -12,31 +12,24 @@
     <uc:FileDrop>
         <uc:FileDrop.MainContent>
             <StackPanel>
-                <uc:ComboControl
-                        Margin="10,10,10,10"
-                        ItemsSource="{x:Bind ViewModel.Typen_List}"
-                        SelectedItem="{x:Bind ViewModel.Typ.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Header="Kostentyp"/>
-                <uc:ExpanderControl IsExpanded="True" Header="Betroffene Wohneinheiten">
-                    <uc:ExpanderControl.MainContent>
-                        <muxc:TreeView
-                            Tapped="WohnungenTree_Tapped"
-                            SelectionMode="Multiple"
-                            x:Name="WohnungenTree"/>
-                    </uc:ExpanderControl.MainContent>    
-                </uc:ExpanderControl>
-                <MenuFlyoutSeparator/>
-                <TextBox
-                    Text="{x:Bind ViewModel.Beschreibung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Header="Beschreibung"/>
                 <StackPanel
                     Margin="0,10,0,0"
                     Orientation="Horizontal">
-                    <!--TODO-->
                     <uc:ComboControl
-                        ItemsSource="{x:Bind ViewModel.Schluessel_List}"
-                        SelectedItem="{x:Bind ViewModel.Schluessel.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Header="Umlageschlüssel"/>
+                        Margin="10,10,10,10"
+                        ItemsSource="{x:Bind ViewModel.Typen_List}"
+                        SelectedItem="{x:Bind ViewModel.Typ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Header="Kostentyp"/>
+                    <uc:ComboControl
+                        Margin="10,10,10,10"
+                        ItemsSource="{x:Bind ViewModel.Umlagen_List.Value, Mode=OneWay}"
+                        SelectedItem="{x:Bind ViewModel.Umlage.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Header="Umlage" />
+                </StackPanel>
+                <MenuFlyoutSeparator/>
+                <StackPanel
+                    Margin="0,10,0,0"
+                    Orientation="Horizontal">
                     <DatePicker
                         SelectedDate="{x:Bind ViewModel.BetreffendesJahrDatum, Mode=TwoWay}"
                         Margin="10,0,10,0"
@@ -52,34 +45,12 @@
                         Margin="10,0,0,0"
                         Header="Betrag"/>
                 </StackPanel>
-                <StackPanel Margin="0,10,0,0" Visibility="{x:Bind ViewModel.isHeizung}" Orientation="Horizontal">
-                    <Slider
-                        Value="{x:Bind ViewModel.HKVO_P7.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Width="100"
-                        Minimum="50"
-                        Maximum="70"
-                        Header="HKVO§7"/>
-                    <Slider
-                        Value="{x:Bind ViewModel.HKVO_P8.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Width="100"
-                        Minimum="50"
-                        Maximum="70"
-                        Margin="10,0,0,0"
-                        Header="HKVO§8"/>
-                    <ComboBox
-                        Margin="10,0,0,0"
-                        Header="HKVO§9"/>
-                </StackPanel>
                 <StackPanel>
                     <TextBox
+                        Margin="10,0,0,0"
                         Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Header="Notiz"/>
                 </StackPanel>
-                <uc:ExpanderControl Margin="0,20,0,0" Header="Wohnungen">
-                    <uc:ExpanderControl.MainContent>
-                        <uc:WohnungListControl ViewModel="{x:Bind WohnungListViewModel}"/>
-                    </uc:ExpanderControl.MainContent>
-                </uc:ExpanderControl>
             </StackPanel>
         </uc:FileDrop.MainContent>
     </uc:FileDrop>

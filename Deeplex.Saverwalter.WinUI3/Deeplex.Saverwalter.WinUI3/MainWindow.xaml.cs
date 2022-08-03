@@ -108,6 +108,7 @@ namespace Deeplex.Saverwalter.WinUI3
         public readonly string ZaehlerListLabel = "Zähler";
         public readonly string BetriebskostenrechnungenListLabel = "Betr. Rechnung";
         public readonly string ErhaltungsaufwendungenListLabel = "Erhaltungsaufw.";
+        public readonly string UmlageListLabel = "Umlagen";
 
         private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
         {
@@ -120,6 +121,7 @@ namespace Deeplex.Saverwalter.WinUI3
                 label == ZaehlerListLabel ? typeof(ZaehlerListViewPage) :
                 label == BetriebskostenrechnungenListLabel ? typeof(BetriebskostenRechnungenListViewPage) :
                 label == ErhaltungsaufwendungenListLabel ? typeof(ErhaltungsaufwendungenListViewPage) :
+                label == UmlageListLabel ? typeof(UmlageListViewPage) :
                 null;
 
             if (pageType != null && pageType != AppFrame.CurrentSourcePageType)
@@ -155,6 +157,10 @@ namespace Deeplex.Saverwalter.WinUI3
             else if (e.SourcePageType == typeof(ZaehlerListViewPage) || e.SourcePageType == typeof(ZaehlerDetailViewPage))
             {
                 NavView.SelectedItem = ZaehlerListMenuItem;
+            }
+            else if (e.SourcePageType == typeof(UmlageListViewPage) || e.SourcePageType == typeof(UmlageDetailViewPage))
+            {
+                NavView.SelectedItem = UmlageListMenuItem;
             }
             else if (e.SourcePageType == typeof(SettingsViewPage))
             {
@@ -208,6 +214,7 @@ namespace Deeplex.Saverwalter.WinUI3
                 Entry is Vertrag ? typeof(VertragDetailViewPage) :
                 Entry is Betriebskostenrechnung ? typeof(BetriebskostenrechnungenDetailViewPage) :
                 Entry is Erhaltungsaufwendung ? typeof(ErhaltungsaufwendungenDetailViewPage) :
+                Entry is Umlage ? typeof(UmlageDetailViewPage) :
                 null;
         }
 

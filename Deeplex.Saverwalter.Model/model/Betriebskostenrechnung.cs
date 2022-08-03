@@ -12,34 +12,14 @@ namespace Deeplex.Saverwalter.Model
             return (Betriebskostenrechnung)MemberwiseClone();
         }
 
-        public Betriebskostenrechnung NewYear()
-        {
-            var copy = ShallowCopy();
-            copy.BetreffendesJahr += 1;
-            copy.Betrag = 0;
-            copy.BetriebskostenrechnungId = 0;
-            copy.Wohnungen = new List<Wohnung>();
-
-            return copy;
-        }
-
         public int BetriebskostenrechnungId { get; set; }
-        public Betriebskostentyp Typ { get; set; }
         public double Betrag { get; set; }
         public DateTime Datum { get; set; }
         public int BetreffendesJahr { get; set; }
-        public UmlageSchluessel Schluessel { get; set; }
-        public string? Beschreibung { get; set; }
+        public Umlage Umlage { get; set; } = null!;
         public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
 
-        public double? HKVO_P7 { get; set; }
-        public double? HKVO_P8 { get; set; }
-        public HKVO_P9A2? HKVO_P9 { get; set; }
-        public Zaehler? Zaehler { get; set; }
-
         public string? Notiz { get; set; }
-
-        public List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
     }
 
     public enum HKVO_P9A2

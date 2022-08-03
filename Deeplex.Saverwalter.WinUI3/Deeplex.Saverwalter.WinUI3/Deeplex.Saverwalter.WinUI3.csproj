@@ -17,7 +17,10 @@
     <None Remove="UserControls\CommandBar\DetailCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\ListCommandBarControl.xaml" />
     <None Remove="UserControls\CommandBar\PrintCommandBarControl.xaml" />
+    <None Remove="UserControls\Lists\UmlageListControl.xaml" />
     <None Remove="UserControls\Utils\ErhaltungsaufwendungWohnungenControl.xaml" />
+    <None Remove="Views\Personen\BetriebskostenrechnungenDetailViewPage.xaml" />
+    <None Remove="Views\Personen\BetriebskostenRechnungenListViewPage.xaml" />
     <None Remove="Views\Rechnungen\BetriebskostenrechnungPrintViewPage.xaml" />
     <None Remove="Views\Rechnungen\ErhaltungsaufwendungenPrintViewPage.xaml" />
   </ItemGroup>
@@ -61,6 +64,9 @@
     </Compile>
     <Compile Update="UserControls\CommandBar\ErhaltungsaufwendungenPrintCommandBarControl - Copy.xaml.cs">
       <DependentUpon>ErhaltungsaufwendungenPrintCommandBarControl.xaml.cs</DependentUpon>
+    </Compile>
+    <Compile Update="UserControls\Lists\BetriebskostenRechnungenListControl - Copy.xaml.cs">
+      <DependentUpon>BetriebskostenRechnungenListControl.xaml</DependentUpon>
     </Compile>
     <Compile Update="UserControls\Utils\AdresseControl.xaml.cs">
       <DependentUpon>AdresseControl.xaml</DependentUpon>
@@ -195,6 +201,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Update="UserControls\Lists\UmlageListControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="UserControls\Utils\AdresseControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -262,6 +272,12 @@
     <Page Update="UserControls\Utils\PersonDetailControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Umlage\UmlageDetailViewPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Views\Umlage\UmlageListViewPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="Views\Personen\JuristischePersonenDetailViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
