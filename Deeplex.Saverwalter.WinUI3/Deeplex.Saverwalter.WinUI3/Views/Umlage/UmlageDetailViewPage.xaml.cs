@@ -51,24 +51,35 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 .ThenInclude(i => i.Umlagen)
                 .ThenInclude(w => w.Betriebskostenrechnungen)
                 .ToList()
+                .GroupBy(a => a.Stadt)
+                .ToList()
                 .ForEach(a =>
                 {
-                    if (a.Wohnungen.Count == 0) return;
+                    var ls = a.ToList();
+                    if (ls.Count == 0) return;
 
-                    var k = new TreeViewNode()
+                    var r = new TreeViewNode() { Content = a.Key };
+
+                    ls.ForEach(d =>
                     {
-                        Content = AdresseViewModel.Anschrift(a),
-                    };
-                    a.Wohnungen.ForEach(w =>
-                    {
-                        var n = new TreeViewNode() { Content = new WohnungListViewModelEntry(w, App.WalterService) };
-                        k.Children.Add(n);
-                        if (ViewModel.Wohnungen.Value.Exists(ww => ww.Id == w.WohnungId))
+                        if (d.Wohnungen.Count == 0)
                         {
-                            WohnungenTree.SelectedNodes.Add(n);
+                            return;
                         }
+
+                        var k = new TreeViewNode() { Content = AdresseViewModel.Anschrift(d) };
+                        d.Wohnungen.ForEach(w =>
+                        {
+                            var n = new TreeViewNode() { Content = new WohnungListViewModelEntry(w, App.WalterService) };
+                            k.Children.Add(n);
+                            if (ViewModel.Wohnungen.Value.Exists(i => i.Id == w.WohnungId))
+                            {
+                                WohnungenTree.SelectedNodes.Add(n);
+                            }
+                        });
+                        r.Children.Add(k);
                     });
-                    WohnungenTree.RootNodes.Add(k);
+                    WohnungenTree.RootNodes.Add(r);
                 });
         }
 
