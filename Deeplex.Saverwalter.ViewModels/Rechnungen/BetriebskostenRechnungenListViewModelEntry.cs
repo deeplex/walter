@@ -7,13 +7,18 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class BetriebskostenRechnungenListEntry
     {
+        public override string ToString()
+        {
+            var str = Wohnungen.GetWohnungenBezeichnung();
+            return str.Trim() == string.Empty ? "Keine Wohnung" : str;
+        }
+
         public Betriebskostenrechnung Entity { get; }
         public int Id => Entity.BetriebskostenrechnungId;
         public List<Wohnung> Wohnungen { get; }
         public Betriebskostentyp Typ => Entity.Umlage.Typ;
         public int BetreffendesJahr => Entity.BetreffendesJahr;
         public double Betrag => Entity.Betrag;
-        public string AdressenBezeichnung { get; }
 
         public int Tmpl { get; } = 0;
 
@@ -21,7 +26,6 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Entity = r;
             Wohnungen = r.Umlage.Wohnungen.ToList();
-            AdressenBezeichnung = Entity.GetWohnungenBezeichnung();
         }
 
         public BetriebskostenRechnungenListEntry(Betriebskostenrechnung r, int tmpl)

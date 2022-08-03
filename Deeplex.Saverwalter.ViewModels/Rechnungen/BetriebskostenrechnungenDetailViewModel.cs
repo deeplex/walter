@@ -22,11 +22,25 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public List<HKVO9Util> HKVO_P9_List = Enums.HKVO9;
         public List<UmlageSchluesselUtil> Schluessel_List = Enums.UmlageSchluessel;
-        public List<BetriebskostentypUtil> Typen_List = Enums.Betriebskostentyp;
-        public List<UmlageListViewModelEntry> Umlagen_List { get; }
+        public ObservableProperty<List<UmlageListViewModelEntry>> Umlagen_List { get; } = new();
         public List<ZaehlerListViewModelEntry> AllgemeinZaehler_List;
 
         public SavableProperty<ZaehlerListViewModelEntry> AllgemeinZaehler { get; }
+
+        public List<BetriebskostentypUtil> Typen_List { get; }
+        public BetriebskostentypUtil Typ
+        {
+            get => Typen_List.FirstOrDefault(t => t.Typ == Umlage.Value?.Typ);
+            set
+            {
+                Umlagen_List.Value = updateUmlagenList(value.Typ);
+                if (value != Typ)
+                {
+                    Umlage.Value = Umlagen_List.Value.First();
+                }
+                RaisePropertyChangedAuto();
+            }
+        }
 
         public SavableProperty<double> Betrag { get; }
         public SavableProperty<DateTimeOffset> Datum { get; }
@@ -66,11 +80,24 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Umlage.Wohnungen.RemoveAll(w => !Wohnungen.Value.Exists(v => v.Entity == w));
         }
 
+        private List<UmlageListViewModelEntry> updateUmlagenList(Betriebskostentyp e)
+        {
+            return Db.ctx.Umlagen
+                .Include(u => u.Wohnungen).ThenInclude(w => w.Adresse)
+                .ToList()
+                .Where(u => u.Typ == e)
+                //.ToList()
+                .Select(e => new UmlageListViewModelEntry(e))
+                .ToList();
+        }
+
         public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, INotificationService ns, IWalterDbService db)
         {
             Entity = r;
             Db = db;
             NotifcationService = ns;
+
+            Typen_List = Enums.Betriebskostentyp.Where(e => Db.ctx.Betriebskostenrechnungen.ToList().Exists(br => br.Umlage.Typ == e.Typ)).ToList();
 
             var datum = r.Datum == default ? DateTime.Now : r.Datum;
 
@@ -98,14 +125,8 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToList();
             AllgemeinZaehler = new(this, AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Umlage?.Zaehler?.ZaehlerId));
 
-            Umlagen_List = Db.ctx.Umlagen
-                .Include(u => u.Wohnungen).ThenInclude(w => w.Adresse)
-                .ToList()
-                //.Where(u => u.Typ == r.Umlage?.Typ)
-                //.ToList()
-                .Select(e => new UmlageListViewModelEntry(e))
-                .ToList();
-            Umlage = new(this, Umlagen_List.FirstOrDefault(e => e.Id == r.Umlage.UmlageId));
+            Umlagen_List.Value = updateUmlagenList(r.Umlage.Typ);
+            Umlage = new(this, Umlagen_List.Value.FirstOrDefault(e => e.Id == r.Umlage.UmlageId));
 
             Delete = new AsyncRelayCommand(async _ =>
             {

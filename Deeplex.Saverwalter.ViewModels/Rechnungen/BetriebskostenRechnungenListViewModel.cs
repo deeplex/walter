@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public override string ToString() => "Betriebskostenrechnungen";
 
         protected override ImmutableList<BetriebskostenRechnungenListEntry> updateList(string filter)
-            => List.Value.Where(v => applyFilter(filter, v.Typ.ToDescriptionString(), v.AdressenBezeichnung, v.BetreffendesJahr.ToString())).ToImmutableList();
+            => List.Value.Where(v => applyFilter(filter, v.Typ.ToDescriptionString(), v.ToString(), v.BetreffendesJahr.ToString())).ToImmutableList();
 
         public BetriebskostenRechnungenListViewModel(IWalterDbService db, INotificationService ns): this(ns)
         {

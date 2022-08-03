@@ -7,14 +7,17 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class UmlageListViewModelEntry
     {
-        public override string ToString() => Typ.ToDescriptionString() + " - " + Wohnungen.GetWohnungenBezeichnung();
+        public override string ToString()
+        {
+            var str = Wohnungen.GetWohnungenBezeichnung();
+            return str.Trim() == string.Empty ? "Keine Wohnung" : str;
+        }
 
         public Umlage Entity { get; }
         public int Id => Entity.UmlageId;
         public string Beschreibung => Entity.Beschreibung;
         public List<Wohnung> Wohnungen { get; }
         public Betriebskostentyp Typ => Entity.Typ;
-        public string AdressenBezeichnung { get; }
 
         public int Tmpl { get; } = 0;
 
@@ -22,7 +25,6 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Entity = r;
             Wohnungen = r.Wohnungen.ToList();
-            AdressenBezeichnung = Entity.Wohnungen.GetWohnungenBezeichnung();
         }
 
         public UmlageListViewModelEntry(Umlage r, int tmpl)

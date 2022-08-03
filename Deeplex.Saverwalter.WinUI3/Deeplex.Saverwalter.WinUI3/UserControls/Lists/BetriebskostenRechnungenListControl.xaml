@@ -51,7 +51,7 @@
                         <TextBlock
                             VerticalAlignment="Center"
                             Padding="10,0,10,0"
-                            Text="{x:Bind AdressenBezeichnung, Mode=OneWay}"/>
+                            Text="{x:Bind Mode=OneWay}"/>
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>
