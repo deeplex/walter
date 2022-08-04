@@ -90,34 +90,18 @@
                         <uc:ExpanderControl.MainContent>
                             <uc:BetriebskostenRechnungenListControl ViewModel="{x:Bind BetriebskostenrechnungViewModel}"/>
                         </uc:ExpanderControl.MainContent>
-                        <uc:ExpanderControl.Bonus>
-                            <StackPanel Orientation="Horizontal">
-                            <NumberBox
-                                Margin="10,0,10,0"
-                                SpinButtonPlacementMode="Inline"
-                                Value="{x:Bind ViewModel.BetriebskostenrechnungsJahr.Value, Mode=TwoWay}" />
-                            <CheckBox
-                                ToolTipService.ToolTip="Zeige Vorlagen für das neue Jahr, basierend auf den Eingaben aus dem Vorjahr."
-                                IsChecked="{x:Bind ViewModel.ZeigeVorlagen.Value, Mode=TwoWay}"
-                                Content="Zeige Vorlagen" />
-                            </StackPanel>
-                        </uc:ExpanderControl.Bonus>
+                    </uc:ExpanderControl>
+
+                    <uc:ExpanderControl Header="Umlagen">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:UmlageListControl ViewModel="{x:Bind UmlageListViewModel}"/>
+                        </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
                     <uc:ExpanderControl Header="Erhaltungsaufwendungen" Click="{x:Bind AddErhaltungsaufwendung_Click}">
                         <uc:ExpanderControl.MainContent>
                             <uc:ErhaltungsaufwendungenListControl ViewModel="{x:Bind ErhaltungsaufwendungViewModel}"/>
                         </uc:ExpanderControl.MainContent>
-                        <uc:ExpanderControl.Bonus>
-                            <Button
-                                Click="Erhaltungsaufwendung_Click"
-                                Background="Transparent">
-                                <StackPanel Orientation="Horizontal">
-                                    <SymbolIcon Symbol="PostUpdate" />
-                                    <TextBlock Margin="10,0,0,0" Text="Erhaltungsaufwendungen"/>
-                                </StackPanel>
-                            </Button>
-                        </uc:ExpanderControl.Bonus>
                     </uc:ExpanderControl>
                 </StackPanel>
             </ScrollViewer>
