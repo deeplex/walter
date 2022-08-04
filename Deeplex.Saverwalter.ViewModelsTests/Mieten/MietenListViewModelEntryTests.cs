@@ -19,8 +19,8 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
             stub.Entity.Should().NotBeNull();
 
             stub.Betrag.Should().Be(0);
-            stub.BetreffenderMonat.Should().BeSameDateAs(DateTime.Now.AsUtcKind());
-            stub.Zahlungsdatum.Should().BeSameDateAs(DateTime.Now.AsUtcKind());
+            stub.BetreffenderMonat.Value.Should().BeSameDateAs(DateTime.Now.AsUtcKind());
+            stub.Zahlungsdatum.Value.Should().BeSameDateAs(DateTime.Now.AsUtcKind());
             stub.Notiz.Should().BeNull();
         }
 
@@ -52,8 +52,8 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
             stub.Entity.Should().NotBeNull();
 
             stub.Betrag.Should().Be(betrag);
-            stub.BetreffenderMonat.Should().BeSameDateAs(betreffenderMonat);
-            stub.Zahlungsdatum.Should().BeSameDateAs(zahlungsDatum);
+            stub.BetreffenderMonat.Value.Should().BeSameDateAs(betreffenderMonat);
+            stub.Zahlungsdatum.Value.Should().BeSameDateAs(zahlungsDatum);
             stub.Notiz.Should().Be(notiz);
         }
 
@@ -73,19 +73,19 @@ namespace Deeplex.Saverwalter.ViewModels.Tests
             //var mockList = new MietenListViewModel();
             var stub = new MietenListViewModelEntry(mockMiete, null);
 
-            stub.Betrag = betrag;
-            stub.BetreffenderMonat = betreffenderMonat;
+            stub.Betrag.Value = betrag;
+            stub.BetreffenderMonat.Value = betreffenderMonat;
             // Zahlungsdatum has no set
             // stub.Zahlungsdatum = zahlungsDatum;
-            stub.Notiz = notiz;
+            stub.Notiz.Value = notiz;
 
             stub.Should().NotBeNull();
 
             stub.Entity.Should().NotBeNull();
 
             stub.Betrag.Should().Be(betrag);
-            stub.BetreffenderMonat.Should().BeSameDateAs(betreffenderMonat);
-            stub.Zahlungsdatum.Should().BeSameDateAs(zahlungsDatum);
+            stub.BetreffenderMonat.Value.Should().BeSameDateAs(betreffenderMonat);
+            stub.Zahlungsdatum.Value.Should().BeSameDateAs(zahlungsDatum);
             stub.Notiz.Should().Be(notiz);
         }
     }

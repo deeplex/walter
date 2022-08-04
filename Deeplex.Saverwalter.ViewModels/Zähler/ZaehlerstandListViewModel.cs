@@ -13,18 +13,29 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public IWalterDbService Db;
         public INotificationService NotificationService;
+        public RelayCommand Add { get; }
 
         public ZaehlerstandListViewModel(Zaehler z, INotificationService ns, IWalterDbService db)
         {
             ZaehlerId = z.ZaehlerId;
             NotificationService = ns;
             Db = db;
-            Liste.Value = z.Staende.Select(s => new ZaehlerstandListViewModelEntry(s, this)).ToImmutableList();
+            Liste.Value = z.Staende
+                .Select(s => new ZaehlerstandListViewModelEntry(s, this))
+                .OrderBy(e => e.Datum.Value)
+                .Reverse()
+                .ToImmutableList();
+
+            Add = new RelayCommand(_ =>
+            {
+                var zs = new Zaehlerstand
+                {
+                    Datum = System.DateTime.Today.AsUtcKind(),
+                    Zaehler = z
+                };
+                Liste.Value = Liste.Value.Prepend(new ZaehlerstandListViewModelEntry(zs, this)).ToImmutableList();
+            }, _ => true);
         }
 
-        public void AddToList(Zaehlerstand z)
-        {
-            Liste.Value = Liste.Value.Add(new ZaehlerstandListViewModelEntry(z, this));
-        }
     }
 }

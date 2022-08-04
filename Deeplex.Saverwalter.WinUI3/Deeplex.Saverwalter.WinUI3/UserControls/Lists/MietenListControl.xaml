@@ -17,58 +17,55 @@
     <UserControl.Resources>
         <conv:DateStringConverter x:Key="DateStringConverterKey" />
     </UserControl.Resources>
-    
-    <RelativePanel>
-        <StackPanel
-            RelativePanel.AlignRightWithPanel="True"
-            RelativePanel.AlignLeftWithPanel="True">
-            <uc:ExpanderControl Header="Mieten">
-                <uc:ExpanderControl.Bonus>
-                    <uc:AddMieteControl MietenListViewModel="{x:Bind ViewModel}" />
-                </uc:ExpanderControl.Bonus>
-                <uc:ExpanderControl.MainContent>
-                    <mtuuc:DataGrid
-                        Style="{StaticResource DataGridUserControl}"
-                        SelectionChanged="DataGrid_SelectionChanged"
-                        ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}">
-                        <mtuuc:DataGrid.Columns>
-                            <mtuuc:DataGridTemplateColumn>
-                                <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="vm:MietenListViewModelEntry">
-                                        <Button
-                                            HorizontalAlignment="Center"
-                                            Background="Transparent"
-                                            Command="{x:Bind SelfDestruct}">
-                                            <SymbolIcon Symbol="Delete"></SymbolIcon>
-                                        </Button>
-                                    </DataTemplate>
-                                </mtuuc:DataGridTemplateColumn.CellTemplate>
-                            </mtuuc:DataGridTemplateColumn>
-                            <mtuuc:DataGridTextColumn Header="Datum" Binding="{Binding Datum, Converter={StaticResource DateStringConverterKey}}"/>
-                            <mtuuc:DataGridTemplateColumn Header="Betr. Monat">
-                                <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="vm:MietenListViewModelEntry">
-                                        <DatePicker
-                                            Language="de"
-                                            SelectedDate="{x:Bind BetreffenderMonat, Mode=TwoWay}"
-                                            DayVisible="False"/>
-                                    </DataTemplate>
-                                </mtuuc:DataGridTemplateColumn.CellTemplate>
-                            </mtuuc:DataGridTemplateColumn>
-                            <mtuuc:DataGridTemplateColumn Header="Betrag">
-                                <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="vm:MietenListViewModelEntry">
-                                        <muxc:NumberBox Value="{x:Bind Betrag, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
-                                    </DataTemplate>
-                                </mtuuc:DataGridTemplateColumn.CellTemplate>
-                            </mtuuc:DataGridTemplateColumn>
-                            <mtuuc:DataGridTextColumn
-                                Binding="{Binding Notiz, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                Header="Notiz"/>
-                        </mtuuc:DataGrid.Columns>
-                    </mtuuc:DataGrid>
-                </uc:ExpanderControl.MainContent>
-            </uc:ExpanderControl>
-        </StackPanel>
-    </RelativePanel>
+
+    <mtuuc:DataGrid
+        Style="{StaticResource DataGridUserControl}"
+        SelectionChanged="DataGrid_SelectionChanged"
+        ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}">
+        <mtuuc:DataGrid.Columns>
+            <mtuuc:DataGridTemplateColumn>
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:MietenListViewModelEntry">
+                        <Button
+                            HorizontalAlignment="Center"
+                            Background="Transparent"
+                            Command="{x:Bind Delete}">
+                            <SymbolIcon Symbol="Delete"></SymbolIcon>
+                        </Button>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Zahlungsdatum">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:MietenListViewModelEntry">
+                        <CalendarDatePicker Language="de" Date="{x:Bind Zahlungsdatum.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Betr. Monat">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:MietenListViewModelEntry">
+                        <DatePicker
+                            Language="de"
+                            SelectedDate="{x:Bind BetreffenderMonat.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            DayVisible="False"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Betrag">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:MietenListViewModelEntry">
+                        <muxc:NumberBox Value="{x:Bind Betrag.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Notiz">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:MietenListViewModelEntry">
+                        <TextBox Text="{x:Bind Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+        </mtuuc:DataGrid.Columns>
+    </mtuuc:DataGrid>
 </UserControl>

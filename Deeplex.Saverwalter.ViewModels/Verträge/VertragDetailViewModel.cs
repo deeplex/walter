@@ -12,21 +12,8 @@ namespace Deeplex.Saverwalter.ViewModels
     public sealed class VertragDetailViewModel : VertragDetailViewModelVersion, IDetail
     {
         public Guid guid { get; }
-        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> AlleMieter = new();
-        public ObservableProperty<KontaktListViewModelEntry> AddMieter = new();
 
-        public void UpdateMieterList()
-        {
-            AlleMieter.Value = Db.ctx.JuristischePersonen
-                .ToImmutableList()
-                .Where(j => j.isMieter == true).Select(j => new KontaktListViewModelEntry(j))
-                .Concat(Db.ctx.NatuerlichePersonen
-                    .Where(n => n.isMieter == true).Select(n => new KontaktListViewModelEntry(n)))
-                 .Where(p => !Mieter.Value.Exists(e => p.Entity.PersonId == e.Entity.PersonId))
-                .ToImmutableList();
-        }
-
-        public List<WohnungListViewModelEntry> AlleWohnungen = new List<WohnungListViewModelEntry>();
+        public List<WohnungListViewModelEntry> AlleWohnungen;
         public List<KontaktListViewModelEntry> AlleKontakte;
 
         public ObservableProperty<ImmutableList<VertragDetailViewModelVersion>> Versionen = new();
@@ -79,13 +66,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 Ansprechpartner = AlleKontakte.Find(e => e.Entity.PersonId == partner.Guid);
             }
 
-            Mieter.Value = db.ctx.MieterSet
-                .Where(m => m.VertragId == v.First().VertragId)
-                .Select(m => new KontaktListViewModelEntry(db, m.PersonId))
-                .ToImmutableList();
-
-            UpdateMieterList();
-
             Delete = new AsyncRelayCommand(async _ =>
             {
                 if (await NotificationService.Confirmation())
@@ -99,21 +79,6 @@ namespace Deeplex.Saverwalter.ViewModels
             }, _ => true);
 
             Save = new RelayCommand(_ => save(), _ => true);
-
-            AddMieterCommand = new RelayCommand(_ =>
-            {
-                if (AddMieter.Value?.Entity.PersonId is Guid mieterGuid)
-                {
-                    Mieter.Value = Mieter.Value.Add(new KontaktListViewModelEntry(Db, mieterGuid));
-                    UpdateMieterList();
-                    Db.ctx.MieterSet.Add(new Mieter()
-                    {
-                        VertragId = guid,
-                        PersonId = mieterGuid,
-                    });
-                    Db.SaveWalter();
-                }
-            }, _ => true);
 
             AddVersion = new RelayCommand(_ =>
             {
@@ -153,9 +118,6 @@ namespace Deeplex.Saverwalter.ViewModels
             NotificationService.outOfSync = false;
         }
 
-        public RelayCommand AddMiete { get; }
-        public RelayCommand AddMieterCommand { get; }
-        public RelayCommand AddMietMinderung { get; }
         public RelayCommand AddVersion { get; }
         public AsyncRelayCommand RemoveVersion { get; }
     }

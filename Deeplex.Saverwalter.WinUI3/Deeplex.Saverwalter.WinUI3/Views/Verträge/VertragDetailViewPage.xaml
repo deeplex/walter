@@ -100,63 +100,15 @@
                             Content="Teil der jur. Person?"
                             Margin="15,15,0,0"/>
                     </mtuuc:WrapPanel>
-                    <uc:ExpanderControl Margin="0,20,0,0" IsExpanded="True" Header="Mieter">
-                        <uc:ExpanderControl.Bonus>
-                            <mtuuc:WrapPanel Orientation="Horizontal">
-                                <Button Margin="20,0,0,0" Background="Transparent">
-                                    <SymbolIcon Symbol="Add" />
-                                    <Button.Flyout>
-                                        <Flyout x:Name="AddMieter_Flyout">
-                                            <StackPanel Orientation="Horizontal">
-                                                <uc:ComboControl
-                                                    PlaceholderText="Mieter hinzufügen"
-                                                    SelectedItem="{x:Bind ViewModel.AddMieter.Value, Mode=TwoWay}"
-                                                    ItemsSource="{x:Bind ViewModel.AlleMieter.Value, Mode=OneWay}"/>
-                                                <Button Margin="10,0,0,0" Command="{x:Bind ViewModel.AddMieterCommand}">
-                                                    <SymbolIcon Symbol="Add" />
-                                                </Button>
-                                            </StackPanel>
-                                        </Flyout>
-                                    </Button.Flyout>
-                                </Button>
-                            </mtuuc:WrapPanel>
-                        </uc:ExpanderControl.Bonus>
+
+                    <uc:ExpanderControl Margin="0,20,0,0" IsExpanded="True" Header="Mieter"><!--Command="{x:Bind MieterListViewModel.Add}"-->
                         <uc:ExpanderControl.MainContent>
                             <uc:KontaktListControl ViewModel="{x:Bind MieterListViewModel}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
+                    <!--TODO: Add Version-->
                     <uc:ExpanderControl IsExpanded="True" Header="Versionen">
-                        <uc:ExpanderControl.Bonus>
-                            <mtuuc:WrapPanel Orientation="Horizontal">
-                                <Button Margin="20,0,0,0" Background="Transparent">
-                                    <SymbolIcon Symbol="Add" />
-                                    <Button.Flyout>
-                                        <Flyout>
-                                            <StackPanel Orientation="Horizontal">
-                                                <DatePicker
-                                                    Header="Beginn"
-                                                    Language="de"
-                                                    SelectedDate="{x:Bind ViewModel.AddVersionDatum, Mode=TwoWay}"/>
-                                                <Button
-                                                    VerticalAlignment="Bottom"
-                                                    Command="{x:Bind ViewModel.AddVersion}"
-                                                    Background="Transparent">
-                                                    <SymbolIcon Symbol="Add"/>
-                                                </Button>
-                                            </StackPanel>
-                                        </Flyout>
-                                    </Button.Flyout>
-                                </Button>
-                                <Button
-                                    Margin="20,0,0,0"
-                                    HorizontalAlignment="Right"
-                                    Background="Transparent"
-                                    Command="{x:Bind ViewModel.RemoveVersion}">
-                                    <SymbolIcon Symbol="Delete" />
-                                </Button>
-                            </mtuuc:WrapPanel>
-                        </uc:ExpanderControl.Bonus>
                         <uc:ExpanderControl.MainContent>
                             <StackPanel>
                                 <mtuuc:DataGrid
@@ -202,9 +154,14 @@
                             </StackPanel>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
-
-                    <uc:MietenListControl VertragGuid="{x:Bind ViewModel.guid}"/>
-                    <uc:MietMinderungListControl VertragGuid="{x:Bind ViewModel.guid}"/>
+                    <uc:ExpanderControl Header="Miete" Command="{x:Bind MietenListViewModel.Add}">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:MietenListControl ViewModel="{x:Bind MietenListViewModel, Mode=OneWay}"/>
+                        </uc:ExpanderControl.MainContent>
+                    </uc:ExpanderControl>
+                    <uc:ExpanderControl Header="Mietminderungen" Command="{x:Bind MietMinderungListViewModel.Add}">
+                        <uc:MietMinderungListControl ViewModel="{x:Bind MietMinderungListViewModel, Mode=OneWay}"/>
+                    </uc:ExpanderControl>
                     <uc:ExpanderControl Header="Betriebskostenrechnungen">
                         <uc:ExpanderControl.MainContent>
                             <uc:BetriebskostenRechnungenListControl ViewModel="{x:Bind BetriebskostenListViewModel}"/>

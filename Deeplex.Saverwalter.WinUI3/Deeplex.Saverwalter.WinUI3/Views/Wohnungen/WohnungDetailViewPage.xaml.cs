@@ -16,6 +16,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         public VertragListViewModel VertragListViewModel { get; private set; }
         public WohnungListViewModel WohnungAdresseViewModel { get; private set; }
         public BetriebskostenRechnungenListViewModel BetriebskostenrechnungViewModel { get; private set; }
+        public UmlageListViewModel UmlageListViewModel { get; private set; }
         public ErhaltungsaufwendungenListViewModel ErhaltungsaufwendungViewModel { get; private set; }
         public ZaehlerListViewModel ZaehlerListViewModel { get; private set; }
 
@@ -34,6 +35,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 BetriebskostenrechnungViewModel = new(App.WalterService, App.NotificationService, wohnung);
                 ErhaltungsaufwendungViewModel = new(App.WalterService, App.NotificationService, wohnung);
                 ZaehlerListViewModel = new(App.WalterService, App.NotificationService, wohnung);
+                UmlageListViewModel = new(App.WalterService, App.NotificationService, wohnung);
             }
             else if (e.Parameter is null) // New Wohnung
             {

@@ -14,6 +14,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public IWalterDbService Db;
         public INotificationService NotificationService;
+        public RelayCommand Add { get; }
 
         public MietMinderungListViewModel(Guid VertragGuid, INotificationService ns, IWalterDbService db)
         {
@@ -24,13 +25,22 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Liste.Value = Db.ctx.MietMinderungen
                 .Where(m => m.VertragId == VertragGuid)
+                .ToList()
                 .Select(m => new MietminderungListViewModelEntry(m, self))
+                .OrderBy(e => e.Beginn)
+                .Reverse()
                 .ToImmutableList();
-        }
 
-        public void AddToList(MietMinderung z)
-        {
-            Liste.Value = Liste.Value.Add(new MietminderungListViewModelEntry(z, this));
+            Add = new RelayCommand(_ =>
+            {
+                var mm = new MietMinderung
+                {
+                    Beginn = DateTime.Today.AsUtcKind(),
+                    Ende = DateTime.Today.AsUtcKind().AddDays(30),
+                    Minderung = 0.1,
+                };
+                Liste.Value = Liste.Value.Prepend(new MietminderungListViewModelEntry(mm, this)).ToImmutableList();
+            }, _ => true);
         }
     }
 }

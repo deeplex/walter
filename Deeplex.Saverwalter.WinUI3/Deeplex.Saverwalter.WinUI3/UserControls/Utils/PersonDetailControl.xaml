@@ -63,20 +63,8 @@
             </uc:ExpanderControl.MainContent>
         </uc:ExpanderControl>
 
+        <!--TODO: Add Command for Erhaltungsaufwendungen-->
         <uc:ExpanderControl Header="Wohnungen">
-            <uc:ExpanderControl.Bonus>
-                <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
-                    <Button
-                        Visibility="{x:Bind ViewModel.isVermieter.Value}"
-                        Click="Erhaltungsaufwendung_Click"
-                        Background="Transparent">
-                        <StackPanel Orientation="Horizontal">
-                            <SymbolIcon Symbol="PostUpdate" />
-                            <TextBlock Margin="10,0,0,0" Text="Erhaltungsaufwendungen"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </uc:ExpanderControl.Bonus>
             <uc:ExpanderControl.MainContent>
                 <uc:WohnungListControl ViewModel="{x:Bind WohnungListViewModel.Value, Mode=OneWay}" />
             </uc:ExpanderControl.MainContent>
