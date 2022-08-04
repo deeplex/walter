@@ -24,9 +24,9 @@
             RelativePanel.AlignRightWithPanel="True"
             RelativePanel.AlignLeftWithPanel="True">
             <uc:ExpanderControl Header="Mietminderungen">
-                <uc:ExpanderControl.Bonus>
+                <!--<uc:ExpanderControl.Bonus> // TODO
                     <uc:AddMietMinderungControl MietMinderungListViewModel="{x:Bind ViewModel}"/>
-                </uc:ExpanderControl.Bonus>
+                </uc:ExpanderControl.Bonus>-->
                 <uc:ExpanderControl.MainContent>
                     <mtuuc:DataGrid
                         Style="{StaticResource DataGridUserControl}"
@@ -39,7 +39,7 @@
                                         <Button
                                             HorizontalAlignment="Center"
                                             Background="Transparent"
-                                            Command="{x:Bind SelfDestruct}">
+                                            Command="{x:Bind Delete}">
                                             <SymbolIcon Symbol="Delete"></SymbolIcon>
                                         </Button>
                                     </DataTemplate>

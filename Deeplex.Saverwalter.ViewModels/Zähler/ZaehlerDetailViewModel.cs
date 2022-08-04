@@ -143,6 +143,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 Id = Entity.ZaehlerId;
                 Staende.Value = new ZaehlerstandListViewModel(Entity, NotificationService, Db);
             }
+            Staende.Value.Liste.Value.ForEach(e => e.Save.Execute(null));
             checkForChanges();
         }
     }

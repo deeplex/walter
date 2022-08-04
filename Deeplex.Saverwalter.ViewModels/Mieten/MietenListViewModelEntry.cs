@@ -5,79 +5,59 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietenListViewModelEntry : BindableBase
+    public sealed class MietenListViewModelEntry : BindableBase, IDetail
     {
         public Miete Entity { get; }
-        public double Betrag
-        {
-            get => Entity.Betrag ?? 0;
-            set
-            {
-                var old = Entity.Betrag;
-                Entity.Betrag = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-        public DateTime Zahlungsdatum => Entity.Zahlungsdatum;
-        public DateTimeOffset BetreffenderMonat
-        {
-            get => Entity.BetreffenderMonat;
-            set
-            {
-                var old = Entity.BetreffenderMonat;
-                Entity.BetreffenderMonat = value.UtcDateTime;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
-        public string Notiz
-        {
-            get => Entity.Notiz;
-            set
-            {
-                var old = Entity.Notiz;
-                Entity.Notiz = value;
-                RaisePropertyChangedAuto(old, value);
-            }
-        }
+        public SavableProperty<double> Betrag { get; }
+        public SavableProperty<DateTimeOffset> Zahlungsdatum { get; }
+        public SavableProperty<DateTimeOffset> BetreffenderMonat { get; }
+        public SavableProperty<string> Notiz { get; }
 
         IWalterDbService Db;
+        INotificationService NotificationService;
+        public AsyncRelayCommand Delete { get; }
+        public RelayCommand Save { get; }
 
         public MietenListViewModelEntry(Miete m, MietenListViewModel vm)
         {
             Entity = m;
 
             Db = vm.Db;
+            NotificationService = vm.NotificationService;
 
-            SelfDestruct = new AsyncRelayCommand(async _ =>
+            Betrag = new(this, m.Betrag ?? 0);
+            Zahlungsdatum = new(this, m.Zahlungsdatum);
+            BetreffenderMonat = new(this, m.BetreffenderMonat);
+            Notiz = new(this, m.Notiz);
+
+            Delete = new AsyncRelayCommand(async _ =>
             {
-                if (await vm.NotificationService.Confirmation())
+                if (Entity.MieteId != 0 && await vm.NotificationService.Confirmation())
                 {
-                    vm.Liste.Value = vm.Liste.Value.Remove(this);
                     vm.Db.ctx.Mieten.Remove(Entity);
                     vm.Db.SaveWalter();
                 }
+                vm.Liste.Value = vm.Liste.Value.Remove(this);
             }, _ => true);
 
-            PropertyChanged += OnUpdate;
+            Save = new RelayCommand(_ => save(), _ => true);
         }
 
-        private void OnUpdate(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        public void checkForChanges()
         {
-            switch (e.PropertyName)
-            {
-                case nameof(BetreffenderMonat):
-                case nameof(Betrag):
-                case nameof(Notiz):
-                    break;
-                default:
-                    return;
-            }
+            NotificationService.outOfSync =
+                Entity.Betrag != Betrag.Value ||
+                Entity.BetreffenderMonat != BetreffenderMonat.Value.UtcDateTime ||
+                Entity.Zahlungsdatum != Zahlungsdatum.Value.UtcDateTime ||
+                Entity.Notiz != Notiz.Value;
+        }
 
-            if (Entity.VertragId == Guid.Empty)
-            {
-                return;
-            }
-
+        private void save()
+        {
+            Entity.Betrag = Betrag.Value;
+            Entity.BetreffenderMonat = BetreffenderMonat.Value.UtcDateTime;
+            Entity.Zahlungsdatum = Zahlungsdatum.Value.UtcDateTime;
+            Entity.Notiz = Notiz.Value;
 
             if (Entity.MieteId != 0)
             {
@@ -88,8 +68,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 Db.ctx.Mieten.Add(Entity);
             }
             Db.SaveWalter();
+            checkForChanges();
         }
-
-        public AsyncRelayCommand SelfDestruct;
     }
 }

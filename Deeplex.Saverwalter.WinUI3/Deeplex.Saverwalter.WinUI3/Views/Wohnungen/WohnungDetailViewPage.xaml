@@ -68,7 +68,7 @@
                             Header="Notiz"/>
                     </mtuuc:WrapPanel>
 
-                    <uc:ExpanderControl Header="Zähler" Click="{x:Bind AddZaehler_Click}">
+                    <uc:ExpanderControl Header="Zähler" Command="{x:Bind ZaehlerListViewModel.Navigate}">
                         <uc:ExpanderControl.MainContent>
                             <uc:ZaehlerListControl ViewModel="{x:Bind ZaehlerListViewModel}"/>
                         </uc:ExpanderControl.MainContent>
@@ -80,25 +80,25 @@
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
-                    <uc:ExpanderControl Header="Verträge" Click="{x:Bind AddVertrag_Click}">
+                    <uc:ExpanderControl Header="Verträge" Command="{x:Bind VertragListViewModel.Navigate}">
                         <uc:ExpanderControl.MainContent>
                             <uc:VertragListControl ViewModel="{x:Bind VertragListViewModel}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
-                    <uc:ExpanderControl Header="Betriebskostenrechnungen" Click="{x:Bind AddBetriebskostenrechnung_Click}">
+                    <uc:ExpanderControl Header="Betriebskostenrechnungen" Command="{x:Bind BetriebskostenrechnungViewModel.Navigate}">
                         <uc:ExpanderControl.MainContent>
                             <uc:BetriebskostenRechnungenListControl ViewModel="{x:Bind BetriebskostenrechnungViewModel}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
-                    <uc:ExpanderControl Header="Umlagen">
+                    <uc:ExpanderControl Header="Umlagen" Command="{x:Bind UmlageListViewModel.Navigate}">
                         <uc:ExpanderControl.MainContent>
                             <uc:UmlageListControl ViewModel="{x:Bind UmlageListViewModel}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
-                    <uc:ExpanderControl Header="Erhaltungsaufwendungen" Click="{x:Bind AddErhaltungsaufwendung_Click}">
+                    <uc:ExpanderControl Header="Erhaltungsaufwendungen" Command="{x:Bind ErhaltungsaufwendungViewModel.Navigate}">
                         <uc:ExpanderControl.MainContent>
                             <uc:ErhaltungsaufwendungenListControl ViewModel="{x:Bind ErhaltungsaufwendungViewModel}"/>
                         </uc:ExpanderControl.MainContent>

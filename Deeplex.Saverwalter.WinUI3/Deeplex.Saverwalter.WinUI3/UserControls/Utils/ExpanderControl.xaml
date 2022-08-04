@@ -17,15 +17,12 @@
             <mtuuc:WrapPanel Orientation="Horizontal">
                 <TextBlock VerticalAlignment="Center" Text="{x:Bind Header}" />
                 <Button
-                    Visibility="{x:Bind ClickAvailable}"
+                    Command="{x:Bind Command}"
+                    Visibility="{x:Bind CommandAvailable}"
                     Background="Transparent"
-                    Margin="10,0,0,0"
-                    Click="{x:Bind ClickWrap}">
+                    Margin="50,0,0,0">
                     <SymbolIcon Symbol="Add" />
                 </Button>
-                <ContentPresenter
-                    Visibility="{x:Bind BonusAvailable}"
-                    Content="{x:Bind Bonus}" />
             </mtuuc:WrapPanel>
         </mtuuc:Expander.Header>
         <ContentPresenter Padding="0,0,0,20" Content="{x:Bind MainContent}" />

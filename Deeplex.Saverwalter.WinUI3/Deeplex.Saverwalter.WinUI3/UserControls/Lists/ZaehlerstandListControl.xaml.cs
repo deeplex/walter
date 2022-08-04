@@ -10,33 +10,20 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
     public sealed partial class ZaehlerstandListControl : UserControl
     {
-        public ObservableProperty<ZaehlerstandListViewModel> ViewModel = new();
-
         public ZaehlerstandListControl()
         {
             InitializeComponent();
-            RegisterPropertyChangedCallback(ZaehlerIdProperty, (ZaehlerIdDepObject, ZaehlerIdProp) =>
-            {
-                ViewModel.Value = new ZaehlerstandListViewModel(App.WalterService.ctx.ZaehlerSet.Find(ZaehlerId), App.NotificationService, App.WalterService);
-                ViewModel.Value.Liste.Value = ViewModel.Value.Liste.Value.OrderBy(v => v.Datum).ToImmutableList();
-            });
-
-            RegisterPropertyChangedCallback(ZaehlerstandListViewModelProperty, (ZaehlerIdDepObject, ZaehlerIdProp) =>
-            {
-                ViewModel.Value = ZaehlerstandListViewModel;
-                ViewModel.Value.Liste.Value = ViewModel.Value.Liste.Value.OrderBy(v => v.Datum).ToImmutableList();
-            });
         }
 
-        public ZaehlerstandListViewModel ZaehlerstandListViewModel
+        public ZaehlerstandListViewModel ViewModel
         {
-            get { return (ZaehlerstandListViewModel)GetValue(ZaehlerstandListViewModelProperty); }
-            set { SetValue(ZaehlerstandListViewModelProperty, value); }
+            get { return (ZaehlerstandListViewModel)GetValue(ViewModelProperty); }
+            set { SetValue(ViewModelProperty, value); }
         }
 
-        public static readonly DependencyProperty ZaehlerstandListViewModelProperty
+        public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
-            "ZaehlerstandListViewModel",
+            "ViewModel",
             typeof(ZaehlerstandListViewModel),
             typeof(ZaehlerstandListControl),
             new PropertyMetadata(null));

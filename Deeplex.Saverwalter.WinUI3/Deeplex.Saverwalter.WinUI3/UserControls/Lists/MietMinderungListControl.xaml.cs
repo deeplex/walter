@@ -8,29 +8,23 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
     public sealed partial class MietMinderungListControl : UserControl
     {
-        public MietMinderungListViewModel ViewModel { get; set; }
-
         public MietMinderungListControl()
         {
             InitializeComponent();
-            RegisterPropertyChangedCallback(VertragGuidProperty, (DepObj, Prop) =>
-            {
-                ViewModel = new MietMinderungListViewModel(VertragGuid, App.NotificationService, App.WalterService);
-            });
         }
 
-        public Guid VertragGuid
+        public MietMinderungListViewModel ViewModel
         {
-            get { return (Guid)GetValue(VertragGuidProperty); }
-            set { SetValue(VertragGuidProperty, value); }
+            get { return (MietMinderungListViewModel)GetValue(ViewModelProperty); }
+            set { SetValue(ViewModelProperty, value); }
         }
 
-        public static readonly DependencyProperty VertragGuidProperty
+        public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
-                  "VertragGuid",
-                  typeof(Guid),
+                  "ViewModel",
+                  typeof(MietMinderungListViewModel),
                   typeof(VertragListControl),
-                  new PropertyMetadata(Guid.Empty));
+                  new PropertyMetadata(null));
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

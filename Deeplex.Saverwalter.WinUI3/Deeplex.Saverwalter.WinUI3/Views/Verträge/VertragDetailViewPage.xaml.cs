@@ -13,6 +13,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         public VertragDetailViewModel ViewModel { get; set; }
         public KontaktListViewModel MieterListViewModel { get; private set; }
         public BetriebskostenRechnungenListViewModel BetriebskostenListViewModel { get; private set; }
+        public MietenListViewModel MietenListViewModel { get; private set; }
+        public MietMinderungListViewModel MietMinderungListViewModel { get; private set; }
 
         public VertragDetailViewPage()
         {
@@ -26,6 +28,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 ViewModel = new(v.VertragId, App.NotificationService, App.WalterService);
                 MieterListViewModel = new(App.WalterService, App.NotificationService, v);
                 BetriebskostenListViewModel = new(App.WalterService, App.NotificationService, v);
+                MietenListViewModel = new(v.VertragId, App.NotificationService, App.WalterService);
+                MietMinderungListViewModel = new(v.VertragId, App.NotificationService, App.WalterService);
             }
             else
             {

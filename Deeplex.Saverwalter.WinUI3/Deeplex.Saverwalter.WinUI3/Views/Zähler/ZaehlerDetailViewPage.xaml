@@ -60,16 +60,12 @@
                     </StackPanel>
 
                     <StackPanel Margin="0,20,0,0" Visibility="{x:Bind ViewModel.Initialized, Mode=OneWay}">
-                        <uc:ExpanderControl IsExpanded="True" Header="Zählerstände">
-                            <uc:ExpanderControl.Bonus>
-                                <uc:AddZaehlerstandControl ZaehlerstandListViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" />
-                            </uc:ExpanderControl.Bonus>
+                        <uc:ExpanderControl IsExpanded="True" Header="Zählerstände" Command="{x:Bind ViewModel.Staende.Value.Add}">
                             <uc:ExpanderControl.MainContent>
-                                <uc:ZaehlerstandListControl ZaehlerstandListViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" />
+                                <uc:ZaehlerstandListControl ViewModel="{x:Bind ViewModel.Staende.Value, Mode=TwoWay}" />
                             </uc:ExpanderControl.MainContent>
                         </uc:ExpanderControl>
                     </StackPanel>
-
                     <StackPanel Visibility="{x:Bind ViewModel.Initialized, Mode=OneWay}">
                         <uc:ExpanderControl Header="Einzelzähler">
                             <uc:ExpanderControl.MainContent>
