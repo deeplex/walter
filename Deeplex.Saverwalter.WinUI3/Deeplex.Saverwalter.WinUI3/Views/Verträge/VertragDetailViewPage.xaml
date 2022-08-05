@@ -103,7 +103,7 @@
 
                     <uc:ExpanderControl Margin="0,20,0,0" IsExpanded="True" Header="Mieter"><!--Command="{x:Bind MieterListViewModel.Add}"-->
                         <uc:ExpanderControl.MainContent>
-                            <uc:KontaktListControl ViewModel="{x:Bind MieterListViewModel}"/>
+                            <uc:KontaktListControl ViewModel="{x:Bind ViewModel.Mieter.Value, Mode=OneWay}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
@@ -154,13 +154,15 @@
                             </StackPanel>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
-                    <uc:ExpanderControl Header="Miete" Command="{x:Bind MietenListViewModel.Add}">
+                    <uc:ExpanderControl Header="Miete" Command="{x:Bind ViewModel.Mieten.Value.Add}">
                         <uc:ExpanderControl.MainContent>
-                            <uc:MietenListControl ViewModel="{x:Bind MietenListViewModel, Mode=OneWay}"/>
+                            <uc:MietenListControl ViewModel="{x:Bind ViewModel.Mieten.Value, Mode=OneWay}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
-                    <uc:ExpanderControl Header="Mietminderungen" Command="{x:Bind MietMinderungListViewModel.Add}">
-                        <uc:MietMinderungListControl ViewModel="{x:Bind MietMinderungListViewModel, Mode=OneWay}"/>
+                    <uc:ExpanderControl Header="Mietminderungen" Command="{x:Bind ViewModel.MietMinderungen.Value.Add}">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:MietMinderungListControl ViewModel="{x:Bind ViewModel.MietMinderungen.Value, Mode=OneWay}"/>
+                        </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
                     <uc:ExpanderControl Header="Betriebskostenrechnungen">
                         <uc:ExpanderControl.MainContent>

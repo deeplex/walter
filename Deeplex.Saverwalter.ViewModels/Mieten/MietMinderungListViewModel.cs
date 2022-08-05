@@ -27,8 +27,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Where(m => m.VertragId == VertragGuid)
                 .ToList()
                 .Select(m => new MietminderungListViewModelEntry(m, self))
-                .OrderBy(e => e.Beginn)
-                .Reverse()
+                .OrderByDescending(e => e.Beginn.Value)
                 .ToImmutableList();
 
             Add = new RelayCommand(_ =>

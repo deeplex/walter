@@ -22,8 +22,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Db = db;
             Liste.Value = z.Staende
                 .Select(s => new ZaehlerstandListViewModelEntry(s, this))
-                .OrderBy(e => e.Datum.Value)
-                .Reverse()
+                .OrderByDescending(e => e.Datum.Value)
                 .ToImmutableList();
 
             Add = new RelayCommand(_ =>

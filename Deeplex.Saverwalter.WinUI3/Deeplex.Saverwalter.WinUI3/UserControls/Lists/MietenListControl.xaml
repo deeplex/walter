@@ -14,10 +14,6 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
 
-    <UserControl.Resources>
-        <conv:DateStringConverter x:Key="DateStringConverterKey" />
-    </UserControl.Resources>
-
     <mtuuc:DataGrid
         Style="{StaticResource DataGridUserControl}"
         SelectionChanged="DataGrid_SelectionChanged"

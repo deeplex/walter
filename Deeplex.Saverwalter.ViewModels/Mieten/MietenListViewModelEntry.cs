@@ -47,12 +47,12 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             NotificationService.outOfSync =
                 Entity.Betrag != Betrag.Value ||
-                Entity.BetreffenderMonat != BetreffenderMonat.Value.UtcDateTime ||
-                Entity.Zahlungsdatum != Zahlungsdatum.Value.UtcDateTime ||
+                Entity.BetreffenderMonat.AsUtcKind() != BetreffenderMonat.Value ||
+                Entity.Zahlungsdatum.AsUtcKind() != Zahlungsdatum.Value ||
                 Entity.Notiz != Notiz.Value;
         }
 
-        private void save()
+        public void save()
         {
             Entity.Betrag = Betrag.Value;
             Entity.BetreffenderMonat = BetreffenderMonat.Value.UtcDateTime;

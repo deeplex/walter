@@ -17,13 +17,16 @@ namespace Deeplex.Saverwalter.ViewModels
         public List<KontaktListViewModelEntry> AlleKontakte;
 
         public ObservableProperty<ImmutableList<VertragDetailViewModelVersion>> Versionen = new();
-        public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Mieter = new();
         public DateTimeOffset? AddVersionDatum;
 
         public DateTimeOffset lastBeginn => Versionen.Value.Last().Beginn.Value;
         public DateTimeOffset? firstEnde => Versionen.Value.First().Ende.Value;
         public int StartJahr => Versionen.Value.Last().Beginn.Value.Year;
         public int EndeJahr => Versionen.Value.First().Ende.Value?.Year ?? 9999;
+
+        public ObservableProperty<MietenListViewModel> Mieten { get; private set; } = new();
+        public ObservableProperty<MietMinderungListViewModel> MietMinderungen { get; private set; } = new();
+        public ObservableProperty<KontaktListViewModel> Mieter { get; private set; } = new();
 
         public new KontaktListViewModelEntry Ansprechpartner
         {
@@ -52,6 +55,10 @@ namespace Deeplex.Saverwalter.ViewModels
         public VertragDetailViewModel(List<Vertrag> v, INotificationService ns, IWalterDbService db) : base(v.OrderBy(vs => vs.Version).Last(), ns, db)
         {
             guid = v.First().VertragId;
+
+            Mieten.Value = new(guid, ns, db);
+            MietMinderungen.Value = new(guid, ns, db);
+            Mieter.Value = new(db, ns, v.First());
 
             Versionen.Value = v.Select(vs => new VertragDetailViewModelVersion(vs, ns, db)).ToImmutableList();
 
@@ -113,6 +120,9 @@ namespace Deeplex.Saverwalter.ViewModels
 
         private void save()
         {
+            Mieten.Value.Liste.Value.ForEach(e => e.save());
+            MietMinderungen.Value.Liste.Value.ForEach(e => e.save());
+
             Versionen.Value.ForEach(v => v.versionSave());
             Db.SaveWalter();
             NotificationService.outOfSync = false;
