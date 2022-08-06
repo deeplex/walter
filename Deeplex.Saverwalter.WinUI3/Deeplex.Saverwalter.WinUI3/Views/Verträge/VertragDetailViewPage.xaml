@@ -164,6 +164,11 @@
                             <uc:MietMinderungListControl ViewModel="{x:Bind ViewModel.MietMinderungen.Value, Mode=OneWay}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
+                    <uc:ExpanderControl Header="Umlagen">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:UmlageListControl ViewModel="{x:Bind UmlageListViewModel}"/>
+                        </uc:ExpanderControl.MainContent>
+                    </uc:ExpanderControl>
                     <uc:ExpanderControl Header="Betriebskostenrechnungen">
                         <uc:ExpanderControl.MainContent>
                             <uc:BetriebskostenRechnungenListControl ViewModel="{x:Bind BetriebskostenListViewModel}"/>

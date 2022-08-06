@@ -27,7 +27,7 @@
         <mtuuc:DataGrid.Columns>
             <mtuuc:DataGridTemplateColumn Header="Typ" IsReadOnly="True">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:BetriebskostenRechnungenListEntry">
+                    <DataTemplate x:DataType="vm:BetriebskostenRechnungenListViewModelEntry">
                         <TextBlock
                             VerticalAlignment="Center"
                             Padding="10,0,10,0"
@@ -37,7 +37,7 @@
             </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTemplateColumn Header="Jahr">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:BetriebskostenRechnungenListEntry">
+                    <DataTemplate x:DataType="vm:BetriebskostenRechnungenListViewModelEntry">
                         <TextBlock
                             VerticalAlignment="Center"
                             Padding="10,0,10,0"
@@ -47,7 +47,7 @@
             </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTemplateColumn Header="Wohnungen">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:BetriebskostenRechnungenListEntry">
+                    <DataTemplate x:DataType="vm:BetriebskostenRechnungenListViewModelEntry">
                         <TextBlock
                             VerticalAlignment="Center"
                             Padding="10,0,10,0"
@@ -57,7 +57,7 @@
             </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTemplateColumn Header="Betrag">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:BetriebskostenRechnungenListEntry">
+                    <DataTemplate x:DataType="vm:BetriebskostenRechnungenListViewModelEntry">
                         <TextBlock
                             VerticalAlignment="Center"
                             Padding="10,0,10,0"
