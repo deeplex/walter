@@ -13,8 +13,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         protected abstract ImmutableList<T> updateList(string filter);
         protected static bool applyFilter(string filter, params string[] strings) =>
-            filter.Split(' ').All(split => strings.Any(str =>
-                str != null && str.ToLower().Contains(split.ToLower())));
+            filter.Split(' ').All(split => strings.Any(str => str.ToLower().Contains(split.ToLower())));
 
 
         public RelayCommand Navigate { get; protected set; }

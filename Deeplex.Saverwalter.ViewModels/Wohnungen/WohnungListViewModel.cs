@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public override string ToString() => "Wohnungen";
 
         protected override ImmutableList<WohnungListViewModelEntry> updateList(string filter)
-            => List.Value.Where(v => applyFilter(filter, v.Bezeichnung, v.Anschrift)).ToImmutableList();
+            => AllRelevant.Where(v => applyFilter(filter, v.Bezeichnung, v.Anschrift)).ToImmutableList();
 
         public WohnungListViewModel(IWalterDbService db, INotificationService ns): this(ns)
         {

@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public override string ToString() => "Umlagen";
 
         protected override ImmutableList<UmlageListViewModelEntry> updateList(string filter)
-            => List.Value.Where(v => applyFilter(filter, v.Typ.ToDescriptionString(), v.ToString())).ToImmutableList();
+            => AllRelevant.Where(v => applyFilter(filter, v.Typ.ToDescriptionString(), v.ToString())).ToImmutableList();
 
 
         public UmlageListViewModel(IWalterDbService db, INotificationService ns): this(ns)

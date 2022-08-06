@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public override string ToString() => "Kontakte";
 
         protected override ImmutableList<KontaktListViewModelEntry> updateList(string value)
-            => List.Value.Where(v => applyFilter(value, v.ToString(), v.Email, v.Telefon)).ToImmutableList();
+            => AllRelevant.Where(v => applyFilter(value, v.ToString(), v.Email, v.Telefon)).ToImmutableList();
 
         public KontaktListViewModel(IWalterDbService db, INotificationService ns): this(ns)
         {
