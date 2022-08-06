@@ -2,7 +2,7 @@
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public interface IDetail
+    public interface IDetailViewModel
     {
         string ToString();
         void checkForChanges();

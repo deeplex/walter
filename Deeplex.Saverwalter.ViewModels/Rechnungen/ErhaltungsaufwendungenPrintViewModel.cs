@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ErhaltungsaufwendungenPrintViewModel : IPrint
+    public sealed class ErhaltungsaufwendungenPrintViewModel : IPrintViewModel
     {
         public ObservableProperty<int> Jahr { get; } = new();
         public ImmutableList<ErhaltungsaufwendungenPrintEntry> Wohnungen { get; }

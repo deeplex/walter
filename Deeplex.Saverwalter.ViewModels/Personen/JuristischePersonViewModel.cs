@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class JuristischePersonViewModel : PersonViewModel, IDetail
+    public sealed class JuristischePersonViewModel : PersonViewModel, IDetailViewModel
     {
         public new JuristischePerson Entity => (JuristischePerson)base.Entity;
         public int Id;

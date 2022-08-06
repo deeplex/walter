@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ZaehlerDetailViewModel : BindableBase, IDetail
+    public sealed class ZaehlerDetailViewModel : BindableBase, IDetailViewModel
     {
         public Zaehler Entity;
         private int mId { get; set; }

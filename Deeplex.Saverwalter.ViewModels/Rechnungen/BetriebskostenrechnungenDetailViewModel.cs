@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class BetriebskostenrechnungDetailViewModel : BindableBase, IDetail
+    public sealed class BetriebskostenrechnungDetailViewModel : BindableBase, IDetailViewModel
     {
         public override string ToString() => Entity.Umlage.Typ.ToDescriptionString() + " - " + Entity.GetWohnungenBezeichnung();
 

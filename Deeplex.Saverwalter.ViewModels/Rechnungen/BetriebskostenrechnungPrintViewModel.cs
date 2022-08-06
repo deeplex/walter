@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class BetriebskostenrechnungPrintViewModel : IPrint
+    public sealed class BetriebskostenrechnungPrintViewModel : IPrintViewModel
     {
         public bool HasNotes => Betriebskostenabrechnung.notes.Count() > 0;
 

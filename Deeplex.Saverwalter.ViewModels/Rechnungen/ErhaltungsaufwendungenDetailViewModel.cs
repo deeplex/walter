@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ErhaltungsaufwendungenDetailViewModel : BindableBase, IDetail
+    public sealed class ErhaltungsaufwendungenDetailViewModel : BindableBase, IDetailViewModel
     {
         public override string ToString() => Entity.Bezeichnung;
 

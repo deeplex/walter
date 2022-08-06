@@ -2,7 +2,7 @@
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public interface IPrint
+    public interface IPrintViewModel
     {
         string ToString();
         AsyncRelayCommand Print { get; }

@@ -5,7 +5,7 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietenListViewModelEntry : BindableBase, IDetail
+    public sealed class MietenListViewModelEntry : BindableBase, IDetailViewModel
     {
         public Miete Entity { get; }
         public SavableProperty<double> Betrag { get; }

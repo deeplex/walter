@@ -5,7 +5,7 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietminderungListViewModelEntry : IDetail
+    public sealed class MietminderungListViewModelEntry : IDetailViewModel
     {
         public MietMinderung Entity { get; }
 
