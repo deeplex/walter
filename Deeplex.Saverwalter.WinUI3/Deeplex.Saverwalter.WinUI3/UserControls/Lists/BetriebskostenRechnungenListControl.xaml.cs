@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (((DataGrid)sender)?.SelectedItem is BetriebskostenRechnungenListEntry r)
+            if (((DataGrid)sender)?.SelectedItem is BetriebskostenRechnungenListViewModelEntry r)
             {
                 App.Window.ListAnhang.Value = new AnhangListViewModel(r.Entity, App.FileService, App.NotificationService, App.WalterService);
             }

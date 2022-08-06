@@ -9,11 +9,11 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class BetriebskostenRechnungenListViewModel : ListViewModel<BetriebskostenRechnungenListEntry>, IListViewModel
+    public sealed class BetriebskostenRechnungenListViewModel : ListViewModel<BetriebskostenRechnungenListViewModelEntry>, IListViewModel
     {
         public override string ToString() => "Betriebskostenrechnungen";
 
-        protected override ImmutableList<BetriebskostenRechnungenListEntry> updateList(string filter)
+        protected override ImmutableList<BetriebskostenRechnungenListViewModelEntry> updateList(string filter)
             => AllRelevant.Where(v => applyFilter(filter, v.Typ.ToDescriptionString(), v.ToString(), v.BetreffendesJahr.ToString())).ToImmutableList();
 
         public BetriebskostenRechnungenListViewModel(IWalterDbService db, INotificationService ns): this(ns)
@@ -58,10 +58,10 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Include(b => b.Umlage.Wohnungen).ThenInclude(g => g.Adresse).ThenInclude(a => a.Anhaenge)
                 .ToList();
         }
-        private ImmutableList<BetriebskostenRechnungenListEntry> transform(IWalterDbService db, List<Betriebskostenrechnung> list)
+        private ImmutableList<BetriebskostenRechnungenListViewModelEntry> transform(IWalterDbService db, List<Betriebskostenrechnung> list)
         {
             return list
-                .Select(w => new BetriebskostenRechnungenListEntry(w))
+                .Select(w => new BetriebskostenRechnungenListViewModelEntry(w))
                 .ToImmutableList();
         }
 
