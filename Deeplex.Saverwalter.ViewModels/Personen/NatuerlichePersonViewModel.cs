@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<string> Vorname { get; }
         public SavableProperty<string> Nachname { get; }
 
-        public override string ToString() => Vorname + " " + Nachname;
+        public override string ToString() => Entity.Bezeichnung;
 
         public bool WohnungenInklusiveJurPers
         {

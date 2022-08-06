@@ -58,7 +58,6 @@
                             Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             Header="Notiz"/>
                     </StackPanel>
-
                     <StackPanel Margin="0,20,0,0" Visibility="{x:Bind ViewModel.Initialized, Mode=OneWay}">
                         <uc:ExpanderControl IsExpanded="True" Header="Zählerstände" Command="{x:Bind ViewModel.Staende.Value.Add}">
                             <uc:ExpanderControl.MainContent>

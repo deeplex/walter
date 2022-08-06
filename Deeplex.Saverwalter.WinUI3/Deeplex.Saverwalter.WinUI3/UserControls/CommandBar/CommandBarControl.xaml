@@ -18,12 +18,12 @@
             RelativePanel.LeftOf="MainPermaCommands"
             Content="{x:Bind MainContent, Mode=OneWay}"/>
         <CommandBar
-        RelativePanel.AlignRightWithPanel="True"
-        x:Name="MainPermaCommands"
-        Background="Transparent"
-        IsOpen="False"
-        HorizontalAlignment="Stretch"
-        DefaultLabelPosition="Right">
+            RelativePanel.AlignRightWithPanel="True"
+            x:Name="MainPermaCommands"
+            Background="Transparent"
+            IsOpen="False"
+            HorizontalAlignment="Stretch"
+            DefaultLabelPosition="Right">
             <AppBarToggleButton
                 RelativePanel.AlignRightWithPanel="True"
                 x:Name="togglepane"
