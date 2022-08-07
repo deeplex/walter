@@ -31,8 +31,12 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             {
                 ViewModel = new(wohnung, App.NotificationService, App.WalterService);
                 VertragListViewModel = new(App.WalterService, App.NotificationService, wohnung);
-                WohnungAdresseViewModel = new(App.WalterService, App.NotificationService, wohnung.Adresse);
+                
+                WohnungAdresseViewModel = App.Container.GetInstance<WohnungListViewModel>();
+                WohnungAdresseViewModel.SetList(ViewModel.Entity.Adresse);
+                
                 BetriebskostenrechnungViewModel = new(App.WalterService, App.NotificationService, wohnung);
+                
                 ErhaltungsaufwendungViewModel = new(App.WalterService, App.NotificationService, wohnung);
                 ZaehlerListViewModel = new(App.WalterService, App.NotificationService, wohnung);
                 UmlageListViewModel = new(App.WalterService, App.NotificationService, wohnung);

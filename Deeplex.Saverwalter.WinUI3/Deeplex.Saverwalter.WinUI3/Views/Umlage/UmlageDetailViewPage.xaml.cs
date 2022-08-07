@@ -34,7 +34,10 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             if (e.Parameter is Umlage r)
             {
                 ViewModel = new(r, App.NotificationService, App.WalterService);
-                WohnungListViewModel = new(App.WalterService, App.NotificationService, r);
+                
+                WohnungListViewModel = App.Container.GetInstance<WohnungListViewModel>();
+                WohnungListViewModel.SetList(r);
+
                 BetriebskostenRechnungenListViewModel = new(App.WalterService, App.NotificationService, r);
             }
             else if (e.Parameter is null)

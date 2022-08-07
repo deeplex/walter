@@ -31,10 +31,8 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                     App.WalterService,
                     App.NotificationService,
                     ViewModel.Entity);
-                WohnungListViewModel.Value = new WohnungListViewModel(
-                    App.WalterService,
-                    App.NotificationService,
-                    ViewModel.Entity);
+                WohnungListViewModel.Value = App.Container.GetInstance<WohnungListViewModel>();
+                WohnungListViewModel.Value.SetList(ViewModel.Entity);
                 JuristischePersonenViewModel.Value = new KontaktListViewModel(
                     App.WalterService,
                     App.NotificationService,

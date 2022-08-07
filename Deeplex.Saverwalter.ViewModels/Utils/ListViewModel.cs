@@ -7,7 +7,15 @@ namespace Deeplex.Saverwalter.ViewModels
     public abstract class ListViewModel<T> : BindableBase, IListViewModel
     {
         public ObservableProperty<ImmutableList<T>> List = new();
-        public ImmutableList<T> AllRelevant;
+        private ImmutableList<T> mAllRelevant { get; set; }
+        public ImmutableList<T> AllRelevant {
+            get => mAllRelevant;
+            protected set
+            {
+                mAllRelevant = value;
+                List.Value = mAllRelevant;
+            }
+        }
         public T Selected;
         public bool hasSelected => Selected != null;
 

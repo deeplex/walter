@@ -14,7 +14,6 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public WohnungListControl()
         {
             InitializeComponent();
-            ViewModel = new WohnungListViewModel(App.WalterService, App.NotificationService);
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)

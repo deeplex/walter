@@ -22,8 +22,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Adresse = w.Adresse;
             Bezeichnung = w.Bezeichnung;
             Anschrift = AdresseViewModel.Anschrift(w);
-            Besitzer = w.BesitzerId != Guid.Empty ?
-                db.ctx.FindPerson(w.BesitzerId).Bezeichnung : "";
+            Besitzer = w.BesitzerId != Guid.Empty ? db.ctx.FindPerson(w.BesitzerId).Bezeichnung : "";
         }
     }
 }
