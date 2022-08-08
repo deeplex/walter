@@ -8,11 +8,11 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class UmlageDetailViewModel : BindableBase, IDetailViewModel
+    public sealed class UmlageDetailViewModel : BindableBase, IDetailViewModel<Umlage>
     {
         public override string ToString() => Entity.Typ.ToDescriptionString() + " - " + Entity.Wohnungen.GetWohnungenBezeichnung();
 
-        public Umlage Entity { get; }
+        public Umlage Entity { get; private set; }
         public int Id => Entity.UmlageId;
 
         public ObservableProperty<WohnungListViewModelEntry> UmlageWohnung = new();
@@ -21,11 +21,11 @@ namespace Deeplex.Saverwalter.ViewModels
         public List<UmlageSchluesselUtil> Schluessel_List = Enums.UmlageSchluessel;
         public List<BetriebskostentypUtil> Typen_List = Enums.Betriebskostentyp;
 
-        public SavableProperty<string> Notiz { get; }
-        public SavableProperty<BetriebskostentypUtil> Typ { get; }
-        public SavableProperty<UmlageSchluesselUtil> Schluessel { get; }
-        public SavableProperty<string> Beschreibung { get; }
-        //public SavableProperty<HKVO_P9A2?> HKVO_P9 { get; }
+        public SavableProperty<string, Umlage> Notiz { get; private set; }
+        public SavableProperty<BetriebskostentypUtil, Umlage> Typ { get; private set; }
+        public SavableProperty<UmlageSchluesselUtil, Umlage> Schluessel { get; private set; }
+        public SavableProperty<string, Umlage> Beschreibung { get; private set; }
+        //public SavableProperty<HKVO_P9A2?> HKVO_P9 { get; private set; }
 
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 
@@ -51,11 +51,9 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Wohnungen.RemoveAll(w => !Wohnungen.Value.Exists(v => v.Entity == w));
         }
 
-        public UmlageDetailViewModel(Umlage r, INotificationService ns, IWalterDbService db)
+        public void SetEntity(Umlage r)
         {
             Entity = r;
-            Db = db;
-            NotifcationService = ns;
 
             Notiz = new(this, r.Notiz);
             Typ = new(this, new(r.Typ));
@@ -66,10 +64,17 @@ namespace Deeplex.Saverwalter.ViewModels
             Typ.Value = Typen_List.FirstOrDefault(e => e.Typ == r.Typ);
 
             Wohnungen.Value = r.Wohnungen.Select(g => new WohnungListViewModelEntry(g, Db)).ToImmutableList();
+
             if (UmlageWohnung.Value == null)
             {
                 UmlageWohnung.Value = Wohnungen.Value.FirstOrDefault();
             }
+        }
+
+        public UmlageDetailViewModel(INotificationService ns, IWalterDbService db)
+        {
+            WalterDbService = db;
+            NotificationService = ns;
 
             Delete = new AsyncRelayCommand(async _ =>
             {
@@ -83,20 +88,11 @@ namespace Deeplex.Saverwalter.ViewModels
             Save = new RelayCommand(_ => save(), _ => true);
         }
 
-        public UmlageDetailViewModel(Umlage r, int w, List<Wohnung> l, INotificationService ns, IWalterDbService db) : this(r, w, ns, db)
-        {
-            Wohnungen.Value = l.Select(e => new WohnungListViewModelEntry(e, db)).ToImmutableList();
-        }
-
-        public UmlageDetailViewModel(Umlage r, int w, INotificationService ns, IWalterDbService avm) : this(r, ns, avm)
-        {
-            UmlageWohnung.Value = Wohnungen.Value.Find(e => e.Id == w);
-        }
-
-        public UmlageDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Umlage(), ns, db) { }
-
         public RelayCommand Save { get; }
         public AsyncRelayCommand Delete { get; }
+
+        public IWalterDbService WalterDbService { get; }
+        public INotificationService NotificationService { get; }
 
         public void Update()
         {

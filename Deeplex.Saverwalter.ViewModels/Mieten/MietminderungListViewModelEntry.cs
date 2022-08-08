@@ -5,14 +5,14 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietminderungListViewModelEntry : IDetailViewModel
+    public sealed class MietminderungListViewModelEntry : IListViewModelEntry<MietMinderung>
     {
         public MietMinderung Entity { get; }
 
-        public SavableProperty<DateTimeOffset> Beginn { get; }
-        public SavableProperty<DateTimeOffset?> Ende { get; }
-        public SavableProperty<double> Minderung { get; }
-        public SavableProperty<string> Notiz { get; }
+        public SavableEntryProperty<DateTimeOffset, MietMinderung> Beginn { get; }
+        public SavableEntryProperty<DateTimeOffset?, MietMinderung> Ende { get; }
+        public SavableEntryProperty<double, MietMinderung> Minderung { get; }
+        public SavableEntryProperty<string, MietMinderung> Notiz { get; }
 
         private INotificationService NotificationService { get; }
         private IWalterDbService Db { get; }

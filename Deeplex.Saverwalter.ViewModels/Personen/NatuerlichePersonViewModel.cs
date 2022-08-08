@@ -7,17 +7,17 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class NatuerlichePersonViewModel : PersonViewModel, IDetailViewModel
+    public sealed class NatuerlichePersonViewModel : PersonViewModel, IDetailViewModel<NatuerlichePerson>
     {
         public new NatuerlichePerson Entity => (NatuerlichePerson)base.Entity;
 
-        public int Id { get; }
+        public int Id { get; private set; }
 
         public List<Anrede> Anreden { get; }
 
-        public SavableProperty<Anrede> Anrede { get; }
-        public SavableProperty<string> Vorname { get; }
-        public SavableProperty<string> Nachname { get; }
+        public SavableProperty<Anrede, NatuerlichePerson> Anrede { get; private set; }
+        public SavableProperty<string, NatuerlichePerson> Vorname { get; private set; }
+        public SavableProperty<string, NatuerlichePerson> Nachname { get; private set; }
 
         public override string ToString() => Entity.Bezeichnung;
 
@@ -36,29 +36,31 @@ namespace Deeplex.Saverwalter.ViewModels
         public void UpdateListen()
         {
             JuristischePersonen.Value = Entity.JuristischePersonen
-                .Select(w => new KontaktListViewModelEntry(Db, w.PersonId))
+                .Select(w => new KontaktListViewModelEntry(WalterDbService, w.PersonId))
                 .ToImmutableList();
 
-            Wohnungen.Value = Db.ctx.Wohnungen
+            Wohnungen.Value = WalterDbService.ctx.Wohnungen
                 .ToList()
                 .Where(w => w.BesitzerId == Entity.PersonId ||
                     (WohnungenInklusiveJurPers && JuristischePersonen.Value.Any(m => m.Entity.PersonId == w.BesitzerId)))
-                .Select(w => new WohnungListViewModelEntry(w, Db))
+                .Select(w => new WohnungListViewModelEntry(w, WalterDbService))
                 .ToImmutableList();
         }
 
-        public NatuerlichePersonViewModel(int id, INotificationService ns, IWalterDbService db) : this(db.ctx.NatuerlichePersonen.Find(id), ns, db) { }
-        public NatuerlichePersonViewModel(INotificationService ns, IWalterDbService db) : this(new NatuerlichePerson(), ns, db) { }
-        public NatuerlichePersonViewModel(NatuerlichePerson k, INotificationService ns, IWalterDbService db) : base(k, ns, db)
+        public void SetEntity(NatuerlichePerson k)
         {
-            base.Entity = k;
+            base.SetEntity(k);
             Id = k.NatuerlichePersonId;
             Anrede = new(this, k.Anrede);
             Vorname = new(this, k.Vorname);
             Nachname = new(this, k.Nachname);
 
-            Anreden = Enums.Anreden;
             UpdateListen();
+        }
+
+        public NatuerlichePersonViewModel(INotificationService ns, IWalterDbService db): base(ns, db)
+        {
+            Anreden = Enums.Anreden;
 
             Save = new RelayCommand(_ =>
             {
@@ -69,21 +71,21 @@ namespace Deeplex.Saverwalter.ViewModels
 
                 if (Entity.NatuerlichePersonId != 0)
                 {
-                    Db.ctx.NatuerlichePersonen.Update(Entity);
+                    base.WalterDbService.ctx.NatuerlichePersonen.Update(Entity);
                 }
                 else
                 {
-                    Db.ctx.NatuerlichePersonen.Add(Entity);
+                    base.WalterDbService.ctx.NatuerlichePersonen.Add(Entity);
                 }
-                Db.SaveWalter();
+                base.WalterDbService.SaveWalter();
             }, _ => true);
 
             Delete = new AsyncRelayCommand(async _ =>
             {
                 if (await NotificationService.Confirmation())
                 {
-                    Db.ctx.NatuerlichePersonen.Remove(Entity);
-                    Db.SaveWalter();
+                    base.WalterDbService.ctx.NatuerlichePersonen.Remove(Entity);
+                    base.WalterDbService.SaveWalter();
                 }
             }, _ => true);
         }

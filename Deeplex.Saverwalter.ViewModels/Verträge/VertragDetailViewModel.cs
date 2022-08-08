@@ -9,9 +9,9 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class VertragDetailViewModel : VertragDetailViewModelVersion, IDetailViewModel
+    public sealed class VertragDetailViewModel : VertragDetailViewModelVersion, IDetailViewModel<Vertrag>
     {
-        public Guid guid { get; }
+        public Guid guid { get; private set; }
 
         public List<WohnungListViewModelEntry> AlleWohnungen;
         public List<KontaktListViewModelEntry> AlleKontakte;
@@ -38,36 +38,40 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public VertragDetailViewModel(INotificationService ns, IWalterDbService db) : this(
-            new List<Vertrag> { new Vertrag { Beginn = DateTime.UtcNow.Date, } }, ns, db)
-        { }
-
-        public VertragDetailViewModel(Guid id, INotificationService ns, IWalterDbService db)
-            : this(db.ctx.Vertraege
-                  .Where(v => v.VertragId == id)
-                  .Include(v => v.Wohnung)
-                  .ToList()
-                  .OrderBy(v => v.Version)
-                  .Reverse()
-                  .ToList(), ns, db)
-        { }
-
-        public VertragDetailViewModel(List<Vertrag> v, INotificationService ns, IWalterDbService db) : base(v.OrderBy(vs => vs.Version).Last(), ns, db)
+        public new void SetEntity(Vertrag v)
         {
-            guid = v.First().VertragId;
+            var list = WalterDbService.ctx.Vertraege
+                  .Where(e => e.VertragId == v.VertragId)
+                  .Include(e => e.Wohnung)
+                  .ToList()
+                  .OrderBy(e => e.Version)
+                  .Reverse()
+                  .ToList();
+            guid = list.First().VertragId;
 
-            Mieten.Value = new(guid, ns, db);
-            MietMinderungen.Value = new(guid, ns, db);
-            Mieter.Value = new(db, ns, v.First());
+            Mieten.Value = new(guid, NotificationService, WalterDbService);
+            MietMinderungen.Value = new(guid, NotificationService, WalterDbService);
+            Mieter.Value = new(WalterDbService, NotificationService);
+            Mieter.Value.SetList(list.First());
 
-            Versionen.Value = v.Select(vs => new VertragDetailViewModelVersion(vs, ns, db)).ToImmutableList();
+            Versionen.Value = list.Select(vs =>
+            {
+                var r = new VertragDetailViewModelVersion(NotificationService, WalterDbService);
+                r.SetEntity(vs);
+                return r;
+            }).ToImmutableList();
 
+            Wohnung.Value = AlleWohnungen.Find(w => w.Id == list.First().WohnungId);
+        }
+
+        public VertragDetailViewModel(INotificationService ns, IWalterDbService db) : base(ns, db)
+        {
             AlleWohnungen = db.ctx.Wohnungen.Select(w => new WohnungListViewModelEntry(w, db)).ToList();
-            Wohnung.Value = AlleWohnungen.Find(w => w.Id == v.First().WohnungId);
 
             AlleKontakte = db.ctx.JuristischePersonen.ToList().Select(j => new KontaktListViewModelEntry(j))
                     .Concat(db.ctx.NatuerlichePersonen.Select(n => new KontaktListViewModelEntry(n)))
                     .ToList();
+
             if (Versionen.Value.Last().Ansprechpartner.Value is KontaktListViewModelEntry partner)
             {
                 Ansprechpartner = AlleKontakte.Find(e => e.Entity.PersonId == partner.Guid);
@@ -79,9 +83,9 @@ namespace Deeplex.Saverwalter.ViewModels
                 {
                     Versionen.Value.ForEach(v =>
                     {
-                        Db.ctx.Vertraege.Remove(v.Entity);
+                        WalterDbService.ctx.Vertraege.Remove(v.Entity);
                     });
-                    Db.SaveWalter();
+                    WalterDbService.SaveWalter();
                 }
             }, _ => true);
 
@@ -95,7 +99,9 @@ namespace Deeplex.Saverwalter.ViewModels
                     Personenzahl = Personenzahl.Value,
                     //KaltMiete = KaltMiete, TODO
                 };
-                var nv = new VertragDetailViewModelVersion(entity, ns, db);
+                var nv = new VertragDetailViewModelVersion(ns, db);
+                nv.SetEntity(entity);
+
                 Versionen.Value = Versionen.Value.Insert(0, nv);
                 db.ctx.Vertraege.Add(entity);
                 db.SaveWalter();
@@ -124,7 +130,7 @@ namespace Deeplex.Saverwalter.ViewModels
             MietMinderungen.Value.Liste.Value.ForEach(e => e.save());
 
             Versionen.Value.ForEach(v => v.versionSave());
-            Db.SaveWalter();
+            WalterDbService.SaveWalter();
             NotificationService.outOfSync = false;
         }
 

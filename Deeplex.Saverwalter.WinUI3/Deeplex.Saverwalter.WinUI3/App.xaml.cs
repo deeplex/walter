@@ -26,11 +26,56 @@ namespace Deeplex.Saverwalter.WinUI3
             FileService = new FileService(WalterService);
 
             Container = new SimpleInjector.Container();
-            Container.Register<INotificationService, NotificationService>(Lifestyle.Singleton);
-            Container.Register<IWalterDbService, WalterDbService>(Lifestyle.Singleton);
-            Container.Register<IFileService, FileService>(Lifestyle.Singleton);
+            Container.Register<INotificationService, NotificationService>();
+            Container.Register<IWalterDbService, WalterDbService>();
+            Container.Register<IFileService, FileService>();
 
             Container.Register<WohnungListViewModel>();
+            //Container.Register<WohnungListViewModelEntry>();
+            Container.Register<WohnungDetailViewModel>();
+
+            Container.Register<VertragListViewModel>();
+            //Container.Register<VertragListViewModelVertrag>(); // TODO rename to Entry
+            //Container.Register<VertragListViewModelVertragVersion>();
+            Container.Register<VertragDetailViewModel>();
+
+            Container.Register<BetriebskostenRechnungenListViewModel>();
+            //Container.Register<BetriebskostenRechnungenListViewModelEntry>();
+            Container.Register<BetriebskostenrechnungDetailViewModel>();
+            Container.Register<BetriebskostenrechnungPrintViewModel>();
+
+            Container.Register<UmlageListViewModel>();
+            //Container.Register<UmlageListViewModelEntry>();
+            Container.Register<UmlageDetailViewModel>();
+
+            Container.Register<KontaktListViewModel>();
+            //Container.Register<KontaktListViewModelEntry>();
+            Container.Register<NatuerlichePersonViewModel>(); // TODO add Detail to name
+            Container.Register<JuristischePersonViewModel>(); // TODO add Detail to name
+
+            Container.Register<ErhaltungsaufwendungenListViewModel>();
+            ////Container.Register<ErhaltungsaufwendungenListViewModelEntry>();
+            Container.Register<ErhaltungsaufwendungenDetailViewModel>();
+            Container.Register<ErhaltungsaufwendungenPrintViewModel>();
+            //Container.Register<ErhaltungsaufwendungenPrintEntry>();
+
+            Container.Register<ZaehlerListViewModel>();
+            //Container.Register<ZaehlerListViewModelEntry>();
+            Container.Register<ZaehlerDetailViewModel>();
+
+            Container.Register<ZaehlerstandListViewModel>();
+            //Container.Register<ZaehlerstandListViewModelEntry>();
+
+            // Only used in ViewModels (Through Vertrag):
+            //Container.Register<MietenListViewModel>();
+            //Container.Register<MietenListViewModelEntry>();
+            //Container.Register<MietenDetailViewModel>();
+
+            //Container.Register<MietMinderungListViewModel>();
+            //Container.Register<MietminderungListViewModelEntry>();
+            //Container.Register<MietMinderungDetailViewModel>();
+
+            Container.Verify();
 
             Window = new MainWindow();
             Window.Activate();

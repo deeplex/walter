@@ -16,12 +16,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public string Titel { get; }
         public ObservableProperty<bool> Enabled = new(true);
 
-        public IWalterDbService Db { get; }
+        public IWalterDbService WalterDbService { get; }
 
         public AsyncRelayCommand Print { get; }
+
         private ErhaltungsaufwendungenPrintViewModel(IWalterDbService db, IFileService fs)
         {
-            Db = db;
+            WalterDbService = db;
 
             Print = new AsyncRelayCommand(async _ =>
             {

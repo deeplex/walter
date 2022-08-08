@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Saverwalter.WinUI3.Views;
@@ -66,9 +67,9 @@ namespace Deeplex.Saverwalter.WinUI3
             if (App.WalterService.root == null || !File.Exists(App.WalterService.root + ".db"))
             {
                 var path = await App.NotificationService.Confirmation(
-                        "Noch keine Datenbank ausgewählt",
-                        "Datenbank suchen, oder leere Datenbank erstellen?",
-                        "Existierende Datenbank auswählen", "Erstelle neue leere Datenbank") ?
+                    "Noch keine Datenbank ausgewählt",
+                    "Datenbank suchen, oder leere Datenbank erstellen?",
+                    "Existierende Datenbank auswählen", "Erstelle neue leere Datenbank") ?
                         await App.FileService.pickFile(".db") :
                         await App.FileService.saveFile("walter", new string[] { ".db" });
                 App.WalterService.root = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
@@ -81,8 +82,8 @@ namespace Deeplex.Saverwalter.WinUI3
             var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
             optionsBuilder.UseSqlite("Data Source=" + App.WalterService.root + ".db");
             App.WalterService.ctx = new SaverwalterContext(optionsBuilder.Options);
+            App.Container.GetInstance<WalterDbService>().ctx = new SaverwalterContext(optionsBuilder.Options);
             App.WalterService.ctx.Database.Migrate();
-
         }
 
         private async void Root_Loaded(object sender, RoutedEventArgs e)

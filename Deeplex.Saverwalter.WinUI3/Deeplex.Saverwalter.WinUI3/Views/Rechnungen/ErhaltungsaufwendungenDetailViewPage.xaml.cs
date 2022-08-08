@@ -18,24 +18,13 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (e.Parameter is int id)
+            ViewModel = App.Container.GetInstance<ErhaltungsaufwendungenDetailViewModel>();
+            if (e.Parameter is Erhaltungsaufwendung r)
             {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.WalterService.ctx.Erhaltungsaufwendungen.Find(id), App.NotificationService, App.WalterService);
-            }
-            else if (e.Parameter is ErhaltungsaufwendungenDetailViewModel vm)
-            {
-                ViewModel = vm;
-            }
-            else if (e.Parameter is Erhaltungsaufwendung r)
-            {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel(r, App.NotificationService, App.WalterService);
-            }
-            else if (e.Parameter is null)
-            {
-                ViewModel = new ErhaltungsaufwendungenDetailViewModel(App.NotificationService, App.WalterService);
+                ViewModel.SetEntity(r);
             }
 
-            App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel }; // TODO123
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl<Erhaltungsaufwendung> { ViewModel = ViewModel }; // TODO123
 
             base.OnNavigatedTo(e);
         }

@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Id = w.WohnungId;
             Bezeichnung = AdresseViewModel.Anschrift(w) + " - " + w.Bezeichnung;
             Liste = Entity.Erhaltungsaufwendungen
-                .Select(e => new ErhaltungsaufwendungenListViewModelEntry(e, vm.Db))
+                .Select(e => new ErhaltungsaufwendungenListViewModelEntry(e, vm.WalterDbService))
                 .ToImmutableList();
             Liste.ForEach(e => e.Enabled.PropertyChanged += updateSumme);
             parent.Jahr.PropertyChanged += updateSumme;

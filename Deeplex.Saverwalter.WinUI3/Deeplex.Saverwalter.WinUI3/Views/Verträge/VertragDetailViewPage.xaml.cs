@@ -1,10 +1,13 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System;
+using System.Linq;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
 {
@@ -23,16 +26,19 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is Vertrag v)
             {
-                ViewModel = new(v.VertragId, App.NotificationService, App.WalterService);
-                BetriebskostenListViewModel = new(App.WalterService, App.NotificationService, v);
-                UmlageListViewModel = new(App.WalterService, App.NotificationService, v);
+                ViewModel = App.Container.GetInstance<VertragDetailViewModel>();
+                ViewModel.SetEntity(v);
+                BetriebskostenListViewModel = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
+                BetriebskostenListViewModel.SetList(v);
+                UmlageListViewModel = App.Container.GetInstance<UmlageListViewModel>();
+                UmlageListViewModel.SetList(v);
             }
             else
             {
                 ViewModel = new VertragDetailViewModel(App.NotificationService, App.WalterService);
             }
 
-            App.Window.CommandBar.MainContent = new UserControls.DetailCommandBarControl() { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new UserControls.DetailCommandBarControl<Vertrag>() { ViewModel = ViewModel };
             // TODO
             //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.ViewModel));
 

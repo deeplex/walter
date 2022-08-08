@@ -27,16 +27,13 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             set
             {
                 SetValue(ViewModelProperty, value);
-                VertragListViewModel.Value = new VertragListViewModel(
-                    App.WalterService,
-                    App.NotificationService,
-                    ViewModel.Entity);
+                VertragListViewModel.Value = App.Container.GetInstance<VertragListViewModel>();
+                VertragListViewModel.Value.SetList(ViewModel.Entity);
                 WohnungListViewModel.Value = App.Container.GetInstance<WohnungListViewModel>();
                 WohnungListViewModel.Value.SetList(ViewModel.Entity);
-                JuristischePersonenViewModel.Value = new KontaktListViewModel(
-                    App.WalterService,
-                    App.NotificationService,
-                    ViewModel.Entity);
+                // Should only show juristische Person? TODO
+                JuristischePersonenViewModel.Value = App.Container.GetInstance<KontaktListViewModel>();
+                JuristischePersonenViewModel.Value.SetList(ViewModel.Entity);
             }
         }
 

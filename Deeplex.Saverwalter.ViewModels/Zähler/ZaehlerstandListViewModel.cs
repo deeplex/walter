@@ -6,24 +6,29 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
+    // TODO this is not a regular ListViewModel, since Zaehlerstaende needs a Zaehler
     public class ZaehlerstandListViewModel : BindableBase
     {
         public ObservableProperty<ImmutableList<ZaehlerstandListViewModelEntry>> Liste = new();
-        public int ZaehlerId;
+        public int ZaehlerId { get; private set; }
 
-        public IWalterDbService Db;
-        public INotificationService NotificationService;
+        public IWalterDbService WalterDbService { get; }
+        public INotificationService NotificationService { get; }
         public RelayCommand Add { get; }
 
-        public ZaehlerstandListViewModel(Zaehler z, INotificationService ns, IWalterDbService db)
+        public void SetList(Zaehler z)
         {
             ZaehlerId = z.ZaehlerId;
-            NotificationService = ns;
-            Db = db;
             Liste.Value = z.Staende
                 .Select(s => new ZaehlerstandListViewModelEntry(s, this))
                 .OrderByDescending(e => e.Datum.Value)
                 .ToImmutableList();
+        }
+
+        public ZaehlerstandListViewModel(Zaehler z, INotificationService ns, IWalterDbService db)
+        {
+            NotificationService = ns;
+            WalterDbService = db;
 
             Add = new RelayCommand(_ =>
             {

@@ -33,12 +33,14 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is Umlage r)
             {
-                ViewModel = new(r, App.NotificationService, App.WalterService);
+                ViewModel = App.Container.GetInstance<UmlageDetailViewModel>();
+                ViewModel.SetEntity(r);
                 
                 WohnungListViewModel = App.Container.GetInstance<WohnungListViewModel>();
                 WohnungListViewModel.SetList(r);
 
-                BetriebskostenRechnungenListViewModel = new(App.WalterService, App.NotificationService, r);
+                BetriebskostenRechnungenListViewModel = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
+                BetriebskostenRechnungenListViewModel.SetList(r);
             }
             else if (e.Parameter is null)
             {
@@ -47,7 +49,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
             base.OnNavigatedTo(e);
 
-            App.Window.CommandBar.MainContent = new DetailCommandBarControl() { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl<Umlage>() { ViewModel = ViewModel };
             // TODO
             //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.WalterService));
 

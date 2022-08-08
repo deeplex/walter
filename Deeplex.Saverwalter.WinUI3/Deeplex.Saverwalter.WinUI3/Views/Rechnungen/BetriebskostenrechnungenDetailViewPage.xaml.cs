@@ -29,18 +29,14 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            ViewModel = App.Container.GetInstance<BetriebskostenrechnungDetailViewModel>();
             if (e.Parameter is Betriebskostenrechnung r)
             {
-                ViewModel = new(r, App.NotificationService, App.WalterService);
+                ViewModel.SetEntity(r);
             }
-            else if (e.Parameter is null)
-            {
-                ViewModel = new BetriebskostenrechnungDetailViewModel(App.NotificationService, App.WalterService);
-            }
-
             base.OnNavigatedTo(e);
 
-            App.Window.CommandBar.MainContent = new DetailCommandBarControl() { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl<Betriebskostenrechnung>() { ViewModel = ViewModel };
         }
     }
 }

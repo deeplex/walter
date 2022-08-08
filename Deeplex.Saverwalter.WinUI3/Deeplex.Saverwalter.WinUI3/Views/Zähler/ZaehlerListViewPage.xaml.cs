@@ -6,13 +6,13 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class ZaehlerListViewPage : Page
     {
-        public ZaehlerListViewModel ViewModel { get; } = new ZaehlerListViewModel(App.WalterService, App.NotificationService);
+        public ZaehlerListViewModel ViewModel { get; } = App.Container.GetInstance<ZaehlerListViewModel>();
 
         public ZaehlerListViewPage()
         {
             InitializeComponent();
 
-            App.Window.CommandBar.MainContent = new ListCommandBarControl { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new ListCommandBarControl<ZaehlerListViewModelEntry> { ViewModel = ViewModel };
         }
     }
 }

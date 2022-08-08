@@ -9,11 +9,11 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class BetriebskostenrechnungDetailViewModel : BindableBase, IDetailViewModel
+    public sealed class BetriebskostenrechnungDetailViewModel : BindableBase, IDetailViewModel<Betriebskostenrechnung>
     {
         public override string ToString() => Entity.Umlage.Typ.ToDescriptionString() + " - " + Entity.GetWohnungenBezeichnung();
 
-        public Betriebskostenrechnung Entity { get; }
+        public Betriebskostenrechnung Entity { get; set; }
         public int Id => Entity.BetriebskostenrechnungId;
 
         public ObservableProperty<int> BetriebskostenrechnungsJahr = new();
@@ -25,9 +25,9 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<List<UmlageListViewModelEntry>> Umlagen_List { get; } = new();
         public List<ZaehlerListViewModelEntry> AllgemeinZaehler_List;
 
-        public SavableProperty<ZaehlerListViewModelEntry> AllgemeinZaehler { get; }
+        public SavableProperty<ZaehlerListViewModelEntry, Betriebskostenrechnung> AllgemeinZaehler { get; private set; }
 
-        public List<BetriebskostentypUtil> Typen_List { get; }
+        public List<BetriebskostentypUtil> Typen_List { get; private set; }
         public BetriebskostentypUtil Typ
         {
             get => Typen_List.FirstOrDefault(t => t.Typ == Umlage.Value?.Typ);
@@ -42,11 +42,13 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public SavableProperty<double> Betrag { get; }
-        public SavableProperty<DateTimeOffset> Datum { get; }
-        public SavableProperty<string> Notiz { get; }
-        public SavableProperty<UmlageListViewModelEntry> Umlage { get; }
-        public DateTimeOffset? BetreffendesJahrDatum
+        public SavableProperty<double, Betriebskostenrechnung> Betrag { get; private set; }
+        public SavableProperty<int, Betriebskostenrechnung> BetreffendesJahr { get; private set; }
+        public SavableProperty<DateTimeOffset, Betriebskostenrechnung> Datum { get; private set; }
+        public SavableProperty<string, Betriebskostenrechnung> Notiz { get; private set; }
+        public SavableProperty<UmlageListViewModelEntry, Betriebskostenrechnung> Umlage { get; private set; }
+
+        public DateTimeOffset? BetreffendesJahrDatum // TODO Remove
         {
             get => new DateTime(BetreffendesJahr.Value, 1, 1);
             set
@@ -54,12 +56,12 @@ namespace Deeplex.Saverwalter.ViewModels
                 BetreffendesJahr.Value = value?.Year ?? DateTime.Now.Year - 1;
             }
         }
-        public SavableProperty<int> BetreffendesJahr { get; }
 
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 
         public IWalterDbService Db;
         public INotificationService NotifcationService;
+
         public void UpdateWohnungen(ImmutableList<WohnungListViewModelEntry> list)
         {
             var flagged = Wohnungen.Value.Count != list.Count;
@@ -91,18 +93,36 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToList();
         }
 
-        public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, INotificationService ns, IWalterDbService db)
+        public IWalterDbService WalterDbService { get; }
+        public INotificationService NotificationService { get; }
+
+        public BetriebskostenrechnungDetailViewModel(IWalterDbService db, INotificationService ns)
         {
-            Entity = r;
-            Db = db;
-            NotifcationService = ns;
+            WalterDbService = db;
+            NotificationService = ns;
 
             Typen_List = Enums.Betriebskostentyp.Where(e => Db.ctx.Betriebskostenrechnungen.ToList().Exists(br => br.Umlage.Typ == e.Typ)).ToList();
+
+
+            Delete = new AsyncRelayCommand(async _ =>
+            {
+                if (await NotifcationService.Confirmation())
+                {
+                    Db.ctx.Betriebskostenrechnungen.Remove(Entity);
+                    Db.SaveWalter();
+                }
+            });
+
+            Save = new RelayCommand(_ => save(), _ => true);
+        }
+
+        public void SetEntity(Betriebskostenrechnung r)
+        {
+            Entity = r;
 
             var datum = r.Datum == default ? DateTime.Now : r.Datum;
 
             Betrag = new(this, r.Betrag);
-
             Datum = new(this, datum.AsUtcKind());
             Notiz = new(this, r.Notiz);
             BetreffendesJahr = new(this, datum.Year);
@@ -127,45 +147,6 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Umlagen_List.Value = updateUmlagenList(r.Umlage.Typ);
             Umlage = new(this, Umlagen_List.Value.FirstOrDefault(e => e.Id == r.Umlage.UmlageId));
-
-            Delete = new AsyncRelayCommand(async _ =>
-            {
-                if (await NotifcationService.Confirmation())
-                {
-                    Db.ctx.Betriebskostenrechnungen.Remove(Entity);
-                    Db.SaveWalter();
-                }
-            });
-
-            Save = new RelayCommand(_ => save(), _ => true);
-        }
-
-        public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, int w, List<Wohnung> l, INotificationService ns, IWalterDbService db) : this(r, w, ns, db)
-        {
-            Wohnungen.Value = l.Select(e => new WohnungListViewModelEntry(e, db)).ToImmutableList();
-        }
-
-        public BetriebskostenrechnungDetailViewModel(Betriebskostenrechnung r, int w, INotificationService ns, IWalterDbService avm) : this(r, ns, avm)
-        {
-            BetriebskostenrechnungsWohnung.Value = Wohnungen.Value.Find(e => e.Id == w);
-        }
-
-        public BetriebskostenrechnungDetailViewModel(IList<WohnungListViewModelEntry> l, int betreffendesJahr, INotificationService ns, IWalterDbService avm) : this(new Betriebskostenrechnung(), ns, avm)
-        {
-            var thisYear = Db.ctx.Betriebskostenrechnungen.ToList().Where(r =>
-               r.BetreffendesJahr == BetreffendesJahr.Value - 1 &&
-               r.Umlage.Wohnungen.Count == Wohnungen.Value.Count &&
-               Wohnungen.Value.All(e => r.Umlage.Wohnungen.ToList().Exists(r => r.WohnungId == e.Id)))
-                .ToList();
-
-            Wohnungen.Value = l.ToImmutableList();
-            BetreffendesJahr.Value = betreffendesJahr;
-        }
-
-        public BetriebskostenrechnungDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Betriebskostenrechnung(), ns, db)
-        {
-            Entity.BetreffendesJahr = DateTime.Now.Year;
-            Entity.Datum = DateTime.Now;
         }
 
         public RelayCommand Save { get; }

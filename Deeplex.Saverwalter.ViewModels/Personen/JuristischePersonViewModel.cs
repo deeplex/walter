@@ -7,12 +7,12 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class JuristischePersonViewModel : PersonViewModel, IDetailViewModel
+    public sealed class JuristischePersonViewModel : PersonViewModel, IDetailViewModel<JuristischePerson>
     {
         public new JuristischePerson Entity => (JuristischePerson)base.Entity;
         public int Id;
 
-        public SavableProperty<string> Bezeichnung { get; }
+        public SavableProperty<string, JuristischePerson> Bezeichnung { get; private set; }
         public override string ToString() => Bezeichnung.Value;
 
         public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Mitglieder = new();
@@ -32,38 +32,39 @@ namespace Deeplex.Saverwalter.ViewModels
         public void UpdateListen()
         {
             Mitglieder.Value = Entity.Mitglieder
-                .Select(w => new KontaktListViewModelEntry(Db, w.PersonId))
+                .Select(w => new KontaktListViewModelEntry(WalterDbService, w.PersonId))
                 .ToImmutableList();
 
-            AddMitglieder.Value = Db.ctx.NatuerlichePersonen
+            AddMitglieder.Value = WalterDbService.ctx.NatuerlichePersonen
                 .Select(k => new KontaktListViewModelEntry(k))
                 .ToList()
-                .Concat(Db.ctx.JuristischePersonen
+                .Concat(WalterDbService.ctx.JuristischePersonen
                     .Select(k => new KontaktListViewModelEntry(k))
                     .ToList())
                 .Where(k => !Mitglieder.Value.Any(e => e.Entity.PersonId == k.Entity.PersonId))
                     .ToImmutableList();
 
-            Wohnungen.Value = Db.ctx.Wohnungen
+            Wohnungen.Value = WalterDbService.ctx.Wohnungen
                 .ToList()
                 .Where(w => w.BesitzerId == Entity.PersonId ||
                     (WohnungenInklusiveMitglieder && Mitglieder.Value.Any(m => m.Entity.PersonId == w.BesitzerId)))
-                .Select(w => new WohnungListViewModelEntry(w, Db))
+                .Select(w => new WohnungListViewModelEntry(w, WalterDbService))
                 .ToImmutableList();
         }
 
         public RelayCommand AddMitgliedCommand;
 
-        public JuristischePersonViewModel(INotificationService ns, IWalterDbService db) : this(new JuristischePerson(), ns, db) { }
-        public JuristischePersonViewModel(int id, INotificationService ns, IWalterDbService db) : this(db.ctx.JuristischePersonen.Find(id), ns, db) { }
-        public JuristischePersonViewModel(JuristischePerson j, INotificationService ns, IWalterDbService db) : base(j, ns, db)
+        public void SetEntity(JuristischePerson k)
         {
-            base.Entity = j;
-            Id = j.JuristischePersonId;
-            Bezeichnung = new(this, j.Bezeichnung);
+            base.SetEntity(k);
+            Id = k.JuristischePersonId;
+            Bezeichnung = new(this, k.Bezeichnung);
 
             UpdateListen();
+        }
 
+        public JuristischePersonViewModel(INotificationService ns, IWalterDbService db) : base(ns, db)
+        {
             AddMitgliedCommand = new RelayCommand(_ =>
             {
                 if (AddMitglied.Value?.Entity.PersonId is Guid guid)
@@ -76,7 +77,7 @@ namespace Deeplex.Saverwalter.ViewModels
                     {
                         j.JuristischePersonen.Add(Entity);
                     }
-                    Db.SaveWalter();
+                    WalterDbService.SaveWalter();
                     UpdateListen();
                 }
             }, _ => true);
@@ -85,8 +86,8 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 if (await NotificationService.Confirmation())
                 {
-                    Db.ctx.JuristischePersonen.Remove(Entity);
-                    Db.SaveWalter();
+                    WalterDbService.ctx.JuristischePersonen.Remove(Entity);
+                    WalterDbService.SaveWalter();
                 }
             }, _ => true);
 
@@ -97,13 +98,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
                 if (Entity.JuristischePersonId != 0)
                 {
-                    Db.ctx.JuristischePersonen.Update(Entity);
+                    WalterDbService.ctx.JuristischePersonen.Update(Entity);
                 }
                 else
                 {
-                    Db.ctx.JuristischePersonen.Add(Entity);
+                    WalterDbService.ctx.JuristischePersonen.Add(Entity);
                 }
-                Db.SaveWalter();
+                WalterDbService.SaveWalter();
             }, _ => true);
         }
 

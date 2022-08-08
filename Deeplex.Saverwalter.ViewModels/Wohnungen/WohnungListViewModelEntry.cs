@@ -17,8 +17,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public WohnungListViewModelEntry(Wohnung w, IWalterDbService db)
         {
-            Id = w.WohnungId;
             Entity = w;
+            Id = w.WohnungId;
             Adresse = w.Adresse;
             Bezeichnung = w.Bezeichnung;
             Anschrift = AdresseViewModel.Anschrift(w);

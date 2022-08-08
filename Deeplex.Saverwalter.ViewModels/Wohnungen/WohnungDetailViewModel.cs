@@ -7,9 +7,9 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class WohnungDetailViewModel : ValidatableBase, IDetailViewModel
+    public sealed class WohnungDetailViewModel : ValidatableBase, IDetailViewModel<Wohnung>
     {
-        public Wohnung Entity { get; }
+        public Wohnung Entity { get; set; }
         public int Id => Entity.WohnungId;
 
         public override string ToString() => AdresseViewModel.Anschrift(Entity) + " - " + Bezeichnung.Value;
@@ -20,55 +20,59 @@ namespace Deeplex.Saverwalter.ViewModels
         public ImmutableList<KontaktListViewModelEntry> AlleVermieter;
 
         public int AdresseId => Entity.AdresseId;
-        public string Anschrift => AdresseViewModel.Anschrift(AdresseId, Db);
+        public string Anschrift => AdresseViewModel.Anschrift(AdresseId, WalterDbService);
 
         public KontaktListViewModelEntry Besitzer { get; set; }
 
-        public SavableProperty<string> Bezeichnung { get; set; }
-        public SavableProperty<string> Notiz { get; set; }
-        public SavableProperty<double> Wohnflaeche { get; set; }
-        public SavableProperty<double> Nutzflaeche { get; set; }
-        public SavableProperty<int> Nutzeinheit { get; set; }
+        public SavableProperty<string, Wohnung> Bezeichnung { get; set; }
+        public SavableProperty<string, Wohnung> Notiz { get; set; }
+        public SavableProperty<double, Wohnung> Wohnflaeche { get; set; }
+        public SavableProperty<double, Wohnung> Nutzflaeche { get; set; }
+        public SavableProperty<int, Wohnung> Nutzeinheit { get; set; }
 
-        private INotificationService NotificationService;
-        private IWalterDbService Db;
+        public INotificationService NotificationService { get; }
+        public IWalterDbService WalterDbService { get; }
         public RelayCommand RemoveBesitzer;
         public RelayCommand Save { get; }
         public AsyncRelayCommand Delete { get; }
 
-        public WohnungDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Wohnung(), ns, db) { }
-        public WohnungDetailViewModel(Wohnung w, INotificationService ns, IWalterDbService db)
+        public WohnungDetailViewModel(INotificationService ns, IWalterDbService db)
         {
-            Entity = w;
-            Db = db;
+            WalterDbService = db;
             NotificationService = ns;
 
-            AlleVermieter = Db.ctx.JuristischePersonen.ToImmutableList()
+            AlleVermieter = WalterDbService.ctx.JuristischePersonen.ToImmutableList()
                 .Where(j => j.isVermieter == true).Select(j => new KontaktListViewModelEntry(j))
-                .Concat(Db.ctx.NatuerlichePersonen
+                .Concat(WalterDbService.ctx.NatuerlichePersonen
                     .Where(n => n.isVermieter == true).Select(n => new KontaktListViewModelEntry(n)))
                 .ToImmutableList();
 
-            if (w.BesitzerId != Guid.Empty)
-            {
-                Besitzer = AlleVermieter.SingleOrDefault(e => e.Entity.PersonId == w.BesitzerId);
-            }
-            Bezeichnung = new(this, w.Bezeichnung);
-            Notiz = new(this, w.Notiz);
-            Wohnflaeche = new(this, w.Wohnflaeche);
-            Nutzflaeche = new(this, w.Nutzflaeche);
-            Nutzeinheit = new(this, w.Nutzeinheit);
-
-            Save = new RelayCommand(_ => save(), _ => true); // Should be NotificationService.outOfSync
-            RemoveBesitzer = new RelayCommand(_ => { Besitzer = null; }, _ => true);
             Delete = new AsyncRelayCommand(async _ =>
             {
                 if (await NotificationService.Confirmation())
                 {
-                    Db.ctx.Wohnungen.Remove(Entity);
-                    Db.SaveWalter();
+                    WalterDbService.ctx.Wohnungen.Remove(Entity);
+                    WalterDbService.SaveWalter();
                 }
             }, _ => true);
+
+            Save = new RelayCommand(_ => save(), _ => true);
+            RemoveBesitzer = new RelayCommand(_ => { Besitzer = null; }, _ => true);
+        }
+
+        public void SetEntity(Wohnung e)
+        {
+            Entity = e;
+
+            if (e.BesitzerId != Guid.Empty)
+            {
+                Besitzer = AlleVermieter.SingleOrDefault(k => k.Entity.PersonId == e.BesitzerId);
+            }
+            Bezeichnung = new(this, e.Bezeichnung);
+            Notiz = new(this, e.Notiz);
+            Wohnflaeche = new(this, e.Wohnflaeche);
+            Nutzflaeche = new(this, e.Nutzflaeche);
+            Nutzeinheit = new(this, e.Nutzeinheit);
         }
 
         private void save()
@@ -81,13 +85,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.WohnungId != 0)
             {
-                Db.ctx.Wohnungen.Update(Entity);
+                WalterDbService.ctx.Wohnungen.Update(Entity);
             }
             else
             {
-                Db.ctx.Wohnungen.Add(Entity);
+                WalterDbService.ctx.Wohnungen.Add(Entity);
             }
-            Db.SaveWalter();
+            WalterDbService.SaveWalter();
             checkForChanges();
         }
 

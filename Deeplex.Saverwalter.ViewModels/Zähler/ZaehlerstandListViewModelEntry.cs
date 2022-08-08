@@ -5,20 +5,20 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class ZaehlerstandListViewModelEntry : IDetailViewModel
+    public class ZaehlerstandListViewModelEntry : IListViewModelEntry<Zaehlerstand>
     {
         public Zaehlerstand Entity { get; }
         public int Id => Entity.ZaehlerstandId;
-        public SavableProperty<double> Stand { get; }
-        public SavableProperty<DateTimeOffset> Datum { get; }
-        public SavableProperty<string> Notiz { get; }
+        public SavableEntryProperty<double, Zaehlerstand> Stand { get; private set; }
+        public SavableEntryProperty<DateTimeOffset, Zaehlerstand> Datum { get; private set; }
+        public SavableEntryProperty<string, Zaehlerstand> Notiz { get; private set; }
 
         private IWalterDbService Db { get; }
         private INotificationService NotificationService { get; }
 
         public ZaehlerstandListViewModelEntry(Zaehlerstand z, ZaehlerstandListViewModel vm)
         {
-            Db = vm.Db;
+            Db = vm.WalterDbService;
             NotificationService = vm.NotificationService;
             Entity = z;
             Stand = new(this, z.Stand);
@@ -28,8 +28,8 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 if (Entity.ZaehlerstandId != 0 && await vm.NotificationService.Confirmation())
                 {
-                    vm.Db.ctx.Zaehlerstaende.Remove(Entity);
-                    vm.Db.SaveWalter();
+                    vm.WalterDbService.ctx.Zaehlerstaende.Remove(Entity);
+                    vm.WalterDbService.SaveWalter();
                 }
                 vm.Liste.Value = vm.Liste.Value.Remove(this);
             }, _ => true);

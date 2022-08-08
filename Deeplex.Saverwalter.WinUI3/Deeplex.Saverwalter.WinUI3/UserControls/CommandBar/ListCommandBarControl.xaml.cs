@@ -4,16 +4,16 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
-    public sealed partial class ListCommandBarControl : UserControl
+    public sealed partial class ListCommandBarControl<T> : UserControl
     {
         public ListCommandBarControl()
         {
             InitializeComponent();
         }
 
-        public IListViewModel ViewModel
+        public IListViewModel<T> ViewModel
         {
-            get { return (IListViewModel)GetValue(ViewModelProperty); }
+            get { return (IListViewModel<T>)GetValue(ViewModelProperty); }
             set
             {
                 SetValue(ViewModelProperty, value);
@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
             "ViewModel",
-            typeof(IListViewModel),
+            typeof(IListViewModel<T>),
             typeof(ListCommandBarControl),
             new PropertyMetadata(null));
     }

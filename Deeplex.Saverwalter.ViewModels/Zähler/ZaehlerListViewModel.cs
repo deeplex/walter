@@ -8,30 +8,33 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class ZaehlerListViewModel : ListViewModel<ZaehlerListViewModelEntry>, IListViewModel
+    public class ZaehlerListViewModel : ListViewModel<ZaehlerListViewModelEntry>, IListViewModel<ZaehlerListViewModelEntry>
     {
         public override string ToString() => "Zähler";
 
         protected override ImmutableList<ZaehlerListViewModelEntry> updateList(string filter)
             => AllRelevant.Where(v => applyFilter(filter, v.Kennnummer, v.TypString, v.Wohnung)).ToImmutableList();
 
-        public ZaehlerListViewModel(IWalterDbService db, INotificationService ns): this(ns)
+        public IWalterDbService WalterDbService { get; }
+        public INotificationService NotificationService { get; }
+
+        public void SetList()
         {
-            AllRelevant = transform(db, include(db));
-            List.Value = AllRelevant;
+            AllRelevant = transform(WalterDbService, include(WalterDbService));
+            List.Value = AllRelevant.ToImmutableList();
         }
 
-        public ZaehlerListViewModel(IWalterDbService db, INotificationService ns, Wohnung w) : this(ns)
+        public void SetList(Wohnung w)
         {
-            AllRelevant = transform(db,
-                include(db)
+            AllRelevant = transform(WalterDbService,
+                include(WalterDbService)
                 .Where(z => z.Wohnung != null && z.Wohnung.WohnungId == w.WohnungId)
                 .ToList());
-            List.Value = AllRelevant;
+            List.Value = AllRelevant.ToImmutableList();
         }
 
 
-        private ZaehlerListViewModel(INotificationService ns)
+        private ZaehlerListViewModel(IWalterDbService db, INotificationService ns)
         {
             Navigate = new RelayCommand(el => ns.Navigation((Zaehler)el), _ => true);
         }

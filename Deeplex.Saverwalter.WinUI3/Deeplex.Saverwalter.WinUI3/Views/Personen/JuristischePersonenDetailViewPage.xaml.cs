@@ -23,16 +23,19 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is JuristischePerson jp)
             {
-                ViewModel = new(jp, App.NotificationService, App.WalterService);
-                VertragListViewModel = new(App.WalterService, App.NotificationService, jp);
-                MitgliederListViewModel = new(App.WalterService, App.NotificationService, jp);
+                ViewModel = App.Container.GetInstance<JuristischePersonViewModel>();
+                ViewModel.SetEntity(jp);
+                VertragListViewModel = App.Container.GetInstance<VertragListViewModel>();
+                VertragListViewModel.SetList(jp);
+                MitgliederListViewModel = App.Container.GetInstance<KontaktListViewModel>();
+                MitgliederListViewModel.SetList(jp);
             }
             else if (e.Parameter is null)
             {
                 ViewModel = new JuristischePersonViewModel(App.NotificationService, App.WalterService);
             }
 
-            App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl<JuristischePerson> { ViewModel = ViewModel };
             // TODO
             //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.Impl, App.ViewModel));
 
