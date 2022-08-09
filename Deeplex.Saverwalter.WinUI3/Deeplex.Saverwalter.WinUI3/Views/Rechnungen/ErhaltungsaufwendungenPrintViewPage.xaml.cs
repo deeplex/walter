@@ -17,13 +17,14 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            ViewModel = App.Container.GetInstance<ErhaltungsaufwendungenPrintViewModel>();
             if (e.Parameter is Wohnung w)
             {
-                ViewModel = new ErhaltungsaufwendungenPrintViewModel(w, App.WalterService, App.FileService);
+                ViewModel.SetEntity(w);
             }
             else if (e.Parameter is IPerson p)
             {
-                ViewModel = new ErhaltungsaufwendungenPrintViewModel(p, App.WalterService, App.FileService);
+                ViewModel.SetEntity(p);
             }
 
             App.Window.CommandBar.MainContent = new PrintCommandBarControl { ViewModel = ViewModel };

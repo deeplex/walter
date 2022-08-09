@@ -5,20 +5,20 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class ZaehlerstandListViewModelEntry : IListViewModelEntry<Zaehlerstand>
+    public class ZaehlerstandListViewModelEntry : IDetailViewModel
     {
         public Zaehlerstand Entity { get; }
         public int Id => Entity.ZaehlerstandId;
-        public SavableEntryProperty<double, Zaehlerstand> Stand { get; private set; }
-        public SavableEntryProperty<DateTimeOffset, Zaehlerstand> Datum { get; private set; }
-        public SavableEntryProperty<string, Zaehlerstand> Notiz { get; private set; }
+        public SavableProperty<double> Stand { get; private set; }
+        public SavableProperty<DateTimeOffset> Datum { get; private set; }
+        public SavableProperty<string> Notiz { get; private set; }
 
-        private IWalterDbService Db { get; }
-        private INotificationService NotificationService { get; }
+        public IWalterDbService WalterDbService { get; }
+        public INotificationService NotificationService { get; }
 
         public ZaehlerstandListViewModelEntry(Zaehlerstand z, ZaehlerstandListViewModel vm)
         {
-            Db = vm.WalterDbService;
+            WalterDbService = vm.WalterDbService;
             NotificationService = vm.NotificationService;
             Entity = z;
             Stand = new(this, z.Stand);
@@ -52,13 +52,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.ZaehlerstandId != 0)
             {
-                Db.ctx.Zaehlerstaende.Update(Entity);
+                WalterDbService.ctx.Zaehlerstaende.Update(Entity);
             }
             else
             {
-                Db.ctx.Zaehlerstaende.Add(Entity);
+                WalterDbService.ctx.Zaehlerstaende.Add(Entity);
             }
-            Db.SaveWalter();
+            WalterDbService.SaveWalter();
             checkForChanges();
         }
 

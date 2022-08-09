@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Utils.ObjectModel;
@@ -31,29 +32,27 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            ViewModel = App.Container.GetInstance<UmlageDetailViewModel>();
+            WohnungListViewModel = App.Container.GetInstance<WohnungListViewModel>();
+            BetriebskostenRechnungenListViewModel = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
+        
             if (e.Parameter is Umlage r)
             {
-                ViewModel = App.Container.GetInstance<UmlageDetailViewModel>();
                 ViewModel.SetEntity(r);
-                
-                WohnungListViewModel = App.Container.GetInstance<WohnungListViewModel>();
                 WohnungListViewModel.SetList(r);
-
-                BetriebskostenRechnungenListViewModel = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
                 BetriebskostenRechnungenListViewModel.SetList(r);
             }
-            else if (e.Parameter is null)
-            {
-                ViewModel = new(App.NotificationService, App.WalterService);
-            }
+
 
             base.OnNavigatedTo(e);
 
-            App.Window.CommandBar.MainContent = new DetailCommandBarControl<Umlage>() { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl() { ViewModel = ViewModel };
             // TODO
             //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.Entity, App.Impl, App.WalterService));
 
-            App.WalterService.ctx.Adressen
+            var db = App.Container.GetInstance<IWalterDbService>();
+
+            db.ctx.Adressen
                 .Include(i => i.Wohnungen)
                 .ThenInclude(i => i.Umlagen)
                 .ThenInclude(w => w.Betriebskostenrechnungen)
@@ -77,7 +76,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                         var k = new TreeViewNode() { Content = AdresseViewModel.Anschrift(d) };
                         d.Wohnungen.ForEach(w =>
                         {
-                            var n = new TreeViewNode() { Content = new WohnungListViewModelEntry(w, App.WalterService) };
+                            var n = new TreeViewNode() { Content = new WohnungListViewModelEntry(w, db) };
                             k.Children.Add(n);
                             if (ViewModel.Wohnungen.Value.Exists(i => i.Id == w.WohnungId))
                             {

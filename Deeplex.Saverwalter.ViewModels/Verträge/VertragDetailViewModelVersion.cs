@@ -5,31 +5,26 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class VertragDetailViewModelVersion : BindableBase, IDetailViewModel<Vertrag>
+    public class VertragDetailViewModelVersion : DetailViewModel<Vertrag>, IDetailViewModel
     {
         public override string ToString() => "Vertrag"; // TODO
 
-        public Vertrag Entity { get; set; }
+        public Vertrag Entity { get; private set; }
         public int Id => Entity.rowid;
         public int Version => Entity.Version;
-        public SavableProperty<double, Vertrag> KaltMiete;
-        public SavableProperty<int, Vertrag> Personenzahl;
-        public SavableProperty<WohnungListViewModelEntry?, Vertrag> Wohnung;
-        public SavableProperty<DateTimeOffset, Vertrag> Beginn;
-        public SavableProperty<DateTimeOffset?, Vertrag> Ende;
-        public SavableProperty<string, Vertrag> Notiz;
-        public SavableProperty<KontaktListViewModelEntry, Vertrag> Ansprechpartner { get; private set; }
+        public SavableProperty<double> KaltMiete;
+        public SavableProperty<int> Personenzahl;
+        public SavableProperty<WohnungListViewModelEntry> Wohnung;
+        public SavableProperty<DateTimeOffset> Beginn;
+        public SavableProperty<DateTimeOffset?> Ende;
+        public SavableProperty<string> Notiz;
+        public SavableProperty<KontaktListViewModelEntry> Ansprechpartner { get; private set; }
 
         public KontaktListViewModelEntry Vermieter
             => Wohnung.Value?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
                     new KontaktListViewModelEntry(WalterDbService, g) : null;
 
         public RelayCommand RemoveDate;
-        public RelayCommand Save { get; protected set; }
-        public AsyncRelayCommand Delete { get; protected set; }
-
-        public IWalterDbService WalterDbService { get; }
-        public INotificationService NotificationService { get; }
 
         public VertragDetailViewModelVersion(INotificationService ns, IWalterDbService db)
         {
@@ -45,7 +40,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }, _ => true);
         }
 
-        public void SetEntity(Vertrag v)
+        public override void SetEntity(Vertrag v)
         {
             Entity = v;
 
@@ -66,7 +61,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public void checkForChanges()
+        public override void checkForChanges()
         {
             if (!(Ansprechpartner.Value == null && Entity.AnsprechpartnerId == Guid.Empty))
             {

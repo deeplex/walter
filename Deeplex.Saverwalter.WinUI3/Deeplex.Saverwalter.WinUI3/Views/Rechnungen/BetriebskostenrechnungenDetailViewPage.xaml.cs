@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             }
             base.OnNavigatedTo(e);
 
-            App.Window.CommandBar.MainContent = new DetailCommandBarControl<Betriebskostenrechnung>() { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl() { ViewModel = ViewModel };
         }
     }
 }

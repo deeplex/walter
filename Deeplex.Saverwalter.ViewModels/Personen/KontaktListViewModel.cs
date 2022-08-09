@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class KontaktListViewModel : ListViewModel<KontaktListViewModelEntry>, IListViewModel<KontaktListViewModelEntry>
+    public sealed class KontaktListViewModel : ListViewModel<KontaktListViewModelEntry>, IListViewModel
     {
         public override string ToString() => "Kontakte";
 

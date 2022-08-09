@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             RegisterPropertyChangedCallback(AnhangListViewModelProperty, (DepObj, Prop) =>
             {
                 ViewModel.Value = AnhangViewModel;
-                active.Value = ViewModel.Value != null && ViewModel.Value?.Text.Value != "";
+                active.Value = ViewModel.Value != null && ViewModel.Value?.ToString() != "";
             });
         }
 

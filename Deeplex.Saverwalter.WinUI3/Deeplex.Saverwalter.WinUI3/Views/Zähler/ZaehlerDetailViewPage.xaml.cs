@@ -17,21 +17,14 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            ViewModel = App.Container.GetInstance<ZaehlerDetailViewModel>();
+
             if (e.Parameter is Zaehler zaehler)
             {
-                ViewModel = App.Container.GetInstance<ZaehlerDetailViewModel>();
                 ViewModel.SetEntity(zaehler);
             }
-            else if (e.Parameter is ZaehlerDetailViewModel vm)
-            {
-                ViewModel = vm;
-            }
-            else if (e.Parameter is null) // New Zaehler
-            {
-                ViewModel = new ZaehlerDetailViewModel(App.NotificationService, App.WalterService);
-            }
 
-            App.Window.CommandBar.MainContent = new DetailCommandBarControl<Zaehler> { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel };
             //App.DetailAnhang.update(ViewModel.Entity, App.WalterService.ctx.ZaehlerAnhaenge);
 
             base.OnNavigatedTo(e);

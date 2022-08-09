@@ -14,14 +14,14 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<AnhangListViewModel> Anhaenge = new();
         public ObservableProperty<string> rootPath = new();
 
-        public async Task LoadDatabase()
+        public async Task<string> LoadDatabase()
         {
             rootPath.Value = await FileService.pickFile();
-            Db.root = Path.Combine(Path.GetDirectoryName(rootPath.Value), Path.GetFileNameWithoutExtension(rootPath.Value));
+            FileService.databaseRoot = Path.Combine(Path.GetDirectoryName(rootPath.Value), Path.GetFileNameWithoutExtension(rootPath.Value));
             // TODO this has to be implemented somehow.
             //await App.initializeDatabase(Impl);
+            return FileService.databaseRoot;
         }
-
 
         public RelayCommand LoadAdressen;
         public RelayCommand LoadAnhaenge;
@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 FileService = fs;
                 Db = db;
-                rootPath.Value = db.root;
+                rootPath.Value = fs.databaseRoot;
 
                 // TODO refactor
                 LoadAnhaenge = new RelayCommand(_ =>

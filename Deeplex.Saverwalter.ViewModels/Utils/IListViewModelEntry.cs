@@ -3,10 +3,9 @@ using Deeplex.Utils.ObjectModel;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public interface IListViewModelEntry<T>
+    public abstract class ListViewModelEntry<T>: BindableBase
     {
-        string ToString();
+        public abstract override string ToString();
         T Entity { get; }
-        void checkForChanges();
     }
 }

@@ -5,16 +5,18 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietenListViewModelEntry : BindableBase, IListViewModelEntry<Miete>
+    public sealed class MietenListViewModelEntry : ListViewModelEntry<Miete>, IDetailViewModel
     {
-        public Miete Entity { get; }
-        public SavableEntryProperty<double, Miete> Betrag { get; private set; }
-        public SavableEntryProperty<DateTimeOffset, Miete> Zahlungsdatum { get; private set; }
-        public SavableEntryProperty<DateTimeOffset, Miete> BetreffenderMonat { get; private set; }
-        public SavableEntryProperty<string, Miete> Notiz { get; private set; }
+        public override string ToString() => Betrag + "€";
 
-        IWalterDbService Db;
-        INotificationService NotificationService;
+        public Miete Entity { get; }
+        public SavableProperty<double> Betrag { get; }
+        public SavableProperty<DateTimeOffset> Zahlungsdatum { get;  }
+        public SavableProperty<DateTimeOffset> BetreffenderMonat { get; }
+        public SavableProperty<string> Notiz { get; }
+
+        public IWalterDbService WalterDbService { get; }
+        public INotificationService NotificationService { get; }
         public AsyncRelayCommand Delete { get; }
         public RelayCommand Save { get; }
 
@@ -22,7 +24,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Entity = m;
 
-            Db = vm.Db;
+            WalterDbService = vm.Db;
             NotificationService = vm.NotificationService;
 
             Betrag = new(this, m.Betrag ?? 0);
@@ -61,13 +63,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.MieteId != 0)
             {
-                Db.ctx.Mieten.Update(Entity);
+                WalterDbService.ctx.Mieten.Update(Entity);
             }
             else
             {
-                Db.ctx.Mieten.Add(Entity);
+                WalterDbService.ctx.Mieten.Add(Entity);
             }
-            Db.SaveWalter();
+            WalterDbService.SaveWalter();
             checkForChanges();
         }
     }

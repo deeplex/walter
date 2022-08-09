@@ -11,11 +11,12 @@ namespace Deeplex.Saverwalter.WinUI3.Services
 {
     public sealed class FileService : IFileService
     {
-        private IWalterDbService Db;
+        public string databaseRoot { get; set; }
 
-        public FileService(IWalterDbService db)
+        public FileService()
         {
-            Db = db;
+            var Settings = Windows.Storage.ApplicationData.Current.LocalSettings;
+            databaseRoot = Settings.Values["root"] as string;
         }
 
         public async Task<string> saveFile(string filename, string[] ext)
@@ -49,13 +50,13 @@ namespace Deeplex.Saverwalter.WinUI3.Services
         {
             try
             {
-                var path = a.getPath(Db.root);
+                var path = a.getPath(databaseRoot);
                 var file = await StorageFile.GetFileFromPathAsync(path);
                 await Windows.System.Launcher.LaunchFileAsync(file);
             }
             catch (Exception e)
             {
-                App.NotificationService.ShowAlert(e.Message);
+                App.Container.GetInstance<INotificationService>().ShowAlert(e.Message);
             }
         }
 

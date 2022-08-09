@@ -9,11 +9,11 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class BetriebskostenrechnungDetailViewModel : BindableBase, IDetailViewModel<Betriebskostenrechnung>
+    public sealed class BetriebskostenrechnungDetailViewModel : DetailViewModel<Betriebskostenrechnung>, IDetailViewModel
     {
         public override string ToString() => Entity.Umlage.Typ.ToDescriptionString() + " - " + Entity.GetWohnungenBezeichnung();
 
-        public Betriebskostenrechnung Entity { get; set; }
+        public Betriebskostenrechnung Entity { get; private set; }
         public int Id => Entity.BetriebskostenrechnungId;
 
         public ObservableProperty<int> BetriebskostenrechnungsJahr = new();
@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<List<UmlageListViewModelEntry>> Umlagen_List { get; } = new();
         public List<ZaehlerListViewModelEntry> AllgemeinZaehler_List;
 
-        public SavableProperty<ZaehlerListViewModelEntry, Betriebskostenrechnung> AllgemeinZaehler { get; private set; }
+        public SavableProperty<ZaehlerListViewModelEntry> AllgemeinZaehler { get; private set; }
 
         public List<BetriebskostentypUtil> Typen_List { get; private set; }
         public BetriebskostentypUtil Typ
@@ -42,11 +42,11 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public SavableProperty<double, Betriebskostenrechnung> Betrag { get; private set; }
-        public SavableProperty<int, Betriebskostenrechnung> BetreffendesJahr { get; private set; }
-        public SavableProperty<DateTimeOffset, Betriebskostenrechnung> Datum { get; private set; }
-        public SavableProperty<string, Betriebskostenrechnung> Notiz { get; private set; }
-        public SavableProperty<UmlageListViewModelEntry, Betriebskostenrechnung> Umlage { get; private set; }
+        public SavableProperty<double> Betrag { get; private set; }
+        public SavableProperty<int> BetreffendesJahr { get; private set; }
+        public SavableProperty<DateTimeOffset> Datum { get; private set; }
+        public SavableProperty<string> Notiz { get; private set; }
+        public SavableProperty<UmlageListViewModelEntry> Umlage { get; private set; }
 
         public DateTimeOffset? BetreffendesJahrDatum // TODO Remove
         {
@@ -93,15 +93,12 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToList();
         }
 
-        public IWalterDbService WalterDbService { get; }
-        public INotificationService NotificationService { get; }
-
         public BetriebskostenrechnungDetailViewModel(IWalterDbService db, INotificationService ns)
         {
             WalterDbService = db;
             NotificationService = ns;
 
-            Typen_List = Enums.Betriebskostentyp.Where(e => Db.ctx.Betriebskostenrechnungen.ToList().Exists(br => br.Umlage.Typ == e.Typ)).ToList();
+            Typen_List = Enums.Betriebskostentyp.Where(e => WalterDbService.ctx.Betriebskostenrechnungen.Include(b => b.Umlage).ToList().Exists(br => br.Umlage.Typ == e.Typ)).ToList();
 
 
             Delete = new AsyncRelayCommand(async _ =>
@@ -116,7 +113,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Save = new RelayCommand(_ => save(), _ => true);
         }
 
-        public void SetEntity(Betriebskostenrechnung r)
+        public override void SetEntity(Betriebskostenrechnung r)
         {
             Entity = r;
 
@@ -149,9 +146,6 @@ namespace Deeplex.Saverwalter.ViewModels
             Umlage = new(this, Umlagen_List.Value.FirstOrDefault(e => e.Id == r.Umlage.UmlageId));
         }
 
-        public RelayCommand Save { get; }
-        public AsyncRelayCommand Delete { get; }
-
         public void Update()
         {
             if (Entity.BetriebskostenrechnungId != 0)
@@ -180,7 +174,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         }
 
-        public void checkForChanges()
+        public override void checkForChanges()
         {
             if (Umlage.Value == null)
             {

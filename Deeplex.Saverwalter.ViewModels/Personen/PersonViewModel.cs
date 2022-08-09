@@ -6,20 +6,14 @@ using System.Collections.Immutable;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public abstract class PersonViewModel : BindableBase, IDetailViewModel<IPerson>
+    public abstract class PersonViewModel : DetailViewModel<IPerson>, IDetailViewModel
     {
-        public IPerson Entity { get; set; }
+        public IPerson Entity { get; private set; }
 
         protected bool mInklusiveZusatz;
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 
-        public IWalterDbService WalterDbService { get; }
-        public INotificationService NotificationService { get; }
-
-        public RelayCommand Save { get; protected set; }
-        public AsyncRelayCommand Delete { get; protected set; }
-
-        public void SetEntity(IPerson p)
+        public override void SetEntity(IPerson p)
         {
             Email = new(this, p.Email);
             Telefon = new(this, p.Telefon);
@@ -51,18 +45,18 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
         public Guid PersonId;
-        public SavableProperty<string, IPerson> Notiz { get; private set; }
-        public SavableProperty<bool, IPerson> isVermieter { get; private set; }
-        public SavableProperty<bool, IPerson> isMieter { get; private set; }
-        public SavableProperty<bool, IPerson> isHandwerker { get; private set; }
-        public SavableProperty<string, IPerson> Email { get; private set; }
-        public SavableProperty<string, IPerson> Telefon { get; private set; }
-        public SavableProperty<string, IPerson> Mobil { get; private set; }
-        public SavableProperty<string, IPerson> Fax { get; private set; }
+        public SavableProperty<string> Notiz { get; private set; }
+        public SavableProperty<bool> isVermieter { get; private set; }
+        public SavableProperty<bool> isMieter { get; private set; }
+        public SavableProperty<bool> isHandwerker { get; private set; }
+        public SavableProperty<string> Email { get; private set; }
+        public SavableProperty<string> Telefon { get; private set; }
+        public SavableProperty<string> Mobil { get; private set; }
+        public SavableProperty<string> Fax { get; private set; }
 
         public int AdresseId => Entity.AdresseId ?? 0;
 
-        public abstract void checkForChanges();
+        public abstract override void checkForChanges();
         protected bool BaseCheckForChanges() =>
             Entity.Notiz != Notiz.Value ||
             Entity.isVermieter != isVermieter.Value ||

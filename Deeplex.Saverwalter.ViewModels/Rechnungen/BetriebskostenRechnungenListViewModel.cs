@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class BetriebskostenRechnungenListViewModel : ListViewModel<BetriebskostenRechnungenListViewModelEntry>, IListViewModel<BetriebskostenRechnungenListViewModelEntry>
+    public sealed class BetriebskostenRechnungenListViewModel : ListViewModel<BetriebskostenRechnungenListViewModelEntry>, IListViewModel
     {
         public override string ToString() => "Betriebskostenrechnungen";
 

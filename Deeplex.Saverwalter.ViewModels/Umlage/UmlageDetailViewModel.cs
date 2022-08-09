@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class UmlageDetailViewModel : BindableBase, IDetailViewModel<Umlage>
+    public sealed class UmlageDetailViewModel : DetailViewModel<Umlage>, IDetailViewModel
     {
         public override string ToString() => Entity.Typ.ToDescriptionString() + " - " + Entity.Wohnungen.GetWohnungenBezeichnung();
 
@@ -21,10 +21,10 @@ namespace Deeplex.Saverwalter.ViewModels
         public List<UmlageSchluesselUtil> Schluessel_List = Enums.UmlageSchluessel;
         public List<BetriebskostentypUtil> Typen_List = Enums.Betriebskostentyp;
 
-        public SavableProperty<string, Umlage> Notiz { get; private set; }
-        public SavableProperty<BetriebskostentypUtil, Umlage> Typ { get; private set; }
-        public SavableProperty<UmlageSchluesselUtil, Umlage> Schluessel { get; private set; }
-        public SavableProperty<string, Umlage> Beschreibung { get; private set; }
+        public SavableProperty<string> Notiz { get; private set; }
+        public SavableProperty<BetriebskostentypUtil> Typ { get; private set; }
+        public SavableProperty<UmlageSchluesselUtil> Schluessel { get; private set; }
+        public SavableProperty<string> Beschreibung { get; private set; }
         //public SavableProperty<HKVO_P9A2?> HKVO_P9 { get; private set; }
 
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
@@ -51,7 +51,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Wohnungen.RemoveAll(w => !Wohnungen.Value.Exists(v => v.Entity == w));
         }
 
-        public void SetEntity(Umlage r)
+        public override void SetEntity(Umlage r)
         {
             Entity = r;
 
@@ -88,12 +88,6 @@ namespace Deeplex.Saverwalter.ViewModels
             Save = new RelayCommand(_ => save(), _ => true);
         }
 
-        public RelayCommand Save { get; }
-        public AsyncRelayCommand Delete { get; }
-
-        public IWalterDbService WalterDbService { get; }
-        public INotificationService NotificationService { get; }
-
         public void Update()
         {
             if (Entity.UmlageId != 0)
@@ -122,7 +116,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         }
 
-        public void checkForChanges()
+        public override void checkForChanges()
         {
             NotifcationService.outOfSync =
                 Entity.Notiz != Notiz.Value ||

@@ -12,7 +12,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             InitializeComponent();
 
-            App.Window.CommandBar.MainContent = new ListCommandBarControl<WohnungListViewModelEntry> { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new ListCommandBarControl { ViewModel = ViewModel };
             ViewModel.SetList();
         }
     }

@@ -7,9 +7,9 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class WohnungDetailViewModel : ValidatableBase, IDetailViewModel<Wohnung>
+    public sealed class WohnungDetailViewModel : DetailViewModel<Wohnung>, IDetailViewModel
     {
-        public Wohnung Entity { get; set; }
+        public Wohnung Entity { get; private set; }
         public int Id => Entity.WohnungId;
 
         public override string ToString() => AdresseViewModel.Anschrift(Entity) + " - " + Bezeichnung.Value;
@@ -24,17 +24,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public KontaktListViewModelEntry Besitzer { get; set; }
 
-        public SavableProperty<string, Wohnung> Bezeichnung { get; set; }
-        public SavableProperty<string, Wohnung> Notiz { get; set; }
-        public SavableProperty<double, Wohnung> Wohnflaeche { get; set; }
-        public SavableProperty<double, Wohnung> Nutzflaeche { get; set; }
-        public SavableProperty<int, Wohnung> Nutzeinheit { get; set; }
+        public SavableProperty<string> Bezeichnung { get; set; }
+        public SavableProperty<string> Notiz { get; set; }
+        public SavableProperty<double> Wohnflaeche { get; set; }
+        public SavableProperty<double> Nutzflaeche { get; set; }
+        public SavableProperty<int> Nutzeinheit { get; set; }
 
-        public INotificationService NotificationService { get; }
-        public IWalterDbService WalterDbService { get; }
         public RelayCommand RemoveBesitzer;
-        public RelayCommand Save { get; }
-        public AsyncRelayCommand Delete { get; }
 
         public WohnungDetailViewModel(INotificationService ns, IWalterDbService db)
         {
@@ -60,7 +56,7 @@ namespace Deeplex.Saverwalter.ViewModels
             RemoveBesitzer = new RelayCommand(_ => { Besitzer = null; }, _ => true);
         }
 
-        public void SetEntity(Wohnung e)
+        public override void SetEntity(Wohnung e)
         {
             Entity = e;
 
@@ -95,7 +91,7 @@ namespace Deeplex.Saverwalter.ViewModels
             checkForChanges();
         }
 
-        public void checkForChanges()
+        public override void checkForChanges()
         {
             NotificationService.outOfSync =
                 Entity.Bezeichnung != Bezeichnung.Value ||

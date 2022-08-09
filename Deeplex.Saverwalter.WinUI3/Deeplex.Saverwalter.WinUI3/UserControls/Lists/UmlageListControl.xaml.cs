@@ -40,9 +40,10 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            App.Window.ListAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
             if (((DataGrid)sender)?.SelectedItem is UmlageListViewModelEntry r)
             {
-                App.Window.ListAnhang.Value = new AnhangListViewModel(r.Entity, App.FileService, App.NotificationService, App.WalterService);
+                App.Window.ListAnhang.Value.SetList(r.Entity);
             }
         }
 

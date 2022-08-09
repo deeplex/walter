@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class NatuerlichePersonViewModel : PersonViewModel, IDetailViewModel<NatuerlichePerson>
+    public sealed class NatuerlichePersonViewModel : PersonViewModel, IDetailViewModel
     {
         public new NatuerlichePerson Entity => (NatuerlichePerson)base.Entity;
 
@@ -15,9 +15,9 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public List<Anrede> Anreden { get; }
 
-        public SavableProperty<Anrede, NatuerlichePerson> Anrede { get; private set; }
-        public SavableProperty<string, NatuerlichePerson> Vorname { get; private set; }
-        public SavableProperty<string, NatuerlichePerson> Nachname { get; private set; }
+        public SavableProperty<Anrede> Anrede { get; private set; }
+        public SavableProperty<string> Vorname { get; private set; }
+        public SavableProperty<string> Nachname { get; private set; }
 
         public override string ToString() => Entity.Bezeichnung;
 

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ErhaltungsaufwendungenDetailViewModel : BindableBase, IDetailViewModel<Erhaltungsaufwendung>
+    public sealed class ErhaltungsaufwendungenDetailViewModel : DetailViewModel<Erhaltungsaufwendung>, IDetailViewModel
     {
         public override string ToString() => Entity.Bezeichnung;
 
@@ -22,18 +22,12 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public List<WohnungListViewModelEntry> Wohnungen { get; private set; }
 
-        public SavableProperty<WohnungListViewModelEntry, Erhaltungsaufwendung> Wohnung { get; private set; }
-        public SavableProperty<KontaktListViewModelEntry, Erhaltungsaufwendung> Aussteller { get; private set; }
-        public SavableProperty<string, Erhaltungsaufwendung> Bezeichnung { get; private set; }
-        public SavableProperty<double, Erhaltungsaufwendung> Betrag { get; private set; }
-        public SavableProperty<DateTimeOffset, Erhaltungsaufwendung> Datum { get; private set; }
-        public SavableProperty<string, Erhaltungsaufwendung> Notiz { get; private set; }
-
-        public IWalterDbService WalterDbService { get; }
-        public INotificationService NotificationService { get; }
-
-        public AsyncRelayCommand Delete { get; }
-        public RelayCommand Save { get; }
+        public SavableProperty<WohnungListViewModelEntry> Wohnung { get; private set; }
+        public SavableProperty<KontaktListViewModelEntry> Aussteller { get; private set; }
+        public SavableProperty<string> Bezeichnung { get; private set; }
+        public SavableProperty<double> Betrag { get; private set; }
+        public SavableProperty<DateTimeOffset> Datum { get; private set; }
+        public SavableProperty<string> Notiz { get; private set; }
 
         public ErhaltungsaufwendungenDetailViewModel(INotificationService ns, IWalterDbService db)
         {
@@ -54,7 +48,7 @@ namespace Deeplex.Saverwalter.ViewModels
                /* TODO */await Task.FromResult<object>(null), _ => false);
         }
 
-        public void SetEntity(Erhaltungsaufwendung e)
+        public override void SetEntity(Erhaltungsaufwendung e)
         {
             Entity = e;
 
@@ -82,7 +76,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public AsyncRelayCommand AttachFile;
 
-        public void checkForChanges()
+        public override void checkForChanges()
         {
             NotificationService.outOfSync =
                 Entity.Betrag != Betrag.Value ||

@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class UmlageListViewModel : ListViewModel<UmlageListViewModelEntry>, IListViewModel<UmlageListViewModelEntry>
+    public sealed class UmlageListViewModel : ListViewModel<UmlageListViewModelEntry>, IListViewModel
     {
         public override string ToString() => "Umlagen";
 

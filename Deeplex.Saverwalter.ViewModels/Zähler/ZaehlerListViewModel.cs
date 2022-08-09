@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class ZaehlerListViewModel : ListViewModel<ZaehlerListViewModelEntry>, IListViewModel<ZaehlerListViewModelEntry>
+    public class ZaehlerListViewModel : ListViewModel<ZaehlerListViewModelEntry>, IListViewModel
     {
         public override string ToString() => "Zähler";
 
@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
 
-        private ZaehlerListViewModel(IWalterDbService db, INotificationService ns)
+        public ZaehlerListViewModel(IWalterDbService db, INotificationService ns)
         {
             Navigate = new RelayCommand(el => ns.Navigation((Zaehler)el), _ => true);
         }

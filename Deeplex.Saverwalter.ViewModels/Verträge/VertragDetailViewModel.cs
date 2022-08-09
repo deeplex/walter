@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class VertragDetailViewModel : VertragDetailViewModelVersion, IDetailViewModel<Vertrag>
+    public sealed class VertragDetailViewModel : VertragDetailViewModelVersion, IDetailViewModel
     {
         public Guid guid { get; private set; }
 
@@ -62,6 +62,11 @@ namespace Deeplex.Saverwalter.ViewModels
             }).ToImmutableList();
 
             Wohnung.Value = AlleWohnungen.Find(w => w.Id == list.First().WohnungId);
+
+            if (Versionen.Value.Last().Ansprechpartner.Value is KontaktListViewModelEntry partner)
+            {
+                Ansprechpartner = AlleKontakte.Find(e => e.Entity.PersonId == partner.Guid);
+            }
         }
 
         public VertragDetailViewModel(INotificationService ns, IWalterDbService db) : base(ns, db)
@@ -71,11 +76,6 @@ namespace Deeplex.Saverwalter.ViewModels
             AlleKontakte = db.ctx.JuristischePersonen.ToList().Select(j => new KontaktListViewModelEntry(j))
                     .Concat(db.ctx.NatuerlichePersonen.Select(n => new KontaktListViewModelEntry(n)))
                     .ToList();
-
-            if (Versionen.Value.Last().Ansprechpartner.Value is KontaktListViewModelEntry partner)
-            {
-                Ansprechpartner = AlleKontakte.Find(e => e.Entity.PersonId == partner.Guid);
-            }
 
             Delete = new AsyncRelayCommand(async _ =>
             {

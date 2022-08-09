@@ -41,13 +41,10 @@ namespace Deeplex.Saverwalter.WinUI3
                 return;
             }
 
+            DetailAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
             if (SendParameter is IAnhang a)
             {
-                DetailAnhang.Value = new AnhangListViewModel(a, App.FileService, App.NotificationService, App.WalterService);
-            }
-            else
-            {
-                DetailAnhang.Value = null;
+                DetailAnhang.Value.SetList(a);
             }
             ListAnhang.Value = null;
 
@@ -58,47 +55,6 @@ namespace Deeplex.Saverwalter.WinUI3
         public MainWindow()
         {
             InitializeComponent();
-
-            MainGrid.Loaded += Root_Loaded;
-        }
-
-        private async Task initializeDatabase()
-        {
-            if (App.WalterService.root == null || !File.Exists(App.WalterService.root + ".db"))
-            {
-                var path = await App.NotificationService.Confirmation(
-                    "Noch keine Datenbank ausgewählt",
-                    "Datenbank suchen, oder leere Datenbank erstellen?",
-                    "Existierende Datenbank auswählen", "Erstelle neue leere Datenbank") ?
-                        await App.FileService.pickFile(".db") :
-                        await App.FileService.saveFile("walter", new string[] { ".db" });
-                App.WalterService.root = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
-            }
-
-            if (App.WalterService.ctx != null)
-            {
-                App.WalterService.ctx.Dispose();
-            }
-            var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
-            optionsBuilder.UseSqlite("Data Source=" + App.WalterService.root + ".db");
-            App.WalterService.ctx = new SaverwalterContext(optionsBuilder.Options);
-            App.Container.GetInstance<WalterDbService>().ctx = new SaverwalterContext(optionsBuilder.Options);
-            App.WalterService.ctx.Database.Migrate();
-        }
-
-        private async void Root_Loaded(object sender, RoutedEventArgs e)
-        {
-            var Settings = Windows.Storage.ApplicationData.Current.LocalSettings;
-            var str = Settings.Values["root"] as string;
-            App.WalterService.root = str;
-            await initializeDatabase();
-
-            if (str != App.WalterService.root)
-            {
-                Utils.Elements.SetDatabaseAsDefault();
-            }
-
-            AutoSuggest = new AutoSuggestListViewModel(App.WalterService);
         }
 
         public Frame AppFrame => frame;
@@ -175,9 +131,10 @@ namespace Deeplex.Saverwalter.WinUI3
 
         private async Task<bool> checkOutOfSync()
         {
-            if (App.NotificationService.outOfSync)
+            var ns = App.Container.GetInstance<INotificationService>();
+            if (ns.outOfSync)
             {
-                if (!await App.NotificationService.Confirmation(
+                if (!await ns.Confirmation(
                     "Sind Sie sicher?",
                     "Sie haben ungespeicherte Änderungen.",
                     "Ja", "Nein"))
@@ -186,7 +143,7 @@ namespace Deeplex.Saverwalter.WinUI3
                 }
                 else
                 {
-                    App.NotificationService.outOfSync = false;
+                    ns.outOfSync = false;
                 }
             }
 
@@ -200,7 +157,7 @@ namespace Deeplex.Saverwalter.WinUI3
                 return;
             }
 
-            if (AppFrame.CanGoBack && !App.NotificationService.outOfSync)
+            if (AppFrame.CanGoBack && !App.Container.GetInstance<INotificationService>().outOfSync)
             {
                 AppFrame.GoBack();
             }

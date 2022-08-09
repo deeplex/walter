@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ZaehlerDetailViewModel : BindableBase, IDetailViewModel<Zaehler>
+    public sealed class ZaehlerDetailViewModel : DetailViewModel<Zaehler>, IDetailViewModel
     {
         public Zaehler Entity { get; private set; }
         private int mId { get; set; }
@@ -46,18 +46,15 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public SavableProperty<Zaehlertyp, Zaehler> Typ { get; private set; }
-        public SavableProperty<string, Zaehler> Notiz { get; private set; }
-        public SavableProperty<string, Zaehler> Kennnummer { get; private set; }
-        public SavableProperty<WohnungListViewModelEntry, Zaehler> Wohnung { get; private set; }
+        public SavableProperty<Zaehlertyp> Typ { get; private set; }
+        public SavableProperty<string> Notiz { get; private set; }
+        public SavableProperty<string> Kennnummer { get; private set; }
+        public SavableProperty<WohnungListViewModelEntry> Wohnung { get; private set; }
 
         // Necessary to show / hide Zählerstände
         public bool Initialized => Entity.ZaehlerId != 0;
 
-        public IWalterDbService WalterDbService { get; }
-        public INotificationService NotificationService { get; }
-
-        public void SetEntity(Zaehler z)
+        public override void SetEntity(Zaehler z)
         {
             Entity = z;
             mId = Entity.ZaehlerId;
@@ -111,10 +108,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public RelayCommand DeleteAllgemeinZaehler;
         public RelayCommand DeleteZaehlerWohnung;
-        public AsyncRelayCommand Delete { get; }
-        public RelayCommand Save { get; }
 
-        public void checkForChanges()
+        public override void checkForChanges()
         {
             NotificationService.outOfSync =
                 Kennnummer.Value != Entity.Kennnummer ||

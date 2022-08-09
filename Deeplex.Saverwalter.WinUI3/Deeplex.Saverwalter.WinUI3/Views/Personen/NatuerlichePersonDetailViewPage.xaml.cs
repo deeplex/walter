@@ -29,10 +29,10 @@ namespace Deeplex.Saverwalter.WinUI3.Views
             }
             else if (e.Parameter is null) // New Contact
             {
-                ViewModel = new NatuerlichePersonViewModel(App.NotificationService, App.WalterService);
+                ViewModel = App.Container.GetInstance<NatuerlichePersonViewModel>();
             }
 
-            App.Window.CommandBar.MainContent = new DetailCommandBarControl<NatuerlichePerson> { ViewModel = ViewModel };
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel };
             // TODO
             //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.Impl, App.ViewModel));
 

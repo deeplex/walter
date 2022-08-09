@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
@@ -87,7 +88,7 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
     public class GetBriefAnredeConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
-            => App.WalterService.ctx.FindPerson((Guid)value).GetBriefAnrede();
+            => App.Container.GetInstance<IWalterDbService>().ctx.FindPerson((Guid)value).GetBriefAnrede();
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {

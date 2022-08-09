@@ -27,37 +27,29 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            ViewModel = App.Container.GetInstance<WohnungDetailViewModel>();
+            VertragListViewModel = App.Container.GetInstance<VertragListViewModel>();
+            WohnungAdresseViewModel = App.Container.GetInstance<WohnungListViewModel>();
+            BetriebskostenrechnungViewModel = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
+            ErhaltungsaufwendungViewModel = App.Container.GetInstance<ErhaltungsaufwendungenListViewModel>();
+            ZaehlerListViewModel = App.Container.GetInstance<ZaehlerListViewModel>();
+            UmlageListViewModel = App.Container.GetInstance<UmlageListViewModel>();
+
             if (e.Parameter is Wohnung wohnung)
             {
-                ViewModel = App.Container.GetInstance<WohnungDetailViewModel>();
                 ViewModel.SetEntity(wohnung);
-
-                VertragListViewModel = App.Container.GetInstance<VertragListViewModel>();
                 VertragListViewModel.SetList(wohnung);
-                
-                WohnungAdresseViewModel = App.Container.GetInstance<WohnungListViewModel>();
                 WohnungAdresseViewModel.SetList(ViewModel.Entity.Adresse);
-                
-                BetriebskostenrechnungViewModel = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
                 BetriebskostenrechnungViewModel.SetList(wohnung);
-                
-                ErhaltungsaufwendungViewModel = App.Container.GetInstance<ErhaltungsaufwendungenListViewModel>();
                 ErhaltungsaufwendungViewModel.SetList(wohnung);
-
-                ZaehlerListViewModel = App.Container.GetInstance<ZaehlerListViewModel>();
                 ZaehlerListViewModel.SetList(wohnung);
-
-                UmlageListViewModel = App.Container.GetInstance<UmlageListViewModel>();
                 UmlageListViewModel.SetList(wohnung);
             }
-            else if (e.Parameter is null) // New Wohnung
-            {
-                ViewModel = new WohnungDetailViewModel(App.NotificationService, App.WalterService);
-            }
+            
+            App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel };
 
-            App.Window.CommandBar.MainContent = new DetailCommandBarControl<Wohnung> { ViewModel = ViewModel };
-
-            App.Window.DetailAnhang.Value = new AnhangListViewModel(ViewModel.Entity, App.FileService, App.NotificationService, App.WalterService);
+            App.Window.DetailAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
+            App.Window.DetailAnhang.Value.SetList(ViewModel.Entity);
 
             base.OnNavigatedTo(e);
         }

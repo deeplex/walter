@@ -6,11 +6,9 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public interface IListViewModel<IListViewModelEntry>
+    public interface IListViewModel
     {
         string ToString();
-        IEnumerable<IListViewModelEntry> AllRelevant { get; set; }
-        ObservableProperty<ImmutableList<IListViewModelEntry>> List { get; set; }
         IWalterDbService WalterDbService { get; }
         INotificationService NotificationService { get; }
         void SetList();

@@ -37,11 +37,9 @@ namespace Deeplex.Saverwalter.ViewModels
         public AsyncRelayCommand Print { get; }
         public IWalterDbService WalterDbService { get; }
 
-        public BetriebskostenrechnungPrintViewModel(Vertrag v, IWalterDbService db, IFileService fs)
+        public BetriebskostenrechnungPrintViewModel(IWalterDbService db, IFileService fs)
         {
             Jahr.Value = DateTime.Now.Year - 1;
-
-
 
             Print = new AsyncRelayCommand(async _ =>
             {

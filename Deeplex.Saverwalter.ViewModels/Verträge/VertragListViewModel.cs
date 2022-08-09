@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class VertragListViewModel : ListViewModel<VertragListViewModelVertrag>, IListViewModel<VertragListViewModelVertrag>
+    public sealed class VertragListViewModel : ListViewModel<VertragListViewModelVertrag>, IListViewModel
     {
         public override string ToString() => "Verträge";
 
@@ -23,7 +23,6 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             WalterDbService = db;
             NotificationService = ns;
-            List.Value = AllRelevant.ToImmutableList();
             Navigate = new RelayCommand(el => ns.Navigation((Vertrag)el), _ => true);
         }
 
@@ -43,11 +42,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 mieterSets.Exists(w => w.VertragId == v.VertragId && w.PersonId == p.PersonId)
                 ).ToList());
             List.Value = AllRelevant.ToImmutableList();
-        }
-
-        public VertragListViewModel(IWalterDbService db, INotificationService ns, Wohnung w)
-        {
-            
         }
 
         public void SetList(Wohnung w)

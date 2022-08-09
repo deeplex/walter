@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class WohnungListViewModel : ListViewModel<WohnungListViewModelEntry>, IListViewModel<WohnungListViewModelEntry>
+    public sealed class WohnungListViewModel : ListViewModel<WohnungListViewModelEntry>, IListViewModel
     {
         public override string ToString() => "Wohnungen";
 

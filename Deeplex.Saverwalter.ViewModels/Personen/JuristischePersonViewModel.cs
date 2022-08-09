@@ -7,12 +7,12 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class JuristischePersonViewModel : PersonViewModel, IDetailViewModel<JuristischePerson>
+    public sealed class JuristischePersonViewModel : PersonViewModel, IDetailViewModel
     {
         public new JuristischePerson Entity => (JuristischePerson)base.Entity;
         public int Id;
 
-        public SavableProperty<string, JuristischePerson> Bezeichnung { get; private set; }
+        public SavableProperty<string> Bezeichnung { get; private set; }
         public override string ToString() => Bezeichnung.Value;
 
         public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Mitglieder = new();

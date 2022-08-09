@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public ErhaltungsaufwendungenListControl()
         {
             InitializeComponent();
-            ViewModel = new ErhaltungsaufwendungenListViewModel(App.WalterService, App.NotificationService);
+            ViewModel = App.Container.GetInstance<ErhaltungsaufwendungenListViewModel>();
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)
@@ -91,14 +91,10 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            App.Window.ListAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
             if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungenListViewModelEntry entry)
             {
                 var a = entry.Entity;
-                App.Window.ListAnhang.Value = new AnhangListViewModel(a, App.FileService, App.NotificationService, App.WalterService);
-            }
-            else
-            {
-                App.Window.ListAnhang.Value = null;
             }
         }
 

@@ -38,14 +38,15 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            App.Window.ListAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
             var a = ((KontaktListViewModelEntry)((DataGrid)sender).SelectedItem)?.Entity;
             if (a is NatuerlichePerson n)
             {
-                App.Window.ListAnhang.Value = new AnhangListViewModel(n, App.FileService, App.NotificationService, App.WalterService);
+                App.Window.ListAnhang.Value.SetList(n);
             }
             else if (a is JuristischePerson j)
             {
-                App.Window.ListAnhang.Value = new AnhangListViewModel(j, App.FileService, App.NotificationService, App.WalterService);
+                App.Window.ListAnhang.Value.SetList(j);
             }
         }
 
