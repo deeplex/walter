@@ -14,9 +14,9 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             InitializeComponent();
         }
 
-        public IDetailViewModel ViewModel
+        public DetailViewModel ViewModel
         {
-            get { return (IDetailViewModel)GetValue(ViewModelProperty); }
+            get { return (DetailViewModel)GetValue(ViewModelProperty); }
             set
             {
                 SetValue(ViewModelProperty, value);
@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
             "ViewModel",
-            typeof(IDetailViewModel),
+            typeof(DetailViewModel),
             typeof(DetailCommandBarControl),
             new PropertyMetadata(null));
 

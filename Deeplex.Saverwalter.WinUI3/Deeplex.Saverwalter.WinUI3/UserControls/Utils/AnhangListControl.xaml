@@ -29,7 +29,7 @@
                         Style="{StaticResource BaseTextBlockStyle}"
                         Margin="10,0,0,0"
                         Padding="0,0,20,0"
-                        Text="{x:Bind ViewModel.Value.Text.Value, Mode=OneWay}"/>
+                        Text="{x:Bind ViewModel.Value, Mode=OneWay}"/>
                     <Button
                         Command="{x:Bind ViewModel.Value.AddAnhang, Mode=OneWay}"
                         RelativePanel.AlignRightWithPanel="True"

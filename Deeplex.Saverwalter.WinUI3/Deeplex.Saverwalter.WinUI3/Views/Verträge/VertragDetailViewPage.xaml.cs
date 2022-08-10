@@ -4,15 +4,14 @@ using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using System;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class VertragDetailViewPage : Page
     {
-        public VertragDetailViewModel ViewModel { get; set; }
-        public BetriebskostenRechnungenListViewModel BetriebskostenListViewModel { get; private set; }
-        public UmlageListViewModel UmlageListViewModel { get; private set; }
+        public VertragDetailViewModel ViewModel { get; } = App.Container.GetInstance<VertragDetailViewModel>();
+        public BetriebskostenRechnungenListViewModel BetriebskostenListViewModel { get; } = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
+        public UmlageListViewModel UmlageListViewModel { get; } = App.Container.GetInstance<UmlageListViewModel>();
 
         public VertragDetailViewPage()
         {
@@ -23,13 +22,9 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is Vertrag v)
             {
-                ViewModel = new(v.VertragId, App.NotificationService, App.WalterService);
-                BetriebskostenListViewModel = new(App.WalterService, App.NotificationService, v);
-                UmlageListViewModel = new(App.WalterService, App.NotificationService, v);
-            }
-            else
-            {
-                ViewModel = new VertragDetailViewModel(App.NotificationService, App.WalterService);
+                ViewModel.SetEntity(v);
+                BetriebskostenListViewModel.SetList(v);
+                UmlageListViewModel.SetList(v);
             }
 
             App.Window.CommandBar.MainContent = new UserControls.DetailCommandBarControl() { ViewModel = ViewModel };

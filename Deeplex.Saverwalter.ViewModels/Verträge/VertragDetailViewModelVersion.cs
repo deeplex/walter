@@ -5,67 +5,64 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class VertragDetailViewModelVersion : BindableBase, IDetailViewModel
+    public class VertragDetailViewModelVersion : DetailViewModel<Vertrag>, DetailViewModel
     {
         public override string ToString() => "Vertrag"; // TODO
 
-        public Vertrag Entity { get; }
+        public Vertrag Entity { get; private set; }
         public int Id => Entity.rowid;
         public int Version => Entity.Version;
         public SavableProperty<double> KaltMiete;
         public SavableProperty<int> Personenzahl;
-        public SavableProperty<WohnungListViewModelEntry?> Wohnung;
+        public SavableProperty<WohnungListViewModelEntry> Wohnung { get; protected set; }
         public SavableProperty<DateTimeOffset> Beginn;
         public SavableProperty<DateTimeOffset?> Ende;
         public SavableProperty<string> Notiz;
-        public SavableProperty<KontaktListViewModelEntry> Ansprechpartner { get; }
+        public SavableProperty<KontaktListViewModelEntry> Ansprechpartner { get; protected set; }
 
         public KontaktListViewModelEntry Vermieter
-            => Wohnung.Value?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
-                    new KontaktListViewModelEntry(Db, g) : null;
-
-        protected IWalterDbService Db;
-        protected INotificationService NotificationService;
+            => Wohnung?.Value?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
+                    new KontaktListViewModelEntry(WalterDbService, g) : null;
 
         public RelayCommand RemoveDate;
-        public RelayCommand Save { get; protected set; }
-        public AsyncRelayCommand Delete { get; protected set; }
 
-        public VertragDetailViewModelVersion(int id, INotificationService ns, IWalterDbService db) : this(db.ctx.Vertraege.Find(id), ns, db) { }
-        public VertragDetailViewModelVersion(Vertrag v, INotificationService ns, IWalterDbService db)
+        public VertragDetailViewModelVersion(INotificationService ns, IWalterDbService db)
+        {
+            WalterDbService = db;
+            NotificationService = ns;
+            RemoveDate = new RelayCommand(_ => Ende = null, _ => Ende != null);
+            Delete = new AsyncRelayCommand(async _ =>
+            {
+                if (await NotificationService.Confirmation())
+                {
+                    WalterDbService.ctx.Vertraege.Remove(Entity);
+                    WalterDbService.SaveWalter();
+                }
+            }, _ => true);
+        }
+
+        public override void SetEntity(Vertrag v)
         {
             Entity = v;
-            Db = db;
-            NotificationService = ns;
 
             KaltMiete = new(this, v.KaltMiete);
             Personenzahl = new(this, v.Personenzahl);
-            Wohnung = new(this, new(v.Wohnung, db));
+            Wohnung = new(this, new(v.Wohnung, WalterDbService));
             Beginn = new(this, v.Beginn);
             Ende = new(this, v.Ende);
             Notiz = new(this, v.Notiz);
 
             if (v.AnsprechpartnerId != Guid.Empty && v.AnsprechpartnerId != null)
             {
-                Ansprechpartner = new(this, new(db, v.AnsprechpartnerId.Value));
+                Ansprechpartner = new(this, new(WalterDbService, v.AnsprechpartnerId.Value));
             }
             else
             {
                 Ansprechpartner = new(this, null);
             }
-
-            RemoveDate = new RelayCommand(_ => Ende = null, _ => Ende != null);
-            Delete = new AsyncRelayCommand(async _ =>
-            {
-                if (await NotificationService.Confirmation())
-                {
-                    Db.ctx.Vertraege.Remove(Entity);
-                    Db.SaveWalter();
-                }
-            }, _ => true);
         }
 
-        public void checkForChanges()
+        public override void checkForChanges()
         {
             if (!(Ansprechpartner.Value == null && Entity.AnsprechpartnerId == Guid.Empty))
             {
@@ -93,11 +90,11 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.rowid != 0)
             {
-                Db.ctx.Vertraege.Update(Entity);
+                WalterDbService.ctx.Vertraege.Update(Entity);
             }
             else
             {
-                Db.ctx.Vertraege.Add(Entity);
+                WalterDbService.ctx.Vertraege.Add(Entity);
             }
         }
     }

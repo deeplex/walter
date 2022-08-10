@@ -8,36 +8,32 @@ using System.Linq;
 namespace Deeplex.Saverwalter.ViewModels
 {
     // TODO i18n out of viewmodels...
-    public sealed class AnhangListViewModel : BindableBase
+    public sealed class AnhangListViewModel : ListViewModel<AnhangListViewModelEntry>, IListViewModel
     {
-        public ObservableProperty<string> Text = new();
+        public override string ToString() => "Anhänge";
+
         public ObservableProperty<ImmutableList<AnhangListViewModelEntry>> Liste = new();
 
         public IFileService FileService;
-        public IWalterDbService Db;
-        public INotificationService NotificationService;
 
         public RelayCommand AddAnhang;
 
-        private void SetList(IAnhang a)
+        public void SetList(IAnhang a)
         {
-            var self = this;
+            Entity = a;
 
             Liste.Value = a.Anhaenge
                 .ToList()
-                .Select(e => new AnhangListViewModelEntry(e, self))
+                .Select(e => new AnhangListViewModelEntry(e, this))
                 .ToImmutableList();
         }
 
-        public IAnhang Entity { get; }
+        public IAnhang Entity { get; private set; }
 
-        public AnhangListViewModel(IAnhang a, IFileService fs, INotificationService ns, IWalterDbService db)
+        public AnhangListViewModel(IFileService fs, INotificationService ns, IWalterDbService db)
         {
-            Entity = a;
-            Db = db;
+            WalterDbService = db;
             FileService = fs;
-            Text.Value = "Anhänge"; // TODO Hard code?
-            SetList(a);
             AddAnhang = new RelayCommand(f => SaveAnhang(f as List<Anhang>), _ => true);
         }
 
@@ -45,13 +41,23 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (newFiles == null)
             {
-                newFiles = (await FileService.pickFiles()).Select(f => Files.SaveAnhang(f, Db.root)).ToList();
+                newFiles = (await FileService.pickFiles()).Select(f => Files.SaveAnhang(f, FileService.databaseRoot)).ToList();
             }
             Entity.Anhaenge.AddRange(newFiles);
-            Db.ctx.Anhaenge.AddRange(newFiles);
-            Db.SaveWalter();
+            WalterDbService.ctx.Anhaenge.AddRange(newFiles);
+            WalterDbService.SaveWalter();
             var self = this;
             newFiles.ForEach(f => Liste.Value = Liste.Value.Add(new AnhangListViewModelEntry(f, self)));
+        }
+
+        protected override void updateList()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void SetList()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

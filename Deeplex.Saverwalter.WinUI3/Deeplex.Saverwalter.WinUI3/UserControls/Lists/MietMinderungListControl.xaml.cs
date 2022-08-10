@@ -2,7 +2,6 @@
 using Deeplex.Saverwalter.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System;
 
 namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
@@ -28,13 +27,10 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            App.Window.ListAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
             if (((DataGrid)sender).SelectedItem is MietminderungListViewModelEntry m)
             {
-                App.Window.ListAnhang.Value = new AnhangListViewModel(m.Entity, App.FileService, App.NotificationService, App.WalterService);
-            }
-            else
-            {
-                App.Window.ListAnhang.Value = null;
+                App.Window.ListAnhang.Value.SetList(m.Entity);
             }
         }
     }

@@ -5,20 +5,20 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class ZaehlerstandListViewModelEntry : IDetailViewModel
+    public class ZaehlerstandListViewModelEntry : DetailViewModel
     {
         public Zaehlerstand Entity { get; }
         public int Id => Entity.ZaehlerstandId;
-        public SavableProperty<double> Stand { get; }
-        public SavableProperty<DateTimeOffset> Datum { get; }
-        public SavableProperty<string> Notiz { get; }
+        public SavableProperty<double> Stand { get; private set; }
+        public SavableProperty<DateTimeOffset> Datum { get; private set; }
+        public SavableProperty<string> Notiz { get; private set; }
 
-        private IWalterDbService Db { get; }
-        private INotificationService NotificationService { get; }
+        public IWalterDbService WalterDbService { get; }
+        public INotificationService NotificationService { get; }
 
         public ZaehlerstandListViewModelEntry(Zaehlerstand z, ZaehlerstandListViewModel vm)
         {
-            Db = vm.Db;
+            WalterDbService = vm.WalterDbService;
             NotificationService = vm.NotificationService;
             Entity = z;
             Stand = new(this, z.Stand);
@@ -28,8 +28,8 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 if (Entity.ZaehlerstandId != 0 && await vm.NotificationService.Confirmation())
                 {
-                    vm.Db.ctx.Zaehlerstaende.Remove(Entity);
-                    vm.Db.SaveWalter();
+                    vm.WalterDbService.ctx.Zaehlerstaende.Remove(Entity);
+                    vm.WalterDbService.SaveWalter();
                 }
                 vm.Liste.Value = vm.Liste.Value.Remove(this);
             }, _ => true);
@@ -52,13 +52,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.ZaehlerstandId != 0)
             {
-                Db.ctx.Zaehlerstaende.Update(Entity);
+                WalterDbService.ctx.Zaehlerstaende.Update(Entity);
             }
             else
             {
-                Db.ctx.Zaehlerstaende.Add(Entity);
+                WalterDbService.ctx.Zaehlerstaende.Add(Entity);
             }
-            Db.SaveWalter();
+            WalterDbService.SaveWalter();
             checkForChanges();
         }
 

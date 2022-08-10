@@ -54,9 +54,10 @@ namespace Deeplex.Saverwalter.ViewModels
                     if (a != null)
                     {
                         atLeastOne = true;
-                        var src = Path.Combine(db.root, a.AnhangId.ToString() + Path.GetExtension(a.FileName));
-                        var tar = Path.Combine(temppath, a.FileName);
-                        File.Copy(src, tar);
+                        // TODO
+                        //var src = Path.Combine(db.root, a.AnhangId.ToString() + Path.GetExtension(a.FileName));
+                        //var tar = Path.Combine(temppath, a.FileName);
+                        //File.Copy(src, tar);
                     }
                 });
 

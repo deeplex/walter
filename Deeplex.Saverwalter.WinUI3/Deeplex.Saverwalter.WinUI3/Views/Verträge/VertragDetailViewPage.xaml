@@ -68,7 +68,7 @@
                             Width="400"
                             ItemsSource="{x:Bind ViewModel.AlleWohnungen}"
                             PlaceholderText="Wohnung hinzufügen"
-                            SelectedItem="{x:Bind ViewModel.Wohnung.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                            SelectedItem="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                     </mtuuc:WrapPanel>
                     <mtuuc:WrapPanel Orientation="Horizontal">
                         <TextBlock Text="Vermieter:" Style="{StaticResource Labels}"/>

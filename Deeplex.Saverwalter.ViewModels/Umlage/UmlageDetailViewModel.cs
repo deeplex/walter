@@ -1,18 +1,17 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class UmlageDetailViewModel : BindableBase, IDetailViewModel
+    public sealed class UmlageDetailViewModel : DetailViewModel<Umlage>, DetailViewModel
     {
         public override string ToString() => Entity.Typ.ToDescriptionString() + " - " + Entity.Wohnungen.GetWohnungenBezeichnung();
 
-        public Umlage Entity { get; }
+        public Umlage Entity { get; private set; }
         public int Id => Entity.UmlageId;
 
         public ObservableProperty<WohnungListViewModelEntry> UmlageWohnung = new();
@@ -21,21 +20,19 @@ namespace Deeplex.Saverwalter.ViewModels
         public List<UmlageSchluesselUtil> Schluessel_List = Enums.UmlageSchluessel;
         public List<BetriebskostentypUtil> Typen_List = Enums.Betriebskostentyp;
 
-        public SavableProperty<string> Notiz { get; }
-        public SavableProperty<BetriebskostentypUtil> Typ { get; }
-        public SavableProperty<UmlageSchluesselUtil> Schluessel { get; }
-        public SavableProperty<string> Beschreibung { get; }
-        //public SavableProperty<HKVO_P9A2?> HKVO_P9 { get; }
+        public SavableProperty<string> Notiz { get; private set; }
+        public SavableProperty<BetriebskostentypUtil> Typ { get; private set; }
+        public SavableProperty<UmlageSchluesselUtil> Schluessel { get; private set; }
+        public SavableProperty<string> Beschreibung { get; private set; }
+        //public SavableProperty<HKVO_P9A2?> HKVO_P9 { get; private set; }
 
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 
-        public IWalterDbService Db;
-        public INotificationService NotifcationService;
         public void UpdateWohnungen(ImmutableList<WohnungListViewModelEntry> list)
         {
             var flagged = Wohnungen.Value.Count != list.Count;
             Wohnungen.Value = list
-                .Select(e => new WohnungListViewModelEntry(e.Entity, Db))
+                .Select(e => new WohnungListViewModelEntry(e.Entity, WalterDbService))
                 .ToImmutableList();
             if (flagged) Update();
         }
@@ -51,11 +48,9 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Wohnungen.RemoveAll(w => !Wohnungen.Value.Exists(v => v.Entity == w));
         }
 
-        public UmlageDetailViewModel(Umlage r, INotificationService ns, IWalterDbService db)
+        public override void SetEntity(Umlage r)
         {
             Entity = r;
-            Db = db;
-            NotifcationService = ns;
 
             Notiz = new(this, r.Notiz);
             Typ = new(this, new(r.Typ));
@@ -65,52 +60,44 @@ namespace Deeplex.Saverwalter.ViewModels
             Schluessel.Value = Schluessel_List.FirstOrDefault(e => e.Schluessel == r.Schluessel);
             Typ.Value = Typen_List.FirstOrDefault(e => e.Typ == r.Typ);
 
-            Wohnungen.Value = r.Wohnungen.Select(g => new WohnungListViewModelEntry(g, Db)).ToImmutableList();
+            Wohnungen.Value = r.Wohnungen.Select(g => new WohnungListViewModelEntry(g, WalterDbService)).ToImmutableList();
+
             if (UmlageWohnung.Value == null)
             {
                 UmlageWohnung.Value = Wohnungen.Value.FirstOrDefault();
             }
+        }
+
+        public UmlageDetailViewModel(INotificationService ns, IWalterDbService db)
+        {
+            WalterDbService = db;
+            NotificationService = ns;
 
             Delete = new AsyncRelayCommand(async _ =>
             {
-                if (await NotifcationService.Confirmation())
+                if (await NotificationService.Confirmation())
                 {
-                    Db.ctx.Umlagen.Remove(Entity);
-                    Db.SaveWalter();
+                    WalterDbService.ctx.Umlagen.Remove(Entity);
+                    WalterDbService.SaveWalter();
                 }
             });
 
             Save = new RelayCommand(_ => save(), _ => true);
         }
 
-        public UmlageDetailViewModel(Umlage r, int w, List<Wohnung> l, INotificationService ns, IWalterDbService db) : this(r, w, ns, db)
-        {
-            Wohnungen.Value = l.Select(e => new WohnungListViewModelEntry(e, db)).ToImmutableList();
-        }
-
-        public UmlageDetailViewModel(Umlage r, int w, INotificationService ns, IWalterDbService avm) : this(r, ns, avm)
-        {
-            UmlageWohnung.Value = Wohnungen.Value.Find(e => e.Id == w);
-        }
-
-        public UmlageDetailViewModel(INotificationService ns, IWalterDbService db) : this(new Umlage(), ns, db) { }
-
-        public RelayCommand Save { get; }
-        public AsyncRelayCommand Delete { get; }
-
         public void Update()
         {
             if (Entity.UmlageId != 0)
             {
-                Db.ctx.Umlagen.Update(Entity);
+                WalterDbService.ctx.Umlagen.Update(Entity);
             }
             else
             {
-                Db.ctx.Umlagen.Add(Entity);
+                WalterDbService.ctx.Umlagen.Add(Entity);
             }
             SaveWohnungen();
-            Db.SaveWalter();
-            NotifcationService.outOfSync = false;
+            WalterDbService.SaveWalter();
+            checkForChanges();
         }
 
         public bool checkNullable<T>(object a, T b)
@@ -126,14 +113,14 @@ namespace Deeplex.Saverwalter.ViewModels
 
         }
 
-        public void checkForChanges()
+        public override void checkForChanges()
         {
-            NotifcationService.outOfSync =
+            NotificationService.outOfSync =
                 Entity.Notiz != Notiz.Value ||
                 Entity.Typ != Typ.Value.Typ ||
                 Entity.Schluessel != Schluessel.Value.Schluessel ||
                 Entity.Beschreibung != Beschreibung.Value;
-                //checkNullable(Entity.HKVO_P9, HKVO_P9.Value);
+            //checkNullable(Entity.HKVO_P9, HKVO_P9.Value);
         }
 
         private void save()

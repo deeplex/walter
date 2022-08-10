@@ -30,6 +30,7 @@
     <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.3" />
     <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.3" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.0.3" />
+    <PackageReference Include="SimpleInjector" Version="5.4.0" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 

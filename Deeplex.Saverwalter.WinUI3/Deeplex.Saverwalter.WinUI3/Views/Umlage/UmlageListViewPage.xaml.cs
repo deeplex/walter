@@ -6,13 +6,12 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class UmlageListViewPage : Page
     {
-        public UmlageListViewModel ViewModel { get; } = new UmlageListViewModel(App.WalterService, App.NotificationService);
+        public UmlageListViewModel ViewModel { get; } = App.Container.GetInstance<UmlageListViewModel>();
 
         public UmlageListViewPage()
         {
             InitializeComponent();
-            App.Window.Titel.Value = "Betriebskostenrechnungen";
-
+            ViewModel.SetList();
             App.Window.CommandBar.MainContent = new ListCommandBarControl { ViewModel = ViewModel };
         }
     }

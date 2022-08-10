@@ -40,7 +40,8 @@
                                         Header="Bezeichnung der juristischen Person"
                                         Width="300"
                                         Text="{x:Bind ViewModel.QuickPerson.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <Button VerticalAlignment="Bottom" Click="AddQuickPerson_Click">
+                                    <Button VerticalAlignment="Bottom">
+                                        <!--  Click="AddQuickPerson_Click" -->
                                         <SymbolIcon Symbol="Add"/>
                                     </Button>
                                 </StackPanel>

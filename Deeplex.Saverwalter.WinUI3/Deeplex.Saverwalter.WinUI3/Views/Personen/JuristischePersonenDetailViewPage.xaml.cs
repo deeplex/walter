@@ -1,18 +1,16 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.UserControls;
-using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class JuristischePersonenDetailViewPage : Page
     {
-        public JuristischePersonViewModel ViewModel { get; set; }
-        public VertragListViewModel VertragListViewModel { get; set; }
-        public KontaktListViewModel MitgliederListViewModel { get; set; }
+        public JuristischePersonViewModel ViewModel { get; } = App.Container.GetInstance<JuristischePersonViewModel>();
+        public VertragListViewModel VertragListViewModel { get; } = App.Container.GetInstance<VertragListViewModel>();
+        public KontaktListViewModel MitgliederListViewModel { get; } = App.Container.GetInstance<KontaktListViewModel>();
 
         public JuristischePersonenDetailViewPage()
         {
@@ -23,13 +21,9 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is JuristischePerson jp)
             {
-                ViewModel = new(jp, App.NotificationService, App.WalterService);
-                VertragListViewModel = new(App.WalterService, App.NotificationService, jp);
-                MitgliederListViewModel = new(App.WalterService, App.NotificationService, jp);
-            }
-            else if (e.Parameter is null)
-            {
-                ViewModel = new JuristischePersonViewModel(App.NotificationService, App.WalterService);
+                ViewModel.SetEntity(jp);
+                VertragListViewModel.SetList(jp);
+                MitgliederListViewModel.SetList(jp);
             }
 
             App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel };

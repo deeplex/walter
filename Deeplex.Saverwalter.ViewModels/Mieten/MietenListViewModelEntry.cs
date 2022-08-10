@@ -5,16 +5,18 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietenListViewModelEntry : BindableBase, IDetailViewModel
+    public sealed class MietenListViewModelEntry : ListViewModelEntry<Miete>, DetailViewModel
     {
+        public override string ToString() => Betrag + "€";
+
         public Miete Entity { get; }
         public SavableProperty<double> Betrag { get; }
         public SavableProperty<DateTimeOffset> Zahlungsdatum { get; }
         public SavableProperty<DateTimeOffset> BetreffenderMonat { get; }
         public SavableProperty<string> Notiz { get; }
 
-        IWalterDbService Db;
-        INotificationService NotificationService;
+        public IWalterDbService WalterDbService { get; }
+        public INotificationService NotificationService { get; }
         public AsyncRelayCommand Delete { get; }
         public RelayCommand Save { get; }
 
@@ -22,7 +24,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Entity = m;
 
-            Db = vm.Db;
+            WalterDbService = vm.WalterDbService;
             NotificationService = vm.NotificationService;
 
             Betrag = new(this, m.Betrag ?? 0);
@@ -34,8 +36,8 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 if (Entity.MieteId != 0 && await vm.NotificationService.Confirmation())
                 {
-                    vm.Db.ctx.Mieten.Remove(Entity);
-                    vm.Db.SaveWalter();
+                    vm.WalterDbService.ctx.Mieten.Remove(Entity);
+                    vm.WalterDbService.SaveWalter();
                 }
                 vm.Liste.Value = vm.Liste.Value.Remove(this);
             }, _ => true);
@@ -61,13 +63,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.MieteId != 0)
             {
-                Db.ctx.Mieten.Update(Entity);
+                WalterDbService.ctx.Mieten.Update(Entity);
             }
             else
             {
-                Db.ctx.Mieten.Add(Entity);
+                WalterDbService.ctx.Mieten.Add(Entity);
             }
-            Db.SaveWalter();
+            WalterDbService.SaveWalter();
             checkForChanges();
         }
     }

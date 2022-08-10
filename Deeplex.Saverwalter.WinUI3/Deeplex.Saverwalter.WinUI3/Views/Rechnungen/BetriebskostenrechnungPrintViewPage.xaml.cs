@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
 {
     public sealed partial class BetriebskostenrechnungPrintViewPage : Page
     {
-        public BetriebskostenrechnungPrintViewModel ViewModel { get; set; }
+        public BetriebskostenrechnungPrintViewModel ViewModel { get; } = App.Container.GetInstance<BetriebskostenrechnungPrintViewModel>();
 
         public BetriebskostenrechnungPrintViewPage()
         {
@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
         {
             if (e.Parameter is Vertrag v)
             {
-                ViewModel = new BetriebskostenrechnungPrintViewModel(v, App.WalterService, App.FileService);
+                ViewModel.SetEntity(v);
             }
 
             App.Window.CommandBar.MainContent = new PrintCommandBarControl { ViewModel = ViewModel };

@@ -1,11 +1,9 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
 using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.WinUI3.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Immutable;
-using System.Linq;
 using static Deeplex.Saverwalter.WinUI3.Utils.Elements;
 
 namespace Deeplex.Saverwalter.WinUI3.UserControls
@@ -15,7 +13,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public ErhaltungsaufwendungenListControl()
         {
             InitializeComponent();
-            ViewModel = new ErhaltungsaufwendungenListViewModel(App.WalterService, App.NotificationService);
+            ViewModel = App.Container.GetInstance<ErhaltungsaufwendungenListViewModel>();
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)
@@ -91,14 +89,10 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungenListViewModelEntry entry)
+            App.Window.ListAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
+            if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungenListViewModelEntry a)
             {
-                var a = entry.Entity;
-                App.Window.ListAnhang.Value = new AnhangListViewModel(a, App.FileService, App.NotificationService, App.WalterService);
-            }
-            else
-            {
-                App.Window.ListAnhang.Value = null;
+                App.Window.ListAnhang.Value.SetList(a.Entity);
             }
         }
 

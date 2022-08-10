@@ -5,8 +5,10 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietminderungListViewModelEntry : IDetailViewModel
+    public sealed class MietminderungListViewModelEntry : ListViewModelEntry<MietMinderung>, DetailViewModel
     {
+        public override string ToString() => (Minderung.Value * 100).ToString() + "€";
+
         public MietMinderung Entity { get; }
 
         public SavableProperty<DateTimeOffset> Beginn { get; }
@@ -14,15 +16,15 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<double> Minderung { get; }
         public SavableProperty<string> Notiz { get; }
 
-        private INotificationService NotificationService { get; }
-        private IWalterDbService Db { get; }
+        public INotificationService NotificationService { get; }
+        public IWalterDbService WalterDbService { get; }
         public AsyncRelayCommand Delete { get; }
         public RelayCommand Save { get; }
 
         public MietminderungListViewModelEntry(MietMinderung m, MietMinderungListViewModel vm)
         {
             Entity = m;
-            Db = vm.Db;
+            WalterDbService = vm.WalterDbService;
             NotificationService = vm.NotificationService;
 
             Beginn = new(this, m.Beginn);
@@ -34,8 +36,8 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 if (Entity.MietMinderungId != 0 && await vm.NotificationService.Confirmation())
                 {
-                    vm.Db.ctx.MietMinderungen.Remove(Entity);
-                    vm.Db.SaveWalter();
+                    vm.WalterDbService.ctx.MietMinderungen.Remove(Entity);
+                    vm.WalterDbService.SaveWalter();
                 }
                 vm.Liste.Value = vm.Liste.Value.Remove(this);
             }, _ => true);
@@ -59,13 +61,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.MietMinderungId != 0)
             {
-                Db.ctx.MietMinderungen.Update(Entity);
+                WalterDbService.ctx.MietMinderungen.Update(Entity);
             }
             else
             {
-                Db.ctx.MietMinderungen.Add(Entity);
+                WalterDbService.ctx.MietMinderungen.Add(Entity);
             }
-            Db.SaveWalter();
+            WalterDbService.SaveWalter();
             checkForChanges();
         }
     }

@@ -1,10 +1,7 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
 using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.WinUI3.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System.Collections.Immutable;
-using System.Linq;
 using static Deeplex.Saverwalter.WinUI3.Utils.Elements;
 
 namespace Deeplex.Saverwalter.WinUI3.UserControls
@@ -14,7 +11,6 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public WohnungListControl()
         {
             InitializeComponent();
-            ViewModel = new WohnungListViewModel(App.WalterService, App.NotificationService);
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)
@@ -36,8 +32,11 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var a = ((WohnungListViewModelEntry)((DataGrid)sender).SelectedItem).Entity;
-            App.Window.ListAnhang.Value = new AnhangListViewModel(a, App.FileService, App.NotificationService, App.WalterService);
+            App.Window.ListAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
+            if (((DataGrid)sender).SelectedItem is WohnungListViewModelEntry a)
+            {
+                App.Window.ListAnhang.Value.SetList(a.Entity);
+            }
         }
 
         private void DataGrid_Sorting(object sender, DataGridColumnEventArgs e)

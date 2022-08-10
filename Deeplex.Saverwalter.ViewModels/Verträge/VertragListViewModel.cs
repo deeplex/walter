@@ -13,31 +13,40 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => "Verträge";
 
-        protected override ImmutableList<VertragListViewModelVertrag> updateList(string filter)
-            => AllRelevant.Where(v => applyFilter(filter, v.AnschriftMitWohnung, v.AuflistungMieter)).ToImmutableList();
-
-        public VertragListViewModel(IWalterDbService db, INotificationService ns): this(ns)
+        protected override void updateList()
         {
-            AllRelevant = transform(db, include(db));
-            List.Value = AllRelevant;
+            List.Value = AllRelevant.Where(v => applyFilter(v.AnschriftMitWohnung, v.AuflistungMieter)).ToImmutableList();
         }
 
-        public VertragListViewModel(IWalterDbService db, INotificationService ns, IPerson p): this(ns)
+        public VertragListViewModel(IWalterDbService db, INotificationService ns)
         {
-            var mieterSets = db.ctx.MieterSet.ToList();
+            WalterDbService = db;
+            NotificationService = ns;
+            Navigate = new RelayCommand(el => ns.Navigation((Vertrag)el), _ => true);
+        }
 
-            AllRelevant = transform(db, include(db).Where(v =>
+        public override void SetList()
+        {
+            AllRelevant = transform(WalterDbService, include(WalterDbService));
+            updateList();
+        }
+
+        public void SetList(IPerson p)
+        {
+            var mieterSets = WalterDbService.ctx.MieterSet.ToList();
+
+            AllRelevant = transform(WalterDbService, include(WalterDbService).Where(v =>
                 v.AnsprechpartnerId == p.PersonId ||
                 v.Wohnung.BesitzerId == p.PersonId ||
                 mieterSets.Exists(w => w.VertragId == v.VertragId && w.PersonId == p.PersonId)
                 ).ToList());
-            List.Value = AllRelevant;
+            List.Value = AllRelevant.ToImmutableList();
         }
 
-        public VertragListViewModel(IWalterDbService db, INotificationService ns, Wohnung w): this(ns)
+        public void SetList(Wohnung w)
         {
-            AllRelevant = transform(db, include(db).Where(v => v.Wohnung.WohnungId == w.WohnungId).ToList());
-            List.Value = AllRelevant;
+            AllRelevant = transform(WalterDbService, include(WalterDbService).Where(v => v.Wohnung.WohnungId == w.WohnungId).ToList());
+            List.Value = AllRelevant.ToImmutableList();
         }
 
         private List<Vertrag> include(IWalterDbService db)
@@ -55,11 +64,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Select(v => new VertragListViewModelVertrag(v, db))
                 .OrderBy(v => v.Beginn).Reverse()
                 .ToImmutableList();
-        }
-
-        private VertragListViewModel(INotificationService ns)
-        {
-            Navigate = new RelayCommand(el => ns.Navigation((Vertrag)el), _ => true);
         }
     }
 }
