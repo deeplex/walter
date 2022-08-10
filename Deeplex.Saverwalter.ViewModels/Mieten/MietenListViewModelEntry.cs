@@ -5,7 +5,7 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietenListViewModelEntry : ListViewModelEntry<Miete>, IDetailViewModel
+    public sealed class MietenListViewModelEntry : ListViewModelEntry<Miete>, DetailViewModel
     {
         public override string ToString() => Betrag + "€";
 

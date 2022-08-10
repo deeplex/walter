@@ -39,7 +39,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }, _ => true);
         }
 
-        public void SetList()
+        public override void SetList()
         {
             AllRelevant = transform(WalterDbService, includeNP(WalterDbService), includeJP(WalterDbService));
             updateList();

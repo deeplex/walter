@@ -43,7 +43,7 @@ namespace Deeplex.Saverwalter.ViewModels
             List.Value = AllRelevant.ToImmutableList();
         }
 
-        public void SetList()
+        public override void SetList()
         {
             AllRelevant = transform(WalterDbService, include(WalterDbService));
             updateList();

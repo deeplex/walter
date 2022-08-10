@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ErhaltungsaufwendungenDetailViewModel : DetailViewModel<Erhaltungsaufwendung>, IDetailViewModel
+    public sealed class ErhaltungsaufwendungenDetailViewModel : DetailViewModel<Erhaltungsaufwendung>, DetailViewModel
     {
         public override string ToString() => Entity.Bezeichnung;
 

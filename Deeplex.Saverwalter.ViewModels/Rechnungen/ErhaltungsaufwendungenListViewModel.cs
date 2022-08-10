@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Navigate = new RelayCommand(el => ns.Navigation((Erhaltungsaufwendung)el), _ => true);
         }
 
-        public void SetList()
+        public override void SetList()
         {
             AllRelevant = transform(WalterDbService, include(WalterDbService));
             updateList();

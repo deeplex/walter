@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public abstract class ListViewModel<IListViewModelEntry> : BindableBase
+    public abstract class ListViewModel<IListViewModelEntry> : BindableBase, IListViewModel
     {
         public IWalterDbService WalterDbService { get; protected set; }
         public INotificationService NotificationService { get; protected set; }
@@ -25,6 +25,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public IListViewModelEntry Selected;
         public bool hasSelected => Selected != null;
+
+        public abstract void SetList();
 
         protected abstract void updateList();
         protected bool applyFilter(params string[] strings)
@@ -51,5 +53,15 @@ namespace Deeplex.Saverwalter.ViewModels
                 RaisePropertyChangedAuto();
             }
         }
+    }
+
+    public interface IListViewModel
+    {
+        string ToString();
+        IWalterDbService WalterDbService { get; }
+        INotificationService NotificationService { get; }
+        void SetList();
+        RelayCommand Navigate { get; }
+        string Filter { get; set; }
     }
 }

@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.ViewModels
             List.Value = AllRelevant.Where(v => applyFilter(v.Kennnummer, v.TypString, v.Wohnung)).ToImmutableList();
         }
 
-        public void SetList()
+        public override void SetList()
         {
             AllRelevant = transform(WalterDbService, include(WalterDbService));
             List.Value = AllRelevant.ToImmutableList();

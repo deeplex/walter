@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.ViewModels
                .ToList();
         }
 
-        public void SetList()
+        public override void SetList()
         {
             AllRelevant = include().Select(e => new WohnungListViewModelEntry(e, WalterDbService));
             updateList();

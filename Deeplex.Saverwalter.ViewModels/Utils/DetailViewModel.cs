@@ -3,7 +3,7 @@ using Deeplex.Utils.ObjectModel;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public interface IDetailViewModel
+    public interface DetailViewModel
     {
         string ToString();
         void checkForChanges();
@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.ViewModels
         INotificationService NotificationService { get; }
     }
 
-    public abstract class DetailViewModel<T> : BindableBase, IDetailViewModel
+    public abstract class DetailViewModel<T> : BindableBase, DetailViewModel
     {
         T Entity { get; }
         public abstract void SetEntity(T e);

@@ -47,5 +47,10 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             throw new NotImplementedException();
         }
+
+        public override void SetList()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
