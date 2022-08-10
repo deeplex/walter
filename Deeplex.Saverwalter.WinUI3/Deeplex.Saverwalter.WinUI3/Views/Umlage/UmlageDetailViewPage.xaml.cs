@@ -15,9 +15,9 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class UmlageDetailViewPage : Page
     {
-        public UmlageDetailViewModel ViewModel { get; private set; }
-        public WohnungListViewModel WohnungListViewModel { get; private set; }
-        public BetriebskostenRechnungenListViewModel BetriebskostenRechnungenListViewModel { get; private set; }
+        public UmlageDetailViewModel ViewModel { get; } = App.Container.GetInstance<UmlageDetailViewModel>();
+        public WohnungListViewModel WohnungListViewModel { get; } = App.Container.GetInstance<WohnungListViewModel>();
+        public BetriebskostenRechnungenListViewModel BetriebskostenRechnungenListViewModel { get; } = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
 
         public UmlageDetailViewPage()
         {
@@ -32,17 +32,12 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewModel = App.Container.GetInstance<UmlageDetailViewModel>();
-            WohnungListViewModel = App.Container.GetInstance<WohnungListViewModel>();
-            BetriebskostenRechnungenListViewModel = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
-        
             if (e.Parameter is Umlage r)
             {
                 ViewModel.SetEntity(r);
                 WohnungListViewModel.SetList(r);
                 BetriebskostenRechnungenListViewModel.SetList(r);
             }
-
 
             base.OnNavigatedTo(e);
 

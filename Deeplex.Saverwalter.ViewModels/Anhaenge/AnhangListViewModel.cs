@@ -14,7 +14,6 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public ObservableProperty<ImmutableList<AnhangListViewModelEntry>> Liste = new();
 
-
         public IFileService FileService;
         public IWalterDbService WalterDbService { get; }
         public INotificationService NotificationService { get; }
@@ -39,8 +38,6 @@ namespace Deeplex.Saverwalter.ViewModels
             FileService = fs;
             AddAnhang = new RelayCommand(f => SaveAnhang(f as List<Anhang>), _ => true);
         }
-
-
 
         public async void SaveAnhang(List<Anhang> newFiles = null)
         {

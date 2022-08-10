@@ -13,9 +13,9 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class VertragDetailViewPage : Page
     {
-        public VertragDetailViewModel ViewModel { get; set; }
-        public BetriebskostenRechnungenListViewModel BetriebskostenListViewModel { get; private set; }
-        public UmlageListViewModel UmlageListViewModel { get; private set; }
+        public VertragDetailViewModel ViewModel { get; } = App.Container.GetInstance<VertragDetailViewModel>();
+        public BetriebskostenRechnungenListViewModel BetriebskostenListViewModel { get; } = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
+        public UmlageListViewModel UmlageListViewModel { get; } = App.Container.GetInstance<UmlageListViewModel>();
 
         public VertragDetailViewPage()
         {
@@ -24,10 +24,6 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewModel = App.Container.GetInstance<VertragDetailViewModel>();
-            BetriebskostenListViewModel = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
-            UmlageListViewModel = App.Container.GetInstance<UmlageListViewModel>();
-
             if (e.Parameter is Vertrag v)
             {
                 ViewModel.SetEntity(v);

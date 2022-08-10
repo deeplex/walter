@@ -12,13 +12,13 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class WohnungDetailViewPage : Page
     {
-        public WohnungDetailViewModel ViewModel { get; set; }
-        public VertragListViewModel VertragListViewModel { get; private set; }
-        public WohnungListViewModel WohnungAdresseViewModel { get; private set; }
-        public BetriebskostenRechnungenListViewModel BetriebskostenrechnungViewModel { get; private set; }
-        public UmlageListViewModel UmlageListViewModel { get; private set; }
-        public ErhaltungsaufwendungenListViewModel ErhaltungsaufwendungViewModel { get; private set; }
-        public ZaehlerListViewModel ZaehlerListViewModel { get; private set; }
+        public WohnungDetailViewModel ViewModel { get; } = App.Container.GetInstance<WohnungDetailViewModel>();
+        public VertragListViewModel VertragListViewModel { get; } = App.Container.GetInstance<VertragListViewModel>();
+        public WohnungListViewModel WohnungAdresseViewModel { get; } = App.Container.GetInstance<WohnungListViewModel>();
+        public BetriebskostenRechnungenListViewModel BetriebskostenrechnungViewModel { get; } = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
+        public UmlageListViewModel UmlageListViewModel { get; } = App.Container.GetInstance<UmlageListViewModel>();
+        public ErhaltungsaufwendungenListViewModel ErhaltungsaufwendungViewModel { get; } = App.Container.GetInstance<ErhaltungsaufwendungenListViewModel>();
+        public ZaehlerListViewModel ZaehlerListViewModel { get; } = App.Container.GetInstance<ZaehlerListViewModel>();
 
         public WohnungDetailViewPage()
         {
@@ -27,14 +27,6 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewModel = App.Container.GetInstance<WohnungDetailViewModel>();
-            VertragListViewModel = App.Container.GetInstance<VertragListViewModel>();
-            WohnungAdresseViewModel = App.Container.GetInstance<WohnungListViewModel>();
-            BetriebskostenrechnungViewModel = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
-            ErhaltungsaufwendungViewModel = App.Container.GetInstance<ErhaltungsaufwendungenListViewModel>();
-            ZaehlerListViewModel = App.Container.GetInstance<ZaehlerListViewModel>();
-            UmlageListViewModel = App.Container.GetInstance<UmlageListViewModel>();
-
             if (e.Parameter is Wohnung wohnung)
             {
                 ViewModel.SetEntity(wohnung);

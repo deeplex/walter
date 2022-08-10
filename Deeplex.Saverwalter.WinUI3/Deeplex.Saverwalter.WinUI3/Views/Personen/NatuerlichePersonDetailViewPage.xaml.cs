@@ -10,8 +10,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class NatuerlichePersonDetailViewPage : Page
     {
-        public NatuerlichePersonViewModel ViewModel { get; set; }
-        public VertragListViewModel VertragListViewModel { get; set; }
+        public NatuerlichePersonViewModel ViewModel { get; } = App.Container.GetInstance<NatuerlichePersonViewModel>();
+        public VertragListViewModel VertragListViewModel { get; } = App.Container.GetInstance<VertragListViewModel>();
 
         public NatuerlichePersonDetailViewPage()
         {
@@ -22,14 +22,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         {
             if (e.Parameter is NatuerlichePerson kontakt)
             {
-                ViewModel = App.Container.GetInstance<NatuerlichePersonViewModel>();
                 ViewModel.SetEntity(kontakt);
-                VertragListViewModel = App.Container.GetInstance<VertragListViewModel>();
                 VertragListViewModel.SetList(kontakt);
-            }
-            else if (e.Parameter is null) // New Contact
-            {
-                ViewModel = App.Container.GetInstance<NatuerlichePersonViewModel>();
             }
 
             App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel };

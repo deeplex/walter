@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
 {
     public sealed partial class ErhaltungsaufwendungenPrintViewPage : Page
     {
-        public ErhaltungsaufwendungenPrintViewModel ViewModel { get; set; }
+        public ErhaltungsaufwendungenPrintViewModel ViewModel { get; } = App.Container.GetInstance<ErhaltungsaufwendungenPrintViewModel>();
 
         public ErhaltungsaufwendungenPrintViewPage()
         {
@@ -17,7 +17,6 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewModel = App.Container.GetInstance<ErhaltungsaufwendungenPrintViewModel>();
             if (e.Parameter is Wohnung w)
             {
                 ViewModel.SetEntity(w);

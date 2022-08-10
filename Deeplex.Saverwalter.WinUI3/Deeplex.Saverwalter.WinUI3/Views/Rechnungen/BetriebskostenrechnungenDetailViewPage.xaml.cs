@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class BetriebskostenrechnungenDetailViewPage : Page
     {
-        public BetriebskostenrechnungDetailViewModel ViewModel { get; private set; }
+        public BetriebskostenrechnungDetailViewModel ViewModel { get; } = App.Container.GetInstance<BetriebskostenrechnungDetailViewModel>();
 
         public BetriebskostenrechnungenDetailViewPage()
         {
@@ -29,7 +29,6 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewModel = App.Container.GetInstance<BetriebskostenrechnungDetailViewModel>();
             if (e.Parameter is Betriebskostenrechnung r)
             {
                 ViewModel.SetEntity(r);

@@ -10,9 +10,9 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class JuristischePersonenDetailViewPage : Page
     {
-        public JuristischePersonViewModel ViewModel { get; set; }
-        public VertragListViewModel VertragListViewModel { get; set; }
-        public KontaktListViewModel MitgliederListViewModel { get; set; }
+        public JuristischePersonViewModel ViewModel { get; } = App.Container.GetInstance<JuristischePersonViewModel>();
+        public VertragListViewModel VertragListViewModel { get; } = App.Container.GetInstance<VertragListViewModel>();
+        public KontaktListViewModel MitgliederListViewModel { get; } = App.Container.GetInstance<KontaktListViewModel>();
 
         public JuristischePersonenDetailViewPage()
         {
@@ -21,10 +21,6 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewModel = App.Container.GetInstance<JuristischePersonViewModel>();
-            VertragListViewModel = App.Container.GetInstance<VertragListViewModel>();
-            MitgliederListViewModel = App.Container.GetInstance<KontaktListViewModel>();
-
             if (e.Parameter is JuristischePerson jp)
             {
                 ViewModel.SetEntity(jp);

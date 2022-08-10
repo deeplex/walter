@@ -9,7 +9,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class ErhaltungsaufwendungenDetailViewPage : Page
     {
-        public ErhaltungsaufwendungenDetailViewModel ViewModel { get; set; }
+        public ErhaltungsaufwendungenDetailViewModel ViewModel { get; } = App.Container.GetInstance<ErhaltungsaufwendungenDetailViewModel>();
 
         public ErhaltungsaufwendungenDetailViewPage()
         {
@@ -18,7 +18,6 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewModel = App.Container.GetInstance<ErhaltungsaufwendungenDetailViewModel>();
             if (e.Parameter is Erhaltungsaufwendung r)
             {
                 ViewModel.SetEntity(r);
