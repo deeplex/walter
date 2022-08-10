@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class NatuerlichePersonViewModel : PersonViewModel, DetailViewModel
+    public sealed class NatuerlichePersonDetailViewModel : IPersonDetailViewModel, DetailViewModel
     {
         public new NatuerlichePerson Entity => (NatuerlichePerson)base.Entity;
 
@@ -58,7 +58,7 @@ namespace Deeplex.Saverwalter.ViewModels
             UpdateListen();
         }
 
-        public NatuerlichePersonViewModel(INotificationService ns, IWalterDbService db) : base(ns, db)
+        public NatuerlichePersonDetailViewModel(INotificationService ns, IWalterDbService db) : base(ns, db)
         {
             Anreden = Enums.Anreden;
 

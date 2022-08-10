@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class JuristischePersonViewModel : PersonViewModel, DetailViewModel
+    public sealed class JuristischePersonDetailViewModel : IPersonDetailViewModel, DetailViewModel
     {
         public new JuristischePerson Entity => (JuristischePerson)base.Entity;
         public int Id;
@@ -63,7 +63,7 @@ namespace Deeplex.Saverwalter.ViewModels
             UpdateListen();
         }
 
-        public JuristischePersonViewModel(INotificationService ns, IWalterDbService db) : base(ns, db)
+        public JuristischePersonDetailViewModel(INotificationService ns, IWalterDbService db) : base(ns, db)
         {
             AddMitgliedCommand = new RelayCommand(_ =>
             {

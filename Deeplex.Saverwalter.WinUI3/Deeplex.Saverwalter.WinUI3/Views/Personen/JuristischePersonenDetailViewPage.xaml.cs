@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class JuristischePersonenDetailViewPage : Page
     {
-        public JuristischePersonViewModel ViewModel { get; } = App.Container.GetInstance<JuristischePersonViewModel>();
+        public JuristischePersonDetailViewModel ViewModel { get; } = App.Container.GetInstance<JuristischePersonDetailViewModel>();
         public VertragListViewModel VertragListViewModel { get; } = App.Container.GetInstance<VertragListViewModel>();
         public KontaktListViewModel MitgliederListViewModel { get; } = App.Container.GetInstance<KontaktListViewModel>();
 

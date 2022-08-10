@@ -18,9 +18,9 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public ObservableProperty<WohnungListViewModel> WohnungListViewModel { get; set; } = new();
         public ObservableProperty<KontaktListViewModel> JuristischePersonenViewModel { get; set; } = new();
 
-        public PersonViewModel ViewModel
+        public IPersonDetailViewModel ViewModel
         {
-            get { return (PersonViewModel)GetValue(ViewModelProperty); }
+            get { return (IPersonDetailViewModel)GetValue(ViewModelProperty); }
             set
             {
                 SetValue(ViewModelProperty, value);
@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
             "PersonViewModel",
-            typeof(PersonViewModel),
+            typeof(IPersonDetailViewModel),
             typeof(PersonDetailControl),
             new PropertyMetadata(null));
 

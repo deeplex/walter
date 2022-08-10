@@ -45,8 +45,8 @@ namespace Deeplex.Saverwalter.WinUI3
             Container.Register<UmlageDetailViewModel>();
 
             Container.Register<KontaktListViewModel>(Lifestyle.Singleton);
-            Container.Register<NatuerlichePersonViewModel>(); // TODO add Detail to name
-            Container.Register<JuristischePersonViewModel>(); // TODO add Detail to name
+            Container.Register<NatuerlichePersonDetailViewModel>(); // TODO add Detail to name
+            Container.Register<JuristischePersonDetailViewModel>(); // TODO add Detail to name
 
             Container.Register<ErhaltungsaufwendungenListViewModel>(Lifestyle.Singleton);
             Container.Register<ErhaltungsaufwendungenDetailViewModel>();

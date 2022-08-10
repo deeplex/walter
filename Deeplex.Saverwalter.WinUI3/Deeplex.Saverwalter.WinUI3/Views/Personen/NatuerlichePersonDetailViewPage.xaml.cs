@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class NatuerlichePersonDetailViewPage : Page
     {
-        public NatuerlichePersonViewModel ViewModel { get; } = App.Container.GetInstance<NatuerlichePersonViewModel>();
+        public NatuerlichePersonDetailViewModel ViewModel { get; } = App.Container.GetInstance<NatuerlichePersonDetailViewModel>();
         public VertragListViewModel VertragListViewModel { get; } = App.Container.GetInstance<VertragListViewModel>();
 
         public NatuerlichePersonDetailViewPage()
