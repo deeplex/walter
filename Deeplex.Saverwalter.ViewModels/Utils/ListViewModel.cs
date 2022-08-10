@@ -8,6 +8,9 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public abstract class ListViewModel<IListViewModelEntry> : BindableBase
     {
+        public IWalterDbService WalterDbService { get; protected set; }
+        public INotificationService NotificationService { get; protected set; }
+
         public ObservableProperty<ImmutableList<IListViewModelEntry>> List { get; set; } = new();
         protected IEnumerable<IListViewModelEntry> mAllRelevant { get; set; }
         public IEnumerable<IListViewModelEntry> AllRelevant {
@@ -22,13 +25,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public IListViewModelEntry Selected;
         public bool hasSelected => Selected != null;
 
-        protected abstract ImmutableList<IListViewModelEntry> updateList(string filter);
-        protected static bool applyFilter(string filter, params string[] strings) =>
-            filter.Split(' ').All(split => strings.Any(str => str.ToLower().Contains(split.ToLower())));
+        protected abstract void updateList();
+        protected bool applyFilter(params string[] strings)
+            => Filter.Split(' ').All(split => strings.Any(str => str.ToLower().Contains(split.ToLower())));
 
         public RelayCommand Navigate { get; protected set; }
 
-        private string mFilter;
+        private string mFilter = "";
         public string Filter
         {
             get => mFilter;
@@ -38,7 +41,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
                 if (value != "")
                 {
-                    List.Value = updateList(value);
+                    updateList();
                 }
                 else
                 {

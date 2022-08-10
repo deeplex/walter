@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Entity = m;
 
-            WalterDbService = vm.Db;
+            WalterDbService = vm.WalterDbService;
             NotificationService = vm.NotificationService;
 
             Betrag = new(this, m.Betrag ?? 0);
@@ -36,8 +36,8 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 if (Entity.MieteId != 0 && await vm.NotificationService.Confirmation())
                 {
-                    vm.Db.ctx.Mieten.Remove(Entity);
-                    vm.Db.SaveWalter();
+                    vm.WalterDbService.ctx.Mieten.Remove(Entity);
+                    vm.WalterDbService.SaveWalter();
                 }
                 vm.Liste.Value = vm.Liste.Value.Remove(this);
             }, _ => true);

@@ -29,13 +29,11 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 
-        public IWalterDbService Db;
-        public INotificationService NotifcationService;
         public void UpdateWohnungen(ImmutableList<WohnungListViewModelEntry> list)
         {
             var flagged = Wohnungen.Value.Count != list.Count;
             Wohnungen.Value = list
-                .Select(e => new WohnungListViewModelEntry(e.Entity, Db))
+                .Select(e => new WohnungListViewModelEntry(e.Entity, WalterDbService))
                 .ToImmutableList();
             if (flagged) Update();
         }
@@ -63,7 +61,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Schluessel.Value = Schluessel_List.FirstOrDefault(e => e.Schluessel == r.Schluessel);
             Typ.Value = Typen_List.FirstOrDefault(e => e.Typ == r.Typ);
 
-            Wohnungen.Value = r.Wohnungen.Select(g => new WohnungListViewModelEntry(g, Db)).ToImmutableList();
+            Wohnungen.Value = r.Wohnungen.Select(g => new WohnungListViewModelEntry(g, WalterDbService)).ToImmutableList();
 
             if (UmlageWohnung.Value == null)
             {
@@ -78,10 +76,10 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Delete = new AsyncRelayCommand(async _ =>
             {
-                if (await NotifcationService.Confirmation())
+                if (await NotificationService.Confirmation())
                 {
-                    Db.ctx.Umlagen.Remove(Entity);
-                    Db.SaveWalter();
+                    WalterDbService.ctx.Umlagen.Remove(Entity);
+                   WalterDbService.SaveWalter();
                 }
             });
 
@@ -92,15 +90,15 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (Entity.UmlageId != 0)
             {
-                Db.ctx.Umlagen.Update(Entity);
+                WalterDbService.ctx.Umlagen.Update(Entity);
             }
             else
             {
-                Db.ctx.Umlagen.Add(Entity);
+                WalterDbService.ctx.Umlagen.Add(Entity);
             }
             SaveWohnungen();
-            Db.SaveWalter();
-            NotifcationService.outOfSync = false;
+            WalterDbService.SaveWalter();
+            checkForChanges();
         }
 
         public bool checkNullable<T>(object a, T b)
@@ -118,7 +116,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public override void checkForChanges()
         {
-            NotifcationService.outOfSync =
+            NotificationService.outOfSync =
                 Entity.Notiz != Notiz.Value ||
                 Entity.Typ != Typ.Value.Typ ||
                 Entity.Schluessel != Schluessel.Value.Schluessel ||

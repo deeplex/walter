@@ -12,11 +12,10 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => "Erhaltungsaufwendungen";
 
-        protected override ImmutableList<ErhaltungsaufwendungenListViewModelEntry> updateList(string filter)
-            => AllRelevant.Where(v => applyFilter(filter, v.Wohnung.Anschrift, v.Bezeichnung)).ToImmutableList();
-
-        public IWalterDbService WalterDbService { get; }
-        public INotificationService NotificationService { get; }
+        protected override void updateList()
+        {
+            List.Value = AllRelevant.Where(v => applyFilter(v.Wohnung.Anschrift, v.Bezeichnung)).ToImmutableList();
+        }
 
         public ErhaltungsaufwendungenListViewModel(IWalterDbService db, INotificationService ns)
         {
@@ -28,7 +27,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public void SetList()
         {
             AllRelevant = transform(WalterDbService, include(WalterDbService));
-            List.Value = AllRelevant.ToImmutableList();
+            updateList();
         }
 
         public void SetList(Wohnung w)

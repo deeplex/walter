@@ -14,14 +14,14 @@ namespace Deeplex.Saverwalter.ViewModels
         public int Version => Entity.Version;
         public SavableProperty<double> KaltMiete;
         public SavableProperty<int> Personenzahl;
-        public SavableProperty<WohnungListViewModelEntry> Wohnung;
+        public SavableProperty<WohnungListViewModelEntry> Wohnung { get; protected set; }
         public SavableProperty<DateTimeOffset> Beginn;
         public SavableProperty<DateTimeOffset?> Ende;
         public SavableProperty<string> Notiz;
-        public SavableProperty<KontaktListViewModelEntry> Ansprechpartner { get; private set; }
+        public SavableProperty<KontaktListViewModelEntry> Ansprechpartner { get; protected set; }
 
         public KontaktListViewModelEntry Vermieter
-            => Wohnung.Value?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
+            => Wohnung?.Value?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
                     new KontaktListViewModelEntry(WalterDbService, g) : null;
 
         public RelayCommand RemoveDate;
@@ -29,6 +29,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public VertragDetailViewModelVersion(INotificationService ns, IWalterDbService db)
         {
             WalterDbService = db;
+            NotificationService = ns;
             RemoveDate = new RelayCommand(_ => Ende = null, _ => Ende != null);
             Delete = new AsyncRelayCommand(async _ =>
             {

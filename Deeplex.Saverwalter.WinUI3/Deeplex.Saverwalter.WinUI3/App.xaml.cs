@@ -24,39 +24,40 @@ namespace Deeplex.Saverwalter.WinUI3
         {
 
             Container = new SimpleInjector.Container();
-            Container.Register<INotificationService, NotificationService>();
-            Container.Register<IFileService, FileService>();
-            Container.Register<IWalterDbService, WalterDbService>();
+            Container.Register<INotificationService, NotificationService>(Lifestyle.Singleton);
+            Container.Register<IFileService, FileService>(Lifestyle.Singleton);
+            Container.Register<IWalterDbService, WalterDbService>(Lifestyle.Singleton);
 
             Container.Register<SettingsViewModel>();
 
-            Container.Register<AnhangListViewModel>();
+            Container.Register<AnhangListViewModel>(Lifestyle.Singleton);
 
-            Container.Register<WohnungListViewModel>();
+            Container.Register<WohnungListViewModel>(Lifestyle.Singleton);
             Container.Register<WohnungDetailViewModel>();
 
-            Container.Register<VertragListViewModel>();
+            Container.Register<VertragListViewModel>(Lifestyle.Singleton);
             Container.Register<VertragDetailViewModel>();
 
-            Container.Register<BetriebskostenRechnungenListViewModel>();
+            Container.Register<BetriebskostenRechnungenListViewModel>(Lifestyle.Singleton);
             Container.Register<BetriebskostenrechnungDetailViewModel>();
             Container.Register<BetriebskostenrechnungPrintViewModel>();
 
-            Container.Register<UmlageListViewModel>();
+            Container.Register<UmlageListViewModel>(Lifestyle.Singleton);
             Container.Register<UmlageDetailViewModel>();
 
-            Container.Register<KontaktListViewModel>();
+            Container.Register<KontaktListViewModel>(Lifestyle.Singleton);
             Container.Register<NatuerlichePersonViewModel>(); // TODO add Detail to name
             Container.Register<JuristischePersonViewModel>(); // TODO add Detail to name
 
-            Container.Register<ErhaltungsaufwendungenListViewModel>();
+            Container.Register<ErhaltungsaufwendungenListViewModel>(Lifestyle.Singleton);
             Container.Register<ErhaltungsaufwendungenDetailViewModel>();
             Container.Register<ErhaltungsaufwendungenPrintViewModel>();
 
-            Container.Register<ZaehlerListViewModel>();
+            Container.Register<ZaehlerListViewModel>(Lifestyle.Singleton);
             Container.Register<ZaehlerDetailViewModel>();
 
             // Missing:
+            // Container.Register<AnhangListViewModelEntry>();
             // Container.Register<WohnungListViewModelEntry>();
             // Container.Register<VertragListViewModelVertrag>(); // TODO rename to Entry
             // Container.Register<VertragListViewModelVertragVersion>();

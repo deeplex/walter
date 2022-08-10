@@ -7,13 +7,11 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietMinderungListViewModel : BindableBase
+    public sealed class MietMinderungListViewModel : ListViewModel<MietminderungListViewModelEntry>
     {
         public ObservableProperty<ImmutableList<MietminderungListViewModelEntry>> Liste = new();
         public Guid VertragId;
 
-        public IWalterDbService Db;
-        public INotificationService NotificationService;
         public RelayCommand Add { get; }
 
         public MietMinderungListViewModel(Guid VertragGuid, INotificationService ns, IWalterDbService db)
@@ -21,9 +19,9 @@ namespace Deeplex.Saverwalter.ViewModels
             VertragId = VertragGuid;
             var self = this;
             NotificationService = ns;
-            Db = db;
+            WalterDbService = db;
 
-            Liste.Value = Db.ctx.MietMinderungen
+            Liste.Value = WalterDbService.ctx.MietMinderungen
                 .Where(m => m.VertragId == VertragGuid)
                 .ToList()
                 .Select(m => new MietminderungListViewModelEntry(m, self))
@@ -40,6 +38,11 @@ namespace Deeplex.Saverwalter.ViewModels
                 };
                 Liste.Value = Liste.Value.Prepend(new MietminderungListViewModelEntry(mm, this)).ToImmutableList();
             }, _ => true);
+        }
+
+        protected override void updateList()
+        {
+            throw new NotImplementedException();
         }
     }
 }

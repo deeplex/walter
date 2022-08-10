@@ -11,9 +11,8 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         public WohnungListViewPage()
         {
             InitializeComponent();
-
-            App.Window.CommandBar.MainContent = new ListCommandBarControl { ViewModel = ViewModel };
             ViewModel.SetList();
+            App.Window.CommandBar.MainContent = new ListCommandBarControl { ViewModel = ViewModel };
         }
     }
 }

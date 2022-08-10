@@ -38,6 +38,16 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
+        public new WohnungListViewModelEntry Wohnung
+        {
+            get => Versionen.Value.Last().Wohnung.Value;
+            set
+            {
+                Versionen.Value.Last().Wohnung.Value = value;
+                RaisePropertyChangedAuto();
+            }
+        }
+
         public new void SetEntity(Vertrag v)
         {
             var list = WalterDbService.ctx.Vertraege
@@ -61,7 +71,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 return r;
             }).ToImmutableList();
 
-            Wohnung.Value = AlleWohnungen.Find(w => w.Id == list.First().WohnungId);
+            Wohnung = AlleWohnungen.Find(w => w.Id == list.First().WohnungId);
 
             if (Versionen.Value.Last().Ansprechpartner.Value is KontaktListViewModelEntry partner)
             {

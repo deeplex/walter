@@ -15,8 +15,6 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<ImmutableList<AnhangListViewModelEntry>> Liste = new();
 
         public IFileService FileService;
-        public IWalterDbService WalterDbService { get; }
-        public INotificationService NotificationService { get; }
 
         public RelayCommand AddAnhang;
 
@@ -52,7 +50,7 @@ namespace Deeplex.Saverwalter.ViewModels
             newFiles.ForEach(f => Liste.Value = Liste.Value.Add(new AnhangListViewModelEntry(f, self)));
         }
 
-        protected override ImmutableList<AnhangListViewModelEntry> updateList(string filter)
+        protected override void updateList()
         {
             throw new System.NotImplementedException();
         }

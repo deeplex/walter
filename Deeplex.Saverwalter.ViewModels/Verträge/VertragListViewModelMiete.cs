@@ -9,6 +9,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public int Id;
         public ObservableProperty<DateTimeOffset> Datum = new();
         public ObservableProperty<DateTimeOffset> BetreffenderMonat = new();
+        public ObservableProperty<string> Notiz = new();
         public double Kalt;
         public string KaltString
         {
@@ -43,8 +44,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 RaisePropertyChanged(nameof(Betrag));
             }
         }
-
-        public ObservableProperty<string> Notiz = new();
 
         public VertragListViewModelMiete()
         {

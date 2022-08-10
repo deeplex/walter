@@ -11,8 +11,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         public UmlageListViewPage()
         {
             InitializeComponent();
-            App.Window.Titel.Value = "Betriebskostenrechnungen";
-
+            ViewModel.SetList();
             App.Window.CommandBar.MainContent = new ListCommandBarControl { ViewModel = ViewModel };
         }
     }

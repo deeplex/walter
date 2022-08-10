@@ -59,14 +59,11 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 
-        public IWalterDbService Db;
-        public INotificationService NotifcationService;
-
         public void UpdateWohnungen(ImmutableList<WohnungListViewModelEntry> list)
         {
             var flagged = Wohnungen.Value.Count != list.Count;
             Wohnungen.Value = list
-                .Select(e => new WohnungListViewModelEntry(e.Entity, Db))
+                .Select(e => new WohnungListViewModelEntry(e.Entity, WalterDbService))
                 .ToImmutableList();
             if (flagged) Update();
         }
@@ -84,7 +81,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         private List<UmlageListViewModelEntry> updateUmlagenList(Betriebskostentyp e)
         {
-            return Db.ctx.Umlagen
+            return WalterDbService.ctx.Umlagen
                 .Include(u => u.Wohnungen).ThenInclude(w => w.Adresse)
                 .ToList()
                 .Where(u => u.Typ == e)
@@ -95,18 +92,18 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public BetriebskostenrechnungDetailViewModel(IWalterDbService db, INotificationService ns)
         {
-            WalterDbService = db;
-            NotificationService = ns;
+            base.WalterDbService = db;
+            base.NotificationService = ns;
 
             Typen_List = Enums.Betriebskostentyp.Where(e => WalterDbService.ctx.Betriebskostenrechnungen.Include(b => b.Umlage).ToList().Exists(br => br.Umlage.Typ == e.Typ)).ToList();
 
 
             Delete = new AsyncRelayCommand(async _ =>
             {
-                if (await NotifcationService.Confirmation())
+                if (await NotificationService.Confirmation())
                 {
-                    Db.ctx.Betriebskostenrechnungen.Remove(Entity);
-                    Db.SaveWalter();
+                    WalterDbService.ctx.Betriebskostenrechnungen.Remove(Entity);
+                    WalterDbService.SaveWalter();
                 }
             });
 
@@ -126,7 +123,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (r.Umlage != null)
             {
-                Wohnungen.Value = r.Umlage.Wohnungen.Select(g => new WohnungListViewModelEntry(g, Db)).ToImmutableList();
+                Wohnungen.Value = r.Umlage.Wohnungen.Select(g => new WohnungListViewModelEntry(g, WalterDbService)).ToImmutableList();
             }
             else
             {
@@ -137,7 +134,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 BetriebskostenrechnungsWohnung.Value = Wohnungen.Value.FirstOrDefault();
             }
 
-            AllgemeinZaehler_List = Db.ctx.ZaehlerSet
+            AllgemeinZaehler_List = WalterDbService.ctx.ZaehlerSet
                 .Select(a => new ZaehlerListViewModelEntry(a))
                 .ToList();
             AllgemeinZaehler = new(this, AllgemeinZaehler_List.FirstOrDefault(e => e.Id == r.Umlage?.Zaehler?.ZaehlerId));
@@ -150,15 +147,15 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (Entity.BetriebskostenrechnungId != 0)
             {
-                Db.ctx.Betriebskostenrechnungen.Update(Entity);
+                WalterDbService.ctx.Betriebskostenrechnungen.Update(Entity);
             }
             else
             {
-                Db.ctx.Betriebskostenrechnungen.Add(Entity);
+                WalterDbService.ctx.Betriebskostenrechnungen.Add(Entity);
             }
             SaveWohnungen();
-            Db.SaveWalter();
-            NotifcationService.outOfSync = false;
+            WalterDbService.SaveWalter();
+            NotificationService.outOfSync = false;
         }
 
         public bool checkNullable<T>(object a, T b)
@@ -178,11 +175,11 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (Umlage.Value == null)
             {
-                NotifcationService.outOfSync = true;
+                NotificationService.outOfSync = true;
                 return;
             }
 
-            NotifcationService.outOfSync =
+            NotificationService.outOfSync =
                 Entity.Umlage.UmlageId != Umlage.Value.Entity.UmlageId ||
                 Entity.Betrag != Betrag.Value ||
                 Entity.Datum.AsUtcKind() != Datum.Value ||

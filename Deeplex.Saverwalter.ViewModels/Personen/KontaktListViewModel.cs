@@ -12,11 +12,10 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => "Kontakte";
 
-        protected override ImmutableList<KontaktListViewModelEntry> updateList(string value)
-            => AllRelevant.Where(v => applyFilter(value, v.ToString(), v.Email, v.Telefon)).ToImmutableList();
-
-        public IWalterDbService WalterDbService { get; }
-        public INotificationService NotificationService { get; }
+        protected override void updateList()
+        {
+            List.Value = AllRelevant.Where(v => applyFilter(v.ToString(), v.Email, v.Telefon)).ToImmutableList();
+        }
 
         public KontaktListViewModel(IWalterDbService db, INotificationService ns)
         {
@@ -43,7 +42,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public void SetList()
         {
             AllRelevant = transform(WalterDbService, includeNP(WalterDbService), includeJP(WalterDbService));
-            List.Value = AllRelevant.ToImmutableList();
+            updateList();
         }
 
         public void SetList(Vertrag v)

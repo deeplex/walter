@@ -12,11 +12,10 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => "Wohnungen";
 
-        protected override ImmutableList<WohnungListViewModelEntry> updateList(string filter = "")
-            => AllRelevant.Where(v => applyFilter(filter, v.Bezeichnung, v.Anschrift)).ToImmutableList();
-
-        public INotificationService NotificationService { get; }
-        public IWalterDbService WalterDbService { get; }
+        protected override void updateList()
+        {
+            List.Value = AllRelevant.Where(v => applyFilter(v.Bezeichnung, v.Anschrift)).ToImmutableList();
+        }
 
         public WohnungListViewModel(INotificationService notificationService, IWalterDbService walterDbService)
         {
@@ -37,8 +36,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList()
         {
-            AllRelevant = include()
-                .Select(e => new WohnungListViewModelEntry(e, WalterDbService));
+            AllRelevant = include().Select(e => new WohnungListViewModelEntry(e, WalterDbService));
             updateList();
         }
 
@@ -51,6 +49,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToList();
 
             var wohnungen = WalterDbService.ctx.Vertraege
+                .Include(v => v.Wohnung)
                 .ToList()
                 .Where(v =>
                     vertragIds.Exists(i => v.VertragId == i) ||
@@ -63,7 +62,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Where(w => wohnungen
                     .Exists(e => e.WohnungId == w.WohnungId))
                     .Select(e => new WohnungListViewModelEntry(e, WalterDbService));
-            updateList();
+            List.Value = AllRelevant.ToImmutableList();
         }
 
         public void SetList(Umlage e)
@@ -71,7 +70,7 @@ namespace Deeplex.Saverwalter.ViewModels
             AllRelevant = include()
                 .Where(w => w.Umlagen.Exists(b => b.UmlageId == e.UmlageId))
                 .Select(e => new WohnungListViewModelEntry(e, WalterDbService));
-            updateList();
+            List.Value = AllRelevant.ToImmutableList();
         }
 
         public void SetList(Adresse e)
@@ -79,7 +78,7 @@ namespace Deeplex.Saverwalter.ViewModels
             AllRelevant = include()
                 .Where(w => w.AdresseId == e.AdresseId)
                 .Select(e => new WohnungListViewModelEntry(e, WalterDbService));
-            updateList();
+            List.Value = AllRelevant.ToImmutableList();
         }
     }
 }

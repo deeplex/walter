@@ -92,9 +92,9 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             App.Window.ListAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
-            if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungenListViewModelEntry entry)
+            if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungenListViewModelEntry a)
             {
-                var a = entry.Entity;
+                App.Window.ListAnhang.Value.SetList(a.Entity);
             }
         }
 

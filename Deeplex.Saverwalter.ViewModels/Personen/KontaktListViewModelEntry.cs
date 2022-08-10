@@ -32,6 +32,9 @@ namespace Deeplex.Saverwalter.ViewModels
         private KontaktListViewModelEntry(IPerson p)
         {
             Entity = p;
+            Email = p.Email;
+            Telefon = p.Telefon;
+            Mobil = p.Mobil;
         }
     }
 }

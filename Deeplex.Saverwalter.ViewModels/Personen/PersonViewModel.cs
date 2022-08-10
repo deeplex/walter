@@ -15,6 +15,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public override void SetEntity(IPerson p)
         {
+            Entity = p;
             Email = new(this, p.Email);
             Telefon = new(this, p.Telefon);
             Mobil = new(this, p.Mobil);
