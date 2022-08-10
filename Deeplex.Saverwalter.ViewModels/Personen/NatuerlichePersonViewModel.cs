@@ -58,7 +58,7 @@ namespace Deeplex.Saverwalter.ViewModels
             UpdateListen();
         }
 
-        public NatuerlichePersonViewModel(INotificationService ns, IWalterDbService db): base(ns, db)
+        public NatuerlichePersonViewModel(INotificationService ns, IWalterDbService db) : base(ns, db)
         {
             Anreden = Enums.Anreden;
 

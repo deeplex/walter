@@ -4,7 +4,7 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class KontaktListViewModelEntry: ListViewModelEntry<IPerson>
+    public sealed class KontaktListViewModelEntry : ListViewModelEntry<IPerson>
     {
         public override string ToString() => Entity.Bezeichnung;
 

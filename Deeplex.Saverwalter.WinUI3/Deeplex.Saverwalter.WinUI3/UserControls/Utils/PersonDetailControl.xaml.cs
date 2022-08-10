@@ -1,12 +1,9 @@
 ﻿using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.WinUI3.Views;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
-using System;
-using System.Linq;
 
 namespace Deeplex.Saverwalter.WinUI3.UserControls
 {

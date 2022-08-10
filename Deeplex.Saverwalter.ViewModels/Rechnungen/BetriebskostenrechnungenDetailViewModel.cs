@@ -194,7 +194,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Notiz = Notiz.Value;
             Entity.BetreffendesJahr = BetreffendesJahr.Value;
             Entity.Umlage = Umlage.Value.Entity;
-            
+
             Update();
         }
     }

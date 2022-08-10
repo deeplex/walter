@@ -13,7 +13,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public ObservableProperty<ImmutableList<IListViewModelEntry>> List { get; set; } = new();
         protected IEnumerable<IListViewModelEntry> mAllRelevant { get; set; }
-        public IEnumerable<IListViewModelEntry> AllRelevant {
+        public IEnumerable<IListViewModelEntry> AllRelevant
+        {
             get => mAllRelevant;
             set
             {

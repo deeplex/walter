@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public Miete Entity { get; }
         public SavableProperty<double> Betrag { get; }
-        public SavableProperty<DateTimeOffset> Zahlungsdatum { get;  }
+        public SavableProperty<DateTimeOffset> Zahlungsdatum { get; }
         public SavableProperty<DateTimeOffset> BetreffenderMonat { get; }
         public SavableProperty<string> Notiz { get; }
 

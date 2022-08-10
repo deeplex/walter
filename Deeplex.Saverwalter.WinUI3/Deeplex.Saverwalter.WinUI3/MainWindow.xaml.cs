@@ -6,13 +6,11 @@ using Deeplex.Saverwalter.WinUI3.UserControls;
 using Deeplex.Saverwalter.WinUI3.Views;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Deeplex.Utils.ObjectModel;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.WinUI3

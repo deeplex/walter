@@ -1,7 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -79,7 +78,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 if (await NotificationService.Confirmation())
                 {
                     WalterDbService.ctx.Umlagen.Remove(Entity);
-                   WalterDbService.SaveWalter();
+                    WalterDbService.SaveWalter();
                 }
             });
 
@@ -121,7 +120,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Typ != Typ.Value.Typ ||
                 Entity.Schluessel != Schluessel.Value.Schluessel ||
                 Entity.Beschreibung != Beschreibung.Value;
-                //checkNullable(Entity.HKVO_P9, HKVO_P9.Value);
+            //checkNullable(Entity.HKVO_P9, HKVO_P9.Value);
         }
 
         private void save()

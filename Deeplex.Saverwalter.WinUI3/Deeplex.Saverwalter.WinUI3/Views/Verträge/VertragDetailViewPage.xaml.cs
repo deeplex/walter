@@ -1,13 +1,9 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using System;
-using System.Linq;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
 {

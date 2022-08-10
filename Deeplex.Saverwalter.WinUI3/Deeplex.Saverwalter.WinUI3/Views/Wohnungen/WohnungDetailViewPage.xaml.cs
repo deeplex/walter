@@ -1,12 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.UserControls;
-using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using System;
-using System.Linq;
 
 namespace Deeplex.Saverwalter.WinUI3.Views
 {
@@ -37,7 +33,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 ZaehlerListViewModel.SetList(wohnung);
                 UmlageListViewModel.SetList(wohnung);
             }
-            
+
             App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel };
 
             App.Window.DetailAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();

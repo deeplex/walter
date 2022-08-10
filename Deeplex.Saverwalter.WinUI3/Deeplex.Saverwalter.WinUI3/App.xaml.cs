@@ -1,5 +1,4 @@
-﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
+﻿using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.Services;
 using Microsoft.EntityFrameworkCore;

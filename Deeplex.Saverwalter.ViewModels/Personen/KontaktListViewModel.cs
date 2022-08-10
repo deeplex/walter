@@ -76,7 +76,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList(IPerson jp)
         {
-            AllRelevant = transform(WalterDbService, new List<NatuerlichePerson> {}, jp.JuristischePersonen);
+            AllRelevant = transform(WalterDbService, new List<NatuerlichePerson> { }, jp.JuristischePersonen);
             List.Value = AllRelevant.ToImmutableList();
         }
 

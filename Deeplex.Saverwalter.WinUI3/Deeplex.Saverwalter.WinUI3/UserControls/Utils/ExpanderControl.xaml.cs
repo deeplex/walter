@@ -17,12 +17,12 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         }
 
         public static readonly DependencyProperty CommandProperty
-            =DependencyProperty.Register(
+            = DependencyProperty.Register(
                 "Command",
                 typeof(RelayCommand),
                 typeof(ExpanderControl),
                 new PropertyMetadata(default(RelayCommand)));
-        
+
         public RelayCommand Command
         {
             get { return (RelayCommand)GetValue(CommandProperty); }

@@ -1,12 +1,9 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.WinUI3.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
-using System.Collections.Immutable;
-using System.Linq;
 using static Deeplex.Saverwalter.WinUI3.Utils.Elements;
 
 namespace Deeplex.Saverwalter.WinUI3.UserControls
