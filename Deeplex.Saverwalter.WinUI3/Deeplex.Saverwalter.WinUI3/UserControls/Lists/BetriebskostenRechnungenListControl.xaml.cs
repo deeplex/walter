@@ -1,14 +1,8 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
-using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.WinUI3.Views;
-using Deeplex.Utils.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using static Deeplex.Saverwalter.WinUI3.Utils.Elements;
 
 namespace Deeplex.Saverwalter.WinUI3.UserControls
@@ -40,9 +34,10 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (((DataGrid)sender)?.SelectedItem is BetriebskostenRechnungenListEntry r)
+            App.Window.ListAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
+            if (((DataGrid)sender)?.SelectedItem is BetriebskostenRechnungenListViewModelEntry r)
             {
-                App.Window.ListAnhang.Value = new AnhangListViewModel(r.Entity, App.FileService, App.NotificationService, App.WalterService);
+                App.Window.ListAnhang.Value.SetList(r.Entity);
             }
         }
 

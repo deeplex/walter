@@ -12,50 +12,16 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => "Kontakte";
 
-        protected override ImmutableList<KontaktListViewModelEntry> updateList(string value)
-            => List.Value.Where(v => applyFilter(value, v.Name, v.Vorname, v.Email, v.Telefon)).ToImmutableList();
-
-        public KontaktListViewModel(IWalterDbService db, INotificationService ns): this(ns)
+        protected override void updateList()
         {
-            AllRelevant = transform(db, includeNP(db), includeJP(db));
-            List.Value = AllRelevant;
+            List.Value = AllRelevant.Where(v => applyFilter(v.ToString(), v.Email, v.Telefon)).ToImmutableList();
         }
 
-        public KontaktListViewModel(IWalterDbService db, INotificationService ns, Vertrag v): this(ns)
+        public KontaktListViewModel(IWalterDbService db, INotificationService ns)
         {
-            var mieter = db.ctx.MieterSet.Where(m => m.VertragId == v.VertragId).Select(m => m.PersonId).ToList();
-            var np = new List<NatuerlichePerson> { };
-            var jp = new List<JuristischePerson> { };
+            WalterDbService = db;
+            NotificationService = ns;
 
-            mieter.ForEach(e =>
-            {
-                var a = db.ctx.FindPerson(e);
-                if (a is NatuerlichePerson n)
-                {
-                    np.Add(n);
-                }
-                else if (a is JuristischePerson j)
-                {
-                    jp.Add(j);
-                }
-            });
-            AllRelevant = transform(db, np, jp);
-        }
-
-        public KontaktListViewModel(IWalterDbService db, INotificationService ns, JuristischePerson jp): this(ns)
-        {
-            AllRelevant = transform(db, jp.NatuerlicheMitglieder, jp.JuristischeMitglieder);
-            List.Value = AllRelevant;
-        }
-
-        public KontaktListViewModel(IWalterDbService db, INotificationService ns, IPerson jp) : this(ns)
-        {
-            AllRelevant = transform(db, new List<NatuerlichePerson> {}, jp.JuristischePersonen);
-            List.Value = AllRelevant;
-        }
-
-        private KontaktListViewModel(INotificationService ns)
-        {
             Navigate = new RelayCommand(el =>
             {
                 if (el is NatuerlichePerson n)
@@ -71,6 +37,47 @@ namespace Deeplex.Saverwalter.ViewModels
                     ns.Navigation((NatuerlichePerson)el);
                 }
             }, _ => true);
+        }
+
+        public override void SetList()
+        {
+            AllRelevant = transform(WalterDbService, includeNP(WalterDbService), includeJP(WalterDbService));
+            updateList();
+        }
+
+        public void SetList(Vertrag v)
+        {
+            var mieter = WalterDbService.ctx.MieterSet.Where(m => m.VertragId == v.VertragId).Select(m => m.PersonId).ToList();
+            var np = new List<NatuerlichePerson> { };
+            var jp = new List<JuristischePerson> { };
+
+            mieter.ForEach(e =>
+            {
+                var a = WalterDbService.ctx.FindPerson(e);
+                if (a is NatuerlichePerson n)
+                {
+                    np.Add(n);
+                }
+                else if (a is JuristischePerson j)
+                {
+                    jp.Add(j);
+                }
+            });
+
+            AllRelevant = transform(WalterDbService, np, jp);
+            List.Value = AllRelevant.ToImmutableList();
+        }
+
+        public void SetList(JuristischePerson jp)
+        {
+            AllRelevant = transform(WalterDbService, jp.NatuerlicheMitglieder, jp.JuristischeMitglieder);
+            List.Value = AllRelevant.ToImmutableList();
+        }
+
+        public void SetList(IPerson jp)
+        {
+            AllRelevant = transform(WalterDbService, new List<NatuerlichePerson> { }, jp.JuristischePersonen);
+            List.Value = AllRelevant.ToImmutableList();
         }
 
         private List<NatuerlichePerson> includeNP(IWalterDbService db)

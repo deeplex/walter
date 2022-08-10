@@ -22,7 +22,7 @@
                 <uc:PersonDetailControl ViewModel="{x:Bind ViewModel}" />
 
                 <uc:ExpanderControl Header="Mitglieder">
-                    <uc:ExpanderControl.Bonus>
+                    <!--<uc:ExpanderControl.Bonus>
                         <Button Margin="20,0,0,0" Background="Transparent">
                             <SymbolIcon Symbol="Add" />
                             <Button.Flyout>
@@ -39,7 +39,7 @@
                                 </Flyout>
                             </Button.Flyout>
                         </Button>
-                    </uc:ExpanderControl.Bonus>
+                    </uc:ExpanderControl.Bonus>-->
                     <uc:ExpanderControl.MainContent>
                         <uc:KontaktListControl ViewModel="{x:Bind MitgliederListViewModel}"/>
                     </uc:ExpanderControl.MainContent>

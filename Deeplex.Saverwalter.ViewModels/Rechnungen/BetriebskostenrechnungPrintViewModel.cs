@@ -6,15 +6,15 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class BetriebskostenrechnungPrintViewModel : IPrint
+    public sealed class BetriebskostenrechnungPrintViewModel : IPrintViewModel
     {
         public bool HasNotes => Betriebskostenabrechnung.notes.Count() > 0;
 
         public ObservableProperty<int> Jahr { get; } = new();
-        public Betriebskostenabrechnung Betriebskostenabrechnung { get; }
+        public Betriebskostenabrechnung Betriebskostenabrechnung { get; private set; }
         public IPerson FirstMieter => Betriebskostenabrechnung.Mieter.First();
         public DateTime Today => DateTime.Now;
-        public Vertrag Entity { get; }
+        public Vertrag Entity { get; private set; }
 
         public string Title => Betriebskostenabrechnung.Title();
         public string Mieterliste => Betriebskostenabrechnung.Mieterliste();
@@ -35,17 +35,11 @@ namespace Deeplex.Saverwalter.ViewModels
         public string Anmerkung => Betriebskostenabrechnung.Anmerkung();
 
         public AsyncRelayCommand Print { get; }
-        public BetriebskostenrechnungPrintViewModel(Vertrag v, IWalterDbService db, IFileService fs)
-        {
-            Entity = v;
-            Jahr.Value = DateTime.Now.Year - 1;
-            Betriebskostenabrechnung = new Betriebskostenabrechnung(
-                db.ctx,
-                v.rowid,
-                Jahr.Value,
-                new DateTime(Jahr.Value, 1, 1),
-                new DateTime(Jahr.Value, 12, 31));
+        public IWalterDbService WalterDbService { get; }
 
+        public BetriebskostenrechnungPrintViewModel(IWalterDbService db, IFileService fs)
+        {
+            Jahr.Value = DateTime.Now.Year - 1;
 
             Print = new AsyncRelayCommand(async _ =>
             {
@@ -60,6 +54,17 @@ namespace Deeplex.Saverwalter.ViewModels
                     // impl.ShowAlert(ex.Message);
                 }
             }, _ => true);
+        }
+
+        public void SetEntity(Vertrag v)
+        {
+            Entity = v;
+            Betriebskostenabrechnung = new Betriebskostenabrechnung(
+                WalterDbService.ctx,
+                Entity.rowid,
+                Jahr.Value,
+                new DateTime(Jahr.Value, 1, 1),
+                new DateTime(Jahr.Value, 12, 31));
         }
     }
 }

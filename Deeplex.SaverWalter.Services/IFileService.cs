@@ -6,6 +6,7 @@ namespace Deeplex.Saverwalter.Services
 {
     public interface IFileService
     {
+        string databaseRoot { get; set; }
         Task<string> pickFile(params string[] ext);
         Task<List<string>> pickFiles(params string[] ext);
         Task<string> saveFile(string filename, string[] ext);

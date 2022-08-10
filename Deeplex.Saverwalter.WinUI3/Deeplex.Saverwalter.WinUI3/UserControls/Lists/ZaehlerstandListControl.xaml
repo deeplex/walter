@@ -11,30 +11,41 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
 
-    <UserControl.Resources>
-        <conv:DateStringConverter x:Key="DateStringConverterKey" />
-    </UserControl.Resources>
-
     <mtuuc:DataGrid
         Style="{StaticResource DataGridUserControl}"
         SelectionChanged="DataGrid_SelectionChanged"
-        ItemsSource="{x:Bind ViewModel.Value.Liste.Value, Mode=OneWay}">
+        ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}">
         <mtuuc:DataGrid.Columns>
             <mtuuc:DataGridTemplateColumn>
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                     <DataTemplate x:DataType="vm:ZaehlerstandListViewModelEntry">
-                        <Button Command="{x:Bind Delete}">
+                        <Button Command="{x:Bind Delete}" Background="Transparent">
                             <SymbolIcon Symbol="Delete"/>
                         </Button>
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>
-            <mtuuc:DataGridTextColumn
-            Header="Datum"
-            Binding="{Binding Datum, Converter={StaticResource DateStringConverterKey}}"/>
-            <mtuuc:DataGridTextColumn
-            Header="Stand"
-            Binding="{Binding Stand}"/>
+            <mtuuc:DataGridTemplateColumn Header="Datum">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:ZaehlerstandListViewModelEntry">
+                        <CalendarDatePicker Date="{x:Bind Datum.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Stand">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:ZaehlerstandListViewModelEntry">
+                        <TextBox Text="{x:Bind Stand.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Notiz">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:ZaehlerstandListViewModelEntry">
+                        <TextBox Text="{x:Bind Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
         </mtuuc:DataGrid.Columns>
     </mtuuc:DataGrid>
 </UserControl>

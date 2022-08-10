@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class BetriebskostenRechnungenListEntry
+    public sealed class BetriebskostenRechnungenListViewModelEntry
     {
         public override string ToString()
         {
@@ -22,13 +22,13 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public int Tmpl { get; } = 0;
 
-        public BetriebskostenRechnungenListEntry(Betriebskostenrechnung r)
+        public BetriebskostenRechnungenListViewModelEntry(Betriebskostenrechnung r)
         {
             Entity = r;
             Wohnungen = r.Umlage.Wohnungen.ToList();
         }
 
-        public BetriebskostenRechnungenListEntry(Betriebskostenrechnung r, int tmpl)
+        public BetriebskostenRechnungenListViewModelEntry(Betriebskostenrechnung r, int tmpl)
             : this(r)
         {
             Tmpl = tmpl;

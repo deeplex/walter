@@ -11,16 +11,16 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             InitializeComponent();
         }
 
-        public IPrint ViewModel
+        public IPrintViewModel ViewModel
         {
-            get { return (IPrint)GetValue(ViewModelProperty); }
+            get { return (IPrintViewModel)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
 
         public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
             "ViewModel",
-            typeof(IPrint),
+            typeof(IPrintViewModel),
             typeof(PrintCommandBarControl),
             new PropertyMetadata(null));
     }

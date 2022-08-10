@@ -12,27 +12,31 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => "Zähler";
 
-        protected override ImmutableList<ZaehlerListViewModelEntry> updateList(string filter)
-            => List.Value.Where(v => applyFilter(filter, v.Kennnummer, v.TypString, v.Wohnung)).ToImmutableList();
-
-        public ZaehlerListViewModel(IWalterDbService db, INotificationService ns): this(ns)
+        protected override void updateList()
         {
-            AllRelevant = transform(db, include(db));
-            List.Value = AllRelevant;
+            List.Value = AllRelevant.Where(v => applyFilter(v.Kennnummer, v.TypString, v.Wohnung)).ToImmutableList();
         }
 
-        public ZaehlerListViewModel(IWalterDbService db, INotificationService ns, Wohnung w) : this(ns)
+        public override void SetList()
         {
-            AllRelevant = transform(db,
-                include(db)
+            AllRelevant = transform(WalterDbService, include(WalterDbService));
+            List.Value = AllRelevant.ToImmutableList();
+        }
+
+        public void SetList(Wohnung w)
+        {
+            AllRelevant = transform(WalterDbService,
+                include(WalterDbService)
                 .Where(z => z.Wohnung != null && z.Wohnung.WohnungId == w.WohnungId)
                 .ToList());
-            List.Value = AllRelevant;
+            List.Value = AllRelevant.ToImmutableList();
         }
 
 
-        private ZaehlerListViewModel(INotificationService ns)
+        public ZaehlerListViewModel(IWalterDbService db, INotificationService ns)
         {
+            WalterDbService = db;
+            NotificationService = ns;
             Navigate = new RelayCommand(el => ns.Navigation((Zaehler)el), _ => true);
         }
 

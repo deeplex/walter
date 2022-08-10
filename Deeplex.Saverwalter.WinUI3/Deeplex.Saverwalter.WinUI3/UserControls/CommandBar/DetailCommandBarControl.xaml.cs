@@ -14,16 +14,20 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             InitializeComponent();
         }
 
-        public IDetail ViewModel
+        public DetailViewModel ViewModel
         {
-            get { return (IDetail)GetValue(ViewModelProperty); }
-            set { SetValue(ViewModelProperty, value); }
+            get { return (DetailViewModel)GetValue(ViewModelProperty); }
+            set
+            {
+                SetValue(ViewModelProperty, value);
+                App.Window.CommandBar.Title = ViewModel.ToString();
+            }
         }
 
         public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
             "ViewModel",
-            typeof(IDetail),
+            typeof(DetailViewModel),
             typeof(DetailCommandBarControl),
             new PropertyMetadata(null));
 

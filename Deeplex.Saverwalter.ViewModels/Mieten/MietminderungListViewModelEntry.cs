@@ -1,33 +1,74 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietminderungListViewModelEntry
+    public sealed class MietminderungListViewModelEntry : ListViewModelEntry<MietMinderung>, DetailViewModel
     {
+        public override string ToString() => (Minderung.Value * 100).ToString() + "€";
+
         public MietMinderung Entity { get; }
 
-        public DateTime Beginn => Entity.Beginn;
-        public DateTime? Ende => Entity.Ende;
-        public double Minderung => Entity.Minderung;
-        public string Notiz => Entity.Notiz;
+        public SavableProperty<DateTimeOffset> Beginn { get; }
+        public SavableProperty<DateTimeOffset?> Ende { get; }
+        public SavableProperty<double> Minderung { get; }
+        public SavableProperty<string> Notiz { get; }
+
+        public INotificationService NotificationService { get; }
+        public IWalterDbService WalterDbService { get; }
+        public AsyncRelayCommand Delete { get; }
+        public RelayCommand Save { get; }
 
         public MietminderungListViewModelEntry(MietMinderung m, MietMinderungListViewModel vm)
         {
             Entity = m;
+            WalterDbService = vm.WalterDbService;
+            NotificationService = vm.NotificationService;
 
-            SelfDestruct = new AsyncRelayCommand(async _ =>
+            Beginn = new(this, m.Beginn);
+            Ende = new(this, m.Ende);
+            Minderung = new(this, m.Minderung);
+            Notiz = new(this, m.Notiz);
+
+            Delete = new AsyncRelayCommand(async _ =>
             {
-                if (await vm.NotificationService.Confirmation())
+                if (Entity.MietMinderungId != 0 && await vm.NotificationService.Confirmation())
                 {
-                    vm.Liste.Value = vm.Liste.Value.Remove(this);
-                    vm.Db.ctx.MietMinderungen.Remove(Entity);
-                    vm.Db.SaveWalter();
+                    vm.WalterDbService.ctx.MietMinderungen.Remove(Entity);
+                    vm.WalterDbService.SaveWalter();
                 }
-
+                vm.Liste.Value = vm.Liste.Value.Remove(this);
             }, _ => true);
         }
-        public AsyncRelayCommand SelfDestruct;
+
+        public void checkForChanges()
+        {
+            NotificationService.outOfSync =
+                Entity.Beginn != Beginn.Value.UtcDateTime ||
+                Entity.Ende != Ende.Value?.UtcDateTime ||
+                Entity.Notiz != Notiz.Value ||
+                Entity.Minderung != Minderung.Value;
+        }
+
+        public void save()
+        {
+            Entity.Beginn = Beginn.Value.UtcDateTime;
+            Entity.Ende = Ende.Value?.UtcDateTime;
+            Entity.Notiz = Notiz.Value;
+            Entity.Minderung = Minderung.Value;
+
+            if (Entity.MietMinderungId != 0)
+            {
+                WalterDbService.ctx.MietMinderungen.Update(Entity);
+            }
+            else
+            {
+                WalterDbService.ctx.MietMinderungen.Add(Entity);
+            }
+            WalterDbService.SaveWalter();
+            checkForChanges();
+        }
     }
 }

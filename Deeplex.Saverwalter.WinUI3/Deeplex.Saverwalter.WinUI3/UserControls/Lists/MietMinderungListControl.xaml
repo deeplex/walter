@@ -14,87 +14,51 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
 
-    <UserControl.Resources>
-        <conv:DateStringConverter x:Key="DateStringConverterKey" />
-        <conv:ToStringConverter x:Key="ToStringConverterKey" />
-    </UserControl.Resources>
-
-    <RelativePanel>
-        <StackPanel
-            RelativePanel.AlignRightWithPanel="True"
-            RelativePanel.AlignLeftWithPanel="True">
-            <uc:ExpanderControl Header="Mietminderungen">
-                <uc:ExpanderControl.Bonus>
-                    <uc:AddMietMinderungControl MietMinderungListViewModel="{x:Bind ViewModel}"/>
-                </uc:ExpanderControl.Bonus>
-                <uc:ExpanderControl.MainContent>
-                    <mtuuc:DataGrid
-                        Style="{StaticResource DataGridUserControl}"
-                        SelectionChanged="DataGrid_SelectionChanged"
-                        ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}">
-                        <mtuuc:DataGrid.Columns>
-                            <mtuuc:DataGridTemplateColumn>
-                                <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="vm:MietminderungListViewModelEntry">
-                                        <Button
-                                            HorizontalAlignment="Center"
-                                            Background="Transparent"
-                                            Command="{x:Bind SelfDestruct}">
-                                            <SymbolIcon Symbol="Delete"></SymbolIcon>
-                                        </Button>
-                                    </DataTemplate>
-                                </mtuuc:DataGridTemplateColumn.CellTemplate>
-                            </mtuuc:DataGridTemplateColumn>
-                            <mtuuc:DataGridTextColumn Header="Beginn" Binding="{Binding Beginn, Converter={StaticResource DateStringConverterKey}}"/>
-                            <!--<mtuuc:DataGridTemplateColumn Header="Beginn">
-                                <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
-                                        <CalendarDatePicker
-                                            Date="{x:Bind Beginn, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                            Language="de"
-                                            Width="176"
-                                            PlaceholderText="Beginn"
-                                            DateFormat="{}{day.integer}. {month.full} {year.full}"/>
-                                    </DataTemplate>
-                                </mtuuc:DataGridTemplateColumn.CellTemplate>
-                            </mtuuc:DataGridTemplateColumn>-->
-                            <mtuuc:DataGridTextColumn Header="Ende" Binding="{Binding Ende, Converter={StaticResource DateStringConverterKey}}"/>
-                            <!--<mtuuc:DataGridTemplateColumn Header="Ende">
-                                <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
-                                        <CalendarDatePicker
-                                            Date="{x:Bind Ende, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                            Language="de"
-                                            Width="176"
-                                            PlaceholderText="Offen"
-                                            DateFormat="{}{day.integer}. {month.full} {year.full}"/>
-                                    </DataTemplate>
-                                </mtuuc:DataGridTemplateColumn.CellTemplate>
-                            </mtuuc:DataGridTemplateColumn>-->
-                            <mtuuc:DataGridTextColumn Header="Minderung" Binding="{Binding MinderungString, Converter={StaticResource ToStringConverterKey}}"/>
-                            <!--<mtuuc:DataGridTemplateColumn Header="Minderung">
-                                <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
-                                        <muxc:NumberBox
-                                            Value="{x:Bind Minderung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                            PlaceholderText="0.1"/>
-                                    </DataTemplate>
-                                </mtuuc:DataGridTemplateColumn.CellTemplate>
-                            </mtuuc:DataGridTemplateColumn>-->
-                            <mtuuc:DataGridTextColumn Binding="{Binding Notiz}" Header="Notiz"/>
-                            <!--<mtuuc:DataGridTemplateColumn>
-                                <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="vm:VertragDetailMietMinderung">
-                                        <Button Background="Transparent" Command="{x:Bind AttachFile}">
-                                            <SymbolIcon Symbol="Attach"/>
-                                        </Button>
-                                    </DataTemplate>
-                                </mtuuc:DataGridTemplateColumn.CellTemplate>
-                            </mtuuc:DataGridTemplateColumn>-->
-                        </mtuuc:DataGrid.Columns>
-                    </mtuuc:DataGrid>
-                </uc:ExpanderControl.MainContent>
-            </uc:ExpanderControl>
-        </StackPanel>
-    </RelativePanel>
+    <mtuuc:DataGrid
+        Style="{StaticResource DataGridUserControl}"
+        SelectionChanged="DataGrid_SelectionChanged"
+        ItemsSource="{x:Bind ViewModel.Liste.Value, Mode=OneWay}">
+        <mtuuc:DataGrid.Columns>
+            <mtuuc:DataGridTemplateColumn>
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:MietminderungListViewModelEntry">
+                        <Button
+                            HorizontalAlignment="Center"
+                            Background="Transparent"
+                            Command="{x:Bind Delete}">
+                            <SymbolIcon Symbol="Delete"></SymbolIcon>
+                        </Button>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Zahlungsdatum">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:MietminderungListViewModelEntry">
+                        <CalendarDatePicker Language="de" Date="{x:Bind Beginn.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Zahlungsdatum">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:MietminderungListViewModelEntry">
+                        <CalendarDatePicker Language="de" Date="{x:Bind Ende.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Minderung">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:MietminderungListViewModelEntry">
+                        <muxc:NumberBox Value="{x:Bind Minderung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Notiz">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:MietminderungListViewModelEntry">
+                        <TextBox Text="{x:Bind Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+        </mtuuc:DataGrid.Columns>
+    </mtuuc:DataGrid>
 </UserControl>

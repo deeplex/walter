@@ -6,25 +6,40 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
+    // TODO this is not a regular ListViewModel, since Zaehlerstaende needs a Zaehler
     public class ZaehlerstandListViewModel : BindableBase
     {
         public ObservableProperty<ImmutableList<ZaehlerstandListViewModelEntry>> Liste = new();
-        public int ZaehlerId;
+        public int ZaehlerId { get; private set; }
 
-        public IWalterDbService Db;
-        public INotificationService NotificationService;
+        public IWalterDbService WalterDbService { get; }
+        public INotificationService NotificationService { get; }
+        public RelayCommand Add { get; }
+
+        public void SetList(Zaehler z)
+        {
+            ZaehlerId = z.ZaehlerId;
+            Liste.Value = z.Staende
+                .Select(s => new ZaehlerstandListViewModelEntry(s, this))
+                .OrderByDescending(e => e.Datum.Value)
+                .ToImmutableList();
+        }
 
         public ZaehlerstandListViewModel(Zaehler z, INotificationService ns, IWalterDbService db)
         {
-            ZaehlerId = z.ZaehlerId;
             NotificationService = ns;
-            Db = db;
-            Liste.Value = z.Staende.Select(s => new ZaehlerstandListViewModelEntry(s, this)).ToImmutableList();
+            WalterDbService = db;
+
+            Add = new RelayCommand(_ =>
+            {
+                var zs = new Zaehlerstand
+                {
+                    Datum = System.DateTime.Today.AsUtcKind(),
+                    Zaehler = z
+                };
+                Liste.Value = Liste.Value.Prepend(new ZaehlerstandListViewModelEntry(zs, this)).ToImmutableList();
+            }, _ => true);
         }
 
-        public void AddToList(Zaehlerstand z)
-        {
-            Liste.Value = Liste.Value.Add(new ZaehlerstandListViewModelEntry(z, this));
-        }
     }
 }

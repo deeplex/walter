@@ -2,45 +2,35 @@
 using Deeplex.Saverwalter.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System;
 
 namespace Deeplex.Saverwalter.WinUI3.UserControls
 {
     public sealed partial class MietenListControl : UserControl
     {
-        public MietenListViewModel ViewModel { get; set; }
-
         public MietenListControl()
         {
             InitializeComponent();
-            RegisterPropertyChangedCallback(VertragGuidProperty, (DepObj, Prop) =>
-            {
-                ViewModel = new MietenListViewModel(VertragGuid, App.NotificationService, App.WalterService);
-            });
         }
 
-        public Guid VertragGuid
+        public MietenListViewModel ViewModel
         {
-            get { return (Guid)GetValue(VertragGuidProperty); }
-            set { SetValue(VertragGuidProperty, value); }
+            get { return (MietenListViewModel)GetValue(ViewModelProperty); }
+            set { SetValue(ViewModelProperty, value); }
         }
 
-        public static readonly DependencyProperty VertragGuidProperty
+        public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
-                  "VertragGuid",
-                  typeof(Guid),
+                  "ViewModel",
+                  typeof(MietenListViewModel),
                   typeof(VertragListControl),
-                  new PropertyMetadata(Guid.Empty));
+                  new PropertyMetadata(null));
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            App.Window.ListAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
             if (((DataGrid)sender).SelectedItem is MietenListViewModelEntry m)
             {
-                App.Window.ListAnhang.Value = new AnhangListViewModel(m.Entity, App.FileService, App.NotificationService, App.WalterService);
-            }
-            else
-            {
-                App.Window.ListAnhang.Value = null;
+                App.Window.ListAnhang.Value.SetList(m.Entity);
             }
         }
     }

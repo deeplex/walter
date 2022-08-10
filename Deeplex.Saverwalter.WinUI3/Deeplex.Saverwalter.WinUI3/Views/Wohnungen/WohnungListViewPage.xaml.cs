@@ -6,12 +6,12 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class WohnungListViewPage : Page
     {
-        public WohnungListViewModel ViewModel { get; } = new WohnungListViewModel(App.WalterService, App.NotificationService);
+        public WohnungListViewModel ViewModel { get; } = App.Container.GetInstance<WohnungListViewModel>();
 
         public WohnungListViewPage()
         {
             InitializeComponent();
-
+            ViewModel.SetList();
             App.Window.CommandBar.MainContent = new ListCommandBarControl { ViewModel = ViewModel };
         }
     }

@@ -7,28 +7,50 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietenListViewModel : BindableBase
+    public sealed class MietenListViewModel : ListViewModel<MietenListViewModelEntry>
     {
-        public ObservableProperty<ImmutableList<MietenListViewModelEntry>> Liste = new();
+        public ObservableProperty<ImmutableList<MietenListViewModelEntry>> Liste { get; } = new();
         public Guid VertragId;
 
-        public IWalterDbService Db;
-        public INotificationService NotificationService;
+        public RelayCommand Add { get; }
 
         public MietenListViewModel(Guid VertragGuid, INotificationService ns, IWalterDbService db)
         {
             VertragId = VertragGuid;
-            Db = db;
+            WalterDbService = db;
+            NotificationService = ns;
             var self = this;
-            Liste.Value = Db.ctx.Mieten
+
+            Liste.Value = WalterDbService.ctx.Mieten
                 .Where(m => m.VertragId == VertragGuid)
+                .ToList()
                 .Select(m => new MietenListViewModelEntry(m, self))
+                .OrderByDescending(e => e.Zahlungsdatum.Value)
                 .ToImmutableList();
+
+            Add = new RelayCommand(_ =>
+            {
+                var miete = new Miete
+                {
+                    VertragId = VertragId,
+                    Zahlungsdatum = DateTime.Now.AsUtcKind(),
+                    BetreffenderMonat = DateTime.Now.AsUtcKind(),
+                    Betrag = Liste.Value.FirstOrDefault()?.Betrag?.Value
+                };
+                Liste.Value = Liste.Value
+                    .Prepend(new MietenListViewModelEntry(miete, this))
+                    .ToImmutableList();
+            }, _ => true);
         }
 
-        public void AddToList(Miete z)
+        protected override void updateList()
         {
-            Liste.Value = Liste.Value.Add(new MietenListViewModelEntry(z, this));
+            throw new NotImplementedException();
+        }
+
+        public override void SetList()
+        {
+            throw new NotImplementedException();
         }
     }
 }

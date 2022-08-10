@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.ViewModels;
+﻿using Deeplex.Saverwalter.Services;
+using Deeplex.Saverwalter.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System.Collections.Immutable;
@@ -19,7 +20,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewModel = new SettingsViewModel(App.FileService, App.NotificationService, App.WalterService);
+            ViewModel = App.Container.GetInstance<SettingsViewModel>();
         }
 
         private void Adressen_AutoGeneratingColumn(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridAutoGeneratingColumnEventArgs e)
@@ -40,12 +41,14 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private async void DeleteAdresse_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            if (await App.NotificationService.Confirmation())
+            var db = App.Container.GetInstance<IWalterDbService>();
+            var ns = App.Container.GetInstance<INotificationService>();
+            if (await ns.Confirmation())
             {
                 if (((Button)sender).Tag is AdresseViewModel vm)
                 {
                     vm.Dispose.Execute(null);
-                    ViewModel.Adressen.Value = App.WalterService.ctx.Adressen.Select(a => new AdresseViewModel(a, App.WalterService)).ToImmutableList();
+                    ViewModel.Adressen.Value = db.ctx.Adressen.Select(a => new AdresseViewModel(a, db)).ToImmutableList();
                 }
             }
         }
@@ -60,8 +63,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
         private async void LoadDatabase_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            await ViewModel.LoadDatabase();
-            Utils.Elements.SetDatabaseAsDefault();
+            Utils.Elements.SetDatabaseAsDefault(await ViewModel.LoadDatabase());
         }
     }
 }

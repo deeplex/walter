@@ -10,13 +10,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public override string ToString() => Entity.FileName;
         public DateTime CreationTime => Entity.CreationTime;
 
-        public string path => Entity.getPath(Container.Db.root);
+        public string path => Entity.getPath(Container.FileService.databaseRoot);
         public double size => File.Exists(path) ? new FileInfo(path).Length : 0;
 
         public int GetReferences => Entity.getReferences();
 
         public AnhangListViewModel Container { get; }
-        private SaverwalterContext ctx => Container.Db.ctx;
+        private SaverwalterContext ctx => Container.WalterDbService.ctx;
 
         public AnhangListViewModelEntry(Anhang a, AnhangListViewModel vm)
         {
@@ -31,9 +31,9 @@ namespace Deeplex.Saverwalter.ViewModels
                 if (await Container.NotificationService.Confirmation())
                 {
                     ctx.Anhaenge.Remove(Entity);
-                    Container.Db.SaveWalter();
+                    Container.WalterDbService.SaveWalter();
 
-                    File.Delete(Entity.getPath(Container.Db.root));
+                    File.Delete(Entity.getPath(Container.FileService.databaseRoot));
 
                     var deleted = Container.Liste.Value.Find(e => e.Entity.AnhangId == Entity.AnhangId);
                     if (deleted != null)

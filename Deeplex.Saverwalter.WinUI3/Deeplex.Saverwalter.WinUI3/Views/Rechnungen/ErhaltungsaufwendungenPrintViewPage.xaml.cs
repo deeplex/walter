@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
 {
     public sealed partial class ErhaltungsaufwendungenPrintViewPage : Page
     {
-        public ErhaltungsaufwendungenPrintViewModel ViewModel { get; set; }
+        public ErhaltungsaufwendungenPrintViewModel ViewModel { get; } = App.Container.GetInstance<ErhaltungsaufwendungenPrintViewModel>();
 
         public ErhaltungsaufwendungenPrintViewPage()
         {
@@ -19,11 +19,11 @@ namespace Deeplex.Saverwalter.WinUI3.Views.Rechnungen
         {
             if (e.Parameter is Wohnung w)
             {
-                ViewModel = new ErhaltungsaufwendungenPrintViewModel(w, App.WalterService, App.FileService);
+                ViewModel.SetEntity(w);
             }
             else if (e.Parameter is IPerson p)
             {
-                ViewModel = new ErhaltungsaufwendungenPrintViewModel(p, App.WalterService, App.FileService);
+                ViewModel.SetEntity(p);
             }
 
             App.Window.CommandBar.MainContent = new PrintCommandBarControl { ViewModel = ViewModel };

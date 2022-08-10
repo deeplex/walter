@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
+using Deeplex.Saverwalter.Services;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -6,12 +7,14 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
 {
     public static class Elements
     {
-        public static async void SetDatabaseAsDefault()
+        public static async void SetDatabaseAsDefault(string databaseRoot)
         {
-            if (await App.NotificationService.Confirmation("Als Standard festlegen", "Die Datenbank: " + App.WalterService.root + " als Standard festlegen?", "Ja", "Nein"))
+            var db = App.Container.GetInstance<IWalterDbService>();
+            var ns = App.Container.GetInstance<INotificationService>();
+            if (await ns.Confirmation("Als Standard festlegen", "Die Datenbank: " + databaseRoot + " als Standard festlegen?", "Ja", "Nein"))
             {
                 var Settings = Windows.Storage.ApplicationData.Current.LocalSettings;
-                Settings.Values["root"] = App.WalterService.root;
+                Settings.Values["root"] = databaseRoot;
             };
         }
 

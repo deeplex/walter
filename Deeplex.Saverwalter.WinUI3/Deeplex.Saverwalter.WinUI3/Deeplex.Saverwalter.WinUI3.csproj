@@ -30,6 +30,7 @@
     <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.3" />
     <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.3" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.0.3" />
+    <PackageReference Include="SimpleInjector" Version="5.4.0" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
@@ -41,15 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="UserControls\Add\AddMieteControl.xaml.cs">
-      <DependentUpon>AddMieteControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="UserControls\Add\AddMietMinderungControl.xaml.cs">
-      <DependentUpon>AddMietMinderungControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="UserControls\Add\AddZaehlerstandControl.xaml.cs">
-      <DependentUpon>AddZaehlerstandControl.xaml</DependentUpon>
-    </Compile>
     <Compile Update="UserControls\CommandBar\BetriebskostenRechnungenListCommandBarControl - Copy - Copy.xaml.cs">
       <DependentUpon>BetriebskostenRechnungenListCommandBarControl - Copy.xaml.cs</DependentUpon>
     </Compile>
@@ -189,18 +181,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="UserControls\Add\AddMieteControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="UserControls\Add\AddMietMinderungControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="UserControls\Add\AddZaehlerstandControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Update="UserControls\Lists\UmlageListControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>

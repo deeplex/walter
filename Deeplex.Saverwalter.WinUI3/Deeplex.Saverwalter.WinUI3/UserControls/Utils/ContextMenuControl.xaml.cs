@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.ViewModels;
+﻿using Deeplex.Saverwalter.Services;
+using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Saverwalter.WinUI3.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -62,14 +63,15 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             }
             else if (Item is KontaktListViewModelEntry k)
             {
-                var a = App.WalterService.ctx.NatuerlichePersonen.SingleOrDefault(p => p.PersonId == k.Entity.PersonId);
+                var db = App.Container.GetInstance<IWalterDbService>();
+                var a = db.ctx.NatuerlichePersonen.SingleOrDefault(p => p.PersonId == k.Entity.PersonId);
                 if (a != null)
                 {
                     App.Window.Navigate(typeof(NatuerlichePersonDetailViewPage), a);
                 }
                 else
                 {
-                    var b = App.WalterService.ctx.JuristischePersonen.SingleOrDefault(p => p.PersonId == k.Entity.PersonId);
+                    var b = db.ctx.JuristischePersonen.SingleOrDefault(p => p.PersonId == k.Entity.PersonId);
                     if (b != null)
                     {
                         App.Window.Navigate(typeof(JuristischePersonenDetailViewPage), b);
