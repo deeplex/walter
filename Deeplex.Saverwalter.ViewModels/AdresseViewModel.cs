@@ -6,20 +6,43 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class AdresseViewModel<T> : AdresseViewModel, IDetailViewModel where T : IAdresse, IDetailViewModel
+    public sealed class AdresseViewModel<T> : AdresseViewModel, IDetailViewModel where T : IAdresse
     {
         private T reference;
 
-        public AdresseViewModel(T value, IWalterDbService db, INotificationService ns) : base(value.Adresse ?? new Adresse(), db, ns)
+        public AdresseViewModel(T entity, IWalterDbService db, INotificationService ns) : base(entity.Adresse ?? new Adresse(), db, ns)
         {
-            reference = value;
+            reference = entity;
+        }
+
+        public new void save()
+        {
+            if (findAdresse() is Adresse a)
+            {
+                Entity = a;
+            }
+            else
+            {
+                Entity = new Adresse();
+                Entity.Strasse = Strasse.Value;
+                Entity.Hausnummer = Hausnummer.Value;
+                Entity.Postleitzahl = Postleitzahl.Value;
+                Entity.Stadt = Stadt.Value;
+
+                WalterDbService.ctx.Adressen.Add(Entity);
+            }
             
+            // reference is updated in save method of reference
+            reference.Adresse = Entity;
+
+            WalterDbService.SaveWalter();
+            checkForChanges();
         }
     }
 
     public class AdresseViewModel : BindableBase, IDetailViewModel
     {
-        protected Adresse Entity { get; set; }
+        public Adresse Entity { get; set; }
 
         public IWalterDbService WalterDbService { get; }
         public INotificationService NotificationService { get; }
@@ -28,6 +51,14 @@ namespace Deeplex.Saverwalter.ViewModels
         public AsyncRelayCommand Delete { get; }
 
         protected ImmutableList<Adresse> AlleAdressen;
+
+        protected Adresse findAdresse()
+            => WalterDbService.ctx.Adressen.FirstOrDefault(a =>
+                a.Strasse == Strasse.Value &&
+                a.Hausnummer == Hausnummer.Value &&
+                a.Postleitzahl == Postleitzahl.Value &&
+                a.Stadt == Stadt.Value);
+
         public void updateAdressen(string strasse = null, string hausnr = null, string plz = null, string stadt = null)
         {
             Strassen.Value = AlleAdressen
@@ -97,11 +128,11 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public int Id;
-        public SavableProperty<string> Strasse;
-        public SavableProperty<string> Hausnummer;
-        public SavableProperty<string> Postleitzahl;
-        public SavableProperty<string> Stadt;
+        public int Id => Entity.AdresseId;
+        public SavableProperty<string> Strasse { get; set; }
+        public SavableProperty<string> Hausnummer { get; set; }
+        public SavableProperty<string> Postleitzahl { get; set; }
+        public SavableProperty<string> Stadt { get; set; }
 
         public AdresseViewModel(Adresse a, IWalterDbService db, INotificationService ns)
         {
@@ -129,9 +160,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Save = new RelayCommand(_ => save(), _ => true);
         }
 
-        public static string Anschrift(int id, IWalterDbService Avm) => Anschrift(Avm.ctx.Adressen.Find(id));
-        public static string Anschrift(IPerson k) => Anschrift(k is IPerson a ? a.Adresse : null);
-        public static string Anschrift(Wohnung w) => Anschrift(w is Wohnung a ? a.Adresse : null);
+        public static string Anschrift(IAdresse k) => Anschrift(k is IAdresse a ? a.Adresse : null);
         public static string Anschrift(Adresse a)
         {
             if (a == null ||
@@ -153,8 +182,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Stadt == null || Entity.Stadt == "");
         }
 
-        // Only used for update. No adding here.
-        private void save()
+        public void save()
         {
             Entity.Strasse = Strasse.Value;
             Entity.Hausnummer = Hausnummer.Value;
@@ -171,6 +199,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
 
             WalterDbService.SaveWalter();
+            checkForChanges();
         }
 
         public void checkForChanges()

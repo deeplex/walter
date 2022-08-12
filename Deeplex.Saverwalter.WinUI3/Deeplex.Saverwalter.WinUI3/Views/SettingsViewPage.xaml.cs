@@ -48,7 +48,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
                 if (((Button)sender).Tag is AdresseViewModel vm)
                 {
                     vm.Delete.Execute(null);
-                    ViewModel.Adressen.Value = db.ctx.Adressen.Select(a => new AdresseViewModel(a, db)).ToImmutableList();
+                    ViewModel.Adressen.Value = db.ctx.Adressen.Select(a => new AdresseViewModel(a, db, ns)).ToImmutableList();
                 }
             }
         }

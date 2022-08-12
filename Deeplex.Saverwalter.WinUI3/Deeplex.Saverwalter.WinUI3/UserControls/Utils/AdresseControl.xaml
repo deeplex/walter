@@ -12,32 +12,20 @@
 
     <mtuuc:WrapPanel>
         <AutoSuggestBox
-            TextChanged="TextChanged"
-            QuerySubmitted="QuerySubmitted"
-            LostFocus="lostFocus"
-            Width="210" Header="Straße" x:Name="Strasse"
+            Width="210" Header="Straße"
             ItemsSource="{x:Bind ViewModel.Strassen.Value, Mode=OneWay}"
-            Text="{x:Bind ViewModel.Strasse, Mode=OneWay}"/>
+            Text="{x:Bind ViewModel.Strasse.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         <AutoSuggestBox
-            TextChanged="TextChanged"
-            QuerySubmitted="QuerySubmitted"
-            LostFocus="lostFocus"
             ItemsSource="{x:Bind ViewModel.Hausnummern.Value, Mode=OneWay}"
-            Width="70" Margin="20,0,0,0" Header="Hausnr." x:Name="Hausnr"
-            Text="{x:Bind ViewModel.Hausnummer, Mode=OneWay}"/>
+            Width="70" Margin="20,0,0,0" Header="Hausnr."
+            Text="{x:Bind ViewModel.Hausnummer.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         <AutoSuggestBox
-            TextChanged="TextChanged"
-            QuerySubmitted="QuerySubmitted"
-            LostFocus="lostFocus"
             ItemsSource="{x:Bind ViewModel.Postleitzahlen.Value, Mode=OneWay}"
-            Width="70" Margin="20,0,0,0" Header="Postleitzahl" x:Name="Postleitzahl"
-            Text="{x:Bind ViewModel.Postleitzahl, Mode=OneWay}"/>
+            Width="70" Margin="20,0,0,0" Header="Postleitzahl"
+            Text="{x:Bind ViewModel.Postleitzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         <AutoSuggestBox
-            TextChanged="TextChanged"
-            QuerySubmitted="QuerySubmitted"
-            LostFocus="lostFocus"
             ItemsSource="{x:Bind ViewModel.Staedte.Value, Mode=OneWay}"
-            Width="210" Margin="20,0,0,0" Header="Stadt" x:Name="Stadt"
-            Text="{x:Bind ViewModel.Stadt, Mode=OneWay}"/>
+            Width="210" Margin="20,0,0,0" Header="Stadt"
+            Text="{x:Bind ViewModel.Stadt.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
     </mtuuc:WrapPanel>
 </UserControl>

@@ -45,7 +45,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 }, _ => true);
                 LoadAdressen = new RelayCommand(_ =>
                 {
-                    Adressen.Value = Db.ctx.Adressen.Select(a => new AdresseViewModel(a, Db)).ToImmutableList();
+                    Adressen.Value = Db.ctx.Adressen.Select(a => new AdresseViewModel(a, Db, ns)).ToImmutableList();
                 }, _ => true);
             }
             catch (Exception e)

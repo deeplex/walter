@@ -16,6 +16,5 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 
             base.OnNavigatedTo(e);
         }
-
     }
 }

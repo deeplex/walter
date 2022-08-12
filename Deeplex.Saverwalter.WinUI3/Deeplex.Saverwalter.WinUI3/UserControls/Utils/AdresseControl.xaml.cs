@@ -16,7 +16,10 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
             RegisterPropertyChangedCallback(AdresseProperty, (idDepObject, idProp) =>
             {
-                ViewModel = new AdresseViewModel<IAdresse>(Adresse, App.Container.GetInstance<IWalterDbService>());
+                ViewModel = new AdresseViewModel<IAdresse>(
+                    Adresse,
+                    App.Container.GetInstance<IWalterDbService>(),
+                    App.Container.GetInstance<INotificationService>());
             });
         }
 
@@ -32,40 +35,5 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                 typeof(IAdresse),
                 typeof(AdresseControl),
                 new PropertyMetadata(null));
-
-        private void TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
-        {
-            ViewModel.updateAdressen(Strasse.Text.Trim(), Hausnr.Text.Trim(), Postleitzahl.Text.Trim(), Stadt.Text.Trim());
-        }
-
-        private void QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
-        {
-            updateAdresse(sender, args.QueryText);
-        }
-
-        private void lostFocus(object sender, RoutedEventArgs e)
-        {
-            updateAdresse((AutoSuggestBox)sender, ((TextBox)e.OriginalSource).Text);
-        }
-
-        private void updateAdresse(AutoSuggestBox sender, string text)
-        {
-            if (sender == Strasse)
-            {
-                ViewModel.Strasse = text;
-            }
-            if (sender == Hausnr)
-            {
-                ViewModel.Hausnummer = text;
-            }
-            if (sender == Postleitzahl)
-            {
-                ViewModel.Postleitzahl = text;
-            }
-            if (sender == Stadt)
-            {
-                ViewModel.Stadt = text;
-            }
-        }
     }
 }

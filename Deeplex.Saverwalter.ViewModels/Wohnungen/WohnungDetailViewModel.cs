@@ -14,16 +14,10 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public override string ToString() => AdresseViewModel.Anschrift(Entity) + " - " + Bezeichnung.Value;
 
-        public ObservableProperty<int> BetriebskostenrechnungsJahr = new(DateTime.Now.Year - 1);
-        public ObservableProperty<bool> ZeigeVorlagen = new();
-
         public ImmutableList<KontaktListViewModelEntry> AlleVermieter;
-
-        public SavableProperty<Adresse> Adresse { get; set; }
-        public string Anschrift => AdresseViewModel.Anschrift(Adresse.Value.AdresseId, WalterDbService);
-
         public KontaktListViewModelEntry Besitzer { get; set; }
 
+        public SavableProperty<AdresseViewModel<Wohnung>> Adresse { get; set; }
         public SavableProperty<string> Bezeichnung { get; set; }
         public SavableProperty<string> Notiz { get; set; }
         public SavableProperty<double> Wohnflaeche { get; set; }
@@ -69,11 +63,13 @@ namespace Deeplex.Saverwalter.ViewModels
             Wohnflaeche = new(this, e.Wohnflaeche);
             Nutzflaeche = new(this, e.Nutzflaeche);
             Nutzeinheit = new(this, e.Nutzeinheit);
+            Adresse = new(this, new(e, WalterDbService, NotificationService));
         }
 
         private void save()
         {
-            Entity.Adresse = Adresse.Value;
+            Adresse.Value.save();
+            Entity.Adresse = Adresse.Value.Entity;
             Entity.Bezeichnung = Bezeichnung.Value;
             Entity.Wohnflaeche = Wohnflaeche.Value;
             Entity.Nutzflaeche = Nutzflaeche.Value;
@@ -95,7 +91,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public override void checkForChanges()
         {
             NotificationService.outOfSync =
-                Entity.Adresse.AdresseId != Adresse.Value.AdresseId ||
+                Entity.Adresse.AdresseId != Adresse.Value.Id ||
                 Entity.Bezeichnung != Bezeichnung.Value ||
                 Entity.Wohnflaeche != Wohnflaeche.Value ||
                 Entity.Nutzflaeche != Nutzflaeche.Value ||

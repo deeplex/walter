@@ -16,7 +16,7 @@ namespace Deeplex.Saverwalter.ViewModels
             get => base.Value;
             set
             {
-                base.Value = value;
+               base.Value = value;
                 Parent.checkForChanges();
             }
         }
