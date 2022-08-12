@@ -14,6 +14,8 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public static class Files
     {
+        // TODO move to FileService
+
         // TODO needs rework
         //public static void ConnectAnhangToEntity<T, U>(DbSet<T> Set, U target, List<Anhang> files, IWalterDbService db) where T : class, Anhang a, new()
         //{
