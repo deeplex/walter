@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class UmlageDetailViewModel : DetailViewModel<Umlage>, DetailViewModel
+    public sealed class UmlageDetailViewModel : DetailViewModel<Umlage>, IDetailViewModel
     {
         public override string ToString() => Entity.Typ.ToDescriptionString() + " - " + Entity.Wohnungen.GetWohnungenBezeichnung();
 

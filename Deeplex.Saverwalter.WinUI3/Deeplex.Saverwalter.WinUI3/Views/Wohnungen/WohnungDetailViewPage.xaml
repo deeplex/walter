@@ -20,9 +20,7 @@
                             HorizontalAlignment="Stretch"
                             RelativePanel.AlignRightWithPanel="True"
                             RelativePanel.AlignLeftWithPanel="True">
-                            <Grid
-                                Background="{ThemeResource SystemChromeLowColor}"
-                                MinHeight="250">
+                            <Grid Background="{ThemeResource SystemChromeLowColor}" MinHeight="250">
                             </Grid>
                         </Grid>
                     </RelativePanel>
@@ -40,9 +38,7 @@
                         </Button>
                     </StackPanel>
                     <mtuuc:WrapPanel>
-                        <uc:AdresseControl
-                            Margin="20,20,0,0"
-                            Adresse="{x:Bind ViewModel.Entity}" />
+                        <uc:AdresseControl Margin="20,20,0,0" Adresse="{x:Bind ViewModel.Entity}" />
                     </mtuuc:WrapPanel>
                     <mtuuc:WrapPanel Orientation="Horizontal">
                         <TextBox

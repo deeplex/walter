@@ -5,7 +5,7 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class ZaehlerstandListViewModelEntry : DetailViewModel
+    public class ZaehlerstandListViewModelEntry : IDetailViewModel
     {
         public Zaehlerstand Entity { get; }
         public int Id => Entity.ZaehlerstandId;

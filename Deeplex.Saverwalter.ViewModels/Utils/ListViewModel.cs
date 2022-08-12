@@ -30,7 +30,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         protected abstract void updateList();
         protected bool applyFilter(params string[] strings)
-            => Filter.Split(' ').All(split => strings.Any(str => str.ToLower().Contains(split.ToLower())));
+            => Filter.Split(' ').All(split => strings.Any(str => str != null && str.ToLower().Contains(split.ToLower())));
 
         public RelayCommand Navigate { get; protected set; }
 

@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class WohnungDetailViewModel : DetailViewModel<Wohnung>, DetailViewModel
+    public sealed class WohnungDetailViewModel : DetailViewModel<Wohnung>, IDetailViewModel
     {
         public Wohnung Entity { get; private set; }
         public int Id => Entity.WohnungId;
@@ -19,8 +19,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public ImmutableList<KontaktListViewModelEntry> AlleVermieter;
 
-        public int AdresseId => Entity.AdresseId;
-        public string Anschrift => AdresseViewModel.Anschrift(AdresseId, WalterDbService);
+        public SavableProperty<Adresse> Adresse { get; set; }
+        public string Anschrift => AdresseViewModel.Anschrift(Adresse.Value.AdresseId, WalterDbService);
 
         public KontaktListViewModelEntry Besitzer { get; set; }
 
@@ -73,6 +73,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         private void save()
         {
+            Entity.Adresse = Adresse.Value;
             Entity.Bezeichnung = Bezeichnung.Value;
             Entity.Wohnflaeche = Wohnflaeche.Value;
             Entity.Nutzflaeche = Nutzflaeche.Value;
@@ -94,6 +95,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public override void checkForChanges()
         {
             NotificationService.outOfSync =
+                Entity.Adresse.AdresseId != Adresse.Value.AdresseId ||
                 Entity.Bezeichnung != Bezeichnung.Value ||
                 Entity.Wohnflaeche != Wohnflaeche.Value ||
                 Entity.Nutzflaeche != Nutzflaeche.Value ||

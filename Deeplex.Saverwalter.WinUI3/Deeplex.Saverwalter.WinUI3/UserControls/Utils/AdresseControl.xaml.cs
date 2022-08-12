@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
 
         public static readonly DependencyProperty AdresseProperty
             = DependencyProperty.Register(
-                "value",
+                "Adresse",
                 typeof(IAdresse),
                 typeof(AdresseControl),
                 new PropertyMetadata(null));

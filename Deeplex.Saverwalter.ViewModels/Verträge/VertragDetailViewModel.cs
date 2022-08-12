@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class VertragDetailViewModel : VertragDetailViewModelVersion, DetailViewModel
+    public sealed class VertragDetailViewModel : VertragDetailViewModelVersion, IDetailViewModel
     {
         public Guid guid { get; private set; }
 

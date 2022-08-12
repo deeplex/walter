@@ -4,9 +4,9 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public class SavableProperty<T> : ObservableProperty<T>
     {
-        DetailViewModel Parent;
+        IDetailViewModel Parent;
 
-        public SavableProperty(DetailViewModel parent, T initial = default) : base(initial)
+        public SavableProperty(IDetailViewModel parent, T initial = default) : base(initial)
         {
             Parent = parent;
         }

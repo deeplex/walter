@@ -10,8 +10,12 @@ namespace Deeplex.Saverwalter.WinUI3.Services
 {
     public sealed class NotificationService : BindableBase, INotificationService
     {
-        public void Navigation<T>(T Element)
+        public void Navigation<T>(T Element) where T : new()
         {
+            if (Element == null)
+            {
+                Element = new T();
+            }
             App.Window.Navigate(getDetailViewPage(typeof(T)), Element);
         }
 

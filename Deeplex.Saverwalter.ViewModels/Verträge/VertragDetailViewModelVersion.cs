@@ -5,7 +5,7 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class VertragDetailViewModelVersion : DetailViewModel<Vertrag>, DetailViewModel
+    public class VertragDetailViewModelVersion : DetailViewModel<Vertrag>, IDetailViewModel
     {
         public override string ToString() => "Vertrag"; // TODO
 

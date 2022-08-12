@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public abstract class IPersonDetailViewModel : DetailViewModel<IPerson>, DetailViewModel
+    public abstract class IPersonDetailViewModel : DetailViewModel<IPerson>, IDetailViewModel
     {
         public IPerson Entity { get; private set; }
 
