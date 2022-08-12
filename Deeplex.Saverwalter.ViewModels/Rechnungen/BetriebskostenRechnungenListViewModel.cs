@@ -25,8 +25,16 @@ namespace Deeplex.Saverwalter.ViewModels
             Navigate = new RelayCommand(el => ns.Navigation((Betriebskostenrechnung)el), _ => true);
         }
 
+        public override void SetList()
+        {
+            AllRelevant = transform(WalterDbService, include(WalterDbService));
+            updateList();
+        }
+
         public void SetList(Vertrag v)
         {
+            if (v == null) return;
+
             AllRelevant = transform(WalterDbService,
                 include(WalterDbService)
                     .Where(b => b.Umlage.Wohnungen.Exists(w => v.Wohnung.WohnungId == w.WohnungId))
@@ -36,6 +44,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList(Wohnung w)
         {
+            if (w == null) return;
+
             AllRelevant = transform(WalterDbService,
                 include(WalterDbService)
                     .Where(b => b.Umlage.Wohnungen.Exists(i => i.WohnungId == w.WohnungId))
@@ -43,14 +53,10 @@ namespace Deeplex.Saverwalter.ViewModels
             List.Value = AllRelevant.ToImmutableList();
         }
 
-        public override void SetList()
-        {
-            AllRelevant = transform(WalterDbService, include(WalterDbService));
-            updateList();
-        }
-
         public void SetList(Umlage u)
         {
+            if (u == null) return;
+
             AllRelevant = transform(WalterDbService, include(WalterDbService)
                 .Where(e => u.Betriebskostenrechnungen.Exists(i => i.BetriebskostenrechnungId == e.BetriebskostenrechnungId))
                 .ToList());

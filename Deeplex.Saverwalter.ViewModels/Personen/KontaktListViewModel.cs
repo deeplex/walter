@@ -47,6 +47,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList(Vertrag v)
         {
+            if (v == null) return;
+
             var mieter = WalterDbService.ctx.MieterSet.Where(m => m.VertragId == v.VertragId).Select(m => m.PersonId).ToList();
             var np = new List<NatuerlichePerson> { };
             var jp = new List<JuristischePerson> { };
@@ -70,12 +72,16 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList(JuristischePerson jp)
         {
+            if (jp == null) return;
+
             AllRelevant = transform(WalterDbService, jp.NatuerlicheMitglieder, jp.JuristischeMitglieder);
             List.Value = AllRelevant.ToImmutableList();
         }
 
         public void SetList(IPerson jp)
         {
+            if (jp == null) return;
+
             AllRelevant = transform(WalterDbService, new List<NatuerlichePerson> { }, jp.JuristischePersonen);
             List.Value = AllRelevant.ToImmutableList();
         }

@@ -33,6 +33,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList(Vertrag v)
         {
+            if (v == null) return;
+
             AllRelevant = transform(WalterDbService,
                 include(WalterDbService)
                     .Where(b => b.Wohnungen.Exists(w => v.Wohnung.WohnungId == w.WohnungId))
@@ -42,6 +44,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList(Wohnung w)
         {
+            if (w == null) return;
+
             AllRelevant = transform(WalterDbService,
                 include(WalterDbService)
                     .Where(b => b.Wohnungen.Exists(i => i.WohnungId == w.WohnungId))

@@ -12,9 +12,6 @@ namespace Deeplex.Saverwalter.ViewModels
         public new JuristischePerson Entity => (JuristischePerson)base.Entity;
         public int Id;
 
-        public SavableProperty<string> Bezeichnung { get; private set; }
-        public override string ToString() => Bezeichnung.Value;
-
         public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Mitglieder = new();
         public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> AddMitglieder = new();
         public ObservableProperty<KontaktListViewModelEntry> AddMitglied = new();
@@ -58,7 +55,6 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             base.SetEntity(k);
             Id = k.JuristischePersonId;
-            Bezeichnung = new(this, k.Bezeichnung);
 
             UpdateListen();
         }
@@ -105,14 +101,13 @@ namespace Deeplex.Saverwalter.ViewModels
                     WalterDbService.ctx.JuristischePersonen.Add(Entity);
                 }
                 WalterDbService.SaveWalter();
+                checkForChanges();
             }, _ => true);
         }
 
         public override void checkForChanges()
         {
-            NotificationService.outOfSync =
-                BaseCheckForChanges() ||
-                Entity.Bezeichnung != Bezeichnung.Value;
+            NotificationService.outOfSync = BaseCheckForChanges();
         }
     }
 }

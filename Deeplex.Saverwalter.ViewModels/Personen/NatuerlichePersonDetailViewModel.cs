@@ -19,8 +19,6 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<string> Vorname { get; private set; }
         public SavableProperty<string> Nachname { get; private set; }
 
-        public override string ToString() => Entity.Bezeichnung;
-
         public bool WohnungenInklusiveJurPers
         {
             get => mInklusiveZusatz;
@@ -71,13 +69,14 @@ namespace Deeplex.Saverwalter.ViewModels
 
                 if (Entity.NatuerlichePersonId != 0)
                 {
-                    base.WalterDbService.ctx.NatuerlichePersonen.Update(Entity);
+                    WalterDbService.ctx.NatuerlichePersonen.Update(Entity);
                 }
                 else
                 {
-                    base.WalterDbService.ctx.NatuerlichePersonen.Add(Entity);
+                    WalterDbService.ctx.NatuerlichePersonen.Add(Entity);
                 }
-                base.WalterDbService.SaveWalter();
+                WalterDbService.SaveWalter();
+                checkForChanges();
             }, _ => true);
 
             Delete = new AsyncRelayCommand(async _ =>

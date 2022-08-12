@@ -18,6 +18,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList(Zaehler z)
         {
+            if (z == null) return;
+
             ZaehlerId = z.ZaehlerId;
             Liste.Value = z.Staende
                 .Select(s => new ZaehlerstandListViewModelEntry(s, this))

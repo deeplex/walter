@@ -25,6 +25,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList(Wohnung w)
         {
+            if (w == null) return;
+
             AllRelevant = transform(WalterDbService,
                 include(WalterDbService)
                 .Where(z => z.Wohnung != null && z.Wohnung.WohnungId == w.WohnungId)

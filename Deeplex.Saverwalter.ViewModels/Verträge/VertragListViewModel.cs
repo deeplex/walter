@@ -33,6 +33,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList(IPerson p)
         {
+            if (p == null) return;
+
             var mieterSets = WalterDbService.ctx.MieterSet.ToList();
 
             AllRelevant = transform(WalterDbService, include(WalterDbService).Where(v =>
@@ -45,6 +47,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList(Wohnung w)
         {
+            if (w == null) return;
+
             AllRelevant = transform(WalterDbService, include(WalterDbService).Where(v => v.Wohnung.WohnungId == w.WohnungId).ToList());
             List.Value = AllRelevant.ToImmutableList();
         }

@@ -42,6 +42,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList(IPerson e)
         {
+            if (e == null) return;
+
             var vertragIds = WalterDbService.ctx.MieterSet
                 .ToList()
                 .Where(m => m.PersonId == e.PersonId)
@@ -67,6 +69,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList(Umlage e)
         {
+            if (e == null) return;
+
             AllRelevant = include()
                 .Where(w => w.Umlagen.Exists(b => b.UmlageId == e.UmlageId))
                 .Select(e => new WohnungListViewModelEntry(e, WalterDbService));
@@ -75,6 +79,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList(Adresse e)
         {
+            if (e == null) return;
+
             AllRelevant = include()
                 .Where(w => w.AdresseId == e.AdresseId)
                 .Select(e => new WohnungListViewModelEntry(e, WalterDbService));

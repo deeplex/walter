@@ -17,6 +17,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Entity = p;
             Email = new(this, p.Email);
+            Bezeichnung = new(this, p.Bezeichnung);
             Telefon = new(this, p.Telefon);
             Mobil = new(this, p.Mobil);
             Fax = new(this, p.Fax);
@@ -46,6 +47,9 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
         public Guid PersonId;
+        public override string ToString() => Bezeichnung?.Value ?? "Neue Person";
+
+        public SavableProperty<string> Bezeichnung { get; private set; }
         public SavableProperty<string> Notiz { get; private set; }
         public SavableProperty<bool> isVermieter { get; private set; }
         public SavableProperty<bool> isMieter { get; private set; }
@@ -59,6 +63,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public abstract override void checkForChanges();
         protected bool BaseCheckForChanges() =>
+            Entity.Bezeichnung != Bezeichnung.Value ||
             Entity.Notiz != Notiz.Value ||
             Entity.isVermieter != isVermieter.Value ||
             Entity.isMieter != isMieter.Value ||

@@ -32,6 +32,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void SetList(Wohnung w)
         {
+            if (w == null) return;
+
             AllRelevant = transform(WalterDbService,
                 include(WalterDbService)
                     .Where(e => w.Erhaltungsaufwendungen
