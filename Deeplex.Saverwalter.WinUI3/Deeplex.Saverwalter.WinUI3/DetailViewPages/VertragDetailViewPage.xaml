@@ -153,22 +153,22 @@
                             </StackPanel>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
-                    <uc:ExpanderControl Header="Miete" Command="{x:Bind ViewModel.Mieten.Value.Add}">
+                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Miete" Command="{x:Bind ViewModel.Mieten.Value.Add}">
                         <uc:ExpanderControl.MainContent>
                             <uc:MieteListControl ViewModel="{x:Bind ViewModel.Mieten.Value, Mode=OneWay}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
-                    <uc:ExpanderControl Header="Mietminderungen" Command="{x:Bind ViewModel.MietMinderungen.Value.Add}">
+                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Mietminderungen" Command="{x:Bind ViewModel.MietMinderungen.Value.Add}">
                         <uc:ExpanderControl.MainContent>
                             <uc:MietminderungListControl ViewModel="{x:Bind ViewModel.MietMinderungen.Value, Mode=OneWay}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
-                    <uc:ExpanderControl Header="Umlagen">
+                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Umlagen">
                         <uc:ExpanderControl.MainContent>
                             <uc:UmlageListControl ViewModel="{x:Bind UmlageListViewModel}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
-                    <uc:ExpanderControl Header="Betriebskostenrechnungen">
+                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Betriebskostenrechnungen">
                         <uc:ExpanderControl.MainContent>
                             <uc:BetriebskostenrechnungListControl ViewModel="{x:Bind BetriebskostenListViewModel}"/>
                         </uc:ExpanderControl.MainContent>

@@ -38,9 +38,6 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<string> Kennnummer { get; private set; }
         public SavableProperty<WohnungListViewModelEntry> Wohnung { get; private set; }
 
-        // Necessary to show / hide Zählerstände
-        public bool Initialized => Entity.ZaehlerId != 0;
-
         public override void SetEntity(Zaehler z)
         {
             Entity = z;

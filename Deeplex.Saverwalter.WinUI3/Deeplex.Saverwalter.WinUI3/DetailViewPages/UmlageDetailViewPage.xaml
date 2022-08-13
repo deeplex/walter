@@ -61,12 +61,12 @@
                         Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Header="Notiz"/>
                 </StackPanel>
-                <uc:ExpanderControl Margin="0,20,0,0" Header="Wohnungen">
+                <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Margin="0,20,0,0" Header="Wohnungen">
                     <uc:ExpanderControl.MainContent>
                         <uc:WohnungListControl ViewModel="{x:Bind WohnungListViewModel}"/>
                     </uc:ExpanderControl.MainContent>
                 </uc:ExpanderControl>
-                <uc:ExpanderControl Header="Betriebskostenrechnungen">
+                <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Betriebskostenrechnungen">
                     <uc:ExpanderControl.MainContent>
                         <uc:BetriebskostenrechnungListControl ViewModel="{x:Bind BetriebskostenRechnungenListViewModel}"/>
                     </uc:ExpanderControl.MainContent>

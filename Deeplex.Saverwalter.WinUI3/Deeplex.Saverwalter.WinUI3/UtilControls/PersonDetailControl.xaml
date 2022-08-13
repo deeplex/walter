@@ -57,20 +57,20 @@
                 Header="Notiz"/>
         </mtuuc:WrapPanel>
 
-        <uc:ExpanderControl Header="Verträge">
+        <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized, Mode=OneWay}" Header="Verträge">
             <uc:ExpanderControl.MainContent>
                 <uc:VertragListControl ViewModel="{x:Bind VertragListViewModel.Value, Mode=OneWay}"/>
             </uc:ExpanderControl.MainContent>
         </uc:ExpanderControl>
 
         <!--TODO: Add Command for Erhaltungsaufwendungen-->
-        <uc:ExpanderControl Header="Wohnungen">
+        <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized, Mode=OneWay}" Header="Wohnungen">
             <uc:ExpanderControl.MainContent>
                 <uc:WohnungListControl ViewModel="{x:Bind WohnungListViewModel.Value, Mode=OneWay}" />
             </uc:ExpanderControl.MainContent>
         </uc:ExpanderControl>
 
-        <uc:ExpanderControl Header="Juristische Personen">
+        <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized, Mode=OneWay}" Header="Juristische Personen">
             <uc:ExpanderControl.MainContent>
                 <uc:KontaktListControl ViewModel="{x:Bind JuristischePersonenViewModel.Value}"/>
             </uc:ExpanderControl.MainContent>

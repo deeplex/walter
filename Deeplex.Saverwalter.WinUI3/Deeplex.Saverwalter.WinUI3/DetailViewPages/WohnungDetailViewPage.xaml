@@ -64,37 +64,37 @@
                             Header="Notiz"/>
                     </mtuuc:WrapPanel>
 
-                    <uc:ExpanderControl Header="Zähler" Command="{x:Bind ZaehlerListViewModel.Navigate}">
+                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Zähler" Command="{x:Bind ZaehlerListViewModel.Navigate}">
                         <uc:ExpanderControl.MainContent>
                             <uc:ZaehlerListControl ViewModel="{x:Bind ZaehlerListViewModel}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
-                    <uc:ExpanderControl Header="Adresse">
+                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Adresse">
                         <uc:ExpanderControl.MainContent>
                             <uc:WohnungListControl ViewModel="{x:Bind WohnungAdresseViewModel}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
-                    <uc:ExpanderControl Header="Verträge" Command="{x:Bind VertragListViewModel.Navigate}">
+                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Verträge" Command="{x:Bind VertragListViewModel.Navigate}">
                         <uc:ExpanderControl.MainContent>
                             <uc:VertragListControl ViewModel="{x:Bind VertragListViewModel}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
-                    <uc:ExpanderControl Header="Betriebskostenrechnungen" Command="{x:Bind BetriebskostenrechnungViewModel.Navigate}">
+                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Betriebskostenrechnungen" Command="{x:Bind BetriebskostenrechnungViewModel.Navigate}">
                         <uc:ExpanderControl.MainContent>
                             <uc:BetriebskostenrechnungListControl ViewModel="{x:Bind BetriebskostenrechnungViewModel}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
-                    <uc:ExpanderControl Header="Umlagen" Command="{x:Bind UmlageListViewModel.Navigate}">
+                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Umlagen" Command="{x:Bind UmlageListViewModel.Navigate}">
                         <uc:ExpanderControl.MainContent>
                             <uc:UmlageListControl ViewModel="{x:Bind UmlageListViewModel}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
-                    <uc:ExpanderControl Header="Erhaltungsaufwendungen" Command="{x:Bind ErhaltungsaufwendungViewModel.Navigate}">
+                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Erhaltungsaufwendungen" Command="{x:Bind ErhaltungsaufwendungViewModel.Navigate}">
                         <uc:ExpanderControl.MainContent>
                             <uc:ErhaltungsaufwendungListControl ViewModel="{x:Bind ErhaltungsaufwendungViewModel}"/>
                         </uc:ExpanderControl.MainContent>

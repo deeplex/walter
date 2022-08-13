@@ -21,7 +21,7 @@
                 </mtuuc:WrapPanel>
                 <uc:PersonDetailControl ViewModel="{x:Bind ViewModel}" />
 
-                <uc:ExpanderControl Header="Mitglieder">
+                <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Mitglieder">
                     <!--<uc:ExpanderControl.Bonus>
                         <Button Margin="20,0,0,0" Background="Transparent">
                             <SymbolIcon Symbol="Add" />
