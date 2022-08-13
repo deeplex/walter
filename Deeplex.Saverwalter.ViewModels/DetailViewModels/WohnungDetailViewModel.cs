@@ -31,9 +31,9 @@ namespace Deeplex.Saverwalter.ViewModels
             NotificationService = ns;
 
             AlleVermieter = WalterDbService.ctx.JuristischePersonen.ToImmutableList()
-                .Where(j => j.isVermieter == true).Select(j => new KontaktListViewModelEntry(j))
+                .Select(j => new KontaktListViewModelEntry(j))
                 .Concat(WalterDbService.ctx.NatuerlichePersonen
-                    .Where(n => n.isVermieter == true).Select(n => new KontaktListViewModelEntry(n)))
+                    .Select(n => new KontaktListViewModelEntry(n)))
                 .ToImmutableList();
 
             Delete = new AsyncRelayCommand(async _ =>

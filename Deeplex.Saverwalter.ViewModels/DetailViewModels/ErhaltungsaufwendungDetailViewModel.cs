@@ -72,11 +72,9 @@ namespace Deeplex.Saverwalter.ViewModels
             Wohnung = new(this, Wohnungen.Find(f => f.Id == e.Wohnung?.WohnungId));
 
             Personen.Value = WalterDbService.ctx.NatuerlichePersonen
-                .Where(w => w.isHandwerker)
                 .Select(k => new KontaktListViewModelEntry(k))
                 .ToList()
                 .Concat(WalterDbService.ctx.JuristischePersonen
-                    .Where(w => w.isHandwerker)
                     .Select(k => new KontaktListViewModelEntry(k))
                     .ToList())
                     .ToImmutableList();

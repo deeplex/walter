@@ -20,9 +20,6 @@ namespace Deeplex.Saverwalter.ViewModels
             Mobil = new(this, p.Mobil);
             Fax = new(this, p.Fax);
             Notiz = new(this, p.Notiz);
-            isHandwerker = new(this, p.isHandwerker);
-            isMieter = new(this, p.isMieter);
-            isVermieter = new(this, p.isVermieter);
         }
 
 
@@ -39,9 +36,6 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Mobil = Mobil.Value;
             Entity.Fax = Fax.Value;
             Entity.Notiz = Notiz.Value;
-            Entity.isHandwerker = isHandwerker.Value;
-            Entity.isMieter = isMieter.Value;
-            Entity.isVermieter = isVermieter.Value;
 
             base.save();
         }
@@ -51,9 +45,6 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public SavableProperty<string> Bezeichnung { get; private set; }
         public SavableProperty<string> Notiz { get; private set; }
-        public SavableProperty<bool> isVermieter { get; private set; }
-        public SavableProperty<bool> isMieter { get; private set; }
-        public SavableProperty<bool> isHandwerker { get; private set; }
         public SavableProperty<string> Email { get; private set; }
         public SavableProperty<string> Telefon { get; private set; }
         public SavableProperty<string> Mobil { get; private set; }
@@ -65,9 +56,6 @@ namespace Deeplex.Saverwalter.ViewModels
         protected bool BaseCheckForChanges() =>
             Entity.Bezeichnung != Bezeichnung.Value ||
             Entity.Notiz != Notiz.Value ||
-            Entity.isVermieter != isVermieter.Value ||
-            Entity.isMieter != isMieter.Value ||
-            Entity.isHandwerker != isHandwerker.Value ||
             Entity.Email != Email.Value ||
             Entity.Telefon != Telefon.Value ||
             Entity.Mobil != Mobil.Value ||

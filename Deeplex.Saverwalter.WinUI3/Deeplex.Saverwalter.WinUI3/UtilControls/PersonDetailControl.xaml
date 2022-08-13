@@ -34,20 +34,6 @@
                 Text="{x:Bind ViewModel.Mobil.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Header="Mobil" Style="{StaticResource Eintraege}"/>
         </mtuuc:WrapPanel>
-        <mtuuc:WrapPanel Orientation="Horizontal">
-            <CheckBox
-                Margin="20,20,0,0"
-                Content="Vermieter"
-                IsChecked="{x:Bind ViewModel.isVermieter.Value, Mode=TwoWay}"/>
-            <CheckBox
-                Margin="20,20,0,0"
-                Content="Mieter"
-                IsChecked="{x:Bind ViewModel.isMieter.Value, Mode=TwoWay}"/>
-            <CheckBox
-                Margin="20,20,0,0"
-                Content="Handwerker"
-                IsChecked="{x:Bind ViewModel.isHandwerker.Value, Mode=TwoWay}"/>
-        </mtuuc:WrapPanel>
         <mtuuc:WrapPanel>
             <TextBox
                 Width="620"

@@ -3,14 +3,16 @@ using System;
 using Deeplex.Saverwalter.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Deeplex.Saverwalter.Model.Migrations
 {
     [DbContext(typeof(SaverwalterContext))]
-    partial class SaverwalterContextModelSnapshot : ModelSnapshot
+    [Migration("20220813191815_RemoveIsMieterIsVermieterIsHandwerker")]
+    partial class RemoveIsMieterIsVermieterIsHandwerker
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -449,6 +451,15 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<string>("Telefon")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("isHandwerker")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("isMieter")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("isVermieter")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("JuristischePersonId");
 
                     b.HasAlternateKey("PersonId");
@@ -588,6 +599,15 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<string>("Vorname")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("isHandwerker")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("isMieter")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("isVermieter")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("NatuerlichePersonId");
 

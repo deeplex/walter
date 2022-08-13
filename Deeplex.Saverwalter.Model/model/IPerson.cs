@@ -7,9 +7,6 @@ namespace Deeplex.Saverwalter.Model
     {
         public Guid PersonId { get; set; }
         public string Bezeichnung { get; }
-        public bool isVermieter { get; set; }
-        public bool isMieter { get; set; }
-        public bool isHandwerker { get; set; }
         public Anrede Anrede { get; set; }
         public string? Telefon { get; set; }
         public string? Mobil { get; set; }
