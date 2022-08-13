@@ -101,6 +101,7 @@ namespace Deeplex.Saverwalter.ViewModels
                     WalterDbService.ctx.JuristischePersonen.Add(Entity);
                 }
                 WalterDbService.SaveWalter();
+                RaisePropertyChanged(nameof(isInitialized));
                 checkForChanges();
             }, _ => true);
         }

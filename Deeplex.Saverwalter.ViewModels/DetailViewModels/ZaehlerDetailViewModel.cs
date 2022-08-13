@@ -9,20 +9,7 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class ZaehlerDetailViewModel : DetailViewModel<Zaehler>, IDetailViewModel
     {
-        public Zaehler Entity { get; private set; }
-        private int mId { get; set; }
-        public int Id
-        {
-            get => mId;
-            set
-            {
-                var old = mId;
-                Entity.ZaehlerId = value;
-                mId = value;
-                RaisePropertyChangedAuto(old, value);
-                RaisePropertyChanged(nameof(Initialized));
-            }
-        }
+        public int Id => Entity.ZaehlerId;
 
         public override string ToString() => Kennnummer.Value;
 
@@ -57,7 +44,6 @@ namespace Deeplex.Saverwalter.ViewModels
         public override void SetEntity(Zaehler z)
         {
             Entity = z;
-            mId = Entity.ZaehlerId;
             Typ = new(this, z.Typ);
             Notiz = new(this, z.Notiz);
             Kennnummer = new(this, z.Kennnummer);
@@ -134,14 +120,17 @@ namespace Deeplex.Saverwalter.ViewModels
             else
             {
                 WalterDbService.ctx.ZaehlerSet.Add(Entity);
+                
             }
             WalterDbService.SaveWalter();
-            if (mId != Entity.ZaehlerId)
+            RaisePropertyChanged(nameof(isInitialized));
+
+            if (Id != Entity.ZaehlerId)
             {
-                Id = Entity.ZaehlerId;
                 Staende.Value = new ZaehlerstandListViewModel(Entity, NotificationService, WalterDbService);
             }
-            Staende.Value.Liste.Value.ForEach(e => e.Save.Execute(null));
+
+            Staende.Value.Liste.Value?.ForEach(e => e.Save.Execute(null));
             checkForChanges();
         }
     }

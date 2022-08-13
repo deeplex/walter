@@ -8,8 +8,6 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public abstract class IPersonDetailViewModel : DetailViewModel<IPerson>, IDetailViewModel
     {
-        public IPerson Entity { get; private set; }
-
         protected bool mInklusiveZusatz;
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 

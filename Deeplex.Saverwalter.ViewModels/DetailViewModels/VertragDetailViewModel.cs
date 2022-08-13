@@ -141,7 +141,9 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Versionen.Value.ForEach(v => v.versionSave());
             WalterDbService.SaveWalter();
-            NotificationService.outOfSync = false;
+            RaisePropertyChanged(nameof(isInitialized));
+
+            checkForChanges();
         }
 
         public RelayCommand AddVersion { get; }

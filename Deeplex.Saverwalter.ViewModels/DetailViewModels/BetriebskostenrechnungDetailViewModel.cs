@@ -13,7 +13,6 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => Entity.Umlage.Typ.ToDescriptionString() + " - " + Entity.GetWohnungenBezeichnung();
 
-        public Betriebskostenrechnung Entity { get; private set; }
         public int Id => Entity.BetriebskostenrechnungId;
 
         public ObservableProperty<int> BetriebskostenrechnungsJahr = new();
@@ -154,8 +153,9 @@ namespace Deeplex.Saverwalter.ViewModels
                 WalterDbService.ctx.Betriebskostenrechnungen.Add(Entity);
             }
             SaveWohnungen();
+            RaisePropertyChanged(nameof(isInitialized));
             WalterDbService.SaveWalter();
-            NotificationService.outOfSync = false;
+            checkForChanges();
         }
 
         public bool checkNullable<T>(object a, T b)

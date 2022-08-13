@@ -10,7 +10,6 @@ namespace Deeplex.Saverwalter.ViewModels
     public sealed class NatuerlichePersonDetailViewModel : IPersonDetailViewModel, IDetailViewModel
     {
         public new NatuerlichePerson Entity => (NatuerlichePerson)base.Entity;
-
         public int Id { get; private set; }
 
         public List<Anrede> Anreden { get; }
@@ -76,6 +75,7 @@ namespace Deeplex.Saverwalter.ViewModels
                     WalterDbService.ctx.NatuerlichePersonen.Add(Entity);
                 }
                 WalterDbService.SaveWalter();
+                RaisePropertyChanged(nameof(isInitialized));
                 checkForChanges();
             }, _ => true);
 

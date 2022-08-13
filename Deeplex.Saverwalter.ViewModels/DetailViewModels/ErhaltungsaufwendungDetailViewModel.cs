@@ -14,7 +14,6 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => Entity.Bezeichnung;
 
-        public Erhaltungsaufwendung Entity { get; private set; }
         public int Id => Entity.ErhaltungsaufwendungId;
 
         public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Personen = new();
@@ -105,7 +104,8 @@ namespace Deeplex.Saverwalter.ViewModels
                 WalterDbService.ctx.Erhaltungsaufwendungen.Add(Entity);
             }
             WalterDbService.SaveWalter();
-            NotificationService.outOfSync = false;
+            RaisePropertyChanged(nameof(isInitialized));
+            checkForChanges();
         }
     }
 }

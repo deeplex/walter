@@ -9,7 +9,6 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class WohnungDetailViewModel : DetailViewModel<Wohnung>, IDetailViewModel
     {
-        public Wohnung Entity { get; private set; }
         public int Id => Entity.WohnungId;
 
         public override string ToString() => AdresseViewModel.Anschrift(Entity) + " - " + Bezeichnung.Value;
@@ -58,6 +57,7 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 Besitzer = AlleVermieter.SingleOrDefault(k => k.Entity.PersonId == e.BesitzerId);
             }
+
             Bezeichnung = new(this, e.Bezeichnung);
             Notiz = new(this, e.Notiz);
             Wohnflaeche = new(this, e.Wohnflaeche);
@@ -84,7 +84,9 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 WalterDbService.ctx.Wohnungen.Add(Entity);
             }
+
             WalterDbService.SaveWalter();
+            RaisePropertyChanged(nameof(isInitialized));
             checkForChanges();
         }
 

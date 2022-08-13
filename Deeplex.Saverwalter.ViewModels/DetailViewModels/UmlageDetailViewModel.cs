@@ -11,7 +11,6 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => Entity.Typ.ToDescriptionString() + " - " + Entity.Wohnungen.GetWohnungenBezeichnung();
 
-        public Umlage Entity { get; private set; }
         public int Id => Entity.UmlageId;
 
         public ObservableProperty<WohnungListViewModelEntry> UmlageWohnung = new();
@@ -97,6 +96,8 @@ namespace Deeplex.Saverwalter.ViewModels
             }
             SaveWohnungen();
             WalterDbService.SaveWalter();
+            RaisePropertyChanged(nameof(isInitialized));
+
             checkForChanges();
         }
 
