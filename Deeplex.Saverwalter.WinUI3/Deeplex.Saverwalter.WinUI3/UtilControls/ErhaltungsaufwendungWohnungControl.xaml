@@ -1,0 +1,45 @@
+﻿<UserControl
+    x:Class="Deeplex.Saverwalter.WinUI3.ErhaltungsaufwendungWohnungControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Deeplex.Saverwalter.WinUI3"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:uc="using:Deeplex.Saverwalter.WinUI3"
+    xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <UserControl.Resources>
+        <conv:EuroStringConverter x:Key="EuroStringConverterKey" />
+    </UserControl.Resources>
+
+    <ItemsRepeater ItemsSource="{x:Bind ViewModel.Wohnungen}">
+        <ItemsRepeater.ItemTemplate>
+            <DataTemplate x:DataType="vm:ErhaltungsaufwendungenPrintEntry">
+                <StackPanel>
+                    <CheckBox
+                        Style="{StaticResource PivotTitleContentControlStyle}"
+                        Margin="10,0,0,0"
+                        Content="{x:Bind Bezeichnung}"  IsChecked="{x:Bind Enabled.Value, Mode=TwoWay}"/>
+                    <StackPanel Visibility="{x:Bind Enabled.Value, Mode=OneWay}">
+                        <uc:ErhaltungsaufwendungListControl                            Margin="0, 10, 0, 10"
+                            Enabled="{x:Bind Enabled.Value, Mode=OneWay}"
+                            Selectable="True"
+                            Liste="{x:Bind Liste}" />
+                        <StackPanel Margin="0,-10,20,10" HorizontalAlignment="Right" Orientation="Horizontal">
+                            <TextBlock FontSize="18" Text="Summe: "/>
+                            <TextBlock
+                                Margin="10,0,0,0"
+                                FontSize="18"
+                                Text="{x:Bind Summe.Value, Mode=OneWay, Converter={StaticResource EuroStringConverterKey}}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <MenuFlyoutSeparator/>
+                </StackPanel>
+            </DataTemplate>
+        </ItemsRepeater.ItemTemplate>
+    </ItemsRepeater>
+</UserControl>

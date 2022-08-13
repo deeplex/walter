@@ -1,12 +1,11 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
-using Deeplex.Saverwalter.WinUI3.Views;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Threading.Tasks;
 
-namespace Deeplex.Saverwalter.WinUI3.Services
+namespace Deeplex.Saverwalter.WinUI3
 {
     public sealed class NotificationService : BindableBase, INotificationService
     {
@@ -24,11 +23,11 @@ namespace Deeplex.Saverwalter.WinUI3.Services
             return
                 type == typeof(Wohnung) ? typeof(WohnungDetailViewPage) :
                 type == typeof(NatuerlichePerson) ? typeof(NatuerlichePersonDetailViewPage) :
-                type == typeof(JuristischePerson) ? typeof(JuristischePersonenDetailViewPage) :
+                type == typeof(JuristischePerson) ? typeof(JuristischePersonDetailViewPage) :
                 type == typeof(Vertrag) ? typeof(VertragDetailViewPage) :
                 type == typeof(Zaehler) ? typeof(ZaehlerDetailViewPage) :
-                type == typeof(Betriebskostenrechnung) ? typeof(BetriebskostenrechnungenDetailViewPage) :
-                type == typeof(Erhaltungsaufwendung) ? typeof(ErhaltungsaufwendungenDetailViewPage) :
+                type == typeof(Betriebskostenrechnung) ? typeof(BetriebskostenrechnungDetailViewPage) :
+                type == typeof(Erhaltungsaufwendung) ? typeof(ErhaltungsaufwendungDetailViewPage) :
                 type == typeof(Umlage) ? typeof(UmlageDetailViewPage) :
                 null;
         }

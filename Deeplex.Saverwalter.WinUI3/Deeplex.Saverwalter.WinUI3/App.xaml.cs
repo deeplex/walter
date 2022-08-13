@@ -1,7 +1,5 @@
-﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
+﻿using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.WinUI3.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml;
 using SimpleInjector;
@@ -102,7 +100,8 @@ namespace Deeplex.Saverwalter.WinUI3
                         await fs.pickFile(".db") :
                         await fs.saveFile("walter", new string[] { ".db" });
                 var databaseRoot = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
-                Utils.Elements.SetDatabaseAsDefault(databaseRoot);
+                // TODO
+                //SetDatabaseAsDefault(databaseRoot);
             }
 
             //if (db.ctx != null)

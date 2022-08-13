@@ -1,0 +1,70 @@
+﻿<UserControl
+    x:Class="Deeplex.Saverwalter.WinUI3.BetriebskostenrechnungListControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3"
+    mc:Ignorable="d"
+    xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <UserControl.Resources>
+        <conv:ToDescriptionStringConverter x:Key="ToDescriptionStringConverterKey" />
+        <conv:ToStringConverter x:Key="ToStringConverterKey" />
+        <conv:EuroStringConverter x:Key="EuroStringConverterKey" />
+        <conv:IntToBoolConverter x:Key="IntToBoolConverterKey" />
+    </UserControl.Resources>
+
+    <mtuuc:DataGrid
+        Style="{StaticResource DataGridUserControl}"
+        Sorting="DataGrid_Sorting"
+        SelectionChanged="DataGrid_SelectionChanged"
+        DoubleTapped="Details_Click"
+        ItemsSource="{x:Bind ViewModel.List.Value, Mode=OneWay}"
+        SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}">
+        <mtuuc:DataGrid.Columns>
+            <mtuuc:DataGridTemplateColumn Header="Typ" IsReadOnly="True">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:BetriebskostenrechnungListViewModelEntry">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Padding="10,0,10,0"
+                            Text="{x:Bind Typ, Converter={StaticResource ToDescriptionStringConverterKey}, Mode=OneWay}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Jahr">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:BetriebskostenrechnungListViewModelEntry">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Padding="10,0,10,0"
+                            Text="{x:Bind BetreffendesJahr, Converter={StaticResource ToStringConverterKey}, Mode=OneWay}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Wohnungen">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:BetriebskostenrechnungListViewModelEntry">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Padding="10,0,10,0"
+                            Text="{x:Bind Mode=OneWay}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Header="Betrag">
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:BetriebskostenrechnungListViewModelEntry">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Padding="10,0,10,0"
+                            Text="{x:Bind Betrag, Converter={StaticResource EuroStringConverterKey}, Mode=OneWay}"/>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
+            </mtuuc:DataGrid.Columns>
+    </mtuuc:DataGrid>
+</UserControl>

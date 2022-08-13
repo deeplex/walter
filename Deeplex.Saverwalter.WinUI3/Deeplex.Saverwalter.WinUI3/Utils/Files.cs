@@ -1,9 +1,11 @@
 ﻿using Windows.Storage.Pickers;
 
-namespace Deeplex.Saverwalter.WinUI3.Utils
+namespace Deeplex.Saverwalter.WinUI3
 {
     public static class Files
     {
+        // TODO should be in service
+
         private static void getWindowHandle(object picker)
         {
             var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.Window);

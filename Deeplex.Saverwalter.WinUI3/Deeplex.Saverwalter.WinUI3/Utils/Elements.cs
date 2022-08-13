@@ -3,7 +3,7 @@ using Deeplex.Saverwalter.Services;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Deeplex.Saverwalter.WinUI3.Utils
+namespace Deeplex.Saverwalter.WinUI3
 {
     public static class Elements
     {

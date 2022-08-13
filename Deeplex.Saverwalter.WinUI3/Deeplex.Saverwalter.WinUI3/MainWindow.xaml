@@ -5,7 +5,7 @@
     xmlns:local="using:Deeplex.Saverwalter.WinUI3"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:uc="using:Deeplex.Saverwalter.WinUI3.UserControls"
+    xmlns:uc="using:Deeplex.Saverwalter.WinUI3"
     xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
     mc:Ignorable="d">
@@ -56,12 +56,12 @@
                     Content="{x:Bind VertragListLabel}" 
                     Icon="Library"/>
                 <NavigationViewItem
-                    x:Name="BetriebskostenListMenuItem"
-                    Content="{x:Bind BetriebskostenrechnungenListLabel}" 
+                    x:Name="BetriebskostenrechnungListMenuItem"
+                    Content="{x:Bind BetriebskostenrechnungListLabel}" 
                     Icon="List"/>
                 <NavigationViewItem
-                    x:Name="ErhaltungsAufwendungenListMenuItem"
-                    Content="{x:Bind ErhaltungsaufwendungenListLabel}" 
+                    x:Name="ErhaltungsaufwendungListMenuItem"
+                    Content="{x:Bind ErhaltungsaufwendungListLabel}" 
                     Icon="Bullets"/>
                 <NavigationViewItem
                     x:Name="UmlageListMenuItem"

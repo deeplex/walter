@@ -1,0 +1,42 @@
+﻿<Page
+    x:Class="Deeplex.Saverwalter.WinUI3.BetriebskostenrechnungPrintViewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    xmlns:uc="using:Deeplex.Saverwalter.WinUI3"
+    xmlns:vm="using:Deeplex.Saverwalter.Model"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Visible"
+        IsScrollInertiaEnabled="True"
+        HorizontalScrollMode="Auto"
+        Background="{StaticResource SystemChromeLowColor}">
+        <StackPanel>
+            <uc:ExpanderControl
+                Visibility="{x:Bind ViewModel.HasNotes}"
+                Width="850"
+                Margin="0,10,0,0"
+                Header="Fehlerliste">
+                <uc:ExpanderControl.MainContent>
+                    <ListView Height="400" ItemsSource="{x:Bind ViewModel.Betriebskostenabrechnung.notes}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:Note">
+                                <TextBlock Text="{x:Bind Message}" />
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </uc:ExpanderControl.MainContent>
+            </uc:ExpanderControl>
+            <StackPanel
+                Margin="10"
+                Padding="101.19, 68.404, 40.476, 68.404"
+                x:Name="Panel"
+                Background="{ThemeResource SystemAltHighColor}"
+                Width="850" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

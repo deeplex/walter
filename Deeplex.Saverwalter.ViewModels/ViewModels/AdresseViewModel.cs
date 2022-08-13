@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
                 WalterDbService.ctx.Adressen.Add(Entity);
             }
-            
+
             // reference is updated in save method of reference
             reference.Adresse = Entity;
 

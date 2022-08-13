@@ -1,0 +1,71 @@
+﻿<Page
+    x:Class="Deeplex.Saverwalter.WinUI3.ErhaltungsaufwendungDetailViewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:uc="using:Deeplex.Saverwalter.WinUI3"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <uc:FileDropControl>
+        <uc:FileDropControl.MainContent>
+            <StackPanel>
+                <TextBox
+                    Margin="20,20,0,0"
+                    Header="Bezeichnung"
+                    Text="{x:Bind ViewModel.Bezeichnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <mtuuc:WrapPanel Orientation="Horizontal">
+                    <uc:ComboControl
+                        Header="Wohnung"
+                        SelectedItem="{x:Bind ViewModel.Wohnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Margin="20,20,0,0"
+                        PlaceholderText="Wohnung..."
+                        ItemsSource="{x:Bind ViewModel.Wohnungen}"/>
+                    <uc:ComboControl
+                        Header="Aussteller"
+                        SelectedItem="{x:Bind ViewModel.Aussteller.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Margin="20,20,0,0"
+                        PlaceholderText="Aussteller..."
+                        MinWidth="300"
+                        ItemsSource="{x:Bind ViewModel.Personen.Value, Mode=OneWay}"/>
+                    <Button VerticalAlignment="Bottom" x:Name="QuickPersonFlyout">
+                        <SymbolIcon Symbol="Add"/>
+                        <Button.Flyout>
+                            <Flyout>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox
+                                        Header="Bezeichnung der juristischen Person"
+                                        Width="300"
+                                        Text="{x:Bind ViewModel.QuickPerson.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Button VerticalAlignment="Bottom">
+                                        <!--  Click="AddQuickPerson_Click" -->
+                                        <SymbolIcon Symbol="Add"/>
+                                    </Button>
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                </mtuuc:WrapPanel>
+                <mtuuc:WrapPanel Orientation="Horizontal">
+                    <DatePicker
+                        Margin="20,20,0,0"
+                        Header="Datum"
+                        Date="{x:Bind ViewModel.Datum.Value, Mode=TwoWay}" />
+                    <muxc:NumberBox
+                        Value="{x:Bind ViewModel.Betrag.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Margin="20,20,0,0"
+                        Header="Betrag"/>
+                </mtuuc:WrapPanel>
+                <StackPanel>
+                    <TextBox
+                        Margin="20,20,0,0"
+                        Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Header="Notiz"/>
+                </StackPanel>
+            </StackPanel>
+        </uc:FileDropControl.MainContent>
+    </uc:FileDropControl>
+</Page>

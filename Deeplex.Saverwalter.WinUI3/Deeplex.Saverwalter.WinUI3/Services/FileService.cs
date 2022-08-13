@@ -1,13 +1,12 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
-using Deeplex.Saverwalter.WinUI3.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 
-namespace Deeplex.Saverwalter.WinUI3.Services
+namespace Deeplex.Saverwalter.WinUI3
 {
     public sealed class FileService : IFileService
     {

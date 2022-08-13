@@ -5,7 +5,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using System;
 
-namespace Deeplex.Saverwalter.WinUI3.Utils
+namespace Deeplex.Saverwalter.WinUI3
 {
     public class IsEnabledConverter : IValueConverter
     {
