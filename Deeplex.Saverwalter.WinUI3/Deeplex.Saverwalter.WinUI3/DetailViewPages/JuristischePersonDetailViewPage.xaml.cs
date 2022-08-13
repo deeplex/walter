@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -30,6 +31,11 @@ namespace Deeplex.Saverwalter.WinUI3
             //App.ViewModel.updateDetailAnhang(new AnhangListViewModel(ViewModel.GetEntity, App.Impl, App.ViewModel));
 
             base.OnNavigatedTo(e);
+        }
+
+        private void Switch_To_Natuerliche_Person_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            App.Container.GetInstance<INotificationService>().Navigation<NatuerlichePerson>(null);
         }
     }
 }

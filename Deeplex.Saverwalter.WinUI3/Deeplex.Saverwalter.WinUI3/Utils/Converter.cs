@@ -28,10 +28,10 @@ namespace Deeplex.Saverwalter.WinUI3
         }
     }
 
-    public class BoolConverter : IValueConverter
+    public class ToInvisibleConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
-            => !(bool)value;
+            => (bool)value ? Visibility.Collapsed : Visibility.Visible;
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {

@@ -12,22 +12,29 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     
     <UserControl.Resources>
-        <conv:BoolConverter x:Key="BoolConverterKey"/>
+        <conv:ToInvisibleConverter x:Key="ToInvisibleConverterKey"/>
     </UserControl.Resources>
 
     <uc:FileDropControl>
         <uc:FileDropControl.MainContent>
             <StackPanel>
-                <!--<Button Visibility="{x:Bind ViewModel.isInitialized, Mode=OneWay, Converter={StaticResource BoolConverterKey}}" HorizontalAlignment="Right" VerticalAlignment="Top">
+                <Button
+                    Margin="0,0,0,-120"
+                    Click="Switch_To_Juristische_Person_Click"
+                    Visibility="{x:Bind ViewModel.isInitialized, Converter={StaticResource ToInvisibleConverterKey}, Mode=OneWay}"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top">
                     <StackPanel Orientation="Horizontal">
-                        <SymbolIcon Symbol="People"/>
-                        <TextBlock Text="Juristische Person"/>
+                        <SymbolIcon Symbol="Contact2"/>
+                        <TextBlock Margin="10,0,0,0" Text="Juristische Person"/>
                     </StackPanel>
-                </Button>-->
+                </Button>
                 <mtuuc:WrapPanel Orientation="Horizontal">
                     <ComboBox
                         Margin="20,20,0,0" Header="Anrede"
-                        x:Name="ComboBoxAnrede" Width="80" ItemsSource="{x:Bind ViewModel.Anreden}"
+                        x:Name="ComboBoxAnrede"
+                        Width="80"
+                        ItemsSource="{x:Bind ViewModel.Anreden}"
                         SelectedItem="{x:Bind ViewModel.Anrede.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBox
                         Width="200"
@@ -37,8 +44,8 @@
                         Text="{x:Bind ViewModel.Nachname.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Header="Nachname" Style="{StaticResource Eintraege}"/>
                 </mtuuc:WrapPanel>
-                <uc:PersonDetailControl ViewModel="{x:Bind ViewModel}" />
-            </StackPanel>
+                    <uc:PersonDetailControl ViewModel="{x:Bind ViewModel}" />
+                </StackPanel>
         </uc:FileDropControl.MainContent>
     </uc:FileDropControl>
 </Page>

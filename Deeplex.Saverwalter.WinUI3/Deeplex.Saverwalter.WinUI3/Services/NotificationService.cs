@@ -11,11 +11,7 @@ namespace Deeplex.Saverwalter.WinUI3
     {
         public void Navigation<T>(T Element) where T : new()
         {
-            if (Element == null)
-            {
-                Element = new T();
-            }
-            App.Window.Navigate(getDetailViewPage(typeof(T)), Element);
+            App.Window.Navigate(getDetailViewPage(typeof(T)), Element ?? new T());
         }
 
         private Type getDetailViewPage(Type type)
