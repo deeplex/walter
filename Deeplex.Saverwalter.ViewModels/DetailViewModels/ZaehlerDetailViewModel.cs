@@ -89,7 +89,16 @@ namespace Deeplex.Saverwalter.ViewModels
                 }
             });
 
-            Save = new RelayCommand(_ => save(), _ => true);
+            Save = new RelayCommand(_ =>
+            {
+                Entity.Kennnummer = Kennnummer.Value;
+                Entity.Wohnung = Wohnung.Value?.Entity;
+                Entity.Typ = Typ.Value;
+                Entity.AllgemeinZaehler = AllgemeinZaehler?.Entity;
+                Entity.Notiz = Notiz.Value;
+                save();
+                Staende.Value.Liste.Value?.ForEach(e => e.Save.Execute(null));
+            }, _ => true);
         }
 
         public RelayCommand DeleteAllgemeinZaehler;
@@ -103,35 +112,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 Typ.Value != Entity.Typ ||
                 Notiz.Value != Entity.Notiz ||
                 AllgemeinZaehler?.Id != Entity.AllgemeinZaehler?.ZaehlerId;
-        }
-
-        private void save()
-        {
-            Entity.Kennnummer = Kennnummer.Value;
-            Entity.Wohnung = Wohnung.Value?.Entity;
-            Entity.Typ = Typ.Value;
-            Entity.AllgemeinZaehler = AllgemeinZaehler?.Entity;
-            Entity.Notiz = Notiz.Value;
-
-            if (Entity.ZaehlerId != 0)
-            {
-                WalterDbService.ctx.ZaehlerSet.Update(Entity);
-            }
-            else
-            {
-                WalterDbService.ctx.ZaehlerSet.Add(Entity);
-                
-            }
-            WalterDbService.SaveWalter();
-            RaisePropertyChanged(nameof(isInitialized));
-
-            if (Id != Entity.ZaehlerId)
-            {
-                Staende.Value = new ZaehlerstandListViewModel(Entity, NotificationService, WalterDbService);
-            }
-
-            Staende.Value.Liste.Value?.ForEach(e => e.Save.Execute(null));
-            checkForChanges();
         }
     }
 }

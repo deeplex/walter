@@ -58,26 +58,6 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 
-        public void UpdateWohnungen(ImmutableList<WohnungListViewModelEntry> list)
-        {
-            var flagged = Wohnungen.Value.Count != list.Count;
-            Wohnungen.Value = list
-                .Select(e => new WohnungListViewModelEntry(e.Entity, WalterDbService))
-                .ToImmutableList();
-            if (flagged) Update();
-        }
-        public void SaveWohnungen()
-        {
-            if (Entity == null) return;
-
-            // Add missing Wohnungen
-            Entity.Umlage.Wohnungen
-                .AddRange(Wohnungen.Value.Where(w => !Entity.Umlage.Wohnungen.Contains(w.Entity))
-                .Select(w => w.Entity));
-            // Remove old Wohnungen
-            Entity.Umlage.Wohnungen.RemoveAll(w => !Wohnungen.Value.Exists(v => v.Entity == w));
-        }
-
         private List<UmlageListViewModelEntry> updateUmlagenList(Betriebskostentyp e)
         {
             return WalterDbService.ctx.Umlagen
@@ -106,7 +86,16 @@ namespace Deeplex.Saverwalter.ViewModels
                 }
             });
 
-            Save = new RelayCommand(_ => save(), _ => true);
+            Save = new RelayCommand(_ =>
+            {
+                Entity.Betrag = Betrag.Value;
+                Entity.Datum = Datum.Value.UtcDateTime;
+                Entity.Notiz = Notiz.Value;
+                Entity.BetreffendesJahr = BetreffendesJahr.Value;
+                Entity.Umlage = Umlage.Value.Entity;
+
+                save();
+            }, _ => true);
         }
 
         public override void SetEntity(Betriebskostenrechnung r)
@@ -142,22 +131,6 @@ namespace Deeplex.Saverwalter.ViewModels
             Umlage = new(this, Umlagen_List.Value.FirstOrDefault(e => e.Id == r.Umlage.UmlageId));
         }
 
-        public void Update()
-        {
-            if (Entity.BetriebskostenrechnungId != 0)
-            {
-                WalterDbService.ctx.Betriebskostenrechnungen.Update(Entity);
-            }
-            else
-            {
-                WalterDbService.ctx.Betriebskostenrechnungen.Add(Entity);
-            }
-            SaveWohnungen();
-            RaisePropertyChanged(nameof(isInitialized));
-            WalterDbService.SaveWalter();
-            checkForChanges();
-        }
-
         public bool checkNullable<T>(object a, T b)
         {
             if (a == null && b.Equals(default(T)))
@@ -185,17 +158,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Datum.AsUtcKind() != Datum.Value ||
                 Entity.Notiz != Notiz.Value ||
                 Entity.BetreffendesJahr != BetreffendesJahr.Value;
-        }
-
-        private void save()
-        {
-            Entity.Betrag = Betrag.Value;
-            Entity.Datum = Datum.Value.UtcDateTime;
-            Entity.Notiz = Notiz.Value;
-            Entity.BetreffendesJahr = BetreffendesJahr.Value;
-            Entity.Umlage = Umlage.Value.Entity;
-
-            Update();
         }
     }
 }

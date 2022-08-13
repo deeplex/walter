@@ -99,7 +99,14 @@ namespace Deeplex.Saverwalter.ViewModels
                 }
             }, _ => true);
 
-            Save = new RelayCommand(_ => save(), _ => true);
+            Save = new RelayCommand(_ =>
+            {
+                Mieten.Value.Liste.Value.ForEach(e => e.save());
+                MietMinderungen.Value.Liste.Value.ForEach(e => e.save());
+
+                Versionen.Value.ForEach(v => v.versionSave());
+                save();
+            }, _ => true);
 
             AddVersion = new RelayCommand(_ =>
             {
@@ -132,18 +139,6 @@ namespace Deeplex.Saverwalter.ViewModels
         public new void checkForChanges()
         {
             Versionen.Value.ForEach(v => v.checkForChanges());
-        }
-
-        private void save()
-        {
-            Mieten.Value.Liste.Value.ForEach(e => e.save());
-            MietMinderungen.Value.Liste.Value.ForEach(e => e.save());
-
-            Versionen.Value.ForEach(v => v.versionSave());
-            WalterDbService.SaveWalter();
-            RaisePropertyChanged(nameof(isInitialized));
-
-            checkForChanges();
         }
 
         public RelayCommand AddVersion { get; }

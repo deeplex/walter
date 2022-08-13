@@ -28,6 +28,21 @@ namespace Deeplex.Saverwalter.ViewModels
         public IWalterDbService WalterDbService { get; protected set; }
         public INotificationService NotificationService { get; protected set; }
         public abstract void checkForChanges();
+        protected void save()
+        {
+            if (isInitialized)
+            {
+                WalterDbService.ctx.Update(Entity);
+            }
+            else
+            {
+                WalterDbService.ctx.Add(Entity);
+            }
+
+            WalterDbService.SaveWalter();
+            RaisePropertyChanged(nameof(isInitialized));
+            checkForChanges();
+        }
         public bool isInitialized
         {
             get
@@ -52,11 +67,11 @@ namespace Deeplex.Saverwalter.ViewModels
                             {
                                 return false;
                             }
-                        }) == 0;
+                        }) > 0;
                 }
                 else
                 {
-                    return true;
+                    return false;
                 }
             }
         }

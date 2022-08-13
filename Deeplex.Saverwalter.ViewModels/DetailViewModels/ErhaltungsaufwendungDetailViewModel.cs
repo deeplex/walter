@@ -42,7 +42,17 @@ namespace Deeplex.Saverwalter.ViewModels
                 }
             }, _ => true);
 
-            Save = new RelayCommand(_ => save(), _ => true);
+            Save = new RelayCommand(_ =>
+            {
+                Entity.Betrag = Betrag.Value;
+                Entity.Bezeichnung = Bezeichnung.Value;
+                Entity.Datum = Datum.Value.UtcDateTime;
+                Entity.Notiz = Notiz.Value;
+                Entity.AusstellerId = Aussteller.Value.Entity.PersonId;
+                Entity.Wohnung = Wohnung.Value.Entity;
+
+                save();
+            }, _ => true);
             AttachFile = new AsyncRelayCommand(async _ =>
                /* TODO */await Task.FromResult<object>(null), _ => false);
         }
@@ -84,28 +94,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Notiz != Notiz.Value ||
                 Entity.AusstellerId != Aussteller.Value.Entity.PersonId ||
                 Entity.Wohnung != Wohnung.Value.Entity;
-        }
-
-        private void save()
-        {
-            Entity.Betrag = Betrag.Value;
-            Entity.Bezeichnung = Bezeichnung.Value;
-            Entity.Datum = Datum.Value.UtcDateTime;
-            Entity.Notiz = Notiz.Value;
-            Entity.AusstellerId = Aussteller.Value.Entity.PersonId;
-            Entity.Wohnung = Wohnung.Value.Entity;
-
-            if (Entity.ErhaltungsaufwendungId != 0)
-            {
-                WalterDbService.ctx.Erhaltungsaufwendungen.Update(Entity);
-            }
-            else
-            {
-                WalterDbService.ctx.Erhaltungsaufwendungen.Add(Entity);
-            }
-            WalterDbService.SaveWalter();
-            RaisePropertyChanged(nameof(isInitialized));
-            checkForChanges();
         }
     }
 }

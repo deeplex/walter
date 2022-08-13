@@ -81,24 +81,21 @@ namespace Deeplex.Saverwalter.ViewModels
                 }
             });
 
-            Save = new RelayCommand(_ => save(), _ => true);
+            Save = new RelayCommand(_ =>
+            {
+                Entity.Notiz = Notiz.Value;
+                Entity.Typ = Typ.Value.Typ;
+                Entity.Schluessel = Schluessel.Value.Schluessel;
+                Entity.Beschreibung = Beschreibung.Value;
+
+                Update();
+            }, _ => true);
         }
 
         public void Update()
         {
-            if (Entity.UmlageId != 0)
-            {
-                WalterDbService.ctx.Umlagen.Update(Entity);
-            }
-            else
-            {
-                WalterDbService.ctx.Umlagen.Add(Entity);
-            }
             SaveWohnungen();
-            WalterDbService.SaveWalter();
-            RaisePropertyChanged(nameof(isInitialized));
-
-            checkForChanges();
+            save();
         }
 
         public bool checkNullable<T>(object a, T b)
@@ -122,20 +119,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Schluessel != Schluessel.Value.Schluessel ||
                 Entity.Beschreibung != Beschreibung.Value;
             //checkNullable(Entity.HKVO_P9, HKVO_P9.Value);
-        }
-
-        private void save()
-        {
-            Entity.Notiz = Notiz.Value;
-            Entity.Typ = Typ.Value.Typ;
-            Entity.Schluessel = Schluessel.Value.Schluessel;
-            Entity.Beschreibung = Beschreibung.Value;
-            //if (Entity.HKVO_P9 != null && HKVO_P9.Value != 0)
-            //{
-            //    Entity.HKVO_P9 = HKVO_P9.Value;
-            //}
-
-            Update();
         }
     }
 }

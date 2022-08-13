@@ -89,20 +89,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Save = new RelayCommand(_ =>
             {
-                save();
                 Entity.Bezeichnung = Bezeichnung.Value;
-
-                if (Entity.JuristischePersonId != 0)
-                {
-                    WalterDbService.ctx.JuristischePersonen.Update(Entity);
-                }
-                else
-                {
-                    WalterDbService.ctx.JuristischePersonen.Add(Entity);
-                }
-                WalterDbService.SaveWalter();
-                RaisePropertyChanged(nameof(isInitialized));
-                checkForChanges();
+                save();
             }, _ => true);
         }
 

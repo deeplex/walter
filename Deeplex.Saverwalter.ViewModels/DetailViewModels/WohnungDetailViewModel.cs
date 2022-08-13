@@ -75,19 +75,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Nutzflaeche = Nutzflaeche.Value;
             Entity.Nutzeinheit = Nutzeinheit.Value;
             Entity.Notiz = Notiz.Value;
-
-            if (Entity.WohnungId != 0)
-            {
-                WalterDbService.ctx.Wohnungen.Update(Entity);
-            }
-            else
-            {
-                WalterDbService.ctx.Wohnungen.Add(Entity);
-            }
-
-            WalterDbService.SaveWalter();
-            RaisePropertyChanged(nameof(isInitialized));
-            checkForChanges();
+            save();
         }
 
         public override void checkForChanges()

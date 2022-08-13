@@ -16,7 +16,6 @@ namespace Deeplex.Saverwalter.WinUI3
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            ViewModel.SaveWohnungen();
             base.OnNavigatingFrom(e);
         }
 

@@ -10,19 +10,20 @@
     xmlns:conv="using:Deeplex.Saverwalter.WinUI3"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    
     <UserControl.Resources>
-        <conv:BoolConverter x:Key="BoolConverterKey" />
+        <conv:BoolConverter x:Key="BoolConverterKey"/>
     </UserControl.Resources>
 
     <uc:FileDropControl>
         <uc:FileDropControl.MainContent>
             <StackPanel>
-                <Button Visibility="{x:Bind ViewModel.isInitialized, Mode=OneWay, Converter={StaticResource BoolConverterKey}}" HorizontalAlignment="Right" VerticalAlignment="Top">
+                <!--<Button Visibility="{x:Bind ViewModel.isInitialized, Mode=OneWay, Converter={StaticResource BoolConverterKey}}" HorizontalAlignment="Right" VerticalAlignment="Top">
                     <StackPanel Orientation="Horizontal">
                         <SymbolIcon Symbol="People"/>
                         <TextBlock Text="Juristische Person"/>
                     </StackPanel>
-                </Button>
+                </Button>-->
                 <mtuuc:WrapPanel Orientation="Horizontal">
                     <ComboBox
                         Margin="20,20,0,0" Header="Anrede"

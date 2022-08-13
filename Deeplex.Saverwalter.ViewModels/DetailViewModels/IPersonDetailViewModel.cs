@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.ViewModels
             NotificationService = ns;
         }
 
-        protected void save()
+        protected new void save()
         {
             Entity.Email = Email.Value;
             Entity.Telefon = Telefon.Value;
@@ -42,6 +42,8 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.isHandwerker = isHandwerker.Value;
             Entity.isMieter = isMieter.Value;
             Entity.isVermieter = isVermieter.Value;
+
+            base.save();
         }
 
         public Guid PersonId;

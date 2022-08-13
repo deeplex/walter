@@ -61,22 +61,11 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Save = new RelayCommand(_ =>
             {
-                save();
                 Entity.Nachname = Nachname.Value;
                 Entity.Vorname = Vorname.Value;
                 Entity.Anrede = Anrede.Value;
 
-                if (Entity.NatuerlichePersonId != 0)
-                {
-                    WalterDbService.ctx.NatuerlichePersonen.Update(Entity);
-                }
-                else
-                {
-                    WalterDbService.ctx.NatuerlichePersonen.Add(Entity);
-                }
-                WalterDbService.SaveWalter();
-                RaisePropertyChanged(nameof(isInitialized));
-                checkForChanges();
+                save();
             }, _ => true);
 
             Delete = new AsyncRelayCommand(async _ =>
