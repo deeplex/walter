@@ -9,9 +9,10 @@ namespace Deeplex.Saverwalter.Model
 {
     public interface IBetriebskostenabrechnung
     {
-        IPerson? Ansprechpartner { get; }
+        IPerson Ansprechpartner { get; }
         List<Rechnungsgruppe> Gruppen { get; }
-        Wohnung Wohnung { get; }
+        List<Umlage> Umlagen { get; }
+        Wohnung Wohnung => Vertrag.Wohnung;
         DateTime Nutzungsbeginn { get; }
         int Nutzungszeitspanne { get; }
         int Abrechnungszeitspanne { get; }
@@ -51,7 +52,7 @@ namespace Deeplex.Saverwalter.Model
             .OrderBy(v => v.Beginn).ToList();
 
         public IPerson Vermieter => db.FindPerson(Wohnung.BesitzerId);
-        public IPerson Ansprechpartner => db.FindPerson(Vertrag.AnsprechpartnerId!.Value);
+        public IPerson Ansprechpartner => db.FindPerson(Vertrag.AnsprechpartnerId!.Value) ?? Vermieter;
         public List<IPerson> Mieter => db.MieterSet
             .Where(m => m.VertragId == Vertrag.VertragId)
             .Select(m => db.FindPerson(m.PersonId))
@@ -60,7 +61,7 @@ namespace Deeplex.Saverwalter.Model
 
         public Vertrag Vertrag { get; }
 
-        public Wohnung Wohnung => Vertrag.Wohnung!;
+        public Wohnung Wohnung => Vertrag.Wohnung;
         public Adresse Adresse => Wohnung.Adresse;
 
         public double Gezahlt => db.Mieten
@@ -94,6 +95,7 @@ namespace Deeplex.Saverwalter.Model
         public double Zeitanteil => (double)Nutzungszeitspanne / Abrechnungszeitspanne;
 
         public List<Rechnungsgruppe> Gruppen { get; }
+        public List<Umlage> Umlagen { get; }
 
         public double Result => BezahltNebenkosten - BetragNebenkosten + KaltMinderung + NebenkostenMinderung;
 
@@ -128,9 +130,10 @@ namespace Deeplex.Saverwalter.Model
                         .ThenInclude(w => w.Betriebskostenrechnungen)
                 .First();
 
-            Gruppen = Vertrag.Wohnung.Umlagen.SelectMany(u => u.Betriebskostenrechnungen)
-                .Where(g => g.BetreffendesJahr == Jahr)
-                .GroupBy(p => new SortedSet<int>(p.Umlage.Wohnungen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
+            Umlagen = Vertrag.Wohnung.Umlagen;
+
+            Gruppen = Vertrag.Wohnung.Umlagen
+                .GroupBy(p => new SortedSet<int>(p.Wohnungen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
                 .Select(g => new Rechnungsgruppe(this, g.ToList()))
                 .ToList();
 

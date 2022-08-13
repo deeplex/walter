@@ -99,10 +99,10 @@ namespace Deeplex.Saverwalter.Model
         }
 
         public static bool dir(this IBetriebskostenabrechnung b)
-            => b.Gruppen.Any(g => g.Rechnungen.Any(r => r.Umlage.Wohnungen.Count == 1));
+            => b.Gruppen.Any(g => g.Umlagen.Any(r => r.Wohnungen.Count == 1));
 
         private static bool uml(this IBetriebskostenabrechnung b, Umlageschluessel k) =>
-            b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Umlage.Wohnungen.Count > 1).Any(r => r.Umlage.Schluessel == k));
+            b.Gruppen.Any(g => g.Umlagen.Where(r => r.Wohnungen.Count > 1).Any(r => r.Schluessel == k));
 
         public static bool nWF(this IBetriebskostenabrechnung b) => b.uml(Umlageschluessel.NachWohnflaeche);
         public static bool nNF(this IBetriebskostenabrechnung b) => b.uml(Umlageschluessel.NachNutzflaeche);

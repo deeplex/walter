@@ -16,7 +16,7 @@ namespace Deeplex.Saverwalter.Model
         double WFZeitanteil { get; }
         double NFZeitanteil { get; }
         double NEZeitanteil { get; }
-        List<Betriebskostenrechnung> Rechnungen { get; }
+        List<Umlage> Umlagen { get; }
         List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil { get; }
         Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch { get; }
         Dictionary<Betriebskostentyp, double> VerbrauchAnteil { get; }
@@ -28,14 +28,14 @@ namespace Deeplex.Saverwalter.Model
 
     public sealed class Rechnungsgruppe : IRechnungsgruppe
     {
-        public List<Betriebskostenrechnung> Rechnungen { get; }
+        public List<Umlage> Umlagen { get; }
 
         private IBetriebskostenabrechnung b { get; }
-        private List<Wohnung> gr => Rechnungen.First().Umlage.Wohnungen.ToList();
+        private List<Wohnung> gr => Umlagen.First().Wohnungen.ToList();
         private IEnumerable<Vertrag> alleVertraegeDieserWohnungen => gr.SelectMany(w => w.Vertraege.Where(v =>
                 v.Beginn <= b.Abrechnungsende && (v.Ende is null || v.Ende >= b.Abrechnungsbeginn)));
 
-        public string Bezeichnung => Rechnungen.First().GetWohnungenBezeichnung();
+        public string Bezeichnung => Umlagen.First().GetWohnungenBezeichnung();
         public double GesamtWohnflaeche => gr.Sum(w => w.Wohnflaeche);
         public double WFZeitanteil => b.Wohnung.Wohnflaeche / GesamtWohnflaeche * b.Zeitanteil;
         public double NFZeitanteil => b.Wohnung.Nutzflaeche / GesamtNutzflaeche * b.Zeitanteil;
@@ -71,8 +71,10 @@ namespace Deeplex.Saverwalter.Model
         {
             get
             {
-                var VerbrauchList = Rechnungen
-                    .Where(g => g.Umlage.Schluessel == Umlageschluessel.NachVerbrauch)
+                var VerbrauchList = Umlagen
+                    .Where(g => g.Schluessel == Umlageschluessel.NachVerbrauch)
+                    .SelectMany(u => u.Betriebskostenrechnungen)
+                    .Where(r => r.BetreffendesJahr == b.Jahr)
                     .Select(r => b.GetVerbrauch(r));
 
                 if (VerbrauchList.Any(w => w.Count() == 0))
@@ -91,9 +93,11 @@ namespace Deeplex.Saverwalter.Model
         }
 
 
-        public Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch => Rechnungen
-        .Where(g => g.Umlage.Schluessel == Umlageschluessel.NachVerbrauch)
-        .Select(r => b.GetVerbrauch(r, true))
+        public Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch => Umlagen
+            .Where(g => g.Schluessel == Umlageschluessel.NachVerbrauch)
+            .SelectMany(u => u.Betriebskostenrechnungen)
+            .Where(u => u.BetreffendesJahr == b.Jahr)
+            .Select(r => b.GetVerbrauch(r, true))
         .ToDictionary(g => g.First().Betriebskostentyp, g => g.GroupBy(gg => gg.Zaehlertyp)
         .Select(gg => (gg.Key, gg.Sum(ggg => ggg.Delta))).ToList());
 
@@ -113,49 +117,61 @@ namespace Deeplex.Saverwalter.Model
         public Dictionary<Betriebskostentyp, double> VerbrauchAnteil => Verbrauch
             .Select(v => (v.Key, v.Value.Sum(vv => vv.Delta), v.Value.Sum(vv => vv.Delta / vv.Anteil)))
             .ToDictionary(v => v.Key, v => v.Item2 / v.Item3);
-        public List<Heizkostenberechnung> Heizkosten => Rechnungen
-            .Where(r => (int)r.Umlage.Typ % 2 == 1)
+        public List<Heizkostenberechnung> Heizkosten => Umlagen
+            .Where(r => (int)r.Typ % 2 == 1)
+            .SelectMany(u => u.Betriebskostenrechnungen)
+            .Where(r => r.BetreffendesJahr == b.Jahr)
             .Select(r => new Heizkostenberechnung(r, b))
             .ToList();
-        public double GesamtBetragKalt => Rechnungen.Where(r => (int)r.Umlage.Typ % 2 == 0).Sum(r => r.Betrag);
-        public double BetragKalt => Rechnungen.Where(r => (int)r.Umlage.Typ % 2 == 0).Aggregate(0.0, (a, r) =>
-            r.Umlage.Schluessel switch
-            {
-                Umlageschluessel.NachWohnflaeche => a + r.Betrag * WFZeitanteil,
-                Umlageschluessel.NachNutzeinheit => a + r.Betrag * NEZeitanteil,
-                Umlageschluessel.NachPersonenzahl => a + PersZeitanteil.Aggregate(0.0, (a2, z) => a2 += z.Anteil * r.Betrag),
-                Umlageschluessel.NachVerbrauch => a + r.Betrag * checkVerbrauch(r.Umlage.Typ),
-                _ => a + 0, // TODO or throw something...
-            });
+        public double GesamtBetragKalt => Umlagen
+                .Where(r => (int)r.Typ % 2 == 0)
+                .SelectMany(u => u.Betriebskostenrechnungen)
+                .Where(r => r.BetreffendesJahr == b.Jahr)
+                .Sum(r => r.Betrag);
+        public double BetragKalt => Umlagen
+            .Where(r => (int)r.Typ % 2 == 0)
+            .SelectMany(u => u.Betriebskostenrechnungen)
+            .Where(r => r.BetreffendesJahr == b.Jahr)
+            .Aggregate(0.0, (a, r) =>
+                r.Umlage.Schluessel switch
+                {
+                    Umlageschluessel.NachWohnflaeche => a + r.Betrag * WFZeitanteil,
+                    Umlageschluessel.NachNutzeinheit => a + r.Betrag * NEZeitanteil,
+                    Umlageschluessel.NachPersonenzahl => a + PersZeitanteil.Aggregate(0.0, (a2, z) => a2 += z.Anteil * r.Betrag),
+                    Umlageschluessel.NachVerbrauch => a + r.Betrag * checkVerbrauch(r.Umlage.Typ),
+                    _ => a + 0, // TODO or throw something...
+                });
         public double GesamtBetragWarm => Heizkosten.Sum(h => h.PauschalBetrag);
         public double BetragWarm => Heizkosten.Sum(h => h.Kosten);
 
-        public Rechnungsgruppe(IBetriebskostenabrechnung _b, List<Betriebskostenrechnung> gruppe)
+        public Rechnungsgruppe(IBetriebskostenabrechnung _b, List<Umlage> gruppe)
         {
-            Rechnungen = gruppe;
+            Umlagen = gruppe;
             b = _b;
 
+            // TODO!
             // Remove 5% of Heizkosten to allgStrom (they are added there)
-            var allgStrom = Rechnungen.Find(r => r.Umlage.Typ == Betriebskostentyp.AllgemeinstromHausbeleuchtung);
+            // TODO only the first one is used here...
+            //var allgStrom = Umlagen
+            //    .Find(r => r.Typ == Betriebskostentyp.AllgemeinstromHausbeleuchtung)
+            //    .Betriebskostenrechnungen
+            //    .Where(r => r.BetreffendesJahr == b.Jahr)
+            //    .First();
             // TODO this 0.05 has to be variable.
-            if (allgStrom != null && !b.AllgStromVerrechnetMitHeizkosten)
-            {
-                var copy = allgStrom.ShallowCopy();
-                var idx = Rechnungen.IndexOf(allgStrom);
+            //if (allgStrom != null && !b.AllgStromVerrechnetMitHeizkosten)
+            //{
+            //    var copy = allgStrom.ShallowCopy();
 
-                copy.Betrag -= b.Vertrag.Wohnung.Umlagen.SelectMany(u => u.Betriebskostenrechnungen)
-                    .Where(g => g.BetreffendesJahr == b.Jahr && (int)g.Umlage.Typ % 2 == 1)
-                    .Select(r => r.Betrag)
-                    .Sum() * 0.05;
-                b.AllgStromVerrechnetMitHeizkosten = true;
-                if (copy.Betrag < 0)
-                {
-                    b.notes.Add(new Note("Allgemeinstrom hat einen Betrag von " + string.Format("{0:N2}€", copy.Betrag), Severity.Error));
-                }
-
-                Rechnungen.Remove(allgStrom);
-                Rechnungen.Insert(idx, copy);
-            }
+            //    copy.Betrag -= b.Vertrag.Wohnung.Umlagen.SelectMany(u => u.Betriebskostenrechnungen)
+            //        .Where(g => g.BetreffendesJahr == b.Jahr && (int)g.Umlage.Typ % 2 == 1)
+            //        .Select(r => r.Betrag)
+            //        .Sum() * 0.05;
+            //    b.AllgStromVerrechnetMitHeizkosten = true;
+            //    if (copy.Betrag < 0)
+            //    {
+            //        b.notes.Add(new Note("Allgemeinstrom hat einen Betrag von " + string.Format("{0:N2}€", copy.Betrag), Severity.Error));
+            //    }
+            //}
         }
 
         private static List<PersonenZeitIntervall>

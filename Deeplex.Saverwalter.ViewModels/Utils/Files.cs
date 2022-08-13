@@ -43,7 +43,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public static void SaveBetriebskostenabrechnung(this Betriebskostenabrechnung b, string path, Services.IWalterDbService db)
         {
-            var Rechnungen = b.Gruppen.SelectMany(g => g.Rechnungen);
+            var Rechnungen = b.Gruppen.SelectMany(g => g.Umlagen);
             var temppath = Path.GetTempPath();
 
             var atLeastOne = false;
