@@ -7,14 +7,14 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietMinderungListViewModel : ListViewModel<MietminderungListViewModelEntry>
+    public sealed class MietminderungListViewModel : ListViewModel<MietminderungListViewModelEntry>
     {
         public ObservableProperty<ImmutableList<MietminderungListViewModelEntry>> Liste = new();
         public Guid VertragId;
 
         public RelayCommand Add { get; }
 
-        public MietMinderungListViewModel(Guid VertragGuid, INotificationService ns, IWalterDbService db)
+        public MietminderungListViewModel(Guid VertragGuid, INotificationService ns, IWalterDbService db)
         {
             VertragId = VertragGuid;
             var self = this;

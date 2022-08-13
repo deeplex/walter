@@ -10,7 +10,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
     public sealed partial class VertragDetailViewPage : Page
     {
         public VertragDetailViewModel ViewModel { get; } = App.Container.GetInstance<VertragDetailViewModel>();
-        public BetriebskostenRechnungenListViewModel BetriebskostenListViewModel { get; } = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
+        public BetriebskostenrechnungListViewModel BetriebskostenListViewModel { get; } = App.Container.GetInstance<BetriebskostenrechnungListViewModel>();
         public UmlageListViewModel UmlageListViewModel { get; } = App.Container.GetInstance<UmlageListViewModel>();
 
         public VertragDetailViewPage()

@@ -6,7 +6,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class BetriebskostenRechnungenListViewPage : Page
     {
-        public BetriebskostenRechnungenListViewModel ViewModel { get; } = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
+        public BetriebskostenrechnungListViewModel ViewModel { get; } = App.Container.GetInstance<BetriebskostenrechnungListViewModel>();
 
         public BetriebskostenRechnungenListViewPage()
         {

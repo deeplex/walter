@@ -12,16 +12,16 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             InitializeComponent();
         }
 
-        public MietMinderungListViewModel ViewModel
+        public MietminderungListViewModel ViewModel
         {
-            get { return (MietMinderungListViewModel)GetValue(ViewModelProperty); }
+            get { return (MietminderungListViewModel)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
 
         public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
                   "ViewModel",
-                  typeof(MietMinderungListViewModel),
+                  typeof(MietminderungListViewModel),
                   typeof(VertragListControl),
                   new PropertyMetadata(null));
 

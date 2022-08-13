@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             App.Window.ListAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
-            if ((VertragListViewModelVertrag)((DataGrid)sender).SelectedItem is VertragListViewModelVertrag a)
+            if ((VertragListViewModelEntry)((DataGrid)sender).SelectedItem is VertragListViewModelEntry a)
             {
                 App.Window.ListAnhang.Value.SetList(a.Entity);
             }

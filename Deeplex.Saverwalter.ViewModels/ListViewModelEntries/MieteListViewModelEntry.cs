@@ -5,7 +5,7 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietenListViewModelEntry : ListViewModelEntry<Miete>, IDetailViewModel
+    public sealed class MieteListViewModelEntry : ListViewModelEntry<Miete>, IDetailViewModel
     {
         public override string ToString() => Betrag + "€";
 
@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public AsyncRelayCommand Delete { get; }
         public RelayCommand Save { get; }
 
-        public MietenListViewModelEntry(Miete m, MietenListViewModel vm)
+        public MieteListViewModelEntry(Miete m, MieteListViewModel vm)
         {
             Entity = m;
 

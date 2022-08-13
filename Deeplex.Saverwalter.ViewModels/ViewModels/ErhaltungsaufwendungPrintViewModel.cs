@@ -8,11 +8,11 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ErhaltungsaufwendungenPrintViewModel : IPrintViewModel
+    public sealed class ErhaltungsaufwendungPrintViewModel : IPrintViewModel
     {
         public ObservableProperty<int> Jahr { get; } = new();
         public ImmutableList<ErhaltungsaufwendungenPrintEntry> Wohnungen { get; private set; }
-        public ImmutableList<ErhaltungsaufwendungenPrintViewModel> Zusatz;
+        public ImmutableList<ErhaltungsaufwendungPrintViewModel> Zusatz;
         public string Titel { get; private set; }
         public ObservableProperty<bool> Enabled = new(true);
 
@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public AsyncRelayCommand Print { get; }
 
-        public ErhaltungsaufwendungenPrintViewModel(IWalterDbService db, IFileService fs)
+        public ErhaltungsaufwendungPrintViewModel(IWalterDbService db, IFileService fs)
         {
             WalterDbService = db;
             FileService = fs;
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Where(j => j.PersonId == p.PersonId && !g.Contains(j.PersonId))
                 .Select(z =>
                 {
-                    var vm = new ErhaltungsaufwendungenPrintViewModel(WalterDbService, FileService);
+                    var vm = new ErhaltungsaufwendungPrintViewModel(WalterDbService, FileService);
                     vm.SetEntity(z, g.Append(z.PersonId).ToArray());
                     return vm;
                 })
@@ -95,7 +95,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Where(j => j.PersonId == p.PersonId && !g.Contains(j.PersonId))
                 .Select(z =>
                 {
-                    var vm = new ErhaltungsaufwendungenPrintViewModel(WalterDbService, FileService);
+                    var vm = new ErhaltungsaufwendungPrintViewModel(WalterDbService, FileService);
                     vm.SetEntity(WalterDbService.ctx.FindPerson(z.PersonId), g.Append(z.PersonId).ToArray());
                     return vm;
                 }))

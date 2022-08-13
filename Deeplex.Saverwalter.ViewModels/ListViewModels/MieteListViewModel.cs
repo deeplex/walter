@@ -7,14 +7,14 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietenListViewModel : ListViewModel<MietenListViewModelEntry>
+    public sealed class MieteListViewModel : ListViewModel<MieteListViewModelEntry>
     {
-        public ObservableProperty<ImmutableList<MietenListViewModelEntry>> Liste { get; } = new();
+        public ObservableProperty<ImmutableList<MieteListViewModelEntry>> Liste { get; } = new();
         public Guid VertragId;
 
         public RelayCommand Add { get; }
 
-        public MietenListViewModel(Guid VertragGuid, INotificationService ns, IWalterDbService db)
+        public MieteListViewModel(Guid VertragGuid, INotificationService ns, IWalterDbService db)
         {
             VertragId = VertragGuid;
             WalterDbService = db;
@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Liste.Value = WalterDbService.ctx.Mieten
                 .Where(m => m.VertragId == VertragGuid)
                 .ToList()
-                .Select(m => new MietenListViewModelEntry(m, self))
+                .Select(m => new MieteListViewModelEntry(m, self))
                 .OrderByDescending(e => e.Zahlungsdatum.Value)
                 .ToImmutableList();
 
@@ -38,7 +38,7 @@ namespace Deeplex.Saverwalter.ViewModels
                     Betrag = Liste.Value.FirstOrDefault()?.Betrag?.Value
                 };
                 Liste.Value = Liste.Value
-                    .Prepend(new MietenListViewModelEntry(miete, this))
+                    .Prepend(new MieteListViewModelEntry(miete, this))
                     .ToImmutableList();
             }, _ => true);
         }

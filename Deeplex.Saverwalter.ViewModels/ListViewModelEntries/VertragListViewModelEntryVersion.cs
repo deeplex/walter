@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class VertragListViewModelVertragVersion : BindableBase
+    public class VertragListViewModelEntryVersion : BindableBase
     {
         public int Id => Entity.rowid;
         public Guid VertragId => Entity.VertragId;
@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public Vertrag Entity { get; }
         private IWalterDbService WalterDbService;
 
-        public VertragListViewModelVertragVersion(Vertrag v, IWalterDbService db)
+        public VertragListViewModelEntryVersion(Vertrag v, IWalterDbService db)
         {
             WalterDbService = db;
             Entity = v;

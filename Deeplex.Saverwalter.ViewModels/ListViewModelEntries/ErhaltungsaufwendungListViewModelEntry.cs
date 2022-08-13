@@ -5,7 +5,7 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ErhaltungsaufwendungenListViewModelEntry
+    public sealed class ErhaltungsaufwendungListViewModelEntry
     {
         public Erhaltungsaufwendung Entity { get; }
         public ObservableProperty<bool> Enabled = new(true);
@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public DateTime Datum => Entity.Datum;
         private IWalterDbService Db;
 
-        public ErhaltungsaufwendungenListViewModelEntry(Erhaltungsaufwendung e, IWalterDbService db)
+        public ErhaltungsaufwendungListViewModelEntry(Erhaltungsaufwendung e, IWalterDbService db)
         {
             Entity = e;
             Db = db;

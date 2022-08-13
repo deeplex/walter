@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class VertragListViewModel : ListViewModel<VertragListViewModelVertrag>, IListViewModel
+    public sealed class VertragListViewModel : ListViewModel<VertragListViewModelEntry>, IListViewModel
     {
         public override string ToString() => "Verträge";
 
@@ -62,10 +62,10 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToList();
         }
 
-        private ImmutableList<VertragListViewModelVertrag> transform(IWalterDbService db, List<Vertrag> list)
+        private ImmutableList<VertragListViewModelEntry> transform(IWalterDbService db, List<Vertrag> list)
         {
             return list.GroupBy(v => v.VertragId)
-                .Select(v => new VertragListViewModelVertrag(v, db))
+                .Select(v => new VertragListViewModelEntry(v, db))
                 .OrderBy(v => v.Beginn).Reverse()
                 .ToImmutableList();
         }

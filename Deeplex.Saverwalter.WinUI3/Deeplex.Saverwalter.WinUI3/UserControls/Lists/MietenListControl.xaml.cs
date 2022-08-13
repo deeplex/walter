@@ -12,23 +12,23 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             InitializeComponent();
         }
 
-        public MietenListViewModel ViewModel
+        public MieteListViewModel ViewModel
         {
-            get { return (MietenListViewModel)GetValue(ViewModelProperty); }
+            get { return (MieteListViewModel)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
 
         public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
                   "ViewModel",
-                  typeof(MietenListViewModel),
+                  typeof(MieteListViewModel),
                   typeof(VertragListControl),
                   new PropertyMetadata(null));
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             App.Window.ListAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
-            if (((DataGrid)sender).SelectedItem is MietenListViewModelEntry m)
+            if (((DataGrid)sender).SelectedItem is MieteListViewModelEntry m)
             {
                 App.Window.ListAnhang.Value.SetList(m.Entity);
             }

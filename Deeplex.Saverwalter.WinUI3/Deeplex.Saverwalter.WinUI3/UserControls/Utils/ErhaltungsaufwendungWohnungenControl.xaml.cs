@@ -12,16 +12,16 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             InitializeComponent();
         }
 
-        public ErhaltungsaufwendungenPrintViewModel ViewModel
+        public ErhaltungsaufwendungPrintViewModel ViewModel
         {
-            get { return (ErhaltungsaufwendungenPrintViewModel)GetValue(ViewModelProperty); }
+            get { return (ErhaltungsaufwendungPrintViewModel)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
 
         public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
             "ViewModel",
-            typeof(ErhaltungsaufwendungenPrintViewModel),
+            typeof(ErhaltungsaufwendungPrintViewModel),
             typeof(ErhaltungsaufwendungWohnungenControl),
             new PropertyMetadata(null));
 

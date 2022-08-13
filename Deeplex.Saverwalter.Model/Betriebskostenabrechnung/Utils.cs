@@ -101,14 +101,14 @@ namespace Deeplex.Saverwalter.Model
         public static bool dir(this IBetriebskostenabrechnung b)
             => b.Gruppen.Any(g => g.Rechnungen.Any(r => r.Umlage.Wohnungen.Count == 1));
 
-        private static bool uml(this IBetriebskostenabrechnung b, UmlageSchluessel k) =>
+        private static bool uml(this IBetriebskostenabrechnung b, Umlageschluessel k) =>
             b.Gruppen.Any(g => g.Rechnungen.Where(r => r.Umlage.Wohnungen.Count > 1).Any(r => r.Umlage.Schluessel == k));
 
-        public static bool nWF(this IBetriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachWohnflaeche);
-        public static bool nNF(this IBetriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachNutzflaeche);
-        public static bool nNE(this IBetriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachNutzeinheit);
-        public static bool nPZ(this IBetriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachPersonenzahl);
-        public static bool nVb(this IBetriebskostenabrechnung b) => b.uml(UmlageSchluessel.NachVerbrauch);
+        public static bool nWF(this IBetriebskostenabrechnung b) => b.uml(Umlageschluessel.NachWohnflaeche);
+        public static bool nNF(this IBetriebskostenabrechnung b) => b.uml(Umlageschluessel.NachNutzflaeche);
+        public static bool nNE(this IBetriebskostenabrechnung b) => b.uml(Umlageschluessel.NachNutzeinheit);
+        public static bool nPZ(this IBetriebskostenabrechnung b) => b.uml(Umlageschluessel.NachPersonenzahl);
+        public static bool nVb(this IBetriebskostenabrechnung b) => b.uml(Umlageschluessel.NachVerbrauch);
 
         public static string Anmerkung(this IBetriebskostenabrechnung b)
             => "Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger) Kostenanteil";

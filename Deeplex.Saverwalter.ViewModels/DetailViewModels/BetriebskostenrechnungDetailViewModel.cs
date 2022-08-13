@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<WohnungListViewModelEntry> BetriebskostenrechnungsWohnung = new();
 
         public List<HKVO9Util> HKVO_P9_List = Enums.HKVO9;
-        public List<UmlageSchluesselUtil> Schluessel_List = Enums.UmlageSchluessel;
+        public List<UmlageschluesselUtil> Schluessel_List = Enums.UmlageSchluessel;
         public ObservableProperty<List<UmlageListViewModelEntry>> Umlagen_List { get; } = new();
         public List<ZaehlerListViewModelEntry> AllgemeinZaehler_List;
 

@@ -8,10 +8,10 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class VertragListViewModelVertrag : VertragListViewModelVertragVersion
+    public sealed class VertragListViewModelEntry : VertragListViewModelEntryVersion
     {
-        public List<VertragListViewModelVertragVersion> Versionen { get; }
-            = new List<VertragListViewModelVertragVersion>();
+        public List<VertragListViewModelEntryVersion> Versionen { get; }
+            = new List<VertragListViewModelEntryVersion>();
         public ObservableProperty<VertragListViewModelMiete> AddMieteValue = new();
 
         public ImmutableList<VertragListViewModelMiete> Mieten { get; set; }
@@ -27,10 +27,10 @@ namespace Deeplex.Saverwalter.ViewModels
         }
         public bool HasLastMiete => LastMiete != "";
 
-        public VertragListViewModelVertrag(IGrouping<Guid, Vertrag> v, IWalterDbService db)
+        public VertragListViewModelEntry(IGrouping<Guid, Vertrag> v, IWalterDbService db)
             : base(v.OrderBy(vs => vs.Version).Last(), db)
         {
-            Versionen = v.OrderBy(vs => vs.Version).Select(vs => new VertragListViewModelVertragVersion(vs, db)).ToList();
+            Versionen = v.OrderBy(vs => vs.Version).Select(vs => new VertragListViewModelEntryVersion(vs, db)).ToList();
             Beginn = Versionen.First().Beginn;
 
             Mieten = db.ctx.Mieten

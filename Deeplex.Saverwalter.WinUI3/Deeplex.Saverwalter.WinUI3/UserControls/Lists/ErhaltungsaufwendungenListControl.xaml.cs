@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         public ErhaltungsaufwendungenListControl()
         {
             InitializeComponent();
-            ViewModel = App.Container.GetInstance<ErhaltungsaufwendungenListViewModel>();
+            ViewModel = App.Container.GetInstance<ErhaltungsaufwendungListViewModel>();
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)
@@ -21,16 +21,16 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             ViewModel.Navigate.Execute(ViewModel.Selected.Entity);
         }
 
-        public ErhaltungsaufwendungenListViewModel ViewModel
+        public ErhaltungsaufwendungListViewModel ViewModel
         {
-            get { return (ErhaltungsaufwendungenListViewModel)GetValue(ViewModelProperty); }
+            get { return (ErhaltungsaufwendungListViewModel)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
 
         public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
                 "ViewModel",
-                typeof(ErhaltungsaufwendungenListViewModel),
+                typeof(ErhaltungsaufwendungListViewModel),
                 typeof(ErhaltungsaufwendungenListControl),
                 new PropertyMetadata(null));
 
@@ -47,16 +47,16 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
                   typeof(ErhaltungsaufwendungenListControl),
                   new PropertyMetadata(0));
 
-        public ImmutableList<ErhaltungsaufwendungenListViewModelEntry> Liste
+        public ImmutableList<ErhaltungsaufwendungListViewModelEntry> Liste
         {
-            get { return (ImmutableList<ErhaltungsaufwendungenListViewModelEntry>)GetValue(ListeProperty); }
+            get { return (ImmutableList<ErhaltungsaufwendungListViewModelEntry>)GetValue(ListeProperty); }
             set { SetValue(ListeProperty, value); }
         }
 
         public static readonly DependencyProperty ListeProperty
             = DependencyProperty.Register(
                   "Liste",
-                  typeof(ImmutableList<ErhaltungsaufwendungenListViewModelEntry>),
+                  typeof(ImmutableList<ErhaltungsaufwendungListViewModelEntry>),
                   typeof(ErhaltungsaufwendungenListControl),
                   new PropertyMetadata(null));
 
@@ -90,7 +90,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             App.Window.ListAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
-            if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungenListViewModelEntry a)
+            if (((DataGrid)sender).SelectedItem is ErhaltungsaufwendungListViewModelEntry a)
             {
                 App.Window.ListAnhang.Value.SetList(a.Entity);
             }

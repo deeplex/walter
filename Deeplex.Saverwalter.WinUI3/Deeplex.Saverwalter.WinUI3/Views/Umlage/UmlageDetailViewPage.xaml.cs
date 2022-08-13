@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
     {
         public UmlageDetailViewModel ViewModel { get; } = App.Container.GetInstance<UmlageDetailViewModel>();
         public WohnungListViewModel WohnungListViewModel { get; } = App.Container.GetInstance<WohnungListViewModel>();
-        public BetriebskostenRechnungenListViewModel BetriebskostenRechnungenListViewModel { get; } = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
+        public BetriebskostenrechnungListViewModel BetriebskostenRechnungenListViewModel { get; } = App.Container.GetInstance<BetriebskostenrechnungListViewModel>();
 
         public UmlageDetailViewPage()
         {

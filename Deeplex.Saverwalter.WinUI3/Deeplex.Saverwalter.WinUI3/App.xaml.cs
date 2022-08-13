@@ -38,7 +38,7 @@ namespace Deeplex.Saverwalter.WinUI3
             Container.Register<VertragListViewModel>(Lifestyle.Singleton);
             Container.Register<VertragDetailViewModel>();
 
-            Container.Register<BetriebskostenRechnungenListViewModel>(Lifestyle.Singleton);
+            Container.Register<BetriebskostenrechnungListViewModel>(Lifestyle.Singleton);
             Container.Register<BetriebskostenrechnungDetailViewModel>();
             Container.Register<BetriebskostenrechnungPrintViewModel>();
 
@@ -49,9 +49,9 @@ namespace Deeplex.Saverwalter.WinUI3
             Container.Register<NatuerlichePersonDetailViewModel>(); // TODO add Detail to name
             Container.Register<JuristischePersonDetailViewModel>(); // TODO add Detail to name
 
-            Container.Register<ErhaltungsaufwendungenListViewModel>(Lifestyle.Singleton);
-            Container.Register<ErhaltungsaufwendungenDetailViewModel>();
-            Container.Register<ErhaltungsaufwendungenPrintViewModel>();
+            Container.Register<ErhaltungsaufwendungListViewModel>(Lifestyle.Singleton);
+            Container.Register<ErhaltungsaufwendungDetailViewModel>();
+            Container.Register<ErhaltungsaufwendungPrintViewModel>();
 
             Container.Register<ZaehlerListViewModel>(Lifestyle.Singleton);
             Container.Register<ZaehlerDetailViewModel>();

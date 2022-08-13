@@ -26,7 +26,7 @@
         <mtuuc:DataGrid.Columns>
             <mtuuc:DataGridTemplateColumn Header="Mieter">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:VertragListViewModelVertrag">
+                    <DataTemplate x:DataType="vm:VertragListViewModelEntry">
                         <TextBlock
                             Margin="5,0,0,0"
                             HorizontalAlignment="Left"
@@ -37,7 +37,7 @@
             </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTemplateColumn Header="Wohnung">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:VertragListViewModelVertrag">
+                    <DataTemplate x:DataType="vm:VertragListViewModelEntry">
                         <TextBlock
                             Margin="5,0,0,0"
                             HorizontalAlignment="Left"
@@ -48,7 +48,7 @@
             </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTemplateColumn Header="Beginn">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:VertragListViewModelVertrag">
+                    <DataTemplate x:DataType="vm:VertragListViewModelEntry">
                         <TextBlock
                             Margin="5,0,0,0"
                             HorizontalAlignment="Left"
@@ -59,7 +59,7 @@
             </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTemplateColumn Header="Ende">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate x:DataType="vm:VertragListViewModelVertrag">
+                    <DataTemplate x:DataType="vm:VertragListViewModelEntry">
                         <TextBlock
                             Margin="5,0,0,0"
                             HorizontalAlignment="Left"

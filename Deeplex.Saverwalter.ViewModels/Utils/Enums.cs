@@ -7,11 +7,11 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     class Enums
     {
-        public static List<UmlageSchluesselUtil> UmlageSchluessel =
-            Enum.GetValues(typeof(UmlageSchluessel))
-                .Cast<UmlageSchluessel>()
+        public static List<UmlageschluesselUtil> UmlageSchluessel =
+            Enum.GetValues(typeof(Umlageschluessel))
+                .Cast<Umlageschluessel>()
                 .ToList()
-                .Select(t => new UmlageSchluesselUtil(t))
+                .Select(t => new UmlageschluesselUtil(t))
                 .ToList();
 
         public static List<BetriebskostentypUtil> Betriebskostentyp =

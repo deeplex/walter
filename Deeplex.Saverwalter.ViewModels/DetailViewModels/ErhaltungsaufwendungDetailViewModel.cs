@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ErhaltungsaufwendungenDetailViewModel : DetailViewModel<Erhaltungsaufwendung>, IDetailViewModel
+    public sealed class ErhaltungsaufwendungDetailViewModel : DetailViewModel<Erhaltungsaufwendung>, IDetailViewModel
     {
         public override string ToString() => Entity.Bezeichnung;
 
@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<DateTimeOffset> Datum { get; private set; }
         public SavableProperty<string> Notiz { get; private set; }
 
-        public ErhaltungsaufwendungenDetailViewModel(INotificationService ns, IWalterDbService db)
+        public ErhaltungsaufwendungDetailViewModel(INotificationService ns, IWalterDbService db)
         {
             WalterDbService = db;
             NotificationService = ns;

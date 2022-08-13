@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.WinUI3.Views
 {
     public sealed partial class ErhaltungsaufwendungenDetailViewPage : Page
     {
-        public ErhaltungsaufwendungenDetailViewModel ViewModel { get; } = App.Container.GetInstance<ErhaltungsaufwendungenDetailViewModel>();
+        public ErhaltungsaufwendungDetailViewModel ViewModel { get; } = App.Container.GetInstance<ErhaltungsaufwendungDetailViewModel>();
 
         public ErhaltungsaufwendungenDetailViewPage()
         {

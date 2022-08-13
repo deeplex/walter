@@ -24,8 +24,8 @@ namespace Deeplex.Saverwalter.ViewModels
         public int StartJahr => Versionen.Value.Last().Beginn.Value.Year;
         public int EndeJahr => Versionen.Value.First().Ende.Value?.Year ?? 9999;
 
-        public ObservableProperty<MietenListViewModel> Mieten { get; private set; } = new();
-        public ObservableProperty<MietMinderungListViewModel> MietMinderungen { get; private set; } = new();
+        public ObservableProperty<MieteListViewModel> Mieten { get; private set; } = new();
+        public ObservableProperty<MietminderungListViewModel> MietMinderungen { get; private set; } = new();
         public ObservableProperty<KontaktListViewModel> Mieter { get; private set; } = new();
 
         public new KontaktListViewModelEntry Ansprechpartner

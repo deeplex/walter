@@ -11,9 +11,9 @@ namespace Deeplex.Saverwalter.WinUI3.Views
         public WohnungDetailViewModel ViewModel { get; } = App.Container.GetInstance<WohnungDetailViewModel>();
         public VertragListViewModel VertragListViewModel { get; } = App.Container.GetInstance<VertragListViewModel>();
         public WohnungListViewModel WohnungAdresseViewModel { get; } = App.Container.GetInstance<WohnungListViewModel>();
-        public BetriebskostenRechnungenListViewModel BetriebskostenrechnungViewModel { get; } = App.Container.GetInstance<BetriebskostenRechnungenListViewModel>();
+        public BetriebskostenrechnungListViewModel BetriebskostenrechnungViewModel { get; } = App.Container.GetInstance<BetriebskostenrechnungListViewModel>();
         public UmlageListViewModel UmlageListViewModel { get; } = App.Container.GetInstance<UmlageListViewModel>();
-        public ErhaltungsaufwendungenListViewModel ErhaltungsaufwendungViewModel { get; } = App.Container.GetInstance<ErhaltungsaufwendungenListViewModel>();
+        public ErhaltungsaufwendungListViewModel ErhaltungsaufwendungViewModel { get; } = App.Container.GetInstance<ErhaltungsaufwendungListViewModel>();
         public ZaehlerListViewModel ZaehlerListViewModel { get; } = App.Container.GetInstance<ZaehlerListViewModel>();
 
         public WohnungDetailViewPage()

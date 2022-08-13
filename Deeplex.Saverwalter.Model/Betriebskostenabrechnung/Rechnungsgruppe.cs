@@ -72,7 +72,7 @@ namespace Deeplex.Saverwalter.Model
             get
             {
                 var VerbrauchList = Rechnungen
-                    .Where(g => g.Umlage.Schluessel == UmlageSchluessel.NachVerbrauch)
+                    .Where(g => g.Umlage.Schluessel == Umlageschluessel.NachVerbrauch)
                     .Select(r => b.GetVerbrauch(r));
 
                 if (VerbrauchList.Any(w => w.Count() == 0))
@@ -92,7 +92,7 @@ namespace Deeplex.Saverwalter.Model
 
 
         public Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch => Rechnungen
-        .Where(g => g.Umlage.Schluessel == UmlageSchluessel.NachVerbrauch)
+        .Where(g => g.Umlage.Schluessel == Umlageschluessel.NachVerbrauch)
         .Select(r => b.GetVerbrauch(r, true))
         .ToDictionary(g => g.First().Betriebskostentyp, g => g.GroupBy(gg => gg.Zaehlertyp)
         .Select(gg => (gg.Key, gg.Sum(ggg => ggg.Delta))).ToList());
@@ -121,10 +121,10 @@ namespace Deeplex.Saverwalter.Model
         public double BetragKalt => Rechnungen.Where(r => (int)r.Umlage.Typ % 2 == 0).Aggregate(0.0, (a, r) =>
             r.Umlage.Schluessel switch
             {
-                UmlageSchluessel.NachWohnflaeche => a + r.Betrag * WFZeitanteil,
-                UmlageSchluessel.NachNutzeinheit => a + r.Betrag * NEZeitanteil,
-                UmlageSchluessel.NachPersonenzahl => a + PersZeitanteil.Aggregate(0.0, (a2, z) => a2 += z.Anteil * r.Betrag),
-                UmlageSchluessel.NachVerbrauch => a + r.Betrag * checkVerbrauch(r.Umlage.Typ),
+                Umlageschluessel.NachWohnflaeche => a + r.Betrag * WFZeitanteil,
+                Umlageschluessel.NachNutzeinheit => a + r.Betrag * NEZeitanteil,
+                Umlageschluessel.NachPersonenzahl => a + PersZeitanteil.Aggregate(0.0, (a2, z) => a2 += z.Anteil * r.Betrag),
+                Umlageschluessel.NachVerbrauch => a + r.Betrag * checkVerbrauch(r.Umlage.Typ),
                 _ => a + 0, // TODO or throw something...
             });
         public double GesamtBetragWarm => Heizkosten.Sum(h => h.PauschalBetrag);

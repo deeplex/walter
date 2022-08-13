@@ -14,7 +14,7 @@
             <uc:ErhaltungsaufwendungWohnungenControl ViewModel="{x:Bind ViewModel}" />
             <ItemsRepeater ItemsSource="{x:Bind ViewModel.Zusatz}">
                 <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungenPrintViewModel">
+                    <DataTemplate x:DataType="vm:ErhaltungsaufwendungPrintViewModel">
                         <StackPanel>
                             <CheckBox
                                 IsChecked="{x:Bind Enabled.Value, Mode=TwoWay}"

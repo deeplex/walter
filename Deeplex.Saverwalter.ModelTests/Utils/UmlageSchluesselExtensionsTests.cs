@@ -10,7 +10,7 @@ namespace Deeplex.Saverwalter.Model.Tests
         {
             for (var i = 0; i < 5; ++i)
             {
-                var stub = (UmlageSchluessel)i;
+                var stub = (Umlageschluessel)i;
                 stub.ToDescriptionString().Should().NotBeNull();
             }
         }

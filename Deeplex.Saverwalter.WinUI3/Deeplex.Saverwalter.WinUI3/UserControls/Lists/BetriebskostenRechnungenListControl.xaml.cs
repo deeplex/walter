@@ -14,16 +14,16 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
             InitializeComponent();
         }
 
-        public BetriebskostenRechnungenListViewModel ViewModel
+        public BetriebskostenrechnungListViewModel ViewModel
         {
-            get { return (BetriebskostenRechnungenListViewModel)GetValue(ViewModelProperty); }
+            get { return (BetriebskostenrechnungListViewModel)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
 
         public static readonly DependencyProperty ViewModelProperty
             = DependencyProperty.Register(
                 "ViewModel",
-                typeof(BetriebskostenRechnungenListViewModel),
+                typeof(BetriebskostenrechnungListViewModel),
                 typeof(BetriebskostenRechnungenListControl),
                 new PropertyMetadata(null));
 
@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.WinUI3.UserControls
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             App.Window.ListAnhang.Value = App.Container.GetInstance<AnhangListViewModel>();
-            if (((DataGrid)sender)?.SelectedItem is BetriebskostenRechnungenListViewModelEntry r)
+            if (((DataGrid)sender)?.SelectedItem is BetriebskostenrechnungListViewModelEntry r)
             {
                 App.Window.ListAnhang.Value.SetList(r.Entity);
             }

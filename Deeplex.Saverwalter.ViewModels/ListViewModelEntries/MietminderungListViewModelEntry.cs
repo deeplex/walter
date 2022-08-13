@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public AsyncRelayCommand Delete { get; }
         public RelayCommand Save { get; }
 
-        public MietminderungListViewModelEntry(MietMinderung m, MietMinderungListViewModel vm)
+        public MietminderungListViewModelEntry(MietMinderung m, MietminderungListViewModel vm)
         {
             Entity = m;
             WalterDbService = vm.WalterDbService;

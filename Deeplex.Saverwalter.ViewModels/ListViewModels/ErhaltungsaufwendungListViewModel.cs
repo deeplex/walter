@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class ErhaltungsaufwendungenListViewModel : ListViewModel<ErhaltungsaufwendungenListViewModelEntry>, IListViewModel
+    public sealed class ErhaltungsaufwendungListViewModel : ListViewModel<ErhaltungsaufwendungListViewModelEntry>, IListViewModel
     {
         public override string ToString() => "Erhaltungsaufwendungen";
 
@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.ViewModels
             List.Value = AllRelevant.Where(v => applyFilter(v.Wohnung.Anschrift, v.Bezeichnung)).ToImmutableList();
         }
 
-        public ErhaltungsaufwendungenListViewModel(IWalterDbService db, INotificationService ns)
+        public ErhaltungsaufwendungListViewModel(IWalterDbService db, INotificationService ns)
         {
             WalterDbService = db;
             NotificationService = ns;
@@ -50,9 +50,9 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Include(e => e.Wohnung).ThenInclude(w => w.Adresse).ThenInclude(w => w.Anhaenge)
                 .ToList();
         }
-        private ImmutableList<ErhaltungsaufwendungenListViewModelEntry> transform(IWalterDbService db, List<Erhaltungsaufwendung> list)
+        private ImmutableList<ErhaltungsaufwendungListViewModelEntry> transform(IWalterDbService db, List<Erhaltungsaufwendung> list)
         {
-            return list.Select(w => new ErhaltungsaufwendungenListViewModelEntry(w, db)).ToImmutableList();
+            return list.Select(w => new ErhaltungsaufwendungListViewModelEntry(w, db)).ToImmutableList();
         }
     }
 }

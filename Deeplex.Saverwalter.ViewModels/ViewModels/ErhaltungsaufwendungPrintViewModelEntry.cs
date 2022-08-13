@@ -13,18 +13,18 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<int> Jahr => parent.Jahr;
         public ObservableProperty<bool> Enabled = new();
         public ObservableProperty<double> Summe = new();
-        public ImmutableList<ErhaltungsaufwendungenListViewModelEntry> Liste;
+        public ImmutableList<ErhaltungsaufwendungListViewModelEntry> Liste;
 
-        private ErhaltungsaufwendungenPrintViewModel parent { get; }
+        private ErhaltungsaufwendungPrintViewModel parent { get; }
 
-        public ErhaltungsaufwendungenPrintEntry(Wohnung w, ErhaltungsaufwendungenPrintViewModel vm)
+        public ErhaltungsaufwendungenPrintEntry(Wohnung w, ErhaltungsaufwendungPrintViewModel vm)
         {
             Entity = w;
             parent = vm;
             Id = w.WohnungId;
             Bezeichnung = AdresseViewModel.Anschrift(w) + " - " + w.Bezeichnung;
             Liste = Entity.Erhaltungsaufwendungen
-                .Select(e => new ErhaltungsaufwendungenListViewModelEntry(e, vm.WalterDbService))
+                .Select(e => new ErhaltungsaufwendungListViewModelEntry(e, vm.WalterDbService))
                 .ToImmutableList();
             Liste.ForEach(e => e.Enabled.PropertyChanged += updateSumme);
             parent.Jahr.PropertyChanged += updateSumme;

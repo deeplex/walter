@@ -6,7 +6,7 @@ namespace Deeplex.Saverwalter.Model
     {
         public int UmlageId { get; set; }
         public Betriebskostentyp Typ { get; set; }
-        public UmlageSchluessel Schluessel { get; set; }
+        public Umlageschluessel Schluessel { get; set; }
         public string? Beschreibung { get; set; }
         public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
         public string? Notiz { get; set; }
