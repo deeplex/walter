@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.Print
 
             p.Table(widths, j, bold, underlined, new string[][] { left.ToArray(), right.ToArray() });
         }
-        private static void ExplainUmlageSchluessel(IBetriebskostenabrechnung b, IPrint<T> p)
+        private static void ExplainUmlageschluessel(IBetriebskostenabrechnung b, IPrint<T> p)
         {
             var left1 = new List<string> { "Umlageschlüssel" };
             var right1 = new List<string> { "Bedeutung" };
@@ -730,7 +730,7 @@ namespace Deeplex.Saverwalter.Print
             p.PageBreak();
 
             p.Heading("Abrechnung der Nebenkosten");
-            ExplainUmlageSchluessel(b, p);
+            ExplainUmlageschluessel(b, p);
             p.Break();
             p.Text("Anmerkung:");
             p.Text(b.Anmerkung());

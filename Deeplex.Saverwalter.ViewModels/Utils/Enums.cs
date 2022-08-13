@@ -7,7 +7,7 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     class Enums
     {
-        public static List<UmlageschluesselUtil> UmlageSchluessel =
+        public static List<UmlageschluesselUtil> Umlageschluessel =
             Enum.GetValues(typeof(Umlageschluessel))
                 .Cast<Umlageschluessel>()
                 .ToList()

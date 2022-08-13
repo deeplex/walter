@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<WohnungListViewModelEntry> UmlageWohnung = new();
 
         public List<HKVO9Util> HKVO_P9_List = Enums.HKVO9;
-        public List<UmlageschluesselUtil> Schluessel_List = Enums.UmlageSchluessel;
+        public List<UmlageschluesselUtil> Schluessel_List = Enums.Umlageschluessel;
         public List<BetriebskostentypUtil> Typen_List = Enums.Betriebskostentyp;
 
         public SavableProperty<string> Notiz { get; private set; }

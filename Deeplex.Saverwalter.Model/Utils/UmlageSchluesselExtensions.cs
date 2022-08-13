@@ -2,7 +2,7 @@
 
 namespace Deeplex.Saverwalter.Model
 {
-    public static class UmlageSchluesselExtensions
+    public static class UmlageschluesselExtensions
     {
         public static string ToDescriptionString(this Umlageschluessel val)
         {

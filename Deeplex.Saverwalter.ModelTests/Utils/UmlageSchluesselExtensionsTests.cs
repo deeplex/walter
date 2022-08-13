@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Deeplex.Saverwalter.Model.Tests
 {
-    public class UmlageSchluesselExtensionsTests
+    public class UmlageschluesselExtensionsTests
     {
         [Fact]
         public void ToDescriptionStringTest()

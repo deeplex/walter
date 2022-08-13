@@ -18,9 +18,6 @@ namespace Deeplex.Saverwalter.WinUI3
             };
         }
 
-        public static bool applyFilter(string filter, params string[] strings)
-            => filter.Split(' ').All(split => strings.Any(str => str != null && str.ToLower().Contains(split.ToLower())));
-
         public static ImmutableList<T> Sort<T>(this DataGrid dataGrid, DataGridColumn columnToSort, ImmutableList<T> list)
         {
             var lastSortedColumn = dataGrid.Columns.Where(column =>
