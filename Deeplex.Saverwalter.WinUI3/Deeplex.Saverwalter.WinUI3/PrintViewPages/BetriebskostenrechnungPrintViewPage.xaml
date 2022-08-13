@@ -9,20 +9,34 @@
     xmlns:vm="using:Deeplex.Saverwalter.Model"
     xmlns:conv="using:Deeplex.Saverwalter.WinUI3"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <ScrollViewer
-        HorizontalScrollBarVisibility="Visible"
-        IsScrollInertiaEnabled="True"
-        HorizontalScrollMode="Auto"
-        Background="{StaticResource SystemChromeLowColor}">
-        <StackPanel>
+    <Grid Background="{StaticResource SystemChromeLowColor}">
+        <ScrollViewer
+                HorizontalScrollBarVisibility="Visible"
+                IsScrollInertiaEnabled="True"
+                HorizontalScrollMode="Auto">
+                <StackPanel>
+                <!--Padding to kind of resemble DinA4-->
+                <StackPanel
+                    Margin="10"
+                    Padding="101.19, 68.404, 40.476, 68.404"
+                    x:Name="Panel"
+                    Background="{ThemeResource SystemAltHighColor}"
+                    Width="850" />
+            </StackPanel>
+        </ScrollViewer>
+        <Grid VerticalAlignment="Top">
+            <NumberBox
+                Margin="20"
+                HorizontalAlignment="Right"
+                SpinButtonPlacementMode="Inline"
+                ValueChanged="Jahr_ValueChanged"
+                Value="{x:Bind ViewModel.Jahr, Mode=OneWay}"/>
             <uc:ExpanderControl
-                Visibility="{x:Bind ViewModel.HasNotes}"
-                Width="850"
-                Margin="0,10,0,0"
-                Header="Fehlerliste">
+                        Visibility="{x:Bind ViewModel.HasNotes}"
+                        Width="850"
+                        Header="Fehlerliste">
                 <uc:ExpanderControl.MainContent>
-                    <ListView Height="400" ItemsSource="{x:Bind ViewModel.Betriebskostenabrechnung.notes}">
+                    <ListView Height="400" ItemsSource="{x:Bind ViewModel.Betriebskostenabrechnung.Value.notes, Mode=OneWay}">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="vm:Note">
                                 <TextBlock Text="{x:Bind Message}" />
@@ -31,12 +45,6 @@
                     </ListView>
                 </uc:ExpanderControl.MainContent>
             </uc:ExpanderControl>
-            <StackPanel
-                Margin="10"
-                Padding="101.19, 68.404, 40.476, 68.404"
-                x:Name="Panel"
-                Background="{ThemeResource SystemAltHighColor}"
-                Width="850" />
-        </StackPanel>
-    </ScrollViewer>
+        </Grid>
+    </Grid>
 </Page>

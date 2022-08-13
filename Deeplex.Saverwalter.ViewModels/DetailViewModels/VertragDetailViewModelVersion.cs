@@ -9,7 +9,6 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => "Vertrag"; // TODO
 
-        public Vertrag Entity { get; private set; }
         public int Id => Entity.rowid;
         public int Version => Entity.Version;
         public SavableProperty<double> KaltMiete;

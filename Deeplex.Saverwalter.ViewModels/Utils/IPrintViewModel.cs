@@ -7,7 +7,7 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         string ToString();
         AsyncRelayCommand Print { get; }
-        ObservableProperty<int> Jahr { get; }
+        int Jahr { get; set; }
         IWalterDbService WalterDbService { get; }
     }
 }

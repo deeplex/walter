@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             get
             {
-                if (WalterDbService.ctx.Entry(Entity) is EntityEntry entry)
+                if (Entity != null && WalterDbService.ctx.Entry(Entity) is EntityEntry entry)
                 {
                     return entry.Metadata
                         .FindPrimaryKey()

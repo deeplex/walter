@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class VertragDetailViewModel : VertragDetailViewModelVersion, IDetailViewModel
     {
-        public Guid guid { get; private set; }
+        public Guid guid => Entity.VertragId;
 
         public List<WohnungListViewModelEntry> AlleWohnungen;
         public List<KontaktListViewModelEntry> AlleKontakte;
@@ -50,6 +50,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public new void SetEntity(Vertrag v)
         {
+            Entity = v;
             var list = WalterDbService.ctx.Vertraege
                   .Where(e => e.VertragId == v.VertragId)
                   .Include(e => e.Wohnung)
@@ -57,7 +58,6 @@ namespace Deeplex.Saverwalter.ViewModels
                   .OrderBy(e => e.Version)
                   .Reverse()
                   .ToList();
-            guid = list.First().VertragId;
 
             Mieten.Value = new(guid, NotificationService, WalterDbService);
             MietMinderungen.Value = new(guid, NotificationService, WalterDbService);

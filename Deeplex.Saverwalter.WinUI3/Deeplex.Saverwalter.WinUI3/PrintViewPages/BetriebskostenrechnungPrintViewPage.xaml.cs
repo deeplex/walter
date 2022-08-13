@@ -24,15 +24,24 @@ namespace Deeplex.Saverwalter.WinUI3
         {
             if (e.Parameter is Vertrag v)
             {
-                ViewModel.SetEntity(v);
+                ViewModel.SetEntity(v, DateTime.Now.Year - 1);
+                TPrint<Page>.Print(ViewModel.Betriebskostenabrechnung.Value, new BetriebskostenPrintImpl(this));
             }
 
             App.Window.CommandBar.MainContent = new PrintCommandBarControl { ViewModel = ViewModel };
-            var self = this;
-            TPrint<Page>.Print(ViewModel.Betriebskostenabrechnung, new BetriebskostenPrintImpl(self));
 
             base.OnNavigatedTo(e);
         }
+
+
+        private void Jahr_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+        {
+            ViewModel.Jahr = (int)((NumberBox)sender).Value;
+            Panel.Children.Clear();
+            TPrint<Page>.Print(ViewModel.Betriebskostenabrechnung.Value, new BetriebskostenPrintImpl(this));
+        }
+
+        // Betriebskostenprint:
 
         private sealed class BetriebskostenPrintImpl : IPrint<Page>
         {

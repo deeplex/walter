@@ -10,7 +10,7 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class ErhaltungsaufwendungPrintViewModel : IPrintViewModel
     {
-        public ObservableProperty<int> Jahr { get; } = new();
+        public int Jahr { get; set; }
         public ImmutableList<ErhaltungsaufwendungenPrintEntry> Wohnungen { get; private set; }
         public ImmutableList<ErhaltungsaufwendungPrintViewModel> Zusatz;
         public string Titel { get; private set; }
@@ -52,9 +52,9 @@ namespace Deeplex.Saverwalter.ViewModels
                 w = w.Concat(ww).ToList();
                 filtered = filtered.Concat(filterered).ToList();
 
-                await Files.PrintErhaltungsaufwendungen(w, false, Jahr.Value, db, fs, filtered);
+                await Files.PrintErhaltungsaufwendungen(w, false, Jahr, db, fs, filtered);
             }, _ => true);
-            Jahr.Value = DateTime.Now.Year - 1;
+            Jahr = DateTime.Now.Year - 1;
         }
         public void SetEntity(Wohnung w)
         {
