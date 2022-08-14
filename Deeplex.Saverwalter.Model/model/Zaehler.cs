@@ -7,7 +7,7 @@ namespace Deeplex.Saverwalter.Model
         public int ZaehlerId { get; set; }
         public string Kennnummer { get; set; } = null!;
         public Wohnung? Wohnung { get; set; } = null!;
-        public Zaehler? AllgemeinZaehler { get; set; } = null!;
+        public Zaehler? Allgemeinzaehler { get; set; } = null!;
         public List<Zaehler> EinzelZaehler { get; private set; } = new List<Zaehler>();
         public int? WohnungId { get; set; }
         public Zaehlertyp Typ { get; set; }

@@ -33,7 +33,7 @@
                             PlaceholderText="Wohnung hinzufügen"
                             SelectedItem="{x:Bind ViewModel.Wohnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Button
-                            Command="{x:Bind ViewModel.DeleteZaehlerWohnung}"
+                            Command="{x:Bind ViewModel.DeleteWohnung}"
                             VerticalAlignment="Bottom">
                             <SymbolIcon Symbol="Delete"/>
                         </Button>
@@ -44,34 +44,32 @@
                             Margin="20,20,0,0"
                             Header="Allgemeinzähler"
                             Width="380"
-                            ItemsSource="{x:Bind ViewModel.EinzelZaehler}"
-                            SelectedItem="{x:Bind ViewModel.AllgemeinZaehler, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            ItemsSource="{x:Bind ViewModel.AllgemeinzaehlerList}"
+                            SelectedItem="{x:Bind ViewModel.Allgemeinzaehler.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Button
-                            Command="{x:Bind ViewModel.DeleteAllgemeinZaehler}"
+                            Command="{x:Bind ViewModel.DeleteAllgemeinzaehler}"
                             VerticalAlignment="Bottom">
                             <SymbolIcon Symbol="Delete"/>
                         </Button>
                     </mtuuc:WrapPanel>
-                    <StackPanel>
-                        <TextBox
-                            Margin="20,20,0,0"
-                            Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            Header="Notiz"/>
-                    </StackPanel>
-                    <StackPanel Margin="0,20,0,0" Visibility="{x:Bind ViewModel.isInitialized, Mode=OneWay}">
-                        <uc:ExpanderControl IsExpanded="True" Header="Zählerstände" Command="{x:Bind ViewModel.Staende.Value.Add}">
-                            <uc:ExpanderControl.MainContent>
-                                <uc:ZaehlerstandListControl ViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" />
-                            </uc:ExpanderControl.MainContent>
-                        </uc:ExpanderControl>
-                    </StackPanel>
-                    <StackPanel Visibility="{x:Bind ViewModel.isInitialized, Mode=OneWay}">
-                        <uc:ExpanderControl Header="Einzelzähler">
-                            <uc:ExpanderControl.MainContent>
-                                <uc:ZaehlerListControl ZaehlerId="{x:Bind ViewModel.Id, Mode=OneWay}"/>
-                            </uc:ExpanderControl.MainContent>
-                        </uc:ExpanderControl>
-                    </StackPanel>
+                    <TextBox
+                        Margin="20,20,0,0"
+                        Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Header="Notiz"/>
+                    <uc:ExpanderControl
+                        Margin="0,20,0,0"
+                        Visibility="{x:Bind ViewModel.isInitialized, Mode=OneWay}"
+                        IsExpanded="True" Header="Zählerstände"
+                        Command="{x:Bind ViewModel.Staende.Value.Add}">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:ZaehlerstandListControl ViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" />
+                        </uc:ExpanderControl.MainContent>
+                    </uc:ExpanderControl>
+                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized, Mode=OneWay}" Header="Dem selben Allgemeinzähler zugeordnet:">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:ZaehlerListControl ViewModel="{x:Bind ZaehlerViewModel}"/>
+                        </uc:ExpanderControl.MainContent>
+                    </uc:ExpanderControl>
                 </StackPanel>
             </ScrollViewer>
         </uc:FileDropControl.MainContent>

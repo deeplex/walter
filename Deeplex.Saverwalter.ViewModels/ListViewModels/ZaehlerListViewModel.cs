@@ -23,6 +23,17 @@ namespace Deeplex.Saverwalter.ViewModels
             List.Value = AllRelevant.ToImmutableList();
         }
 
+        public void SetList(Zaehler z)
+        {
+            if (z.Allgemeinzaehler is Zaehler zz)
+            {
+                AllRelevant = transform(include(WalterDbService)
+                    .Where(a => a.Allgemeinzaehler is Zaehler az && az.ZaehlerId == zz.ZaehlerId)
+                    .ToList());
+               List.Value = AllRelevant.ToImmutableList();
+            }
+        }
+
         public void SetList(Wohnung w)
         {
             if (w == null) return;
@@ -32,7 +43,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToList());
             List.Value = AllRelevant.ToImmutableList();
         }
-
 
         public ZaehlerListViewModel(IWalterDbService db, INotificationService ns)
         {

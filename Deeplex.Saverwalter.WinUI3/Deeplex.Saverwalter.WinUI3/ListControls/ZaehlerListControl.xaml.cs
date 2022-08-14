@@ -10,8 +10,6 @@ namespace Deeplex.Saverwalter.WinUI3
         public ZaehlerListControl()
         {
             InitializeComponent();
-            ViewModel = App.Container.GetInstance<ZaehlerListViewModel>();
-            ViewModel.SetList();
         }
 
         private void Details_Click(object sender, RoutedEventArgs e)
@@ -31,32 +29,6 @@ namespace Deeplex.Saverwalter.WinUI3
                     typeof(ZaehlerListViewModel),
                     typeof(ZaehlerListControl),
                     new PropertyMetadata(null));
-
-        public int WohnungId
-        {
-            get { return (int)GetValue(WohnungIdProperty); }
-            set { SetValue(WohnungIdProperty, value); }
-        }
-
-        public static readonly DependencyProperty WohnungIdProperty
-            = DependencyProperty.Register(
-                  "WohnungId",
-                  typeof(int),
-                  typeof(ZaehlerListControl),
-                  new PropertyMetadata(0));
-
-        public int ZaehlerId
-        {
-            get { return (int)GetValue(ZaehlerIdProperty); }
-            set { SetValue(ZaehlerIdProperty, value); }
-        }
-
-        public static readonly DependencyProperty ZaehlerIdProperty
-            = DependencyProperty.Register(
-            "ZaehlerId",
-            typeof(int),
-            typeof(ZaehlerListControl),
-            new PropertyMetadata(0));
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

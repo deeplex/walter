@@ -64,7 +64,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Include(u => u.Wohnungen).ThenInclude(w => w.Adresse)
                 .ToList()
                 .Where(u => u.Typ == e)
-                //.ToList()
                 .Select(e => new UmlageListViewModelEntry(e))
                 .ToList();
         }

@@ -41,6 +41,8 @@ namespace Deeplex.Saverwalter.ViewModels
                 };
                 Liste.Value = Liste.Value.Prepend(new ZaehlerstandListViewModelEntry(zs, this)).ToImmutableList();
             }, _ => true);
+
+            SetList(z);
         }
 
     }

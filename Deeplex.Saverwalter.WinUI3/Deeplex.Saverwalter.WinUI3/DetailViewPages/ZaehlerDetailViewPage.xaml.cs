@@ -7,7 +7,8 @@ namespace Deeplex.Saverwalter.WinUI3
 {
     public sealed partial class ZaehlerDetailViewPage : Page
     {
-        public ZaehlerDetailViewModel ViewModel { get; set; } = App.Container.GetInstance<ZaehlerDetailViewModel>();
+        public ZaehlerDetailViewModel ViewModel { get; } = App.Container.GetInstance<ZaehlerDetailViewModel>();
+        public ZaehlerListViewModel ZaehlerViewModel { get; } = App.Container.GetInstance<ZaehlerListViewModel>();
 
         public ZaehlerDetailViewPage()
         {
@@ -19,6 +20,7 @@ namespace Deeplex.Saverwalter.WinUI3
             if (e.Parameter is Zaehler zaehler)
             {
                 ViewModel.SetEntity(zaehler);
+                ZaehlerViewModel.SetList(zaehler);
             }
 
             App.Window.CommandBar.MainContent = new DetailCommandBarControl { ViewModel = ViewModel };

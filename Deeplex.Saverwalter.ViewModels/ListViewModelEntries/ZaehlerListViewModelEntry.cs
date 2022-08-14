@@ -23,7 +23,7 @@ namespace Deeplex.Saverwalter.ViewModels
         // TODO remove i18n from viewmodels
         public string Wohnung => Entity.Wohnung == null ? "Keine Wohnung" :
             AdresseViewModel.Anschrift(Entity.Wohnung) + ", " + Entity.Wohnung.Bezeichnung;
-        public Zaehler AllgemeinZaehler => Entity.AllgemeinZaehler;
+        public Zaehler AllgemeinZaehler => Entity.Allgemeinzaehler;
 
         public ZaehlerListViewModelEntry(Zaehler z)
         {
