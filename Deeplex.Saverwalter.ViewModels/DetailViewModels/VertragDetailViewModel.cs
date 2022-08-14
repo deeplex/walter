@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public int EndeJahr => Versionen.Value.First().Ende.Value?.Year ?? 9999;
 
         public ObservableProperty<MieteListViewModel> Mieten { get; private set; } = new();
-        public ObservableProperty<MietminderungListViewModel> MietMinderungen { get; private set; } = new();
+        public ObservableProperty<MietminderungListViewModel> Mietminderungen { get; private set; } = new();
         public ObservableProperty<KontaktListViewModel> Mieter { get; private set; } = new();
 
         public new KontaktListViewModelEntry Ansprechpartner
@@ -44,9 +44,12 @@ namespace Deeplex.Saverwalter.ViewModels
             set
             {
                 Versionen.Value.Last().Wohnung.Value = value;
+                RaisePropertyChanged(nameof(Vermieter));
                 RaisePropertyChangedAuto();
             }
         }
+
+        public string Vermieter => Versionen.Value.Last().Wohnung.Value.Besitzer;
 
         public new void SetEntity(Vertrag v)
         {
@@ -60,7 +63,7 @@ namespace Deeplex.Saverwalter.ViewModels
                   .ToList();
 
             Mieten.Value = new(guid, NotificationService, WalterDbService);
-            MietMinderungen.Value = new(guid, NotificationService, WalterDbService);
+            Mietminderungen.Value = new(guid, NotificationService, WalterDbService);
             Mieter.Value = new(WalterDbService, NotificationService);
             Mieter.Value.SetList(list.First());
 
@@ -102,7 +105,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Save = new RelayCommand(_ =>
             {
                 Mieten.Value.Liste.Value.ForEach(e => e.save());
-                MietMinderungen.Value.Liste.Value.ForEach(e => e.save());
+                Mietminderungen.Value.Liste.Value.ForEach(e => e.save());
 
                 Versionen.Value.ForEach(v => v.versionSave());
                 save();

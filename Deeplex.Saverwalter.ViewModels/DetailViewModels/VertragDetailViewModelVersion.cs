@@ -19,10 +19,6 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<string> Notiz;
         public SavableProperty<KontaktListViewModelEntry> Ansprechpartner { get; protected set; }
 
-        public KontaktListViewModelEntry Vermieter
-            => Wohnung?.Value?.Entity?.BesitzerId is Guid g && g != Guid.Empty ?
-                    new KontaktListViewModelEntry(WalterDbService, g) : null;
-
         public RelayCommand RemoveDate;
 
         public VertragDetailViewModelVersion(INotificationService ns, IWalterDbService db): base(ns, db)
@@ -40,15 +36,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Beginn = new(this, v.Beginn);
             Ende = new(this, v.Ende);
             Notiz = new(this, v.Notiz);
-
-            if (v.AnsprechpartnerId != Guid.Empty && v.AnsprechpartnerId != null)
-            {
-                Ansprechpartner = new(this, new(WalterDbService, v.AnsprechpartnerId.Value));
-            }
-            else
-            {
-                Ansprechpartner = new(this, null);
-            }
+            Ansprechpartner = new(this, v.AnsprechpartnerId is Guid g ? new(WalterDbService, g) : null);
         }
 
         public override void checkForChanges()

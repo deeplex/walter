@@ -34,28 +34,28 @@
         <uc:FileDropControl.MainContent>
             <ScrollViewer>
                 <StackPanel>
-                    <Button Click="Betriebskostenabrechnung_Click" HorizontalAlignment="Right">
+                    <Button Click="Betriebskostenabrechnung_Click" HorizontalAlignment="Right" Margin="0,-10,0,-120">
                         <StackPanel Orientation="Horizontal">
                             <SymbolIcon Symbol="PostUpdate" />
                             <TextBlock Margin="10,0,0,0" Text="Betriebskostenrechnung"/>
                         </StackPanel>
                     </Button>
                     <mtuuc:WrapPanel Orientation="Horizontal">
-                        <TextBlock Text="Laufzeit:" Margin="20,50,0,0" Style="{StaticResource Labels}"/>
+                        <TextBlock Text="Laufzeit:" Margin="20,30,0,0" Style="{StaticResource Labels}"/>
                         <TextBlock
                             VerticalAlignment="Bottom"
-                            Margin="20,20,0,7"
+                            Margin="20,0,0,7"
                             Text="{x:Bind ViewModel.lastBeginn, Mode=OneWay}" />
                         <TextBlock
                             VerticalAlignment="Bottom"
-                            Margin="20,20,0,7"
+                            Margin="20,0,0,7"
                             Text=" - "/>
                         <TextBlock
                             VerticalAlignment="Bottom"
-                            Margin="20,20,20,7"
+                            Margin="20,0,20,7"
                             Text="{x:Bind ViewModel.firstEnde, Mode=OneWay}" />
                         <Button
-                            Margin="0,43,0,0"
+                            Margin="0,23,0,0"
                             Command="{x:Bind ViewModel.RemoveDate}">
                             <SymbolIcon Symbol="Delete"></SymbolIcon>
                         </Button>
@@ -158,9 +158,9 @@
                             <uc:MieteListControl ViewModel="{x:Bind ViewModel.Mieten.Value, Mode=OneWay}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
-                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Mietminderungen" Command="{x:Bind ViewModel.MietMinderungen.Value.Add}">
+                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Mietminderungen" Command="{x:Bind ViewModel.Mietminderungen.Value.Add}">
                         <uc:ExpanderControl.MainContent>
-                            <uc:MietminderungListControl ViewModel="{x:Bind ViewModel.MietMinderungen.Value, Mode=OneWay}"/>
+                            <uc:MietminderungListControl ViewModel="{x:Bind ViewModel.Mietminderungen.Value, Mode=OneWay}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
                     <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Umlagen">
