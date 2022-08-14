@@ -14,8 +14,8 @@ namespace Deeplex.Saverwalter.ViewModels
         public override string ToString() => AdresseViewModel.Anschrift(Entity) + " - " + Bezeichnung.Value;
 
         public ImmutableList<KontaktListViewModelEntry> AlleVermieter;
-        public KontaktListViewModelEntry Besitzer { get; set; }
 
+        public SavableProperty<KontaktListViewModelEntry> Besitzer { get; set; }
         public SavableProperty<AdresseViewModel<Wohnung>> Adresse { get; set; }
         public SavableProperty<string> Bezeichnung { get; set; }
         public SavableProperty<string> Notiz { get; set; }
@@ -36,6 +36,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Save = new RelayCommand(_ =>
             {
                 Adresse.Value.save();
+                Entity.BesitzerId = Besitzer.Value.Entity.PersonId;
                 Entity.Adresse = Adresse.Value.Entity;
                 Entity.Bezeichnung = Bezeichnung.Value;
                 Entity.Wohnflaeche = Wohnflaeche.Value;
@@ -51,11 +52,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Entity = e;
 
-            if (e.BesitzerId != Guid.Empty)
-            {
-                Besitzer = AlleVermieter.SingleOrDefault(k => k.Entity.PersonId == e.BesitzerId);
-            }
-
+            Besitzer = new(this, AlleVermieter.SingleOrDefault(k => k.Entity.PersonId == e.BesitzerId));
             Bezeichnung = new(this, e.Bezeichnung);
             Notiz = new(this, e.Notiz);
             Wohnflaeche = new(this, e.Wohnflaeche);
@@ -68,6 +65,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             NotificationService.outOfSync =
                 Entity.Adresse.AdresseId != Adresse.Value.Id ||
+                Entity.BesitzerId != Besitzer.Value.Entity.PersonId ||
                 Entity.Bezeichnung != Bezeichnung.Value ||
                 Entity.Wohnflaeche != Wohnflaeche.Value ||
                 Entity.Nutzflaeche != Nutzflaeche.Value ||

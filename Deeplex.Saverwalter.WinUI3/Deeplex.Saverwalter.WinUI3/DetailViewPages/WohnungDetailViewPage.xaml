@@ -29,7 +29,7 @@
                             Header="Besitzer"
                             Margin="20,20,0,0"
                             PlaceholderText="Besitzer"
-                            SelectedItem="{x:Bind ViewModel.Besitzer, Mode=TwoWay}"
+                            SelectedItem="{x:Bind ViewModel.Besitzer.Value, Mode=TwoWay}"
                             ItemsSource="{x:Bind ViewModel.AlleVermieter, Mode=OneWay}"/>
                         <Button
                             VerticalAlignment="Bottom"
