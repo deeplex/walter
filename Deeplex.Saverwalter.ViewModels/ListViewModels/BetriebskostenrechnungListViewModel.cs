@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public override void SetList()
         {
-            AllRelevant = transform(WalterDbService, include(WalterDbService));
+            AllRelevant = transform(include(WalterDbService));
             updateList();
         }
 
@@ -35,8 +35,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (v == null) return;
 
-            AllRelevant = transform(WalterDbService,
-                include(WalterDbService)
+            AllRelevant = transform(include(WalterDbService)
                     .Where(b => b.Umlage.Wohnungen.Exists(w => v.Wohnung.WohnungId == w.WohnungId))
                     .ToList());
             List.Value = AllRelevant.ToImmutableList();
@@ -46,8 +45,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (w == null) return;
 
-            AllRelevant = transform(WalterDbService,
-                include(WalterDbService)
+            AllRelevant = transform(include(WalterDbService)
                     .Where(b => b.Umlage.Wohnungen.Exists(i => i.WohnungId == w.WohnungId))
                     .ToList());
             List.Value = AllRelevant.ToImmutableList();
@@ -57,7 +55,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (u == null) return;
 
-            AllRelevant = transform(WalterDbService, include(WalterDbService)
+            AllRelevant = transform(include(WalterDbService)
                 .Where(e => u.Betriebskostenrechnungen.Exists(i => i.BetriebskostenrechnungId == e.BetriebskostenrechnungId))
                 .ToList());
             List.Value = AllRelevant.ToImmutableList();
@@ -73,7 +71,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Include(b => b.Umlage.Wohnungen).ThenInclude(g => g.Adresse).ThenInclude(a => a.Anhaenge)
                 .ToList();
         }
-        private ImmutableList<BetriebskostenrechnungListViewModelEntry> transform(IWalterDbService db, List<Betriebskostenrechnung> list)
+        private ImmutableList<BetriebskostenrechnungListViewModelEntry> transform(List<Betriebskostenrechnung> list)
         {
             return list
                 .Select(w => new BetriebskostenrechnungListViewModelEntry(w))

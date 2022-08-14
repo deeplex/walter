@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public override void SetList()
         {
-            AllRelevant = transform(WalterDbService, include(WalterDbService));
+            AllRelevant = transform(include(WalterDbService));
             List.Value = AllRelevant.ToImmutableList();
         }
 
@@ -27,8 +27,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (w == null) return;
 
-            AllRelevant = transform(WalterDbService,
-                include(WalterDbService)
+            AllRelevant = transform(include(WalterDbService)
                 .Where(z => z.Wohnung != null && z.Wohnung.WohnungId == w.WohnungId)
                 .ToList());
             List.Value = AllRelevant.ToImmutableList();
@@ -51,7 +50,7 @@ namespace Deeplex.Saverwalter.ViewModels
                .Include(z => z.Staende).ThenInclude(s => s.Anhaenge)
                .ToList();
         }
-        private ImmutableList<ZaehlerListViewModelEntry> transform(IWalterDbService db, List<Zaehler> list)
+        private ImmutableList<ZaehlerListViewModelEntry> transform(List<Zaehler> list)
         {
             return list
                 .Select(z => new ZaehlerListViewModelEntry(z))

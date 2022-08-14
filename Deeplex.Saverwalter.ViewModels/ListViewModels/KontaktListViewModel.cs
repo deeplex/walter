@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public override void SetList()
         {
-            AllRelevant = transform(WalterDbService, includeNP(WalterDbService), includeJP(WalterDbService));
+            AllRelevant = transform(includeNP(WalterDbService), includeJP(WalterDbService));
             updateList();
         }
 
@@ -66,7 +66,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 }
             });
 
-            AllRelevant = transform(WalterDbService, np, jp);
+            AllRelevant = transform(np, jp);
             List.Value = AllRelevant.ToImmutableList();
         }
 
@@ -74,7 +74,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (jp == null) return;
 
-            AllRelevant = transform(WalterDbService, jp.NatuerlicheMitglieder, jp.JuristischeMitglieder);
+            AllRelevant = transform(jp.NatuerlicheMitglieder, jp.JuristischeMitglieder);
             List.Value = AllRelevant.ToImmutableList();
         }
 
@@ -82,7 +82,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (jp == null) return;
 
-            AllRelevant = transform(WalterDbService, new List<NatuerlichePerson> { }, jp.JuristischePersonen);
+            AllRelevant = transform(new List<NatuerlichePerson> { }, jp.JuristischePersonen);
             List.Value = AllRelevant.ToImmutableList();
         }
 
@@ -103,7 +103,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToList();
         }
 
-        private ImmutableList<KontaktListViewModelEntry> transform(IWalterDbService db, List<NatuerlichePerson> np, List<JuristischePerson> jp)
+        private ImmutableList<KontaktListViewModelEntry> transform(List<NatuerlichePerson> np, List<JuristischePerson> jp)
         {
             return
                 np.Select(p => new KontaktListViewModelEntry(p))

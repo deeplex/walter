@@ -10,47 +10,34 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class VertragListViewModelEntry : VertragListViewModelEntryVersion
     {
-        public List<VertragListViewModelEntryVersion> Versionen { get; }
-            = new List<VertragListViewModelEntryVersion>();
-        public ObservableProperty<VertragListViewModelMiete> AddMieteValue = new();
+        public List<VertragListViewModelEntryVersion> Versionen { get; } = new();
 
-        public ImmutableList<VertragListViewModelMiete> Mieten { get; set; }
+        public MieteListViewModel Mieten { get; set; }
         public string LastMiete
         {
             get
             {
-                var mieten = Mieten.OrderBy(m => m.Datum.Value);
+                var mieten = Mieten.List.Value.OrderBy(m => m.Zahlungsdatum.Value);
                 var last = mieten.Any() ? mieten.Last() : null;
-                return last != null ? last.Datum.Value.ToString("dd.MM.yyyy") +
+                return last != null ? last.Zahlungsdatum.Value.ToString("dd.MM.yyyy") +
                     " - Betrag: " + string.Format("{0:F2}€", last.Betrag) : "";
             }
         }
         public bool HasLastMiete => LastMiete != "";
 
-        public VertragListViewModelEntry(IGrouping<Guid, Vertrag> v, IWalterDbService db)
+        public VertragListViewModelEntry(IGrouping<Guid, Vertrag> v, IWalterDbService db, INotificationService ns)
             : base(v.OrderBy(vs => vs.Version).Last(), db)
         {
             Versionen = v.OrderBy(vs => vs.Version).Select(vs => new VertragListViewModelEntryVersion(vs, db)).ToList();
             Beginn = Versionen.First().Beginn;
 
-            Mieten = db.ctx.Mieten
-                .Where(m => m.VertragId == v.First().VertragId)
-                .Select(m => new VertragListViewModelMiete(m))
-                .ToImmutableList();
+            Mieten = new MieteListViewModel(v.Key, ns, db);
 
-            AddMieteValue.Value = new VertragListViewModelMiete();
             AddMiete = new RelayCommand(_ =>
             {
-                Mieten = Mieten.Add(AddMieteValue.Value);
-                db.ctx.Mieten.Add(new Miete
-                {
-                    Zahlungsdatum = AddMieteValue.Value.Datum.Value.UtcDateTime,
-                    BetreffenderMonat = AddMieteValue.Value.BetreffenderMonat.Value.UtcDateTime,
-                    Betrag = AddMieteValue.Value.Betrag,
-                    VertragId = Versionen.Last().VertragId,
-                });
+                Mieten.Add.Execute(null);
+                db.ctx.Mieten.Add(Mieten.List.Value.Last().Entity);
                 db.SaveWalter();
-                AddMieteValue.Value = new VertragListViewModelMiete();
                 RaisePropertyChanged(nameof(LastMiete));
                 RaisePropertyChanged(nameof(HasLastMiete));
             }, _ => true);

@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public override void SetList()
         {
-            AllRelevant = transform(WalterDbService, include(WalterDbService));
+            AllRelevant = transform(include(WalterDbService));
             updateList();
         }
 
@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             var mieterSets = WalterDbService.ctx.MieterSet.ToList();
 
-            AllRelevant = transform(WalterDbService, include(WalterDbService).Where(v =>
+            AllRelevant = transform(include(WalterDbService).Where(v =>
                 v.AnsprechpartnerId == p.PersonId ||
                 v.Wohnung.BesitzerId == p.PersonId ||
                 mieterSets.Exists(w => w.VertragId == v.VertragId && w.PersonId == p.PersonId)
@@ -49,7 +49,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (w == null) return;
 
-            AllRelevant = transform(WalterDbService, include(WalterDbService).Where(v => v.Wohnung.WohnungId == w.WohnungId).ToList());
+            AllRelevant = transform(include(WalterDbService).Where(v => v.Wohnung.WohnungId == w.WohnungId).ToList());
             List.Value = AllRelevant.ToImmutableList();
         }
 
@@ -62,10 +62,10 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToList();
         }
 
-        private ImmutableList<VertragListViewModelEntry> transform(IWalterDbService db, List<Vertrag> list)
+        private ImmutableList<VertragListViewModelEntry> transform(List<Vertrag> list)
         {
             return list.GroupBy(v => v.VertragId)
-                .Select(v => new VertragListViewModelEntry(v, db))
+                .Select(v => new VertragListViewModelEntry(v, WalterDbService, NotificationService))
                 .OrderBy(v => v.Beginn).Reverse()
                 .ToImmutableList();
         }
