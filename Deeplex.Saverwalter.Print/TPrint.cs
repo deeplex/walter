@@ -251,7 +251,7 @@ namespace Deeplex.Saverwalter.Print
             }
             else
             {
-                if (b.Umlagen.Exists(r => r.Schluessel == Umlageschluessel.NachWohnflaeche))
+                if (g.Umlagen.Exists(r => r.Schluessel == Umlageschluessel.NachWohnflaeche))
                 {
                     col1.Add("bei Umlage nach Wohnfläche (n. WF)");
                     col2.Add("");
@@ -268,7 +268,7 @@ namespace Deeplex.Saverwalter.Print
                     underlined.Add(true);
                 }
 
-                if (b.Umlagen.Exists(r => r.Schluessel == Umlageschluessel.NachNutzflaeche))
+                if (g.Umlagen.Exists(r => r.Schluessel == Umlageschluessel.NachNutzflaeche))
                 {
                     col1.Add("bei Umlage nach Nutzfläche (n. NF)");
                     col2.Add("");
@@ -285,7 +285,7 @@ namespace Deeplex.Saverwalter.Print
                     underlined.Add(true);
                 }
 
-                if (b.Umlagen.Exists(r => r.Schluessel == Umlageschluessel.NachNutzeinheit))
+                if (g.Umlagen.Exists(r => r.Schluessel == Umlageschluessel.NachNutzeinheit))
                 {
                     col1.Add("bei Umlage nach Nutzeinheiten (n. NE)");
                     col2.Add("");
@@ -302,7 +302,7 @@ namespace Deeplex.Saverwalter.Print
                     underlined.Add(true);
                 }
 
-                if (b.Umlagen.Exists(r => r.Schluessel == Umlageschluessel.NachPersonenzahl))
+                if (g.Umlagen.Exists(r => r.Schluessel == Umlageschluessel.NachPersonenzahl))
                 {
                     col1.Add("bei Umlage nach Personenzahl (n. Pers.)");
                     col2.Add("");
@@ -329,7 +329,7 @@ namespace Deeplex.Saverwalter.Print
                     }
                 }
 
-                if (b.Umlagen.Any(e => e.Schluessel == Umlageschluessel.NachVerbrauch))
+                if (g.Umlagen.Any(e => e.Schluessel == Umlageschluessel.NachVerbrauch))
                 {
                     col1.Add("bei Umlage nach Verbrauch (n. Verb.)");
                     col2.Add("");
@@ -390,6 +390,10 @@ namespace Deeplex.Saverwalter.Print
             void kostenPunkt(Umlage umlage, string zeitraum, int Jahr, double anteil, bool f = true)
             {
                 var betrag = umlage.Betriebskostenrechnungen.Where(r => r.BetreffendesJahr == b.Jahr).Sum(b => b.Betrag);
+                if (umlage.Typ == Betriebskostentyp.AllgemeinstromHausbeleuchtung)
+                {
+                    betrag -= b.AllgStromFaktor;
+                }
                 col1.Add(f ? umlage.Typ.ToDescriptionString() : "");
                 col2.Add(g.GesamtEinheiten == 1 ? "Direkt" : (f ? umlage.Schluessel.ToDescriptionString() : ""));
                 col3.Add(zeitraum);
@@ -400,7 +404,7 @@ namespace Deeplex.Saverwalter.Print
                 underlined.Add(true);
             }
 
-            foreach (var umlage in b.Umlagen.Where(r => (int)r.Typ % 2 == 0)) // Kalte Betriebskosten
+            foreach (var umlage in g.Umlagen.Where(r => (int)r.Typ % 2 == 0)) // Kalte Betriebskosten
             {
                 switch (umlage.Schluessel)
                 {
@@ -479,8 +483,8 @@ namespace Deeplex.Saverwalter.Print
                 {
                     "Betrag",
                     Euro(betrag),
-                    Euro(betrag * 0.05),
-                    Euro(betrag * 1.05),
+                    Euro(b.AllgStromFaktor),
+                    Euro(betrag + b.AllgStromFaktor),
                 };
                 var cols = new List<List<string>> { col1, col2 }.Select(w => w.ToArray()).ToArray();
 
@@ -666,13 +670,6 @@ namespace Deeplex.Saverwalter.Print
             {
                 Euro(b.Gezahlt - b.KaltMiete)
             };
-
-
-            if (b.Minderung > 0)
-            {
-                col1.Add("Verrechnung mit Mietminderung: ");
-                col2.Add("+" + Euro(b.KaltMinderung));
-            }
 
             var f = true;
             foreach (var gruppe in b.Gruppen)

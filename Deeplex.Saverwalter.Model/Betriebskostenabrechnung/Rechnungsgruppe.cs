@@ -73,8 +73,6 @@ namespace Deeplex.Saverwalter.Model
             {
                 var VerbrauchList = Umlagen
                     .Where(g => g.Schluessel == Umlageschluessel.NachVerbrauch)
-                    .SelectMany(u => u.Betriebskostenrechnungen)
-                    .Where(r => r.BetreffendesJahr == b.Jahr)
                     .Select(r => b.GetVerbrauch(r));
 
                 if (VerbrauchList.Any(w => w.Count() == 0))
@@ -84,22 +82,24 @@ namespace Deeplex.Saverwalter.Model
                     return new Dictionary<Betriebskostentyp, List<VerbrauchAnteil>>();
                 }
 
-                return VerbrauchList.ToDictionary(r =>
-                    r.First().Betriebskostentyp,
-                    r => r.Select(rr => new VerbrauchAnteil(rr.Kennnummer, rr.Zaehlertyp, rr.Delta, rr.Delta / GesamtVerbrauch[r.First().Betriebskostentyp]
-                        .First(rrr => rrr.Typ == rr.Zaehlertyp).Delta))
-                        .ToList());
+                return VerbrauchList
+                    .Where(r => r.Count > 0 && GesamtVerbrauch.ContainsKey(r.First().Betriebskostentyp))
+                    .ToDictionary(r => r.First().Betriebskostentyp, r => r.Select(rr => new VerbrauchAnteil(
+                        rr.Kennnummer, 
+                        rr.Zaehlertyp,
+                        rr.Delta,
+                        rr.Delta / GesamtVerbrauch[r.First().Betriebskostentyp].First(rrr => rrr.Typ == rr.Zaehlertyp).Delta))
+                    .ToList());
             }
         }
 
 
         public Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch => Umlagen
             .Where(g => g.Schluessel == Umlageschluessel.NachVerbrauch)
-            .SelectMany(u => u.Betriebskostenrechnungen)
-            .Where(u => u.BetreffendesJahr == b.Jahr)
             .Select(r => b.GetVerbrauch(r, true))
-        .ToDictionary(g => g.First().Betriebskostentyp, g => g.GroupBy(gg => gg.Zaehlertyp)
-        .Select(gg => (gg.Key, gg.Sum(ggg => ggg.Delta))).ToList());
+            .Where(g => g.Count > 0)
+            .ToDictionary(g => g.First().Betriebskostentyp, g => g.GroupBy(gg => gg.Zaehlertyp)
+            .Select(gg => (gg.Key, gg.Sum(ggg => ggg.Delta))).ToList());
 
         private double checkVerbrauch(Betriebskostentyp t)
         {
@@ -132,15 +132,14 @@ namespace Deeplex.Saverwalter.Model
             .Where(r => (int)r.Typ % 2 == 0)
             .SelectMany(u => u.Betriebskostenrechnungen)
             .Where(r => r.BetreffendesJahr == b.Jahr)
-            .Aggregate(0.0, (a, r) =>
-                r.Umlage.Schluessel switch
-                {
-                    Umlageschluessel.NachWohnflaeche => a + r.Betrag * WFZeitanteil,
-                    Umlageschluessel.NachNutzeinheit => a + r.Betrag * NEZeitanteil,
-                    Umlageschluessel.NachPersonenzahl => a + PersZeitanteil.Aggregate(0.0, (a2, z) => a2 += z.Anteil * r.Betrag),
-                    Umlageschluessel.NachVerbrauch => a + r.Betrag * checkVerbrauch(r.Umlage.Typ),
-                    _ => a + 0, // TODO or throw something...
-                });
+            .Sum(r => r.Umlage.Schluessel switch
+            {
+                Umlageschluessel.NachWohnflaeche => r.Betrag * WFZeitanteil,
+                Umlageschluessel.NachNutzeinheit => r.Betrag * NEZeitanteil,
+                Umlageschluessel.NachPersonenzahl => PersZeitanteil.Sum(z => z.Anteil * r.Betrag),
+                Umlageschluessel.NachVerbrauch => r.Betrag * checkVerbrauch(r.Umlage.Typ),
+                _ => 0
+            });
         public double GesamtBetragWarm => Heizkosten.Sum(h => h.PauschalBetrag);
         public double BetragWarm => Heizkosten.Sum(h => h.Kosten);
 
@@ -148,30 +147,6 @@ namespace Deeplex.Saverwalter.Model
         {
             Umlagen = gruppe;
             b = _b;
-
-            // TODO!
-            // Remove 5% of Heizkosten to allgStrom (they are added there)
-            // TODO only the first one is used here...
-            //var allgStrom = Umlagen
-            //    .Find(r => r.Typ == Betriebskostentyp.AllgemeinstromHausbeleuchtung)
-            //    .Betriebskostenrechnungen
-            //    .Where(r => r.BetreffendesJahr == b.Jahr)
-            //    .First();
-            // TODO this 0.05 has to be variable.
-            //if (allgStrom != null && !b.AllgStromVerrechnetMitHeizkosten)
-            //{
-            //    var copy = allgStrom.ShallowCopy();
-
-            //    copy.Betrag -= b.Vertrag.Wohnung.Umlagen.SelectMany(u => u.Betriebskostenrechnungen)
-            //        .Where(g => g.BetreffendesJahr == b.Jahr && (int)g.Umlage.Typ % 2 == 1)
-            //        .Select(r => r.Betrag)
-            //        .Sum() * 0.05;
-            //    b.AllgStromVerrechnetMitHeizkosten = true;
-            //    if (copy.Betrag < 0)
-            //    {
-            //        b.notes.Add(new Note("Allgemeinstrom hat einen Betrag von " + string.Format("{0:N2}€", copy.Betrag), Severity.Error));
-            //    }
-            //}
         }
 
         private static List<PersonenZeitIntervall>
@@ -196,7 +171,10 @@ namespace Deeplex.Saverwalter.Model
                     i + 1 < merged.Count ? merged[i + 1].Beginn.AddDays(-1) : Ende,
                     i - 1 >= 0 ? merged[i - 1].Personenzahl + merged[i].Personenzahl : merged[i].Personenzahl);
             }
-            merged.RemoveAt(merged.Count - 1);
+            if (merged.Count > 0)
+            {
+                merged.RemoveAt(merged.Count - 1);
+            }
 
             // TODO refactor function to switch from tuple to class - or replace this function by constructor
             var ret = merged.Select(m => new PersonenZeitIntervall(m, parent)).ToList();

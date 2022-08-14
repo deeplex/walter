@@ -11,7 +11,6 @@ namespace Deeplex.Saverwalter.Model
     {
         IPerson Ansprechpartner { get; }
         List<Rechnungsgruppe> Gruppen { get; }
-        List<Umlage> Umlagen { get; }
         Wohnung Wohnung => Vertrag.Wohnung;
         DateTime Nutzungsbeginn { get; }
         int Nutzungszeitspanne { get; }
@@ -34,8 +33,8 @@ namespace Deeplex.Saverwalter.Model
         List<Note> notes { get; }
         Vertrag Vertrag { get; }
         List<Vertrag> Vertragsversionen { get; }
-        List<Verbrauch> GetVerbrauch(Betriebskostenrechnung r, bool ganzeGruppe = false);
-        bool AllgStromVerrechnetMitHeizkosten { get; set; }
+        List<Verbrauch> GetVerbrauch(Umlage u, bool ganzeGruppe = false);
+        double AllgStromFaktor { get; set; }
     }
 
     public sealed class Betriebskostenabrechnung : IBetriebskostenabrechnung
@@ -69,10 +68,24 @@ namespace Deeplex.Saverwalter.Model
             .Where(m => m.BetreffenderMonat >= Abrechnungsbeginn && m.BetreffenderMonat < Abrechnungsende)
             .Sum(z => z.Betrag ?? 0);
 
-        public double KaltMiete => Vertragsversionen.Sum(v => v.Ende != null && v.Ende < Abrechnungsbeginn ? 0 :
-            (Min(v.Ende ?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);
+        public double KaltMiete
+        {
+            get
+            {
+                if (Jahr < Vertragsversionen.First().Beginn.Year ||
+                    (Vertragsversionen.Last().Ende is DateTime d && d.Year < Jahr))
+                {
+                    return 0;
+                }
+                return Vertragsversionen
+                    .Sum(v => v.Ende != null &&
+                        v.Ende < Abrechnungsbeginn ?
+                        0 :
+                        (Min(v.Ende ?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);
+            }
+        }
         public double BetragNebenkosten => Gruppen.Sum(g => g.BetragKalt + g.BetragWarm);
-        public double BezahltNebenkosten => Gezahlt - KaltMiete;
+        public double BezahltNebenkosten => Gezahlt - KaltMiete + KaltMinderung;
 
         public List<MietMinderung> Minderungen => db.MietMinderungen
                 .Where(m => m.VertragId == Vertrag.VertragId &&
@@ -95,11 +108,10 @@ namespace Deeplex.Saverwalter.Model
         public double Zeitanteil => (double)Nutzungszeitspanne / Abrechnungszeitspanne;
 
         public List<Rechnungsgruppe> Gruppen { get; }
-        public List<Umlage> Umlagen { get; }
 
-        public double Result => BezahltNebenkosten - BetragNebenkosten + KaltMinderung + NebenkostenMinderung;
+        public double Result => BezahltNebenkosten - BetragNebenkosten + NebenkostenMinderung;
 
-        public bool AllgStromVerrechnetMitHeizkosten { get; set; } = false;
+        public double AllgStromFaktor { get; set; }
 
         public Betriebskostenabrechnung(SaverwalterContext _db, int rowid, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
         {
@@ -130,7 +142,11 @@ namespace Deeplex.Saverwalter.Model
                         .ThenInclude(w => w.Betriebskostenrechnungen)
                 .First();
 
-            Umlagen = Vertrag.Wohnung.Umlagen;
+            AllgStromFaktor = Vertrag.Wohnung.Umlagen
+                .Where(s => s.Typ == Betriebskostentyp.Heizkosten)
+                .SelectMany(u => u.Betriebskostenrechnungen)
+                .Where(u => u.BetreffendesJahr == Jahr)
+                .Sum(e => e.Betrag) * 0.05;
 
             Gruppen = Vertrag.Wohnung.Umlagen
                 .GroupBy(p => new SortedSet<int>(p.Wohnungen.Select(gr => gr.WohnungId)), new SortedSetIntEqualityComparer())
@@ -140,9 +156,9 @@ namespace Deeplex.Saverwalter.Model
             // If Ansprechpartner or Besitzer is null => throw
         }
 
-        public List<Verbrauch> GetVerbrauch(Betriebskostenrechnung r, bool ganzeGruppe = false)
+        public List<Verbrauch> GetVerbrauch(Umlage u, bool ganzeGruppe = false)
         {
-            var Zaehler = r.Umlage.Typ switch
+            var Zaehler = u.Typ switch
             {
                 Betriebskostentyp.EntwaesserungSchmutzwasser =>
                     db.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
@@ -155,7 +171,7 @@ namespace Deeplex.Saverwalter.Model
 
             var fZaehler = Zaehler.Where(z =>
                 ganzeGruppe ?
-                    r.Umlage.Wohnungen.Contains(z.Wohnung!) :
+                    u.Wohnungen.Contains(z.Wohnung!) :
                     z.WohnungId == Wohnung.WohnungId);
 
             var ende = (ganzeGruppe ? Abrechnungsende : Nutzungsende).Date;
@@ -190,7 +206,7 @@ namespace Deeplex.Saverwalter.Model
             {
                 for (var i = 0; i < Ende.Count(); ++i)
                 {
-                    Deltas.Add(new Verbrauch(r.Umlage.Typ, Ende[i].Zaehler.Kennnummer, Ende[i].Zaehler.Typ, Ende[i].Stand - Beginn[i].Stand));
+                    Deltas.Add(new Verbrauch(u.Typ, Ende[i].Zaehler.Kennnummer, Ende[i].Zaehler.Typ, Ende[i].Stand - Beginn[i].Stand));
                 }
             }
 
