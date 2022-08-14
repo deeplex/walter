@@ -7,7 +7,12 @@
     mc:Ignorable="d"
     xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:uc="using:Deeplex.Saverwalter.WinUI3"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <UserControl.Resources>
+        <conv:NullToInvisibleConverter x:Key="NullToInvisibleConverterKey"/>
+    </UserControl.Resources>
 
     <uc:FileDropControl>
         <uc:FileDropControl.MainContent>
@@ -65,7 +70,9 @@
                             <uc:ZaehlerstandListControl ViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" />
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
-                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized, Mode=OneWay}" Header="Dem selben Allgemeinzähler zugeordnet:">
+                    <uc:ExpanderControl
+                        Visibility="{x:Bind ViewModel.Allgemeinzaehler.Value, Mode=OneWay, Converter={StaticResource NullToInvisibleConverterKey}}"
+                        Header="Dem selben Allgemeinzähler zugeordnet:">
                         <uc:ExpanderControl.MainContent>
                             <uc:ZaehlerListControl ViewModel="{x:Bind ZaehlerViewModel}"/>
                         </uc:ExpanderControl.MainContent>

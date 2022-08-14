@@ -35,7 +35,9 @@
             <mtuuc:DataGridTemplateColumn Header="Stand">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                     <DataTemplate x:DataType="vm:ZaehlerstandListViewModelEntry">
-                        <TextBox Text="{x:Bind Stand.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox
+                            TextAlignment="Right"
+                            Text="{x:Bind Stand.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>

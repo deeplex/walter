@@ -49,7 +49,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Select(w => new WohnungListViewModelEntry(w, WalterDbService))
                 .ToList();
 
-            DeleteAllgemeinzaehler = new RelayCommand(_ => Allgemeinzaehler = null);
+            DeleteAllgemeinzaehler = new RelayCommand(_ => Allgemeinzaehler.Value = null);
             DeleteWohnung = new RelayCommand(_ => Wohnung.Value = null);
 
             Save = new RelayCommand(_ =>
