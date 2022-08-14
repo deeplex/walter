@@ -30,7 +30,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Add = new RelayCommand(_ =>
             {
-                var mm = new MietMinderung
+                var mm = new Mietminderung
                 {
                     Beginn = DateTime.Today.AsUtcKind(),
                     Ende = DateTime.Today.AsUtcKind().AddDays(30),

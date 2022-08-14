@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Konto> Kontos { get; set; } = null!;
         public DbSet<Miete> Mieten { get; set; } = null!;
         public DbSet<Mieter> MieterSet { get; set; } = null!;
-        public DbSet<MietMinderung> MietMinderungen { get; set; } = null!;
+        public DbSet<Mietminderung> MietMinderungen { get; set; } = null!;
         public DbSet<NatuerlichePerson> NatuerlichePersonen { get; set; } = null!;
         public DbSet<Umlage> Umlagen { get; set; } = null!;
         public DbSet<Vertrag> Vertraege { get; set; } = null!;

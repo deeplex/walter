@@ -51,7 +51,7 @@ namespace Deeplex.Saverwalter.Model
                 typeof(JuristischePerson),
                 typeof(Konto),
                 typeof(Miete),
-                typeof(MietMinderung),
+                typeof(Mietminderung),
                 typeof(NatuerlichePerson),
                 typeof(Vertrag),
                 typeof(VertragsBetriebskostenrechnung),

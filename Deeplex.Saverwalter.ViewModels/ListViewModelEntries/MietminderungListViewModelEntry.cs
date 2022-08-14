@@ -5,11 +5,11 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class MietminderungListViewModelEntry : ListViewModelEntry<MietMinderung>, IDetailViewModel
+    public sealed class MietminderungListViewModelEntry : ListViewModelEntry<Mietminderung>, IDetailViewModel
     {
         public override string ToString() => (Minderung.Value * 100).ToString() + "€";
 
-        public MietMinderung Entity { get; }
+        public Mietminderung Entity { get; }
 
         public SavableProperty<DateTimeOffset> Beginn { get; }
         public SavableProperty<DateTimeOffset?> Ende { get; }
@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public AsyncRelayCommand Delete { get; }
         public RelayCommand Save { get; }
 
-        public MietminderungListViewModelEntry(MietMinderung m, MietminderungListViewModel vm)
+        public MietminderungListViewModelEntry(Mietminderung m, MietminderungListViewModel vm)
         {
             Entity = m;
             WalterDbService = vm.WalterDbService;
@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
             Delete = new AsyncRelayCommand(async _ =>
             {
-                if (Entity.MietMinderungId != 0 && await vm.NotificationService.Confirmation())
+                if (Entity.MietminderungId != 0 && await vm.NotificationService.Confirmation())
                 {
                     vm.WalterDbService.ctx.MietMinderungen.Remove(Entity);
                     vm.WalterDbService.SaveWalter();
@@ -59,7 +59,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.Notiz = Notiz.Value;
             Entity.Minderung = Minderung.Value;
 
-            if (Entity.MietMinderungId != 0)
+            if (Entity.MietminderungId != 0)
             {
                 WalterDbService.ctx.MietMinderungen.Update(Entity);
             }

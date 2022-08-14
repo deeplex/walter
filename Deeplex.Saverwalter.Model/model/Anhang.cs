@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.Model
         public List<JuristischePerson> JuristischePersonen { get; set; } = new List<JuristischePerson>();
         public List<Konto> Konten { get; set; } = new List<Konto>();
         public List<Miete> Mieten { get; set; } = new List<Miete>();
-        public List<MietMinderung> Mietminderungen { get; set; } = new List<MietMinderung>();
+        public List<Mietminderung> Mietminderungen { get; set; } = new List<Mietminderung>();
         public List<NatuerlichePerson> NatuerlichePersonen { get; set; } = new List<NatuerlichePerson>();
         public List<Vertrag> Vertraege { get; set; } = new List<Vertrag>();
         public List<VertragsBetriebskostenrechnung> VertragsBetriebskostenrechnungen { get; set; } = new List<VertragsBetriebskostenrechnung>();
