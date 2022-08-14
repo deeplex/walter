@@ -23,11 +23,7 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
 
-        public IPersonDetailViewModel(INotificationService ns, IWalterDbService db)
-        {
-            WalterDbService = db;
-            NotificationService = ns;
-        }
+        public IPersonDetailViewModel(INotificationService ns, IWalterDbService db): base(ns, db) { }
 
         protected new void save()
         {

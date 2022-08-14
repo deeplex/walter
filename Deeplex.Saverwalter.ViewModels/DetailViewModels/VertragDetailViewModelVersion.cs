@@ -25,19 +25,9 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public RelayCommand RemoveDate;
 
-        public VertragDetailViewModelVersion(INotificationService ns, IWalterDbService db)
+        public VertragDetailViewModelVersion(INotificationService ns, IWalterDbService db): base(ns, db)
         {
-            WalterDbService = db;
-            NotificationService = ns;
             RemoveDate = new RelayCommand(_ => Ende = null, _ => Ende != null);
-            Delete = new AsyncRelayCommand(async _ =>
-            {
-                if (await NotificationService.Confirmation())
-                {
-                    WalterDbService.ctx.Vertraege.Remove(Entity);
-                    WalterDbService.SaveWalter();
-                }
-            }, _ => true);
         }
 
         public override void SetEntity(Vertrag v)

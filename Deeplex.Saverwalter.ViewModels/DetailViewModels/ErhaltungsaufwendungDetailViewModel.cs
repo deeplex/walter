@@ -28,20 +28,8 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<DateTimeOffset> Datum { get; private set; }
         public SavableProperty<string> Notiz { get; private set; }
 
-        public ErhaltungsaufwendungDetailViewModel(INotificationService ns, IWalterDbService db)
+        public ErhaltungsaufwendungDetailViewModel(INotificationService ns, IWalterDbService db) : base(ns, db)
         {
-            WalterDbService = db;
-            NotificationService = ns;
-
-            Delete = new AsyncRelayCommand(async _ =>
-            {
-                if (await NotificationService.Confirmation())
-                {
-                    WalterDbService.ctx.Erhaltungsaufwendungen.Remove(Entity);
-                    WalterDbService.SaveWalter();
-                }
-            }, _ => true);
-
             Save = new RelayCommand(_ =>
             {
                 Entity.Betrag = Betrag.Value;

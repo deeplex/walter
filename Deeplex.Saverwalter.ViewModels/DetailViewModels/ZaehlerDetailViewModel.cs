@@ -62,12 +62,8 @@ namespace Deeplex.Saverwalter.ViewModels
             AllgemeinZaehler = mAllgemeinZaehler = EinzelZaehler.SingleOrDefault(y => y.Id == z.AllgemeinZaehler?.ZaehlerId);
         }
 
-        public ZaehlerDetailViewModel(INotificationService ns, IWalterDbService db)
+        public ZaehlerDetailViewModel(INotificationService ns, IWalterDbService db): base(ns, db)
         {
-
-            NotificationService = ns;
-            WalterDbService = db;
-
             Wohnungen = WalterDbService.ctx.Wohnungen
                 .Include(w => w.Adresse)
                 .Select(w => new WohnungListViewModelEntry(w, WalterDbService))
@@ -75,16 +71,6 @@ namespace Deeplex.Saverwalter.ViewModels
 
             DeleteAllgemeinZaehler = new RelayCommand(_ => AllgemeinZaehler = null);
             DeleteZaehlerWohnung = new RelayCommand(_ => Wohnung.Value = null);
-
-            Delete = new AsyncRelayCommand(async _ =>
-            {
-                if (await NotificationService.Confirmation())
-                {
-                    Entity.Staende.ForEach(s => WalterDbService.ctx.Zaehlerstaende.Remove(s));
-                    WalterDbService.ctx.ZaehlerSet.Remove(Entity);
-                    WalterDbService.SaveWalter();
-                }
-            });
 
             Save = new RelayCommand(_ =>
             {

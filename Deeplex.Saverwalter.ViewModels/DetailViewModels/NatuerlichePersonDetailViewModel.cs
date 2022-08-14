@@ -67,15 +67,6 @@ namespace Deeplex.Saverwalter.ViewModels
 
                 save();
             }, _ => true);
-
-            Delete = new AsyncRelayCommand(async _ =>
-            {
-                if (await NotificationService.Confirmation())
-                {
-                    base.WalterDbService.ctx.NatuerlichePersonen.Remove(Entity);
-                    base.WalterDbService.SaveWalter();
-                }
-            }, _ => true);
         }
 
         public override void checkForChanges()

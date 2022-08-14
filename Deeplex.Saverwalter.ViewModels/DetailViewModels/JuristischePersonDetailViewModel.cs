@@ -78,15 +78,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 }
             }, _ => true);
 
-            Delete = new AsyncRelayCommand(async _ =>
-            {
-                if (await NotificationService.Confirmation())
-                {
-                    WalterDbService.ctx.JuristischePersonen.Remove(Entity);
-                    WalterDbService.SaveWalter();
-                }
-            }, _ => true);
-
             Save = new RelayCommand(_ =>
             {
                 Entity.Bezeichnung = Bezeichnung.Value;

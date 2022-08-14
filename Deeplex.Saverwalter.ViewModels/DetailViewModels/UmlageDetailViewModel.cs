@@ -67,20 +67,8 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public UmlageDetailViewModel(INotificationService ns, IWalterDbService db)
+        public UmlageDetailViewModel(INotificationService ns, IWalterDbService db): base(ns, db)
         {
-            WalterDbService = db;
-            NotificationService = ns;
-
-            Delete = new AsyncRelayCommand(async _ =>
-            {
-                if (await NotificationService.Confirmation())
-                {
-                    WalterDbService.ctx.Umlagen.Remove(Entity);
-                    WalterDbService.SaveWalter();
-                }
-            });
-
             Save = new RelayCommand(_ =>
             {
                 Entity.Notiz = Notiz.Value;

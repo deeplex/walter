@@ -69,22 +69,14 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToList();
         }
 
-        public BetriebskostenrechnungDetailViewModel(IWalterDbService db, INotificationService ns)
+        public BetriebskostenrechnungDetailViewModel(IWalterDbService db, INotificationService ns) : base(ns, db)
         {
-            base.WalterDbService = db;
-            base.NotificationService = ns;
-
-            Typen_List = Enums.Betriebskostentyp.Where(e => WalterDbService.ctx.Betriebskostenrechnungen.Include(b => b.Umlage).ToList().Exists(br => br.Umlage.Typ == e.Typ)).ToList();
-
-
-            Delete = new AsyncRelayCommand(async _ =>
-            {
-                if (await NotificationService.Confirmation())
-                {
-                    WalterDbService.ctx.Betriebskostenrechnungen.Remove(Entity);
-                    WalterDbService.SaveWalter();
-                }
-            });
+            Typen_List = Enums.Betriebskostentyp
+                .Where(e => WalterDbService.ctx.Betriebskostenrechnungen
+                    .Include(b => b.Umlage)
+                    .ToList()
+                    .Exists(br => br.Umlage.Typ == e.Typ))
+                .ToList();
 
             Save = new RelayCommand(_ =>
             {

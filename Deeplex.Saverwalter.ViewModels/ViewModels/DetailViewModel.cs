@@ -17,17 +17,33 @@ namespace Deeplex.Saverwalter.ViewModels
         INotificationService NotificationService { get; }
     }
 
-    public abstract class DetailViewModel<T> : BindableBase, IDetailViewModel
+    public abstract class DetailViewModel<T> : BindableBase, IDetailViewModel where T : class
     {
+        public DetailViewModel(INotificationService ns, IWalterDbService db)
+        {
+            WalterDbService = db;
+            NotificationService = ns;
+
+            Delete = new (async _ =>
+            {
+                if (await NotificationService.Confirmation())
+                {
+                    WalterDbService.ctx.Remove(Entity);
+                    WalterDbService.SaveWalter();
+                }
+            }, _ => true);
+        }
+
         // Could be protected, but Vertrag needs public for its Versionen. Maybe something can be done about that.
         public T Entity { get; protected set; }
         public abstract void SetEntity(T e);
         public abstract override string ToString();
         public RelayCommand Save { get; protected set; }
-        public AsyncRelayCommand Delete { get; protected set; }
+        public AsyncRelayCommand Delete { get; set; }
         public IWalterDbService WalterDbService { get; protected set; }
         public INotificationService NotificationService { get; protected set; }
         public abstract void checkForChanges();
+
         protected void save()
         {
             if (isInitialized)

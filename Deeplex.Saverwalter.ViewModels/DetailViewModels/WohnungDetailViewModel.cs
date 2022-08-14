@@ -25,27 +25,25 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public RelayCommand RemoveBesitzer;
 
-        public WohnungDetailViewModel(INotificationService ns, IWalterDbService db)
+        public WohnungDetailViewModel(INotificationService ns, IWalterDbService db) : base(ns, db)
         {
-            WalterDbService = db;
-            NotificationService = ns;
-
             AlleVermieter = WalterDbService.ctx.JuristischePersonen.ToImmutableList()
                 .Select(j => new KontaktListViewModelEntry(j))
                 .Concat(WalterDbService.ctx.NatuerlichePersonen
                     .Select(n => new KontaktListViewModelEntry(n)))
                 .ToImmutableList();
 
-            Delete = new AsyncRelayCommand(async _ =>
+            Save = new RelayCommand(_ =>
             {
-                if (await NotificationService.Confirmation())
-                {
-                    WalterDbService.ctx.Wohnungen.Remove(Entity);
-                    WalterDbService.SaveWalter();
-                }
+                Adresse.Value.save();
+                Entity.Adresse = Adresse.Value.Entity;
+                Entity.Bezeichnung = Bezeichnung.Value;
+                Entity.Wohnflaeche = Wohnflaeche.Value;
+                Entity.Nutzflaeche = Nutzflaeche.Value;
+                Entity.Nutzeinheit = Nutzeinheit.Value;
+                Entity.Notiz = Notiz.Value;
+                save();
             }, _ => true);
-
-            Save = new RelayCommand(_ => save(), _ => true);
             RemoveBesitzer = new RelayCommand(_ => { Besitzer = null; }, _ => true);
         }
 
@@ -64,18 +62,6 @@ namespace Deeplex.Saverwalter.ViewModels
             Nutzflaeche = new(this, e.Nutzflaeche);
             Nutzeinheit = new(this, e.Nutzeinheit);
             Adresse = new(this, new(e, WalterDbService, NotificationService));
-        }
-
-        private void save()
-        {
-            Adresse.Value.save();
-            Entity.Adresse = Adresse.Value.Entity;
-            Entity.Bezeichnung = Bezeichnung.Value;
-            Entity.Wohnflaeche = Wohnflaeche.Value;
-            Entity.Nutzflaeche = Nutzflaeche.Value;
-            Entity.Nutzeinheit = Nutzeinheit.Value;
-            Entity.Notiz = Notiz.Value;
-            save();
         }
 
         public override void checkForChanges()
