@@ -6,9 +6,9 @@ using Microsoft.UI.Xaml.Media.Animation;
 
 namespace Deeplex.Saverwalter.WinUI3
 {
-    public sealed partial class PersonDetailControl : UserControl
+    public sealed partial class IPersonDetailControl : UserControl
     {
-        public PersonDetailControl()
+        public IPersonDetailControl()
         {
             InitializeComponent();
         }
@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.WinUI3
             = DependencyProperty.Register(
             "PersonViewModel",
             typeof(IPersonDetailViewModel),
-            typeof(PersonDetailControl),
+            typeof(IPersonDetailControl),
             new PropertyMetadata(null));
 
 

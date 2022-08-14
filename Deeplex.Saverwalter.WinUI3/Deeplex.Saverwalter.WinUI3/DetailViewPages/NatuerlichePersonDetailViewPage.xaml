@@ -44,7 +44,7 @@
                         Text="{x:Bind ViewModel.Nachname.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Header="Nachname" Style="{StaticResource Eintraege}"/>
                 </mtuuc:WrapPanel>
-                    <uc:PersonDetailControl ViewModel="{x:Bind ViewModel}" />
+                    <uc:IPersonDetailControl ViewModel="{x:Bind ViewModel}" />
                 </StackPanel>
         </uc:FileDropControl.MainContent>
     </uc:FileDropControl>
