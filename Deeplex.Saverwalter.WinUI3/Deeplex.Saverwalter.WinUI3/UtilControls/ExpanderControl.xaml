@@ -20,9 +20,10 @@
                     Command="{x:Bind Command}"
                     Visibility="{x:Bind CommandAvailable}"
                     Background="Transparent"
-                    Margin="50,0,0,0">
+                    Margin="20,0,0,0">
                     <SymbolIcon Symbol="Add" />
                 </Button>
+                <ContentPresenter Visibility="{x:Bind BonusAvailable}" Content="{x:Bind Bonus}" />
             </mtuuc:WrapPanel>
         </mtuuc:Expander.Header>
         <ContentPresenter Padding="0,0,0,20" Content="{x:Bind MainContent}" />

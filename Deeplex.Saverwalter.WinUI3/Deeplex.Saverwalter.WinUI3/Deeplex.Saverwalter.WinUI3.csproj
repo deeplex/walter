@@ -14,6 +14,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="ListControls\UmlageListControl.xaml" />
+    <None Remove="UtilControls\AddPersonControl.xaml" />
   </ItemGroup>
   
   <ItemGroup>
@@ -129,6 +130,9 @@
     </Page>
     <Page Update="ListViewPages\ZaehlerListViewPage.xaml">
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UtilControls\AddPersonControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
   </ItemGroup>
 </Project>

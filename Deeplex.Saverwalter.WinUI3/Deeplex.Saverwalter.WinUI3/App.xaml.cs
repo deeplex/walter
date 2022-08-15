@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.Services;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml;
@@ -53,6 +54,9 @@ namespace Deeplex.Saverwalter.WinUI3
 
             Container.Register<ZaehlerListViewModel>(Lifestyle.Singleton);
             Container.Register<ZaehlerDetailViewModel>();
+
+            Container.Register<MemberViewModel<IPerson>>();
+            Container.Register<MemberViewModel<Vertrag>>();
 
             // Missing:
             // Container.Register<AnhangListViewModelEntry>();

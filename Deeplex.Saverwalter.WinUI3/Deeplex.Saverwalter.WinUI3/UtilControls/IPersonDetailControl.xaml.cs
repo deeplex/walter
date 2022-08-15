@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.ViewModels;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.ViewModels;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -13,9 +14,10 @@ namespace Deeplex.Saverwalter.WinUI3
             InitializeComponent();
         }
 
-        public ObservableProperty<VertragListViewModel> VertragListViewModel { get; set; } = new();
-        public ObservableProperty<WohnungListViewModel> WohnungListViewModel { get; set; } = new();
-        public ObservableProperty<KontaktListViewModel> JuristischePersonenViewModel { get; set; } = new();
+        public VertragListViewModel VertragListViewModel { get; set; } = App.Container.GetInstance<VertragListViewModel>();
+        public WohnungListViewModel WohnungListViewModel { get; set; } = App.Container.GetInstance<WohnungListViewModel>();
+        public KontaktListViewModel JuristischePersonenViewModel { get; set; } = App.Container.GetInstance<KontaktListViewModel>();
+        public MemberViewModel<IPerson> SelectJuristischePersonListViewModel { get; } = App.Container.GetInstance<MemberViewModel<IPerson>>();
 
         public IPersonDetailViewModel ViewModel
         {
@@ -23,13 +25,10 @@ namespace Deeplex.Saverwalter.WinUI3
             set
             {
                 SetValue(ViewModelProperty, value);
-                VertragListViewModel.Value = App.Container.GetInstance<VertragListViewModel>();
-                VertragListViewModel.Value.SetList(ViewModel.Entity);
-                WohnungListViewModel.Value = App.Container.GetInstance<WohnungListViewModel>();
-                WohnungListViewModel.Value.SetList(ViewModel.Entity);
-                // Should only show juristische Person? TODO
-                JuristischePersonenViewModel.Value = App.Container.GetInstance<KontaktListViewModel>();
-                JuristischePersonenViewModel.Value.SetList(ViewModel.Entity);
+                VertragListViewModel.SetList(ViewModel.Entity);
+                WohnungListViewModel.SetList(ViewModel.Entity);
+                JuristischePersonenViewModel.SetList(ViewModel.Entity);
+                SelectJuristischePersonListViewModel.SetList(ViewModel.Entity, true);
             }
         }
 

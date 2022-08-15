@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public override void SetList()
         {
-            AllRelevant = transform(includeNP(WalterDbService), includeJP(WalterDbService));
+            AllRelevant = transform(includeNP(), includeJP());
             updateList();
         }
 
@@ -74,29 +74,39 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (jp == null) return;
 
-            AllRelevant = transform(jp.NatuerlicheMitglieder, jp.JuristischeMitglieder);
+            AllRelevant = transform(
+                includeNP()
+                    .Where(e => jp.NatuerlicheMitglieder.Exists(f => f.PersonId == e.PersonId))
+                    .ToList(),
+                includeJP()
+                    .Where(e => jp.JuristischeMitglieder.Exists(f => f.PersonId == e.PersonId))
+                    .ToList());
             List.Value = AllRelevant.ToImmutableList();
         }
 
-        public void SetList(IPerson jp)
+        public void SetList(IPerson p)
         {
-            if (jp == null) return;
+            if (p == null) return;
 
-            AllRelevant = transform(new List<NatuerlichePerson> { }, jp.JuristischePersonen);
+            AllRelevant = transform(
+                new List<NatuerlichePerson> { },
+                includeJP()
+                    .Where(e => p.JuristischePersonen.Exists(f => f.PersonId == e.PersonId))
+                    .ToList());
             List.Value = AllRelevant.ToImmutableList();
         }
 
-        private List<NatuerlichePerson> includeNP(IWalterDbService db)
+        private List<NatuerlichePerson> includeNP()
         {
-            return db.ctx.NatuerlichePersonen
+            return WalterDbService.ctx.NatuerlichePersonen
                 .Include(k => k.Anhaenge)
                 .Include(k => k.Adresse)
                 .ThenInclude(a => a.Anhaenge)
                 .ToList();
         }
-        private List<JuristischePerson> includeJP(IWalterDbService db)
+        private List<JuristischePerson> includeJP()
         {
-            return db.ctx.JuristischePersonen
+            return WalterDbService.ctx.JuristischePersonen
                 .Include(j => j.Anhaenge)
                 .Include(j => j.Adresse)
                 .ThenInclude(a => a.Anhaenge)

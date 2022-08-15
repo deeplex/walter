@@ -10,6 +10,7 @@ namespace Deeplex.Saverwalter.WinUI3
     public sealed partial class ExpanderControl : UserControl
     {
         public bool CommandAvailable => Command != null;
+        public bool BonusAvailable => Bonus != null;
 
         public ExpanderControl()
         {
@@ -40,6 +41,19 @@ namespace Deeplex.Saverwalter.WinUI3
         {
             get { return GetValue(MainContentProperty); }
             set { SetValue(MainContentProperty, value); }
+        }
+
+        public static readonly DependencyProperty BonusProperty =
+            DependencyProperty.Register(
+            "Bonus",
+            typeof(object),
+            typeof(ExpanderControl),
+            new PropertyMetadata(default(object)));
+
+        public object Bonus
+        {
+            get { return GetValue(BonusProperty); }
+            set { SetValue(BonusProperty, value); }
         }
 
         public bool IsExpanded

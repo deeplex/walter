@@ -101,6 +101,9 @@
                     </mtuuc:WrapPanel>
 
                     <uc:ExpanderControl Margin="0,20,0,0" IsExpanded="True" Header="Mieter"><!--Command="{x:Bind MieterListViewModel.Add}"-->
+                        <uc:ExpanderControl.Bonus>
+                            <uc:AddPersonControl ViewModel="{x:Bind ViewModel.SelectMieter}"/>
+                        </uc:ExpanderControl.Bonus>
                         <uc:ExpanderControl.MainContent>
                             <uc:KontaktListControl ViewModel="{x:Bind ViewModel.Mieter.Value, Mode=OneWay}"/>
                         </uc:ExpanderControl.MainContent>

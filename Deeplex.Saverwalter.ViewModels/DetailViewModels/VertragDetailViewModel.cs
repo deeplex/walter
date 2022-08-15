@@ -27,6 +27,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<MieteListViewModel> Mieten { get; private set; } = new();
         public ObservableProperty<MietminderungListViewModel> Mietminderungen { get; private set; } = new();
         public ObservableProperty<KontaktListViewModel> Mieter { get; private set; } = new();
+        public MemberViewModel<Vertrag> SelectMieter { get; private set; }
 
         public new KontaktListViewModelEntry Ansprechpartner
         {
@@ -80,6 +81,9 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 Ansprechpartner = AlleKontakte.Find(e => e.Entity.PersonId == partner.Guid);
             }
+
+            SelectMieter = new(WalterDbService, NotificationService);
+            SelectMieter.SetList(v);
         }
 
         public VertragDetailViewModel(INotificationService ns, IWalterDbService db) : base(ns, db)
@@ -108,7 +112,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 Mietminderungen.Value.Liste.Value.ForEach(e => e.save());
 
                 Versionen.Value.ForEach(v => v.versionSave());
-                save();
             }, _ => true);
 
             AddVersion = new RelayCommand(_ =>

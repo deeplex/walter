@@ -65,14 +65,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity.KaltMiete = KaltMiete.Value;
             Entity.AnsprechpartnerId = Ansprechpartner.Value?.Guid ?? Guid.Empty;
 
-            if (Entity.rowid != 0)
-            {
-                WalterDbService.ctx.Vertraege.Update(Entity);
-            }
-            else
-            {
-                WalterDbService.ctx.Vertraege.Add(Entity);
-            }
+            save();
         }
     }
 

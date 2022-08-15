@@ -6,14 +6,14 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public abstract class ListViewModel<IListViewModelEntry> : BindableBase, IListViewModel
+    public abstract class ListViewModel<T> : BindableBase, IListViewModel
     {
         public IWalterDbService WalterDbService { get; protected set; }
         public INotificationService NotificationService { get; protected set; }
 
-        public ObservableProperty<ImmutableList<IListViewModelEntry>> List { get; set; } = new();
-        protected IEnumerable<IListViewModelEntry> mAllRelevant { get; set; }
-        public IEnumerable<IListViewModelEntry> AllRelevant
+        public ObservableProperty<ImmutableList<T>> List { get; set; } = new();
+        protected IEnumerable<T> mAllRelevant { get; set; }
+        public IEnumerable<T> AllRelevant
         {
             get => mAllRelevant;
             set
@@ -23,7 +23,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public IListViewModelEntry Selected;
+        public T Selected { get; set; }
         public bool hasSelected => Selected != null;
 
         public abstract void SetList();

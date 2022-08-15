@@ -7,9 +7,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:vm="using:Deeplex.Saverwalter.ViewModels"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3"
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <conv:NullToInvisibleConverter x:Key="NullToInvisibleConverterKey"/>
+    </UserControl.Resources>
 
     <mtuuc:DataGrid
         Style="{StaticResource DataGridUserControl}"
@@ -19,6 +24,16 @@
         SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}"
         ItemsSource="{x:Bind ViewModel.List.Value, Mode=OneWay}">
         <mtuuc:DataGrid.Columns>
+            <mtuuc:DataGridTemplateColumn>
+                <mtuuc:DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="vm:KontaktListViewModelEntry">
+                        <!--Visibility="{x:Bind Delete, Mode=OneWay, Converter={StaticResource NullToInvisibleConverterKey}}"-->
+                        <Button Command="{x:Bind Delete}" Background="Transparent">
+                            <SymbolIcon Symbol="Delete"/>
+                        </Button>
+                    </DataTemplate>
+                </mtuuc:DataGridTemplateColumn.CellTemplate>
+            </mtuuc:DataGridTemplateColumn>
             <mtuuc:DataGridTemplateColumn Header="Name">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                     <DataTemplate x:DataType="vm:KontaktListViewModelEntry">

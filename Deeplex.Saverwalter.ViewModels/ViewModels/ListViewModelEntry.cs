@@ -1,4 +1,5 @@
-﻿using Deeplex.Utils.ObjectModel;
+﻿using Deeplex.Saverwalter.Services;
+using Deeplex.Utils.ObjectModel;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
@@ -6,5 +7,10 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public abstract override string ToString();
         T Entity { get; }
+    }
+
+    public interface IDeletableEntry
+    {
+        AsyncRelayCommand Delete { get; }
     }
 }
