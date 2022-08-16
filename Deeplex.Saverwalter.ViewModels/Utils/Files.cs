@@ -14,6 +14,8 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public static class Files
     {
+        // TODO move to FileService
+
         // TODO needs rework
         //public static void ConnectAnhangToEntity<T, U>(DbSet<T> Set, U target, List<Anhang> files, IWalterDbService db) where T : class, Anhang a, new()
         //{
@@ -41,7 +43,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public static void SaveBetriebskostenabrechnung(this Betriebskostenabrechnung b, string path, Services.IWalterDbService db)
         {
-            var Rechnungen = b.Gruppen.SelectMany(g => g.Rechnungen);
+            var Rechnungen = b.Gruppen.SelectMany(g => g.Umlagen);
             var temppath = Path.GetTempPath();
 
             var atLeastOne = false;

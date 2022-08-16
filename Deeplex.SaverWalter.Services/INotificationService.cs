@@ -9,6 +9,6 @@ namespace Deeplex.Saverwalter.Services
         void ShowAlert(string text);
         bool outOfSync { get; set; }
 
-        public void Navigation<T>(T Element);
+        public void Navigation<T>(T Element) where T : new();
     }
 }

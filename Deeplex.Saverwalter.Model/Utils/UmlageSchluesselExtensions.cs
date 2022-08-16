@@ -2,9 +2,9 @@
 
 namespace Deeplex.Saverwalter.Model
 {
-    public static class UmlageSchluesselExtensions
+    public static class UmlageschluesselExtensions
     {
-        public static string ToDescriptionString(this UmlageSchluessel val)
+        public static string ToDescriptionString(this Umlageschluessel val)
         {
             DescriptionAttribute[] attributes = (DescriptionAttribute[])val
                .GetType()

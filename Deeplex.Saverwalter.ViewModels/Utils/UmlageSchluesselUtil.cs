@@ -2,12 +2,12 @@
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class UmlageSchluesselUtil
+    public sealed class UmlageschluesselUtil
     {
         public override string ToString() => Schluessel.ToDescriptionString();
 
-        public UmlageSchluessel Schluessel { get; }
-        public UmlageSchluesselUtil(UmlageSchluessel u)
+        public Umlageschluessel Schluessel { get; }
+        public UmlageschluesselUtil(Umlageschluessel u)
         {
             Schluessel = u;
         }

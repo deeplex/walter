@@ -3,14 +3,14 @@ using Xunit;
 
 namespace Deeplex.Saverwalter.Model.Tests
 {
-    public class UmlageSchluesselExtensionsTests
+    public class UmlageschluesselExtensionsTests
     {
         [Fact]
         public void ToDescriptionStringTest()
         {
             for (var i = 0; i < 5; ++i)
             {
-                var stub = (UmlageSchluessel)i;
+                var stub = (Umlageschluessel)i;
                 stub.ToDescriptionString().Should().NotBeNull();
             }
         }

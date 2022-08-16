@@ -1,0 +1,84 @@
+﻿<Page
+    x:Class="Deeplex.Saverwalter.WinUI3.ZaehlerDetailViewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:uc="using:Deeplex.Saverwalter.WinUI3"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <UserControl.Resources>
+        <conv:NullToInvisibleConverter x:Key="NullToInvisibleConverterKey"/>
+    </UserControl.Resources>
+
+    <uc:FileDropControl>
+        <uc:FileDropControl.MainContent>
+            <ScrollViewer>
+                <StackPanel>
+                    <mtuuc:WrapPanel Orientation="Horizontal">
+                        <TextBox
+                            Header="Kennnummer"
+                            Width="200"
+                            Style="{StaticResource Eintraege}"
+                            Text="{x:Bind ViewModel.Kennnummer.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <ComboBox
+                            Margin="20,20,0,0" Header="Typ"
+                            Width="200" ItemsSource="{x:Bind ViewModel.Typen}"
+                            SelectedItem="{x:Bind ViewModel.Typ.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </mtuuc:WrapPanel>
+                    <mtuuc:WrapPanel Orientation="Horizontal">
+                        <uc:ComboControl
+                            Margin="20,20,0,0"
+                            Header="Wohnung"
+                            Width="380"
+                            ItemsSource="{x:Bind ViewModel.Wohnungen}"
+                            PlaceholderText="Wohnung hinzufügen"
+                            SelectedItem="{x:Bind ViewModel.Wohnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button
+                            Command="{x:Bind ViewModel.DeleteWohnung}"
+                            VerticalAlignment="Bottom">
+                            <SymbolIcon Symbol="Delete"/>
+                        </Button>
+                    </mtuuc:WrapPanel>
+                    <mtuuc:WrapPanel Orientation="Horizontal">
+                        <uc:ComboControl
+                            PlaceholderText="Verbundener Allgemeinzähler..."
+                            Margin="20,20,0,0"
+                            Header="Allgemeinzähler"
+                            Width="380"
+                            ItemsSource="{x:Bind ViewModel.AllgemeinzaehlerList}"
+                            SelectedItem="{x:Bind ViewModel.Allgemeinzaehler.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button
+                            Command="{x:Bind ViewModel.DeleteAllgemeinzaehler}"
+                            VerticalAlignment="Bottom">
+                            <SymbolIcon Symbol="Delete"/>
+                        </Button>
+                    </mtuuc:WrapPanel>
+                    <TextBox
+                        Margin="20,20,0,0"
+                        Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Header="Notiz"/>
+                    <uc:ExpanderControl
+                        Margin="0,20,0,0"
+                        Visibility="{x:Bind ViewModel.isInitialized, Mode=OneWay}"
+                        IsExpanded="True" Header="Zählerstände"
+                        Command="{x:Bind ViewModel.Staende.Value.Add}">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:ZaehlerstandListControl ViewModel="{x:Bind ViewModel.Staende.Value, Mode=OneWay}" />
+                        </uc:ExpanderControl.MainContent>
+                    </uc:ExpanderControl>
+                    <uc:ExpanderControl
+                        Visibility="{x:Bind ViewModel.Allgemeinzaehler.Value, Mode=OneWay, Converter={StaticResource NullToInvisibleConverterKey}}"
+                        Header="Dem selben Allgemeinzähler zugeordnet:">
+                        <uc:ExpanderControl.MainContent>
+                            <uc:ZaehlerListControl ViewModel="{x:Bind ZaehlerViewModel}"/>
+                        </uc:ExpanderControl.MainContent>
+                    </uc:ExpanderControl>
+                </StackPanel>
+            </ScrollViewer>
+        </uc:FileDropControl.MainContent>
+    </uc:FileDropControl>
+</Page>

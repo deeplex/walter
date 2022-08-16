@@ -1,6 +1,6 @@
-﻿using Deeplex.Saverwalter.Services;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.WinUI3.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml;
 using SimpleInjector;
@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.WinUI3
             Container.Register<VertragListViewModel>(Lifestyle.Singleton);
             Container.Register<VertragDetailViewModel>();
 
-            Container.Register<BetriebskostenRechnungenListViewModel>(Lifestyle.Singleton);
+            Container.Register<BetriebskostenrechnungListViewModel>(Lifestyle.Singleton);
             Container.Register<BetriebskostenrechnungDetailViewModel>();
             Container.Register<BetriebskostenrechnungPrintViewModel>();
 
@@ -45,15 +45,18 @@ namespace Deeplex.Saverwalter.WinUI3
             Container.Register<UmlageDetailViewModel>();
 
             Container.Register<KontaktListViewModel>(Lifestyle.Singleton);
-            Container.Register<NatuerlichePersonViewModel>(); // TODO add Detail to name
-            Container.Register<JuristischePersonViewModel>(); // TODO add Detail to name
+            Container.Register<NatuerlichePersonDetailViewModel>(); // TODO add Detail to name
+            Container.Register<JuristischePersonDetailViewModel>(); // TODO add Detail to name
 
-            Container.Register<ErhaltungsaufwendungenListViewModel>(Lifestyle.Singleton);
-            Container.Register<ErhaltungsaufwendungenDetailViewModel>();
-            Container.Register<ErhaltungsaufwendungenPrintViewModel>();
+            Container.Register<ErhaltungsaufwendungListViewModel>(Lifestyle.Singleton);
+            Container.Register<ErhaltungsaufwendungDetailViewModel>();
+            Container.Register<ErhaltungsaufwendungPrintViewModel>();
 
             Container.Register<ZaehlerListViewModel>(Lifestyle.Singleton);
             Container.Register<ZaehlerDetailViewModel>();
+
+            Container.Register<MemberViewModel<IPerson>>();
+            Container.Register<MemberViewModel<Vertrag>>();
 
             // Missing:
             // Container.Register<AnhangListViewModelEntry>();
@@ -101,7 +104,8 @@ namespace Deeplex.Saverwalter.WinUI3
                         await fs.pickFile(".db") :
                         await fs.saveFile("walter", new string[] { ".db" });
                 var databaseRoot = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
-                Utils.Elements.SetDatabaseAsDefault(databaseRoot);
+                // TODO
+                //SetDatabaseAsDefault(databaseRoot);
             }
 
             //if (db.ctx != null)

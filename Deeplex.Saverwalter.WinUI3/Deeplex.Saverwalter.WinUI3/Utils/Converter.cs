@@ -5,7 +5,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using System;
 
-namespace Deeplex.Saverwalter.WinUI3.Utils
+namespace Deeplex.Saverwalter.WinUI3
 {
     public class IsEnabledConverter : IValueConverter
     {
@@ -25,6 +25,28 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
             return enabled;
+        }
+    }
+
+    public class NullToInvisibleConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+            => value == null ? Visibility.Collapsed : Visibility.Visible;
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ToInvisibleConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+            => (bool)value ? Visibility.Collapsed : Visibility.Visible;
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
         }
     }
 

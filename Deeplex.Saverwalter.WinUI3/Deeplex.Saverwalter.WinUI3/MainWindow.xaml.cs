@@ -2,9 +2,6 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.ViewModels;
-using Deeplex.Saverwalter.WinUI3.UserControls;
-using Deeplex.Saverwalter.WinUI3.Views;
-using Deeplex.Saverwalter.WinUI3.Views.Rechnungen;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -61,8 +58,8 @@ namespace Deeplex.Saverwalter.WinUI3
         public readonly string VertragListLabel = "Verträge";
         public readonly string WohnungListLabel = "Mietobjekte";
         public readonly string ZaehlerListLabel = "Zähler";
-        public readonly string BetriebskostenrechnungenListLabel = "Betr. Rechnung";
-        public readonly string ErhaltungsaufwendungenListLabel = "Erhaltungsaufw.";
+        public readonly string BetriebskostenrechnungListLabel = "Betr. Rechnung";
+        public readonly string ErhaltungsaufwendungListLabel = "Erhaltungsaufw.";
         public readonly string UmlageListLabel = "Umlagen";
 
         private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
@@ -74,8 +71,8 @@ namespace Deeplex.Saverwalter.WinUI3
                 label == WohnungListLabel ? typeof(WohnungListViewPage) :
                 label == VertragListLabel ? typeof(VertragListViewPage) :
                 label == ZaehlerListLabel ? typeof(ZaehlerListViewPage) :
-                label == BetriebskostenrechnungenListLabel ? typeof(BetriebskostenRechnungenListViewPage) :
-                label == ErhaltungsaufwendungenListLabel ? typeof(ErhaltungsaufwendungenListViewPage) :
+                label == BetriebskostenrechnungListLabel ? typeof(BetriebskostenrechnungListViewPage) :
+                label == ErhaltungsaufwendungListLabel ? typeof(ErhaltungsaufwendungListViewPage) :
                 label == UmlageListLabel ? typeof(UmlageListViewPage) :
                 null;
 
@@ -88,7 +85,7 @@ namespace Deeplex.Saverwalter.WinUI3
         private void OnNavigatingToPage(object sender, NavigatingCancelEventArgs e)
         {
             if (e.SourcePageType == typeof(KontaktListViewPage) ||
-                e.SourcePageType == typeof(JuristischePersonenDetailViewPage) ||
+                e.SourcePageType == typeof(JuristischePersonDetailViewPage) ||
                 e.SourcePageType == typeof(NatuerlichePersonDetailViewPage))
             {
                 NavView.SelectedItem = KontaktListMenuItem;
@@ -101,13 +98,13 @@ namespace Deeplex.Saverwalter.WinUI3
             {
                 NavView.SelectedItem = VertragListMenuItem;
             }
-            else if (e.SourcePageType == typeof(BetriebskostenRechnungenListViewPage) || e.SourcePageType == typeof(BetriebskostenrechnungenDetailViewPage))
+            else if (e.SourcePageType == typeof(BetriebskostenrechnungListViewPage) || e.SourcePageType == typeof(BetriebskostenrechnungDetailViewPage))
             {
-                NavView.SelectedItem = BetriebskostenListMenuItem;
+                NavView.SelectedItem = BetriebskostenrechnungListMenuItem;
             }
-            else if (e.SourcePageType == typeof(ErhaltungsaufwendungenListViewPage) || e.SourcePageType == typeof(ErhaltungsaufwendungenDetailViewPage))
+            else if (e.SourcePageType == typeof(ErhaltungsaufwendungListViewPage) || e.SourcePageType == typeof(ErhaltungsaufwendungDetailViewPage))
             {
-                NavView.SelectedItem = ErhaltungsAufwendungenListMenuItem;
+                NavView.SelectedItem = ErhaltungsaufwendungListMenuItem;
             }
             else if (e.SourcePageType == typeof(ZaehlerListViewPage) || e.SourcePageType == typeof(ZaehlerDetailViewPage))
             {
@@ -164,12 +161,12 @@ namespace Deeplex.Saverwalter.WinUI3
         private Type GetEntryPage(object Entry)
         {
             return Entry is NatuerlichePerson ? typeof(NatuerlichePersonDetailViewPage) :
-                Entry is JuristischePerson ? typeof(JuristischePersonenDetailViewPage) :
+                Entry is JuristischePerson ? typeof(JuristischePersonDetailViewPage) :
                 Entry is Wohnung ? typeof(WohnungDetailViewPage) :
                 Entry is Zaehler ? typeof(ZaehlerDetailViewPage) :
                 Entry is Vertrag ? typeof(VertragDetailViewPage) :
-                Entry is Betriebskostenrechnung ? typeof(BetriebskostenrechnungenDetailViewPage) :
-                Entry is Erhaltungsaufwendung ? typeof(ErhaltungsaufwendungenDetailViewPage) :
+                Entry is Betriebskostenrechnung ? typeof(BetriebskostenrechnungDetailViewPage) :
+                Entry is Erhaltungsaufwendung ? typeof(ErhaltungsaufwendungDetailViewPage) :
                 Entry is Umlage ? typeof(UmlageDetailViewPage) :
                 null;
         }

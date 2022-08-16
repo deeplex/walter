@@ -1,0 +1,67 @@
+﻿<Page
+    x:Class="Deeplex.Saverwalter.WinUI3.JuristischePersonDetailViewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:uc="using:Deeplex.Saverwalter.WinUI3"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mtuuc="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <UserControl.Resources>
+        <conv:ToInvisibleConverter x:Key="ToInvisibleConverterKey"/>
+    </UserControl.Resources>
+    
+    <uc:FileDropControl>
+        <uc:FileDropControl.MainContent>
+            <StackPanel>
+                <Button
+                    Margin="0,0,0,-120"
+                    Click="Switch_To_Natuerliche_Person_Click"
+                    Visibility="{x:Bind ViewModel.isInitialized, Converter={StaticResource ToInvisibleConverterKey}, Mode=OneWay}"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top">
+                    <StackPanel Orientation="Horizontal">
+                        <SymbolIcon Symbol="Contact"/>
+                        <TextBlock Margin="10,0,0,0" Text="Natürliche Person"/>
+                    </StackPanel>
+                </Button>
+                <mtuuc:WrapPanel Orientation="Horizontal">
+                    <TextBox
+                        Width="620"
+                        Text="{x:Bind ViewModel.Bezeichnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Header="Bezeichnung" Style="{StaticResource Eintraege}"/>
+                </mtuuc:WrapPanel>
+                <uc:IPersonDetailControl ViewModel="{x:Bind ViewModel}" />
+
+                <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Mitglieder">
+                    <!--<uc:ExpanderControl.Bonus>
+                        <Button Margin="20,0,0,0" Background="Transparent">
+                            <SymbolIcon Symbol="Add" />
+                            <Button.Flyout>
+                                <Flyout x:Name="AddMitglied_Flyout">
+                                    <StackPanel Orientation="Horizontal">
+                                        <uc:ComboControl
+                                            PlaceholderText="Mitglied hinzufügen"
+                                            SelectedItem="{x:Bind ViewModel.AddMitglied.Value, Mode=TwoWay}"
+                                            ItemsSource="{x:Bind ViewModel.AddMitglieder.Value, Mode=OneWay}"/>
+                                        <Button Margin="10,0,0,0" Command="{x:Bind ViewModel.AddMitgliedCommand}">
+                                            <SymbolIcon Symbol="Add" />
+                                        </Button>
+                                    </StackPanel>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </uc:ExpanderControl.Bonus>-->
+                    <uc:ExpanderControl.MainContent>
+                        <uc:KontaktListControl ViewModel="{x:Bind MitgliederListViewModel}"/>
+                    </uc:ExpanderControl.MainContent>
+                </uc:ExpanderControl>
+                
+            </StackPanel>
+        </uc:FileDropControl.MainContent>
+    </uc:FileDropControl>
+</Page>

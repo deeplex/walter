@@ -76,7 +76,7 @@ namespace Deeplex.Saverwalter.Model
     }
 
 
-    public enum UmlageSchluessel
+    public enum Umlageschluessel
     {
         [Description("n. WF")]
         NachWohnflaeche,

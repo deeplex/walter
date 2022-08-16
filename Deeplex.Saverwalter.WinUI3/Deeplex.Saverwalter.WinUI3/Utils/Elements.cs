@@ -3,7 +3,7 @@ using Deeplex.Saverwalter.Services;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Deeplex.Saverwalter.WinUI3.Utils
+namespace Deeplex.Saverwalter.WinUI3
 {
     public static class Elements
     {
@@ -17,9 +17,6 @@ namespace Deeplex.Saverwalter.WinUI3.Utils
                 Settings.Values["root"] = databaseRoot;
             };
         }
-
-        public static bool applyFilter(string filter, params string[] strings)
-            => filter.Split(' ').All(split => strings.Any(str => str != null && str.ToLower().Contains(split.ToLower())));
 
         public static ImmutableList<T> Sort<T>(this DataGrid dataGrid, DataGridColumn columnToSort, ImmutableList<T> list)
         {

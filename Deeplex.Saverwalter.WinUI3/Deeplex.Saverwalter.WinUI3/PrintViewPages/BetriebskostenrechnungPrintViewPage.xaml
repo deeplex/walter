@@ -1,0 +1,50 @@
+﻿<Page
+    x:Class="Deeplex.Saverwalter.WinUI3.BetriebskostenrechnungPrintViewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    xmlns:uc="using:Deeplex.Saverwalter.WinUI3"
+    xmlns:vm="using:Deeplex.Saverwalter.Model"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="{StaticResource SystemChromeLowColor}">
+        <ScrollViewer
+                HorizontalScrollBarVisibility="Visible"
+                IsScrollInertiaEnabled="True"
+                HorizontalScrollMode="Auto">
+                <StackPanel>
+                <!--Padding to kind of resemble DinA4-->
+                <StackPanel
+                    Margin="10"
+                    Padding="101.19, 68.404, 40.476, 68.404"
+                    x:Name="Panel"
+                    Background="{ThemeResource SystemAltHighColor}"
+                    Width="850" />
+            </StackPanel>
+        </ScrollViewer>
+        <Grid VerticalAlignment="Top">
+            <NumberBox
+                Margin="20"
+                HorizontalAlignment="Right"
+                SpinButtonPlacementMode="Inline"
+                ValueChanged="Jahr_ValueChanged"
+                Value="{x:Bind ViewModel.Jahr, Mode=OneWay}"/>
+            <uc:ExpanderControl
+                        Visibility="{x:Bind ViewModel.HasNotes}"
+                        Width="850"
+                        Header="Fehlerliste">
+                <uc:ExpanderControl.MainContent>
+                    <ListView Height="400" ItemsSource="{x:Bind ViewModel.Betriebskostenabrechnung.Value.notes, Mode=OneWay}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:Note">
+                                <TextBlock Text="{x:Bind Message}" />
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </uc:ExpanderControl.MainContent>
+            </uc:ExpanderControl>
+        </Grid>
+    </Grid>
+</Page>
