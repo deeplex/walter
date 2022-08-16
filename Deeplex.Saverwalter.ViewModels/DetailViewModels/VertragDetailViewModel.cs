@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public new KontaktListViewModelEntry Ansprechpartner
         {
-            get => Versionen.Value.Last().Ansprechpartner.Value;
+            get => Versionen.Value.LastOrDefault()?.Ansprechpartner.Value;
             set
             {
                 Versionen.Value.Last().Ansprechpartner.Value = value;
@@ -44,7 +44,10 @@ namespace Deeplex.Saverwalter.ViewModels
             get => Versionen.Value.Last().Wohnung.Value;
             set
             {
-                Versionen.Value.Last().Wohnung.Value = value;
+                if (Versionen.Value.LastOrDefault() is VertragDetailViewModelVersion v)
+                {
+                    v.Wohnung.Value = value;
+                }
                 RaisePropertyChanged(nameof(Vermieter));
                 RaisePropertyChangedAuto();
             }
@@ -66,7 +69,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Mieten.Value = new(guid, NotificationService, WalterDbService);
             Mietminderungen.Value = new(guid, NotificationService, WalterDbService);
             Mieter.Value = new(WalterDbService, NotificationService);
-            Mieter.Value.SetList(list.First());
+            Mieter.Value.SetList(list.FirstOrDefault());
 
             Versionen.Value = list.Select(vs =>
             {
@@ -75,15 +78,15 @@ namespace Deeplex.Saverwalter.ViewModels
                 return r;
             }).ToImmutableList();
 
-            Wohnung = AlleWohnungen.Find(w => w.Id == list.First().WohnungId);
+            Wohnung = AlleWohnungen.Find(w => w.Id == list.FirstOrDefault()?.WohnungId);
 
-            if (Versionen.Value.Last().Ansprechpartner.Value is KontaktListViewModelEntry partner)
+            if (Versionen.Value.LastOrDefault()?.Ansprechpartner.Value is KontaktListViewModelEntry partner)
             {
                 Ansprechpartner = AlleKontakte.Find(e => e.Entity.PersonId == partner.Guid);
             }
 
             SelectMieter = new(WalterDbService, NotificationService);
-            SelectMieter.SetList(v);
+            SelectMieter.SetList(v, Mieter.Value);
         }
 
         public VertragDetailViewModel(INotificationService ns, IWalterDbService db) : base(ns, db)

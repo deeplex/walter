@@ -30,8 +30,8 @@ namespace Deeplex.Saverwalter.ViewModels
                 {
                     vm.WalterDbService.ctx.Zaehlerstaende.Remove(Entity);
                     vm.WalterDbService.SaveWalter();
+                    vm.Liste.Value = vm.Liste.Value.Remove(this);
                 }
-                vm.Liste.Value = vm.Liste.Value.Remove(this);
             }, _ => true);
             Save = new RelayCommand(_ => save(), _ => true);
         }

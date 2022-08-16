@@ -12,10 +12,6 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
 
-    <UserControl.Resources>
-        <conv:NullToInvisibleConverter x:Key="NullToInvisibleConverterKey"/>
-    </UserControl.Resources>
-
     <mtuuc:DataGrid
         Style="{StaticResource DataGridUserControl}"
         Sorting="DataGrid_Sorting"
@@ -24,10 +20,9 @@
         SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}"
         ItemsSource="{x:Bind ViewModel.List.Value, Mode=OneWay}">
         <mtuuc:DataGrid.Columns>
-            <mtuuc:DataGridTemplateColumn>
+            <mtuuc:DataGridTemplateColumn Visibility="{x:Bind ViewModel.Deletable}">
                 <mtuuc:DataGridTemplateColumn.CellTemplate>
                     <DataTemplate x:DataType="vm:KontaktListViewModelEntry">
-                        <!--Visibility="{x:Bind Delete, Mode=OneWay, Converter={StaticResource NullToInvisibleConverterKey}}"-->
                         <Button Command="{x:Bind Delete}" Background="Transparent">
                             <SymbolIcon Symbol="Delete"/>
                         </Button>

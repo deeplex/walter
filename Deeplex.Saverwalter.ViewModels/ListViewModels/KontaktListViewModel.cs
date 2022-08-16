@@ -12,6 +12,9 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => "Kontakte";
 
+        // Used to determine if delete button is shown. Set in injected MemberViewModel
+        public bool Deletable { get; set; }
+
         protected override void updateList()
         {
             List.Value = AllRelevant.Where(v => applyFilter(v.ToString(), v.Email, v.Telefon)).ToImmutableList();

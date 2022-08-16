@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public override string ToString() => "Personen";
 
         public T Entity;
+        private KontaktListViewModel Reference;
         private bool OnlyJuristische { get; set; }
 
         public IWalterDbService WalterDbService { get; }
@@ -46,18 +48,21 @@ namespace Deeplex.Saverwalter.ViewModels
                         VertragId = v.VertragId,
                     });
                 }
+                Reference.List.Value = Reference.List.Value.Prepend(Selected).ToImmutableList();
                 // TODO add the added thing to the corresponding List... 
             }, _ => true);
         }
 
         // If onlyJuristische is selected, then we want to add a JuristischePerson to a Juristische, or NatuerlichePerson.
         // If it is false we want to add a Mitglied to a JuristischePerson
-        public void SetList(T e, bool onlyJuristische = false)
+        public void SetList(T e, KontaktListViewModel reference, bool onlyJuristische = false)
         {
+            Reference = reference;
+            Reference.Deletable = true;
             Entity = e;
             OnlyJuristische = onlyJuristische;
 
-            if (onlyJuristische)
+           if (onlyJuristische)
             {
                 List.Value = transform(new List<NatuerlichePerson> { }, includeJP());
             }
@@ -65,6 +70,33 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 List.Value = transform(includeNP(), includeJP());
             }
+
+            if (Reference.List.Value == null) return;
+
+            List.Value = List.Value
+                .Where(e => !Reference.List.Value
+                    .Exists(m => m.Entity.PersonId == e.Entity.PersonId))
+                .ToImmutableList();
+
+            Reference.List.Value.ForEach(l =>
+            {
+                l.Delete = new AsyncRelayCommand(async _ =>
+                {
+                    if (l.Entity.PersonId != Guid.Empty && await NotificationService.Confirmation())
+                    {
+                        if (e is Vertrag v)
+                        {
+                            WalterDbService.ctx.MieterSet
+                                .Where(e => e.PersonId == l.Entity.PersonId && e.VertragId == v.VertragId)
+                                .ToList()
+                                .ForEach(e => WalterDbService.ctx.Remove(e));
+                        }
+                        // TODO Remove Mitglieder or JuristischePerson
+                        WalterDbService.SaveWalter();
+                        Reference.List.Value = Reference.List.Value.Remove(l);
+                    }
+                }, _ => true);
+            });
         }
 
         private List<NatuerlichePerson> includeNP()
@@ -87,9 +119,9 @@ namespace Deeplex.Saverwalter.ViewModels
         private ImmutableList<KontaktListViewModelEntry> transform(List<NatuerlichePerson> np, List<JuristischePerson> jp)
         {
             return
-                np.Select(p => new KontaktListViewModelEntry(this, p))
+                np.Select(p => new KontaktListViewModelEntry(p))
              .Concat(
-                jp.Select(p => new KontaktListViewModelEntry(this, p)))
+                jp.Select(p => new KontaktListViewModelEntry(p)))
              .ToImmutableList();
         }
     }

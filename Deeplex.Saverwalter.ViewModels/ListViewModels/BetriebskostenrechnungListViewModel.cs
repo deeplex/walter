@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.ViewModels
             if (v == null) return;
 
             AllRelevant = transform(include(WalterDbService)
-                    .Where(b => b.Umlage.Wohnungen.Exists(w => v.Wohnung.WohnungId == w.WohnungId))
+                    .Where(b => b.Umlage.Wohnungen.Exists(w => v.Wohnung?.WohnungId == w.WohnungId))
                     .ToList());
             List.Value = AllRelevant.ToImmutableList();
         }

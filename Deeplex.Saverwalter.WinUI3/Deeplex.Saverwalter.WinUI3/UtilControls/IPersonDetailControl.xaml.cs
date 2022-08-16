@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.WinUI3
                 VertragListViewModel.SetList(ViewModel.Entity);
                 WohnungListViewModel.SetList(ViewModel.Entity);
                 JuristischePersonenViewModel.SetList(ViewModel.Entity);
-                SelectJuristischePersonListViewModel.SetList(ViewModel.Entity, true);
+                SelectJuristischePersonListViewModel.SetList(ViewModel.Entity, JuristischePersonenViewModel, true);
             }
         }
 
