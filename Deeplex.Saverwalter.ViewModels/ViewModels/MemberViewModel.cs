@@ -45,7 +45,7 @@ namespace Deeplex.Saverwalter.ViewModels
                     WalterDbService.ctx.MieterSet.Add(new Mieter
                     {
                         PersonId = Selected.Entity.PersonId,
-                        VertragId = v.VertragId,
+                        Vertrag = v,
                     });
                 }
                 Reference.List.Value = Reference.List.Value.Prepend(Selected).ToImmutableList();
@@ -87,7 +87,7 @@ namespace Deeplex.Saverwalter.ViewModels
                         if (e is Vertrag v)
                         {
                             WalterDbService.ctx.MieterSet
-                                .Where(e => e.PersonId == l.Entity.PersonId && e.VertragId == v.VertragId)
+                                .Where(e => e.PersonId == l.Entity.PersonId && e.Vertrag.VertragId == v.VertragId)
                                 .ToList()
                                 .ForEach(e => WalterDbService.ctx.Remove(e));
                         }

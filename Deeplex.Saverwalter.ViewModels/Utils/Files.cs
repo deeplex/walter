@@ -71,10 +71,10 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public static async Task<string> PrintBetriebskostenabrechnung(Vertrag v, int Jahr, IWalterDbService db, IFileService fs)
         {
-            var b = new Betriebskostenabrechnung(db.ctx, v.rowid, Jahr, new DateTime(Jahr, 1, 1), new DateTime(Jahr, 12, 31));
+            var b = new Betriebskostenabrechnung(db.ctx, v, Jahr, new DateTime(Jahr, 1, 1), new DateTime(Jahr, 12, 31));
 
             var AuflistungMieter = string.Join(", ", db.ctx.MieterSet
-                .Where(m => m.VertragId == v.VertragId).ToList()
+                .Where(m => m.Vertrag.VertragId == v.VertragId).ToList()
                 .Select(a => db.ctx.FindPerson(a.PersonId).Bezeichnung));
 
             var filename = Jahr.ToString() + " - " + v.Wohnung.ToString() + " - " + AuflistungMieter;

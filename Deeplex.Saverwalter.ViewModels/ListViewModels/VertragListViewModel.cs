@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.ViewModels
             AllRelevant = transform(include(WalterDbService).Where(v =>
                 v.AnsprechpartnerId == p.PersonId ||
                 v.Wohnung.BesitzerId == p.PersonId ||
-                mieterSets.Exists(w => w.VertragId == v.VertragId && w.PersonId == p.PersonId)
+                mieterSets.Exists(w => w.Vertrag.VertragId == v.VertragId && w.PersonId == p.PersonId)
                 ).ToList());
             List.Value = AllRelevant.ToImmutableList();
         }
@@ -64,9 +64,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         private ImmutableList<VertragListViewModelEntry> transform(List<Vertrag> list)
         {
-            return list.GroupBy(v => v.VertragId)
+            return list
                 .Select(v => new VertragListViewModelEntry(v, WalterDbService, NotificationService))
-                .OrderBy(v => v.Beginn).Reverse()
                 .ToImmutableList();
         }
     }

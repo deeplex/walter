@@ -45,7 +45,7 @@
                         <TextBlock
                             VerticalAlignment="Bottom"
                             Margin="20,0,0,7"
-                            Text="{x:Bind ViewModel.lastBeginn, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.Beginn, Mode=OneWay}" />
                         <TextBlock
                             VerticalAlignment="Bottom"
                             Margin="20,0,0,7"
@@ -53,7 +53,7 @@
                         <TextBlock
                             VerticalAlignment="Bottom"
                             Margin="20,0,20,7"
-                            Text="{x:Bind ViewModel.firstEnde, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.Ende, Mode=OneWay}" />
                         <Button
                             Margin="0,23,0,0"
                             Command="{x:Bind ViewModel.RemoveDate}">
@@ -139,7 +139,7 @@
                                             <mtuuc:DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate x:DataType="vm:VertragDetailViewModelVersion">
                                                     <muxc:NumberBox
-                                                        Value="{x:Bind KaltMiete.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                        Value="{x:Bind Grundmiete.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                         PlaceholderText="0"/>
                                                 </DataTemplate>
                                             </mtuuc:DataGridTemplateColumn.CellTemplate>

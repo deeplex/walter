@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 Betriebskostenabrechnung.Value =
                 new Betriebskostenabrechnung(
                     WalterDbService.ctx,
-                    Entity.rowid,
+                    Entity,
                     Jahr,
                     new DateTime(Jahr, 1, 1),
                     new DateTime(Jahr, 12, 31));

@@ -52,7 +52,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             if (v == null) return;
 
-            var mieter = WalterDbService.ctx.MieterSet.Where(m => m.VertragId == v.VertragId).Select(m => m.PersonId).ToList();
+            var mieter = WalterDbService.ctx.MieterSet.Where(m => m.Vertrag.VertragId == v.VertragId).Select(m => m.PersonId).ToList();
             var np = new List<NatuerlichePerson> { };
             var jp = new List<JuristischePerson> { };
 

@@ -5,13 +5,12 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class VertragDetailViewModelVersion : DetailViewModel<Vertrag>, IDetailViewModel
+    public class VertragDetailViewModelVersion : DetailViewModel<VertragVersion>, IDetailViewModel
     {
-        public override string ToString() => "Vertrag"; // TODO
+        public override string ToString() => "Vertragsversion"; // TODO
 
-        public int Id => Entity.rowid;
-        public int Version => Entity.Version;
-        public SavableProperty<double> KaltMiete;
+        public int Id => Entity.VertragVersionId;
+        public SavableProperty<double> Grundmiete;
         public SavableProperty<int> Personenzahl;
         public SavableProperty<WohnungListViewModelEntry> Wohnung { get; protected set; }
         public SavableProperty<DateTimeOffset> Beginn;
@@ -26,30 +25,22 @@ namespace Deeplex.Saverwalter.ViewModels
             RemoveDate = new RelayCommand(_ => Ende = null, _ => Ende != null);
         }
 
-        public override void SetEntity(Vertrag v)
+        public override void SetEntity(VertragVersion v)
         {
             Entity = v;
 
-            KaltMiete = new(this, v.KaltMiete);
+            Grundmiete = new(this, v.Grundmiete);
             Personenzahl = new(this, v.Personenzahl);
-            Wohnung = new(this, new(v.Wohnung, WalterDbService));
             Beginn = new(this, v.Beginn);
             Ende = new(this, v.Ende);
             Notiz = new(this, v.Notiz);
-            Ansprechpartner = new(this, v.AnsprechpartnerId is Guid g ? new(WalterDbService, g) : null);
         }
 
         public override void checkForChanges()
         {
-            if (!(Ansprechpartner.Value == null && Entity.AnsprechpartnerId == Guid.Empty))
-            {
-                NotificationService.outOfSync = Ansprechpartner.Value?.Guid != Entity.AnsprechpartnerId;
-            }
-
             NotificationService.outOfSync =
-                Wohnung.Value.Entity.WohnungId != Entity.Wohnung.WohnungId ||
                 Personenzahl.Value != Entity.Personenzahl ||
-                KaltMiete.Value != Entity.KaltMiete ||
+                Grundmiete.Value != Entity.Grundmiete ||
                 Beginn.Value != Entity.Beginn ||
                 Ende.Value != Entity.Ende ||
                 Notiz.Value != Entity.Notiz;
@@ -57,13 +48,11 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public void versionSave()
         {
-            Entity.Wohnung = Wohnung.Value.Entity;
             Entity.Beginn = Beginn.Value.DateTime;
             Entity.Ende = Ende.Value?.DateTime;
             Entity.Notiz = Notiz.Value;
             Entity.Personenzahl = Personenzahl.Value;
-            Entity.KaltMiete = KaltMiete.Value;
-            Entity.AnsprechpartnerId = Ansprechpartner.Value?.Guid ?? Guid.Empty;
+            Entity.Grundmiete = Grundmiete.Value;
 
             save();
         }

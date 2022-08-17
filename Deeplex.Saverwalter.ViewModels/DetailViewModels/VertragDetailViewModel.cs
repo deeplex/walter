@@ -9,9 +9,11 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class VertragDetailViewModel : VertragDetailViewModelVersion, IDetailViewModel
+    public sealed class VertragDetailViewModel : DetailViewModel<Vertrag>, IDetailViewModel
     {
-        public Guid guid => Entity.VertragId;
+        public override string ToString() => "Vertrag";
+
+        public int Id => Entity.VertragId;
 
         public List<WohnungListViewModelEntry> AlleWohnungen;
         public List<KontaktListViewModelEntry> AlleKontakte;
@@ -19,35 +21,27 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<ImmutableList<VertragDetailViewModelVersion>> Versionen = new();
         public DateTimeOffset? AddVersionDatum;
 
-        public DateTimeOffset lastBeginn => Versionen.Value.Last().Beginn.Value;
-        public DateTimeOffset? firstEnde => Versionen.Value.First().Ende.Value;
-        public int StartJahr => Versionen.Value.Last().Beginn.Value.Year;
-        public int EndeJahr => Versionen.Value.First().Ende.Value?.Year ?? 9999;
+        public DateTimeOffset Beginn => Entity.Beginn().AsUtcKind();
+        public DateTimeOffset? Ende => Entity.Ende()?.AsUtcKind();
+        public int StartJahr => Beginn.Year;
+        public int EndeJahr => Ende?.Year ?? 9999;
 
         public ObservableProperty<MieteListViewModel> Mieten { get; private set; } = new();
         public ObservableProperty<MietminderungListViewModel> Mietminderungen { get; private set; } = new();
         public ObservableProperty<KontaktListViewModel> Mieter { get; private set; } = new();
         public MemberViewModel<Vertrag> SelectMieter { get; private set; }
 
-        public new KontaktListViewModelEntry Ansprechpartner
-        {
-            get => Versionen.Value.LastOrDefault()?.Ansprechpartner.Value;
-            set
-            {
-                Versionen.Value.Last().Ansprechpartner.Value = value;
-                RaisePropertyChangedAuto();
-            }
-        }
+        public SavableProperty<KontaktListViewModelEntry> Ansprechpartner { get; set; }
+        public SavableProperty<string> Notiz { get; private set; }
 
-        public new WohnungListViewModelEntry Wohnung
+        private WohnungListViewModelEntry mWohnung { get; set; }
+        public WohnungListViewModelEntry Wohnung
         {
-            get => Versionen.Value.Last().Wohnung.Value;
+            get => AlleWohnungen.Find(e => e.Id == mWohnung.Id);
             set
             {
-                if (Versionen.Value.LastOrDefault() is VertragDetailViewModelVersion v)
-                {
-                    v.Wohnung.Value = value;
-                }
+                mWohnung = value;
+                checkForChanges();
                 RaisePropertyChanged(nameof(Vermieter));
                 RaisePropertyChangedAuto();
             }
@@ -55,35 +49,25 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public string Vermieter => Versionen.Value.Last().Wohnung.Value.Besitzer;
 
-        public new void SetEntity(Vertrag v)
+        public override void SetEntity(Vertrag v)
         {
             Entity = v;
-            var list = WalterDbService.ctx.Vertraege
-                  .Where(e => e.VertragId == v.VertragId)
-                  .Include(e => e.Wohnung)
-                  .ToList()
-                  .OrderBy(e => e.Version)
-                  .Reverse()
-                  .ToList();
 
-            Mieten.Value = new(guid, NotificationService, WalterDbService);
-            Mietminderungen.Value = new(guid, NotificationService, WalterDbService);
+            Mieten.Value = new(v, NotificationService, WalterDbService);
+            Mietminderungen.Value = new(v, NotificationService, WalterDbService);
             Mieter.Value = new(WalterDbService, NotificationService);
-            Mieter.Value.SetList(list.FirstOrDefault());
+            Mieter.Value.SetList(v);
 
-            Versionen.Value = list.Select(vs =>
+            Versionen.Value = v.Versionen.Select(vs =>
             {
                 var r = new VertragDetailViewModelVersion(NotificationService, WalterDbService);
                 r.SetEntity(vs);
                 return r;
             }).ToImmutableList();
 
-            Wohnung = AlleWohnungen.Find(w => w.Id == list.FirstOrDefault()?.WohnungId);
-
-            if (Versionen.Value.LastOrDefault()?.Ansprechpartner.Value is KontaktListViewModelEntry partner)
-            {
-                Ansprechpartner = AlleKontakte.Find(e => e.Entity.PersonId == partner.Guid);
-            }
+            Wohnung = AlleWohnungen.Find(w => w.Id == v.Wohnung.WohnungId);
+            Ansprechpartner = new(this, AlleKontakte.Find(e => e.Entity.PersonId == v.AnsprechpartnerId));
+            Notiz = new(this, v.Notiz);
 
             SelectMieter = new(WalterDbService, NotificationService);
             SelectMieter.SetList(v, Mieter.Value);
@@ -101,10 +85,7 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 if (await NotificationService.Confirmation())
                 {
-                    Versionen.Value.ForEach(v =>
-                    {
-                        WalterDbService.ctx.Vertraege.Remove(v.Entity);
-                    });
+                    WalterDbService.ctx.Vertraege.Remove(Entity);
                     WalterDbService.SaveWalter();
                 }
             }, _ => true);
@@ -113,44 +94,45 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 Mieten.Value.Liste.Value.ForEach(e => e.save());
                 Mietminderungen.Value.Liste.Value.ForEach(e => e.save());
-
                 Versionen.Value.ForEach(v => v.versionSave());
+
+                Entity.Notiz = Notiz.Value;
+                Entity.Wohnung = Wohnung.Entity;
+                Entity.AnsprechpartnerId = Ansprechpartner.Value.Guid;
+
+                save();
             }, _ => true);
 
             AddVersion = new RelayCommand(_ =>
             {
-                var last = Versionen.Value.First().Entity;
-                var entity = new Vertrag(last, AddVersionDatum?.UtcDateTime ?? DateTime.UtcNow.Date)
+                var last = Entity.Versionen.OrderBy(e => e.Beginn).Last();
+                var entity = new VertragVersion()
                 {
-                    Personenzahl = Personenzahl.Value,
-                    //KaltMiete = KaltMiete, TODO
+                    Personenzahl = last.Personenzahl,
+                    Grundmiete = last.Grundmiete,
+                    Vertrag = Entity,
                 };
                 var nv = new VertragDetailViewModelVersion(ns, db);
                 nv.SetEntity(entity);
 
-                Versionen.Value = Versionen.Value.Insert(0, nv);
-                db.ctx.Vertraege.Add(entity);
+                Versionen.Value = Versionen.Value.Prepend(nv).ToImmutableList();
+                db.ctx.VertragVersionen.Add(entity);
                 db.SaveWalter();
-            }, _ => true);
-
-            RemoveVersion = new AsyncRelayCommand(async _ =>
-            {
-                if (await NotificationService.Confirmation())
-                {
-                    var vs = Versionen.Value.First().Entity;
-                    db.ctx.Vertraege.Remove(vs);
-                    Versionen.Value = Versionen.Value.Skip(1).ToImmutableList();
-                    db.SaveWalter();
-                }
             }, _ => true);
         }
 
-        public new void checkForChanges()
+        public override void checkForChanges()
         {
+            NotificationService.outOfSync =
+                Wohnung.Id != Entity.Wohnung.WohnungId ||
+                Ansprechpartner.Value.Guid != Entity.AnsprechpartnerId ||
+                Notiz.Value != Entity.Notiz;
+
             Versionen.Value.ForEach(v => v.checkForChanges());
         }
 
         public RelayCommand AddVersion { get; }
         public AsyncRelayCommand RemoveVersion { get; }
+        public RelayCommand RemoveDate { get; }
     }
 }

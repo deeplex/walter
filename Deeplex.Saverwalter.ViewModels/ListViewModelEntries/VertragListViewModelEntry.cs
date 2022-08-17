@@ -8,9 +8,26 @@ using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public sealed class VertragListViewModelEntry : VertragListViewModelEntryVersion
+    public sealed class VertragListViewModelEntry : BindableBase
     {
+        public Vertrag Entity { get; }
+        public IWalterDbService WalterDbService { get; }
+
+        public DateTimeOffset? Ende => Entity.Ende()?.AsUtcKind();
+        public DateTimeOffset Beginn => Entity.Beginn().AsUtcKind();
+
         public List<VertragListViewModelEntryVersion> Versionen { get; } = new();
+        public string Anschrift => AdresseViewModel.Anschrift(Entity.Wohnung);
+        public string AnschriftMitWohnung => Anschrift + ", " + Wohnung.Bezeichnung;
+        public Wohnung Wohnung => Entity.Wohnung;
+        public ImmutableList<Guid> Mieter => WalterDbService.ctx.MieterSet
+            .Where(w => w.Vertrag.VertragId == Entity.VertragId)
+            .Select(m => m.PersonId).ToImmutableList();
+
+        public string AuflistungMieter => string.Join(", ", WalterDbService.ctx.MieterSet
+            .Where(m => m.Vertrag.VertragId == Entity.VertragId).ToList()
+            .Select(a => WalterDbService.ctx.FindPerson(a.PersonId).Bezeichnung));
+        public string Besitzer => WalterDbService.ctx.FindPerson(Entity.Wohnung.BesitzerId)?.Bezeichnung;
 
         public MieteListViewModel Mieten { get; set; }
         public string LastMiete
@@ -25,13 +42,12 @@ namespace Deeplex.Saverwalter.ViewModels
         }
         public bool HasLastMiete => LastMiete != "";
 
-        public VertragListViewModelEntry(IGrouping<Guid, Vertrag> v, IWalterDbService db, INotificationService ns)
-            : base(v.OrderBy(vs => vs.Version).Last(), db)
+        public VertragListViewModelEntry(Vertrag v, IWalterDbService db, INotificationService ns)
         {
-            Versionen = v.OrderBy(vs => vs.Version).Select(vs => new VertragListViewModelEntryVersion(vs, db)).ToList();
-            Beginn = Versionen.First().Beginn;
+            Versionen = v.Versionen.OrderBy(vs => vs.Beginn).Select(vs => new VertragListViewModelEntryVersion(vs, db)).ToList();
+            WalterDbService = db;
 
-            Mieten = new MieteListViewModel(v.Key, ns, db);
+            Mieten = new MieteListViewModel(v, ns, db);
 
             AddMiete = new RelayCommand(_ =>
             {

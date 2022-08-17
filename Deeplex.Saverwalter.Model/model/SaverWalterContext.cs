@@ -21,6 +21,7 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<NatuerlichePerson> NatuerlichePersonen { get; set; } = null!;
         public DbSet<Umlage> Umlagen { get; set; } = null!;
         public DbSet<Vertrag> Vertraege { get; set; } = null!;
+        public DbSet<VertragVersion> VertragVersionen { get; set; } = null!;
         public DbSet<Wohnung> Wohnungen { get; set; } = null!;
         public DbSet<Zaehler> ZaehlerSet { get; set; } = null!;
         public DbSet<Zaehlerstand> Zaehlerstaende { get; set; } = null!;
@@ -55,13 +56,6 @@ namespace Deeplex.Saverwalter.Model
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Vertrag>()
-                .HasKey(v => v.rowid);
-            modelBuilder.Entity<Vertrag>()
-                .HasAlternateKey("VertragId", "Version");
-            modelBuilder.Entity<Vertrag>()
-                .Property(v => v.Version);
-
             modelBuilder.Entity<JuristischePerson>()
                 .HasAlternateKey(jp => jp.PersonId);
             modelBuilder.Entity<NatuerlichePerson>()

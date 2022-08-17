@@ -10,19 +10,17 @@ namespace Deeplex.Saverwalter.ViewModels
     public sealed class MietminderungListViewModel : ListViewModel<MietminderungListViewModelEntry>
     {
         public ObservableProperty<ImmutableList<MietminderungListViewModelEntry>> Liste = new();
-        public Guid VertragId;
 
         public RelayCommand Add { get; }
 
-        public MietminderungListViewModel(Guid VertragGuid, INotificationService ns, IWalterDbService db)
+        public MietminderungListViewModel(Vertrag v, INotificationService ns, IWalterDbService db)
         {
-            VertragId = VertragGuid;
             var self = this;
             NotificationService = ns;
             WalterDbService = db;
 
             Liste.Value = WalterDbService.ctx.MietMinderungen
-                .Where(m => m.VertragId == VertragGuid)
+                .Where(m => m.Vertrag.VertragId == v.VertragId)
                 .ToList()
                 .Select(m => new MietminderungListViewModelEntry(m, self))
                 .OrderByDescending(e => e.Beginn.Value)
