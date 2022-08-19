@@ -34,28 +34,31 @@
         <uc:FileDropControl.MainContent>
             <ScrollViewer>
                 <StackPanel>
-                    <Button Click="Betriebskostenabrechnung_Click" HorizontalAlignment="Right" Margin="0,-10,0,-120">
+                    <Button
+                        Click="Betriebskostenabrechnung_Click"
+                        HorizontalAlignment="Right"
+                        Margin="0,-90,0,-120">
                         <StackPanel Orientation="Horizontal">
                             <SymbolIcon Symbol="PostUpdate" />
                             <TextBlock Margin="10,0,0,0" Text="Betriebskostenrechnung"/>
                         </StackPanel>
                     </Button>
                     <mtuuc:WrapPanel Orientation="Horizontal">
-                        <TextBlock Text="Laufzeit:" Margin="20,30,0,0" Style="{StaticResource Labels}"/>
-                        <TextBlock
-                            VerticalAlignment="Bottom"
-                            Margin="20,0,0,7"
-                            Text="{x:Bind ViewModel.Beginn, Mode=OneWay}" />
-                        <TextBlock
-                            VerticalAlignment="Bottom"
-                            Margin="20,0,0,7"
-                            Text=" - "/>
-                        <TextBlock
-                            VerticalAlignment="Bottom"
-                            Margin="20,0,20,7"
-                            Text="{x:Bind ViewModel.Ende, Mode=OneWay}" />
+                        <TextBlock Text="Laufzeit:" Margin="20,40,0,0" Style="{StaticResource Labels}"/>
+                        <DatePicker
+                            Margin="20,20,0,0"
+                            Header="Beginn"
+                            SelectedDate="{x:Bind ViewModel.Beginn, Mode=OneWay}"
+                            IsEnabled="False"
+                            Language="de"/>
+                        <DatePicker
+                            Margin="20,20,0,0"
+                            Header="Ende"
+                            SelectedDate="{x:Bind ViewModel.Ende.Value, Mode=TwoWay}"
+                            IsEnabled="True"
+                            Language="de"/>
                         <Button
-                            Margin="0,23,0,0"
+                            Margin="0,40,0,0"
                             Command="{x:Bind ViewModel.RemoveDate}">
                             <SymbolIcon Symbol="Delete"></SymbolIcon>
                         </Button>
@@ -119,13 +122,9 @@
                                     AutoGenerateColumns="False"
                                     ItemsSource="{x:Bind ViewModel.Versionen.Value, Mode=TwoWay}">
                                     <mtuuc:DataGrid.Columns>
-                                        <mtuuc:DataGridTextColumn IsReadOnly="True" Header="Version" Binding="{Binding Version}"/>
                                         <mtuuc:DataGridTemplateColumn
                                             Header="Beginn"
                                             CellTemplate="{StaticResource BeginnGrid}"/>
-                                        <mtuuc:DataGridTemplateColumn
-                                            Header="Ende"
-                                            CellTemplate="{StaticResource EndeGrid}"/>
                                         <mtuuc:DataGridTemplateColumn Header="Personenzahl">
                                             <mtuuc:DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate x:DataType="vm:VertragDetailViewModelVersion">

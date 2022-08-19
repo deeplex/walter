@@ -9,7 +9,7 @@ namespace Deeplex.Saverwalter.Model
     public sealed class VertragsBetriebskostenrechnung : IAnhang
     {
         public int VertragsBetriebskostenrechnungId { get; set; }
-        public Guid VertragId { get; set; }
+        public Vertrag Vertrag { get; set; } = null!;
         public Betriebskostenrechnung Rechnung { get; set; } = null!;
         public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
     }

@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public Vertrag Entity { get; }
         public IWalterDbService WalterDbService { get; }
 
-        public DateTimeOffset? Ende => Entity.Ende()?.AsUtcKind();
+        public DateTimeOffset? Ende => Entity.Ende?.AsUtcKind();
         public DateTimeOffset Beginn => Entity.Beginn().AsUtcKind();
 
         public List<VertragListViewModelEntryVersion> Versionen { get; } = new();
@@ -44,6 +44,8 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public VertragListViewModelEntry(Vertrag v, IWalterDbService db, INotificationService ns)
         {
+            Entity = v;
+
             Versionen = v.Versionen.OrderBy(vs => vs.Beginn).Select(vs => new VertragListViewModelEntryVersion(vs, db)).ToList();
             WalterDbService = db;
 

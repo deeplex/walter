@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity = v;
 
             Beginn = v.Beginn.AsUtcKind();
-            Ende = v.Ende?.AsUtcKind();
+            Ende = v.Ende()?.AsUtcKind();
         }
     }
 }

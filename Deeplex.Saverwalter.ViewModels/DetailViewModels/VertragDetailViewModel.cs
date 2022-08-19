@@ -22,15 +22,13 @@ namespace Deeplex.Saverwalter.ViewModels
         public DateTimeOffset? AddVersionDatum;
 
         public DateTimeOffset Beginn => Entity.Beginn().AsUtcKind();
-        public DateTimeOffset? Ende => Entity.Ende()?.AsUtcKind();
-        public int StartJahr => Beginn.Year;
-        public int EndeJahr => Ende?.Year ?? 9999;
 
         public ObservableProperty<MieteListViewModel> Mieten { get; private set; } = new();
         public ObservableProperty<MietminderungListViewModel> Mietminderungen { get; private set; } = new();
         public ObservableProperty<KontaktListViewModel> Mieter { get; private set; } = new();
         public MemberViewModel<Vertrag> SelectMieter { get; private set; }
 
+        public SavableProperty<DateTimeOffset?> Ende { get; set; }
         public SavableProperty<KontaktListViewModelEntry> Ansprechpartner { get; set; }
         public SavableProperty<string> Notiz { get; private set; }
 
@@ -47,7 +45,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public string Vermieter => Versionen.Value.Last().Wohnung.Value.Besitzer;
+        public string Vermieter => WalterDbService.ctx.FindPerson(Entity.Wohnung.BesitzerId).Bezeichnung;
 
         public override void SetEntity(Vertrag v)
         {
@@ -65,9 +63,11 @@ namespace Deeplex.Saverwalter.ViewModels
                 return r;
             }).ToImmutableList();
 
-            Wohnung = AlleWohnungen.Find(w => w.Id == v.Wohnung.WohnungId);
             Ansprechpartner = new(this, AlleKontakte.Find(e => e.Entity.PersonId == v.AnsprechpartnerId));
             Notiz = new(this, v.Notiz);
+            Ende = new(this, v.Ende);
+            // Wohnung has to be last, because everything has to be set for the checkForChanges in Wohnung setter
+            Wohnung = new(AlleWohnungen.FirstOrDefault(w => w.Id == v.Wohnung.WohnungId).Entity, WalterDbService);
 
             SelectMieter = new(WalterDbService, NotificationService);
             SelectMieter.SetList(v, Mieter.Value);
@@ -96,6 +96,7 @@ namespace Deeplex.Saverwalter.ViewModels
                 Mietminderungen.Value.Liste.Value.ForEach(e => e.save());
                 Versionen.Value.ForEach(v => v.versionSave());
 
+                Entity.Ende = Ende.Value?.UtcDateTime;
                 Entity.Notiz = Notiz.Value;
                 Entity.Wohnung = Wohnung.Entity;
                 Entity.AnsprechpartnerId = Ansprechpartner.Value.Guid;
@@ -126,7 +127,8 @@ namespace Deeplex.Saverwalter.ViewModels
             NotificationService.outOfSync =
                 Wohnung.Id != Entity.Wohnung.WohnungId ||
                 Ansprechpartner.Value.Guid != Entity.AnsprechpartnerId ||
-                Notiz.Value != Entity.Notiz;
+                Notiz.Value != Entity.Notiz ||
+                Ende.Value != Entity.Ende?.AsUtcKind();
 
             Versionen.Value.ForEach(v => v.checkForChanges());
         }

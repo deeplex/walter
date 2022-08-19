@@ -32,7 +32,6 @@ namespace Deeplex.Saverwalter.ViewModels
             Grundmiete = new(this, v.Grundmiete);
             Personenzahl = new(this, v.Personenzahl);
             Beginn = new(this, v.Beginn);
-            Ende = new(this, v.Ende);
             Notiz = new(this, v.Notiz);
         }
 
@@ -42,14 +41,12 @@ namespace Deeplex.Saverwalter.ViewModels
                 Personenzahl.Value != Entity.Personenzahl ||
                 Grundmiete.Value != Entity.Grundmiete ||
                 Beginn.Value != Entity.Beginn ||
-                Ende.Value != Entity.Ende ||
                 Notiz.Value != Entity.Notiz;
         }
 
         public void versionSave()
         {
             Entity.Beginn = Beginn.Value.DateTime;
-            Entity.Ende = Ende.Value?.DateTime;
             Entity.Notiz = Notiz.Value;
             Entity.Personenzahl = Personenzahl.Value;
             Entity.Grundmiete = Grundmiete.Value;

@@ -56,6 +56,7 @@ namespace Deeplex.Saverwalter.ViewModels
         private List<Vertrag> include(IWalterDbService db)
         {
             return db.ctx.Vertraege
+                .Include(v => v.Versionen)
                 .Include(v => v.Wohnung).ThenInclude(w => w.Adresse).ThenInclude(a => a.Anhaenge)
                 .Include(v => v.Wohnung).ThenInclude(w => w.Anhaenge)
                 .Include(v => v.Anhaenge)
