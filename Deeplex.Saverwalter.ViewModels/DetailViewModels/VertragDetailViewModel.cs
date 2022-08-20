@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public List<WohnungListViewModelEntry> AlleWohnungen;
         public List<KontaktListViewModelEntry> AlleKontakte;
 
-        public ObservableProperty<ImmutableList<VertragDetailViewModelVersion>> Versionen = new();
+        public ObservableProperty<VertragVersionListViewModel> Versionen = new();
         public DateTimeOffset? AddVersionDatum;
 
         public DateTimeOffset Beginn => Entity.Beginn().AsUtcKind();
@@ -56,12 +56,8 @@ namespace Deeplex.Saverwalter.ViewModels
             Mieter.Value = new(WalterDbService, NotificationService);
             Mieter.Value.SetList(v);
 
-            Versionen.Value = v.Versionen.Select(vs =>
-            {
-                var r = new VertragDetailViewModelVersion(NotificationService, WalterDbService);
-                r.SetEntity(vs);
-                return r;
-            }).ToImmutableList();
+            Versionen.Value = new(NotificationService, WalterDbService);
+            Versionen.Value.SetList(v);
 
             Ansprechpartner = new(this, AlleKontakte.Find(e => e.Entity.PersonId == v.AnsprechpartnerId));
             Notiz = new(this, v.Notiz);
@@ -81,20 +77,11 @@ namespace Deeplex.Saverwalter.ViewModels
                     .Concat(db.ctx.NatuerlichePersonen.Select(n => new KontaktListViewModelEntry(n)))
                     .ToList();
 
-            Delete = new AsyncRelayCommand(async _ =>
-            {
-                if (await NotificationService.Confirmation())
-                {
-                    WalterDbService.ctx.Vertraege.Remove(Entity);
-                    WalterDbService.SaveWalter();
-                }
-            }, _ => true);
-
             Save = new RelayCommand(_ =>
             {
                 Mieten.Value.Liste.Value.ForEach(e => e.save());
                 Mietminderungen.Value.Liste.Value.ForEach(e => e.save());
-                Versionen.Value.ForEach(v => v.versionSave());
+                Versionen.Value.Liste.Value.ForEach(v => v.save());
 
                 Entity.Ende = Ende.Value?.UtcDateTime;
                 Entity.Notiz = Notiz.Value;
@@ -113,10 +100,10 @@ namespace Deeplex.Saverwalter.ViewModels
                     Grundmiete = last.Grundmiete,
                     Vertrag = Entity,
                 };
-                var nv = new VertragDetailViewModelVersion(ns, db);
+                var nv = new VertragVersionListViewModelEntry(entity, db, ns);
                 nv.SetEntity(entity);
 
-                Versionen.Value = Versionen.Value.Prepend(nv).ToImmutableList();
+                Versionen.Value.Liste.Value = Versionen.Value.Liste.Value.Prepend(nv).ToImmutableList();
                 db.ctx.VertragVersionen.Add(entity);
                 db.SaveWalter();
             }, _ => true);
@@ -129,8 +116,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 Ansprechpartner.Value.Guid != Entity.AnsprechpartnerId ||
                 Notiz.Value != Entity.Notiz ||
                 Ende.Value != Entity.Ende?.AsUtcKind();
-
-            Versionen.Value.ForEach(v => v.checkForChanges());
         }
 
         public RelayCommand AddVersion { get; }

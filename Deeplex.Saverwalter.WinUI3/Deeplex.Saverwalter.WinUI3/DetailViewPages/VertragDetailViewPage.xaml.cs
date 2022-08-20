@@ -11,6 +11,7 @@ namespace Deeplex.Saverwalter.WinUI3
         public VertragDetailViewModel ViewModel { get; } = App.Container.GetInstance<VertragDetailViewModel>();
         public BetriebskostenrechnungListViewModel BetriebskostenListViewModel { get; } = App.Container.GetInstance<BetriebskostenrechnungListViewModel>();
         public UmlageListViewModel UmlageListViewModel { get; } = App.Container.GetInstance<UmlageListViewModel>();
+        public VertragVersionListViewModel VersionListViewModel { get; } = App.Container.GetInstance<VertragVersionListViewModel>();
 
         public VertragDetailViewPage()
         {
@@ -24,6 +25,7 @@ namespace Deeplex.Saverwalter.WinUI3
                 ViewModel.SetEntity(v);
                 BetriebskostenListViewModel.SetList(v);
                 UmlageListViewModel.SetList(v);
+                VersionListViewModel.SetList(v);
             }
 
             App.Window.CommandBar.MainContent = new DetailCommandBarControl() { ViewModel = ViewModel };

@@ -36,6 +36,7 @@ namespace Deeplex.Saverwalter.WinUI3
 
             Container.Register<VertragListViewModel>(Lifestyle.Singleton);
             Container.Register<VertragDetailViewModel>();
+            Container.Register<VertragVersionListViewModel>();
 
             Container.Register<BetriebskostenrechnungListViewModel>(Lifestyle.Singleton);
             Container.Register<BetriebskostenrechnungDetailViewModel>();
