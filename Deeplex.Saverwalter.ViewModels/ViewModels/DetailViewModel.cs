@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         protected async Task<bool> delete()
         {
-            if (Id != 0 || await NotificationService.Confirmation())
+            if (!isInitialized || await NotificationService.Confirmation())
             {
                 WalterDbService.ctx.Remove(Entity);
                 WalterDbService.SaveWalter();
@@ -77,35 +77,7 @@ namespace Deeplex.Saverwalter.ViewModels
         }
         public bool isInitialized
         {
-            get
-            {
-                if (Entity != null && WalterDbService.ctx.Entry(Entity) is EntityEntry entry)
-                {
-                    return entry.Metadata
-                        .FindPrimaryKey()
-                        .Properties
-                        .Count(e =>
-                        {
-                            var currentValue = entry.Property(e.Name).CurrentValue;
-                            if (currentValue is int i)
-                            {
-                                return i != default(int);
-                            }
-                            else if (currentValue is Guid g)
-                            {
-                                return g != default(Guid);
-                            }
-                            else
-                            {
-                                return false;
-                            }
-                        }) > 0;
-                }
-                else
-                {
-                    return false;
-                }
-            }
+            get => Entity != null && Id != 0;
         }
     }
 }

@@ -86,7 +86,7 @@
                         <uc:ComboControl
                             Margin="20,15,0,0"
                             MinWidth="200"
-                            SelectedItem="{x:Bind ViewModel.Ansprechpartner, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            SelectedItem="{x:Bind ViewModel.Ansprechpartner.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             ItemsSource="{x:Bind ViewModel.AlleKontakte}"
                             PlaceholderText="Ansprechpartner..."/>
                         <CheckBox

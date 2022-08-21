@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public Adresse Adresse { get; }
         public string Bezeichnung { get; }
         public string Anschrift { get; }
-        public string Besitzer { get; }
+        public IPerson Besitzer { get; }
 
         public WohnungListViewModelEntry(Wohnung w, IWalterDbService db)
         {
@@ -22,7 +22,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Adresse = w.Adresse;
             Bezeichnung = w.Bezeichnung;
             Anschrift = AdresseViewModel.Anschrift(w);
-            Besitzer = w.BesitzerId != Guid.Empty ? db.ctx.FindPerson(w.BesitzerId).Bezeichnung : "";
+            Besitzer = w.BesitzerId != Guid.Empty ? db.ctx.FindPerson(w.BesitzerId) : null;
         }
     }
 }

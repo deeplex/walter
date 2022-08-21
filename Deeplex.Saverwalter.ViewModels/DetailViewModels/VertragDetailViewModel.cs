@@ -33,17 +33,21 @@ namespace Deeplex.Saverwalter.ViewModels
         private WohnungListViewModelEntry mWohnung { get; set; }
         public WohnungListViewModelEntry Wohnung
         {
-            get => AlleWohnungen.Find(e => e.Id == mWohnung.Id);
+            get => mWohnung is WohnungListViewModelEntry w ? AlleWohnungen.Find(e => w.Id == e.Id) : null;
             set
             {
                 mWohnung = value;
                 checkForChanges();
+                if (value != null && Ansprechpartner.Value == null)
+                {
+                    Ansprechpartner.Value = AlleKontakte.Find(e => e.Entity.PersonId == value.Besitzer.PersonId);
+                }
                 RaisePropertyChanged(nameof(Vermieter));
                 RaisePropertyChangedAuto();
             }
         }
 
-        public string Vermieter => WalterDbService.ctx.FindPerson(Entity.Wohnung.BesitzerId).Bezeichnung;
+        public string Vermieter => mWohnung != null ? Wohnung.Besitzer.Bezeichnung : "Keine Wohnung ausgewählt";
 
         public override void SetEntity(Vertrag v)
         {
@@ -61,7 +65,10 @@ namespace Deeplex.Saverwalter.ViewModels
             Notiz = new(this, v.Notiz);
             Ende = new(this, v.Ende);
             // Wohnung has to be last, because everything has to be set for the checkForChanges in Wohnung setter
-            Wohnung = new(AlleWohnungen.FirstOrDefault(w => w.Id == v.Wohnung.WohnungId).Entity, WalterDbService);
+            if (v.Wohnung is Wohnung b)
+            {
+                Wohnung = new(AlleWohnungen.FirstOrDefault(w => w.Id == b.WohnungId).Entity, WalterDbService);
+            }
 
             SelectMieter = new(WalterDbService, NotificationService);
             SelectMieter.SetList(v, Mieter.Value);
@@ -93,8 +100,8 @@ namespace Deeplex.Saverwalter.ViewModels
         public override void checkForChanges()
         {
             NotificationService.outOfSync =
-                Wohnung.Id != Entity.Wohnung.WohnungId ||
-                Ansprechpartner.Value.Guid != Entity.AnsprechpartnerId ||
+                Wohnung?.Id != Entity.Wohnung?.WohnungId ||
+                Ansprechpartner.Value?.Guid != Entity.AnsprechpartnerId ||
                 Notiz.Value != Entity.Notiz ||
                 Ende.Value != Entity.Ende?.AsUtcKind();
         }
