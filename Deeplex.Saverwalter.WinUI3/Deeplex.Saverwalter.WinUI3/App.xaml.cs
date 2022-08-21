@@ -36,6 +36,7 @@ namespace Deeplex.Saverwalter.WinUI3
 
             Container.Register<VertragListViewModel>(Lifestyle.Singleton);
             Container.Register<VertragDetailViewModel>();
+            Container.Register<VertragVersionListViewModel>();
 
             Container.Register<BetriebskostenrechnungListViewModel>(Lifestyle.Singleton);
             Container.Register<BetriebskostenrechnungDetailViewModel>();
@@ -95,18 +96,18 @@ namespace Deeplex.Saverwalter.WinUI3
             var fs = App.Container.GetInstance<IFileService>();
             var ns = App.Container.GetInstance<INotificationService>();
 
-            if (fs.databaseRoot == null || !File.Exists(fs.databaseRoot + ".db"))
-            {
-                var path = await ns.Confirmation(
-                    "Noch keine Datenbank ausgewählt",
-                    "Datenbank suchen, oder leere Datenbank erstellen?",
-                    "Existierende Datenbank auswählen", "Erstelle neue leere Datenbank") ?
-                        await fs.pickFile(".db") :
-                        await fs.saveFile("walter", new string[] { ".db" });
-                var databaseRoot = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
-                // TODO
-                //SetDatabaseAsDefault(databaseRoot);
-            }
+            //if (fs.databaseRoot == null || !File.Exists(fs.databaseRoot + ".db"))
+            //{
+            //    var path = await ns.Confirmation(
+            //        "Noch keine Datenbank ausgewählt",
+            //        "Datenbank suchen, oder leere Datenbank erstellen?",
+            //        "Existierende Datenbank auswählen", "Erstelle neue leere Datenbank") ?
+            //            await fs.pickFile(".db") :
+            //            await fs.saveFile("walter", new string[] { ".db" });
+            //    var databaseRoot = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+            //    // TODO
+            //    //SetDatabaseAsDefault(databaseRoot);
+            //}
 
             //if (db.ctx != null)
             //{

@@ -32,8 +32,9 @@ namespace Deeplex.Saverwalter.Model
 
         private IBetriebskostenabrechnung b { get; }
         private List<Wohnung> gr => Umlagen.First().Wohnungen.ToList();
-        private IEnumerable<Vertrag> alleVertraegeDieserWohnungen => gr.SelectMany(w => w.Vertraege.Where(v =>
-                v.Beginn <= b.Abrechnungsende && (v.Ende is null || v.Ende >= b.Abrechnungsbeginn)));
+        private IEnumerable<VertragVersion> alleVertraegeDieserWohnungen => gr
+            .SelectMany(w => w.Vertraege.SelectMany(e => e.Versionen))
+            .Where(v => v.Beginn <= b.Abrechnungsende && (v.Ende() is null || v.Ende() >= b.Abrechnungsbeginn));
 
         public string Bezeichnung => Umlagen.First().GetWohnungenBezeichnung();
         public double GesamtWohnflaeche => gr.Sum(w => w.Wohnflaeche);
@@ -56,7 +57,7 @@ namespace Deeplex.Saverwalter.Model
             get
             {
                 var self = this;
-                return VertraegeIntervallPersonenzahl(b.Vertragsversionen, b.Nutzungsbeginn, b.Nutzungsende, self).ToList();
+                return VertraegeIntervallPersonenzahl(b.Versionen, b.Nutzungsbeginn, b.Nutzungsende, self).ToList();
             }
         }
 
@@ -150,14 +151,14 @@ namespace Deeplex.Saverwalter.Model
         }
 
         private static List<PersonenZeitIntervall>
-            VertraegeIntervallPersonenzahl(IEnumerable<Vertrag> vertraege, DateTime Beginn, DateTime Ende, Rechnungsgruppe parent)
+            VertraegeIntervallPersonenzahl(IEnumerable<VertragVersion> vertraege, DateTime Beginn, DateTime Ende, Rechnungsgruppe parent)
         {
             var merged = vertraege
-                .Where(v => v.Beginn <= Ende && (v.Ende is null || v.Ende >= Beginn))
+                .Where(v => v.Beginn <= Ende && (v.Ende() is null || v.Ende() >= Beginn))
                 .SelectMany(v => new[]
                 {
                     (Max(v.Beginn, Beginn), v.Personenzahl),
-                    (Min(v.Ende ?? Ende, Ende).AddDays(1), -v.Personenzahl)
+                    (Min(v.Ende() ?? Ende, Ende).AddDays(1), -v.Personenzahl)
                 })
                 .GroupBy(t => t.Item1.Date)
                 .Select(g => (Beginn: g.Key, Ende, Personenzahl: g.Sum(t => t.Item2)))

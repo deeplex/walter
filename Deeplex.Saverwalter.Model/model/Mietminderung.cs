@@ -7,7 +7,7 @@ namespace Deeplex.Saverwalter.Model
     public sealed class Mietminderung : IAnhang
     {
         public int MietminderungId { get; set; }
-        public Guid VertragId { get; set; }
+        public Vertrag Vertrag { get; set; } = null!;
         public DateTime Beginn { get; set; }
         public DateTime? Ende { get; set; } = null!;
         public double Minderung { get; set; }

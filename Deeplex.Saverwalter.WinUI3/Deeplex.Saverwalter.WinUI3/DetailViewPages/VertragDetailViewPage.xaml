@@ -15,51 +15,43 @@
             <Setter Property="Margin" Value="20,20,0,0"/>
             <Setter Property="Width" Value="110" />
         </Style>
-
-        <DataTemplate x:Key="BeginnGrid" x:DataType="vm:VertragDetailViewModelVersion">
-            <DatePicker
-                Date="{x:Bind Beginn.Value, Mode=TwoWay}"
-                Language="de"/>
-        </DataTemplate>
-
-        <DataTemplate x:Key="EndeGrid" x:DataType="vm:VertragDetailViewModelVersion">
-            <DatePicker
-                SelectedDate="{x:Bind Ende.Value, Mode=TwoWay}"
-                IsEnabled="True"
-                Language="de"/>
-        </DataTemplate>
     </Page.Resources>
 
     <uc:FileDropControl>
         <uc:FileDropControl.MainContent>
             <ScrollViewer>
                 <StackPanel>
-                    <Button Click="Betriebskostenabrechnung_Click" HorizontalAlignment="Right" Margin="0,-10,0,-120">
+                    <Button
+                        Click="Betriebskostenabrechnung_Click"
+                        HorizontalAlignment="Right"
+                        Margin="0,-90,0,-120">
                         <StackPanel Orientation="Horizontal">
                             <SymbolIcon Symbol="PostUpdate" />
                             <TextBlock Margin="10,0,0,0" Text="Betriebskostenrechnung"/>
                         </StackPanel>
                     </Button>
+                    
                     <mtuuc:WrapPanel Orientation="Horizontal">
-                        <TextBlock Text="Laufzeit:" Margin="20,30,0,0" Style="{StaticResource Labels}"/>
-                        <TextBlock
-                            VerticalAlignment="Bottom"
-                            Margin="20,0,0,7"
-                            Text="{x:Bind ViewModel.lastBeginn, Mode=OneWay}" />
-                        <TextBlock
-                            VerticalAlignment="Bottom"
-                            Margin="20,0,0,7"
-                            Text=" - "/>
-                        <TextBlock
-                            VerticalAlignment="Bottom"
-                            Margin="20,0,20,7"
-                            Text="{x:Bind ViewModel.firstEnde, Mode=OneWay}" />
+                        <TextBlock Text="Laufzeit:" Margin="20,40,0,0" Style="{StaticResource Labels}"/>
+                        <DatePicker
+                            Margin="20,20,0,0"
+                            Header="Beginn"
+                            SelectedDate="{x:Bind ViewModel.Beginn, Mode=OneWay}"
+                            IsEnabled="False"
+                            Language="de"/>
+                        <DatePicker
+                            Margin="20,20,0,0"
+                            Header="Ende"
+                            SelectedDate="{x:Bind ViewModel.Ende.Value, Mode=TwoWay}"
+                            IsEnabled="True"
+                            Language="de"/>
                         <Button
-                            Margin="0,23,0,0"
+                            Margin="0,40,0,0"
                             Command="{x:Bind ViewModel.RemoveDate}">
                             <SymbolIcon Symbol="Delete"></SymbolIcon>
                         </Button>
                     </mtuuc:WrapPanel>
+                    
                     <mtuuc:WrapPanel Orientation="Horizontal">
                         <TextBlock Text="Wohnung:" Style="{StaticResource Labels}"/>
                         <uc:ComboControl
@@ -69,6 +61,7 @@
                             PlaceholderText="Wohnung hinzufügen"
                             SelectedItem="{x:Bind ViewModel.Wohnung, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                     </mtuuc:WrapPanel>
+                    
                     <mtuuc:WrapPanel Orientation="Horizontal">
                         <TextBlock Text="Vermieter:" Style="{StaticResource Labels}"/>
                         <Grid>
@@ -87,6 +80,7 @@
                             </Grid.ContextFlyout>
                         </Grid>
                     </mtuuc:WrapPanel>
+                    
                     <mtuuc:WrapPanel Orientation="Horizontal">
                         <TextBlock Text="Ansprechpartner: " Style="{StaticResource Labels}"/>
                         <uc:ComboControl
@@ -109,69 +103,44 @@
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
 
-                    <!--TODO: Add Version-->
-                    <uc:ExpanderControl IsExpanded="True" Header="Versionen">
+                    <uc:ExpanderControl
+                        IsExpanded="True"
+                        Header="Versionen"
+                        Command="{x:Bind ViewModel.Versionen.Add}">
                         <uc:ExpanderControl.MainContent>
-                            <StackPanel>
-                                <mtuuc:DataGrid
-                                    CanUserReorderColumns="False"
-                                    CanUserResizeColumns="True"
-                                    AutoGenerateColumns="False"
-                                    ItemsSource="{x:Bind ViewModel.Versionen.Value, Mode=TwoWay}">
-                                    <mtuuc:DataGrid.Columns>
-                                        <mtuuc:DataGridTextColumn IsReadOnly="True" Header="Version" Binding="{Binding Version}"/>
-                                        <mtuuc:DataGridTemplateColumn
-                                            Header="Beginn"
-                                            CellTemplate="{StaticResource BeginnGrid}"/>
-                                        <mtuuc:DataGridTemplateColumn
-                                            Header="Ende"
-                                            CellTemplate="{StaticResource EndeGrid}"/>
-                                        <mtuuc:DataGridTemplateColumn Header="Personenzahl">
-                                            <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate x:DataType="vm:VertragDetailViewModelVersion">
-                                                    <muxc:NumberBox
-                                                        Value="{x:Bind Personenzahl.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                        PlaceholderText="0"/>
-                                                </DataTemplate>
-                                            </mtuuc:DataGridTemplateColumn.CellTemplate>
-                                        </mtuuc:DataGridTemplateColumn>
-                                        <mtuuc:DataGridTemplateColumn Header="Kaltmiete">
-                                            <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate x:DataType="vm:VertragDetailViewModelVersion">
-                                                    <muxc:NumberBox
-                                                        Value="{x:Bind KaltMiete.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                        PlaceholderText="0"/>
-                                                </DataTemplate>
-                                            </mtuuc:DataGridTemplateColumn.CellTemplate>
-                                        </mtuuc:DataGridTemplateColumn>
-                                        <mtuuc:DataGridTemplateColumn Header="Notiz">
-                                            <mtuuc:DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate x:DataType="vm:VertragDetailViewModelVersion">
-                                                    <TextBox Text="{x:Bind Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                                </DataTemplate>
-                                            </mtuuc:DataGridTemplateColumn.CellTemplate>
-                                        </mtuuc:DataGridTemplateColumn>
-                                    </mtuuc:DataGrid.Columns>
-                                </mtuuc:DataGrid>
-                            </StackPanel>
+                            <uc:VertragVersionListControl ViewModel="{x:Bind ViewModel.Versionen, Mode=OneWay}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
-                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Miete" Command="{x:Bind ViewModel.Mieten.Value.Add}">
+                    
+                    <uc:ExpanderControl
+                        Visibility="{x:Bind ViewModel.isInitialized}"
+                        Header="Miete"
+                        Command="{x:Bind ViewModel.Mieten.Value.Add}">
                         <uc:ExpanderControl.MainContent>
                             <uc:MieteListControl ViewModel="{x:Bind ViewModel.Mieten.Value, Mode=OneWay}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
-                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Mietminderungen" Command="{x:Bind ViewModel.Mietminderungen.Value.Add}">
+                    
+                    <uc:ExpanderControl
+                        Visibility="{x:Bind ViewModel.isInitialized}"
+                        Header="Mietminderungen"
+                        Command="{x:Bind ViewModel.Mietminderungen.Value.Add}">
                         <uc:ExpanderControl.MainContent>
                             <uc:MietminderungListControl ViewModel="{x:Bind ViewModel.Mietminderungen.Value, Mode=OneWay}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
-                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Umlagen">
+                    
+                    <uc:ExpanderControl
+                        Visibility="{x:Bind ViewModel.isInitialized}"
+                        Header="Umlagen">
                         <uc:ExpanderControl.MainContent>
                             <uc:UmlageListControl ViewModel="{x:Bind UmlageListViewModel}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
-                    <uc:ExpanderControl Visibility="{x:Bind ViewModel.isInitialized}" Header="Betriebskostenrechnungen">
+                    
+                    <uc:ExpanderControl
+                        Visibility="{x:Bind ViewModel.isInitialized}"
+                        Header="Betriebskostenrechnungen">
                         <uc:ExpanderControl.MainContent>
                             <uc:BetriebskostenrechnungListControl ViewModel="{x:Bind BetriebskostenListViewModel}"/>
                         </uc:ExpanderControl.MainContent>

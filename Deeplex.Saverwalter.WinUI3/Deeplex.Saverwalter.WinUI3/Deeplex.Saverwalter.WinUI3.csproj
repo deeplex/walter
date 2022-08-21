@@ -14,6 +14,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="ListControls\UmlageListControl.xaml" />
+    <None Remove="ListControls\VertragVersionListControl.xaml" />
     <None Remove="UtilControls\AddPersonControl.xaml" />
   </ItemGroup>
   
@@ -77,6 +78,9 @@
 
   <ItemGroup>
     <Page Update="DetailViewPages\UmlageDetailViewPage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="ListControls\VertragVersionListControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="ListViewPages\UmlageListViewPage.xaml">

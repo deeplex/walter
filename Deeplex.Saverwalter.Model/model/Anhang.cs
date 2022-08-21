@@ -21,6 +21,7 @@ namespace Deeplex.Saverwalter.Model
         public List<Mietminderung> Mietminderungen { get; set; } = new List<Mietminderung>();
         public List<NatuerlichePerson> NatuerlichePersonen { get; set; } = new List<NatuerlichePerson>();
         public List<Vertrag> Vertraege { get; set; } = new List<Vertrag>();
+        public List<VertragVersion> VertragVersionen { get; set; } = new List<VertragVersion>();
         public List<VertragsBetriebskostenrechnung> VertragsBetriebskostenrechnungen { get; set; } = new List<VertragsBetriebskostenrechnung>();
         public List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
         public List<Zaehler> Zaehler { get; set; } = new List<Zaehler>();

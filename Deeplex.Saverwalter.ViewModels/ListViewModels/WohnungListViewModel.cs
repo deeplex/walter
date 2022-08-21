@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.ViewModels
             var vertragIds = WalterDbService.ctx.MieterSet
                 .ToList()
                 .Where(m => m.PersonId == e.PersonId)
-                .Select(m => m.VertragId)
+                .Select(m => m.Vertrag.VertragId)
                 .ToList();
 
             var wohnungen = WalterDbService.ctx.Vertraege

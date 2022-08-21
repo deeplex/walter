@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.Model
         double Zeitanteil { get; }
         List<Note> notes { get; }
         Vertrag Vertrag { get; }
-        List<Vertrag> Vertragsversionen { get; }
+        List<VertragVersion> Versionen { get; }
         List<Verbrauch> GetVerbrauch(Umlage u, bool ganzeGruppe = false);
         double AllgStromFaktor { get; set; }
     }
@@ -46,14 +46,12 @@ namespace Deeplex.Saverwalter.Model
         public DateTime Abrechnungsbeginn { get; set; }
         public DateTime Abrechnungsende { get; set; }
 
-        public List<Vertrag> Vertragsversionen => Wohnung.Vertraege
-            .Where(v => v.VertragId == Vertrag.VertragId)
-            .OrderBy(v => v.Beginn).ToList();
+        public List<VertragVersion> Versionen => Vertrag.Versionen.OrderBy(v => v.Beginn).ToList();
 
         public IPerson Vermieter => db.FindPerson(Wohnung.BesitzerId);
         public IPerson Ansprechpartner => db.FindPerson(Vertrag.AnsprechpartnerId!.Value) ?? Vermieter;
         public List<IPerson> Mieter => db.MieterSet
-            .Where(m => m.VertragId == Vertrag.VertragId)
+            .Where(m => m.Vertrag.VertragId == Vertrag.VertragId)
             .Select(m => db.FindPerson(m.PersonId))
             .ToList();
         // TODO juristische
@@ -64,7 +62,7 @@ namespace Deeplex.Saverwalter.Model
         public Adresse Adresse => Wohnung.Adresse;
 
         public double Gezahlt => db.Mieten
-            .Where(m => m.VertragId == Vertrag.VertragId)
+            .Where(m => m.Vertrag.VertragId == Vertrag.VertragId)
             .Where(m => m.BetreffenderMonat >= Abrechnungsbeginn && m.BetreffenderMonat < Abrechnungsende)
             .Sum(z => z.Betrag ?? 0);
 
@@ -72,23 +70,33 @@ namespace Deeplex.Saverwalter.Model
         {
             get
             {
-                if (Jahr < Vertragsversionen.First().Beginn.Year ||
-                    (Vertragsversionen.Last().Ende is DateTime d && d.Year < Jahr))
+                if (Jahr < Versionen.First().Beginn.Year ||
+                    (Vertrag.Ende is DateTime d && d.Year < Jahr))
                 {
                     return 0;
                 }
-                return Vertragsversionen
-                    .Sum(v => v.Ende != null &&
-                        v.Ende < Abrechnungsbeginn ?
-                        0 :
-                        (Min(v.Ende ?? Abrechnungsende, Abrechnungsende).Month - Max(v.Beginn, Abrechnungsbeginn).Month + 1) * v.KaltMiete);
+                return Versionen
+                    .Sum(v =>
+                    {
+                        var ende = v.Ende();
+                        if (ende is DateTime d && d < Abrechnungsbeginn)
+                        {
+                            return 0;
+                        }
+                        else
+                        {
+                            var last = Min(ende ?? Abrechnungsende, Abrechnungsende).Month;
+                            var first = Max(v.Beginn, Abrechnungsbeginn).Month - 1;
+                            return (last - first) * v.Grundmiete;
+                        }
+                    });
             }
         }
         public double BetragNebenkosten => Gruppen.Sum(g => g.BetragKalt + g.BetragWarm);
         public double BezahltNebenkosten => Gezahlt - KaltMiete + KaltMinderung;
 
         public List<Mietminderung> Minderungen => db.MietMinderungen
-                .Where(m => m.VertragId == Vertrag.VertragId &&
+                .Where(m => m.Vertrag.VertragId == Vertrag.VertragId &&
                     (m.Ende == null || m.Ende > Abrechnungsbeginn) &&
                     m.Beginn <= Abrechnungsende).ToList();
 
@@ -98,8 +106,8 @@ namespace Deeplex.Saverwalter.Model
         public double NebenkostenMinderung => BetragNebenkosten * Minderung;
         public double KaltMinderung => KaltMiete * Minderung;
 
-        public DateTime Nutzungsbeginn => Max(Vertragsversionen.First().Beginn, Abrechnungsbeginn);
-        public DateTime Nutzungsende => Min(Vertragsversionen.Last().Ende ?? Abrechnungsende, Abrechnungsende);
+        public DateTime Nutzungsbeginn => Max(Versionen.First().Beginn, Abrechnungsbeginn);
+        public DateTime Nutzungsende => Min(Vertrag.Ende ?? Abrechnungsende, Abrechnungsende);
 
         public List<Zaehler> Zaehler => Wohnung.Zaehler;
 
@@ -113,15 +121,16 @@ namespace Deeplex.Saverwalter.Model
 
         public double AllgStromFaktor { get; set; }
 
-        public Betriebskostenabrechnung(SaverwalterContext _db, int rowid, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
+        public Betriebskostenabrechnung(SaverwalterContext _db, Vertrag v, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
         {
             db = _db;
             Abrechnungsbeginn = abrechnungsbeginn;
             Abrechnungsende = abrechnungsende;
             Jahr = jahr;
 
-            Vertrag = db.Vertraege
-                .Where(v => v.rowid == rowid)
+            // TODO
+            db.Vertraege
+                .Include(v => v.Versionen)
                 .Include(v => v.Wohnung)
                     .ThenInclude(w => w.Adresse)
                 .Include(v => v.Wohnung)
@@ -141,6 +150,8 @@ namespace Deeplex.Saverwalter.Model
                     .ThenInclude(u => u.Umlagen)
                         .ThenInclude(w => w.Betriebskostenrechnungen)
                 .First();
+
+            Vertrag = v;
 
             AllgStromFaktor = Vertrag.Wohnung.Umlagen
                 .Where(s => s.Typ == Betriebskostentyp.Heizkosten)

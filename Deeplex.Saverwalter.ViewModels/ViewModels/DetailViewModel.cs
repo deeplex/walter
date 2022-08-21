@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
@@ -24,14 +25,18 @@ namespace Deeplex.Saverwalter.ViewModels
             WalterDbService = db;
             NotificationService = ns;
 
-            Delete = new (async _ =>
+            Delete = new(async _ => { await delete(); }, _ => true);
+        }
+
+        protected async Task<bool> delete()
+        {
+            if (await NotificationService.Confirmation())
             {
-                if (await NotificationService.Confirmation())
-                {
-                    WalterDbService.ctx.Remove(Entity);
-                    WalterDbService.SaveWalter();
-                }
-            }, _ => true);
+                WalterDbService.ctx.Remove(Entity);
+                WalterDbService.SaveWalter();
+                return true;
+            }
+            return false;
         }
 
         // Could be protected, but Vertrag needs public for its Versionen. Maybe something can be done about that.
