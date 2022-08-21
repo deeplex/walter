@@ -14,41 +14,11 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             reference = entity;
         }
-
-        public new void save()
-        {
-            if (findAdresse() is Adresse a)
-            {
-                Entity = a;
-            }
-            else
-            {
-                Entity = new Adresse();
-                Entity.Strasse = Strasse.Value;
-                Entity.Hausnummer = Hausnummer.Value;
-                Entity.Postleitzahl = Postleitzahl.Value;
-                Entity.Stadt = Stadt.Value;
-
-                WalterDbService.ctx.Adressen.Add(Entity);
-            }
-
-            // reference is updated in save method of reference
-            reference.Adresse = Entity;
-
-            WalterDbService.SaveWalter();
-            checkForChanges();
-        }
     }
 
-    public class AdresseViewModel : BindableBase, IDetailViewModel
+    public class AdresseViewModel : DetailViewModel<Adresse>, IDetailViewModel
     {
-        public Adresse Entity { get; set; }
-
-        public IWalterDbService WalterDbService { get; }
-        public INotificationService NotificationService { get; }
-
-        public RelayCommand Save { get; }
-        public AsyncRelayCommand Delete { get; }
+        public override string ToString() => Anschrift(Entity);
 
         protected ImmutableList<Adresse> AlleAdressen;
 
@@ -134,30 +104,24 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<string> Postleitzahl { get; set; }
         public SavableProperty<string> Stadt { get; set; }
 
-        public AdresseViewModel(Adresse a, IWalterDbService db, INotificationService ns)
+        public AdresseViewModel(Adresse a, IWalterDbService db, INotificationService ns) : base(ns, db)
+        {
+            AlleAdressen = WalterDbService.ctx.Adressen.ToImmutableList();
+            updateAdressen();
+
+            SetEntity(a);
+
+            Save = new RelayCommand(_ => save(), _ => true);
+        }
+
+        public override void SetEntity(Adresse a)
         {
             Strasse = new(this, a.Strasse);
             Hausnummer = new(this, a.Hausnummer);
             Postleitzahl = new(this, a.Postleitzahl);
             Stadt = new(this, a.Stadt);
 
-            WalterDbService = db;
-            NotificationService = ns;
             Entity = a;
-
-            AlleAdressen = WalterDbService.ctx.Adressen.ToImmutableList();
-            updateAdressen();
-
-            Delete = new AsyncRelayCommand(async _ =>
-            {
-                if (await NotificationService.Confirmation())
-                {
-                    WalterDbService.ctx.Adressen.Remove(Entity);
-                    WalterDbService.SaveWalter();
-                }
-            });
-
-            Save = new RelayCommand(_ => save(), _ => true);
         }
 
         public static string Anschrift(IAdresse k) => Anschrift(k is IAdresse a ? a.Adresse : null);
@@ -182,27 +146,17 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Stadt == null || Entity.Stadt == "");
         }
 
-        public void save()
+        public new void save()
         {
             Entity.Strasse = Strasse.Value;
             Entity.Hausnummer = Hausnummer.Value;
             Entity.Postleitzahl = Postleitzahl.Value;
             Entity.Stadt = Stadt.Value;
 
-            if (Entity.AdresseId == 0)
-            {
-                WalterDbService.ctx.Adressen.Add(Entity);
-            }
-            else
-            {
-                WalterDbService.ctx.Adressen.Update(Entity);
-            }
-
-            WalterDbService.SaveWalter();
-            checkForChanges();
+            base.save();
         }
 
-        public void checkForChanges()
+        public override void checkForChanges()
         {
             NotificationService.outOfSync =
                 Strasse.Value != Entity.Strasse ||

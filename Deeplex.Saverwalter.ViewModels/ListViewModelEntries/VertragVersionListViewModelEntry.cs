@@ -18,9 +18,6 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public VertragVersionListViewModelEntry(VertragVersion v, VertragVersionListViewModel vm) : base(vm.NotificationService, vm.WalterDbService)
         {
-            WalterDbService = vm.WalterDbService;
-            NotificationService = vm.NotificationService;
-
             SetEntity(v);
 
             Save = new RelayCommand(_ => save(), _ => true);

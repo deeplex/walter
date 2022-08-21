@@ -47,7 +47,7 @@
                             Margin="5,0,0,0"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
-                            Text="{x:Bind Besitzer}" />
+                            Text="{x:Bind Besitzer.Bezeichnung}" />
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>

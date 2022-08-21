@@ -14,6 +14,7 @@ namespace Deeplex.Saverwalter.ViewModels
         void checkForChanges();
         RelayCommand Save { get; }
         AsyncRelayCommand Delete { get; }
+        Task<bool> delete();
         IWalterDbService WalterDbService { get; }
         INotificationService NotificationService { get; }
     }
@@ -39,7 +40,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Delete = new(async _ => { await delete(); }, _ => true);
         }
 
-        protected async Task<bool> delete()
+        public async Task<bool> delete()
         {
             if (!isInitialized || await NotificationService.Confirmation())
             {

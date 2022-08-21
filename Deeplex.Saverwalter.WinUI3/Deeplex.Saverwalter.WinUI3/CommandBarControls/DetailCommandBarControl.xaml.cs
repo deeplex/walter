@@ -31,10 +31,12 @@ namespace Deeplex.Saverwalter.WinUI3
             typeof(DetailCommandBarControl),
             new PropertyMetadata(null));
 
-        private void Delete_Click(object sender, RoutedEventArgs e)
+        private async void Delete_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.Delete.Execute(null); // Should be awaited?
-            App.Window.AppFrame.GoBack();
+            if (await ViewModel.delete())
+            {
+                App.Window.AppFrame.GoBack();
+            }
         }
     }
 }

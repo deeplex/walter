@@ -5,38 +5,36 @@ using System;
 
 namespace Deeplex.Saverwalter.ViewModels
 {
-    public class ZaehlerstandListViewModelEntry : IDetailViewModel
+    public class ZaehlerstandListViewModelEntry : DetailViewModel<Zaehlerstand>, IDetailViewModel
     {
-        public Zaehlerstand Entity { get; }
-        public int Id => Entity.ZaehlerstandId;
+        public override string ToString() => Stand.ToString();
+
         public SavableProperty<double> Stand { get; private set; }
         public SavableProperty<DateTimeOffset> Datum { get; private set; }
         public SavableProperty<string> Notiz { get; private set; }
 
-        public IWalterDbService WalterDbService { get; }
-        public INotificationService NotificationService { get; }
-
-        public ZaehlerstandListViewModelEntry(Zaehlerstand z, ZaehlerstandListViewModel vm)
+        public ZaehlerstandListViewModelEntry(Zaehlerstand z, ZaehlerstandListViewModel vm): base(vm.NotificationService, vm.WalterDbService)
         {
-            WalterDbService = vm.WalterDbService;
-            NotificationService = vm.NotificationService;
+            Delete = new AsyncRelayCommand(async _ =>
+            {
+                if (await delete())
+                {
+                    vm.Liste.Value = vm.Liste.Value.Remove(this);
+                };
+            }, _ => true);
+
+            Save = new RelayCommand(_ => save(), _ => true);
+        }
+
+        public override void SetEntity(Zaehlerstand z)
+        {
             Entity = z;
             Stand = new(this, z.Stand);
             Datum = new(this, z.Datum);
             Notiz = new(this, z.Notiz);
-            Delete = new AsyncRelayCommand(async _ =>
-            {
-                if (Entity.ZaehlerstandId != 0 && await vm.NotificationService.Confirmation())
-                {
-                    vm.WalterDbService.ctx.Zaehlerstaende.Remove(Entity);
-                    vm.WalterDbService.SaveWalter();
-                    vm.Liste.Value = vm.Liste.Value.Remove(this);
-                }
-            }, _ => true);
-            Save = new RelayCommand(_ => save(), _ => true);
         }
 
-        public void checkForChanges()
+        public override void checkForChanges()
         {
             NotificationService.outOfSync =
                 Entity.Stand != Stand.Value ||
@@ -44,25 +42,13 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Notiz != Notiz.Value;
         }
 
-        private void save()
+        private new void save()
         {
             Entity.Stand = Stand.Value;
             Entity.Datum = Datum.Value.UtcDateTime;
             Entity.Notiz = Notiz.Value;
 
-            if (Entity.ZaehlerstandId != 0)
-            {
-                WalterDbService.ctx.Zaehlerstaende.Update(Entity);
-            }
-            else
-            {
-                WalterDbService.ctx.Zaehlerstaende.Add(Entity);
-            }
-            WalterDbService.SaveWalter();
-            checkForChanges();
+            base.save();
         }
-
-        public AsyncRelayCommand Delete { get; }
-        public RelayCommand Save { get; }
     }
 }
