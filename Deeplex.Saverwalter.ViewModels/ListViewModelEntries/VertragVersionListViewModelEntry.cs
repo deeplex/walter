@@ -18,14 +18,21 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<double> Grundmiete { get; set; }
         public SavableProperty<int> Personenzahl { get; set; }
 
-        public VertragVersionListViewModelEntry(VertragVersion v, IWalterDbService db, INotificationService ns) : base(ns, db)
+        public VertragVersionListViewModelEntry(VertragVersion v, VertragVersionListViewModel vm) : base(vm.NotificationService, vm.WalterDbService)
         {
-            WalterDbService = db;
-            NotificationService = ns;
+            WalterDbService = vm.WalterDbService;
+            NotificationService = vm.NotificationService;
 
             SetEntity(v);
 
             Save = new RelayCommand(_ => save(), _ => true);
+            Delete = new AsyncRelayCommand(async _ =>
+            {
+                if (await delete())
+                {
+                    vm.Liste.Value = vm.Liste.Value.Remove(this);
+                };
+            }, _ => true);
         }
 
         public new void save()

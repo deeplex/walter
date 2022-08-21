@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity = v;
 
             Liste.Value = v.Versionen
-                .Select(s => new VertragVersionListViewModelEntry(s, WalterDbService, NotificationService))
+                .Select(s => new VertragVersionListViewModelEntry(s, this))
                 .OrderByDescending(e => e.Entity.Beginn)
                 .ToImmutableList();
         }
@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.ViewModels
                     Vertrag = Entity,
                 };
                 Liste.Value = Liste.Value.Prepend(
-                    new VertragVersionListViewModelEntry(vv, WalterDbService, NotificationService))
+                    new VertragVersionListViewModelEntry(vv, this))
                 .ToImmutableList();
             }, _ => true);
         }

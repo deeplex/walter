@@ -16,7 +16,6 @@ namespace Deeplex.Saverwalter.ViewModels
         public DateTimeOffset? Ende => Entity.Ende?.AsUtcKind();
         public DateTimeOffset Beginn => Entity.Beginn().AsUtcKind();
 
-        public List<VertragVersionListViewModelEntry> Versionen { get; } = new();
         public string Anschrift => AdresseViewModel.Anschrift(Entity.Wohnung);
         public string AnschriftMitWohnung => Anschrift + ", " + Wohnung.Bezeichnung;
         public Wohnung Wohnung => Entity.Wohnung;
@@ -34,6 +33,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             get
             {
+                // TODO Vertrag can have mieten
                 var mieten = Mieten.List.Value.OrderBy(m => m.Zahlungsdatum.Value);
                 var last = mieten.Any() ? mieten.Last() : null;
                 return last != null ? last.Zahlungsdatum.Value.ToString("dd.MM.yyyy") +
@@ -46,7 +46,6 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Entity = v;
 
-            Versionen = v.Versionen.OrderBy(vs => vs.Beginn).Select(vs => new VertragVersionListViewModelEntry(vs, db, ns)).ToList();
             WalterDbService = db;
 
             Mieten = new MieteListViewModel(v, ns, db);
