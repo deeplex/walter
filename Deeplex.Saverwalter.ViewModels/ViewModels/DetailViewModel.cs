@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         protected async Task<bool> delete()
         {
-            if (await NotificationService.Confirmation())
+            if (Id != 0 || await NotificationService.Confirmation())
             {
                 WalterDbService.ctx.Remove(Entity);
                 WalterDbService.SaveWalter();
