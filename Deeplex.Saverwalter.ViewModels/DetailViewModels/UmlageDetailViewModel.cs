@@ -11,8 +11,6 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => Entity.Typ.ToDescriptionString() + " - " + Entity.Wohnungen.GetWohnungenBezeichnung();
 
-        public int Id => Entity.UmlageId;
-
         public ObservableProperty<WohnungListViewModelEntry> UmlageWohnung = new();
 
         public List<HKVO9Util> HKVO_P9_List = Enums.HKVO9;

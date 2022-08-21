@@ -11,8 +11,6 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => "Vertragsversion";
 
-        public int Id => Entity.VertragVersionId;
-
         public SavableProperty<DateTimeOffset> Beginn { get; set; }
         public SavableProperty<string> Notiz { get; set; }
         public SavableProperty<double> Grundmiete { get; set; }

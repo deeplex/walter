@@ -13,8 +13,6 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => Entity.Umlage.Typ.ToDescriptionString() + " - " + Entity.GetWohnungenBezeichnung();
 
-        public int Id => Entity.BetriebskostenrechnungId;
-
         public ObservableProperty<int> BetriebskostenrechnungsJahr = new();
         public ObservableProperty<bool> ZeigeVorlagen = new();
         public ObservableProperty<WohnungListViewModelEntry> BetriebskostenrechnungsWohnung = new();

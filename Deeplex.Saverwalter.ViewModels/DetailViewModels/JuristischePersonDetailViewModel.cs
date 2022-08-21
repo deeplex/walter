@@ -10,7 +10,6 @@ namespace Deeplex.Saverwalter.ViewModels
     public sealed class JuristischePersonDetailViewModel : IPersonDetailViewModel, IDetailViewModel
     {
         public new JuristischePerson Entity => (JuristischePerson)base.Entity;
-        public int Id;
 
         public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Mitglieder = new();
         public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> AddMitglieder = new();
@@ -54,7 +53,6 @@ namespace Deeplex.Saverwalter.ViewModels
         public void SetEntity(JuristischePerson k)
         {
             base.SetEntity(k);
-            Id = k.JuristischePersonId;
 
             UpdateListen();
         }

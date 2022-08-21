@@ -13,8 +13,6 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => "Vertrag";
 
-        public int Id => Entity.VertragId;
-
         public List<WohnungListViewModelEntry> AlleWohnungen;
         public List<KontaktListViewModelEntry> AlleKontakte;
         public VertragVersionListViewModel Versionen { get; private set; }

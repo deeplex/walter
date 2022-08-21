@@ -20,6 +20,17 @@ namespace Deeplex.Saverwalter.ViewModels
 
     public abstract class DetailViewModel<T> : BindableBase, IDetailViewModel where T : class
     {
+        public int Id
+        {
+            get
+            {
+                var keyName = WalterDbService.ctx.Entry(Entity).Metadata.FindPrimaryKey().Properties
+                    .Select(x => x.Name).Single();
+
+                return (int)Entity.GetType().GetProperty(keyName).GetValue(Entity, null);
+            }
+        }
+
         public DetailViewModel(INotificationService ns, IWalterDbService db)
         {
             WalterDbService = db;

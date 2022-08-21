@@ -10,7 +10,6 @@ namespace Deeplex.Saverwalter.ViewModels
     public sealed class NatuerlichePersonDetailViewModel : IPersonDetailViewModel, IDetailViewModel
     {
         public new NatuerlichePerson Entity => (NatuerlichePerson)base.Entity;
-        public int Id { get; private set; }
 
         public List<Anrede> Anreden { get; }
 
@@ -47,7 +46,6 @@ namespace Deeplex.Saverwalter.ViewModels
         public void SetEntity(NatuerlichePerson k)
         {
             base.SetEntity(k);
-            Id = k.NatuerlichePersonId;
             Anrede = new(this, k.Anrede);
             Vorname = new(this, k.Vorname);
             Nachname = new(this, k.Nachname);

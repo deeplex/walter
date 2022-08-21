@@ -9,8 +9,6 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class ZaehlerDetailViewModel : DetailViewModel<Zaehler>, IDetailViewModel
     {
-        public int Id => Entity.ZaehlerId;
-
         public override string ToString() => Kennnummer.Value;
 
         public ObservableProperty<ZaehlerstandListViewModel> Staende { get; private set; } = new();

@@ -14,8 +14,6 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString() => Entity.Bezeichnung;
 
-        public int Id => Entity.ErhaltungsaufwendungId;
-
         public ObservableProperty<ImmutableList<KontaktListViewModelEntry>> Personen = new();
         public ObservableProperty<string> QuickPerson = new(); // TODO what is a QuickPerson?
 

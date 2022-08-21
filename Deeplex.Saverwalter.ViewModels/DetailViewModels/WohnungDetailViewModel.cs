@@ -9,8 +9,6 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class WohnungDetailViewModel : DetailViewModel<Wohnung>, IDetailViewModel
     {
-        public int Id => Entity.WohnungId;
-
         public override string ToString() => AdresseViewModel.Anschrift(Entity) + " - " + Bezeichnung.Value;
 
         public ImmutableList<KontaktListViewModelEntry> AlleVermieter;
