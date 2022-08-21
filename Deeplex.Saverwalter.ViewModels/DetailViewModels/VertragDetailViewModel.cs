@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.ViewModels
         public List<WohnungListViewModelEntry> AlleWohnungen;
         public List<KontaktListViewModelEntry> AlleKontakte;
 
-        public ObservableProperty<VertragVersionListViewModel> Versionen = new();
+        public VertragVersionListViewModel Versionen { get; private set; }
         public DateTimeOffset? AddVersionDatum;
 
         public DateTimeOffset Beginn => Entity.Beginn().AsUtcKind();
@@ -56,8 +56,8 @@ namespace Deeplex.Saverwalter.ViewModels
             Mieter.Value = new(WalterDbService, NotificationService);
             Mieter.Value.SetList(v);
 
-            Versionen.Value = new(NotificationService, WalterDbService);
-            Versionen.Value.SetList(v);
+            Versionen = new(NotificationService, WalterDbService);
+            Versionen.SetList(v);
 
             Ansprechpartner = new(this, AlleKontakte.Find(e => e.Entity.PersonId == v.AnsprechpartnerId));
             Notiz = new(this, v.Notiz);
@@ -81,7 +81,7 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 Mieten.Value.Liste.Value.ForEach(e => e.save());
                 Mietminderungen.Value.Liste.Value.ForEach(e => e.save());
-                Versionen.Value.Liste.Value.ForEach(v => v.save());
+                Versionen.Liste.Value.ForEach(v => v.save());
 
                 Entity.Ende = Ende.Value?.UtcDateTime;
                 Entity.Notiz = Notiz.Value;
@@ -89,23 +89,6 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.AnsprechpartnerId = Ansprechpartner.Value.Guid;
 
                 save();
-            }, _ => true);
-
-            AddVersion = new RelayCommand(_ =>
-            {
-                var last = Entity.Versionen.OrderBy(e => e.Beginn).Last();
-                var entity = new VertragVersion()
-                {
-                    Personenzahl = last.Personenzahl,
-                    Grundmiete = last.Grundmiete,
-                    Vertrag = Entity,
-                };
-                var nv = new VertragVersionListViewModelEntry(entity, db, ns);
-                nv.SetEntity(entity);
-
-                Versionen.Value.Liste.Value = Versionen.Value.Liste.Value.Prepend(nv).ToImmutableList();
-                db.ctx.VertragVersionen.Add(entity);
-                db.SaveWalter();
             }, _ => true);
         }
 

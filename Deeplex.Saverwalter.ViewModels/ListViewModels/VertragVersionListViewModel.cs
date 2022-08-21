@@ -46,6 +46,5 @@ namespace Deeplex.Saverwalter.ViewModels
                 .ToImmutableList();
             }, _ => true);
         }
-
     }
 }

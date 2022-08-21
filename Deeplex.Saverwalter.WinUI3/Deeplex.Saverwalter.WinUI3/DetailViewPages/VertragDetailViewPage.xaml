@@ -106,9 +106,9 @@
                     <uc:ExpanderControl
                         IsExpanded="True"
                         Header="Versionen"
-                        Command="{x:Bind VersionListViewModel.Add}">
+                        Command="{x:Bind ViewModel.Versionen.Add}">
                         <uc:ExpanderControl.MainContent>
-                            <uc:VertragVersionListControl ViewModel="{x:Bind VersionListViewModel, Mode=OneWay}"/>
+                            <uc:VertragVersionListControl ViewModel="{x:Bind ViewModel.Versionen, Mode=OneWay}"/>
                         </uc:ExpanderControl.MainContent>
                     </uc:ExpanderControl>
                     
