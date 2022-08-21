@@ -61,8 +61,7 @@ namespace Deeplex.Saverwalter.Model
         public Wohnung Wohnung => Vertrag.Wohnung;
         public Adresse Adresse => Wohnung.Adresse;
 
-        public double Gezahlt => db.Mieten
-            .Where(m => m.Vertrag.VertragId == Vertrag.VertragId)
+        public double Gezahlt => Vertrag.Mieten
             .Where(m => m.BetreffenderMonat >= Abrechnungsbeginn && m.BetreffenderMonat < Abrechnungsende)
             .Sum(z => z.Betrag ?? 0);
 
@@ -95,9 +94,8 @@ namespace Deeplex.Saverwalter.Model
         public double BetragNebenkosten => Gruppen.Sum(g => g.BetragKalt + g.BetragWarm);
         public double BezahltNebenkosten => Gezahlt - KaltMiete + KaltMinderung;
 
-        public List<Mietminderung> Minderungen => db.MietMinderungen
-                .Where(m => m.Vertrag.VertragId == Vertrag.VertragId &&
-                    (m.Ende == null || m.Ende > Abrechnungsbeginn) &&
+        public List<Mietminderung> Minderungen => Vertrag.Mietminderungen
+                .Where(m => (m.Ende == null || m.Ende > Abrechnungsbeginn) &&
                     m.Beginn <= Abrechnungsende).ToList();
 
         public double Minderung => Minderungen.Sum(m =>

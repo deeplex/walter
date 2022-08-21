@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 if (Entity.MietminderungId != 0 && await vm.NotificationService.Confirmation())
                 {
-                    vm.WalterDbService.ctx.MietMinderungen.Remove(Entity);
+                    vm.WalterDbService.ctx.Mietminderungen.Remove(Entity);
                     vm.WalterDbService.SaveWalter();
                 }
                 vm.Liste.Value = vm.Liste.Value.Remove(this);
@@ -61,11 +61,11 @@ namespace Deeplex.Saverwalter.ViewModels
 
             if (Entity.MietminderungId != 0)
             {
-                WalterDbService.ctx.MietMinderungen.Update(Entity);
+                WalterDbService.ctx.Mietminderungen.Update(Entity);
             }
             else
             {
-                WalterDbService.ctx.MietMinderungen.Add(Entity);
+                WalterDbService.ctx.Mietminderungen.Add(Entity);
             }
             WalterDbService.SaveWalter();
             checkForChanges();

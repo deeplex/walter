@@ -19,9 +19,7 @@ namespace Deeplex.Saverwalter.ViewModels
             NotificationService = ns;
             var self = this;
 
-            Liste.Value = WalterDbService.ctx.Mieten
-                .Where(m => m.Vertrag.VertragId == v.VertragId)
-                .ToList()
+            Liste.Value = v.Mieten
                 .Select(m => new MieteListViewModelEntry(m, self))
                 .OrderByDescending(e => e.Zahlungsdatum.Value)
                 .ToImmutableList();

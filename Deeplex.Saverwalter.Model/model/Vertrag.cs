@@ -11,6 +11,8 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
         public DateTime? Ende { get; set; }
         public List<VertragVersion> Versionen { get; private set; } = new List<VertragVersion>();
+        public List<Miete> Mieten { get; private set; } = new List<Miete>();
+        public List<Mietminderung> Mietminderungen { get; private set; } = new List<Mietminderung>();
         public List<Garage> Garagen { get; private set; } = new List<Garage>();
         public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
     }
