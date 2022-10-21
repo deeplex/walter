@@ -98,7 +98,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public int Id => Entity.AdresseId;
+        public new int Id => Entity.AdresseId;
         public SavableProperty<string> Strasse { get; set; }
         public SavableProperty<string> Hausnummer { get; set; }
         public SavableProperty<string> Postleitzahl { get; set; }

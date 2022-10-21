@@ -312,20 +312,20 @@ namespace Deeplex.Saverwalter.Print
                     underlined.Add(false);
 
                     string PersonEn(int i) => i.ToString() + (i > 1 ? " Personen" : " Person");
-                    for (var i = 0; i < g.PersZeitanteil.Count; ++i)
+                    for (var i = 0; i < g.PersonenZeitanteil.Count; ++i)
                     {
-                        var Beginn = g.PersZeitanteil[i].Beginn;
-                        var Ende = g.PersZeitanteil[i].Ende;
-                        var GesamtPersonenzahl = g.GesamtPersonenIntervall.Last(gs => gs.Beginn.Date <= g.PersZeitanteil[i].Beginn.Date).Personenzahl;
-                        var Personenzahl = g.PersonenIntervall.LastOrDefault(p => p.Beginn.Date <= g.PersZeitanteil[i].Beginn)?.Personenzahl ?? 0;
+                        var Beginn = g.PersonenZeitanteil[i].Beginn;
+                        var Ende = g.PersonenZeitanteil[i].Ende;
+                        var GesamtPersonenzahl = g.GesamtPersonenIntervall.Last(gs => gs.Beginn.Date <= g.PersonenZeitanteil[i].Beginn.Date).Personenzahl;
+                        var Personenzahl = g.PersonenIntervall.LastOrDefault(p => p.Beginn.Date <= g.PersonenZeitanteil[i].Beginn)?.Personenzahl ?? 0;
                         var timespan = ((Ende - Beginn).Days + 1).ToString();
 
                         col1.Add(PersonEn(Personenzahl) + " / " + PersonEn(GesamtPersonenzahl));
                         col2.Add(Datum(Beginn) + " - " + Datum(Ende));
                         col3.Add(timespan + " / " + b.Abrechnungszeitspanne.ToString());
-                        col4.Add(Prozent(g.PersZeitanteil[i].Anteil));
+                        col4.Add(Prozent(g.PersonenZeitanteil[i].Anteil));
                         bold.Add(false);
-                        underlined.Add(i == g.PersZeitanteil.Count - 1);
+                        underlined.Add(i == g.PersonenZeitanteil.Count - 1);
                     }
                 }
 
@@ -424,7 +424,7 @@ namespace Deeplex.Saverwalter.Print
                         break;
                     case Umlageschluessel.NachPersonenzahl:
                         var first = true;
-                        foreach (var a in g.PersZeitanteil)
+                        foreach (var a in g.PersonenZeitanteil)
                         {
                             kostenPunkt(
                                 umlage,
@@ -529,31 +529,31 @@ namespace Deeplex.Saverwalter.Print
                 bold.Add(false);
 
                 string PersonEn(int i) => i.ToString() + (i > 1 ? " Personen" : " Person");
-                for (var i = 0; i < g.PersZeitanteil.Count; ++i)
+                for (var i = 0; i < g.PersonenZeitanteil.Count; ++i)
                 {
-                    var Beginn = g.PersZeitanteil[i].Beginn;
-                    var Ende = g.PersZeitanteil[i].Ende;
-                    var GesamtPersonenzahl = g.GesamtPersonenIntervall.Last(gs => gs.Beginn.Date <= g.PersZeitanteil[i].Beginn.Date).Personenzahl;
-                    var Personenzahl = g.PersonenIntervall.Last(p => p.Beginn.Date <= g.PersZeitanteil[i].Beginn).Personenzahl;
+                    var Beginn = g.PersonenZeitanteil[i].Beginn;
+                    var Ende = g.PersonenZeitanteil[i].Ende;
+                    var GesamtPersonenzahl = g.GesamtPersonenIntervall.Last(gs => gs.Beginn.Date <= g.PersonenZeitanteil[i].Beginn.Date).Personenzahl;
+                    var Personenzahl = g.PersonenIntervall.Last(p => p.Beginn.Date <= g.PersonenZeitanteil[i].Beginn).Personenzahl;
                     var timespan = ((Ende - Beginn).Days + 1).ToString();
 
-                    if (i == g.PersZeitanteil.Count - 1)
+                    if (i == g.PersonenZeitanteil.Count - 1)
                     {
 
                         col1.Add(PersonEn(Personenzahl) + " / " + PersonEn(GesamtPersonenzahl));
                         col2.Add(Datum(Beginn) + " - " + Datum(Ende));
                         col3.Add(timespan + " / " + b.Abrechnungszeitspanne.ToString());
-                        col4.Add(Prozent(g.PersZeitanteil[i].Anteil));
+                        col4.Add(Prozent(g.PersonenZeitanteil[i].Anteil));
                     }
                     else
                     {
                         col1.Add(PersonEn(Personenzahl) + " / " + PersonEn(GesamtPersonenzahl));
                         col2.Add(Datum(Beginn) + " - " + Datum(Ende));
                         col3.Add(timespan + " / " + b.Abrechnungszeitspanne.ToString());
-                        col4.Add(Prozent(g.PersZeitanteil[i].Anteil));
+                        col4.Add(Prozent(g.PersonenZeitanteil[i].Anteil));
                     }
                     bold.Add(false);
-                    underlined.Add(i == g.PersZeitanteil.Count - 1);
+                    underlined.Add(i == g.PersonenZeitanteil.Count - 1);
                 }
             }
 

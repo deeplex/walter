@@ -5,6 +5,29 @@ using static Deeplex.Saverwalter.Model.Utils;
 
 namespace Deeplex.Saverwalter.Model
 {
+    // Determine the fraction of people for a specific Rechnung with the fraction of time
+    // List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil { get; }
+    public class PersonenZeitanteil
+    {
+        public DateTime Beginn { get; }
+        public DateTime Ende { get; }
+        public double Anteil { get; }
+        public int Personenzahl { get; }
+
+
+        public PersonenZeitanteil(PersonenZeitIntervall interval, List<PersonenZeitIntervall> l, IBetriebskostenabrechnung b)
+        {
+            Beginn = interval.Beginn;
+            Ende = interval.Ende;
+            Personenzahl = interval.Personenzahl;
+
+            double personenAnteil = (double)(l.FirstOrDefault(p => p.Beginn <= Beginn)?.Personenzahl ?? 0) / Personenzahl;
+            double zeitAnteil = (double)((Ende - Beginn).Days + 1) / b.Abrechnungszeitspanne;
+
+            Anteil = personenAnteil * zeitAnteil;
+        }
+    }
+
     public interface IRechnungsgruppe
     {
         string Bezeichnung { get; }
@@ -17,7 +40,7 @@ namespace Deeplex.Saverwalter.Model
         double NFZeitanteil { get; }
         double NEZeitanteil { get; }
         List<Umlage> Umlagen { get; }
-        List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil { get; }
+        List<PersonenZeitanteil> PersonenZeitanteil { get; }
         Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch { get; }
         Dictionary<Betriebskostentyp, double> VerbrauchAnteil { get; }
         double BetragKalt { get; }
@@ -61,12 +84,9 @@ namespace Deeplex.Saverwalter.Model
             }
         }
 
-        public List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil => GesamtPersonenIntervall
-                .Where(g => g.Beginn < b.Nutzungsende && g.Ende >= b.Nutzungsbeginn)
-                    .Select((w, i) =>
-                        (w.Beginn, w.Ende, Anteil:
-                            (double)(PersonenIntervall.FirstOrDefault(p => p.Beginn <= w.Beginn)?.Personenzahl ?? 0) / w.Personenzahl *
-                            (((double)(w.Ende - w.Beginn).Days + 1) / b.Abrechnungszeitspanne))).ToList();
+        public List<PersonenZeitanteil> PersonenZeitanteil => GesamtPersonenIntervall
+            .Where(g => g.Beginn < b.Nutzungsende && g.Ende >= b.Nutzungsbeginn)
+            .Select((w, i) => new PersonenZeitanteil(w, PersonenIntervall, b)).ToList();
 
         public Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch
         {
@@ -86,7 +106,7 @@ namespace Deeplex.Saverwalter.Model
                 return VerbrauchList
                     .Where(r => r.Count > 0 && GesamtVerbrauch.ContainsKey(r.First().Betriebskostentyp))
                     .ToDictionary(r => r.First().Betriebskostentyp, r => r.Select(rr => new VerbrauchAnteil(
-                        rr.Kennnummer, 
+                        rr.Kennnummer,
                         rr.Zaehlertyp,
                         rr.Delta,
                         rr.Delta / GesamtVerbrauch[r.First().Betriebskostentyp].First(rrr => rrr.Typ == rr.Zaehlertyp).Delta))
@@ -137,7 +157,7 @@ namespace Deeplex.Saverwalter.Model
             {
                 Umlageschluessel.NachWohnflaeche => r.Betrag * WFZeitanteil,
                 Umlageschluessel.NachNutzeinheit => r.Betrag * NEZeitanteil,
-                Umlageschluessel.NachPersonenzahl => PersZeitanteil.Sum(z => z.Anteil * r.Betrag),
+                Umlageschluessel.NachPersonenzahl => PersonenZeitanteil.Sum(z => z.Anteil * r.Betrag),
                 Umlageschluessel.NachVerbrauch => r.Betrag * checkVerbrauch(r.Umlage.Typ),
                 _ => 0
             });
