@@ -51,6 +51,19 @@ namespace Deeplex.Saverwalter.WinUI3
             typeof(ComboControl),
             new PropertyMetadata(""));
 
+        public object DisplayMemberPath
+        {
+            get { return (string)GetValue(DisplayMemberPathProperty); }
+            set { SetValue(DisplayMemberPathProperty, value); }
+        }
+
+        public static readonly DependencyProperty DisplayMemberPathProperty
+            = DependencyProperty.Register(
+            "DisplayMemberPath",
+            typeof(string),
+            typeof(ComboControl),
+            new PropertyMetadata(""));
+
         public object PlaceholderText
         {
             get { return (string)GetValue(PlaceholderTextProperty); }

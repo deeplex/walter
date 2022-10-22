@@ -18,6 +18,7 @@
         IsEditable="True"
         IsTextSearchEnabled="True"
         SelectionChanged="ComboBox_SelectionChanged"
+        DisplayMemberPath="{x:Bind DisplayMemberPath, Mode=OneWay}"
         Header="{x:Bind Header, Mode=OneWay}"
         PlaceholderText="{x:Bind PlaceholderText, Mode=OneWay}"
         SelectedItem="{x:Bind SelectedItem, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"

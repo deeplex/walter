@@ -34,11 +34,19 @@
                             Margin="20,20,0,0"
                             Header="Wohnung"
                             Width="380"
-                            ItemsSource="{x:Bind ViewModel.Wohnungen}"
+                            ItemsSource="{x:Bind ViewModel.Adressen}"
+                            PlaceholderText="Adresse hinzufügen"
+                            SelectedItem="{x:Bind ViewModel.Adresse, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <uc:ComboControl
+                            Margin="20,20,0,0"
+                            Header="Wohnung"
+                            Visibility="{x:Bind ViewModel.Adresse, Mode=OneWay, Converter={StaticResource NullToInvisibleConverterKey}}"
+                            DisplayMemberPath="Bezeichnung"
+                            ItemsSource="{x:Bind ViewModel.Wohnungen.Value, Mode=OneWay}"
                             PlaceholderText="Wohnung hinzufügen"
                             SelectedItem="{x:Bind ViewModel.Wohnung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Button
-                            Command="{x:Bind ViewModel.DeleteWohnung}"
+                            Command="{x:Bind ViewModel.DeleteAdresse}"
                             VerticalAlignment="Bottom">
                             <SymbolIcon Symbol="Delete"/>
                         </Button>

@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class AdresseViewModel<T> : AdresseViewModel, IDetailViewModel where T : IAdresse
     {
-        private T reference;
+        public T reference;
 
         public AdresseViewModel(T entity, IWalterDbService db, INotificationService ns) : base(entity.Adresse ?? new Adresse(), db, ns)
         {

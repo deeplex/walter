@@ -3,6 +3,7 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Utils.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.ViewModels
@@ -14,7 +15,8 @@ namespace Deeplex.Saverwalter.ViewModels
         public ObservableProperty<ZaehlerstandListViewModel> Staende { get; private set; } = new();
 
         public List<Zaehlertyp> Typen => Enums.Zaehlertypen;
-        public List<WohnungListViewModelEntry> Wohnungen = new List<WohnungListViewModelEntry>();
+        public List<AdresseViewModel> Adressen = new();
+        public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 
         public List<ZaehlerListViewModelEntry> AllgemeinzaehlerList { get; private set; }
         public SavableProperty<ZaehlerListViewModelEntry> Allgemeinzaehler { get; set; }
@@ -22,6 +24,28 @@ namespace Deeplex.Saverwalter.ViewModels
         public SavableProperty<string> Notiz { get; set; }
         public SavableProperty<string> Kennnummer { get; set; }
         public SavableProperty<WohnungListViewModelEntry> Wohnung { get; set; }
+        private AdresseViewModel mAdresse { get; set; }
+        public AdresseViewModel Adresse
+        {
+            get => mAdresse;
+            set
+            {
+                if (value == mAdresse)
+                {
+                    return;
+                }
+
+                mAdresse = value;
+                Wohnungen.Value = mAdresse?.Entity.Wohnungen.Select(e => new WohnungListViewModelEntry(e, WalterDbService)).ToImmutableList();
+                if (Wohnung != null)
+                {
+                    Wohnung.Value = null;
+                }
+                RaisePropertyChanged(nameof(Wohnungen));
+                RaisePropertyChanged(nameof(Wohnung));
+                RaisePropertyChangedAuto();
+            }
+        }
 
         public override void SetEntity(Zaehler z)
         {
@@ -29,7 +53,9 @@ namespace Deeplex.Saverwalter.ViewModels
             Typ = new(this, z.Typ);
             Notiz = new(this, z.Notiz);
             Kennnummer = new(this, z.Kennnummer);
-            Wohnung = new(this, Wohnungen.FirstOrDefault(e => z.Wohnung == e.Entity));
+            Adresse = Adressen.FirstOrDefault(e => z.Adresse == e.Entity);
+
+            Wohnung = new(this, Wohnungen.Value.FirstOrDefault(e => z.Wohnung == e.Entity));
 
             AllgemeinzaehlerList = WalterDbService.ctx.ZaehlerSet
                .Where(y => y.ZaehlerId != Id && y.Wohnung == null)
@@ -42,17 +68,18 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public ZaehlerDetailViewModel(INotificationService ns, IWalterDbService db): base(ns, db)
         {
-            Wohnungen = WalterDbService.ctx.Wohnungen
-                .Include(w => w.Adresse)
-                .Select(w => new WohnungListViewModelEntry(w, WalterDbService))
+            Adressen = WalterDbService.ctx.Adressen
+                .Include(a => a.Wohnungen)
+                .Select(a => new AdresseViewModel(a, WalterDbService, NotificationService))
                 .ToList();
-
+            
             DeleteAllgemeinzaehler = new RelayCommand(_ => Allgemeinzaehler.Value = null);
-            DeleteWohnung = new RelayCommand(_ => Wohnung.Value = null);
+            DeleteAdresse = new RelayCommand(_ => Adresse = null);
 
             Save = new RelayCommand(_ =>
             {
                 Entity.Kennnummer = Kennnummer.Value;
+                Entity.Adresse = Adresse.Entity;
                 Entity.Wohnung = Wohnung.Value?.Entity;
                 Entity.Typ = Typ.Value;
                 Entity.Allgemeinzaehler = Allgemeinzaehler.Value?.Entity;
@@ -63,13 +90,14 @@ namespace Deeplex.Saverwalter.ViewModels
         }
 
         public RelayCommand DeleteAllgemeinzaehler { get; }
-        public RelayCommand DeleteWohnung { get; }
+        public RelayCommand DeleteAdresse { get; }
 
         public override void checkForChanges()
         {
             NotificationService.outOfSync =
                 Kennnummer.Value != Entity.Kennnummer ||
                 Wohnung.Value?.Id != Entity.Wohnung?.WohnungId ||
+                Adresse?.Id != Entity.Adresse?.AdresseId ||
                 Typ.Value != Entity.Typ ||
                 Notiz.Value != Entity.Notiz ||
                 Allgemeinzaehler.Value?.Id != Entity.Allgemeinzaehler?.ZaehlerId;
