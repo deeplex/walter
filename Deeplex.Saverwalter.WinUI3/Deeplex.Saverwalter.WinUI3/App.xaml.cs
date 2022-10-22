@@ -21,7 +21,6 @@ namespace Deeplex.Saverwalter.WinUI3
 
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
-
             Container = new SimpleInjector.Container();
             Container.Register<INotificationService, NotificationService>(Lifestyle.Singleton);
             Container.Register<IFileService, FileService>(Lifestyle.Singleton);
@@ -81,7 +80,6 @@ namespace Deeplex.Saverwalter.WinUI3
             Container.Verify();
 
             await initializeDatabase();
-
 
             Window = new MainWindow();
             Window.Activate();
