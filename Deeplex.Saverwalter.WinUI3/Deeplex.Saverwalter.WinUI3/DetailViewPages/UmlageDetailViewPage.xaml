@@ -6,8 +6,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:uc="using:Deeplex.Saverwalter.WinUI3"
+    xmlns:conv="using:Deeplex.Saverwalter.WinUI3"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <UserControl.Resources>
+        <conv:ShowHKVOConverter x:Key="ShowHKVOConverterKey" />
+        <conv:ShowZaehlerConverter x:Key="ShowZaehlerConverterKey" />
+    </UserControl.Resources>
 
     <uc:FileDropControl>
         <uc:FileDropControl.MainContent>
@@ -25,37 +31,51 @@
                             x:Name="WohnungenTree"/>
                     </uc:ExpanderControl.MainContent>    
                 </uc:ExpanderControl>
-                <MenuFlyoutSeparator/>
+                <MenuFlyoutSeparator Margin="10"/>
                 <TextBox
                     Text="{x:Bind ViewModel.Beschreibung.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Header="Beschreibung"/>
                 <StackPanel
                     Margin="0,10,0,0"
                     Orientation="Horizontal">
-                    <!--TODO-->
                     <uc:ComboControl
                         ItemsSource="{x:Bind ViewModel.Schluessel_List}"
                         SelectedItem="{x:Bind ViewModel.Schluessel.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Header="Umlageschlüssel"/>
+                    <uc:ComboControl
+                        Margin="10,0,0,0"
+                        Width="500"
+                        Visibility="{x:Bind ViewModel.Schluessel.Value.Schluessel, Mode=OneWay, Converter={StaticResource ShowZaehlerConverterKey}}"
+                        ItemsSource="{x:Bind ViewModel.Zaehler_List}"
+                        SelectedItem="{x:Bind ViewModel.Zaehler.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Header="Zaehler"/>
+                </StackPanel>
+                <StackPanel Visibility="{x:Bind ViewModel.Typ.Value.Typ, Mode=OneWay, Converter={StaticResource ShowHKVOConverterKey}}">
+                    <MenuFlyoutSeparator Margin="10"/>
+                    <StackPanel
+                        Margin="20,0,0,0"
+                        Orientation="Horizontal">
+                        <Slider
+                            Value="{x:Bind ViewModel.HKVO_P7.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Width="100"
+                            Minimum="50"
+                            Maximum="70"
+                            Header="HKVO§7"/>
+                        <Slider
+                            Value="{x:Bind ViewModel.HKVO_P8.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Width="100"
+                            Minimum="50"
+                            Maximum="70"
+                            Margin="10,0,0,0"
+                            Header="HKVO§8"/>
+                        <ComboBox
+                            ItemsSource="{x:Bind ViewModel.HKVO_P9_List}"
+                            SelectedItem="{x:Bind ViewModel.HKVO_P9.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Margin="10,0,0,0"
+                            Header="HKVO§9"/>
                     </StackPanel>
-                <!--<StackPanel Margin="0,10,0,0" Visibility="{x:Bind ViewModel.isHeizung}" Orientation="Horizontal">
-                    <Slider
-                        Value="{x:Bind ViewModel.HKVO_P7.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Width="100"
-                        Minimum="50"
-                        Maximum="70"
-                        Header="HKVO§7"/>
-                    <Slider
-                        Value="{x:Bind ViewModel.HKVO_P8.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Width="100"
-                        Minimum="50"
-                        Maximum="70"
-                        Margin="10,0,0,0"
-                        Header="HKVO§8"/>
-                    <ComboBox
-                        Margin="10,0,0,0"
-                        Header="HKVO§9"/>
-                </StackPanel>-->
+                    <MenuFlyoutSeparator Margin="10"/>
+                </StackPanel>
                 <StackPanel>
                     <TextBox
                         Text="{x:Bind ViewModel.Notiz.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

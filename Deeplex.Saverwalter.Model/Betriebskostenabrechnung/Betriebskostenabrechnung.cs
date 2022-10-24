@@ -181,7 +181,7 @@ namespace Deeplex.Saverwalter.Model
             var fZaehler = Zaehler.Where(z =>
                 ganzeGruppe ?
                     u.Wohnungen.Contains(z.Wohnung!) :
-                    z.WohnungId == Wohnung.WohnungId);
+                    z.Wohnung?.WohnungId == Wohnung.WohnungId);
 
             var ende = (ganzeGruppe ? Abrechnungsende : Nutzungsende).Date;
             var beginn = (ganzeGruppe ? Abrechnungsbeginn : Nutzungsbeginn).Date.AddDays(-1);

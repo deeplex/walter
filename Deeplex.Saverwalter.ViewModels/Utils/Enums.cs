@@ -21,6 +21,11 @@ namespace Deeplex.Saverwalter.ViewModels
                 .Select(e => new BetriebskostentypUtil(e))
                 .ToList();
 
+        public static List<HKVO_P9A2> HKVO_P9A2 =
+            Enum.GetValues(typeof(HKVO_P9A2))
+                .Cast<HKVO_P9A2>()
+                .ToList();
+
         public static List<HKVO9Util> HKVO9 =
             Enum.GetValues(typeof(HKVO_P9A2))
                 .Cast<HKVO_P9A2>()

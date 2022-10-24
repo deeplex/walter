@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.Model
         public double? HKVO_P7 { get; set; }
         public double? HKVO_P8 { get; set; }
         public HKVO_P9A2? HKVO_P9 { get; set; }
-        public Zaehler? Zaehler { get; set; }
+        public Zaehler? Zaehler { get; set; } // not used? Is implemented in Umlage anyway (for nach Verbrauch)
 
         public string? Notiz { get; set; }
     }

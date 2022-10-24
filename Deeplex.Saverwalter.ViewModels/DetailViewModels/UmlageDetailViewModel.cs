@@ -16,12 +16,17 @@ namespace Deeplex.Saverwalter.ViewModels
         public List<HKVO9Util> HKVO_P9_List = Enums.HKVO9;
         public List<UmlageschluesselUtil> Schluessel_List = Enums.Umlageschluessel;
         public List<BetriebskostentypUtil> Typen_List = Enums.Betriebskostentyp;
+        public List<ZaehlerListViewModelEntry> Zaehler_List;
 
         public SavableProperty<string> Notiz { get; private set; }
         public SavableProperty<BetriebskostentypUtil> Typ { get; private set; }
         public SavableProperty<UmlageschluesselUtil> Schluessel { get; private set; }
         public SavableProperty<string> Beschreibung { get; private set; }
-        //public SavableProperty<HKVO_P9A2?> HKVO_P9 { get; private set; }
+        
+        public SavableProperty<double> HKVO_P7 { get; private set; }
+        public SavableProperty<double> HKVO_P8 { get; private set; }
+        public SavableProperty<HKVO9Util> HKVO_P9 { get; private set; }
+        public SavableProperty<ZaehlerListViewModelEntry> Zaehler { get; private set; }
 
         public ObservableProperty<ImmutableList<WohnungListViewModelEntry>> Wohnungen = new();
 
@@ -50,12 +55,20 @@ namespace Deeplex.Saverwalter.ViewModels
             Entity = r;
 
             Notiz = new(this, r.Notiz);
-            Typ = new(this, new(r.Typ));
+            Typ = new(this, Typen_List.FirstOrDefault(e => e.Typ == r.Typ));
             Beschreibung = new(this, r.Beschreibung);
-            //HKVO_P9 = new(this, r.HKVO_P9);
-            Schluessel = new(this, new(r.Schluessel));
-            Schluessel.Value = Schluessel_List.FirstOrDefault(e => e.Schluessel == r.Schluessel);
-            Typ.Value = Typen_List.FirstOrDefault(e => e.Typ == r.Typ);
+            Schluessel = new(this, Schluessel_List.FirstOrDefault(e => e.Schluessel == r.Schluessel));
+
+            Zaehler_List = WalterDbService.ctx.ZaehlerSet
+                   .Select(y => new ZaehlerListViewModelEntry(y))
+                   .ToList();
+            Zaehler = new(this, Zaehler_List.FirstOrDefault(e => r.Zaehler == e.Entity));
+
+            HKVO_P7 = new(this, r.HKVO?.HKVO_P7 ?? 0.5);
+            HKVO_P8 = new(this, r.HKVO?.HKVO_P8 ?? 0.5);
+            HKVO_P9 = new(this,
+                HKVO_P9_List.FirstOrDefault(e => e.Enum == r.HKVO?.HKVO_P9) ??
+                HKVO_P9_List.FirstOrDefault(e => e.Enum == HKVO_P9A2.Satz_2));
 
             Wohnungen.Value = r.Wohnungen.Select(g => new WohnungListViewModelEntry(g, WalterDbService)).ToImmutableList();
 
@@ -72,7 +85,17 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Notiz = Notiz.Value;
                 Entity.Typ = Typ.Value.Typ;
                 Entity.Schluessel = Schluessel.Value.Schluessel;
+                Entity.Zaehler = Zaehler.Value.Entity;
                 Entity.Beschreibung = Beschreibung.Value;
+
+                if (Entity.HKVO == null)
+                {
+                    Entity.HKVO = new HKVO();
+                }
+
+                Entity.HKVO.HKVO_P7 = HKVO_P7.Value / 100;
+                Entity.HKVO.HKVO_P8 = HKVO_P8.Value / 100;
+                Entity.HKVO.HKVO_P9 = HKVO_P9.Value.Enum;
 
                 Update();
             }, _ => true);
@@ -94,7 +117,6 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 return a.Equals(b);
             }
-
         }
 
         public override void checkForChanges()
@@ -103,8 +125,11 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Notiz != Notiz.Value ||
                 Entity.Typ != Typ.Value.Typ ||
                 Entity.Schluessel != Schluessel.Value.Schluessel ||
-                Entity.Beschreibung != Beschreibung.Value;
-            //checkNullable(Entity.HKVO_P9, HKVO_P9.Value);
+                Entity.Zaehler != Zaehler.Value?.Entity ||
+                Entity.Beschreibung != Beschreibung.Value ||
+                Entity.HKVO?.HKVO_P7 * 100 != HKVO_P7.Value ||
+                Entity.HKVO?.HKVO_P8 * 100 != HKVO_P8.Value ||
+                Entity.HKVO?.HKVO_P9 != HKVO_P9.Value.Enum;
         }
     }
 }

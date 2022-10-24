@@ -17,9 +17,6 @@ namespace Deeplex.Saverwalter.Model.Tests
             var mockE = DateTime.Now;
 
             var fake = A.Fake<Rechnungsgruppe>();
-            var stub = new PersonenZeitIntervall((mockB, mockE, p), fake);
-
-            stub.Should().NotBeNull();
         }
     }
 }

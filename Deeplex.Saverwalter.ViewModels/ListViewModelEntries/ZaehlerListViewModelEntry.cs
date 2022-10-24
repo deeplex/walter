@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.ViewModels
     {
         public override string ToString()
         {
-            return Kennnummer + ", " + Wohnung;
+            return Kennnummer + ", " + Ort;
         }
 
         public Zaehler Entity;
@@ -21,12 +21,14 @@ namespace Deeplex.Saverwalter.ViewModels
         public DateTime? Datum => LastStand == null ? null : LastStand.Datum;
         public int WohnungId => Entity.Wohnung?.WohnungId ?? 0;
         // TODO remove i18n from viewmodels
-        public string Wohnung => Entity.Wohnung == null ? "Keine Wohnung" :
-            AdresseViewModel.Anschrift(Entity.Wohnung) + ", " + Entity.Wohnung.Bezeichnung;
+        public string Ort => Entity.Wohnung == null ? "Unbestimmter Ort" :
+            AdresseViewModel.Anschrift(Entity.Adresse) + ", " + Entity.Wohnung.Bezeichnung;
         public Zaehler AllgemeinZaehler => Entity.Allgemeinzaehler;
 
         public ZaehlerListViewModelEntry(Zaehler z)
         {
+            // TODO Handle Entity.Wohnung.Adresse != Entity.Adresse
+
             Entity = z;
             LastStand = z.Staende.OrderBy(e => e.Datum).LastOrDefault();
         }

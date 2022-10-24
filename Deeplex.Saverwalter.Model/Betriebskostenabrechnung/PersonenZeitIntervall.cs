@@ -11,11 +11,11 @@ namespace Deeplex.Saverwalter.Model
         public int Personenzahl { get; }
         public Rechnungsgruppe Parent { get; }
 
-        public PersonenZeitIntervall((DateTime b, DateTime e, int p) i, Rechnungsgruppe parent)
+        public PersonenZeitIntervall(DateTime beginn, DateTime ende, int personenzahl, Rechnungsgruppe parent)
         {
-            Beginn = i.b;
-            Ende = i.e;
-            Personenzahl = i.p;
+            Beginn = beginn;
+            Ende = ende;
+            Personenzahl = personenzahl;
             Parent = parent;
         }
     }

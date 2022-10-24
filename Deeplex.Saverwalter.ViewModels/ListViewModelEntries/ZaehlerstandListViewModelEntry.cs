@@ -24,6 +24,8 @@ namespace Deeplex.Saverwalter.ViewModels
             }, _ => true);
 
             Save = new RelayCommand(_ => save(), _ => true);
+            
+            SetEntity(z);
         }
 
         public override void SetEntity(Zaehlerstand z)

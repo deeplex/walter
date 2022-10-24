@@ -28,9 +28,9 @@ namespace Deeplex.Saverwalter.ViewModels
             AlleVermieter = WalterDbService.ctx.JuristischePersonen.ToImmutableList()
                 .Select(j => new KontaktListViewModelEntry(j))
                 .Concat(WalterDbService.ctx.NatuerlichePersonen
-                    .Select(n => new KontaktListViewModelEntry(n)))
+                .Select(n => new KontaktListViewModelEntry(n)))
                 .ToImmutableList();
-
+            
             Save = new RelayCommand(_ =>
             {
                 Adresse.Value.save();
@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.ViewModels
             Wohnflaeche = new(this, e.Wohnflaeche);
             Nutzflaeche = new(this, e.Nutzflaeche);
             Nutzeinheit = new(this, e.Nutzeinheit);
-            Adresse = new(this, new(e, WalterDbService, NotificationService));
+            Adresse = new(this, new AdresseViewModel<Wohnung>(e, WalterDbService, NotificationService));
         }
 
         public override void checkForChanges()

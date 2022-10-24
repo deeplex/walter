@@ -556,7 +556,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MietMinderungen",
+                name: "Mietminderungen",
                 columns: table => new
                 {
                     MietminderungId = table.Column<int>(type: "INTEGER", nullable: false)
@@ -569,9 +569,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MietMinderungen", x => x.MietminderungId);
+                    table.PrimaryKey("PK_Mietminderungen", x => x.MietminderungId);
                     table.ForeignKey(
-                        name: "FK_MietMinderungen_Vertraege_VertragId",
+                        name: "FK_Mietminderungen_Vertraege_VertragId",
                         column: x => x.VertragId,
                         principalTable: "Vertraege",
                         principalColumn: "VertragId",
@@ -711,9 +711,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         principalColumn: "AnhangId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AnhangMietminderung_MietMinderungen_MietminderungenMietminderungId",
+                        name: "FK_AnhangMietminderung_Mietminderungen_MietminderungenMietminderungId",
                         column: x => x.MietminderungenMietminderungId,
-                        principalTable: "MietMinderungen",
+                        principalTable: "Mietminderungen",
                         principalColumn: "MietminderungId",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1077,8 +1077,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 column: "VertragId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MietMinderungen_VertragId",
-                table: "MietMinderungen",
+                name: "IX_Mietminderungen_VertragId",
+                table: "Mietminderungen",
                 column: "VertragId");
 
             migrationBuilder.CreateIndex(
@@ -1222,7 +1222,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 name: "Mieten");
 
             migrationBuilder.DropTable(
-                name: "MietMinderungen");
+                name: "Mietminderungen");
 
             migrationBuilder.DropTable(
                 name: "VertragsBetriebskostenrechnung");

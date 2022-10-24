@@ -54,7 +54,7 @@
                             VerticalAlignment="Center"
                             HorizontalAlignment="Left"
                             Margin="5,0,0,0"
-                            Text="{x:Bind Wohnung}" />
+                            Text="{x:Bind Ort}" />
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellEditingTemplate>
             </mtuuc:DataGridTemplateColumn>

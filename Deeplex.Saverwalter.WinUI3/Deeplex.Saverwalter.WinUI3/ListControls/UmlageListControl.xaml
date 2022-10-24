@@ -31,7 +31,7 @@
                         <TextBlock
                             VerticalAlignment="Center"
                             Padding="10,0,10,0"
-                            Text="{x:Bind Typ, Converter={StaticResource ToDescriptionStringConverterKey}, Mode=OneWay}"/>
+                            Text="{x:Bind Typ, Converter={StaticResource ToDescriptionStringConverterKey}}"/>
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>
@@ -41,7 +41,7 @@
                         <TextBlock
                             VerticalAlignment="Center"
                             Padding="10,0,10,0"
-                            Text="{x:Bind Mode=OneWay}"/>
+                            Text="{x:Bind}"/>
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>
@@ -51,7 +51,7 @@
                         <TextBlock
                             VerticalAlignment="Center"
                             Padding="10,0,10,0"
-                            Text="{x:Bind Beschreibung, Mode=OneWay}"/>
+                            Text="{x:Bind Beschreibung}"/>
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>

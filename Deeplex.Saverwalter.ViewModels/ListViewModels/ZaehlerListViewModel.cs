@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         protected override void updateList()
         {
-            List.Value = AllRelevant.Where(v => applyFilter(v.Kennnummer, v.TypString, v.Wohnung)).ToImmutableList();
+            List.Value = AllRelevant.Where(v => applyFilter(v.Kennnummer, v.TypString, v.Ort)).ToImmutableList();
         }
 
         public override void SetList()

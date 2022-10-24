@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.ViewModels
 {
     public sealed class AdresseViewModel<T> : AdresseViewModel, IDetailViewModel where T : IAdresse
     {
-        private T reference;
+        public T reference;
 
         public AdresseViewModel(T entity, IWalterDbService db, INotificationService ns) : base(entity.Adresse ?? new Adresse(), db, ns)
         {
@@ -98,7 +98,7 @@ namespace Deeplex.Saverwalter.ViewModels
             }
         }
 
-        public int Id => Entity.AdresseId;
+        public new int Id => Entity.AdresseId;
         public SavableProperty<string> Strasse { get; set; }
         public SavableProperty<string> Hausnummer { get; set; }
         public SavableProperty<string> Postleitzahl { get; set; }

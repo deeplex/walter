@@ -55,7 +55,7 @@ namespace Deeplex.Saverwalter.WinUI3
             AddFilePanel.Visibility = Visibility.Collapsed;
         }
 
-        private async void Grid_Drop(object sender, DragEventArgs e)
+        private void Grid_Drop(object sender, DragEventArgs e)
         {
             // TODO
             //if (e.DataView.Contains(StandardDataFormats.StorageItems))
