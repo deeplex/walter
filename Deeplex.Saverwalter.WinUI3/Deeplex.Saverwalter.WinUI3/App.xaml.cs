@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.WinUI3
             InitializeComponent();
         }
 
-        protected override async void OnLaunched(LaunchActivatedEventArgs args)
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
             Container = new SimpleInjector.Container();
             Container.Register<INotificationService, NotificationService>(Lifestyle.Singleton);
@@ -79,13 +79,13 @@ namespace Deeplex.Saverwalter.WinUI3
             // Container.Register<MietMinderungDetailViewModel>();
             Container.Verify();
 
-            await initializeDatabase();
+            initializeDatabase();
 
             Window = new MainWindow();
             Window.Activate();
         }
 
-        private async Task initializeDatabase()
+        private void initializeDatabase()
         {
             // Removed when moving from MainWindow to App
             // AutoSuggest = new AutoSuggestListViewModel(App.WalterService);

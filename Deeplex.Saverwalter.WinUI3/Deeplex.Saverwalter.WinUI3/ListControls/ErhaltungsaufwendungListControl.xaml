@@ -45,7 +45,7 @@
                             Margin="10,0,10,0"
                             VerticalAlignment="Center"
                             Foreground="{x:Bind Enabled.Value, Mode=OneWay, Converter={StaticResource IsEnabledConverterKey}}"
-                            Text="{x:Bind Bezeichnung, Mode=OneWay}" />
+                            Text="{x:Bind Bezeichnung}" />
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>
@@ -56,7 +56,7 @@
                             Margin="10,0,10,0"
                             VerticalAlignment="Center"
                             Foreground="{x:Bind Enabled.Value, Mode=OneWay, Converter={StaticResource IsEnabledConverterKey}}"
-                            Text="{x:Bind Aussteller, Mode=OneWay}" />
+                            Text="{x:Bind Aussteller}" />
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>
@@ -67,7 +67,7 @@
                             Margin="10,0,10,0"
                             VerticalAlignment="Center"
                             Foreground="{x:Bind Enabled.Value, Mode=OneWay, Converter={StaticResource IsEnabledConverterKey}}"
-                            Text="{x:Bind Betrag, Mode=OneWay, Converter={StaticResource EuroStringConverterKey}}" />
+                            Text="{x:Bind Betrag, Converter={StaticResource EuroStringConverterKey}}" />
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>
@@ -78,7 +78,7 @@
                             Margin="10,0,10,0"
                             VerticalAlignment="Center"
                             Foreground="{x:Bind Enabled.Value, Mode=OneWay, Converter={StaticResource IsEnabledConverterKey}}"
-                            Text="{x:Bind Datum, Mode=OneWay, Converter={StaticResource DateStringConverterKey}}" />
+                            Text="{x:Bind Datum, Converter={StaticResource DateStringConverterKey}}" />
                     </DataTemplate>
                 </mtuuc:DataGridTemplateColumn.CellTemplate>
             </mtuuc:DataGridTemplateColumn>

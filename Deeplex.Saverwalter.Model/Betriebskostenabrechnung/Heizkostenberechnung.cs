@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Deeplex.Saverwalter.Model
@@ -43,21 +44,34 @@ namespace Deeplex.Saverwalter.Model
             Para7 = r.Umlage.HKVO?.HKVO_P7 ?? 0.5; // HeizkostenV §7
             Para8 = r.Umlage.HKVO?.HKVO_P8 ?? 0.5; // HeizkostenV §8
 
-            var AllgWarmwasserZaehler = b.db.ZaehlerSet.Where(z =>
+            // Alle Warmwasserzähler die in dieser Umlage betroffen sind
+            var AlleWarmwasserZaehler = b.db.ZaehlerSet.Where(z =>
                 z.Typ == Zaehlertyp.Warmwasser && r.Umlage.Wohnungen.Contains(z.Wohnung!)).ToImmutableList();
 
-            var AllgWaermeZaehler = b.db.ZaehlerSet.Where(z =>
-                z.Typ == Zaehlertyp.Gas && r.Umlage.Wohnungen.Contains(z.Wohnung!)).ToImmutableList();
-
-            var WaermeZaehler = AllgWaermeZaehler
+            // Der Warmwasserzähler der Wohnung der Abrechnung
+            var WarmwasserZaehler = AlleWarmwasserZaehler
                 .Where(z => z.Wohnung == b.Wohnung)
                 .ToImmutableList();
 
-            var WarmwasserZaehler = AllgWarmwasserZaehler
+            if (r.Umlage.HKVO == null)
+            {
+                new Note("Kein Zähler für die Umlage vorhanden", Severity.Error);
+                return;
+            }
+            var Allgemeinzaehler = r.Umlage.HKVO!.Zaehler;
+
+            if (Allgemeinzaehler == null)
+            {
+                new Note("Notwendiger Zähler für Umlage ist nicht definiert", Severity.Error);
+                return;
+            }
+
+            // Get all Zaehler for this Umlage for this Wohnung
+            var WohnungWaermeZaehler = Allgemeinzaehler!.EinzelZaehler
                 .Where(z => z.Wohnung == b.Wohnung)
                 .ToImmutableList();
 
-            ImmutableList<Zaehlerstand> Ende(ImmutableList<Zaehler> z, bool ganzeGruppe = false)
+            ImmutableList<Zaehlerstand> Ende(IEnumerable<Zaehler> z, bool ganzeGruppe = false)
             {
                 var ende = (ganzeGruppe ? b.Abrechnungsende : b.Nutzungsende).Date;
                 var ret = z.Select(z => z.Staende.OrderBy(s => s.Datum)
@@ -68,7 +82,7 @@ namespace Deeplex.Saverwalter.Model
                 return ret;
             }
 
-            ImmutableList<Zaehlerstand> Beginn(ImmutableList<Zaehler> z, bool ganzeGruppe = false)
+            ImmutableList<Zaehlerstand> Beginn(IEnumerable<Zaehler> z, bool ganzeGruppe = false)
             {
                 var beginn = (ganzeGruppe ? b.Abrechnungsbeginn : b.Nutzungsbeginn).Date.AddDays(-1);
                 var ret = z.Select(z => z.Staende.OrderBy(s => s.Datum)
@@ -79,11 +93,11 @@ namespace Deeplex.Saverwalter.Model
                 return ret;
             }
 
-            V = Ende(AllgWarmwasserZaehler, true).Sum(w => w.Stand) -
-                Beginn(AllgWarmwasserZaehler, true).Sum(w => w.Stand);
+            V = Ende(AlleWarmwasserZaehler, true).Sum(w => w.Stand) -
+                Beginn(AlleWarmwasserZaehler, true).Sum(w => w.Stand);
 
-            Q = Ende(AllgWaermeZaehler, true).Sum(w => w.Stand) -
-                Beginn(AllgWaermeZaehler, true).Sum(w => w.Stand);
+            Q = Ende(new List<Zaehler>() { Allgemeinzaehler }, true).Sum(w => w.Stand) -
+                Beginn(new List<Zaehler>() { Allgemeinzaehler }, true).Sum(w => w.Stand);
 
             if (Q == 0)
             {
@@ -100,7 +114,7 @@ namespace Deeplex.Saverwalter.Model
             GesamtNutzflaeche = r.Umlage.Wohnungen.Sum(w => w.Nutzflaeche);
             NFZeitanteil = b.Wohnung.Nutzflaeche / GesamtNutzflaeche * b.Zeitanteil;
 
-            HeizkostenVerbrauchAnteil = (Ende(WaermeZaehler).Sum(w => w.Stand) - Beginn(WaermeZaehler).Sum(w => w.Stand)) / Q;
+            HeizkostenVerbrauchAnteil = (Ende(WohnungWaermeZaehler).Sum(w => w.Stand) - Beginn(WohnungWaermeZaehler).Sum(w => w.Stand)) / Q;
             WarmwasserVerbrauchAnteil = (Ende(WarmwasserZaehler).Sum(w => w.Stand) - Beginn(WarmwasserZaehler).Sum(w => w.Stand)) / V;
 
             WaermeAnteilNF = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * NFZeitanteil;

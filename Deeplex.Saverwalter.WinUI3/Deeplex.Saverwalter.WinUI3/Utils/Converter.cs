@@ -39,6 +39,28 @@ namespace Deeplex.Saverwalter.WinUI3
         }
     }
 
+    public class ShowZaehlerConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+            => (Umlageschluessel)value != Umlageschluessel.NachVerbrauch ? Visibility.Collapsed : Visibility.Visible;
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ShowHKVOConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+            => (int)value % 2 == 0 ? Visibility.Collapsed : Visibility.Visible;
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class ToInvisibleConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)

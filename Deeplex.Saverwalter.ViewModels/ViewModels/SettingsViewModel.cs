@@ -48,7 +48,7 @@ namespace Deeplex.Saverwalter.ViewModels
                     Adressen.Value = Db.ctx.Adressen.Select(a => new AdresseViewModel(a, Db, ns)).ToImmutableList();
                 }, _ => true);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // TODO
                 //impl.ShowAlert(e.Message);

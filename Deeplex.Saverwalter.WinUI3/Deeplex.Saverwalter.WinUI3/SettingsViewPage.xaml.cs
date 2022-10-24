@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.WinUI3
             }
         }
 
-        private async void LoadDatabase_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private void LoadDatabase_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             // TODO
             //SetDatabaseAsDefault(await ViewModel.LoadDatabase());
