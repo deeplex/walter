@@ -85,7 +85,17 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Notiz = Notiz.Value;
                 Entity.Typ = Typ.Value.Typ;
                 Entity.Schluessel = Schluessel.Value.Schluessel;
+                Entity.Zaehler = Zaehler.Value.Entity;
                 Entity.Beschreibung = Beschreibung.Value;
+
+                if (Entity.HKVO == null)
+                {
+                    Entity.HKVO = new HKVO();
+                }
+
+                Entity.HKVO.HKVO_P7 = HKVO_P7.Value / 100;
+                Entity.HKVO.HKVO_P8 = HKVO_P8.Value / 100;
+                Entity.HKVO.HKVO_P9 = HKVO_P9.Value.Enum;
 
                 Update();
             }, _ => true);
@@ -107,7 +117,6 @@ namespace Deeplex.Saverwalter.ViewModels
             {
                 return a.Equals(b);
             }
-
         }
 
         public override void checkForChanges()
@@ -116,8 +125,11 @@ namespace Deeplex.Saverwalter.ViewModels
                 Entity.Notiz != Notiz.Value ||
                 Entity.Typ != Typ.Value.Typ ||
                 Entity.Schluessel != Schluessel.Value.Schluessel ||
-                Entity.Beschreibung != Beschreibung.Value;
-            //checkNullable(Entity.HKVO_P9, HKVO_P9.Value);
+                Entity.Zaehler != Zaehler.Value?.Entity ||
+                Entity.Beschreibung != Beschreibung.Value ||
+                Entity.HKVO?.HKVO_P7 * 100 != HKVO_P7.Value ||
+                Entity.HKVO?.HKVO_P8 * 100 != HKVO_P8.Value ||
+                Entity.HKVO?.HKVO_P9 != HKVO_P9.Value.Enum;
         }
     }
 }
