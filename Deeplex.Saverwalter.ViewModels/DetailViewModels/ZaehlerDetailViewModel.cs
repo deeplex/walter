@@ -70,6 +70,7 @@ namespace Deeplex.Saverwalter.ViewModels
         {
             Adressen = WalterDbService.ctx.Adressen
                 .Include(a => a.Wohnungen)
+                .ToList()
                 .Select(a => new AdresseViewModel(a, WalterDbService, NotificationService))
                 .ToList();
             

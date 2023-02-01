@@ -50,13 +50,20 @@ namespace Deeplex.Saverwalter.Model
 
         public IPerson Vermieter => db.FindPerson(Wohnung.BesitzerId);
         public IPerson Ansprechpartner => db.FindPerson(Vertrag.AnsprechpartnerId!.Value) ?? Vermieter;
-        public List<IPerson> Mieter => db.MieterSet
-            .Where(m => m.Vertrag.VertragId == Vertrag.VertragId)
-            .Select(m => db.FindPerson(m.PersonId))
-            .ToList();
-        // TODO juristische
+        public List<IPerson> Mieter
+        {
+            get
+            {
+                return db.MieterSet
+                    .Where(m => m.Vertrag.VertragId == Vertrag.VertragId)
+                    .ToList()
+                    .Select(m => db.FindPerson(m.PersonId))
+                    .ToList();
+            }
+    }
+    // TODO juristische
 
-        public Vertrag Vertrag { get; }
+    public Vertrag Vertrag { get; }
 
         public Wohnung Wohnung => Vertrag.Wohnung;
         public Adresse Adresse => Wohnung.Adresse;

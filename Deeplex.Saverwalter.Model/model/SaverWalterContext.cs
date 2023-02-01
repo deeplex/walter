@@ -1,9 +1,29 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal;
 using System;
 using System.Linq;
+using System.Text;
 
 namespace Deeplex.Saverwalter.Model
 {
+    /// <summary>A replacement for <see cref="NpgsqlSqlGenerationHelper"/>
+    /// to convert PascalCaseCsharpyIdentifiers to alllowercasenames.
+    /// So table and column names with no embedded punctuation
+    /// get generated with no quotes or delimiters.</summary>
+    public class NpgsqlSqlGenerationLowercasingHelper : NpgsqlSqlGenerationHelper
+    {
+        //Don't lowercase ef's migration table
+        const string dontAlter = "__EFMigrationsHistory";
+        static string Customize(string input) => input == dontAlter ? input : input.ToLower();
+        public NpgsqlSqlGenerationLowercasingHelper(RelationalSqlGenerationHelperDependencies dependencies)
+            : base(dependencies) { }
+        public override string DelimitIdentifier(string identifier)
+            => base.DelimitIdentifier(Customize(identifier));
+        public override void DelimitIdentifier(StringBuilder builder, string identifier)
+            => base.DelimitIdentifier(builder, Customize(identifier));
+    }
+
     public sealed class SaverwalterContext : DbContext
     {
         private bool mPreconfigured = false;
@@ -38,9 +58,11 @@ namespace Deeplex.Saverwalter.Model
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
+            options.ReplaceService<ISqlGenerationHelper, NpgsqlSqlGenerationLowercasingHelper>();
+
             if (!mPreconfigured)
             {
-                options.UseSqlite("Data Source=walter.db");
+                //options.UseSqlite("Data Source=walter.db");
             }
         }
 
@@ -60,6 +82,9 @@ namespace Deeplex.Saverwalter.Model
                 .HasAlternateKey(jp => jp.PersonId);
             modelBuilder.Entity<NatuerlichePerson>()
                 .HasAlternateKey(np => np.PersonId);
+
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.HasPostgresExtension("uuid-ossp");
         }
     }
 }

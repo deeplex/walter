@@ -76,7 +76,7 @@ namespace Deeplex.Saverwalter.ViewModels
 
         public VertragDetailViewModel(INotificationService ns, IWalterDbService db) : base(ns, db)
         {
-            AlleWohnungen = db.ctx.Wohnungen.Select(w => new WohnungListViewModelEntry(w, db)).ToList();
+            AlleWohnungen = db.ctx.Wohnungen.ToList().Select(w => new WohnungListViewModelEntry(w, db)).ToList();
 
             AlleKontakte = db.ctx.JuristischePersonen.ToList().Select(j => new KontaktListViewModelEntry(j))
                     .Concat(db.ctx.NatuerlichePersonen.Select(n => new KontaktListViewModelEntry(n)))

@@ -13,12 +13,21 @@ namespace Deeplex.Saverwalter.WinUI3
     public sealed class FileService : IFileService
     {
         public string databaseRoot { get; set; }
+        public string databasePort { get; set; }
+        public string databaseURL { get; set; }
+        public string databaseUser { get; set; }
+        public string databasePass { get; set; }
 
         public FileService(INotificationService ns)
         {
             var Settings = Windows.Storage.ApplicationData.Current.LocalSettings;
             // TODO. This was set after the initialization. But the data is necessary at App-Start. So I have to check for the database beforehand
+            
             databaseRoot = "C:/Users/me/OneDrive/Desktop/walter/walter"; // Settings.Values["root"] as string;
+            databasePort = "5432";
+            databaseURL = "192.168.178.61";
+            databaseUser = "postgres";
+            databasePass = "admin";
         }
 
         //public async Task loadDataBase(INotificationService ns)

@@ -112,7 +112,7 @@ namespace Deeplex.Saverwalter.WinUI3
             //    db.ctx.Dispose();
             //}
 
-            db.ctx.Database.Migrate();
+            // db.ctx.Database.Migrate();
         }
     }
 }

@@ -22,7 +22,8 @@ namespace Deeplex.Saverwalter.Services
         public WalterDbService(INotificationService ns, IFileService fs)
         {
             var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
-            optionsBuilder.UseSqlite("Data Source=" + fs.databaseRoot + ".db");
+            optionsBuilder.UseNpgsql("Server=" + fs.databaseURL + ";Port=" + fs.databasePort + ";Database=postgres;Username=" + fs.databaseUser + ";Password=" + fs.databasePass);
+            //optionsBuilder.UseSqlite("Data Source=" + fs.databaseRoot + ".db");
             ctx = new SaverwalterContext(optionsBuilder.Options);
 
             FileService = fs;
