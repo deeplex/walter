@@ -22,10 +22,9 @@ namespace Deeplex.Saverwalter.WebAPI
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            // app.UseStaticFiles();
 
-            app.UseAuthorization();
-
+            //app.UseAuthorization();
 
             app.MapControllers();
 
