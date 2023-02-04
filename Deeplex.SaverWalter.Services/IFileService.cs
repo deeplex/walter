@@ -11,9 +11,9 @@ namespace Deeplex.Saverwalter.Services
         string databasePort { get; set; }
         string databaseUser { get; set; }
         string databasePass { get; set; }
-        Task<string> pickFile(params string[] ext);
-        Task<List<string>> pickFiles(params string[] ext);
-        Task<string> saveFile(string filename, string[] ext);
-        void launchFile(Anhang a);
+        //Task<string> pickFile(params string[] ext);
+        //Task<List<string>> pickFiles(params string[] ext);
+        //Task<string> saveFile(string filename, string[] ext);
+        //void launchFile(Anhang a);
     }
 }
