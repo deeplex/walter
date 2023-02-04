@@ -1,9 +1,21 @@
+using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
+using SimpleInjector;
+
 namespace Deeplex.Saverwalter.WebAPI
 {
     public class Program
     {
+        private static Container Container { get; set; } = null!;
+        public static SaverwalterContext ctx => Container.GetInstance<IWalterDbService>().ctx;
+
         public static void Main(string[] args)
         {
+            Container = new Container();
+            Container.Register<INotificationService, NotificationService>(Lifestyle.Singleton);
+            Container.Register<IFileService, FileService>(Lifestyle.Singleton);
+            Container.Register<IWalterDbService, WalterDbService>(Lifestyle.Singleton);
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -25,7 +37,6 @@ namespace Deeplex.Saverwalter.WebAPI
             // app.UseStaticFiles();
 
             //app.UseAuthorization();
-
             app.MapControllers();
 
             app.Run();
