@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -16,7 +17,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string Bezeichnung => Entity.Bezeichnung;
             public string Besitzer => "TODO";
             public string Bewohner => "TODO";
-            public string Anschrift => "TODO";
+            public string Anschrift => Entity.Adresse.Anschrift;
 
             public WohnungListEntry(Wohnung w)
             {
@@ -34,7 +35,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpGet(Name = "GetWohnungen")]
         public IEnumerable<WohnungListEntry> Get()
         {
-            return Program.ctx.Wohnungen.Select(e => new WohnungListEntry(e)).ToList();
+            return Program.ctx.Wohnungen.Include(e => e.Adresse).Select(e => new WohnungListEntry(e)).ToList();
         }
     }
 }
