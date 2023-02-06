@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public int id => Entity.WohnungId;
             public string Bezeichnung => Entity.Bezeichnung;
-            public string Besitzer => "TODO";
+            public string Besitzer => Program.FindPerson(Entity.BesitzerId) is IPerson p ? p.Bezeichnung : "Unbekannt";
             public string Bewohner => "TODO";
             public string Anschrift => Entity.Adresse.Anschrift;
 

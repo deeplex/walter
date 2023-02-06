@@ -1,5 +1,6 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
+using Deeplex.Saverwalter.WebAPI.Services;
 using SimpleInjector;
 
 namespace Deeplex.Saverwalter.WebAPI
@@ -8,6 +9,7 @@ namespace Deeplex.Saverwalter.WebAPI
     {
         private static Container Container { get; set; } = null!;
         public static SaverwalterContext ctx => Container.GetInstance<IWalterDbService>().ctx;
+        public static IPerson FindPerson(Guid guid) => Container.GetInstance<PersonMap>().FindPerson(guid);
 
         public static void Main(string[] args)
         {
@@ -15,6 +17,8 @@ namespace Deeplex.Saverwalter.WebAPI
             Container.Register<INotificationService, NotificationService>(Lifestyle.Singleton);
             Container.Register<IFileService, FileService>(Lifestyle.Singleton);
             Container.Register<IWalterDbService, WalterDbService>(Lifestyle.Singleton);
+            Container.Register<PersonMap>(Lifestyle.Singleton);
+            Container.Verify();
 
             var builder = WebApplication.CreateBuilder(args);
 

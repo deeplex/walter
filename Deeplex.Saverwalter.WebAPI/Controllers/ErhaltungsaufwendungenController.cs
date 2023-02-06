@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
+using SimpleInjector;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -16,7 +17,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int id => Entity.ErhaltungsaufwendungId;
             public string Betrag => Entity.Betrag.Euro();
             public string Bezeichnung => Entity.Bezeichnung;
-            public string Aussteller => "TODO";
+            public string Aussteller => Program.FindPerson(Entity.AusstellerId) is IPerson p ? p.Bezeichnung : "Unbekannt";
             public string Datum => Entity.Datum.Datum();
 
             public ErhaltungsaufwendungListEntry(Erhaltungsaufwendung e)
