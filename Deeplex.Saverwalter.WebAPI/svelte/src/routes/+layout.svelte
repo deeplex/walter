@@ -84,7 +84,7 @@
 		position: relative;
 	}
 
-	:global(.bx--text-input-wrapper) {
+	:global(.bx--text-input-wrapper, .bx--form-item) {
 		margin: 10px;
 	}
 	:global(.bx--content) {

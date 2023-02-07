@@ -8,7 +8,7 @@
 
 <Grid padding>
 	<Row>
-		<TextInput labelText="Bezeichnung" value={person.name} />
+		<TextInput required labelText="Bezeichnung" value={person.name} />
 	</Row>
 	<Person {person} />
 </Grid>

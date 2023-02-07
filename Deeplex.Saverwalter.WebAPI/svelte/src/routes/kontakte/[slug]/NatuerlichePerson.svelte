@@ -9,7 +9,7 @@
 <Grid padding>
 	<Row>
 		<TextInput labelText="Vorname" value={person.vorname} />
-		<TextInput labelText="Nachname" value={person.nachname} />
+		<TextInput required labelText="Nachname" value={person.nachname} />
 	</Row>
 	<Person {person} />
 </Grid>
