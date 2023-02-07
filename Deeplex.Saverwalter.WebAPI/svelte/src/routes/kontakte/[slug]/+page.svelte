@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { TextInputSkeleton } from 'carbon-components-svelte';
 	import { JuristischePersonEntry, NatuerlichePersonEntry } from './classes';
 	import JuristischePerson from './JuristischePerson.svelte';
 	import NatuerlichePerson from './NatuerlichePerson.svelte';
-	import Person from './Person.svelte';
+	import Person from './AsyncPerson.svelte';
+	import AsyncPerson from './AsyncPerson.svelte';
 
 	const request_options = {
 		method: 'GET',
@@ -23,7 +23,7 @@
 
 <h1>
 	{#await async}
-		<Person />
+		<AsyncPerson />
 	{:then person}
 		{#if person.natuerlichePerson}
 			<NatuerlichePerson {person} />

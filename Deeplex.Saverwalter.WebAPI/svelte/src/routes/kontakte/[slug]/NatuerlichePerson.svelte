@@ -1,11 +1,15 @@
 <script lang="ts">
-	import { TextInput } from 'carbon-components-svelte';
+	import { Column, Grid, Row, TextInput } from 'carbon-components-svelte';
+	import Person from './Person.svelte';
 	import type { NatuerlichePersonEntry } from './classes';
 
 	export let person: NatuerlichePersonEntry;
 </script>
 
-<div>
-	<TextInput labelText="Vorname" value={person.vorname} />
-	<TextInput labelText="Nachname" value={person.nachname} />
-</div>
+<Grid padding>
+	<Row>
+		<TextInput labelText="Vorname" value={person.vorname} />
+		<TextInput labelText="Nachname" value={person.nachname} />
+	</Row>
+	<Person {person} />
+</Grid>

@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontakteController;
@@ -46,7 +47,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public bool natuerlichePerson => Entity is NatuerlichePerson;
             //public IEnumerable<KontaktListEntry> JuristischePersonen => Entity.JuristischePersonen.Select(e => new KontaktListEntry(e));
             public string Telefon => Entity.Telefon ?? "";
-            public Adresse Adresse => Entity.Adresse;
+            public AdresseEntry? Adresse => Entity.Adresse is Adresse a ? new AdresseEntry(a) : null;
 
             public PersonEntry(IPerson entity)
             {

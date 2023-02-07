@@ -1,8 +1,14 @@
 <script lang="ts">
-	import { TextInput } from 'carbon-components-svelte';
+	import { Column, Grid, Row, TextInput } from 'carbon-components-svelte';
+	import Person from './Person.svelte';
 	import type { JuristischePersonEntry } from './classes';
 
 	export let person: JuristischePersonEntry;
 </script>
 
-<TextInput labelText="Bezeichnung" value={person.name} />
+<Grid padding>
+	<Row>
+		<TextInput labelText="Bezeichnung" value={person.name} />
+	</Row>
+	<Person {person} />
+</Grid>

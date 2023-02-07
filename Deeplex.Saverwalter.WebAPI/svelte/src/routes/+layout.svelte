@@ -83,6 +83,10 @@
 		width: 100vw;
 		position: relative;
 	}
+
+	:global(.bx--text-input-wrapper) {
+		margin: 10px;
+	}
 	:global(.bx--content) {
 		padding: 0;
 	}
