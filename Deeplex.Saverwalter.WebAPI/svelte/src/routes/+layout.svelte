@@ -84,7 +84,7 @@
 		position: relative;
 	}
 
-	:global(.bx--text-input-wrapper, .bx--form-item) {
+	:global(.bx--text-input-wrapper, .bx--form-item, .bx--date-picker-container) {
 		margin: 10px;
 	}
 	:global(.bx--content) {

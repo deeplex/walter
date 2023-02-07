@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpGet(Name = "GetVertraege")]
         public IEnumerable<VertraegeListEntry> Get()
         {
-            return Program.ctx.Vertraege.Include(e => e.Versionen).Include(e => e.Wohnung).Select(e => new VertraegeListEntry(e)).ToList();
+            return Program.ctx.Vertraege.Include(e => e.Versionen).Include(e => e.Wohnung).ThenInclude(w => w.Adresse).Select(e => new VertraegeListEntry(e)).ToList();
         }
     }
 }
