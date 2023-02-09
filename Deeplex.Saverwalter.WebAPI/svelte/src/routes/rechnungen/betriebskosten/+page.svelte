@@ -41,10 +41,8 @@
 		);
 </script>
 
-<h1>
-	{#await async_rows}
-		<DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
-	{:then rows}
-		<DataTable sortable zebra stickyHeader {headers} {rows} />
-	{/await}
-</h1>
+{#await async_rows}
+	<DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
+{:then rows}
+	<DataTable sortable zebra stickyHeader {headers} {rows} />
+{/await}

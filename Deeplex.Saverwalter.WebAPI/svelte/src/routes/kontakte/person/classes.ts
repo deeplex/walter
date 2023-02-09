@@ -1,4 +1,6 @@
 import { Adresse } from "../../../components/adresse";
+import type { JuristischePersonEntry } from "../jur/[slug]/classes";
+import type { NatuerlichePersonEntry } from "../nat/[slug]/classes";
 
 export class PersonEntry {
     id: string;
@@ -8,6 +10,7 @@ export class PersonEntry {
     fax: string;
     mobil: string;
     notiz: string;
+    name: string;
 
     natuerlichePerson: boolean;
     adresse: Adresse;
@@ -15,6 +18,7 @@ export class PersonEntry {
     constructor(e: NatuerlichePersonEntry | JuristischePersonEntry) {
         this.guid = e.guid;
         this.id = this.guid;
+        this.name = e.name;
         this.email = e.email;
         this.telefon = e.telefon;
         this.fax = e.fax;
@@ -23,28 +27,5 @@ export class PersonEntry {
 
         this.natuerlichePerson = e.natuerlichePerson;
         this.adresse = new Adresse(e.adresse);
-    }
-}
-
-export class JuristischePersonEntry extends PersonEntry {
-    name: string;
-
-    constructor(e: JuristischePersonEntry) {
-        super(e);
-        this.name = e.name;
-
-    }
-}
-
-export class NatuerlichePersonEntry extends PersonEntry {
-    vorname: string;
-    nachname: string;
-    name: string;
-
-    constructor(e: NatuerlichePersonEntry) {
-        super(e);
-        this.name = e.name;
-        this.vorname = e.vorname;
-        this.nachname = e.nachname;
     }
 }

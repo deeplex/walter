@@ -14,6 +14,7 @@
 		{ key: 'name', value: 'Name' },
 		{ key: 'anschrift', value: 'Anschrift' },
 		{ key: 'telefon', value: 'Telefon' },
+		{ key: 'mobil', value: 'Mobil' },
 		{ key: 'email', value: 'E-Mail' }
 	];
 
@@ -24,28 +25,33 @@
 		anschrift: string;
 		email: string;
 		telefon: string;
+		mobil: string;
+		natuerlich: boolean;
+		tid: string;
 
 		constructor(e: KontaktListEntry) {
 			this.guid = e.guid;
-			this.id = this.guid;
+			this.id = e.guid;
+			this.tid = e.id;
 			this.name = e.name;
 			this.anschrift = e.anschrift;
 			this.email = e.email;
 			this.telefon = e.telefon;
+			this.mobil = e.mobil;
+			this.natuerlich = e.natuerlich;
 		}
 	}
 
-	const navigate = (e: CustomEvent<DataTableRow>) => goto(`/kontakte/${e.detail.guid}`);
+	const navigate = (e: CustomEvent<DataTableRow>) =>
+		goto(`/kontakte/${e.detail.natuerlich ? 'nat' : 'jur'}/${e.detail.tid}`);
 
 	const async_rows = fetch('/api/kontakte', request_options)
 		.then((e) => e.json())
 		.then((j) => j.map((k: KontaktListEntry) => new KontaktListEntry(k)));
 </script>
 
-<h1>
-	{#await async_rows}
-		<DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
-	{:then rows}
-		<DataTable on:click:row={navigate} sortable zebra stickyHeader {headers} {rows} />
-	{/await}
-</h1>
+{#await async_rows}
+	<DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
+{:then rows}
+	<DataTable on:click:row={navigate} sortable zebra stickyHeader {headers} {rows} />
+{/await}

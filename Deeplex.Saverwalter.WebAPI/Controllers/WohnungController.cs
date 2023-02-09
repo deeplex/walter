@@ -4,7 +4,6 @@ using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 using System.Xml.Linq;
-using static Deeplex.Saverwalter.WebAPI.Controllers.PersonController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
