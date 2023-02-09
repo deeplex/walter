@@ -3,22 +3,29 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using static Deeplex.Saverwalter.WebAPI.Controllers.KontakteController;
+using System.Collections.Generic;
 
-namespace Deeplex.Saverwalter.WebAPI.Controllers
+namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
     [ApiController]
     [Route("api/kontakte/jur/{id}")]
     public class JuristischePersonController : ControllerBase
     {
-
-        public sealed class JuristischePersonEntry : PersonEntry
+        public class JuristischePersonEntryBase : PersonEntry
         {
-            private JuristischePerson Entity { get; }
+            private new JuristischePerson Entity { get; }
+            public IEnumerable<PersonEntryBase> Mitglieder => Entity.Mitglieder.Select(e => new PersonEntryBase(e));
 
-            public JuristischePersonEntry(JuristischePerson entity) : base(entity)
+            public JuristischePersonEntryBase(JuristischePerson entity) : base(entity)
             {
                 Entity = entity;
+            }
+        }
+
+        public sealed class JuristischePersonEntry : JuristischePersonEntryBase
+        {
+            public JuristischePersonEntry(JuristischePerson entity) : base(entity)
+            {
             }
         }
 

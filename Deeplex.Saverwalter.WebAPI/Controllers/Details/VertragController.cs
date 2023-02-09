@@ -3,13 +3,13 @@ using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml.Linq;
 
-namespace Deeplex.Saverwalter.WebAPI.Controllers
+namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
     [ApiController]
     [Route("api/vertraege/{id}")]
     public class VertragController
     {
-        public class VertragEntry
+        public class VertragEntryBase
         {
             private Vertrag Entity { get; }
 
@@ -17,9 +17,16 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime Beginn => Entity.Beginn();
             public DateTime? Ende => Entity.Ende;
 
-            public VertragEntry(Vertrag e)
+            public VertragEntryBase(Vertrag entity)
             {
-                Entity = e;
+                Entity = entity;
+            }
+        }
+
+        public class VertragEntry : VertragEntryBase
+        {
+            public VertragEntry(Vertrag entity) : base(entity)
+            {
             }
         }
 

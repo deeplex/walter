@@ -1,17 +1,16 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 using System.Xml.Linq;
 
-namespace Deeplex.Saverwalter.WebAPI.Controllers
+namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
     [ApiController]
     [Route("api/wohnungen/{id}")]
     public class WohnungController
     {
-        public class WohnungEntry
+        public class WohnungEntryBase
         {
             private Wohnung Entity { get; }
 
@@ -23,10 +22,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string Notiz => Entity.Notiz ?? "";
             public AdresseEntry? Adresse => Entity.Adresse is Adresse a ? new AdresseEntry(a) : null;
 
-            public WohnungEntry(Wohnung e)
+            public WohnungEntryBase(Wohnung entity)
             {
-                Entity = e;
+                Entity = entity;
             }
+        }
+
+        public class WohnungEntry : WohnungEntryBase
+        {
+            // Wohnungen die an der selben Adresse sind.
+            // Zähler
+            // Betriebskostenrechnungen
+            // Erhaltungsaufwendungen
+            // Umlagen
+
+            public WohnungEntry(Wohnung entity) : base(entity) { }
         }
 
         private readonly ILogger<WohnungController> _logger;
