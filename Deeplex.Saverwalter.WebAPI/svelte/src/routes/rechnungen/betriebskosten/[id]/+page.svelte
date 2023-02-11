@@ -7,15 +7,9 @@
 		TextInput,
 		TextInputSkeleton
 	} from 'carbon-components-svelte';
+	import { request_options } from '../../../../services/utilts';
 	import type { BetriebskostenrechnungEntry } from '../../../../types/betriebskostenrechnung.type';
 	import type { PageData } from './$types';
-
-	const request_options = {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'text/json'
-		}
-	};
 
 	export let data: PageData;
 	const async: Promise<BetriebskostenrechnungEntry> = fetch(

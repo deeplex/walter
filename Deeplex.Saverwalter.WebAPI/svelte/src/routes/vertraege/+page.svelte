@@ -2,13 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { DataTable, DataTableSkeleton } from 'carbon-components-svelte';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-
-	const request_options = {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'text/json'
-		}
-	};
+	import { request_options } from '../../services/utilts';
 
 	const headers = [
 		{ key: 'wohnung', value: 'Wohnung' },
@@ -33,7 +27,8 @@
 		}
 	}
 
-	const navigate = (e: CustomEvent<DataTableRow>) => goto(`/vertraege/${e.detail.id}`);
+	const navigate = (e: CustomEvent<DataTableRow>) =>
+		goto(`/vertraege/${e.detail.id}`);
 
 	const async_rows = fetch('/api/vertraege', request_options)
 		.then((e) => e.json())
@@ -44,6 +39,13 @@
 	{#await async_rows}
 		<DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
 	{:then rows}
-		<DataTable on:click:row={navigate} sortable zebra stickyHeader {headers} {rows} />
+		<DataTable
+			on:click:row={navigate}
+			sortable
+			zebra
+			stickyHeader
+			{headers}
+			{rows}
+		/>
 	{/await}
 </h1>

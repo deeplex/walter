@@ -6,15 +6,9 @@
 		TextInputSkeleton
 	} from 'carbon-components-svelte';
 	import Adresse from '../../../components/Adresse.svelte';
+	import { request_options } from '../../../services/utilts';
 	import type { WohnungEntry } from '../../../types/wohnung.type';
 	import type { PageData } from './$types';
-
-	const request_options = {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'text/json'
-		}
-	};
 
 	export let data: PageData;
 	const async: Promise<WohnungEntry> = fetch(

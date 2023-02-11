@@ -1,4 +1,4 @@
-import type { Adresse } from './adresse.type';
+import type { AdresseEntry } from './adresse.type';
 
 export type PersonEntry = {
     id: string;
@@ -11,5 +11,5 @@ export type PersonEntry = {
     name: string;
 
     natuerlichePerson: boolean;
-    adresse: Adresse;
+    adresse: AdresseEntry;
 }

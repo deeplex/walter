@@ -6,3 +6,10 @@ export function convertDate(text: string | undefined): string | undefined {
         return undefined;
     }
 }
+
+export const request_options = {
+    method: 'GET',
+    headers: {
+        'Content-Type': 'text/json'
+    }
+};

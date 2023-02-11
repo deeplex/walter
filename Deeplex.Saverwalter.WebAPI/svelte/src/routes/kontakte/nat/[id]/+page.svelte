@@ -6,13 +6,7 @@
 	import type { PageData } from './$types';
 	import type { NatuerlichePersonEntry } from '../../../../types/natuerlicheperson.type';
 	import AsyncPerson from '../../../../components/AsyncPerson.svelte';
-
-	const request_options = {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'text/json'
-		}
-	};
+	import { request_options } from '../../../../services/utilts';
 
 	export let data: PageData;
 	const async: Promise<NatuerlichePersonEntry> = fetch(

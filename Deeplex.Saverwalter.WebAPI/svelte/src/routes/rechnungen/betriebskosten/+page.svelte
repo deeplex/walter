@@ -2,14 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { DataTable, DataTableSkeleton } from 'carbon-components-svelte';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
+	import { request_options } from '../../../services/utilts';
 	import type { BetriebskostenrechnungListEntry } from '../../../types/betriebskostenrechnunglist.type';
-
-	const request_options = {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'text/json'
-		}
-	};
 
 	const headers = [
 		{ key: 'typ', value: 'Typ' },

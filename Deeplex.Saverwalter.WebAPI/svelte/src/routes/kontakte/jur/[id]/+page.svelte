@@ -2,17 +2,17 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import Person from '../../../../components/Person.svelte';
-	import { Column, Grid, Row, TextInput, TextInputSkeleton } from 'carbon-components-svelte';
+	import {
+		Column,
+		Grid,
+		Row,
+		TextInput,
+		TextInputSkeleton
+	} from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 	import type { JuristischePersonEntry } from '../../../../types/juristischeperson.type';
 	import AsyncPerson from '../../../../components/AsyncPerson.svelte';
-
-	const request_options = {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'text/json'
-		}
-	};
+	import { request_options } from '../../../../services/utilts';
 
 	export let data: PageData;
 	const async: Promise<JuristischePersonEntry> = fetch(
