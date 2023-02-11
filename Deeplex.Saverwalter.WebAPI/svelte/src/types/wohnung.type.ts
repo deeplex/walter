@@ -1,4 +1,4 @@
-import type { Adresse } from "../../../components/adresse";
+import type { Adresse } from './adresse.type';
 
 export class WohnungEntry {
     adresse: Adresse;

@@ -15,7 +15,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
 
             public Guid Guid => Entity.PersonId;
             public int Id { get; }
-            public bool Natuerlich { get; }
             public string Name => Entity.Bezeichnung;
             public string Email => Entity.Email ?? "";
             public string Telefon => Entity.Telefon ?? "";
@@ -26,8 +25,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             public KontaktListEntry(IPerson p, int id, bool n)
             {
                 Entity = p;
-                Id = id;
-                Natuerlich = n;
+                Id = id * (n ? 1 : -1);
             }
         }
 

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Column, Row, TextInput } from 'carbon-components-svelte';
-	import Adresse from '../../../components/adresse.svelte';
-	import type { PersonEntry } from './classes';
+	import { Row, TextInput } from 'carbon-components-svelte';
+	import type { PersonEntry } from '../types/person.type';
+	import Adresse from './Adresse.svelte';
 
 	export let person: PersonEntry;
 </script>

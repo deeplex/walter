@@ -1,5 +1,5 @@
 <script>
-	import { Column, Grid, Row, TextInput, TextInputSkeleton } from 'carbon-components-svelte';
+	import { Column, Row, TextInputSkeleton } from 'carbon-components-svelte';
 </script>
 
 <Row>

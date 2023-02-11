@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { NatuerlichePersonEntry } from './classes';
-	import Person from '../../person/Person.svelte';
-	import AsyncPerson from '../../person/AsyncPerson.svelte';
+	import Person from '../../../../components/Person.svelte';
 	import { Grid, Row, TextInput } from 'carbon-components-svelte';
+	import type { PageData } from './$types';
+	import type { NatuerlichePersonEntry } from '../../../../types/natuerlicheperson.type';
+	import AsyncPerson from '../../../../components/AsyncPerson.svelte';
 
 	const request_options = {
 		method: 'GET',
@@ -13,12 +14,11 @@
 		}
 	};
 
-	const async = fetch(
-		`/api/kontakte/nat/${window.location.href.split('/').at(-1)}`,
+	export let data: PageData;
+	const async: Promise<NatuerlichePersonEntry> = fetch(
+		`/api/kontakte/nat/${data.id}`,
 		request_options
-	)
-		.then((e) => e.json())
-		.then((p) => new NatuerlichePersonEntry(p));
+	).then((e) => e.json());
 </script>
 
 <Grid>
