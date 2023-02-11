@@ -1,0 +1,50 @@
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services;
+using Microsoft.AspNetCore.Mvc;
+using System.Xml.Linq;
+
+namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
+{
+    [ApiController]
+    [Route("api/betriebskostenrechnungen/{id}")]
+    public class BetriebskostenrechnungController
+    {
+        public class BetriebskostenrechnungEntryBase
+        {
+            protected Betriebskostenrechnung Entity { get; }
+
+            public int Id => Entity.BetriebskostenrechnungId;
+            public double Betrag => Entity.Betrag;
+            public int BetreffendesJahr => Entity.BetreffendesJahr;
+            public string Datum => Entity.Datum.Datum();
+            public string Notiz => Entity.Notiz ?? "";
+
+            public BetriebskostenrechnungEntryBase(Betriebskostenrechnung entity)
+            {
+                Entity = entity;
+            }
+        }
+
+        public class BetriebskostenrechnungEntry : BetriebskostenrechnungEntryBase
+        {
+            public Umlage Umlage => Entity.Umlage;
+
+            public BetriebskostenrechnungEntry(Betriebskostenrechnung entity) : base(entity)
+            {
+            }
+        }
+
+        private readonly ILogger<BetriebskostenrechnungController> _logger;
+
+        public BetriebskostenrechnungController(ILogger<BetriebskostenrechnungController> logger)
+        {
+            _logger = logger;
+        }
+
+        [HttpGet(Name = "GetBetriebskostenrechnung")]
+        public BetriebskostenrechnungEntry Get(int id)
+        {
+            return new BetriebskostenrechnungEntry(Program.ctx.Betriebskostenrechnungen.Find(id));
+        }
+    }
+}
