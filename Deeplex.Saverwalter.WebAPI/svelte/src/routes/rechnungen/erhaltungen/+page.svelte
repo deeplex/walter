@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { DataTable, DataTableSkeleton } from 'carbon-components-svelte';
+	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 	import type { ErhaltungsaufwendungListEntry } from '../../../types/erhaltungsaufwendunglist.type';
 
 	const request_options = {
@@ -16,6 +18,9 @@
 		{ key: 'datum', value: 'Datum' }
 	];
 
+	const navigate = (e: CustomEvent<DataTableRow>) =>
+		goto(`/rechnungen/erhaltungen/${e.detail.id}`);
+
 	const async_rows: Promise<ErhaltungsaufwendungListEntry[]> = fetch(
 		'/api/erhaltungsaufwendungen',
 		request_options
@@ -26,6 +31,13 @@
 	{#await async_rows}
 		<DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
 	{:then rows}
-		<DataTable sortable zebra stickyHeader {headers} {rows} />
+		<DataTable
+			on:click:row={navigate}
+			sortable
+			zebra
+			stickyHeader
+			{headers}
+			{rows}
+		/>
 	{/await}
 </h1>

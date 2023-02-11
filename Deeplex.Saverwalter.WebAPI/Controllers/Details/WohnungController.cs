@@ -21,6 +21,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             public int Einheiten => Entity.Nutzeinheit;
             public string Notiz => Entity.Notiz ?? "";
             public AdresseEntry? Adresse => Entity.Adresse is Adresse a ? new AdresseEntry(a) : null;
+            public string Anschrift => Entity.Adresse.Anschrift + ", " + Entity.Bezeichnung;
 
             public WohnungEntryBase(Wohnung entity)
             {

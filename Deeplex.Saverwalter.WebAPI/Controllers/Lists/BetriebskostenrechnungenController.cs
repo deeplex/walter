@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             public int id => Entity.BetriebskostenrechnungId;
             public string Typ => Entity.Umlage.Typ.ToDescriptionString();
             public string Betrag => Entity.Betrag.Euro();
-            public string Wohnung => Entity.GetWohnungenBezeichnung();
+            public string WohnungenBezeichnung => Entity.GetWohnungenBezeichnung();
             public string BetreffendesJahr => Entity.BetreffendesJahr.ToString();
             public string Datum => Entity.Datum.Datum();
 
@@ -39,6 +39,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
         {
             return Program.ctx.Betriebskostenrechnungen
                 .Include(e => e.Umlage)
+                .ThenInclude(e => e.Wohnungen)
+                .ThenInclude(e => e.Adresse)
                 .Select(e => new BetriebskostenrechungListEntry(e)).ToList();
         }
     }

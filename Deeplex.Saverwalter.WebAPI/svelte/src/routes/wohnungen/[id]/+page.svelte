@@ -1,7 +1,12 @@
 <script lang="ts">
-	import { Grid, Row, TextInput, TextInputSkeleton } from 'carbon-components-svelte';
+	import {
+		Grid,
+		Row,
+		TextInput,
+		TextInputSkeleton
+	} from 'carbon-components-svelte';
 	import Adresse from '../../../components/Adresse.svelte';
-	import { WohnungEntry } from '../../../types/wohnung.type';
+	import type { WohnungEntry } from '../../../types/wohnung.type';
 	import type { PageData } from './$types';
 
 	const request_options = {
@@ -12,9 +17,10 @@
 	};
 
 	export let data: PageData;
-	const async = fetch(`/api/wohnungen/${data.id}`, request_options)
-		.then((e) => e.json())
-		.then((e) => new WohnungEntry(e));
+	const async: Promise<WohnungEntry> = fetch(
+		`/api/wohnungen/${data.id}`,
+		request_options
+	).then((e) => e.json());
 </script>
 
 <h1>

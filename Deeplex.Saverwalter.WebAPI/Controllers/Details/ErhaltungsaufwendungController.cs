@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml.Linq;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Details.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
@@ -28,6 +29,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         public class ErhaltungsaufwendungEntry : ErhaltungsaufwendungEntryBase
         {
             public PersonEntryBase Aussteller => new PersonEntryBase(Program.FindPerson(Entity.AusstellerId));
+            public WohnungEntryBase Wohnung => new WohnungEntryBase(Entity.Wohnung);
 
             public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity) : base(entity)
             {

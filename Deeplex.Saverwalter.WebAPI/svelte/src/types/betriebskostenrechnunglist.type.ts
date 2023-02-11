@@ -1,8 +1,8 @@
 export type BetriebskostenrechnungListEntry = {
     id: number;
     typ: string;
-    wohnungen: string;
+    wohnungenbezeichnung: string;
     betrag: string;
-    betreffendesjahr: string;
+    betreffendesJahr: string;
     datum: string;
 }

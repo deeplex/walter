@@ -1,17 +1,10 @@
-export class BetriebskostenrechnungEntry {
+import type { UmlageEntry } from "./umlage.type";
+
+export type BetriebskostenrechnungEntry = {
     id: number;
     betrag: number;
-    betreffendesjahr: number;
+    betreffendesJahr: number;
     datum: string;
     notiz: string;
-    umlage: string;
-
-    constructor(e: BetriebskostenrechnungEntry) {
-        this.id = e.id;
-        this.betrag = e.betrag;
-        this.betreffendesjahr = e.betreffendesjahr;
-        this.datum = e.datum;
-        this.notiz = e.notiz;
-        this.umlage = e.umlage;
-    }
+    umlage: UmlageEntry;
 }

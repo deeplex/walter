@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml.Linq;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Details.UmlageController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
@@ -27,7 +28,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
         public class BetriebskostenrechnungEntry : BetriebskostenrechnungEntryBase
         {
-            public Umlage Umlage => Entity.Umlage;
+            public UmlageEntry Umlage => new UmlageEntry(Entity.Umlage);
 
             public BetriebskostenrechnungEntry(Betriebskostenrechnung entity) : base(entity)
             {

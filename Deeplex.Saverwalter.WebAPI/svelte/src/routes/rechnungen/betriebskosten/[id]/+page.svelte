@@ -1,7 +1,14 @@
 <script lang="ts">
-	import { Grid, Row, TextInput, TextInputSkeleton } from 'carbon-components-svelte';
+	import {
+		DatePicker,
+		DatePickerInput,
+		Grid,
+		Row,
+		TextInput,
+		TextInputSkeleton
+	} from 'carbon-components-svelte';
 	import type { BetriebskostenrechnungEntry } from '../../../../types/betriebskostenrechnung.type';
-	import type { PageData, RouteParams } from './$types';
+	import type { PageData } from './$types';
 
 	const request_options = {
 		method: 'GET',
@@ -21,6 +28,21 @@
 	{#await async}
 		<TextInputSkeleton />
 	{:then x}
-		<Row><TextInput value={x.umlage} /></Row>
+		<Row>
+			<TextInput labelText="Typ" value={x.umlage.typ} />
+			<TextInput labelText="Wohnungen" value={x.umlage.wohnungenBezeichnung} />
+		</Row>
+		<Row>
+			<TextInput labelText="Betreffendes Jahr" value={x.betreffendesJahr} />
+			<TextInput labelText="Betrag" value={x.betrag} />
+			<DatePicker
+				value={x.datum}
+				dateFormat="d.m.Y"
+				datePickerType="single"
+				on:change
+			>
+				<DatePickerInput type="text" labelText="Datum" required />
+			</DatePicker>
+		</Row>
 	{/await}
 </Grid>

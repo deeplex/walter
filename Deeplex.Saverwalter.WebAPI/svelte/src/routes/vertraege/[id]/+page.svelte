@@ -7,6 +7,7 @@
 		TextInput,
 		TextInputSkeleton
 	} from 'carbon-components-svelte';
+	import { convertDate } from '../../../services/utilts';
 	import type { VertragEntry } from '../../../types/vertrag.type';
 	import type { PageData } from './$types';
 
@@ -30,10 +31,15 @@
 		</Row>
 	{:then x}
 		<Row>
-			<DatePicker value={x.beginn} dateFormat="d.m.Y" datePickerType="single" on:change>
+			<DatePicker
+				value={convertDate(x.beginn)}
+				dateFormat="d.m.Y"
+				datePickerType="single"
+				on:change
+			>
 				<DatePickerInput type="text" labelText="Beginn" required />
 			</DatePicker>
-			<DatePicker value={x.ende} dateFormat="d.m.Y" datePickerType="single" on:change>
+			<DatePicker value={convertDate(x.ende)} dateFormat="d.m.Y" datePickerType="single" on:change>
 				<DatePickerInput type="text" labelText="Ende" placeholder="Offen" />
 			</DatePicker>
 		</Row>

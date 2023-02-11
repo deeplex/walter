@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { DataTable, DataTableSkeleton } from 'carbon-components-svelte';
+	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 	import type { BetriebskostenrechnungListEntry } from '../../../types/betriebskostenrechnunglist.type';
 
 	const request_options = {
@@ -11,11 +13,14 @@
 
 	const headers = [
 		{ key: 'typ', value: 'Typ' },
-		{ key: 'wohnungen', value: 'Wohnungen' },
-		{ key: 'betreffendesjahr', value: 'Betreffendes Jahr' },
+		{ key: 'wohnungenBezeichnung', value: 'Wohnungen' },
+		{ key: 'betreffendesJahr', value: 'Betreffendes Jahr' },
 		{ key: 'betrag', value: 'Betrag' },
 		{ key: 'datum', value: 'Datum' }
 	];
+
+	const navigate = (e: CustomEvent<DataTableRow>) =>
+		goto(`/rechnungen/betriebskosten/${e.detail.id}`);
 
 	const async_rows: Promise<BetriebskostenrechnungListEntry[]> = fetch(
 		'/api/betriebskostenrechnungen',
@@ -26,5 +31,12 @@
 {#await async_rows}
 	<DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
 {:then rows}
-	<DataTable sortable zebra stickyHeader {headers} {rows} />
+	<DataTable
+		on:click:row={navigate}
+		sortable
+		zebra
+		stickyHeader
+		{headers}
+		{rows}
+	/>
 {/await}

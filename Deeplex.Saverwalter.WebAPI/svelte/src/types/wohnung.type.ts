@@ -1,19 +1,12 @@
-import type { Adresse } from './adresse.type';
+import type { AdresseEntry } from './adresse.type';
 
-export class WohnungEntry {
-    adresse: Adresse;
+export type WohnungEntry = {
+    adresse: AdresseEntry;
+    id: number;
     bezeichnung: string;
     wohnflaeche: number;
     nutzflaeche: number;
     einheiten: number;
     notiz: string;
-
-    constructor(e: WohnungEntry) {
-        this.adresse = e.adresse;
-        this.bezeichnung = e.bezeichnung;
-        this.wohnflaeche = e.wohnflaeche;
-        this.nutzflaeche = e.nutzflaeche;
-        this.einheiten = e.einheiten;
-        this.notiz = e.notiz;
-    }
+    anschrift: string
 }

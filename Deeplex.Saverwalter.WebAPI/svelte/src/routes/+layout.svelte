@@ -22,12 +22,21 @@
 		HeaderPanelDivider,
 		HeaderPanelLink
 	} from 'carbon-components-svelte';
-	import { UserMultiple, Building, Document, Money } from 'carbon-icons-svelte/lib';
+	import {
+		UserMultiple,
+		Building,
+		Document,
+		Money
+	} from 'carbon-icons-svelte/lib';
 
 	let isSideNavOpen = true;
 </script>
 
-<Header persistentHamburgerMenu={true} platformName="Saverwalter" bind:isSideNavOpen>
+<Header
+	persistentHamburgerMenu={true}
+	platformName="Saverwalter"
+	bind:isSideNavOpen
+>
 	<svelte:fragment slot="skip-to-content">
 		<SkipToContent />
 	</svelte:fragment>
@@ -64,7 +73,10 @@
 		<SideNavLink icon={Building} text="Wohnungen" href="/wohnungen" />
 		<SideNavLink icon={Document} text="Verträge" href="/vertraege" />
 		<SideNavMenu icon={Money} text="Rechnungen" href="/rechnungen">
-			<SideNavMenuItem text="Betriebskosten" href="/rechnungen/betriebskosten" />
+			<SideNavMenuItem
+				text="Betriebskosten"
+				href="/rechnungen/betriebskosten"
+			/>
 			<SideNavMenuItem text="Erhaltungen" href="/rechnungen/erhaltungen" />
 		</SideNavMenu>
 		<SideNavDivider />
@@ -84,7 +96,7 @@
 		position: relative;
 	}
 
-	:global(.bx--text-input-wrapper, .bx--form-item, .bx--date-picker-container) {
+	:global(.bx--text-input-wrapper, .bx--form-item) {
 		margin: 10px;
 	}
 	:global(.bx--content) {
