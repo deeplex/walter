@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { DataTable, DataTableSkeleton } from 'carbon-components-svelte';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
+	import WalterDataTable from '../../../components/WalterDataTable.svelte';
 	import { request_options } from '../../../services/utilts';
 	import type { ErhaltungsaufwendungListEntry } from '../../../types/erhaltungsaufwendunglist.type';
 
@@ -25,13 +26,6 @@
 	{#await async_rows}
 		<DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
 	{:then rows}
-		<DataTable
-			on:click:row={navigate}
-			sortable
-			zebra
-			stickyHeader
-			{headers}
-			{rows}
-		/>
+		<WalterDataTable {navigate} {rows} {headers} />
 	{/await}
 </h1>
