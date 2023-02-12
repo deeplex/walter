@@ -36,10 +36,4 @@
 		.then((j) => j.map((v: VertragListEntry) => new VertragListEntry(v)));
 </script>
 
-<h1>
-	{#await async_rows}
-		<DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
-	{:then rows}
-		<WalterDataTable {navigate} {rows} {headers} />
-	{/await}
-</h1>
+<WalterDataTable {navigate} {async_rows} {headers} />

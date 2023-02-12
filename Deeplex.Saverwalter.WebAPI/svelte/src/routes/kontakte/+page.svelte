@@ -31,8 +31,4 @@
 	).then((e) => e.json());
 </script>
 
-{#await async_rows}
-	<DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
-{:then rows}
-	<WalterDataTable {navigate} {rows} {headers} />
-{/await}
+<WalterDataTable {navigate} {async_rows} {headers} />

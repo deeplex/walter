@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		DataTable,
+		DataTableSkeleton,
 		Toolbar,
 		ToolbarContent,
 		ToolbarSearch
@@ -11,15 +12,26 @@
 		key: string;
 		value: string;
 	}[];
-	export let rows: any[];
+	export let async_rows: Promise<any>;
 
 	export let navigate: (e: CustomEvent<DataTableRow>) => Promise<void>;
 </script>
 
-<DataTable on:click:row={navigate} sortable zebra stickyHeader {headers} {rows}>
-	<Toolbar>
-		<ToolbarContent>
-			<ToolbarSearch persistent shouldFilterRows />
-		</ToolbarContent>
-	</Toolbar>
-</DataTable>
+{#await async_rows}
+	<DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
+{:then rows}
+	<DataTable
+		on:click:row={navigate}
+		sortable
+		zebra
+		stickyHeader
+		{headers}
+		{rows}
+	>
+		<Toolbar>
+			<ToolbarContent>
+				<ToolbarSearch persistent shouldFilterRows />
+			</ToolbarContent>
+		</Toolbar>
+	</DataTable>
+{/await}
