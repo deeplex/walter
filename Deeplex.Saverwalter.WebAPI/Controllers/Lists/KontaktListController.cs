@@ -39,8 +39,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
         [HttpGet(Name = "GetKontaktList")]
         public IEnumerable<KontaktListEntry> Get()
         {
-            var np = Program.ctx.NatuerlichePersonen.Include(e => e.Adresse).ToList().Select(e => new KontaktListEntry(e, e.NatuerlichePersonId, true)).ToList();
-            var jp = Program.ctx.JuristischePersonen.Include(e => e.Adresse).ToList().Select(e => new KontaktListEntry(e, e.JuristischePersonId, false)).ToList();
+            var np = Program.ctx.NatuerlichePersonen.Select(e => new KontaktListEntry(e, e.NatuerlichePersonId, true)).ToList();
+            var jp = Program.ctx.JuristischePersonen.Select(e => new KontaktListEntry(e, e.JuristischePersonId, false)).ToList();
             return np.Concat(jp);
         }
     }

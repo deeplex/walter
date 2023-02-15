@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         [HttpGet(Name = "GetZaehler")]
         public ZaehlerEntry Get(int id)
         {
-            return new ZaehlerEntry(Program.LoadNavigations(Program.ctx.ZaehlerSet.Find(id)));
+            return new ZaehlerEntry(Program.ctx.ZaehlerSet.Find(id));
         }
     }
 }

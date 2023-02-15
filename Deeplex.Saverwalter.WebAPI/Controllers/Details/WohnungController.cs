@@ -53,7 +53,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         [HttpGet(Name = "GetWohnung")]
         public WohnungEntry Get(int id)
         {
-            return new WohnungEntry(Program.LoadNavigations(Program.ctx.Wohnungen.Find(id)));
+            return new WohnungEntry(Program.ctx.Wohnungen.Find(id));
         }
     }
 }

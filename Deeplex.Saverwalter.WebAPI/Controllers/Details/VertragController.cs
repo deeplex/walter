@@ -43,7 +43,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         [HttpGet(Name = "GetVertrag")]
         public VertragEntry Get(int id)
         {
-            return new VertragEntry(Program.LoadNavigations(Program.ctx.Vertraege.Find(id)));
+            return new VertragEntry(Program.ctx.Vertraege.Find(id));
         }
     }
 }

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public sealed class Miete : IAnhang
+    public class Miete : IAnhang
     {
         public int MieteId { get; set; }
-        public Vertrag Vertrag { get; set; } = null!;
+        public virtual Vertrag Vertrag { get; set; } = null!;
 
         // Zahlungsdatum may be used to determine if the last Zahlung is more than a month ago (+ tolerance).
         public DateTime Zahlungsdatum { get; set; }
@@ -14,6 +14,6 @@ namespace Deeplex.Saverwalter.Model
         public DateTime BetreffenderMonat { get; set; }
         public double? Betrag { get; set; }
         public string? Notiz { get; set; }
-        public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
+        public virtual List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
     }
 }

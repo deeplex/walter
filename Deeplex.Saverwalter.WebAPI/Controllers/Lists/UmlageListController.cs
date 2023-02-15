@@ -35,10 +35,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
         [HttpGet(Name = "GetUmlageList")]
         public IEnumerable<UmlageListEntry> Get()
         {
-            return Program.ctx.Umlagen
-                .Include(e => e.Wohnungen)
-                .ThenInclude(e => e.Adresse)
-                .Select(e => new UmlageListEntry(e)).ToList();
+            return Program.ctx.Umlagen.Select(e => new UmlageListEntry(e)).ToList();
         }
     }
 }

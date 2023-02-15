@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         [HttpGet(Name = "GetBetriebskostenrechnung")]
         public BetriebskostenrechnungEntry Get(int id)
         {
-            return new BetriebskostenrechnungEntry(Program.LoadNavigations(Program.ctx.Betriebskostenrechnungen.Find(id)));
+            return new BetriebskostenrechnungEntry(Program.ctx.Betriebskostenrechnungen.Find(id));
         }
     }
 }

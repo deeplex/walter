@@ -3,10 +3,10 @@
 namespace Deeplex.Saverwalter.Model
 {
     // JOIN_TABLE
-    public sealed class Mieter
+    public class Mieter
     {
         public int MieterId { get; set; }
         public Guid PersonId { get; set; }
-        public Vertrag Vertrag { get; set; } = null!;
+        public virtual Vertrag Vertrag { get; set; } = null!;
     }
 }

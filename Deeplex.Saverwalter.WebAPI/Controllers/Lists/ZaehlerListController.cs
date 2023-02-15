@@ -36,9 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
         [HttpGet(Name = "GetZaehlerList")]
         public IEnumerable<ZaehlerListEntry> Get()
         {
-            return Program.ctx.ZaehlerSet
-                .Include(e => e.Staende)
-                .Select(e => new ZaehlerListEntry(e)).ToList();
+            return Program.ctx.ZaehlerSet.Select(e => new ZaehlerListEntry(e)).ToList();
         }
     }
 }

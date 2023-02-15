@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         [HttpGet(Name = "GetJuristischePerson")]
         public JuristischePersonEntry Get(int id)
         {
-            return new JuristischePersonEntry(Program.LoadNavigations(Program.ctx.JuristischePersonen.Find(id)));
+            return new JuristischePersonEntry(Program.ctx.JuristischePersonen.Find(id));
         }
     }
 }

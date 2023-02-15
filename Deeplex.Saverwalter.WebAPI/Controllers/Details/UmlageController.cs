@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         [HttpGet(Name = "GetUmlage")]
         public UmlageEntry Get(int id)
         {
-            return new UmlageEntry(Program.LoadNavigations(Program.ctx.Umlagen.Find(id)));
+            return new UmlageEntry(Program.ctx.Umlagen.Find(id));
         }
     }
 }

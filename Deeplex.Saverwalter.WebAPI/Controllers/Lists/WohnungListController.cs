@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
         [HttpGet(Name = "GetWohnungList")]
         public IEnumerable<WohnungListEntry> Get()
         {
-            return Program.ctx.Wohnungen.Include(e => e.Adresse).Select(e => new WohnungListEntry(e)).ToList();
+            return Program.ctx.Wohnungen.Select(e => new WohnungListEntry(e)).ToList();
         }
     }
 }

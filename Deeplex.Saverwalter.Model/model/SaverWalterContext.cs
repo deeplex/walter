@@ -58,7 +58,9 @@ namespace Deeplex.Saverwalter.Model
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            options.ReplaceService<ISqlGenerationHelper, NpgsqlSqlGenerationLowercasingHelper>();
+            options
+                .UseLazyLoadingProxies()
+                .ReplaceService<ISqlGenerationHelper, NpgsqlSqlGenerationLowercasingHelper>();
 
             if (!mPreconfigured)
             {
