@@ -24,7 +24,8 @@
 		Building,
 		Document,
 		Money,
-		Meter
+		Meter,
+		ChartRelationship
 	} from 'carbon-icons-svelte/lib';
 
 	let isSideNavOpen = true;
@@ -73,6 +74,7 @@
 			/>
 			<SideNavMenuItem text="Erhaltungen" href="/rechnungen/erhaltungen" />
 		</SideNavMenu>
+		<SideNavLink icon={ChartRelationship} text="Umlagen" href="/umlagen" />
 		<SideNavLink icon={Meter} text="Zähler" href="/zaehler" />
 		<SideNavDivider />
 	</SideNavItems>

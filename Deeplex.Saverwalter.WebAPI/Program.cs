@@ -9,7 +9,7 @@ namespace Deeplex.Saverwalter.WebAPI
     {
         private static Container Container { get; set; } = null!;
         public static SaverwalterContext ctx => Container.GetInstance<IWalterDbService>().ctx;
-        public static IPerson FindPerson(Guid guid) => Container.GetInstance<PersonMap>().FindPerson(guid);
+        public static IPerson? FindPerson(Guid guid) => Container.GetInstance<PersonMap>().FindPerson(guid);
         public static TEntity LoadNavigations<TEntity>(TEntity entity)
         {
             ctx.Entry(entity).Collections.ToList().ForEach(e => e.Load());
