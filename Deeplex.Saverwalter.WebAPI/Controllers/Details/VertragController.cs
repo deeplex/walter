@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml.Linq;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Details.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
@@ -42,7 +43,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         [HttpGet(Name = "GetVertrag")]
         public VertragEntry Get(int id)
         {
-            return new VertragEntry(Program.ctx.Vertraege.Find(id));
+            return new VertragEntry(Program.LoadNavigations(Program.ctx.Vertraege.Find(id)));
         }
     }
 }

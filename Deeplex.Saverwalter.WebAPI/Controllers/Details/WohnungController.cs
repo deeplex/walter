@@ -3,6 +3,7 @@ using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 using System.Xml.Linq;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Details.ZaehlerController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
@@ -52,7 +53,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         [HttpGet(Name = "GetWohnung")]
         public WohnungEntry Get(int id)
         {
-            return new WohnungEntry(Program.ctx.Wohnungen.Find(id));
+            return new WohnungEntry(Program.LoadNavigations(Program.ctx.Wohnungen.Find(id)));
         }
     }
 }

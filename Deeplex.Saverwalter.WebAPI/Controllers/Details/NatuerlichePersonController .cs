@@ -3,6 +3,7 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Details.UmlageController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
@@ -43,7 +44,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         [HttpGet(Name = "GetNatuerlichePerson")]
         public NatuerlichePersonEntry Get(int id)
         {
-            return new NatuerlichePersonEntry(Program.ctx.NatuerlichePersonen.Find(id));
+            return new NatuerlichePersonEntry(Program.LoadNavigations(Program.ctx.NatuerlichePersonen.Find(id)));
         }
     }
 }

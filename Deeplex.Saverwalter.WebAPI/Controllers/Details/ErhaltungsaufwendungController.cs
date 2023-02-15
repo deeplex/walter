@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         [HttpGet(Name = "GetErhaltungsaufwendung")]
         public ErhaltungsaufwendungEntry Get(int id)
         {
-            return new ErhaltungsaufwendungEntry(Program.ctx.Erhaltungsaufwendungen.Find(id));
+            return new ErhaltungsaufwendungEntry(Program.LoadNavigations(Program.ctx.Erhaltungsaufwendungen.Find(id)));
         }
     }
 }
