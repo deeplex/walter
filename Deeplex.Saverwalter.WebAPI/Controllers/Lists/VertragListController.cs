@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/vertraege")]
     public class VertragListController : ControllerBase
     {
         public class VertraegeListEntry
@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetVertraege")]
+        [HttpGet(Name = "GetVertragList")]
         public IEnumerable<VertraegeListEntry> Get()
         {
             return Program.ctx.Vertraege.Include(e => e.Versionen).Include(e => e.Wohnung).ThenInclude(w => w.Adresse).Select(e => new VertraegeListEntry(e)).ToList();

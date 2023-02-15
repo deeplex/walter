@@ -7,7 +7,7 @@ using SimpleInjector;
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/erhaltungsaufwendungen")]
     public class ErhaltungsaufwendungListController : ControllerBase
     {
         public class ErhaltungsaufwendungListEntry
@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetErhaltungsaufwendungen")]
+        [HttpGet(Name = "GetErhaltungsaufwendungList")]
         public IEnumerable<ErhaltungsaufwendungListEntry> Get()
         {
             return Program.ctx.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungListEntry(e)).ToList();

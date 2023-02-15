@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/betriebskostenrechnungen")]
     public class BetriebskostenrechnungListController : ControllerBase
     {
         public class BetriebskostenrechungListEntry
@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetBetriebskostenrechnungen")]
+        [HttpGet(Name = "GetBetriebskostenrechnungList")]
         public IEnumerable<BetriebskostenrechungListEntry> Get()
         {
             return Program.ctx.Betriebskostenrechnungen
