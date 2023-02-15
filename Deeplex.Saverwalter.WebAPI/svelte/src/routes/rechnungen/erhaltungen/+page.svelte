@@ -3,7 +3,7 @@
 	import { DataTable, DataTableSkeleton } from 'carbon-components-svelte';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 	import WalterDataTable from '../../../components/WalterDataTable.svelte';
-	import { request_options } from '../../../services/utilts';
+	import { request_options } from '../../../services/utils';
 	import type { ErhaltungsaufwendungListEntry } from '../../../types/erhaltungsaufwendunglist.type';
 
 	const headers = [

@@ -6,16 +6,16 @@
 	import type { WohnungListEntry } from '../../types/wohnunglist.type';
 
 	const headers = [
-		{ key: 'anschrift', value: 'Anschrift' },
-		{ key: 'bezeichnung', value: 'Bezeichnung' },
-		{ key: 'besitzer', value: 'Besitzer' },
-		{ key: 'bewohner', value: 'Bewohner' }
+		{ key: 'kennnummer', value: 'Kennnummer' },
+		{ key: 'wohnung', value: 'Wohnung' },
+		{ key: 'typ', value: 'Typ' }
 	];
+
 	const navigate = (e: CustomEvent<DataTableRow>) =>
-		goto(`/wohnungen/${e.detail.id}`);
+		goto(`/zaehler/${e.detail.id}`);
 
 	const async_rows: Promise<WohnungListEntry[]> = fetch(
-		'/api/wohnungen',
+		'/api/zaehler',
 		request_options
 	).then((e) => e.json());
 </script>

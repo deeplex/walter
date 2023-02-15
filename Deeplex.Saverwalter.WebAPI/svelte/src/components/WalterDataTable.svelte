@@ -30,7 +30,7 @@
 	>
 		<Toolbar>
 			<ToolbarContent>
-				<ToolbarSearch persistent shouldFilterRows />
+				<ToolbarSearch placeholder="Suche..." persistent shouldFilterRows />
 			</ToolbarContent>
 		</Toolbar>
 	</DataTable>

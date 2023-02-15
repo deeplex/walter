@@ -1,16 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import {
-		DataTable,
-		DataTableSkeleton,
-		Toolbar,
-		ToolbarContent,
-		ToolbarSearch
-	} from 'carbon-components-svelte';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 	import WalterDataTable from '../../components/WalterDataTable.svelte';
-	import { request_options } from '../../services/utilts';
-	import type { KontaktListEntry } from '../../types/kontaktlistentry.type';
+	import { request_options } from '../../services/utils';
+	import type { ZaehlerListEntry } from '../../types/zaehlerlist.type';
 
 	const headers = [
 		{ key: 'name', value: 'Name' },
@@ -25,7 +18,7 @@
 			`/kontakte/${e.detail.id > 0 ? 'nat' : 'jur'}/${Math.abs(e.detail.id)}`
 		);
 
-	const async_rows: Promise<KontaktListEntry[]> = fetch(
+	const async_rows: Promise<ZaehlerListEntry[]> = fetch(
 		'/api/kontakte',
 		request_options
 	).then((e) => e.json());

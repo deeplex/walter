@@ -23,20 +23,17 @@
 		UserMultiple,
 		Building,
 		Document,
-		Money
+		Money,
+		Meter
 	} from 'carbon-icons-svelte/lib';
 
 	let isSideNavOpen = true;
 </script>
 
-<Header
-	persistentHamburgerMenu={true}
-	platformName="Saverwalter"
-	bind:isSideNavOpen
->
-	<svelte:fragment slot="skip-to-content">
+<Header persistentHamburgerMenu platformName="Saverwalter" bind:isSideNavOpen>
+	<!-- <svelte:fragment slot="skip-to-content">
 		<SkipToContent />
-	</svelte:fragment>
+	</svelte:fragment> -->
 	<HeaderUtilities>
 		<HeaderNav>
 			<HeaderNavItem href="/" text="Link 1" />
@@ -76,6 +73,7 @@
 			/>
 			<SideNavMenuItem text="Erhaltungen" href="/rechnungen/erhaltungen" />
 		</SideNavMenu>
+		<SideNavLink icon={Meter} text="Zähler" href="/zaehler" />
 		<SideNavDivider />
 	</SideNavItems>
 </SideNav>
@@ -101,5 +99,11 @@
 	}
 	:global(.bx--data-table--sticky-header) {
 		max-height: calc(100vh - 3rem - 5px);
+	}
+
+	:global(.bx--side-nav) {
+		border-color: #666;
+		border-right: 1px;
+		border-style: solid;
 	}
 </style>

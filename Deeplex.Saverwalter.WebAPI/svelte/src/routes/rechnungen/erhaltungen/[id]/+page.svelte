@@ -7,7 +7,7 @@
 	} from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 	import type { ErhaltungsaufwendungEntry } from '../../../../types/erhaltungsaufwendung.type';
-	import { request_options } from '../../../../services/utilts';
+	import { request_options } from '../../../../services/utils';
 
 	export let data: PageData;
 	const async: Promise<ErhaltungsaufwendungEntry> = fetch(

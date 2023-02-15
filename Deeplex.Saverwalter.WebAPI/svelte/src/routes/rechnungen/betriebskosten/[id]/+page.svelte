@@ -7,7 +7,7 @@
 		TextInput,
 		TextInputSkeleton
 	} from 'carbon-components-svelte';
-	import { request_options } from '../../../../services/utilts';
+	import { request_options } from '../../../../services/utils';
 	import type { BetriebskostenrechnungEntry } from '../../../../types/betriebskostenrechnung.type';
 	import type { PageData } from './$types';
 

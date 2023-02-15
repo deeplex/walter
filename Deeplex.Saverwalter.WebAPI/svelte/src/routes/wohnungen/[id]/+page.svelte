@@ -6,7 +6,7 @@
 		TextInputSkeleton
 	} from 'carbon-components-svelte';
 	import Adresse from '../../../components/Adresse.svelte';
-	import { request_options } from '../../../services/utilts';
+	import { request_options } from '../../../services/utils';
 	import type { WohnungEntry } from '../../../types/wohnung.type';
 	import type { PageData } from './$types';
 

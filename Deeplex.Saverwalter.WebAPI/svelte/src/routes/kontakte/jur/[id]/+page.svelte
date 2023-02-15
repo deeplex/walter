@@ -12,7 +12,7 @@
 	import type { PageData } from './$types';
 	import type { JuristischePersonEntry } from '../../../../types/juristischeperson.type';
 	import AsyncPerson from '../../../../components/AsyncPerson.svelte';
-	import { request_options } from '../../../../services/utilts';
+	import { request_options } from '../../../../services/utils';
 
 	export let data: PageData;
 	const async: Promise<JuristischePersonEntry> = fetch(

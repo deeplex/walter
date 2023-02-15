@@ -7,7 +7,7 @@
 		TextInput,
 		TextInputSkeleton
 	} from 'carbon-components-svelte';
-	import { convertDate, request_options } from '../../../services/utilts';
+	import { convertDate, request_options } from '../../../services/utils';
 	import type { VertragEntry } from '../../../types/vertrag.type';
 	import type { PageData } from './$types';
 
