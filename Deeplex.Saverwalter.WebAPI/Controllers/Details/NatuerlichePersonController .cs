@@ -12,7 +12,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
     {
         public class NatuerlichePersonEntryBase : PersonEntry
         {
-            private new NatuerlichePerson Entity { get; }
+            protected new NatuerlichePerson Entity { get; }
 
             public Anrede Anrede => Entity.Anrede;
             public string Vorname => Entity.Vorname ?? "";
@@ -26,6 +26,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
         public sealed class NatuerlichePersonEntry : NatuerlichePersonEntryBase
         {
+            public IEnumerable<AnhangEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangEntry(e));
+            
             public NatuerlichePersonEntry(NatuerlichePerson entity) : base(entity)
             {
             }

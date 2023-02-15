@@ -28,6 +28,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         public class UmlageEntry : UmlageEntryBase
         {
             public IEnumerable<WohnungEntryBase> Wohnungen => Entity.Wohnungen.Select(e => new WohnungEntryBase(e));
+            public IEnumerable<AnhangEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangEntry(e));
 
             public UmlageEntry(Umlage entity) : base(entity)
             {

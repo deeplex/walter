@@ -8,13 +8,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class VertraegeController : ControllerBase
+    public class VertragListController : ControllerBase
     {
         public class VertraegeListEntry
         {
             private Vertrag Entity { get; }
 
-            public int id => Entity.VertragId;
+            public int Id => Entity.VertragId;
             public string Mieter => "TODO"; // Mieterbezeichnung
             public string Wohnung => Entity.Wohnung.Adresse.Anschrift + ", " + Entity.Wohnung.Bezeichnung;
             public string Beginn => Entity.Beginn().Datum();
@@ -26,9 +26,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             }
         }
 
-        private readonly ILogger<VertraegeController> _logger;
+        private readonly ILogger<VertragListController> _logger;
 
-        public VertraegeController(ILogger<VertraegeController> logger)
+        public VertragListController(ILogger<VertragListController> logger)
         {
             _logger = logger;
         }

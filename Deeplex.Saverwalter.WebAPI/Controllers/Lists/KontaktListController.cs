@@ -7,7 +7,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class KontakteController : ControllerBase
+    public class KontaktListController : ControllerBase
     {
         public class KontaktListEntry
         {
@@ -29,9 +29,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             }
         }
 
-        private readonly ILogger<KontakteController> _logger;
+        private readonly ILogger<KontaktListController> _logger;
 
-        public KontakteController(ILogger<KontakteController> logger)
+        public KontaktListController(ILogger<KontaktListController> logger)
         {
             _logger = logger;
         }

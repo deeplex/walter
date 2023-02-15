@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ErhaltungsaufwendungenController : ControllerBase
+    public class ErhaltungsaufwendungListController : ControllerBase
     {
         public class ErhaltungsaufwendungListEntry
         {
@@ -26,9 +26,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             }
         }
 
-        private readonly ILogger<ErhaltungsaufwendungenController> _logger;
+        private readonly ILogger<ErhaltungsaufwendungListController> _logger;
 
-        public ErhaltungsaufwendungenController(ILogger<ErhaltungsaufwendungenController> logger)
+        public ErhaltungsaufwendungListController(ILogger<ErhaltungsaufwendungListController> logger)
         {
             _logger = logger;
         }

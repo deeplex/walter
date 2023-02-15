@@ -30,6 +30,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         {
             public PersonEntryBase Aussteller => new PersonEntryBase(Program.FindPerson(Entity.AusstellerId));
             public WohnungEntryBase Wohnung => new WohnungEntryBase(Entity.Wohnung);
+            public IEnumerable<AnhangEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangEntry(e));
 
             public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity) : base(entity)
             {

@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
     {
         public class VertragEntryBase
         {
-            private Vertrag Entity { get; }
+            protected Vertrag Entity { get; }
 
             public int id => Entity.VertragId;
             public DateTime Beginn => Entity.Beginn();
@@ -25,6 +25,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
         public class VertragEntry : VertragEntryBase
         {
+            public IEnumerable<AnhangEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangEntry(e));
+
             public VertragEntry(Vertrag entity) : base(entity)
             {
             }

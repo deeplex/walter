@@ -29,6 +29,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         public class BetriebskostenrechnungEntry : BetriebskostenrechnungEntryBase
         {
             public UmlageEntry Umlage => new UmlageEntry(Entity.Umlage);
+            public IEnumerable<AnhangEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangEntry(e));
 
             public BetriebskostenrechnungEntry(Betriebskostenrechnung entity) : base(entity)
             {

@@ -12,7 +12,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
     {
         public class WohnungEntryBase
         {
-            private Wohnung Entity { get; }
+            protected Wohnung Entity { get; }
 
             public int id => Entity.WohnungId;
             public string Bezeichnung => Entity.Bezeichnung;
@@ -36,6 +36,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             // Betriebskostenrechnungen
             // Erhaltungsaufwendungen
             // Umlagen
+            public IEnumerable<AnhangEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangEntry(e));
+
 
             public WohnungEntry(Wohnung entity) : base(entity) { }
         }

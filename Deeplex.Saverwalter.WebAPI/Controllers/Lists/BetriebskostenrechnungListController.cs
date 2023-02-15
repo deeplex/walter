@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class BetriebskostenrechnungenController : ControllerBase
+    public class BetriebskostenrechnungListController : ControllerBase
     {
         public class BetriebskostenrechungListEntry
         {
@@ -27,9 +27,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             }
         }
 
-        private readonly ILogger<BetriebskostenrechnungenController> _logger;
+        private readonly ILogger<BetriebskostenrechnungListController> _logger;
 
-        public BetriebskostenrechnungenController(ILogger<BetriebskostenrechnungenController> logger)
+        public BetriebskostenrechnungListController(ILogger<BetriebskostenrechnungListController> logger)
         {
             _logger = logger;
         }

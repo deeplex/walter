@@ -7,7 +7,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class WohnungenController : ControllerBase
+    public class WohnungListController : ControllerBase
     {
         public class WohnungListEntry
         {
@@ -25,9 +25,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             }
         }
 
-        private readonly ILogger<WohnungenController> _logger;
+        private readonly ILogger<WohnungListController> _logger;
 
-        public WohnungenController(ILogger<WohnungenController> logger)
+        public WohnungListController(ILogger<WohnungListController> logger)
         {
             _logger = logger;
         }
