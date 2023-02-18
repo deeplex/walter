@@ -9,7 +9,6 @@ namespace Deeplex.Saverwalter.WebAPI
     {
         private static Container Container { get; set; } = null!;
         public static SaverwalterContext ctx => Container.GetInstance<IWalterDbService>().ctx;
-        public static IPerson? FindPerson(Guid guid) => Container.GetInstance<PersonMap>().FindPerson(guid);
         public static TEntity LoadNavigations<TEntity>(TEntity entity)
         {
             ctx.Entry(entity).Collections.ToList().ForEach(e => e.Load());
@@ -22,7 +21,6 @@ namespace Deeplex.Saverwalter.WebAPI
             Container.Register<INotificationService, NotificationService>(Lifestyle.Transient);
             Container.Register<IFileService, FileService>(Lifestyle.Transient);
             Container.Register<IWalterDbService, WalterDbService>(Lifestyle.Transient);
-            Container.Register<PersonMap>(Lifestyle.Transient);
             Container.Verify();
 
             var builder = WebApplication.CreateBuilder(args);

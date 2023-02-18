@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ComboBox, SkeletonPlaceholder } from 'carbon-components-svelte';
+	import { ComboBox, TextInputSkeleton } from 'carbon-components-svelte';
 	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 
 	export let selectedId: Promise<string> | undefined;
@@ -11,10 +11,6 @@
 		return item.text.toLowerCase().includes(value.toLowerCase());
 	}
 
-	const placeholderItems = Array(5)
-		.fill(null)
-		.map((e, i) => ({ id: i, text: 'undefined', disabled: true }));
-
 	let ref: ComboBox;
 	let backup: Promise<string> | undefined = selectedId;
 
@@ -24,17 +20,11 @@
 </script>
 
 {#await items}
-	<ComboBox
-		style="padding-right: 1rem"
-		items={placeholderItems}
-		{titleText}
-		selectedId={selectedId?.then((e) => e)}
-		{shouldFilterItem}
-	>
-		<SkeletonPlaceholder style="width:100%" />
-	</ComboBox>
+	<TextInputSkeleton />
 {:then y}
-	{#await selectedId then x}
+	{#await selectedId}
+		<TextInputSkeleton />
+	{:then x}
 		<ComboBox
 			selectedId={x}
 			on:blur={() => (selectedId = backup)}

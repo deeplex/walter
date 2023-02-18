@@ -1,10 +1,5 @@
 <script lang="ts">
-	import {
-		Grid,
-		Row,
-		TextInput,
-		TextInputSkeleton
-	} from 'carbon-components-svelte';
+	import { Row } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 	import type { ErhaltungsaufwendungEntry } from '../../../../types/erhaltungsaufwendung.type';
 	import { walter_get } from '../../../../services/utils';
@@ -21,19 +16,26 @@
 	);
 
 	const wohnungen: Promise<ComboBoxItem[]> = walter_get(
-		'api/selection/wohnungen'
+		'/api/selection/wohnungen'
+	);
+	const kontakte: Promise<ComboBoxItem[]> = walter_get(
+		'/api/selection/kontakte'
 	);
 </script>
 
-<WalterHeader title={a.then((x) => x.aussteller + ' - ' + x.bezeichnung)} />
+<WalterHeader
+	title={a.then((x) => x.aussteller.name + ' - ' + x.bezeichnung)}
+/>
 
 <WalterGrid>
 	<Row>
 		<WalterTextInput labelText="Typ" value={a.then((x) => x.bezeichnung)} />
-		<WalterTextInput
-			labelText="Aussteller"
-			value={a.then((x) => x.aussteller.name)}
+		<WalterComboBox
+			titleText="Aussteller"
+			items={kontakte}
+			selectedId={a.then((x) => x.aussteller.guid)}
 		/>
+		<WalterDatePicker value={a.then((x) => x.datum)} labelText="Datum" />
 	</Row>
 	<Row>
 		<WalterComboBox
@@ -41,7 +43,6 @@
 			selectedId={a.then((x) => x.wohnung.id.toString())}
 			items={wohnungen}
 		/>
-		<WalterDatePicker value={a.then((x) => x.datum)} labelText="Datum" />
 		<WalterTextInput labelText="Betrag" value={a.then((x) => x.betrag)} />
 	</Row>
 	<Row>

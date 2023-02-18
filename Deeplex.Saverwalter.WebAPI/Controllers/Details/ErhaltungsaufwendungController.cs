@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
         public class ErhaltungsaufwendungEntry : ErhaltungsaufwendungEntryBase
         {
-            public PersonEntryBase Aussteller => new PersonEntryBase(Program.FindPerson(Entity.AusstellerId));
+            public PersonEntryBase Aussteller => new PersonEntryBase(Program.ctx.FindPerson(Entity.AusstellerId));
             public WohnungEntryBase Wohnung => new WohnungEntryBase(Entity.Wohnung);
             public IEnumerable<AnhangEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangEntry(e));
 

@@ -1,20 +1,6 @@
 <script lang="ts">
-	import {
-		Header,
-		HeaderAction,
-		HeaderNav,
-		HeaderNavItem,
-		HeaderNavMenu,
-		HeaderPanelDivider,
-		HeaderPanelLink,
-		HeaderPanelLinks,
-		HeaderUtilities,
-		Loading,
-		SkeletonPlaceholder,
-		SkeletonText
-	} from 'carbon-components-svelte';
+	import { Header, Loading } from 'carbon-components-svelte';
 
-	export let isSideNavOpen: boolean = true;
 	export let title: Promise<string> | string = 'Saverwalter';
 
 	const getTitle = (): string => {
@@ -24,14 +10,24 @@
 			return title;
 		}
 	};
+
+	import { isSideNavOpen } from '../services/stores';
 </script>
 
 {#await title}
-	<Header persistentHamburgerMenu platformName="Lade..." bind:isSideNavOpen>
+	<Header
+		persistentHamburgerMenu
+		platformName="Lade..."
+		bind:isSideNavOpen={$isSideNavOpen}
+	>
 		<Loading withOverlay={false} small />
 	</Header>
 {:then x}
-	<Header persistentHamburgerMenu platformName={x} bind:isSideNavOpen />
+	<Header
+		persistentHamburgerMenu
+		platformName={x}
+		bind:isSideNavOpen={$isSideNavOpen}
+	/>
 {/await}
 
 <!-- <svelte:fragment slot="skip-to-content">

@@ -17,8 +17,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             public int id => Entity.ErhaltungsaufwendungId;
             public string Betrag => Entity.Betrag.Euro();
             public string Bezeichnung => Entity.Bezeichnung;
-            public string Aussteller => Program.FindPerson(Entity.AusstellerId) is IPerson p ? p.Bezeichnung : "Unbekannt";
+            public string Aussteller => Program.ctx.FindPerson(Entity.AusstellerId) is IPerson p ? p.Bezeichnung : "Unbekannt";
             public string Datum => Entity.Datum.Datum();
+            public string Wohnung => Entity.Wohnung.Adresse.Anschrift + " - " + Entity.Wohnung.Bezeichnung;
 
             public ErhaltungsaufwendungListEntry(Erhaltungsaufwendung e)
             {
