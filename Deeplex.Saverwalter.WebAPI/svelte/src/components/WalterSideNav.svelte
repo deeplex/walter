@@ -11,6 +11,7 @@
 		Building,
 		ChartRelationship,
 		Document,
+		DocumentAttachment,
 		Meter,
 		Money,
 		UserMultiple
@@ -31,6 +32,7 @@
 		</SideNavMenu>
 		<SideNavLink icon={ChartRelationship} text="Umlagen" href="/umlagen" />
 		<SideNavLink icon={Meter} text="Zähler" href="/zaehler" />
+		<SideNavLink icon={DocumentAttachment} text="Anhänge" href="/anhaenge" />
 		<SideNavDivider />
 	</SideNavItems>
 </SideNav>

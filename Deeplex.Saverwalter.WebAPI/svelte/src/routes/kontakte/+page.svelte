@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-	import { request_options } from '../../services/utils';
+	import { request_options, walter_get } from '../../services/utils';
 	import type { ZaehlerListEntry } from '../../types/zaehlerlist.type';
 	import { WalterDataTable, WalterHeader } from '../../components';
 
@@ -18,10 +18,7 @@
 			`/kontakte/${e.detail.id > 0 ? 'nat' : 'jur'}/${Math.abs(e.detail.id)}`
 		);
 
-	const rows: Promise<ZaehlerListEntry[]> = fetch(
-		'/api/kontakte',
-		request_options
-	).then((e) => e.json());
+	const rows: Promise<ZaehlerListEntry[]> = walter_get('/api/kontakte');
 </script>
 
 <WalterHeader title="Kontakte" />

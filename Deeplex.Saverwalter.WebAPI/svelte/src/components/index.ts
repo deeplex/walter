@@ -1,4 +1,5 @@
 export { default as Adresse } from './Adresse.svelte';
+export { default as Anhaenge } from './Anhaenge.svelte';
 export { default as Person } from './Person.svelte';
 export { default as WalterComboBox } from './WalterComboBox.svelte';
 export { default as WalterDataTable } from './WalterDataTable.svelte';
