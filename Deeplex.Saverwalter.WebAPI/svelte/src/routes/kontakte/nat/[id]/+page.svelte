@@ -3,23 +3,23 @@
 	import { Grid, Row, TextInput } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 	import type { NatuerlichePersonEntry } from '../../../../types/natuerlicheperson.type';
-	import AsyncPerson from '../../../../components/AsyncPerson.svelte';
 	import { walter_get } from '../../../../services/utils';
+	import WalterHeader from '../../../../components/WalterHeader.svelte';
+	import WalterGrid from '../../../../components/WalterGrid.svelte';
+	import WalterTextInput from '../../../../components/WalterTextInput.svelte';
 
 	export let data: PageData;
-	const async: Promise<NatuerlichePersonEntry> = walter_get(
+	const a: Promise<NatuerlichePersonEntry> = walter_get(
 		`/api/kontakte/nat/${data.id}`
 	);
 </script>
 
-<Grid>
-	{#await async}
-		<AsyncPerson />
-	{:then person}
-		<Row>
-			<TextInput labelText="Vorname" value={person.vorname} />
-			<TextInput required labelText="Nachname" value={person.nachname} />
-		</Row>
-		<Person {person} />
-	{/await}
-</Grid>
+<WalterHeader title={a.then((x) => x.name)} />
+
+<WalterGrid>
+	<Row>
+		<WalterTextInput labelText="Vorname" value={a.then((x) => x.vorname)} />
+		<WalterTextInput labelText="Nachname" value={a.then((x) => x.nachname)} />
+	</Row>
+	<Person person={a} />
+</WalterGrid>

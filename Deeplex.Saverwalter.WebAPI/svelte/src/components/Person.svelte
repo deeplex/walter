@@ -2,19 +2,20 @@
 	import { Row, TextInput } from 'carbon-components-svelte';
 	import type { PersonEntry } from '../types/person.type';
 	import Adresse from './Adresse.svelte';
+	import WalterTextInput from './WalterTextInput.svelte';
 
-	export let person: PersonEntry;
+	export let person: Promise<PersonEntry>;
 </script>
 
-<Adresse adresse={person.adresse} />
+<Adresse adresse={person.then((e) => e.adresse)} />
 <Row>
-	<TextInput labelText="E-Mail" value={person.email} />
-	<TextInput labelText="Fax" value={person.fax} />
+	<WalterTextInput labelText="E-Mail" value={person.then((e) => e.email)} />
+	<WalterTextInput labelText="Fax" value={person.then((e) => e.fax)} />
 </Row>
 <Row>
-	<TextInput labelText="Telefon" value={person.telefon} />
-	<TextInput labelText="Mobil" value={person.mobil} />
+	<WalterTextInput labelText="Telefon" value={person.then((e) => e.telefon)} />
+	<WalterTextInput labelText="Mobil" value={person.then((e) => e.mobil)} />
 </Row>
 <Row>
-	<TextInput labelText="Notiz" value={person.notiz} />
+	<WalterTextInput labelText="Notiz" value={person.then((e) => e.notiz)} />
 </Row>

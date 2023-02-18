@@ -8,17 +8,36 @@
 		HeaderPanelDivider,
 		HeaderPanelLink,
 		HeaderPanelLinks,
-		HeaderUtilities
+		HeaderUtilities,
+		Loading,
+		SkeletonPlaceholder,
+		SkeletonText
 	} from 'carbon-components-svelte';
 
-	export let isSideNavOpen: boolean;
+	export let isSideNavOpen: boolean = true;
+	export let title: Promise<string> | string = 'Saverwalter';
+
+	const getTitle = (): string => {
+		if (title instanceof Promise) {
+			return 'Saverwalter';
+		} else {
+			return title;
+		}
+	};
 </script>
 
-<Header persistentHamburgerMenu platformName="Saverwalter" bind:isSideNavOpen>
-	<!-- <svelte:fragment slot="skip-to-content">
+{#await title}
+	<Header persistentHamburgerMenu platformName="Lade..." bind:isSideNavOpen>
+		<Loading withOverlay={false} small />
+	</Header>
+{:then x}
+	<Header persistentHamburgerMenu platformName={x} bind:isSideNavOpen />
+{/await}
+
+<!-- <svelte:fragment slot="skip-to-content">
 		<SkipToContent />
 	</svelte:fragment> -->
-	<HeaderUtilities>
+<!-- <HeaderUtilities>
 		<HeaderNav>
 			<HeaderNavItem href="/" text="Link 1" />
 			<HeaderNavItem href="/" text="Link 2" />
@@ -42,5 +61,4 @@
 				<HeaderPanelLink>Switcher item 5</HeaderPanelLink>
 			</HeaderPanelLinks>
 		</HeaderAction>
-	</HeaderUtilities>
-</Header>
+	</HeaderUtilities> -->

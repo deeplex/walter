@@ -13,13 +13,15 @@
 	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 	import WalterComboBox from '../../../components/WalterComboBox.svelte';
 	import WalterDatePicker from '../../../components/WalterDatePicker.svelte';
+	import WalterGrid from '../../../components/WalterGrid.svelte';
+	import WalterHeader from '../../../components/WalterHeader.svelte';
 	import { walter_get } from '../../../services/utils';
 	import type { VertragEntry } from '../../../types/vertrag.type';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 
-	const async: Promise<VertragEntry> = walter_get(`/api/vertraege/${data.id}`);
+	const a: Promise<VertragEntry> = walter_get(`/api/vertraege/${data.id}`);
 
 	const wohnungen: Promise<ComboBoxItem[]> = walter_get(
 		`/api/selection/wohnungen`
@@ -28,35 +30,33 @@
 		`/api/selection/kontakte`
 	);
 
-	let vermieter = () =>
-		kontakte.then(async (e) => {
-			const besitzer = await async.then((e) => e.wohnung.besitzerId);
-			return e.find((f) => besitzer === f.id)?.text;
-		});
+	// let vermieter = () =>
+	// 	kontakte.then(async (e) => {
+	// 		const besitzer = await async.then((e) => e.wohnung.besitzerId);
+	// 		return e.find((f) => besitzer === f.id)?.text;
+	// 	});
 </script>
 
-<Grid>
-	{#await async}
-		<Row>
-			<TextInputSkeleton />
-			<TextInputSkeleton />
-		</Row>
-		<Row>
-			<TextInputSkeleton />
-			<TextInputSkeleton />
-		</Row>
-	{:then x}
-		<Row>
-			<WalterDatePicker value={x.beginn} labelText="Beginn" />
-			<WalterDatePicker value={x.ende} labelText="Ende" placeholder="Offen" />
-		</Row>
-		<Row>
-			<WalterComboBox
-				items={wohnungen}
-				selectedId={x.wohnung.id.toString()}
-				titleText="Wohnung"
-			/>
-			<!-- <Column>
+<WalterHeader
+	title={a.then((x) => x.wohnung.anschrift + ' - ' + 'TODO mieter')}
+/>
+
+<WalterGrid>
+	<Row>
+		<WalterDatePicker value={a.then((x) => x.beginn)} labelText="Beginn" />
+		<WalterDatePicker
+			value={a.then((x) => x.ende)}
+			labelText="Ende"
+			placeholder="Offen"
+		/>
+	</Row>
+	<Row>
+		<WalterComboBox
+			items={wohnungen}
+			selectedId={a.then((x) => x.wohnung.id.toString())}
+			titleText="Wohnung"
+		/>
+		<!-- <Column>
 				<div style="margin-top:0.75rem">
 					<p class="bx--label">Vermieter:</p>
 					{#await vermieter()}
@@ -68,11 +68,10 @@
 					{/await}
 				</div>
 			</Column> -->
-			<WalterComboBox
-				items={kontakte}
-				selectedId={x.ansprechpartnerId}
-				titleText="Ansprechpartner"
-			/>
-		</Row>
-	{/await}
-</Grid>
+		<WalterComboBox
+			items={kontakte}
+			selectedId={a.then((x) => x.ansprechpartnerId)}
+			titleText="Ansprechpartner"
+		/>
+	</Row>
+</WalterGrid>

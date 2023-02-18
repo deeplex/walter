@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 	import WalterDataTable from '../../components/WalterDataTable.svelte';
+	import WalterHeader from '../../components/WalterHeader.svelte';
 	import { request_options } from '../../services/utils';
 	import type { ZaehlerListEntry } from '../../types/zaehlerlist.type';
 
@@ -18,10 +19,11 @@
 			`/kontakte/${e.detail.id > 0 ? 'nat' : 'jur'}/${Math.abs(e.detail.id)}`
 		);
 
-	const async_rows: Promise<ZaehlerListEntry[]> = fetch(
+	const rows: Promise<ZaehlerListEntry[]> = fetch(
 		'/api/kontakte',
 		request_options
 	).then((e) => e.json());
 </script>
 
-<WalterDataTable {navigate} {async_rows} {headers} />
+<WalterHeader title="Kontakte" />
+<WalterDataTable {navigate} {rows} {headers} />

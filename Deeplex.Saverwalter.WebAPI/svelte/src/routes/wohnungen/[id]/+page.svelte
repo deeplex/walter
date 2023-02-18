@@ -10,13 +10,16 @@
 	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 	import Adresse from '../../../components/Adresse.svelte';
 	import WalterComboBox from '../../../components/WalterComboBox.svelte';
+	import WalterGrid from '../../../components/WalterGrid.svelte';
+	import WalterHeader from '../../../components/WalterHeader.svelte';
+	import WalterTextInput from '../../../components/WalterTextInput.svelte';
 	import { request_options, walter_get } from '../../../services/utils';
 	import type { KontaktListEntry } from '../../../types/kontaktlist.type';
 	import type { WohnungEntry } from '../../../types/wohnung.type';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const async: Promise<WohnungEntry> = fetch(
+	const a: Promise<WohnungEntry> = fetch(
 		`/api/wohnungen/${data.id}`,
 		request_options
 	).then((e) => e.json());
@@ -27,28 +30,32 @@
 	);
 </script>
 
-<Grid>
-	{#await async}
-		<Row>
-			<TextInputSkeleton />
-		</Row>
-	{:then x}
-		<Row>
-			<WalterComboBox
-				titleText="Besitzer"
-				items={kontakte}
-				selectedId={x.besitzerId}
-			/>
-		</Row>
-		<Adresse adresse={x.adresse} />
-		<Row>
-			<TextInput labelText="Besitzer" value={x.bezeichnung} />
-			<TextInput labelText="Wohnfläche" value={x.wohnflaeche} />
-			<TextInput labelText="Nutzfläche" value={x.nutzflaeche} />
-			<TextInput labelText="Einheiten" value={x.einheiten} />
-		</Row>
-		<Row>
-			<TextInput labelText="Notiz" value={x.notiz} />
-		</Row>
-	{/await}
-</Grid>
+<WalterHeader title={a.then((x) => x.anschrift)} />
+<WalterGrid>
+	<Row>
+		<WalterComboBox
+			titleText="Besitzer"
+			items={kontakte}
+			selectedId={a.then((x) => x.besitzerId)}
+		/>
+	</Row>
+	<Adresse adresse={a.then((x) => x.adresse)} />
+	<Row>
+		<WalterTextInput
+			labelText="Besitzer"
+			value={a.then((x) => x.bezeichnung)}
+		/>
+		<WalterTextInput
+			labelText="Wohnfläche"
+			value={a.then((x) => x.wohnflaeche)}
+		/>
+		<WalterTextInput
+			labelText="Nutzfläche"
+			value={a.then((x) => x.nutzflaeche)}
+		/>
+		<WalterTextInput labelText="Einheiten" value={a.then((x) => x.einheiten)} />
+	</Row>
+	<Row>
+		<WalterTextInput labelText="Notiz" value={a.then((x) => x.notiz)} />
+	</Row>
+</WalterGrid>

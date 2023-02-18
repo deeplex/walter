@@ -1,39 +1,11 @@
 <script>
 	import 'carbon-components-svelte/css/white.css';
-	import {
-		Header,
-		HeaderNav,
-		HeaderNavItem,
-		HeaderNavMenu,
-		SideNav,
-		SideNavItems,
-		SideNavMenu,
-		SideNavMenuItem,
-		SideNavLink,
-		SideNavDivider,
-		SkipToContent,
-		Content,
-		HeaderPanelLinks,
-		HeaderAction,
-		HeaderUtilities,
-		HeaderPanelDivider,
-		HeaderPanelLink
-	} from 'carbon-components-svelte';
-	import {
-		UserMultiple,
-		Building,
-		Document,
-		Money,
-		Meter,
-		ChartRelationship
-	} from 'carbon-icons-svelte/lib';
-	import WalterHeader from '../components/WalterHeader.svelte';
+	import { Content } from 'carbon-components-svelte';
 	import WalterSideNav from '../components/WalterSideNav.svelte';
 
 	let isSideNavOpen = true;
 </script>
 
-<WalterHeader bind:isSideNavOpen />
 <WalterSideNav bind:isSideNavOpen />
 
 <Content>

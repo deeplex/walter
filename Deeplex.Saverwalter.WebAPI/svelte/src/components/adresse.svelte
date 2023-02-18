@@ -1,13 +1,20 @@
 <script lang="ts">
 	import { Row, TextInput } from 'carbon-components-svelte';
 	import type { AdresseEntry } from '../types/adresse.type';
+	import WalterTextInput from './WalterTextInput.svelte';
 
-	export let adresse: AdresseEntry;
+	export let adresse: Promise<AdresseEntry>;
 </script>
 
 <Row>
-	<TextInput labelText="Straße" value={adresse?.strasse} />
-	<TextInput labelText="Hausnr." value={adresse?.hausnummer} />
-	<TextInput labelText="Postleitzahl" value={adresse?.postleitzahl} />
-	<TextInput labelText="Stadt" value={adresse?.stadt} />
+	<WalterTextInput labelText="Straße" value={adresse?.then((x) => x.strasse)} />
+	<WalterTextInput
+		labelText="Hausnr."
+		value={adresse?.then((x) => x.hausnummer)}
+	/>
+	<WalterTextInput
+		labelText="Postleitzahl"
+		value={adresse?.then((x) => x.postleitzahl)}
+	/>
+	<WalterTextInput labelText="Stadt" value={adresse?.then((x) => x.stadt)} />
 </Row>

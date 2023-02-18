@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
 	import Person from '../../../../components/Person.svelte';
 	import {
 		Column,
@@ -11,25 +9,22 @@
 	} from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 	import type { JuristischePersonEntry } from '../../../../types/juristischeperson.type';
-	import AsyncPerson from '../../../../components/AsyncPerson.svelte';
 	import { walter_get } from '../../../../services/utils';
+	import WalterHeader from '../../../../components/WalterHeader.svelte';
+	import WalterGrid from '../../../../components/WalterGrid.svelte';
+	import WalterTextInput from '../../../../components/WalterTextInput.svelte';
 
 	export let data: PageData;
-	const async: Promise<JuristischePersonEntry> = walter_get(
+	const a: Promise<JuristischePersonEntry> = walter_get(
 		`/api/kontakte/jur/${data.id}`
 	);
 </script>
 
-<Grid padding>
-	{#await async}
-		<Row>
-			<Column><TextInputSkeleton /></Column>
-		</Row>
-		<AsyncPerson />
-	{:then person}
-		<Row>
-			<TextInput required labelText="Bezeichnung" value={person.name} />
-		</Row>
-		<Person {person} />
-	{/await}
-</Grid>
+<WalterHeader title={a.then((e) => e.name)} />
+
+<WalterGrid>
+	<Row>
+		<WalterTextInput labelText="Bezeichnung" value={a.then((x) => x.name)} />
+	</Row>
+	<Person person={a} />
+</WalterGrid>
