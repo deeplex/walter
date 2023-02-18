@@ -27,63 +27,17 @@
 		Meter,
 		ChartRelationship
 	} from 'carbon-icons-svelte/lib';
+	import WalterHeader from '../components/WalterHeader.svelte';
+	import WalterSideNav from '../components/WalterSideNav.svelte';
 
 	let isSideNavOpen = true;
 </script>
 
-<Header persistentHamburgerMenu platformName="Saverwalter" bind:isSideNavOpen>
-	<!-- <svelte:fragment slot="skip-to-content">
-		<SkipToContent />
-	</svelte:fragment> -->
-	<HeaderUtilities>
-		<HeaderNav>
-			<HeaderNavItem href="/" text="Link 1" />
-			<HeaderNavItem href="/" text="Link 2" />
-			<HeaderNavItem href="/" text="Link 3" />
-			<HeaderNavMenu text="Menu">
-				<HeaderNavItem href="/" text="Link 1" />
-				<HeaderNavItem href="/" text="Link 2" />
-				<HeaderNavItem href="/" text="Link 3" />
-			</HeaderNavMenu>
-			<HeaderNavItem href="/" text="Link 4" />
-		</HeaderNav>
-		<HeaderAction>
-			<HeaderPanelLinks>
-				<HeaderPanelDivider>Switcher subject 1</HeaderPanelDivider>
-				<HeaderPanelLink>Switcher item 1</HeaderPanelLink>
-				<HeaderPanelDivider>Switcher subject 2</HeaderPanelDivider>
-				<HeaderPanelLink>Switcher item 1</HeaderPanelLink>
-				<HeaderPanelLink>Switcher item 2</HeaderPanelLink>
-				<HeaderPanelLink>Switcher item 3</HeaderPanelLink>
-				<HeaderPanelLink>Switcher item 4</HeaderPanelLink>
-				<HeaderPanelLink>Switcher item 5</HeaderPanelLink>
-			</HeaderPanelLinks>
-		</HeaderAction>
-	</HeaderUtilities>
-</Header>
-
-<SideNav bind:isOpen={isSideNavOpen}>
-	<SideNavItems>
-		<SideNavLink icon={UserMultiple} text="Kontakte" href="/kontakte" />
-		<SideNavLink icon={Building} text="Wohnungen" href="/wohnungen" />
-		<SideNavLink icon={Document} text="Verträge" href="/vertraege" />
-		<SideNavMenu icon={Money} text="Rechnungen" href="/rechnungen">
-			<SideNavMenuItem
-				text="Betriebskosten"
-				href="/rechnungen/betriebskosten"
-			/>
-			<SideNavMenuItem text="Erhaltungen" href="/rechnungen/erhaltungen" />
-		</SideNavMenu>
-		<SideNavLink icon={ChartRelationship} text="Umlagen" href="/umlagen" />
-		<SideNavLink icon={Meter} text="Zähler" href="/zaehler" />
-		<SideNavDivider />
-	</SideNavItems>
-</SideNav>
+<WalterHeader bind:isSideNavOpen />
+<WalterSideNav bind:isSideNavOpen />
 
 <Content>
-	<main>
-		<slot />
-	</main>
+	<slot />
 </Content>
 
 <style>
