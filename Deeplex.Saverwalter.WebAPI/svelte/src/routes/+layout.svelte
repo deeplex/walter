@@ -93,14 +93,33 @@
 		position: relative;
 	}
 
-	:global(.bx--text-input-wrapper, .bx--form-item) {
-		margin: 10px;
-	}
 	:global(.bx--content) {
 		padding: 0;
 	}
+
+	:global(.bx--text-input-wrapper, .bx--form-item, .bx--list-box__wrapper) {
+		margin: 10px;
+		flex: 1 1 auto;
+		display: flex;
+		flex-direction: column;
+		flex-wrap: wrap;
+		align-items: flex-start;
+	}
+
+	:global(
+			.bx--date-picker-container,
+			.flatpickr-input,
+			.flatpickr-wrapper,
+			.bx--date-picker.bx--date-picker--single
+		) {
+		width: 100%;
+	}
 	:global(.bx--data-table--sticky-header) {
 		max-height: calc(100vh - 3rem - 5px);
+	}
+
+	:global(.bx--list-box__menu-icon, .bx--list-box__selection) {
+		visibility: hidden;
 	}
 
 	:global(.bx--side-nav) {

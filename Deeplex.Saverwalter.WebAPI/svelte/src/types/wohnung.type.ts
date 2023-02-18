@@ -8,5 +8,6 @@ export type WohnungEntry = {
     nutzflaeche: number;
     einheiten: number;
     notiz: string;
-    anschrift: string
+    anschrift: string;
+    besitzerId: string;
 }

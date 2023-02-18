@@ -13,5 +13,5 @@
 	datePickerType="single"
 	on:change
 >
-	<DatePickerInput type="text" {placeholder} {labelText} />
+	<DatePickerInput style="width: 100%" type="text" {placeholder} {labelText} />
 </DatePicker>
