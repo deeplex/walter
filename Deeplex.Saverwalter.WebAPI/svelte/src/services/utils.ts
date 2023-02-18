@@ -13,3 +13,8 @@ export const request_options = {
         'Content-Type': 'text/json'
     }
 };
+
+export const walter_get = (url: string) => fetch(
+    url,
+    request_options
+).then((e) => e.json());

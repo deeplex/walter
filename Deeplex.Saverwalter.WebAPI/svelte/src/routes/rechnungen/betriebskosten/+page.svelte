@@ -3,7 +3,7 @@
 	import { DataTable, DataTableSkeleton } from 'carbon-components-svelte';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 	import WalterDataTable from '../../../components/WalterDataTable.svelte';
-	import { request_options } from '../../../services/utils';
+	import { walter_get } from '../../../services/utils';
 	import type { BetriebskostenrechnungListEntry } from '../../../types/betriebskostenrechnunglist.type';
 
 	const headers = [
@@ -17,10 +17,9 @@
 	const navigate = (e: CustomEvent<DataTableRow>) =>
 		goto(`/rechnungen/betriebskosten/${e.detail.id}`);
 
-	const async_rows: Promise<BetriebskostenrechnungListEntry[]> = fetch(
-		'/api/betriebskostenrechnungen',
-		request_options
-	).then((e) => e.json());
+	const async_rows: Promise<BetriebskostenrechnungListEntry[]> = walter_get(
+		'/api/betriebskostenrechnungen'
+	);
 </script>
 
 <WalterDataTable {navigate} {async_rows} {headers} />

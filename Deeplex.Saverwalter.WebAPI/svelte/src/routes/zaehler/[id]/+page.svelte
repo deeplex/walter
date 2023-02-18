@@ -6,15 +6,12 @@
 		TextInputSkeleton
 	} from 'carbon-components-svelte';
 	import Adresse from '../../../components/Adresse.svelte';
-	import { request_options } from '../../../services/utils';
+	import { walter_get } from '../../../services/utils';
 	import type { ZaehlerEntry } from '../../../types/zaehler.type';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const async: Promise<ZaehlerEntry> = fetch(
-		`/api/zaehler/${data.id}`,
-		request_options
-	).then((e) => e.json());
+	const async: Promise<ZaehlerEntry> = walter_get(`/api/zaehler/${data.id}`);
 </script>
 
 <Grid>

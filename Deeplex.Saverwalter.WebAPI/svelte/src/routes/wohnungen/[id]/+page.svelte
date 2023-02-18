@@ -10,7 +10,7 @@
 	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 	import Adresse from '../../../components/Adresse.svelte';
 	import WalterComboBox from '../../../components/WalterComboBox.svelte';
-	import { request_options } from '../../../services/utils';
+	import { request_options, walter_get } from '../../../services/utils';
 	import type { KontaktListEntry } from '../../../types/kontaktlist.type';
 	import type { WohnungEntry } from '../../../types/wohnung.type';
 	import type { PageData } from './$types';
@@ -22,16 +22,9 @@
 	).then((e) => e.json());
 
 	// TODO: See how many data is just not used... Maybe an extra controller?
-	const kontakte: Promise<ComboBoxItem[]> = fetch(
-		`/api/kontakte`,
-		request_options
-	)
-		.then((e) => e.json())
-		.then((e) =>
-			e.map(
-				(f: KontaktListEntry) => ({ id: f.guid, text: f.name } as ComboBoxItem)
-			)
-		);
+	const kontakte: Promise<ComboBoxItem[]> = walter_get(
+		`/api/selection/kontakte`
+	);
 </script>
 
 <Grid>
@@ -42,7 +35,7 @@
 	{:then x}
 		<Row>
 			<WalterComboBox
-				titleText="Aussteller"
+				titleText="Besitzer"
 				items={kontakte}
 				selectedId={x.besitzerId}
 			/>

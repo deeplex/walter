@@ -2,7 +2,7 @@
 	import { ComboBox, SkeletonPlaceholder } from 'carbon-components-svelte';
 	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 
-	export let selectedId: string | number | undefined;
+	export let selectedId: string | undefined;
 	export let titleText: string;
 	export let items: ComboBoxItem[] | Promise<ComboBoxItem[]>;
 
@@ -16,7 +16,7 @@
 		.map((e, i) => ({ id: i, text: 'undefined', disabled: true }));
 
 	let ref: ComboBox;
-	let backup: string | number | undefined = selectedId;
+	let backup: string | undefined = selectedId;
 
 	function clear(_: FocusEvent) {
 		ref.clear();

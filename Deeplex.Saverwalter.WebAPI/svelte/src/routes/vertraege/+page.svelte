@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 	import WalterDataTable from '../../components/WalterDataTable.svelte';
-	import { convertDate, request_options } from '../../services/utils';
+	import { request_options, walter_get } from '../../services/utils';
 
 	const headers = [
 		{ key: 'wohnung', value: 'Wohnung' },
@@ -30,9 +30,9 @@
 	const navigate = (e: CustomEvent<DataTableRow>) =>
 		goto(`/vertraege/${e.detail.id}`);
 
-	const async_rows = fetch('/api/vertraege', request_options)
-		.then((e) => e.json())
-		.then((j) => j.map((v: VertragListEntry) => new VertragListEntry(v)));
+	const async_rows = walter_get('/api/vertraege').then((j) =>
+		j.map((v: VertragListEntry) => new VertragListEntry(v))
+	);
 </script>
 
 <WalterDataTable {navigate} {async_rows} {headers} />

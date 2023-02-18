@@ -1,5 +1,9 @@
+import type { WohnungEntry } from "./wohnung.type";
+
 export type VertragEntry = {
     id: number;
-    beginn: string; // new Date(e.beginn).toLocaleDateString("de-DE")
-    ende: string | undefined; // e?.ende ? new Date(e.ende).toLocaleDateString("de-DE") : undefined
+    beginn: string;
+    ende: string | undefined;
+    wohnung: WohnungEntry;
+    ansprechpartnerId: string;
 }

@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { DataTable, DataTableSkeleton } from 'carbon-components-svelte';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 	import WalterDataTable from '../../../components/WalterDataTable.svelte';
-	import { request_options } from '../../../services/utils';
+	import { walter_get } from '../../../services/utils';
 	import type { ErhaltungsaufwendungListEntry } from '../../../types/erhaltungsaufwendunglist.type';
 
 	const headers = [
@@ -16,10 +15,9 @@
 	const navigate = (e: CustomEvent<DataTableRow>) =>
 		goto(`/rechnungen/erhaltungen/${e.detail.id}`);
 
-	const async_rows: Promise<ErhaltungsaufwendungListEntry[]> = fetch(
-		'/api/erhaltungsaufwendungen',
-		request_options
-	).then((e) => e.json());
+	const async_rows: Promise<ErhaltungsaufwendungListEntry[]> = walter_get(
+		'/api/erhaltungsaufwendungen'
+	);
 </script>
 
 <WalterDataTable {navigate} {async_rows} {headers} />

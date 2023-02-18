@@ -18,9 +18,15 @@
 </script>
 
 {#await async_rows}
-	<DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
+	<DataTableSkeleton
+		style="min-width: 50rem;"
+		{headers}
+		showHeader={false}
+		showToolbar={false}
+	/>
 {:then rows}
 	<DataTable
+		style="min-width: 50rem;"
 		on:click:row={navigate}
 		sortable
 		zebra

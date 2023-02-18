@@ -7,14 +7,19 @@
 	} from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 	import type { ErhaltungsaufwendungEntry } from '../../../../types/erhaltungsaufwendung.type';
-	import { request_options } from '../../../../services/utils';
+	import { walter_get } from '../../../../services/utils';
 	import WalterDatePicker from '../../../../components/WalterDatePicker.svelte';
+	import WalterComboBox from '../../../../components/WalterComboBox.svelte';
+	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 
 	export let data: PageData;
-	const async: Promise<ErhaltungsaufwendungEntry> = fetch(
-		`/api/erhaltungsaufwendungen/${data.id}`,
-		request_options
-	).then((e) => e.json());
+	const async: Promise<ErhaltungsaufwendungEntry> = walter_get(
+		`/api/erhaltungsaufwendungen/${data.id}`
+	);
+
+	const wohnungen: Promise<ComboBoxItem[]> = walter_get(
+		'api/selection/wohnungen'
+	);
 </script>
 
 <Grid>
@@ -36,7 +41,11 @@
 			<TextInput labelText="Aussteller" value={x.aussteller.name} />
 		</Row>
 		<Row>
-			<TextInput labelText="Wohnung" value={x.wohnung.anschrift} />
+			<WalterComboBox
+				titleText="Wohnung"
+				selectedId={x.wohnung.id.toString()}
+				items={wohnungen}
+			/>
 			<WalterDatePicker value={x.datum} labelText="Datum" />
 			<TextInput labelText="Betrag" value={x.betrag} />
 		</Row>

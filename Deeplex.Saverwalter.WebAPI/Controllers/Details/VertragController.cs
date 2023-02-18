@@ -3,6 +3,7 @@ using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml.Linq;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Details.WohnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.KontaktListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
@@ -17,6 +18,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             public int id => Entity.VertragId;
             public DateTime Beginn => Entity.Beginn();
             public DateTime? Ende => Entity.Ende;
+            public WohnungEntryBase Wohnung => new WohnungEntryBase(Entity.Wohnung);
+            public Guid? AnsprechpartnerId => Entity.AnsprechpartnerId;
 
             public VertragEntryBase(Vertrag entity)
             {
@@ -27,6 +30,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         public class VertragEntry : VertragEntryBase
         {
             public IEnumerable<AnhangEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangEntry(e));
+            // TODO MietenEntries
+            // TODO MietMinderungEntries
+            // TODO Mieter?...
 
             public VertragEntry(Vertrag entity) : base(entity)
             {

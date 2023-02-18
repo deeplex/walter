@@ -19,10 +19,10 @@ namespace Deeplex.Saverwalter.WebAPI
         public static void Main(string[] args)
         {
             Container = new Container();
-            Container.Register<INotificationService, NotificationService>(Lifestyle.Singleton);
-            Container.Register<IFileService, FileService>(Lifestyle.Singleton);
-            Container.Register<IWalterDbService, WalterDbService>(Lifestyle.Singleton);
-            Container.Register<PersonMap>(Lifestyle.Singleton);
+            Container.Register<INotificationService, NotificationService>(Lifestyle.Transient);
+            Container.Register<IFileService, FileService>(Lifestyle.Transient);
+            Container.Register<IWalterDbService, WalterDbService>(Lifestyle.Transient);
+            Container.Register<PersonMap>(Lifestyle.Transient);
             Container.Verify();
 
             var builder = WebApplication.CreateBuilder(args);

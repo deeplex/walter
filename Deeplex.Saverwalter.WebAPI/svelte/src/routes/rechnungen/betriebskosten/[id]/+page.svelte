@@ -8,15 +8,14 @@
 		TextInputSkeleton
 	} from 'carbon-components-svelte';
 	import WalterDatePicker from '../../../../components/WalterDatePicker.svelte';
-	import { request_options } from '../../../../services/utils';
+	import { walter_get } from '../../../../services/utils';
 	import type { BetriebskostenrechnungEntry } from '../../../../types/betriebskostenrechnung.type';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const async: Promise<BetriebskostenrechnungEntry> = fetch(
-		`/api/betriebskostenrechnungen/${data.id}`,
-		request_options
-	).then((e) => e.json());
+	const async: Promise<BetriebskostenrechnungEntry> = walter_get(
+		`/api/betriebskostenrechnungen/${data.id}`
+	);
 </script>
 
 <Grid>

@@ -12,13 +12,12 @@
 	import type { PageData } from './$types';
 	import type { JuristischePersonEntry } from '../../../../types/juristischeperson.type';
 	import AsyncPerson from '../../../../components/AsyncPerson.svelte';
-	import { request_options } from '../../../../services/utils';
+	import { walter_get } from '../../../../services/utils';
 
 	export let data: PageData;
-	const async: Promise<JuristischePersonEntry> = fetch(
-		`/api/kontakte/jur/${data.id}`,
-		request_options
-	).then((e) => e.json());
+	const async: Promise<JuristischePersonEntry> = walter_get(
+		`/api/kontakte/jur/${data.id}`
+	);
 </script>
 
 <Grid padding>

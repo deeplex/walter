@@ -5,15 +5,12 @@
 		TextInput,
 		TextInputSkeleton
 	} from 'carbon-components-svelte';
-	import { convertDate, request_options } from '../../../services/utils';
+	import { walter_get } from '../../../services/utils';
 	import type { UmlageEntry } from '../../../types/umlage.type';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const async: Promise<UmlageEntry> = fetch(
-		`/api/umlagen/${data.id}`,
-		request_options
-	).then((e) => e.json());
+	const async: Promise<UmlageEntry> = walter_get(`/api/umlagen/${data.id}`);
 </script>
 
 <Grid>
