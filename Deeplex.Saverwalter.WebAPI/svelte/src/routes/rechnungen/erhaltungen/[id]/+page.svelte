@@ -3,12 +3,14 @@
 	import type { PageData } from './$types';
 	import type { ErhaltungsaufwendungEntry } from '../../../../types/erhaltungsaufwendung.type';
 	import { walter_get } from '../../../../services/utils';
-	import WalterDatePicker from '../../../../components/WalterDatePicker.svelte';
-	import WalterComboBox from '../../../../components/WalterComboBox.svelte';
 	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
-	import WalterHeader from '../../../../components/WalterHeader.svelte';
-	import WalterGrid from '../../../../components/WalterGrid.svelte';
-	import WalterTextInput from '../../../../components/WalterTextInput.svelte';
+	import {
+		WalterComboBox,
+		WalterDatePicker,
+		WalterGrid,
+		WalterHeader,
+		WalterTextInput
+	} from '../../../../components';
 
 	export let data: PageData;
 	const a: Promise<ErhaltungsaufwendungEntry> = walter_get(

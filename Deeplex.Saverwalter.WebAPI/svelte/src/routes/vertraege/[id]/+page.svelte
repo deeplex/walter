@@ -1,20 +1,12 @@
 <script lang="ts">
-	import {
-		Button,
-		Column,
-		ComboBox,
-		DatePicker,
-		DatePickerInput,
-		Grid,
-		Row,
-		TextInput,
-		TextInputSkeleton
-	} from 'carbon-components-svelte';
+	import { Row } from 'carbon-components-svelte';
 	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
-	import WalterComboBox from '../../../components/WalterComboBox.svelte';
-	import WalterDatePicker from '../../../components/WalterDatePicker.svelte';
-	import WalterGrid from '../../../components/WalterGrid.svelte';
-	import WalterHeader from '../../../components/WalterHeader.svelte';
+	import {
+		WalterComboBox,
+		WalterDatePicker,
+		WalterGrid,
+		WalterHeader
+	} from '../../../components';
 	import { walter_get } from '../../../services/utils';
 	import type { VertragEntry } from '../../../types/vertrag.type';
 	import type { PageData } from './$types';

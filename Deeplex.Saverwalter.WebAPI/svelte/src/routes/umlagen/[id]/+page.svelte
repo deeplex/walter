@@ -1,13 +1,10 @@
 <script lang="ts">
+	import { Row } from 'carbon-components-svelte';
 	import {
-		Grid,
-		Row,
-		TextInput,
-		TextInputSkeleton
-	} from 'carbon-components-svelte';
-	import WalterGrid from '../../../components/WalterGrid.svelte';
-	import WalterHeader from '../../../components/WalterHeader.svelte';
-	import WalterTextInput from '../../../components/WalterTextInput.svelte';
+		WalterGrid,
+		WalterHeader,
+		WalterTextInput
+	} from '../../../components';
 	import { walter_get } from '../../../services/utils';
 	import type { UmlageEntry } from '../../../types/umlage.type';
 	import type { PageData } from './$types';

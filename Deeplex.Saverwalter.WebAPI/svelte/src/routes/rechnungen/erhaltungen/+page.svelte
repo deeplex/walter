@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-	import WalterDataTable from '../../../components/WalterDataTable.svelte';
-	import WalterHeader from '../../../components/WalterHeader.svelte';
+	import { WalterDataTable, WalterHeader } from '../../../components';
 	import { walter_get } from '../../../services/utils';
 	import type { ErhaltungsaufwendungListEntry } from '../../../types/erhaltungsaufwendunglist.type';
 

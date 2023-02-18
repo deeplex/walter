@@ -1,12 +1,14 @@
 <script lang="ts">
-	import Person from '../../../../components/Person.svelte';
-	import { Grid, Row, TextInput } from 'carbon-components-svelte';
+	import { Row } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 	import type { NatuerlichePersonEntry } from '../../../../types/natuerlicheperson.type';
 	import { walter_get } from '../../../../services/utils';
-	import WalterHeader from '../../../../components/WalterHeader.svelte';
-	import WalterGrid from '../../../../components/WalterGrid.svelte';
-	import WalterTextInput from '../../../../components/WalterTextInput.svelte';
+	import {
+		Person,
+		WalterHeader,
+		WalterGrid,
+		WalterTextInput
+	} from '../../../../components';
 
 	export let data: PageData;
 	const a: Promise<NatuerlichePersonEntry> = walter_get(

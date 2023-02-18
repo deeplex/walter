@@ -1,12 +1,10 @@
 <script>
 	import 'carbon-components-svelte/css/white.css';
 	import { Content } from 'carbon-components-svelte';
-	import WalterSideNav from '../components/WalterSideNav.svelte';
-
-	let isSideNavOpen = true;
+	import { WalterSideNav } from '../components';
 </script>
 
-<WalterSideNav bind:isSideNavOpen />
+<WalterSideNav />
 
 <Content>
 	<slot />

@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-	import WalterDataTable from '../../components/WalterDataTable.svelte';
-	import WalterHeader from '../../components/WalterHeader.svelte';
 	import { request_options } from '../../services/utils';
 	import type { ZaehlerListEntry } from '../../types/zaehlerlist.type';
+	import { WalterDataTable, WalterHeader } from '../../components';
 
 	const headers = [
 		{ key: 'name', value: 'Name' },

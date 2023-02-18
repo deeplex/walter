@@ -1,16 +1,11 @@
 <script lang="ts">
+	import { Row } from 'carbon-components-svelte';
 	import {
-		DatePicker,
-		DatePickerInput,
-		Grid,
-		Row,
-		TextInput,
-		TextInputSkeleton
-	} from 'carbon-components-svelte';
-	import WalterDatePicker from '../../../../components/WalterDatePicker.svelte';
-	import WalterGrid from '../../../../components/WalterGrid.svelte';
-	import WalterHeader from '../../../../components/WalterHeader.svelte';
-	import WalterTextInput from '../../../../components/WalterTextInput.svelte';
+		WalterDatePicker,
+		WalterGrid,
+		WalterHeader,
+		WalterTextInput
+	} from '../../../../components';
 	import { walter_get } from '../../../../services/utils';
 	import type { BetriebskostenrechnungEntry } from '../../../../types/betriebskostenrechnung.type';
 	import type { PageData } from './$types';
