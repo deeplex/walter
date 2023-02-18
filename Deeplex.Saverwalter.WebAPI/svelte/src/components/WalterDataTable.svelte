@@ -3,6 +3,7 @@
 		Content,
 		DataTable,
 		DataTableSkeleton,
+		SkeletonPlaceholder,
 		Toolbar,
 		ToolbarContent,
 		ToolbarSearch
@@ -20,6 +21,7 @@
 
 <Content>
 	{#await rows}
+		<SkeletonPlaceholder style="margin:0; width: 100%; height:3rem" />
 		<DataTableSkeleton
 			style="min-width: 50rem;"
 			{headers}

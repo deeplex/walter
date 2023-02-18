@@ -3,14 +3,6 @@
 
 	export let title: Promise<string> | string = 'Saverwalter';
 
-	const getTitle = (): string => {
-		if (title instanceof Promise) {
-			return 'Saverwalter';
-		} else {
-			return title;
-		}
-	};
-
 	import { isSideNavOpen } from '../services/stores';
 </script>
 

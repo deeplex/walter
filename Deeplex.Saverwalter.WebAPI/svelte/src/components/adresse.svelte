@@ -7,14 +7,17 @@
 </script>
 
 <Row>
-	<WalterTextInput labelText="Straße" value={adresse?.then((x) => x.strasse)} />
+	<WalterTextInput
+		labelText="Straße"
+		value={adresse?.then((x) => x?.strasse)}
+	/>
 	<WalterTextInput
 		labelText="Hausnr."
-		value={adresse?.then((x) => x.hausnummer)}
+		value={adresse?.then((x) => x?.hausnummer)}
 	/>
 	<WalterTextInput
 		labelText="Postleitzahl"
-		value={adresse?.then((x) => x.postleitzahl)}
+		value={adresse?.then((x) => x?.postleitzahl)}
 	/>
-	<WalterTextInput labelText="Stadt" value={adresse?.then((x) => x.stadt)} />
+	<WalterTextInput labelText="Stadt" value={adresse?.then((x) => x?.stadt)} />
 </Row>

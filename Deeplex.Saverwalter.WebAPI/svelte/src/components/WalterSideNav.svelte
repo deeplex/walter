@@ -19,7 +19,7 @@
 	import { isSideNavOpen } from '../services/stores';
 </script>
 
-<SideNav bind:isOpen={$isSideNavOpen}>
+<SideNav rail bind:isOpen={$isSideNavOpen}>
 	<SideNavItems>
 		<SideNavLink icon={UserMultiple} text="Kontakte" href="/kontakte" />
 		<SideNavLink icon={Building} text="Wohnungen" href="/wohnungen" />

@@ -6,9 +6,7 @@
 
 <WalterSideNav />
 
-<Content>
-	<slot />
-</Content>
+<slot />
 
 <style>
 	slot {
