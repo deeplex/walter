@@ -8,6 +8,7 @@
 	import type { PageData } from './$types';
 	import type { ErhaltungsaufwendungEntry } from '../../../../types/erhaltungsaufwendung.type';
 	import { request_options } from '../../../../services/utils';
+	import WalterDatePicker from '../../../../components/WalterDatePicker.svelte';
 
 	export let data: PageData;
 	const async: Promise<ErhaltungsaufwendungEntry> = fetch(
@@ -36,6 +37,7 @@
 		</Row>
 		<Row>
 			<TextInput labelText="Wohnung" value={x.wohnung.anschrift} />
+			<WalterDatePicker value={x.datum} labelText="Datum" />
 			<TextInput labelText="Betrag" value={x.betrag} />
 		</Row>
 		<Row>

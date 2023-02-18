@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { DataTable, DataTableSkeleton } from 'carbon-components-svelte';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 	import WalterDataTable from '../../components/WalterDataTable.svelte';
-	import { request_options } from '../../services/utils';
+	import { convertDate, request_options } from '../../services/utils';
 
 	const headers = [
 		{ key: 'wohnung', value: 'Wohnung' },
@@ -17,13 +16,13 @@
 		mieter: string;
 		wohnung: string;
 		beginn: string;
-		ende: string;
+		ende: string | undefined;
 
 		constructor(e: VertragListEntry) {
 			this.id = e.id;
 			this.mieter = e.mieter;
 			this.wohnung = e.wohnung;
-			this.beginn = e.beginn;
+			this.beginn = e.beginn!;
 			this.ende = e.ende;
 		}
 	}

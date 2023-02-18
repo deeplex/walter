@@ -7,6 +7,7 @@
 		TextInput,
 		TextInputSkeleton
 	} from 'carbon-components-svelte';
+	import WalterDatePicker from '../../../../components/WalterDatePicker.svelte';
 	import { request_options } from '../../../../services/utils';
 	import type { BetriebskostenrechnungEntry } from '../../../../types/betriebskostenrechnung.type';
 	import type { PageData } from './$types';
@@ -29,14 +30,7 @@
 		<Row>
 			<TextInput labelText="Betreffendes Jahr" value={x.betreffendesJahr} />
 			<TextInput labelText="Betrag" value={x.betrag} />
-			<DatePicker
-				value={x.datum}
-				dateFormat="d.m.Y"
-				datePickerType="single"
-				on:change
-			>
-				<DatePickerInput type="text" labelText="Datum" required />
-			</DatePicker>
+			<WalterDatePicker value={x.datum} labelText="Datum" />
 		</Row>
 	{/await}
 </Grid>

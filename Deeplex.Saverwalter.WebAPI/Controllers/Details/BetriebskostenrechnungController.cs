@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             public int Id => Entity.BetriebskostenrechnungId;
             public double Betrag => Entity.Betrag;
             public int BetreffendesJahr => Entity.BetreffendesJahr;
-            public string Datum => Entity.Datum.Datum();
+            public DateTime Datum => Entity.Datum;
             public string Notiz => Entity.Notiz ?? "";
 
             public BetriebskostenrechnungEntryBase(Betriebskostenrechnung entity)

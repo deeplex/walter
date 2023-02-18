@@ -7,6 +7,7 @@
 		TextInput,
 		TextInputSkeleton
 	} from 'carbon-components-svelte';
+	import WalterDatePicker from '../../../components/WalterDatePicker.svelte';
 	import { convertDate, request_options } from '../../../services/utils';
 	import type { VertragEntry } from '../../../types/vertrag.type';
 	import type { PageData } from './$types';
@@ -25,22 +26,8 @@
 		</Row>
 	{:then x}
 		<Row>
-			<DatePicker
-				value={convertDate(x.beginn)}
-				dateFormat="d.m.Y"
-				datePickerType="single"
-				on:change
-			>
-				<DatePickerInput type="text" labelText="Beginn" required />
-			</DatePicker>
-			<DatePicker
-				value={convertDate(x.ende)}
-				dateFormat="d.m.Y"
-				datePickerType="single"
-				on:change
-			>
-				<DatePickerInput type="text" labelText="Ende" placeholder="Offen" />
-			</DatePicker>
+			<WalterDatePicker value={x.beginn} labelText="Beginn" />
+			<WalterDatePicker value={x.ende} labelText="Ende" placeholder="Offen" />
 		</Row>
 	{/await}
 </Grid>

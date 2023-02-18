@@ -16,7 +16,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
             public int Id => Entity.ErhaltungsaufwendungId;
             public double Betrag => Entity.Betrag;
-            public string Datum => Entity.Datum.Datum();
+            public DateTime Datum => Entity.Datum;
             public string Notiz => Entity.Notiz ?? "";
             public string Bezeichnung => Entity.Bezeichnung;
 
