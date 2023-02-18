@@ -15,11 +15,9 @@
 		Money,
 		UserMultiple
 	} from 'carbon-icons-svelte';
-
-	import { isSideNavOpen } from '../services/stores';
 </script>
 
-<SideNav rail bind:isOpen={$isSideNavOpen}>
+<SideNav rail>
 	<SideNavItems>
 		<SideNavLink icon={UserMultiple} text="Kontakte" href="/kontakte" />
 		<SideNavLink icon={Building} text="Wohnungen" href="/wohnungen" />

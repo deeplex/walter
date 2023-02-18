@@ -2,24 +2,14 @@
 	import { Header, Loading } from 'carbon-components-svelte';
 
 	export let title: Promise<string> | string = 'Saverwalter';
-
-	import { isSideNavOpen } from '../services/stores';
 </script>
 
 {#await title}
-	<Header
-		persistentHamburgerMenu
-		platformName="Lade..."
-		bind:isSideNavOpen={$isSideNavOpen}
-	>
+	<Header company="SaverWalter	|	" platformName="Lade...">
 		<Loading withOverlay={false} small />
 	</Header>
 {:then x}
-	<Header
-		persistentHamburgerMenu
-		platformName={x}
-		bind:isSideNavOpen={$isSideNavOpen}
-	/>
+	<Header company="SaverWalter	|	" platformName={x} />
 {/await}
 
 <!-- <svelte:fragment slot="skip-to-content">
