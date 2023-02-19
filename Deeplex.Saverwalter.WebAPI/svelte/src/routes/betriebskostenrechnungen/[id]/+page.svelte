@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Accordion, Row } from 'carbon-components-svelte';
 	import {
+		Anhaenge,
 		WalterDatePicker,
 		WalterGrid,
 		WalterHeader,
@@ -26,7 +27,9 @@
 			' - ' +
 			x.umlage.wohnungenBezeichnung
 	)}
-/>
+>
+	<Anhaenge rows={a.then((x) => x.anhaenge)} />
+</WalterHeader>
 
 <WalterGrid>
 	<Row>

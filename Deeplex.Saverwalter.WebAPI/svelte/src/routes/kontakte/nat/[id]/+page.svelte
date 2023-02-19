@@ -31,7 +31,7 @@
 </script>
 
 <WalterHeader title={a.then((x) => x.name)}>
-	<Anhaenge />
+	<Anhaenge rows={a.then((x) => x.anhaenge)} />
 </WalterHeader>
 
 <WalterGrid>

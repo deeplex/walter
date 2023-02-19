@@ -1,3 +1,4 @@
+import type { AnhangListEntry } from "./anhanglist.type";
 import type { PersonEntry } from "./person.type";
 import type { WohnungEntry } from "./wohnung.type";
 
@@ -9,4 +10,6 @@ export type ErhaltungsaufwendungEntry = {
     bezeichnung: string;
     wohnung: WohnungEntry;
     aussteller: PersonEntry;
+
+    anhaenge: AnhangListEntry[];
 }

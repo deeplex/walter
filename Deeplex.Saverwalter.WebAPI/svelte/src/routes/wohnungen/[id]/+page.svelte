@@ -11,7 +11,8 @@
 		Zaehler,
 		Erhaltungsaufwendungen,
 		Betriebskostenrechnungen,
-		Umlagen
+		Umlagen,
+		Anhaenge
 	} from '../../../components';
 	import Adresse from '../../../components/Adresse.svelte';
 	import { walter_get } from '../../../services/utils';
@@ -26,7 +27,9 @@
 	);
 </script>
 
-<WalterHeader title={a.then((x) => x.anschrift)} />
+<WalterHeader title={a.then((x) => x.anschrift)}>
+	<Anhaenge rows={a.then((x) => x.anhaenge)} />
+</WalterHeader>
 <WalterGrid>
 	<Row>
 		<WalterComboBox

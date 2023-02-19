@@ -2,6 +2,7 @@
 	import { Accordion, Row } from 'carbon-components-svelte';
 	import {
 		Adresse,
+		Anhaenge,
 		WalterGrid,
 		WalterHeader,
 		WalterTextInput,
@@ -16,7 +17,9 @@
 	const a: Promise<ZaehlerEntry> = walter_get(`/api/zaehler/${data.id}`);
 </script>
 
-<WalterHeader title={a.then((x) => x.kennnummer)} />
+<WalterHeader title={a.then((x) => x.kennnummer)}>
+	<Anhaenge rows={a.then((x) => x.anhaenge)} />
+</WalterHeader>
 <WalterGrid>
 	<Row>
 		<WalterTextInput

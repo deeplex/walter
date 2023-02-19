@@ -1,7 +1,35 @@
 <script lang="ts">
-	import { HeaderAction, HeaderUtilities } from 'carbon-components-svelte';
+	import {
+		HeaderAction,
+		HeaderPanelDivider,
+		HeaderPanelLink,
+		HeaderPanelLinks,
+		HeaderUtilities,
+		Loading
+	} from 'carbon-components-svelte';
+	import { FileStorage, Tools } from 'carbon-icons-svelte';
+	import type { AnhangListEntry } from '../types/anhanglist.type';
+
+	let isOpen: boolean = false;
+
+	export let rows: Promise<AnhangListEntry[]>;
 </script>
 
-<HeaderUtilities>
-	<HeaderAction />
-</HeaderUtilities>
+{#await rows}
+	<HeaderAction disabled>
+		<svelte:fragment slot="icon">
+			<Loading style="margin-left: 1em" withOverlay={false} small />
+		</svelte:fragment>
+	</HeaderAction>
+{:then x}
+	<HeaderUtilities>
+		<HeaderAction>
+			<HeaderPanelLinks>
+				<HeaderPanelDivider>Dateien ({x.length})</HeaderPanelDivider>
+				{#each x as row}
+					<HeaderPanelLink>{row.fileName}</HeaderPanelLink>
+				{/each}
+			</HeaderPanelLinks>
+		</HeaderAction>
+	</HeaderUtilities>
+{/await}

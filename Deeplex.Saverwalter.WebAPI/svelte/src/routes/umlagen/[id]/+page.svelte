@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Accordion, Row } from 'carbon-components-svelte';
 	import {
+		Anhaenge,
 		Betriebskostenrechnungen,
 		WalterGrid,
 		WalterHeader,
@@ -15,8 +16,9 @@
 	const a: Promise<UmlageEntry> = walter_get(`/api/umlagen/${data.id}`);
 </script>
 
-<WalterHeader title={a.then((x) => x.typ + ' - ' + x.wohnungenBezeichnung)} />
-
+<WalterHeader title={a.then((x) => x.typ + ' - ' + x.wohnungenBezeichnung)}>
+	<Anhaenge rows={a.then((x) => x.anhaenge)} />
+</WalterHeader>
 <WalterGrid>
 	<Row>
 		<WalterTextInput labelText="Bezeichnung" value={a.then((x) => x.typ)} />

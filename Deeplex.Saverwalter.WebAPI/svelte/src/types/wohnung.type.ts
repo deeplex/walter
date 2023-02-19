@@ -1,4 +1,5 @@
 import type { AdresseEntry } from './adresse.type';
+import type { AnhangListEntry } from './anhanglist.type';
 import type { BetriebskostenrechnungListEntry } from './betriebskostenrechnunglist.type';
 import type { ErhaltungsaufwendungListEntry } from './erhaltungsaufwendunglist.type';
 import type { UmlageListEntry } from './umlagelist.type';
@@ -23,4 +24,5 @@ export type WohnungEntry = {
     betriebskostenrechnungen: BetriebskostenrechnungListEntry[];
     erhaltungsaufwendungen: ErhaltungsaufwendungListEntry[];
     umlagen: UmlageListEntry[];
+    anhaenge: AnhangListEntry[];
 }

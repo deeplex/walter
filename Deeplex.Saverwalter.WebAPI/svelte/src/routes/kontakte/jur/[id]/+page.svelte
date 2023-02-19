@@ -10,7 +10,8 @@
 		WalterGrid,
 		WalterTextInput,
 		Wohnungen,
-		Vertraege
+		Vertraege,
+		Anhaenge
 	} from '../../../../components';
 	import type { WohnungListEntry } from '../../../../types/wohnunglist.type';
 	import type { VertragListEntry } from '../../../../types/vertraglist.type';
@@ -28,7 +29,9 @@
 	);
 </script>
 
-<WalterHeader title={a.then((e) => e.name)} />
+<WalterHeader title={a.then((x) => x.name)}>
+	<Anhaenge rows={a.then((x) => x.anhaenge)} />
+</WalterHeader>
 
 <WalterGrid>
 	<Row>

@@ -5,6 +5,7 @@
 	import { walter_get } from '../../../services/utils';
 	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 	import {
+		Anhaenge,
 		WalterComboBox,
 		WalterDatePicker,
 		WalterGrid,
@@ -25,9 +26,9 @@
 	);
 </script>
 
-<WalterHeader
-	title={a.then((x) => x.aussteller.name + ' - ' + x.bezeichnung)}
-/>
+<WalterHeader title={a.then((x) => x.aussteller.name + ' - ' + x.bezeichnung)}>
+	<Anhaenge rows={a.then((x) => x.anhaenge)} />
+</WalterHeader>
 
 <WalterGrid>
 	<Row>

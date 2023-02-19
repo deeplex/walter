@@ -2,6 +2,7 @@
 	import { Accordion, Row } from 'carbon-components-svelte';
 	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 	import {
+		Anhaenge,
 		Kontakte,
 		Mieten,
 		Mietminderungen,
@@ -36,7 +37,9 @@
 	title={a.then(
 		(x) => x.wohnung.anschrift + ' - ' + x.mieter.map((m) => m.name).join(', ')
 	)}
-/>
+>
+	<Anhaenge rows={a.then((x) => x.anhaenge)} />
+</WalterHeader>
 
 <WalterGrid>
 	<Row>

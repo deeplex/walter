@@ -29,11 +29,16 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
             return asOther.AsQueryable().DistinctBy(e => e.VertragId);
         }
 
+        private IQueryable<Wohnung> GetQueryableWohnung(Guid id)
+        {
+            return GetQueryableVertrag(id).Select(e => e.Wohnung).Distinct();
+        }
+
         [HttpGet]
         [Route("api/wohnungen/mieter/{id}")]
         public IEnumerable<WohnungListEntry> GetWohnungen(Guid id)
         {
-            return GetQueryableVertrag(id).Select(e => new WohnungListEntry(e.Wohnung)).ToList();
+            return GetQueryableWohnung(id).Select(e => new WohnungListEntry(e)).ToList();
         }
 
         [HttpGet]
