@@ -17,13 +17,13 @@
 
 {#await rows}
 	<HeaderAction disabled>
-		<svelte:fragment slot="icon">
-			<Loading style="margin-left: 1em" withOverlay={false} small />
+		<svelte:fragment slot="text">
+			<Loading style="margin-left: 1em;" withOverlay={false} small />
 		</svelte:fragment>
 	</HeaderAction>
 {:then x}
 	<HeaderUtilities>
-		<HeaderAction>
+		<HeaderAction isOpen text="({x.length})">
 			<HeaderPanelLinks>
 				<HeaderPanelDivider>Dateien ({x.length})</HeaderPanelDivider>
 				{#each x as row}
