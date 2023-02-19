@@ -33,7 +33,6 @@
 		/>
 	{:then rows}
 		<DataTable
-			style="min-width: 50rem;"
 			on:click:row={navigate}
 			sortable
 			zebra

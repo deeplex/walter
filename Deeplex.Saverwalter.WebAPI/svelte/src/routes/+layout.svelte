@@ -40,6 +40,11 @@
 		max-height: calc(100vh - 3rem - 5px);
 	}
 
+	:global(.bx--data-table-container) {
+		min-width: 50rem;
+		padding-top: 0;
+	}
+
 	:global(.bx--list-box__menu-icon, .bx--list-box__selection) {
 		visibility: hidden;
 	}
