@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import {
 		SideNav,
 		SideNavDivider,
@@ -21,22 +22,55 @@
 
 <SideNav rail>
 	<SideNavItems>
-		<SideNavLink icon={UserMultiple} text="Kontakte" href="/kontakte" />
-		<SideNavLink icon={Building} text="Wohnungen" href="/wohnungen" />
-		<SideNavLink icon={Document} text="Verträge" href="/vertraege" />
 		<SideNavLink
+			isSelected={$page.route.id?.includes('/kontakte')}
+			icon={UserMultiple}
+			text="Kontakte"
+			href="/kontakte"
+		/>
+
+		<SideNavLink
+			isSelected={$page.route.id?.includes('/wohnungen')}
+			icon={Building}
+			text="Wohnungen"
+			href="/wohnungen"
+		/>
+		<SideNavLink
+			isSelected={$page.route.id?.includes('/vertraege')}
+			icon={Document}
+			text="Verträge"
+			href="/vertraege"
+		/>
+		<SideNavLink
+			isSelected={$page.route.id?.includes('/betriebskostenrechnungen')}
 			icon={Money}
 			text="Betriebskostenrechnungen"
 			href="/betriebskostenrechnungen"
 		/>
 		<SideNavLink
+			isSelected={$page.route.id?.includes('/erhaltungsaufwendungen')}
 			icon={Tools}
 			text="Erhaltungsaufwendungen"
 			href="/erhaltungsaufwendungen"
 		/>
-		<SideNavLink icon={ChartRelationship} text="Umlagen" href="/umlagen" />
-		<SideNavLink icon={Meter} text="Zähler" href="/zaehler" />
-		<SideNavLink icon={DocumentAttachment} text="Anhänge" href="/anhaenge" />
+		<SideNavLink
+			isSelected={$page.route.id?.includes('/umlagen')}
+			icon={ChartRelationship}
+			text="Umlagen"
+			href="/umlagen"
+		/>
+		<SideNavLink
+			isSelected={$page.route.id?.includes('/zaehler')}
+			icon={Meter}
+			text="Zähler"
+			href="/zaehler"
+		/>
+		<SideNavLink
+			isSelected={$page.route.id?.includes('/anhaenge')}
+			icon={DocumentAttachment}
+			text="Anhänge"
+			href="/anhaenge"
+		/>
 		<SideNavDivider />
 	</SideNavItems>
 </SideNav>
