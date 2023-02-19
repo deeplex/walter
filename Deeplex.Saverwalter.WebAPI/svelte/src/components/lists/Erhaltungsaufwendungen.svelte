@@ -12,7 +12,7 @@
 	];
 
 	const navigate = (e: CustomEvent<DataTableRow>) =>
-		goto(`/rechnungen/erhaltungen/${e.detail.id}`);
+		goto(`/erhaltungsaufwendungen/${e.detail.id}`);
 
 	export let rows: Promise<ErhaltungsaufwendungListEntry[]>;
 	export let search: boolean = false;

@@ -14,6 +14,7 @@
 		DocumentAttachment,
 		Meter,
 		Money,
+		Tools,
 		UserMultiple
 	} from 'carbon-icons-svelte';
 </script>
@@ -23,13 +24,16 @@
 		<SideNavLink icon={UserMultiple} text="Kontakte" href="/kontakte" />
 		<SideNavLink icon={Building} text="Wohnungen" href="/wohnungen" />
 		<SideNavLink icon={Document} text="Verträge" href="/vertraege" />
-		<SideNavMenu icon={Money} text="Rechnungen" href="/rechnungen">
-			<SideNavMenuItem
-				text="Betriebskosten"
-				href="/rechnungen/betriebskosten"
-			/>
-			<SideNavMenuItem text="Erhaltungen" href="/rechnungen/erhaltungen" />
-		</SideNavMenu>
+		<SideNavLink
+			icon={Money}
+			text="Betriebskostenrechnungen"
+			href="/betriebskostenrechnungen"
+		/>
+		<SideNavLink
+			icon={Tools}
+			text="Erhaltungsaufwendungen"
+			href="/erhaltungsaufwendungen"
+		/>
 		<SideNavLink icon={ChartRelationship} text="Umlagen" href="/umlagen" />
 		<SideNavLink icon={Meter} text="Zähler" href="/zaehler" />
 		<SideNavLink icon={DocumentAttachment} text="Anhänge" href="/anhaenge" />

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Row } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
-	import type { ErhaltungsaufwendungEntry } from '../../../../types/erhaltungsaufwendung.type';
-	import { walter_get } from '../../../../services/utils';
+	import type { ErhaltungsaufwendungEntry } from '../../../types/erhaltungsaufwendung.type';
+	import { walter_get } from '../../../services/utils';
 	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 	import {
 		WalterComboBox,
@@ -10,7 +10,7 @@
 		WalterGrid,
 		WalterHeader,
 		WalterTextInput
-	} from '../../../../components';
+	} from '../../../components';
 
 	export let data: PageData;
 	const a: Promise<ErhaltungsaufwendungEntry> = walter_get(

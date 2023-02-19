@@ -12,7 +12,7 @@
 	];
 
 	const navigate = (e: CustomEvent<DataTableRow>) =>
-		goto(`/rechnungen/betriebskosten/${e.detail.id}`);
+		goto(`/betriebskostenrechnungen/${e.detail.id}`);
 
 	export let rows: Promise<BetriebskostenrechnungListEntry[]>;
 	export let search: boolean = false;

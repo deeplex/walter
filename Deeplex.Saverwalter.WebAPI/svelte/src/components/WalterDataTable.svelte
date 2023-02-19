@@ -33,14 +33,14 @@
 			showHeader={false}
 			showToolbar={false}
 		/>
-	{:then rows}
+	{:then x}
 		<DataTable
 			on:click:row={navigate}
 			sortable
 			zebra
 			stickyHeader
 			{headers}
-			{rows}
+			rows={x}
 		>
 			{#if search}
 				<Toolbar>

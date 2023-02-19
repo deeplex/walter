@@ -6,9 +6,9 @@
 		WalterHeader,
 		WalterTextInput,
 		Wohnungen
-	} from '../../../../components';
-	import { walter_get } from '../../../../services/utils';
-	import type { BetriebskostenrechnungEntry } from '../../../../types/betriebskostenrechnung.type';
+	} from '../../../components';
+	import { walter_get } from '../../../services/utils';
+	import type { BetriebskostenrechnungEntry } from '../../../types/betriebskostenrechnung.type';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
