@@ -12,10 +12,19 @@
 		Wohnungen,
 		Vertraege
 	} from '../../../../components';
+	import type { WohnungListEntry } from '../../../../types/wohnunglist.type';
+	import type { VertragListEntry } from '../../../../types/vertraglist.type';
 
 	export let data: PageData;
 	const a: Promise<JuristischePersonEntry> = walter_get(
 		`/api/kontakte/jur/${data.id}`
+	);
+
+	const w: Promise<WohnungListEntry[]> = walter_get(
+		`/api/wohnungen/mieter/${data.id}`
+	);
+	const v: Promise<VertragListEntry[]> = walter_get(
+		`/api/vertraege/mieter/${data.id}`
 	);
 </script>
 
@@ -33,7 +42,7 @@
 			title="Juristische Personen"
 			rows={a.then((x) => x.juristischePersonen)}
 		/>
-		<!-- <Wohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} /> -->
-		<!-- <Vertraege title="Verträge" rows={a.then((x) => x.vertraege)} /> -->
+		<Wohnungen title="Wohnungen" rows={w} />
+		<Vertraege title="Verträge" rows={v} />
 	</Accordion>
 </WalterGrid>

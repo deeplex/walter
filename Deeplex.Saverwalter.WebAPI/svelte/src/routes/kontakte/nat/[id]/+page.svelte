@@ -9,13 +9,25 @@
 		WalterGrid,
 		WalterTextInput,
 		Anhaenge,
-		Kontakte
+		Kontakte,
+		Wohnungen,
+		Vertraege
 	} from '../../../../components';
+	import type { WohnungListEntry } from '../../../../types/wohnunglist.type';
+	import type { VertragListEntry } from '../../../../types/vertraglist.type';
 
 	export let data: PageData;
 	const a: Promise<NatuerlichePersonEntry> = walter_get(
 		`/api/kontakte/nat/${data.id}`
 	);
+
+	function getWohnungen(guid: string): Promise<WohnungListEntry[]> {
+		return walter_get(`/api/wohnungen/mieter/${guid}`);
+	}
+
+	function getVertraege(guid: string): Promise<VertragListEntry[]> {
+		return walter_get(`/api/vertraege/mieter/${guid}`);
+	}
 </script>
 
 <WalterHeader title={a.then((x) => x.name)}>
@@ -34,7 +46,9 @@
 			title="Juristische Personen"
 			rows={a.then((x) => x.juristischePersonen)}
 		/>
-		<!-- <Wohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} /> -->
-		<!-- <Vertraege title="Verträge" rows={a.then((x) => x.vertraege)} /> -->
+		{#await a then x}
+			<Wohnungen title="Wohnungen" rows={getWohnungen(x.guid)} />
+			<Vertraege title="Verträge" rows={getVertraege(x.guid)} />
+		{/await}
 	</Accordion>
 </WalterGrid>
