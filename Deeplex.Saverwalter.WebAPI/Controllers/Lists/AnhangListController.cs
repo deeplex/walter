@@ -10,7 +10,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
     [Route("api/anhaenge")]
     public class AnhangListController : ControllerBase
     {
-        public class AnahngListEntry
+        public class AnhangListEntry
         {
             private Anhang Entity { get; }
 
@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             public string FileName => Entity.FileName;
             public string CreationTime => Entity.CreationTime.Zeit();
 
-            public AnahngListEntry(Anhang a)
+            public AnhangListEntry(Anhang a)
             {
                 Entity = a;
             }
@@ -32,9 +32,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
         }
 
         [HttpGet(Name = "GetAnhaenge")]
-        public IEnumerable<AnahngListEntry> Get()
+        public IEnumerable<AnhangListEntry> Get()
         {
-            return Program.ctx.Anhaenge.Select(e => new AnahngListEntry(e)).ToList();
+            return Program.ctx.Anhaenge.Select(e => new AnhangListEntry(e)).ToList();
         }
     }
 }

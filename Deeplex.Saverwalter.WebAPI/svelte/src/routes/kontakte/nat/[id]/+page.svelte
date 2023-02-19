@@ -7,7 +7,8 @@
 		Person,
 		WalterHeader,
 		WalterGrid,
-		WalterTextInput
+		WalterTextInput,
+		Anhaenge
 	} from '../../../../components';
 
 	export let data: PageData;
@@ -16,7 +17,9 @@
 	);
 </script>
 
-<WalterHeader title={a.then((x) => x.name)} />
+<WalterHeader title={a.then((x) => x.name)}>
+	<Anhaenge />
+</WalterHeader>
 
 <WalterGrid>
 	<Row>

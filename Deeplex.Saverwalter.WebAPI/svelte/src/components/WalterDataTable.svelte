@@ -14,16 +14,17 @@
 		key: string;
 		value: string;
 	}[];
-	export let rows: Promise<any>;
+	export let rows: Promise<any[]>;
 
-	export let navigate: (
-		e: CustomEvent<DataTableRow>
-	) => Promise<void> | void = () => {};
+	export let navigate: (e: CustomEvent<DataTableRow>) => Promise<void>;
+	export let search: boolean = false;
 </script>
 
 <Content>
 	{#await rows}
-		<SkeletonPlaceholder style="margin:0; width: 100%; height:3rem" />
+		{#if search}
+			<SkeletonPlaceholder style="margin:0; width: 100%; height:3rem" />
+		{/if}
 		<DataTableSkeleton
 			style="min-width: 50rem;"
 			{headers}
@@ -40,11 +41,13 @@
 			{headers}
 			{rows}
 		>
-			<Toolbar>
-				<ToolbarContent>
-					<ToolbarSearch placeholder="Suche..." persistent shouldFilterRows />
-				</ToolbarContent>
-			</Toolbar>
+			{#if search}
+				<Toolbar>
+					<ToolbarContent>
+						<ToolbarSearch placeholder="Suche..." persistent shouldFilterRows />
+					</ToolbarContent>
+				</Toolbar>
+			{/if}
 		</DataTable>
 	{/await}
 </Content>

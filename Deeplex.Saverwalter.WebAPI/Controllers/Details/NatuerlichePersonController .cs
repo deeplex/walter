@@ -4,6 +4,7 @@ using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Details.UmlageController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
@@ -27,7 +28,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
         public sealed class NatuerlichePersonEntry : NatuerlichePersonEntryBase
         {
-            public IEnumerable<AnhangEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangEntry(e));
+            public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
             
             public NatuerlichePersonEntry(NatuerlichePerson entity) : base(entity)
             {

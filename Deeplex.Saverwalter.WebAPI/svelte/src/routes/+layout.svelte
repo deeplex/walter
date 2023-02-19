@@ -15,8 +15,8 @@
 		position: relative;
 	}
 
-	:global(.bx--content) {
-		padding: 0;
+	:global(.bx--content, .bx--accordion__content) {
+		padding: 0 !important;
 	}
 
 	:global(.bx--text-input-wrapper, .bx--form-item, .bx--list-box__wrapper) {

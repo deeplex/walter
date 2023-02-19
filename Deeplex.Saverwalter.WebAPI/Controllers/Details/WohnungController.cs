@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 using System.Xml.Linq;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Details.ZaehlerController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
     [ApiController]
     [Route("api/wohnungen/{id}")]
-    public class WohnungController
+    public class WohnungController : ControllerBase
     {
         public class WohnungEntryBase
         {
@@ -39,7 +40,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             // Betriebskostenrechnungen
             // Erhaltungsaufwendungen
             // Umlagen
-            public IEnumerable<AnhangEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangEntry(e));
+            public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
 
 
             public WohnungEntry(Wohnung entity) : base(entity) { }

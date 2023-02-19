@@ -1,39 +1,11 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-	import { WalterDataTable, WalterHeader } from '../../components';
+	import { WalterHeader } from '../../components';
+	import Vertraege from '../../components/lists/Vertraege.svelte';
 	import { walter_get } from '../../services/utils';
+	import type { VertragListEntry } from '../../types/vertraglist.type';
 
-	const headers = [
-		{ key: 'wohnung', value: 'Wohnung' },
-		{ key: 'mieter', value: 'Mieter' },
-		{ key: 'beginn', value: 'Beginn' },
-		{ key: 'ende', value: 'Ende' }
-	];
-
-	class VertragListEntry {
-		id: number;
-		mieter: string;
-		wohnung: string;
-		beginn: string;
-		ende: string | undefined;
-
-		constructor(e: VertragListEntry) {
-			this.id = e.id;
-			this.mieter = e.mieter;
-			this.wohnung = e.wohnung;
-			this.beginn = e.beginn!;
-			this.ende = e.ende;
-		}
-	}
-
-	const navigate = (e: CustomEvent<DataTableRow>) =>
-		goto(`/vertraege/${e.detail.id}`);
-
-	const rows = walter_get('/api/vertraege').then((j) =>
-		j.map((v: VertragListEntry) => new VertragListEntry(v))
-	);
+	const rows: Promise<VertragListEntry[]> = walter_get('/api/vertraege');
 </script>
 
 <WalterHeader title="Verträge" />
-<WalterDataTable {navigate} {rows} {headers} />
+<Vertraege search {rows} />

@@ -9,7 +9,9 @@
 		<Loading withOverlay={false} small />
 	</Header>
 {:then x}
-	<Header company="SaverWalter	|	" platformName={x} />
+	<Header company="SaverWalter	|	" platformName={x}>
+		<slot />
+	</Header>
 {/await}
 
 <!-- <svelte:fragment slot="skip-to-content">

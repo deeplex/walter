@@ -1,0 +1,32 @@
+<script lang="ts">
+	import { AccordionItem, Loading } from 'carbon-components-svelte';
+	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
+	import { WalterDataTable } from '.';
+
+	export let title: string | undefined = undefined;
+	export let rows: Promise<any[]>;
+	export let headers: {
+		key: string;
+		value: string;
+	}[];
+	export let search: boolean = false;
+	export let navigate: (e: CustomEvent<DataTableRow>) => Promise<void>;
+</script>
+
+{#if title !== undefined}
+	{#await rows}
+		<AccordionItem>
+			<svelte:fragment slot="title">
+				<p>{title} (</p>
+				<Loading />
+				<p>)</p>
+			</svelte:fragment>
+		</AccordionItem>
+	{:then x}
+		<AccordionItem title={`${title} (${x.length})`}>
+			<WalterDataTable {search} {navigate} {rows} {headers} />
+		</AccordionItem>
+	{/await}
+{:else}
+	<WalterDataTable {search} {navigate} {rows} {headers} />
+{/if}

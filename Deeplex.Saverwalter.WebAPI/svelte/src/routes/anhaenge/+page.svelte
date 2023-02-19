@@ -2,6 +2,8 @@
 	import { walter_get } from '../../services/utils';
 	import { WalterHeader, WalterDataTable } from '../../components';
 	import type { AnhangListEntry } from '../../types/anhanglist.type';
+	import { goto } from '$app/navigation';
+	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
 	const headers = [
 		{ key: 'fileName', value: 'Dateiname' },
@@ -9,8 +11,11 @@
 	];
 
 	const rows: Promise<AnhangListEntry[]> = walter_get('/api/anhaenge');
+
+	const navigate = (e: CustomEvent<DataTableRow>) =>
+		goto(`/anhaenge/${e.detail.id}`);
 </script>
 
 <WalterHeader title="Anhänge" />
 
-<WalterDataTable {headers} {rows} />
+<WalterDataTable search {navigate} {headers} {rows} />

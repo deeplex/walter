@@ -1,15 +1,14 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Xml.Linq;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Details.WohnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
     [ApiController]
     [Route("api/umlagen/{id}")]
-    public class UmlageController
+    public class UmlageController : ControllerBase
     {
         public class UmlageEntryBase
         {
@@ -29,7 +28,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         public class UmlageEntry : UmlageEntryBase
         {
             public IEnumerable<WohnungEntryBase> Wohnungen => Entity.Wohnungen.Select(e => new WohnungEntryBase(e));
-            public IEnumerable<AnhangEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangEntry(e));
+            public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
 
             public UmlageEntry(Umlage entity) : base(entity)
             {

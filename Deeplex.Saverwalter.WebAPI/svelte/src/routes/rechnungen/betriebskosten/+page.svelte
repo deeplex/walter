@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 	import { WalterDataTable, WalterHeader } from '../../../components';
+	import Betriebskostenrechnungen from '../../../components/lists/Betriebskostenrechnungen.svelte';
 	import { walter_get } from '../../../services/utils';
 	import type { BetriebskostenrechnungListEntry } from '../../../types/betriebskostenrechnunglist.type';
 
@@ -22,4 +23,4 @@
 </script>
 
 <WalterHeader title="Betriebskostenrechnung" />
-<WalterDataTable {navigate} {rows} {headers} />
+<Betriebskostenrechnungen search {rows} />

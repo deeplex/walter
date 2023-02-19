@@ -2,13 +2,14 @@
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml.Linq;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Details.AnhangController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Details.UmlageController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
     [ApiController]
     [Route("api/betriebskostenrechnungen/{id}")]
-    public class BetriebskostenrechnungController
+    public class BetriebskostenrechnungController : ControllerBase
     {
         public class BetriebskostenrechnungEntryBase
         {

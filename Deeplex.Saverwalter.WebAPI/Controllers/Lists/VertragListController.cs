@@ -1,8 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
 {
@@ -10,7 +8,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
     [Route("api/vertraege")]
     public class VertragListController : ControllerBase
     {
-        public class VertraegeListEntry
+        public class VertragListEntry
         {
             private Vertrag Entity { get; }
 
@@ -20,7 +18,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             public string Beginn => Entity.Beginn().Datum();
             public string Ende => Entity.Ende is DateTime d ? d.Datum() : "Offen";
 
-            public VertraegeListEntry(Vertrag v)
+            public VertragListEntry(Vertrag v)
             {
                 Entity = v;
             }
@@ -34,9 +32,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
         }
 
         [HttpGet(Name = "GetVertragList")]
-        public IEnumerable<VertraegeListEntry> Get()
+        public IEnumerable<VertragListEntry> Get()
         {
-            return Program.ctx.Vertraege.Select(e => new VertraegeListEntry(e)).ToList();
+            return Program.ctx.Vertraege.Select(e => new VertragListEntry(e)).ToList();
         }
     }
 }

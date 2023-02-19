@@ -2,12 +2,14 @@
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Details.AnhangController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
     [ApiController]
     [Route("api/zaehler/{id}")]
-    public class ZaehlerController
+    public class ZaehlerController : ControllerBase
     {
         public class ZaehlerEntryBase
         {
@@ -28,7 +30,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         {
             public IEnumerable<ZaehlerEntryBase> EinzelZaehler => Entity.EinzelZaehler.Select(e => new ZaehlerEntryBase(e));
             public IEnumerable<ZaehlerStandEntry> Staende => Entity.Staende.Select(e => new ZaehlerStandEntry(e));
-            public IEnumerable<AnhangEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangEntry(e));
+            public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
             public ZaehlerEntryBase? AllgemeinZaehler => Entity.Allgemeinzaehler is Zaehler z ? new ZaehlerEntryBase(z) : null;
 
             public ZaehlerEntry(Zaehler entity) : base(entity)
