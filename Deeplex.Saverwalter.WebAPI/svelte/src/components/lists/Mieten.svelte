@@ -3,7 +3,7 @@
 	import type { MieteListEntry } from '../../types/mietelist.type';
 	const headers = [
 		{ key: 'betreffenderMonat', value: 'Betreffender Monat' },
-		{ key: 'zahlungsDatum', value: 'Zahlungsdatum' },
+		{ key: 'zahlungsdatum', value: 'Zahlungsdatum' },
 		{ key: 'betrag', value: 'Betrag' }
 	];
 

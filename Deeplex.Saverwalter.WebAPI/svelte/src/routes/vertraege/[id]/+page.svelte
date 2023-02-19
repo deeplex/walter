@@ -33,7 +33,9 @@
 </script>
 
 <WalterHeader
-	title={a.then((x) => x.wohnung.anschrift + ' - ' + 'TODO mieter')}
+	title={a.then(
+		(x) => x.wohnung.anschrift + ' - ' + x.mieter.map((m) => m.name).join(', ')
+	)}
 />
 
 <WalterGrid>

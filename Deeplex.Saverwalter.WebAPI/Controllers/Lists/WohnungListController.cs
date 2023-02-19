@@ -16,7 +16,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             public int id => Entity.WohnungId;
             public string Bezeichnung => Entity.Bezeichnung;
             public string Besitzer => Program.ctx.FindPerson(Entity.BesitzerId) is IPerson p ? p.Bezeichnung : "Unbekannt";
-            public string Bewohner => "TODO";
+            private Vertrag? Vertrag => Entity.Vertraege.FirstOrDefault(e => e.Ende == null || e.Ende < DateTime.Now);
+            public string? Bewohner => Vertrag is Vertrag v ? string.Join(", ", Program.ctx.MieterSet.Where(m => m.Vertrag.VertragId == v.VertragId).ToList().Select(a => Program.ctx.FindPerson(a.PersonId).Bezeichnung)) : "Keine";
+
             public string Anschrift => Entity.Adresse.Anschrift;
 
             public WohnungListEntry(Wohnung w)

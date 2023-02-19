@@ -1,6 +1,6 @@
 export type MieteListEntry = {
     id: number;
     betreffenderMonat: string;
-    zahlungsDatum: string;
+    zahlungsdatum: string;
     betrag: number;
 }
