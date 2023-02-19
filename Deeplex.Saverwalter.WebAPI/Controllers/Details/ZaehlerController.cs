@@ -28,8 +28,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
         public class ZaehlerEntry : ZaehlerEntryBase
         {
-            public IEnumerable<ZaehlerEntryBase> EinzelZaehler => Entity.EinzelZaehler.Select(e => new ZaehlerEntryBase(e));
-            public IEnumerable<ZaehlerStandEntry> Staende => Entity.Staende.Select(e => new ZaehlerStandEntry(e));
+            public IEnumerable<ZaehlerEntryBase> Einzelzaehler => Entity.EinzelZaehler.Select(e => new ZaehlerEntryBase(e));
+            public IEnumerable<ZaehlerstandListEntry> Staende => Entity.Staende.Select(e => new ZaehlerstandListEntry(e));
             public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
             public ZaehlerEntryBase? AllgemeinZaehler => Entity.Allgemeinzaehler is Zaehler z ? new ZaehlerEntryBase(z) : null;
 
@@ -38,16 +38,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             }
         }
 
-        public class ZaehlerStandEntry
+        public class ZaehlerstandListEntry
         {
             private Zaehlerstand Entity { get; }
             public int Id => Entity.ZaehlerstandId;
-            public double Stand => Entity.Stand;
-            public DateTime Datum => Entity.Datum;
-            public IEnumerable<AnhangEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangEntry(e));
-            public ZaehlerEntryBase Zaehler => new ZaehlerEntryBase(Entity.Zaehler);
+            public string Stand => Entity.Stand.ToString();
+            public string Datum => Entity.Datum.Datum();
+            //public ZaehlerEntryBase Zaehler => new ZaehlerEntryBase(Entity.Zaehler);
 
-            public ZaehlerStandEntry(Zaehlerstand entity)
+            public ZaehlerstandListEntry(Zaehlerstand entity)
             {
                 Entity = entity;
             }

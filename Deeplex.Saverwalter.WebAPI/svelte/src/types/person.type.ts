@@ -1,4 +1,7 @@
 import type { AdresseEntry } from './adresse.type';
+import type { KontaktListEntry } from './kontaktlist.type';
+import type { VertragListEntry } from './vertraglist.type';
+import type { WohnungListEntry } from './wohnunglist.type';
 
 export type PersonEntry = {
     id: string;
@@ -12,4 +15,8 @@ export type PersonEntry = {
 
     natuerlichePerson: boolean;
     adresse: AdresseEntry;
+
+    juristischePersonen: KontaktListEntry[];
+    // wohnungen: WohnungListEntry[];
+    // vertraege: VertragListEntry[];
 }

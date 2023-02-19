@@ -1,7 +1,10 @@
 <script lang="ts">
-	import { Row } from 'carbon-components-svelte';
+	import { Accordion, Row } from 'carbon-components-svelte';
 	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 	import {
+		Kontakte,
+		Mieten,
+		Mietminderungen,
 		WalterComboBox,
 		WalterDatePicker,
 		WalterGrid,
@@ -66,4 +69,13 @@
 			titleText="Ansprechpartner"
 		/>
 	</Row>
+
+	<Accordion>
+		<Kontakte title="Mieter" rows={a.then((x) => x.mieter)} />
+		<Mieten title="Mieten" rows={a.then((x) => x.mieten)} />
+		<Mietminderungen
+			title="Mietminderungen"
+			rows={a.then((x) => x.mietminderungen)}
+		/>
+	</Accordion>
 </WalterGrid>

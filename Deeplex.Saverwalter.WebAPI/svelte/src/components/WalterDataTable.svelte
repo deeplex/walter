@@ -16,7 +16,9 @@
 	}[];
 	export let rows: Promise<any[]>;
 
-	export let navigate: (e: CustomEvent<DataTableRow>) => Promise<void>;
+	export let navigate: (
+		e: CustomEvent<DataTableRow>
+	) => Promise<void> | void = () => {};
 	export let search: boolean = false;
 </script>
 

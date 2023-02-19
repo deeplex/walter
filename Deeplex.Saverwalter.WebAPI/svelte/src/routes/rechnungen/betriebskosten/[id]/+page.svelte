@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { Row } from 'carbon-components-svelte';
+	import { Accordion, Row } from 'carbon-components-svelte';
 	import {
 		WalterDatePicker,
 		WalterGrid,
 		WalterHeader,
-		WalterTextInput
+		WalterTextInput,
+		Wohnungen
 	} from '../../../../components';
 	import { walter_get } from '../../../../services/utils';
 	import type { BetriebskostenrechnungEntry } from '../../../../types/betriebskostenrechnung.type';
@@ -43,4 +44,8 @@
 		<WalterTextInput labelText="Betrag" value={a.then((x) => x.betrag)} />
 		<WalterDatePicker labelText="Datum" value={a.then((x) => x.datum)} />
 	</Row>
+
+	<Accordion>
+		<Wohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
+	</Accordion>
 </WalterGrid>

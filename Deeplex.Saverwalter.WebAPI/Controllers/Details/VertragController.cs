@@ -1,8 +1,12 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Details.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.KontaktListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.MieteListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.MietminderungListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
@@ -28,13 +32,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
         public class VertragEntry : VertragEntryBase
         {
+            // TODO Versionen
+
+            public IEnumerable<KontaktListEntry> Mieter => Program.ctx.MieterSet.Where(m => m.Vertrag.VertragId == Entity.VertragId).ToList().Select(e => new KontaktListEntry(Program.ctx.FindPerson(e.PersonId)));
             public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
-            // TODO MietenEntries
-            // TODO MietMinderungEntries
-            // TODO Mieter?...
+            public IEnumerable<MieteListEntry> Mieten => Entity.Mieten.Select(e => new MieteListEntry(e));
+            public IEnumerable<MietminderungListEntry> Mietminderungen => Entity.Mietminderungen.Select(e => new MietminderungListEntry(e));
+            // TODO Garagen
 
             public VertragEntry(Vertrag entity) : base(entity)
             {
+
             }
         }
 

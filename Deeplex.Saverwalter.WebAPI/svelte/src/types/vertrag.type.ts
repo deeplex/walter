@@ -1,3 +1,6 @@
+import type { KontaktListEntry } from "./kontaktlist.type";
+import type { MieteListEntry } from "./mietelist.type";
+import type { MietminderungListEntry } from "./mietminderunglist.type";
 import type { WohnungEntry } from "./wohnung.type";
 
 export type VertragEntry = {
@@ -6,4 +9,8 @@ export type VertragEntry = {
     ende: string | undefined;
     wohnung: WohnungEntry;
     ansprechpartnerId: string;
+
+    mieter: KontaktListEntry[];
+    mieten: MieteListEntry[];
+    mietminderungen: MietminderungListEntry[];
 }

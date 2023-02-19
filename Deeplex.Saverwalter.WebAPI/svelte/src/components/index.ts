@@ -16,3 +16,6 @@ export { default as Betriebskostenrechnungen } from './lists/Betriebskostenrechn
 export { default as Kontakte } from './lists/Kontakte.svelte';
 export { default as Vertraege } from './lists/Vertraege.svelte';
 export { default as Zaehler } from './lists/Zaehler.svelte';
+export { default as Zaehlerstaende } from './lists/Zaehlerstaende.svelte';
+export { default as Mieten } from './lists/Mieten.svelte';
+export { default as Mietminderungen } from './lists/Mietminderungen.svelte';

@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { Row } from 'carbon-components-svelte';
+	import { Accordion, Row } from 'carbon-components-svelte';
 	import {
 		Adresse,
 		WalterGrid,
 		WalterHeader,
-		WalterTextInput
+		WalterTextInput,
+		Zaehler,
+		Zaehlerstaende
 	} from '../../../components';
 	import { walter_get } from '../../../services/utils';
 	import type { ZaehlerEntry } from '../../../types/zaehler.type';
@@ -24,4 +26,9 @@
 		<WalterTextInput labelText="Typ" value={a.then((x) => x.typ)} />
 	</Row>
 	<Adresse adresse={a.then((x) => x.adresse)} />
+
+	<Accordion>
+		<Zaehlerstaende title="Zählerstände" rows={a.then((x) => x.staende)} />
+		<Zaehler title="Einzelzähler" rows={a.then((x) => x.einzelzaehler)} />
+	</Accordion>
 </WalterGrid>

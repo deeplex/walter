@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,7 +14,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             private Vertrag Entity { get; }
 
             public int Id => Entity.VertragId;
-            public string Mieter => "TODO"; // Mieterbezeichnung
+            public string Mieter => string.Join(", ", Program.ctx.MieterSet.Where(m => m.Vertrag.VertragId == Entity.VertragId).ToList().Select(a => Program.ctx.FindPerson(a.PersonId).Bezeichnung));
             public string Wohnung => Entity.Wohnung.Adresse.Anschrift + ", " + Entity.Wohnung.Bezeichnung;
             public string Beginn => Entity.Beginn().Datum();
             public string Ende => Entity.Ende is DateTime d ? d.Datum() : "Offen";

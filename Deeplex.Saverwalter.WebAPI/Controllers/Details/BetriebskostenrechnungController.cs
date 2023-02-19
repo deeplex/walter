@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Xml.Linq;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Details.AnhangController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Details.UmlageController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.WohnungListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
@@ -30,7 +32,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         public class BetriebskostenrechnungEntry : BetriebskostenrechnungEntryBase
         {
             public UmlageEntry Umlage => new UmlageEntry(Entity.Umlage);
-            public IEnumerable<AnhangEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangEntry(e));
+            public IEnumerable<WohnungListEntry> Wohnungen => Entity.Umlage.Wohnungen.Select(e => new WohnungListEntry(e));
+            public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
 
             public BetriebskostenrechnungEntry(Betriebskostenrechnung entity) : base(entity)
             {

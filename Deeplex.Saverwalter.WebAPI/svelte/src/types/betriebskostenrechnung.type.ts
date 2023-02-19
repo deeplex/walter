@@ -1,4 +1,5 @@
 import type { UmlageEntry } from "./umlage.type";
+import type { WohnungListEntry } from "./wohnunglist.type";
 
 export type BetriebskostenrechnungEntry = {
     id: number;
@@ -7,4 +8,6 @@ export type BetriebskostenrechnungEntry = {
     datum: string;
     notiz: string;
     umlage: UmlageEntry;
+
+    wohnungen: WohnungListEntry[];
 }

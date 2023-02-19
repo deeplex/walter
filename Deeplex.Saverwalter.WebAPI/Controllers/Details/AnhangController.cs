@@ -35,8 +35,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         {
             public IEnumerable<BetriebskostenrechungListEntry> Betriebskostenrechnungen => Entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechungListEntry(e));
             public IEnumerable<ErhaltungsaufwendungListEntry> Erhaltungsaufwendungen => Entity.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungListEntry(e));
-            public IEnumerable<KontaktListEntry> NatuerlichePersonen => Entity.NatuerlichePersonen.Select(e => new KontaktListEntry(e, e.NatuerlichePersonId, true));
-            public IEnumerable<KontaktListEntry> JuristischePersonen => Entity.JuristischePersonen.Select(e => new KontaktListEntry(e, e.JuristischePersonId, false));
+            public IEnumerable<KontaktListEntry> NatuerlichePersonen => Entity.NatuerlichePersonen.Select(e => new KontaktListEntry(e));
+            public IEnumerable<KontaktListEntry> JuristischePersonen => Entity.JuristischePersonen.Select(e => new KontaktListEntry(e));
             public IEnumerable<UmlageListEntry> Umlagen => Entity.Umlagen.Select(e => new UmlageListEntry(e));
             public IEnumerable<VertragListEntry> Vertraege => Entity.Vertraege.Select(e => new VertragListEntry(e));
             public IEnumerable<WohnungListEntry> Wohnungen => Entity.Wohnungen.Select(e => new WohnungListEntry(e)).ToList();

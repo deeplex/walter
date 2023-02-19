@@ -21,11 +21,32 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             public string Mobil => Entity.Mobil ?? "";
 
             public string Anschrift => Entity.Adresse is Adresse a ? a.Anschrift : "Unbekannt";
-
-            public KontaktListEntry(IPerson p, int id, bool n)
+            public KontaktListEntry(NatuerlichePerson n)
             {
-                Entity = p;
-                Id = id * (n ? 1 : -1);
+                Entity = n;
+                Id = n.NatuerlichePersonId;
+            }
+            public KontaktListEntry(JuristischePerson j)
+            {
+                Entity = j;
+                Id = - j.JuristischePersonId;
+            }
+            public KontaktListEntry(IPerson p)
+            {
+                if (Program.ctx.FindPerson(p.PersonId) is NatuerlichePerson n)
+                {
+                    Entity = n;
+                    Id = n.NatuerlichePersonId;
+                }
+                else if (Program.ctx.FindPerson(p.PersonId) is JuristischePerson j)
+                {
+                    Entity = j;
+                    Id =  - j.JuristischePersonId;
+                }
+                else
+                {
+                    throw new EntryPointNotFoundException();
+                }
             }
         }
 
@@ -39,8 +60,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
         [HttpGet(Name = "GetKontaktList")]
         public IEnumerable<KontaktListEntry> Get()
         {
-            var np = Program.ctx.NatuerlichePersonen.Select(e => new KontaktListEntry(e, e.NatuerlichePersonId, true)).ToList();
-            var jp = Program.ctx.JuristischePersonen.Select(e => new KontaktListEntry(e, e.JuristischePersonId, false)).ToList();
+            var np = Program.ctx.NatuerlichePersonen.Select(e => new KontaktListEntry(e)).ToList();
+            var jp = Program.ctx.JuristischePersonen.Select(e => new KontaktListEntry(e)).ToList();
             return np.Concat(jp);
         }
     }

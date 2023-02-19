@@ -1,8 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.BetriebskostenrechnungListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.WohnungListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
@@ -17,6 +17,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             public int Id => Entity.UmlageId;
             public string Notiz => Entity.Notiz ?? "";
             public string WohnungenBezeichnung => Entity.GetWohnungenBezeichnung();
+            public string? Beschreibung => Entity.Beschreibung;
+            public Umlageschluessel Schluessel => Entity.Schluessel;
             public Betriebskostentyp Typ => Entity.Typ;
 
             public UmlageEntryBase(Umlage entity)
@@ -27,8 +29,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
         public class UmlageEntry : UmlageEntryBase
         {
-            public IEnumerable<WohnungEntryBase> Wohnungen => Entity.Wohnungen.Select(e => new WohnungEntryBase(e));
             public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
+            public IEnumerable<BetriebskostenrechungListEntry> Betriebskostenrechnungen => Entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechungListEntry(e));
+            public IEnumerable<WohnungListEntry> Wohnungen => Entity.Wohnungen.Select(e => new WohnungListEntry(e));
+            // TODO Zaehler
+            // TODO HKVO
 
             public UmlageEntry(Umlage entity) : base(entity)
             {

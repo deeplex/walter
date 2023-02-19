@@ -13,7 +13,6 @@
 		Wohnungen,
 		Zaehler
 	} from '../../../components';
-	import WalterAccordionItem from '../../../components/WalterDataWrapper.svelte';
 	import { walter_get } from '../../../services/utils';
 	import type { AnhangEntry } from '../../../types/anhang.type';
 	import type { PageData } from './$types';

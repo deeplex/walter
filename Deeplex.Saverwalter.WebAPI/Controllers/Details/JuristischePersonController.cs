@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.KontaktListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 {
@@ -15,7 +16,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         public class JuristischePersonEntryBase : PersonEntry
         {
             protected new JuristischePerson Entity { get; }
-            public IEnumerable<PersonEntryBase> Mitglieder => Entity.Mitglieder.Select(e => new PersonEntryBase(e));
 
             public JuristischePersonEntryBase(JuristischePerson entity) : base(entity)
             {
@@ -26,6 +26,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         public sealed class JuristischePersonEntry : JuristischePersonEntryBase
         {
             public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
+            public IEnumerable<KontaktListEntry> Mitglieder => Entity.Mitglieder.Select(e => new KontaktListEntry(e));
 
             public JuristischePersonEntry(JuristischePerson entity) : base(entity)
             {

@@ -10,7 +10,9 @@
 		value: string;
 	}[];
 	export let search: boolean = false;
-	export let navigate: (e: CustomEvent<DataTableRow>) => Promise<void>;
+	export let navigate: (
+		e: CustomEvent<DataTableRow>
+	) => Promise<void> | void = () => {};
 </script>
 
 {#if title !== undefined}

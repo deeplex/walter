@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Row } from 'carbon-components-svelte';
+	import { Accordion, Row } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 	import type { NatuerlichePersonEntry } from '../../../../types/natuerlicheperson.type';
 	import { walter_get } from '../../../../services/utils';
@@ -8,7 +8,8 @@
 		WalterHeader,
 		WalterGrid,
 		WalterTextInput,
-		Anhaenge
+		Anhaenge,
+		Kontakte
 	} from '../../../../components';
 
 	export let data: PageData;
@@ -27,4 +28,13 @@
 		<WalterTextInput labelText="Nachname" value={a.then((x) => x.nachname)} />
 	</Row>
 	<Person person={a} />
+
+	<Accordion>
+		<Kontakte
+			title="Juristische Personen"
+			rows={a.then((x) => x.juristischePersonen)}
+		/>
+		<!-- <Wohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} /> -->
+		<!-- <Vertraege title="Verträge" rows={a.then((x) => x.vertraege)} /> -->
+	</Accordion>
 </WalterGrid>
