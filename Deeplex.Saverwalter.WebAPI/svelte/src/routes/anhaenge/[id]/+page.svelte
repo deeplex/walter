@@ -37,7 +37,7 @@
 	</Row> -->
 	<Accordion>
 		<Betriebskostenrechnungen
-			title="Erhaltungsaufwendungen"
+			title="Betriebskostenrechnungen"
 			rows={a.then((x) => x.betriebskostenrechnungen)}
 		/>
 		<Erhaltungsaufwendungen

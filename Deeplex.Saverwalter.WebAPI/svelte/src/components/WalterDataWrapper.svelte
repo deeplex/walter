@@ -17,9 +17,10 @@
 	{#await rows}
 		<AccordionItem>
 			<svelte:fragment slot="title">
-				<p>{title} (</p>
-				<Loading />
-				<p>)</p>
+				<div style="display: flex; flex-direction: row; margin-left: -1em">
+					<p class="bx--accordion__title" style="width: auto;">{title}</p>
+					<Loading withOverlay={false} small style="margin-left: 1em" />
+				</div>
 			</svelte:fragment>
 		</AccordionItem>
 	{:then x}
