@@ -1,7 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
+using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
-using System.Xml.Linq;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Details.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.WohnungListController;
@@ -44,17 +44,25 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
         private readonly ILogger<BetriebskostenrechnungController> _logger;
         IWalterDbService DbService { get; }
+        BetriebskostenrechnungControllerService Service { get; }
 
-        public BetriebskostenrechnungController(ILogger<BetriebskostenrechnungController> logger, IWalterDbService dbService)
+        public BetriebskostenrechnungController(ILogger<BetriebskostenrechnungController> logger, IWalterDbService dbService, BetriebskostenrechnungControllerService service)
         {
-            DbService = dbService;
             _logger = logger;
+            DbService = dbService;
+            Service = service;
         }
 
         [HttpGet(Name = "[Controller]")]
-        public BetriebskostenrechnungEntry Get(int id)
-        {
-            return new BetriebskostenrechnungEntry(DbService.ctx.Betriebskostenrechnungen.Find(id), DbService);
-        }
+        public IActionResult Get(int id) => Service.Get(id);
+
+        [HttpPost(Name = "[Controller]")]
+        public IActionResult Post(BetriebskostenrechnungEntry entry) => Service.Post(entry);
+
+        [HttpPut(Name = "[Controller]")]
+        public IActionResult Put(int id, BetriebskostenrechnungEntry entry) => Service.Put(id, entry);
+
+        [HttpDelete(Name = "[Controller]")]
+        public IActionResult Delete(int id, BetriebskostenrechnungEntry entry) => Service.Delete(id, entry);
     }
 }
