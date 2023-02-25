@@ -53,7 +53,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             DbService = dbService;
         }
 
-        [HttpGet(Name = "GetUmlage")]
+        [HttpGet(Name = "[Controller]")]
         public UmlageEntry Get(int id)
         {
             return new UmlageEntry(DbService.ctx.Umlagen.Find(id), DbService);

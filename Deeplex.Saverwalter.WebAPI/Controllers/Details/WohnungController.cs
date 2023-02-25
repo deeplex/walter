@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetWohnung")]
+        [HttpGet(Name = "[Controller]")]
         public WohnungEntry Get(int id)
         {
             return new WohnungEntry(DbService.ctx.Wohnungen.Find(id), DbService);

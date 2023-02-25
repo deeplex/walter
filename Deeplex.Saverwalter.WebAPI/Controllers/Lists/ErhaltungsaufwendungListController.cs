@@ -38,7 +38,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetErhaltungsaufwendungList")]
+        [HttpGet(Name = "GetKontaktList")]
         public IEnumerable<ErhaltungsaufwendungListEntry> Get()
         {
             return DbService.ctx.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungListEntry(e, DbService)).ToList();

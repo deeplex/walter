@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetVertrag")]
+        [HttpGet(Name = "[Controller]")]
         public VertragEntry Get(int id)
         {
             return new VertragEntry(DbService.ctx.Vertraege.Find(id), DbService);

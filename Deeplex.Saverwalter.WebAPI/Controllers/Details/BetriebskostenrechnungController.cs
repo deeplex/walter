@@ -1,8 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml.Linq;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.AnhangController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Details.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.WohnungListController;
@@ -52,10 +51,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetBetriebskostenrechnung")]
+        [HttpGet(Name = "[Controller]")]
         public BetriebskostenrechnungEntry Get(int id)
         {
-            return new BetriebskostenrechnungEntry(Program.ctx.Betriebskostenrechnungen.Find(id));
+            return new BetriebskostenrechnungEntry(DbService.ctx.Betriebskostenrechnungen.Find(id), DbService);
         }
     }
 }

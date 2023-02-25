@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetBetriebskostenrechnungList")]
+        [HttpGet(Name = "[Controller]")]
         public IEnumerable<BetriebskostenrechungListEntry> Get()
         {
             return DbService.ctx.Betriebskostenrechnungen.Select(e => new BetriebskostenrechungListEntry(e)).ToList();

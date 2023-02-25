@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetMietminderungen")]
+        [HttpGet(Name = "[Controller]")]
         public IEnumerable<MietminderungListEntry> Get()
         {
             return DbService.ctx.Mietminderungen.Select(e => new MietminderungListEntry(e)).ToList();

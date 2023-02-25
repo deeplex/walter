@@ -63,7 +63,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetKontaktList")]
+        [HttpGet(Name = "[Controller]")]
         public IEnumerable<KontaktListEntry> Get()
         {
             var np = DbService.ctx.NatuerlichePersonen.Select(e => new KontaktListEntry(e, DbService)).ToList();

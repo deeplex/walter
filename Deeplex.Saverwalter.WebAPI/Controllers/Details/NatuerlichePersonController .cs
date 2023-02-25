@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             DbService = dbService;
         }
 
-        [HttpGet(Name = "GetNatuerlichePerson")]
+        [HttpGet(Name = "[Controller]")]
         public NatuerlichePersonEntry Get(int id)
         {
             return new NatuerlichePersonEntry(DbService.ctx.NatuerlichePersonen.Find(id), DbService);

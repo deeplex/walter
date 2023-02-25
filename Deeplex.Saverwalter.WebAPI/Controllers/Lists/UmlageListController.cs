@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetUmlageList")]
+        [HttpGet(Name = "[Controller]")]
         public IEnumerable<UmlageListEntry> Get()
         {
             return DbService.ctx.Umlagen.Select(e => new UmlageListEntry(e)).ToList();

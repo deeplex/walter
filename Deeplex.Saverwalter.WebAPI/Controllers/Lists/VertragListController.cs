@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetVertragList")]
+        [HttpGet(Name = "[Controller]")]
         public IEnumerable<VertragListEntry> Get()
         {
             return DbService.ctx.Vertraege.Select(e => new VertragListEntry(e, DbService)).ToList();

@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetAnhaenge")]
+        [HttpGet(Name = "[Controller]")]
         public IEnumerable<AnhangListEntry> Get()
         {
             return DbService.ctx.Anhaenge.Select(e => new AnhangListEntry(e)).ToList();

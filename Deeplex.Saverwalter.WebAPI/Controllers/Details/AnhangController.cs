@@ -60,7 +60,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetAnhang")]
+        [HttpGet(Name = "[Controller]")]
         public AnhangEntry Get(Guid id)
         {
             return new AnhangEntry(DbService.ctx.Anhaenge.Find(id), DbService);

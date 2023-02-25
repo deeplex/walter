@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             DbService = dbService;
         }
 
-        [HttpGet(Name = "GetZaehlerList")]
+        [HttpGet(Name = "[Controller]")]
         public IEnumerable<ZaehlerListEntry> Get()
         {
             return DbService.ctx.ZaehlerSet.Select(e => new ZaehlerListEntry(e)).ToList();
