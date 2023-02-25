@@ -15,6 +15,10 @@ namespace Deeplex.Saverwalter.WebAPI
         public static void Main(string[] args)
         {
             var container = new Container();
+            container.Options.DefaultScopedLifestyle = new SimpleInjector.Lifestyles.AsyncScopedLifestyle();
+            container.Register<INotificationService, NotificationService>(Lifestyle.Scoped);
+            container.Register<IFileService, FileService>(Lifestyle.Scoped);
+            container.Register<IWalterDbService, WalterDbService>(Lifestyle.Scoped);
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -36,15 +40,14 @@ namespace Deeplex.Saverwalter.WebAPI
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddScoped<INotificationService, NotificationService>();
-            builder.Services.AddScoped<IFileService, FileService>();
-            builder.Services.AddScoped<IWalterDbService, WalterDbService>();
-            builder.Services.AddSimpleInjector(container);
+            builder.Services.AddSimpleInjector(container, options =>
+            {
+                options.AddAspNetCore().AddControllerActivation();
+            });
 
             var app = builder.Build();
             
-            // Can't use app.UseSimpleInjector because of amiguity https://github.com/simpleinjector/SimpleInjector/issues/933
-            SimpleInjectorUseOptionsAspNetCoreExtensions.UseSimpleInjector(app, container);
+            app.Services.UseSimpleInjector(container);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
