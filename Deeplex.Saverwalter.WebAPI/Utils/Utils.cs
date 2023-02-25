@@ -1,4 +1,4 @@
-﻿namespace Deeplex.Saverwalter.WebAPI.Services
+﻿namespace Deeplex.Saverwalter.WebAPI.Helper
 {
     public static class Utils
     {

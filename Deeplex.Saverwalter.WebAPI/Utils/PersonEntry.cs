@@ -5,7 +5,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.KontaktListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.VertragListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.WohnungListController;
 
-namespace Deeplex.Saverwalter.WebAPI.Services
+namespace Deeplex.Saverwalter.WebAPI.Helper
 {
     public class PersonEntryBase
     {
