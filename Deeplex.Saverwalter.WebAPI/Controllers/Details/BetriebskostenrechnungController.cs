@@ -31,19 +31,24 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
         public class BetriebskostenrechnungEntry : BetriebskostenrechnungEntryBase
         {
-            public UmlageEntry Umlage => new UmlageEntry(Entity.Umlage);
-            public IEnumerable<WohnungListEntry> Wohnungen => Entity.Umlage.Wohnungen.Select(e => new WohnungListEntry(e));
+            private IWalterDbService DbService { get; }
+
+            public UmlageEntry Umlage => new UmlageEntry(Entity.Umlage, DbService);
+            public IEnumerable<WohnungListEntry> Wohnungen => Entity.Umlage.Wohnungen.Select(e => new WohnungListEntry(e, DbService));
             public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
 
-            public BetriebskostenrechnungEntry(Betriebskostenrechnung entity) : base(entity)
+            public BetriebskostenrechnungEntry(Betriebskostenrechnung entity, IWalterDbService dbService) : base(entity)
             {
+                DbService = dbService;
             }
         }
 
         private readonly ILogger<BetriebskostenrechnungController> _logger;
+        IWalterDbService DbService { get; }
 
-        public BetriebskostenrechnungController(ILogger<BetriebskostenrechnungController> logger)
+        public BetriebskostenrechnungController(ILogger<BetriebskostenrechnungController> logger, IWalterDbService dbService)
         {
+            DbService = dbService;
             _logger = logger;
         }
 

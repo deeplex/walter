@@ -25,16 +25,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
         }
 
         private readonly ILogger<AnhangListController> _logger;
+        private IWalterDbService DbService { get; }
 
-        public AnhangListController(ILogger<AnhangListController> logger)
+        public AnhangListController(ILogger<AnhangListController> logger, IWalterDbService dbService)
         {
+            DbService = dbService;
             _logger = logger;
         }
 
         [HttpGet(Name = "GetAnhaenge")]
         public IEnumerable<AnhangListEntry> Get()
         {
-            return Program.ctx.Anhaenge.Select(e => new AnhangListEntry(e)).ToList();
+            return DbService.ctx.Anhaenge.Select(e => new AnhangListEntry(e)).ToList();
         }
     }
 }

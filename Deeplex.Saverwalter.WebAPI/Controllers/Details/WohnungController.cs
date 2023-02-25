@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
@@ -41,29 +42,36 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
         public class WohnungEntry : WohnungEntryBase
         {
-            public IEnumerable<WohnungListEntry> Haus => Entity.Adresse.Wohnungen.Select(e => new WohnungListEntry(e));
+            private IWalterDbService DbService { get; }
+
+            public IEnumerable<WohnungListEntry> Haus => Entity.Adresse.Wohnungen.Select(e => new WohnungListEntry(e, DbService));
             public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
             public IEnumerable<ZaehlerListEntry> Zaehler => Entity.Zaehler.Select(e => new ZaehlerListEntry(e));
-            public IEnumerable<VertragListEntry> Vertraege => Entity.Vertraege.Select(e => new VertragListEntry(e));
-            public IEnumerable<ErhaltungsaufwendungListEntry> Erhaltungsaufwendungen => Entity.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungListEntry(e));
+            public IEnumerable<VertragListEntry> Vertraege => Entity.Vertraege.Select(e => new VertragListEntry(e, DbService));
+            public IEnumerable<ErhaltungsaufwendungListEntry> Erhaltungsaufwendungen => Entity.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungListEntry(e, DbService));
             public IEnumerable<UmlageListEntry> Umlagen => Entity.Umlagen.Select(e => new UmlageListEntry(e));
             public IEnumerable<BetriebskostenrechungListEntry> Betriebskostenrechnungen => Entity.Umlagen.SelectMany(e => e.Betriebskostenrechnungen.Select(f => new BetriebskostenrechungListEntry(f)));
 
 
-            public WohnungEntry(Wohnung entity) : base(entity) { }
+            public WohnungEntry(Wohnung entity, IWalterDbService dbService) : base(entity)
+            {
+                DbService = dbService;
+            }
         }
 
         private readonly ILogger<WohnungController> _logger;
+        private IWalterDbService DbService { get; }
 
-        public WohnungController(ILogger<WohnungController> logger)
+        public WohnungController(ILogger<WohnungController> logger, IWalterDbService dbService)
         {
+            DbService = dbService;
             _logger = logger;
         }
 
         [HttpGet(Name = "GetWohnung")]
         public WohnungEntry Get(int id)
         {
-            return new WohnungEntry(Program.ctx.Wohnungen.Find(id));
+            return new WohnungEntry(DbService.ctx.Wohnungen.Find(id), DbService);
         }
     }
 }

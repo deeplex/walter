@@ -1,11 +1,8 @@
-using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
-using Deeplex.Saverwalter.WebAPI.Services;
 using SimpleInjector;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using System.Diagnostics;
 
 namespace Deeplex.Saverwalter.WebAPI
 {
@@ -15,21 +12,9 @@ namespace Deeplex.Saverwalter.WebAPI
         public static string AppName = "Saverwalter";
         private static string APMServer = Environment.GetEnvironmentVariable("APM-Server") ?? "http://192.168.178.61:8200"; // TODO change to localhost...
 
-        private static Container Container { get; set; } = null!;
-        public static SaverwalterContext ctx => Container.GetInstance<IWalterDbService>().ctx;
-        public static TEntity LoadNavigations<TEntity>(TEntity entity)
-        {
-            ctx.Entry(entity).Collections.ToList().ForEach(e => e.Load());
-            return entity;
-        }
-
         public static void Main(string[] args)
         {
-            Container = new Container();
-            Container.Register<INotificationService, NotificationService>(Lifestyle.Transient);
-            Container.Register<IFileService, FileService>(Lifestyle.Transient);
-            Container.Register<IWalterDbService, WalterDbService>(Lifestyle.Transient);
-            Container.Verify();
+            var container = new Container();
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -51,8 +36,15 @@ namespace Deeplex.Saverwalter.WebAPI
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<IFileService, FileService>();
+            builder.Services.AddScoped<IWalterDbService, WalterDbService>();
+            builder.Services.AddSimpleInjector(container);
 
             var app = builder.Build();
+            
+            // Can't use app.UseSimpleInjector because of amiguity https://github.com/simpleinjector/SimpleInjector/issues/933
+            SimpleInjectorUseOptionsAspNetCoreExtensions.UseSimpleInjector(app, container);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -66,6 +58,7 @@ namespace Deeplex.Saverwalter.WebAPI
             //app.UseAuthorization();
             app.MapControllers();
 
+            container.Verify();
             app.Run();
         }
     }

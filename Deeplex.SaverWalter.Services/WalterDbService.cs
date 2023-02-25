@@ -5,14 +5,18 @@ namespace Deeplex.Saverwalter.Services
 {
     public interface IWalterDbService
     {
+        #pragma warning disable IDE1006 // Naming Styles
         SaverwalterContext ctx { get; set; }
+        #pragma warning restore IDE1006 // Naming Styles
         public void SaveWalter();
         public INotificationService NotificationService { get; }
     }
 
     public sealed class WalterDbService : IWalterDbService
     {
+        #pragma warning disable IDE1006 // Naming Styles
         public string root { get; set; }
+        #pragma warning restore IDE1006 // Naming Styles
 
         public IFileService FileService { get; }
         public INotificationService NotificationService { get; }

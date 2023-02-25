@@ -27,16 +27,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
         }
 
         private readonly ILogger<ZaehlerListController> _logger;
+        private IWalterDbService DbService { get; }
 
-        public ZaehlerListController(ILogger<ZaehlerListController> logger)
+        public ZaehlerListController(ILogger<ZaehlerListController> logger, IWalterDbService dbService)
         {
             _logger = logger;
+            DbService = dbService;
         }
 
         [HttpGet(Name = "GetZaehlerList")]
         public IEnumerable<ZaehlerListEntry> Get()
         {
-            return Program.ctx.ZaehlerSet.Select(e => new ZaehlerListEntry(e)).ToList();
+            return DbService.ctx.ZaehlerSet.Select(e => new ZaehlerListEntry(e)).ToList();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -53,16 +54,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         }
 
         private readonly ILogger<ZaehlerController> _logger;
+        private IWalterDbService DbService { get; }
 
-        public ZaehlerController(ILogger<ZaehlerController> logger)
+        public ZaehlerController(ILogger<ZaehlerController> logger, IWalterDbService dbService)
         {
             _logger = logger;
+            DbService = dbService;
         }
 
         [HttpGet(Name = "GetZaehler")]
         public ZaehlerEntry Get(int id)
         {
-            return new ZaehlerEntry(Program.ctx.ZaehlerSet.Find(id));
+            return new ZaehlerEntry(DbService.ctx.ZaehlerSet.Find(id));
         }
     }
 }

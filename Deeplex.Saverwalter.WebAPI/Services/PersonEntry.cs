@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Details.JuristischePersonController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.KontaktListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.VertragListController;
@@ -27,10 +28,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class PersonEntry : PersonEntryBase
     {
-        public IEnumerable<KontaktListEntry> JuristischePersonen => Entity.JuristischePersonen.Select(e => new KontaktListEntry(e));
+        IWalterDbService DbService { get; }
+        public IEnumerable<KontaktListEntry> JuristischePersonen => Entity.JuristischePersonen.Select(e => new KontaktListEntry(e, DbService));
 
-        public PersonEntry(IPerson entity) : base(entity)
+        public PersonEntry(IPerson entity, IWalterDbService dbService) : base(entity)
         {
+            DbService = dbService;
         }
     }
 }

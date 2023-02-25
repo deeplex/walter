@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml.Linq;
@@ -33,31 +34,36 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
         public class AnhangEntry : AnhangEntryBase
         {
+            private IWalterDbService DbService { get; }
+
             public IEnumerable<BetriebskostenrechungListEntry> Betriebskostenrechnungen => Entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechungListEntry(e));
-            public IEnumerable<ErhaltungsaufwendungListEntry> Erhaltungsaufwendungen => Entity.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungListEntry(e));
-            public IEnumerable<KontaktListEntry> NatuerlichePersonen => Entity.NatuerlichePersonen.Select(e => new KontaktListEntry(e));
-            public IEnumerable<KontaktListEntry> JuristischePersonen => Entity.JuristischePersonen.Select(e => new KontaktListEntry(e));
+            public IEnumerable<ErhaltungsaufwendungListEntry> Erhaltungsaufwendungen => Entity.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungListEntry(e, DbService));
+            public IEnumerable<KontaktListEntry> NatuerlichePersonen => Entity.NatuerlichePersonen.Select(e => new KontaktListEntry(e, DbService));
+            public IEnumerable<KontaktListEntry> JuristischePersonen => Entity.JuristischePersonen.Select(e => new KontaktListEntry(e, DbService));
             public IEnumerable<UmlageListEntry> Umlagen => Entity.Umlagen.Select(e => new UmlageListEntry(e));
-            public IEnumerable<VertragListEntry> Vertraege => Entity.Vertraege.Select(e => new VertragListEntry(e));
-            public IEnumerable<WohnungListEntry> Wohnungen => Entity.Wohnungen.Select(e => new WohnungListEntry(e)).ToList();
+            public IEnumerable<VertragListEntry> Vertraege => Entity.Vertraege.Select(e => new VertragListEntry(e, DbService));
+            public IEnumerable<WohnungListEntry> Wohnungen => Entity.Wohnungen.Select(e => new WohnungListEntry(e, DbService)).ToList();
             public IEnumerable<ZaehlerListEntry> Zaehler => Entity.Zaehler.Select(e => new ZaehlerListEntry(e));
 
-            public AnhangEntry(Anhang entity) : base(entity)
+            public AnhangEntry(Anhang entity, IWalterDbService dbService) : base(entity)
             {
+                DbService = dbService;
             }
         }
 
         private readonly ILogger<AnhangController> _logger;
+        private IWalterDbService DbService { get; }
 
-        public AnhangController(ILogger<AnhangController> logger)
+        public AnhangController(ILogger<AnhangController> logger, IWalterDbService dbService)
         {
+            DbService = dbService;
             _logger = logger;
         }
 
         [HttpGet(Name = "GetAnhang")]
         public AnhangEntry Get(Guid id)
         {
-            return new AnhangEntry(Program.ctx.Anhaenge.Find(id));
+            return new AnhangEntry(DbService.ctx.Anhaenge.Find(id), DbService);
         }
     }
 }

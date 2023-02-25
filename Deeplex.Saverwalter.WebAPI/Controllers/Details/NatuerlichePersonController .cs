@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             public string Vorname => Entity.Vorname ?? "";
             public string Nachname => Entity.Nachname;
 
-            public NatuerlichePersonEntryBase(NatuerlichePerson entity) : base(entity)
+            public NatuerlichePersonEntryBase(NatuerlichePerson entity, IWalterDbService dbService) : base(entity, dbService)
             {
                 Entity = entity;
             }
@@ -30,22 +30,24 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         {
             public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
             
-            public NatuerlichePersonEntry(NatuerlichePerson entity) : base(entity)
+            public NatuerlichePersonEntry(NatuerlichePerson entity, IWalterDbService dbService) : base(entity, dbService)
             {
             }
         }
 
         private readonly ILogger<NatuerlichePersonController> _logger;
+        private IWalterDbService DbService { get; }
 
-        public NatuerlichePersonController(ILogger<NatuerlichePersonController> logger)
+        public NatuerlichePersonController(ILogger<NatuerlichePersonController> logger, IWalterDbService dbService)
         {
             _logger = logger;
+            DbService = dbService;
         }
 
         [HttpGet(Name = "GetNatuerlichePerson")]
         public NatuerlichePersonEntry Get(int id)
         {
-            return new NatuerlichePersonEntry(Program.ctx.NatuerlichePersonen.Find(id));
+            return new NatuerlichePersonEntry(DbService.ctx.NatuerlichePersonen.Find(id), DbService);
         }
     }
 }

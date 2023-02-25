@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         {
             protected new JuristischePerson Entity { get; }
 
-            public JuristischePersonEntryBase(JuristischePerson entity) : base(entity)
+            public JuristischePersonEntryBase(JuristischePerson entity, IWalterDbService dbService) : base(entity, dbService)
             {
                 Entity = entity;
             }
@@ -25,25 +25,30 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
         public sealed class JuristischePersonEntry : JuristischePersonEntryBase
         {
-            public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
-            public IEnumerable<KontaktListEntry> Mitglieder => Entity.Mitglieder.Select(e => new KontaktListEntry(e));
+            private IWalterDbService DbService { get; }
 
-            public JuristischePersonEntry(JuristischePerson entity) : base(entity)
+            public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
+            public IEnumerable<KontaktListEntry> Mitglieder => Entity.Mitglieder.Select(e => new KontaktListEntry(e, DbService));
+
+            public JuristischePersonEntry(JuristischePerson entity, IWalterDbService dbService) : base(entity, dbService)
             {
+                DbService = dbService;
             }
         }
 
         private readonly ILogger<JuristischePersonController> _logger;
+        private IWalterDbService DbService { get; }
 
-        public JuristischePersonController(ILogger<JuristischePersonController> logger)
+        public JuristischePersonController(ILogger<JuristischePersonController> logger, IWalterDbService dbService)
         {
+            DbService = dbService;
             _logger = logger;
         }
 
         [HttpGet(Name = "GetJuristischePerson")]
         public JuristischePersonEntry Get(int id)
         {
-            return new JuristischePersonEntry(Program.ctx.JuristischePersonen.Find(id));
+            return new JuristischePersonEntry(DbService.ctx.JuristischePersonen.Find(id), DbService);
         }
     }
 }

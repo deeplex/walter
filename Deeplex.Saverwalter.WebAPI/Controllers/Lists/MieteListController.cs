@@ -27,16 +27,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
         }
 
         private readonly ILogger<MieteListController> _logger;
+        private IWalterDbService DbService { get; }
 
-        public MieteListController(ILogger<MieteListController> logger)
+        public MieteListController(ILogger<MieteListController> logger, IWalterDbService dbService)
         {
+            DbService = dbService;
             _logger = logger;
         }
 
         [HttpGet(Name = "GetMieten")]
         public IEnumerable<MieteListEntry> Get()
         {
-            return Program.ctx.Mieten.Select(e => new MieteListEntry(e)).ToList();
+            return DbService.ctx.Mieten.Select(e => new MieteListEntry(e)).ToList();
         }
     }
 }

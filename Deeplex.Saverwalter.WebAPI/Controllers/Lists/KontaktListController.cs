@@ -11,6 +11,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
     {
         public class KontaktListEntry
         {
+            private IWalterDbService DbService { get; }
             private IPerson Entity { get; }
 
             public Guid Guid => Entity.PersonId;
@@ -21,24 +22,27 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             public string Mobil => Entity.Mobil ?? "";
 
             public string Anschrift => Entity.Adresse is Adresse a ? a.Anschrift : "Unbekannt";
-            public KontaktListEntry(NatuerlichePerson n)
+            public KontaktListEntry(NatuerlichePerson n, IWalterDbService dbService)
             {
+                DbService = dbService;
                 Entity = n;
                 Id = n.NatuerlichePersonId;
             }
-            public KontaktListEntry(JuristischePerson j)
+            public KontaktListEntry(JuristischePerson j, IWalterDbService dbService)
             {
+                DbService = dbService;
                 Entity = j;
                 Id = - j.JuristischePersonId;
             }
-            public KontaktListEntry(IPerson p)
+            public KontaktListEntry(IPerson p, IWalterDbService dbService)
             {
-                if (Program.ctx.FindPerson(p.PersonId) is NatuerlichePerson n)
+                DbService = dbService;
+                if (DbService.ctx.FindPerson(p.PersonId) is NatuerlichePerson n)
                 {
                     Entity = n;
                     Id = n.NatuerlichePersonId;
                 }
-                else if (Program.ctx.FindPerson(p.PersonId) is JuristischePerson j)
+                else if (DbService.ctx.FindPerson(p.PersonId) is JuristischePerson j)
                 {
                     Entity = j;
                     Id =  - j.JuristischePersonId;
@@ -51,17 +55,19 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
         }
 
         private readonly ILogger<KontaktListController> _logger;
+        private IWalterDbService DbService { get; }
 
-        public KontaktListController(ILogger<KontaktListController> logger)
+        public KontaktListController(ILogger<KontaktListController> logger, IWalterDbService dbService)
         {
+            DbService = dbService;
             _logger = logger;
         }
 
         [HttpGet(Name = "GetKontaktList")]
         public IEnumerable<KontaktListEntry> Get()
         {
-            var np = Program.ctx.NatuerlichePersonen.Select(e => new KontaktListEntry(e)).ToList();
-            var jp = Program.ctx.JuristischePersonen.Select(e => new KontaktListEntry(e)).ToList();
+            var np = DbService.ctx.NatuerlichePersonen.Select(e => new KontaktListEntry(e, DbService)).ToList();
+            var jp = DbService.ctx.JuristischePersonen.Select(e => new KontaktListEntry(e, DbService)).ToList();
             return np.Concat(jp);
         }
     }

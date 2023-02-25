@@ -1,9 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
-using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
 {
@@ -26,16 +23,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
         }
 
         private readonly ILogger<UmlageListController> _logger;
+        private IWalterDbService DbService { get; }
 
-        public UmlageListController(ILogger<UmlageListController> logger)
+        public UmlageListController(ILogger<UmlageListController> logger, IWalterDbService dbService)
         {
+            DbService = dbService;
             _logger = logger;
         }
 
         [HttpGet(Name = "GetUmlageList")]
         public IEnumerable<UmlageListEntry> Get()
         {
-            return Program.ctx.Umlagen.Select(e => new UmlageListEntry(e)).ToList();
+            return DbService.ctx.Umlagen.Select(e => new UmlageListEntry(e)).ToList();
         }
     }
 }

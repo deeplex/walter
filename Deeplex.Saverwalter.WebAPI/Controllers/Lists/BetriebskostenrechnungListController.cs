@@ -28,16 +28,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
         }
 
         private readonly ILogger<BetriebskostenrechnungListController> _logger;
+        private IWalterDbService DbService { get; }
 
-        public BetriebskostenrechnungListController(ILogger<BetriebskostenrechnungListController> logger)
+        public BetriebskostenrechnungListController(ILogger<BetriebskostenrechnungListController> logger, IWalterDbService dbService)
         {
+            DbService = dbService;
             _logger = logger;
         }
 
         [HttpGet(Name = "GetBetriebskostenrechnungList")]
         public IEnumerable<BetriebskostenrechungListEntry> Get()
         {
-            return Program.ctx.Betriebskostenrechnungen.Select(e => new BetriebskostenrechungListEntry(e)).ToList();
+            return DbService.ctx.Betriebskostenrechnungen.Select(e => new BetriebskostenrechungListEntry(e)).ToList();
         }
     }
 }

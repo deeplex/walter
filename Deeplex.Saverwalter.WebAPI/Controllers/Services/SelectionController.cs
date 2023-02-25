@@ -27,9 +27,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         private readonly ILogger<SelectionListController> _logger;
+        private IWalterDbService DbService { get; }
 
-        public SelectionListController(ILogger<SelectionListController> logger)
+        public SelectionListController(ILogger<SelectionListController> logger, IWalterDbService dbService)
         {
+            DbService = dbService;
             _logger = logger;
         }
 
@@ -37,15 +39,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         [Route("api/selection/umlage")]
         public IEnumerable<SelectionListEntry> GetUmlagen()
         {
-            return Program.ctx.Umlagen.Select(e => new SelectionListEntry(e.UmlageId, e.Wohnungen.GetWohnungenBezeichnung())).ToList();
+            return DbService.ctx.Umlagen.Select(e => new SelectionListEntry(e.UmlageId, e.Wohnungen.GetWohnungenBezeichnung())).ToList();
         }
 
         [HttpGet]
         [Route("api/selection/kontakte")]
         public IEnumerable<SelectionListEntry> GetKontakte()
         {
-            var nat = Program.ctx.NatuerlichePersonen.Select(e => new SelectionListEntry(e.PersonId, e.Bezeichnung)).ToList();
-            var jur = Program.ctx.JuristischePersonen.Select(e => new SelectionListEntry(e.PersonId, e.Bezeichnung)).ToList();
+            var nat = DbService.ctx.NatuerlichePersonen.Select(e => new SelectionListEntry(e.PersonId, e.Bezeichnung)).ToList();
+            var jur = DbService.ctx.JuristischePersonen.Select(e => new SelectionListEntry(e.PersonId, e.Bezeichnung)).ToList();
             return nat.Concat(jur);
         }
 
@@ -53,7 +55,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         [Route("api/selection/wohnungen")]
         public IEnumerable<SelectionListEntry> GetWohnungen()
         {
-            return Program.ctx.Wohnungen.Select(e => new SelectionListEntry(e.WohnungId, e.Adresse.Anschrift + " - " + e.Bezeichnung)).ToList();
+            return DbService.ctx.Wohnungen.Select(e => new SelectionListEntry(e.WohnungId, e.Adresse.Anschrift + " - " + e.Bezeichnung)).ToList();
         }
     }
 }
