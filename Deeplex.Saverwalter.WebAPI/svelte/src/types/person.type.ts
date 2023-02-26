@@ -4,7 +4,7 @@ import type { VertragEntry } from './vertrag.type';
 import type { WohnungEntry } from './wohnung.type';
 
 export type PersonEntry = {
-    id: string;
+    id: number;
     guid: string;
     email: string;
     telefon: string;
@@ -20,7 +20,4 @@ export type PersonEntry = {
     wohnungen: WohnungEntry[];
     vertraege: VertragEntry[];
     anhaenge: AnhangEntry[];
-
-    anschrift: string;
-    natuerlich: boolean;
 }

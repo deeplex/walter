@@ -12,14 +12,14 @@
 	export let rows: Promise<AnhangEntry[]>;
 </script>
 
-{#await rows}
-	<HeaderAction disabled>
-		<svelte:fragment slot="text">
-			<Loading style="margin-left: 1em;" withOverlay={false} small />
-		</svelte:fragment>
-	</HeaderAction>
-{:then x}
-	<HeaderUtilities>
+<HeaderUtilities>
+	{#await rows}
+		<HeaderAction disabled>
+			<svelte:fragment slot="text">
+				<Loading style="margin-left: 1em;" withOverlay={false} small />
+			</svelte:fragment>
+		</HeaderAction>
+	{:then x}
 		<HeaderAction isOpen text="({x.length})">
 			<HeaderPanelLinks>
 				<HeaderPanelDivider>Dateien ({x.length})</HeaderPanelDivider>
@@ -28,5 +28,5 @@
 				{/each}
 			</HeaderPanelLinks>
 		</HeaderAction>
-	</HeaderUtilities>
-{/await}
+	{/await}
+</HeaderUtilities>
