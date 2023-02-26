@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Row, TextInput } from 'carbon-components-svelte';
+	import { Row } from 'carbon-components-svelte';
 	import type { PersonEntry } from '../types/person.type';
 	import Adresse from './Adresse.svelte';
 	import WalterTextInput from './WalterTextInput.svelte';

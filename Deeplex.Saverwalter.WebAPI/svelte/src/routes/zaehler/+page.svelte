@@ -2,9 +2,9 @@
 	import { WalterHeader } from '../../components';
 	import Zaehler from '../../components/lists/Zaehler.svelte';
 	import { walter_get } from '../../services/utils';
-	import type { ZaehlerListEntry } from '../../types/zaehlerlist.type';
+	import type { ZaehlerEntry } from '../../types/zaehler.type';
 
-	const rows: Promise<ZaehlerListEntry[]> = walter_get('/api/zaehler');
+	const rows: Promise<ZaehlerEntry[]> = walter_get('/api/zaehler');
 </script>
 
 <WalterHeader title="Zähler" />

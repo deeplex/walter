@@ -13,19 +13,19 @@
 		Wohnungen,
 		Vertraege
 	} from '../../../../components';
-	import type { WohnungListEntry } from '../../../../types/wohnunglist.type';
-	import type { VertragListEntry } from '../../../../types/vertraglist.type';
+	import type { WohnungEntry } from '../../../../types/wohnung.type';
+	import type { VertragEntry } from '../../../../types/vertrag.type';
 
 	export let data: PageData;
 	const a: Promise<NatuerlichePersonEntry> = walter_get(
 		`/api/kontakte/nat/${data.id}`
 	);
 
-	function getWohnungen(guid: string): Promise<WohnungListEntry[]> {
+	function getWohnungen(guid: string): Promise<WohnungEntry[]> {
 		return walter_get(`/api/wohnungen/mieter/${guid}`);
 	}
 
-	function getVertraege(guid: string): Promise<VertragListEntry[]> {
+	function getVertraege(guid: string): Promise<VertragEntry[]> {
 		return walter_get(`/api/vertraege/mieter/${guid}`);
 	}
 </script>

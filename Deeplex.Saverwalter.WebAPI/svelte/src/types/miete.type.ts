@@ -1,4 +1,4 @@
-export type MieteListEntry = {
+export type MieteEntry = {
     id: number;
     betreffenderMonat: string;
     zahlungsdatum: string;

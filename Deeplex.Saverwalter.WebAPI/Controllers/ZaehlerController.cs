@@ -3,15 +3,12 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Helper;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.AnhangController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.WohnungController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
 
-namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
+namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/zaehler/{id}")]
+    [Route("api/zaehler")]
     public class ZaehlerController : ControllerBase
     {
         public class ZaehlerEntryBase
@@ -23,6 +20,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             public Zaehlertyp Typ { get; set; }
             public AdresseEntry? Adresse { get; set; }
             public string? Notiz { get; set; }
+            public string? Wohnung { get; set; }
 
             public ZaehlerEntryBase() { }
             public ZaehlerEntryBase(Zaehler entity)
@@ -33,38 +31,40 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
                 Kennnummer = Entity.Kennnummer;
                 Typ = Entity.Typ;
                 Adresse = Entity.Adresse is Adresse a ? new AdresseEntry(a) : null;
+                Wohnung = Entity.Wohnung is Wohnung w ? w.Adresse.Anschrift + ", " + w.Bezeichnung : null;
                 Notiz = Entity.Notiz;
             }
         }
 
         public class ZaehlerEntry : ZaehlerEntryBase
         {
-            public IWalterDbService? DbService { get; }
+            public ZaehlerEntryBase? AllgemeinZaehler { get; set; }
 
-            public ZaehlerEntryBase? AllgemeinZaehler => Entity?.Allgemeinzaehler is Zaehler z ? new ZaehlerEntryBase(z) : null;
-
-            public IEnumerable<ZaehlerEntryBase>? Einzelzaehler => Entity?.EinzelZaehler.Select(e => new ZaehlerEntryBase(e));
-            public IEnumerable<ZaehlerstandListEntry>? Staende => Entity?.Staende.Select(e => new ZaehlerstandListEntry(e));
-            public IEnumerable<AnhangListEntry>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangListEntry(e));
+            public IEnumerable<ZaehlerEntryBase>? Einzelzaehler => Entity?.EinzelZaehler.ToList().Select(e => new ZaehlerEntryBase(e));
+            public IEnumerable<ZaehlerstandEntryBase>? Staende => Entity?.Staende.ToList().Select(e => new ZaehlerstandEntryBase(e));
+            public IEnumerable<AnhangEntryBase>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangEntryBase(e));
 
             public ZaehlerEntry() : base() { }
-            public ZaehlerEntry(Zaehler entity, IWalterDbService dbService) : base(entity)
+            public ZaehlerEntry(Zaehler entity) : base(entity)
             {
-                DbService = dbService;
+                AllgemeinZaehler = Entity?.Allgemeinzaehler is Zaehler z ? new ZaehlerEntryBase(z) : null;
             }
         }
 
-        public class ZaehlerstandListEntry
+        public class ZaehlerstandEntryBase
         {
-            private Zaehlerstand Entity { get; }
-            public int Id => Entity.ZaehlerstandId;
-            public string Stand => Entity.Stand.ToString();
-            public string Datum => Entity.Datum.Datum();
-            //public ZaehlerEntryBase Zaehler => new ZaehlerEntryBase(Entity.Zaehler);
+            private Zaehlerstand? Entity { get; }
+            public int Id { get; set; }
+            public string Stand { get; set; }
+            public string Datum { get; set; }
 
-            public ZaehlerstandListEntry(Zaehlerstand entity)
+            public ZaehlerstandEntryBase(Zaehlerstand entity)
             {
                 Entity = entity;
+
+                Id = Entity.ZaehlerstandId;
+                Stand = Entity.Stand.ToString();
+                Datum = Entity.Datum.Datum();
             }
         }
 
@@ -77,16 +77,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             DbService = dbService;
         }
 
-        [HttpGet(Name = "[Controller]")]
-        public IActionResult Get(int id) => DbService.Get(id);
-
-        [HttpPost(Name = "[Controller]")]
+        [HttpGet]
+        public IActionResult Get()
+            => new OkObjectResult(DbService.ctx.ZaehlerSet.ToList().Select(e => new ZaehlerEntryBase(e)).ToList());
+        [HttpPost]
         public IActionResult Post([FromBody] ZaehlerEntry entry) => DbService.Post(entry);
 
-        [HttpPut(Name = "[Controller]")]
+        [HttpGet("{id}")]
+        public IActionResult Get(int id) =>  DbService.Get(id);
+        [HttpPut("{id}")]
         public IActionResult Put(int id, ZaehlerEntry entry) => DbService.Put(id, entry);
-
-        [HttpDelete(Name = "[Controller]")]
+        [HttpDelete("{id}")]
         public IActionResult Delete(int id) => DbService.Delete(id);
     }
 }

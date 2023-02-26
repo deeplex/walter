@@ -2,15 +2,14 @@
 using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.JuristischePersonController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.BetriebskostenrechnungListController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.WohnungListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
-namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
+namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/umlagen/{id}")]
+    [Route("api/umlagen")]
     public class UmlageController : ControllerBase
     {
         public class UmlageEntryBase
@@ -23,7 +22,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             public Umlageschluessel Schluessel { get; set; }
             public Betriebskostentyp Typ { get; set; }
 
-            public string WohnungenBezeichnung => Entity?.GetWohnungenBezeichnung() ?? "";
+            public string? WohnungenBezeichnung { get; set; }
 
             protected UmlageEntryBase() { }
             public UmlageEntryBase(Umlage entity)
@@ -35,6 +34,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
                 Beschreibung = Entity.Beschreibung;
                 Schluessel = Entity.Schluessel;
                 Typ = Entity.Typ;
+                WohnungenBezeichnung = Entity.GetWohnungenBezeichnung() ?? "";
             }
         }
 
@@ -42,9 +42,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         {
             private IWalterDbService? DbService { get; }
 
-            public IEnumerable<AnhangListEntry>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangListEntry(e));
-            public IEnumerable<BetriebskostenrechungListEntry>? Betriebskostenrechnungen => Entity?.Betriebskostenrechnungen.Select(e => new BetriebskostenrechungListEntry(e));
-            public IEnumerable<WohnungListEntry>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungListEntry(e, DbService!));
+            public IEnumerable<AnhangEntryBase>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangEntryBase(e));
+            public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen => Entity?.Betriebskostenrechnungen
+                .Select(e => new BetriebskostenrechnungEntryBase(e));
+            public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!));
             // TODO Zaehler
             // TODO HKVO
 
@@ -64,16 +65,16 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             DbService = dbService;
         }
 
-        [HttpGet(Name = "[Controller]")]
-        public IActionResult Get(int id) => DbService.Get(id);
-
-        [HttpPost(Name = "[Controller]")]
+        [HttpGet]
+        public IActionResult Get() => new OkObjectResult(DbService.ctx.Umlagen.ToList().Select(e => new UmlageEntryBase(e)).ToList());
+        [HttpPost]
         public IActionResult Post([FromBody] UmlageEntry entry) => DbService.Post(entry);
 
-        [HttpPut(Name = "[Controller]")]
+        [HttpGet("{id}")]
+        public IActionResult Get(int id) => DbService.Get(id);
+        [HttpPut("{id}")]
         public IActionResult Put(int id, UmlageEntry entry) => DbService.Put(id, entry);
-
-        [HttpDelete(Name = "[Controller]")]
+        [HttpDelete("{id}")]
         public IActionResult Delete(int id) => DbService.Delete(id);
     }
 }

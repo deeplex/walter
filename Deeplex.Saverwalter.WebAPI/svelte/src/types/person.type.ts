@@ -1,8 +1,7 @@
 import type { AdresseEntry } from './adresse.type';
-import type { AnhangListEntry } from './anhanglist.type';
-import type { KontaktListEntry } from './kontaktlist.type';
-import type { VertragListEntry } from './vertraglist.type';
-import type { WohnungListEntry } from './wohnunglist.type';
+import type { AnhangEntry } from './anhang.type';
+import type { VertragEntry } from './vertrag.type';
+import type { WohnungEntry } from './wohnung.type';
 
 export type PersonEntry = {
     id: string;
@@ -17,8 +16,11 @@ export type PersonEntry = {
     natuerlichePerson: boolean;
     adresse: AdresseEntry;
 
-    juristischePersonen: KontaktListEntry[];
-    wohnungen: WohnungListEntry[];
-    vertraege: VertragListEntry[];
-    anhaenge: AnhangListEntry[];
+    juristischePersonen: PersonEntry[];
+    wohnungen: WohnungEntry[];
+    vertraege: VertragEntry[];
+    anhaenge: AnhangEntry[];
+
+    anschrift: string;
+    natuerlich: boolean;
 }

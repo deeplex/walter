@@ -2,7 +2,8 @@
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 	import { WalterDataWrapper } from '..';
-	import type { WohnungListEntry } from '../../types/wohnunglist.type';
+	import type { WohnungEntry } from '../../types/wohnung.type';
+
 	const headers = [
 		{ key: 'anschrift', value: 'Anschrift' },
 		{ key: 'bezeichnung', value: 'Bezeichnung' },
@@ -12,7 +13,7 @@
 	const navigate = (e: CustomEvent<DataTableRow>) =>
 		goto(`/wohnungen/${e.detail.id}`);
 
-	export let rows: Promise<WohnungListEntry[]>;
+	export let rows: Promise<WohnungEntry[]>;
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 </script>

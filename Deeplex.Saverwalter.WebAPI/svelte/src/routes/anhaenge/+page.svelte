@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { walter_get } from '../../services/utils';
 	import { WalterHeader, WalterDataTable } from '../../components';
-	import type { AnhangListEntry } from '../../types/anhanglist.type';
+	import type { AnhangEntry } from '../../types/anhang.type';
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
@@ -10,7 +10,7 @@
 		{ key: 'creationTime', value: 'Erstellungszeitpunkt' }
 	];
 
-	const rows: Promise<AnhangListEntry[]> = walter_get('/api/anhaenge');
+	const rows: Promise<AnhangEntry[]> = walter_get('/api/anhaenge');
 
 	const navigate = (e: CustomEvent<DataTableRow>) =>
 		goto(`/anhaenge/${e.detail.id}`);

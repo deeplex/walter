@@ -1,30 +1,26 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
-using Deeplex.Saverwalter.WebAPI.Helper;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.JuristischePersonController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.UmlageController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
 
-namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
+namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/kontakte/nat/{id}")]
+    [Route("api/kontakte/nat")]
     public class NatuerlichePersonController : ControllerBase
     {
         public class NatuerlichePersonEntryBase : PersonEntry
         {
             protected new NatuerlichePerson? Entity { get; }
-            public int Id { get; set; }
 
             public Anrede? Anrede { get; set; }
             public string? Vorname { get; set; }
             public string? Nachname { get; set; }
 
             protected NatuerlichePersonEntryBase() : base() { }
-            public NatuerlichePersonEntryBase(NatuerlichePerson entity, IWalterDbService dbService) : base(entity, dbService)
+            public NatuerlichePersonEntryBase(NatuerlichePerson entity) : base(entity)
             {
                 Entity = entity;
                 Id = entity.NatuerlichePersonId;
@@ -37,12 +33,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
 
         public sealed class NatuerlichePersonEntry : NatuerlichePersonEntryBase
         {
-            public IEnumerable<AnhangListEntry>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangListEntry(e));
+            public IEnumerable<AnhangEntryBase>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangEntryBase(e));
 
             public NatuerlichePersonEntry() : base() { }
-            public NatuerlichePersonEntry(NatuerlichePerson entity, IWalterDbService dbService) : base(entity, dbService)
-            {
-            }
+            public NatuerlichePersonEntry(NatuerlichePerson entity) : base(entity) { }
         }
 
         private readonly ILogger<NatuerlichePersonController> _logger;
@@ -54,16 +48,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             DbService = dbService;
         }
 
-        [HttpGet(Name = "[Controller]")]
-        public IActionResult Get(int id) => DbService.Get(id);
-
-        [HttpPost(Name = "[Controller]")]
+        [HttpPost]
         public IActionResult Post([FromBody] NatuerlichePersonEntry entry) => DbService.Post(entry);
 
-        [HttpPut(Name = "[Controller]")]
+        [HttpGet("{id}")]
+        public IActionResult Get(int id) => DbService.Get(id);
+        [HttpPut("{id}")]
         public IActionResult Put(int id, NatuerlichePersonEntry entry) => DbService.Put(id, entry);
-
-        [HttpDelete(Name = "[Controller]")]
+        [HttpDelete("{id}")]
         public IActionResult Delete(int id) => DbService.Delete(id);
     }
 }

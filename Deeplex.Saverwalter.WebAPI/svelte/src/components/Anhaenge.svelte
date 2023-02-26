@@ -7,12 +7,9 @@
 		HeaderUtilities,
 		Loading
 	} from 'carbon-components-svelte';
-	import { FileStorage, Tools } from 'carbon-icons-svelte';
-	import type { AnhangListEntry } from '../types/anhanglist.type';
+	import type { AnhangEntry } from '../types/anhang.type';
 
-	let isOpen: boolean = false;
-
-	export let rows: Promise<AnhangListEntry[]>;
+	export let rows: Promise<AnhangEntry[]>;
 </script>
 
 {#await rows}

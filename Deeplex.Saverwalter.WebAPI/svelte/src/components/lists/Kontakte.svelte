@@ -2,7 +2,8 @@
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 	import { WalterDataWrapper } from '..';
-	import type { KontaktListEntry } from '../../types/kontaktlist.type';
+	import type { PersonEntry } from '../../types/person.type';
+
 	const headers = [
 		{ key: 'name', value: 'Name' },
 		{ key: 'anschrift', value: 'Anschrift' },
@@ -16,7 +17,7 @@
 			`/kontakte/${e.detail.id > 0 ? 'nat' : 'jur'}/${Math.abs(e.detail.id)}`
 		);
 
-	export let rows: Promise<KontaktListEntry[]>;
+	export let rows: Promise<PersonEntry[]>;
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 </script>

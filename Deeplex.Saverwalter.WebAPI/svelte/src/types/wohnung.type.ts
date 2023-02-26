@@ -1,11 +1,10 @@
 import type { AdresseEntry } from './adresse.type';
-import type { AnhangListEntry } from './anhanglist.type';
-import type { BetriebskostenrechnungListEntry } from './betriebskostenrechnunglist.type';
-import type { ErhaltungsaufwendungListEntry } from './erhaltungsaufwendunglist.type';
-import type { UmlageListEntry } from './umlagelist.type';
-import type { VertragListEntry } from './vertraglist.type';
-import type { WohnungListEntry } from './wohnunglist.type';
-import type { ZaehlerListEntry } from './zaehlerlist.type';
+import type { AnhangEntry } from './anhang.type';
+import type { BetriebskostenrechnungEntry } from './betriebskostenrechnung.type';
+import type { ErhaltungsaufwendungEntry } from './erhaltungsaufwendung.type';
+import type { UmlageEntry } from './umlage.type';
+import type { VertragEntry } from './vertrag.type';
+import type { ZaehlerEntry } from './zaehler.type';
 
 export type WohnungEntry = {
     adresse: AdresseEntry;
@@ -18,11 +17,14 @@ export type WohnungEntry = {
     anschrift: string;
     besitzerId: string;
 
-    haus: WohnungListEntry[];
-    zaehler: ZaehlerListEntry[];
-    vertraege: VertragListEntry[];
-    betriebskostenrechnungen: BetriebskostenrechnungListEntry[];
-    erhaltungsaufwendungen: ErhaltungsaufwendungListEntry[];
-    umlagen: UmlageListEntry[];
-    anhaenge: AnhangListEntry[];
+    haus: WohnungEntry[];
+    zaehler: ZaehlerEntry[];
+    vertraege: VertragEntry[];
+    betriebskostenrechnungen: BetriebskostenrechnungEntry[];
+    erhaltungsaufwendungen: ErhaltungsaufwendungEntry[];
+    umlagen: UmlageEntry[];
+    anhaenge: AnhangEntry[];
+
+    besitzer: string;
+    bewohner: string;
 }

@@ -12,4 +12,7 @@ export type BetriebskostenrechnungEntry = {
 
     wohnungen: WohnungListEntry[];
     anhaenge: AnhangListEntry[];
+
+    typ: string;
+    wohnungenbezeichnung: string;
 }

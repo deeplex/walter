@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-	import { Umlagen, WalterDataTable, WalterHeader } from '../../components';
+	import { Umlagen, WalterHeader } from '../../components';
 	import { walter_get } from '../../services/utils';
-	import type { UmlageListEntry } from '../../types/umlagelist.type';
+	import type { UmlageEntry } from '../../types/umlage.type';
 
-	const rows: Promise<UmlageListEntry[]> = walter_get('/api/umlagen');
+	const rows: Promise<UmlageEntry[]> = walter_get('/api/umlagen');
 </script>
 
 <WalterHeader title="Umlagen" />

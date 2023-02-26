@@ -1,7 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.NatuerlichePersonController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.NatuerlichePersonController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Get(int id)
         {
-            var entity = DbService.ctx.NatuerlichePersonen.Find(id);
+            var entity = Ref.ctx.NatuerlichePersonen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new NatuerlichePersonEntry(entity, DbService);
+                var entry = new NatuerlichePersonEntry(entity);
                 return new OkObjectResult(entry);
             }
             catch
@@ -43,13 +43,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = DbService.ctx.NatuerlichePersonen.Find(id);
+            var entity = Ref.ctx.NatuerlichePersonen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            DbService.ctx.NatuerlichePersonen.Remove(entity);
+            Ref.ctx.NatuerlichePersonen.Remove(entity);
 
             return Save(null!);
         }
@@ -65,7 +65,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                DbService.ctx.NatuerlichePersonen.Add(entity);
+                Ref.ctx.NatuerlichePersonen.Add(entity);
                 return Save(entry);
             }
             catch
@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Put(int id, NatuerlichePersonEntry entry)
         {
-            var entity = DbService.ctx.NatuerlichePersonen.Find(id);
+            var entity = Ref.ctx.NatuerlichePersonen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                DbService.ctx.NatuerlichePersonen.Update(entity);
+                Ref.ctx.NatuerlichePersonen.Update(entity);
                 return Save(entry);
             }
             catch

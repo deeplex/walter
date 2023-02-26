@@ -1,7 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.AnhangController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Get(Guid id)
         {
-            var entity = DbService.ctx.Anhaenge.Find(id);
+            var entity = Ref.ctx.Anhaenge.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new AnhangEntry(entity, DbService);
+                var entry = new AnhangEntry(entity, Ref);
                 return new OkObjectResult(entry);
             }
             catch
@@ -43,13 +43,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(Guid id)
         {
-            var entity = DbService.ctx.Anhaenge.Find(id);
+            var entity = Ref.ctx.Anhaenge.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            DbService.ctx.Anhaenge.Remove(entity);
+            Ref.ctx.Anhaenge.Remove(entity);
 
             return Save(null!);
         }
@@ -65,7 +65,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                DbService.ctx.Anhaenge.Add(entity);
+                Ref.ctx.Anhaenge.Add(entity);
                 return Save(entry);
             }
             catch
@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Put(Guid id, AnhangEntry entry)
         {
-            var entity = DbService.ctx.Anhaenge.Find(id);
+            var entity = Ref.ctx.Anhaenge.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                DbService.ctx.Anhaenge.Update(entity);
+                Ref.ctx.Anhaenge.Update(entity);
                 return Save(entry);
             }
             catch

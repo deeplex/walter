@@ -1,7 +1,7 @@
-import type { AnhangListEntry } from "./anhanglist.type";
-import type { KontaktListEntry } from "./kontaktlist.type";
-import type { MieteListEntry } from "./mietelist.type";
-import type { MietminderungListEntry } from "./mietminderunglist.type";
+import type { AnhangEntry } from "./anhang.type";
+import type { MieteEntry } from "./miete.type";
+import type { MietminderungEntry } from "./mietminderung.type";
+import type { PersonEntry } from "./person.type";
 import type { WohnungEntry } from "./wohnung.type";
 
 export type VertragEntry = {
@@ -11,9 +11,11 @@ export type VertragEntry = {
     wohnung: WohnungEntry;
     ansprechpartnerId: string;
 
-    mieter: KontaktListEntry[];
-    mieten: MieteListEntry[];
-    mietminderungen: MietminderungListEntry[];
+    mieter: PersonEntry[];
+    mieten: MieteEntry[];
+    mietminderungen: MietminderungEntry[];
 
-    anhaenge: AnhangListEntry[];
+    anhaenge: AnhangEntry[];
+
+    mieterauflistung: string;
 }

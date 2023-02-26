@@ -1,13 +1,10 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-	import { request_options, walter_get } from '../../services/utils';
-	import type { ZaehlerListEntry } from '../../types/zaehlerlist.type';
-	import { WalterDataTable, WalterHeader } from '../../components';
-	import type { KontaktListEntry } from '../../types/kontaktlist.type';
+	import { walter_get } from '../../services/utils';
+	import { WalterHeader } from '../../components';
 	import Kontakte from '../../components/lists/Kontakte.svelte';
+	import type { PersonEntry } from '../../types/person.type';
 
-	const rows: Promise<KontaktListEntry[]> = walter_get('/api/kontakte');
+	const rows: Promise<PersonEntry[]> = walter_get('/api/kontakte');
 </script>
 
 <WalterHeader title="Kontakte" />

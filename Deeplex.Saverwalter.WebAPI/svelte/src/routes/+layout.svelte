@@ -1,6 +1,5 @@
 <script>
 	import 'carbon-components-svelte/css/white.css';
-	import { Content } from 'carbon-components-svelte';
 	import { WalterSideNav } from '../components';
 </script>
 

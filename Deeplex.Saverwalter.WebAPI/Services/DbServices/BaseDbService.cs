@@ -2,24 +2,25 @@
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.BetriebskostenrechnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class BaseDbService<T>
+    public abstract class BaseDbService<T>
     {
-        public IWalterDbService DbService { get; }
+        public IWalterDbService Ref { get; }
+        public SaverwalterContext ctx => Ref.ctx;
 
         public BaseDbService(IWalterDbService dbService)
         {
-            DbService = dbService;
+            Ref = dbService;
         }
 
         protected IActionResult Save(T entry)
         {
             try
             {
-                DbService.SaveWalter();
+                Ref.SaveWalter();
                 return new OkObjectResult(entry);
             }
             catch

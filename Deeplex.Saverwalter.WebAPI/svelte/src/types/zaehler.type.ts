@@ -1,7 +1,6 @@
 import type { AdresseEntry } from "./adresse.type";
-import type { AnhangListEntry } from "./anhanglist.type";
-import type { ZaehlerListEntry } from "./zaehlerlist.type";
-import type { ZaehlerstandListEntry } from "./zaehlerstandlist.type";
+import type { AnhangEntry } from "./anhang.type";
+import type { ZaehlerstandEntry } from "./zaehlerstandlist.type";
 
 export type ZaehlerEntry = {
     id: number;
@@ -10,7 +9,9 @@ export type ZaehlerEntry = {
     typ: string;
     allgemeinZaehler: ZaehlerEntry;
 
-    staende: ZaehlerstandListEntry[];
-    einzelzaehler: ZaehlerListEntry[];
-    anhaenge: AnhangListEntry[];
+    staende: ZaehlerstandEntry[];
+    einzelzaehler: ZaehlerEntry[];
+    anhaenge: AnhangEntry[];
+
+    wohnung: string;
 }

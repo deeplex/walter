@@ -1,6 +1,6 @@
-import type { AnhangListEntry } from "./anhanglist.type";
-import type { BetriebskostenrechnungListEntry } from "./betriebskostenrechnunglist.type";
-import type { WohnungListEntry } from "./wohnunglist.type";
+import type { AnhangEntry } from "./anhang.type";
+import type { BetriebskostenrechnungEntry } from "./betriebskostenrechnung.type";
+import type { WohnungEntry } from "./wohnung.type";
 
 export type UmlageEntry = {
     id: number;
@@ -8,8 +8,8 @@ export type UmlageEntry = {
     wohnungenBezeichnung: string;
     typ: string;
 
-    betriebskostenrechnungen: BetriebskostenrechnungListEntry[];
-    wohnungen: WohnungListEntry[];
+    betriebskostenrechnungen: BetriebskostenrechnungEntry[];
+    wohnungen: WohnungEntry[];
 
-    anhaenge: AnhangListEntry[];
+    anhaenge: AnhangEntry[];
 }

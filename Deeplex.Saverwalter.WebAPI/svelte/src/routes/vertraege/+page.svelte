@@ -2,9 +2,9 @@
 	import { WalterHeader } from '../../components';
 	import Vertraege from '../../components/lists/Vertraege.svelte';
 	import { walter_get } from '../../services/utils';
-	import type { VertragListEntry } from '../../types/vertraglist.type';
+	import type { VertragEntry } from '../../types/vertrag.type';
 
-	const rows: Promise<VertragListEntry[]> = walter_get('/api/vertraege');
+	const rows: Promise<VertragEntry[]> = walter_get('/api/vertraege');
 </script>
 
 <WalterHeader title="Verträge" />

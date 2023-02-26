@@ -2,7 +2,8 @@
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 	import { WalterDataWrapper } from '..';
-	import type { BetriebskostenrechnungListEntry } from '../../types/betriebskostenrechnunglist.type';
+	import type { BetriebskostenrechnungEntry } from '../../types/betriebskostenrechnung.type';
+
 	const headers = [
 		{ key: 'typ', value: 'Typ' },
 		{ key: 'wohnungenBezeichnung', value: 'Wohnungen' },
@@ -14,7 +15,7 @@
 	const navigate = (e: CustomEvent<DataTableRow>) =>
 		goto(`/betriebskostenrechnungen/${e.detail.id}`);
 
-	export let rows: Promise<BetriebskostenrechnungListEntry[]>;
+	export let rows: Promise<BetriebskostenrechnungEntry[]>;
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 </script>

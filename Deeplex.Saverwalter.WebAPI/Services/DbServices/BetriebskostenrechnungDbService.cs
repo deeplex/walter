@@ -1,7 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.BetriebskostenrechnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.BetreffendesJahr = entry.BetreffendesJahr;
             entity.Datum = entry.Datum;
             entity.Notiz = entry.Notiz;
-            entity.Umlage = DbService.ctx.Umlagen.Find(entry.Umlage.Id);
+            entity.Umlage = Ref.ctx.Umlagen.Find(entry.Umlage.Id);
         }
 
         public BetriebskostenrechnungDbService(IWalterDbService dbService) : base(dbService)
@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Get(int id)
         {
-            var entity = DbService.ctx.Betriebskostenrechnungen.Find(id);
+            var entity = Ref.ctx.Betriebskostenrechnungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new BetriebskostenrechnungEntry(entity, DbService);
+                var entry = new BetriebskostenrechnungEntry(entity, Ref);
                 return new OkObjectResult(entry);
             }
             catch
@@ -46,13 +46,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = DbService.ctx.Betriebskostenrechnungen.Find(id);
+            var entity = Ref.ctx.Betriebskostenrechnungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            DbService.ctx.Betriebskostenrechnungen.Remove(entity);
+            Ref.ctx.Betriebskostenrechnungen.Remove(entity);
 
             return Save(null!);
         }
@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                DbService.ctx.Betriebskostenrechnungen.Add(entity);
+                Ref.ctx.Betriebskostenrechnungen.Add(entity);
                 return Save(entry);
             }
             catch
@@ -80,7 +80,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Put(int id, BetriebskostenrechnungEntry entry)
         {
-            var entity = DbService.ctx.Betriebskostenrechnungen.Find(id);
+            var entity = Ref.ctx.Betriebskostenrechnungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -89,7 +89,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                DbService.ctx.Betriebskostenrechnungen.Update(entity);
+                Ref.ctx.Betriebskostenrechnungen.Update(entity);
                 return Save(entry);
             }
             catch

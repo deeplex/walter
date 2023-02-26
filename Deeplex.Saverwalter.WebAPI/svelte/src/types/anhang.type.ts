@@ -1,10 +1,10 @@
-import type { BetriebskostenrechnungListEntry } from "./betriebskostenrechnunglist.type";
-import type { ErhaltungsaufwendungListEntry } from "./erhaltungsaufwendunglist.type";
-import type { KontaktListEntry } from "./kontaktlist.type";
-import type { UmlageListEntry } from "./umlagelist.type";
-import type { VertragListEntry } from "./vertraglist.type";
-import type { WohnungListEntry } from "./wohnunglist.type";
-import type { ZaehlerListEntry } from "./zaehlerlist.type";
+import type { BetriebskostenrechnungEntry } from "./betriebskostenrechnung.type";
+import type { ErhaltungsaufwendungEntry } from "./erhaltungsaufwendung.type";
+import type { PersonEntry } from "./person.type";
+import type { UmlageEntry } from "./umlage.type";
+import type { VertragEntry } from "./vertrag.type";
+import type { WohnungEntry } from "./wohnung.type";
+import type { ZaehlerEntry } from "./zaehler.type";
 
 export type AnhangEntry = {
     id: string;
@@ -12,12 +12,12 @@ export type AnhangEntry = {
     creationTime: string;
     // notiz: string;
 
-    betriebskostenrechnungen: BetriebskostenrechnungListEntry[];
-    erhaltungsaufwendungen: ErhaltungsaufwendungListEntry[];
-    natuerlichePersonen: KontaktListEntry[];
-    juristischePersonen: KontaktListEntry[];
-    umlagen: UmlageListEntry[];
-    vertraege: VertragListEntry[];
-    wohnungen: WohnungListEntry[];
-    zaehler: ZaehlerListEntry[];
+    betriebskostenrechnungen: BetriebskostenrechnungEntry[];
+    erhaltungsaufwendungen: ErhaltungsaufwendungEntry[];
+    natuerlichePersonen: PersonEntry[];
+    juristischePersonen: PersonEntry[];
+    umlagen: UmlageEntry[];
+    vertraege: VertragEntry[];
+    wohnungen: WohnungEntry[];
+    zaehler: ZaehlerEntry[];
 }

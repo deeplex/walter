@@ -2,16 +2,14 @@
 using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Helper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
 
-namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
+namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/mietminderungen")]
-    public class MietminderungListController : ControllerBase
+    public class MietminderungController : ControllerBase
     {
-        public class MietminderungListEntry
+        public class MietminderungEntryBase
         {
             private Mietminderung Entity { get; }
 
@@ -21,25 +19,23 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             public string Minderung => Entity.Minderung.Prozent();
             public string? Notiz => Entity.Notiz;
 
-            public MietminderungListEntry(Mietminderung entity)
+            public MietminderungEntryBase(Mietminderung entity)
             {
                 Entity = entity;
             }
         }
 
-        private readonly ILogger<MietminderungListController> _logger;
+        private readonly ILogger<MietminderungController> _logger;
         private IWalterDbService DbService { get; }
 
-        public MietminderungListController(ILogger<MietminderungListController> logger, IWalterDbService dbService)
+        public MietminderungController(ILogger<MietminderungController> logger, IWalterDbService dbService)
         {
             DbService = dbService;
             _logger = logger;
         }
 
-        [HttpGet(Name = "[Controller]")]
-        public IEnumerable<MietminderungListEntry> Get()
-        {
-            return DbService.ctx.Mietminderungen.Select(e => new MietminderungListEntry(e)).ToList();
-        }
+        [HttpGet]
+        public IActionResult Get() =>
+            new OkObjectResult(DbService.ctx.Mietminderungen.ToList().Select(e => new MietminderungEntryBase(e)).ToList());
     }
 }

@@ -1,17 +1,14 @@
 <script lang="ts">
 	import { WalterDataWrapper } from '..';
-	import type { MietminderungListEntry } from '../../types/mietminderunglist.type';
+	import type { MietminderungEntry } from '../../types/mietminderung.type';
+
 	const headers = [
 		{ key: 'beginn', value: 'Beginn' },
 		{ key: 'ende', value: 'Ende' },
 		{ key: 'minderung', value: 'Minderung' }
 	];
 
-	// TODO
-	// const navigate = (e: CustomEvent<DataTableRow>) =>
-	// 	goto(`/rechnungen/betriebskosten/${e.detail.id}`);
-
-	export let rows: Promise<MietminderungListEntry[]>;
+	export let rows: Promise<MietminderungEntry[]>;
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 </script>

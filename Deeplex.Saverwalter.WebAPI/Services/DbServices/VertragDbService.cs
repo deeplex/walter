@@ -1,7 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.VertragController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Get(int id)
         {
-            var entity = DbService.ctx.Vertraege.Find(id);
+            var entity = Ref.ctx.Vertraege.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new VertragEntry(entity, DbService);
+                var entry = new VertragEntry(entity, Ref);
                 return new OkObjectResult(entry);
             }
             catch
@@ -43,13 +43,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = DbService.ctx.Vertraege.Find(id);
+            var entity = Ref.ctx.Vertraege.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            DbService.ctx.Vertraege.Remove(entity);
+            Ref.ctx.Vertraege.Remove(entity);
 
             return Save(null!);
         }
@@ -65,7 +65,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                DbService.ctx.Vertraege.Add(entity);
+                Ref.ctx.Vertraege.Add(entity);
                 return Save(entry);
             }
             catch
@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Put(int id, VertragEntry entry)
         {
-            var entity = DbService.ctx.Vertraege.Find(id);
+            var entity = Ref.ctx.Vertraege.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                DbService.ctx.Vertraege.Update(entity);
+                Ref.ctx.Vertraege.Update(entity);
                 return Save(entry);
             }
             catch

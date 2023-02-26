@@ -13,20 +13,21 @@
 		Vertraege,
 		Anhaenge
 	} from '../../../../components';
-	import type { WohnungListEntry } from '../../../../types/wohnunglist.type';
-	import type { VertragListEntry } from '../../../../types/vertraglist.type';
+	import type { WohnungEntry } from '../../../../types/wohnung.type';
+	import type { VertragEntry } from '../../../../types/vertrag.type';
 
 	export let data: PageData;
 	const a: Promise<JuristischePersonEntry> = walter_get(
 		`/api/kontakte/jur/${data.id}`
 	);
 
-	const w: Promise<WohnungListEntry[]> = walter_get(
-		`/api/wohnungen/mieter/${data.id}`
-	);
-	const v: Promise<VertragListEntry[]> = walter_get(
-		`/api/vertraege/mieter/${data.id}`
-	);
+	function getWohnungen(guid: string): Promise<WohnungEntry[]> {
+		return walter_get(`/api/wohnungen/mieter/${guid}`);
+	}
+
+	function getVertraege(guid: string): Promise<VertragEntry[]> {
+		return walter_get(`/api/vertraege/mieter/${guid}`);
+	}
 </script>
 
 <WalterHeader title={a.then((x) => x.name)}>
@@ -45,7 +46,9 @@
 			title="Juristische Personen"
 			rows={a.then((x) => x.juristischePersonen)}
 		/>
-		<Wohnungen title="Wohnungen" rows={w} />
-		<Vertraege title="Verträge" rows={v} />
+		{#await a then x}
+			<Wohnungen title="Wohnungen" rows={getWohnungen(x.guid)} />
+			<Vertraege title="Verträge" rows={getVertraege(x.guid)} />
+		{/await}
 	</Accordion>
 </WalterGrid>

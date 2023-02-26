@@ -4,13 +4,13 @@ using Deeplex.Saverwalter.WebAPI.Helper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
+namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/mieten")]
-    public class MieteListController : ControllerBase
+    public class MieteController : ControllerBase
     {
-        public class MieteListEntry
+        public class MieteEntryBase
         {
             private Miete Entity { get; }
 
@@ -20,25 +20,23 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
             public string Zahlungsdatum => Entity.Zahlungsdatum.Datum();
             public string? Notiz => Entity.Notiz;
 
-            public MieteListEntry(Miete entity)
+            public MieteEntryBase(Miete entity)
             {
                 Entity = entity;
             }
         }
 
-        private readonly ILogger<MieteListController> _logger;
+        private readonly ILogger<MieteController> _logger;
         private IWalterDbService DbService { get; }
 
-        public MieteListController(ILogger<MieteListController> logger, IWalterDbService dbService)
+        public MieteController(ILogger<MieteController> logger, IWalterDbService dbService)
         {
             DbService = dbService;
             _logger = logger;
         }
 
-        [HttpGet(Name = "[Controller]")]
-        public IEnumerable<MieteListEntry> Get()
-        {
-            return DbService.ctx.Mieten.Select(e => new MieteListEntry(e)).ToList();
-        }
+        [HttpGet]
+        public IActionResult Get()
+            => new OkObjectResult(DbService.ctx.Mieten.ToList().Select(e => new MieteEntryBase(e)).ToList());
     }
 }

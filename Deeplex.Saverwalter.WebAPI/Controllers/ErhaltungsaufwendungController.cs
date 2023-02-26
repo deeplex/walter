@@ -3,15 +3,14 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Helper;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
-using System.Xml.Linq;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.AnhangController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Details.WohnungController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Lists.AnhangListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
-namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
+namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/erhaltungsaufwendungen/{id}")]
+    [Route("api/erhaltungsaufwendungen")]
     public class ErhaltungsaufwendungController : ControllerBase
     {
         public class ErhaltungsaufwendungEntryBase
@@ -23,8 +22,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             public DateTime Datum { get; set; }
             public string? Notiz { get; set; }
             public string? Bezeichnung { get; set; }
+            public PersonEntryBase? Aussteller { get; set; }
+            public WohnungEntryBase? Wohnung { get; set; }
 
-            public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity)
+            public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity, IWalterDbService dbService)
             {
                 Entity = entity;
 
@@ -33,20 +34,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
                 Datum = Entity.Datum;
                 Notiz = Entity.Notiz;
                 Bezeichnung = Entity.Bezeichnung;
+                Aussteller = new (dbService.ctx.FindPerson(Entity.AusstellerId));
+                Wohnung = new(Entity.Wohnung, dbService);
             }
         }
 
         public class ErhaltungsaufwendungEntry : ErhaltungsaufwendungEntryBase
         {
-            IWalterDbService? DbService { get; }
+            public IEnumerable<AnhangEntryBase>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangEntryBase(e));
 
-            public PersonEntryBase? Aussteller => DbService?.ctx.FindPerson(Entity!.AusstellerId) is IPerson p ? new(p) : null;
-            public WohnungEntryBase? Wohnung => new(Entity!.Wohnung);
-            public IEnumerable<AnhangListEntry>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangListEntry(e));
-
-            public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity, IWalterDbService dbService) : base(entity)
+            public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity, IWalterDbService dbService) : base(entity, dbService)
             {
-                DbService = dbService;
             }
         }
 
@@ -59,16 +57,19 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             _logger = logger;
         }
 
-        [HttpGet(Name = "[Controller]")]
-        public IActionResult Get(int id) => DbService.Get(id);
-
-        [HttpPost(Name = "[Controller]")]
+        [HttpGet]
+        public IActionResult Get() => new OkObjectResult(DbService.ctx.Erhaltungsaufwendungen
+            .ToList()
+            .Select(e => new ErhaltungsaufwendungEntryBase(e, DbService.Ref))
+            .ToList());
+        [HttpPost]
         public IActionResult Post([FromBody] ErhaltungsaufwendungEntry entry) => DbService.Post(entry);
 
-        [HttpPut(Name = "[Controller]")]
+        [HttpGet("{id}")]
+        public IActionResult Get(int id) => DbService.Get(id);
+        [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] ErhaltungsaufwendungEntry entry) => DbService.Put(id, entry);
-
-        [HttpDelete(Name = "[Controller]")]
+        [HttpDelete("{id}")]
         public IActionResult Delete(int id) => DbService.Delete(id);
     }
 }
