@@ -53,4 +53,9 @@
 		border-right: 1px;
 		border-style: solid;
 	}
+
+	:global(.bx--table-sort, .bx--table-header-label) {
+		width: 100%;
+		text-align: center;
+	}
 </style>

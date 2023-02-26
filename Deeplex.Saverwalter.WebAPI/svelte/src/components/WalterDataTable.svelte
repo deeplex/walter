@@ -51,7 +51,7 @@
 				</Toolbar>
 			{/if}
 			<span
-				style="margin-top: -0.5em; line-height: 1rem; ;vertical-align: middle;"
+				style="margin-top: -0.5em; line-height: 1rem; text-align: center; width: 100%"
 				slot="cell"
 				let:cell
 			>
