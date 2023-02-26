@@ -9,28 +9,41 @@ namespace Deeplex.Saverwalter.WebAPI.Helper
 {
     public class PersonEntryBase
     {
-        protected IPerson Entity { get; }
+        protected IPerson Entity { get; } = null!;
 
-        public Guid Guid => Entity.PersonId;
-        public string Name => Entity.Bezeichnung;
-        public string Email => Entity.Email ?? "";
-        public string Fax => Entity.Fax ?? "";
-        public string Notiz => Entity.Notiz ?? "";
-        public bool NatuerlichePerson => Entity is NatuerlichePerson;
-        public string Telefon => Entity.Telefon ?? "";
-        public AdresseEntry? Adresse => Entity.Adresse is Adresse a ? new AdresseEntry(a) : null;
+        public Guid Guid { get; set; }
+        public string? Name { get; set; }
+        public string? Email { get; set; }
+        public string? Fax { get; set; }
+        public string? Notiz { get; set; }
+        public string? Telefon { get; set; }
+        public AdresseEntry? Adresse { get; set; }
 
+        public bool NatuerlichePerson { get; set; }
+
+        protected PersonEntryBase() { }
         public PersonEntryBase(IPerson entity)
         {
             Entity = entity;
+
+            Guid = Entity.PersonId;
+            Name = Entity.Bezeichnung;
+            Email = Entity.Email;
+            Fax = Entity.Fax;
+            Notiz = Entity.Notiz;
+            Telefon = Entity.Telefon;
+            Adresse = Entity.Adresse is Adresse a ? new AdresseEntry(a) : null;
+
+            NatuerlichePerson = Entity is NatuerlichePerson;
         }
     }
 
     public class PersonEntry : PersonEntryBase
     {
-        IWalterDbService DbService { get; }
-        public IEnumerable<KontaktListEntry> JuristischePersonen => Entity.JuristischePersonen.Select(e => new KontaktListEntry(e, DbService));
+        IWalterDbService DbService { get; } = null!;
+        public IEnumerable<KontaktListEntry>? JuristischePersonen => Entity?.JuristischePersonen.Select(e => new KontaktListEntry(e, DbService));
 
+        protected PersonEntry() : base() { }
         public PersonEntry(IPerson entity, IWalterDbService dbService) : base(entity)
         {
             DbService = dbService;

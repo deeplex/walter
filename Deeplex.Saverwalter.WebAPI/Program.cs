@@ -20,7 +20,16 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<INotificationService, NotificationService>(Lifestyle.Scoped);
             container.Register<IFileService, FileService>(Lifestyle.Scoped);
             container.Register<IWalterDbService, WalterDbService>(Lifestyle.Scoped);
-            container.Register<BetriebskostenrechnungControllerService>(Lifestyle.Scoped);
+
+            container.Register<AnhangDbService>(Lifestyle.Scoped);
+            container.Register<BetriebskostenrechnungDbService>(Lifestyle.Scoped);
+            container.Register<ErhaltungsaufwendungDbService>(Lifestyle.Scoped);
+            container.Register<JuristischePersonDbService>(Lifestyle.Scoped);
+            container.Register<NatuerlichePersonDbService>(Lifestyle.Scoped);
+            container.Register<UmlageDbService>(Lifestyle.Scoped);
+            container.Register<VertragDbService>(Lifestyle.Scoped);
+            container.Register<WohnungDbService>(Lifestyle.Scoped);
+            container.Register<ZaehlerDbService>(Lifestyle.Scoped);
 
             var builder = WebApplication.CreateBuilder(args);
 

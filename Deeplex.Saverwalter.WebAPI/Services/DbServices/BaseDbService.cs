@@ -6,16 +6,16 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.Details.Betriebskostenrechnu
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class ControllerService
+    public class BaseDbService<T>
     {
-        protected IWalterDbService DbService { get; }
+        public IWalterDbService DbService { get; }
 
-        public ControllerService(IWalterDbService dbService)
+        public BaseDbService(IWalterDbService dbService)
         {
             DbService = dbService;
         }
 
-        protected IActionResult Save(BetriebskostenrechnungEntry entry)
+        protected IActionResult Save(T entry)
         {
             try
             {

@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
     {
         public class BetriebskostenrechnungEntryBase
         {
-            protected Betriebskostenrechnung Entity { get; } = null!;
+            protected Betriebskostenrechnung? Entity { get; }
 
             public int Id { get; set; }
             public double Betrag { get; set; }
@@ -31,13 +31,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
                 Betrag = Entity.Betrag;
                 BetreffendesJahr = Entity.BetreffendesJahr;
                 Datum = Entity.Datum;
-                Notiz = Entity.Notiz ?? "";
+                Notiz = Entity.Notiz;
             }
         }
 
         public class BetriebskostenrechnungEntry : BetriebskostenrechnungEntryBase
         {
-            private IWalterDbService DbService { get; } = null!;
+            private IWalterDbService? DbService { get; }
 
             public UmlageEntry Umlage { get; set; } = null!;
             public IEnumerable<WohnungListEntry>? Wohnungen => Entity?.Umlage.Wohnungen.Select(e => new WohnungListEntry(e, DbService));
@@ -48,34 +48,29 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
             {
                 DbService = dbService;
 
-                Umlage = new UmlageEntry(Entity.Umlage, DbService);
+                Umlage = new UmlageEntry(Entity!.Umlage, DbService);
             }
         }
 
         private readonly ILogger<BetriebskostenrechnungController> _logger;
-        IWalterDbService DbService { get; }
-        BetriebskostenrechnungControllerService Service { get; }
+        BetriebskostenrechnungDbService DbService { get; }
 
-        public BetriebskostenrechnungController(
-            ILogger<BetriebskostenrechnungController> logger,
-            IWalterDbService dbService,
-            BetriebskostenrechnungControllerService service)
+        public BetriebskostenrechnungController(ILogger<BetriebskostenrechnungController> logger, BetriebskostenrechnungDbService dbService)
         {
             _logger = logger;
             DbService = dbService;
-            Service = service;
         }
 
         [HttpGet(Name = "[Controller]")]
-        public IActionResult Get(int id) => Service.Get(id);
+        public IActionResult Get(int id) => DbService.Get(id);
 
         [HttpPost(Name = "[Controller]")]
-        public IActionResult Post([FromBody] BetriebskostenrechnungEntry entry) => Service.Post(entry);
+        public IActionResult Post([FromBody] BetriebskostenrechnungEntry entry) => DbService.Post(entry);
 
         [HttpPut(Name = "[Controller]")]
-        public IActionResult Put(int id, BetriebskostenrechnungEntry entry) => Service.Put(id, entry);
+        public IActionResult Put(int id, BetriebskostenrechnungEntry entry) => DbService.Put(id, entry);
 
         [HttpDelete(Name = "[Controller]")]
-        public IActionResult Delete(int id) => Service.Delete(id);
+        public IActionResult Delete(int id) => DbService.Delete(id);
     }
 }
