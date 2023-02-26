@@ -25,11 +25,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Mobil { get; set; }
             public AdresseEntry? Adresse { get; set; }
 
-            public string? Anschrift { get; set; } // TODO Anschrift unnötig wenn man schon die Adresse hat.
-
             protected PersonEntryBase() { }
-            public PersonEntryBase(NatuerlichePerson n) : this(n as IPerson) { }
-            public PersonEntryBase(JuristischePerson j) : this(j as IPerson) { }
             public PersonEntryBase(IPerson p)
             {
                 if (p is NatuerlichePerson n)
@@ -58,7 +54,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 if (Entity.Adresse is Adresse a)
                 {
                     Adresse = new AdresseEntry(a);
-                    Anschrift = a.Anschrift;
                 }
 
             }

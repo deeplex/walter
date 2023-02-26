@@ -5,8 +5,8 @@
 	import type { PersonEntry } from '../../types/person.type';
 
 	const headers = [
-		{ key: 'name', value: 'Name' },
-		{ key: 'anschrift', value: 'Anschrift' },
+		{ key: 'name', value: 'Name', default: '' },
+		{ key: 'adresse.anschrift', value: 'Anschrift' },
 		{ key: 'telefon', value: 'Telefon' },
 		{ key: 'mobil', value: 'Mobil' },
 		{ key: 'email', value: 'E-Mail' }

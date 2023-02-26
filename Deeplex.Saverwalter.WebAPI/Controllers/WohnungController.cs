@@ -7,6 +7,7 @@ using System.Linq;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
@@ -28,11 +29,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Einheiten { get; set; }
             public string? Notiz { get; set; }
             public AdresseEntry? Adresse { get; set; }
-            public string? Anschrift { get; set; }
             public string? Bewohner { get; set; }
-            public string? Besitzer { get; set; }
-
-            public Guid BesitzerId { get; set; }
+            public PersonEntryBase? Besitzer { get; set; }
 
             public WohnungEntryBase() { }
             public WohnungEntryBase(Wohnung entity, IWalterDbService dbService)
@@ -46,8 +44,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Einheiten = Entity.Nutzeinheit;
                 Notiz = Entity.Notiz;
                 Adresse = Entity.Adresse is Adresse a ? new AdresseEntry(a) : null;
-                Anschrift = Entity.Adresse.Anschrift + ", " + Entity.Bezeichnung;
-                BesitzerId = Entity.BesitzerId;
 
                 var v = Entity.Vertraege.FirstOrDefault(e => e.Ende == null || e.Ende < DateTime.Now);
 
@@ -57,7 +53,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                         .ToList()
                         .Select(a => dbService.ctx.FindPerson(a.PersonId).Bezeichnung)) :
                     null;
-                Besitzer = dbService.ctx.FindPerson(BesitzerId) is IPerson p ? p.Bezeichnung : null;
+                Besitzer = dbService.ctx.FindPerson(Entity.BesitzerId) is IPerson p ? new PersonEntryBase(p) : null;
             }
         }
 

@@ -9,6 +9,7 @@ namespace Deeplex.Saverwalter.WebAPI.Helper
         public string Hausnummer => Entity.Hausnummer;
         public string Postleitzahl => Entity.Postleitzahl;
         public string Stadt => Entity.Stadt;
+        public string Anschrift => Entity.Anschrift;
 
         public AdresseEntry(Adresse entity)
         {

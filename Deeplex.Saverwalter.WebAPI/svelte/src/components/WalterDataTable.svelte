@@ -9,6 +9,7 @@
 		ToolbarSearch
 	} from 'carbon-components-svelte';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
+	import { convertDate, convertEuro, convertTime } from '../services/utils';
 
 	export let headers: {
 		key: string;
@@ -49,6 +50,23 @@
 					</ToolbarContent>
 				</Toolbar>
 			{/if}
+			<span
+				style="margin-top: -0.5em; line-height: 1rem; ;vertical-align: middle;"
+				slot="cell"
+				let:cell
+			>
+				{#if cell.value === null || cell.value === undefined || cell.value === ''}
+					---
+				{:else if cell.key === 'beginn' || cell.key === 'ende' || cell.key === 'datum'}
+					{convertDate(cell.value)}
+				{:else if cell.key === 'creationTime'}
+					{convertTime(cell.value)}
+				{:else if cell.key === 'betrag'}
+					{convertEuro(cell.value)}
+				{:else}
+					{cell.value}
+				{/if}
+			</span>
 		</DataTable>
 	{/await}
 </Content>

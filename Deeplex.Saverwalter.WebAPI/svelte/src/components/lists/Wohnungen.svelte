@@ -5,9 +5,9 @@
 	import type { WohnungEntry } from '../../types/wohnung.type';
 
 	const headers = [
-		{ key: 'anschrift', value: 'Anschrift' },
+		{ key: 'adresse.anschrift', value: 'Anschrift' },
 		{ key: 'bezeichnung', value: 'Bezeichnung' },
-		{ key: 'besitzer', value: 'Besitzer' },
+		{ key: 'besitzer.name', value: 'Besitzer' },
 		{ key: 'bewohner', value: 'Bewohner' }
 	];
 	const navigate = (e: CustomEvent<DataTableRow>) =>
