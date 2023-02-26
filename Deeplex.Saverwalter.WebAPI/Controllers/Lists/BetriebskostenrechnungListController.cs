@@ -1,8 +1,10 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Helper;
+using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Details.BetriebskostenrechnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
 {
@@ -32,8 +34,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Lists
 
         public BetriebskostenrechnungListController(ILogger<BetriebskostenrechnungListController> logger, IWalterDbService dbService)
         {
-            DbService = dbService;
             _logger = logger;
+            DbService = dbService;
         }
 
         [HttpGet(Name = "[Controller]")]

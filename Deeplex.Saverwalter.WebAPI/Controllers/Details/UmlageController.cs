@@ -13,31 +13,40 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
     {
         public class UmlageEntryBase
         {
-            protected Umlage Entity { get; }
+            protected Umlage Entity { get; } = null!;
 
-            public int Id => Entity.UmlageId;
-            public string Notiz => Entity.Notiz ?? "";
-            public string WohnungenBezeichnung => Entity.GetWohnungenBezeichnung();
-            public string? Beschreibung => Entity.Beschreibung;
-            public Umlageschluessel Schluessel => Entity.Schluessel;
-            public Betriebskostentyp Typ => Entity.Typ;
+            public int Id { get; set; }
+            public string? Notiz { get; set; }
+            public string? Beschreibung { get; set; }
+            public Umlageschluessel Schluessel { get; set; }
+            public Betriebskostentyp Typ { get; set; }
 
+            public string WohnungenBezeichnung => Entity?.GetWohnungenBezeichnung() ?? "";
+
+            protected UmlageEntryBase() { }
             public UmlageEntryBase(Umlage entity)
             {
                 Entity = entity;
+                Id = Entity.UmlageId;
+
+                Notiz = Entity.Notiz ?? "";
+                Beschreibung = Entity.Beschreibung;
+                Schluessel = Entity.Schluessel;
+                Typ = Entity.Typ;
             }
         }
 
         public class UmlageEntry : UmlageEntryBase
         {
-            private IWalterDbService DbService { get; }
+            private IWalterDbService DbService { get; } = null!;
 
-            public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
-            public IEnumerable<BetriebskostenrechungListEntry> Betriebskostenrechnungen => Entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechungListEntry(e));
-            public IEnumerable<WohnungListEntry> Wohnungen => Entity.Wohnungen.Select(e => new WohnungListEntry(e, DbService));
+            public IEnumerable<AnhangListEntry>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangListEntry(e));
+            public IEnumerable<BetriebskostenrechungListEntry>? Betriebskostenrechnungen => Entity?.Betriebskostenrechnungen.Select(e => new BetriebskostenrechungListEntry(e));
+            public IEnumerable<WohnungListEntry>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungListEntry(e, DbService));
             // TODO Zaehler
             // TODO HKVO
 
+            public UmlageEntry() : base() { }
             public UmlageEntry(Umlage entity, IWalterDbService dbService) : base(entity)
             {
                 DbService = dbService;

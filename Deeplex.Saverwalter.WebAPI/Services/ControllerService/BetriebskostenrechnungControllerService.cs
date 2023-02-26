@@ -5,53 +5,36 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.Details.Betriebskostenrechnu
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class BetriebskostenrechnungControllerService : IControllerService<BetriebskostenrechnungEntry>
+    public class BetriebskostenrechnungControllerService : ControllerService, IControllerService<BetriebskostenrechnungEntry>
     {
-        private IWalterDbService DbService { get; }
-        private bool SetValues(Betriebskostenrechnung entity, BetriebskostenrechnungEntry entry)
+        private void SetValues(Betriebskostenrechnung entity, BetriebskostenrechnungEntry entry)
         {
             if (entity.BetriebskostenrechnungId != entry.Id)
             {
-                return false;
+                throw new Exception();
             }
-            try
-            {
-                entity.Betrag = entry.Betrag;
-                entity.BetreffendesJahr = entry.BetreffendesJahr;
-                entity.Datum = entry.Datum;
-                entity.Notiz = entry.Notiz;
-
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            entity.Betrag = entry.Betrag;
+            entity.BetreffendesJahr = entry.BetreffendesJahr;
+            entity.Datum = entry.Datum;
+            entity.Notiz = entry.Notiz;
+            entity.Umlage = DbService.ctx.Umlagen.Find(entry.Umlage.Id);
         }
 
-        private IActionResult Save(BetriebskostenrechnungEntry entry)
+        public BetriebskostenrechnungControllerService(IWalterDbService dbService) : base(dbService)
         {
-            try
-            {
-                DbService.SaveWalter();
-                return new OkObjectResult(entry);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            };
-        }
-
-        public BetriebskostenrechnungControllerService(IWalterDbService dbService)
-        {
-            DbService = dbService;
         }
 
         public IActionResult Get(int id)
         {
+            var entity = DbService.ctx.Betriebskostenrechnungen.Find(id);
+            if (entity == null)
+            {
+                return new NotFoundResult();
+            }
+
             try
             {
-                var entry = new BetriebskostenrechnungEntry(DbService.ctx.Betriebskostenrechnungen.Find(id), DbService);
+                var entry = new BetriebskostenrechnungEntry(entity, DbService);
                 return new OkObjectResult(entry);
             }
             catch
@@ -60,13 +43,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        public IActionResult Delete(int id, BetriebskostenrechnungEntry entry)
+        public IActionResult Delete(int id)
         {
-            if (id != entry.Id)
-            {
-                return new BadRequestResult();
-            }
-
             var entity = DbService.ctx.Betriebskostenrechnungen.Find(id);
             if (entity == null)
             {
@@ -75,19 +53,28 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             DbService.ctx.Betriebskostenrechnungen.Remove(entity);
 
-            return Save(entry);
+            return Save(null!);
         }
 
         public IActionResult Post(BetriebskostenrechnungEntry entry)
         {
-            var entity = new Betriebskostenrechnung();
-            if (!SetValues(entity, entry))
+            if (entry.Id != 0)
             {
                 return new BadRequestResult();
             }
-            DbService.ctx.Betriebskostenrechnungen.Add(entity);
+            var entity = new Betriebskostenrechnung();
 
-            return Save(entry);
+            try
+            {
+                SetValues(entity, entry);
+                DbService.ctx.Betriebskostenrechnungen.Add(entity);
+                return Save(entry);
+            }
+            catch
+            {
+                return new BadRequestResult();
+            }
+
         }
 
         public IActionResult Put(int id, BetriebskostenrechnungEntry entry)
@@ -98,12 +85,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            if (!SetValues(entity, entry))
+            try
+            {
+                SetValues(entity, entry);
+                DbService.ctx.Betriebskostenrechnungen.Update(entity);
+                return Save(entry);
+            }
+            catch
             {
                 return new BadRequestResult();
             }
 
-            return Save(entry);
         }
     }
 }

@@ -7,6 +7,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         public IActionResult Get(int id);
         public IActionResult Put(int id, T entry);
         public IActionResult Post(T entry);
-        public IActionResult Delete(int id, T entry);
+        public IActionResult Delete(int id);
     }
 }

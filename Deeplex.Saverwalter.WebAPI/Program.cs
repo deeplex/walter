@@ -3,6 +3,7 @@ using SimpleInjector;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 
 namespace Deeplex.Saverwalter.WebAPI
 {
@@ -19,6 +20,7 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<INotificationService, NotificationService>(Lifestyle.Scoped);
             container.Register<IFileService, FileService>(Lifestyle.Scoped);
             container.Register<IWalterDbService, WalterDbService>(Lifestyle.Scoped);
+            container.Register<BetriebskostenrechnungControllerService>(Lifestyle.Scoped);
 
             var builder = WebApplication.CreateBuilder(args);
 

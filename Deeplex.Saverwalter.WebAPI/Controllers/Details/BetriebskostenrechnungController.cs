@@ -14,31 +14,41 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
     {
         public class BetriebskostenrechnungEntryBase
         {
-            protected Betriebskostenrechnung Entity { get; }
+            protected Betriebskostenrechnung Entity { get; } = null!;
 
-            public int Id => Entity.BetriebskostenrechnungId;
-            public double Betrag => Entity.Betrag;
-            public int BetreffendesJahr => Entity.BetreffendesJahr;
-            public DateTime Datum => Entity.Datum;
-            public string Notiz => Entity.Notiz ?? "";
+            public int Id { get; set; }
+            public double Betrag { get; set; }
+            public int BetreffendesJahr { get; set; }
+            public DateTime Datum { get; set; }
+            public string? Notiz { get; set; }
 
+            protected BetriebskostenrechnungEntryBase() { }
             public BetriebskostenrechnungEntryBase(Betriebskostenrechnung entity)
             {
                 Entity = entity;
+                Id = Entity.BetriebskostenrechnungId;
+
+                Betrag = Entity.Betrag;
+                BetreffendesJahr = Entity.BetreffendesJahr;
+                Datum = Entity.Datum;
+                Notiz = Entity.Notiz ?? "";
             }
         }
 
         public class BetriebskostenrechnungEntry : BetriebskostenrechnungEntryBase
         {
-            private IWalterDbService DbService { get; }
+            private IWalterDbService DbService { get; } = null!;
 
-            public UmlageEntry Umlage => new UmlageEntry(Entity.Umlage, DbService);
-            public IEnumerable<WohnungListEntry> Wohnungen => Entity.Umlage.Wohnungen.Select(e => new WohnungListEntry(e, DbService));
-            public IEnumerable<AnhangListEntry> Anhaenge => Entity.Anhaenge.Select(e => new AnhangListEntry(e));
+            public UmlageEntry Umlage { get; set; } = null!;
+            public IEnumerable<WohnungListEntry>? Wohnungen => Entity?.Umlage.Wohnungen.Select(e => new WohnungListEntry(e, DbService));
+            public IEnumerable<AnhangListEntry>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangListEntry(e));
 
+            public BetriebskostenrechnungEntry() : base() { }
             public BetriebskostenrechnungEntry(Betriebskostenrechnung entity, IWalterDbService dbService) : base(entity)
             {
                 DbService = dbService;
+
+                Umlage = new UmlageEntry(Entity.Umlage, DbService);
             }
         }
 
@@ -46,7 +56,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         IWalterDbService DbService { get; }
         BetriebskostenrechnungControllerService Service { get; }
 
-        public BetriebskostenrechnungController(ILogger<BetriebskostenrechnungController> logger, IWalterDbService dbService, BetriebskostenrechnungControllerService service)
+        public BetriebskostenrechnungController(
+            ILogger<BetriebskostenrechnungController> logger,
+            IWalterDbService dbService,
+            BetriebskostenrechnungControllerService service)
         {
             _logger = logger;
             DbService = dbService;
@@ -57,12 +70,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Details
         public IActionResult Get(int id) => Service.Get(id);
 
         [HttpPost(Name = "[Controller]")]
-        public IActionResult Post(BetriebskostenrechnungEntry entry) => Service.Post(entry);
+        public IActionResult Post([FromBody] BetriebskostenrechnungEntry entry) => Service.Post(entry);
 
         [HttpPut(Name = "[Controller]")]
         public IActionResult Put(int id, BetriebskostenrechnungEntry entry) => Service.Put(id, entry);
 
         [HttpDelete(Name = "[Controller]")]
-        public IActionResult Delete(int id, BetriebskostenrechnungEntry entry) => Service.Delete(id, entry);
+        public IActionResult Delete(int id) => Service.Delete(id);
     }
 }
