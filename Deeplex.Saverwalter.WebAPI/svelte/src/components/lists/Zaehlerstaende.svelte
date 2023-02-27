@@ -4,7 +4,8 @@
 
 	const headers = [
 		{ key: 'datum', value: 'Datum' },
-		{ key: 'stand', value: 'Stand' }
+		{ key: 'stand', value: 'Stand' },
+		{ key: 'einheit', value: 'Einheit' }
 	];
 
 	export let rows: Promise<ZaehlerstandEntry[]>;

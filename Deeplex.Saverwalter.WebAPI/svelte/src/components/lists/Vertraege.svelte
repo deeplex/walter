@@ -5,8 +5,7 @@
 	import type { VertragEntry } from '../../types/vertrag.type';
 
 	const headers = [
-		{ key: 'wohnung.adresse.anschrift', value: 'Adresse' },
-		{ key: 'wohnung.bezeichnung', value: 'Wohnung' },
+		{ key: 'wohnung.text', value: 'Wohnung' },
 		{ key: 'mieterAuflistung', value: 'Mieter' },
 		{ key: 'beginn', value: 'Beginn' },
 		{ key: 'ende', value: 'Ende' }

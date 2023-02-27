@@ -6,6 +6,7 @@
 		WalterGrid,
 		WalterHeader,
 		WalterTextInput,
+		WalterNumberInput,
 		Wohnungen
 	} from '../../../components';
 	import { walter_get } from '../../../services/utils';
@@ -16,16 +17,18 @@
 	const a: Promise<BetriebskostenrechnungEntry> = walter_get(
 		`/api/betriebskostenrechnungen/${data.id}`
 	);
+	const entry: Partial<BetriebskostenrechnungEntry> = {};
+	a.then((e) => Object.assign(entry, e));
 </script>
 
 <WalterHeader
 	title={a.then(
 		(x) =>
 			x.betreffendesJahr +
-			' - ' +
-			x.umlage.typ +
-			' - ' +
-			x.umlage.wohnungenBezeichnung
+			' - TODO - ' +
+			x.umlage.text +
+			' - TODO - ' +
+			x.umlage.text
 	)}
 >
 	<Anhaenge rows={a.then((x) => x.anhaenge)} />
@@ -33,19 +36,31 @@
 
 <WalterGrid>
 	<Row>
-		<WalterTextInput labelText="Typ" value={a.then((x) => x.umlage.typ)} />
+		<!-- TODO bind:binding={entry.umlage?.typ} -->
+		<WalterTextInput labelText="Typ" value={a.then((x) => x.umlage.text)} />
+		<!-- TODO bind:binding={entry.wohnungenBezeichnung} -->
 		<WalterTextInput
 			labelText="Wohnungen"
-			value={a.then((x) => x.umlage.wohnungenBezeichnung)}
+			value={a.then((x) => x.umlage.text)}
 		/>
 	</Row>
 	<Row>
-		<WalterTextInput
-			labelText="Betreffendes Jahr"
+		<WalterNumberInput
+			bind:binding={entry.betreffendesJahr}
+			hideSteppers={false}
+			label="Betreffendes Jahr"
 			value={a.then((x) => x.betreffendesJahr)}
 		/>
-		<WalterTextInput labelText="Betrag" value={a.then((x) => x.betrag)} />
-		<WalterDatePicker labelText="Datum" value={a.then((x) => x.datum)} />
+		<WalterNumberInput
+			bind:binding={entry.betrag}
+			label="Betrag"
+			value={a.then((x) => x.betrag)}
+		/>
+		<WalterDatePicker
+			bind:binding={entry.datum}
+			labelText="Datum"
+			value={a.then((x) => x.datum)}
+		/>
 	</Row>
 
 	<Accordion>

@@ -1,5 +1,6 @@
 export type ZaehlerstandEntry = {
     id: number;
-    stand: string;
+    stand: number;
     datum: string;
+    einheit: string;
 }

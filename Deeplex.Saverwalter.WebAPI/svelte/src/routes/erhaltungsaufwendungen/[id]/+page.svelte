@@ -10,45 +10,56 @@
 		WalterDatePicker,
 		WalterGrid,
 		WalterHeader,
+		WalterNumberInput,
 		WalterTextInput
 	} from '../../../components';
+	import type { SelectionEntry } from '../../../types/selection.type';
 
 	export let data: PageData;
 	const a: Promise<ErhaltungsaufwendungEntry> = walter_get(
 		`/api/erhaltungsaufwendungen/${data.id}`
 	);
-
-	const wohnungen: Promise<ComboBoxItem[]> = walter_get(
-		'/api/selection/wohnungen'
-	);
-	const kontakte: Promise<ComboBoxItem[]> = walter_get(
-		'/api/selection/kontakte'
-	);
+	const entry: Partial<ErhaltungsaufwendungEntry> = {};
+	a.then((e) => Object.assign(entry, e));
 </script>
 
-<WalterHeader title={a.then((x) => x.aussteller.name + ' - ' + x.bezeichnung)}>
+<WalterHeader title={a.then((x) => x.aussteller.text + ' - ' + x.bezeichnung)}>
 	<Anhaenge rows={a.then((x) => x.anhaenge)} />
 </WalterHeader>
 
 <WalterGrid>
 	<Row>
-		<WalterTextInput labelText="Typ" value={a.then((x) => x.bezeichnung)} />
+		<WalterTextInput
+			bind:binding={entry.bezeichnung}
+			labelText="Typ"
+			value={a.then((x) => x.bezeichnung)}
+		/>
 		<WalterComboBox
+			bind:binding={entry.aussteller}
 			titleText="Aussteller"
-			items={kontakte}
-			selectedId={a.then((x) => x.aussteller.guid)}
+			api={'/api/selection/kontakte'}
+			value={a.then((x) => x.aussteller)}
 		/>
 		<WalterDatePicker value={a.then((x) => x.datum)} labelText="Datum" />
 	</Row>
 	<Row>
 		<WalterComboBox
+			bind:binding={entry.wohnung}
 			titleText="Wohnung"
-			selectedId={a.then((x) => x.wohnung.id.toString())}
-			items={wohnungen}
+			value={a.then((x) => x.wohnung)}
+			api={'/api/selection/wohnungen'}
 		/>
-		<WalterTextInput labelText="Betrag" value={a.then((x) => x.betrag)} />
+		<WalterNumberInput
+			bind:binding={entry.betrag}
+			label="Betrag"
+			value={a.then((x) => x.betrag)}
+		/>
 	</Row>
 	<Row>
-		<WalterTextInput labelText="Notiz" value={a.then((x) => x.notiz)} />
+		<WalterTextInput
+			bind:binding={entry.notiz}
+			labelText="Notiz"
+			value={a.then((x) => x.notiz)}
+		/>
 	</Row>
 </WalterGrid>

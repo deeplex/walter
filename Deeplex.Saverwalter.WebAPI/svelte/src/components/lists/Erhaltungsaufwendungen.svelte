@@ -6,8 +6,8 @@
 
 	const headers = [
 		{ key: 'bezeichnung', value: 'Bezeichnung' },
-		{ key: 'aussteller.name', value: 'Aussteller' },
-		{ key: 'wohnung.anschrift', value: 'Wohnung' },
+		{ key: 'aussteller.text', value: 'Aussteller' },
+		{ key: 'wohnung.text', value: 'Wohnung' },
 		{ key: 'betrag', value: 'Betrag' },
 		{ key: 'datum', value: 'Datum' }
 	];

@@ -4,6 +4,7 @@ using Deeplex.Saverwalter.WebAPI.Helper;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -20,7 +21,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public Zaehlertyp Typ { get; set; }
             public AdresseEntry? Adresse { get; set; }
             public string? Notiz { get; set; }
-            public string? Wohnung { get; set; }
+            public SelectionEntry? Wohnung { get; set; }
+            public SelectionEntry? AllgemeinZaehler { get; set; }
 
             public ZaehlerEntryBase() { }
             public ZaehlerEntryBase(Zaehler entity)
@@ -31,15 +33,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Kennnummer = Entity.Kennnummer;
                 Typ = Entity.Typ;
                 Adresse = Entity.Adresse is Adresse a ? new AdresseEntry(a) : null;
-                Wohnung = Entity.Wohnung is Wohnung w ? w.Adresse.Anschrift + ", " + w.Bezeichnung : null;
+                Wohnung = Entity.Wohnung is Wohnung w ? new (w.WohnungId, w.Adresse.Anschrift + ", " + w.Bezeichnung) : null;
                 Notiz = Entity.Notiz;
+                AllgemeinZaehler = Entity?.Allgemeinzaehler is Zaehler z ? new(z.ZaehlerId, z.Kennnummer) : null;
             }
         }
 
         public class ZaehlerEntry : ZaehlerEntryBase
         {
-            public ZaehlerEntryBase? AllgemeinZaehler { get; set; }
-
             public IEnumerable<ZaehlerEntryBase>? Einzelzaehler => Entity?.EinzelZaehler.ToList().Select(e => new ZaehlerEntryBase(e));
             public IEnumerable<ZaehlerstandEntryBase>? Staende => Entity?.Staende.ToList().Select(e => new ZaehlerstandEntryBase(e));
             public IEnumerable<AnhangEntryBase>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangEntryBase(e));
@@ -47,7 +48,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public ZaehlerEntry() : base() { }
             public ZaehlerEntry(Zaehler entity) : base(entity)
             {
-                AllgemeinZaehler = Entity?.Allgemeinzaehler is Zaehler z ? new ZaehlerEntryBase(z) : null;
             }
         }
 
@@ -55,16 +55,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             private Zaehlerstand? Entity { get; }
             public int Id { get; set; }
-            public string Stand { get; set; }
-            public string Datum { get; set; }
+            public double Stand { get; set; }
+            public DateTime Datum { get; set; }
+            public string Einheit { get; set; }
 
             public ZaehlerstandEntryBase(Zaehlerstand entity)
             {
                 Entity = entity;
 
                 Id = Entity.ZaehlerstandId;
-                Stand = Entity.Stand.ToString();
-                Datum = Entity.Datum.Datum();
+                Stand = Entity.Stand;
+                Datum = Entity.Datum;
+                Einheit = Entity.Zaehler.Typ.ToUnitString();
             }
         }
 

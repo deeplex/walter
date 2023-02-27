@@ -3,6 +3,7 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
@@ -21,8 +22,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int BetreffendesJahr { get; set; }
             public DateTime Datum { get; set; }
             public string? Notiz { get; set; }
-            public Betriebskostentyp? Typ { get; set; }
-            public string? WohnungenBezeichnung { get; set; }
+            public SelectionEntry Umlage { get; set; } = null!;
 
             protected BetriebskostenrechnungEntryBase() { }
             public BetriebskostenrechnungEntryBase(Betriebskostenrechnung entity)
@@ -33,9 +33,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Betrag = Entity.Betrag;
                 BetreffendesJahr = Entity.BetreffendesJahr;
                 Datum = Entity.Datum;
-                Typ = Entity.Umlage?.Typ;
-                WohnungenBezeichnung = Entity.Umlage?.GetWohnungenBezeichnung();
                 Notiz = Entity.Notiz;
+                Umlage = new SelectionEntry(entity.Umlage.UmlageId, entity.Umlage.Typ.ToDescriptionString() + " " + entity.Umlage.GetWohnungenBezeichnung());
             }
         }
 
@@ -43,7 +42,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             private IWalterDbService? DbService { get; }
 
-            public UmlageEntry Umlage { get; set; } = null!;
             public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Umlage.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!));
             public IEnumerable<AnhangEntryBase>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangEntryBase(e));
 
@@ -51,8 +49,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public BetriebskostenrechnungEntry(Betriebskostenrechnung entity, IWalterDbService dbService) : base(entity)
             {
                 DbService = dbService;
-
-                Umlage = new UmlageEntry(Entity!.Umlage, DbService);
             }
         }
 

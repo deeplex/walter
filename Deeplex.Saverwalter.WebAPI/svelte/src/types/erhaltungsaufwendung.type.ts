@@ -1,6 +1,5 @@
 import type { AnhangEntry } from "./anhang.type";
-import type { PersonEntry } from "./person.type";
-import type { WohnungEntry } from "./wohnung.type";
+import type { SelectionEntry } from "./selection.type";
 
 export type ErhaltungsaufwendungEntry = {
     id: number;
@@ -8,8 +7,8 @@ export type ErhaltungsaufwendungEntry = {
     datum: string;
     notiz: string;
     bezeichnung: string;
-    wohnung: WohnungEntry;
-    aussteller: PersonEntry;
+    wohnung: SelectionEntry;
+    aussteller: SelectionEntry;
 
     anhaenge: AnhangEntry[];
 }

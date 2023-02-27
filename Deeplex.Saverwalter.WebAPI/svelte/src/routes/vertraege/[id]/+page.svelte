@@ -12,19 +12,15 @@
 		WalterHeader
 	} from '../../../components';
 	import { walter_get } from '../../../services/utils';
+	import type { SelectionEntry } from '../../../types/selection.type';
 	import type { VertragEntry } from '../../../types/vertrag.type';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 
 	const a: Promise<VertragEntry> = walter_get(`/api/vertraege/${data.id}`);
-
-	const wohnungen: Promise<ComboBoxItem[]> = walter_get(
-		`/api/selection/wohnungen`
-	);
-	const kontakte: Promise<ComboBoxItem[]> = walter_get(
-		`/api/selection/kontakte`
-	);
+	const entry: Partial<VertragEntry> = {};
+	a.then((e) => Object.assign(entry, e));
 
 	// let vermieter = () =>
 	// 	kontakte.then(async (e) => {
@@ -35,7 +31,7 @@
 
 <WalterHeader
 	title={a.then(
-		(x) => x.wohnung.anschrift + ' - ' + x.mieter.map((m) => m.name).join(', ')
+		(x) => x.wohnung.text + ' - ' + x.mieter.map((m) => m.name).join(', ')
 	)}
 >
 	<Anhaenge rows={a.then((x) => x.anhaenge)} />
@@ -43,8 +39,13 @@
 
 <WalterGrid>
 	<Row>
-		<WalterDatePicker value={a.then((x) => x.beginn)} labelText="Beginn" />
 		<WalterDatePicker
+			bind:binding={entry.beginn}
+			value={a.then((x) => x.beginn)}
+			labelText="Beginn"
+		/>
+		<WalterDatePicker
+			bind:binding={entry.ende}
 			value={a.then((x) => x.ende)}
 			labelText="Ende"
 			placeholder="Offen"
@@ -52,10 +53,12 @@
 	</Row>
 	<Row>
 		<WalterComboBox
-			items={wohnungen}
-			selectedId={a.then((x) => x.wohnung.id.toString())}
+			bind:binding={entry.wohnung}
+			api={`/api/selection/kontakte`}
+			value={a.then((x) => x.wohnung)}
 			titleText="Wohnung"
 		/>
+		<!-- TODO -->
 		<!-- <Column>
 				<div style="margin-top:0.75rem">
 					<p class="bx--label">Vermieter:</p>
@@ -68,9 +71,11 @@
 					{/await}
 				</div>
 			</Column> -->
+		<!-- TODO -->
 		<WalterComboBox
-			items={kontakte}
-			selectedId={a.then((x) => x.ansprechpartnerId)}
+			bind:binding={entry.ansprechpartner}
+			api={`/api/selection/wohnungen`}
+			value={a.then((x) => x.ansprechpartner)}
 			titleText="Ansprechpartner"
 		/>
 	</Row>

@@ -14,6 +14,9 @@
 
 	export let data: PageData;
 	const a: Promise<UmlageEntry> = walter_get(`/api/umlagen/${data.id}`);
+
+	const entry: Partial<UmlageEntry> = {};
+	a.then((e) => Object.assign(entry, e));
 </script>
 
 <WalterHeader title={a.then((x) => x.typ + ' - ' + x.wohnungenBezeichnung)}>
@@ -21,14 +24,19 @@
 </WalterHeader>
 <WalterGrid>
 	<Row>
-		<WalterTextInput labelText="Bezeichnung" value={a.then((x) => x.typ)} />
+		<!-- TODO: THESE ARE NO TEXT INPUTS, BUT MENUS... PLEASE CHANGE -->
+		<WalterTextInput labelText="Typ" value={a.then((x) => x.typ)} />
 		<WalterTextInput
-			labelText="Wohnfläche"
+			labelText="Wohnungen"
 			value={a.then((x) => x.wohnungenBezeichnung)}
 		/>
 	</Row>
 	<Row>
-		<WalterTextInput labelText="Notiz" value={a.then((x) => x.notiz)} />
+		<WalterTextInput
+			labelText="Notiz"
+			bind:binding={entry.notiz}
+			value={a.then((x) => x.notiz)}
+		/>
 	</Row>
 
 	<Accordion>

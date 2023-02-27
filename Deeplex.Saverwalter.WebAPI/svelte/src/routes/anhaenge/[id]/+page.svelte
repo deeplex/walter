@@ -19,14 +19,21 @@
 
 	export let data: PageData;
 	const a: Promise<AnhangEntry> = walter_get(`/api/anhaenge/${data.id}`);
+	const entry: Partial<AnhangEntry> = {};
+	a.then((e) => Object.assign(entry, e));
 </script>
 
 <WalterHeader title={a.then((x) => x.fileName)} />
 
 <WalterGrid>
 	<Row>
-		<WalterTextInput labelText="Dateiname" value={a.then((x) => x.fileName)} />
-		<WalterDatePicker
+		<WalterTextInput
+			bind:binding={entry.fileName}
+			labelText="Dateiname"
+			value={a.then((x) => x.fileName)}
+		/>
+		<WalterTextInput
+			readonly
 			labelText="Erstellungszeit"
 			value={a.then((x) => x.creationTime)}
 		/>

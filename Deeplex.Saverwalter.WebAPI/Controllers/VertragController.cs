@@ -7,6 +7,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MietminderungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -21,8 +22,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int? Id { get; set; }
             public DateTime? Beginn { get; set; }
             public DateTime? Ende { get; set; }
-            public WohnungEntryBase? Wohnung { get; set; }
-            public Guid? AnsprechpartnerId { get; set; }
+            public SelectionEntry? Wohnung { get; set; }
+            public SelectionEntry? Ansprechpartner { get; set; }
             public string? Notiz { get; set; }
             public string? MieterAuflistung { get; set; }
 
@@ -34,8 +35,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Id = Entity.VertragId;
                 Beginn = Entity.Beginn();
                 Ende = Entity.Ende;
-                Wohnung = new WohnungEntryBase(Entity.Wohnung, dbService);
-                AnsprechpartnerId = Entity.AnsprechpartnerId;
+                Wohnung = new (Entity.Wohnung.WohnungId, Entity.Wohnung.Adresse.Anschrift + " - " + Entity.Wohnung.Bezeichnung);
+                Ansprechpartner = Entity.AnsprechpartnerId is Guid id && id != Guid.Empty ? new (id, dbService.ctx.FindPerson(id).Bezeichnung) : null;
                 Notiz = Entity.Notiz;
                 MieterAuflistung = string.Join(", ", dbService.ctx.MieterSet
                     .Where(m => m.Vertrag.VertragId == Entity.VertragId)

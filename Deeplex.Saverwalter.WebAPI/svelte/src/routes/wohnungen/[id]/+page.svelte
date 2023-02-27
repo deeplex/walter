@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Accordion, Row } from 'carbon-components-svelte';
-	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 	import {
 		WalterComboBox,
 		WalterGrid,
@@ -12,7 +11,8 @@
 		Erhaltungsaufwendungen,
 		Betriebskostenrechnungen,
 		Umlagen,
-		Anhaenge
+		Anhaenge,
+		WalterNumberInput
 	} from '../../../components';
 	import Adresse from '../../../components/Adresse.svelte';
 	import { walter_get } from '../../../services/utils';
@@ -21,10 +21,8 @@
 
 	export let data: PageData;
 	const a: Promise<WohnungEntry> = walter_get(`/api/wohnungen/${data.id}`);
-
-	const kontakte: Promise<ComboBoxItem[]> = walter_get(
-		`/api/selection/kontakte`
-	);
+	const entry: Partial<WohnungEntry> = {};
+	a.then((e) => Object.assign(entry, e));
 </script>
 
 <WalterHeader title={a.then((x) => x.anschrift)}>
@@ -33,29 +31,43 @@
 <WalterGrid>
 	<Row>
 		<WalterComboBox
+			bind:binding={entry.besitzer}
 			titleText="Besitzer"
-			items={kontakte}
-			selectedId={a.then((x) => x.besitzerId)}
+			api={`/api/selection/kontakte`}
+			value={a.then((x) => x.besitzer)}
 		/>
 	</Row>
+	<!-- TODO -->
 	<Adresse adresse={a.then((x) => x.adresse)} />
 	<Row>
 		<WalterTextInput
+			bind:binding={entry.bezeichnung}
 			labelText="Besitzer"
 			value={a.then((x) => x.bezeichnung)}
 		/>
-		<WalterTextInput
-			labelText="Wohnfläche"
+		<WalterNumberInput
+			bind:binding={entry.wohnflaeche}
+			label="Wohnfläche"
 			value={a.then((x) => x.wohnflaeche)}
 		/>
-		<WalterTextInput
-			labelText="Nutzfläche"
+		<WalterNumberInput
+			bind:binding={entry.nutzflaeche}
+			label="Nutzfläche"
 			value={a.then((x) => x.nutzflaeche)}
 		/>
-		<WalterTextInput labelText="Einheiten" value={a.then((x) => x.einheiten)} />
+		<WalterNumberInput
+			hideSteppers={false}
+			bind:binding={entry.einheiten}
+			label="Einheiten"
+			value={a.then((x) => x.einheiten)}
+		/>
 	</Row>
 	<Row>
-		<WalterTextInput labelText="Notiz" value={a.then((x) => x.notiz)} />
+		<WalterTextInput
+			bind:binding={entry.notiz}
+			labelText="Notiz"
+			value={a.then((x) => x.notiz)}
+		/>
 	</Row>
 
 	<Accordion>

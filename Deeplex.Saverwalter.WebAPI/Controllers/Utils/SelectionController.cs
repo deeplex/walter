@@ -8,18 +8,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
 {
     public class SelectionListController : ControllerBase
     {
-        public class SelectionListEntry
+        public class SelectionEntry
         {
             public string Id { get; }
             public string Text { get; }
 
-            public SelectionListEntry(Guid id, string text)
+            public SelectionEntry(Guid id, string text)
             {
                 Id = id.ToString();
                 Text = text;
             }
 
-            public SelectionListEntry(int id, string text)
+            public SelectionEntry(int id, string text)
             {
                 Id = id.ToString();
                 Text = text;
@@ -37,25 +37,25 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
 
         [HttpGet]
         [Route("api/selection/umlage")]
-        public IEnumerable<SelectionListEntry> GetUmlagen()
+        public IEnumerable<SelectionEntry> GetUmlagen()
         {
-            return DbService.ctx.Umlagen.Select(e => new SelectionListEntry(e.UmlageId, e.Wohnungen.GetWohnungenBezeichnung())).ToList();
+            return DbService.ctx.Umlagen.Select(e => new SelectionEntry(e.UmlageId, e.Wohnungen.GetWohnungenBezeichnung())).ToList();
         }
 
         [HttpGet]
         [Route("api/selection/kontakte")]
-        public IEnumerable<SelectionListEntry> GetKontakte()
+        public IEnumerable<SelectionEntry> GetKontakte()
         {
-            var nat = DbService.ctx.NatuerlichePersonen.Select(e => new SelectionListEntry(e.PersonId, e.Bezeichnung)).ToList();
-            var jur = DbService.ctx.JuristischePersonen.Select(e => new SelectionListEntry(e.PersonId, e.Bezeichnung)).ToList();
+            var nat = DbService.ctx.NatuerlichePersonen.Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung)).ToList();
+            var jur = DbService.ctx.JuristischePersonen.Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung)).ToList();
             return nat.Concat(jur);
         }
 
         [HttpGet]
         [Route("api/selection/wohnungen")]
-        public IEnumerable<SelectionListEntry> GetWohnungen()
+        public IEnumerable<SelectionEntry> GetWohnungen()
         {
-            return DbService.ctx.Wohnungen.Select(e => new SelectionListEntry(e.WohnungId, e.Adresse.Anschrift + " - " + e.Bezeichnung)).ToList();
+            return DbService.ctx.Wohnungen.Select(e => new SelectionEntry(e.WohnungId, e.Adresse.Anschrift + " - " + e.Bezeichnung)).ToList();
         }
     }
 }

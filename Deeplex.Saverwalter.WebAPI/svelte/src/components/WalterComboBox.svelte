@@ -1,40 +1,44 @@
 <script lang="ts">
-	import { ComboBox, TextInputSkeleton } from 'carbon-components-svelte';
+	import {
+		ComboBox,
+		Select,
+		TextInputSkeleton
+	} from 'carbon-components-svelte';
 	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
+	import { walter_get } from '../services/utils';
+	import type { SelectionEntry } from '../types/selection.type';
 
-	export let selectedId: Promise<string> | undefined;
+	type Selection = { selectedId: any; selectedItem: ComboBoxItem };
+
+	export let value: Promise<SelectionEntry | undefined> | undefined;
 	export let titleText: string;
-	export let items: ComboBoxItem[] | Promise<ComboBoxItem[]>;
+	export let binding: SelectionEntry | undefined = undefined;
+	export let api: string;
+
+	const a: Promise<SelectionEntry[]> = walter_get(api);
 
 	function shouldFilterItem(item: ComboBoxItem, value: string) {
 		if (!value) return true;
 		return item.text.toLowerCase().includes(value.toLowerCase());
 	}
 
-	let ref: ComboBox;
-	let backup: Promise<string> | undefined = selectedId;
-
-	function clear(_: FocusEvent) {
-		ref.clear();
+	function select(e: CustomEvent<Selection>) {
+		binding = e.detail.selectedItem;
 	}
 </script>
 
-{#await items}
+{#await a}
 	<TextInputSkeleton />
-{:then y}
-	{#await selectedId}
+{:then items}
+	{#await value}
 		<TextInputSkeleton />
 	{:then x}
 		<ComboBox
-			selectedId={x}
-			on:blur={() => (selectedId = backup)}
-			on:select={() => {
-				backup = selectedId;
-			}}
-			on:focus={clear}
-			bind:this={ref}
+			selectedId={x?.id}
+			on:select={select}
 			style="padding-right: 1rem"
-			items={y}
+			{items}
+			value={x?.text}
 			{titleText}
 			{shouldFilterItem}
 		/>

@@ -8,6 +8,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
@@ -30,7 +31,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Notiz { get; set; }
             public AdresseEntry? Adresse { get; set; }
             public string? Bewohner { get; set; }
-            public PersonEntryBase? Besitzer { get; set; }
+            public SelectionEntry? Besitzer { get; set; }
 
             public WohnungEntryBase() { }
             public WohnungEntryBase(Wohnung entity, IWalterDbService dbService)
@@ -44,16 +45,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Einheiten = Entity.Nutzeinheit;
                 Notiz = Entity.Notiz;
                 Adresse = Entity.Adresse is Adresse a ? new AdresseEntry(a) : null;
-
+                Besitzer = Entity.BesitzerId is Guid id && id != Guid.Empty ? new(id, dbService.ctx.FindPerson(id).Bezeichnung) : null;
+             
                 var v = Entity.Vertraege.FirstOrDefault(e => e.Ende == null || e.Ende < DateTime.Now);
-
                 Bewohner = v != null ?
                     string.Join(", ", dbService.ctx.MieterSet
                         .Where(m => m.Vertrag.VertragId == v.VertragId)
                         .ToList()
                         .Select(a => dbService.ctx.FindPerson(a.PersonId).Bezeichnung)) :
                     null;
-                Besitzer = dbService.ctx.FindPerson(Entity.BesitzerId) is IPerson p ? new PersonEntryBase(p) : null;
             }
         }
 

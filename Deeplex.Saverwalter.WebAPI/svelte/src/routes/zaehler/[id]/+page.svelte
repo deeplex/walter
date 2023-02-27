@@ -15,6 +15,8 @@
 
 	export let data: PageData;
 	const a: Promise<ZaehlerEntry> = walter_get(`/api/zaehler/${data.id}`);
+	const entry: Partial<ZaehlerEntry> = {};
+	a.then((e) => Object.assign(entry, e));
 </script>
 
 <WalterHeader title={a.then((x) => x.kennnummer)}>
@@ -23,11 +25,14 @@
 <WalterGrid>
 	<Row>
 		<WalterTextInput
+			bind:binding={entry.kennnummer}
 			labelText="Kennnummer"
 			value={a.then((x) => x.kennnummer)}
 		/>
+		<!-- TODO -->
 		<WalterTextInput labelText="Typ" value={a.then((x) => x.typ)} />
 	</Row>
+	<!-- TODO -->
 	<Adresse adresse={a.then((x) => x.adresse)} />
 
 	<Accordion>

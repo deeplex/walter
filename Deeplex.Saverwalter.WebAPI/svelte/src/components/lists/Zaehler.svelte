@@ -6,7 +6,7 @@
 
 	const headers = [
 		{ key: 'kennnummer', value: 'Kennnummer' },
-		{ key: 'wohnung', value: 'Wohnung' },
+		{ key: 'wohnung.text', value: 'Wohnung' },
 		{ key: 'typ', value: 'Typ' }
 	];
 

@@ -7,7 +7,7 @@
 	const headers = [
 		{ key: 'adresse.anschrift', value: 'Anschrift' },
 		{ key: 'bezeichnung', value: 'Bezeichnung' },
-		{ key: 'besitzer.name', value: 'Besitzer' },
+		{ key: 'besitzer.text', value: 'Besitzer' },
 		{ key: 'bewohner', value: 'Bewohner' }
 	];
 	const navigate = (e: CustomEvent<DataTableRow>) =>

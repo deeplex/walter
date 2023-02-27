@@ -50,11 +50,8 @@
 					</ToolbarContent>
 				</Toolbar>
 			{/if}
-			<span
-				style="margin-top: -0.5em; line-height: 1rem; text-align: center; width: 100%"
-				slot="cell"
-				let:cell
-			>
+			<!-- style="margin-top: -0.5em; line-height: 1rem; text-align: center; width: 100%" -->
+			<span slot="cell" let:cell>
 				{#if cell.value === null || cell.value === undefined || cell.value === ''}
 					---
 				{:else if cell.key === 'beginn' || cell.key === 'ende' || cell.key === 'datum'}

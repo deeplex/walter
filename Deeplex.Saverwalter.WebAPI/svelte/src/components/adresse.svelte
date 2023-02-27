@@ -4,6 +4,8 @@
 	import WalterTextInput from './WalterTextInput.svelte';
 
 	export let adresse: Promise<AdresseEntry>;
+
+	// TODO Statt dass der Inhalt der Adresse sich ändert, muss sich die Adresse ändern.
 </script>
 
 <Row>
