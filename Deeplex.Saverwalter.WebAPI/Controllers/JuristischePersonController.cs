@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
@@ -15,7 +16,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             protected new JuristischePerson? Entity { get; }
 
             public JuristischePersonEntryBase() : base() { }
-            public JuristischePersonEntryBase(JuristischePerson entity) : base(entity)
+            public JuristischePersonEntryBase(JuristischePerson entity, IWalterDbService dbService) : base(entity, dbService)
             {
                 Entity = entity;
             }
@@ -27,7 +28,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<PersonEntryBase>? Mitglieder => Entity?.Mitglieder.Select(e => new PersonEntryBase(e));
 
             public JuristischePersonEntry() : base() { }
-            public JuristischePersonEntry(JuristischePerson entity) : base(entity) { }
+            public JuristischePersonEntry(JuristischePerson entity, IWalterDbService dbService) : base(entity, dbService) { }
         }
 
         private readonly ILogger<JuristischePersonController> _logger;

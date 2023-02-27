@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new NatuerlichePersonEntry(entity);
+                var entry = new NatuerlichePersonEntry(entity, Ref);
                 return new OkObjectResult(entry);
             }
             catch

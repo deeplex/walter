@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Nachname { get; set; }
 
             protected NatuerlichePersonEntryBase() : base() { }
-            public NatuerlichePersonEntryBase(NatuerlichePerson entity) : base(entity)
+            public NatuerlichePersonEntryBase(NatuerlichePerson entity, IWalterDbService dbService) : base(entity, dbService)
             {
                 Entity = entity;
                 Id = entity.NatuerlichePersonId;
@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<AnhangEntryBase>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangEntryBase(e));
 
             public NatuerlichePersonEntry() : base() { }
-            public NatuerlichePersonEntry(NatuerlichePerson entity) : base(entity) { }
+            public NatuerlichePersonEntry(NatuerlichePerson entity, IWalterDbService dbService) : base(entity, dbService) { }
         }
 
         private readonly ILogger<NatuerlichePersonController> _logger;

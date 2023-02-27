@@ -13,21 +13,14 @@
 		Wohnungen,
 		Vertraege
 	} from '../../../../components';
-	import type { WohnungEntry } from '../../../../types/wohnung.type';
-	import type { VertragEntry } from '../../../../types/vertrag.type';
+	import type { PersonEntry } from '../../../../types/person.type';
 
 	export let data: PageData;
 	const a: Promise<NatuerlichePersonEntry> = walter_get(
 		`/api/kontakte/nat/${data.id}`
 	);
-
-	function getWohnungen(guid: string): Promise<WohnungEntry[]> {
-		return walter_get(`/api/wohnungen/mieter/${guid}`);
-	}
-
-	function getVertraege(guid: string): Promise<VertragEntry[]> {
-		return walter_get(`/api/vertraege/mieter/${guid}`);
-	}
+	const entry: Partial<PersonEntry> = {};
+	a.then((e) => Object.assign(entry, e));
 </script>
 
 <WalterHeader title={a.then((x) => x.name)}>
@@ -39,7 +32,7 @@
 		<WalterTextInput labelText="Vorname" value={a.then((x) => x.vorname)} />
 		<WalterTextInput labelText="Nachname" value={a.then((x) => x.nachname)} />
 	</Row>
-	<Person person={a} />
+	<Person binding={entry} person={a} />
 
 	<Accordion>
 		<Kontakte
@@ -47,8 +40,8 @@
 			rows={a.then((x) => x.juristischePersonen)}
 		/>
 		{#await a then x}
-			<Wohnungen title="Wohnungen" rows={getWohnungen(x.guid)} />
-			<Vertraege title="Verträge" rows={getVertraege(x.guid)} />
+			<Wohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
+			<Vertraege title="Verträge" rows={a.then((x) => x.vertraege)} />
 		{/await}
 	</Accordion>
 </WalterGrid>

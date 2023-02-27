@@ -4,6 +4,8 @@ using Deeplex.Saverwalter.WebAPI.Helper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.JuristischePersonController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -61,12 +63,35 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class PersonEntry : PersonEntryBase
         {
+            private IEnumerable<Vertrag> GetVertraege()
+            {
+                var Person = DbService!.ctx.FindPerson(Guid).JuristischePersonen.Select(e => e.PersonId).ToList();
+                var asMieter = DbService!.ctx.MieterSet.Where(e => e.PersonId == Guid || Person!.Contains(e.PersonId)).Select(e => e.Vertrag).ToList();
+                var asOther = DbService!.ctx.Vertraege.Where(e =>
+                    Guid == e.Wohnung.BesitzerId ||
+                    Guid == e.AnsprechpartnerId ||
+                    Person.Contains(e.Wohnung.BesitzerId) ||
+                    (e.AnsprechpartnerId.HasValue ? Person.Contains(e.AnsprechpartnerId ?? Guid.Empty) : false)).ToList();
+
+                asOther.AddRange(asMieter);
+
+                return asOther.AsQueryable().DistinctBy(e => e.VertragId);
+            }
+
+            private IWalterDbService? DbService { get; set; }
+
             public IEnumerable<JuristischePersonEntryBase>? JuristischePersonen
-                => Entity!.JuristischePersonen.Select(e => new JuristischePersonEntryBase(e))
-                .ToList();
+                => Entity!.JuristischePersonen.Select(e => new JuristischePersonEntryBase(e, DbService!));
+            public IEnumerable<VertragEntryBase>? Vertraege
+                => GetVertraege().Select(e => new VertragEntryBase(e, DbService!));
+            public IEnumerable<WohnungEntryBase>? Wohnungen
+                => GetVertraege().Select(e => e.Wohnung).Distinct().Select(e => new WohnungEntryBase(e, DbService!));
 
             protected PersonEntry() : base() { }
-            public PersonEntry(IPerson entity) : base(entity) { }
+            public PersonEntry(IPerson entity, IWalterDbService dbService) : base(entity)
+            {
+                DbService = dbService;
+            }
         }
 
         private readonly ILogger<KontaktListController> _logger;
