@@ -7,20 +7,13 @@
 </script>
 
 {#await title}
-	<Header {company} platformName="Lade...">
+	<Header href="/" {company} platformName="Lade...">
 		<Loading withOverlay={false} small />
 	</Header>
 {:then x}
-	<Header {company} platformName={x}>
+	<Header href="/" {company} platformName={x}>
 		<HeaderUtilities>
 			<slot />
 		</HeaderUtilities>
 	</Header>
 {/await}
-
-<!-- <svelte:fragment slot="skip-to-content">
-		<SkipToContent />
-	</svelte:fragment> -->
-<!-- <HeaderUtilities>
-
-	</HeaderUtilities> -->

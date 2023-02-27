@@ -14,8 +14,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new Exception();
             }
 
-            // TODO
+            entity.Bezeichnung = entry.Name!;
+            entity.Email = entry.Email;
+            entity.Fax = entry.Fax;
             entity.Notiz = entry.Notiz;
+            entity.Telefon = entry.Telefon;
+            entity.Mobil = entry.Mobil;
         }
 
         public JuristischePersonDbService(IWalterDbService dbService) : base(dbService)

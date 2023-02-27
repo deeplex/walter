@@ -11,26 +11,36 @@
 		Anhaenge,
 		Kontakte,
 		Wohnungen,
-		Vertraege
+		Vertraege,
+		SaveWalter
 	} from '../../../../components';
 	import type { PersonEntry } from '../../../../types/person.type';
 
 	export let data: PageData;
-	const a: Promise<NatuerlichePersonEntry> = walter_get(
-		`/api/kontakte/nat/${data.id}`
-	);
-	const entry: Partial<PersonEntry> = {};
+	const url = `/api/kontakte/nat/${data.id}`;
+
+	const a: Promise<NatuerlichePersonEntry> = walter_get(url);
+	const entry: Partial<NatuerlichePersonEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 </script>
 
 <WalterHeader title={a.then((x) => x.name)}>
+	<SaveWalter {a} {url} body={entry} />
 	<Anhaenge rows={a.then((x) => x.anhaenge)} />
 </WalterHeader>
 
 <WalterGrid>
 	<Row>
-		<WalterTextInput labelText="Vorname" value={a.then((x) => x.vorname)} />
-		<WalterTextInput labelText="Nachname" value={a.then((x) => x.nachname)} />
+		<WalterTextInput
+			bind:binding={entry.vorname}
+			labelText="Vorname"
+			value={a.then((x) => x.vorname)}
+		/>
+		<WalterTextInput
+			bind:binding={entry.nachname}
+			labelText="Nachname"
+			value={a.then((x) => x.nachname)}
+		/>
 	</Row>
 	<Person binding={entry} person={a} />
 

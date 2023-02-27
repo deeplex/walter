@@ -25,7 +25,7 @@
 	a.then((e) => Object.assign(entry, e));
 </script>
 
-<WalterHeader title={a.then((x) => x.anschrift)}>
+<WalterHeader title={a.then((x) => 'TODO - ' + x.bezeichnung)}>
 	<Anhaenge rows={a.then((x) => x.anhaenge)} />
 </WalterHeader>
 <WalterGrid>

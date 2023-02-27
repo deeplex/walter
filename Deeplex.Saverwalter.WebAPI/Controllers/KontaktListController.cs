@@ -63,8 +63,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class PersonEntry : PersonEntryBase
         {
-            private IEnumerable<Vertrag> GetVertraege()
+            private IEnumerable<Vertrag>? GetVertraege()
             {
+                if (DbService == null)
+                {
+                    return null;
+                }
                 var Person = DbService!.ctx.FindPerson(Guid).JuristischePersonen.Select(e => e.PersonId).ToList();
                 var asMieter = DbService!.ctx.MieterSet.Where(e => e.PersonId == Guid || Person!.Contains(e.PersonId)).Select(e => e.Vertrag).ToList();
                 var asOther = DbService!.ctx.Vertraege.Where(e =>
@@ -81,11 +85,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             private IWalterDbService? DbService { get; set; }
 
             public IEnumerable<JuristischePersonEntryBase>? JuristischePersonen
-                => Entity!.JuristischePersonen.Select(e => new JuristischePersonEntryBase(e, DbService!));
+                => Entity?.JuristischePersonen.Select(e => new JuristischePersonEntryBase(e, DbService!));
             public IEnumerable<VertragEntryBase>? Vertraege
-                => GetVertraege().Select(e => new VertragEntryBase(e, DbService!));
+                => GetVertraege()?.Select(e => new VertragEntryBase(e, DbService!));
             public IEnumerable<WohnungEntryBase>? Wohnungen
-                => GetVertraege().Select(e => e.Wohnung).Distinct().Select(e => new WohnungEntryBase(e, DbService!));
+                => GetVertraege()?.Select(e => e.Wohnung).Distinct().Select(e => new WohnungEntryBase(e, DbService!));
 
             protected PersonEntry() : base() { }
             public PersonEntry(IPerson entity, IWalterDbService dbService) : base(entity)

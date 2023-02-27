@@ -36,15 +36,7 @@ namespace Deeplex.Saverwalter.Services
 
         public void SaveWalter()
         {
-            try
-            {
-                ctx.SaveChanges();
-                NotificationService.ShowAlert("Gespeichert");
-            }
-            catch (Exception e)
-            {
-                NotificationService.ShowAlert(e.Message);
-            }
+            ctx.SaveChanges();
         }
     }
 }

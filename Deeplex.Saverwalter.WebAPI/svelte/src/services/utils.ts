@@ -25,14 +25,23 @@ export function convertEuro(value: number | undefined): string | undefined {
     }
 }
 
-export const request_options = {
-    method: 'GET',
-    headers: {
-        'Content-Type': 'text/json'
-    }
-};
-
 export const walter_get = (url: string) => fetch(
     url,
-    request_options
+    {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'text/json'
+        }
+    }
+).then((e) => e.json());
+
+export const walter_put = (url: string, body: any) => fetch(
+    url,
+    {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'text/json'
+        },
+        body: JSON.stringify(body),
+    }
 ).then((e) => e.json());
