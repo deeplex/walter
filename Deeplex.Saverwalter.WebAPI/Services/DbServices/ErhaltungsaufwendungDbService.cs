@@ -14,8 +14,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new Exception();
             }
 
-            // TODO
+            entity.Betrag = entry.Betrag;
+            entity.Datum = entry.Datum;
             entity.Notiz = entry.Notiz;
+            entity.Bezeichnung = entry.Bezeichnung ?? "";
+            entity.AusstellerId = new Guid(entry.Aussteller!.Id!);
+            entity.Wohnung = Ref.ctx.Wohnungen.Find(int.Parse(entry.Wohnung!.Id!));
         }
 
         public ErhaltungsaufwendungDbService(IWalterDbService dbService) : base(dbService)

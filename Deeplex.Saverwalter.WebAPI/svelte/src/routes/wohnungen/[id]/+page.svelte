@@ -12,7 +12,8 @@
 		Betriebskostenrechnungen,
 		Umlagen,
 		Anhaenge,
-		WalterNumberInput
+		WalterNumberInput,
+		SaveWalter
 	} from '../../../components';
 	import Adresse from '../../../components/Adresse.svelte';
 	import { walter_get } from '../../../services/utils';
@@ -20,12 +21,15 @@
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const a: Promise<WohnungEntry> = walter_get(`/api/wohnungen/${data.id}`);
+	const url = `/api/wohnungen/${data.id}`;
+
+	const a: Promise<WohnungEntry> = walter_get(url);
 	const entry: Partial<WohnungEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 </script>
 
 <WalterHeader title={a.then((x) => 'TODO - ' + x.bezeichnung)}>
+	<SaveWalter {a} {url} body={entry} />
 	<Anhaenge rows={a.then((x) => x.anhaenge)} />
 </WalterHeader>
 <WalterGrid>
@@ -42,7 +46,7 @@
 	<Row>
 		<WalterTextInput
 			bind:binding={entry.bezeichnung}
-			labelText="Besitzer"
+			labelText="Bezeichnung"
 			value={a.then((x) => x.bezeichnung)}
 		/>
 		<WalterNumberInput

@@ -6,19 +6,21 @@
 		Kontakte,
 		Mieten,
 		Mietminderungen,
+		SaveWalter,
 		WalterComboBox,
 		WalterDatePicker,
 		WalterGrid,
 		WalterHeader
 	} from '../../../components';
+	import WalterTextInput from '../../../components/WalterTextInput.svelte';
 	import { walter_get } from '../../../services/utils';
-	import type { SelectionEntry } from '../../../types/selection.type';
 	import type { VertragEntry } from '../../../types/vertrag.type';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
+	const url = `/api/vertraege/${data.id}`;
 
-	const a: Promise<VertragEntry> = walter_get(`/api/vertraege/${data.id}`);
+	const a: Promise<VertragEntry> = walter_get(url);
 	const entry: Partial<VertragEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 
@@ -34,6 +36,7 @@
 		(x) => x.wohnung.text + ' - ' + x.mieter.map((m) => m.name).join(', ')
 	)}
 >
+	<SaveWalter {a} {url} body={entry} />
 	<Anhaenge rows={a.then((x) => x.anhaenge)} />
 </WalterHeader>
 
@@ -54,7 +57,7 @@
 	<Row>
 		<WalterComboBox
 			bind:binding={entry.wohnung}
-			api={`/api/selection/kontakte`}
+			api={`/api/selection/wohnungen`}
 			value={a.then((x) => x.wohnung)}
 			titleText="Wohnung"
 		/>
@@ -74,9 +77,16 @@
 		<!-- TODO -->
 		<WalterComboBox
 			bind:binding={entry.ansprechpartner}
-			api={`/api/selection/wohnungen`}
+			api={`/api/selection/kontakte`}
 			value={a.then((x) => x.ansprechpartner)}
 			titleText="Ansprechpartner"
+		/>
+	</Row>
+	<Row>
+		<WalterTextInput
+			labelText="Notiz"
+			bind:binding={entry.notiz}
+			value={a.then((x) => x.notiz)}
 		/>
 	</Row>
 

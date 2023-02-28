@@ -11,19 +11,21 @@
 		WalterTextInput,
 		Wohnungen,
 		Vertraege,
-		Anhaenge
+		Anhaenge,
+		SaveWalter
 	} from '../../../../components';
 	import type { PersonEntry } from '../../../../types/person.type';
 
 	export let data: PageData;
-	const a: Promise<JuristischePersonEntry> = walter_get(
-		`/api/kontakte/jur/${data.id}`
-	);
+	const url = `/api/kontakte/jur/${data.id}`;
+
+	const a: Promise<JuristischePersonEntry> = walter_get(url);
 	const entry: Partial<PersonEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 </script>
 
 <WalterHeader title={a.then((x) => x.name)}>
+	<SaveWalter {a} {url} body={entry} />
 	<Anhaenge rows={a.then((x) => x.anhaenge)} />
 </WalterHeader>
 

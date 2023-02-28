@@ -14,7 +14,6 @@
 		Vertraege,
 		SaveWalter
 	} from '../../../../components';
-	import type { PersonEntry } from '../../../../types/person.type';
 
 	export let data: PageData;
 	const url = `/api/kontakte/nat/${data.id}`;

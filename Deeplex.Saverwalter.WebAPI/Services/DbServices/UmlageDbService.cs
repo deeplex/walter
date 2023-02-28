@@ -14,7 +14,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new Exception();
             }
 
-            // TODO
+            entity.Beschreibung = entry.Beschreibung;
+            //TODO
+            //entity.Typ = entry.Typ;
+            //entity.Zaehler = entry
+            //entity.Schluessel = entry.Schluessel;
             entity.Notiz = entry.Notiz;
         }
 

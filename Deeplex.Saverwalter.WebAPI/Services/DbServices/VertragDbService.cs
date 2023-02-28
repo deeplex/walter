@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
@@ -14,7 +15,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new Exception();
             }
 
-            // TODO
+            // TODO Vertragsversionen
+            // Beginn => Versionen
+            entity.Ende = entry.Ende;
+            entity.Wohnung = Ref.ctx.Wohnungen.Find(int.Parse(entry.Wohnung!.Id!));
+            entity.AnsprechpartnerId = entry.Ansprechpartner is SelectionEntry s ? new Guid(s.Id!) : null;
             entity.Notiz = entry.Notiz;
         }
 

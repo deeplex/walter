@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
@@ -14,8 +15,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new Exception();
             }
 
-            // TODO
+            entity.Bezeichnung = entry.Bezeichnung ?? "";
+            entity.Wohnflaeche = entry.Wohnflaeche;
+            entity.Nutzflaeche = entry.Nutzflaeche;
+            entity.Nutzeinheit = entry.Einheiten;
             entity.Notiz = entry.Notiz;
+            // TODO guid may be null?
+            entity.BesitzerId = entry.Besitzer is SelectionEntry b ? new Guid(b.Id!) : Guid.Empty;
         }
 
         public WohnungDbService(IWalterDbService dbService) : base(dbService)

@@ -13,6 +13,7 @@ export type BetriebskostenrechnungEntry = {
     // Aber es gibt halt noch keine Umlagetypliste... 
     // typ: SelectionEntry;
     // wohnungen: SelectionEntry
+    wohnungenBezeichnung: string;
     umlage: SelectionEntry;
 
     wohnungen: WohnungEntry[];

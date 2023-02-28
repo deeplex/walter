@@ -10,6 +10,7 @@ export type VertragEntry = {
     ende: string | undefined;
     wohnung: SelectionEntry;
     ansprechpartner: SelectionEntry | undefined;
+    notiz: string;
 
     mieterauflistung: string;
 

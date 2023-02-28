@@ -3,9 +3,9 @@
 	import type { PageData } from './$types';
 	import type { ErhaltungsaufwendungEntry } from '../../../types/erhaltungsaufwendung.type';
 	import { walter_get } from '../../../services/utils';
-	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 	import {
 		Anhaenge,
+		SaveWalter,
 		WalterComboBox,
 		WalterDatePicker,
 		WalterGrid,
@@ -13,17 +13,17 @@
 		WalterNumberInput,
 		WalterTextInput
 	} from '../../../components';
-	import type { SelectionEntry } from '../../../types/selection.type';
 
 	export let data: PageData;
-	const a: Promise<ErhaltungsaufwendungEntry> = walter_get(
-		`/api/erhaltungsaufwendungen/${data.id}`
-	);
+	const url = `/api/erhaltungsaufwendungen/${data.id}`;
+
+	const a: Promise<ErhaltungsaufwendungEntry> = walter_get(url);
 	const entry: Partial<ErhaltungsaufwendungEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 </script>
 
 <WalterHeader title={a.then((x) => x.aussteller.text + ' - ' + x.bezeichnung)}>
+	<SaveWalter {a} {url} body={entry} />
 	<Anhaenge rows={a.then((x) => x.anhaenge)} />
 </WalterHeader>
 

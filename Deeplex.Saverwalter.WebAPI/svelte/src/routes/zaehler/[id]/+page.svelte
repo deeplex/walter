@@ -3,6 +3,7 @@
 	import {
 		Adresse,
 		Anhaenge,
+		SaveWalter,
 		WalterGrid,
 		WalterHeader,
 		WalterTextInput,
@@ -14,12 +15,15 @@
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const a: Promise<ZaehlerEntry> = walter_get(`/api/zaehler/${data.id}`);
+	const url = `/api/zaehler/${data.id}`;
+
+	const a: Promise<ZaehlerEntry> = walter_get(url);
 	const entry: Partial<ZaehlerEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 </script>
 
 <WalterHeader title={a.then((x) => x.kennnummer)}>
+	<SaveWalter {a} {url} body={entry} />
 	<Anhaenge rows={a.then((x) => x.anhaenge)} />
 </WalterHeader>
 <WalterGrid>
@@ -34,6 +38,13 @@
 	</Row>
 	<!-- TODO -->
 	<Adresse adresse={a.then((x) => x.adresse)} />
+	<Row>
+		<WalterTextInput
+			bind:binding={entry.notiz}
+			labelText="Notiz"
+			value={a.then((x) => x.notiz)}
+		/>
+	</Row>
 
 	<Accordion>
 		<Zaehlerstaende title="Zählerstände" rows={a.then((x) => x.staende)} />

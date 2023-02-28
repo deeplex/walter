@@ -7,16 +7,17 @@
 		WalterHeader,
 		WalterTextInput,
 		WalterNumberInput,
-		Wohnungen
+		Wohnungen,
+		SaveWalter
 	} from '../../../components';
 	import { walter_get } from '../../../services/utils';
 	import type { BetriebskostenrechnungEntry } from '../../../types/betriebskostenrechnung.type';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const a: Promise<BetriebskostenrechnungEntry> = walter_get(
-		`/api/betriebskostenrechnungen/${data.id}`
-	);
+	const url = `/api/betriebskostenrechnungen/${data.id}`;
+
+	const a: Promise<BetriebskostenrechnungEntry> = walter_get(url);
 	const entry: Partial<BetriebskostenrechnungEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 </script>
@@ -31,6 +32,7 @@
 			x.umlage.text
 	)}
 >
+	<SaveWalter {a} {url} body={entry} />
 	<Anhaenge rows={a.then((x) => x.anhaenge)} />
 </WalterHeader>
 
@@ -41,7 +43,7 @@
 		<!-- TODO bind:binding={entry.wohnungenBezeichnung} -->
 		<WalterTextInput
 			labelText="Wohnungen"
-			value={a.then((x) => x.umlage.text)}
+			value={a.then((x) => x.wohnungenBezeichnung)}
 		/>
 	</Row>
 	<Row>

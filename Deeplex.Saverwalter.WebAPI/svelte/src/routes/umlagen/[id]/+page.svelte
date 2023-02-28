@@ -3,6 +3,7 @@
 	import {
 		Anhaenge,
 		Betriebskostenrechnungen,
+		SaveWalter,
 		WalterGrid,
 		WalterHeader,
 		WalterTextInput
@@ -13,13 +14,15 @@
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const a: Promise<UmlageEntry> = walter_get(`/api/umlagen/${data.id}`);
+	const url = `/api/umlagen/${data.id}`;
 
+	const a: Promise<UmlageEntry> = walter_get(url);
 	const entry: Partial<UmlageEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 </script>
 
 <WalterHeader title={a.then((x) => x.typ + ' - ' + x.wohnungenBezeichnung)}>
+	<SaveWalter {a} {url} body={entry} />
 	<Anhaenge rows={a.then((x) => x.anhaenge)} />
 </WalterHeader>
 <WalterGrid>

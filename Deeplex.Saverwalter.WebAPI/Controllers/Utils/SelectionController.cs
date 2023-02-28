@@ -10,9 +10,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
     {
         public class SelectionEntry
         {
-            public string Id { get; }
-            public string Text { get; }
+            public string? Id { get; set; }
+            public string? Text { get; set; }
 
+            public SelectionEntry() { }
             public SelectionEntry(Guid id, string text)
             {
                 Id = id.ToString();

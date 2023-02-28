@@ -18,7 +18,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.BetreffendesJahr = entry.BetreffendesJahr;
             entity.Datum = entry.Datum;
             entity.Notiz = entry.Notiz;
-            entity.Umlage = Ref.ctx.Umlagen.Find(entry.Umlage.Id);
+            // TODO
+            //entity.Umlage = Ref.ctx.Umlagen.Find(entry.Umlage.Id);
         }
 
         public BetriebskostenrechnungDbService(IWalterDbService dbService) : base(dbService)

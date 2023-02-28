@@ -10,6 +10,7 @@ export type ZaehlerEntry = {
     typ: string;
     allgemeinZaehler: SelectionEntry | undefined;
     wohnung: SelectionEntry | undefined;
+    notiz: string;
 
     staende: ZaehlerstandEntry[];
     einzelzaehler: ZaehlerEntry[];

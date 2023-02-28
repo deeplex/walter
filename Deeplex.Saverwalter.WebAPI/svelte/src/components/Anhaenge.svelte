@@ -18,7 +18,7 @@
 		</svelte:fragment>
 	</HeaderAction>
 {:then x}
-	<HeaderAction isOpen text="({x.length})">
+	<HeaderAction text="({x.length})">
 		<HeaderPanelLinks>
 			<HeaderPanelDivider>Dateien ({x.length})</HeaderPanelDivider>
 			{#each x as row}
