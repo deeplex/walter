@@ -1,10 +1,14 @@
-<script>
+<script lang="ts">
 	import 'carbon-components-svelte/css/white.css';
-	import { WalterSideNav } from '../components';
+	import { WalterSideNav, WalterToasts } from '../components';
 </script>
 
 <WalterSideNav />
-
+<div
+	style="; overflow: hidden; position: absolute; top: 48px; right: 0; z-index: 99"
+>
+	<WalterToasts />
+</div>
 <slot />
 
 <style>

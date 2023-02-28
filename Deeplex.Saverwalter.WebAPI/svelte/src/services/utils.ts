@@ -1,3 +1,5 @@
+import { addToast } from '../store';
+
 export function convertDate(text: string | undefined): string | undefined {
     if (text) {
         return new Date(text).toLocaleDateString("de-DE");
@@ -24,24 +26,27 @@ export function convertEuro(value: number | undefined): string | undefined {
         return undefined;
     }
 }
+async function finishRequest(e: Response) {
+    const ok = e.status === 200;
+    const kind = ok ? "success" : "error";
+    const title = ok ? "Speichern Erfolgreich" : "Fehler";
+    const j = await e.json();
+
+    const subtitle = "TODO parse response body." // JSON.stringify(j);
+
+    addToast({ title, kind, subtitle });
+    return j;
+}
+
+const headers = {
+    'Content-Type': 'text/json'
+};
 
 export const walter_get = (url: string) => fetch(
-    url,
-    {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'text/json'
-        }
-    }
-).then((e) => e.json());
+    url, { method: 'GET', headers }
+).then(e => e.json());
 
 export const walter_put = (url: string, body: any) => fetch(
     url,
-    {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'text/json'
-        },
-        body: JSON.stringify(body),
-    }
-).then((e) => e.json());
+    { method: 'PUT', headers, body: JSON.stringify(body) }
+).then(finishRequest);

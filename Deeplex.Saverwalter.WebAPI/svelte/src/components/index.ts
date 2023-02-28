@@ -9,6 +9,7 @@ export { default as WalterHeader } from './WalterHeader.svelte';
 export { default as WalterGrid } from './WalterGrid.svelte';
 export { default as WalterSideNav } from './WalterSideNav.svelte';
 export { default as WalterTextInput } from './WalterTextInput.svelte';
+export { default as WalterToasts } from './WalterToasts.svelte';
 export { default as SaveWalter } from './SaveWalter.svelte';
 export { default as WalterNumberInput } from './WalterNumberInput.svelte';
 export { default as Umlagen } from './lists/Umlagen.svelte';
