@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { WalterDataWrapper } from '..';
-	import type { MieteEntry } from '../../types/miete.type';
+	import { WalterDataWrapper } from '$components';
+	import type { MieteEntry } from '$types';
 
 	const headers = [
 		{ key: 'betreffenderMonat', value: 'Betreffender Monat' },

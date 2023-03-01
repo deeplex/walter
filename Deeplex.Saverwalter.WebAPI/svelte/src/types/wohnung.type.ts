@@ -1,11 +1,4 @@
-import type { AdresseEntry } from './adresse.type';
-import type { AnhangEntry } from './anhang.type';
-import type { BetriebskostenrechnungEntry } from './betriebskostenrechnung.type';
-import type { ErhaltungsaufwendungEntry } from './erhaltungsaufwendung.type';
-import type { SelectionEntry } from './selection.type';
-import type { UmlageEntry } from './umlage.type';
-import type { VertragEntry } from './vertrag.type';
-import type { ZaehlerEntry } from './zaehler.type';
+import type { AdresseEntry, AnhangEntry, BetriebskostenrechnungEntry, ErhaltungsaufwendungEntry, SelectionEntry, UmlageEntry, VertragEntry, ZaehlerEntry } from '$types';
 
 export type WohnungEntry = {
     adresse: AdresseEntry;

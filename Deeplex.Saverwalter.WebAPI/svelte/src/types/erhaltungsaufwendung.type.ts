@@ -1,5 +1,4 @@
-import type { AnhangEntry } from "./anhang.type";
-import type { SelectionEntry } from "./selection.type";
+import type { AnhangEntry, SelectionEntry } from "$types";
 
 export type ErhaltungsaufwendungEntry = {
     id: number;

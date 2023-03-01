@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { Accordion, Row } from 'carbon-components-svelte';
+
+	import type { PageData } from './$types';
+
 	import {
+		Adresse,
 		WalterComboBox,
 		WalterGrid,
 		WalterHeader,
@@ -14,11 +18,9 @@
 		Anhaenge,
 		WalterNumberInput,
 		SaveWalter
-	} from '../../../components';
-	import Adresse from '../../../components/Adresse.svelte';
-	import { walter_get } from '../../../services/utils';
-	import type { WohnungEntry } from '../../../types/wohnung.type';
-	import type { PageData } from './$types';
+	} from '$components';
+	import type { WohnungEntry } from '$types';
+	import { walter_get } from '$services/utils';
 
 	export let data: PageData;
 	const url = `/api/wohnungen/${data.id}`;

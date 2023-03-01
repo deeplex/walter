@@ -1,4 +1,4 @@
-import type { PersonEntry } from "./person.type";
+import type { PersonEntry } from "$types";
 
 export type JuristischePersonEntry = {
     mitglieder: PersonEntry[];

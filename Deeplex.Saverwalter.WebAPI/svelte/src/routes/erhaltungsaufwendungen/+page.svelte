@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-	import { WalterDataTable, WalterHeader } from '../../components';
-	import Erhaltungsaufwendungen from '../../components/lists/Erhaltungsaufwendungen.svelte';
-	import { walter_get } from '../../services/utils';
-	import type { ErhaltungsaufwendungListEntry } from '../../types/erhaltungsaufwendunglist.type';
-	const rows: Promise<ErhaltungsaufwendungListEntry[]> = walter_get(
+	import { Erhaltungsaufwendungen, WalterHeader } from '$components';
+	import { walter_get } from '$services/utils';
+	import type { ErhaltungsaufwendungEntry } from '$types';
+
+	const rows: Promise<ErhaltungsaufwendungEntry[]> = walter_get(
 		'/api/erhaltungsaufwendungen'
 	);
 </script>

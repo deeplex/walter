@@ -1,4 +1,4 @@
-import { addToast } from '../store';
+import { addToast } from '$store';
 
 export function convertDate(text: string | undefined): string | undefined {
     if (text) {

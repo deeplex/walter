@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+
 	import {
 		SideNav,
 		SideNavDivider,
 		SideNavItems,
-		SideNavLink,
-		SideNavMenu,
-		SideNavMenuItem
+		SideNavLink
 	} from 'carbon-components-svelte';
 	import {
 		Building,

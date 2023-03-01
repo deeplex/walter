@@ -10,6 +10,23 @@
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
+		"paths": {
+			"$components": [
+				"./src/components/index.ts",
+			],
+			"$store": [
+				"./src/store"
+			],
+			"$services/*": [
+				"./src/services/*"
+			],
+			"$types": [
+				"./src/types/index.ts",
+			],
+			"$routes/*": [
+				"./src/routes/*"
+			],
+		}
 	}
 	// Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
 	//

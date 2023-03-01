@@ -5,7 +5,8 @@
 		Loading
 	} from 'carbon-components-svelte';
 	import { Save } from 'carbon-icons-svelte';
-	import { walter_put } from '../services/utils';
+
+	import { walter_put } from '$services/utils';
 
 	export let a: Promise<any>;
 	export let body: any;

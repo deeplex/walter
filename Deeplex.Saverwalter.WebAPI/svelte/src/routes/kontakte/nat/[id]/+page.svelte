@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { Accordion, Row } from 'carbon-components-svelte';
+
 	import type { PageData } from './$types';
-	import type { NatuerlichePersonEntry } from '../../../../types/natuerlicheperson.type';
-	import { walter_get } from '../../../../services/utils';
+
+	import type { NatuerlichePersonEntry } from '$types';
+	import { walter_get } from '$services/utils';
 	import {
 		Person,
 		WalterHeader,
@@ -13,7 +15,7 @@
 		Wohnungen,
 		Vertraege,
 		SaveWalter
-	} from '../../../../components';
+	} from '$components';
 
 	export let data: PageData;
 	const url = `/api/kontakte/nat/${data.id}`;

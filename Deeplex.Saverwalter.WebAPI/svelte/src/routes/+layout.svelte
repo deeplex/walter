@@ -1,6 +1,7 @@
 <script lang="ts">
 	import 'carbon-components-svelte/css/white.css';
-	import { WalterSideNav, WalterToasts } from '../components';
+
+	import { WalterSideNav, WalterToasts } from '$components';
 </script>
 
 <WalterSideNav />

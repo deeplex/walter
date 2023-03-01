@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { Accordion, Row } from 'carbon-components-svelte';
+	import type { PageData } from './$types';
+
 	import {
 		Anhaenge,
 		WalterDatePicker,
@@ -9,10 +11,9 @@
 		WalterNumberInput,
 		Wohnungen,
 		SaveWalter
-	} from '../../../components';
-	import { walter_get } from '../../../services/utils';
-	import type { BetriebskostenrechnungEntry } from '../../../types/betriebskostenrechnung.type';
-	import type { PageData } from './$types';
+	} from '$components';
+	import { walter_get } from '$services/utils';
+	import type { BetriebskostenrechnungEntry } from '$types';
 
 	export let data: PageData;
 	const url = `/api/betriebskostenrechnungen/${data.id}`;

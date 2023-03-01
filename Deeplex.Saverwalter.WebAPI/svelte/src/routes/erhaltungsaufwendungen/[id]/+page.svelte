@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { Row } from 'carbon-components-svelte';
+
 	import type { PageData } from './$types';
-	import type { ErhaltungsaufwendungEntry } from '../../../types/erhaltungsaufwendung.type';
-	import { walter_get } from '../../../services/utils';
+
+	import type { ErhaltungsaufwendungEntry } from '$types';
+	import { walter_get } from '$services/utils';
 	import {
 		Anhaenge,
 		SaveWalter,
@@ -12,7 +14,7 @@
 		WalterHeader,
 		WalterNumberInput,
 		WalterTextInput
-	} from '../../../components';
+	} from '$components';
 
 	export let data: PageData;
 	const url = `/api/erhaltungsaufwendungen/${data.id}`;

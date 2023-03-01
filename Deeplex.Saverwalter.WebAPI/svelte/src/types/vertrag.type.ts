@@ -1,8 +1,4 @@
-import type { AnhangEntry } from "./anhang.type";
-import type { MieteEntry } from "./miete.type";
-import type { MietminderungEntry } from "./mietminderung.type";
-import type { PersonEntry } from "./person.type";
-import type { SelectionEntry } from "./selection.type";
+import type { AnhangEntry, MieteEntry, MietminderungEntry, PersonEntry, SelectionEntry } from "$types";
 
 export type VertragEntry = {
     id: number;

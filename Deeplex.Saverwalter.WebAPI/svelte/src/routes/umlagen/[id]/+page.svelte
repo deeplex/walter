@@ -1,17 +1,19 @@
 <script lang="ts">
 	import { Accordion, Row } from 'carbon-components-svelte';
+
+	import type { PageData } from './$types';
+
 	import {
 		Anhaenge,
 		Betriebskostenrechnungen,
 		SaveWalter,
 		WalterGrid,
 		WalterHeader,
-		WalterTextInput
-	} from '../../../components';
-	import Wohnungen from '../../../components/lists/Wohnungen.svelte';
-	import { walter_get } from '../../../services/utils';
-	import type { UmlageEntry } from '../../../types/umlage.type';
-	import type { PageData } from './$types';
+		WalterTextInput,
+		Wohnungen
+	} from '$components';
+	import { walter_get } from '$services/utils';
+	import type { UmlageEntry } from '$types';
 
 	export let data: PageData;
 	const url = `/api/umlagen/${data.id}`;

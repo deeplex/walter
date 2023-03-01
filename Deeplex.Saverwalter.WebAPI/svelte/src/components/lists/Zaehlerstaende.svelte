@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { WalterDataWrapper } from '..';
-	import type { ZaehlerstandEntry } from '../../types/zaehlerstandlist.type';
+	import { WalterDataWrapper } from '$components';
+
+	import type { ZaehlerstandEntry } from '$types';
 
 	const headers = [
 		{ key: 'datum', value: 'Datum' },

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { NumberInput, NumberInputSkeleton } from 'carbon-components-svelte';
-	import { WarningFilled } from 'carbon-icons-svelte';
 
 	export let value: Promise<number>;
 	export let binding: number | undefined = undefined;

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { ToastNotification } from 'carbon-components-svelte';
 	import { fly } from 'svelte/transition';
-	import { removeToast, toasts } from '../store';
-	import type { WalterToast } from '../types/waltertoast.type';
+
+	import { removeToast, toasts } from '$store';
+	import type { WalterToast } from '$types';
 
 	function close(e: CustomEvent<any>) {
 		removeToast(e.detail);

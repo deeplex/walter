@@ -4,7 +4,8 @@
 		DatePickerInput,
 		DatePickerSkeleton
 	} from 'carbon-components-svelte';
-	import { convertDate } from '../services/utils';
+
+	import { convertDate } from '$services/utils';
 
 	export let labelText: string;
 	export let value: Promise<string | undefined> | undefined;

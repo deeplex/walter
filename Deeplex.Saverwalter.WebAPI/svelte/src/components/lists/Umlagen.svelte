@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-	import { WalterDataWrapper } from '..';
-	import type { UmlageEntry } from '../../types/umlage.type';
+
+	import { WalterDataWrapper } from '$components';
+	import type { UmlageEntry } from '$types';
 
 	const headers = [
 		{ key: 'typ', value: 'Typ' },

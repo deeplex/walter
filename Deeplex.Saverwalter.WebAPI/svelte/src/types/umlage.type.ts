@@ -1,6 +1,4 @@
-import type { AnhangEntry } from "./anhang.type";
-import type { BetriebskostenrechnungEntry } from "./betriebskostenrechnung.type";
-import type { WohnungEntry } from "./wohnung.type";
+import type { AnhangEntry, BetriebskostenrechnungEntry, WohnungEntry } from "$types";
 
 export type UmlageEntry = {
     id: number;

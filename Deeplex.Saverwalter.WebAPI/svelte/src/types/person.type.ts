@@ -1,7 +1,4 @@
-import type { AdresseEntry } from './adresse.type';
-import type { AnhangEntry } from './anhang.type';
-import type { VertragEntry } from './vertrag.type';
-import type { WohnungEntry } from './wohnung.type';
+import type { AdresseEntry, AnhangEntry, VertragEntry, WohnungEntry } from '$types';
 
 export type PersonEntry = {
     id: number;

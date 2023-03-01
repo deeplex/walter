@@ -1,7 +1,4 @@
-import type { AdresseEntry } from "./adresse.type";
-import type { AnhangEntry } from "./anhang.type";
-import type { SelectionEntry } from "./selection.type";
-import type { ZaehlerstandEntry } from "./zaehlerstandlist.type";
+import type { AdresseEntry, AnhangEntry, SelectionEntry, ZaehlerstandEntry } from "$types";
 
 export type ZaehlerEntry = {
     id: number;

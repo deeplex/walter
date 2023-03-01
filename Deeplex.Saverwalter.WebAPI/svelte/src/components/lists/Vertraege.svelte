@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-	import { WalterDataWrapper } from '..';
-	import type { VertragEntry } from '../../types/vertrag.type';
+
+	import { WalterDataWrapper } from '$components';
+	import type { VertragEntry } from '$types';
 
 	const headers = [
 		{ key: 'wohnung.text', value: 'Wohnung' },

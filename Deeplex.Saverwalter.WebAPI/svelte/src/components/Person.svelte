@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Row } from 'carbon-components-svelte';
-	import type { PersonEntry } from '../types/person.type';
-	import Adresse from './Adresse.svelte';
-	import WalterTextInput from './WalterTextInput.svelte';
+
+	import type { PersonEntry } from '$types';
+	import { Adresse, WalterTextInput } from '$components';
 
 	export let person: Promise<PersonEntry>;
 	export let binding: Partial<PersonEntry>;

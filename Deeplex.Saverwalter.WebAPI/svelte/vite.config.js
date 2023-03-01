@@ -7,7 +7,7 @@ const config = {
 		proxy: {
 			'/api': 'http://localhost:5254'
 		},
-	},
+	}
 };
 
 export default config;

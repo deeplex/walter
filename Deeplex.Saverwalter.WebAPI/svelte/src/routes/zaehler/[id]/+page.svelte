@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { Accordion, Row } from 'carbon-components-svelte';
+
+	import type { PageData } from './$types';
+
 	import {
 		Adresse,
 		Anhaenge,
@@ -9,10 +12,9 @@
 		WalterTextInput,
 		Zaehler,
 		Zaehlerstaende
-	} from '../../../components';
-	import { walter_get } from '../../../services/utils';
-	import type { ZaehlerEntry } from '../../../types/zaehler.type';
-	import type { PageData } from './$types';
+	} from '$components';
+	import { walter_get } from '$services/utils';
+	import type { ZaehlerEntry } from '$types';
 
 	export let data: PageData;
 	const url = `/api/zaehler/${data.id}`;

@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { Accordion, AccordionItem, Row } from 'carbon-components-svelte';
+	import { Accordion, Row } from 'carbon-components-svelte';
+
+	import type { PageData } from './$types';
+
 	import {
 		WalterGrid,
 		WalterHeader,
 		WalterTextInput,
-		WalterDatePicker,
 		Betriebskostenrechnungen,
 		Erhaltungsaufwendungen,
 		Kontakte,
@@ -12,10 +14,9 @@
 		Vertraege,
 		Wohnungen,
 		Zaehler
-	} from '../../../components';
-	import { walter_get } from '../../../services/utils';
-	import type { AnhangEntry } from '../../../types/anhang.type';
-	import type { PageData } from './$types';
+	} from '$components';
+	import { walter_get } from '$services/utils';
+	import type { AnhangEntry } from '$types';
 
 	export let data: PageData;
 	const a: Promise<AnhangEntry> = walter_get(`/api/anhaenge/${data.id}`);

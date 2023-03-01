@@ -6,7 +6,8 @@
 		HeaderPanelLinks,
 		Loading
 	} from 'carbon-components-svelte';
-	import type { AnhangEntry } from '../types/anhang.type';
+
+	import type { AnhangEntry } from '$types';
 
 	export let rows: Promise<AnhangEntry[]>;
 </script>

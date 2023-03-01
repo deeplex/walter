@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { WalterDataWrapper } from '..';
-	import type { MietminderungEntry } from '../../types/mietminderung.type';
+	import { WalterDataWrapper } from '$components';
+	import type { MietminderungEntry } from '$types';
 
 	const headers = [
 		{ key: 'beginn', value: 'Beginn' },

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Accordion, Row } from 'carbon-components-svelte';
-	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
+	import type { PageData } from './$types';
+
 	import {
 		Anhaenge,
 		Kontakte,
@@ -10,12 +11,11 @@
 		WalterComboBox,
 		WalterDatePicker,
 		WalterGrid,
-		WalterHeader
-	} from '../../../components';
-	import WalterTextInput from '../../../components/WalterTextInput.svelte';
-	import { walter_get } from '../../../services/utils';
-	import type { VertragEntry } from '../../../types/vertrag.type';
-	import type { PageData } from './$types';
+		WalterHeader,
+		WalterTextInput
+	} from '$components';
+	import { walter_get } from '$services/utils';
+	import type { VertragEntry } from '$types';
 
 	export let data: PageData;
 	const url = `/api/vertraege/${data.id}`;
