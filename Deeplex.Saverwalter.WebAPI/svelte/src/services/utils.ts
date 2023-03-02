@@ -1,4 +1,6 @@
-import { addToast } from '$store';
+import { afterNavigate } from '$app/navigation';
+import { base } from '$app/paths';
+import { addToast, openModal } from '$store';
 
 export function convertDate(text: string | undefined): string | undefined {
     if (text) {
@@ -26,7 +28,25 @@ export function convertEuro(value: number | undefined): string | undefined {
         return undefined;
     }
 }
-async function finishRequest(e: Response) {
+
+const headers = {
+    'Content-Type': 'text/json'
+};
+
+// =================================== GET ====================================
+
+export const walter_get = (url: string) => fetch(
+    url, { method: 'GET', headers }
+).then(e => e.json());
+
+// ================================ POST / PUT ================================
+
+export const walter_put = (url: string, body: any) => fetch(
+    url,
+    { method: 'PUT', headers, body: JSON.stringify(body) }
+).then(finishPutPost);
+
+async function finishPutPost(e: Response) {
     const ok = e.status === 200;
     const kind = ok ? "success" : "error";
     const title = ok ? "Speichern Erfolgreich" : "Fehler";
@@ -38,15 +58,42 @@ async function finishRequest(e: Response) {
     return j;
 }
 
-const headers = {
-    'Content-Type': 'text/json'
-};
+// =================================== DELETE =================================
 
-export const walter_get = (url: string) => fetch(
-    url, { method: 'GET', headers }
-).then(e => e.json());
+export const walter_delete = (url: string, entry_title: string) => {
+    const content = `Bist du sicher, dass du ${entry_title} löschen möchtest?
+    Dieser Vorgang kann nicht rückgängig gemacht werden.`
 
-export const walter_put = (url: string, body: any) => fetch(
-    url,
-    { method: 'PUT', headers, body: JSON.stringify(body) }
-).then(finishRequest);
+    openModal({
+        modalHeading: "Eintrag löschen",
+        content,
+        danger: true,
+        primaryButtonText: "Löschen",
+        submit: () => really_delete_walter(url),
+    });
+}
+
+function really_delete_walter(url: string) {
+    return fetch(
+        url,
+        { method: 'DELETE', headers }
+    ).then(finishDelete);
+}
+
+async function finishDelete(e: Response) {
+    const ok = e.status === 200;
+    const kind = ok ? "success" : "error";
+    const title = ok ? "Löschen Erfolgreich" : "Fehler";
+    const j = await e.json();
+
+    const subtitle = "TODO parse response body." // JSON.stringify(j);
+
+    let previousPage: string = base;
+
+    afterNavigate(({ from }) => {
+        previousPage = from?.url.pathname || previousPage
+    })
+
+    addToast({ title, kind, subtitle });
+    return j;
+}

@@ -14,3 +14,4 @@ export { type WalterToast } from './waltertoast.type';
 export { type WohnungEntry } from './wohnung.type';
 export { type ZaehlerEntry } from './zaehler.type';
 export { type ZaehlerstandEntry } from './zaehlerstandlist.type';
+export { type WalterModalControl } from './waltermodalcontrol.type';

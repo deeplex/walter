@@ -2,6 +2,14 @@
 	import 'carbon-components-svelte/css/white.css';
 
 	import { WalterSideNav, WalterToasts } from '$components';
+	import { Modal } from 'carbon-components-svelte';
+	import type { WalterModalControl } from '$types';
+	import { walterModalControl } from '$store';
+
+	let modalControl: WalterModalControl;
+	walterModalControl.subscribe((value) => {
+		modalControl = value;
+	});
 </script>
 
 <WalterSideNav />
@@ -9,6 +17,17 @@
 	style="; overflow: hidden; position: absolute; top: 48px; right: 0; z-index: 99"
 >
 	<WalterToasts />
+	<Modal
+		{...modalControl}
+		bind:open={modalControl.open}
+		secondaryButtonText="Abbrechen"
+		on:click:button--secondary={() => (modalControl.open = false)}
+		on:open
+		on:close
+		on:submit={modalControl.submit}
+	>
+		<p>{modalControl.content}</p>
+	</Modal>
 </div>
 <slot />
 
