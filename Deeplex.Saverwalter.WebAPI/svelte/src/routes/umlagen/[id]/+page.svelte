@@ -5,7 +5,7 @@
 
 	import {
 		Betriebskostenrechnungen,
-		WalterDetailHeader,
+		WalterHeaderDetail,
 		WalterGrid,
 		WalterTextInput,
 		Wohnungen
@@ -23,7 +23,7 @@
 	const title = a.then((x) => x.typ + ' - ' + x.wohnungenBezeichnung);
 </script>
 
-<WalterDetailHeader {a} {url} {entry} {title} />
+<WalterHeaderDetail {a} {url} {entry} {title} />
 
 <WalterGrid>
 	<Row>

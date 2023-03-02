@@ -8,7 +8,7 @@
 	import {
 		WalterComboBox,
 		WalterDatePicker,
-		WalterDetailHeader,
+		WalterHeaderDetail,
 		WalterGrid,
 		WalterNumberInput,
 		WalterTextInput
@@ -24,7 +24,7 @@
 	const title = a.then((x) => x.aussteller.text + ' - ' + x.bezeichnung);
 </script>
 
-<WalterDetailHeader {a} {url} {entry} {title} />
+<WalterHeaderDetail {a} {url} {entry} {title} />
 
 <WalterGrid>
 	<Row>

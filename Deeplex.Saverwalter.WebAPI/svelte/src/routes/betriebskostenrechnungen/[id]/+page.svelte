@@ -8,7 +8,7 @@
 		WalterTextInput,
 		WalterNumberInput,
 		Wohnungen,
-		WalterDetailHeader
+		WalterHeaderDetail
 	} from '$components';
 	import { walter_get } from '$services/utils';
 	import type { BetriebskostenrechnungEntry } from '$types';
@@ -30,7 +30,7 @@
 	);
 </script>
 
-<WalterDetailHeader {a} {url} {entry} {title} />
+<WalterHeaderDetail {a} {url} {entry} {title} />
 
 <WalterGrid>
 	<Row>

@@ -8,7 +8,7 @@
 		Mietminderungen,
 		WalterComboBox,
 		WalterDatePicker,
-		WalterDetailHeader,
+		WalterHeaderDetail,
 		WalterGrid,
 		WalterTextInput
 	} from '$components';
@@ -34,7 +34,7 @@
 	// 	});
 </script>
 
-<WalterDetailHeader {a} {url} {entry} {title} />
+<WalterHeaderDetail {a} {url} {entry} {title} />
 
 <WalterGrid>
 	<Row>

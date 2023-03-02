@@ -12,7 +12,7 @@
 		Kontakte,
 		Wohnungen,
 		Vertraege,
-		WalterDetailHeader
+		WalterHeaderDetail
 	} from '$components';
 
 	export let data: PageData;
@@ -25,7 +25,7 @@
 	const title = a.then((x) => x.name);
 </script>
 
-<WalterDetailHeader {a} {url} {entry} {title} />
+<WalterHeaderDetail {a} {url} {entry} {title} />
 
 <WalterGrid>
 	<Row>

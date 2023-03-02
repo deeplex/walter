@@ -6,7 +6,7 @@ export { default as WalterDataTable } from './WalterDataTable.svelte';
 export { default as WalterDataWrapper } from './WalterDataWrapper.svelte';
 export { default as WalterDatePicker } from './WalterDatePicker.svelte';
 export { default as WalterHeader } from './WalterHeader.svelte';
-export { default as WalterDetailHeader } from './WalterDetailHeader.svelte';
+export { default as WalterHeaderDetail } from './WalterHeaderDetail.svelte';
 export { default as WalterGrid } from './WalterGrid.svelte';
 export { default as WalterSideNav } from './WalterSideNav.svelte';
 export { default as WalterTextInput } from './WalterTextInput.svelte';

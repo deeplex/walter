@@ -12,7 +12,7 @@
 		WalterTextInput,
 		Wohnungen,
 		Vertraege,
-		WalterDetailHeader
+		WalterHeaderDetail
 	} from '$components';
 
 	export let data: PageData;
@@ -23,7 +23,7 @@
 	a.then((e) => Object.assign(entry, e));
 </script>
 
-<WalterDetailHeader {a} {url} {entry} title={a.then((x) => x.name)} />
+<WalterHeaderDetail {a} {url} {entry} title={a.then((x) => x.name)} />
 
 <WalterGrid>
 	<Row>

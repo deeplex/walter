@@ -15,7 +15,7 @@
 		Betriebskostenrechnungen,
 		Umlagen,
 		WalterNumberInput,
-		WalterDetailHeader
+		WalterHeaderDetail
 	} from '$components';
 	import type { WohnungEntry } from '$types';
 	import { walter_get } from '$services/utils';
@@ -30,7 +30,7 @@
 	const title = a.then((x) => 'TODO - ' + x.bezeichnung);
 </script>
 
-<WalterDetailHeader {a} {url} {entry} {title} />
+<WalterHeaderDetail {a} {url} {entry} {title} />
 
 <WalterGrid>
 	<Row>

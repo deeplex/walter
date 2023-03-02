@@ -5,7 +5,7 @@
 
 	import {
 		Adresse,
-		WalterDetailHeader,
+		WalterHeaderDetail,
 		WalterGrid,
 		WalterTextInput,
 		Zaehler,
@@ -24,7 +24,7 @@
 	const title = a.then((x) => x.kennnummer);
 </script>
 
-<WalterDetailHeader {a} {url} {entry} {title} />
+<WalterHeaderDetail {a} {url} {entry} {title} />
 
 <WalterGrid>
 	<Row>
