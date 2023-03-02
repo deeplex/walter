@@ -4,11 +4,9 @@
 	import type { PageData } from './$types';
 
 	import {
-		Anhaenge,
 		Betriebskostenrechnungen,
-		SaveWalter,
+		WalterDetailHeader,
 		WalterGrid,
-		WalterHeader,
 		WalterTextInput,
 		Wohnungen
 	} from '$components';
@@ -21,12 +19,12 @@
 	const a: Promise<UmlageEntry> = walter_get(url);
 	const entry: Partial<UmlageEntry> = {};
 	a.then((e) => Object.assign(entry, e));
+
+	const title = a.then((x) => x.typ + ' - ' + x.wohnungenBezeichnung);
 </script>
 
-<WalterHeader title={a.then((x) => x.typ + ' - ' + x.wohnungenBezeichnung)}>
-	<SaveWalter {a} {url} body={entry} />
-	<Anhaenge rows={a.then((x) => x.anhaenge)} />
-</WalterHeader>
+<WalterDetailHeader {a} {url} {entry} {title} />
+
 <WalterGrid>
 	<Row>
 		<!-- TODO: THESE ARE NO TEXT INPUTS, BUT MENUS... PLEASE CHANGE -->

@@ -6,12 +6,10 @@
 	import type { ErhaltungsaufwendungEntry } from '$types';
 	import { walter_get } from '$services/utils';
 	import {
-		Anhaenge,
-		SaveWalter,
 		WalterComboBox,
 		WalterDatePicker,
+		WalterDetailHeader,
 		WalterGrid,
-		WalterHeader,
 		WalterNumberInput,
 		WalterTextInput
 	} from '$components';
@@ -22,12 +20,11 @@
 	const a: Promise<ErhaltungsaufwendungEntry> = walter_get(url);
 	const entry: Partial<ErhaltungsaufwendungEntry> = {};
 	a.then((e) => Object.assign(entry, e));
+
+	const title = a.then((x) => x.aussteller.text + ' - ' + x.bezeichnung);
 </script>
 
-<WalterHeader title={a.then((x) => x.aussteller.text + ' - ' + x.bezeichnung)}>
-	<SaveWalter {a} {url} body={entry} />
-	<Anhaenge rows={a.then((x) => x.anhaenge)} />
-</WalterHeader>
+<WalterDetailHeader {a} {url} {entry} {title} />
 
 <WalterGrid>
 	<Row>

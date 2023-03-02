@@ -8,13 +8,11 @@
 	import {
 		Kontakte,
 		Person,
-		WalterHeader,
 		WalterGrid,
 		WalterTextInput,
 		Wohnungen,
 		Vertraege,
-		Anhaenge,
-		SaveWalter
+		WalterDetailHeader
 	} from '$components';
 
 	export let data: PageData;
@@ -25,10 +23,7 @@
 	a.then((e) => Object.assign(entry, e));
 </script>
 
-<WalterHeader title={a.then((x) => x.name)}>
-	<SaveWalter {a} {url} body={entry} />
-	<Anhaenge rows={a.then((x) => x.anhaenge)} />
-</WalterHeader>
+<WalterDetailHeader {a} {url} {entry} title={a.then((x) => x.name)} />
 
 <WalterGrid>
 	<Row>

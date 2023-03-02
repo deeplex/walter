@@ -3,14 +3,12 @@
 	import type { PageData } from './$types';
 
 	import {
-		Anhaenge,
 		WalterDatePicker,
 		WalterGrid,
-		WalterHeader,
 		WalterTextInput,
 		WalterNumberInput,
 		Wohnungen,
-		SaveWalter
+		WalterDetailHeader
 	} from '$components';
 	import { walter_get } from '$services/utils';
 	import type { BetriebskostenrechnungEntry } from '$types';
@@ -21,21 +19,18 @@
 	const a: Promise<BetriebskostenrechnungEntry> = walter_get(url);
 	const entry: Partial<BetriebskostenrechnungEntry> = {};
 	a.then((e) => Object.assign(entry, e));
-</script>
 
-<WalterHeader
-	title={a.then(
+	const title = a.then(
 		(x) =>
 			x.betreffendesJahr +
 			' - TODO - ' +
 			x.umlage.text +
 			' - TODO - ' +
 			x.umlage.text
-	)}
->
-	<SaveWalter {a} {url} body={entry} />
-	<Anhaenge rows={a.then((x) => x.anhaenge)} />
-</WalterHeader>
+	);
+</script>
+
+<WalterDetailHeader {a} {url} {entry} {title} />
 
 <WalterGrid>
 	<Row>

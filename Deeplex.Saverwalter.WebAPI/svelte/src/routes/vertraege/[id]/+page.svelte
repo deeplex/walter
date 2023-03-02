@@ -3,15 +3,13 @@
 	import type { PageData } from './$types';
 
 	import {
-		Anhaenge,
 		Kontakte,
 		Mieten,
 		Mietminderungen,
-		SaveWalter,
 		WalterComboBox,
 		WalterDatePicker,
+		WalterDetailHeader,
 		WalterGrid,
-		WalterHeader,
 		WalterTextInput
 	} from '$components';
 	import { walter_get } from '$services/utils';
@@ -24,6 +22,11 @@
 	const entry: Partial<VertragEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 
+	const title = a.then(
+		(x) => x.wohnung.text + ' - ' + x.mieter.map((m) => m.name).join(', ')
+	);
+
+	// TODO
 	// let vermieter = () =>
 	// 	kontakte.then(async (e) => {
 	// 		const besitzer = await async.then((e) => e.wohnung.besitzerId);
@@ -31,14 +34,7 @@
 	// 	});
 </script>
 
-<WalterHeader
-	title={a.then(
-		(x) => x.wohnung.text + ' - ' + x.mieter.map((m) => m.name).join(', ')
-	)}
->
-	<SaveWalter {a} {url} body={entry} />
-	<Anhaenge rows={a.then((x) => x.anhaenge)} />
-</WalterHeader>
+<WalterDetailHeader {a} {url} {entry} {title} />
 
 <WalterGrid>
 	<Row>

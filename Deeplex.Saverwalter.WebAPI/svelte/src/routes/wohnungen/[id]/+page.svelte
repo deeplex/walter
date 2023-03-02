@@ -7,7 +7,6 @@
 		Adresse,
 		WalterComboBox,
 		WalterGrid,
-		WalterHeader,
 		WalterTextInput,
 		Wohnungen,
 		Vertraege,
@@ -15,9 +14,8 @@
 		Erhaltungsaufwendungen,
 		Betriebskostenrechnungen,
 		Umlagen,
-		Anhaenge,
 		WalterNumberInput,
-		SaveWalter
+		WalterDetailHeader
 	} from '$components';
 	import type { WohnungEntry } from '$types';
 	import { walter_get } from '$services/utils';
@@ -28,12 +26,12 @@
 	const a: Promise<WohnungEntry> = walter_get(url);
 	const entry: Partial<WohnungEntry> = {};
 	a.then((e) => Object.assign(entry, e));
+
+	const title = a.then((x) => 'TODO - ' + x.bezeichnung);
 </script>
 
-<WalterHeader title={a.then((x) => 'TODO - ' + x.bezeichnung)}>
-	<SaveWalter {a} {url} body={entry} />
-	<Anhaenge rows={a.then((x) => x.anhaenge)} />
-</WalterHeader>
+<WalterDetailHeader {a} {url} {entry} {title} />
+
 <WalterGrid>
 	<Row>
 		<WalterComboBox

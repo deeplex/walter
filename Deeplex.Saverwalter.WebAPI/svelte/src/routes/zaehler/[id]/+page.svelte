@@ -5,10 +5,8 @@
 
 	import {
 		Adresse,
-		Anhaenge,
-		SaveWalter,
+		WalterDetailHeader,
 		WalterGrid,
-		WalterHeader,
 		WalterTextInput,
 		Zaehler,
 		Zaehlerstaende
@@ -22,12 +20,12 @@
 	const a: Promise<ZaehlerEntry> = walter_get(url);
 	const entry: Partial<ZaehlerEntry> = {};
 	a.then((e) => Object.assign(entry, e));
+
+	const title = a.then((x) => x.kennnummer);
 </script>
 
-<WalterHeader title={a.then((x) => x.kennnummer)}>
-	<SaveWalter {a} {url} body={entry} />
-	<Anhaenge rows={a.then((x) => x.anhaenge)} />
-</WalterHeader>
+<WalterDetailHeader {a} {url} {entry} {title} />
+
 <WalterGrid>
 	<Row>
 		<WalterTextInput

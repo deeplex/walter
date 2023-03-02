@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Accordion, Row } from 'carbon-components-svelte';
+	import { Accordion, HeaderGlobalAction, Row } from 'carbon-components-svelte';
 
 	import type { PageData } from './$types';
 
@@ -7,14 +7,12 @@
 	import { walter_get } from '$services/utils';
 	import {
 		Person,
-		WalterHeader,
 		WalterGrid,
 		WalterTextInput,
-		Anhaenge,
 		Kontakte,
 		Wohnungen,
 		Vertraege,
-		SaveWalter
+		WalterDetailHeader
 	} from '$components';
 
 	export let data: PageData;
@@ -23,12 +21,11 @@
 	const a: Promise<NatuerlichePersonEntry> = walter_get(url);
 	const entry: Partial<NatuerlichePersonEntry> = {};
 	a.then((e) => Object.assign(entry, e));
+
+	const title = a.then((x) => x.name);
 </script>
 
-<WalterHeader title={a.then((x) => x.name)}>
-	<SaveWalter {a} {url} body={entry} />
-	<Anhaenge rows={a.then((x) => x.anhaenge)} />
-</WalterHeader>
+<WalterDetailHeader {a} {url} {entry} {title} />
 
 <WalterGrid>
 	<Row>
