@@ -1,4 +1,4 @@
-export type AdresseEntry = {
+export type WalterAdresseEntry = {
     strasse: string;
     hausnummer: string;
     postleitzahl: string;

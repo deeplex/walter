@@ -1,9 +1,13 @@
 <script lang="ts">
-	import { WalterGrid, WalterVertrag, WalterHeaderNew } from '$components';
-	import type { VertragEntry } from '$types';
+	import {
+		WalterGrid,
+		WalterVertrag,
+		WalterHeaderNew
+	} from '$WalterComponents';
+	import type { WalterVertragEntry } from '$WalterTypes';
 
 	const url = `/api/vertraege`;
-	const entry: Partial<VertragEntry> = {};
+	const entry: Partial<WalterVertragEntry> = {};
 	const title = 'Neuer Vertrag';
 </script>
 

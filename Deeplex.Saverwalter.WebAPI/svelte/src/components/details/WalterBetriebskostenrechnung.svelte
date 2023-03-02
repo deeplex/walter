@@ -3,12 +3,13 @@
 		WalterDatePicker,
 		WalterNumberInput,
 		WalterTextInput
-	} from '$components';
+	} from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
-	import type { BetriebskostenrechnungEntry } from '$types';
+	import type { WalterBetriebskostenrechnungEntry } from '$WalterTypes';
 
-	export let a: Promise<BetriebskostenrechnungEntry> | undefined = undefined;
-	export let entry: Partial<BetriebskostenrechnungEntry> = {};
+	export let a: Promise<WalterBetriebskostenrechnungEntry> | undefined =
+		undefined;
+	export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
 </script>
 
 <Row>

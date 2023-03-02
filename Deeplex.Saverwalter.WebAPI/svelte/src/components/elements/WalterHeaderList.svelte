@@ -4,7 +4,7 @@
 
 	import { goto } from '$app/navigation';
 
-	import { WalterHeader } from '$components';
+	import { WalterHeader } from '$WalterComponents';
 
 	export let title: Promise<string> | string = 'Saverwalter';
 	export let url: string;

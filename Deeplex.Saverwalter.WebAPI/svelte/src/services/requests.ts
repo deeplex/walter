@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation";
-import { addToast, openModal } from "$store";
+import { addToast, openModal } from "$WalterStore";
 
 const headers = {
     'Content-Type': 'text/json'

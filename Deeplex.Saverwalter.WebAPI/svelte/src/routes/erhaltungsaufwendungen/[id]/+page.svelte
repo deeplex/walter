@@ -1,19 +1,19 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
-	import type { ErhaltungsaufwendungEntry } from '$types';
-	import { walter_get } from '$services/requests';
+	import type { WalterErhaltungsaufwendungEntry } from '$WalterTypes';
+	import { walter_get } from '$WalterServices/requests';
 	import {
 		WalterHeaderDetail,
 		WalterGrid,
 		WalterErhaltungsaufwendung
-	} from '$components';
+	} from '$WalterComponents';
 
 	export let data: PageData;
 	const url = `/api/erhaltungsaufwendungen/${data.id}`;
 
-	const a: Promise<ErhaltungsaufwendungEntry> = walter_get(url);
-	const entry: Partial<ErhaltungsaufwendungEntry> = {};
+	const a: Promise<WalterErhaltungsaufwendungEntry> = walter_get(url);
+	const entry: Partial<WalterErhaltungsaufwendungEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 
 	const title = a.then((x) => x.aussteller.text + ' - ' + x.bezeichnung);

@@ -2,16 +2,20 @@
 	import { Accordion } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 
-	import { WalterGrid, Wohnungen, WalterHeaderDetail } from '$components';
-	import { walter_get } from '$services/requests';
-	import type { BetriebskostenrechnungEntry } from '$types';
-	import WalterBetriebskostenrechnung from '../../../components/details/WalterBetriebskostenrechnung.svelte';
+	import {
+		WalterGrid,
+		WalterWohnungen,
+		WalterHeaderDetail,
+		WalterBetriebskostenrechnung
+	} from '$WalterComponents';
+	import { walter_get } from '$WalterServices/requests';
+	import type { WalterBetriebskostenrechnungEntry } from '$WalterTypes';
 
 	export let data: PageData;
 	const url = `/api/betriebskostenrechnungen/${data.id}`;
 
-	const a: Promise<BetriebskostenrechnungEntry> = walter_get(url);
-	const entry: Partial<BetriebskostenrechnungEntry> = {};
+	const a: Promise<WalterBetriebskostenrechnungEntry> = walter_get(url);
+	const entry: Partial<WalterBetriebskostenrechnungEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 
 	const title = a.then(
@@ -30,6 +34,6 @@
 	<WalterBetriebskostenrechnung {a} {entry} />
 
 	<Accordion>
-		<Wohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
+		<WalterWohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
 	</Accordion>
 </WalterGrid>

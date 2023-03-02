@@ -1,6 +1,6 @@
-import type { AnhangEntry, SelectionEntry, WohnungEntry } from "$types";
+import type { WalterAnhangEntry, WalterSelectionEntry, WalterWohnungEntry } from "$WalterTypes";
 
-export type BetriebskostenrechnungEntry = {
+export type WalterBetriebskostenrechnungEntry = {
     id: number;
     betrag: number;
     betreffendesJahr: number;
@@ -12,8 +12,8 @@ export type BetriebskostenrechnungEntry = {
     // typ: SelectionEntry;
     // wohnungen: SelectionEntry
     wohnungenBezeichnung: string;
-    umlage: SelectionEntry;
+    umlage: WalterSelectionEntry;
 
-    wohnungen: WohnungEntry[];
-    anhaenge: AnhangEntry[];
+    wohnungen: WalterWohnungEntry[];
+    anhaenge: WalterAnhangEntry[];
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { WalterDataWrapper } from '$components';
-	import type { MieteEntry } from '$types';
+	import { WalterDataWrapper } from '$WalterComponents';
+	import type { WalterMieteEntry } from '$WalterTypes';
 
 	const headers = [
 		{ key: 'betreffenderMonat', value: 'Betreffender Monat' },
@@ -8,7 +8,7 @@
 		{ key: 'betrag', value: 'Betrag' }
 	];
 
-	export let rows: Promise<MieteEntry[]>;
+	export let rows: Promise<WalterMieteEntry[]>;
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 </script>

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { WalterGrid, WalterUmlage, WalterHeaderNew } from '$components';
-	import type { UmlageEntry } from '$types';
+	import { WalterGrid, WalterUmlage, WalterHeaderNew } from '$WalterComponents';
+	import type { WalterUmlageEntry } from '$WalterTypes';
 
-	const entry: Partial<UmlageEntry> = {};
+	const entry: Partial<WalterUmlageEntry> = {};
 	const url = `/api/umlagen`;
 
 	const title = 'Neue Umlage';

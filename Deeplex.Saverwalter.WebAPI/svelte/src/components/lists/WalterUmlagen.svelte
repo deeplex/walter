@@ -2,8 +2,8 @@
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-	import { WalterDataWrapper } from '$components';
-	import type { UmlageEntry } from '$types';
+	import { WalterDataWrapper } from '$WalterComponents';
+	import type { WalterUmlageEntry } from '$WalterTypes';
 
 	const headers = [
 		{ key: 'typ', value: 'Typ' },
@@ -13,7 +13,7 @@
 	const navigate = (e: CustomEvent<DataTableRow>) =>
 		goto(`/umlagen/${e.detail.id}`);
 
-	export let rows: Promise<UmlageEntry[]>;
+	export let rows: Promise<WalterUmlageEntry[]>;
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 </script>

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { WalterHeaderList, Zaehler } from '$components';
-	import { walter_get } from '$services/requests';
-	import type { ZaehlerEntry } from '$types';
+	import { WalterHeaderList, WalterZaehlerList } from '$WalterComponents';
+	import { walter_get } from '$WalterServices/requests';
+	import type { WalterZaehlerEntry } from '$WalterTypes';
 
 	const url = 'zaehler';
 
-	const rows: Promise<ZaehlerEntry[]> = walter_get(`/api/${url}`);
+	const rows: Promise<WalterZaehlerEntry[]> = walter_get(`/api/${url}`);
 </script>
 
 <WalterHeaderList {url} title="Zähler" />
-<Zaehler search {rows} />
+<WalterZaehlerList search {rows} />

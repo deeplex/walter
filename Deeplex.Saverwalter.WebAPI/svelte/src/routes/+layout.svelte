@@ -1,10 +1,10 @@
 <script lang="ts">
 	import 'carbon-components-svelte/css/white.css';
 
-	import { WalterSideNav, WalterToasts } from '$components';
+	import { WalterSideNav, WalterToasts } from '$WalterComponents';
 	import { Modal } from 'carbon-components-svelte';
-	import type { WalterModalControl } from '$types';
-	import { walterModalControl } from '$store';
+	import type { WalterModalControl } from '$WalterTypes';
+	import { walterModalControl } from '$WalterStore';
 
 	let modalControl: WalterModalControl;
 	walterModalControl.subscribe((value) => {

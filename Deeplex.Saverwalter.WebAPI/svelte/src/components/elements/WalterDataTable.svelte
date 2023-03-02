@@ -10,7 +10,7 @@
 	} from 'carbon-components-svelte';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-	import { convertDate, convertEuro, convertTime } from '$services/utils';
+	import { convertDate, convertEuro, convertTime } from '$WalterServices/utils';
 
 	export let headers: {
 		key: string;

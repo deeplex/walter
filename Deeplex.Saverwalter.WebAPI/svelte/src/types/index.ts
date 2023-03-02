@@ -10,7 +10,7 @@ export { type WalterNatuerlichePersonEntry } from './WalterNatuerlichePerson.typ
 export { type WalterSelectionEntry } from './WalterSelection.type';
 export { type WalterUmlageEntry } from './WalterUmlage.type';
 export { type WalterVertragEntry } from './WalterVertrag.type';
-export { type WalterWalterToast } from './WalterToast.type';
+export { type WalterToast } from './WalterToast.type';
 export { type WalterWohnungEntry } from './WalterWohnung.type';
 export { type WalterZaehlerEntry } from './WalterZaehler.type';
 export { type WalterZaehlerstandEntry } from './WalterZaehlerstand.type';

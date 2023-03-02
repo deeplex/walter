@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Adresse, WalterTextInput } from '$components';
-	import type { ZaehlerEntry } from '$types';
+	import { WalterAdresse, WalterTextInput } from '$WalterComponents';
+	import type { WalterZaehlerEntry } from '$WalterTypes';
 	import { Row } from 'carbon-components-svelte';
 
-	export let a: Promise<ZaehlerEntry> | undefined = undefined;
-	export let entry: Partial<ZaehlerEntry> = {};
+	export let a: Promise<WalterZaehlerEntry> | undefined = undefined;
+	export let entry: Partial<WalterZaehlerEntry> = {};
 </script>
 
 <Row>
@@ -17,7 +17,7 @@
 	<WalterTextInput labelText="Typ" value={a?.then((x) => x.typ)} />
 </Row>
 <!-- TODO -->
-<Adresse adresse={a?.then((x) => x.adresse)} />
+<WalterAdresse adresse={a?.then((x) => x.adresse)} />
 <Row>
 	<WalterTextInput
 		bind:binding={entry.notiz}

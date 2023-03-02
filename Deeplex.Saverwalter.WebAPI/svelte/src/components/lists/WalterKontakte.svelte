@@ -2,19 +2,23 @@
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-	import { WalterDataWrapper } from '$components';
-	import type { WohnungEntry } from '$types';
+	import { WalterDataWrapper } from '$WalterComponents';
+	import type { WalterPersonEntry } from '$WalterTypes';
 
 	const headers = [
+		{ key: 'name', value: 'Name', default: '' },
 		{ key: 'adresse.anschrift', value: 'Anschrift' },
-		{ key: 'bezeichnung', value: 'Bezeichnung' },
-		{ key: 'besitzer.text', value: 'Besitzer' },
-		{ key: 'bewohner', value: 'Bewohner' }
+		{ key: 'telefon', value: 'Telefon' },
+		{ key: 'mobil', value: 'Mobil' },
+		{ key: 'email', value: 'E-Mail' }
 	];
-	const navigate = (e: CustomEvent<DataTableRow>) =>
-		goto(`/wohnungen/${e.detail.id}`);
 
-	export let rows: Promise<WohnungEntry[]>;
+	const navigate = (e: CustomEvent<DataTableRow>) =>
+		goto(
+			`/kontakte/${e.detail.id > 0 ? 'nat' : 'jur'}/${Math.abs(e.detail.id)}`
+		);
+
+	export let rows: Promise<WalterPersonEntry[]>;
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 </script>

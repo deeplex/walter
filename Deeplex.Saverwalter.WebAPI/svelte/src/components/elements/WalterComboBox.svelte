@@ -2,17 +2,17 @@
 	import { ComboBox, TextInputSkeleton } from 'carbon-components-svelte';
 	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 
-	import { walter_get } from '$services/requests';
-	import type { SelectionEntry } from '$types';
+	import { walter_get } from '$WalterServices/requests';
+	import type { WalterSelectionEntry } from '$WalterTypes';
 
 	type Selection = { selectedId: any; selectedItem: ComboBoxItem };
 
-	export let value: Promise<SelectionEntry | undefined> | undefined;
+	export let value: Promise<WalterSelectionEntry | undefined> | undefined;
 	export let titleText: string;
-	export let binding: SelectionEntry | undefined = undefined;
+	export let binding: WalterSelectionEntry | undefined = undefined;
 	export let api: string;
 
-	const a: Promise<SelectionEntry[]> = walter_get(api);
+	const a: Promise<WalterSelectionEntry[]> = walter_get(api);
 
 	function shouldFilterItem(item: ComboBoxItem, value: string) {
 		if (!value) return true;

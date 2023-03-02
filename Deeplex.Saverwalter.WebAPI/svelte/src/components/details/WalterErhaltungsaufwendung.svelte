@@ -4,9 +4,9 @@
 		WalterDatePicker,
 		WalterNumberInput,
 		WalterTextInput
-	} from '$components';
+	} from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
-	import type { ErhaltungsaufwendungEntry } from '$types';
+	import type { ErhaltungsaufwendungEntry } from '$WalterTypes';
 
 	export let a: Promise<ErhaltungsaufwendungEntry> | undefined = undefined;
 	export let entry: Partial<ErhaltungsaufwendungEntry> = {};

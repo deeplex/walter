@@ -11,11 +11,11 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		alias: {
-			$components: resolve("./src/components/index"),
-			$store: resolve("./src/store"),
-			$services: resolve("./src/services"),
-			$types: resolve("./src/types/index"),
-			$routes: resolve("./src/routes"),
+			$WalterComponents: resolve("./src/components/index"),
+			$WalterStore: resolve("./src/store"),
+			$WalterServices: resolve("./src/services"),
+			$WalterTypes: resolve("./src/types/index"),
+			$WalterRoutes: resolve("./src/routes"),
 		}
 	}
 };

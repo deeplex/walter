@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { WalterTextInput } from '$components';
+	import { WalterTextInput } from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
-	import type { UmlageEntry } from '$types';
+	import type { WalterUmlageEntry } from '$WalterTypes';
 
-	export let a: Promise<UmlageEntry> | undefined = undefined;
-	export let entry: Partial<UmlageEntry> = {};
+	export let a: Promise<WalterUmlageEntry> | undefined = undefined;
+	export let entry: Partial<WalterUmlageEntry> = {};
 </script>
 
 <Row>

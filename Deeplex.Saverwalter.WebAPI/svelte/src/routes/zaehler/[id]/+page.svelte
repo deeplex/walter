@@ -6,18 +6,18 @@
 	import {
 		WalterHeaderDetail,
 		WalterGrid,
-		Zaehler,
-		Zaehlerstaende,
-		WalterZaehler
-	} from '$components';
-	import { walter_get } from '$services/requests';
-	import type { ZaehlerEntry } from '$types';
+		WalterZaehler,
+		WalterZaehlerstaende,
+		WalterZaehlerList
+	} from '$WalterComponents';
+	import { walter_get } from '$WalterServices/requests';
+	import type { WalterZaehlerEntry } from '$WalterTypes';
 
 	export let data: PageData;
 	const url = `/api/zaehler/${data.id}`;
 
-	const a: Promise<ZaehlerEntry> = walter_get(url);
-	const entry: Partial<ZaehlerEntry> = {};
+	const a: Promise<WalterZaehlerEntry> = walter_get(url);
+	const entry: Partial<WalterZaehlerEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 
 	const title = a.then((x) => x.kennnummer);
@@ -29,7 +29,13 @@
 	<WalterZaehler {a} {entry} />
 
 	<Accordion>
-		<Zaehlerstaende title="Zählerstände" rows={a.then((x) => x.staende)} />
-		<Zaehler title="Einzelzähler" rows={a.then((x) => x.einzelzaehler)} />
+		<WalterZaehlerstaende
+			title="Zählerstände"
+			rows={a.then((x) => x.staende)}
+		/>
+		<WalterZaehlerList
+			title="Einzelzähler"
+			rows={a.then((x) => x.einzelzaehler)}
+		/>
 	</Accordion>
 </WalterGrid>

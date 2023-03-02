@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { WalterDataWrapper } from '$components';
+	import { WalterDataWrapper } from '$WalterComponents';
 
-	import type { ZaehlerstandEntry } from '$types';
+	import type { WalterZaehlerstandEntry } from '$WalterTypes';
 
 	const headers = [
 		{ key: 'datum', value: 'Datum' },
@@ -9,7 +9,7 @@
 		{ key: 'einheit', value: 'Einheit' }
 	];
 
-	export let rows: Promise<ZaehlerstandEntry[]>;
+	export let rows: Promise<WalterZaehlerstandEntry[]>;
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 </script>

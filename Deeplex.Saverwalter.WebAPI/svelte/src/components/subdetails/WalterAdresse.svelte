@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Row } from 'carbon-components-svelte';
 
-	import type { AdresseEntry } from '$types';
-	import { WalterTextInput } from '$components';
+	import type { WalterAdresseEntry } from '$WalterTypes';
+	import { WalterTextInput } from '$WalterComponents';
 
-	export let adresse: Promise<AdresseEntry> | undefined = undefined;
+	export let adresse: Promise<WalterAdresseEntry> | undefined = undefined;
 
 	// TODO Statt dass der Inhalt der Adresse sich ändert, muss sich die Adresse ändern.
 </script>

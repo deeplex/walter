@@ -2,8 +2,8 @@
 	import { ToastNotification } from 'carbon-components-svelte';
 	import { fly } from 'svelte/transition';
 
-	import { removeToast, toasts } from '$store';
-	import type { WalterToast } from '$types';
+	import { removeToast, toasts } from '$WalterStore';
+	import type { WalterToast } from '$WalterTypes';
 
 	function close(e: CustomEvent<any>) {
 		removeToast(e.detail);

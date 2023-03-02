@@ -7,20 +7,20 @@
 		WalterGrid,
 		WalterHeader,
 		WalterTextInput,
-		Betriebskostenrechnungen,
-		Erhaltungsaufwendungen,
-		Kontakte,
-		Umlagen,
-		Vertraege,
-		Wohnungen,
-		Zaehler
-	} from '$components';
-	import { walter_get } from '$services/requests';
-	import type { AnhangEntry } from '$types';
+		WalterBetriebskostenrechnungen,
+		WalterErhaltungsaufwendungen,
+		WalterKontakte,
+		WalterUmlagen,
+		WalterVertraege,
+		WalterWohnungen,
+		WalterZaehlerList
+	} from '$WalterComponents';
+	import { walter_get } from '$WalterServices/requests';
+	import type { WalterAnhangEntry } from '$WalterTypes';
 
 	export let data: PageData;
-	const a: Promise<AnhangEntry> = walter_get(`/api/anhaenge/${data.id}`);
-	const entry: Partial<AnhangEntry> = {};
+	const a: Promise<WalterAnhangEntry> = walter_get(`/api/anhaenge/${data.id}`);
+	const entry: Partial<WalterAnhangEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 </script>
 
@@ -43,21 +43,21 @@
 		<WalterTextInput labelText="Notiz" value={a.then((x) => x.notiz)} />
 	</Row> -->
 	<Accordion>
-		<Betriebskostenrechnungen
+		<WalterBetriebskostenrechnungen
 			title="Betriebskostenrechnungen"
 			rows={a.then((x) => x.betriebskostenrechnungen)}
 		/>
-		<Erhaltungsaufwendungen
+		<WalterErhaltungsaufwendungen
 			title="Erhaltungsaufwendungen"
 			rows={a.then((x) => x.erhaltungsaufwendungen)}
 		/>
-		<Kontakte
+		<WalterKontakte
 			title="Kontakte"
 			rows={a.then((x) => x.natuerlichePersonen.concat(x.juristischePersonen))}
 		/>
-		<Umlagen title="Umlagen" rows={a.then((x) => x.umlagen)} />
-		<Vertraege title="Verträge" rows={a.then((x) => x.vertraege)} />
-		<Wohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
-		<Zaehler title="Zähler" rows={a.then((x) => x.zaehler)} />
+		<WalterUmlagen title="Umlagen" rows={a.then((x) => x.umlagen)} />
+		<WalterVertraege title="Verträge" rows={a.then((x) => x.vertraege)} />
+		<WalterWohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
+		<WalterZaehlerList title="Zähler" rows={a.then((x) => x.zaehler)} />
 	</Accordion>
 </WalterGrid>

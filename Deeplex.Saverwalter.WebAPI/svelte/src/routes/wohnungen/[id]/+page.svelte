@@ -5,23 +5,23 @@
 
 	import {
 		WalterGrid,
-		Wohnungen,
-		Vertraege,
-		Zaehler,
-		Erhaltungsaufwendungen,
-		Betriebskostenrechnungen,
-		Umlagen,
+		WalterWohnungen,
+		WalterVertraege,
+		WalterZaehlerList,
+		WalterErhaltungsaufwendungen,
+		WalterBetriebskostenrechnungen,
+		WalterUmlagen,
 		WalterHeaderDetail,
 		WalterWohnung
-	} from '$components';
-	import type { WohnungEntry } from '$types';
-	import { walter_get } from '$services/requests';
+	} from '$WalterComponents';
+	import type { WalterWohnungEntry } from '$WalterTypes';
+	import { walter_get } from '$WalterServices/requests';
 
 	export let data: PageData;
 	const url = `/api/wohnungen/${data.id}`;
 
-	const a: Promise<WohnungEntry> = walter_get(url);
-	const entry: Partial<WohnungEntry> = {};
+	const a: Promise<WalterWohnungEntry> = walter_get(url);
+	const entry: Partial<WalterWohnungEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 
 	const title = a.then((x) => 'TODO - ' + x.bezeichnung);
@@ -33,15 +33,15 @@
 	<WalterWohnung {a} {entry} />
 
 	<Accordion>
-		<Wohnungen title="Haus" rows={a.then((x) => x.haus)} />
-		<Zaehler title="Zähler" rows={a.then((x) => x.zaehler)} />
-		<Vertraege title="Verträge" rows={a.then((x) => x.vertraege)} />
-		<Umlagen title="Umlagen" rows={a.then((x) => x.umlagen)} />
-		<Betriebskostenrechnungen
+		<WalterWohnungen title="Haus" rows={a.then((x) => x.haus)} />
+		<WalterZaehlerList title="Zähler" rows={a.then((x) => x.zaehler)} />
+		<WalterVertraege title="Verträge" rows={a.then((x) => x.vertraege)} />
+		<WalterUmlagen title="Umlagen" rows={a.then((x) => x.umlagen)} />
+		<WalterBetriebskostenrechnungen
 			title="Betriebskostenrechnungen"
 			rows={a.then((x) => x.betriebskostenrechnungen)}
 		/>
-		<Erhaltungsaufwendungen
+		<WalterErhaltungsaufwendungen
 			title="Erhaltungsaufwendungen"
 			rows={a.then((x) => x.erhaltungsaufwendungen)}
 		/>

@@ -6,8 +6,8 @@
 	} from 'carbon-components-svelte';
 	import { Save, TrashCan } from 'carbon-icons-svelte';
 
-	import { Anhaenge, WalterHeader } from '$components';
-	import { walter_delete, walter_put } from '$services/requests';
+	import { WalterAnhaenge, WalterHeader } from '$WalterComponents';
+	import { walter_delete, walter_put } from '$WalterServices/requests';
 
 	export let title: Promise<string> | string = 'Saverwalter';
 	export let a: Promise<any>; // TODO replace with type that has anhaenge
@@ -43,6 +43,6 @@
 				<HeaderGlobalAction on:click={() => click_delete(x)} icon={TrashCan} />
 			{/await}
 		</HeaderNav>
-		<Anhaenge rows={a.then((x) => x.anhaenge)} />
+		<WalterAnhaenge rows={a.then((x) => x.anhaenge)} />
 	{/await}
 </WalterHeader>

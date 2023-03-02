@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type { ErhaltungsaufwendungEntry } from '$types';
+	import type { WalterErhaltungsaufwendungEntry } from '$WalterTypes';
 	import {
 		WalterGrid,
 		WalterErhaltungsaufwendung,
 		WalterHeaderNew
-	} from '$components';
+	} from '$WalterComponents';
 
 	const url = `/api/erhaltungsaufwendungen`;
-	const entry: Partial<ErhaltungsaufwendungEntry> = {};
+	const entry: Partial<WalterErhaltungsaufwendungEntry> = {};
 
 	const title = 'Neue Erhaltungsaufwendung';
 </script>

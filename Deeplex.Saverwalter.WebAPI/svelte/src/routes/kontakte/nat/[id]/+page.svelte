@@ -3,23 +3,23 @@
 
 	import type { PageData } from './$types';
 
-	import type { NatuerlichePersonEntry } from '$types';
-	import { walter_get } from '$services/requests';
+	import type { WalterNatuerlichePersonEntry } from '$WalterTypes';
+	import { walter_get } from '$WalterServices/requests';
 	import {
-		Person,
+		WalterPerson,
 		WalterGrid,
 		WalterTextInput,
-		Kontakte,
-		Wohnungen,
-		Vertraege,
+		WalterKontakte,
+		WalterWohnungen,
+		WalterVertraege,
 		WalterHeaderDetail
-	} from '$components';
+	} from '$WalterComponents';
 
 	export let data: PageData;
 	const url = `/api/kontakte/nat/${data.id}`;
 
-	const a: Promise<NatuerlichePersonEntry> = walter_get(url);
-	const entry: Partial<NatuerlichePersonEntry> = {};
+	const a: Promise<WalterNatuerlichePersonEntry> = walter_get(url);
+	const entry: Partial<WalterNatuerlichePersonEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 
 	const title = a.then((x) => x.name);
@@ -40,16 +40,16 @@
 			value={a.then((x) => x.nachname)}
 		/>
 	</Row>
-	<Person binding={entry} person={a} />
+	<WalterPerson binding={entry} person={a} />
 
 	<Accordion>
-		<Kontakte
+		<WalterKontakte
 			title="Juristische Personen"
 			rows={a.then((x) => x.juristischePersonen)}
 		/>
 		{#await a then x}
-			<Wohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
-			<Vertraege title="Verträge" rows={a.then((x) => x.vertraege)} />
+			<WalterWohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
+			<WalterVertraege title="Verträge" rows={a.then((x) => x.vertraege)} />
 		{/await}
 	</Accordion>
 </WalterGrid>

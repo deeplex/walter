@@ -1,15 +1,15 @@
 <script lang="ts">
 	import {
-		Adresse,
+		WalterAdresse,
 		WalterComboBox,
 		WalterNumberInput,
 		WalterTextInput
-	} from '$components';
+	} from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
-	import type { WohnungEntry } from '$types';
+	import type { WalterWohnungEntry } from '$WalterTypes';
 
-	export let a: Promise<WohnungEntry> | undefined = undefined;
-	export let entry: Partial<WohnungEntry> = {};
+	export let a: Promise<WalterWohnungEntry> | undefined = undefined;
+	export let entry: Partial<WalterWohnungEntry> = {};
 </script>
 
 <Row>
@@ -21,7 +21,7 @@
 	/>
 </Row>
 <!-- TODO -->
-<Adresse adresse={a?.then((x) => x.adresse)} />
+<WalterAdresse adresse={a?.then((x) => x.adresse)} />
 <Row>
 	<WalterTextInput
 		bind:binding={entry.bezeichnung}

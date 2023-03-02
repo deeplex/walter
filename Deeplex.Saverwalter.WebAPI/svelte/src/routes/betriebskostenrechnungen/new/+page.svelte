@@ -3,13 +3,13 @@
 		WalterGrid,
 		WalterHeaderNew,
 		WalterBetriebskostenrechnung
-	} from '$components';
-	import type { BetriebskostenrechnungEntry } from '$types';
+	} from '$WalterComponents';
+	import type { WalterBetriebskostenrechnungEntry } from '$WalterTypes';
 
 	const url = `/api/betriebskostenrechnungen`;
 	const title = 'Neue Betriebskostenrechnung';
 
-	const entry: Partial<BetriebskostenrechnungEntry> = {};
+	const entry: Partial<WalterBetriebskostenrechnungEntry> = {};
 </script>
 
 <WalterHeaderNew {url} {entry} {title} />

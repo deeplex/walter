@@ -4,20 +4,20 @@
 	import type { PageData } from './$types';
 
 	import {
-		Betriebskostenrechnungen,
+		WalterBetriebskostenrechnungen,
 		WalterHeaderDetail,
 		WalterGrid,
-		Wohnungen,
+		WalterWohnungen,
 		WalterUmlage
-	} from '$components';
-	import { walter_get } from '$services/requests';
-	import type { UmlageEntry } from '$types';
+	} from '$WalterComponents';
+	import { walter_get } from '$WalterServices/requests';
+	import type { WalterUmlageEntry } from '$WalterTypes';
 
 	export let data: PageData;
 	const url = `/api/umlagen/${data.id}`;
 
-	const a: Promise<UmlageEntry> = walter_get(url);
-	const entry: Partial<UmlageEntry> = {};
+	const a: Promise<WalterUmlageEntry> = walter_get(url);
+	const entry: Partial<WalterUmlageEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 
 	const title = a.then((x) => x.typ + ' - ' + x.wohnungenBezeichnung);
@@ -29,8 +29,8 @@
 	<WalterUmlage {a} {entry} />
 
 	<Accordion>
-		<Wohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
-		<Betriebskostenrechnungen
+		<WalterWohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
+		<WalterBetriebskostenrechnungen
 			title="Betriebskostenrechnungen"
 			rows={a.then((x) => x.betriebskostenrechnungen)}
 		/>

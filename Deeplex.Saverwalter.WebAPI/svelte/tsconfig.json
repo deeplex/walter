@@ -11,20 +11,17 @@
 		"sourceMap": true,
 		"strict": true,
 		"paths": {
-			"$components": [
+			"$WalterComponents": [
 				"./src/components/index.ts",
 			],
-			"$store": [
+			"$WalterStore": [
 				"./src/store"
 			],
-			"$services/*": [
+			"$WalterServices/*": [
 				"./src/services/*"
 			],
-			"$types": [
+			"$WalterTypes": [
 				"./src/types/index.ts",
-			],
-			"$routes/*": [
-				"./src/routes/*"
 			],
 		}
 	}

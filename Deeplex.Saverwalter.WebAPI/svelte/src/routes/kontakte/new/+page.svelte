@@ -1,18 +1,23 @@
 <script lang="ts">
 	import { ContentSwitcher, Row, Switch } from 'carbon-components-svelte';
 
-	import type { JuristischePersonEntry, NatuerlichePersonEntry } from '$types';
+	import type {
+		WalterJuristischePersonEntry,
+		WalterNatuerlichePersonEntry
+	} from '$WalterTypes';
 	import {
-		Person,
+		WalterPerson,
 		WalterGrid,
 		WalterTextInput,
 		WalterHeaderNew
-	} from '$components';
+	} from '$WalterComponents';
 
 	const url = `/api/kontakte`;
 	const title = 'Neue Person';
 
-	const entry: Partial<NatuerlichePersonEntry & JuristischePersonEntry> = {};
+	const entry: Partial<
+		WalterNatuerlichePersonEntry & WalterJuristischePersonEntry
+	> = {};
 
 	let personType: number = 0;
 </script>
@@ -39,5 +44,5 @@
 			<WalterTextInput bind:binding={entry.name} labelText="Bezeichnung" />
 		{/if}
 	</Row>
-	<Person binding={entry} />
+	<WalterPerson binding={entry} />
 </WalterGrid>

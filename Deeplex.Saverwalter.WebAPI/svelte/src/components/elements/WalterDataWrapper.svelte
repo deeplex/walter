@@ -2,7 +2,7 @@
 	import { AccordionItem, Loading } from 'carbon-components-svelte';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-	import { WalterDataTable } from '$components';
+	import { WalterDataTable } from '$WalterComponents';
 
 	export let title: string | undefined = undefined;
 	export let rows: Promise<any[]>;

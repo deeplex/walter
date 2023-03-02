@@ -7,9 +7,9 @@
 		Loading
 	} from 'carbon-components-svelte';
 
-	import type { AnhangEntry } from '$types';
+	import type { WalterAnhangEntry } from '$WalterTypes';
 
-	export let rows: Promise<AnhangEntry[]>;
+	export let rows: Promise<WalterAnhangEntry[]>;
 </script>
 
 {#await rows}

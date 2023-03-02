@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { Row } from 'carbon-components-svelte';
 
-	import type { PersonEntry } from '$types';
-	import { Adresse, WalterTextInput } from '$components';
+	import type { WalterPersonEntry } from '$WalterTypes';
+	import { WalterAdresse, WalterTextInput } from '$WalterComponents';
 
-	export let person: Promise<PersonEntry> | undefined = undefined;
-	export let binding: Partial<PersonEntry>;
+	export let person: Promise<WalterPersonEntry> | undefined = undefined;
+	export let binding: Partial<WalterPersonEntry>;
 </script>
 
-<Adresse adresse={person?.then((e) => e.adresse)} />
+<WalterAdresse adresse={person?.then((e) => e.adresse)} />
 <Row>
 	<WalterTextInput
 		bind:binding={binding.email}

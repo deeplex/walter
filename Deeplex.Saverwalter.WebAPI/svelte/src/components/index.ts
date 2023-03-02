@@ -1,6 +1,6 @@
-export { default as Adresse } from './Adresse.svelte';
-export { default as Anhaenge } from './Anhaenge.svelte';
-export { default as Person } from './Person.svelte';
+export { default as WalterAdresse } from './subdetails/WalterAdresse.svelte';
+export { default as WalterAnhaenge } from './subdetails/WalterAnhaenge.svelte';
+export { default as WalterPerson } from './subdetails/WalterPerson.svelte';
 
 export { default as WalterBetriebskostenrechnung } from './details/WalterBetriebskostenrechnung.svelte';
 export { default as WalterErhaltungsaufwendung } from './details/WalterErhaltungsaufwendung.svelte';
@@ -23,13 +23,13 @@ export { default as WalterTextInput } from './elements/WalterTextInput.svelte';
 export { default as WalterToasts } from './elements/WalterToasts.svelte';
 export { default as WalterNumberInput } from './elements/WalterNumberInput.svelte';
 
-export { default as Umlagen } from './lists/Umlagen.svelte';
-export { default as Wohnungen } from './lists/Wohnungen.svelte';
-export { default as Erhaltungsaufwendungen } from './lists/Erhaltungsaufwendungen.svelte';
-export { default as Betriebskostenrechnungen } from './lists/Betriebskostenrechnungen.svelte';
-export { default as Kontakte } from './lists/Kontakte.svelte';
-export { default as Vertraege } from './lists/Vertraege.svelte';
-export { default as Zaehler } from './lists/Zaehler.svelte';
-export { default as Zaehlerstaende } from './lists/Zaehlerstaende.svelte';
-export { default as Mieten } from './lists/Mieten.svelte';
-export { default as Mietminderungen } from './lists/Mietminderungen.svelte';
+export { default as WalterUmlagen } from './lists/WalterUmlagen.svelte';
+export { default as WalterWohnungen } from './lists/WalterWohnungen.svelte';
+export { default as WalterErhaltungsaufwendungen } from './lists/WalterErhaltungsaufwendungen.svelte';
+export { default as WalterBetriebskostenrechnungen } from './lists/WalterBetriebskostenrechnungen.svelte';
+export { default as WalterKontakte } from './lists/WalterKontakte.svelte';
+export { default as WalterVertraege } from './lists/WalterVertraege.svelte';
+export { default as WalterZaehlerList } from './lists/WalterZaehlerList.svelte';
+export { default as WalterZaehlerstaende } from './lists/WalterZaehlerstaende.svelte';
+export { default as WalterMieten } from './lists/WalterMieten.svelte';
+export { default as WalterMietminderungen } from './lists/WalterMietminderungen.svelte';

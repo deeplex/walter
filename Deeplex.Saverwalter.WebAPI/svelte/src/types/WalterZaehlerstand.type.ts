@@ -1,4 +1,4 @@
-export type ZaehlerstandEntry = {
+export type WalterZaehlerstandEntry = {
     id: number;
     stand: number;
     datum: string;

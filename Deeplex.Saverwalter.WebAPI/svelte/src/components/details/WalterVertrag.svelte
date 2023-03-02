@@ -3,8 +3,8 @@
 		WalterComboBox,
 		WalterDatePicker,
 		WalterTextInput
-	} from '$components';
-	import type { VertragEntry } from '$types';
+	} from '$WalterComponents';
+	import type { VertragEntry } from '$WalterTypes';
 	import { Row } from 'carbon-components-svelte';
 
 	export let a: Promise<VertragEntry> | undefined = undefined;
