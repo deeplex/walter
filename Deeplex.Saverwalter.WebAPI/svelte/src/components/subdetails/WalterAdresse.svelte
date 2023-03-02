@@ -5,22 +5,28 @@
 	import { WalterTextInput } from '$WalterComponents';
 
 	export let adresse: Promise<WalterAdresseEntry> | undefined = undefined;
-
-	// TODO Statt dass der Inhalt der Adresse sich ändert, muss sich die Adresse ändern.
+	export let entry: Partial<WalterAdresseEntry> = {};
 </script>
 
 <Row>
 	<WalterTextInput
 		labelText="Straße"
+		bind:binding={entry.strasse}
 		value={adresse?.then((x) => x?.strasse)}
 	/>
 	<WalterTextInput
 		labelText="Hausnr."
+		bind:binding={entry.hausnummer}
 		value={adresse?.then((x) => x?.hausnummer)}
 	/>
 	<WalterTextInput
 		labelText="Postleitzahl"
+		bind:binding={entry.postleitzahl}
 		value={adresse?.then((x) => x?.postleitzahl)}
 	/>
-	<WalterTextInput labelText="Stadt" value={adresse?.then((x) => x?.stadt)} />
+	<WalterTextInput
+		labelText="Stadt"
+		bind:binding={entry.stadt}
+		value={adresse?.then((x) => x?.stadt)}
+	/>
 </Row>

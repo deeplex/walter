@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public sealed class JuristischePersonEntry : JuristischePersonEntryBase
         {
             public IEnumerable<AnhangEntryBase>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangEntryBase(e));
-            public IEnumerable<PersonEntryBase>? Mitglieder => Entity?.Mitglieder.Select(e => new PersonEntryBase(e));
+            public IEnumerable<PersonEntryBase>? Mitglieder => Entity?.Mitglieder.Select(e => new PersonEntryBase(e, DbService));
 
             public JuristischePersonEntry() : base() { }
             public JuristischePersonEntry(JuristischePerson entity, IWalterDbService dbService) : base(entity, dbService) { }

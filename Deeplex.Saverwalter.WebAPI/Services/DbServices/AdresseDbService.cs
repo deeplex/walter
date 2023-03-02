@@ -1,36 +1,39 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
+using Deeplex.Saverwalter.WebAPI.Controllers;
+using Deeplex.Saverwalter.WebAPI.Helper;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class ZaehlerDbService : IControllerService<ZaehlerEntry>
+    public class AdresseDbService : IControllerService<AdresseEntry>
     {
         public IWalterDbService DbService { get; }
         public SaverwalterContext ctx => DbService.ctx;
 
-        public ZaehlerDbService(IWalterDbService dbService)
+        public AdresseDbService(IWalterDbService dbService)
         {
             DbService = dbService;
         }
 
-        private void SetValues(Zaehler entity, ZaehlerEntry entry)
+        private void SetValues(Adresse entity, AdresseEntry entry)
         {
-            if (entity.ZaehlerId != entry.Id)
+            if (entity.AdresseId != entry.Id)
             {
                 throw new Exception();
             }
 
-            // TODO
-            entity.Notiz = entry.Notiz;
+            entity.Strasse = entry.Strasse!;
+            entity.Hausnummer = entry.Hausnummer!;
+            entity.Postleitzahl = entry.Postleitzahl!;
+            entity.Stadt = entry.Stadt!;
         }
-
 
         public IActionResult Get(int id)
         {
-            var entity = DbService.ctx.ZaehlerSet.Find(id);
+            var entity = DbService.ctx.Adressen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -38,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new ZaehlerEntry(entity, DbService);
+                var entry = new AdresseEntry(entity, DbService);
                 return new OkObjectResult(entry);
             }
             catch
@@ -49,33 +52,33 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = DbService.ctx.ZaehlerSet.Find(id);
+            var entity = DbService.ctx.Adressen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            DbService.ctx.ZaehlerSet.Remove(entity);
+            DbService.ctx.Adressen.Remove(entity);
             DbService.SaveWalter();
 
             return new OkResult();
         }
 
-        public IActionResult Post(ZaehlerEntry entry)
+        public IActionResult Post(AdresseEntry entry)
         {
             if (entry.Id != 0)
             {
                 return new BadRequestResult();
             }
-            var entity = new Zaehler();
+            var entity = new Adresse();
 
             try
             {
                 SetValues(entity, entry);
-                DbService.ctx.ZaehlerSet.Add(entity);
+                DbService.ctx.Adressen.Add(entity);
                 DbService.SaveWalter();
 
-                return new OkObjectResult(new ZaehlerEntry(entity, DbService));
+                return new OkObjectResult(new AdresseEntry(entity, DbService));
             }
             catch
             {
@@ -84,9 +87,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         }
 
-        public IActionResult Put(int id, ZaehlerEntry entry)
+        public IActionResult Put(int id, AdresseEntry entry)
         {
-            var entity = DbService.ctx.ZaehlerSet.Find(id);
+            var entity = DbService.ctx.Adressen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -95,10 +98,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                DbService.ctx.ZaehlerSet.Update(entity);
+                DbService.ctx.Adressen.Update(entity);
                 DbService.SaveWalter();
 
-                return new OkObjectResult(new ZaehlerEntry(entity, DbService));
+                return new OkObjectResult(new AdresseEntry(entity, DbService));
             }
             catch
             {

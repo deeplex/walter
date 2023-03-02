@@ -1,8 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
-using Deeplex.Saverwalter.WebAPI.Helper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.JuristischePersonController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
@@ -16,6 +16,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class PersonEntryBase
         {
             protected IPerson? Entity { get; }
+            protected IWalterDbService? DbService { get; }
 
             public int Id { get; set; }
             public Guid Guid { get; set; }
@@ -28,8 +29,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public AdresseEntry? Adresse { get; set; }
 
             protected PersonEntryBase() { }
-            public PersonEntryBase(IPerson p)
+            public PersonEntryBase(IPerson p, IWalterDbService dbService)
             {
+                DbService = dbService;
                 if (p is NatuerlichePerson n)
                 {
                     Entity = n;
@@ -55,7 +57,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 if (Entity.Adresse is Adresse a)
                 {
-                    Adresse = new AdresseEntry(a);
+                    Adresse = new AdresseEntry(a, DbService);
                 }
 
             }
@@ -92,7 +94,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 => GetVertraege()?.Select(e => e.Wohnung).Distinct().Select(e => new WohnungEntryBase(e, DbService!));
 
             protected PersonEntry() : base() { }
-            public PersonEntry(IPerson entity, IWalterDbService dbService) : base(entity)
+            public PersonEntry(IPerson entity, IWalterDbService dbService) : base(entity, dbService)
             {
                 DbService = dbService;
             }
@@ -110,8 +112,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            var np = DbService.ctx.NatuerlichePersonen.ToList().Select(e => new PersonEntryBase(e)).ToList();
-            var jp = DbService.ctx.JuristischePersonen.ToList().Select(e => new PersonEntryBase(e)).ToList();
+            var np = DbService.ctx.NatuerlichePersonen.ToList().Select(e => new PersonEntryBase(e, DbService)).ToList();
+            var jp = DbService.ctx.JuristischePersonen.ToList().Select(e => new PersonEntryBase(e, DbService)).ToList();
             return new OkObjectResult(np.Concat(jp));
         }
     }

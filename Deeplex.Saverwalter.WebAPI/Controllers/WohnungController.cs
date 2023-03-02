@@ -1,8 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
-using Deeplex.Saverwalter.WebAPI.Helper;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public double Nutzflaeche { get; set; }
             public int Einheiten { get; set; }
             public string? Notiz { get; set; }
-            public AdresseEntry? Adresse { get; set; }
+            public AdresseEntryBase? Adresse { get; set; }
             public string? Bewohner { get; set; }
             public SelectionEntry? Besitzer { get; set; }
 
@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Nutzflaeche = Entity.Nutzflaeche;
                 Einheiten = Entity.Nutzeinheit;
                 Notiz = Entity.Notiz;
-                Adresse = Entity.Adresse is Adresse a ? new AdresseEntry(a) : null;
+                Adresse = Entity.Adresse is Adresse a ? new AdresseEntryBase(a) : null;
                 Besitzer = Entity.BesitzerId is Guid id && id != Guid.Empty ? new(id, dbService.ctx.FindPerson(id).Bezeichnung) : null;
              
                 var v = Entity.Vertraege.FirstOrDefault(e => e.Ende == null || e.Ende < DateTime.Now);
@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public IEnumerable<WohnungEntryBase>? Haus => Entity?.Adresse.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!));
             public IEnumerable<AnhangEntryBase>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangEntryBase(e));
-            public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
+            public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e, DbService!));
             public IEnumerable<VertragEntryBase>? Vertraege => Entity?.Vertraege.Select(e => new VertragEntryBase(e, DbService!));
             public IEnumerable<ErhaltungsaufwendungEntryBase>? Erhaltungsaufwendungen
                 => Entity?.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungEntryBase(e, DbService!));

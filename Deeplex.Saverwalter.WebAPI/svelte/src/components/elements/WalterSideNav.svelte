@@ -12,6 +12,7 @@
 		ChartRelationship,
 		Document,
 		DocumentAttachment,
+		Location,
 		Meter,
 		Money,
 		Tools,
@@ -69,6 +70,13 @@
 			icon={DocumentAttachment}
 			text="Anhänge"
 			href="/anhaenge"
+		/>
+
+		<SideNavLink
+			isSelected={$page.route.id?.includes('/adressen')}
+			icon={Location}
+			text="Adressen"
+			href="/adressen"
 		/>
 		<SideNavDivider />
 	</SideNavItems>

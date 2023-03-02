@@ -1,8 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
-using Deeplex.Saverwalter.WebAPI.Helper;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 
@@ -25,14 +25,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry? AllgemeinZaehler { get; set; }
 
             public ZaehlerEntryBase() { }
-            public ZaehlerEntryBase(Zaehler entity)
+            public ZaehlerEntryBase(Zaehler entity, IWalterDbService dbService)
             {
                 Entity = entity;
 
                 Id = Entity.ZaehlerId;
                 Kennnummer = Entity.Kennnummer;
                 Typ = Entity.Typ;
-                Adresse = Entity.Adresse is Adresse a ? new AdresseEntry(a) : null;
+                Adresse = Entity.Adresse is Adresse a ? new AdresseEntry(a, dbService) : null;
                 Wohnung = Entity.Wohnung is Wohnung w ? new (w.WohnungId, w.Adresse.Anschrift + ", " + w.Bezeichnung) : null;
                 Notiz = Entity.Notiz;
                 AllgemeinZaehler = Entity?.Allgemeinzaehler is Zaehler z ? new(z.ZaehlerId, z.Kennnummer) : null;
@@ -41,13 +41,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class ZaehlerEntry : ZaehlerEntryBase
         {
-            public IEnumerable<ZaehlerEntryBase>? Einzelzaehler => Entity?.EinzelZaehler.ToList().Select(e => new ZaehlerEntryBase(e));
+            private IWalterDbService DbService { get; }
+            public IEnumerable<ZaehlerEntryBase>? Einzelzaehler => Entity?.EinzelZaehler.ToList().Select(e => new ZaehlerEntryBase(e, DbService));
             public IEnumerable<ZaehlerstandEntryBase>? Staende => Entity?.Staende.ToList().Select(e => new ZaehlerstandEntryBase(e));
             public IEnumerable<AnhangEntryBase>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangEntryBase(e));
 
             public ZaehlerEntry() : base() { }
-            public ZaehlerEntry(Zaehler entity) : base(entity)
+            public ZaehlerEntry(Zaehler entity, IWalterDbService dbService) : base(entity, dbService)
             {
+                DbService = dbService;
             }
         }
 
@@ -81,7 +83,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         [HttpGet]
         public IActionResult Get()
-            => new OkObjectResult(DbService.ctx.ZaehlerSet.ToList().Select(e => new ZaehlerEntryBase(e)).ToList());
+            => new OkObjectResult(DbService.ctx.ZaehlerSet.ToList().Select(e => new ZaehlerEntryBase(e, DbService.DbService)).ToList());
         [HttpPost]
         public IActionResult Post([FromBody] ZaehlerEntry entry) => DbService.Post(entry);
 

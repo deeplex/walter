@@ -42,12 +42,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen => Entity?.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e));
             public IEnumerable<ErhaltungsaufwendungEntryBase>? Erhaltungsaufwendungen => Entity?.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungEntryBase(e, DbService!));
-            public IEnumerable<PersonEntryBase>? NatuerlichePersonen => Entity?.NatuerlichePersonen.Select(e => new PersonEntryBase(e));
-            public IEnumerable<PersonEntryBase>? JuristischePersonen => Entity?.JuristischePersonen.Select(e => new PersonEntryBase(e));
+            public IEnumerable<PersonEntryBase>? NatuerlichePersonen => Entity?.NatuerlichePersonen.Select(e => new PersonEntryBase(e, DbService!));
+            public IEnumerable<PersonEntryBase>? JuristischePersonen => Entity?.JuristischePersonen.Select(e => new PersonEntryBase(e, DbService!));
             public IEnumerable<UmlageEntryBase>? Umlagen => Entity?.Umlagen.Select(e => new UmlageEntryBase(e));
             public IEnumerable<VertragEntryBase>? Vertraege => Entity?.Vertraege.Select(e => new VertragEntryBase(e, DbService!));
             public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!)).ToList();
-            public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
+            public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e, DbService!));
 
             public AnhangEntry() : base() { }
             public AnhangEntry(Anhang entity, IWalterDbService dbService) : base(entity)
