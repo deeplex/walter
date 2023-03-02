@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Erhaltungsaufwendungen, WalterHeaderList } from '$components';
-	import { walter_get } from '$services/utils';
+	import { walter_get } from '$services/requests';
 	import type { ErhaltungsaufwendungEntry } from '$types';
 
 	const url = 'erhaltungsaufwendungen';

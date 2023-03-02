@@ -3,7 +3,7 @@
 	import type { PageData } from './$types';
 
 	import { WalterGrid, Wohnungen, WalterHeaderDetail } from '$components';
-	import { walter_get } from '$services/utils';
+	import { walter_get } from '$services/requests';
 	import type { BetriebskostenrechnungEntry } from '$types';
 	import WalterBetriebskostenrechnung from '../../../components/details/WalterBetriebskostenrechnung.svelte';
 

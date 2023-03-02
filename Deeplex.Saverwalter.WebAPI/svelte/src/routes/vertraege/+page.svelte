@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Vertraege, WalterHeaderList } from '$components';
 	import type { VertragEntry } from '$types';
-	import { walter_get } from '$services/utils';
+	import { walter_get } from '$services/requests';
 
 	const url = 'vertraege';
 

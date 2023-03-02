@@ -7,7 +7,7 @@
 	import { Save, TrashCan } from 'carbon-icons-svelte';
 
 	import { Anhaenge, WalterHeader } from '$components';
-	import { walter_delete, walter_put } from '$services/utils';
+	import { walter_delete, walter_put } from '$services/requests';
 
 	export let title: Promise<string> | string = 'Saverwalter';
 	export let a: Promise<any>; // TODO replace with type that has anhaenge

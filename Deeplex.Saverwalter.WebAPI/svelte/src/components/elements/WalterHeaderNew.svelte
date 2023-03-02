@@ -3,7 +3,7 @@
 	import { Save } from 'carbon-icons-svelte';
 
 	import { WalterHeader } from '$components';
-	import { walter_post } from '$services/utils';
+	import { walter_post } from '$services/requests';
 
 	export let title: string = 'Neu...';
 	export let url: string;

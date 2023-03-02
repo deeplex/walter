@@ -2,7 +2,7 @@
 	import { ComboBox, TextInputSkeleton } from 'carbon-components-svelte';
 	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 
-	import { walter_get } from '$services/utils';
+	import { walter_get } from '$services/requests';
 	import type { SelectionEntry } from '$types';
 
 	type Selection = { selectedId: any; selectedItem: ComboBoxItem };

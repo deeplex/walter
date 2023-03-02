@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WalterHeaderList, Wohnungen } from '$components';
-	import { walter_get } from '$services/utils';
+	import { walter_get } from '$services/requests';
 	import type { WohnungEntry } from '$types';
 
 	const url = 'wohnungen';

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WalterHeaderList, Zaehler } from '$components';
-	import { walter_get } from '$services/utils';
+	import { walter_get } from '$services/requests';
 	import type { ZaehlerEntry } from '$types';
 
 	const url = 'zaehler';

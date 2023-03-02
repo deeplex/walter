@@ -10,7 +10,7 @@
 		Zaehlerstaende,
 		WalterZaehler
 	} from '$components';
-	import { walter_get } from '$services/utils';
+	import { walter_get } from '$services/requests';
 	import type { ZaehlerEntry } from '$types';
 
 	export let data: PageData;

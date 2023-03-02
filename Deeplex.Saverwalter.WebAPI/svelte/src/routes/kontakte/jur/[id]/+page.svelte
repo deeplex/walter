@@ -4,7 +4,7 @@
 	import type { PageData } from './$types';
 
 	import type { PersonEntry, JuristischePersonEntry } from '$types';
-	import { walter_get } from '$services/utils';
+	import { walter_get } from '$services/requests';
 	import {
 		Kontakte,
 		Person,

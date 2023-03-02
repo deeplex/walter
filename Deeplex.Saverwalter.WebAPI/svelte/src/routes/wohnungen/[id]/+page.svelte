@@ -15,7 +15,7 @@
 		WalterWohnung
 	} from '$components';
 	import type { WohnungEntry } from '$types';
-	import { walter_get } from '$services/utils';
+	import { walter_get } from '$services/requests';
 
 	export let data: PageData;
 	const url = `/api/wohnungen/${data.id}`;

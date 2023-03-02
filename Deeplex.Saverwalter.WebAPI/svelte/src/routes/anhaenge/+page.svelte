@@ -2,7 +2,7 @@
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 	import { goto } from '$app/navigation';
 
-	import { walter_get } from '$services/utils';
+	import { walter_get } from '$services/requests';
 	import { WalterDataTable, WalterHeaderList } from '$components';
 	import type { AnhangEntry } from '$types';
 
