@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 
 	import { walter_get } from '$services/utils';
-	import { WalterHeader, WalterDataTable } from '$components';
+	import { WalterDataTable, WalterHeaderList } from '$components';
 	import type { AnhangEntry } from '$types';
 
 	const headers = [
@@ -11,12 +11,14 @@
 		{ key: 'creationTime', value: 'Erstellungszeitpunkt' }
 	];
 
-	const rows: Promise<AnhangEntry[]> = walter_get('/api/anhaenge');
+	const url = 'anhaenge';
+
+	const rows: Promise<AnhangEntry[]> = walter_get(`/api/${url}`);
 
 	const navigate = (e: CustomEvent<DataTableRow>) =>
-		goto(`/anhaenge/${e.detail.id}`);
+		goto(`/${url}/${e.detail.id}`);
 </script>
 
-<WalterHeader title="Anhänge" />
+<WalterHeaderList {url} title="Anhänge" />
 
 <WalterDataTable search {navigate} {headers} {rows} />

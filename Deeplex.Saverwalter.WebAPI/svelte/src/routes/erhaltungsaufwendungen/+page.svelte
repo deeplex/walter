@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Erhaltungsaufwendungen, WalterHeader } from '$components';
+	import { Erhaltungsaufwendungen, WalterHeaderList } from '$components';
 	import { walter_get } from '$services/utils';
 	import type { ErhaltungsaufwendungEntry } from '$types';
 
-	const rows: Promise<ErhaltungsaufwendungEntry[]> = walter_get(
-		'/api/erhaltungsaufwendungen'
-	);
+	const url = 'erhaltungsaufwendungen';
+
+	const rows: Promise<ErhaltungsaufwendungEntry[]> = walter_get(`/api/${url}`);
 </script>
 
-<WalterHeader title="Erhaltungsaufwendungen" />
+<WalterHeaderList {url} title="Erhaltungsaufwendungen" />
 <Erhaltungsaufwendungen search {rows} />

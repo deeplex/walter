@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { Betriebskostenrechnungen, WalterHeader } from '$components';
+	import { Betriebskostenrechnungen, WalterHeaderList } from '$components';
 	import { walter_get } from '$services/utils';
 	import type { BetriebskostenrechnungEntry } from '$types';
 
+	const url = 'betriebskostenrechnungen';
+
 	const rows: Promise<BetriebskostenrechnungEntry[]> = walter_get(
-		'/api/betriebskostenrechnungen'
+		`/api/${url}`
 	);
 </script>
 
-<WalterHeader title="Betriebskostenrechnung" />
+<WalterHeaderList {url} title="Betriebskostenrechnung" />
 <Betriebskostenrechnungen search {rows} />

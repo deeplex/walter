@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { Umlagen, WalterHeader } from '$components';
+	import { Umlagen, WalterHeaderList } from '$components';
 	import { walter_get } from '$services/utils';
 	import type { UmlageEntry } from '$types';
 
-	const rows: Promise<UmlageEntry[]> = walter_get('/api/umlagen');
+	const url = 'umlagen';
+
+	const rows: Promise<UmlageEntry[]> = walter_get(`/api/${url}`);
 </script>
 
-<WalterHeader title="Umlagen" />
+<WalterHeaderList {url} title="Umlagen" />
 <Umlagen search {rows} />

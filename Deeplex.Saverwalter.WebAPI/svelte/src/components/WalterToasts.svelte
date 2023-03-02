@@ -27,9 +27,3 @@
 		/>
 	</span>
 {/each}
-<!-- 
-<ToastNotification
-	title="Error"
-	subtitle="An internal server error occurred."
-	caption={new Date().toLocaleString('de-DE')}
-/> -->

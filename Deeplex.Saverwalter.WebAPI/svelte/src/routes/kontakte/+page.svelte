@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { walter_get } from '$services/utils';
-	import { Kontakte, WalterHeader } from '$components';
+	import { Kontakte, WalterHeaderList } from '$components';
 	import type { PersonEntry } from '$types';
 
-	const rows: Promise<PersonEntry[]> = walter_get('/api/kontakte');
+	const url = 'kontakte';
+
+	const rows: Promise<PersonEntry[]> = walter_get(`/api/${url}`);
 </script>
 
-<WalterHeader title="Kontakte" />
+<WalterHeaderList {url} title="Kontakte" />
 <Kontakte search {rows} />
