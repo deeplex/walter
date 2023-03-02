@@ -2,12 +2,21 @@
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class WohnungDbService : BaseDbService<WohnungEntry>, IControllerService<WohnungEntry>
+    public class WohnungDbService : IControllerService<WohnungEntry>
     {
+        public IWalterDbService DbService { get; }
+        public SaverwalterContext ctx => DbService.ctx;
+
+        public WohnungDbService(IWalterDbService dbService)
+        {
+            DbService = dbService;
+        }
+
         private void SetValues(Wohnung entity, WohnungEntry entry)
         {
             if (entity.WohnungId != entry.Id)
@@ -24,13 +33,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.BesitzerId = entry.Besitzer is SelectionEntry b ? new Guid(b.Id!) : Guid.Empty;
         }
 
-        public WohnungDbService(IWalterDbService dbService) : base(dbService)
-        {
-        }
-
         public IActionResult Get(int id)
         {
-            var entity = Ref.ctx.Wohnungen.Find(id);
+            var entity = DbService.ctx.Wohnungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -38,7 +43,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new WohnungEntry(entity, Ref);
+                var entry = new WohnungEntry(entity, DbService);
                 return new OkObjectResult(entry);
             }
             catch
@@ -49,15 +54,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = Ref.ctx.Wohnungen.Find(id);
+            var entity = DbService.ctx.Wohnungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            Ref.ctx.Wohnungen.Remove(entity);
+            DbService.ctx.Wohnungen.Remove(entity);
+            DbService.SaveWalter();
 
-            return Save(null!);
+            return new OkResult();
         }
 
         public IActionResult Post(WohnungEntry entry)
@@ -71,8 +77,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                Ref.ctx.Wohnungen.Add(entity);
-                return Save(entry);
+                DbService.ctx.Wohnungen.Add(entity);
+                DbService.SaveWalter();
+
+                return new OkObjectResult(new WohnungEntry(entity, DbService));
             }
             catch
             {
@@ -83,7 +91,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Put(int id, WohnungEntry entry)
         {
-            var entity = Ref.ctx.Wohnungen.Find(id);
+            var entity = DbService.ctx.Wohnungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -92,8 +100,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                Ref.ctx.Wohnungen.Update(entity);
-                return Save(entry);
+                DbService.ctx.Wohnungen.Update(entity);
+                DbService.SaveWalter();
+
+                return new OkObjectResult(new WohnungEntry(entity, DbService));
             }
             catch
             {

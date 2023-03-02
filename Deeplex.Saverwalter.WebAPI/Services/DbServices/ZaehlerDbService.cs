@@ -1,12 +1,21 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class ZaehlerDbService : BaseDbService<ZaehlerEntry>, IControllerService<ZaehlerEntry>
+    public class ZaehlerDbService : IControllerService<ZaehlerEntry>
     {
+        public IWalterDbService DbService { get; }
+        public SaverwalterContext ctx => DbService.ctx;
+
+        public ZaehlerDbService(IWalterDbService dbService)
+        {
+            DbService = dbService;
+        }
+
         private void SetValues(Zaehler entity, ZaehlerEntry entry)
         {
             if (entity.ZaehlerId != entry.Id)
@@ -18,13 +27,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Notiz = entry.Notiz;
         }
 
-        public ZaehlerDbService(IWalterDbService dbService) : base(dbService)
-        {
-        }
 
         public IActionResult Get(int id)
         {
-            var entity = Ref.ctx.ZaehlerSet.Find(id);
+            var entity = DbService.ctx.ZaehlerSet.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -43,15 +49,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = Ref.ctx.ZaehlerSet.Find(id);
+            var entity = DbService.ctx.ZaehlerSet.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            Ref.ctx.ZaehlerSet.Remove(entity);
+            DbService.ctx.ZaehlerSet.Remove(entity);
+            DbService.SaveWalter();
 
-            return Save(null!);
+            return new OkResult();
         }
 
         public IActionResult Post(ZaehlerEntry entry)
@@ -65,8 +72,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                Ref.ctx.ZaehlerSet.Add(entity);
-                return Save(entry);
+                DbService.ctx.ZaehlerSet.Add(entity);
+                DbService.SaveWalter();
+
+                return new OkObjectResult(new ZaehlerEntry(entity));
             }
             catch
             {
@@ -77,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Put(int id, ZaehlerEntry entry)
         {
-            var entity = Ref.ctx.ZaehlerSet.Find(id);
+            var entity = DbService.ctx.ZaehlerSet.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -86,8 +95,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                Ref.ctx.ZaehlerSet.Update(entity);
-                return Save(entry);
+                DbService.ctx.ZaehlerSet.Update(entity);
+                DbService.SaveWalter();
+
+                return new OkObjectResult(new ZaehlerEntry(entity));
             }
             catch
             {

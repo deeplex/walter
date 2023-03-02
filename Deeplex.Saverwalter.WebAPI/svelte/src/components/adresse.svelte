@@ -4,7 +4,7 @@
 	import type { AdresseEntry } from '$types';
 	import { WalterTextInput } from '$components';
 
-	export let adresse: Promise<AdresseEntry>;
+	export let adresse: Promise<AdresseEntry> | undefined = undefined;
 
 	// TODO Statt dass der Inhalt der Adresse sich ändert, muss sich die Adresse ändern.
 </script>

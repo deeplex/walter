@@ -1,5 +1,5 @@
-import { afterNavigate } from '$app/navigation';
-import { base } from '$app/paths';
+import { goto } from '$app/navigation';
+
 import { addToast, openModal } from '$store';
 
 export function convertDate(text: string | undefined): string | undefined {
@@ -39,20 +39,42 @@ export const walter_get = (url: string) => fetch(
     url, { method: 'GET', headers }
 ).then(e => e.json());
 
-// ================================ POST / PUT ================================
+// =================================== PUT ===================================
 
 export const walter_put = (url: string, body: any) => fetch(
     url,
     { method: 'PUT', headers, body: JSON.stringify(body) }
-).then(finishPutPost);
+).then(finishPut);
 
-async function finishPutPost(e: Response) {
+async function finishPut(e: Response) {
     const ok = e.status === 200;
     const kind = ok ? "success" : "error";
     const title = ok ? "Speichern Erfolgreich" : "Fehler";
     const j = await e.json();
 
     const subtitle = "TODO parse response body." // JSON.stringify(j);
+
+    addToast({ title, kind, subtitle });
+    return j;
+}
+
+// =================================== POST ====================================
+
+export const walter_post = (url: string, body: any) => fetch(
+    url,
+    { method: 'POST', headers, body: JSON.stringify(body) }
+    // TODO Navigate to target position.
+).then(finishPost);
+
+async function finishPost(e: Response) {
+    const ok = e.status === 200;
+    const kind = ok ? "success" : "error";
+    const title = ok ? "Speichern Erfolgreich" : "Fehler";
+    const j = await e.json();
+
+    const subtitle = "TODO parse response body." // JSON.stringify(j);
+
+    goto(`${e.url.replace("api/", "")}/${j.id}`);
 
     addToast({ title, kind, subtitle });
     return j;
@@ -80,20 +102,16 @@ function really_delete_walter(url: string) {
     ).then(finishDelete);
 }
 
-async function finishDelete(e: Response) {
+function finishDelete(e: Response) {
     const ok = e.status === 200;
     const kind = ok ? "success" : "error";
     const title = ok ? "Löschen Erfolgreich" : "Fehler";
-    const j = await e.json();
+    // const j = await e.json();
 
     const subtitle = "TODO parse response body." // JSON.stringify(j);
 
-    let previousPage: string = base;
-
-    afterNavigate(({ from }) => {
-        previousPage = from?.url.pathname || previousPage
-    })
+    goto("/")
 
     addToast({ title, kind, subtitle });
-    return j;
+    return e;
 }

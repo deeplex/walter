@@ -1,21 +1,18 @@
 <script lang="ts">
-	import { Accordion, Row } from 'carbon-components-svelte';
+	import { Accordion } from 'carbon-components-svelte';
 
 	import type { PageData } from './$types';
 
 	import {
-		Adresse,
-		WalterComboBox,
 		WalterGrid,
-		WalterTextInput,
 		Wohnungen,
 		Vertraege,
 		Zaehler,
 		Erhaltungsaufwendungen,
 		Betriebskostenrechnungen,
 		Umlagen,
-		WalterNumberInput,
-		WalterHeaderDetail
+		WalterHeaderDetail,
+		WalterWohnung
 	} from '$components';
 	import type { WohnungEntry } from '$types';
 	import { walter_get } from '$services/utils';
@@ -33,46 +30,7 @@
 <WalterHeaderDetail {a} {url} {entry} {title} />
 
 <WalterGrid>
-	<Row>
-		<WalterComboBox
-			bind:binding={entry.besitzer}
-			titleText="Besitzer"
-			api={`/api/selection/kontakte`}
-			value={a.then((x) => x.besitzer)}
-		/>
-	</Row>
-	<!-- TODO -->
-	<Adresse adresse={a.then((x) => x.adresse)} />
-	<Row>
-		<WalterTextInput
-			bind:binding={entry.bezeichnung}
-			labelText="Bezeichnung"
-			value={a.then((x) => x.bezeichnung)}
-		/>
-		<WalterNumberInput
-			bind:binding={entry.wohnflaeche}
-			label="Wohnfläche"
-			value={a.then((x) => x.wohnflaeche)}
-		/>
-		<WalterNumberInput
-			bind:binding={entry.nutzflaeche}
-			label="Nutzfläche"
-			value={a.then((x) => x.nutzflaeche)}
-		/>
-		<WalterNumberInput
-			hideSteppers={false}
-			bind:binding={entry.einheiten}
-			label="Einheiten"
-			value={a.then((x) => x.einheiten)}
-		/>
-	</Row>
-	<Row>
-		<WalterTextInput
-			bind:binding={entry.notiz}
-			labelText="Notiz"
-			value={a.then((x) => x.notiz)}
-		/>
-	</Row>
+	<WalterWohnung {a} {entry} />
 
 	<Accordion>
 		<Wohnungen title="Haus" rows={a.then((x) => x.haus)} />

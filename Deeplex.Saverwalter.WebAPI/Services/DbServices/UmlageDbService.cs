@@ -1,12 +1,21 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.NatuerlichePersonController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class UmlageDbService : BaseDbService<UmlageEntry>, IControllerService<UmlageEntry>
+    public class UmlageDbService : IControllerService<UmlageEntry>
     {
+        public IWalterDbService DbService { get; }
+        public SaverwalterContext ctx => DbService.ctx;
+
+        public UmlageDbService(IWalterDbService dbService)
+        {
+            DbService = dbService;
+        }
+
         private void SetValues(Umlage entity, UmlageEntry entry)
         {
             if (entity.UmlageId != entry.Id)
@@ -22,13 +31,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Notiz = entry.Notiz;
         }
 
-        public UmlageDbService(IWalterDbService dbService) : base(dbService)
-        {
-        }
 
         public IActionResult Get(int id)
         {
-            var entity = Ref.ctx.Umlagen.Find(id);
+            var entity = DbService.ctx.Umlagen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -36,7 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new UmlageEntry(entity, Ref);
+                var entry = new UmlageEntry(entity, DbService);
                 return new OkObjectResult(entry);
             }
             catch
@@ -47,15 +53,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = Ref.ctx.Umlagen.Find(id);
+            var entity = DbService.ctx.Umlagen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            Ref.ctx.Umlagen.Remove(entity);
+            DbService.ctx.Umlagen.Remove(entity);
+            DbService.SaveWalter();
 
-            return Save(null!);
+            return new OkResult();
         }
 
         public IActionResult Post(UmlageEntry entry)
@@ -69,8 +76,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                Ref.ctx.Umlagen.Add(entity);
-                return Save(entry);
+                DbService.ctx.Umlagen.Add(entity);
+                DbService.SaveWalter();
+
+                return new OkObjectResult(new UmlageEntry(entity, DbService));
             }
             catch
             {
@@ -81,7 +90,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Put(int id, UmlageEntry entry)
         {
-            var entity = Ref.ctx.Umlagen.Find(id);
+            var entity = DbService.ctx.Umlagen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -90,8 +99,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                Ref.ctx.Umlagen.Update(entity);
-                return Save(entry);
+                DbService.ctx.Umlagen.Update(entity);
+                DbService.SaveWalter();
+
+                return new OkObjectResult(new UmlageEntry(entity, DbService));
             }
             catch
             {

@@ -1,12 +1,21 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class ErhaltungsaufwendungDbService : BaseDbService<ErhaltungsaufwendungEntry>, IControllerService<ErhaltungsaufwendungEntry>
+    public class ErhaltungsaufwendungDbService : IControllerService<ErhaltungsaufwendungEntry>
     {
+        public IWalterDbService DbService { get; }
+        public SaverwalterContext ctx => DbService.ctx;
+
+        public ErhaltungsaufwendungDbService(IWalterDbService dbService)
+        {
+            DbService = dbService;
+        }
+
         private void SetValues(Erhaltungsaufwendung entity, ErhaltungsaufwendungEntry entry)
         {
             if (entity.ErhaltungsaufwendungId != entry.Id)
@@ -19,16 +28,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Notiz = entry.Notiz;
             entity.Bezeichnung = entry.Bezeichnung ?? "";
             entity.AusstellerId = new Guid(entry.Aussteller!.Id!);
-            entity.Wohnung = Ref.ctx.Wohnungen.Find(int.Parse(entry.Wohnung!.Id!));
-        }
-
-        public ErhaltungsaufwendungDbService(IWalterDbService dbService) : base(dbService)
-        {
+            entity.Wohnung = DbService.ctx.Wohnungen.Find(int.Parse(entry.Wohnung!.Id!));
         }
 
         public IActionResult Get(int id)
         {
-            var entity = Ref.ctx.Erhaltungsaufwendungen.Find(id);
+            var entity = DbService.ctx.Erhaltungsaufwendungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -36,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new ErhaltungsaufwendungEntry(entity, Ref);
+                var entry = new ErhaltungsaufwendungEntry(entity, DbService);
                 return new OkObjectResult(entry);
             }
             catch
@@ -47,15 +52,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = Ref.ctx.Erhaltungsaufwendungen.Find(id);
+            var entity = DbService.ctx.Erhaltungsaufwendungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            Ref.ctx.Erhaltungsaufwendungen.Remove(entity);
+            DbService.ctx.Erhaltungsaufwendungen.Remove(entity);
+            DbService.SaveWalter();
 
-            return Save(null!);
+            return new OkResult();
         }
 
         public IActionResult Post(ErhaltungsaufwendungEntry entry)
@@ -69,8 +75,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                Ref.ctx.Erhaltungsaufwendungen.Add(entity);
-                return Save(entry);
+                DbService.ctx.Erhaltungsaufwendungen.Add(entity);
+                DbService.SaveWalter();
+
+                return new OkObjectResult(new ErhaltungsaufwendungEntry(entity, DbService));
             }
             catch
             {
@@ -81,7 +89,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Put(int id, ErhaltungsaufwendungEntry entry)
         {
-            var entity = Ref.ctx.Erhaltungsaufwendungen.Find(id);
+            var entity = DbService.ctx.Erhaltungsaufwendungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -90,8 +98,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 SetValues(entity, entry);
-                Ref.ctx.Erhaltungsaufwendungen.Update(entity);
-                return Save(entry);
+                DbService.ctx.Erhaltungsaufwendungen.Update(entity);
+                DbService.SaveWalter();
+
+                return new OkObjectResult(new ErhaltungsaufwendungEntry(entity, DbService));
             }
             catch
             {

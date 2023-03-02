@@ -78,7 +78,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpGet]
         public IActionResult Get() => new OkObjectResult(DbService.ctx.Vertraege
             .ToList()
-            .Select(e => new VertragEntryBase(e, DbService.Ref))
+            .Select(e => new VertragEntryBase(e, DbService.DbService))
             .ToList());
         [HttpPost]
         public IActionResult Post([FromBody] VertragEntry entry) => DbService.Post(entry);

@@ -1,17 +1,11 @@
 <script lang="ts">
-	import { Accordion, Row } from 'carbon-components-svelte';
+	import { Accordion } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 
-	import {
-		WalterDatePicker,
-		WalterGrid,
-		WalterTextInput,
-		WalterNumberInput,
-		Wohnungen,
-		WalterHeaderDetail
-	} from '$components';
+	import { WalterGrid, Wohnungen, WalterHeaderDetail } from '$components';
 	import { walter_get } from '$services/utils';
 	import type { BetriebskostenrechnungEntry } from '$types';
+	import WalterBetriebskostenrechnung from '../../../components/details/WalterBetriebskostenrechnung.svelte';
 
 	export let data: PageData;
 	const url = `/api/betriebskostenrechnungen/${data.id}`;
@@ -33,33 +27,7 @@
 <WalterHeaderDetail {a} {url} {entry} {title} />
 
 <WalterGrid>
-	<Row>
-		<!-- TODO bind:binding={entry.umlage?.typ} -->
-		<WalterTextInput labelText="Typ" value={a.then((x) => x.umlage.text)} />
-		<!-- TODO bind:binding={entry.wohnungenBezeichnung} -->
-		<WalterTextInput
-			labelText="Wohnungen"
-			value={a.then((x) => x.wohnungenBezeichnung)}
-		/>
-	</Row>
-	<Row>
-		<WalterNumberInput
-			bind:binding={entry.betreffendesJahr}
-			hideSteppers={false}
-			label="Betreffendes Jahr"
-			value={a.then((x) => x.betreffendesJahr)}
-		/>
-		<WalterNumberInput
-			bind:binding={entry.betrag}
-			label="Betrag"
-			value={a.then((x) => x.betrag)}
-		/>
-		<WalterDatePicker
-			bind:binding={entry.datum}
-			labelText="Datum"
-			value={a.then((x) => x.datum)}
-		/>
-	</Row>
+	<WalterBetriebskostenrechnung {a} {entry} />
 
 	<Accordion>
 		<Wohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />

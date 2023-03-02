@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { TextInput, TextInputSkeleton } from 'carbon-components-svelte';
 
-	export let value: Promise<string>;
+	export let value: Promise<string> | undefined = undefined;
 	export let binding: string | undefined = undefined;
 	export let labelText: string | undefined;
 	export let readonly: boolean = false;

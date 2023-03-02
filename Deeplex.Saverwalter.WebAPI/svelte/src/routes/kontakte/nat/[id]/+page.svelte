@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Accordion, HeaderGlobalAction, Row } from 'carbon-components-svelte';
+	import { Accordion, Row } from 'carbon-components-svelte';
 
 	import type { PageData } from './$types';
 

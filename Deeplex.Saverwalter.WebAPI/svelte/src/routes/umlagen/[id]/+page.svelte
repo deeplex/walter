@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Accordion, Row } from 'carbon-components-svelte';
+	import { Accordion } from 'carbon-components-svelte';
 
 	import type { PageData } from './$types';
 
@@ -7,8 +7,8 @@
 		Betriebskostenrechnungen,
 		WalterHeaderDetail,
 		WalterGrid,
-		WalterTextInput,
-		Wohnungen
+		Wohnungen,
+		WalterUmlage
 	} from '$components';
 	import { walter_get } from '$services/utils';
 	import type { UmlageEntry } from '$types';
@@ -26,21 +26,7 @@
 <WalterHeaderDetail {a} {url} {entry} {title} />
 
 <WalterGrid>
-	<Row>
-		<!-- TODO: THESE ARE NO TEXT INPUTS, BUT MENUS... PLEASE CHANGE -->
-		<WalterTextInput labelText="Typ" value={a.then((x) => x.typ)} />
-		<WalterTextInput
-			labelText="Wohnungen"
-			value={a.then((x) => x.wohnungenBezeichnung)}
-		/>
-	</Row>
-	<Row>
-		<WalterTextInput
-			labelText="Notiz"
-			bind:binding={entry.notiz}
-			value={a.then((x) => x.notiz)}
-		/>
-	</Row>
+	<WalterUmlage {a} {entry} />
 
 	<Accordion>
 		<Wohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />

@@ -22,6 +22,7 @@
 		bind:open={modalControl.open}
 		secondaryButtonText="Abbrechen"
 		on:click:button--secondary={() => (modalControl.open = false)}
+		on:click:button--primary={() => (modalControl.open = false)}
 		on:open
 		on:close
 		on:submit={modalControl.submit}

@@ -8,7 +8,7 @@
 	import { convertDate } from '$services/utils';
 
 	export let labelText: string;
-	export let value: Promise<string | undefined> | undefined;
+	export let value: Promise<string | undefined> | undefined = undefined;
 	export let binding: string | undefined = undefined;
 	export let placeholder: string | undefined = undefined;
 

@@ -63,7 +63,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpGet]
         public IActionResult Get() => new OkObjectResult(DbService.ctx.Erhaltungsaufwendungen
             .ToList()
-            .Select(e => new ErhaltungsaufwendungEntryBase(e, DbService.Ref))
+            .Select(e => new ErhaltungsaufwendungEntryBase(e, DbService.DbService))
             .ToList());
         [HttpPost]
         public IActionResult Post([FromBody] ErhaltungsaufwendungEntry entry) => DbService.Post(entry);
