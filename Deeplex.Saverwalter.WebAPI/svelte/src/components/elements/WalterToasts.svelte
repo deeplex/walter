@@ -5,8 +5,8 @@
 	import { removeToast, toasts } from '$WalterStore';
 	import type { WalterToast } from '$WalterTypes';
 
-	function close(e: CustomEvent<any>) {
-		removeToast(e.detail);
+	function close(index: number) {
+		removeToast(index);
 	}
 
 	let toaster: Partial<WalterToast>[] = [];
@@ -16,10 +16,10 @@
 	});
 </script>
 
-{#each toaster as toast}
+{#each toaster as toast, i}
 	<span in:fly={{ y: -300 }}>
 		<ToastNotification
-			on:close={close}
+			onclose={() => close(i)}
 			title={toast.title}
 			kind={toast.kind}
 			subtitle={toast.subtitle}

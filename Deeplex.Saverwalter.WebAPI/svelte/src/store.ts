@@ -8,7 +8,7 @@ export const toasts: Writable<Partial<WalterToast>[]> = writable([]);
 export function removeToast(toast: Partial<WalterToast>) {
     toasts.update(e => {
         const index = e.findIndex((f) => f === toast);
-        e.slice(index, 1);
+        e.splice(index, 1);
         return e;
     });
     return toasts;
