@@ -16,8 +16,7 @@
 	<!-- TODO -->
 	<WalterTextInput labelText="Typ" value={a?.then((x) => x.typ)} />
 </Row>
-<!-- TODO -->
-<WalterAdresse adresse={a?.then((x) => x.adresse)} />
+<WalterAdresse bind:entry={entry.adresse} adresse={a?.then((x) => x.adresse)} />
 <Row>
 	<WalterTextInput
 		bind:binding={entry.notiz}

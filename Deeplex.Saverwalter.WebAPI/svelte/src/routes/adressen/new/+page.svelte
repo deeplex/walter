@@ -2,8 +2,7 @@
 	import {
 		WalterAdresse,
 		WalterGrid,
-		WalterHeaderNew,
-		WalterWohnungen
+		WalterHeaderNew
 	} from '$WalterComponents';
 	import type { WalterAdresseEntry } from '$WalterTypes';
 

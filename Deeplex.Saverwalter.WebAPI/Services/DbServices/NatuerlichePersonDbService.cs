@@ -1,7 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
+using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.NatuerlichePersonController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
@@ -30,6 +31,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Notiz = entry.Notiz;
             entity.Telefon = entry.Telefon;
             entity.Mobil = entry.Mobil;
+            if (entry.Adresse is AdresseEntry a)
+            {
+                entity.Adresse = GetAdresse(a, ctx);
+            }
         }
 
         public IActionResult Get(int id)

@@ -1,8 +1,9 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
@@ -31,6 +32,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Notiz = entry.Notiz;
             // TODO guid may be null?
             entity.BesitzerId = entry.Besitzer is SelectionEntry b ? new Guid(b.Id!) : Guid.Empty;
+            if (entry.Adresse is AdresseEntry a)
+            {
+                entity.Adresse = GetAdresse(a, ctx);
+            }
         }
 
         public IActionResult Get(int id)

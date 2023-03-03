@@ -6,6 +6,7 @@
 
 	export let adresse: Promise<WalterAdresseEntry> | undefined = undefined;
 	export let entry: Partial<WalterAdresseEntry> = {};
+	adresse?.then((e) => Object.assign(entry, e));
 </script>
 
 <Row>

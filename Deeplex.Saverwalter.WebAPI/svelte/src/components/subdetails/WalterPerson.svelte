@@ -8,7 +8,10 @@
 	export let binding: Partial<WalterPersonEntry>;
 </script>
 
-<WalterAdresse adresse={person?.then((e) => e.adresse)} />
+<WalterAdresse
+	bind:entry={binding.adresse}
+	adresse={person?.then((e) => e.adresse)}
+/>
 <Row>
 	<WalterTextInput
 		bind:binding={binding.email}

@@ -1,7 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
+using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
@@ -23,7 +24,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new Exception();
             }
 
-            // TODO
+            entity.Kennnummer = entry.Kennnummer!;
+            entity.Typ = entry.Typ;
+            entity.Allgemeinzaehler = DbService.ctx.ZaehlerSet.Find(int.Parse(entry.AllgemeinZaehler!.Id!));
+            entity.Wohnung = DbService.ctx.Wohnungen.Find(int.Parse(entry.Wohnung!.Id!));
+            if (entry.Adresse is AdresseEntry a)
+            {
+                entity.Adresse = GetAdresse(a, ctx);
+            }
             entity.Notiz = entry.Notiz;
         }
 

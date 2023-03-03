@@ -15,7 +15,6 @@
 
 	const a: Promise<WalterAdresseEntry> = walter_get(url);
 	const entry: Partial<WalterAdresseEntry> = {};
-	a.then((e) => Object.assign(entry, e));
 </script>
 
 <WalterHeaderDetail {a} {url} {entry} title={a.then((x) => x.anschrift)} />
