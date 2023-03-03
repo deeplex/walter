@@ -15,7 +15,7 @@
 				"./src/components/index.ts",
 			],
 			"$WalterStore": [
-				"./src/store"
+				"./src/store.ts"
 			],
 			"$WalterServices/*": [
 				"./src/services/*"

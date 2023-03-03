@@ -14,8 +14,7 @@ const config = {
 			$WalterComponents: resolve("./src/components/index"),
 			$WalterStore: resolve("./src/store"),
 			$WalterServices: resolve("./src/services"),
-			$WalterTypes: resolve("./src/types/index"),
-			$WalterRoutes: resolve("./src/routes"),
+			$WalterTypes: resolve("./src/types/index")
 		}
 	}
 };

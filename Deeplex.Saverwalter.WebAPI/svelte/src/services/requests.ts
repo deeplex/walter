@@ -46,7 +46,9 @@ async function finishPost(e: Response) {
 
     const subtitle = "TODO parse response body." // JSON.stringify(j);
 
-    goto(`${e.url.replace("api/", "")}/${j.id}`);
+    if (j.id) {
+        goto(`${e.url.replace("api/", "")}/${j.id}`);
+    }
 
     addToast({ title, kind, subtitle });
     return j;
