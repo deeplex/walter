@@ -1,6 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
-using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,18 +11,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         {
             public string? Id { get; set; }
             public string? Text { get; set; }
+            public string? Filter { get; set; }
 
             public SelectionEntry() { }
-            public SelectionEntry(Guid id, string text)
+            public SelectionEntry(Guid id, string text, string? filter = null)
             {
                 Id = id.ToString();
                 Text = text;
+                Filter = filter;
             }
 
-            public SelectionEntry(int id, string text)
+            public SelectionEntry(int id, string text, string? filter = null)
             {
                 Id = id.ToString();
                 Text = text;
+                Filter = filter;
             }
         }
 
@@ -37,26 +39,88 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         [HttpGet]
-        [Route("api/selection/umlage")]
+        [Route("api/selection/umlagen")]
         public IEnumerable<SelectionEntry> GetUmlagen()
         {
-            return DbService.ctx.Umlagen.Select(e => new SelectionEntry(e.UmlageId, e.Wohnungen.GetWohnungenBezeichnung())).ToList();
+            return DbService.ctx.Umlagen.ToList().Select(e =>
+                new SelectionEntry(
+                    e.UmlageId,
+                    e.Wohnungen.ToList().GetWohnungenBezeichnung(),
+                    ((int)e.Typ).ToString()))
+                .ToList();
         }
 
         [HttpGet]
         [Route("api/selection/kontakte")]
         public IEnumerable<SelectionEntry> GetKontakte()
         {
-            var nat = DbService.ctx.NatuerlichePersonen.Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung)).ToList();
-            var jur = DbService.ctx.JuristischePersonen.Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung)).ToList();
+            var nat = DbService.ctx.NatuerlichePersonen.Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung, null)).ToList();
+            var jur = DbService.ctx.JuristischePersonen.Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung, null)).ToList();
             return nat.Concat(jur);
         }
 
         [HttpGet]
         [Route("api/selection/wohnungen")]
-        public IEnumerable<SelectionEntry> GetWohnungen()
+        public IActionResult GetWohnungen()
         {
-            return DbService.ctx.Wohnungen.Select(e => new SelectionEntry(e.WohnungId, e.Adresse.Anschrift + " - " + e.Bezeichnung)).ToList();
+            return new OkObjectResult(DbService.ctx.Wohnungen
+                .Select(e => new SelectionEntry(e.WohnungId, e.Adresse.Anschrift + " - " + e.Bezeichnung, null))
+                .ToList());
+        }
+
+        [HttpGet]
+        [Route("api/selection/betriebskostentypen")]
+        public IActionResult GetBetriebskostentypen()
+        {
+            return new OkObjectResult(Enum.GetValues(typeof(Betriebskostentyp))
+                .Cast<Betriebskostentyp>()
+                .ToList()
+                .Select(e => new SelectionEntry((int)e, e.ToDescriptionString()))
+                .ToList());
+        }
+
+        [HttpGet]
+        [Route("api/selection/umlageschluessel")]
+        public IActionResult GetUmlageschluessel()
+        {
+            return new OkObjectResult(Enum.GetValues(typeof(Umlageschluessel))
+                .Cast<Umlageschluessel>()
+                .ToList()
+                .Select(t => new SelectionEntry((int)t, t.ToDescriptionString()))
+                .ToList());
+        }
+
+        [HttpGet]
+        [Route("api/selection/hkvo_p9a2")]
+        public IActionResult GetHKVO_P9A2()
+        {
+            return new OkObjectResult(Enum.GetValues(typeof(HKVO_P9A2))
+                .Cast<HKVO_P9A2>()
+                .ToList()
+                .Select(e => new SelectionEntry((int)e, e.ToString()))
+                .ToList());
+        }
+
+        [HttpGet]
+        [Route("api/selection/zaehlertypen")]
+        public IActionResult GetZaehlertypen()
+        {
+            return new OkObjectResult(Enum.GetValues(typeof(Zaehlertyp))
+                .Cast<Zaehlertyp>()
+                .ToList()
+                .Select(e => new SelectionEntry((int)e, e.ToString()))
+                .ToList());
+        }
+
+        [HttpGet]
+        [Route("api/selection/anreden")]
+        public IActionResult GetAnreden()
+        {
+            return new OkObjectResult(Enum.GetValues(typeof(Anrede))
+                .Cast<Anrede>()
+                .ToList()
+                .Select(e => new SelectionEntry((int)e, e.ToString()))
+                .ToList());
         }
     }
 }

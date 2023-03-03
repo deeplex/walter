@@ -14,7 +14,7 @@
 
 	const a: Promise<WalterSelectionEntry[]> = walter_get(api);
 
-	function shouldFilterItem(item: ComboBoxItem, value: string) {
+	function shouldFilterItem(item: WalterSelectionEntry, value: string) {
 		if (!value) return true;
 		return item.text.toLowerCase().includes(value.toLowerCase());
 	}

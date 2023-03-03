@@ -1,4 +1,4 @@
-import type { WalterAnhangEntry, WalterBetriebskostenrechnungEntry, WalterWohnungEntry } from "$WalterTypes";
+import type { WalterAnhangEntry, WalterBetriebskostenrechnungEntry, WalterSelectionEntry, WalterWohnungEntry } from "$WalterTypes";
 
 export type WalterUmlageEntry = {
     id: number;
@@ -7,10 +7,8 @@ export type WalterUmlageEntry = {
     wohnungenBezeichnung: string;
     // TODO => SelectionEntry
     zaehler: string;
-    // TODO => SelectionEntry
-    typ: string;
-    // TODO => SelectionEntry
-    schluessel: string;
+    typ: WalterSelectionEntry;
+    schluessel: WalterSelectionEntry;
 
     betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[];
     wohnungen: WalterWohnungEntry[];

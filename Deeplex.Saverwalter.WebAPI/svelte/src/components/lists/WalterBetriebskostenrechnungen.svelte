@@ -6,8 +6,8 @@
 	import type { WalterBetriebskostenrechnungEntry } from '$WalterTypes';
 
 	const headers = [
-		{ key: 'typ', value: 'Typ' },
-		{ key: 'wohnungenBezeichnung', value: 'Wohnungen' },
+		{ key: 'typ.text', value: 'Typ' },
+		{ key: 'umlage.text', value: 'Wohnungen' },
 		{ key: 'betreffendesJahr', value: 'Betreffendes Jahr' },
 		{ key: 'betrag', value: 'Betrag' },
 		{ key: 'datum', value: 'Datum' }

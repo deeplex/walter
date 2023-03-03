@@ -4,23 +4,91 @@
 		WalterNumberInput,
 		WalterTextInput
 	} from '$WalterComponents';
-	import { Row } from 'carbon-components-svelte';
-	import type { WalterBetriebskostenrechnungEntry } from '$WalterTypes';
+	import { ComboBox, Row, TextInputSkeleton } from 'carbon-components-svelte';
+	import type {
+		WalterBetriebskostenrechnungEntry,
+		WalterSelectionEntry
+	} from '$WalterTypes';
+	import { walter_get } from '$WalterServices/requests';
+	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
+
+	type Selection = { selectedId: any; selectedItem: ComboBoxItem };
 
 	export let a: Promise<WalterBetriebskostenrechnungEntry> | undefined =
 		undefined;
 	export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
+
+	const betriebskostentypen: Promise<WalterSelectionEntry[]> = walter_get(
+		'/api/selection/betriebskostentypen'
+	);
+	const umlagePromise: Promise<WalterSelectionEntry[]> = walter_get(
+		'/api/selection/umlagen'
+	);
+	let umlagen: WalterSelectionEntry[];
+	let umlageEntries: WalterSelectionEntry[] = [];
+	umlagePromise.then((x) => {
+		umlagen = x;
+		updateUmlageEntries(entry.typ?.id);
+	});
+
+	function updateUmlageEntries(id: string | number | undefined) {
+		umlageEntries = umlagen.filter((u) => u.filter === id);
+	}
+
+	function shouldFilterItem(item: WalterSelectionEntry, value: string) {
+		if (!value) return true;
+		return item.text.toLowerCase().includes(value.toLowerCase());
+	}
+
+	function selectTyp(e: CustomEvent<Selection>) {
+		updateUmlageEntries(e.detail.selectedItem.id);
+		entry.umlage = undefined;
+	}
+
+	function selectUmlage(e: CustomEvent<Selection>) {
+		entry.umlage = e.detail.selectedItem;
+		// entry.typ = entry.umlage.filter;
+	}
 </script>
 
 <Row>
-	<!-- TODO bind:binding={entry.umlage?.typ} -->
-	<WalterTextInput labelText="Typ" value={a?.then((x) => x.umlage.text)} />
-	<!-- TODO bind:binding={entry.wohnungenBezeichnung} -->
-	<WalterTextInput
-		labelText="Wohnungen"
-		value={a?.then((x) => x.wohnungenBezeichnung)}
-	/>
+	{#await betriebskostentypen}
+		<TextInputSkeleton />
+	{:then items}
+		{#await a}
+			<TextInputSkeleton />
+		{:then x}
+			<ComboBox
+				selectedId={x?.typ.id}
+				on:select={selectTyp}
+				style="padding-right: 1rem"
+				{items}
+				value={x?.typ.text}
+				titleText="Betriebskostentyp"
+				{shouldFilterItem}
+			/>
+		{/await}
+	{/await}
+
+	{#await umlagePromise}
+		<TextInputSkeleton />
+	{:then}
+		{#await a}
+			<TextInputSkeleton />
+		{:then x}
+			<ComboBox
+				selectedId={entry.umlage?.id}
+				on:select={selectUmlage}
+				style="padding-right: 1rem"
+				bind:items={umlageEntries}
+				value={x?.umlage.text}
+				titleText="Wohnungen"
+				{shouldFilterItem}
+			/>
+		{/await}
+	{/await}
 </Row>
+
 <Row>
 	<WalterNumberInput
 		bind:binding={entry.betreffendesJahr}
@@ -37,5 +105,12 @@
 		bind:binding={entry.datum}
 		labelText="Datum"
 		value={a?.then((x) => x.datum)}
+	/>
+</Row>
+<Row>
+	<WalterTextInput
+		bind:binding={entry.notiz}
+		labelText="Notiz"
+		value={a?.then((x) => x.notiz)}
 	/>
 </Row>

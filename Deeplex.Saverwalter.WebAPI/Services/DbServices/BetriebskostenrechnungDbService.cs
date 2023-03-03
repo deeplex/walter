@@ -1,8 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
-using Deeplex.Saverwalter.WebAPI.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -27,8 +27,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.BetreffendesJahr = entry.BetreffendesJahr;
             entity.Datum = entry.Datum;
             entity.Notiz = entry.Notiz;
-            // TODO
-            //entity.Umlage = Ref.ctx.Umlagen.Find(entry.Umlage.Id);
+            entity.Umlage = DbService.ctx.Umlagen.Find(int.Parse(entry.Umlage!.Id!));
         }
 
         public IActionResult Get(int id)

@@ -24,10 +24,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
 
             entity.Beschreibung = entry.Beschreibung;
-            //TODO
-            //entity.Typ = entry.Typ;
+            entity.Typ = (Betriebskostentyp)int.Parse(entry.Typ!.Id!);
+            entity.Schluessel = (Umlageschluessel)int.Parse(entry.Schluessel!.Id!);
             //entity.Zaehler = entry
-            //entity.Schluessel = entry.Schluessel;
             entity.Notiz = entry.Notiz;
         }
 

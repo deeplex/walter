@@ -19,12 +19,7 @@
 	a.then((e) => Object.assign(entry, e));
 
 	const title = a.then(
-		(x) =>
-			x.betreffendesJahr +
-			' - TODO - ' +
-			x.umlage.text +
-			' - TODO - ' +
-			x.umlage.text
+		(x) => x.typ.text + ' - ' + x.betreffendesJahr + ' - ' + x.umlage.text
 	);
 </script>
 

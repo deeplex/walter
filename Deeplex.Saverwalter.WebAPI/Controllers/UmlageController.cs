@@ -4,6 +4,7 @@ using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
@@ -19,8 +20,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int? Id { get; set; }
             public string? Notiz { get; set; }
             public string? Beschreibung { get; set; }
-            public Umlageschluessel Schluessel { get; set; }
-            public Betriebskostentyp Typ { get; set; }
+            public SelectionEntry? Schluessel { get; set; }
+            public SelectionEntry? Typ { get; set; }
 
             public string? WohnungenBezeichnung { get; set; }
 
@@ -32,8 +33,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 Notiz = Entity.Notiz;
                 Beschreibung = Entity.Beschreibung;
-                Schluessel = Entity.Schluessel;
-                Typ = Entity.Typ;
+                Schluessel = new SelectionEntry((int)Entity.Schluessel, Entity.Schluessel.ToDescriptionString());
+                Typ = new SelectionEntry((int)Entity.Typ, Entity.Typ.ToDescriptionString());
                 WohnungenBezeichnung = Entity.GetWohnungenBezeichnung() ?? "";
             }
         }

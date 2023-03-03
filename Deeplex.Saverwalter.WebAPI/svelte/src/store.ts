@@ -5,9 +5,8 @@ import type { WalterToast } from './types/WalterToast.type';
 
 export const toasts: Writable<Partial<WalterToast>[]> = writable([]);
 
-export function removeToast(toast: Partial<WalterToast>) {
+export function removeToast(index: number) {
     toasts.update(e => {
-        const index = e.findIndex((f) => f === toast);
         e.splice(index, 1);
         return e;
     });

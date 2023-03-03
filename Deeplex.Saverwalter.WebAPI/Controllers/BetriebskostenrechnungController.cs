@@ -22,9 +22,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int BetreffendesJahr { get; set; }
             public DateTime Datum { get; set; }
             public string? Notiz { get; set; }
-            public SelectionEntry Umlage { get; set; } = null!;
-            public string? wohnungenBezeichnung { get; set; }
-            public string? Typ { get; set; }
+            public SelectionEntry? Typ { get; set; }
+            public SelectionEntry? Umlage { get; set; }
 
             protected BetriebskostenrechnungEntryBase() { }
             public BetriebskostenrechnungEntryBase(Betriebskostenrechnung entity)
@@ -36,10 +35,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 BetreffendesJahr = Entity.BetreffendesJahr;
                 Datum = Entity.Datum;
                 Notiz = Entity.Notiz;
-                wohnungenBezeichnung = Entity.Umlage.GetWohnungenBezeichnung();
-                Umlage = new SelectionEntry(entity.Umlage.UmlageId, entity.Umlage.Typ.ToDescriptionString() + " " + entity.Umlage.GetWohnungenBezeichnung());
-                // TODO => SelectionEntry
-                Typ = Entity.Umlage.Typ.ToDescriptionString();
+                Typ = new SelectionEntry((int)Entity.Umlage.Typ, Entity.Umlage.Typ.ToDescriptionString());
+                Umlage = new SelectionEntry(
+                    entity.Umlage.UmlageId,
+                    entity.Umlage.GetWohnungenBezeichnung(),
+                    ((int)entity.Umlage.Typ).ToString());
             }
         }
 

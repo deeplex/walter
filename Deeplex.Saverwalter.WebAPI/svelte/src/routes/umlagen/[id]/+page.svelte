@@ -20,7 +20,7 @@
 	const entry: Partial<WalterUmlageEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 
-	const title = a.then((x) => x.typ + ' - ' + x.wohnungenBezeichnung);
+	const title = a.then((x) => x.typ.text + ' - ' + x.wohnungenBezeichnung);
 </script>
 
 <WalterHeaderDetail {a} {url} {entry} {title} />

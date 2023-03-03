@@ -6,7 +6,7 @@
 	import type { WalterUmlageEntry } from '$WalterTypes';
 
 	const headers = [
-		{ key: 'typ', value: 'Typ' },
+		{ key: 'typ.text', value: 'Typ' },
 		{ key: 'wohnungenBezeichnung', value: 'Wohnungen' }
 	];
 

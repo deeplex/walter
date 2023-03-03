@@ -6,10 +6,11 @@
 		WalterTextInput
 	} from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
-	import type { ErhaltungsaufwendungEntry } from '$WalterTypes';
+	import type { WalterErhaltungsaufwendungEntry } from '$WalterTypes';
 
-	export let a: Promise<ErhaltungsaufwendungEntry> | undefined = undefined;
-	export let entry: Partial<ErhaltungsaufwendungEntry> = {};
+	export let a: Promise<WalterErhaltungsaufwendungEntry> | undefined =
+		undefined;
+	export let entry: Partial<WalterErhaltungsaufwendungEntry> = {};
 </script>
 
 <Row>
