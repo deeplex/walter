@@ -26,6 +26,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry? Ansprechpartner { get; set; }
             public string? Notiz { get; set; }
             public string? MieterAuflistung { get; set; }
+            public IEnumerable<SelectionEntry>? SelectedMieter { get; set; }
 
             public VertragEntryBase() { }
             public VertragEntryBase(Vertrag entity, IWalterDbService dbService)
@@ -38,10 +39,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Wohnung = new (Entity.Wohnung.WohnungId, Entity.Wohnung.Adresse.Anschrift + " - " + Entity.Wohnung.Bezeichnung);
                 Ansprechpartner = Entity.AnsprechpartnerId is Guid id && id != Guid.Empty ? new (id, dbService.ctx.FindPerson(id).Bezeichnung) : null;
                 Notiz = Entity.Notiz;
-                MieterAuflistung = string.Join(", ", dbService.ctx.MieterSet
+
+                var Mieter = dbService.ctx.MieterSet
                     .Where(m => m.Vertrag.VertragId == Entity.VertragId)
-                    .ToList()
+                    .ToList();
+                MieterAuflistung = string.Join(", ", Mieter
                     .Select(a => dbService.ctx.FindPerson(a.PersonId).Bezeichnung));
+                SelectedMieter = Mieter.Select(e => new SelectionEntry(e.PersonId, dbService.ctx.FindPerson(e.PersonId).Bezeichnung));
             }
         }
 

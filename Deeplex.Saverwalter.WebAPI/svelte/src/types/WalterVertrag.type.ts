@@ -6,6 +6,7 @@ export type WalterVertragEntry = {
     ende: string | undefined;
     wohnung: WalterSelectionEntry;
     ansprechpartner: WalterSelectionEntry | undefined;
+    selectedMieter: WalterSelectionEntry[];
     notiz: string;
 
     mieterauflistung: string;

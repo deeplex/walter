@@ -2,13 +2,14 @@
 	import {
 		WalterComboBox,
 		WalterDatePicker,
+		WalterMultiSelect,
 		WalterTextInput
 	} from '$WalterComponents';
-	import type { VertragEntry } from '$WalterTypes';
+	import type { WalterVertragEntry } from '$WalterTypes';
 	import { Row } from 'carbon-components-svelte';
 
-	export let a: Promise<VertragEntry> | undefined = undefined;
-	export let entry: Partial<VertragEntry> = {};
+	export let a: Promise<WalterVertragEntry> | undefined = undefined;
+	export let entry: Partial<WalterVertragEntry> = {};
 
 	// TODO
 	// let vermieter = () =>
@@ -57,6 +58,14 @@
 		api={`/api/selection/kontakte`}
 		value={a?.then((x) => x.ansprechpartner)}
 		titleText="Ansprechpartner"
+	/>
+</Row>
+<Row>
+	<WalterMultiSelect
+		value={a?.then((x) => x.selectedMieter)}
+		bind:binding={entry.selectedMieter}
+		api="/api/selection/kontakte"
+		titleText="Mieter"
 	/>
 </Row>
 <Row>

@@ -30,6 +30,28 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Wohnung = DbService.ctx.Wohnungen.Find(int.Parse(entry.Wohnung!.Id!));
             entity.AnsprechpartnerId = entry.Ansprechpartner is SelectionEntry s ? new Guid(s.Id!) : null;
             entity.Notiz = entry.Notiz;
+
+            if (entry.SelectedMieter is IEnumerable<SelectionEntry> l)
+            {
+                // Get a list of all mieter
+                var mieter = DbService.ctx.MieterSet.Where(m => m.Vertrag.VertragId == entity.VertragId).ToList();
+                // Add missing mieter
+                foreach(var selectedMieter in l)
+                {
+                    if (!mieter.Any(m => m.PersonId.ToString() == selectedMieter.Id))
+                    {
+                        DbService.ctx.MieterSet.Add(new Mieter() { PersonId = new Guid(selectedMieter.Id!), Vertrag = entity });
+                    }
+                }
+                // Remove mieter
+                foreach(var m in mieter)
+                {
+                    if (!l.Any(e => m.PersonId.ToString() == e.Id))
+                    {
+                        DbService.ctx.MieterSet.Remove(m);
+                    }
+                }
+            }
         }
 
         public IActionResult Get(int id)
