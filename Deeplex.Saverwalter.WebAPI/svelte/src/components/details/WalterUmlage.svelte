@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { WalterTextInput } from '$WalterComponents';
+	import { WalterMultiSelect, WalterTextInput } from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
 	import type { WalterUmlageEntry } from '$WalterTypes';
 	import WalterComboBox from '../elements/WalterComboBox.svelte';
@@ -21,11 +21,14 @@
 		titleText="Umlageschlüssel"
 		value={a?.then((x) => x.schluessel)}
 	/>
-	<!-- TODO REPLACE WITH LIST -->
-	<!-- <WalterTextInput
-		labelText="Wohnungen"
-		value={a?.then((x) => x.wohnungenBezeichnung)}
-	/> -->
+</Row>
+<Row>
+	<WalterMultiSelect
+		value={a?.then((x) => x.selectedWohnungen)}
+		bind:binding={entry.selectedWohnungen}
+		api="/api/selection/wohnungen"
+		titleText="Wohnungen"
+	/>
 </Row>
 <Row>
 	<WalterTextInput

@@ -9,8 +9,9 @@ export type WalterUmlageEntry = {
     zaehler: string;
     typ: WalterSelectionEntry;
     schluessel: WalterSelectionEntry;
+    selectedWohnungen: WalterSelectionEntry[];
 
-    betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[];
     wohnungen: WalterWohnungEntry[];
+    betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[];
     anhaenge: WalterAnhangEntry[];
 }

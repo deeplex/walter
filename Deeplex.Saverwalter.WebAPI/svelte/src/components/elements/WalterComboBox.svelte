@@ -5,8 +5,6 @@
 	import { walter_get } from '$WalterServices/requests';
 	import type { WalterSelectionEntry } from '$WalterTypes';
 
-	type Selection = { selectedId: any; selectedItem: ComboBoxItem };
-
 	export let value: Promise<WalterSelectionEntry | undefined> | undefined;
 	export let titleText: string;
 	export let binding: WalterSelectionEntry | undefined = undefined;
@@ -19,7 +17,7 @@
 		return item.text.toLowerCase().includes(value.toLowerCase());
 	}
 
-	function select(e: CustomEvent<Selection>) {
+	function select(e: CustomEvent) {
 		binding = e.detail.selectedItem;
 	}
 </script>

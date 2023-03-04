@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.Model
         public virtual HKVO? HKVO { get; set; }
         public virtual Zaehler? Zaehler { get; set; }
 
-        public virtual List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
+        public virtual List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
         public virtual List<Betriebskostenrechnung> Betriebskostenrechnungen { get; private set; } = new List<Betriebskostenrechnung>();
     }
 

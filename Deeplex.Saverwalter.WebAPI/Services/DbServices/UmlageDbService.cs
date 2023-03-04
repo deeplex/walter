@@ -1,7 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.NatuerlichePersonController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
@@ -26,6 +26,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Beschreibung = entry.Beschreibung;
             entity.Typ = (Betriebskostentyp)int.Parse(entry.Typ!.Id!);
             entity.Schluessel = (Umlageschluessel)int.Parse(entry.Schluessel!.Id!);
+            if (entry.SelectedWohnungen is IEnumerable<SelectionEntry> l)
+            {
+                // Add missing Wohnungen
+                entity.Wohnungen
+                    .AddRange(l.Where(w => !entity.Wohnungen.Exists(e => w.Id == e.WohnungId.ToString()))
+                    .Select(w => ctx.Wohnungen.Find(int.Parse(w.Id!))));
+                // Remove old Wohnungen
+                entity.Wohnungen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.WohnungId.ToString()));
+            }
             //entity.Zaehler = entry
             entity.Notiz = entry.Notiz;
         }

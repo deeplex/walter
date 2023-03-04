@@ -22,7 +22,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Beschreibung { get; set; }
             public SelectionEntry? Schluessel { get; set; }
             public SelectionEntry? Typ { get; set; }
-
+            public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
             public string? WohnungenBezeichnung { get; set; }
 
             protected UmlageEntryBase() { }
@@ -36,6 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Schluessel = new SelectionEntry((int)Entity.Schluessel, Entity.Schluessel.ToDescriptionString());
                 Typ = new SelectionEntry((int)Entity.Typ, Entity.Typ.ToDescriptionString());
                 WohnungenBezeichnung = Entity.GetWohnungenBezeichnung() ?? "";
+                SelectedWohnungen = Entity.Wohnungen.Select(e => new SelectionEntry(e.WohnungId, e.Adresse.Anschrift + " - " + e.Bezeichnung));
             }
         }
 
