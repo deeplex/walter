@@ -9,6 +9,7 @@ export { default as WalterVertrag } from './details/WalterVertrag.svelte';
 export { default as WalterWohnung } from './details/WalterWohnung.svelte';
 export { default as WalterZaehler } from './details/WalterZaehler.svelte';
 
+export { default as WalterMultiSelect } from './elements/WalterMultiSelect.svelte';
 export { default as WalterComboBox } from './elements/WalterComboBox.svelte';
 export { default as WalterDataTable } from './elements/WalterDataTable.svelte';
 export { default as WalterDataWrapper } from './elements/WalterDataWrapper.svelte';
