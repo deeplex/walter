@@ -18,9 +18,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public int Id { get; set; }
             public string? Kennnummer { get; set; }
-            public Zaehlertyp Typ { get; set; }
             public AdresseEntry? Adresse { get; set; }
             public string? Notiz { get; set; }
+            public SelectionEntry? Typ { get; set; }
             public SelectionEntry? Wohnung { get; set; }
             public SelectionEntry? AllgemeinZaehler { get; set; }
 
@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 Id = Entity.ZaehlerId;
                 Kennnummer = Entity.Kennnummer;
-                Typ = Entity.Typ;
+                Typ = new((int)Entity.Typ, Entity.Typ.ToString());
                 Adresse = Entity.Adresse is Adresse a ? new AdresseEntry(a, dbService) : null;
                 Wohnung = Entity.Wohnung is Wohnung w ? new (w.WohnungId, w.Adresse.Anschrift + ", " + w.Bezeichnung) : null;
                 Notiz = Entity.Notiz;
@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class ZaehlerEntry : ZaehlerEntryBase
         {
-            private IWalterDbService DbService { get; }
+            private IWalterDbService? DbService { get; }
             public IEnumerable<ZaehlerEntryBase>? Einzelzaehler => Entity?.EinzelZaehler.ToList().Select(e => new ZaehlerEntryBase(e, DbService));
             public IEnumerable<ZaehlerstandEntryBase>? Staende => Entity?.Staende.ToList().Select(e => new ZaehlerstandEntryBase(e));
             public IEnumerable<AnhangEntryBase>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangEntryBase(e));

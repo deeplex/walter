@@ -4,7 +4,7 @@ export type WalterZaehlerEntry = {
     id: number;
     kennnummer: string;
     adresse: WalterAdresseEntry;
-    typ: string;
+    typ: WalterSelectionEntry | undefined;
     allgemeinZaehler: WalterSelectionEntry | undefined;
     wohnung: WalterSelectionEntry | undefined;
     notiz: string;

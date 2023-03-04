@@ -38,6 +38,10 @@
 				<HeaderGlobalAction on:click={() => click_delete(x)} icon={TrashCan} />
 			{/await}
 		</HeaderNav>
-		<WalterAnhaenge rows={a.then((x) => x.anhaenge)} />
+		{#await a then x}
+			{#if x.anhaenge}
+				<WalterAnhaenge rows={a.then((x) => x.anhaenge)} />
+			{/if}
+		{/await}
 	{/await}
 </WalterHeader>

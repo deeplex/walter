@@ -24,7 +24,7 @@
 	const entry: Partial<WalterWohnungEntry> = {};
 	a.then((e) => Object.assign(entry, e));
 
-	const title = a.then((x) => 'TODO - ' + x.bezeichnung);
+	const title = a.then((x) => x.adresse.anschrift + ' - ' + x.bezeichnung);
 </script>
 
 <WalterHeaderDetail {a} {url} {entry} {title} />

@@ -8,7 +8,6 @@ export type WalterWohnungEntry = {
     nutzflaeche: number;
     einheiten: number;
     notiz: string;
-    anschrift: string;
     besitzer: WalterSelectionEntry | undefined;
 
     haus: WalterWohnungEntry[];

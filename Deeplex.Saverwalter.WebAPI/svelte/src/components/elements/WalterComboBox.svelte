@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { ComboBox, TextInputSkeleton } from 'carbon-components-svelte';
-	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 
 	import { walter_get } from '$WalterServices/requests';
 	import type { WalterSelectionEntry } from '$WalterTypes';

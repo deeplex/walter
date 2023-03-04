@@ -8,7 +8,7 @@
 	const headers = [
 		{ key: 'kennnummer', value: 'Kennnummer' },
 		{ key: 'wohnung.text', value: 'Wohnung' },
-		{ key: 'typ', value: 'Typ' }
+		{ key: 'typ.text', value: 'Typ' }
 	];
 
 	const navigate = (e: CustomEvent<DataTableRow>) =>

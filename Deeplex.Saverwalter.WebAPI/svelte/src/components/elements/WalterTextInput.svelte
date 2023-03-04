@@ -6,10 +6,9 @@
 	export let labelText: string | undefined;
 	export let readonly: boolean = false;
 
-	// TODO any...
-	function change(e: CustomEvent<string | number | null>) {
+	export let change = (e: CustomEvent<string | number | null>) => {
 		binding = '' + e.detail || undefined;
-	}
+	};
 </script>
 
 {#await value}

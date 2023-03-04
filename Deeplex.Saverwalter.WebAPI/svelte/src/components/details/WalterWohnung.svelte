@@ -20,7 +20,6 @@
 		value={a?.then((x) => x.besitzer)}
 	/>
 </Row>
-<!-- TODO -->
 <WalterAdresse bind:entry={entry.adresse} adresse={a?.then((x) => x.adresse)} />
 <Row>
 	<WalterTextInput
