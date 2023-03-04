@@ -12,17 +12,23 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     {
         public class MieteEntryBase
         {
-            private Miete Entity { get; }
+            private Miete? Entity { get; }
 
-            public int Id => Entity.MieteId;
-            public string Betrag => Entity.Betrag.Euro();
-            public string BetreffenderMonat => Entity.BetreffenderMonat.Datum();
-            public string Zahlungsdatum => Entity.Zahlungsdatum.Datum();
-            public string? Notiz => Entity.Notiz;
+            public int? Id { get; set; }
+            public double? Betrag { get; set; }
+            public DateTime? BetreffenderMonat { get; set; }
+            public DateTime? Zahlungsdatum { get; set; }
+            public string? Notiz { get; set; }
 
+            public MieteEntryBase() { }
             public MieteEntryBase(Miete entity)
             {
                 Entity = entity;
+                Id = entity.MieteId;
+                Betrag = entity.Betrag;
+                BetreffenderMonat = entity.BetreffenderMonat;
+                Zahlungsdatum = entity.Zahlungsdatum;
+                Notiz = entity.Notiz;
             }
         }
 

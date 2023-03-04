@@ -54,7 +54,7 @@
 			>
 				{#if cell.value === null || cell.value === undefined || cell.value === ''}
 					---
-				{:else if cell.key === 'beginn' || cell.key === 'ende' || cell.key === 'datum'}
+				{:else if cell.key === 'beginn' || cell.key === 'ende' || cell.key === 'datum' || cell.key === 'betreffenderMonat' || cell.key === 'zahlungsdatum'}
 					{convertDate(cell.value)}
 				{:else if cell.key === 'creationTime'}
 					{convertTime(cell.value)}
