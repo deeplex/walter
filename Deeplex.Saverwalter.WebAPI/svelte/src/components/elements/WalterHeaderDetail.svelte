@@ -30,16 +30,11 @@
 				<HeaderGlobalAction>
 					<Loading style="margin-left: 33%" withOverlay={false} small />
 				</HeaderGlobalAction>
-			{:then}
-				<HeaderGlobalAction on:click={click_save} icon={Save} />
-			{/await}
-		</HeaderNav>
-		<HeaderNav>
-			{#await a}
 				<HeaderGlobalAction>
 					<Loading style="margin-left: 33%" withOverlay={false} small />
 				</HeaderGlobalAction>
 			{:then}
+				<HeaderGlobalAction on:click={click_save} icon={Save} />
 				<HeaderGlobalAction on:click={() => click_delete(x)} icon={TrashCan} />
 			{/await}
 		</HeaderNav>
