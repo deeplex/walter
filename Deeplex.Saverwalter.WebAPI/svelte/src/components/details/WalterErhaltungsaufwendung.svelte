@@ -25,7 +25,11 @@
 		api={'/api/selection/kontakte'}
 		value={a?.then((x) => x.aussteller)}
 	/>
-	<WalterDatePicker value={a?.then((x) => x.datum)} labelText="Datum" />
+	<WalterDatePicker
+		binding={entry.datum}
+		value={a?.then((x) => x.datum)}
+		labelText="Datum"
+	/>
 </Row>
 <Row>
 	<WalterComboBox

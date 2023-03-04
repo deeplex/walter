@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
+using FluentAssertions.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 
@@ -24,7 +25,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             entity.Betrag = entry.Betrag;
             entity.BetreffendesJahr = entry.BetreffendesJahr;
-            entity.Datum = entry.Datum;
+            entity.Datum = (DateTime)entry.Datum!;
             entity.Notiz = entry.Notiz;
             entity.Umlage = DbService.ctx.Umlagen.Find(int.Parse(entry.Umlage!.Id!));
         }

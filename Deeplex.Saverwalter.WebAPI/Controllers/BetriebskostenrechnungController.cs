@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Id { get; set; }
             public double Betrag { get; set; }
             public int BetreffendesJahr { get; set; }
-            public DateTime Datum { get; set; }
+            public DateTime? Datum { get; set; }
             public string? Notiz { get; set; }
             public SelectionEntry? Typ { get; set; }
             public SelectionEntry? Umlage { get; set; }

@@ -5,7 +5,7 @@
 		DatePickerSkeleton
 	} from 'carbon-components-svelte';
 
-	import { convertDate } from '$WalterServices/utils';
+	import { convertDate, toLocaleIsoString } from '$WalterServices/utils';
 
 	export let labelText: string;
 	export let value: Promise<string | undefined> | undefined = undefined;
@@ -13,7 +13,7 @@
 	export let placeholder: string | undefined = undefined;
 
 	function change(e: any) {
-		binding = e.detail?.dateStr;
+		binding = toLocaleIsoString(new Date(e.detail?.selectedDates[0]));
 	}
 </script>
 
