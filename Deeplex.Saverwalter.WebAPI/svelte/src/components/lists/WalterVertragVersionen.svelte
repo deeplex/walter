@@ -8,9 +8,18 @@
 		{ key: 'grundmiete', value: 'Grundmiete' }
 	];
 
+	const addUrl = `/api/vertragversionen/`;
+
 	export let rows: Promise<WalterVertragVersionEntry[]>;
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
+
+	export let entry: Partial<WalterVertragVersionEntry> | undefined = undefined;
 </script>
 
-<WalterDataWrapper {title} {search} {rows} {headers} />
+<WalterDataWrapper {addUrl} addEntry={entry} {title} {search} {rows} {headers}>
+	{#if entry}
+		<p>TODO WALTERVERTRAGVERSION</p>
+		<!-- <WalterVertragVersion {entry} /> -->
+	{/if}
+</WalterDataWrapper>

@@ -30,10 +30,12 @@
 
 	<Accordion>
 		<WalterZaehlerstaende
+			entry={{}}
 			title="Zählerstände"
 			rows={a.then((x) => x.staende)}
 		/>
 		<WalterZaehlerList
+			entry={{}}
 			title="Einzelzähler"
 			rows={a.then((x) => x.einzelzaehler)}
 		/>

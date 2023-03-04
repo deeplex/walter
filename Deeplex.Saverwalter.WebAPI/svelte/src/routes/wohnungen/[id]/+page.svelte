@@ -33,15 +33,25 @@
 	<WalterWohnung {a} {entry} />
 
 	<Accordion>
-		<WalterWohnungen title="Haus" rows={a.then((x) => x.haus)} />
-		<WalterZaehlerList title="Zähler" rows={a.then((x) => x.zaehler)} />
-		<WalterVertraege title="Verträge" rows={a.then((x) => x.vertraege)} />
-		<WalterUmlagen title="Umlagen" rows={a.then((x) => x.umlagen)} />
+		<WalterWohnungen entry={{}} title="Haus" rows={a.then((x) => x.haus)} />
+		<WalterZaehlerList
+			entry={{}}
+			title="Zähler"
+			rows={a.then((x) => x.zaehler)}
+		/>
+		<WalterVertraege
+			entry={{}}
+			title="Verträge"
+			rows={a.then((x) => x.vertraege)}
+		/>
+		<WalterUmlagen entry={{}} title="Umlagen" rows={a.then((x) => x.umlagen)} />
 		<WalterBetriebskostenrechnungen
+			entry={{}}
 			title="Betriebskostenrechnungen"
 			rows={a.then((x) => x.betriebskostenrechnungen)}
 		/>
 		<WalterErhaltungsaufwendungen
+			entry={{}}
 			title="Erhaltungsaufwendungen"
 			rows={a.then((x) => x.erhaltungsaufwendungen)}
 		/>

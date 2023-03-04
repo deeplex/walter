@@ -2,7 +2,10 @@
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-	import { WalterDataWrapper } from '$WalterComponents';
+	import {
+		WalterDataWrapper,
+		WalterErhaltungsaufwendung
+	} from '$WalterComponents';
 	import type { WalterErhaltungsaufwendungEntry } from '$WalterTypes';
 
 	const headers = [
@@ -13,12 +16,29 @@
 		{ key: 'datum', value: 'Datum' }
 	];
 
+	const addUrl = `/api/erhaltungsaufwendungen/`;
+
 	const navigate = (e: CustomEvent<DataTableRow>) =>
 		goto(`/erhaltungsaufwendungen/${e.detail.id}`);
 
 	export let rows: Promise<WalterErhaltungsaufwendungEntry[]>;
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
+
+	export let entry: Partial<WalterErhaltungsaufwendungEntry> | undefined =
+		undefined;
 </script>
 
-<WalterDataWrapper {title} {search} {navigate} {rows} {headers} />
+<WalterDataWrapper
+	{addUrl}
+	addEntry={entry}
+	{title}
+	{search}
+	{navigate}
+	{rows}
+	{headers}
+>
+	{#if entry}
+		<WalterErhaltungsaufwendung {entry} />
+	{/if}
+</WalterDataWrapper>

@@ -8,9 +8,18 @@
 		{ key: 'betrag', value: 'Betrag' }
 	];
 
+	const addUrl = `/api/mieten/`;
+
 	export let rows: Promise<WalterMieteEntry[]>;
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
+
+	export let entry: Partial<WalterMieteEntry> | undefined = undefined;
 </script>
 
-<WalterDataWrapper {title} {search} {rows} {headers} />
+<WalterDataWrapper {addUrl} addEntry={entry} {title} {search} {rows} {headers}>
+	{#if entry}
+		<p>TODO WALTERMIETE</p>
+		<!-- <WalterMiete {entry} /> -->
+	{/if}
+</WalterDataWrapper>

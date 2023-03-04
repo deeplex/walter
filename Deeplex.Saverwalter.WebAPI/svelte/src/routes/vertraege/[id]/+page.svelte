@@ -32,13 +32,15 @@
 	<WalterVertrag {a} {entry} />
 
 	<Accordion>
-		<WalterKontakte title="Mieter" rows={a.then((x) => x.mieter)} />
+		<WalterKontakte entry={{}} title="Mieter" rows={a.then((x) => x.mieter)} />
 		<WalterVertragVersionen
+			entry={{}}
 			title="Versionen"
 			rows={a.then((x) => x.versionen)}
 		/>
-		<WalterMieten title="Mieten" rows={a.then((x) => x.mieten)} />
+		<WalterMieten entry={{}} title="Mieten" rows={a.then((x) => x.mieten)} />
 		<WalterMietminderungen
+			entry={{}}
 			title="Mietminderungen"
 			rows={a.then((x) => x.mietminderungen)}
 		/>

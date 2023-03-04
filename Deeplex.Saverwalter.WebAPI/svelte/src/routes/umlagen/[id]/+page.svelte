@@ -29,8 +29,13 @@
 	<WalterUmlage {a} {entry} />
 
 	<Accordion>
-		<WalterWohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
+		<WalterWohnungen
+			entry={{}}
+			title="Wohnungen"
+			rows={a.then((x) => x.wohnungen)}
+		/>
 		<WalterBetriebskostenrechnungen
+			entry={{}}
 			title="Betriebskostenrechnungen"
 			rows={a.then((x) => x.betriebskostenrechnungen)}
 		/>

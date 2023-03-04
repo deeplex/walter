@@ -9,9 +9,18 @@
 		{ key: 'einheit', value: 'Einheit' }
 	];
 
+	const addUrl = `/api/zaehlerstaende/`;
+
 	export let rows: Promise<WalterZaehlerstandEntry[]>;
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
+
+	export let entry: Partial<WalterZaehlerstandEntry> | undefined = undefined;
 </script>
 
-<WalterDataWrapper {title} {search} {rows} {headers} />
+<WalterDataWrapper {addUrl} addEntry={entry} {title} {search} {rows} {headers}>
+	{#if entry}
+		<p>TODO WALTERZAEHLERSTAND</p>
+		<!-- <WalterZaehlerstand {entry} /> -->
+	{/if}
+</WalterDataWrapper>

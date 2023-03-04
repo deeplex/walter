@@ -2,8 +2,17 @@
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-	import { WalterDataWrapper } from '$WalterComponents';
+	import {
+		WalterBetriebskostenrechnung,
+		WalterDataWrapper
+	} from '$WalterComponents';
 	import type { WalterBetriebskostenrechnungEntry } from '$WalterTypes';
+
+	export let rows: Promise<WalterBetriebskostenrechnungEntry[]>;
+	export let search: boolean = false;
+	export let title: string | undefined = undefined;
+	export let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined =
+		undefined;
 
 	const headers = [
 		{ key: 'typ.text', value: 'Typ' },
@@ -13,12 +22,22 @@
 		{ key: 'datum', value: 'Datum' }
 	];
 
+	const addUrl = `/api/betriebskostenrechnungen/`;
+
 	const navigate = (e: CustomEvent<DataTableRow>) =>
 		goto(`/betriebskostenrechnungen/${e.detail.id}`);
-
-	export let rows: Promise<WalterBetriebskostenrechnungEntry[]>;
-	export let search: boolean = false;
-	export let title: string | undefined = undefined;
 </script>
 
-<WalterDataWrapper {title} {search} {navigate} {rows} {headers} />
+<WalterDataWrapper
+	{addUrl}
+	addEntry={entry}
+	{title}
+	{search}
+	{navigate}
+	{rows}
+	{headers}
+>
+	{#if entry}
+		<WalterBetriebskostenrechnung {entry} />
+	{/if}
+</WalterDataWrapper>

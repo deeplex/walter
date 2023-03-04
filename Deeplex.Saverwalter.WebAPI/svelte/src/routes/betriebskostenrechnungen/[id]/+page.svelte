@@ -29,6 +29,10 @@
 	<WalterBetriebskostenrechnung {a} {entry} />
 
 	<Accordion>
-		<WalterWohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
+		<WalterWohnungen
+			entry={{}}
+			title="Wohnungen"
+			rows={a.then((x) => x.wohnungen)}
+		/>
 	</Accordion>
 </WalterGrid>

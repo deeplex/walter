@@ -44,12 +44,21 @@
 
 	<Accordion>
 		<WalterKontakte
+			entry={{}}
 			title="Juristische Personen"
 			rows={a.then((x) => x.juristischePersonen)}
 		/>
 		{#await a then x}
-			<WalterWohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
-			<WalterVertraege title="Verträge" rows={a.then((x) => x.vertraege)} />
+			<WalterWohnungen
+				entry={{}}
+				title="Wohnungen"
+				rows={a.then((x) => x.wohnungen)}
+			/>
+			<WalterVertraege
+				entry={{}}
+				title="Verträge"
+				rows={a.then((x) => x.vertraege)}
+			/>
 		{/await}
 	</Accordion>
 </WalterGrid>
