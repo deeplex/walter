@@ -29,12 +29,7 @@
 		{#if search}
 			<SkeletonPlaceholder style="margin:0; width: 100%; height:3rem" />
 		{/if}
-		<DataTableSkeleton
-			style="min-width: 50rem;"
-			{headers}
-			showHeader={false}
-			showToolbar={false}
-		/>
+		<DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
 	{:then x}
 		<DataTable
 			on:click:row={navigate}
@@ -43,6 +38,7 @@
 			stickyHeader
 			{headers}
 			rows={x}
+			style="cursor: pointer"
 		>
 			{#if search}
 				<Toolbar>
@@ -51,8 +47,11 @@
 					</ToolbarContent>
 				</Toolbar>
 			{/if}
-			<!-- style="margin-top: -0.5em; line-height: 1rem; text-align: center; width: 100%" -->
-			<span slot="cell" let:cell>
+			<span
+				style="text-overflow: ellipsis; white-space: nowrap; overflow:hidden;"
+				slot="cell"
+				let:cell
+			>
 				{#if cell.value === null || cell.value === undefined || cell.value === ''}
 					---
 				{:else if cell.key === 'beginn' || cell.key === 'ende' || cell.key === 'datum'}
