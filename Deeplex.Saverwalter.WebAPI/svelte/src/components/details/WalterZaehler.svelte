@@ -23,6 +23,20 @@
 </Row>
 <WalterAdresse bind:entry={entry.adresse} adresse={a?.then((x) => x.adresse)} />
 <Row>
+	<WalterComboBox
+		bind:binding={entry.wohnung}
+		titleText="Wohnung"
+		api={`/api/selection/wohnungen`}
+		value={a?.then((x) => x.wohnung)}
+	/>
+	<WalterComboBox
+		bind:binding={entry.allgemeinZaehler}
+		titleText="Allgemeinzähler"
+		api={`/api/selection/zaehler`}
+		value={a?.then((x) => x.allgemeinZaehler)}
+	/>
+</Row>
+<Row>
 	<WalterTextInput
 		bind:binding={entry.notiz}
 		labelText="Notiz"

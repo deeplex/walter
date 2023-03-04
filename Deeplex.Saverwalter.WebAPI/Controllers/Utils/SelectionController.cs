@@ -69,6 +69,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         [HttpGet]
+        [Route("api/selection/zaehler")]
+        public IActionResult GetZaehler()
+        {
+            return new OkObjectResult(DbService.ctx.ZaehlerSet
+                .Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer, null))
+                .ToList());
+        }
+
+        [HttpGet]
         [Route("api/selection/betriebskostentypen")]
         public IActionResult GetBetriebskostentypen()
         {
