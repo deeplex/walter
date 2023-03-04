@@ -36,8 +36,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Id = Entity.VertragId;
                 Beginn = Entity.Beginn();
                 Ende = Entity.Ende;
-                Wohnung = new (Entity.Wohnung.WohnungId, Entity.Wohnung.Adresse.Anschrift + " - " + Entity.Wohnung.Bezeichnung);
-                Ansprechpartner = Entity.AnsprechpartnerId is Guid id && id != Guid.Empty ? new (id, dbService.ctx.FindPerson(id).Bezeichnung) : null;
+                Wohnung = new(Entity.Wohnung.WohnungId, Entity.Wohnung.Adresse.Anschrift + " - " + Entity.Wohnung.Bezeichnung);
+                Ansprechpartner = Entity.AnsprechpartnerId is Guid id && id != Guid.Empty ? new(id, dbService.ctx.FindPerson(id).Bezeichnung) : null;
                 Notiz = Entity.Notiz;
 
                 var Mieter = dbService.ctx.MieterSet
@@ -46,6 +46,28 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 MieterAuflistung = string.Join(", ", Mieter
                     .Select(a => dbService.ctx.FindPerson(a.PersonId).Bezeichnung));
                 SelectedMieter = Mieter.Select(e => new SelectionEntry(e.PersonId, dbService.ctx.FindPerson(e.PersonId).Bezeichnung));
+            }
+        }
+
+        public class VertragVersionEntryBase
+        {
+            protected VertragVersion? Entity { get; }
+
+            public int? Id { get; set; }
+            public int? Personenzahl { get; set; }
+            public string? Notiz { get; set; }
+            public DateTime? Beginn { get; set; }
+            public double? Grundmiete { get; set; }
+
+            public VertragVersionEntryBase() { }
+            public VertragVersionEntryBase(VertragVersion entity)
+            {
+                Entity = entity;
+                Id = entity.VertragVersionId;
+                Personenzahl = entity.Personenzahl;
+                Notiz = entity.Notiz;
+                Beginn = entity.Beginn;
+                Grundmiete = entity.Grundmiete;
             }
         }
 
@@ -61,6 +83,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Where(m => Entity != null && m.Vertrag.VertragId == Entity.VertragId)
                 .ToList()
                 .Select(e => new PersonEntryBase(DbService.ctx.FindPerson(e.PersonId), DbService));
+            public IEnumerable<VertragVersionEntryBase>? Versionen => Entity?.Versionen.Select(e => new VertragVersionEntryBase(e));
             // TODO Garagen
 
             public VertragEntry() : base() { }

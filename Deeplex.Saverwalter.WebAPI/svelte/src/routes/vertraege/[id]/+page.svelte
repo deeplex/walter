@@ -12,6 +12,7 @@
 	} from '$WalterComponents';
 	import { walter_get } from '$WalterServices/requests';
 	import type { WalterVertragEntry } from '$WalterTypes';
+	import WalterVertragVersionen from '../../../components/lists/WalterVertragVersionen.svelte';
 
 	export let data: PageData;
 	const url = `/api/vertraege/${data.id}`;
@@ -32,6 +33,10 @@
 
 	<Accordion>
 		<WalterKontakte title="Mieter" rows={a.then((x) => x.mieter)} />
+		<WalterVertragVersionen
+			title="Versionen"
+			rows={a.then((x) => x.versionen)}
+		/>
 		<WalterMieten title="Mieten" rows={a.then((x) => x.mieten)} />
 		<WalterMietminderungen
 			title="Mietminderungen"

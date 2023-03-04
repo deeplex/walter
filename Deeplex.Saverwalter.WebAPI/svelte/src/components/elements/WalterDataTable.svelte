@@ -58,7 +58,7 @@
 					{convertDate(cell.value)}
 				{:else if cell.key === 'creationTime'}
 					{convertTime(cell.value)}
-				{:else if cell.key === 'betrag'}
+				{:else if cell.key === 'betrag' || cell.key === 'grundmiete'}
 					{convertEuro(cell.value)}
 				{:else}
 					{cell.value}

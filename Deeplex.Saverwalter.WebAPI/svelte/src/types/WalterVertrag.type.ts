@@ -1,4 +1,4 @@
-import type { WalterAnhangEntry, WalterMieteEntry, WalterMietminderungEntry, WalterPersonEntry, WalterSelectionEntry } from "$WalterTypes";
+import type { WalterAnhangEntry, WalterMieteEntry, WalterMietminderungEntry, WalterPersonEntry, WalterSelectionEntry, WalterVertragVersionEntry } from "$WalterTypes";
 
 export type WalterVertragEntry = {
     id: number;
@@ -11,6 +11,7 @@ export type WalterVertragEntry = {
 
     mieterauflistung: string;
 
+    versionen: WalterVertragVersionEntry[];
     mieter: WalterPersonEntry[];
     mieten: WalterMieteEntry[];
     mietminderungen: WalterMietminderungEntry[];
