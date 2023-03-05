@@ -25,8 +25,10 @@
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 
-	export let entry: Partial<WalterErhaltungsaufwendungEntry> | undefined =
+	export let a: Promise<Partial<WalterErhaltungsaufwendungEntry>> | undefined =
 		undefined;
+	let entry: Partial<WalterErhaltungsaufwendungEntry> | undefined = undefined;
+	a?.then((e) => (entry = e));
 </script>
 
 <WalterDataWrapper
@@ -39,6 +41,6 @@
 	{headers}
 >
 	{#if entry}
-		<WalterErhaltungsaufwendung {entry} />
+		<WalterErhaltungsaufwendung {a} {entry} />
 	{/if}
 </WalterDataWrapper>

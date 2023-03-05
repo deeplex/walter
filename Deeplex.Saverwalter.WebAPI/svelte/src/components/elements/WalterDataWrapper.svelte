@@ -25,6 +25,16 @@
 	) => Promise<void> | void = () => {};
 
 	let addModalOpen: boolean = false;
+	let open: boolean = false;
+
+	async function click_post(url: string | undefined, body: any) {
+		if (!url) {
+			return;
+		}
+		const j = await walter_post(url, body);
+		rows = rows.then((e) => [...e, j]);
+		open = true;
+	}
 </script>
 
 {#if title !== undefined}
@@ -38,22 +48,22 @@
 			</svelte:fragment>
 		</AccordionItem>
 	{:then x}
-		<AccordionItem title={`${title} (${x.length})`}>
+		<AccordionItem title={`${title} (${x.length})`} bind:open>
 			{#if x.length}
-				<WalterDataTable {search} {navigate} {rows} {headers} />
+				<WalterDataTable {search} {navigate} bind:rows {headers} />
 			{/if}
-			<div style="float: right">
-				<Button
-					on:click={() => (addModalOpen = true)}
-					iconDescription="Eintrag hinzufügen"
-					icon={Add}
-				/>
-			</div>
 			{#if addUrl && addEntry}
+				<div style="float: right">
+					<Button
+						on:click={() => (addModalOpen = true)}
+						iconDescription="Eintrag hinzufügen"
+						icon={Add}
+					/>
+				</div>
 				<Modal
 					secondaryButtonText="Abbrechen"
 					primaryButtonText="Bestätigen"
-					on:submit={() => walter_post(addUrl || '', addEntry)}
+					on:submit={() => click_post(addUrl, addEntry)}
 					on:click:button--secondary={() => (addModalOpen = false)}
 					on:click:button--primary={() => (addModalOpen = false)}
 					modalHeading="Eintrag zu {title} hinzufügen"

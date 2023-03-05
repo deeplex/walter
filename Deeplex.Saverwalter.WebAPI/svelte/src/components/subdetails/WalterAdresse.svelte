@@ -4,7 +4,8 @@
 	import type { WalterAdresseEntry } from '$WalterTypes';
 	import { WalterTextInput } from '$WalterComponents';
 
-	export let adresse: Promise<WalterAdresseEntry> | undefined = undefined;
+	export let adresse: Promise<WalterAdresseEntry | undefined> | undefined =
+		undefined;
 	export let entry: Partial<WalterAdresseEntry> = {};
 	adresse?.then((e) => Object.assign(entry, e));
 

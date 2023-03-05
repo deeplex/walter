@@ -8,7 +8,7 @@
 	import type { WalterVertragEntry } from '$WalterTypes';
 	import { Row } from 'carbon-components-svelte';
 
-	export let a: Promise<WalterVertragEntry> | undefined = undefined;
+	export let a: Promise<Partial<WalterVertragEntry>> | undefined = undefined;
 	export let entry: Partial<WalterVertragEntry> = {};
 
 	// TODO

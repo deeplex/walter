@@ -14,8 +14,14 @@
 		WalterHeaderDetail,
 		WalterWohnung
 	} from '$WalterComponents';
-	import type { WalterWohnungEntry } from '$WalterTypes';
+	import type {
+		WalterErhaltungsaufwendungEntry,
+		WalterUmlageEntry,
+		WalterWohnungEntry,
+		WalterZaehlerEntry
+	} from '$WalterTypes';
 	import { walter_get } from '$WalterServices/requests';
+	import { toLocaleIsoString } from '$WalterServices/utils';
 
 	export let data: PageData;
 	const url = `/api/wohnungen/${data.id}`;
@@ -25,6 +31,31 @@
 	a.then((e) => Object.assign(entry, e));
 
 	const title = a.then((x) => x.adresse.anschrift + ' - ' + x.bezeichnung);
+
+	const zaehlerEntry: Promise<Partial<WalterZaehlerEntry>> = a.then((e) => ({
+		wohnung: {
+			id: '' + e.id,
+			text: e.adresse.anschrift + ' - ' + e.bezeichnung
+		},
+		adresse: { ...e.adresse }
+	}));
+	const umlageEntry: Promise<Partial<WalterUmlageEntry>> = a.then((e) => ({
+		selectedWohnungen: [
+			{
+				id: '' + e.id,
+				text: e.adresse.anschrift + ' - ' + e.bezeichnung
+			}
+		]
+	}));
+	const erhaltungsaufwendungEntry: Promise<
+		Partial<WalterErhaltungsaufwendungEntry>
+	> = a.then((e) => ({
+		wohnung: {
+			id: '' + e.id,
+			text: e.adresse.anschrift + ' - ' + e.bezeichnung
+		},
+		datum: toLocaleIsoString(new Date())
+	}));
 </script>
 
 <WalterHeaderDetail {a} {url} {entry} {title} />
@@ -33,25 +64,27 @@
 	<WalterWohnung {a} {entry} />
 
 	<Accordion>
-		<WalterWohnungen entry={{}} title="Haus" rows={a.then((x) => x.haus)} />
+		<WalterWohnungen
+			title="Wohnungen an der selben Adresse"
+			rows={a.then((x) => x.haus)}
+		/>
 		<WalterZaehlerList
-			entry={{}}
+			a={zaehlerEntry}
 			title="Zähler"
 			rows={a.then((x) => x.zaehler)}
 		/>
-		<WalterVertraege
-			entry={{}}
-			title="Verträge"
-			rows={a.then((x) => x.vertraege)}
+		<WalterVertraege title="Verträge" rows={a.then((x) => x.vertraege)} />
+		<WalterUmlagen
+			a={umlageEntry}
+			title="Umlagen"
+			rows={a.then((x) => x.umlagen)}
 		/>
-		<WalterUmlagen entry={{}} title="Umlagen" rows={a.then((x) => x.umlagen)} />
 		<WalterBetriebskostenrechnungen
-			entry={{}}
 			title="Betriebskostenrechnungen"
 			rows={a.then((x) => x.betriebskostenrechnungen)}
 		/>
 		<WalterErhaltungsaufwendungen
-			entry={{}}
+			a={erhaltungsaufwendungEntry}
 			title="Erhaltungsaufwendungen"
 			rows={a.then((x) => x.erhaltungsaufwendungen)}
 		/>

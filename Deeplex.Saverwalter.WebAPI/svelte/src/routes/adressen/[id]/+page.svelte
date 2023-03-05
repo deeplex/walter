@@ -6,7 +6,7 @@
 		WalterWohnungen
 	} from '$WalterComponents';
 	import { walter_get } from '$WalterServices/requests';
-	import type { WalterAdresseEntry } from '$WalterTypes';
+	import type { WalterAdresseEntry, WalterWohnungEntry } from '$WalterTypes';
 	import { Accordion } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 
@@ -16,6 +16,10 @@
 	const a: Promise<WalterAdresseEntry> = walter_get(url);
 	let entry: Partial<WalterAdresseEntry> = {};
 	a.then((e) => Object.assign(entry, e));
+
+	const wohnungEntry: Promise<Partial<WalterWohnungEntry>> = a.then((e) => ({
+		adresse: { ...e }
+	}));
 </script>
 
 <WalterHeaderDetail {a} {url} {entry} title={a.then((x) => x.anschrift)} />
@@ -25,7 +29,7 @@
 
 	<Accordion>
 		<WalterWohnungen
-			entry={{}}
+			a={wohnungEntry}
 			title="Wohnungen"
 			rows={a.then((x) => x.wohnungen)}
 		/>

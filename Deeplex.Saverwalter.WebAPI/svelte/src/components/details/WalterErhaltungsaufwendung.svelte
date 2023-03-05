@@ -8,7 +8,7 @@
 	import { Row } from 'carbon-components-svelte';
 	import type { WalterErhaltungsaufwendungEntry } from '$WalterTypes';
 
-	export let a: Promise<WalterErhaltungsaufwendungEntry> | undefined =
+	export let a: Promise<Partial<WalterErhaltungsaufwendungEntry>> | undefined =
 		undefined;
 	export let entry: Partial<WalterErhaltungsaufwendungEntry> = {};
 </script>
@@ -16,7 +16,7 @@
 <Row>
 	<WalterTextInput
 		bind:binding={entry.bezeichnung}
-		labelText="Typ"
+		labelText="Bezeichnung"
 		value={a?.then((x) => x.bezeichnung)}
 	/>
 	<WalterComboBox
@@ -26,7 +26,7 @@
 		value={a?.then((x) => x.aussteller)}
 	/>
 	<WalterDatePicker
-		binding={entry.datum}
+		bind:binding={entry.datum}
 		value={a?.then((x) => x.datum)}
 		labelText="Datum"
 	/>

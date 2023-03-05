@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Accordion } from 'carbon-components-svelte';
+	import { Accordion, Button } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 
 	import {
@@ -29,10 +29,10 @@
 	<WalterBetriebskostenrechnung {a} {entry} />
 
 	<Accordion>
-		<WalterWohnungen
-			entry={{}}
-			title="Wohnungen"
-			rows={a.then((x) => x.wohnungen)}
-		/>
+		<WalterWohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
 	</Accordion>
+
+	{#await a then x}
+		<Button href={`/umlagen/${x.umlage.id}`}>Zur Umlage</Button>
+	{/await}
 </WalterGrid>

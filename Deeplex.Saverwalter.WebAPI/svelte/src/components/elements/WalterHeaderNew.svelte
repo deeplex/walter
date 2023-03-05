@@ -4,13 +4,17 @@
 
 	import { WalterHeader } from '$WalterComponents';
 	import { walter_post } from '$WalterServices/requests';
+	import { goto } from '$app/navigation';
 
 	export let title: string = 'Neu...';
 	export let url: string;
 	export let entry: any;
 
-	function click_post() {
-		walter_post(url, entry);
+	async function click_post() {
+		const j = await walter_post(url, entry);
+		if (j.id) {
+			goto(`${url.replace('api/', '')}/${j.id}`);
+		}
 	}
 </script>
 

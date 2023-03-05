@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { WalterDataWrapper } from '$WalterComponents';
+	import { goto } from '$app/navigation';
+	import { WalterDataWrapper, WalterMietminderung } from '$WalterComponents';
 	import type { WalterMietminderungEntry } from '$WalterTypes';
 
 	const headers = [
@@ -14,12 +15,24 @@
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 
-	export let entry: Partial<WalterMietminderungEntry> | undefined = undefined;
+	const navigate = (e: CustomEvent) => goto(`/mietminderungen/${e.detail.id}`);
+
+	export let a: Promise<Partial<WalterMietminderungEntry>> | undefined =
+		undefined;
+	let entry: Partial<WalterMietminderungEntry> | undefined = undefined;
+	a?.then((e) => (entry = e));
 </script>
 
-<WalterDataWrapper {addUrl} addEntry={entry} {title} {search} {rows} {headers}>
+<WalterDataWrapper
+	{navigate}
+	{addUrl}
+	addEntry={entry}
+	{title}
+	{search}
+	{rows}
+	{headers}
+>
 	{#if entry}
-		<p>TODO WALTERMIETMINDERUNG</p>
-		<!-- <WalterMietminderung {entry} /> -->
+		<WalterMietminderung {a} {entry} />
 	{/if}
 </WalterDataWrapper>

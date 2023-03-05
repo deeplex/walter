@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { NumberInput, NumberInputSkeleton } from 'carbon-components-svelte';
 
-	export let value: Promise<number> | undefined = undefined;
+	export let value: Promise<number | undefined> | undefined = undefined;
 	export let binding: number | undefined = undefined;
 	export let label: string | undefined;
 	export let hideSteppers: boolean = true;

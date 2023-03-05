@@ -10,12 +10,10 @@
 		WalterSelectionEntry
 	} from '$WalterTypes';
 	import { walter_get } from '$WalterServices/requests';
-	import type { ComboBoxItem } from 'carbon-components-svelte/types/ComboBox/ComboBox.svelte';
 
-	type Selection = { selectedId: any; selectedItem: ComboBoxItem };
-
-	export let a: Promise<WalterBetriebskostenrechnungEntry> | undefined =
-		undefined;
+	export let a:
+		| Promise<Partial<WalterBetriebskostenrechnungEntry>>
+		| undefined = undefined;
 	export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
 
 	const betriebskostentypen: Promise<WalterSelectionEntry[]> = walter_get(
@@ -40,12 +38,12 @@
 		return item.text.toLowerCase().includes(value.toLowerCase());
 	}
 
-	function selectTyp(e: CustomEvent<Selection>) {
+	function selectTyp(e: CustomEvent) {
 		updateUmlageEntries(e.detail.selectedItem.id);
 		entry.umlage = undefined;
 	}
 
-	function selectUmlage(e: CustomEvent<Selection>) {
+	function selectUmlage(e: CustomEvent) {
 		entry.umlage = e.detail.selectedItem;
 		// entry.typ = entry.umlage.filter;
 	}
@@ -59,12 +57,12 @@
 			<TextInputSkeleton />
 		{:then x}
 			<ComboBox
-				selectedId={x?.typ.id}
+				selectedId={x?.typ?.id}
 				on:select={selectTyp}
 				style="padding-right: 1rem"
 				{items}
-				value={x?.typ.text}
-				titleText="Betriebskostentyp"
+				value={x?.typ?.text}
+				titleText="Betriebskostentyp der Umlage"
 				{shouldFilterItem}
 			/>
 		{/await}
@@ -73,19 +71,14 @@
 	{#await umlagePromise}
 		<TextInputSkeleton />
 	{:then}
-		{#await a}
-			<TextInputSkeleton />
-		{:then x}
-			<ComboBox
-				selectedId={entry.umlage?.id}
-				on:select={selectUmlage}
-				style="padding-right: 1rem"
-				bind:items={umlageEntries}
-				value={x?.umlage.text}
-				titleText="Wohnungen"
-				{shouldFilterItem}
-			/>
-		{/await}
+		<ComboBox
+			selectedId={entry.umlage?.id}
+			on:select={selectUmlage}
+			style="padding-right: 1rem"
+			bind:items={umlageEntries}
+			titleText="Wohnungen der Umlage"
+			{shouldFilterItem}
+		/>
 	{/await}
 </Row>
 

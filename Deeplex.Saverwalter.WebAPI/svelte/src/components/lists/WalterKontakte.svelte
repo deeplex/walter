@@ -30,10 +30,17 @@
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 
-	export let entry:
+	let personType: number = 0;
+
+	export let a:
+		| Promise<
+				Partial<WalterNatuerlichePersonEntry & WalterJuristischePersonEntry>
+		  >
+		| undefined = undefined;
+	let entry:
 		| Partial<WalterNatuerlichePersonEntry & WalterJuristischePersonEntry>
 		| undefined = undefined;
-	let personType: number = 0;
+	a?.then((e) => (entry = e));
 </script>
 
 <WalterDataWrapper

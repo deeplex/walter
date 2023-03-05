@@ -1,0 +1,24 @@
+<script lang="ts">
+	import {
+		WalterHeaderDetail,
+		WalterGrid,
+		WalterMietminderung
+	} from '$WalterComponents';
+	import { walter_get } from '$WalterServices/requests';
+	import type { WalterMietminderungEntry } from '$WalterTypes';
+
+	export let data: PageData;
+	const url = `/api/erhaltungsaufwendungen/${data.id}`;
+
+	const a: Promise<WalterMietminderungEntry> = walter_get(url);
+	const entry: Partial<WalterMietminderungEntry> = {};
+	a.then((e) => Object.assign(entry, e));
+
+	const title = a.then((x) => x.vertrag.text);
+</script>
+
+<WalterHeaderDetail {a} {url} {entry} {title} />
+
+<WalterGrid>
+	<WalterMietminderung {a} {entry} />
+</WalterGrid>

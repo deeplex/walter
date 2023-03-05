@@ -1,6 +1,10 @@
+import type { WalterSelectionEntry } from "./WalterSelection.type";
+
 export type WalterMietminderungEntry = {
     id: number;
     beginn: string;
     ende: string | undefined;
-    betrag: number;
+    minderung: number;
+    notiz: string;
+    vertrag: WalterSelectionEntry;
 }

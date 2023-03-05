@@ -4,7 +4,7 @@
 	import { Row } from 'carbon-components-svelte';
 	import WalterComboBox from '../elements/WalterComboBox.svelte';
 
-	export let a: Promise<WalterZaehlerEntry> | undefined = undefined;
+	export let a: Promise<Partial<WalterZaehlerEntry>> | undefined = undefined;
 	export let entry: Partial<WalterZaehlerEntry> = {};
 </script>
 

@@ -1,8 +1,9 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
-using Deeplex.Saverwalter.WebAPI.Helper;
+using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using Deeplex.Saverwalter.WebAPI.Helper;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -14,11 +15,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             private Miete? Entity { get; }
 
-            public int? Id { get; set; }
+            public int Id { get; set; }
             public double? Betrag { get; set; }
             public DateTime? BetreffenderMonat { get; set; }
             public DateTime? Zahlungsdatum { get; set; }
             public string? Notiz { get; set; }
+            public SelectionEntry? Vertrag { get; set; }
 
             public MieteEntryBase() { }
             public MieteEntryBase(Miete entity)
@@ -29,13 +31,16 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 BetreffenderMonat = entity.BetreffenderMonat;
                 Zahlungsdatum = entity.Zahlungsdatum;
                 Notiz = entity.Notiz;
+                var v = entity.Vertrag;
+                var a = v.Wohnung.Adresse.Anschrift;
+                Vertrag = new(v.VertragId, a + " - " + v.Wohnung.Bezeichnung + " - " + Zahlungsdatum.Datum());
             }
         }
 
         private readonly ILogger<MieteController> _logger;
-        private IWalterDbService DbService { get; }
+        private MieteDbService DbService { get; }
 
-        public MieteController(ILogger<MieteController> logger, IWalterDbService dbService)
+        public MieteController(ILogger<MieteController> logger, MieteDbService dbService)
         {
             DbService = dbService;
             _logger = logger;
@@ -44,5 +49,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpGet]
         public IActionResult Get()
             => new OkObjectResult(DbService.ctx.Mieten.ToList().Select(e => new MieteEntryBase(e)).ToList());
+        [HttpPost]
+        public IActionResult Post([FromBody] MieteEntryBase entry) => DbService.Post(entry);
+
+        [HttpGet("{id}")]
+        public IActionResult Get(int id) => DbService.Get(id);
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] MieteEntryBase entry) => DbService.Put(id, entry);
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id) => DbService.Delete(id);
     }
 }

@@ -15,12 +15,15 @@
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 
-	export let entry: Partial<WalterZaehlerstandEntry> | undefined = undefined;
+	export let a: Promise<Partial<WalterZaehlerstandEntry>> | undefined =
+		undefined;
+	let entry: Partial<WalterZaehlerstandEntry> | undefined = undefined;
+	a?.then((e) => (entry = e));
 </script>
 
 <WalterDataWrapper {addUrl} addEntry={entry} {title} {search} {rows} {headers}>
 	{#if entry}
 		<p>TODO WALTERZAEHLERSTAND</p>
-		<!-- <WalterZaehlerstand {entry} /> -->
+		<!-- <WalterZaehlerstaende {a} {entry} /> -->
 	{/if}
 </WalterDataWrapper>

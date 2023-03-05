@@ -4,7 +4,7 @@
 	import type { WalterUmlageEntry } from '$WalterTypes';
 	import WalterComboBox from '../elements/WalterComboBox.svelte';
 
-	export let a: Promise<WalterUmlageEntry> | undefined = undefined;
+	export let a: Promise<Partial<WalterUmlageEntry>> | undefined = undefined;
 	export let entry: Partial<WalterUmlageEntry> = {};
 </script>
 

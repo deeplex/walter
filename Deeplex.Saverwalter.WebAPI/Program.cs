@@ -26,6 +26,8 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<BetriebskostenrechnungDbService>(Lifestyle.Scoped);
             container.Register<ErhaltungsaufwendungDbService>(Lifestyle.Scoped);
             container.Register<JuristischePersonDbService>(Lifestyle.Scoped);
+            container.Register<MieteDbService>(Lifestyle.Scoped);
+            container.Register<MietminderungDbService>(Lifestyle.Scoped);
             container.Register<NatuerlichePersonDbService>(Lifestyle.Scoped);
             container.Register<UmlageDbService>(Lifestyle.Scoped);
             container.Register<VertragDbService>(Lifestyle.Scoped);

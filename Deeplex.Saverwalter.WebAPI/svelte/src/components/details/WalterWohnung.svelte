@@ -8,7 +8,7 @@
 	import { Row } from 'carbon-components-svelte';
 	import type { WalterWohnungEntry } from '$WalterTypes';
 
-	export let a: Promise<WalterWohnungEntry> | undefined = undefined;
+	export let a: Promise<Partial<WalterWohnungEntry>> | undefined = undefined;
 	export let entry: Partial<WalterWohnungEntry> = {};
 </script>
 
@@ -20,7 +20,10 @@
 		value={a?.then((x) => x.besitzer)}
 	/>
 </Row>
-<WalterAdresse bind:entry={entry.adresse} adresse={a?.then((x) => x.adresse)} />
+<WalterAdresse
+	bind:entry={entry.adresse}
+	adresse={a?.then((x) => x?.adresse)}
+/>
 <Row>
 	<WalterTextInput
 		bind:binding={entry.bezeichnung}

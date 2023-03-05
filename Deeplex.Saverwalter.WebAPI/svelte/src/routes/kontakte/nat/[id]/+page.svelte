@@ -43,22 +43,14 @@
 	<WalterPerson binding={entry} person={a} />
 
 	<Accordion>
+		<!-- TODO add here -->
 		<WalterKontakte
-			entry={{}}
 			title="Juristische Personen"
 			rows={a.then((x) => x.juristischePersonen)}
 		/>
-		{#await a then x}
-			<WalterWohnungen
-				entry={{}}
-				title="Wohnungen"
-				rows={a.then((x) => x.wohnungen)}
-			/>
-			<WalterVertraege
-				entry={{}}
-				title="Verträge"
-				rows={a.then((x) => x.vertraege)}
-			/>
+		{#await a then}
+			<WalterWohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
+			<WalterVertraege title="Verträge" rows={a.then((x) => x.vertraege)} />
 		{/await}
 	</Accordion>
 </WalterGrid>

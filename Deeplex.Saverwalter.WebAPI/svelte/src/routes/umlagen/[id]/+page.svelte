@@ -11,7 +11,13 @@
 		WalterUmlage
 	} from '$WalterComponents';
 	import { walter_get } from '$WalterServices/requests';
-	import type { WalterUmlageEntry } from '$WalterTypes';
+	import type {
+		WalterBetriebskostenrechnungEntry,
+		WalterSelectionEntry,
+		WalterUmlageEntry
+	} from '$WalterTypes';
+	import { toLocaleIsoString } from '$WalterServices/utils';
+	import WalterBetriebskostenrechnung from '../../../components/details/WalterBetriebskostenrechnung.svelte';
 
 	export let data: PageData;
 	const url = `/api/umlagen/${data.id}`;
@@ -21,6 +27,25 @@
 	a.then((e) => Object.assign(entry, e));
 
 	const title = a.then((x) => x.typ.text + ' - ' + x.wohnungenBezeichnung);
+
+	const betriebskostenrechungEntry: Promise<
+		Partial<WalterBetriebskostenrechnungEntry>
+	> = a.then((e) => {
+		const last =
+			e.betriebskostenrechnungen[e.betriebskostenrechnungen.length - 1];
+		const umlage: WalterSelectionEntry = {
+			id: '' + e.id,
+			text: e.wohnungenBezeichnung,
+			filter: '' + e.typ
+		};
+		return {
+			typ: e.typ,
+			umlage: umlage,
+			betrag: last.betrag,
+			betreffendesJahr: last.betreffendesJahr + 1,
+			datum: toLocaleIsoString(new Date())
+		} as WalterBetriebskostenrechnungEntry;
+	});
 </script>
 
 <WalterHeaderDetail {a} {url} {entry} {title} />
@@ -29,13 +54,9 @@
 	<WalterUmlage {a} {entry} />
 
 	<Accordion>
-		<WalterWohnungen
-			entry={{}}
-			title="Wohnungen"
-			rows={a.then((x) => x.wohnungen)}
-		/>
+		<WalterWohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
 		<WalterBetriebskostenrechnungen
-			entry={{}}
+			a={betriebskostenrechungEntry}
 			title="Betriebskostenrechnungen"
 			rows={a.then((x) => x.betriebskostenrechnungen)}
 		/>

@@ -2,6 +2,8 @@ export { default as WalterAdresse } from './subdetails/WalterAdresse.svelte';
 export { default as WalterAnhaenge } from './subdetails/WalterAnhaenge.svelte';
 export { default as WalterPerson } from './subdetails/WalterPerson.svelte';
 
+export { default as WalterMiete } from './details/WalterMiete.svelte';
+export { default as WalterMietminderung } from './details/WalterMietminderung.svelte';
 export { default as WalterBetriebskostenrechnung } from './details/WalterBetriebskostenrechnung.svelte';
 export { default as WalterErhaltungsaufwendung } from './details/WalterErhaltungsaufwendung.svelte';
 export { default as WalterUmlage } from './details/WalterUmlage.svelte';

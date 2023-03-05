@@ -11,8 +11,6 @@
 	export let rows: Promise<WalterBetriebskostenrechnungEntry[]>;
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
-	export let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined =
-		undefined;
 
 	const headers = [
 		{ key: 'typ.text', value: 'Typ' },
@@ -26,6 +24,12 @@
 
 	const navigate = (e: CustomEvent<DataTableRow>) =>
 		goto(`/betriebskostenrechnungen/${e.detail.id}`);
+
+	export let a:
+		| Promise<Partial<WalterBetriebskostenrechnungEntry>>
+		| undefined = undefined;
+	let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined = undefined;
+	a?.then((e) => (entry = e));
 </script>
 
 <WalterDataWrapper
@@ -38,6 +42,6 @@
 	{headers}
 >
 	{#if entry}
-		<WalterBetriebskostenrechnung {entry} />
+		<WalterBetriebskostenrechnung {a} {entry} />
 	{/if}
 </WalterDataWrapper>

@@ -21,6 +21,14 @@
 	a.then((e) => Object.assign(entry, e));
 
 	const title = a.then((x) => x.kennnummer);
+
+	const einzelzaehlerEntry: Promise<Partial<WalterZaehlerEntry>> = a.then(
+		(e) => ({
+			adresse: { ...e.adresse },
+			typ: e.typ,
+			allgemeinZaehler: { id: '' + e.id, text: e.kennnummer }
+		})
+	);
 </script>
 
 <WalterHeaderDetail {a} {url} {entry} {title} />
@@ -29,13 +37,13 @@
 	<WalterZaehler {a} {entry} />
 
 	<Accordion>
+		<!-- TODO liste fehlt -->
 		<WalterZaehlerstaende
-			entry={{}}
 			title="Zählerstände"
 			rows={a.then((x) => x.staende)}
 		/>
 		<WalterZaehlerList
-			entry={{}}
+			a={einzelzaehlerEntry}
 			title="Einzelzähler"
 			rows={a.then((x) => x.einzelzaehler)}
 		/>

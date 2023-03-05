@@ -21,7 +21,9 @@
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 
-	export let entry: Partial<WalterWohnungEntry> | undefined = undefined;
+	export let a: Promise<Partial<WalterWohnungEntry>> | undefined = undefined;
+	let entry: Partial<WalterWohnungEntry> | undefined = undefined;
+	a?.then((e) => (entry = e));
 </script>
 
 <WalterDataWrapper
@@ -33,7 +35,7 @@
 	{rows}
 	{headers}
 >
-	{#if entry}
-		<WalterWohnung {entry} />
+	{#if a}
+		<WalterWohnung {a} {entry} />
 	{/if}
 </WalterDataWrapper>
