@@ -10,11 +10,8 @@
 		{ key: 'fileName', value: 'Dateiname' },
 		{ key: 'creationTime', value: 'Erstellungszeitpunkt' }
 	];
-
-	const navigate = (e: CustomEvent<DataTableRow>) =>
-		goto(`/${data.url}/${e.detail.id}`);
 </script>
 
 <WalterHeaderList url={data.url} title="Anhänge" />
 
-<WalterDataTable search {navigate} {headers} rows={data.rows} />
+<WalterDataTable search {headers} rows={data.rows} />
