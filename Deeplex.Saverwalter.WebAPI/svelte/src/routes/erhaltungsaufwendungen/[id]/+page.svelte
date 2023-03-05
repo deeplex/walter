@@ -1,8 +1,5 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-
-	import type { WalterErhaltungsaufwendungEntry } from '$WalterTypes';
-	import { walter_get } from '$WalterServices/requests';
 	import {
 		WalterHeaderDetail,
 		WalterGrid,

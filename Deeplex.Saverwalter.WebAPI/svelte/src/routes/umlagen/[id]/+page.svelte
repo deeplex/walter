@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { Accordion } from 'carbon-components-svelte';
-
 	import type { PageData } from './$types';
-
 	import {
 		WalterBetriebskostenrechnungen,
 		WalterHeaderDetail,
@@ -10,31 +8,25 @@
 		WalterWohnungen,
 		WalterUmlage
 	} from '$WalterComponents';
-	import { walter_get } from '$WalterServices/requests';
 	import type {
 		WalterBetriebskostenrechnungEntry,
-		WalterSelectionEntry,
-		WalterUmlageEntry
+		WalterSelectionEntry
 	} from '$WalterTypes';
 	import { toLocaleIsoString } from '$WalterServices/utils';
-	import WalterBetriebskostenrechnung from '../../../components/details/WalterBetriebskostenrechnung.svelte';
 
 	export let data: PageData;
-	const url = `/api/umlagen/${data.id}`;
-
-	const a = data.a;
 
 	const lastBetriebskostenrechnung =
-		a.betriebskostenrechnungen[a.betriebskostenrechnungen.length - 1];
+		data.a.betriebskostenrechnungen[data.a.betriebskostenrechnungen.length - 1];
 
 	const umlage: WalterSelectionEntry = {
-		id: '' + a.id,
-		text: a.wohnungenBezeichnung,
-		filter: '' + a.typ
+		id: '' + data.a.id,
+		text: data.a.wohnungenBezeichnung,
+		filter: '' + data.a.typ
 	};
 	const betriebskostenrechungEntry: Partial<WalterBetriebskostenrechnungEntry> =
 		{
-			typ: a.typ,
+			typ: data.a.typ,
 			umlage: umlage,
 			betrag: lastBetriebskostenrechnung.betrag,
 			betreffendesJahr: lastBetriebskostenrechnung.betreffendesJahr + 1,
@@ -43,20 +35,20 @@
 </script>
 
 <WalterHeaderDetail
-	{a}
-	{url}
-	title={a.typ.text + ' - ' + a.wohnungenBezeichnung}
+	a={data.a}
+	url={data.url}
+	title={data.a.typ.text + ' - ' + data.a.wohnungenBezeichnung}
 />
 
 <WalterGrid>
-	<WalterUmlage {a} />
+	<WalterUmlage a={data.a} />
 
 	<Accordion>
-		<WalterWohnungen title="Wohnungen" rows={a.wohnungen} />
+		<WalterWohnungen title="Wohnungen" rows={data.a.wohnungen} />
 		<WalterBetriebskostenrechnungen
 			a={betriebskostenrechungEntry}
 			title="Betriebskostenrechnungen"
-			rows={a.betriebskostenrechnungen}
+			rows={data.a.betriebskostenrechnungen}
 		/>
 	</Accordion>
 </WalterGrid>

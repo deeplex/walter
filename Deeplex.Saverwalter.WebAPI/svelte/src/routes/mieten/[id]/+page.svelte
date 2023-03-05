@@ -4,8 +4,6 @@
 		WalterGrid,
 		WalterMiete
 	} from '$WalterComponents';
-	import { walter_get } from '$WalterServices/requests';
-	import type { WalterMieteEntry } from '$WalterTypes';
 	import { Button, ButtonSkeleton } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 

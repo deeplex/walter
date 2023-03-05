@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { Accordion, Row } from 'carbon-components-svelte';
-
 	import type { PageData } from './$types';
-
 	import type { WalterNatuerlichePersonEntry } from '$WalterTypes';
-	import { walter_get } from '$WalterServices/requests';
 	import {
 		WalterPerson,
 		WalterGrid,

@@ -5,8 +5,7 @@
 		WalterHeaderDetail,
 		WalterWohnungen
 	} from '$WalterComponents';
-	import { walter_get } from '$WalterServices/requests';
-	import type { WalterAdresseEntry, WalterWohnungEntry } from '$WalterTypes';
+	import type { WalterWohnungEntry } from '$WalterTypes';
 	import { Accordion } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 
