@@ -46,6 +46,8 @@
 	<Accordion>
 		<WalterWohnungen title="Wohnungen" rows={data.a.wohnungen} />
 		<WalterBetriebskostenrechnungen
+			betriebskostentypen={data.betriebskostentypen}
+			umlagen={data.umlagen}
 			a={betriebskostenrechungEntry}
 			title="Betriebskostenrechnungen"
 			rows={data.a.betriebskostenrechnungen}

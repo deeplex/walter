@@ -17,18 +17,17 @@
 	} from '$WalterComponents';
 
 	export let data: PageData;
-	const a = data.a;
 </script>
 
-<WalterHeader title={a.fileName} />
+<WalterHeader title={data.a.fileName} />
 
 <WalterGrid>
 	<Row>
-		<WalterTextInput bind:value={a.fileName} labelText="Dateiname" />
+		<WalterTextInput bind:value={data.a.fileName} labelText="Dateiname" />
 		<WalterTextInput
 			readonly
 			labelText="Erstellungszeit"
-			bind:value={a.creationTime}
+			bind:value={data.a.creationTime}
 		/>
 	</Row>
 	<!-- <Row>
@@ -36,20 +35,22 @@
 	</Row> -->
 	<Accordion>
 		<WalterBetriebskostenrechnungen
+			betriebskostentypen={data.betriebskostentypen}
+			umlagen={data.umlagen}
 			title="Betriebskostenrechnungen"
-			rows={a.betriebskostenrechnungen}
+			rows={data.a.betriebskostenrechnungen}
 		/>
 		<WalterErhaltungsaufwendungen
 			title="Erhaltungsaufwendungen"
-			rows={a.erhaltungsaufwendungen}
+			rows={data.a.erhaltungsaufwendungen}
 		/>
 		<WalterKontakte
 			title="Kontakte"
-			rows={a.natuerlichePersonen.concat(a.juristischePersonen)}
+			rows={data.a.natuerlichePersonen.concat(data.a.juristischePersonen)}
 		/>
-		<WalterUmlagen title="Umlagen" rows={a.umlagen} />
-		<WalterVertraege title="Verträge" rows={a.vertraege} />
-		<WalterWohnungen title="Wohnungen" rows={a.wohnungen} />
-		<WalterZaehlerList title="Zähler" rows={a.zaehler} />
+		<WalterUmlagen title="Umlagen" rows={data.a.umlagen} />
+		<WalterVertraege title="Verträge" rows={data.a.vertraege} />
+		<WalterWohnungen title="Wohnungen" rows={data.a.wohnungen} />
+		<WalterZaehlerList title="Zähler" rows={data.a.zaehler} />
 	</Accordion>
 </WalterGrid>

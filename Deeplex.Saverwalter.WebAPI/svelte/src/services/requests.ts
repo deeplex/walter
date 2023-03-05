@@ -7,8 +7,9 @@ const headers = {
 
 // =================================== GET ====================================
 
+// Get fetch from svelte:
 type fetchType = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>
-export const walter_get = (url: string, f: fetchType = fetch): Promise<any> =>
+export const walter_get = (url: string, f: fetchType): Promise<any> =>
     f(url, { method: 'GET', headers }).then(e => e.json());
 
 // =================================== PUT ===================================

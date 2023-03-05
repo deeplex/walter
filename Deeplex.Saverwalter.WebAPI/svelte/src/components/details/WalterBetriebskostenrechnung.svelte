@@ -9,22 +9,13 @@
 		WalterBetriebskostenrechnungEntry,
 		WalterSelectionEntry
 	} from '$WalterTypes';
-	import { walter_get } from '$WalterServices/requests';
 
 	export let a: Partial<WalterBetriebskostenrechnungEntry> = {};
+	export let betriebskostentypen: WalterSelectionEntry[];
+	export let umlagen: WalterSelectionEntry[];
 
-	const betriebskostentypen: Promise<WalterSelectionEntry[]> = walter_get(
-		'/api/selection/betriebskostentypen'
-	);
-	const umlagePromise: Promise<WalterSelectionEntry[]> = walter_get(
-		'/api/selection/umlagen'
-	);
-	let umlagen: WalterSelectionEntry[];
-	let umlageEntries: WalterSelectionEntry[] = [];
-	umlagePromise.then((x) => {
-		umlagen = x;
-		updateUmlageEntries(a.typ?.id);
-	});
+	let umlageEntries: WalterSelectionEntry[];
+	updateUmlageEntries(a.typ?.id);
 
 	function updateUmlageEntries(id: string | number | undefined) {
 		umlageEntries = umlagen.filter((u) => u.filter === id);
@@ -37,6 +28,7 @@
 
 	function selectTyp(e: CustomEvent) {
 		updateUmlageEntries(e.detail.selectedItem.id);
+		a.typ = e.detail.selectedItem;
 		a.umlage = undefined;
 	}
 
@@ -56,6 +48,7 @@
 			<ComboBox
 				selectedId={x?.typ?.id}
 				on:select={selectTyp}
+				on:blur={() => (a.typ = a.typ)}
 				style="padding-right: 1rem"
 				{items}
 				value={x?.typ?.text}
@@ -65,10 +58,11 @@
 		{/await}
 	{/await}
 
-	{#await umlagePromise}
+	{#await umlagen}
 		<TextInputSkeleton />
 	{:then}
 		<ComboBox
+			disabled={!a.typ}
 			selectedId={a.umlage?.id}
 			on:select={selectUmlage}
 			style="padding-right: 1rem"

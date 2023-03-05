@@ -6,11 +6,16 @@
 		WalterBetriebskostenrechnung,
 		WalterDataWrapper
 	} from '$WalterComponents';
-	import type { WalterBetriebskostenrechnungEntry } from '$WalterTypes';
+	import type {
+		WalterBetriebskostenrechnungEntry,
+		WalterSelectionEntry
+	} from '$WalterTypes';
 
 	export let rows: WalterBetriebskostenrechnungEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
+	export let betriebskostentypen: WalterSelectionEntry[];
+	export let umlagen: WalterSelectionEntry[];
 
 	const headers = [
 		{ key: 'typ.text', value: 'Typ' },
@@ -39,6 +44,6 @@
 	{headers}
 >
 	{#if a}
-		<WalterBetriebskostenrechnung {a} />
+		<WalterBetriebskostenrechnung {umlagen} {betriebskostentypen} {a} />
 	{/if}
 </WalterDataWrapper>

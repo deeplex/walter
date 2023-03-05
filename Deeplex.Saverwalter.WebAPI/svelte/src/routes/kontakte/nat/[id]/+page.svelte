@@ -13,26 +13,26 @@
 	} from '$WalterComponents';
 
 	export let data: PageData;
-	const url = `/api/kontakte/nat/${data.id}`;
-
-	const a: WalterNatuerlichePersonEntry = data.a;
 </script>
 
-<WalterHeaderDetail {a} {url} title={a.name} />
+<WalterHeaderDetail a={data.a} url={data.url} title={data.a.name} />
 
 <WalterGrid>
 	<Row>
-		<WalterTextInput bind:value={a.vorname} labelText="Vorname" />
-		<WalterTextInput bind:value={a.nachname} labelText="Nachname" />
+		<WalterTextInput bind:value={data.a.vorname} labelText="Vorname" />
+		<WalterTextInput bind:value={data.a.nachname} labelText="Nachname" />
 	</Row>
-	<WalterPerson value={a} />
+	<WalterPerson value={data.a} />
 
 	<Accordion>
 		<!-- TODO add here -->
-		<WalterKontakte title="Juristische Personen" rows={a.juristischePersonen} />
-		{#await a then}
-			<WalterWohnungen title="Wohnungen" rows={a.wohnungen} />
-			<WalterVertraege title="Verträge" rows={a.vertraege} />
+		<WalterKontakte
+			title="Juristische Personen"
+			rows={data.a.juristischePersonen}
+		/>
+		{#await data.a then}
+			<WalterWohnungen title="Wohnungen" rows={data.a.wohnungen} />
+			<WalterVertraege title="Verträge" rows={data.a.vertraege} />
 		{/await}
 	</Accordion>
 </WalterGrid>

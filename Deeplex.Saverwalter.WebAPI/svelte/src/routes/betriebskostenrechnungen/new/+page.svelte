@@ -5,15 +5,19 @@
 		WalterBetriebskostenrechnung
 	} from '$WalterComponents';
 	import type { WalterBetriebskostenrechnungEntry } from '$WalterTypes';
+	import type { PageData } from './$types';
 
-	const url = `/api/betriebskostenrechnungen`;
-	const title = 'Neue Betriebskostenrechnung';
+	export let data: PageData;
 
 	const entry: Partial<WalterBetriebskostenrechnungEntry> = {};
 </script>
 
-<WalterHeaderNew {url} {entry} {title} />
+<WalterHeaderNew url={data.url} {entry} title={data.title} />
 
 <WalterGrid>
-	<WalterBetriebskostenrechnung a={entry} />
+	<WalterBetriebskostenrechnung
+		betriebskostentypen={data.betriebskostentypen}
+		umlagen={data.umlagen}
+		a={entry}
+	/>
 </WalterGrid>

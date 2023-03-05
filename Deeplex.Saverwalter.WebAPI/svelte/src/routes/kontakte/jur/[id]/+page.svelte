@@ -12,26 +12,27 @@
 	} from '$WalterComponents';
 
 	export let data: PageData;
-
-	let a = data.a;
 </script>
 
-<WalterHeaderDetail {a} url={data.url} title={a.name} />
+<WalterHeaderDetail a={data.a} url={data.url} title={data.a.name} />
 
 <WalterGrid>
 	<Row>
-		<WalterTextInput labelText="Bezeichnung" value={a.name} />
+		<WalterTextInput labelText="Bezeichnung" value={data.a.name} />
 	</Row>
-	<WalterPerson value={a} />
+	<WalterPerson value={data.a} />
 
 	<Accordion>
 		<!-- TODO add -->
-		<WalterKontakte title="Mitglieder" rows={a.mitglieder} />
+		<WalterKontakte title="Mitglieder" rows={data.a.mitglieder} />
 		<!-- TODO add -->
-		<WalterKontakte title="Juristische Personen" rows={a.juristischePersonen} />
-		{#await a then}
-			<WalterWohnungen title="Wohnungen" rows={a.wohnungen} />
-			<WalterVertraege title="Verträge" rows={a.vertraege} />
+		<WalterKontakte
+			title="Juristische Personen"
+			rows={data.a.juristischePersonen}
+		/>
+		{#await data.a then}
+			<WalterWohnungen title="Wohnungen" rows={data.a.wohnungen} />
+			<WalterVertraege title="Verträge" rows={data.a.vertraege} />
 		{/await}
 	</Accordion>
 </WalterGrid>

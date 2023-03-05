@@ -8,28 +8,30 @@
 		WalterHeaderDetail,
 		WalterBetriebskostenrechnung
 	} from '$WalterComponents';
-	import type { WalterBetriebskostenrechnungEntry } from '$WalterTypes';
 
 	export let data: PageData;
-	const url = `/api/betriebskostenrechnungen/${data.id}`;
-
-	const a: Partial<WalterBetriebskostenrechnungEntry> = data.a;
 </script>
 
 <WalterHeaderDetail
-	{a}
-	{url}
-	title={a.typ?.text + ' - ' + a.betreffendesJahr + ' - ' + a.umlage?.text}
+	a={data.a}
+	url={data.url}
+	title={data.a.typ?.text +
+		' - ' +
+		data.a.betreffendesJahr +
+		' - ' +
+		data.a.umlage?.text}
 />
 
 <WalterGrid>
-	<WalterBetriebskostenrechnung {a} />
+	<WalterBetriebskostenrechnung
+		betriebskostentypen={data.betriebskostentypen}
+		umlagen={data.umlagen}
+		a={data.a}
+	/>
 
 	<Accordion>
-		<WalterWohnungen title="Wohnungen" rows={a.wohnungen || []} />
+		<WalterWohnungen title="Wohnungen" rows={data.a.wohnungen} />
 	</Accordion>
 
-	{#await a then x}
-		<Button href={`/umlagen/${x.umlage?.id}`}>Zur Umlage</Button>
-	{/await}
+	<Button href={`/umlagen/${data.a.umlage?.id}`}>Zur Umlage</Button>
 </WalterGrid>

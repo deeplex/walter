@@ -22,56 +22,58 @@
 	import { toLocaleIsoString } from '$WalterServices/utils';
 
 	export let data: PageData;
-	const url = `/api/wohnungen/${data.id}`;
-
-	const a = data.a;
 
 	const zaehlerEntry: Partial<WalterZaehlerEntry> = {
 		wohnung: {
-			id: '' + a.id,
-			text: a.adresse?.anschrift + ' - ' + a.bezeichnung
+			id: '' + data.a.id,
+			text: data.a.adresse?.anschrift + ' - ' + data.a.bezeichnung
 		},
-		adresse: { ...a.adresse }
+		adresse: { ...data.a.adresse }
 	};
 	const umlageEntry: Partial<WalterUmlageEntry> = {
 		selectedWohnungen: [
 			{
-				id: '' + a.id,
-				text: a.adresse?.anschrift + ' - ' + a.bezeichnung
+				id: '' + data.a.id,
+				text: data.a.adresse?.anschrift + ' - ' + data.a.bezeichnung
 			}
 		]
 	};
 	const erhaltungsaufwendungEntry: Partial<WalterErhaltungsaufwendungEntry> = {
 		wohnung: {
-			id: '' + a.id,
-			text: a.adresse?.anschrift + ' - ' + a.bezeichnung
+			id: '' + data.a.id,
+			text: data.a.adresse?.anschrift + ' - ' + data.a.bezeichnung
 		},
 		datum: toLocaleIsoString(new Date())
 	};
 </script>
 
 <WalterHeaderDetail
-	{a}
-	{url}
-	title={a.adresse?.anschrift + ' - ' + a.bezeichnung}
+	a={data.a}
+	url={data.url}
+	title={data.a.adresse?.anschrift + ' - ' + data.a.bezeichnung}
 />
 
 <WalterGrid>
-	<WalterWohnung {a} />
+	<WalterWohnung a={data.a} />
 
 	<Accordion>
-		<WalterWohnungen title="Wohnungen an der selben Adresse" rows={a.haus} />
-		<WalterZaehlerList a={zaehlerEntry} title="Zähler" rows={a.zaehler} />
-		<WalterVertraege title="Verträge" rows={a.vertraege} />
-		<WalterUmlagen a={umlageEntry} title="Umlagen" rows={a.umlagen} />
+		<WalterWohnungen
+			title="Wohnungen an der selben Adresse"
+			rows={data.a.haus}
+		/>
+		<WalterZaehlerList a={zaehlerEntry} title="Zähler" rows={data.a.zaehler} />
+		<WalterVertraege title="Verträge" rows={data.a.vertraege} />
+		<WalterUmlagen a={umlageEntry} title="Umlagen" rows={data.a.umlagen} />
 		<WalterBetriebskostenrechnungen
+			betriebskostentypen={data.betriebskostentypen}
+			umlagen={data.umlagen}
 			title="Betriebskostenrechnungen"
-			rows={a.betriebskostenrechnungen}
+			rows={data.a.betriebskostenrechnungen}
 		/>
 		<WalterErhaltungsaufwendungen
 			a={erhaltungsaufwendungEntry}
 			title="Erhaltungsaufwendungen"
-			rows={a.erhaltungsaufwendungen}
+			rows={data.a.erhaltungsaufwendungen}
 		/>
 	</Accordion>
 </WalterGrid>
