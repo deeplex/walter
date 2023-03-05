@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { WalterDataWrapper } from '$WalterComponents';
+	import { goto } from '$app/navigation';
+	import { WalterDataWrapper, WalterZaehlerstand } from '$WalterComponents';
 
 	import type { WalterZaehlerstandEntry } from '$WalterTypes';
 
@@ -15,15 +16,24 @@
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 
+	const navigate = (e: CustomEvent) => goto(`/zaehlerstaende/${e.detail.id}`);
+
 	export let a: Promise<Partial<WalterZaehlerstandEntry>> | undefined =
 		undefined;
 	let entry: Partial<WalterZaehlerstandEntry> | undefined = undefined;
 	a?.then((e) => (entry = e));
 </script>
 
-<WalterDataWrapper {addUrl} addEntry={entry} {title} {search} {rows} {headers}>
+<WalterDataWrapper
+	{navigate}
+	{addUrl}
+	addEntry={entry}
+	{title}
+	{search}
+	{rows}
+	{headers}
+>
 	{#if entry}
-		<p>TODO WALTERZAEHLERSTAND</p>
-		<!-- <WalterZaehlerstaende {a} {entry} /> -->
+		<WalterZaehlerstand {a} {entry} />
 	{/if}
 </WalterDataWrapper>

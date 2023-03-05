@@ -8,10 +8,15 @@
 		WalterGrid,
 		WalterZaehler,
 		WalterZaehlerstaende,
-		WalterZaehlerList
+		WalterZaehlerList,
+		WalterZaehlerstand
 	} from '$WalterComponents';
 	import { walter_get } from '$WalterServices/requests';
-	import type { WalterZaehlerEntry } from '$WalterTypes';
+	import type {
+		WalterZaehlerEntry,
+		WalterZaehlerstandEntry
+	} from '$WalterTypes';
+	import { toLocaleIsoString } from '$WalterServices/utils';
 
 	export let data: PageData;
 	const url = `/api/zaehler/${data.id}`;
@@ -21,6 +26,18 @@
 	a.then((e) => Object.assign(entry, e));
 
 	const title = a.then((x) => x.kennnummer);
+
+	const zaehlerstandEntry: Promise<Partial<WalterZaehlerstandEntry>> = a.then(
+		(e) => {
+			const last = e.staende[e.staende.length - 1] || undefined;
+			return {
+				zaehler: { id: '' + e.id, text: e.kennnummer },
+				datum: toLocaleIsoString(new Date()),
+				stand: last.stand || 0,
+				einheit: last.einheit
+			};
+		}
+	);
 
 	const einzelzaehlerEntry: Promise<Partial<WalterZaehlerEntry>> = a.then(
 		(e) => ({
@@ -37,8 +54,8 @@
 	<WalterZaehler {a} {entry} />
 
 	<Accordion>
-		<!-- TODO liste fehlt -->
 		<WalterZaehlerstaende
+			a={zaehlerstandEntry}
 			title="Zählerstände"
 			rows={a.then((x) => x.staende)}
 		/>

@@ -2,7 +2,7 @@
 	import { WalterGrid, WalterHeaderNew, WalterMiete } from '$WalterComponents';
 	import type { WalterMieteEntry } from '$WalterTypes';
 
-	const url = `/api/miete`;
+	const url = `/api/mieten`;
 	const title = 'Neue Miete';
 
 	const entry: Partial<WalterMieteEntry> = {};

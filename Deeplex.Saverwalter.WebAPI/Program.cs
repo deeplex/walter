@@ -33,6 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<VertragDbService>(Lifestyle.Scoped);
             container.Register<WohnungDbService>(Lifestyle.Scoped);
             container.Register<ZaehlerDbService>(Lifestyle.Scoped);
+            container.Register<ZaehlerstandDbService>(Lifestyle.Scoped);
 
             var builder = WebApplication.CreateBuilder(args);
 

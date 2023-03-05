@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -50,25 +51,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public ZaehlerEntry(Zaehler entity, IWalterDbService dbService) : base(entity, dbService)
             {
                 DbService = dbService;
-            }
-        }
-
-        public class ZaehlerstandEntryBase
-        {
-            private Zaehlerstand? Entity { get; }
-            public int Id { get; set; }
-            public double Stand { get; set; }
-            public DateTime Datum { get; set; }
-            public string Einheit { get; set; }
-
-            public ZaehlerstandEntryBase(Zaehlerstand entity)
-            {
-                Entity = entity;
-
-                Id = Entity.ZaehlerstandId;
-                Stand = Entity.Stand;
-                Datum = Entity.Datum;
-                Einheit = Entity.Zaehler.Typ.ToUnitString();
             }
         }
 
