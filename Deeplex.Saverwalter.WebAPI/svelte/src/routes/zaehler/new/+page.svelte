@@ -5,14 +5,20 @@
 		WalterHeaderNew
 	} from '$WalterComponents';
 	import type { WalterZaehlerEntry } from '$WalterTypes';
+	import type { PageData } from './$types';
 
-	const url = `/api/zaehler`;
+	export let data: PageData;
+
 	const entry: Partial<WalterZaehlerEntry> = {};
-	const title = 'Neuer Zähler';
 </script>
 
-<WalterHeaderNew {url} {entry} {title} />
+<WalterHeaderNew url={data.url} {entry} title={data.title} />
 
 <WalterGrid>
-	<WalterZaehler a={entry} />
+	<WalterZaehler
+		wohnungen={data.wohnungen}
+		zaehler={data.zaehler}
+		zaehlertypen={data.zaehlertypen}
+		a={entry}
+	/>
 </WalterGrid>

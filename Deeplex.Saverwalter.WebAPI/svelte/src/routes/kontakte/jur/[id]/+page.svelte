@@ -31,8 +31,17 @@
 			rows={data.a.juristischePersonen}
 		/>
 		{#await data.a then}
-			<WalterWohnungen title="Wohnungen" rows={data.a.wohnungen} />
-			<WalterVertraege title="Verträge" rows={data.a.vertraege} />
+			<WalterWohnungen
+				kontakte={data.kontakte}
+				title="Wohnungen"
+				rows={data.a.wohnungen}
+			/>
+			<WalterVertraege
+				wohnungen={data.wohnungen}
+				kontakte={data.kontakte}
+				title="Verträge"
+				rows={data.a.vertraege}
+			/>
 		{/await}
 	</Accordion>
 </WalterGrid>

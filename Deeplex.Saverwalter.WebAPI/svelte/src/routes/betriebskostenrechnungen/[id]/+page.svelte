@@ -30,7 +30,11 @@
 	/>
 
 	<Accordion>
-		<WalterWohnungen title="Wohnungen" rows={data.a.wohnungen} />
+		<WalterWohnungen
+			kontakte={data.kontakte}
+			title="Wohnungen"
+			rows={data.a.wohnungen}
+		/>
 	</Accordion>
 
 	<Button href={`/umlagen/${data.a.umlage?.id}`}>Zur Umlage</Button>

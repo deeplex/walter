@@ -9,4 +9,9 @@
 </script>
 
 <WalterHeaderList url={data.url} title="Erhaltungsaufwendungen" />
-<WalterErhaltungsaufwendungen search rows={data.rows} />
+<WalterErhaltungsaufwendungen
+	kontakte={data.kontakte}
+	wohnungen={data.wohnungen}
+	search
+	rows={data.rows}
+/>

@@ -1,5 +1,5 @@
 import { walter_get } from "$WalterServices/requests";
-import type { WalterAdresseEntry } from "$WalterTypes";
+import type { WalterAdresseEntry, WalterSelectionEntry } from "$WalterTypes";
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, fetch }) => {
@@ -7,6 +7,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
     return {
         id: params.id,
         url: url,
+        kontakte: walter_get(`/api/selection/kontakte`, fetch) as Promise<WalterSelectionEntry[]>,
         a: walter_get(url, fetch) as Promise<WalterAdresseEntry>
     }
 }

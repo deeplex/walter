@@ -6,4 +6,10 @@
 </script>
 
 <WalterHeaderList url={data.url} title="Umlagen" />
-<WalterUmlagen search rows={data.rows} />
+<WalterUmlagen
+	wohnungen={data.wohnungen}
+	umlageschluessel={data.umlageschluessel}
+	betriebskostentypen={data.betriebskostentypen}
+	search
+	rows={data.rows}
+/>

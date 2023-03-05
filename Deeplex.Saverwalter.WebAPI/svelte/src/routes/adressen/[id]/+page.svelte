@@ -20,6 +20,7 @@
 
 	<Accordion>
 		<WalterWohnungen
+			kontakte={data.kontakte}
 			a={wohnungEntry}
 			title="Wohnungen"
 			rows={data.a.wohnungen}

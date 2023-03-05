@@ -3,11 +3,9 @@ import type { WalterSelectionEntry, WalterZaehlerEntry } from "$WalterTypes";
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    const url = `/api/zaehler/${params.id}`;
     return {
-        id: params.id,
-        url: url,
-        a: walter_get(url, fetch) as Promise<WalterZaehlerEntry>,
+        url: `/api/zaehler`,
+        title: 'Neuer Zähler',
         wohnungen: walter_get(`/api/selection/wohnungen`, fetch) as Promise<WalterSelectionEntry[]>,
         zaehler: walter_get(`/api/selection/zaehler`, fetch) as Promise<WalterSelectionEntry[]>,
         zaehlertypen: walter_get(`/api/selection/zaehlertypen`, fetch) as Promise<WalterSelectionEntry[]>,

@@ -6,7 +6,10 @@
 		WalterDataWrapper,
 		WalterErhaltungsaufwendung
 	} from '$WalterComponents';
-	import type { WalterErhaltungsaufwendungEntry } from '$WalterTypes';
+	import type {
+		WalterErhaltungsaufwendungEntry,
+		WalterSelectionEntry
+	} from '$WalterTypes';
 
 	const headers = [
 		{ key: 'bezeichnung', value: 'Bezeichnung' },
@@ -24,6 +27,8 @@
 	export let rows: WalterErhaltungsaufwendungEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
+	export let kontakte: WalterSelectionEntry[];
+	export let wohnungen: WalterSelectionEntry[];
 
 	export let a: Partial<WalterErhaltungsaufwendungEntry> | undefined =
 		undefined;
@@ -39,6 +44,6 @@
 	{headers}
 >
 	{#if a}
-		<WalterErhaltungsaufwendung {a} />
+		<WalterErhaltungsaufwendung {kontakte} {wohnungen} {a} />
 	{/if}
 </WalterDataWrapper>

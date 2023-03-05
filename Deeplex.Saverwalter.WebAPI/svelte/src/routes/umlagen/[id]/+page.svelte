@@ -41,10 +41,19 @@
 />
 
 <WalterGrid>
-	<WalterUmlage a={data.a} />
+	<WalterUmlage
+		betriebskostentypen={data.betriebskostentypen}
+		wohnungen={data.wohnungen}
+		umlageschluessel={data.umlageschluessel}
+		a={data.a}
+	/>
 
 	<Accordion>
-		<WalterWohnungen title="Wohnungen" rows={data.a.wohnungen} />
+		<WalterWohnungen
+			kontakte={data.kontakte}
+			title="Wohnungen"
+			rows={data.a.wohnungen}
+		/>
 		<WalterBetriebskostenrechnungen
 			betriebskostentypen={data.betriebskostentypen}
 			umlagen={data.umlagen}

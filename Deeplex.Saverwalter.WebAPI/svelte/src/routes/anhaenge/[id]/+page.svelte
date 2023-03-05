@@ -41,6 +41,8 @@
 			rows={data.a.betriebskostenrechnungen}
 		/>
 		<WalterErhaltungsaufwendungen
+			wohnungen={data.wohnungen}
+			kontakte={data.kontakte}
 			title="Erhaltungsaufwendungen"
 			rows={data.a.erhaltungsaufwendungen}
 		/>
@@ -48,9 +50,30 @@
 			title="Kontakte"
 			rows={data.a.natuerlichePersonen.concat(data.a.juristischePersonen)}
 		/>
-		<WalterUmlagen title="Umlagen" rows={data.a.umlagen} />
-		<WalterVertraege title="Verträge" rows={data.a.vertraege} />
-		<WalterWohnungen title="Wohnungen" rows={data.a.wohnungen} />
-		<WalterZaehlerList title="Zähler" rows={data.a.zaehler} />
+		<WalterUmlagen
+			betriebskostentypen={data.betriebskostentypen}
+			umlageschluessel={data.umlageschluessel}
+			wohnungen={data.wohnungen}
+			title="Umlagen"
+			rows={data.a.umlagen}
+		/>
+		<WalterVertraege
+			wohnungen={data.wohnungen}
+			kontakte={data.kontakte}
+			title="Verträge"
+			rows={data.a.vertraege}
+		/>
+		<WalterWohnungen
+			kontakte={data.kontakte}
+			title="Wohnungen"
+			rows={data.a.wohnungen}
+		/>
+		<WalterZaehlerList
+			zaehlertypen={data.zaehlertypen}
+			zaehler={data.zaehler}
+			wohnungen={data.wohnungen}
+			title="Zähler"
+			rows={data.a.zaehler}
+		/>
 	</Accordion>
 </WalterGrid>

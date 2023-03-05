@@ -5,9 +5,7 @@
 
 	export let value: WalterSelectionEntry[] | undefined;
 	export let titleText: string;
-	export let api: string;
-
-	const a: Promise<WalterSelectionEntry[]> = walter_get(api);
+	export let a: WalterSelectionEntry[];
 
 	function select(e: CustomEvent) {
 		value = e.detail.selected;

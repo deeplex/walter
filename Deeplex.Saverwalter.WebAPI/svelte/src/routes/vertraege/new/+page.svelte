@@ -5,14 +5,19 @@
 		WalterHeaderNew
 	} from '$WalterComponents';
 	import type { WalterVertragEntry } from '$WalterTypes';
+	import type { PageData } from './$types';
 
-	const url = `/api/vertraege`;
+	export let data: PageData;
+
 	const entry: Partial<WalterVertragEntry> = {};
-	const title = 'Neuer Vertrag';
 </script>
 
-<WalterHeaderNew {url} {entry} {title} />
+<WalterHeaderNew url={data.url} {entry} title={data.title} />
 
 <WalterGrid>
-	<WalterVertrag a={entry} />
+	<WalterVertrag
+		kontakte={data.kontakte}
+		wohnungen={data.wohnungen}
+		a={entry}
+	/>
 </WalterGrid>

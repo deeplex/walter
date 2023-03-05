@@ -6,4 +6,10 @@
 </script>
 
 <WalterHeaderList url={data.url} title="Zähler" />
-<WalterZaehlerList search rows={data.rows} />
+<WalterZaehlerList
+	zaehlertypen={data.zaehlertypen}
+	wohnungen={data.wohnungen}
+	zaehler={data.zaehler}
+	search
+	rows={data.rows}
+/>

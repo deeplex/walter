@@ -6,4 +6,9 @@
 </script>
 
 <WalterHeaderList url={data.url} title="Verträge" />
-<WalterVertraege search rows={data.rows} />
+<WalterVertraege
+	wohnungen={data.wohnungen}
+	kontakte={data.kontakte}
+	search
+	rows={data.rows}
+/>

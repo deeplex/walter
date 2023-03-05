@@ -3,7 +3,7 @@
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
 	import { WalterDataWrapper } from '$WalterComponents';
-	import type { WalterVertragEntry } from '$WalterTypes';
+	import type { WalterSelectionEntry, WalterVertragEntry } from '$WalterTypes';
 	import WalterVertrag from '../details/WalterVertrag.svelte';
 
 	const headers = [
@@ -21,6 +21,8 @@
 	export let rows: WalterVertragEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
+	export let kontakte: WalterSelectionEntry[];
+	export let wohnungen: WalterSelectionEntry[];
 	export let a: Partial<WalterVertragEntry> | undefined = undefined;
 </script>
 
@@ -34,6 +36,6 @@
 	{headers}
 >
 	{#if a}
-		<WalterVertrag {a} />
+		<WalterVertrag {kontakte} {wohnungen} {a} />
 	{/if}
 </WalterDataWrapper>

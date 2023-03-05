@@ -6,17 +6,14 @@
 		WalterTextInput
 	} from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
-	import type { WalterWohnungEntry } from '$WalterTypes';
+	import type { WalterSelectionEntry, WalterWohnungEntry } from '$WalterTypes';
 
 	export let a: Partial<WalterWohnungEntry> = {};
+	export let kontakte: WalterSelectionEntry[];
 </script>
 
 <Row>
-	<WalterComboBox
-		bind:value={a.besitzer}
-		titleText="Besitzer"
-		api={`/api/selection/kontakte`}
-	/>
+	<WalterComboBox bind:value={a.besitzer} titleText="Besitzer" a={kontakte} />
 </Row>
 <WalterAdresse bind:value={a.adresse} />
 <Row>

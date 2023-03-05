@@ -35,7 +35,12 @@
 <WalterHeaderDetail a={data.a} url={data.url} title={data.a.kennnummer} />
 
 <WalterGrid>
-	<WalterZaehler a={data.a} />
+	<WalterZaehler
+		zaehler={data.zaehler}
+		zaehlertypen={data.zaehlertypen}
+		wohnungen={data.wohnungen}
+		a={data.a}
+	/>
 
 	<Accordion>
 		<WalterZaehlerstaende
@@ -44,6 +49,9 @@
 			rows={data.a.staende}
 		/>
 		<WalterZaehlerList
+			zaehlertypen={data.zaehlertypen}
+			zaehler={data.zaehler}
+			wohnungen={data.wohnungen}
 			a={einzelzaehlerEntry}
 			title="Einzelzähler"
 			rows={data.a.einzelzaehler}

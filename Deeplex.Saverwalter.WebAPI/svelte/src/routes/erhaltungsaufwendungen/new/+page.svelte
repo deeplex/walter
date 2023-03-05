@@ -5,15 +5,18 @@
 		WalterErhaltungsaufwendung,
 		WalterHeaderNew
 	} from '$WalterComponents';
+	import type { PageData } from './$types';
 
-	const url = `/api/erhaltungsaufwendungen`;
+	export let data: PageData;
 	const entry: Partial<WalterErhaltungsaufwendungEntry> = {};
-
-	const title = 'Neue Erhaltungsaufwendung';
 </script>
 
-<WalterHeaderNew {url} {entry} {title} />
+<WalterHeaderNew url={data.url} {entry} title={data.title} />
 
 <WalterGrid>
-	<WalterErhaltungsaufwendung a={entry} />
+	<WalterErhaltungsaufwendung
+		kontakte={data.kontakte}
+		wohnungen={data.wohnungen}
+		a={entry}
+	/>
 </WalterGrid>

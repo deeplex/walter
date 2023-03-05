@@ -1,15 +1,20 @@
 <script lang="ts">
 	import { WalterGrid, WalterUmlage, WalterHeaderNew } from '$WalterComponents';
 	import type { WalterUmlageEntry } from '$WalterTypes';
+	import type { PageData } from './$types';
 
 	const entry: Partial<WalterUmlageEntry> = {};
-	const url = `/api/umlagen`;
 
-	const title = 'Neue Umlage';
+	export let data: PageData;
 </script>
 
-<WalterHeaderNew {url} {entry} {title} />
+<WalterHeaderNew url={data.url} {entry} title={data.title} />
 
 <WalterGrid>
-	<WalterUmlage a={entry} />
+	<WalterUmlage
+		wohnungen={data.wohnungen}
+		betriebskostentypen={data.betriebskostentypen}
+		umlageschluessel={data.umlageschluessel}
+		a={entry}
+	/>
 </WalterGrid>

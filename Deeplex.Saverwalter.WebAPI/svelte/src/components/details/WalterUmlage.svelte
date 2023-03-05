@@ -5,19 +5,19 @@
 		WalterTextInput
 	} from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
-	import type { WalterUmlageEntry } from '$WalterTypes';
+	import type { WalterSelectionEntry, WalterUmlageEntry } from '$WalterTypes';
+
+	export let betriebskostentypen: WalterSelectionEntry[];
+	export let umlageschluessel: WalterSelectionEntry[];
+	export let wohnungen: WalterSelectionEntry[];
 
 	export let a: Partial<WalterUmlageEntry> = {};
 </script>
 
 <Row>
+	<WalterComboBox a={betriebskostentypen} bind:value={a.typ} titleText="Typ" />
 	<WalterComboBox
-		api={'/api/selection/betriebskostentypen'}
-		bind:value={a.typ}
-		titleText="Typ"
-	/>
-	<WalterComboBox
-		api={'/api/selection/umlageschluessel'}
+		a={umlageschluessel}
 		bind:value={a.schluessel}
 		titleText="Umlageschlüssel"
 	/>
@@ -25,7 +25,7 @@
 <Row>
 	<WalterMultiSelect
 		bind:value={a.selectedWohnungen}
-		api="/api/selection/wohnungen"
+		a={wohnungen}
 		titleText="Wohnungen"
 	/>
 </Row>

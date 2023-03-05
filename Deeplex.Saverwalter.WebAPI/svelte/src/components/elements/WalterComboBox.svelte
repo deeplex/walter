@@ -7,9 +7,7 @@
 	export let value: WalterSelectionEntry | undefined;
 	export let titleText: string;
 	export let binding: WalterSelectionEntry | undefined = undefined;
-	export let api: string;
-
-	const a: Promise<WalterSelectionEntry[]> = walter_get(api);
+	export let a: WalterSelectionEntry[];
 
 	function shouldFilterItem(item: WalterSelectionEntry, value: string) {
 		if (!value) return true;

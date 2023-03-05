@@ -51,7 +51,11 @@
 />
 
 <WalterGrid>
-	<WalterVertrag a={data.a} />
+	<WalterVertrag
+		kontakte={data.kontakte}
+		wohnungen={data.wohnungen}
+		a={data.a}
+	/>
 
 	<Accordion>
 		<WalterKontakte title="Mieter" rows={data.a.mieter} />

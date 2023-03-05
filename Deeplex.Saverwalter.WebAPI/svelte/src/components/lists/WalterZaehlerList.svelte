@@ -3,7 +3,7 @@
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
 	import { WalterDataWrapper, WalterZaehler } from '$WalterComponents';
-	import type { WalterZaehlerEntry } from '$WalterTypes';
+	import type { WalterSelectionEntry, WalterZaehlerEntry } from '$WalterTypes';
 
 	const headers = [
 		{ key: 'kennnummer', value: 'Kennnummer' },
@@ -16,6 +16,9 @@
 	export let rows: WalterZaehlerEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
+	export let wohnungen: WalterSelectionEntry[];
+	export let zaehler: WalterSelectionEntry[];
+	export let zaehlertypen: WalterSelectionEntry[];
 	export let a: Partial<WalterZaehlerEntry> | undefined = undefined;
 
 	const navigate = (e: CustomEvent<DataTableRow>) =>
@@ -32,6 +35,6 @@
 	{headers}
 >
 	{#if a}
-		<WalterZaehler {a} />
+		<WalterZaehler {wohnungen} {zaehler} {zaehlertypen} {a} />
 	{/if}
 </WalterDataWrapper>

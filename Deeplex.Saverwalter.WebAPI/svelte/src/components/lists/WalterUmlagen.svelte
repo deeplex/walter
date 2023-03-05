@@ -3,7 +3,7 @@
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
 	import { WalterDataWrapper, WalterUmlage } from '$WalterComponents';
-	import type { WalterUmlageEntry } from '$WalterTypes';
+	import type { WalterSelectionEntry, WalterUmlageEntry } from '$WalterTypes';
 
 	const headers = [
 		{ key: 'typ.text', value: 'Typ' },
@@ -18,6 +18,9 @@
 	export let rows: WalterUmlageEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
+	export let betriebskostentypen: WalterSelectionEntry[];
+	export let umlageschluessel: WalterSelectionEntry[];
+	export let wohnungen: WalterSelectionEntry[];
 	export let a: Partial<WalterUmlageEntry> | undefined = undefined;
 </script>
 
@@ -31,6 +34,6 @@
 	{headers}
 >
 	{#if a}
-		<WalterUmlage {a} />
+		<WalterUmlage {betriebskostentypen} {umlageschluessel} {wohnungen} {a} />
 	{/if}
 </WalterDataWrapper>

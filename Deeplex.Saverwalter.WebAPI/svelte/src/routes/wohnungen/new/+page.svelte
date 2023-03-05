@@ -5,14 +5,14 @@
 		WalterWohnung
 	} from '$WalterComponents';
 	import type { WalterWohnungEntry } from '$WalterTypes';
+	import type { PageData } from './$types';
 
-	const url = `/api/wohnungen`;
+	export let data: PageData;
 	const entry: Partial<WalterWohnungEntry> = {};
-	const title = 'Neue Wohnung';
 </script>
 
-<WalterHeaderNew {url} {entry} {title} />
+<WalterHeaderNew url={data.url} {entry} title={data.title} />
 
 <WalterGrid>
-	<WalterWohnung a={entry} />
+	<WalterWohnung kontakte={data.kontakte} a={entry} />
 </WalterGrid>
