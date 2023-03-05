@@ -24,6 +24,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Notiz {get; set;}
             public SelectionEntry? Vertrag { get; set; }
 
+            public MietminderungEntryBase() { }
             public MietminderungEntryBase(Mietminderung entity)
             {
                 Entity = entity;

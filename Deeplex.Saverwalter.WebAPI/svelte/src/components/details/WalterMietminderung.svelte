@@ -15,7 +15,7 @@
 <Row>
 	<WalterNumberInput
 		bind:binding={entry.minderung}
-		label="Betrag"
+		label="Minderung"
 		value={a?.then((x) => x.minderung)}
 	/>
 	<WalterDatePicker

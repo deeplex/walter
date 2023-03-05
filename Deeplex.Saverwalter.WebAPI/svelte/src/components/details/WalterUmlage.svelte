@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { WalterMultiSelect, WalterTextInput } from '$WalterComponents';
+	import {
+		WalterComboBox,
+		WalterMultiSelect,
+		WalterTextInput
+	} from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
 	import type { WalterUmlageEntry } from '$WalterTypes';
-	import WalterComboBox from '../elements/WalterComboBox.svelte';
 
 	export let a: Promise<Partial<WalterUmlageEntry>> | undefined = undefined;
 	export let entry: Partial<WalterUmlageEntry> = {};

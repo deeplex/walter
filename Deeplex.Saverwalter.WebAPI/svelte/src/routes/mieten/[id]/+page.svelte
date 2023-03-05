@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import {
 		WalterHeaderDetail,
 		WalterGrid,
@@ -7,7 +6,7 @@
 	} from '$WalterComponents';
 	import { walter_get } from '$WalterServices/requests';
 	import type { WalterMieteEntry } from '$WalterTypes';
-	import { Button } from 'carbon-components-svelte';
+	import { Button, ButtonSkeleton } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -24,9 +23,9 @@
 
 <WalterGrid>
 	<WalterMiete {a} {entry} />
-	{#await a then x}
-		<Button on:click={() => goto(`/vertraege/${x.vertrag.id}`)}
-			>Zum Vertrag</Button
-		>
+	{#await a}
+		<ButtonSkeleton />
+	{:then x}
+		<Button href={`/vertraege/${x.vertrag.id}`}>Zum Vertrag</Button>
 	{/await}
 </WalterGrid>
