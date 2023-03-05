@@ -34,6 +34,7 @@ export { default as WalterErhaltungsaufwendungen } from './lists/WalterErhaltung
 export { default as WalterBetriebskostenrechnungen } from './lists/WalterBetriebskostenrechnungen.svelte';
 export { default as WalterKontakte } from './lists/WalterKontakte.svelte';
 export { default as WalterVertraege } from './lists/WalterVertraege.svelte';
+export { default as WalterVertragVersionen } from './lists/WalterVertragVersionen.svelte';
 export { default as WalterZaehlerList } from './lists/WalterZaehlerList.svelte';
 export { default as WalterZaehlerstaende } from './lists/WalterZaehlerstaende.svelte';
 export { default as WalterMieten } from './lists/WalterMieten.svelte';
