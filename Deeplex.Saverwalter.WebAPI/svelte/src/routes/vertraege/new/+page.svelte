@@ -14,5 +14,5 @@
 <WalterHeaderNew {url} {entry} {title} />
 
 <WalterGrid>
-	<WalterVertrag {entry} />
+	<WalterVertrag a={entry} />
 </WalterGrid>

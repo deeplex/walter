@@ -1,12 +1,11 @@
 import { walter_get } from "$WalterServices/requests";
-import type { WalterAdresseEntry } from "$WalterTypes";
+import type { WalterPersonEntry } from "$WalterTypes";
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    const url = `/api/adressen/${params.id}`;
+    const url = `/api/kontakte`;
     return {
-        id: params.id,
         url: url,
-        a: walter_get(url, fetch) as Promise<WalterAdresseEntry>
+        rows: walter_get(url, fetch) as Promise<WalterPersonEntry[]>
     }
 }

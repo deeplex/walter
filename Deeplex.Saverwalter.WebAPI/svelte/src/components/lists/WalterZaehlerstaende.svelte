@@ -12,28 +12,24 @@
 
 	const addUrl = `/api/zaehlerstaende/`;
 
-	export let rows: Promise<WalterZaehlerstandEntry[]>;
+	export let rows: WalterZaehlerstandEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
+	export let a: Partial<WalterZaehlerstandEntry> | undefined = undefined;
 
 	const navigate = (e: CustomEvent) => goto(`/zaehlerstaende/${e.detail.id}`);
-
-	export let a: Promise<Partial<WalterZaehlerstandEntry>> | undefined =
-		undefined;
-	let entry: Partial<WalterZaehlerstandEntry> | undefined = undefined;
-	a?.then((e) => (entry = e));
 </script>
 
 <WalterDataWrapper
 	{navigate}
 	{addUrl}
-	addEntry={entry}
+	addEntry={a}
 	{title}
 	{search}
 	{rows}
 	{headers}
 >
-	{#if entry}
-		<WalterZaehlerstand {a} {entry} />
+	{#if a}
+		<WalterZaehlerstand {a} />
 	{/if}
 </WalterDataWrapper>

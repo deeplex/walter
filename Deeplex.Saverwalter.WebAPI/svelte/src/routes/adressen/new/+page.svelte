@@ -15,5 +15,5 @@
 <WalterHeaderNew {url} {entry} {title} />
 
 <WalterGrid>
-	<WalterAdresse {entry} />
+	<WalterAdresse value={entry} />
 </WalterGrid>

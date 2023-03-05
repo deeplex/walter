@@ -28,6 +28,7 @@ export { default as WalterTextInput } from './elements/WalterTextInput.svelte';
 export { default as WalterToasts } from './elements/WalterToasts.svelte';
 export { default as WalterNumberInput } from './elements/WalterNumberInput.svelte';
 
+export { default as WalterAdressen } from './lists/WalterAdressen.svelte';
 export { default as WalterUmlagen } from './lists/WalterUmlagen.svelte';
 export { default as WalterWohnungen } from './lists/WalterWohnungen.svelte';
 export { default as WalterErhaltungsaufwendungen } from './lists/WalterErhaltungsaufwendungen.svelte';

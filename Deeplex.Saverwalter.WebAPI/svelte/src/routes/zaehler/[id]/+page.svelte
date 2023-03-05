@@ -19,50 +19,38 @@
 	import { toLocaleIsoString } from '$WalterServices/utils';
 
 	export let data: PageData;
-	const url = `/api/zaehler/${data.id}`;
+	const a = data.a;
 
-	const a: Promise<WalterZaehlerEntry> = walter_get(url);
-	const entry: Partial<WalterZaehlerEntry> = {};
-	a.then((e) => Object.assign(entry, e));
+	const lastZaehlerstand = a.staende[a.staende.length - 1] || undefined;
+	const zaehlerstandEntry: Partial<WalterZaehlerstandEntry> = {
+		zaehler: { id: '' + a.id, text: a.kennnummer },
+		datum: toLocaleIsoString(new Date()),
+		stand: lastZaehlerstand.stand || 0,
+		einheit: lastZaehlerstand.einheit
+	};
 
-	const title = a.then((x) => x.kennnummer);
-
-	const zaehlerstandEntry: Promise<Partial<WalterZaehlerstandEntry>> = a.then(
-		(e) => {
-			const last = e.staende[e.staende.length - 1] || undefined;
-			return {
-				zaehler: { id: '' + e.id, text: e.kennnummer },
-				datum: toLocaleIsoString(new Date()),
-				stand: last.stand || 0,
-				einheit: last.einheit
-			};
-		}
-	);
-
-	const einzelzaehlerEntry: Promise<Partial<WalterZaehlerEntry>> = a.then(
-		(e) => ({
-			adresse: { ...e.adresse },
-			typ: e.typ,
-			allgemeinZaehler: { id: '' + e.id, text: e.kennnummer }
-		})
-	);
+	const einzelzaehlerEntry: Partial<WalterZaehlerEntry> = {
+		adresse: { ...a.adresse },
+		typ: a.typ,
+		allgemeinZaehler: { id: '' + a.id, text: a.kennnummer }
+	};
 </script>
 
-<WalterHeaderDetail {a} {url} {entry} {title} />
+<WalterHeaderDetail {a} url={data.url} title={a.kennnummer} />
 
 <WalterGrid>
-	<WalterZaehler {a} {entry} />
+	<WalterZaehler {a} />
 
 	<Accordion>
 		<WalterZaehlerstaende
 			a={zaehlerstandEntry}
 			title="Zählerstände"
-			rows={a.then((x) => x.staende)}
+			rows={a.staende}
 		/>
 		<WalterZaehlerList
 			a={einzelzaehlerEntry}
 			title="Einzelzähler"
-			rows={a.then((x) => x.einzelzaehler)}
+			rows={a.einzelzaehler}
 		/>
 	</Accordion>
 </WalterGrid>

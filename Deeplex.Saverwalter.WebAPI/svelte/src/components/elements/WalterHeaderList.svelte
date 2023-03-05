@@ -10,7 +10,7 @@
 	export let url: string;
 
 	function click_new() {
-		goto(`${url}/new`);
+		goto(`${url}/new`.replace('api/', ''));
 	}
 </script>
 

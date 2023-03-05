@@ -7,9 +7,9 @@ const headers = {
 
 // =================================== GET ====================================
 
-export const walter_get = (url: string) => fetch(
-    url, { method: 'GET', headers }
-).then(e => e.json());
+type fetchType = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>
+export const walter_get = (url: string, f: fetchType = fetch): Promise<any> =>
+    f(url, { method: 'GET', headers }).then(e => e.json());
 
 // =================================== PUT ===================================
 

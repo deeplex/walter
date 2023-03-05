@@ -18,39 +18,24 @@
 	export let data: PageData;
 	const url = `/api/kontakte/nat/${data.id}`;
 
-	const a: Promise<WalterNatuerlichePersonEntry> = walter_get(url);
-	const entry: Partial<WalterNatuerlichePersonEntry> = {};
-	a.then((e) => Object.assign(entry, e));
-
-	const title = a.then((x) => x.name);
+	const a: WalterNatuerlichePersonEntry = data.a;
 </script>
 
-<WalterHeaderDetail {a} {url} {entry} {title} />
+<WalterHeaderDetail {a} {url} title={a.name} />
 
 <WalterGrid>
 	<Row>
-		<WalterTextInput
-			bind:binding={entry.vorname}
-			labelText="Vorname"
-			value={a.then((x) => x.vorname)}
-		/>
-		<WalterTextInput
-			bind:binding={entry.nachname}
-			labelText="Nachname"
-			value={a.then((x) => x.nachname)}
-		/>
+		<WalterTextInput bind:value={a.vorname} labelText="Vorname" />
+		<WalterTextInput bind:value={a.nachname} labelText="Nachname" />
 	</Row>
-	<WalterPerson binding={entry} person={a} />
+	<WalterPerson value={a} />
 
 	<Accordion>
 		<!-- TODO add here -->
-		<WalterKontakte
-			title="Juristische Personen"
-			rows={a.then((x) => x.juristischePersonen)}
-		/>
+		<WalterKontakte title="Juristische Personen" rows={a.juristischePersonen} />
 		{#await a then}
-			<WalterWohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
-			<WalterVertraege title="Verträge" rows={a.then((x) => x.vertraege)} />
+			<WalterWohnungen title="Wohnungen" rows={a.wohnungen} />
+			<WalterVertraege title="Verträge" rows={a.vertraege} />
 		{/await}
 	</Accordion>
 </WalterGrid>

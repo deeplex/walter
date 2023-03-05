@@ -4,64 +4,37 @@
 	import type { WalterAdresseEntry } from '$WalterTypes';
 	import { WalterTextInput } from '$WalterComponents';
 
-	export let adresse: Promise<WalterAdresseEntry | undefined> | undefined =
-		undefined;
-	export let entry: Partial<WalterAdresseEntry> = {};
-	adresse?.then((e) => Object.assign(entry, e));
+	export let value: Partial<WalterAdresseEntry> | undefined = undefined;
 
 	let fallback: Partial<WalterAdresseEntry> = {};
 
 	const change = () => {
-		entry = fallback;
+		value = fallback;
 	};
 </script>
 
 <Row>
-	{#if entry}
-		<WalterTextInput
-			labelText="Straße"
-			bind:binding={entry.strasse}
-			value={adresse?.then((x) => x?.strasse)}
-		/>
-		<WalterTextInput
-			labelText="Hausnr."
-			bind:binding={entry.hausnummer}
-			value={adresse?.then((x) => x?.hausnummer)}
-		/>
-		<WalterTextInput
-			labelText="Postleitzahl"
-			bind:binding={entry.postleitzahl}
-			value={adresse?.then((x) => x?.postleitzahl)}
-		/>
-		<WalterTextInput
-			labelText="Stadt"
-			bind:binding={entry.stadt}
-			value={adresse?.then((x) => x?.stadt)}
-		/>
+	{#if value}
+		<WalterTextInput labelText="Straße" bind:value={value.strasse} />
+		<WalterTextInput labelText="Hausnr." bind:value={value.hausnummer} />
+		<WalterTextInput labelText="Postleitzahl" bind:value={value.postleitzahl} />
+		<WalterTextInput labelText="Stadt" bind:value={value.stadt} />
 	{:else}
 		<WalterTextInput
 			{change}
 			labelText="Straße"
-			bind:binding={fallback.strasse}
-			value={adresse?.then((x) => x?.strasse)}
+			bind:value={fallback.strasse}
 		/>
 		<WalterTextInput
 			{change}
 			labelText="Hausnr."
-			bind:binding={fallback.hausnummer}
-			value={adresse?.then((x) => x?.hausnummer)}
+			bind:value={fallback.hausnummer}
 		/>
 		<WalterTextInput
 			{change}
 			labelText="Postleitzahl"
-			bind:binding={fallback.postleitzahl}
-			value={adresse?.then((x) => x?.postleitzahl)}
+			bind:value={fallback.postleitzahl}
 		/>
-		<WalterTextInput
-			{change}
-			labelText="Stadt"
-			bind:binding={fallback.stadt}
-			value={adresse?.then((x) => x?.stadt)}
-		/>
+		<WalterTextInput {change} labelText="Stadt" bind:value={fallback.stadt} />
 	{/if}
 </Row>

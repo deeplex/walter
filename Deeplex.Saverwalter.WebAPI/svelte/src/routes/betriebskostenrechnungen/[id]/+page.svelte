@@ -8,31 +8,28 @@
 		WalterHeaderDetail,
 		WalterBetriebskostenrechnung
 	} from '$WalterComponents';
-	import { walter_get } from '$WalterServices/requests';
 	import type { WalterBetriebskostenrechnungEntry } from '$WalterTypes';
 
 	export let data: PageData;
 	const url = `/api/betriebskostenrechnungen/${data.id}`;
 
-	const a: Promise<WalterBetriebskostenrechnungEntry> = walter_get(url);
-	const entry: Partial<WalterBetriebskostenrechnungEntry> = {};
-	a.then((e) => Object.assign(entry, e));
-
-	const title = a.then(
-		(x) => x.typ.text + ' - ' + x.betreffendesJahr + ' - ' + x.umlage.text
-	);
+	const a: Partial<WalterBetriebskostenrechnungEntry> = data.a;
 </script>
 
-<WalterHeaderDetail {a} {url} {entry} {title} />
+<WalterHeaderDetail
+	{a}
+	{url}
+	title={a.typ?.text + ' - ' + a.betreffendesJahr + ' - ' + a.umlage?.text}
+/>
 
 <WalterGrid>
-	<WalterBetriebskostenrechnung {a} {entry} />
+	<WalterBetriebskostenrechnung {a} />
 
 	<Accordion>
-		<WalterWohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
+		<WalterWohnungen title="Wohnungen" rows={a.wohnungen || []} />
 	</Accordion>
 
 	{#await a then x}
-		<Button href={`/umlagen/${x.umlage.id}`}>Zur Umlage</Button>
+		<Button href={`/umlagen/${x.umlage?.id}`}>Zur Umlage</Button>
 	{/await}
 </WalterGrid>

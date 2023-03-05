@@ -26,33 +26,27 @@
 			`/kontakte/${e.detail.id > 0 ? 'nat' : 'jur'}/${Math.abs(e.detail.id)}`
 		);
 
-	export let rows: Promise<WalterPersonEntry[]>;
+	export let rows: WalterPersonEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 
 	let personType: number = 0;
 
 	export let a:
-		| Promise<
-				Partial<WalterNatuerlichePersonEntry & WalterJuristischePersonEntry>
-		  >
-		| undefined = undefined;
-	let entry:
 		| Partial<WalterNatuerlichePersonEntry & WalterJuristischePersonEntry>
 		| undefined = undefined;
-	a?.then((e) => (entry = e));
 </script>
 
 <WalterDataWrapper
 	{addUrl}
-	addEntry={entry}
+	addEntry={a}
 	{title}
 	{search}
 	{navigate}
 	{rows}
 	{headers}
 >
-	{#if entry}
+	{#if a}
 		<Row>
 			<ContentSwitcher bind:selectedIndex={personType}>
 				<Switch text="Natürliche Person" />
@@ -61,12 +55,12 @@
 		</Row>
 		<Row>
 			{#if personType === 0}
-				<WalterTextInput bind:binding={entry.vorname} labelText="Vorname" />
-				<WalterTextInput bind:binding={entry.nachname} labelText="Nachname" />
+				<WalterTextInput bind:value={a.vorname} labelText="Vorname" />
+				<WalterTextInput bind:value={a.nachname} labelText="Nachname" />
 			{:else}
-				<WalterTextInput bind:binding={entry.name} labelText="Bezeichnung" />
+				<WalterTextInput bind:value={a.name} labelText="Bezeichnung" />
 			{/if}
 		</Row>
-		<WalterPerson binding={entry} />
+		<WalterPerson value={a} />
 	{/if}
 </WalterDataWrapper>

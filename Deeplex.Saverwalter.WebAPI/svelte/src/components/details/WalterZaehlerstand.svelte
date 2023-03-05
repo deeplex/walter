@@ -7,29 +7,14 @@
 	import { Row } from 'carbon-components-svelte';
 	import type { WalterZaehlerstandEntry } from '$WalterTypes';
 
-	export let a:
-		| Promise<Partial<WalterZaehlerstandEntry | undefined>>
-		| undefined = undefined;
-	export let entry: Partial<WalterZaehlerstandEntry> = {};
+	export let a: Partial<WalterZaehlerstandEntry> = {};
 </script>
 
 <Row>
-	<WalterNumberInput
-		bind:binding={entry.stand}
-		label="Zählerstand"
-		value={a?.then((x) => x?.stand)}
-	/>
-	<WalterDatePicker
-		bind:binding={entry.datum}
-		value={a?.then((x) => x?.datum)}
-		labelText="Ablesedatum"
-	/>
+	<WalterNumberInput bind:value={a.stand} label="Zählerstand" />
+	<WalterDatePicker bind:value={a.datum} labelText="Ablesedatum" />
 	<!-- TODO add einheit? -->
 </Row>
 <Row>
-	<WalterTextInput
-		labelText="Notiz"
-		bind:binding={entry.notiz}
-		value={a?.then((x) => x?.notiz)}
-	/>
+	<WalterTextInput labelText="Notiz" bind:value={a.notiz} />
 </Row>

@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { NumberInput, NumberInputSkeleton } from 'carbon-components-svelte';
 
-	export let value: Promise<number | undefined> | undefined = undefined;
-	export let binding: number | undefined = undefined;
+	export let value: number | undefined = undefined;
 	export let label: string | undefined;
 	export let hideSteppers: boolean = true;
 	export let digits: number = 2;
 
 	function change(e: CustomEvent<number | null>) {
-		binding = e.detail || undefined;
+		value = e.detail || undefined;
 	}
 </script>
 

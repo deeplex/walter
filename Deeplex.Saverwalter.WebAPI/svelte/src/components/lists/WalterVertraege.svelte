@@ -18,25 +18,22 @@
 	const navigate = (e: CustomEvent<DataTableRow>) =>
 		goto(`/vertraege/${e.detail.id}`);
 
-	export let rows: Promise<WalterVertragEntry[]>;
+	export let rows: WalterVertragEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
-
-	export let a: Promise<Partial<WalterVertragEntry>> | undefined = undefined;
-	let entry: Partial<WalterVertragEntry> | undefined = undefined;
-	a?.then((e) => (entry = e));
+	export let a: Partial<WalterVertragEntry> | undefined = undefined;
 </script>
 
 <WalterDataWrapper
 	{addUrl}
-	addEntry={entry}
+	addEntry={a}
 	{title}
 	{search}
 	{navigate}
 	{rows}
 	{headers}
 >
-	{#if entry}
-		<WalterVertrag {a} {entry} />
+	{#if a}
+		<WalterVertrag {a} />
 	{/if}
 </WalterDataWrapper>

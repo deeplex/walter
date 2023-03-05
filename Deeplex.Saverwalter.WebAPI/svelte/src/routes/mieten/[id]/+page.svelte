@@ -10,19 +10,13 @@
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const url = `/api/mieten/${data.id}`;
-
-	const a: Promise<WalterMieteEntry> = walter_get(url);
-	const entry: Partial<WalterMieteEntry> = {};
-	a.then((e) => Object.assign(entry, e));
-
-	const title = a.then((x) => x.vertrag.text);
+	const a = data.a;
 </script>
 
-<WalterHeaderDetail {a} {url} {entry} {title} />
+<WalterHeaderDetail {a} url={data.url} title={a.vertrag.text} />
 
 <WalterGrid>
-	<WalterMiete {a} {entry} />
+	<WalterMiete {a} />
 	{#await a}
 		<ButtonSkeleton />
 	{:then x}

@@ -10,17 +10,14 @@
 	} from '$WalterComponents';
 
 	export let data: PageData;
-	const url = `/api/erhaltungsaufwendungen/${data.id}`;
-
-	const a: Promise<WalterErhaltungsaufwendungEntry> = walter_get(url);
-	const entry: Partial<WalterErhaltungsaufwendungEntry> = {};
-	a.then((e) => Object.assign(entry, e));
-
-	const title = a.then((x) => x.aussteller.text + ' - ' + x.bezeichnung);
 </script>
 
-<WalterHeaderDetail {a} {url} {entry} {title} />
+<WalterHeaderDetail
+	a={data.a}
+	url={data.url}
+	title={data.a.aussteller?.text + ' - ' + data.a.bezeichnung}
+/>
 
 <WalterGrid>
-	<WalterErhaltungsaufwendung {a} {entry} />
+	<WalterErhaltungsaufwendung a={data.a} />
 </WalterGrid>

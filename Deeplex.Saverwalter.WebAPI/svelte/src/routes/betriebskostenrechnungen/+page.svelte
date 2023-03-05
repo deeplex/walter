@@ -3,15 +3,10 @@
 		WalterBetriebskostenrechnungen,
 		WalterHeaderList
 	} from '$WalterComponents';
-	import { walter_get } from '$WalterServices/requests';
-	import type { WalterBetriebskostenrechnungEntry } from '$WalterTypes';
+	import type { PageData } from './$types';
 
-	const url = 'betriebskostenrechnungen';
-
-	const rows: Promise<WalterBetriebskostenrechnungEntry[]> = walter_get(
-		`/api/${url}`
-	);
+	export let data: PageData;
 </script>
 
-<WalterHeaderList {url} title="Betriebskostenrechnung" />
-<WalterBetriebskostenrechnungen search {rows} />
+<WalterHeaderList url={data.url} title="Betriebskostenrechnung" />
+<WalterBetriebskostenrechnungen search rows={data.rows} />

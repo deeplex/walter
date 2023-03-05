@@ -16,7 +16,7 @@
 		key: string;
 		value: string;
 	}[];
-	export let rows: Promise<any[]>;
+	export let rows: any[];
 
 	export let navigate: (
 		e: CustomEvent<DataTableRow>

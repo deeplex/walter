@@ -7,34 +7,18 @@
 	import { Row } from 'carbon-components-svelte';
 	import type { WalterVertragVersionEntry } from '$WalterTypes';
 
-	export let a:
-		| Promise<Partial<WalterVertragVersionEntry | undefined>>
-		| undefined = undefined;
-	export let entry: Partial<WalterVertragVersionEntry> = {};
+	export let a: Partial<WalterVertragVersionEntry> = {};
 </script>
 
 <Row>
-	<WalterDatePicker
-		bind:binding={entry.beginn}
-		value={a?.then((x) => x?.beginn)}
-		labelText="Beginn"
-	/>
+	<WalterDatePicker bind:value={a.beginn} labelText="Beginn" />
 	<WalterNumberInput
 		hideSteppers
-		bind:binding={entry.grundmiete}
+		bind:value={a.grundmiete}
 		label="Grundmiete"
-		value={a?.then((x) => x?.grundmiete)}
 	/>
-	<WalterNumberInput
-		bind:binding={entry.personenzahl}
-		label="Personenzahl"
-		value={a?.then((x) => x?.personenzahl)}
-	/>
+	<WalterNumberInput bind:value={a.personenzahl} label="Personenzahl" />
 </Row>
 <Row>
-	<WalterTextInput
-		labelText="Notiz"
-		bind:binding={entry.notiz}
-		value={a?.then((x) => x?.notiz)}
-	/>
+	<WalterTextInput labelText="Notiz" bind:value={a.notiz} />
 </Row>

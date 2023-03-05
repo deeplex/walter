@@ -8,46 +8,26 @@
 	import { Row } from 'carbon-components-svelte';
 	import type { WalterErhaltungsaufwendungEntry } from '$WalterTypes';
 
-	export let a: Promise<Partial<WalterErhaltungsaufwendungEntry>> | undefined =
-		undefined;
-	export let entry: Partial<WalterErhaltungsaufwendungEntry> = {};
+	export let a: Partial<WalterErhaltungsaufwendungEntry> = {};
 </script>
 
 <Row>
-	<WalterTextInput
-		bind:binding={entry.bezeichnung}
-		labelText="Bezeichnung"
-		value={a?.then((x) => x.bezeichnung)}
-	/>
+	<WalterTextInput bind:value={a.bezeichnung} labelText="Bezeichnung" />
 	<WalterComboBox
-		bind:binding={entry.aussteller}
+		bind:value={a.aussteller}
 		titleText="Aussteller"
 		api={'/api/selection/kontakte'}
-		value={a?.then((x) => x.aussteller)}
 	/>
-	<WalterDatePicker
-		bind:binding={entry.datum}
-		value={a?.then((x) => x.datum)}
-		labelText="Datum"
-	/>
+	<WalterDatePicker bind:value={a.datum} labelText="Datum" />
 </Row>
 <Row>
 	<WalterComboBox
-		bind:binding={entry.wohnung}
+		bind:value={a.wohnung}
 		titleText="Wohnung"
-		value={a?.then((x) => x.wohnung)}
 		api={'/api/selection/wohnungen'}
 	/>
-	<WalterNumberInput
-		bind:binding={entry.betrag}
-		label="Betrag"
-		value={a?.then((x) => x.betrag)}
-	/>
+	<WalterNumberInput bind:value={a.betrag} label="Betrag" />
 </Row>
 <Row>
-	<WalterTextInput
-		bind:binding={entry.notiz}
-		labelText="Notiz"
-		value={a?.then((x) => x.notiz)}
-	/>
+	<WalterTextInput bind:value={a.notiz} labelText="Notiz" />
 </Row>

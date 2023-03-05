@@ -1,12 +1,9 @@
 <script lang="ts">
 	import { WalterHeaderList, WalterWohnungen } from '$WalterComponents';
-	import { walter_get } from '$WalterServices/requests';
-	import type { WalterWohnungEntry } from '$WalterTypes';
+	import type { PageData } from './$types';
 
-	const url = 'wohnungen';
-
-	const rows: Promise<WalterWohnungEntry[]> = walter_get(`/api/${url}`);
+	export let data: PageData;
 </script>
 
-<WalterHeaderList {url} title="Wohnungen" />
-<WalterWohnungen search {rows} />
+<WalterHeaderList url={data.url} title="Wohnungen" />
+<WalterWohnungen search rows={data.rows} />

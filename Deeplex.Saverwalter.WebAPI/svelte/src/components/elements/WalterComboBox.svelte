@@ -4,7 +4,7 @@
 	import { walter_get } from '$WalterServices/requests';
 	import type { WalterSelectionEntry } from '$WalterTypes';
 
-	export let value: Promise<WalterSelectionEntry | undefined> | undefined;
+	export let value: WalterSelectionEntry | undefined;
 	export let titleText: string;
 	export let binding: WalterSelectionEntry | undefined = undefined;
 	export let api: string;

@@ -11,10 +11,7 @@
 	} from '$WalterTypes';
 	import { walter_get } from '$WalterServices/requests';
 
-	export let a:
-		| Promise<Partial<WalterBetriebskostenrechnungEntry>>
-		| undefined = undefined;
-	export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
+	export let a: Partial<WalterBetriebskostenrechnungEntry> = {};
 
 	const betriebskostentypen: Promise<WalterSelectionEntry[]> = walter_get(
 		'/api/selection/betriebskostentypen'
@@ -26,7 +23,7 @@
 	let umlageEntries: WalterSelectionEntry[] = [];
 	umlagePromise.then((x) => {
 		umlagen = x;
-		updateUmlageEntries(entry.typ?.id);
+		updateUmlageEntries(a.typ?.id);
 	});
 
 	function updateUmlageEntries(id: string | number | undefined) {
@@ -40,11 +37,11 @@
 
 	function selectTyp(e: CustomEvent) {
 		updateUmlageEntries(e.detail.selectedItem.id);
-		entry.umlage = undefined;
+		a.umlage = undefined;
 	}
 
 	function selectUmlage(e: CustomEvent) {
-		entry.umlage = e.detail.selectedItem;
+		a.umlage = e.detail.selectedItem;
 		// entry.typ = entry.umlage.filter;
 	}
 </script>
@@ -72,7 +69,7 @@
 		<TextInputSkeleton />
 	{:then}
 		<ComboBox
-			selectedId={entry.umlage?.id}
+			selectedId={a.umlage?.id}
 			on:select={selectUmlage}
 			style="padding-right: 1rem"
 			bind:items={umlageEntries}
@@ -84,26 +81,13 @@
 
 <Row>
 	<WalterNumberInput
-		bind:binding={entry.betreffendesJahr}
+		bind:value={a.betreffendesJahr}
 		hideSteppers={false}
 		label="Betreffendes Jahr"
-		value={a?.then((x) => x.betreffendesJahr)}
 	/>
-	<WalterNumberInput
-		bind:binding={entry.betrag}
-		label="Betrag"
-		value={a?.then((x) => x.betrag)}
-	/>
-	<WalterDatePicker
-		bind:binding={entry.datum}
-		labelText="Datum"
-		value={a?.then((x) => x.datum)}
-	/>
+	<WalterNumberInput bind:value={a.betrag} label="Betrag" />
+	<WalterDatePicker bind:value={a.datum} labelText="Datum" />
 </Row>
 <Row>
-	<WalterTextInput
-		bind:binding={entry.notiz}
-		labelText="Notiz"
-		value={a?.then((x) => x.notiz)}
-	/>
+	<WalterTextInput bind:value={a.notiz} labelText="Notiz" />
 </Row>

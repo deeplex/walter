@@ -3,15 +3,10 @@
 		WalterErhaltungsaufwendungen,
 		WalterHeaderList
 	} from '$WalterComponents';
-	import { walter_get } from '$WalterServices/requests';
-	import type { WalterErhaltungsaufwendungEntry } from '$WalterTypes';
+	import type { PageData } from './$types';
 
-	const url = 'erhaltungsaufwendungen';
-
-	const rows: Promise<WalterErhaltungsaufwendungEntry[]> = walter_get(
-		`/api/${url}`
-	);
+	export let data: PageData;
 </script>
 
-<WalterHeaderList {url} title="Erhaltungsaufwendungen" />
-<WalterErhaltungsaufwendungen search {rows} />
+<WalterHeaderList url={data.url} title="Erhaltungsaufwendungen" />
+<WalterErhaltungsaufwendungen search rows={data.rows} />

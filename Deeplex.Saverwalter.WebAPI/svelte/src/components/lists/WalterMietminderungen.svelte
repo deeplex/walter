@@ -11,28 +11,25 @@
 
 	const addUrl = `/api/mietminderungen/`;
 
-	export let rows: Promise<WalterMietminderungEntry[]>;
+	export let rows: WalterMietminderungEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 
 	const navigate = (e: CustomEvent) => goto(`/mietminderungen/${e.detail.id}`);
 
-	export let a: Promise<Partial<WalterMietminderungEntry>> | undefined =
-		undefined;
-	let entry: Partial<WalterMietminderungEntry> | undefined = undefined;
-	a?.then((e) => (entry = e));
+	export let a: Partial<WalterMietminderungEntry> | undefined = undefined;
 </script>
 
 <WalterDataWrapper
 	{navigate}
 	{addUrl}
-	addEntry={entry}
+	addEntry={a}
 	{title}
 	{search}
 	{rows}
 	{headers}
 >
-	{#if entry}
-		<WalterMietminderung {a} {entry} />
+	{#if a}
+		<WalterMietminderung {a} />
 	{/if}
 </WalterDataWrapper>

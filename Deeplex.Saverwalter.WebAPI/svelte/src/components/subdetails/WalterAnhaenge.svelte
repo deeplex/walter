@@ -9,7 +9,7 @@
 
 	import type { WalterAnhangEntry } from '$WalterTypes';
 
-	export let rows: Promise<WalterAnhangEntry[]>;
+	export let rows: WalterAnhangEntry[];
 </script>
 
 {#await rows}

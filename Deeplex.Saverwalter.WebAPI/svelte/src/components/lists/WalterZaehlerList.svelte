@@ -13,20 +13,17 @@
 
 	const addUrl = `/api/zaehler/`;
 
-	const navigate = (e: CustomEvent<DataTableRow>) =>
-		goto(`/zaehler/${e.detail.id}`);
-
-	export let rows: Promise<WalterZaehlerEntry[]>;
+	export let rows: WalterZaehlerEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
+	export let a: Partial<WalterZaehlerEntry> | undefined = undefined;
 
-	export let a: Promise<Partial<WalterZaehlerEntry>> | undefined = undefined;
-	let entry: Partial<WalterZaehlerEntry> | undefined = undefined;
-	a?.then((e) => (entry = e));
+	const navigate = (e: CustomEvent<DataTableRow>) =>
+		goto(`/zaehler/${e.detail.id}`);
 </script>
 
 <WalterDataWrapper
-	addEntry={entry}
+	addEntry={a}
 	{addUrl}
 	{title}
 	{search}
@@ -34,7 +31,7 @@
 	{rows}
 	{headers}
 >
-	{#if entry}
-		<WalterZaehler {a} {entry} />
+	{#if a}
+		<WalterZaehler {a} />
 	{/if}
 </WalterDataWrapper>

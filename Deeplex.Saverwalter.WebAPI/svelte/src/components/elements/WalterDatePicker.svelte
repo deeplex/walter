@@ -8,12 +8,11 @@
 	import { convertDate, toLocaleIsoString } from '$WalterServices/utils';
 
 	export let labelText: string;
-	export let value: Promise<string | undefined> | undefined = undefined;
-	export let binding: string | undefined = undefined;
+	export let value: string | undefined = undefined;
 	export let placeholder: string | undefined = undefined;
 
 	function change(e: any) {
-		binding = toLocaleIsoString(new Date(e.detail?.selectedDates[0]));
+		value = toLocaleIsoString(new Date(e.detail?.selectedDates[0]));
 	}
 </script>
 

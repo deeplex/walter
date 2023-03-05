@@ -13,7 +13,7 @@
 	async function click_post() {
 		const j = await walter_post(url, entry);
 		if (j.id) {
-			goto(`${url.replace('api/', '')}/${j.id}`);
+			goto(`${url}/${j.id}`.replace('api/', ''));
 		}
 	}
 </script>

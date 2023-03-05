@@ -21,26 +21,24 @@
 	const navigate = (e: CustomEvent<DataTableRow>) =>
 		goto(`/erhaltungsaufwendungen/${e.detail.id}`);
 
-	export let rows: Promise<WalterErhaltungsaufwendungEntry[]>;
+	export let rows: WalterErhaltungsaufwendungEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 
-	export let a: Promise<Partial<WalterErhaltungsaufwendungEntry>> | undefined =
+	export let a: Partial<WalterErhaltungsaufwendungEntry> | undefined =
 		undefined;
-	let entry: Partial<WalterErhaltungsaufwendungEntry> | undefined = undefined;
-	a?.then((e) => (entry = e));
 </script>
 
 <WalterDataWrapper
 	{addUrl}
-	addEntry={entry}
+	addEntry={a}
 	{title}
 	{search}
 	{navigate}
 	{rows}
 	{headers}
 >
-	{#if entry}
-		<WalterErhaltungsaufwendung {a} {entry} />
+	{#if a}
+		<WalterErhaltungsaufwendung {a} />
 	{/if}
 </WalterDataWrapper>

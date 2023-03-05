@@ -15,5 +15,5 @@
 <WalterHeaderNew {url} {entry} {title} />
 
 <WalterGrid>
-	<WalterErhaltungsaufwendung {entry} />
+	<WalterErhaltungsaufwendung a={entry} />
 </WalterGrid>

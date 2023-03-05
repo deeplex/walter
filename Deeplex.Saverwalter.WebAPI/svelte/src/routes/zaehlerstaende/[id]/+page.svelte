@@ -11,19 +11,17 @@
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const url = `/api/zaehlerstaende/${data.id}`;
-
-	const a: Promise<WalterZaehlerstandEntry> = walter_get(url);
-	const entry: Partial<WalterZaehlerstandEntry> = {};
-	a.then((e) => Object.assign(entry, e));
-
-	const title = a.then((x) => x.zaehler.text + ' - ' + convertDate(x.datum));
+	const a = data.a;
 </script>
 
-<WalterHeaderDetail {a} {url} {entry} {title} />
+<WalterHeaderDetail
+	{a}
+	url={data.url}
+	title={a.zaehler.text + ' - ' + convertDate(a.datum)}
+/>
 
 <WalterGrid>
-	<WalterZaehlerstand {a} {entry} />
+	<WalterZaehlerstand {a} />
 	{#await a}
 		<ButtonSkeleton />
 	{:then x}

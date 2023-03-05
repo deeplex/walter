@@ -17,76 +17,61 @@
 	import type {
 		WalterErhaltungsaufwendungEntry,
 		WalterUmlageEntry,
-		WalterWohnungEntry,
 		WalterZaehlerEntry
 	} from '$WalterTypes';
-	import { walter_get } from '$WalterServices/requests';
 	import { toLocaleIsoString } from '$WalterServices/utils';
 
 	export let data: PageData;
 	const url = `/api/wohnungen/${data.id}`;
 
-	const a: Promise<WalterWohnungEntry> = walter_get(url);
-	const entry: Partial<WalterWohnungEntry> = {};
-	a.then((e) => Object.assign(entry, e));
+	const a = data.a;
 
-	const title = a.then((x) => x.adresse.anschrift + ' - ' + x.bezeichnung);
-
-	const zaehlerEntry: Promise<Partial<WalterZaehlerEntry>> = a.then((e) => ({
+	const zaehlerEntry: Partial<WalterZaehlerEntry> = {
 		wohnung: {
-			id: '' + e.id,
-			text: e.adresse.anschrift + ' - ' + e.bezeichnung
+			id: '' + a.id,
+			text: a.adresse?.anschrift + ' - ' + a.bezeichnung
 		},
-		adresse: { ...e.adresse }
-	}));
-	const umlageEntry: Promise<Partial<WalterUmlageEntry>> = a.then((e) => ({
+		adresse: { ...a.adresse }
+	};
+	const umlageEntry: Partial<WalterUmlageEntry> = {
 		selectedWohnungen: [
 			{
-				id: '' + e.id,
-				text: e.adresse.anschrift + ' - ' + e.bezeichnung
+				id: '' + a.id,
+				text: a.adresse?.anschrift + ' - ' + a.bezeichnung
 			}
 		]
-	}));
-	const erhaltungsaufwendungEntry: Promise<
-		Partial<WalterErhaltungsaufwendungEntry>
-	> = a.then((e) => ({
+	};
+	const erhaltungsaufwendungEntry: Partial<WalterErhaltungsaufwendungEntry> = {
 		wohnung: {
-			id: '' + e.id,
-			text: e.adresse.anschrift + ' - ' + e.bezeichnung
+			id: '' + a.id,
+			text: a.adresse?.anschrift + ' - ' + a.bezeichnung
 		},
 		datum: toLocaleIsoString(new Date())
-	}));
+	};
 </script>
 
-<WalterHeaderDetail {a} {url} {entry} {title} />
+<WalterHeaderDetail
+	{a}
+	{url}
+	title={a.adresse?.anschrift + ' - ' + a.bezeichnung}
+/>
 
 <WalterGrid>
-	<WalterWohnung {a} {entry} />
+	<WalterWohnung {a} />
 
 	<Accordion>
-		<WalterWohnungen
-			title="Wohnungen an der selben Adresse"
-			rows={a.then((x) => x.haus)}
-		/>
-		<WalterZaehlerList
-			a={zaehlerEntry}
-			title="Zähler"
-			rows={a.then((x) => x.zaehler)}
-		/>
-		<WalterVertraege title="Verträge" rows={a.then((x) => x.vertraege)} />
-		<WalterUmlagen
-			a={umlageEntry}
-			title="Umlagen"
-			rows={a.then((x) => x.umlagen)}
-		/>
+		<WalterWohnungen title="Wohnungen an der selben Adresse" rows={a.haus} />
+		<WalterZaehlerList a={zaehlerEntry} title="Zähler" rows={a.zaehler} />
+		<WalterVertraege title="Verträge" rows={a.vertraege} />
+		<WalterUmlagen a={umlageEntry} title="Umlagen" rows={a.umlagen} />
 		<WalterBetriebskostenrechnungen
 			title="Betriebskostenrechnungen"
-			rows={a.then((x) => x.betriebskostenrechnungen)}
+			rows={a.betriebskostenrechnungen}
 		/>
 		<WalterErhaltungsaufwendungen
 			a={erhaltungsaufwendungEntry}
 			title="Erhaltungsaufwendungen"
-			rows={a.then((x) => x.erhaltungsaufwendungen)}
+			rows={a.erhaltungsaufwendungen}
 		/>
 	</Accordion>
 </WalterGrid>

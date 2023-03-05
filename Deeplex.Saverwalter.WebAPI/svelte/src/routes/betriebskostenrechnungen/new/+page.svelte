@@ -15,5 +15,5 @@
 <WalterHeaderNew {url} {entry} {title} />
 
 <WalterGrid>
-	<WalterBetriebskostenrechnung {entry} />
+	<WalterBetriebskostenrechnung a={entry} />
 </WalterGrid>

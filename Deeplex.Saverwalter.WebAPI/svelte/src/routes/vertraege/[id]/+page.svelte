@@ -8,80 +8,60 @@
 		WalterMietminderungen,
 		WalterHeaderDetail,
 		WalterGrid,
-		WalterVertrag
+		WalterVertrag,
+		WalterVertragVersionen
 	} from '$WalterComponents';
-	import { walter_get } from '$WalterServices/requests';
 	import type {
 		WalterMieteEntry,
 		WalterMietminderungEntry,
-		WalterVertragEntry,
 		WalterVertragVersionEntry
 	} from '$WalterTypes';
-	import WalterVertragVersionen from '../../../components/lists/WalterVertragVersionen.svelte';
 	import { toLocaleIsoString } from '$WalterServices/utils';
-	import WalterVertragVersion from '../../../components/details/WalterVertragVersion.svelte';
 
 	export let data: PageData;
-	const url = `/api/vertraege/${data.id}`;
+	const a = data.a;
 
-	const a: Promise<WalterVertragEntry> = walter_get(url);
-	const entry: Partial<WalterVertragEntry> = {};
-	a.then((e) => Object.assign(entry, e));
+	const title = a.wohnung.text + ' - ' + a.mieter.map((m) => m.name).join(', ');
 
-	const title = a.then(
-		(x) => x.wohnung.text + ' - ' + x.mieter.map((m) => m.name).join(', ')
-	);
-
-	const mieteEntry: Promise<Partial<WalterMieteEntry>> = a.then((e) => ({
-		vertrag: { id: '' + e.id, text: '' },
+	const mieteEntry: Partial<WalterMieteEntry> = {
+		vertrag: { id: '' + a.id, text: '' },
 		zahlungsdatum: toLocaleIsoString(new Date()),
-		betrag: e.versionen[e.versionen.length - 1].grundmiete
-	}));
+		betrag: a.versionen[a.versionen.length - 1].grundmiete
+	};
 
-	const mietminderungEntry: Promise<Partial<WalterMietminderungEntry>> = a.then(
-		(e) => {
-			const today = new Date();
-			return {
-				vertrag: { id: '' + e.id, text: '' },
-				beginn: toLocaleIsoString(new Date()),
-				ende: toLocaleIsoString(new Date(today.setMonth(today.getMonth() + 1)))
-			};
-		}
-	);
+	const today = new Date();
+	const mietminderungEntry: Partial<WalterMietminderungEntry> = {
+		vertrag: { id: '' + a.id, text: '' },
+		beginn: toLocaleIsoString(new Date()),
+		ende: toLocaleIsoString(new Date(today.setMonth(today.getMonth() + 1)))
+	};
 
-	const vertragversionEntry: Promise<Partial<WalterVertragVersionEntry>> =
-		a.then((e) => {
-			const last = e.versionen[e.versionen.length - 1];
-			return {
-				vertrag: { id: '' + e.id, text: '' },
-				beginn: toLocaleIsoString(new Date()),
-				personenzahl: last.personenzahl,
-				grundmiete: last.grundmiete
-			};
-		});
+	const lastVersion = a.versionen[a.versionen.length - 1];
+	const vertragversionEntry: Partial<WalterVertragVersionEntry> = {
+		vertrag: { id: '' + a.id, text: '' },
+		beginn: toLocaleIsoString(new Date()),
+		personenzahl: lastVersion.personenzahl,
+		grundmiete: lastVersion.grundmiete
+	};
 </script>
 
-<WalterHeaderDetail {a} {url} {entry} {title} />
+<WalterHeaderDetail {a} url={data.url} {title} />
 
 <WalterGrid>
-	<WalterVertrag {a} {entry} />
+	<WalterVertrag {a} />
 
 	<Accordion>
-		<WalterKontakte title="Mieter" rows={a.then((x) => x.mieter)} />
+		<WalterKontakte title="Mieter" rows={a.mieter} />
 		<WalterVertragVersionen
 			a={vertragversionEntry}
 			title="Vertragsänderungen"
-			rows={a.then((x) => x.versionen)}
+			rows={a.versionen}
 		/>
-		<WalterMieten
-			a={mieteEntry}
-			title="Mieten"
-			rows={a.then((x) => x.mieten)}
-		/>
+		<WalterMieten a={mieteEntry} title="Mieten" rows={a.mieten} />
 		<WalterMietminderungen
 			a={mietminderungEntry}
 			title="Mietminderungen"
-			rows={a.then((x) => x.mietminderungen)}
+			rows={a.mietminderungen}
 		/>
 	</Accordion>
 </WalterGrid>

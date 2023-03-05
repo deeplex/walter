@@ -15,5 +15,5 @@
 <WalterHeaderNew {url} {entry} {title} />
 
 <WalterGrid>
-	<WalterZaehlerstand {entry} />
+	<WalterZaehlerstand a={entry} />
 </WalterGrid>

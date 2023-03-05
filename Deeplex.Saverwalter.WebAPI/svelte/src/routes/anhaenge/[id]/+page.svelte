@@ -15,28 +15,20 @@
 		WalterWohnungen,
 		WalterZaehlerList
 	} from '$WalterComponents';
-	import { walter_get } from '$WalterServices/requests';
-	import type { WalterAnhangEntry } from '$WalterTypes';
 
 	export let data: PageData;
-	const a: Promise<WalterAnhangEntry> = walter_get(`/api/anhaenge/${data.id}`);
-	const entry: Partial<WalterAnhangEntry> = {};
-	a.then((e) => Object.assign(entry, e));
+	const a = data.a;
 </script>
 
-<WalterHeader title={a.then((x) => x.fileName)} />
+<WalterHeader title={a.fileName} />
 
 <WalterGrid>
 	<Row>
-		<WalterTextInput
-			bind:binding={entry.fileName}
-			labelText="Dateiname"
-			value={a.then((x) => x.fileName)}
-		/>
+		<WalterTextInput bind:value={a.fileName} labelText="Dateiname" />
 		<WalterTextInput
 			readonly
 			labelText="Erstellungszeit"
-			value={a.then((x) => x.creationTime)}
+			bind:value={a.creationTime}
 		/>
 	</Row>
 	<!-- <Row>
@@ -45,19 +37,19 @@
 	<Accordion>
 		<WalterBetriebskostenrechnungen
 			title="Betriebskostenrechnungen"
-			rows={a.then((x) => x.betriebskostenrechnungen)}
+			rows={a.betriebskostenrechnungen}
 		/>
 		<WalterErhaltungsaufwendungen
 			title="Erhaltungsaufwendungen"
-			rows={a.then((x) => x.erhaltungsaufwendungen)}
+			rows={a.erhaltungsaufwendungen}
 		/>
 		<WalterKontakte
 			title="Kontakte"
-			rows={a.then((x) => x.natuerlichePersonen.concat(x.juristischePersonen))}
+			rows={a.natuerlichePersonen.concat(a.juristischePersonen)}
 		/>
-		<WalterUmlagen title="Umlagen" rows={a.then((x) => x.umlagen)} />
-		<WalterVertraege title="Verträge" rows={a.then((x) => x.vertraege)} />
-		<WalterWohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
-		<WalterZaehlerList title="Zähler" rows={a.then((x) => x.zaehler)} />
+		<WalterUmlagen title="Umlagen" rows={a.umlagen} />
+		<WalterVertraege title="Verträge" rows={a.vertraege} />
+		<WalterWohnungen title="Wohnungen" rows={a.wohnungen} />
+		<WalterZaehlerList title="Zähler" rows={a.zaehler} />
 	</Accordion>
 </WalterGrid>

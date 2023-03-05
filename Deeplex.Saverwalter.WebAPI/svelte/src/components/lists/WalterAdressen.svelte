@@ -3,24 +3,25 @@
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
 	import { WalterDataWrapper, WalterWohnung } from '$WalterComponents';
-	import type { WalterWohnungEntry } from '$WalterTypes';
+	import type { WalterAdresseEntry, WalterWohnungEntry } from '$WalterTypes';
+	import WalterAdresse from '../subdetails/WalterAdresse.svelte';
 
 	const headers = [
-		{ key: 'adresse.anschrift', value: 'Anschrift' },
-		{ key: 'bezeichnung', value: 'Bezeichnung' },
-		{ key: 'besitzer.text', value: 'Besitzer' },
-		{ key: 'bewohner', value: 'Bewohner' }
+		{ key: 'strasse', value: 'Straße' },
+		{ key: 'hausnummer', value: 'Hausnummer' },
+		{ key: 'postleitzahl', value: 'Postleitzahl' },
+		{ key: 'stadt', value: 'Stadt' }
 	];
 
 	const addUrl = `/api/wohnungen/`;
 
 	const navigate = (e: CustomEvent<DataTableRow>) =>
-		goto(`/wohnungen/${e.detail.id}`);
+		goto(`/adressen/${e.detail.id}`);
 
-	export let rows: WalterWohnungEntry[];
+	export let rows: WalterAdresseEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
-	export let a: Partial<WalterWohnungEntry> | undefined = undefined;
+	export let a: Partial<WalterAdresseEntry> | undefined = undefined;
 </script>
 
 <WalterDataWrapper
@@ -33,6 +34,6 @@
 	{headers}
 >
 	{#if a}
-		<WalterWohnung {a} />
+		<WalterAdresse value={a} />
 	{/if}
 </WalterDataWrapper>

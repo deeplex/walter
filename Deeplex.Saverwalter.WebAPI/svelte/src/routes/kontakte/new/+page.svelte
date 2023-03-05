@@ -38,11 +38,11 @@
 <WalterGrid>
 	<Row>
 		{#if personType === 0}
-			<WalterTextInput bind:binding={entry.vorname} labelText="Vorname" />
-			<WalterTextInput bind:binding={entry.nachname} labelText="Nachname" />
+			<WalterTextInput bind:value={entry.vorname} labelText="Vorname" />
+			<WalterTextInput bind:value={entry.nachname} labelText="Nachname" />
 		{:else}
-			<WalterTextInput bind:binding={entry.name} labelText="Bezeichnung" />
+			<WalterTextInput bind:value={entry.name} labelText="Bezeichnung" />
 		{/if}
 	</Row>
-	<WalterPerson binding={entry} />
+	<WalterPerson value={entry} />
 </WalterGrid>

@@ -4,42 +4,18 @@
 	import type { WalterPersonEntry } from '$WalterTypes';
 	import { WalterAdresse, WalterTextInput } from '$WalterComponents';
 
-	export let person: Promise<WalterPersonEntry> | undefined = undefined;
-	export let binding: Partial<WalterPersonEntry>;
+	export let value: Partial<WalterPersonEntry>;
 </script>
 
-<WalterAdresse
-	bind:entry={binding.adresse}
-	adresse={person?.then((e) => e.adresse)}
-/>
+<WalterAdresse bind:value={value.adresse} />
 <Row>
-	<WalterTextInput
-		bind:binding={binding.email}
-		labelText="E-Mail"
-		value={person?.then((e) => e.email)}
-	/>
-	<WalterTextInput
-		bind:binding={binding.fax}
-		labelText="Fax"
-		value={person?.then((e) => e.fax)}
-	/>
+	<WalterTextInput bind:value={value.email} labelText="E-Mail" />
+	<WalterTextInput bind:value={value.fax} labelText="Fax" />
 </Row>
 <Row>
-	<WalterTextInput
-		bind:binding={binding.telefon}
-		labelText="Telefon"
-		value={person?.then((e) => e.telefon)}
-	/>
-	<WalterTextInput
-		bind:binding={binding.mobil}
-		labelText="Mobil"
-		value={person?.then((e) => e.mobil)}
-	/>
+	<WalterTextInput bind:value={value.telefon} labelText="Telefon" />
+	<WalterTextInput bind:value={value.mobil} labelText="Mobil" />
 </Row>
 <Row>
-	<WalterTextInput
-		bind:binding={binding.notiz}
-		labelText="Notiz"
-		value={person?.then((e) => e.notiz)}
-	/>
+	<WalterTextInput bind:value={value.notiz} labelText="Notiz" />
 </Row>

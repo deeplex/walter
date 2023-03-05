@@ -11,27 +11,20 @@
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const url = `/api/adressen/${data.id}`;
-
-	const a: Promise<WalterAdresseEntry> = walter_get(url);
-	let entry: Partial<WalterAdresseEntry> = {};
-	a.then((e) => Object.assign(entry, e));
-
-	const wohnungEntry: Promise<Partial<WalterWohnungEntry>> = a.then((e) => ({
-		adresse: { ...e }
-	}));
+	const wohnungEntry: Partial<WalterWohnungEntry> = { adresse: { ...data.a } };
 </script>
 
-<WalterHeaderDetail {a} {url} {entry} title={a.then((x) => x.anschrift)} />
+<WalterHeaderDetail a={data.a} url={data.url} title={data.a.anschrift} />
 
 <WalterGrid>
-	<WalterAdresse adresse={a} bind:entry />
+	<WalterAdresse bind:value={data.a} />
 
 	<Accordion>
 		<WalterWohnungen
 			a={wohnungEntry}
 			title="Wohnungen"
-			rows={a.then((x) => x.wohnungen)}
+			rows={data.a.wohnungen}
 		/>
+		<!-- TODO add Kontakte, Verträge, Umlagen, Zähler? -->
 	</Accordion>
 </WalterGrid>

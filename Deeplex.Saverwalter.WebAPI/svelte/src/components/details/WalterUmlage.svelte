@@ -7,36 +7,28 @@
 	import { Row } from 'carbon-components-svelte';
 	import type { WalterUmlageEntry } from '$WalterTypes';
 
-	export let a: Promise<Partial<WalterUmlageEntry>> | undefined = undefined;
-	export let entry: Partial<WalterUmlageEntry> = {};
+	export let a: Partial<WalterUmlageEntry> = {};
 </script>
 
 <Row>
 	<WalterComboBox
 		api={'/api/selection/betriebskostentypen'}
-		bind:binding={entry.typ}
+		bind:value={a.typ}
 		titleText="Typ"
-		value={a?.then((x) => x.typ)}
 	/>
 	<WalterComboBox
 		api={'/api/selection/umlageschluessel'}
-		bind:binding={entry.schluessel}
+		bind:value={a.schluessel}
 		titleText="Umlageschlüssel"
-		value={a?.then((x) => x.schluessel)}
 	/>
 </Row>
 <Row>
 	<WalterMultiSelect
-		value={a?.then((x) => x.selectedWohnungen)}
-		bind:binding={entry.selectedWohnungen}
+		bind:value={a.selectedWohnungen}
 		api="/api/selection/wohnungen"
 		titleText="Wohnungen"
 	/>
 </Row>
 <Row>
-	<WalterTextInput
-		labelText="Notiz"
-		bind:binding={entry.notiz}
-		value={a?.then((x) => x.notiz)}
-	/>
+	<WalterTextInput labelText="Notiz" bind:value={a.notiz} />
 </Row>

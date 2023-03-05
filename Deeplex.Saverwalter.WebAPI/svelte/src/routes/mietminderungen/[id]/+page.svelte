@@ -4,25 +4,17 @@
 		WalterGrid,
 		WalterMietminderung
 	} from '$WalterComponents';
-	import { walter_get } from '$WalterServices/requests';
-	import type { WalterMietminderungEntry } from '$WalterTypes';
 	import { Button, ButtonSkeleton } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const url = `/api/mietminderungen/${data.id}`;
-
-	const a: Promise<WalterMietminderungEntry> = walter_get(url);
-	const entry: Partial<WalterMietminderungEntry> = {};
-	a.then((e) => Object.assign(entry, e));
-
-	const title = a.then((x) => x.vertrag.text);
+	const a = data.a;
 </script>
 
-<WalterHeaderDetail {a} {url} {entry} {title} />
+<WalterHeaderDetail {a} url={data.url} title={a.vertrag.text} />
 
 <WalterGrid>
-	<WalterMietminderung {a} {entry} />
+	<WalterMietminderung {a} />
 	{#await a}
 		<ButtonSkeleton />
 	{:then x}

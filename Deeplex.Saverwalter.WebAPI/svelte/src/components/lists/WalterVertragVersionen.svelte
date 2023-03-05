@@ -13,29 +13,26 @@
 
 	const addUrl = `/api/vertragversionen/`;
 
-	export let rows: Promise<WalterVertragVersionEntry[]>;
+	export let rows: WalterVertragVersionEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 
 	const navigate = (e: CustomEvent<DataTableRow>) =>
 		goto(`/vertragversionen/${e.detail.id}`);
 
-	export let a: Promise<Partial<WalterVertragVersionEntry>> | undefined =
-		undefined;
-	let entry: Partial<WalterVertragVersionEntry> | undefined = undefined;
-	a?.then((e) => (entry = e));
+	export let a: Partial<WalterVertragVersionEntry> | undefined = undefined;
 </script>
 
 <WalterDataWrapper
 	{navigate}
 	{addUrl}
-	addEntry={entry}
+	addEntry={a}
 	{title}
 	{search}
 	{rows}
 	{headers}
 >
-	{#if entry}
-		<WalterVertragVersion {a} {entry} />
+	{#if a}
+		<WalterVertragVersion {a} />
 	{/if}
 </WalterDataWrapper>

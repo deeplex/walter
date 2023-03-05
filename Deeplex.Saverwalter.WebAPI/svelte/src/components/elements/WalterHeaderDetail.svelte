@@ -10,12 +10,11 @@
 	import { walter_delete, walter_put } from '$WalterServices/requests';
 
 	export let title: Promise<string> | string = 'Saverwalter';
-	export let a: Promise<any>; // TODO replace with type that has anhaenge
+	export let a: any; // TODO replace with type that has anhaenge
 	export let url: string;
-	export let entry: any;
 
 	function click_save() {
-		walter_put(url, entry);
+		walter_put(url, a);
 	}
 
 	function click_delete(title: string) {
@@ -40,7 +39,7 @@
 		</HeaderNav>
 		{#await a then x}
 			{#if x.anhaenge}
-				<WalterAnhaenge rows={a.then((x) => x.anhaenge)} />
+				<WalterAnhaenge rows={a.anhaenge} />
 			{/if}
 		{/await}
 	{/await}

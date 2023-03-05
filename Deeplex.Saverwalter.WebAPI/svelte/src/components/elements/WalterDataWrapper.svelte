@@ -14,7 +14,7 @@
 	export let addUrl: string | undefined = undefined;
 	export let addEntry: any | undefined = undefined;
 	export let title: string | undefined = undefined;
-	export let rows: Promise<any[]>;
+	export let rows: any[];
 	export let headers: {
 		key: string;
 		value: string;
@@ -32,7 +32,7 @@
 			return;
 		}
 		const j = await walter_post(url, body);
-		rows = rows.then((e) => [...e, j]);
+		rows = [...rows, j];
 		open = true;
 	}
 </script>

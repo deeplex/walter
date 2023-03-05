@@ -22,43 +22,41 @@
 	export let data: PageData;
 	const url = `/api/umlagen/${data.id}`;
 
-	const a: Promise<WalterUmlageEntry> = walter_get(url);
-	const entry: Partial<WalterUmlageEntry> = {};
-	a.then((e) => Object.assign(entry, e));
+	const a = data.a;
 
-	const title = a.then((x) => x.typ.text + ' - ' + x.wohnungenBezeichnung);
+	const lastBetriebskostenrechnung =
+		a.betriebskostenrechnungen[a.betriebskostenrechnungen.length - 1];
 
-	const betriebskostenrechungEntry: Promise<
-		Partial<WalterBetriebskostenrechnungEntry>
-	> = a.then((e) => {
-		const last =
-			e.betriebskostenrechnungen[e.betriebskostenrechnungen.length - 1];
-		const umlage: WalterSelectionEntry = {
-			id: '' + e.id,
-			text: e.wohnungenBezeichnung,
-			filter: '' + e.typ
-		};
-		return {
-			typ: e.typ,
+	const umlage: WalterSelectionEntry = {
+		id: '' + a.id,
+		text: a.wohnungenBezeichnung,
+		filter: '' + a.typ
+	};
+	const betriebskostenrechungEntry: Partial<WalterBetriebskostenrechnungEntry> =
+		{
+			typ: a.typ,
 			umlage: umlage,
-			betrag: last.betrag,
-			betreffendesJahr: last.betreffendesJahr + 1,
+			betrag: lastBetriebskostenrechnung.betrag,
+			betreffendesJahr: lastBetriebskostenrechnung.betreffendesJahr + 1,
 			datum: toLocaleIsoString(new Date())
-		} as WalterBetriebskostenrechnungEntry;
-	});
+		};
 </script>
 
-<WalterHeaderDetail {a} {url} {entry} {title} />
+<WalterHeaderDetail
+	{a}
+	{url}
+	title={a.typ.text + ' - ' + a.wohnungenBezeichnung}
+/>
 
 <WalterGrid>
-	<WalterUmlage {a} {entry} />
+	<WalterUmlage {a} />
 
 	<Accordion>
-		<WalterWohnungen title="Wohnungen" rows={a.then((x) => x.wohnungen)} />
+		<WalterWohnungen title="Wohnungen" rows={a.wohnungen} />
 		<WalterBetriebskostenrechnungen
 			a={betriebskostenrechungEntry}
 			title="Betriebskostenrechnungen"
-			rows={a.then((x) => x.betriebskostenrechnungen)}
+			rows={a.betriebskostenrechnungen}
 		/>
 	</Accordion>
 </WalterGrid>
