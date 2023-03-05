@@ -8,6 +8,7 @@ export { default as WalterBetriebskostenrechnung } from './details/WalterBetrieb
 export { default as WalterErhaltungsaufwendung } from './details/WalterErhaltungsaufwendung.svelte';
 export { default as WalterUmlage } from './details/WalterUmlage.svelte';
 export { default as WalterVertrag } from './details/WalterVertrag.svelte';
+export { default as WalterVertragVersion } from './details/WalterVertragVersion.svelte';
 export { default as WalterWohnung } from './details/WalterWohnung.svelte';
 export { default as WalterZaehler } from './details/WalterZaehler.svelte';
 export { default as WalterZaehlerstand } from './details/WalterZaehlerstand.svelte';

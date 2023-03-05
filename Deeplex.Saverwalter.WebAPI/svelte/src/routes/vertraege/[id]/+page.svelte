@@ -14,10 +14,12 @@
 	import type {
 		WalterMieteEntry,
 		WalterMietminderungEntry,
-		WalterVertragEntry
+		WalterVertragEntry,
+		WalterVertragVersionEntry
 	} from '$WalterTypes';
 	import WalterVertragVersionen from '../../../components/lists/WalterVertragVersionen.svelte';
 	import { toLocaleIsoString } from '$WalterServices/utils';
+	import WalterVertragVersion from '../../../components/details/WalterVertragVersion.svelte';
 
 	export let data: PageData;
 	const url = `/api/vertraege/${data.id}`;
@@ -46,6 +48,17 @@
 			};
 		}
 	);
+
+	const vertragversionEntry: Promise<Partial<WalterVertragVersionEntry>> =
+		a.then((e) => {
+			const last = e.versionen[e.versionen.length - 1];
+			return {
+				vertrag: { id: '' + e.id, text: '' },
+				beginn: toLocaleIsoString(new Date()),
+				personenzahl: last.personenzahl,
+				grundmiete: last.grundmiete
+			};
+		});
 </script>
 
 <WalterHeaderDetail {a} {url} {entry} {title} />
@@ -55,9 +68,9 @@
 
 	<Accordion>
 		<WalterKontakte title="Mieter" rows={a.then((x) => x.mieter)} />
-		<!-- TODO -->
 		<WalterVertragVersionen
-			title="Versionen"
+			a={vertragversionEntry}
+			title="Vertragsänderungen"
 			rows={a.then((x) => x.versionen)}
 		/>
 		<WalterMieten

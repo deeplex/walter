@@ -1,11 +1,14 @@
 <script lang="ts">
-	import { WalterDataWrapper } from '$WalterComponents';
+	import { goto } from '$app/navigation';
+	import { WalterDataWrapper, WalterVertragVersion } from '$WalterComponents';
 	import type { WalterVertragVersionEntry } from '$WalterTypes';
+	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
 	const headers = [
 		{ key: 'beginn', value: 'Beginn' },
 		{ key: 'personenzahl', value: 'Personenzahl' },
-		{ key: 'grundmiete', value: 'Grundmiete' }
+		{ key: 'grundmiete', value: 'Grundmiete' },
+		{ key: 'notiz', value: 'Notiz' }
 	];
 
 	const addUrl = `/api/vertragversionen/`;
@@ -14,15 +17,25 @@
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
 
+	const navigate = (e: CustomEvent<DataTableRow>) =>
+		goto(`/vertragversionen/${e.detail.id}`);
+
 	export let a: Promise<Partial<WalterVertragVersionEntry>> | undefined =
 		undefined;
 	let entry: Partial<WalterVertragVersionEntry> | undefined = undefined;
 	a?.then((e) => (entry = e));
 </script>
 
-<WalterDataWrapper {addUrl} addEntry={entry} {title} {search} {rows} {headers}>
+<WalterDataWrapper
+	{navigate}
+	{addUrl}
+	addEntry={entry}
+	{title}
+	{search}
+	{rows}
+	{headers}
+>
 	{#if entry}
-		<p>TODO WALTERVERTRAGVERSION</p>
-		<!-- <WalterVertragVersion {a} {entry} /> -->
+		<WalterVertragVersion {a} {entry} />
 	{/if}
 </WalterDataWrapper>

@@ -8,6 +8,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MietminderungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.VertragVersionController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -46,28 +47,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 MieterAuflistung = string.Join(", ", Mieter
                     .Select(a => dbService.ctx.FindPerson(a.PersonId).Bezeichnung));
                 SelectedMieter = Mieter.Select(e => new SelectionEntry(e.PersonId, dbService.ctx.FindPerson(e.PersonId).Bezeichnung));
-            }
-        }
-
-        public class VertragVersionEntryBase
-        {
-            protected VertragVersion? Entity { get; }
-
-            public int? Id { get; set; }
-            public int? Personenzahl { get; set; }
-            public string? Notiz { get; set; }
-            public DateTime? Beginn { get; set; }
-            public double? Grundmiete { get; set; }
-
-            public VertragVersionEntryBase() { }
-            public VertragVersionEntryBase(VertragVersion entity)
-            {
-                Entity = entity;
-                Id = entity.VertragVersionId;
-                Personenzahl = entity.Personenzahl;
-                Notiz = entity.Notiz;
-                Beginn = entity.Beginn;
-                Grundmiete = entity.Grundmiete;
             }
         }
 
