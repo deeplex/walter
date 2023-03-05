@@ -5,16 +5,15 @@
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const a = data.a;
 </script>
 
-<WalterHeaderDetail {a} url={data.url} title={a.vertrag.text} />
+<WalterHeaderDetail a={data.a} url={data.url} title={data.a.vertrag.text} />
 
 <WalterGrid>
-	<WalterVertragVersion {a} />
-	{#await a}
+	<WalterVertragVersion a={data.a} />
+	{#await data.a}
 		<ButtonSkeleton />
 	{:then x}
-		<Button href={`/vertraege/${a.vertrag.id}`}>Zum Vertrag</Button>
+		<Button href={`/vertraege/${data.a.vertrag.id}`}>Zum Vertrag</Button>
 	{/await}
 </WalterGrid>
