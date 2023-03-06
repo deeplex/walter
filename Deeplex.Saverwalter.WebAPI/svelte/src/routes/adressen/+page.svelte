@@ -1,11 +1,5 @@
 <script lang="ts">
-	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
-	import { goto } from '$app/navigation';
-	import {
-		WalterAdressen,
-		WalterDataTable,
-		WalterHeaderList
-	} from '$WalterComponents';
+	import { WalterAdressen, WalterHeaderList } from '$WalterComponents';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
