@@ -8,16 +8,22 @@
 
 	export let title: Promise<string> | string = 'Saverwalter';
 	export let url: string;
+	export let nonav: boolean = false;
 
 	function click_new() {
+		if (nonav) {
+			return;
+		}
 		goto(`${url}/new`.replace('api/', ''));
 	}
 </script>
 
 <WalterHeader {title}>
-	{#await title then}
-		<HeaderNav>
-			<HeaderGlobalAction on:click={click_new} icon={Add} />
-		</HeaderNav>
-	{/await}
+	{#if !nonav}
+		{#await title then}
+			<HeaderNav>
+				<HeaderGlobalAction on:click={click_new} icon={Add} />
+			</HeaderNav>
+		{/await}
+	{/if}
 </WalterHeader>
