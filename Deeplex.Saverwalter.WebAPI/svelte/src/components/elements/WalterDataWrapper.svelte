@@ -3,7 +3,8 @@
 		AccordionItem,
 		Button,
 		Loading,
-		Modal
+		Modal,
+		Tile
 	} from 'carbon-components-svelte';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
@@ -70,6 +71,8 @@
 					bind:open={addModalOpen}
 				>
 					<slot />
+					<!-- Spacer for DatePickers. Otherwise the modal is too narrow -->
+					<Tile style="height: 13em" />
 				</Modal>
 			{/if}
 		</AccordionItem>
