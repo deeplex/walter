@@ -2,7 +2,7 @@
 	import {
 		WalterDatePicker,
 		WalterNumberInput,
-		WalterTextInput
+		WalterTextArea
 	} from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
 	import type { WalterMietminderungEntry } from '$WalterTypes';
@@ -16,5 +16,5 @@
 	<WalterDatePicker placeholder="Offen" bind:value={a.ende} labelText="Ende" />
 </Row>
 <Row>
-	<WalterTextInput labelText="Notiz" bind:value={a.notiz} />
+	<WalterTextArea labelText="Notiz" bind:value={a.notiz} />
 </Row>

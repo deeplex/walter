@@ -24,6 +24,7 @@ export { default as WalterHeaderList } from './elements/WalterHeaderList.svelte'
 export { default as WalterHeaderNew } from './elements/WalterHeaderNew.svelte';
 export { default as WalterGrid } from './elements/WalterGrid.svelte';
 export { default as WalterSideNav } from './elements/WalterSideNav.svelte';
+export { default as WalterTextArea } from './elements/WalterTextArea.svelte';
 export { default as WalterTextInput } from './elements/WalterTextInput.svelte';
 export { default as WalterToasts } from './elements/WalterToasts.svelte';
 export { default as WalterNumberInput } from './elements/WalterNumberInput.svelte';

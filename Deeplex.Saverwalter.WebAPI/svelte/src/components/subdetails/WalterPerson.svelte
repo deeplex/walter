@@ -2,7 +2,11 @@
 	import { Row } from 'carbon-components-svelte';
 
 	import type { WalterPersonEntry } from '$WalterTypes';
-	import { WalterAdresse, WalterTextInput } from '$WalterComponents';
+	import {
+		WalterAdresse,
+		WalterTextArea,
+		WalterTextInput
+	} from '$WalterComponents';
 
 	export let value: Partial<WalterPersonEntry>;
 </script>
@@ -17,5 +21,5 @@
 	<WalterTextInput bind:value={value.mobil} labelText="Mobil" />
 </Row>
 <Row>
-	<WalterTextInput bind:value={value.notiz} labelText="Notiz" />
+	<WalterTextArea bind:value={value.notiz} labelText="Notiz" />
 </Row>

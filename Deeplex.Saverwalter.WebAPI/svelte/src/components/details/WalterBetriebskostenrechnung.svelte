@@ -2,7 +2,7 @@
 	import {
 		WalterDatePicker,
 		WalterNumberInput,
-		WalterTextInput
+		WalterTextArea
 	} from '$WalterComponents';
 	import { ComboBox, Row, TextInputSkeleton } from 'carbon-components-svelte';
 	import type {
@@ -83,5 +83,5 @@
 	<WalterDatePicker bind:value={a.datum} labelText="Datum" />
 </Row>
 <Row>
-	<WalterTextInput bind:value={a.notiz} labelText="Notiz" />
+	<WalterTextArea bind:value={a.notiz} labelText="Notiz" />
 </Row>

@@ -3,6 +3,7 @@
 		WalterAdresse,
 		WalterComboBox,
 		WalterNumberInput,
+		WalterTextArea,
 		WalterTextInput
 	} from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
@@ -27,5 +28,5 @@
 	/>
 </Row>
 <Row>
-	<WalterTextInput bind:value={a.notiz} labelText="Notiz" />
+	<WalterTextArea bind:value={a.notiz} labelText="Notiz" />
 </Row>

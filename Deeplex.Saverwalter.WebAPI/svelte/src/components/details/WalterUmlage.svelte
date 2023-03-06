@@ -2,7 +2,7 @@
 	import {
 		WalterComboBox,
 		WalterMultiSelect,
-		WalterTextInput
+		WalterTextArea
 	} from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
 	import type { WalterSelectionEntry, WalterUmlageEntry } from '$WalterTypes';
@@ -30,5 +30,5 @@
 	/>
 </Row>
 <Row>
-	<WalterTextInput labelText="Notiz" bind:value={a.notiz} />
+	<WalterTextArea labelText="Notiz" bind:value={a.notiz} />
 </Row>

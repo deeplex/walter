@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { WalterAdresse, WalterTextInput } from '$WalterComponents';
+	import {
+		WalterAdresse,
+		WalterTextArea,
+		WalterTextInput
+	} from '$WalterComponents';
 	import type { WalterSelectionEntry, WalterZaehlerEntry } from '$WalterTypes';
 	import { Row } from 'carbon-components-svelte';
 	import WalterComboBox from '../elements/WalterComboBox.svelte';
@@ -24,5 +28,5 @@
 	/>
 </Row>
 <Row>
-	<WalterTextInput bind:value={a.notiz} labelText="Notiz" />
+	<WalterTextArea bind:value={a.notiz} labelText="Notiz" />
 </Row>

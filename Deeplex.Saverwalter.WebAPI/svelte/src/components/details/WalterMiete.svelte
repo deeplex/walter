@@ -2,7 +2,7 @@
 	import {
 		WalterDatePicker,
 		WalterNumberInput,
-		WalterTextInput
+		WalterTextArea
 	} from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
 	import type { WalterMieteEntry } from '$WalterTypes';
@@ -19,5 +19,5 @@
 	<WalterDatePicker bind:value={a.zahlungsdatum} labelText="Zahlungsdatum" />
 </Row>
 <Row>
-	<WalterTextInput labelText="Notiz" bind:value={a.notiz} />
+	<WalterTextArea labelText="Notiz" bind:value={a.notiz} />
 </Row>
