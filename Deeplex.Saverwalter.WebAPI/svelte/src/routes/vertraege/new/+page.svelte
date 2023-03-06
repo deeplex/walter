@@ -4,12 +4,20 @@
 		WalterVertrag,
 		WalterHeaderNew
 	} from '$WalterComponents';
-	import type { WalterVertragEntry } from '$WalterTypes';
+	import type {
+		WalterVertragEntry,
+		WalterVertragVersionEntry
+	} from '$WalterTypes';
+	import { Tile } from 'carbon-components-svelte';
+	import WalterVertragVersion from '../../../components/details/WalterVertragVersion.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 
-	const entry: Partial<WalterVertragEntry> = {};
+	let entryVersion: Partial<WalterVertragVersionEntry> = {};
+	let entry: Partial<WalterVertragEntry> = {
+		versionen: [entryVersion as WalterVertragVersionEntry]
+	};
 </script>
 
 <WalterHeaderNew url={data.url} {entry} title={data.title} />
@@ -20,4 +28,6 @@
 		wohnungen={data.wohnungen}
 		a={entry}
 	/>
+	<Tile>Vertragsversion:</Tile>
+	<WalterVertragVersion a={entryVersion} />
 </WalterGrid>

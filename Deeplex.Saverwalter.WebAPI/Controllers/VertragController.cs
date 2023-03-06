@@ -1,4 +1,4 @@
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
@@ -65,13 +65,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Where(m => Entity != null && m.Vertrag.VertragId == Entity.VertragId)
                 .ToList()
                 .Select(e => new PersonEntryBase(DbService.ctx.FindPerson(e.PersonId), DbService));
-            public IEnumerable<VertragVersionEntryBase>? Versionen => Entity?.Versionen.Select(e => new VertragVersionEntryBase(e));
+            public IEnumerable<VertragVersionEntryBase>? Versionen { get; set; }
             // TODO Garagen
 
             public VertragEntry() : base() { }
             public VertragEntry(Vertrag entity, IWalterDbService dbService) : base(entity, dbService)
             {
                 DbService = dbService;
+                Versionen = Entity?.Versionen.Select(e => new VertragVersionEntryBase(e));
             }
         }
 

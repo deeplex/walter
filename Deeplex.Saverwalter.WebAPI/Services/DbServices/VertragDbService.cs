@@ -24,10 +24,33 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new Exception();
             }
 
-            // TODO Vertragsversionen
-            // Beginn => Versionen
+            // Create Version for initial create (if provided)
+            if (entity.VertragId == 0)
+            {
+                var entryVersion = entry.Versionen?.FirstOrDefault();
+                if (entryVersion != null)
+                {
+                    var entityVersion = new VertragVersion()
+                    {
+                        Beginn = (DateTime)entryVersion.Beginn!,
+                        Grundmiete = entryVersion.Grundmiete,
+                        Personenzahl = entryVersion.Personenzahl,
+                        Notiz = entryVersion.Notiz,
+                        Vertrag = entity
+                    };
+                    entity.Versionen.Add(entityVersion);
+                }
+            }
+
             entity.Ende = entry.Ende;
-            entity.Wohnung = DbService.ctx.Wohnungen.Find(int.Parse(entry.Wohnung!.Id!));
+            if (entry.Wohnung is SelectionEntry w)
+            {
+                entity.Wohnung = DbService.ctx.Wohnungen.Find(int.Parse(w.Id!));
+            }
+            else
+            {
+                throw new Exception();
+            }
             entity.AnsprechpartnerId = entry.Ansprechpartner is SelectionEntry s ? new Guid(s.Id!) : null;
             entity.Notiz = entry.Notiz;
 

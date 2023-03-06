@@ -10,6 +10,7 @@
 	export let labelText: string;
 	export let value: string | undefined = undefined;
 	export let placeholder: string | undefined = undefined;
+	export let disabled: boolean | undefined = false;
 
 	function change(e: any) {
 		value = toLocaleIsoString(new Date(e.detail?.selectedDates[0]));
@@ -26,6 +27,7 @@
 		on:change={change}
 	>
 		<DatePickerInput
+			{disabled}
 			style="width: 100%"
 			type="text"
 			{placeholder}

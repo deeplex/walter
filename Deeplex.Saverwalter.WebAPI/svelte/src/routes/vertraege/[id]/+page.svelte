@@ -20,12 +20,6 @@
 
 	export let data: PageData;
 
-	const mieteEntry: Partial<WalterMieteEntry> = {
-		vertrag: { id: '' + data.a.id, text: '' },
-		zahlungsdatum: toLocaleIsoString(new Date()),
-		betrag: data.a.versionen[data.a.versionen.length - 1].grundmiete
-	};
-
 	const today = new Date();
 	const mietminderungEntry: Partial<WalterMietminderungEntry> = {
 		vertrag: { id: '' + data.a.id, text: '' },
@@ -33,21 +27,29 @@
 		ende: toLocaleIsoString(new Date(today.setMonth(today.getMonth() + 1)))
 	};
 
-	const lastVersion = data.a.versionen[data.a.versionen.length - 1];
+	const lastVersion = data.a.versionen
+		? data.a.versionen[data.a.versionen?.length - 1]
+		: undefined;
 	const vertragversionEntry: Partial<WalterVertragVersionEntry> = {
 		vertrag: { id: '' + data.a.id, text: '' },
 		beginn: toLocaleIsoString(new Date()),
-		personenzahl: lastVersion.personenzahl,
-		grundmiete: lastVersion.grundmiete
+		personenzahl: lastVersion?.personenzahl,
+		grundmiete: lastVersion?.grundmiete
+	};
+
+	const mieteEntry: Partial<WalterMieteEntry> = {
+		vertrag: { id: '' + data.a.id, text: '' },
+		zahlungsdatum: toLocaleIsoString(new Date()),
+		betrag: lastVersion?.grundmiete || 0
 	};
 </script>
 
 <WalterHeaderDetail
 	a={data.a}
 	url={data.url}
-	title={data.a.wohnung.text +
+	title={data.a.wohnung?.text +
 		' - ' +
-		data.a.mieter.map((m) => m.name).join(', ')}
+		data.a.mieter?.map((m) => m.name).join(', ')}
 />
 
 <WalterGrid>
@@ -61,7 +63,7 @@
 		<WalterKontakte title="Mieter" rows={data.a.mieter} />
 		<WalterVertragVersionen
 			a={vertragversionEntry}
-			title="Vertragsänderungen"
+			title="Versionen:"
 			rows={data.a.versionen}
 		/>
 		<WalterMieten a={mieteEntry} title="Mieten" rows={data.a.mieten} />

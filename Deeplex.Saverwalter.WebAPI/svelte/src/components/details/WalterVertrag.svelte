@@ -11,17 +11,14 @@
 	export let a: Partial<WalterVertragEntry> = {};
 	export let wohnungen: WalterSelectionEntry[];
 	export let kontakte: WalterSelectionEntry[];
-
-	// TODO
-	// let vermieter = () =>
-	// 	kontakte.then(async (e) => {
-	// 		const besitzer = await async.then((e) => e.wohnung.besitzerId);
-	// 		return e.find((f) => besitzer === f.id)?.text;
-	// 	});
 </script>
 
 <Row>
-	<WalterDatePicker bind:value={a.beginn} labelText="Beginn" />
+	<WalterDatePicker
+		disabled
+		bind:value={a.beginn}
+		labelText="Beginn (aus Vertragsversion)"
+	/>
 	<WalterDatePicker bind:value={a.ende} labelText="Ende" placeholder="Offen" />
 </Row>
 <Row>
