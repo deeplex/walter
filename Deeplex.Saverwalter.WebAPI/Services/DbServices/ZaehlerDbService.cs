@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
@@ -26,7 +26,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
 
             entity.Kennnummer = entry.Kennnummer!;
-            entity.Typ = (Zaehlertyp)int.Parse(entry.Typ!.Id!);
+            if (entry.Typ is SelectionEntry t)
+            {
+                entity.Typ = (Zaehlertyp)int.Parse(t.Id!);
+            }
+            else
+            {
+                throw new Exception();
+            }
             entity.Wohnung = entry.Wohnung is SelectionEntry w ? DbService.ctx.Wohnungen.Find(int.Parse(w.Id!)) : null;
             if (entry.AllgemeinZaehler is SelectionEntry z)
             {

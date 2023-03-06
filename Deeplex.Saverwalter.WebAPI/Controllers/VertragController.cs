@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +20,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             protected Vertrag? Entity { get; }
 
-            public int? Id { get; set; }
+            public int Id { get; set; }
             public DateTime? Beginn { get; set; }
             public DateTime? Ende { get; set; }
             public SelectionEntry? Wohnung { get; set; }
@@ -37,7 +37,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Id = Entity.VertragId;
                 Beginn = Entity.Beginn();
                 Ende = Entity.Ende;
-                Wohnung = new(Entity.Wohnung.WohnungId, Entity.Wohnung.Adresse.Anschrift + " - " + Entity.Wohnung.Bezeichnung);
+                Wohnung = new(
+                    Entity.Wohnung.WohnungId,
+                    Entity.Wohnung.Adresse.Anschrift + " - " + Entity.Wohnung.Bezeichnung,
+                    Entity.Wohnung.BesitzerId.ToString());
                 Ansprechpartner = Entity.AnsprechpartnerId is Guid id && id != Guid.Empty ? new(id, dbService.ctx.FindPerson(id).Bezeichnung) : null;
                 Notiz = Entity.Notiz;
 

@@ -6,7 +6,7 @@
 		WalterTextInput
 	} from '$WalterComponents';
 	import type { WalterSelectionEntry, WalterVertragEntry } from '$WalterTypes';
-	import { Row } from 'carbon-components-svelte';
+	import { Row, TextInput } from 'carbon-components-svelte';
 
 	export let a: Partial<WalterVertragEntry> = {};
 	export let wohnungen: WalterSelectionEntry[];
@@ -26,20 +26,11 @@
 </Row>
 <Row>
 	<WalterComboBox bind:value={a.wohnung} a={wohnungen} titleText="Wohnung" />
-	<!-- TODO -->
-	<!-- <Column>
-            <div style="margin-top:0.75rem">
-                <p class="bx--label">Vermieter:</p>
-                {#await vermieter()}
-                    <TextInputSkeleton />
-                {:then y}
-                    <p style="margin-top: 0.5rem" class=".bx--text-input::placeholder">
-                        {y}
-                    </p>
-                {/await}
-            </div>
-        </Column> -->
-	<!-- TODO -->
+	<TextInput
+		labelText="Vermieter"
+		readonly
+		value={kontakte.find((e) => e.id === a.wohnung?.filter)?.text}
+	/>
 	<WalterComboBox
 		bind:value={a.ansprechpartner}
 		a={kontakte}
