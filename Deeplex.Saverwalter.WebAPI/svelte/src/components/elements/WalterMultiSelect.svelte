@@ -19,6 +19,7 @@
 		<TextInputSkeleton />
 	{:then x}
 		<MultiSelect
+			placeholder={value?.map((e) => e.text).join(', ')}
 			selectedIds={x?.map((e) => e.id)}
 			style="padding-right: 1rem"
 			{items}
