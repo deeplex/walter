@@ -79,6 +79,11 @@
 		border-style: solid;
 	}
 
+	:global(.bx--number input[type='number']) {
+		min-width: 6.375rem;
+		padding-right: 4em;
+	}
+
 	/* :global(.bx--table-sort, .bx--table-header-label) {
 		width: 100%;
 		text-align: center;
