@@ -9,4 +9,9 @@
 </script>
 
 <WalterHeaderList url={data.url} title="Betriebskostenrechnung" />
-<WalterBetriebskostenrechnungen search rows={data.rows} />
+<WalterBetriebskostenrechnungen
+	umlagen={data.umlagen}
+	betriebskostentypen={data.betriebskostentypen}
+	search
+	rows={data.rows}
+/>
