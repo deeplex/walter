@@ -1,4 +1,4 @@
-import type { WalterAdresseEntry, WalterAnhangEntry, WalterBetriebskostenrechnungEntry, WalterErhaltungsaufwendungEntry, WalterSelectionEntry, WalterUmlageEntry, WalterVertragEntry, WalterZaehlerEntry } from '$WalterTypes';
+import type { IWalterAnhang, WalterAdresseEntry, WalterBetriebskostenrechnungEntry, WalterErhaltungsaufwendungEntry, WalterSelectionEntry, WalterUmlageEntry, WalterVertragEntry, WalterZaehlerEntry } from '$WalterTypes';
 
 export type WalterWohnungEntry = {
     adresse: WalterAdresseEntry;
@@ -16,7 +16,6 @@ export type WalterWohnungEntry = {
     betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[];
     erhaltungsaufwendungen: WalterErhaltungsaufwendungEntry[];
     umlagen: WalterUmlageEntry[];
-    anhaenge: WalterAnhangEntry[];
 
     bewohner: string;
-}
+} & IWalterAnhang;

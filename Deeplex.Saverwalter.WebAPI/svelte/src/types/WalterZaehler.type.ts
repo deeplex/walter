@@ -1,4 +1,4 @@
-import type { WalterAdresseEntry, WalterAnhangEntry, WalterSelectionEntry, WalterZaehlerstandEntry } from "$WalterTypes";
+import type { IWalterAnhang, WalterAdresseEntry, WalterSelectionEntry, WalterZaehlerstandEntry } from "$WalterTypes";
 
 export type WalterZaehlerEntry = {
     id: number;
@@ -11,6 +11,4 @@ export type WalterZaehlerEntry = {
 
     staende: WalterZaehlerstandEntry[];
     einzelzaehler: WalterZaehlerEntry[];
-    anhaenge: WalterAnhangEntry[];
-
-}
+} & IWalterAnhang;

@@ -3,7 +3,7 @@ import type { WalterBetriebskostenrechnungEntry, WalterErhaltungsaufwendungEntry
 export type WalterAnhangEntry = {
     id: string;
     fileName: string;
-    creationTime: string;
+    creationTime: Date;
     // notiz: string;
 
     betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[];
