@@ -23,6 +23,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public Guid Id { get; set; }
             public string? FileName { get; set; }
             public DateTime CreationTime { get; set; }
+            public string? ContentType { get; set; }
             //public string Notiz => Entity.Notiz;
 
             public AnhangEntryBase() { }
@@ -30,6 +31,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 Entity = entity;
 
+                ContentType = Entity.ContentType;
                 Id = Entity.AnhangId;
                 FileName = Entity.FileName;
                 CreationTime = Entity.CreationTime;

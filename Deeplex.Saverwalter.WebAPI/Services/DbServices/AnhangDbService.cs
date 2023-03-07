@@ -22,8 +22,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new Exception();
             }
 
-            // TODO
-            //entity.Notiz = entry.Notiz;
+            entity.FileName = entry.FileName!;
+            entity.CreationTime = entry.CreationTime!;
         }
 
         public IActionResult Get(Guid id)
@@ -61,11 +61,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Post(AnhangEntry entry)
         {
-            if (entry.Id != Guid.Empty)
+           if (entry.Id != Guid.Empty)
             {
                 return new BadRequestResult();
             }
             var entity = new Anhang();
+            // Anhang gets its Guid on creation.
+            entry.Id = entity.AnhangId;
 
             try
             {

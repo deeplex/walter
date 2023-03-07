@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		FileUploader,
 		HeaderAction,
 		HeaderPanelDivider,
 		HeaderPanelLink,
@@ -7,9 +8,24 @@
 		Loading
 	} from 'carbon-components-svelte';
 
-	import type { WalterAnhangEntry } from '$WalterTypes';
+	import type { IWalterAnhang, WalterAnhangEntry } from '$WalterTypes';
+	import { walter_s3_post } from '$WalterServices/s3';
 
+	export let reference: IWalterAnhang;
 	export let rows: WalterAnhangEntry[];
+	let fileUploadComplete: boolean = false;
+	let files: File[] = [];
+
+	async function upload() {
+		fileUploadComplete = false;
+		for (const file of files) {
+			{
+				walter_s3_post(file, reference).then(() => {
+					fileUploadComplete = true;
+				});
+			}
+		}
+	}
 </script>
 
 {#await rows}
@@ -21,10 +37,19 @@
 {:then x}
 	<HeaderAction text="({x.length})">
 		<HeaderPanelLinks>
+			<FileUploader
+				status={fileUploadComplete ? 'complete' : 'uploading'}
+				bind:files
+				on:add={upload}
+				multiple
+				buttonLabel="Datei hochladen"
+			/>
 			<HeaderPanelDivider>Dateien ({x.length})</HeaderPanelDivider>
-			{#each x as row}
-				<HeaderPanelLink>{row.fileName}</HeaderPanelLink>
-			{/each}
+			<HeaderPanelLinks>
+				{#each x as row}
+					<HeaderPanelLink>{row.fileName}</HeaderPanelLink>
+				{/each}
+			</HeaderPanelLinks>
 		</HeaderPanelLinks>
 	</HeaderAction>
 {/await}

@@ -7,7 +7,6 @@ namespace Deeplex.Saverwalter.Model
     {
         public Guid AnhangId { get; set; }
         public string FileName { get; set; } = null!;
-        public byte[] Sha256Hash { get; set; } = null!;
         public string? ContentType { get; set; }
         public DateTime CreationTime { get; set; }
 
