@@ -1,6 +1,3 @@
-import type { WalterAnhangEntry } from "$WalterTypes";
-import { walter_post } from "./requests";
-
 const baseURL = "http://192.168.178.61:9002/saverwalter";
 type fetchType = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>
 
@@ -13,7 +10,27 @@ export const walter_s3_post = (file: File, path: string) => fetch(
         },
         body: file
     }
-)
+);
+
+export const walter_s3_get = (url: string) => fetch(
+    `${baseURL}/${url}`, {
+    method: 'GET',
+    headers: {}
+});
+
+export const walter_s3_download = (response: Response, fileName: string) => {
+    response.blob()
+        .then((blob) => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+}
 
 export function get_files_with_common_prefix(url: string, f: fetchType) {
     return f(`${baseURL}?prefix=${url}`, {

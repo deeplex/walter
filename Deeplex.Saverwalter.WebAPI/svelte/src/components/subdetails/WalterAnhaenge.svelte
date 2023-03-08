@@ -8,7 +8,11 @@
 	} from 'carbon-components-svelte';
 
 	import type { WalterAnhangEntry } from '$WalterTypes';
-	import { walter_s3_post } from '$WalterServices/s3';
+	import {
+		walter_s3_download,
+		walter_s3_get,
+		walter_s3_post
+	} from '$WalterServices/s3';
 	import { page } from '$app/stores';
 
 	export let rows: WalterAnhangEntry[] = [];
@@ -27,6 +31,17 @@
 			}
 		}
 	}
+
+	async function download(e: MouseEvent) {
+		const name = (e!.target as any).text;
+		walter_s3_get(`${$page.url.pathname}/${name}`).then((e) =>
+			walter_s3_download(e, name)
+		);
+	}
+
+	function walter_download(e: Response, name: any): any {
+		throw new Error('Function not implemented.');
+	}
 </script>
 
 <HeaderAction text="({files.length})">
@@ -41,7 +56,7 @@
 		<HeaderPanelDivider>Dateien ({files.length})</HeaderPanelDivider>
 		<HeaderPanelLinks>
 			{#each files as row}
-				<HeaderPanelLink>{row}</HeaderPanelLink>
+				<HeaderPanelLink on:click={download}>{row}</HeaderPanelLink>
 			{/each}
 		</HeaderPanelLinks>
 	</HeaderPanelLinks>
