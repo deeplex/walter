@@ -7,7 +7,12 @@
 	export let data: PageData;
 </script>
 
-<WalterHeaderDetail a={data.a} url={data.url} title={data.a.vertrag.text} />
+<WalterHeaderDetail
+	files={data.anhaenge}
+	a={data.a}
+	url={data.url}
+	title={data.a.vertrag.text}
+/>
 
 <WalterGrid>
 	<WalterVertragVersion a={data.a} />

@@ -32,7 +32,12 @@
 	};
 </script>
 
-<WalterHeaderDetail a={data.a} url={data.url} title={data.a.kennnummer} />
+<WalterHeaderDetail
+	files={data.anhaenge}
+	a={data.a}
+	url={data.url}
+	title={data.a.kennnummer}
+/>
 
 <WalterGrid>
 	<WalterZaehler

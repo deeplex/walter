@@ -1,4 +1,5 @@
 import { walter_get } from "$WalterServices/requests";
+import { get_files_with_common_prefix } from "$WalterServices/s3";
 import type { WalterSelectionEntry, WalterWohnungEntry } from "$WalterTypes";
 import type { PageLoad } from "./$types";
 
@@ -15,5 +16,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         zaehler: walter_get('/api/selection/zaehler', fetch) as Promise<WalterSelectionEntry[]>,
         zaehlertypen: walter_get('/api/selection/zaehlertypen', fetch) as Promise<WalterSelectionEntry[]>,
         umlageschluessel: walter_get('/api/selection/umlageschluessel', fetch) as Promise<WalterSelectionEntry[]>,
+
+        anhaenge: get_files_with_common_prefix(`wohnungen/${params.id}`, fetch) as Promise<string[]>
     }
 }

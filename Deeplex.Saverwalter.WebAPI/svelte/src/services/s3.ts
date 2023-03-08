@@ -1,31 +1,85 @@
-import type { IWalterAnhang, WalterAnhangEntry } from "$WalterTypes";
+import type { WalterAnhangEntry } from "$WalterTypes";
 import { walter_post } from "./requests";
 
-const headers = {
-    'Content-Type': 'application/octet-stream'
-};
+const baseURL = "http://192.168.178.61:9002/saverwalter";
+type fetchType = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>
 
-export const walter_s3_post = (file: File, reference: IWalterAnhang) => {
-    const new_file: Partial<WalterAnhangEntry> = {
-        fileName: file.name,
-        creationTime: new Date(file.lastModified)
-    };
+export const walter_s3_post = (file: File, path: string) => fetch(
+    `${baseURL}/${path}/${file.name}`,
+    {
+        method: 'PUT',
+        headers: {
+            'Content-Type': `${file.type}`,
+        },
+        body: file
+    }
+)
 
-    return walter_post(`/api/anhaenge`, new_file)
-        .then((e: WalterAnhangEntry) => {
-            return upload_file(e.id, file).then(() => e);
+export function get_files_with_common_prefix(url: string, f: fetchType) {
+    return f(`${baseURL}?prefix=${url}`, {
+        method: 'GET',
+        headers: {}
+    })
+        .then((e) => e.body?.getReader().read())
+        .then((e) => {
+            const json: any = e ? xml2json(new TextDecoder().decode(e.value)) : {};
+            if (Array.isArray(json.Contents)) {
+                const a = json.Contents
+                    .map((e: any) => e.Key["#text"])
+                    .map((e: string) => e.split("/").pop());
+                console.log(a);
+                return a;
+            }
+            else if (json.Contents?.Key) {
+                return [json.Contents?.Key["#text"].split("/").pop()];
+            }
+            else {
+                return [];
+            }
         });
 }
 
-function upload_file(id: string, file: File) {
-    return fetch(
-        `http://192.168.178.61:9002/saverwalter/${id}`,
-        {
-            method: 'PUT',
-            headers: {
-                'Content-Type': `${file.type}`,
-            },
-            body: file
+function xml2json(xmlString: string) {
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(xmlString, 'text/xml');
+    const person = xmlToJson(xml.documentElement);
+
+    function xmlToJson(xml: Node): any {
+        let obj: any = {};
+        if (xml.nodeType === 1) {
+            const element = xml as Element;
+            if (element.attributes && element.attributes.length > 0) {
+                obj['@attributes'] = {};
+                for (let i = 0; i < element.attributes.length; i++) {
+                    const attribute = element.attributes.item(i);
+                    if (attribute) {
+                        obj['@attributes'][attribute.nodeName] = attribute.nodeValue;
+                    }
+                }
+            }
+        } else if (xml.nodeType === 3) {
+            obj = xml.nodeValue?.trim();
         }
-    )
+        if (xml.hasChildNodes()) {
+            for (let i = 0; i < xml.childNodes.length; i++) {
+                const item = xml.childNodes.item(i);
+                if (item) {
+                    const nodeName = item.nodeName;
+                    if (typeof obj[nodeName] === 'undefined') {
+                        obj[nodeName] = xmlToJson(item);
+                    } else {
+                        if (typeof obj[nodeName].push === 'undefined') {
+                            const old = obj[nodeName];
+                            obj[nodeName] = [];
+                            obj[nodeName].push(old);
+                        }
+                        obj[nodeName].push(xmlToJson(item));
+                    }
+                }
+            }
+        }
+        return obj;
+    }
+
+    return person;
 }

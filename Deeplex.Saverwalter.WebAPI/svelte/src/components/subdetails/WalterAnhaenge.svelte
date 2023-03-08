@@ -4,52 +4,45 @@
 		HeaderAction,
 		HeaderPanelDivider,
 		HeaderPanelLink,
-		HeaderPanelLinks,
-		Loading
+		HeaderPanelLinks
 	} from 'carbon-components-svelte';
 
-	import type { IWalterAnhang, WalterAnhangEntry } from '$WalterTypes';
+	import type { WalterAnhangEntry } from '$WalterTypes';
 	import { walter_s3_post } from '$WalterServices/s3';
+	import { page } from '$app/stores';
 
-	export let reference: IWalterAnhang;
-	export let rows: WalterAnhangEntry[];
+	export let rows: WalterAnhangEntry[] = [];
 	let fileUploadComplete: boolean = false;
-	let files: File[] = [];
+	export let files: string[];
+	let newFiles: File[] = rows.map((e) => new File([], e.fileName));
 
 	async function upload() {
 		fileUploadComplete = false;
-		for (const file of files) {
+		for (const file of newFiles) {
 			{
-				walter_s3_post(file, reference).then(() => {
+				walter_s3_post(file, $page.url.pathname).then(() => {
 					fileUploadComplete = true;
+					files = [...files, file.name];
 				});
 			}
 		}
 	}
 </script>
 
-{#await rows}
-	<HeaderAction disabled>
-		<svelte:fragment slot="text">
-			<Loading style="margin-left: 1em;" withOverlay={false} small />
-		</svelte:fragment>
-	</HeaderAction>
-{:then x}
-	<HeaderAction text="({x.length})">
+<HeaderAction text="({files.length})">
+	<HeaderPanelLinks>
+		<FileUploader
+			status={fileUploadComplete ? 'complete' : 'uploading'}
+			bind:files={newFiles}
+			on:add={upload}
+			multiple
+			buttonLabel="Datei hochladen"
+		/>
+		<HeaderPanelDivider>Dateien ({files.length})</HeaderPanelDivider>
 		<HeaderPanelLinks>
-			<FileUploader
-				status={fileUploadComplete ? 'complete' : 'uploading'}
-				bind:files
-				on:add={upload}
-				multiple
-				buttonLabel="Datei hochladen"
-			/>
-			<HeaderPanelDivider>Dateien ({x.length})</HeaderPanelDivider>
-			<HeaderPanelLinks>
-				{#each x as row}
-					<HeaderPanelLink>{row.fileName}</HeaderPanelLink>
-				{/each}
-			</HeaderPanelLinks>
+			{#each files as row}
+				<HeaderPanelLink>{row}</HeaderPanelLink>
+			{/each}
 		</HeaderPanelLinks>
-	</HeaderAction>
-{/await}
+	</HeaderPanelLinks>
+</HeaderAction>
