@@ -9,7 +9,7 @@
 
 	import type { WalterAnhangEntry } from '$WalterTypes';
 	import {
-		walter_s3_download,
+		download_file_blob,
 		walter_s3_get,
 		walter_s3_post
 	} from '$WalterServices/s3';
@@ -35,12 +35,8 @@
 	async function download(e: MouseEvent) {
 		const name = (e!.target as any).text;
 		walter_s3_get(`${$page.url.pathname}/${name}`).then((e) =>
-			walter_s3_download(e, name)
+			download_file_blob(e, name)
 		);
-	}
-
-	function walter_download(e: Response, name: any): any {
-		throw new Error('Function not implemented.');
 	}
 </script>
 

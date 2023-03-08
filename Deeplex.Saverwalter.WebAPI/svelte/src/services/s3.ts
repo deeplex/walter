@@ -16,20 +16,17 @@ export const walter_s3_get = (url: string) => fetch(
     `${baseURL}/${url}`, {
     method: 'GET',
     headers: {}
-});
+}).then(e => e.blob());
 
-export const walter_s3_download = (response: Response, fileName: string) => {
-    response.blob()
-        .then((blob) => {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
+export function download_file_blob(blob: Blob, fileName: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 export function get_files_with_common_prefix(url: string, f: fetchType) {
