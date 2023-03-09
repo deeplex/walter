@@ -8,12 +8,9 @@
 	} from 'carbon-components-svelte';
 
 	import type { WalterAnhangEntry } from '$WalterTypes';
-	import {
-		download_file_blob,
-		walter_s3_get,
-		walter_s3_post
-	} from '$WalterServices/s3';
+	import { walter_s3_get, walter_s3_post } from '$WalterServices/s3';
 	import { page } from '$app/stores';
+	import { WalterPreview } from '$WalterComponents';
 
 	export let rows: WalterAnhangEntry[] = [];
 	let fileUploadComplete: boolean = false;
@@ -33,12 +30,23 @@
 	}
 
 	async function download(e: MouseEvent) {
-		const name = (e!.target as any).text;
-		walter_s3_get(`${$page.url.pathname}/${name}`).then((e) =>
-			download_file_blob(e, name)
-		);
+		selectedFileName = (e!.target as any).text;
+		walter_s3_get(`${$page.url.pathname}/${selectedFileName}`).then((e) => {
+			selectedFile = e;
+			previewOpen = true;
+		});
 	}
+
+	let selectedFile: Blob | undefined = undefined;
+	let selectedFileName: string = '';
+	let previewOpen = false;
 </script>
+
+<WalterPreview
+	bind:name={selectedFileName}
+	bind:blob={selectedFile}
+	bind:open={previewOpen}
+/>
 
 <HeaderAction text="({files.length})">
 	<HeaderPanelLinks>
