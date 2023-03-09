@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { WalterPreviewPdf } from '$WalterComponents';
 	import { download_file_blob } from '$WalterServices/s3';
 	import { ImageLoader, Modal, Tile } from 'carbon-components-svelte';
 
@@ -41,6 +42,10 @@
 			<ImageLoader src={URL.createObjectURL(blob)} />
 		{:else if blob.type === 'text/plain'}
 			<Tile light>{text}</Tile>
+		{:else if blob.type === 'application/pdf'}
+			<div style="height:100vw">
+				<WalterPreviewPdf src={URL.createObjectURL(blob)} />
+			</div>
 		{:else}
 			<Tile>
 				Kann für die Datei: {blob.name} keine Vorschau anzeigen. Dateityp: {blob.type}.

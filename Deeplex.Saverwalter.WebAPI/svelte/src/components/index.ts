@@ -13,6 +13,7 @@ export { default as WalterWohnung } from './details/WalterWohnung.svelte';
 export { default as WalterZaehler } from './details/WalterZaehler.svelte';
 export { default as WalterZaehlerstand } from './details/WalterZaehlerstand.svelte';
 
+export { default as WalterPreviewPdf } from './elements/WalterPreviewPdf.svelte';
 export { default as WalterPreview } from './elements/WalterPreview.svelte';
 export { default as WalterMultiSelect } from './elements/WalterMultiSelect.svelte';
 export { default as WalterComboBox } from './elements/WalterComboBox.svelte';
