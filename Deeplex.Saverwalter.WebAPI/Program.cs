@@ -36,6 +36,8 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<ZaehlerDbService>(Lifestyle.Scoped);
             container.Register<ZaehlerstandDbService>(Lifestyle.Scoped);
 
+            container.Register<BetriebskostenabrechnungSerivce>(Lifestyle.Scoped);
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.

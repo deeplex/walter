@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Accordion } from 'carbon-components-svelte';
+	import { Accordion, Button } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 
 	import {
@@ -74,4 +74,8 @@
 			rows={data.a.mietminderungen}
 		/>
 	</Accordion>
+
+	<Button href={`/betriebskostenabrechnung/${data.id}`}
+		>Zu Betriebskostenabrechnungen</Button
+	>
 </WalterGrid>

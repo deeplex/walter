@@ -10,9 +10,8 @@ namespace Deeplex.Saverwalter.Print
 {
     public static class OpenXMLIntegration
     {
-        private static void CreateWordDocument(string filepath, Body body)
+        private static void fillDocumentWithContent(WordprocessingDocument wordDocument, Body body)
         {
-            using var wordDocument = WordprocessingDocument.Create(filepath, WordprocessingDocumentType.Document);
             try
             {
                 MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
@@ -21,10 +20,21 @@ namespace Deeplex.Saverwalter.Print
             catch (Exception)
             {
                 wordDocument.Dispose();
-                File.Delete(filepath);
                 throw;
             }
             wordDocument.MainDocumentPart.Document.AppendChild(body);
+        }
+
+        private static void CreateWordDocument(Stream stream, Body body)
+        {
+            using var wordDocument = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
+            fillDocumentWithContent(wordDocument, body);
+        }
+
+        private static void CreateWordDocument(string filepath, Body body)
+        {
+            using var wordDocument = WordprocessingDocument.Create(filepath, WordprocessingDocumentType.Document);
+            fillDocumentWithContent(wordDocument, body);
         }
 
         public static Body DinA4()
@@ -58,6 +68,13 @@ namespace Deeplex.Saverwalter.Print
             }
 
             CreateWordDocument(filepath, body);
+        }
+
+        public static void SaveAsDocx(this IBetriebskostenabrechnung b, Stream stream)
+        {
+            var body = TPrint<Body>.Print(b, new WordPrint());
+
+            CreateWordDocument(stream, body);
         }
 
         public static void SaveAsDocx(this IBetriebskostenabrechnung b, string filepath)
