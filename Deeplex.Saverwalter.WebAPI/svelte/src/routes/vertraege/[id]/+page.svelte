@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { Accordion, Button } from 'carbon-components-svelte';
+	import {
+		Accordion,
+		Button,
+		HeaderPanelDivider,
+		Row,
+		Tile,
+		Truncate
+	} from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 
 	import {
@@ -9,7 +16,8 @@
 		WalterHeaderDetail,
 		WalterGrid,
 		WalterVertrag,
-		WalterVertragVersionen
+		WalterVertragVersionen,
+		WalterNumberInput
 	} from '$WalterComponents';
 	import type {
 		WalterMieteEntry,
@@ -17,6 +25,7 @@
 		WalterVertragVersionEntry
 	} from '$WalterTypes';
 	import { toLocaleIsoString } from '$WalterServices/utils';
+	import { print_abrechnung } from '$WalterServices/print_abrechnung';
 
 	export let data: PageData;
 
@@ -42,16 +51,20 @@
 		zahlungsdatum: toLocaleIsoString(new Date()),
 		betrag: lastVersion?.grundmiete || 0
 	};
+
+	let jahr: number = new Date().getFullYear() - 1;
+
+	function abrechnung_click(id: string, j: number) {
+		print_abrechnung(id, j, title).then(
+			(e) => (data.anhaenge = [...data.anhaenge, e])
+		);
+	}
+
+	let title =
+		data.a.wohnung?.text + ' - ' + data.a.mieter?.map((m) => m.name).join(', ');
 </script>
 
-<WalterHeaderDetail
-	files={data.anhaenge}
-	a={data.a}
-	url={data.url}
-	title={data.a.wohnung?.text +
-		' - ' +
-		data.a.mieter?.map((m) => m.name).join(', ')}
-/>
+<WalterHeaderDetail files={data.anhaenge} a={data.a} url={data.url} {title} />
 
 <WalterGrid>
 	<WalterVertrag
@@ -75,7 +88,13 @@
 		/>
 	</Accordion>
 
-	<Button href={`/betriebskostenabrechnung/${data.id}`}
-		>Zu Betriebskostenabrechnungen</Button
-	>
+	<hr style="margin: 2em" />
+	<Truncate>Betriebskostenabrechnung erstellen:</Truncate>
+
+	<Row>
+		<WalterNumberInput bind:value={jahr} label="Jahr" hideSteppers={false} />
+		<Button size="small" on:click={() => abrechnung_click(data.id, jahr)}>
+			Erstellen
+		</Button>
+	</Row>
 </WalterGrid>

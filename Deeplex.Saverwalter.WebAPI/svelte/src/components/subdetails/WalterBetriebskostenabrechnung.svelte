@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { WalterHeader, WalterNumberInput } from '$WalterComponents';
+	import { WalterNumberInput } from '$WalterComponents';
 	import { walter_s3_post } from '$WalterServices/s3';
-	import { Button, Content } from 'carbon-components-svelte';
-	import type { PageData } from './$types';
+	import { Button, Row } from 'carbon-components-svelte';
 
-	export let data: PageData;
-
+	export let id: number;
 	let jahr: number = new Date().getFullYear() - 1;
 
 	const headers = {
@@ -13,7 +11,7 @@
 	};
 
 	function click() {
-		const url = `/api/betriebskostenabrechnung/${data.id}/${jahr}`;
+		const url = `/api/betriebskostenabrechnung/${id}/${jahr}`;
 		fetch(url, {
 			method: 'GET',
 			headers
@@ -22,15 +20,13 @@
 			.then((e) =>
 				walter_s3_post(
 					new File([e], `Abrechnung ${jahr}.docx`),
-					`vertraege/${data.id}`
+					`vertraege/${id}`
 				)
 			);
 	}
 </script>
 
-<WalterHeader title="Betriebskostenrechnung" />
-
-<Content>
+<Row>
 	<WalterNumberInput bind:value={jahr} label="Jahr" hideSteppers={false} />
 	<Button on:click={click}>Betriebskostenabrechnung erstellen</Button>
-</Content>
+</Row>

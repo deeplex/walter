@@ -4,7 +4,8 @@
 		HeaderAction,
 		HeaderPanelDivider,
 		HeaderPanelLink,
-		HeaderPanelLinks
+		HeaderPanelLinks,
+		Truncate
 	} from 'carbon-components-svelte';
 
 	import type { WalterAnhangEntry } from '$WalterTypes';
@@ -29,8 +30,8 @@
 		}
 	}
 
-	async function download(e: MouseEvent) {
-		selectedFileName = (e!.target as any).text;
+	async function showModal(e: MouseEvent) {
+		selectedFileName = (e!.target as any).textContent;
 		walter_s3_get(`${$page.url.pathname}/${selectedFileName}`).then((e) => {
 			selectedFile = e;
 			previewOpen = true;
@@ -60,7 +61,19 @@
 		<HeaderPanelDivider>Dateien ({files.length})</HeaderPanelDivider>
 		<HeaderPanelLinks>
 			{#each files as row}
-				<HeaderPanelLink on:click={download}>{row}</HeaderPanelLink>
+				<HeaderPanelLink on:click={showModal}>
+					<Truncate
+						style="font-size: 0.875rem;
+					margin-left: 0;
+					font-weight: 600;
+					line-height: 1.28572;
+					letter-spacing: 0.16px;
+					display: block;
+					height: 2rem;
+					color: #c6c6c6;
+					text-decoration: none;">{row}</Truncate
+					>
+				</HeaderPanelLink>
 			{/each}
 		</HeaderPanelLinks>
 	</HeaderPanelLinks>

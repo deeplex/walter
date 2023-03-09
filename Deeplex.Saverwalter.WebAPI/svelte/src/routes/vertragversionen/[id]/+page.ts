@@ -4,7 +4,7 @@ import type { WalterVertragEntry, WalterVertragVersionEntry } from "$WalterTypes
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    const url = `/api/vertragversion/${params.id}`;
+    const url = `/api/vertragversionen/${params.id}`;
     return {
         id: params.id,
         url: url,

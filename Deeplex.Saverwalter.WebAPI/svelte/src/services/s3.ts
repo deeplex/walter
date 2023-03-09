@@ -41,7 +41,6 @@ export function get_files_with_common_prefix(url: string, f: fetchType) {
                 const a = json.Contents
                     .map((e: any) => e.Key["#text"])
                     .map((e: string) => e.split("/").pop());
-                console.log(a);
                 return a;
             }
             else if (json.Contents?.Key) {

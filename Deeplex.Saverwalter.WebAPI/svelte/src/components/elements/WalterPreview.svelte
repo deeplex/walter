@@ -47,8 +47,8 @@
 				<WalterPreviewPdf src={URL.createObjectURL(blob)} />
 			</div>
 		{:else}
-			<Tile>
-				Kann für die Datei: {blob.name} keine Vorschau anzeigen. Dateityp: {blob.type}.
+			<Tile light>
+				Kann für die Datei: {name} keine Vorschau anzeigen. Dateityp: {blob.type}.
 			</Tile>
 		{/if}
 	{/if}
