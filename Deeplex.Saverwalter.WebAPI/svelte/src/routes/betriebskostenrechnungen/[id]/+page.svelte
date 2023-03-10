@@ -13,7 +13,7 @@
 </script>
 
 <WalterHeaderDetail
-	fileNames={data.anhaenge}
+	files={data.anhaenge}
 	a={data.a}
 	url={data.url}
 	title={data.a.typ?.text +
