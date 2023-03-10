@@ -34,6 +34,7 @@
 							FileName: file.name,
 							Key: `${$page.url.pathname}/${file.name}`,
 							LastModified: file.lastModified,
+							Type: file.type,
 							Size: file.size
 						}
 					];
@@ -43,23 +44,27 @@
 	}
 
 	async function showModal(e: MouseEvent) {
-		selectedFileName = (e!.target as any).textContent;
-		walter_s3_get(`${$page.url.pathname}/${selectedFileName}`).then((e) => {
-			selectedFile = e;
+		const name = (e!.target as any).textContent;
+		walter_s3_get(`${$page.url.pathname}/${name}`).then((e: Blob) => {
+			selectedFile = {
+				FileName: name,
+				Key: `${$page.url.pathname}/${e.name}`,
+				LastModified: new File([e], '').lastModified,
+				Size: e.size,
+				Type: e.type,
+				Blob: e
+			};
 			previewOpen = true;
 		});
 	}
 
-	let selectedFile: Blob | undefined = undefined;
-	let selectedFileName: string = '';
+	let selectedFile: WalterS3File;
 	let previewOpen = false;
 </script>
 
-<WalterPreview
-	bind:name={selectedFileName}
-	bind:blob={selectedFile}
-	bind:open={previewOpen}
-/>
+{#if selectedFile}
+	<WalterPreview bind:file={selectedFile} bind:open={previewOpen} />
+{/if}
 
 <HeaderAction text="({files.length})">
 	<HeaderPanelLinks>

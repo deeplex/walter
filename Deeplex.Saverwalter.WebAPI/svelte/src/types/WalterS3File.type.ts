@@ -3,4 +3,6 @@ export type WalterS3File = {
     Key: string;
     LastModified: number;
     Size: number;
+    Blob?: Blob;
+    Type: string;
 }

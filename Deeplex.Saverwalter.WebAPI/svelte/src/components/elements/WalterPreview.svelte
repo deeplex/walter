@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { WalterPreviewPdf } from '$WalterComponents';
-	import { download_file_blob } from '$WalterServices/s3';
+	import type { WalterS3File } from '$WalterTypes';
 	import {
 		Button,
 		ComposedModal,
 		ImageLoader,
-		Modal,
 		ModalBody,
 		ModalFooter,
 		ModalHeader,
@@ -13,18 +12,16 @@
 	} from 'carbon-components-svelte';
 
 	export let open: boolean = false;
-	export let blob: Blob | undefined = undefined;
-	export let name: string;
+	export let file: WalterS3File;
 
 	let text: string = '';
-
 	function handleModalOpen() {
-		if (blob && blob.type === 'text/plain') {
+		if (file.Blob && file.Blob.type === 'text/plain') {
 			const reader = new FileReader();
 			reader.onload = function (event) {
 				text = (event.target?.result as string) || '';
 			};
-			reader.readAsText(blob);
+			reader.readAsText(file.Blob);
 		}
 	}
 
@@ -33,8 +30,8 @@
 	}
 
 	function download() {
-		if (blob) {
-			download_file_blob(blob, name);
+		if (file.Blob) {
+			download_file_blob(file.Blob, file.FileName);
 		}
 	}
 
@@ -56,20 +53,20 @@
 	on:close={handleModalClose}
 	on:submit
 >
-	<ModalHeader title={name} />
+	<ModalHeader bind:title={file.FileName} />
 	<ModalBody>
-		{#if blob}
-			{#if blob.type === 'image/png'}
-				<ImageLoader src={createObjectURL(blob)} />
-			{:else if blob.type === 'text/plain'}
+		{#if file.Blob}
+			{#if file.Type === 'image/png'}
+				<ImageLoader src={createObjectURL(file.Blob)} />
+			{:else if file.Type === 'text/plain' || file.Blob.type === 'application/json'}
 				<Tile light>{text}</Tile>
-			{:else if blob.type === 'application/pdf'}
+			{:else if file.Type === 'application/pdf'}
 				<div style="height:100vw">
-					<WalterPreviewPdf src={createObjectURL(blob)} />
+					<WalterPreviewPdf src={createObjectURL(file.Blob)} />
 				</div>
 			{:else}
 				<Tile light>
-					Kann für die Datei: {name} keine Vorschau anzeigen. Dateityp: {blob.type}.
+					Kann für die Datei: {name} keine Vorschau anzeigen. Dateityp: {file.Type}.
 				</Tile>
 			{/if}
 		{/if}

@@ -58,7 +58,7 @@ export const walter_delete = (url: string, entry_title: string) => {
     Dieser Vorgang kann nicht rückgängig gemacht werden.`
 
     openModal({
-        modalHeading: "Eintrag löschen",
+        modalHeading: "Löschen",
         content,
         danger: true,
         primaryButtonText: "Löschen",
