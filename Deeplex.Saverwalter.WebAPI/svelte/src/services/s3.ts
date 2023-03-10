@@ -53,10 +53,10 @@ export function get_files_with_common_prefix(url: string, f: fetchType) {
                 return [];
             }
             else if (Array.isArray(Contents)) {
-                return Contents.map((e: Content) => e.Key) || [];
+                return Contents.map((e: Content) => e.Key.split("/").pop()) || [];
             }
             else {
-                return [Contents.Key];
+                return [Contents.Key.split("/").pop()];
             }
         });
 }
