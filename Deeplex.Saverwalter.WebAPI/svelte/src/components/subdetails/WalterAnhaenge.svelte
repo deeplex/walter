@@ -8,15 +8,14 @@
 		Truncate
 	} from 'carbon-components-svelte';
 
-	import type { WalterAnhangEntry } from '$WalterTypes';
 	import { walter_s3_get, walter_s3_post } from '$WalterServices/s3';
 	import { page } from '$app/stores';
 	import { WalterPreview } from '$WalterComponents';
 
-	export let rows: WalterAnhangEntry[] = [];
+	export let fileNames: string[];
+
 	let fileUploadComplete: boolean = false;
-	export let files: string[];
-	let newFiles: File[] = rows.map((e) => new File([], e.fileName));
+	let newFiles: File[] = fileNames.map((e) => new File([], e));
 
 	async function upload() {
 		fileUploadComplete = false;
@@ -24,7 +23,7 @@
 			{
 				walter_s3_post(file, $page.url.pathname).then(() => {
 					fileUploadComplete = true;
-					files = [...files, file.name];
+					fileNames = [...fileNames, file.name];
 				});
 			}
 		}
@@ -49,7 +48,7 @@
 	bind:open={previewOpen}
 />
 
-<HeaderAction text="({files.length})">
+<HeaderAction text="({fileNames.length})">
 	<HeaderPanelLinks>
 		<FileUploader
 			status={fileUploadComplete ? 'complete' : 'uploading'}
@@ -58,10 +57,11 @@
 			multiple
 			buttonLabel="Datei hochladen"
 		/>
-		<HeaderPanelDivider>Dateien ({files.length})</HeaderPanelDivider>
+		<HeaderPanelDivider>Dateien ({fileNames.length})</HeaderPanelDivider>
 		<HeaderPanelLinks>
-			{#each files as row}
+			{#each fileNames as fileName}
 				<HeaderPanelLink on:click={showModal}>
+					<!-- Copy the style from the original element. -->
 					<Truncate
 						style="font-size: 0.875rem;
 					margin-left: 0;
@@ -71,8 +71,10 @@
 					display: block;
 					height: 2rem;
 					color: #c6c6c6;
-					text-decoration: none;">{row}</Truncate
+							   text-decoration: none;"
 					>
+						{fileName}
+					</Truncate>
 				</HeaderPanelLink>
 			{/each}
 		</HeaderPanelLinks>

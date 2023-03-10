@@ -64,7 +64,12 @@
 		data.a.wohnung?.text + ' - ' + data.a.mieter?.map((m) => m.name).join(', ');
 </script>
 
-<WalterHeaderDetail files={data.anhaenge} a={data.a} url={data.url} {title} />
+<WalterHeaderDetail
+	fileNames={data.anhaenge}
+	a={data.a}
+	url={data.url}
+	{title}
+/>
 
 <WalterGrid>
 	<WalterVertrag

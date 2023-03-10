@@ -12,7 +12,7 @@
 	export let title: Promise<string> | string = 'Saverwalter';
 	export let a: any;
 	export let url: string;
-	export let files: string[] | undefined = undefined;
+	export let fileNames: string[] | undefined = undefined;
 
 	function click_save() {
 		walter_put(url, a);
@@ -38,8 +38,8 @@
 				<HeaderGlobalAction on:click={() => click_delete(x)} icon={TrashCan} />
 			{/await}
 		</HeaderNav>
-		{#if files}
-			<WalterAnhaenge {files} />
+		{#if fileNames}
+			<WalterAnhaenge {fileNames} />
 		{/if}
 	{/await}
 </WalterHeader>

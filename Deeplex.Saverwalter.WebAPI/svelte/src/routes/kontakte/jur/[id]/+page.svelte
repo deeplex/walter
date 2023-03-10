@@ -15,7 +15,7 @@
 </script>
 
 <WalterHeaderDetail
-	files={data.anhaenge}
+	fileNames={data.anhaenge}
 	a={data.a}
 	url={data.url}
 	title={data.a.name}
