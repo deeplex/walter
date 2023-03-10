@@ -38,7 +38,9 @@
 		}
 	}
 
-	function remove() {}
+	function remove() {
+		console.log(name);
+	}
 
 	let objectURL: string;
 	function createObjectURL(blob: Blob): string {

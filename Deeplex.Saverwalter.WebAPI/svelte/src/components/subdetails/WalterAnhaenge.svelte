@@ -8,15 +8,14 @@
 		Truncate
 	} from 'carbon-components-svelte';
 
-	import type { WalterAnhangEntry } from '$WalterTypes';
 	import { walter_s3_get, walter_s3_post } from '$WalterServices/s3';
 	import { page } from '$app/stores';
 	import { WalterPreview } from '$WalterComponents';
+	import type { WalterS3File } from '../../types/WalterS3File.type';
 
-	export let rows: WalterAnhangEntry[] = [];
 	let fileUploadComplete: boolean = false;
-	export let files: string[];
-	let newFiles: File[] = rows.map((e) => new File([], e.fileName));
+	export let files: WalterS3File[];
+	let newFiles: File[] = [];
 
 	async function upload() {
 		fileUploadComplete = false;
@@ -24,7 +23,15 @@
 			{
 				walter_s3_post(file, $page.url.pathname).then(() => {
 					fileUploadComplete = true;
-					files = [...files, file.name];
+					files = [
+						...files,
+						{
+							FileName: file.name,
+							Key: 'TODO',
+							LastModified: file.lastModified,
+							Size: file.size
+						}
+					];
 				});
 			}
 		}
@@ -60,7 +67,7 @@
 		/>
 		<HeaderPanelDivider>Dateien ({files.length})</HeaderPanelDivider>
 		<HeaderPanelLinks>
-			{#each files as row}
+			{#each files as file}
 				<HeaderPanelLink on:click={showModal}>
 					<Truncate
 						style="font-size: 0.875rem;
@@ -71,7 +78,7 @@
 					display: block;
 					height: 2rem;
 					color: #c6c6c6;
-					text-decoration: none;">{row}</Truncate
+					text-decoration: none;">{file.FileName}</Truncate
 					>
 				</HeaderPanelLink>
 			{/each}

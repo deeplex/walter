@@ -1,3 +1,4 @@
+import type { WalterS3File } from '$WalterTypes';
 import * as parser from 'fast-xml-parser';
 
 const baseURL = "http://192.168.178.61:9002/saverwalter";
@@ -33,7 +34,8 @@ export function download_file_blob(blob: Blob, fileName: string) {
 
 type Content = {
     Key: string;
-    LastModified: string
+    Size: string;
+    LastModified: string;
 }
 
 export function get_files_with_common_prefix(url: string, f: fetchType) {
@@ -53,10 +55,20 @@ export function get_files_with_common_prefix(url: string, f: fetchType) {
                 return [];
             }
             else if (Array.isArray(Contents)) {
-                return Contents.map((e: Content) => e.Key.split("/").pop()) || [];
+                return Contents.map((e: Content) => ({
+                    FileName: e.Key.split("/").pop(),
+                    Key: e.Key,
+                    LastModified: e.LastModified,
+                    Size: e.Size
+                })) || [];
             }
             else {
-                return [Contents.Key.split("/").pop()];
+                return [{
+                    FileName: Contents.Key.split("/").pop(),
+                    Key: Contents.Key,
+                    LastModified: Contents.LastModified,
+                    Size: Contents.Size
+                }];
             }
         });
 }

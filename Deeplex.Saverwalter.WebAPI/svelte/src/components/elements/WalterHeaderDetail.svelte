@@ -8,11 +8,12 @@
 
 	import { WalterAnhaenge, WalterHeader } from '$WalterComponents';
 	import { walter_delete, walter_put } from '$WalterServices/requests';
+	import type { WalterS3File } from '../../types/WalterS3File.type';
 
 	export let title: Promise<string> | string = 'Saverwalter';
 	export let a: any;
 	export let url: string;
-	export let files: string[] | undefined = undefined;
+	export let files: WalterS3File[] | undefined = undefined;
 
 	function click_save() {
 		walter_put(url, a);
