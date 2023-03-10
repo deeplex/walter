@@ -53,35 +53,37 @@ async function finishPost(e: Response) {
 
 // =================================== DELETE =================================
 
-export const walter_delete = (url: string, entry_title: string) => {
+export const walter_delete = (url: string, entry_title: string, nav: string = "/") => {
     const content = `Bist du sicher, dass du ${entry_title} löschen möchtest?
     Dieser Vorgang kann nicht rückgängig gemacht werden.`
 
     openModal({
-        modalHeading: "Eintrag löschen",
+        modalHeading: "Löschen",
         content,
         danger: true,
         primaryButtonText: "Löschen",
-        submit: () => really_delete_walter(url),
+        submit: () => really_delete_walter(url, nav),
     });
 }
 
-function really_delete_walter(url: string) {
+function really_delete_walter(url: string, nav: string) {
     return fetch(
         url,
         { method: 'DELETE', headers }
-    ).then(finishDelete);
+    ).then((e) => finishDelete(e, nav));
 }
 
-function finishDelete(e: Response) {
-    const ok = e.status === 200;
+function finishDelete(e: Response, nav: string) {
+    const ok = e.status === 200 || e.status === 204;
     const kind = ok ? "success" : "error";
     const title = ok ? "Löschen Erfolgreich" : "Fehler";
     // const j = await e.json();
 
     const subtitle = "TODO parse response body." // JSON.stringify(j);
 
-    goto("/")
+    if (nav) {
+        goto("/")
+    }
 
     addToast({ title, kind, subtitle });
     return e;

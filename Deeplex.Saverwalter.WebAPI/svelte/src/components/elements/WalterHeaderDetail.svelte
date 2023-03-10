@@ -8,11 +8,12 @@
 
 	import { WalterAnhaenge, WalterHeader } from '$WalterComponents';
 	import { walter_delete, walter_put } from '$WalterServices/requests';
+	import type { WalterS3File } from '../../types/WalterS3File.type';
 
 	export let title: Promise<string> | string = 'Saverwalter';
 	export let a: any;
 	export let url: string;
-	export let fileNames: string[] | undefined = undefined;
+	export let files: WalterS3File[] | undefined = undefined;
 
 	function click_save() {
 		walter_put(url, a);
@@ -38,8 +39,8 @@
 				<HeaderGlobalAction on:click={() => click_delete(x)} icon={TrashCan} />
 			{/await}
 		</HeaderNav>
-		{#if fileNames}
-			<WalterAnhaenge {fileNames} />
+		{#if files}
+			<WalterAnhaenge {files} />
 		{/if}
 	{/await}
 </WalterHeader>

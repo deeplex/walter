@@ -1,3 +1,4 @@
+import type { WalterS3File } from '$WalterTypes';
 import * as parser from 'fast-xml-parser';
 import { walter_delete } from './requests';
 
@@ -21,8 +22,8 @@ export const walter_s3_get = (url: string) => fetch(
     headers: {}
 }).then(e => e.blob());
 
-export const walter_s3_delete = (url: string, fileName: string) =>
-    walter_delete(`${baseURL}/${url}`, fileName);
+export const walter_s3_delete = (file: WalterS3File, nav: string) =>
+    walter_delete(`${baseURL}/${file.Key}`, file.FileName, nav);
 
 export function download_file_blob(blob: Blob, fileName: string) {
     const url = URL.createObjectURL(blob);
@@ -33,6 +34,12 @@ export function download_file_blob(blob: Blob, fileName: string) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+}
+
+type Content = {
+    Key: string;
+    Size: string;
+    LastModified: string;
 }
 
 export function walter_s3_get_files(url: string, f: fetchType) {
@@ -46,7 +53,27 @@ export function walter_s3_get_files(url: string, f: fetchType) {
                 return [];
             }
             const result = new parser.XMLParser().parse(new TextDecoder().decode(e.value));
-            return getFileNamesFromCommonPrefix(result);
+
+            const Contents = result?.ListBucketResult?.Contents;
+            if (!Contents) {
+                return [];
+            }
+            else if (Array.isArray(Contents)) {
+                return Contents.map((e: Content) => ({
+                    FileName: e.Key.split("/").pop(),
+                    Key: e.Key,
+                    LastModified: e.LastModified,
+                    Size: e.Size
+                })) || [];
+            }
+            else {
+                return [{
+                    FileName: Contents.Key.split("/").pop(),
+                    Key: Contents.Key,
+                    LastModified: Contents.LastModified,
+                    Size: Contents.Size
+                }];
+            }
         });
 }
 

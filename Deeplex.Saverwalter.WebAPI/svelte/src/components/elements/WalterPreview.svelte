@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WalterPreviewPdf } from '$WalterComponents';
 	import { download_file_blob, walter_s3_delete } from '$WalterServices/s3';
+	import type { WalterS3File } from '$WalterTypes';
 	import {
 		Button,
 		ComposedModal,
@@ -12,49 +13,38 @@
 	} from 'carbon-components-svelte';
 
 	export let open: boolean = false;
-	export let blob: Blob | undefined = undefined;
-	export let name: string;
-	export let url: string;
+	export let file: WalterS3File;
 
 	let text: string = '';
-
 	function handleModalOpen() {
-		if (blob && blob.type === 'text/plain') {
+		if (file.Blob && file.Blob.type === 'text/plain') {
 			const reader = new FileReader();
 			reader.onload = function (event) {
 				text = (event.target?.result as string) || '';
 			};
-			reader.readAsText(blob);
+			reader.readAsText(file.Blob);
 		}
 	}
 
 	function handleModalClose() {
-		URL.revokeObjectURL(url);
+		URL.revokeObjectURL(objectURL);
 	}
 
 	function download() {
-		if (blob) {
-			download_file_blob(blob, name);
+		if (file.Blob) {
+			download_file_blob(file.Blob, file.FileName);
 		}
 	}
 
-	function remove() {
-		console.log(blob);
-
-		// 	if (blob) {
-		// 		walter_s3_delete(`${url}/${name}`, name);
-		// 	}
-	}
-
-	function close() {
-		open = false;
+	function remove(f: WalterS3File) {
+		walter_s3_delete(f, '');
 	}
 
 	let objectURL: string;
-	function createObjectURL(blob: Blob) {
+	function createObjectURL(blob: Blob): string {
 		objectURL = URL.createObjectURL(blob);
-		console.log(objectURL);
-		return url;
+
+		return objectURL;
 	}
 </script>
 
@@ -64,27 +54,28 @@
 	on:close={handleModalClose}
 	on:submit
 >
-	<ModalHeader title={name} />
+	<ModalHeader bind:title={file.FileName} />
 	<ModalBody>
-		{#if blob}
-			{#if blob.type === 'image/png'}
-				<ImageLoader src={createObjectURL(blob)} />
-			{:else if blob.type === 'text/plain'}
+		{#if file.Blob}
+			{#if file.Type === 'image/png'}
+				<ImageLoader src={createObjectURL(file.Blob)} />
+			{:else if file.Type === 'text/plain' || file.Blob.type === 'application/json'}
 				<Tile light>{text}</Tile>
-			{:else if blob.type === 'application/pdf'}
+			{:else if file.Type === 'application/pdf'}
 				<div style="height:100vw">
-					<WalterPreviewPdf src={createObjectURL(blob)} />
+					<WalterPreviewPdf src={createObjectURL(file.Blob)} />
 				</div>
 			{:else}
 				<Tile light>
-					Kann für die Datei: {name} keine Vorschau anzeigen. Dateityp: {blob.type}.
+					Kann für die Datei: {file.FileName} keine Vorschau anzeigen. Dateityp:
+					{file.Type}.
 				</Tile>
 			{/if}
 		{/if}
 	</ModalBody>
 	<ModalFooter>
 		<Button kind="secondary" on:click={close}>Abbrechen</Button>
-		<Button kind="danger" on:click={remove}>Löschen</Button>
+		<Button kind="danger" on:click={() => remove(file)}>Löschen</Button>
 		<Button kind="primary" on:click={download}>Herunterladen</Button>
 	</ModalFooter>
 </ComposedModal>

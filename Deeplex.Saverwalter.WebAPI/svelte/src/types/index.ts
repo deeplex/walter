@@ -17,3 +17,4 @@ export { type WalterWohnungEntry } from './WalterWohnung.type';
 export { type WalterZaehlerEntry } from './WalterZaehler.type';
 export { type WalterZaehlerstandEntry } from './WalterZaehlerstand.type';
 export { type WalterModalControl } from './WalterModalControl';
+export { type WalterS3File } from './WalterS3File.type';
