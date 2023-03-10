@@ -15,7 +15,7 @@
 	export let fileNames: string[];
 
 	let fileUploadComplete: boolean = false;
-	let newFiles: File[] = fileNames.map((e) => new File([], e));
+	let newFiles: File[] = [];
 
 	async function upload() {
 		fileUploadComplete = false;
@@ -23,7 +23,9 @@
 			{
 				walter_s3_post(file, $page.url.pathname).then(() => {
 					fileUploadComplete = true;
-					fileNames = [...fileNames, file.name];
+					if (!fileNames.includes(file.name)) {
+						fileNames = [...fileNames, file.name];
+					}
 				});
 			}
 		}
@@ -31,10 +33,12 @@
 
 	async function showModal(e: MouseEvent) {
 		selectedFileName = (e!.target as any).textContent;
-		walter_s3_get(`${$page.url.pathname}/${selectedFileName}`).then((e) => {
-			selectedFile = e;
-			previewOpen = true;
-		});
+		walter_s3_get(`${$page.url.pathname}/${selectedFileName}`).then(
+			(e: Blob) => {
+				selectedFile = e;
+				previewOpen = true;
+			}
+		);
 	}
 
 	let selectedFile: Blob | undefined = undefined;
@@ -43,6 +47,7 @@
 </script>
 
 <WalterPreview
+	bind:url={$page.url.pathname}
 	bind:name={selectedFileName}
 	bind:blob={selectedFile}
 	bind:open={previewOpen}
@@ -64,13 +69,13 @@
 					<!-- Copy the style from the original element. -->
 					<Truncate
 						style="font-size: 0.875rem;
-					margin-left: 0;
-					font-weight: 600;
-					line-height: 1.28572;
-					letter-spacing: 0.16px;
-					display: block;
-					height: 2rem;
-					color: #c6c6c6;
+							   margin-left: 0;
+							   font-weight: 600;
+							   line-height: 1.28572;
+							   letter-spacing: 0.16px;
+							   display: block;
+							   height: 2rem;
+							   color: #c6c6c6;
 							   text-decoration: none;"
 					>
 						{fileName}
