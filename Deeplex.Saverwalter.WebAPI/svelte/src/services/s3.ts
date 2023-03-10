@@ -35,12 +35,7 @@ export function download_file_blob(blob: Blob, fileName: string) {
     URL.revokeObjectURL(url);
 }
 
-type Content = {
-    Key: string;
-    LastModified: string
-}
-
-export function get_files_with_common_prefix(url: string, f: fetchType) {
+export function walter_s3_get_files(url: string, f: fetchType) {
     return f(`${baseURL}?prefix=${url}`, {
         method: 'GET',
         headers: {}
@@ -51,16 +46,22 @@ export function get_files_with_common_prefix(url: string, f: fetchType) {
                 return [];
             }
             const result = new parser.XMLParser().parse(new TextDecoder().decode(e.value));
-            const Contents = result?.ListBucketResult?.Contents;
-            if (!Contents) {
-                return [];
-            }
-            else if (Array.isArray(Contents)) {
-                // Key is the full filepath, therefore split("/").pop() to get the filename
-                return Contents.map((e: Content) => e.Key.split("/").pop()) || [];
-            }
-            else {
-                return [Contents.Key];
-            }
+            return getFileNamesFromCommonPrefix(result);
         });
+}
+
+type XMLResult = { ListBucketResult: { Contents: { Key: string } | { Key: string }[] } }
+
+function getFileNamesFromCommonPrefix(result: XMLResult) {
+    const Contents = result?.ListBucketResult?.Contents;
+    if (!Contents) {
+        return [];
+    }
+    else if (Array.isArray(Contents)) {
+        // Key is the full filepath, therefore split("/").pop() to get the filename
+        return Contents.map((e) => e.Key.split("/").pop() as string) || [];
+    }
+    else {
+        return [Contents.Key];
+    }
 }
