@@ -1,5 +1,6 @@
 import type { WalterS3File } from '$WalterTypes';
 import * as parser from 'fast-xml-parser';
+import { walter_delete } from './requests';
 
 const baseURL = "http://192.168.178.61:9002/saverwalter";
 type fetchType = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>
@@ -20,6 +21,9 @@ export const walter_s3_get = (url: string) => fetch(
     method: 'GET',
     headers: {}
 }).then(e => e.blob());
+
+export const walter_s3_delete = (file: WalterS3File, nav: string) =>
+    walter_delete(`${baseURL}/${file.Key}`, file.FileName, nav);
 
 export function download_file_blob(blob: Blob, fileName: string) {
     const url = URL.createObjectURL(blob);

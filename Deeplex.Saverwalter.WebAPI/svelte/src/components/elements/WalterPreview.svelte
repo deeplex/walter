@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { WalterPreviewPdf } from '$WalterComponents';
+	import { download_file_blob, walter_s3_delete } from '$WalterServices/s3';
 	import type { WalterS3File } from '$WalterTypes';
 	import {
 		Button,
@@ -35,8 +36,8 @@
 		}
 	}
 
-	function remove() {
-		console.log(name);
+	function remove(f: WalterS3File) {
+		walter_s3_delete(f, '');
 	}
 
 	let objectURL: string;
@@ -66,14 +67,15 @@
 				</div>
 			{:else}
 				<Tile light>
-					Kann für die Datei: {name} keine Vorschau anzeigen. Dateityp: {file.Type}.
+					Kann für die Datei: {file.FileName} keine Vorschau anzeigen. Dateityp:
+					{file.Type}.
 				</Tile>
 			{/if}
 		{/if}
 	</ModalBody>
 	<ModalFooter>
 		<Button kind="secondary" on:click={close}>Abbrechen</Button>
-		<Button kind="danger" on:click={remove}>Löschen</Button>
+		<Button kind="danger" on:click={() => remove(file)}>Löschen</Button>
 		<Button kind="primary" on:click={download}>Herunterladen</Button>
 	</ModalFooter>
 </ComposedModal>

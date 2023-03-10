@@ -48,7 +48,7 @@
 		walter_s3_get(`${$page.url.pathname}/${name}`).then((e: Blob) => {
 			selectedFile = {
 				FileName: name,
-				Key: `${$page.url.pathname}/${e.name}`,
+				Key: `${$page.url.pathname}/${name}`,
 				LastModified: new File([e], '').lastModified,
 				Size: e.size,
 				Type: e.type,
