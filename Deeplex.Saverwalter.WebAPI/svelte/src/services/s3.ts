@@ -38,7 +38,7 @@ type Content = {
     LastModified: string;
 }
 
-export function get_files_with_common_prefix(url: string, f: fetchType) {
+export function walter_s3_get_files(url: string, f: fetchType) {
     return f(`${baseURL}?prefix=${url}`, {
         method: 'GET',
         headers: {}

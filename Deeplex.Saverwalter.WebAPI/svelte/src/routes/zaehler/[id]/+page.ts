@@ -1,5 +1,5 @@
 import { walter_get } from "$WalterServices/requests";
-import { get_files_with_common_prefix } from "$WalterServices/s3";
+import { walter_s3_get_files } from "$WalterServices/s3";
 import type { WalterS3File, WalterSelectionEntry, WalterZaehlerEntry } from "$WalterTypes";
 import type { PageLoad } from "./$types";
 
@@ -13,6 +13,6 @@ export const load: PageLoad = async ({ params, fetch }) => {
         zaehler: walter_get(`/api/selection/zaehler`, fetch) as Promise<WalterSelectionEntry[]>,
         zaehlertypen: walter_get(`/api/selection/zaehlertypen`, fetch) as Promise<WalterSelectionEntry[]>,
 
-        anhaenge: get_files_with_common_prefix(`zaehler/${params.id}`, fetch) as Promise<WalterS3File[]>
+        anhaenge: walter_s3_get_files(`zaehler/${params.id}`, fetch) as Promise<WalterS3File[]>
     }
 }

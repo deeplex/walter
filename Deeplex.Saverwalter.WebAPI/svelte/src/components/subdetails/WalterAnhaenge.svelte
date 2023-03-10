@@ -17,17 +17,22 @@
 	export let files: WalterS3File[];
 	let newFiles: File[] = [];
 
+	// TODO show Toast
 	async function upload() {
 		fileUploadComplete = false;
 		for (const file of newFiles) {
 			{
 				walter_s3_post(file, $page.url.pathname).then(() => {
 					fileUploadComplete = true;
+					// Don't update if file already exists (file overwrite)
+					if (files.some((e) => e.FileName == file.name)) {
+						return;
+					}
 					files = [
 						...files,
 						{
 							FileName: file.name,
-							Key: 'TODO',
+							Key: `${$page.url.pathname}/${file.name}`,
 							LastModified: file.lastModified,
 							Size: file.size
 						}
