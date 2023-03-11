@@ -1,4 +1,4 @@
-import { walter_get } from "$WalterServices/requests";
+import { walter_get, walter_selection } from "$WalterServices/requests";
 import type { WalterSelectionEntry, WalterUmlageEntry } from "$WalterTypes";
 import type { PageLoad } from "./$types";
 
@@ -6,9 +6,10 @@ export const load: PageLoad = async ({ params, fetch }) => {
     return {
         apiURL: `/api/umlagen`,
         title: 'Neue Umlage',
-        betriebskostentypen: walter_get('/api/selection/betriebskostentypen', fetch) as Promise<WalterSelectionEntry[]>,
-        umlagen: walter_get('/api/selection/umlagen', fetch) as Promise<WalterSelectionEntry[]>,
-        umlageschluessel: walter_get('/api/selection/umlageschluessel', fetch) as Promise<WalterSelectionEntry[]>,
-        wohnungen: walter_get('/api/selection/wohnungen', fetch) as Promise<WalterSelectionEntry[]>,
+
+        betriebskostentypen: walter_selection.betriebskostentypen(fetch),
+        umlagen: walter_selection.umlagen(fetch),
+        umlageschluessel: walter_selection.umlageschluessel(fetch),
+        wohnungen: walter_selection.wohnungen(fetch),
     }
 }

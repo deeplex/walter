@@ -1,4 +1,4 @@
-import { walter_get } from "$WalterServices/requests";
+import { walter_get, walter_selection } from "$WalterServices/requests";
 import type { WalterAnhangEntry, WalterSelectionEntry } from "$WalterTypes";
 import type { PageLoad } from "./$types";
 
@@ -8,12 +8,12 @@ export const load: PageLoad = async ({ params, fetch }) => {
         id: params.id,
         apiURL: apiURL,
         a: walter_get(apiURL, fetch) as Promise<WalterAnhangEntry>,
-        betriebskostentypen: walter_get('/api/selection/betriebskostentypen', fetch) as Promise<WalterSelectionEntry[]>,
-        umlagen: walter_get('/api/selection/umlagen', fetch) as Promise<WalterSelectionEntry[]>,
-        kontakte: walter_get('/api/selection/kontakte', fetch) as Promise<WalterSelectionEntry[]>,
-        wohnungen: walter_get('/api/selection/wohnungen', fetch) as Promise<WalterSelectionEntry[]>,
-        umlageschluessel: walter_get('/api/selection/umlageschluessel', fetch) as Promise<WalterSelectionEntry[]>,
-        zaehler: walter_get('/api/selection/zaehler', fetch) as Promise<WalterSelectionEntry[]>,
-        zaehlertypen: walter_get('/api/selection/zaehlertypen', fetch) as Promise<WalterSelectionEntry[]>,
+        betriebskostentypen: walter_selection.betriebskostentypen(fetch),
+        umlagen: walter_selection.umlagen(fetch),
+        kontakte: walter_selection.kontakte(fetch),
+        wohnungen: walter_selection.wohnungen(fetch),
+        umlageschluessel: walter_selection.umlageschluessel(fetch),
+        zaehler: walter_selection.zaehler(fetch),
+        zaehlertypen: walter_selection.zaehlertypen(fetch),
     }
 }
