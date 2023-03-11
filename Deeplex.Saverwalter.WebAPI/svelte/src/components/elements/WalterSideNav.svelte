@@ -65,12 +65,6 @@
 			text="Zähler"
 			href="/zaehler"
 		/>
-		<SideNavLink
-			isSelected={$page.route.id?.includes('/anhaenge')}
-			icon={DocumentAttachment}
-			text="Anhänge"
-			href="/anhaenge"
-		/>
 
 		<SideNavLink
 			isSelected={$page.route.id?.includes('/adressen')}
