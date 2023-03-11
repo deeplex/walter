@@ -5,6 +5,7 @@
 		WalterPreviewText
 	} from '$WalterComponents';
 	import { download_file_blob, walter_s3_delete } from '$WalterServices/s3';
+	import { openModal } from '$WalterStore';
 	import type { WalterS3File } from '$WalterTypes';
 	import {
 		Button,
@@ -17,6 +18,7 @@
 
 	export let open: boolean = false;
 	export let file: WalterS3File;
+	export let files: WalterS3File[];
 
 	function download() {
 		if (file.Blob) {
@@ -25,7 +27,20 @@
 	}
 
 	function remove() {
-		walter_s3_delete(file, '');
+		const content = `Bist du sicher, dass du ${file.FileName} löschen möchtest?
+    	Dieser Vorgang kann nicht rückgängig gemacht werden.`;
+
+		openModal({
+			modalHeading: 'Löschen',
+			content,
+			danger: true,
+			primaryButtonText: 'Löschen',
+			submit: () =>
+				walter_s3_delete(file).then(() => {
+					open = false;
+					files = files.filter((e) => e.FileName !== file.FileName);
+				})
+		});
 	}
 </script>
 

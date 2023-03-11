@@ -23,8 +23,9 @@ export const walter_s3_get = (S3URL: string) => fetch(
     headers: {}
 }).then(e => e.blob());
 
-export const walter_s3_delete = (file: WalterS3File, nav: string) =>
-    walter_delete(`${baseURL}/${file.Key}`, file.FileName, nav);
+export function walter_s3_delete(file: WalterS3File) {
+    return walter_delete(`${baseURL}/${file.Key}`)
+}
 
 export function download_file_blob(blob: Blob, fileName: string) {
     const url = URL.createObjectURL(blob);

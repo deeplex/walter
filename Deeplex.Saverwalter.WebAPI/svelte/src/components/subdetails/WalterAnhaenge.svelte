@@ -55,7 +55,7 @@
 </script>
 
 {#if selectedFile}
-	<WalterPreview bind:file={selectedFile} bind:open={previewOpen} />
+	<WalterPreview bind:files bind:file={selectedFile} bind:open={previewOpen} />
 {/if}
 
 <HeaderAction text="({files.length})">
