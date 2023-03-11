@@ -9,7 +9,6 @@
 	} from 'carbon-components-svelte';
 
 	import { walter_s3_get, walter_s3_post } from '$WalterServices/s3';
-	import { page } from '$app/stores';
 	import { WalterPreview } from '$WalterComponents';
 	import type { WalterS3File } from '../../types/WalterS3File.type';
 
@@ -24,7 +23,7 @@
 		fileUploadComplete = false;
 		for (const file of newFiles) {
 			{
-				walter_s3_post(file, $page.url.pathname).then(() => {
+				walter_s3_post(file, S3URL).then(() => {
 					fileUploadComplete = true;
 					// Don't update if file already exists (file overwrite)
 					if (files.some((e) => e.FileName == file.name)) {
@@ -34,7 +33,7 @@
 						...files,
 						{
 							FileName: file.name,
-							Key: `${$page.url.pathname}/${file.name}`,
+							Key: `${S3URL}/${file.name}`,
 							LastModified: file.lastModified,
 							Type: file.type,
 							Size: file.size
@@ -46,11 +45,11 @@
 	}
 
 	async function showModal(e: MouseEvent) {
-		const name = (e!.target as any).textContent;
-		walter_s3_get(`${S3URL}/${name}`).then((e: Blob) => {
+		const fileName = (e!.target as any).textContent;
+		walter_s3_get(`${S3URL}/${fileName}`).then((e: Blob) => {
 			selectedFile = {
-				FileName: name,
-				Key: `${$page.url.pathname}/${name}`,
+				FileName: fileName,
+				Key: `${S3URL}/${fileName}`,
 				LastModified: new File([e], '').lastModified,
 				Size: e.size,
 				Type: e.type,
