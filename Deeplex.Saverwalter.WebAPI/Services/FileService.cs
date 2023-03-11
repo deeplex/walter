@@ -41,11 +41,6 @@ namespace Deeplex.Saverwalter.WebAPI
         //    }
         //}
 
-        public async void launchFile(Anhang a)
-        {
-            throw(new NotImplementedException());
-        }
-
         public Task<List<string>> pickFiles()
         {
             throw new NotImplementedException();

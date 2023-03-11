@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public class NatuerlichePerson : IPerson, IAnhang
+    public class NatuerlichePerson : IPerson
     {
         public string Bezeichnung => string.Join(" ", Vorname ?? "", Nachname);
 
@@ -21,7 +21,6 @@ namespace Deeplex.Saverwalter.Model
         public virtual Adresse? Adresse { get; set; }
         public virtual List<JuristischePerson> JuristischePersonen { get; set; } = new List<JuristischePerson>();
         public string? Notiz { get; set; }
-        public virtual List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
 
         public NatuerlichePerson()
         {

@@ -2,13 +2,12 @@
 
 namespace Deeplex.Saverwalter.Model
 {
-    public class Umlage : IAnhang
+    public class Umlage
     {
         public int UmlageId { get; set; }
         public Betriebskostentyp Typ { get; set; }
         public Umlageschluessel Schluessel { get; set; }
         public string? Beschreibung { get; set; }
-        public virtual List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
         public string? Notiz { get; set; }
         public virtual HKVO? HKVO { get; set; }
         public virtual Zaehler? Zaehler { get; set; }

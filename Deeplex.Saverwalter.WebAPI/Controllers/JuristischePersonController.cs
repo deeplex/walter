@@ -2,7 +2,6 @@
 using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
@@ -24,7 +23,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public sealed class JuristischePersonEntry : JuristischePersonEntryBase
         {
-            public IEnumerable<AnhangEntryBase>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangEntryBase(e));
             public IEnumerable<PersonEntryBase>? Mitglieder => Entity?.Mitglieder.Select(e => new PersonEntryBase(e, DbService));
 
             public JuristischePersonEntry() : base() { }

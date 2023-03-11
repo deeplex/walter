@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.Model
     }
 
     // An Adresse is pointed at by a Wohnung, Garage or Kontakt.
-    public class Adresse : IAnhang
+    public class Adresse
     {
         public string Anschrift => string.Join(", ",
             string.Join(" ", Strasse, Hausnummer),
@@ -22,6 +22,5 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
         public virtual List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
         public virtual List<Garage> Garagen { get; private set; } = new List<Garage>();
-        public virtual List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
     }
 }

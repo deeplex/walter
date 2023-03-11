@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public class Vertrag : IAnhang
+    public class Vertrag
     {
         public int VertragId { get; set; }
         public virtual Wohnung Wohnung { get; set; } = null!;
@@ -14,10 +14,9 @@ namespace Deeplex.Saverwalter.Model
         public virtual List<Miete> Mieten { get; private set; } = new List<Miete>();
         public virtual List<Mietminderung> Mietminderungen { get; private set; } = new List<Mietminderung>();
         public virtual List<Garage> Garagen { get; private set; } = new List<Garage>();
-        public virtual List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
     }
 
-    public class VertragVersion : IAnhang
+    public class VertragVersion
     {
         public int VertragVersionId { get; set; }
         public int Personenzahl { get; set; }
@@ -25,6 +24,5 @@ namespace Deeplex.Saverwalter.Model
         public DateTime Beginn { get; set; }
         public double Grundmiete { get; set; }
         public string? Notiz { get; set; }
-        public virtual List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
     }
 }

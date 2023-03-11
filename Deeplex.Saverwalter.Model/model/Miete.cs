@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public class Miete : IAnhang
+    public class Miete
     {
         public int MieteId { get; set; }
         public virtual Vertrag Vertrag { get; set; } = null!;
@@ -14,6 +14,5 @@ namespace Deeplex.Saverwalter.Model
         public DateTime BetreffenderMonat { get; set; }
         public double? Betrag { get; set; }
         public string? Notiz { get; set; }
-        public virtual List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
     }
 }

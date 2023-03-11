@@ -29,7 +29,6 @@ namespace Deeplex.Saverwalter.Model
         private bool mPreconfigured = false;
 
         public DbSet<Adresse> Adressen { get; set; } = null!;
-        public DbSet<Anhang> Anhaenge { get; set; } = null!;
         public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
         public DbSet<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; set; } = null!;
         public DbSet<Garage> Garagen { get; set; } = null!;

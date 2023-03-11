@@ -3,7 +3,6 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Helper;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.AnhangController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
@@ -43,8 +42,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class ErhaltungsaufwendungEntry : ErhaltungsaufwendungEntryBase
         {
-            public IEnumerable<AnhangEntryBase>? Anhaenge => Entity?.Anhaenge.Select(e => new AnhangEntryBase(e));
-
             public ErhaltungsaufwendungEntry() { }
             public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity, IWalterDbService dbService) : base(entity, dbService)
             {

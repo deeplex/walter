@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public class Erhaltungsaufwendung : IAnhang
+    public class Erhaltungsaufwendung
     {
         public int ErhaltungsaufwendungId { get; set; }
         public DateTime Datum { get; set; }
@@ -12,6 +12,5 @@ namespace Deeplex.Saverwalter.Model
         public double Betrag { get; set; }
         public virtual Wohnung Wohnung { get; set; } = null!;
         public string? Notiz { get; set; }
-        public virtual List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
     }
 }
