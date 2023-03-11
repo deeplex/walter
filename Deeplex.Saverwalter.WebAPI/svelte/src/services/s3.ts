@@ -4,6 +4,7 @@ import { walter_delete } from './requests';
 
 const baseURL = "http://192.168.178.61:9002/saverwalter";
 type fetchType = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>
+type XMLResult = { ListBucketResult?: { Contents?: WalterS3File | WalterS3File[] } }
 
 export const walter_s3_post = (file: File, path: string) => fetch(
     `${baseURL}/${path}/${file.name}`,
@@ -36,59 +37,50 @@ export function download_file_blob(blob: Blob, fileName: string) {
     URL.revokeObjectURL(url);
 }
 
-type Content = {
-    Key: string;
-    Size: string;
-    LastModified: string;
-}
-
 export function walter_s3_get_files(S3prefixURL: string, f: fetchType) {
-    return f(`${baseURL}?prefix=${S3prefixURL}`, {
-        method: 'GET',
-        headers: {}
-    })
-        .then((e) => e.body?.getReader().read())
-        .then((e) => {
-            if (!e) {
-                return [];
-            }
-            const result = new parser.XMLParser().parse(new TextDecoder().decode(e.value));
+    const url = `${baseURL}?prefix=${S3prefixURL}`;
+    const requestInit = { method: 'GET', headers: {} };
 
-            const Contents = result?.ListBucketResult?.Contents;
-            if (!Contents) {
-                return [];
-            }
-            else if (Array.isArray(Contents)) {
-                return Contents.map((e: Content) => ({
-                    FileName: e.Key.split("/").pop(),
-                    Key: e.Key,
-                    LastModified: e.LastModified,
-                    Size: e.Size
-                })) || [];
-            }
-            else {
-                return [{
-                    FileName: Contents.Key.split("/").pop(),
-                    Key: Contents.Key,
-                    LastModified: Contents.LastModified,
-                    Size: Contents.Size
-                }];
-            }
-        });
+    return f(url, requestInit)
+        .then((e) => e.body?.getReader().read())
+        .then(parse_stream_into_walter_s3_files);
 }
 
-type XMLResult = { ListBucketResult: { Contents: { Key: string } | { Key: string }[] } }
+function parse_stream_into_walter_s3_files(e: ReadableStreamReadResult<Uint8Array> | undefined) {
+    if (!e) {
+        return [];
+    }
+    const result: XMLResult = new parser.XMLParser().parse(new TextDecoder().decode(e.value));
 
-function getFileNamesFromCommonPrefix(result: XMLResult) {
     const Contents = result?.ListBucketResult?.Contents;
+
     if (!Contents) {
         return [];
     }
     else if (Array.isArray(Contents)) {
-        // Key is the full filepath, therefore split("/").pop() to get the filename
-        return Contents.map((e) => e.Key.split("/").pop() as string) || [];
+        return Contents.map(create_walter_s3_file_from_xml_parse) || [];
     }
     else {
-        return [Contents.Key];
+        return [create_walter_s3_file_from_xml_parse(Contents)];
+    }
+}
+
+export function create_walter_s3_file_from_file(file: File, S3URL: string): WalterS3File {
+    return {
+        FileName: file.name,
+        Key: `${S3URL}/${file.name}`,
+        LastModified: file.lastModified,
+        Type: file.type,
+        Size: file.size,
+        Blob: file
+    }
+}
+
+function create_walter_s3_file_from_xml_parse(e: WalterS3File): WalterS3File {
+    return {
+        FileName: e.Key.split("/").pop()!,
+        Key: e.Key,
+        LastModified: e.LastModified,
+        Size: e.Size
     }
 }

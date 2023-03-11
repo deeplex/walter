@@ -8,9 +8,13 @@
 		Truncate
 	} from 'carbon-components-svelte';
 
-	import { walter_s3_get, walter_s3_post } from '$WalterServices/s3';
+	import {
+		create_walter_s3_file_from_file,
+		walter_s3_get,
+		walter_s3_post
+	} from '$WalterServices/s3';
 	import { WalterPreview } from '$WalterComponents';
-	import type { WalterS3File } from '../../types/WalterS3File.type';
+	import type { WalterS3File } from '$WalterTypes';
 
 	export let S3URL: string;
 	export let files: WalterS3File[];
@@ -18,28 +22,21 @@
 	let fileUploadComplete: boolean = false;
 	let newFiles: File[] = [];
 
+	function upload_finished(file: File) {
+		fileUploadComplete = true;
+		// Don't update if file already exists (file overwrite)
+		if (files.some((e) => e.FileName == file.name)) {
+			return;
+		}
+		files = [...files, create_walter_s3_file_from_file(file, S3URL)];
+	}
+
 	// TODO show Toast
 	async function upload() {
 		fileUploadComplete = false;
 		for (const file of newFiles) {
 			{
-				walter_s3_post(file, S3URL).then(() => {
-					fileUploadComplete = true;
-					// Don't update if file already exists (file overwrite)
-					if (files.some((e) => e.FileName == file.name)) {
-						return;
-					}
-					files = [
-						...files,
-						{
-							FileName: file.name,
-							Key: `${S3URL}/${file.name}`,
-							LastModified: file.lastModified,
-							Type: file.type,
-							Size: file.size
-						}
-					];
-				});
+				walter_s3_post(file, S3URL).then(() => upload_finished(file));
 			}
 		}
 	}
@@ -47,14 +44,8 @@
 	async function showModal(e: MouseEvent) {
 		const fileName = (e!.target as any).textContent;
 		walter_s3_get(`${S3URL}/${fileName}`).then((e: Blob) => {
-			selectedFile = {
-				FileName: fileName,
-				Key: `${S3URL}/${fileName}`,
-				LastModified: new File([e], '').lastModified,
-				Size: e.size,
-				Type: e.type,
-				Blob: e
-			};
+			const file = new File([e], fileName, { type: e.type });
+			selectedFile = create_walter_s3_file_from_file(file, S3URL);
 			previewOpen = true;
 		});
 	}
