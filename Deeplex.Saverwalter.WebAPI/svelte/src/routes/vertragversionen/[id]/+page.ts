@@ -4,11 +4,11 @@ import type { WalterS3File, WalterVertragEntry, WalterVertragVersionEntry } from
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, fetch }) => {
-        const url = `/api/vertragversionen/${params.id}`;
+        const apiURL = `/api/vertragversionen/${params.id}`;
         return {
                 id: params.id,
-                url: url,
-                a: walter_get(url, fetch) as Promise<WalterVertragVersionEntry>,
+                apiURL: apiURL,
+                a: walter_get(apiURL, fetch) as Promise<WalterVertragVersionEntry>,
 
                 anhaenge: walter_s3_get_files(`vertragversion/${params.id}`, fetch) as Promise<WalterS3File[]>
         }

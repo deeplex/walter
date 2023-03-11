@@ -4,11 +4,11 @@ import type { WalterS3File, WalterSelectionEntry, WalterWohnungEntry } from "$Wa
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, fetch }) => {
-        const url = `/api/wohnungen/${params.id}`;
+        const apiURL = `/api/wohnungen/${params.id}`;
         return {
                 id: params.id,
-                url: url,
-                a: walter_get(url, fetch) as Promise<WalterWohnungEntry>,
+                apiURL: apiURL,
+                a: walter_get(apiURL, fetch) as Promise<WalterWohnungEntry>,
                 betriebskostentypen: walter_get('/api/selection/betriebskostentypen', fetch) as Promise<WalterSelectionEntry[]>,
                 umlagen: walter_get('/api/selection/umlagen', fetch) as Promise<WalterSelectionEntry[]>,
                 kontakte: walter_get('/api/selection/kontakte', fetch) as Promise<WalterSelectionEntry[]>,

@@ -11,7 +11,7 @@
 	const entry: Partial<WalterErhaltungsaufwendungEntry> = {};
 </script>
 
-<WalterHeaderNew url={data.url} {entry} title={data.title} />
+<WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} />
 
 <WalterGrid>
 	<WalterErhaltungsaufwendung

@@ -12,7 +12,7 @@
 		WalterHeaderNew
 	} from '$WalterComponents';
 
-	const url = `/api/kontakte`;
+	const apiURL = `/api/kontakte`;
 	const title = 'Neue Person';
 
 	const entry: Partial<
@@ -22,7 +22,11 @@
 	let personType: number = 0;
 </script>
 
-<WalterHeaderNew url={url + `/${personType ? 'jur' : 'nat'}`} {title} {entry}>
+<WalterHeaderNew
+	apiURL={apiURL + `/${personType ? 'jur' : 'nat'}`}
+	{title}
+	{entry}
+>
 	<div style="width: 100%;">
 		<ContentSwitcher
 			style="display: flex; width: 60em; margin: auto"

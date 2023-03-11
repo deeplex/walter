@@ -12,15 +12,15 @@
 
 	export let title: Promise<string> | string = 'Saverwalter';
 	export let a: any;
-	export let url: string;
+	export let apiURL: string;
 	export let files: WalterS3File[] | undefined = undefined;
 
 	function click_save() {
-		walter_put(url, a);
+		walter_put(apiURL, a);
 	}
 
 	function click_delete(title: string) {
-		walter_delete(url, title);
+		walter_delete(apiURL, title);
 	}
 </script>
 

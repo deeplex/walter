@@ -6,13 +6,13 @@
 	} from '$WalterComponents';
 	import type { WalterAdresseEntry } from '$WalterTypes';
 
-	const url = `/api/adressen`;
+	const apiURL = `/api/adressen`;
 	const title = 'Neue Adresse';
 
 	const entry: Partial<WalterAdresseEntry> = {};
 </script>
 
-<WalterHeaderNew {url} {entry} {title} />
+<WalterHeaderNew {apiURL} {entry} {title} />
 
 <WalterGrid>
 	<WalterAdresse value={entry} />

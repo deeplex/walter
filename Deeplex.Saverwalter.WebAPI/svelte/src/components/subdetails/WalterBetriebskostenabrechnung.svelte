@@ -11,8 +11,8 @@
 	};
 
 	function click() {
-		const url = `/api/betriebskostenabrechnung/${id}/${jahr}`;
-		fetch(url, {
+		const apiURL = `/api/betriebskostenabrechnung/${id}/${jahr}`;
+		fetch(apiURL, {
 			method: 'GET',
 			headers
 		})

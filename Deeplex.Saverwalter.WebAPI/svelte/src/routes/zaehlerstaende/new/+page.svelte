@@ -6,13 +6,13 @@
 	} from '$WalterComponents';
 	import type { WalterZaehlerstandEntry } from '$WalterTypes';
 
-	const url = `/api/zaehlerstaende`;
+	const apiURL = `/api/zaehlerstaende`;
 	const title = 'Neuer Zählerstand';
 
 	const entry: Partial<WalterZaehlerstandEntry> = {};
 </script>
 
-<WalterHeaderNew {url} {entry} {title} />
+<WalterHeaderNew {apiURL} {entry} {title} />
 
 <WalterGrid>
 	<WalterZaehlerstand a={entry} />

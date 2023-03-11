@@ -7,13 +7,13 @@
 	} from '$WalterComponents';
 	import type { WalterMieteEntry } from '$WalterTypes';
 
-	const url = `/api/vertragversionen`;
+	const apiURL = `/api/vertragversionen`;
 	const title = 'Vertragsänderung';
 
 	const entry: Partial<WalterMieteEntry> = {};
 </script>
 
-<WalterHeaderNew {url} {entry} {title} />
+<WalterHeaderNew {apiURL} {entry} {title} />
 
 <WalterGrid>
 	<WalterVertragVersion a={entry} />

@@ -14,7 +14,7 @@
 <WalterHeaderDetail
 	files={data.anhaenge}
 	a={data.a}
-	url={data.url}
+	apiURL={data.apiURL}
 	title={data.a.zaehler.text + ' - ' + convertDate(data.a.datum)}
 />
 

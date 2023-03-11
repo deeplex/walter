@@ -54,6 +54,7 @@
 
 	let jahr: number = new Date().getFullYear() - 1;
 
+	// TODO this has to be rewritten to use WalterS3File
 	function abrechnung_click(id: string, j: number) {
 		print_abrechnung(id, j, title).then(
 			(e) => (data.anhaenge = [...data.anhaenge, e])
@@ -64,7 +65,12 @@
 		data.a.wohnung?.text + ' - ' + data.a.mieter?.map((m) => m.name).join(', ');
 </script>
 
-<WalterHeaderDetail files={data.anhaenge} a={data.a} url={data.url} {title} />
+<WalterHeaderDetail
+	files={data.anhaenge}
+	a={data.a}
+	apiURL={data.apiURL}
+	{title}
+/>
 
 <WalterGrid>
 	<WalterVertrag

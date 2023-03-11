@@ -8,7 +8,7 @@
 	export let data: PageData;
 </script>
 
-<WalterHeaderList url={data.url} title="Erhaltungsaufwendungen" />
+<WalterHeaderList apiUrl={data.apiURL} title="Erhaltungsaufwendungen" />
 <WalterErhaltungsaufwendungen
 	kontakte={data.kontakte}
 	wohnungen={data.wohnungen}

@@ -7,13 +7,13 @@
 	import { goto } from '$app/navigation';
 
 	export let title: string = 'Neu...';
-	export let url: string;
+	export let apiURL: string;
 	export let entry: any;
 
 	async function click_post() {
-		const j = await walter_post(url, entry);
+		const j = await walter_post(apiURL, entry);
 		if (j.id) {
-			goto(`${url}/${j.id}`.replace('api/', ''));
+			goto(`${apiURL}/${j.id}`.replace('api/', ''));
 		}
 	}
 </script>

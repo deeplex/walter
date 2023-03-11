@@ -15,5 +15,5 @@
 		goto(`/anhaenge/${e.detail.id}`);
 </script>
 
-<WalterHeaderList nonav url={data.url} title="Anhänge" />
+<WalterHeaderList nonav apiUrl={data.apiURL} title="Anhänge" />
 <WalterDataTable {navigate} search {headers} rows={data.rows} />

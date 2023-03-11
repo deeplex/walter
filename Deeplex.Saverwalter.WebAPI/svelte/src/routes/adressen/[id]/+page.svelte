@@ -13,7 +13,7 @@
 	const wohnungEntry: Partial<WalterWohnungEntry> = { adresse: { ...data.a } };
 </script>
 
-<WalterHeaderDetail a={data.a} url={data.url} title={data.a.anschrift} />
+<WalterHeaderDetail a={data.a} apiURL={data.apiURL} title={data.a.anschrift} />
 
 <WalterGrid>
 	<WalterAdresse bind:value={data.a} />

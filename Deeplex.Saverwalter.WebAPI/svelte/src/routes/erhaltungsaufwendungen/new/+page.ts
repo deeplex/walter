@@ -4,7 +4,7 @@ import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, fetch }) => {
     return {
-        url: `/api/erhaltungsaufwendungen`,
+        apiURL: `/api/erhaltungsaufwendungen`,
         title: 'Neue Erhaltungsaufwendung',
         kontakte: walter_get(`/api/selection/kontakte`, fetch) as Promise<WalterSelectionEntry[]>,
         wohnungen: walter_get(`/api/selection/wohnungen`, fetch) as Promise<WalterSelectionEntry[]>,

@@ -16,8 +16,8 @@ export const walter_s3_post = (file: File, path: string) => fetch(
     }
 );
 
-export const walter_s3_get = (url: string) => fetch(
-    `${baseURL}/${url}`, {
+export const walter_s3_get = (S3URL: string) => fetch(
+    `${baseURL}/${S3URL}`, {
     method: 'GET',
     headers: {}
 }).then(e => e.blob());
@@ -42,8 +42,8 @@ type Content = {
     LastModified: string;
 }
 
-export function walter_s3_get_files(url: string, f: fetchType) {
-    return f(`${baseURL}?prefix=${url}`, {
+export function walter_s3_get_files(S3prefixURL: string, f: fetchType) {
+    return f(`${baseURL}?prefix=${S3prefixURL}`, {
         method: 'GET',
         headers: {}
     })

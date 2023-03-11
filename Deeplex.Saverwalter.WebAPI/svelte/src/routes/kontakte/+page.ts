@@ -3,9 +3,9 @@ import type { WalterPersonEntry } from "$WalterTypes";
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    const url = `/api/kontakte`;
+    const apiURL = `/api/kontakte`;
     return {
-        url: url,
-        rows: walter_get(url, fetch) as Promise<WalterPersonEntry[]>
+        apiURL: apiURL,
+        rows: walter_get(apiURL, fetch) as Promise<WalterPersonEntry[]>
     }
 }

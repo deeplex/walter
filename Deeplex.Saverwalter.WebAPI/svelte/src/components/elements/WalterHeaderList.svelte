@@ -7,14 +7,15 @@
 	import { WalterHeader } from '$WalterComponents';
 
 	export let title: Promise<string> | string = 'Saverwalter';
-	export let url: string;
+	export let apiUrl: string;
 	export let nonav: boolean = false;
 
 	function click_new() {
 		if (nonav) {
 			return;
 		}
-		goto(`${url}/new`.replace('api/', ''));
+		// TODO apiURL just to replace it...
+		goto(`${apiUrl}/new`.replace('api/', ''));
 	}
 </script>
 

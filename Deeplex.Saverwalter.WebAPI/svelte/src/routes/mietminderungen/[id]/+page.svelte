@@ -10,7 +10,11 @@
 	export let data: PageData;
 </script>
 
-<WalterHeaderDetail a={data.a} url={data.url} title={data.a.vertrag.text} />
+<WalterHeaderDetail
+	a={data.a}
+	apiURL={data.apiURL}
+	title={data.a.vertrag.text}
+/>
 
 <WalterGrid>
 	<WalterMietminderung a={data.a} />

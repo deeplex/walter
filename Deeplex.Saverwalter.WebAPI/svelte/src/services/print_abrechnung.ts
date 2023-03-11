@@ -5,9 +5,9 @@ const headers = {
 };
 
 export function print_abrechnung(id: string, jahr: number, fileNameBase: string) {
-    const url = `/api/betriebskostenabrechnung/${id}/${jahr}`;
+    const apiURL = `/api/betriebskostenabrechnung/${id}/${jahr}`;
     const fileName = `Abrechnung ${jahr} - ${fileNameBase}.docx`;
-    return fetch(url, {
+    return fetch(apiURL, {
         method: 'GET',
         headers
     })
