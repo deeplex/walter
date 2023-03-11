@@ -1,6 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
-using FluentAssertions.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 
