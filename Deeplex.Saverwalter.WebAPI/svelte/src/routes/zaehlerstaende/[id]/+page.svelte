@@ -12,6 +12,7 @@
 </script>
 
 <WalterHeaderDetail
+	S3URL={data.S3URL}
 	files={data.anhaenge}
 	a={data.a}
 	apiURL={data.apiURL}

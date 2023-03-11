@@ -13,7 +13,12 @@
 	const wohnungEntry: Partial<WalterWohnungEntry> = { adresse: { ...data.a } };
 </script>
 
-<WalterHeaderDetail a={data.a} apiURL={data.apiURL} title={data.a.anschrift} />
+<WalterHeaderDetail
+	S3URL={data.S3URL}
+	a={data.a}
+	apiURL={data.apiURL}
+	title={data.a.anschrift}
+/>
 
 <WalterGrid>
 	<WalterAdresse bind:value={data.a} />

@@ -13,8 +13,10 @@
 	import { WalterPreview } from '$WalterComponents';
 	import type { WalterS3File } from '../../types/WalterS3File.type';
 
-	let fileUploadComplete: boolean = false;
+	export let S3URL: string;
 	export let files: WalterS3File[];
+
+	let fileUploadComplete: boolean = false;
 	let newFiles: File[] = [];
 
 	// TODO show Toast
@@ -45,7 +47,7 @@
 
 	async function showModal(e: MouseEvent) {
 		const name = (e!.target as any).textContent;
-		walter_s3_get(`${$page.url.pathname}/${name}`).then((e: Blob) => {
+		walter_s3_get(`${S3URL}/${name}`).then((e: Blob) => {
 			selectedFile = {
 				FileName: name,
 				Key: `${$page.url.pathname}/${name}`,

@@ -56,9 +56,9 @@
 
 	// TODO this has to be rewritten to use WalterS3File
 	function abrechnung_click(id: string, j: number) {
-		print_abrechnung(id, j, title).then(
-			(e) => (data.anhaenge = [...data.anhaenge, e])
-		);
+		// print_abrechnung(id, j, title).then(
+		// 	(e) => (data.anhaenge = [...data.anhaenge, e])
+		// );
 	}
 
 	let title =
@@ -66,6 +66,7 @@
 </script>
 
 <WalterHeaderDetail
+	S3URL={data.S3URL}
 	files={data.anhaenge}
 	a={data.a}
 	apiURL={data.apiURL}

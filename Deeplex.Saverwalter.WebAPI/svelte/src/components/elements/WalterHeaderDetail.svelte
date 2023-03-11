@@ -13,6 +13,7 @@
 	export let title: Promise<string> | string = 'Saverwalter';
 	export let a: any;
 	export let apiURL: string;
+	export let S3URL: string;
 	export let files: WalterS3File[] | undefined = undefined;
 
 	function click_save() {
@@ -40,7 +41,7 @@
 			{/await}
 		</HeaderNav>
 		{#if files}
-			<WalterAnhaenge {files} />
+			<WalterAnhaenge {S3URL} {files} />
 		{/if}
 	{/await}
 </WalterHeader>
