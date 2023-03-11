@@ -3,25 +3,25 @@ import { addToast, openModal } from "$WalterStore";
 import type { WalterSelectionEntry } from "$WalterTypes";
 
 export const walter_selection = {
-    betriebskostentypen(f: fetchType): Promise<WalterSelectionEntry> {
+    betriebskostentypen(f: fetchType): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/betriebskostentypen', f)
     },
-    umlagen(f: fetchType): Promise<WalterSelectionEntry> {
+    umlagen(f: fetchType): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/umlagen', f)
     },
-    kontakte(f: fetchType): Promise<WalterSelectionEntry> {
+    kontakte(f: fetchType): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/kontakte', f)
     },
-    wohnungen(f: fetchType): Promise<WalterSelectionEntry> {
+    wohnungen(f: fetchType): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/wohnungen', f)
     },
-    umlageschluessel(f: fetchType): Promise<WalterSelectionEntry> {
+    umlageschluessel(f: fetchType): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/umlageschluessel', f)
     },
-    zaehler(f: fetchType): Promise<WalterSelectionEntry> {
+    zaehler(f: fetchType): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/zaehler', f)
     },
-    zaehlertypen(f: fetchType): Promise<WalterSelectionEntry> {
+    zaehlertypen(f: fetchType): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/zaehlertypen', f)
     },
 }
