@@ -1,7 +1,5 @@
-import type { WalterModalControl } from '$WalterTypes';
-import { createEventDispatcher } from 'svelte';
+import type { WalterModalControl, WalterToast } from '$WalterTypes';
 import { get, writable, type Writable } from 'svelte/store';
-import type { WalterToast } from './types/WalterToast.type';
 
 export const toasts: Writable<Partial<WalterToast>[]> = writable([]);
 

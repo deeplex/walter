@@ -1,5 +1,4 @@
-import { goto } from "$app/navigation";
-import { addToast, openModal } from "$WalterStore";
+import { addToast } from "$WalterStore";
 import type { WalterSelectionEntry } from "$WalterTypes";
 
 export const walter_selection = {

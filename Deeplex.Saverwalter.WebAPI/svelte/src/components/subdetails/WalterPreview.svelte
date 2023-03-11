@@ -2,7 +2,8 @@
 	import {
 		WalterPreviewImage,
 		WalterPreviewPdf,
-		WalterPreviewText
+		WalterPreviewText,
+		WalterPreviewUnknown
 	} from '$WalterComponents';
 	import { download_file_blob, walter_s3_delete } from '$WalterServices/s3';
 	import { openModal } from '$WalterStore';
@@ -15,7 +16,6 @@
 		ModalHeader,
 		Tile
 	} from 'carbon-components-svelte';
-	import WalterPreviewUnknown from './WalterPreviewUnknown.svelte';
 
 	export let open: boolean = false;
 	export let file: WalterS3File;

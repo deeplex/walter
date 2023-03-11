@@ -2,13 +2,16 @@
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-	import { WalterDataWrapper, WalterTextInput } from '$WalterComponents';
+	import {
+		WalterDataWrapper,
+		WalterPerson,
+		WalterTextInput
+	} from '$WalterComponents';
 	import type {
 		WalterJuristischePersonEntry,
 		WalterNatuerlichePersonEntry,
 		WalterPersonEntry
 	} from '$WalterTypes';
-	import WalterPerson from '../subdetails/WalterPerson.svelte';
 	import { ContentSwitcher, Row, Switch } from 'carbon-components-svelte';
 
 	const headers = [

@@ -8,8 +8,8 @@
 
 	import { WalterAnhaenge, WalterHeader } from '$WalterComponents';
 	import { walter_delete, walter_put } from '$WalterServices/requests';
-	import type { WalterS3File } from '../../types/WalterS3File.type';
 	import { openModal } from '$WalterStore';
+	import type { WalterS3File } from '$WalterTypes';
 
 	export let title: Promise<string> | string = 'Saverwalter';
 	export let a: any;

@@ -1,7 +1,7 @@
 <script lang="ts">
+	import type { WalterS3File } from '$WalterTypes';
 	import { Tile } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
-	import type { WalterS3File } from '../../types/WalterS3File.type';
 
 	export let file: WalterS3File;
 	let text: string = '';

@@ -2,14 +2,14 @@
 	import {
 		WalterGrid,
 		WalterVertrag,
-		WalterHeaderNew
+		WalterHeaderNew,
+		WalterVertragVersion
 	} from '$WalterComponents';
 	import type {
 		WalterVertragEntry,
 		WalterVertragVersionEntry
 	} from '$WalterTypes';
 	import { Tile } from 'carbon-components-svelte';
-	import WalterVertragVersion from '../../../components/details/WalterVertragVersion.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

@@ -2,9 +2,8 @@
 	import { goto } from '$app/navigation';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-	import { WalterDataWrapper } from '$WalterComponents';
+	import { WalterDataWrapper, WalterVertrag } from '$WalterComponents';
 	import type { WalterSelectionEntry, WalterVertragEntry } from '$WalterTypes';
-	import WalterVertrag from '../details/WalterVertrag.svelte';
 
 	const headers = [
 		{ key: 'wohnung.text', value: 'Wohnung' },

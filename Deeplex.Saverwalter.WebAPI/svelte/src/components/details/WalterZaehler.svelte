@@ -1,12 +1,12 @@
 <script lang="ts">
 	import {
 		WalterAdresse,
+		WalterComboBox,
 		WalterTextArea,
 		WalterTextInput
 	} from '$WalterComponents';
 	import type { WalterSelectionEntry, WalterZaehlerEntry } from '$WalterTypes';
 	import { Row } from 'carbon-components-svelte';
-	import WalterComboBox from '../elements/WalterComboBox.svelte';
 
 	export let a: Partial<WalterZaehlerEntry> = {};
 	export let zaehlertypen: WalterSelectionEntry[];

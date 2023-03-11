@@ -1,7 +1,10 @@
 <script lang="ts">
-	import { WalterHeaderDetail, WalterGrid } from '$WalterComponents';
+	import {
+		WalterHeaderDetail,
+		WalterGrid,
+		WalterVertragVersion
+	} from '$WalterComponents';
 	import { Button, ButtonSkeleton } from 'carbon-components-svelte';
-	import WalterVertragVersion from '../../../components/details/WalterVertragVersion.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
