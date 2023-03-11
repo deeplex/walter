@@ -1,6 +1,10 @@
 export { default as WalterAdresse } from './subdetails/WalterAdresse.svelte';
 export { default as WalterAnhaenge } from './subdetails/WalterAnhaenge.svelte';
 export { default as WalterPerson } from './subdetails/WalterPerson.svelte';
+export { default as WalterPreviewImage } from './subdetails/WalterPreviewImage.svelte';
+export { default as WalterPreviewText } from './subdetails/WalterPreviewText.svelte';
+export { default as WalterPreviewPdf } from './subdetails/WalterPreviewPdf.svelte';
+export { default as WalterPreview } from './subdetails/WalterPreview.svelte';
 
 export { default as WalterMiete } from './details/WalterMiete.svelte';
 export { default as WalterMietminderung } from './details/WalterMietminderung.svelte';
@@ -13,8 +17,6 @@ export { default as WalterWohnung } from './details/WalterWohnung.svelte';
 export { default as WalterZaehler } from './details/WalterZaehler.svelte';
 export { default as WalterZaehlerstand } from './details/WalterZaehlerstand.svelte';
 
-export { default as WalterPreviewPdf } from './elements/WalterPreviewPdf.svelte';
-export { default as WalterPreview } from './elements/WalterPreview.svelte';
 export { default as WalterMultiSelect } from './elements/WalterMultiSelect.svelte';
 export { default as WalterComboBox } from './elements/WalterComboBox.svelte';
 export { default as WalterDataTable } from './elements/WalterDataTable.svelte';
