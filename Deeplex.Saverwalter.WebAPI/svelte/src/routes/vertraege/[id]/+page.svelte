@@ -1,12 +1,5 @@
 <script lang="ts">
-	import {
-		Accordion,
-		Button,
-		HeaderPanelDivider,
-		Row,
-		Tile,
-		Truncate
-	} from 'carbon-components-svelte';
+	import { Accordion, Button, Row, Truncate } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 
 	import {
@@ -25,7 +18,11 @@
 		WalterVertragVersionEntry
 	} from '$WalterTypes';
 	import { toLocaleIsoString } from '$WalterServices/utils';
-	import { print_abrechnung } from '$WalterServices/print_abrechnung';
+	import { create_abrechnung } from '$WalterServices/print_abrechnung';
+	import {
+		create_walter_s3_file_from_file,
+		walter_s3_post
+	} from '$WalterServices/s3';
 
 	export let data: PageData;
 
@@ -54,11 +51,17 @@
 
 	let jahr: number = new Date().getFullYear() - 1;
 
-	// TODO this has to be rewritten to use WalterS3File
 	function abrechnung_click(id: string, j: number) {
-		// print_abrechnung(id, j, title).then(
-		// 	(e) => (data.anhaenge = [...data.anhaenge, e])
-		// );
+		create_abrechnung(id, j, title).then((e) => {
+			const file = create_walter_s3_file_from_file(e, data.S3URL);
+			walter_s3_post(new File([e], file.FileName), `${data.S3URL}`).then(
+				(e) => {
+					if (e.ok) {
+						data.anhaenge = [...data.anhaenge, file];
+					}
+				}
+			);
+		});
 	}
 
 	let title =
