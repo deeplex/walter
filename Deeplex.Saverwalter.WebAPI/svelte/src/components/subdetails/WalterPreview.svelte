@@ -15,10 +15,15 @@
 		ModalHeader,
 		Tile
 	} from 'carbon-components-svelte';
+	import WalterPreviewUnknown from './WalterPreviewUnknown.svelte';
 
 	export let open: boolean = false;
 	export let file: WalterS3File;
 	export let files: WalterS3File[];
+
+	function close() {
+		open = false;
+	}
 
 	function download() {
 		if (file.Blob) {
@@ -54,10 +59,7 @@
 		{:else if file.Type === 'application/pdf'}
 			<WalterPreviewPdf {file} />
 		{:else}
-			<Tile light>
-				Kann für die Datei: {file.FileName} keine Vorschau anzeigen. Dateityp:
-				{file.Type}.
-			</Tile>
+			<WalterPreviewUnknown {file} />
 		{/if}
 	</ModalBody>
 	<ModalFooter>

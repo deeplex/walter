@@ -5,6 +5,7 @@ export { default as WalterPreviewImage } from './subdetails/WalterPreviewImage.s
 export { default as WalterPreviewText } from './subdetails/WalterPreviewText.svelte';
 export { default as WalterPreviewPdf } from './subdetails/WalterPreviewPdf.svelte';
 export { default as WalterPreview } from './subdetails/WalterPreview.svelte';
+export { default as WalterPreviewUnknown } from './subdetails/WalterPreviewUnknown.svelte';
 
 export { default as WalterMiete } from './details/WalterMiete.svelte';
 export { default as WalterMietminderung } from './details/WalterMietminderung.svelte';
