@@ -9,7 +9,6 @@ namespace Deeplex.Saverwalter.Services
         SaverwalterContext ctx { get; set; }
         #pragma warning restore IDE1006 // Naming Styles
         public void SaveWalter();
-        public INotificationService NotificationService { get; }
     }
 
     public sealed class WalterDbService : IWalterDbService
@@ -19,11 +18,10 @@ namespace Deeplex.Saverwalter.Services
         #pragma warning restore IDE1006 // Naming Styles
 
         public IFileService FileService { get; }
-        public INotificationService NotificationService { get; }
 
         public SaverwalterContext ctx { get; set; }
 
-        public WalterDbService(INotificationService ns, IFileService fs)
+        public WalterDbService(IFileService fs)
         {
             var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
             optionsBuilder.UseNpgsql("Server=" + fs.databaseURL + ";Port=" + fs.databasePort + ";Database=postgres;Username=" + fs.databaseUser + ";Password=" + fs.databasePass);
@@ -31,7 +29,6 @@ namespace Deeplex.Saverwalter.Services
             ctx = new SaverwalterContext(optionsBuilder.Options);
 
             FileService = fs;
-            NotificationService = ns;
         }
 
         public void SaveWalter()

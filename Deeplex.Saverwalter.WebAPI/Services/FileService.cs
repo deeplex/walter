@@ -16,7 +16,7 @@ namespace Deeplex.Saverwalter.WebAPI
         public string databaseUser { get; set; }
         public string databasePass { get; set; }
 
-        public FileService(INotificationService ns)
+        public FileService()
         {
             // TODO. This was set after the initialization. But the data is necessary at App-Start. So I have to check for the database beforehand
             
