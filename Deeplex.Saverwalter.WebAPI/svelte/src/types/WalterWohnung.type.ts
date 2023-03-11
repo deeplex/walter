@@ -1,4 +1,12 @@
-import type { WalterAdresseEntry, WalterBetriebskostenrechnungEntry, WalterErhaltungsaufwendungEntry, WalterSelectionEntry, WalterUmlageEntry, WalterVertragEntry, WalterZaehlerEntry } from '$WalterTypes';
+import type {
+    WalterAdresseEntry,
+    WalterBetriebskostenrechnungEntry,
+    WalterErhaltungsaufwendungEntry,
+    WalterSelectionEntry,
+    WalterUmlageEntry,
+    WalterVertragEntry,
+    WalterZaehlerEntry
+} from '$WalterTypes';
 
 export type WalterWohnungEntry = {
     adresse: WalterAdresseEntry;

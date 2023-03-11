@@ -1,4 +1,8 @@
-import type { WalterBetriebskostenrechnungEntry, WalterSelectionEntry, WalterWohnungEntry } from "$WalterTypes";
+import type {
+    WalterBetriebskostenrechnungEntry,
+    WalterSelectionEntry,
+    WalterWohnungEntry
+} from "$WalterTypes";
 
 export type WalterUmlageEntry = {
     id: number;
