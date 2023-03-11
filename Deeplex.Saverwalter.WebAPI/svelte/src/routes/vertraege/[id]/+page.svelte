@@ -18,7 +18,7 @@
 		WalterVertragVersionEntry
 	} from '$WalterTypes';
 	import { toLocaleIsoString } from '$WalterServices/utils';
-	import { create_abrechnung } from '$WalterServices/print_abrechnung';
+	import { create_abrechnung } from '$WalterServices/abrechnung';
 	import {
 		create_walter_s3_file_from_file,
 		walter_s3_post
