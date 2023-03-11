@@ -9,6 +9,7 @@
 	import { WalterAnhaenge, WalterHeader } from '$WalterComponents';
 	import { walter_delete, walter_put } from '$WalterServices/requests';
 	import type { WalterS3File } from '../../types/WalterS3File.type';
+	import { openModal } from '$WalterStore';
 
 	export let title: Promise<string> | string = 'Saverwalter';
 	export let a: any;
@@ -21,7 +22,16 @@
 	}
 
 	function click_delete(title: string) {
-		walter_delete(apiURL, title);
+		const content = `Bist du sicher, dass du ${title} löschen möchtest?
+    	Dieser Vorgang kann nicht rückgängig gemacht werden.`;
+
+		openModal({
+			modalHeading: 'Löschen',
+			content,
+			danger: true,
+			primaryButtonText: 'Löschen',
+			submit: () => walter_delete(apiURL).then(() => history.back())
+		});
 	}
 </script>
 
