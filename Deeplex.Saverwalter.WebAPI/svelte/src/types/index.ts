@@ -1,6 +1,4 @@
-export { type IWalterAnhang } from './IWalterAnhang.type';
 export { type WalterAdresseEntry } from './WalterAdresse.type';
-export { type WalterAnhangEntry } from './WalterAnhang.type';
 export { type WalterPersonEntry } from './WalterPerson.type';
 export { type WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung.type';
 export { type WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung.type';

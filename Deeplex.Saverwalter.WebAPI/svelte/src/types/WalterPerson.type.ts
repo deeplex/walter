@@ -1,4 +1,4 @@
-import type { IWalterAnhang, WalterAdresseEntry, WalterVertragEntry, WalterWohnungEntry } from '$WalterTypes';
+import type { WalterAdresseEntry, WalterVertragEntry, WalterWohnungEntry } from '$WalterTypes';
 
 export type WalterPersonEntry = {
     id: number;
@@ -16,4 +16,4 @@ export type WalterPersonEntry = {
     juristischePersonen: WalterPersonEntry[];
     wohnungen: WalterWohnungEntry[];
     vertraege: WalterVertragEntry[];
-} & IWalterAnhang;
+};

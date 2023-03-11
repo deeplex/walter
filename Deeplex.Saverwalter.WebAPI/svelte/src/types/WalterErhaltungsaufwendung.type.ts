@@ -1,4 +1,4 @@
-import type { IWalterAnhang, WalterSelectionEntry } from "$WalterTypes";
+import type { WalterSelectionEntry } from "$WalterTypes";
 
 export type WalterErhaltungsaufwendungEntry = {
     id: number;
@@ -8,4 +8,4 @@ export type WalterErhaltungsaufwendungEntry = {
     bezeichnung: string;
     wohnung: WalterSelectionEntry;
     aussteller: WalterSelectionEntry;
-} & IWalterAnhang;
+};
