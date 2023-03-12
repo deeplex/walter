@@ -40,6 +40,5 @@
 			title="Zähler"
 			rows={data.a.zaehler}
 		/>
-		<!-- TODO add Kontakte, Verträge, Umlagen, Zähler? -->
 	</Accordion>
 </WalterGrid>

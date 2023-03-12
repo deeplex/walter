@@ -60,7 +60,6 @@ async function finishPut(e: Response) {
 export const walter_post = (url: string, body: any) => fetch(
     url,
     { method: 'POST', headers, body: JSON.stringify(body) }
-    // TODO Navigate to target position.
 ).then(finishPost);
 
 async function finishPost(e: Response) {

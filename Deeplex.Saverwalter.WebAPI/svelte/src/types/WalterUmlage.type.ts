@@ -9,7 +9,6 @@ export type WalterUmlageEntry = {
     notiz: string;
     beschreibung: string;
     wohnungenBezeichnung: string;
-    // TODO => SelectionEntry
     zaehler: string;
     typ: WalterSelectionEntry;
     schluessel: WalterSelectionEntry;
