@@ -1,3 +1,4 @@
+import { addToast } from '$WalterStore';
 import type { WalterS3File } from '$WalterTypes';
 import * as parser from 'fast-xml-parser';
 import { walter_delete } from './requests';
@@ -15,7 +16,18 @@ export const walter_s3_post = (file: File, path: string) => fetch(
         },
         body: file
     }
-);
+).then(finish_s3_post);
+
+async function finish_s3_post(e: Response) {
+    const ok = e.status === 200;
+    const kind = ok ? "success" : "error";
+    const title = ok ? "Hochladen erfolgreich" : "Fehler";
+
+    const subtitle = "TODO parse response body." // JSON.stringify(j);
+
+    addToast({ title, kind, subtitle });
+    return e;
+}
 
 export const walter_s3_get = (S3URL: string) => fetch(
     `${baseURL}/${S3URL}`, {

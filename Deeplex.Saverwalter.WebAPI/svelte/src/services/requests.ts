@@ -66,7 +66,7 @@ export const walter_post = (url: string, body: any) => fetch(
 async function finishPost(e: Response) {
     const ok = e.status === 200;
     const kind = ok ? "success" : "error";
-    const title = ok ? "Speichern Erfolgreich" : "Fehler";
+    const title = ok ? "Speichern erfolgreich" : "Fehler";
     const j = await e.json();
 
     const subtitle = "TODO parse response body." // JSON.stringify(j);
