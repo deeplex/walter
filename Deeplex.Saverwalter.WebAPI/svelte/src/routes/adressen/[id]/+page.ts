@@ -11,6 +11,9 @@ export const load: PageLoad = async ({ params, fetch }) => {
         apiURL: apiURL,
         S3URL: S3URL,
         kontakte: walter_selection.kontakte(fetch),
+        wohnungen: walter_selection.wohnungen(fetch),
+        zaehlertypen: walter_selection.zaehlertypen(fetch),
+        zaehler: walter_selection.zaehler(fetch),
         a: walter_get(apiURL, fetch) as Promise<WalterAdresseEntry>,
 
         anhaenge: walter_s3_get_files(S3URL, fetch) as Promise<WalterS3File[]>

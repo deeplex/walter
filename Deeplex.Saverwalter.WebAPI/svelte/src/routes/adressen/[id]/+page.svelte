@@ -3,7 +3,9 @@
 		WalterAdresse,
 		WalterGrid,
 		WalterHeaderDetail,
-		WalterWohnungen
+		WalterKontakte,
+		WalterWohnungen,
+		WalterZaehlerList
 	} from '$WalterComponents';
 	import type { WalterWohnungEntry } from '$WalterTypes';
 	import { Accordion } from 'carbon-components-svelte';
@@ -29,6 +31,14 @@
 			a={wohnungEntry}
 			title="Wohnungen"
 			rows={data.a.wohnungen}
+		/>
+		<WalterKontakte title="Personen" rows={data.a.kontakte} />
+		<WalterZaehlerList
+			zaehler={data.zaehler}
+			zaehlertypen={data.zaehlertypen}
+			wohnungen={data.wohnungen}
+			title="Zähler"
+			rows={data.a.zaehler}
 		/>
 		<!-- TODO add Kontakte, Verträge, Umlagen, Zähler? -->
 	</Accordion>

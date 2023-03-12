@@ -2,7 +2,9 @@
 using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -20,18 +22,20 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Postleitzahl { get; set; }
             public string? Stadt { get; set; }
             public string? Anschrift { get; set; }
+            public string? Notiz { get; set; }
 
-            protected AdresseEntryBase() { }
+            public AdresseEntryBase() { }
             public AdresseEntryBase(Adresse entity)
             {
                 Entity = entity;
                 Id = Entity.AdresseId;
-                
+
                 Strasse= Entity.Strasse;
                 Hausnummer = Entity.Hausnummer;
                 Postleitzahl   = Entity.Postleitzahl;
                 Stadt = Entity.Stadt;
                 Anschrift = Entity.Anschrift;
+                Notiz = Entity.Notiz;
             }
         }
 
@@ -39,7 +43,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             private IWalterDbService? DbService { get; }
 
-            public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!));
+            public IEnumerable<WohnungEntryBase>? Wohnungen
+                => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!));
+            public IEnumerable<PersonEntryBase>? Kontakte
+                => Entity?.JuristischePersonen.Select(e => new PersonEntryBase(e))
+                    .Concat(Entity.NatuerlichePersonen.Select(e => new PersonEntryBase(e)));
+            public IEnumerable<ZaehlerEntryBase>? Zaehler
+                => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
+
 
             public AdresseEntry() : base() { }
             public AdresseEntry(Adresse entity, IWalterDbService dbService) : base(entity)

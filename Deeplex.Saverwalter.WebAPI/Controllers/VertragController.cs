@@ -62,7 +62,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<PersonEntryBase>? Mieter => DbService?.ctx.MieterSet
                 .Where(m => Entity != null && m.Vertrag.VertragId == Entity.VertragId)
                 .ToList()
-                .Select(e => new PersonEntryBase(DbService.ctx.FindPerson(e.PersonId), DbService));
+                .Select(e => new PersonEntryBase(DbService.ctx.FindPerson(e.PersonId)));
             public IEnumerable<VertragVersionEntryBase>? Versionen { get; set; }
             // TODO Garagen
 

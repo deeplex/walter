@@ -1,4 +1,4 @@
-import type { WalterWohnungEntry } from "./WalterWohnung.type";
+import type { WalterZaehlerEntry, WalterWohnungEntry, WalterPersonEntry } from "$WalterTypes";
 
 export type WalterAdresseEntry = {
     strasse: string;
@@ -6,6 +6,9 @@ export type WalterAdresseEntry = {
     postleitzahl: string;
     stadt: string;
     anschrift: string;
+    notiz: string;
 
     wohnungen: WalterWohnungEntry[];
+    kontakte: WalterPersonEntry[];
+    zaehler: WalterZaehlerEntry[];
 }

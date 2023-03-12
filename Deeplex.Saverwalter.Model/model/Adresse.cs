@@ -22,5 +22,8 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
         public virtual List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
         public virtual List<Garage> Garagen { get; private set; } = new List<Garage>();
+        public virtual List<JuristischePerson> JuristischePersonen { get; private set; } = new List<JuristischePerson>();
+        public virtual List<NatuerlichePerson> NatuerlichePersonen { get; private set; } = new List<NatuerlichePerson>();
+        public virtual List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
     }
 }

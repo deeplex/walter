@@ -16,13 +16,16 @@
 
 	export let data: PageData;
 
-	const lastZaehlerstand =
-		data.a.staende[data.a.staende.length - 1] || undefined;
+	const staende = data.a.staende;
+
+	const lastZaehlerstand = staende.length
+		? staende[staende.length - 1]
+		: undefined;
 	const zaehlerstandEntry: Partial<WalterZaehlerstandEntry> = {
 		zaehler: { id: '' + data.a.id, text: data.a.kennnummer },
 		datum: toLocaleIsoString(new Date()),
-		stand: lastZaehlerstand.stand || 0,
-		einheit: lastZaehlerstand.einheit
+		stand: lastZaehlerstand?.stand || 0,
+		einheit: lastZaehlerstand?.einheit
 	};
 
 	const einzelzaehlerEntry: Partial<WalterZaehlerEntry> = {

@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 entity.Allgemeinzaehler = null;
             }
 
-            if (entry.Adresse is AdresseEntry a)
+            if (entry.Adresse is AdresseEntryBase a)
             {
                 entity.Adresse = GetAdresse(a, ctx)!;
             }

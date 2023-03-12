@@ -16,7 +16,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class PersonEntryBase
         {
             protected IPerson? Entity { get; }
-            protected IWalterDbService? DbService { get; }
 
             public int Id { get; set; }
             public Guid Guid { get; set; }
@@ -26,12 +25,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Notiz { get; set; }
             public string? Telefon { get; set; }
             public string? Mobil { get; set; }
-            public AdresseEntry? Adresse { get; set; }
+            public AdresseEntryBase? Adresse { get; set; }
 
             protected PersonEntryBase() { }
-            public PersonEntryBase(IPerson p, IWalterDbService dbService)
+            public PersonEntryBase(IPerson p)
             {
-                DbService = dbService;
                 if (p is NatuerlichePerson n)
                 {
                     Entity = n;
@@ -57,7 +55,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 if (Entity.Adresse is Adresse a)
                 {
-                    Adresse = new AdresseEntry(a, DbService);
+                    Adresse = new AdresseEntryBase(a);
                 }
 
             }
@@ -94,7 +92,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 => GetVertraege()?.Select(e => e.Wohnung).Distinct().Select(e => new WohnungEntryBase(e, DbService!));
 
             protected PersonEntry() : base() { }
-            public PersonEntry(IPerson entity, IWalterDbService dbService) : base(entity, dbService)
+            public PersonEntry(IPerson entity, IWalterDbService dbService) : base(entity)
             {
                 DbService = dbService;
             }
@@ -112,8 +110,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            var np = DbService.ctx.NatuerlichePersonen.ToList().Select(e => new PersonEntryBase(e, DbService)).ToList();
-            var jp = DbService.ctx.JuristischePersonen.ToList().Select(e => new PersonEntryBase(e, DbService)).ToList();
+            var np = DbService.ctx.NatuerlichePersonen.ToList().Select(e => new PersonEntryBase(e)).ToList();
+            var jp = DbService.ctx.JuristischePersonen.ToList().Select(e => new PersonEntryBase(e)).ToList();
             return new OkObjectResult(np.Concat(jp));
         }
     }
