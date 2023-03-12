@@ -31,7 +31,6 @@
 		files = [...files, create_walter_s3_file_from_file(file, S3URL)];
 	}
 
-	// TODO show Toast
 	async function upload() {
 		fileUploadComplete = false;
 		for (const file of newFiles) {

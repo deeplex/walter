@@ -2,6 +2,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import PDFObject from 'pdfobject';
 	import type { WalterS3File } from '$WalterTypes';
+	import { WalterPreviewError } from '$WalterComponents';
 
 	export let file: WalterS3File;
 
@@ -15,10 +16,13 @@
 			src = URL.createObjectURL(file.Blob);
 			PDFObject.embed(src, '#pdf-container');
 		}
-		// TODO may want to handle !src.blob
 	});
 </script>
 
-<div style="height:100vw">
-	<div style="height: 100vw" id="pdf-container" />
-</div>
+{#if file.Blob}
+	<div style="height:100vw">
+		<div style="height: 100vw" id="pdf-container" />
+	</div>
+{:else}
+	<WalterPreviewError {file} />
+{/if}

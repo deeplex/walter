@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { WalterPreviewError } from '$WalterComponents';
 	import type { WalterS3File } from '$WalterTypes';
 	import { Tile } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
@@ -14,9 +15,11 @@
 		if (file.Blob) {
 			reader.readAsText(file.Blob);
 		}
-
-		// TODO may want to catch !file.Blob here.
 	});
 </script>
 
-<Tile light>{text}</Tile>
+{#if file.Blob}
+	<Tile light>{text}</Tile>
+{:else}
+	<WalterPreviewError {file} />
+{/if}

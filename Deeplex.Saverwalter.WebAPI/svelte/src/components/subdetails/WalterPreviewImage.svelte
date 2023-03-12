@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { WalterPreviewError } from '$WalterComponents';
 	import type { WalterS3File } from '$WalterTypes';
 	import { ImageLoader } from 'carbon-components-svelte';
 	import { onDestroy, onMount } from 'svelte';
@@ -15,8 +16,11 @@
 		if (file.Blob) {
 			src = URL.createObjectURL(file.Blob);
 		}
-		// TODO may want to handle !file.blob
 	});
 </script>
 
-<ImageLoader {src} />
+{#if file.Blob}
+	<ImageLoader {src} />
+{:else}
+	<WalterPreviewError {file} />
+{/if}
