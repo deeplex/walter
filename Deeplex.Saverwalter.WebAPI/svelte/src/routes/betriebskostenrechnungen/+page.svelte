@@ -8,7 +8,7 @@
 	export let data: PageData;
 </script>
 
-<WalterHeaderList apiUrl={data.apiURL} title="Betriebskostenrechnung" />
+<WalterHeaderList title="Betriebskostenrechnung" />
 <WalterBetriebskostenrechnungen
 	umlagen={data.umlagen}
 	betriebskostentypen={data.betriebskostentypen}

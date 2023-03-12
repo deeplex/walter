@@ -5,17 +5,16 @@
 	import { goto } from '$app/navigation';
 
 	import { WalterHeader } from '$WalterComponents';
+	import { page } from '$app/stores';
 
 	export let title: Promise<string> | string = 'Saverwalter';
-	export let apiUrl: string;
 	export let nonav: boolean = false;
 
 	function click_new() {
 		if (nonav) {
 			return;
 		}
-		// TODO apiURL just to replace it...
-		goto(`${apiUrl}/new`.replace('api/', ''));
+		goto(`${$page.url.pathname}/new`);
 	}
 </script>
 

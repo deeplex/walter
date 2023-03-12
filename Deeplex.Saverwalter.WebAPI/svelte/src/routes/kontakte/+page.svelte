@@ -5,5 +5,5 @@
 	export let data: PageData;
 </script>
 
-<WalterHeaderList apiUrl={data.apiURL} title="Kontakte" />
+<WalterHeaderList title="Kontakte" />
 <WalterKontakte search rows={data.rows} />

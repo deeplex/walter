@@ -28,6 +28,6 @@
 		wohnungen={data.wohnungen}
 		a={entry}
 	/>
-	<Tile>Vertragsversion:</Tile>
+	<Tile light>Vertragsversion:</Tile>
 	<WalterVertragVersion a={entryVersion} />
 </WalterGrid>

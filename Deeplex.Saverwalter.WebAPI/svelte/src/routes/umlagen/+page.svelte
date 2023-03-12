@@ -5,7 +5,7 @@
 	export let data: PageData;
 </script>
 
-<WalterHeaderList apiUrl={data.apiURL} title="Umlagen" />
+<WalterHeaderList title="Umlagen" />
 <WalterUmlagen
 	wohnungen={data.wohnungen}
 	umlageschluessel={data.umlageschluessel}
