@@ -1,8 +1,9 @@
 <script lang="ts">
-	import 'carbon-components-svelte/css/white.css';
+	// import 'carbon-components-svelte/css/white.css';
+	import 'carbon-components-svelte/css/all.css';
 
 	import { WalterSideNav, WalterToasts } from '$WalterComponents';
-	import { Modal } from 'carbon-components-svelte';
+	import { Modal, Theme } from 'carbon-components-svelte';
 	import type { WalterModalControl } from '$WalterTypes';
 	import { walterModalControl } from '$WalterStore';
 
@@ -11,6 +12,18 @@
 		modalControl = value;
 	});
 </script>
+
+<Theme
+	theme="g10"
+	tokens={{
+		'interactive-01': '#2E7D32', // darker green primary color
+		'interactive-01-selected': '#2E7D32', // darker green selected color
+		'active-primary': '#1D5F27',
+		'link-01': '#2E7D32', // darker green link color
+		focus: '#388E3C', // slightly lighter green focus color
+		'hover-primary': '#388E3C' // slightly lighter green hover color
+	}}
+/>
 
 <WalterSideNav />
 <div
@@ -33,6 +46,13 @@
 <slot />
 
 <style>
+	:global(
+			a.bx--side-nav__link[aria-current='page']::before,
+			a.bx--side-nav__link--current::before
+		) {
+		background-color: #2e7d32;
+	}
+
 	slot {
 		height: 100vh - 3rem - 5px;
 		width: 100vw;
