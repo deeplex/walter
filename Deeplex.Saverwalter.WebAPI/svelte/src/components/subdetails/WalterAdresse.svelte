@@ -4,9 +4,9 @@
 	import type { WalterAdresseEntry } from '$WalterTypes';
 	import { WalterTextInput } from '$WalterComponents';
 
-	export let value: Partial<WalterAdresseEntry> | undefined = undefined;
+	export let value: Partial<WalterAdresseEntry> | undefined = {};
 
-	let fallback: Partial<WalterAdresseEntry> = {};
+	let fallback: Partial<WalterAdresseEntry> = value || {};
 
 	const change = () => {
 		value = fallback;
