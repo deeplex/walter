@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.NatuerlichePersonController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -34,6 +35,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             if (entry.Adresse is AdresseEntry a)
             {
                 entity.Adresse = GetAdresse(a, ctx);
+            }
+            if (entry.SelectedJuristischePersonen is IEnumerable<SelectionEntry> l)
+            {
+                // Add new
+                entity.JuristischePersonen
+                    .AddRange(l.Where(w => !entity.JuristischePersonen.Exists(e => w.Id == e.JuristischePersonId.ToString()))
+                    .Select(w => ctx.JuristischePersonen.Find(new Guid(w.Id!))));
+                // Remove old
+                entity.JuristischePersonen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.JuristischePersonen.ToString()));
             }
         }
 

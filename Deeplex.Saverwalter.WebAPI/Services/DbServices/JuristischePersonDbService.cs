@@ -5,6 +5,7 @@ using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
 using static Deeplex.Saverwalter.WebAPI.Controllers.JuristischePersonController;
 using Deeplex.Saverwalter.WebAPI.Controllers;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -20,7 +21,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private void SetValues(JuristischePerson entity, JuristischePersonEntry entry)
         {
-            if (entity.JuristischePersonId != entry.Id)
+            // NOTE: There is a minus before entry.Id.
+            // This is, because FrontEnd needs different Ids for List with Nat. Pers.
+            if (entity.JuristischePersonId != -entry.Id)
             {
                 throw new Exception();
             }
@@ -35,6 +38,34 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 entity.Adresse = GetAdresse(a, ctx);
             }
+            if (entry.SelectedJuristischePersonen is IEnumerable<SelectionEntry> l)
+            {
+                // Add new
+                entity.JuristischePersonen
+                    .AddRange(l.Where(w => !entity.JuristischePersonen.Exists(e => w.Id == e.PersonId.ToString()))
+                    .Select(w => ctx.FindPerson(new Guid(w.Id!)) as JuristischePerson)!);
+                // Remove old
+                entity.JuristischePersonen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.PersonId.ToString()));
+            }
+            if (entry.SelectedMitglieder is IEnumerable<SelectionEntry> m)
+            {
+                // Add new
+                var missingPersons = m.Where(w =>
+                    !entity.Mitglieder.Exists(e => w.Id == e.PersonId.ToString())
+                    ).Select(w => ctx.FindPerson(new Guid(w.Id!)!)!);
+
+                entity.JuristischeMitglieder.AddRange(missingPersons!
+                    .Where(e => e is JuristischePerson)
+                    .Select(e => (JuristischePerson)e));
+
+                entity.NatuerlicheMitglieder.AddRange(missingPersons!
+                    .Where(e => e is NatuerlichePerson)
+                    .Select(e => (NatuerlichePerson)e));
+
+                // Remove old
+                entity.Mitglieder.RemoveAll(w => !m.ToList().Exists(e => e.Id == w.PersonId.ToString()));
+            }
+
         }
 
         public IActionResult Get(int id)

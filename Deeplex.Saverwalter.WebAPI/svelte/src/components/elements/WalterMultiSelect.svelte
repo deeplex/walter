@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { walter_get } from '$WalterServices/requests';
 	import type { WalterSelectionEntry } from '$WalterTypes';
 	import { MultiSelect, TextInputSkeleton } from 'carbon-components-svelte';
 

@@ -11,6 +11,9 @@ export const walter_selection = {
     kontakte(f: fetchType): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/kontakte', f)
     },
+    juristischePersonen(f: fetchType): Promise<WalterSelectionEntry[]> {
+        return walter_get('/api/selection/juristischepersonen', f)
+    },
     wohnungen(f: fetchType): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/wohnungen', f)
     },

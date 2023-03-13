@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Accordion, Row } from 'carbon-components-svelte';
+	import { Accordion, MultiSelect, Row } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 	import {
 		WalterKontakte,
@@ -8,7 +8,8 @@
 		WalterTextInput,
 		WalterWohnungen,
 		WalterVertraege,
-		WalterHeaderDetail
+		WalterHeaderDetail,
+		WalterMultiSelect
 	} from '$WalterComponents';
 
 	export let data: PageData;
@@ -26,13 +27,24 @@
 	<Row>
 		<WalterTextInput labelText="Bezeichnung" value={data.a.name} />
 	</Row>
-	<WalterPerson value={data.a} />
+	<WalterPerson juristischePersonen={data.juristischePersonen} value={data.a}>
+		<WalterMultiSelect
+			titleText="Mitglieder"
+			a={data.kontakte}
+			bind:value={data.a.selectedMitglieder}
+		/>
+	</WalterPerson>
 
 	<Accordion>
 		<!-- TODO add -->
-		<WalterKontakte title="Mitglieder" rows={data.a.mitglieder} />
+		<WalterKontakte
+			juristischePersonen={data.juristischePersonen}
+			title="Mitglieder"
+			rows={data.a.mitglieder}
+		/>
 		<!-- TODO add -->
 		<WalterKontakte
+			juristischePersonen={data.juristischePersonen}
 			title="Juristische Personen"
 			rows={data.a.juristischePersonen}
 		/>

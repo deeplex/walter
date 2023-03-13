@@ -71,7 +71,7 @@
 <WalterHeaderDetail
 	S3URL={data.S3URL}
 	files={data.anhaenge}
-	a={data.a}
+	bind:a={data.a}
 	apiURL={data.apiURL}
 	{title}
 />
@@ -80,11 +80,15 @@
 	<WalterVertrag
 		kontakte={data.kontakte}
 		wohnungen={data.wohnungen}
-		a={data.a}
+		bind:a={data.a}
 	/>
 
 	<Accordion>
-		<WalterKontakte title="Mieter" rows={data.a.mieter} />
+		<WalterKontakte
+			juristischePersonen={data.juristischePersonen}
+			title="Mieter"
+			rows={data.a.mieter}
+		/>
 		<WalterVertragVersionen
 			a={vertragversionEntry}
 			title="Versionen:"

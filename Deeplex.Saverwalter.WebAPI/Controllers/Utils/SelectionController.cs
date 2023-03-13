@@ -54,9 +54,22 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         [Route("api/selection/kontakte")]
         public IEnumerable<SelectionEntry> GetKontakte()
         {
-            var nat = DbService.ctx.NatuerlichePersonen.Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung, null)).ToList();
-            var jur = DbService.ctx.JuristischePersonen.Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung, null)).ToList();
+            var nat = DbService.ctx.NatuerlichePersonen
+                .Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung, null))
+                .ToList();
+            var jur = DbService.ctx.JuristischePersonen
+                .Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung, null))
+                .ToList();
             return nat.Concat(jur);
+        }
+
+        [HttpGet]
+        [Route("api/selection/juristischepersonen")]
+        public IEnumerable<SelectionEntry> GetJuristischePersonen()
+        {
+            return DbService.ctx.JuristischePersonen
+                .Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung, null))
+                .ToList();
         }
 
         [HttpGet]

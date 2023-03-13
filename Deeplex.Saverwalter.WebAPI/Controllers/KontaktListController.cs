@@ -6,6 +6,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.JuristischePersonController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -27,18 +28,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Mobil { get; set; }
             public AdresseEntryBase? Adresse { get; set; }
 
+            public bool NatuerlichePerson { get; set; }
+
             protected PersonEntryBase() { }
             public PersonEntryBase(IPerson p)
             {
+                Entity = p;
                 if (p is NatuerlichePerson n)
                 {
-                    Entity = n;
                     Id = n.NatuerlichePersonId;
+                    NatuerlichePerson = true;
                 }
                 else if (p is JuristischePerson j)
                 {
-                    Entity = j;
                     Id = -j.JuristischePersonId;
+                    NatuerlichePerson = false;
                 }
                 else
                 {
@@ -57,7 +61,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 {
                     Adresse = new AdresseEntryBase(a);
                 }
-
             }
         }
 
@@ -84,8 +87,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             private IWalterDbService? DbService { get; set; }
 
-            public IEnumerable<JuristischePersonEntryBase>? JuristischePersonen
-                => Entity?.JuristischePersonen.Select(e => new JuristischePersonEntryBase(e, DbService!));
+            public IEnumerable<SelectionEntry>? SelectedJuristischePersonen { get; set; }
+            public IEnumerable<PersonEntryBase>? JuristischePersonen
+                => Entity?.JuristischePersonen.Select(e => new PersonEntryBase(e));
             public IEnumerable<VertragEntryBase>? Vertraege
                 => GetVertraege()?.Select(e => new VertragEntryBase(e, DbService!));
             public IEnumerable<WohnungEntryBase>? Wohnungen
@@ -95,6 +99,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public PersonEntry(IPerson entity, IWalterDbService dbService) : base(entity)
             {
                 DbService = dbService;
+                SelectedJuristischePersonen = Entity!.JuristischePersonen.Select(e => new SelectionEntry(e.PersonId, dbService.ctx.FindPerson(e.PersonId).Bezeichnung));
             }
         }
 

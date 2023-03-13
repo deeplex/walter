@@ -1,4 +1,4 @@
-import type { WalterAdresseEntry, WalterVertragEntry, WalterWohnungEntry } from '$WalterTypes';
+import type { WalterAdresseEntry, WalterSelectionEntry, WalterVertragEntry, WalterWohnungEntry } from '$WalterTypes';
 
 export type WalterPersonEntry = {
     id: number;
@@ -9,6 +9,7 @@ export type WalterPersonEntry = {
     mobil: string;
     notiz: string;
     name: string;
+    selectedJuristischePersonen: WalterSelectionEntry[];
 
     natuerlichePerson: boolean;
     adresse: WalterAdresseEntry;

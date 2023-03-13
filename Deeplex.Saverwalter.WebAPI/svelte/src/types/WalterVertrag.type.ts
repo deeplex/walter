@@ -1,4 +1,10 @@
-import type { WalterMieteEntry, WalterMietminderungEntry, WalterPersonEntry, WalterSelectionEntry, WalterVertragVersionEntry } from "$WalterTypes";
+import type {
+    WalterMieteEntry,
+    WalterMietminderungEntry,
+    WalterPersonEntry,
+    WalterSelectionEntry,
+    WalterVertragVersionEntry
+} from "$WalterTypes";
 
 export type WalterVertragEntry = {
     id: number;

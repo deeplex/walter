@@ -28,15 +28,15 @@
 		<WalterTextInput bind:value={data.a.vorname} labelText="Vorname" />
 		<WalterTextInput bind:value={data.a.nachname} labelText="Nachname" />
 	</Row>
-	<WalterPerson value={data.a} />
+	<WalterPerson juristischePersonen={data.juristischePersonen} value={data.a} />
 
 	<Accordion>
-		<!-- TODO add here -->
-		<WalterKontakte
-			title="Juristische Personen"
-			rows={data.a.juristischePersonen}
-		/>
 		{#await data.a then}
+			<WalterKontakte
+				juristischePersonen={data.juristischePersonen}
+				title="Juristische Personen"
+				rows={data.a.juristischePersonen}
+			/>
 			<WalterWohnungen
 				kontakte={data.kontakte}
 				title="Wohnungen"

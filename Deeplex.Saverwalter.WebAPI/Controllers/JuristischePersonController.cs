@@ -3,6 +3,7 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -10,23 +11,19 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     [Route("api/kontakte/jur")]
     public class JuristischePersonController : ControllerBase
     {
-        public class JuristischePersonEntryBase : PersonEntry
+        public class JuristischePersonEntry : PersonEntry
         {
             protected new JuristischePerson? Entity { get; }
 
-            public JuristischePersonEntryBase() : base() { }
-            public JuristischePersonEntryBase(JuristischePerson entity, IWalterDbService dbService) : base(entity, dbService)
+            public IEnumerable<PersonEntryBase>? Mitglieder => Entity?.Mitglieder.Select(e => new PersonEntryBase(e));
+            public IEnumerable<SelectionEntry>? SelectedMitglieder { get; set; }
+            
+            public JuristischePersonEntry() : base() { }
+            public JuristischePersonEntry(JuristischePerson entity, IWalterDbService dbService) : base(entity, dbService)
             {
                 Entity = entity;
+                SelectedMitglieder = Entity!.Mitglieder.Select(e => new SelectionEntry(e.PersonId, dbService.ctx.FindPerson(e.PersonId).Bezeichnung));
             }
-        }
-
-        public sealed class JuristischePersonEntry : JuristischePersonEntryBase
-        {
-            public IEnumerable<PersonEntryBase>? Mitglieder => Entity?.Mitglieder.Select(e => new PersonEntryBase(e));
-
-            public JuristischePersonEntry() : base() { }
-            public JuristischePersonEntry(JuristischePerson entity, IWalterDbService dbService) : base(entity, dbService) { }
         }
 
         private readonly ILogger<JuristischePersonController> _logger;

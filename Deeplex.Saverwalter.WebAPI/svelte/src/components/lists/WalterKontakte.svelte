@@ -10,7 +10,8 @@
 	import type {
 		WalterJuristischePersonEntry,
 		WalterNatuerlichePersonEntry,
-		WalterPersonEntry
+		WalterPersonEntry,
+		WalterSelectionEntry
 	} from '$WalterTypes';
 	import { ContentSwitcher, Row, Switch } from 'carbon-components-svelte';
 
@@ -32,6 +33,7 @@
 	export let rows: WalterPersonEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
+	export let juristischePersonen: WalterSelectionEntry[];
 
 	let personType: number = 0;
 
@@ -64,6 +66,6 @@
 				<WalterTextInput bind:value={a.name} labelText="Bezeichnung" />
 			{/if}
 		</Row>
-		<WalterPerson value={a} />
+		<WalterPerson {juristischePersonen} value={a} />
 	{/if}
 </WalterDataWrapper>

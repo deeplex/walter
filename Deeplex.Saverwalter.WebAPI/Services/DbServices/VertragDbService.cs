@@ -2,7 +2,6 @@
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
