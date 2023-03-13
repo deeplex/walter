@@ -58,8 +58,8 @@
 					<Button
 						on:click={() => (addModalOpen = true)}
 						iconDescription="Eintrag hinzufügen"
-						icon={Add}
-					/>
+						icon={Add}>Eintrag hinzufügen</Button
+					>
 				</div>
 				<Modal
 					secondaryButtonText="Abbrechen"
