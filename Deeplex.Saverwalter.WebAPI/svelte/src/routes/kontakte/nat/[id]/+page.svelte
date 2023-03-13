@@ -1,15 +1,13 @@
 <script lang="ts">
 	import { Accordion, Row } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
-	import type { WalterNatuerlichePersonEntry } from '$WalterTypes';
 	import {
-		WalterPerson,
 		WalterGrid,
-		WalterTextInput,
 		WalterKontakte,
 		WalterWohnungen,
 		WalterVertraege,
-		WalterHeaderDetail
+		WalterHeaderDetail,
+		WalterNatuerlichePerson
 	} from '$WalterComponents';
 
 	export let data: PageData;
@@ -24,30 +22,27 @@
 />
 
 <WalterGrid>
-	<Row>
-		<WalterTextInput bind:value={data.a.vorname} labelText="Vorname" />
-		<WalterTextInput bind:value={data.a.nachname} labelText="Nachname" />
-	</Row>
-	<WalterPerson juristischePersonen={data.juristischePersonen} value={data.a} />
+	<WalterNatuerlichePerson
+		bind:a={data.a}
+		juristischePersonen={data.juristischePersonen}
+	/>
 
 	<Accordion>
-		{#await data.a then}
-			<WalterKontakte
-				juristischePersonen={data.juristischePersonen}
-				title="Juristische Personen"
-				rows={data.a.juristischePersonen}
-			/>
-			<WalterWohnungen
-				kontakte={data.kontakte}
-				title="Wohnungen"
-				rows={data.a.wohnungen}
-			/>
-			<WalterVertraege
-				wohnungen={data.wohnungen}
-				kontakte={data.kontakte}
-				title="Verträge"
-				rows={data.a.vertraege}
-			/>
-		{/await}
+		<WalterKontakte
+			juristischePersonen={data.juristischePersonen}
+			title="Juristische Personen"
+			rows={data.a.juristischePersonen}
+		/>
+		<WalterWohnungen
+			kontakte={data.kontakte}
+			title="Wohnungen"
+			rows={data.a.wohnungen}
+		/>
+		<WalterVertraege
+			wohnungen={data.wohnungen}
+			kontakte={data.kontakte}
+			title="Verträge"
+			rows={data.a.vertraege}
+		/>
 	</Accordion>
 </WalterGrid>

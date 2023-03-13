@@ -3,16 +3,28 @@
 	import type { PageData } from './$types';
 	import {
 		WalterKontakte,
-		WalterPerson,
 		WalterGrid,
-		WalterTextInput,
 		WalterWohnungen,
 		WalterVertraege,
 		WalterHeaderDetail,
-		WalterMultiSelect
+		WalterJuristischePerson
 	} from '$WalterComponents';
+	import type {
+		WalterJuristischePersonEntry,
+		WalterNatuerlichePersonEntry
+	} from '$WalterTypes';
 
 	export let data: PageData;
+
+	let mitglied: Partial<
+		WalterNatuerlichePersonEntry | WalterJuristischePersonEntry
+	> = {
+		selectedJuristischePersonen: [{ id: +data.id, text: data.a.name }]
+	};
+
+	let juristischePerson: Partial<WalterJuristischePersonEntry> = {
+		selectedMitglieder: [{ id: +data.id, text: data.a.name }]
+	};
 </script>
 
 <WalterHeaderDetail
@@ -24,42 +36,35 @@
 />
 
 <WalterGrid>
-	<Row>
-		<WalterTextInput labelText="Bezeichnung" value={data.a.name} />
-	</Row>
-	<WalterPerson juristischePersonen={data.juristischePersonen} value={data.a}>
-		<WalterMultiSelect
-			titleText="Mitglieder"
-			a={data.kontakte}
-			bind:value={data.a.selectedMitglieder}
-		/>
-	</WalterPerson>
+	<WalterJuristischePerson
+		a={data.a}
+		kontakte={data.kontakte}
+		juristischePersonen={data.juristischePersonen}
+	/>
 
 	<Accordion>
-		<!-- TODO add -->
 		<WalterKontakte
+			bind:a={mitglied}
 			juristischePersonen={data.juristischePersonen}
 			title="Mitglieder"
 			rows={data.a.mitglieder}
 		/>
-		<!-- TODO add -->
 		<WalterKontakte
+			bind:a={juristischePerson}
 			juristischePersonen={data.juristischePersonen}
 			title="Juristische Personen"
 			rows={data.a.juristischePersonen}
 		/>
-		{#await data.a then}
-			<WalterWohnungen
-				kontakte={data.kontakte}
-				title="Wohnungen"
-				rows={data.a.wohnungen}
-			/>
-			<WalterVertraege
-				wohnungen={data.wohnungen}
-				kontakte={data.kontakte}
-				title="Verträge"
-				rows={data.a.vertraege}
-			/>
-		{/await}
+		<WalterWohnungen
+			kontakte={data.kontakte}
+			title="Wohnungen"
+			rows={data.a.wohnungen}
+		/>
+		<WalterVertraege
+			wohnungen={data.wohnungen}
+			kontakte={data.kontakte}
+			title="Verträge"
+			rows={data.a.vertraege}
+		/>
 	</Accordion>
 </WalterGrid>

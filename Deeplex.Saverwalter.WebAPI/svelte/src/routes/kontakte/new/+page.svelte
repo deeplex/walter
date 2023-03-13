@@ -6,11 +6,14 @@
 		WalterNatuerlichePersonEntry
 	} from '$WalterTypes';
 	import {
-		WalterPerson,
 		WalterGrid,
-		WalterTextInput,
-		WalterHeaderNew
+		WalterHeaderNew,
+		WalterJuristischePerson,
+		WalterNatuerlichePerson
 	} from '$WalterComponents';
+	import type { PageData } from './$types';
+
+	export let data: PageData;
 
 	const apiURL = `/api/kontakte`;
 	const title = 'Neue Person';
@@ -40,13 +43,16 @@
 </WalterHeaderNew>
 
 <WalterGrid>
-	<Row>
-		{#if personType === 0}
-			<WalterTextInput bind:value={entry.vorname} labelText="Vorname" />
-			<WalterTextInput bind:value={entry.nachname} labelText="Nachname" />
-		{:else}
-			<WalterTextInput bind:value={entry.name} labelText="Bezeichnung" />
-		{/if}
-	</Row>
-	<WalterPerson value={entry} />
+	{#if personType === 0}
+		<WalterNatuerlichePerson
+			a={entry}
+			juristischePersonen={data.juristischePersonen}
+		/>
+	{:else}
+		<WalterJuristischePerson
+			a={entry}
+			kontakte={data.kontakte}
+			juristischePersonen={data.juristischePersonen}
+		/>
+	{/if}
 </WalterGrid>

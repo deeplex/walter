@@ -15,6 +15,7 @@
 	import type {
 		WalterMieteEntry,
 		WalterMietminderungEntry,
+		WalterPersonEntry,
 		WalterVertragVersionEntry
 	} from '$WalterTypes';
 	import { toLocaleIsoString } from '$WalterServices/utils';
@@ -64,6 +65,8 @@
 		});
 	}
 
+	const mieterEntry: Partial<WalterPersonEntry> = {};
+
 	let title =
 		data.a.wohnung?.text + ' - ' + data.a.mieter?.map((m) => m.name).join(', ');
 </script>
@@ -85,6 +88,7 @@
 
 	<Accordion>
 		<WalterKontakte
+			a={mieterEntry}
 			juristischePersonen={data.juristischePersonen}
 			title="Mieter"
 			rows={data.a.mieter}
