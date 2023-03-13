@@ -28,7 +28,7 @@
 			id: '' + data.a.id,
 			text: data.a.adresse?.anschrift + ' - ' + data.a.bezeichnung
 		},
-		adresse: { ...data.a.adresse }
+		adresse: data.a.adresse ? { ...data.a.adresse } : undefined
 	};
 	const umlageEntry: Partial<WalterUmlageEntry> = {
 		selectedWohnungen: [
@@ -62,7 +62,7 @@
 		<WalterWohnungen
 			kontakte={data.kontakte}
 			title="Wohnungen an der selben Adresse"
-			rows={data.a.haus}
+			rows={data.a.haus || []}
 		/>
 		<WalterZaehlerList
 			zaehlertypen={data.zaehlertypen}

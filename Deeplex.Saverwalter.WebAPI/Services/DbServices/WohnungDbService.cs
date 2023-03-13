@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Notiz = entry.Notiz;
             // TODO guid may be null?
             entity.BesitzerId = entry.Besitzer is SelectionEntry b ? new Guid(b.Id!) : Guid.Empty;
-            if (entry.Adresse is AdresseEntry a)
+            if (entry.Adresse is AdresseEntryBase a)
             {
                 entity.Adresse = GetAdresse(a, ctx)!;
             }

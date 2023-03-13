@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Notiz = entry.Notiz;
             entity.Telefon = entry.Telefon;
             entity.Mobil = entry.Mobil;
-            if (entry.Adresse is AdresseEntry a)
+            if (entry.Adresse is AdresseEntryBase a)
             {
                 entity.Adresse = GetAdresse(a, ctx);
             }

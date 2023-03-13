@@ -58,7 +58,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             private IWalterDbService? DbService { get; }
 
-            public IEnumerable<WohnungEntryBase>? Haus => Entity?.Adresse.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!));
+            public IEnumerable<WohnungEntryBase>? Haus => Entity?.Adresse?.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!));
             public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
             public IEnumerable<VertragEntryBase>? Vertraege => Entity?.Vertraege.Select(e => new VertragEntryBase(e, DbService!));
             public IEnumerable<ErhaltungsaufwendungEntryBase>? Erhaltungsaufwendungen
