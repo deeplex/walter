@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.Model
         // TODO Zähler sind hier noch nicht so richtig drin. Aktuell werden einfach alle Zähler eines
         // Typen in einen Topf geworfen, aber Zähler referenzieren jetzt jeweils die Allgemeinzähler.
         // Man kann also auch direkt die Zähler des Allgemeinzählers der Rechnung nehmen
-        public Heizkostenberechnung(Betriebskostenrechnung r, IBetriebskostenabrechnung b)
+        public Heizkostenberechnung(SaverwalterContext ctx, Betriebskostenrechnung r, IBetriebskostenabrechnung b)
         {
             Betrag = r.Betrag;
             PauschalBetrag = r.Betrag * 1.05;
@@ -45,7 +45,7 @@ namespace Deeplex.Saverwalter.Model
             Para8 = r.Umlage.HKVO?.HKVO_P8 ?? 0.5; // HeizkostenV §8
 
             // Alle Warmwasserzähler die in dieser Umlage betroffen sind
-            var AlleWarmwasserZaehler = b.db.ZaehlerSet.Where(z =>
+            var AlleWarmwasserZaehler = ctx.ZaehlerSet.Where(z =>
                 z.Typ == Zaehlertyp.Warmwasser && r.Umlage.Wohnungen.Contains(z.Wohnung!)).ToImmutableList();
 
             // Der Warmwasserzähler der Wohnung der Abrechnung

@@ -53,16 +53,21 @@
 	let jahr: number = new Date().getFullYear() - 1;
 
 	function abrechnung_click(id: string, j: number) {
-		create_abrechnung(id, j, title).then((e) => {
-			const file = create_walter_s3_file_from_file(e, data.S3URL);
-			walter_s3_post(new File([e], file.FileName), `${data.S3URL}`).then(
-				(e) => {
-					if (e.ok) {
-						data.anhaenge = [...data.anhaenge, file];
-					}
-				}
-			);
-		});
+		const apiURL = `/api/betriebskostenabrechnung/${id}/${j}`;
+		return fetch(apiURL, {
+			method: 'GET',
+			headers: {}
+		}).then((e) => console.log(e.json()));
+		// create_abrechnung(id, j, title).then((e) => {
+		// 	const file = create_walter_s3_file_from_file(e, data.S3URL);
+		// 	walter_s3_post(new File([e], file.FileName), `${data.S3URL}`).then(
+		// 		(e) => {
+		// 			if (e.ok) {
+		// 				data.anhaenge = [...data.anhaenge, file];
+		// 			}
+		// 		}
+		// 	);
+		// });
 	}
 
 	const mieterEntry: Partial<WalterPersonEntry> = {};

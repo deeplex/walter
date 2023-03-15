@@ -9,14 +9,12 @@ namespace Deeplex.Saverwalter.Model
         public int Tage => (Ende - Beginn).Days + 1;
         public int GesamtTage => (new DateTime(Ende.Year, 12, 31) - new DateTime(Ende.Year, 1, 1)).Days + 1;
         public int Personenzahl { get; }
-        public Rechnungsgruppe Parent { get; }
 
         public PersonenZeitIntervall(DateTime beginn, DateTime ende, int personenzahl, Rechnungsgruppe parent)
         {
             Beginn = beginn;
             Ende = ende;
             Personenzahl = personenzahl;
-            Parent = parent;
         }
     }
 

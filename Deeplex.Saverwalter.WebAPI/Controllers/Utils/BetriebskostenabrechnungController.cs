@@ -1,7 +1,10 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.VertragVersionController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
@@ -10,6 +13,104 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
     {
         private readonly ILogger<BetriebskostenabrechnungController> _logger;
         private BetriebskostenabrechnungSerivce Service { get; }
+
+        public class RechnungsgruppeEntry
+        {
+            public List<UmlageEntry>? Umlagen { get; }
+
+            public string? Bezeichnung { get; }
+            public double GesamtWohnflaeche { get; }
+            public double WFZeitanteil { get; }
+            public double NFZeitanteil { get; }
+            public double GesamtNutzflaeche { get; }
+            public int GesamtEinheiten { get; }
+            public double NEZeitanteil { get; }
+            public List<PersonenZeitIntervall>? GesamtPersonenIntervall { get; }
+            public List<PersonenZeitIntervall>? PersonenIntervall { get; }
+            public List<PersonenZeitanteil>? PersonenZeitanteil { get; }
+
+            public List<Heizkostenberechnung>? Heizkosten { get; }
+            public double GesamtBetragKalt { get; }
+            public double BetragKalt { get; }
+            public double GesamtBetragWarm { get; }
+            public double BetragWarm { get; }
+
+            public RechnungsgruppeEntry(IRechnungsgruppe g, IWalterDbService dbService)
+            {
+                Umlagen = g.Umlagen.Select(e => new UmlageEntry(e, dbService)).ToList();
+                Bezeichnung = g.Bezeichnung;
+                GesamtWohnflaeche = g.GesamtWohnflaeche;
+                WFZeitanteil = g.WFZeitanteil;
+                NFZeitanteil = g.NFZeitanteil;
+                GesamtNutzflaeche = g.GesamtNutzflaeche;
+                GesamtEinheiten = g.GesamtEinheiten;
+                NEZeitanteil = g.NEZeitanteil;
+                GesamtPersonenIntervall = g.GesamtPersonenIntervall;
+                PersonenIntervall = g.PersonenIntervall;
+                PersonenZeitanteil = g.PersonenZeitanteil;
+            }
+        }
+
+        public class BetriebskostenabrechnungEntry
+        {
+            public List<Note> notes { get; } = new List<Note>();
+            public int Jahr { get; set; }
+            public DateTime Abrechnungsbeginn { get; set; }
+            public DateTime Abrechnungsende { get; set; }
+            public SelectionEntry? Vermieter { get; }
+            public SelectionEntry? Ansprechpartner { get; }
+            public List<SelectionEntry>? Mieter { get; }
+            public SelectionEntry? Vertrag { get; }
+            public SelectionEntry? Wohnung { get; }
+            public AdresseEntryBase? Adresse { get; }
+            public double Gezahlt { get; }
+            public double KaltMiete { get; }
+            public double BetragNebenkosten { get; }
+            public double BezahltNebenkosten { get; }
+            public double Minderung { get; }
+            public double NebenkostenMinderung { get; }
+            public double KaltMinderung { get; }
+            public DateTime Nutzungsbeginn { get; }
+            public DateTime Nutzungsende { get; }
+            public List<SelectionEntry>? Zaehler { get; }
+            public int Abrechnungszeitspanne { get; }
+            public int Nutzungszeitspanne { get; }
+            public double Zeitanteil { get; }
+            public List<RechnungsgruppeEntry>? Gruppen { get; }
+            public double Result { get; }
+            public double AllgStromFaktor { get; set; }
+
+            public BetriebskostenabrechnungEntry(IBetriebskostenabrechnung b, IWalterDbService dbService)
+            {
+                notes = b.notes;
+                Jahr = b.Jahr;
+                Abrechnungsbeginn = b.Abrechnungsbeginn;
+                Abrechnungsende = b.Abrechnungsende;
+                //Versionen = b.Versionen;
+                Vermieter = new SelectionEntry(b.Vermieter.PersonId, b.Vermieter.Bezeichnung);
+                Ansprechpartner = new SelectionEntry(b.Ansprechpartner.PersonId, b.Ansprechpartner.Bezeichnung);
+                Mieter = b.Mieter.Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung)).ToList();
+                Vertrag = new SelectionEntry(b.Vertrag.VertragId, "Vertrag");
+                Wohnung = new SelectionEntry(b.Wohnung.WohnungId, b.Wohnung.Bezeichnung);
+                Adresse = new AdresseEntryBase(b.Adresse);
+                Gezahlt = b.Gezahlt;
+                KaltMiete = b.KaltMiete;
+                Minderung = b.Minderung;
+                NebenkostenMinderung = b.NebenkostenMinderung;
+                KaltMinderung = b.KaltMinderung;
+                Nutzungsbeginn = b.Nutzungsbeginn;
+                Nutzungsende = b.Nutzungsende;
+                Zaehler = b.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer)).ToList();
+                Abrechnungszeitspanne = b.Abrechnungszeitspanne;
+                Nutzungszeitspanne = b.Nutzungszeitspanne;
+                Zeitanteil = b.Zeitanteil;
+
+                Result = b.Result;
+                AllgStromFaktor = b.AllgStromFaktor;
+
+                Gruppen = b.Gruppen.Select(e => new RechnungsgruppeEntry(e, dbService)).ToList();
+            }
+        }
 
         public BetriebskostenabrechnungController(ILogger<BetriebskostenabrechnungController> logger, BetriebskostenabrechnungSerivce service)
         {
@@ -21,7 +122,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}")]
         public IActionResult GetBetriebskostenabrechnung(int vertrag_id, int jahr)
         {
-            return Service.Get(vertrag_id, jahr, Service.DbService.ctx);
+            return Service.Get(vertrag_id, jahr, Service.DbService);
         }
     }
 }
