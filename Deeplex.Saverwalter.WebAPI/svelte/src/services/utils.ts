@@ -29,3 +29,12 @@ export function convertEuro(value: number | undefined): string | undefined {
         return undefined;
     }
 }
+
+export function convertPercent(value: number | undefined): string | undefined {
+    if (value) {
+        return `${(value * 100).toFixed(2)}%`;
+    }
+    else {
+        return undefined;
+    }
+}

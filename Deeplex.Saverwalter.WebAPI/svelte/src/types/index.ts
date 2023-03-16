@@ -1,5 +1,10 @@
 export { type WalterAdresseEntry } from './WalterAdresse.type';
 export { type WalterPersonEntry } from './WalterPerson.type';
+export {
+    type WalterBetriebskostenabrechnungEntry,
+    type WalterBetriebskostenabrechnungsRechnungsgruppen,
+    type WalterBetriebskostenabrechnungKostenpunkt
+} from './WalterBetriebskostenabrechnung.type';
 export { type WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung.type';
 export { type WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung.type';
 export { type WalterJuristischePersonEntry } from './WalterJuristischePerson.type';

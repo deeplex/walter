@@ -4,7 +4,7 @@ import type { WalterS3File, WalterSelectionEntry, WalterVertragEntry } from "$Wa
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    const apiURL = `/api/vertraege/${params.id}`;
+    const apiURL = `/api/betriebskostenabrechnung/${params.id}/${params.year}`;
     const S3URL = `vertraege/${params.id}`;
 
     return {

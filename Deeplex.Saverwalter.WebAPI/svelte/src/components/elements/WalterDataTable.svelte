@@ -10,7 +10,12 @@
 	} from 'carbon-components-svelte';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-	import { convertDate, convertEuro, convertTime } from '$WalterServices/utils';
+	import {
+		convertDate,
+		convertEuro,
+		convertPercent,
+		convertTime
+	} from '$WalterServices/utils';
 
 	export let headers: {
 		key: string;
@@ -22,6 +27,19 @@
 		e: CustomEvent<DataTableRow>
 	) => Promise<void> | void = () => {};
 	export let search: boolean = false;
+
+	function dates(key: string) {
+		switch (key) {
+			case 'beginn':
+			case 'ende':
+			case 'datum':
+			case 'betreffenderMonat':
+			case 'zahlungsdatum':
+				return true;
+			default:
+				return false;
+		}
+	}
 </script>
 
 <Content>
@@ -54,12 +72,14 @@
 			>
 				{#if cell.value === null || cell.value === undefined || cell.value === ''}
 					---
-				{:else if cell.key === 'beginn' || cell.key === 'ende' || cell.key === 'datum' || cell.key === 'betreffenderMonat' || cell.key === 'zahlungsdatum'}
+				{:else if dates(cell.key)}
 					{convertDate(cell.value)}
 				{:else if cell.key === 'creationTime'}
 					{convertTime(cell.value)}
-				{:else if cell.key === 'betrag' || cell.key === 'grundmiete'}
+				{:else if cell.key === 'betrag' || cell.key === 'grundmiete' || cell.key === 'kosten'}
 					{convertEuro(cell.value)}
+				{:else if cell.key === 'anteil'}
+					{convertPercent(cell.value)}
 				{:else}
 					{cell.value}
 				{/if}
