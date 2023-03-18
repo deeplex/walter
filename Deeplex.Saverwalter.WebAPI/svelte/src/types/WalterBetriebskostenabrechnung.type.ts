@@ -24,7 +24,7 @@ export type WalterBetriebskostenabrechnungEntry = {
     abrechnungszeitspanne: number;
     nutzungszeitspanne: number;
     zeitanteil: number;
-    gruppen: WalterBetriebskostenabrechnungsRechnungsgruppen[];
+    gruppen: WalterBetriebskostenabrechnungsRechnungsgruppe[];
     result: number;
     allgStromFaktor: number;
 }
@@ -42,7 +42,7 @@ export type WalterBetriebskostenabrechnungPersonenZeitIntervall = {
     personenzahl: number;
 }
 
-export type WalterBetriebskostenabrechnungsRechnungsgruppen = {
+export type WalterBetriebskostenabrechnungsRechnungsgruppe = {
     umlagen: WalterUmlageEntry[];
 
     bezeichnung: string;
@@ -61,6 +61,10 @@ export type WalterBetriebskostenabrechnungsRechnungsgruppen = {
     gesamtBetragWarm: number;
     betragWarm: number;
 }
+
+export type WalterBetriebskostenabrechnungsRechnungsgruppeEntry = {
+    kostenpunkte: WalterBetriebskostenabrechnungKostenpunkt[]
+} & WalterBetriebskostenabrechnungsRechnungsgruppe
 
 export type WalterBetriebskostenabrechnungHeizkostenberechnungEntry = {
     betrag: number;

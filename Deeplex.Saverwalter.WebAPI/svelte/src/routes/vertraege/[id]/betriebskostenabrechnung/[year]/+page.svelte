@@ -4,11 +4,26 @@
 	import {
 		WalterHeaderDetail,
 		WalterGrid,
-		WalterAbrechnungGruppe
+		WalterAbrechnungGruppe,
+		WalterVertrag,
+		WalterDatePicker
 	} from '$WalterComponents';
 	import { getKostenpunkt } from '$WalterServices/abrechnung';
 	import { onMount } from 'svelte';
-	import type { WalterBetriebskostenabrechnungKostenpunkt } from '$WalterTypes';
+	import type {
+		WalterBetriebskostenabrechnungKostenpunkt,
+		WalterBetriebskostenabrechnungsRechnungsgruppeEntry
+	} from '$WalterTypes';
+	import {
+		Row,
+		StructuredList,
+		StructuredListBody,
+		StructuredListCell,
+		StructuredListHead,
+		StructuredListRow,
+		Tile
+	} from 'carbon-components-svelte';
+	import { convertEuro, convertM2 } from '$WalterServices/utils';
 
 	export let data: PageData;
 
@@ -23,40 +38,116 @@
 	// 	);
 	// });
 
-	const title = 'Vertrag - Betriebskostenrechnung';
+	const wohnungText = data.vertrag.wohnung?.text;
+	const mieterText = data.vertrag.mieter?.map((m) => m.name).join(', ');
+	let title = `Abrechnung ${data.year}: ${wohnungText} - ${mieterText}`;
 
-	console.log(data.a);
-
-	let kostengruppen: WalterBetriebskostenabrechnungKostenpunkt[][];
+	let kostengruppen: WalterBetriebskostenabrechnungsRechnungsgruppeEntry[];
 	onMount(() => {
-		kostengruppen = data.a.gruppen.map((e) =>
-			e.umlagen.map((u, i) =>
+		kostengruppen = data.abrechnung.gruppen.map((e) => {
+			const kostenpunkte = e.umlagen.map((u, i) =>
 				getKostenpunkt(
 					i,
 					u,
-					new Date(data.a.nutzungsbeginn).toLocaleDateString('de-De'),
-					new Date(data.a.nutzungsende).toLocaleDateString('de-De'),
+					new Date(data.abrechnung.nutzungsbeginn).toLocaleDateString('de-De'),
+					new Date(data.abrechnung.nutzungsende).toLocaleDateString('de-De'),
 					+data.year,
 					e.wfZeitanteil
 				)
-			)
-		);
-		console.log(kostengruppen);
+			);
+
+			return {
+				kostenpunkte,
+				...e
+			};
+		});
 	});
 </script>
 
 <WalterHeaderDetail
 	S3URL={data.S3URL}
 	files={data.anhaenge}
-	bind:a={data.a}
-	apiURL={data.apiURL}
+	bind:a={data.abrechnung}
+	apiURL={data.abrechnungURL}
 	{title}
 />
 
 <WalterGrid>
+	<WalterVertrag
+		kontakte={data.kontakte}
+		wohnungen={data.wohnungen}
+		a={data.vertrag}
+	/>
+
+	<Row>
+		<WalterDatePicker
+			placeholder="Nutzungsbeginn"
+			labelText="Nutzungsbeginn"
+			disabled
+			value={data.abrechnung.nutzungsbeginn.toLocaleString('de-DE')}
+		/>
+		<WalterDatePicker
+			placeholder="Nutzungsende"
+			labelText="Nutzungsende"
+			disabled
+			value={data.abrechnung.nutzungsende.toLocaleString('de-DE')}
+		/>
+	</Row>
+	<Row>
+		<Tile style="width: 100vw; margin: 1em"
+			><h4>Resultat: {convertEuro(data.abrechnung.result)}</h4></Tile
+		>
+	</Row>
 	{#if kostengruppen}
 		{#each kostengruppen as gruppe}
-			<WalterAbrechnungGruppe rows={gruppe} />
+			<hr />
+			<Tile light>
+				<h4>Abrechnungseinheit: {gruppe.bezeichnung}</h4>
+			</Tile>
+			<Row>
+				<StructuredList>
+					<StructuredListHead>
+						<StructuredListRow head>
+							<StructuredListCell head>Nutzeinheiten</StructuredListCell>
+							<StructuredListCell head>Wohnfläche</StructuredListCell>
+							<StructuredListCell head>Nutzfläche</StructuredListCell>
+							<StructuredListCell head>Bewohner</StructuredListCell>
+							<StructuredListCell head>Nutzungsintervall</StructuredListCell>
+							<StructuredListCell head>Tage</StructuredListCell>
+						</StructuredListRow>
+					</StructuredListHead>
+					<StructuredListBody>
+						{#each gruppe.gesamtPersonenIntervall as intervall, index}
+							<StructuredListRow>
+								<StructuredListCell
+									>{!index ? gruppe.gesamtEinheiten : ''}</StructuredListCell
+								>
+								<StructuredListCell
+									>{!index
+										? convertM2(gruppe.gesamtWohnflaeche)
+										: ''}</StructuredListCell
+								>
+								<StructuredListCell
+									>{!index
+										? convertM2(gruppe.gesamtNutzflaeche)
+										: ''}</StructuredListCell
+								>
+								<StructuredListCell>{intervall.personenzahl}</StructuredListCell
+								>
+								<StructuredListCell
+									>{new Date(intervall.beginn).toLocaleDateString('de-DE')} - {new Date(
+										intervall.ende
+									).toLocaleDateString('de-DE')}</StructuredListCell
+								>
+								<StructuredListCell
+									>{intervall.tage} / {intervall.gesamtTage}</StructuredListCell
+								>
+							</StructuredListRow>
+						{/each}
+					</StructuredListBody>
+				</StructuredList>
+			</Row>
+			<WalterAbrechnungGruppe rows={gruppe.kostenpunkte} />
 		{/each}
 	{/if}
 </WalterGrid>
