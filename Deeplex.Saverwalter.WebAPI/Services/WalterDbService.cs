@@ -6,26 +6,23 @@ namespace Deeplex.Saverwalter.WebAPI
 {
     public sealed class WalterDbService : IWalterDbService
     {
-        public string databasePort { get; set; }
-        public string databaseURL { get; set; }
-        public string databaseUser { get; set; }
-        public string databasePass { get; set; }
-
         public SaverwalterContext ctx { get; set; }
 
         public WalterDbService()
         {
-            databasePort = "5432";
-            databaseURL = "192.168.178.61";
-            databaseUser = "postgres";
-            databasePass = "admin";
+            DotNetEnv.Env.Load();
+
+            var databaseURL = Environment.GetEnvironmentVariable("DATABASE_URL");
+            var databasePort = Environment.GetEnvironmentVariable("DATABASE_PORT");
+            var databaseUser = Environment.GetEnvironmentVariable("DATABASE_USER");
+            var databasePass = Environment.GetEnvironmentVariable("DATABASE_PASS");
 
             var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
             optionsBuilder.UseNpgsql(
-                "Server=" + databaseURL +
-                ";Port=" + databasePort +
-                ";Database=postgres;Username=" + databaseUser +
-                ";Password=" + databasePass);
+                $@"Server={databaseURL}
+                ;Port={databasePort}
+                ;Database=postgres;Username={databaseUser}
+                ;Password={databasePass}");
 
             ctx = new SaverwalterContext(optionsBuilder.Options);
         }
