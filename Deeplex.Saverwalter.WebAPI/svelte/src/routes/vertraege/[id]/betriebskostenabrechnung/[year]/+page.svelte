@@ -14,7 +14,7 @@
 	import { onMount } from 'svelte';
 	import type { WalterBetriebskostenabrechnungsRechnungsgruppeEntry } from '$WalterTypes';
 	import { Row, Tile } from 'carbon-components-svelte';
-	import { convertEuro, convertM2 } from '$WalterServices/utils';
+	import { convertEuro } from '$WalterServices/utils';
 
 	export let data: PageData;
 
@@ -84,15 +84,10 @@
 			value={data.abrechnung.nutzungsende.toLocaleString('de-DE')}
 		/>
 	</Row>
-	<Row>
-		<WalterAbrechnungResultat entry={data.abrechnung} />
-	</Row>
+	<WalterAbrechnungResultat entry={data.abrechnung} />
 	{#if kostengruppen}
 		{#each kostengruppen as gruppe}
 			<hr />
-			<Tile light>
-				<h4>Abrechnungseinheit: {gruppe.bezeichnung}</h4>
-			</Tile>
 			<WalterAbrechnungEinheit entry={gruppe} />
 			<WalterAbrechnungGruppe rows={gruppe.kostenpunkte} />
 			<Tile light>

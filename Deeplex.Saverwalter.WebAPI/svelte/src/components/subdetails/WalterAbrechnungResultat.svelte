@@ -14,9 +14,9 @@
 	export let entry: WalterBetriebskostenabrechnungEntry;
 </script>
 
-<Row style="margin-left: 2em">
+<Row>
 	<Tile light><h4>Resultat:</h4></Tile>
-	<StructuredList>
+	<StructuredList style="margin-right: 2em">
 		<StructuredListHead>
 			<StructuredListRow head>
 				<StructuredListCell head>Teil</StructuredListCell>
@@ -61,7 +61,7 @@
 				>
 			</StructuredListRow>
 			<StructuredListRow>
-				<StructuredListCell head>Abrechnungsbetrag :</StructuredListCell>
+				<StructuredListCell head>Ergebnis der Abrechnung :</StructuredListCell>
 				<StructuredListCell head style="text-align: right">
 					-{convertEuro(entry.result)}
 				</StructuredListCell>

@@ -7,12 +7,18 @@
 		StructuredListBody,
 		StructuredListCell,
 		StructuredListHead,
-		StructuredListRow
+		StructuredListRow,
+		Tile
 	} from 'carbon-components-svelte';
 
 	export let entry: WalterBetriebskostenabrechnungsRechnungsgruppeEntry;
 </script>
 
+<Row>
+	<Tile light>
+		<h4>Abrechnungseinheit: {entry.bezeichnung}</h4>
+	</Tile>
+</Row>
 <Row>
 	<StructuredList>
 		<StructuredListHead>
