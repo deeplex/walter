@@ -9,6 +9,7 @@ export { default as WalterPreviewUnknown } from './subdetails/WalterPreviewUnkno
 export { default as WalterPreviewError } from './subdetails/WalterPreviewError.svelte';
 export { default as WalterAbrechnungGruppe } from './subdetails/WalterAbrechnungGruppe.svelte';
 export { default as WalterAbrechnungEinheit } from './subdetails/WalterAbrechnungEinheit.svelte';
+export { default as WalterAbrechnungResultat } from './subdetails/WalterAbrechnungResultat.svelte';
 
 export { default as WalterNatuerlichePerson } from './details/WalterNatuerlichePerson.svelte';
 export { default as WalterJuristischePerson } from './details/WalterJuristischePerson.svelte';

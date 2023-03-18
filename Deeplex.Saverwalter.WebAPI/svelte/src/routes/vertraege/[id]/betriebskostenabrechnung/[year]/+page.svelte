@@ -7,23 +7,13 @@
 		WalterAbrechnungGruppe,
 		WalterVertrag,
 		WalterDatePicker,
-		WalterAbrechnungEinheit
+		WalterAbrechnungEinheit,
+		WalterAbrechnungResultat
 	} from '$WalterComponents';
 	import { getKostenpunkt } from '$WalterServices/abrechnung';
 	import { onMount } from 'svelte';
-	import type {
-		WalterBetriebskostenabrechnungKostenpunkt,
-		WalterBetriebskostenabrechnungsRechnungsgruppeEntry
-	} from '$WalterTypes';
-	import {
-		Row,
-		StructuredList,
-		StructuredListBody,
-		StructuredListCell,
-		StructuredListHead,
-		StructuredListRow,
-		Tile
-	} from 'carbon-components-svelte';
+	import type { WalterBetriebskostenabrechnungsRechnungsgruppeEntry } from '$WalterTypes';
+	import { Row, Tile } from 'carbon-components-svelte';
 	import { convertEuro, convertM2 } from '$WalterServices/utils';
 
 	export let data: PageData;
@@ -95,11 +85,7 @@
 		/>
 	</Row>
 	<Row>
-		<Tile light>
-			<h5 style="display: flex; justify-content: center">
-				Abrechnungsbetrag: {convertEuro(data.abrechnung.result)}
-			</h5>
-		</Tile>
+		<WalterAbrechnungResultat entry={data.abrechnung} />
 	</Row>
 	{#if kostengruppen}
 		{#each kostengruppen as gruppe}

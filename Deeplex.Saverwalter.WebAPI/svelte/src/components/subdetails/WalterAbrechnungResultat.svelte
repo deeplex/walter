@@ -1,0 +1,71 @@
+<script lang="ts">
+	import { convertEuro, convertM2 } from '$WalterServices/utils';
+	import type { WalterBetriebskostenabrechnungEntry } from '$WalterTypes';
+	import {
+		Row,
+		StructuredList,
+		StructuredListBody,
+		StructuredListCell,
+		StructuredListHead,
+		StructuredListRow,
+		Tile
+	} from 'carbon-components-svelte';
+
+	export let entry: WalterBetriebskostenabrechnungEntry;
+</script>
+
+<Row style="margin-left: 2em">
+	<Tile light><h4>Resultat:</h4></Tile>
+	<StructuredList>
+		<StructuredListHead>
+			<StructuredListRow head>
+				<StructuredListCell head>Teil</StructuredListCell>
+				<StructuredListCell head style="text-align:right"
+					>Betrag</StructuredListCell
+				>
+			</StructuredListRow>
+		</StructuredListHead>
+		<StructuredListBody>
+			{#each entry.gruppen as gruppe, index}
+				{#if gruppe.betragKalt}
+					<StructuredListRow>
+						<StructuredListCell
+							>Einheit {index + 1} (kalte Nebenkosten) :</StructuredListCell
+						>
+						<StructuredListCell style="text-align: right"
+							>{convertEuro(gruppe.betragKalt)}</StructuredListCell
+						>
+					</StructuredListRow>
+				{/if}
+				{#if gruppe.betragWarm}
+					<StructuredListRow>
+						<StructuredListCell
+							>Einheit {index + 1} (warme Nebenkosten) :</StructuredListCell
+						>
+						<StructuredListCell style="text-align: right"
+							>{convertEuro(gruppe.betragWarm)}</StructuredListCell
+						>
+					</StructuredListRow>
+				{/if}
+			{/each}
+			<StructuredListRow>
+				<StructuredListCell>Kaltmiete:</StructuredListCell>
+				<StructuredListCell style="text-align: right"
+					>{convertEuro(entry.kaltMiete)}</StructuredListCell
+				>
+			</StructuredListRow>
+			<StructuredListRow>
+				<StructuredListCell>Gezahlt :</StructuredListCell>
+				<StructuredListCell style="text-align: right"
+					>-{convertEuro(entry.gezahlt)}</StructuredListCell
+				>
+			</StructuredListRow>
+			<StructuredListRow>
+				<StructuredListCell head>Abrechnungsbetrag :</StructuredListCell>
+				<StructuredListCell head style="text-align: right">
+					-{convertEuro(entry.result)}
+				</StructuredListCell>
+			</StructuredListRow>
+		</StructuredListBody>
+	</StructuredList>
+</Row>
