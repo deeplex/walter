@@ -6,7 +6,8 @@
 		WalterGrid,
 		WalterAbrechnungGruppe,
 		WalterVertrag,
-		WalterDatePicker
+		WalterDatePicker,
+		WalterAbrechnungEinheit
 	} from '$WalterComponents';
 	import { getKostenpunkt } from '$WalterServices/abrechnung';
 	import { onMount } from 'svelte';
@@ -94,9 +95,11 @@
 		/>
 	</Row>
 	<Row>
-		<Tile style="width: 100vw; margin: 1em"
-			><h4>Resultat: {convertEuro(data.abrechnung.result)}</h4></Tile
-		>
+		<Tile light>
+			<h5 style="display: flex; justify-content: center">
+				Abrechnungsbetrag: {convertEuro(data.abrechnung.result)}
+			</h5>
+		</Tile>
 	</Row>
 	{#if kostengruppen}
 		{#each kostengruppen as gruppe}
@@ -104,50 +107,13 @@
 			<Tile light>
 				<h4>Abrechnungseinheit: {gruppe.bezeichnung}</h4>
 			</Tile>
-			<Row>
-				<StructuredList>
-					<StructuredListHead>
-						<StructuredListRow head>
-							<StructuredListCell head>Nutzeinheiten</StructuredListCell>
-							<StructuredListCell head>Wohnfläche</StructuredListCell>
-							<StructuredListCell head>Nutzfläche</StructuredListCell>
-							<StructuredListCell head>Bewohner</StructuredListCell>
-							<StructuredListCell head>Nutzungsintervall</StructuredListCell>
-							<StructuredListCell head>Tage</StructuredListCell>
-						</StructuredListRow>
-					</StructuredListHead>
-					<StructuredListBody>
-						{#each gruppe.gesamtPersonenIntervall as intervall, index}
-							<StructuredListRow>
-								<StructuredListCell
-									>{!index ? gruppe.gesamtEinheiten : ''}</StructuredListCell
-								>
-								<StructuredListCell
-									>{!index
-										? convertM2(gruppe.gesamtWohnflaeche)
-										: ''}</StructuredListCell
-								>
-								<StructuredListCell
-									>{!index
-										? convertM2(gruppe.gesamtNutzflaeche)
-										: ''}</StructuredListCell
-								>
-								<StructuredListCell>{intervall.personenzahl}</StructuredListCell
-								>
-								<StructuredListCell
-									>{new Date(intervall.beginn).toLocaleDateString('de-DE')} - {new Date(
-										intervall.ende
-									).toLocaleDateString('de-DE')}</StructuredListCell
-								>
-								<StructuredListCell
-									>{intervall.tage} / {intervall.gesamtTage}</StructuredListCell
-								>
-							</StructuredListRow>
-						{/each}
-					</StructuredListBody>
-				</StructuredList>
-			</Row>
+			<WalterAbrechnungEinheit entry={gruppe} />
 			<WalterAbrechnungGruppe rows={gruppe.kostenpunkte} />
+			<Tile light>
+				<h5 style="display: flex; justify-content: center">
+					Zwischensumme: {convertEuro(gruppe.betragKalt)}
+				</h5>
+			</Tile>
 		{/each}
 	{/if}
 </WalterGrid>

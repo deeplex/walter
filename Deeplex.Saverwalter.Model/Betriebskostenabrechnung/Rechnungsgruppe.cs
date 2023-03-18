@@ -43,6 +43,7 @@ namespace Deeplex.Saverwalter.Model
         Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch { get; }
         Dictionary<Betriebskostentyp, double> VerbrauchAnteil { get; }
         double BetragKalt { get; }
+        double GesamtBetragKalt { get; }
         List<Heizkostenberechnung> Heizkosten { get; }
         double BetragWarm { get; }
         double GesamtBetragWarm { get; }
@@ -58,7 +59,7 @@ namespace Deeplex.Saverwalter.Model
         public string Bezeichnung { get; }
         public double GesamtWohnflaeche { get; }
         public double WFZeitanteil { get; }
-        public double NFZeitanteil { get; } 
+        public double NFZeitanteil { get; }
         public double GesamtNutzflaeche { get; }
         public int GesamtEinheiten { get; }
         public double NEZeitanteil { get; }
@@ -128,21 +129,16 @@ namespace Deeplex.Saverwalter.Model
                 .Select(r => new Heizkostenberechnung(ctx, r, b))
                 .ToList();
 
-            GesamtBetragKalt = Umlagen
+            var kalteUmlagen = Umlagen
                 .Where(r => (int)r.Typ % 2 == 0)
                 .ToList()
                 .SelectMany(u => u.Betriebskostenrechnungen)
                 .ToList()
                 .Where(r => r.BetreffendesJahr == b.Jahr)
-                .Sum(r => r.Betrag);
+                .ToList();
 
-            BetragKalt = Umlagen
-                .Where(r => (int)r.Typ % 2 == 0)
-                .ToList()
-                .SelectMany(u => u.Betriebskostenrechnungen)
-                .ToList()
-                .Where(r => r.BetreffendesJahr == b.Jahr)
-                .Sum(r => r.Umlage.Schluessel switch
+            GesamtBetragKalt = kalteUmlagen.Sum(r => r.Betrag);
+            BetragKalt = kalteUmlagen.Sum(r => r.Umlage.Schluessel switch
                 {
                     Umlageschluessel.NachWohnflaeche => r.Betrag * WFZeitanteil,
                     Umlageschluessel.NachNutzeinheit => r.Betrag * NEZeitanteil,
