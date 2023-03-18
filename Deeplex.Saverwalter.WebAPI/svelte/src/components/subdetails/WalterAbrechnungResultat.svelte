@@ -14,9 +14,7 @@
 	export let entry: WalterBetriebskostenabrechnungEntry;
 </script>
 
-<hr />
 <Row>
-	<Tile light><h4>Betriebskostenabrechnung:</h4></Tile>
 	<StructuredList style="margin-right: 2em">
 		<StructuredListHead>
 			<StructuredListRow head>
@@ -34,7 +32,7 @@
 							>Einheit {index + 1} (kalte Nebenkosten) :</StructuredListCell
 						>
 						<StructuredListCell style="text-align: right"
-							>{convertEuro(gruppe.betragKalt)}</StructuredListCell
+							>{convertEuro(gruppe.betragKalt || 0)}</StructuredListCell
 						>
 					</StructuredListRow>
 				{/if}
@@ -58,13 +56,13 @@
 			<StructuredListRow>
 				<StructuredListCell>Gezahlt :</StructuredListCell>
 				<StructuredListCell style="text-align: right"
-					>-{convertEuro(entry.gezahlt)}</StructuredListCell
+					>{convertEuro(entry.gezahlt)}</StructuredListCell
 				>
 			</StructuredListRow>
 			<StructuredListRow>
 				<StructuredListCell head>Ergebnis der Abrechnung :</StructuredListCell>
 				<StructuredListCell head style="text-align: right">
-					-{convertEuro(entry.result)}
+					{convertEuro(entry.result)}
 				</StructuredListCell>
 			</StructuredListRow>
 		</StructuredListBody>

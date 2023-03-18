@@ -8,13 +8,15 @@
 		WalterVertrag,
 		WalterDatePicker,
 		WalterAbrechnungEinheit,
-		WalterAbrechnungResultat
+		WalterAbrechnungResultat,
+		WalterNumberInput
 	} from '$WalterComponents';
 	import { getKostenpunkt } from '$WalterServices/abrechnung';
 	import { onMount } from 'svelte';
 	import type { WalterBetriebskostenabrechnungsRechnungsgruppeEntry } from '$WalterTypes';
 	import { Row, Tile } from 'carbon-components-svelte';
 	import { convertEuro } from '$WalterServices/utils';
+	import { goto } from '$app/navigation';
 
 	export let data: PageData;
 
@@ -53,6 +55,10 @@
 			};
 		});
 	});
+
+	let navigate = (e: CustomEvent<number | null>) => {
+		goto(`${e.detail}`, { noScroll: true });
+	};
 </script>
 
 <WalterHeaderDetail
@@ -84,6 +90,20 @@
 			value={data.abrechnung.nutzungsende.toLocaleString('de-DE')}
 		/>
 	</Row>
+	<Row>
+		<Tile style="margin-top: 2em;" light
+			><h4>Betriebskostenabrechnung:</h4></Tile
+		>
+	</Row>
+	<Row>
+		<WalterNumberInput
+			hideSteppers={false}
+			label="Jahr"
+			value={+data.year}
+			bind:change={navigate}
+		/>
+	</Row>
+
 	<WalterAbrechnungResultat entry={data.abrechnung} />
 	{#if kostengruppen}
 		{#each kostengruppen as gruppe}

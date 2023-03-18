@@ -6,9 +6,9 @@
 	export let hideSteppers: boolean = true;
 	export let digits: number = 2;
 
-	function change(e: CustomEvent<number | null>) {
+	export let change = (e: CustomEvent<number | null>) => {
 		value = e.detail || undefined;
-	}
+	};
 </script>
 
 {#await value}

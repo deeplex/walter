@@ -22,28 +22,13 @@ export function toLocaleIsoString(date: Date) {
 }
 
 export function convertEuro(value: number | undefined): string | undefined {
-    if (value) {
-        return `${value.toFixed(2)} €`;
-    }
-    else {
-        return undefined;
-    }
+    return `${(value || 0).toFixed(2)} €`;
 }
 
 export function convertPercent(value: number | undefined): string | undefined {
-    if (value) {
-        return `${(value * 100).toFixed(2)}%`;
-    }
-    else {
-        return undefined;
-    }
+    return `${((value || 0) * 100).toFixed(2)}%`;
 }
 
 export function convertM2(value: number | undefined): string | undefined {
-    if (value) {
-        return `${(value).toFixed(2)} m²`;
-    }
-    else {
-        return undefined;
-    }
+    return `${(value || 0).toFixed(2)} m²`;
 }

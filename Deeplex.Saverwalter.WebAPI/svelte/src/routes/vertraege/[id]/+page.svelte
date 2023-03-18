@@ -54,7 +54,7 @@
 	let jahr: number = new Date().getFullYear() - 1;
 
 	function abrechnung_click(id: string, j: number) {
-		goto(`${id}/betriebskostenabrechnung/${j}`);
+		goto(`${id}/betriebskostenabrechnung/${j}`, { noScroll: true });
 	}
 
 	const mieterEntry: Partial<WalterPersonEntry> = {};
