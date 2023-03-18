@@ -14,8 +14,9 @@
 	export let entry: WalterBetriebskostenabrechnungEntry;
 </script>
 
+<hr />
 <Row>
-	<Tile light><h4>Resultat:</h4></Tile>
+	<Tile light><h4>Betriebskostenabrechnung:</h4></Tile>
 	<StructuredList style="margin-right: 2em">
 		<StructuredListHead>
 			<StructuredListRow head>
