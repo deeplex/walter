@@ -12,7 +12,7 @@ export function removeToast(index: number) {
 }
 
 export function addToast(toast: Partial<WalterToast>) {
-    toasts.update((e) => [...e, toast]);
+    toasts.update((e) => [toast, ...e]);
     return toasts;
 }
 

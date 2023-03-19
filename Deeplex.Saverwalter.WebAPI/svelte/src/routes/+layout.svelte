@@ -26,11 +26,7 @@
 />
 
 <WalterSideNav />
-<div
-	style="; overflow: hidden; position: absolute; top: 48px; right: 0; z-index: 99"
->
-	<WalterToasts />
-</div>
+<WalterToasts />
 <Modal
 	{...modalControl}
 	bind:open={modalControl.open}
@@ -103,9 +99,4 @@
 		min-width: 6.375rem;
 		padding-right: 4em;
 	}
-
-	/* :global(.bx--table-sort, .bx--table-header-label) {
-		width: 100%;
-		text-align: center;
-	} */
 </style>
