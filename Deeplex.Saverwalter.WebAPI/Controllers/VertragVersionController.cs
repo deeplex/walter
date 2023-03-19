@@ -35,8 +35,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Beginn = entity.Beginn;
                 Grundmiete = entity.Grundmiete;
 
-                var v = Entity.Vertrag;
-                Vertrag = new(v.VertragId, "Name not implemented");
+                Vertrag = new(Entity.Vertrag.VertragId, "Name not implemented");
             }
         }
 

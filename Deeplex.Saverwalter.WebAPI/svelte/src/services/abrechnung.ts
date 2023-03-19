@@ -29,7 +29,7 @@ export function getKostenpunkt(
         .map(e => e.betrag)
         .reduce((p, c) => p + c, 0.0000000000001); // weird hack to show stable 0.
 
-    const betriebskostenrechnungId = rechnungen.pop()?.id || 0;
+    const betriebskostenrechnungId = rechnungen[rechnungen.length - 1]?.id || 0;
     return {
         betriebskostenrechnungId,
         umlageId: umlage.id,

@@ -21,9 +21,7 @@
 		value: string;
 	}[];
 	export let search: boolean = false;
-	export let navigate: (
-		e: CustomEvent<DataTableRow>
-	) => Promise<void> | void = () => {};
+	export let navigate: (e: any) => Promise<void> | void = () => {};
 
 	let addModalOpen: boolean = false;
 	let open: boolean = false;

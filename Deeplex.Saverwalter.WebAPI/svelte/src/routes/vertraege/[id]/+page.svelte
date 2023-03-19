@@ -32,13 +32,14 @@
 
 	export let data: PageData;
 
+	const ver = data.a.versionen;
 	const mietminderungEntry: Partial<WalterMietminderungEntry> =
 		getMietminderungEntry(`${data.id}`);
 	const vertragversionEntry: Partial<WalterVertragVersionEntry> =
-		getVertragversionEntry(`${data.id}`, data.a.versionen.pop());
+		getVertragversionEntry(`${data.id}`, ver[ver.length - 1]);
 	const mieteEntry: Partial<WalterMieteEntry> = getMieteEntry(
 		`${data.id}`,
-		data.a.versionen.pop()
+		ver[ver.length - 1]
 	);
 	const mieterEntry: Partial<WalterPersonEntry> = {};
 
@@ -62,6 +63,8 @@
 	let title = `${data.a.wohnung?.text} - ${data.a.mieter
 		?.map((m) => m.name)
 		.join(', ')}`;
+
+	console.log(data.a);
 </script>
 
 <WalterHeaderDetail
