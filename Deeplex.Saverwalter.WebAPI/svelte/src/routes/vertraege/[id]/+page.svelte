@@ -10,57 +10,61 @@
 		WalterGrid,
 		WalterVertrag,
 		WalterVertragVersionen,
-		WalterNumberInput
+		WalterNumberInput,
+		WalterAbrechnung
 	} from '$WalterComponents';
 	import type {
+		WalterBetriebskostenabrechnungEntry,
 		WalterMieteEntry,
 		WalterMietminderungEntry,
 		WalterPersonEntry,
 		WalterVertragVersionEntry
 	} from '$WalterTypes';
 	import { toLocaleIsoString } from '$WalterServices/utils';
-	import { create_abrechnung } from '$WalterServices/abrechnung';
-	import {
-		create_walter_s3_file_from_file,
-		walter_s3_post
-	} from '$WalterServices/s3';
 	import { goto } from '$app/navigation';
+	import { walter_get } from '$WalterServices/requests';
+	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
+	import {
+		getMieteEntry,
+		getMietminderungEntry,
+		getVertragversionEntry,
+		loadAbrechnung
+	} from './utils';
 
 	export let data: PageData;
 
-	const today = new Date();
-	const mietminderungEntry: Partial<WalterMietminderungEntry> = {
-		vertrag: { id: '' + data.a.id, text: '' },
-		beginn: toLocaleIsoString(new Date()),
-		ende: toLocaleIsoString(new Date(today.setMonth(today.getMonth() + 1)))
-	};
-
-	const lastVersion = data.a.versionen
-		? data.a.versionen[data.a.versionen?.length - 1]
-		: undefined;
-	const vertragversionEntry: Partial<WalterVertragVersionEntry> = {
-		vertrag: { id: '' + data.a.id, text: '' },
-		beginn: toLocaleIsoString(new Date()),
-		personenzahl: lastVersion?.personenzahl,
-		grundmiete: lastVersion?.grundmiete
-	};
-
-	const mieteEntry: Partial<WalterMieteEntry> = {
-		vertrag: { id: '' + data.a.id, text: '' },
-		zahlungsdatum: toLocaleIsoString(new Date()),
-		betrag: lastVersion?.grundmiete || 0
-	};
+	const mietminderungEntry: Partial<WalterMietminderungEntry> =
+		getMietminderungEntry(`${data.id}`);
+	const vertragversionEntry: Partial<WalterVertragVersionEntry> =
+		getVertragversionEntry(`${data.id}`, data.a.versionen.pop());
+	const mieteEntry: Partial<WalterMieteEntry> = getMieteEntry(
+		`${data.id}`,
+		data.a.versionen.pop()
+	);
+	const mieterEntry: Partial<WalterPersonEntry> = {};
 
 	let jahr: number = new Date().getFullYear() - 1;
 
-	function abrechnung_click(id: string, j: number) {
-		goto(`${id}/betriebskostenabrechnung/${j}`, { noScroll: true });
+	let abrechnung: WalterBetriebskostenabrechnungEntry;
+	let searchParams: URLSearchParams = new URL($page.url).searchParams;
+
+	onMount(async () => {
+		const year = searchParams.get('abrechnung');
+		if (year) {
+			abrechnung = await loadAbrechnung(data.id, year, data.fetch);
+		}
+	});
+
+	async function abrechnung_click(id: string, year: number) {
+		searchParams = new URLSearchParams({ abrechnung: `${year}` });
+		goto(`?${searchParams.toString()}`, { noScroll: true });
+		abrechnung = await loadAbrechnung(id, `${year}`, data.fetch);
 	}
 
-	const mieterEntry: Partial<WalterPersonEntry> = {};
-
-	let title =
-		data.a.wohnung?.text + ' - ' + data.a.mieter?.map((m) => m.name).join(', ');
+	let title = `${data.a.wohnung?.text} - ${data.a.mieter
+		?.map((m) => m.name)
+		.join(', ')}`;
 </script>
 
 <WalterHeaderDetail
@@ -79,12 +83,7 @@
 	/>
 
 	<Accordion>
-		<WalterKontakte
-			a={mieterEntry}
-			juristischePersonen={data.juristischePersonen}
-			title="Mieter"
-			rows={data.a.mieter}
-		/>
+		<WalterKontakte a={mieterEntry} title="Mieter" rows={data.a.mieter} />
 		<WalterVertragVersionen
 			a={vertragversionEntry}
 			title="Versionen:"
@@ -107,4 +106,8 @@
 			Erstellen
 		</Button>
 	</Row>
+
+	{#if searchParams.has('abrechnung') && abrechnung}
+		<WalterAbrechnung bind:abrechnung />
+	{/if}
 </WalterGrid>

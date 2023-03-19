@@ -33,7 +33,6 @@
 	export let rows: WalterPersonEntry[];
 	export let search: boolean = false;
 	export let title: string | undefined = undefined;
-	export let juristischePersonen: WalterSelectionEntry[];
 
 	let personType: number = 0;
 
@@ -66,6 +65,6 @@
 				<WalterTextInput bind:value={a.name} labelText="Bezeichnung" />
 			{/if}
 		</Row>
-		<WalterPerson {juristischePersonen} value={a} />
+		<WalterPerson value={a} />
 	{/if}
 </WalterDataWrapper>

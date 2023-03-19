@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { convertEuro, convertM2 } from '$WalterServices/utils';
+	import { convertEuro } from '$WalterServices/utils';
 	import type { WalterBetriebskostenabrechnungEntry } from '$WalterTypes';
 	import {
 		Row,

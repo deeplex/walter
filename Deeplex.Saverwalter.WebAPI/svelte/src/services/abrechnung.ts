@@ -26,7 +26,6 @@ export function getKostenpunkt(
         .filter(e => e.betreffendesJahr === jahr)
         .map(e => e.betrag)
         .reduce((p, c) => p + c, 0.0000000000001); // weird hack to show stable 0.
-    console.log(nutzungsbeginn);
     return {
         id,
         typ: umlage.typ.text,
