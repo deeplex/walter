@@ -42,20 +42,15 @@
 	{#await betriebskostentypen}
 		<TextInputSkeleton />
 	{:then items}
-		{#await a}
-			<TextInputSkeleton />
-		{:then x}
-			<ComboBox
-				selectedId={x?.typ?.id}
-				on:select={selectTyp}
-				on:blur={() => (a.typ = a.typ)}
-				style="padding-right: 1rem"
-				{items}
-				value={x?.typ?.text}
-				titleText="Betriebskostentyp der Umlage"
-				{shouldFilterItem}
-			/>
-		{/await}
+		<ComboBox
+			selectedId={a?.typ?.id}
+			on:select={selectTyp}
+			style="padding-right: 1rem"
+			{items}
+			value={a?.typ?.text}
+			titleText="Betriebskostentyp der Umlage"
+			{shouldFilterItem}
+		/>
 	{/await}
 
 	{#await umlagen}

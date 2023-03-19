@@ -43,7 +43,7 @@
 	{#each abrechnung.kostengruppen as gruppe}
 		<hr />
 		<WalterAbrechnungEinheit entry={gruppe} />
-		<WalterAbrechnungGruppe rows={gruppe.kostenpunkte} />
+		<WalterAbrechnungGruppe rows={gruppe.kostenpunkte} year={abrechnung.jahr} />
 		<Tile light>
 			<h5 style="display: flex; justify-content: center">
 				Zwischensumme: {convertEuro(gruppe.betragKalt)}

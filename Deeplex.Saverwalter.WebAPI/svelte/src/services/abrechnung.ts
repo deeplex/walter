@@ -22,18 +22,20 @@ export function getKostenpunkt(
     nutzungsende: string,
     jahr: number,
     anteil: number): WalterBetriebskostenabrechnungKostenpunkt {
-    const betrag = umlage.betriebskostenrechnungen
+    const rechnungen = umlage.betriebskostenrechnungen
         .filter(e => e.betreffendesJahr === jahr)
+
+    const betrag = rechnungen
         .map(e => e.betrag)
         .reduce((p, c) => p + c, 0.0000000000001); // weird hack to show stable 0.
-    const betriebskostenrechnungId =
-        umlage.betriebskostenrechnungen
-            .filter(e => e.betreffendesJahr === jahr)[0]?.id || 0;
+
+    const betriebskostenrechnungId = rechnungen.pop()?.id || 0;
     return {
         betriebskostenrechnungId,
+        umlageId: umlage.id,
         id,
-        typ: umlage.typ.text,
-        schluessel: umlage.schluessel.text,
+        typ: umlage.typ,
+        schluessel: umlage.schluessel,
         nutzungsintervall: `${nutzungsbeginn} - ${nutzungsende}`,
         betrag,
         anteil,
