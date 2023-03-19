@@ -45,13 +45,11 @@
 	<Accordion>
 		<WalterKontakte
 			bind:a={mitglied}
-			juristischePersonen={data.juristischePersonen}
 			title="Mitglieder"
 			rows={data.a.mitglieder}
 		/>
 		<WalterKontakte
 			bind:a={juristischePerson}
-			juristischePersonen={data.juristischePersonen}
 			title="Juristische Personen"
 			rows={data.a.juristischePersonen}
 		/>

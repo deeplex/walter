@@ -6,8 +6,4 @@
 </script>
 
 <WalterHeaderList title="Kontakte" />
-<WalterKontakte
-	juristischePersonen={data.juristischePersonen}
-	search
-	rows={data.rows}
-/>
+<WalterKontakte search rows={data.rows} />

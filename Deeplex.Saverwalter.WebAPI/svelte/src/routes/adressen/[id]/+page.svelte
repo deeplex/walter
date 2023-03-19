@@ -32,11 +32,7 @@
 			title="Wohnungen"
 			rows={data.a.wohnungen}
 		/>
-		<WalterKontakte
-			juristischePersonen={data.juristischePersonen}
-			title="Personen"
-			rows={data.a.kontakte}
-		/>
+		<WalterKontakte title="Personen" rows={data.a.kontakte} />
 		<WalterZaehlerList
 			zaehler={data.zaehler}
 			zaehlertypen={data.zaehlertypen}

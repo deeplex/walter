@@ -29,7 +29,6 @@
 
 	<Accordion>
 		<WalterKontakte
-			juristischePersonen={data.juristischePersonen}
 			title="Juristische Personen"
 			rows={data.a.juristischePersonen}
 		/>
