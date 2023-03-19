@@ -63,7 +63,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     .Select(e => (NatuerlichePerson)e));
 
                 // Remove old
-                entity.Mitglieder.RemoveAll(w => !m.ToList().Exists(e => e.Id == w.PersonId.ToString()));
+                entity.NatuerlicheMitglieder.RemoveAll((w) => !m.ToList().Exists(e => e.Id == w.PersonId.ToString()));
+                entity.JuristischeMitglieder.RemoveAll((w) => !m.ToList().Exists(e => e.Id == w.PersonId.ToString()));
             }
 
         }
