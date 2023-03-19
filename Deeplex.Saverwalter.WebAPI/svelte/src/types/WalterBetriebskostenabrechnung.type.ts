@@ -91,6 +91,7 @@ export type WalterBetriebskostenabrechnungHeizkostenberechnungEntry = {
 }
 
 export type WalterBetriebskostenabrechnungKostenpunkt = {
+    betriebskostenrechnungId: number;
     id: number; // just for rows
     typ: string;
     schluessel: string;

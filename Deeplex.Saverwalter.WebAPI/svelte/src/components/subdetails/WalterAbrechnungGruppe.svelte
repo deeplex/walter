@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { WalterDataTable } from '$WalterComponents';
 	import type { WalterBetriebskostenabrechnungKostenpunkt } from '$WalterTypes';
 
@@ -12,6 +13,13 @@
 		{ key: 'anteil', value: 'Ihr Anteil' },
 		{ key: 'kosten', value: 'Ihre Kosten' }
 	];
+
+	const navigate = (e: any) => {
+		const punkt = e.detail as WalterBetriebskostenabrechnungKostenpunkt;
+		goto(
+			`/betriebskostenrechnungen/${punkt.betriebskostenrechnungId || 'new'}`
+		);
+	};
 </script>
 
-<WalterDataTable {headers} {rows} />
+<WalterDataTable {navigate} {headers} {rows} />

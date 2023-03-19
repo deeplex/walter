@@ -26,7 +26,11 @@ export function getKostenpunkt(
         .filter(e => e.betreffendesJahr === jahr)
         .map(e => e.betrag)
         .reduce((p, c) => p + c, 0.0000000000001); // weird hack to show stable 0.
+    const betriebskostenrechnungId =
+        umlage.betriebskostenrechnungen
+            .filter(e => e.betreffendesJahr === jahr)[0]?.id || 0;
     return {
+        betriebskostenrechnungId,
         id,
         typ: umlage.typ.text,
         schluessel: umlage.schluessel.text,

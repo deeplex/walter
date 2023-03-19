@@ -14,7 +14,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
                 a: walter_get(apiURL, fetch) as Promise<WalterUmlageEntry>,
                 betriebskostentypen: walter_selection.betriebskostentypen(fetch),
                 umlagen: walter_selection.umlagen(fetch),
-                umlageschlussel: walter_selection.umlageschluessel(fetch),
+                umlageschluessel: walter_selection.umlageschluessel(fetch),
                 wohnungen: walter_selection.wohnungen(fetch),
                 kontakte: walter_selection.kontakte(fetch),
 
