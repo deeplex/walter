@@ -14,15 +14,13 @@
 		WalterAbrechnung
 	} from '$WalterComponents';
 	import type {
-		WalterBetriebskostenabrechnungEntry,
+		WalterBetriebskostenabrechnungKostengruppenEntry,
 		WalterMieteEntry,
 		WalterMietminderungEntry,
 		WalterPersonEntry,
 		WalterVertragVersionEntry
 	} from '$WalterTypes';
-	import { toLocaleIsoString } from '$WalterServices/utils';
 	import { goto } from '$app/navigation';
-	import { walter_get } from '$WalterServices/requests';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import {
@@ -44,9 +42,7 @@
 	);
 	const mieterEntry: Partial<WalterPersonEntry> = {};
 
-	let jahr: number = new Date().getFullYear() - 1;
-
-	let abrechnung: WalterBetriebskostenabrechnungEntry;
+	let abrechnung: WalterBetriebskostenabrechnungKostengruppenEntry;
 	let searchParams: URLSearchParams = new URL($page.url).searchParams;
 
 	onMount(async () => {
@@ -55,11 +51,12 @@
 			abrechnung = await loadAbrechnung(data.id, year, data.fetch);
 		}
 	});
-
-	async function abrechnung_click(id: string, year: number) {
+	let year: number =
+		+(searchParams.get('abrechnung') || 0) || new Date().getFullYear() - 1;
+	async function abrechnung_click() {
 		searchParams = new URLSearchParams({ abrechnung: `${year}` });
 		goto(`?${searchParams.toString()}`, { noScroll: true });
-		abrechnung = await loadAbrechnung(id, `${year}`, data.fetch);
+		abrechnung = await loadAbrechnung(data.id, `${year}`, data.fetch);
 	}
 
 	let title = `${data.a.wohnung?.text} - ${data.a.mieter
@@ -98,16 +95,19 @@
 	</Accordion>
 
 	<hr style="margin: 2em" />
-	<Truncate>Betriebskostenabrechnung erstellen:</Truncate>
+	<Truncate>Betriebskostenabrechnung :</Truncate>
 
 	<Row>
-		<WalterNumberInput bind:value={jahr} label="Jahr" hideSteppers={false} />
-		<Button size="small" on:click={() => abrechnung_click(data.id, jahr)}>
-			Erstellen
-		</Button>
+		<WalterNumberInput
+			min={new Date(data.a.beginn).getFullYear()}
+			bind:value={year}
+			label="Jahr"
+			hideSteppers={false}
+		/>
+		<Button on:click={abrechnung_click}>Bestätigen</Button>
 	</Row>
 
-	{#if searchParams.has('abrechnung') && abrechnung}
-		<WalterAbrechnung bind:abrechnung />
+	{#if abrechnung}
+		<WalterAbrechnung {abrechnung} />
 	{/if}
 </WalterGrid>

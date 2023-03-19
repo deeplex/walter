@@ -1,5 +1,9 @@
 import type { WalterAdresseEntry, WalterSelectionEntry, WalterUmlageEntry } from "$WalterTypes";
 
+export type WalterBetriebskostenabrechnungKostengruppenEntry = {
+    kostengruppen: WalterBetriebskostenabrechnungsRechnungsgruppeEntry[]
+} & WalterBetriebskostenabrechnungEntry
+
 export type WalterBetriebskostenabrechnungEntry = {
     notes: WalterBetriebskostenabrechnungNote[];
     jahr: number;

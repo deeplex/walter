@@ -3,6 +3,8 @@
 
 	export let value: number | undefined = undefined;
 	export let label: string | undefined;
+	export let min: number | undefined = undefined;
+	export let max: number | undefined = undefined;
 	export let hideSteppers: boolean = true;
 	export let digits: number = 2;
 
@@ -15,6 +17,8 @@
 	<NumberInputSkeleton />
 {:then x}
 	<NumberInput
+		{min}
+		{max}
 		{hideSteppers}
 		on:change={change}
 		{label}

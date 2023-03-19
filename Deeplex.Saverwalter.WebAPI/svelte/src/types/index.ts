@@ -4,7 +4,8 @@ export {
     type WalterBetriebskostenabrechnungEntry,
     type WalterBetriebskostenabrechnungsRechnungsgruppe,
     type WalterBetriebskostenabrechnungsRechnungsgruppeEntry,
-    type WalterBetriebskostenabrechnungKostenpunkt
+    type WalterBetriebskostenabrechnungKostenpunkt,
+    type WalterBetriebskostenabrechnungKostengruppenEntry
 } from './WalterBetriebskostenabrechnung.type';
 export { type WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung.type';
 export { type WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung.type';
