@@ -1,4 +1,5 @@
-import type { WalterBetriebskostenabrechnungKostenpunkt, WalterUmlageEntry } from "$WalterTypes";
+import type { WalterUmlageEntry } from "$WalterLib";
+import type { WalterBetriebskostenabrechnungKostenpunkt } from "$WalterTypes";
 
 const headers = {
     'Content-Type': 'application/octet-stream'
