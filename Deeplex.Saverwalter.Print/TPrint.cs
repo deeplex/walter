@@ -82,7 +82,7 @@ namespace Deeplex.Saverwalter.PrintService
             var left2 = new List<string> { "Umlageweg" };
             var right2 = new List<string> { "Beschreibung" };
 
-            if (betriebskostenabrechnung.direkteZuordnung())
+            if (betriebskostenabrechnung.DirekteZuordnung())
             {
                 left1.Add("Direkt");
                 left2.Add("Direkt");
@@ -90,7 +90,7 @@ namespace Deeplex.Saverwalter.PrintService
                 right2.Add("Kostenanteil = Kosten werden Einheit direkt zugeordnet.");
             }
 
-            if (betriebskostenabrechnung.nachWohnflaeche())
+            if (betriebskostenabrechnung.NachWohnflaeche())
             {
                 left1.Add("n. WF.");
                 left2.Add("n. WF.");
@@ -99,7 +99,7 @@ namespace Deeplex.Saverwalter.PrintService
             }
 
             // There is a Umlage nach Nutzfläche in the Heizkostenberechnung:
-            if (betriebskostenabrechnung.nachNutzflaeche() || betriebskostenabrechnung.Gruppen.Any(g => g.Umlagen.Where(r => r.Wohnungen.Count > 1).Any(r => (int)r.Typ % 2 == 1)))
+            if (betriebskostenabrechnung.NachNutzflaeche() || betriebskostenabrechnung.Gruppen.Any(g => g.Umlagen.Where(r => r.Wohnungen.Count > 1).Any(r => (int)r.Typ % 2 == 1)))
             {
                 left1.Add("n. NF");
                 left2.Add("n. NF");
@@ -107,7 +107,7 @@ namespace Deeplex.Saverwalter.PrintService
                 right2.Add("Kostenanteil = Kosten je Quadratmeter Nutzfläche mal Anteil Fläche je Wohnung.");
             }
 
-            if (betriebskostenabrechnung.nachNutzeinheiten())
+            if (betriebskostenabrechnung.NachNutzeinheiten())
             {
                 left1.Add("n. NE");
                 left2.Add("n. NE");
@@ -115,7 +115,7 @@ namespace Deeplex.Saverwalter.PrintService
                 right2.Add("Kostenanteil = Kosten je Wohn-/Nutzeinheit.");
             }
 
-            if (betriebskostenabrechnung.nachPersonenzahl())
+            if (betriebskostenabrechnung.NachPersonenzahl())
             {
                 left1.Add("n. Pers.");
                 left2.Add("n. Pers.");
@@ -123,7 +123,7 @@ namespace Deeplex.Saverwalter.PrintService
                 right2.Add("Kostenanteil = Kosten je Hausbewohner mal Anzahl Bewohner je Wohnung.");
             }
 
-            if (betriebskostenabrechnung.nachVerbrauch())
+            if (betriebskostenabrechnung.NachVerbrauch())
             {
                 left1.Add("n. Verb");
                 left2.Add("n. Verb");
@@ -170,7 +170,7 @@ namespace Deeplex.Saverwalter.PrintService
             var col5 = new List<string> { "Nutzungsintervall" };
             var col6 = new List<string> { "Tage" };
 
-            for (var i = 0; i < rechnungsgruppe.PersonenIntervall.Count(); ++i)
+            for (var i = 0; i < rechnungsgruppe.PersonenIntervall.Count; ++i)
             {
                 var personenZeitIntervall = rechnungsgruppe.PersonenIntervall[i];
                 var firstLine = personenZeitIntervall.Beginn.Date == betriebskostenabrechnung.Nutzungsbeginn.Date;
@@ -204,7 +204,7 @@ namespace Deeplex.Saverwalter.PrintService
             var col5 = new List<string> { "Nutzungsintervall" };
             var col6 = new List<string> { "Tage" };
 
-            for (var i = 0; i < rechnungsgruppe.GesamtPersonenIntervall.Count(); ++i)
+            for (var i = 0; i < rechnungsgruppe.GesamtPersonenIntervall.Count; ++i)
             {
                 var personenZeitIntervall = rechnungsgruppe.GesamtPersonenIntervall[i];
                 var firstLine = personenZeitIntervall.Beginn.Date == betriebskostenabrechnung.Nutzungsbeginn.Date;
@@ -313,7 +313,7 @@ namespace Deeplex.Saverwalter.PrintService
                     bold.Add(true);
                     underlined.Add(false);
 
-                    string PersonEn(int i) => i.ToString() + (i > 1 ? " Personen" : " Person");
+                    static string SingularOrPluralPerson(int i) => i.ToString() + (i > 1 ? " Personen" : " Person");
                     for (var i = 0; i < rechnungsgruppe.PersonenZeitanteil.Count; ++i)
                     {
                         var Beginn = rechnungsgruppe.PersonenZeitanteil[i].Beginn;
@@ -322,7 +322,7 @@ namespace Deeplex.Saverwalter.PrintService
                         var Personenzahl = rechnungsgruppe.PersonenIntervall.LastOrDefault(p => p.Beginn.Date <= rechnungsgruppe.PersonenZeitanteil[i].Beginn)?.Personenzahl ?? 0;
                         var timespan = ((Ende - Beginn).Days + 1).ToString();
 
-                        col1.Add(PersonEn(Personenzahl) + " / " + PersonEn(GesamtPersonenzahl));
+                        col1.Add(SingularOrPluralPerson(Personenzahl) + " / " + SingularOrPluralPerson(GesamtPersonenzahl));
                         col2.Add(Datum(Beginn) + " - " + Datum(Ende));
                         col3.Add(timespan + " / " + betriebskostenabrechnung.Abrechnungszeitspanne.ToString());
                         col4.Add(Prozent(rechnungsgruppe.PersonenZeitanteil[i].Anteil));
@@ -537,7 +537,7 @@ namespace Deeplex.Saverwalter.PrintService
                 bold.Add(true);
                 bold.Add(false);
 
-                string PersonEn(int i) => i.ToString() + (i > 1 ? " Personen" : " Person");
+                static string SingularOrPluralPerson(int i) => i.ToString() + (i > 1 ? " Personen" : " Person");
                 for (var i = 0; i < rechnungsgruppe.PersonenZeitanteil.Count; ++i)
                 {
                     var Beginn = rechnungsgruppe.PersonenZeitanteil[i].Beginn;
@@ -549,14 +549,14 @@ namespace Deeplex.Saverwalter.PrintService
                     if (i == rechnungsgruppe.PersonenZeitanteil.Count - 1)
                     {
 
-                        col1.Add(PersonEn(Personenzahl) + " / " + PersonEn(GesamtPersonenzahl));
+                        col1.Add(SingularOrPluralPerson(Personenzahl) + " / " + SingularOrPluralPerson(GesamtPersonenzahl));
                         col2.Add(Datum(Beginn) + " - " + Datum(Ende));
                         col3.Add(timespan + " / " + b.Abrechnungszeitspanne.ToString());
                         col4.Add(Prozent(rechnungsgruppe.PersonenZeitanteil[i].Anteil));
                     }
                     else
                     {
-                        col1.Add(PersonEn(Personenzahl) + " / " + PersonEn(GesamtPersonenzahl));
+                        col1.Add(SingularOrPluralPerson(Personenzahl) + " / " + SingularOrPluralPerson(GesamtPersonenzahl));
                         col2.Add(Datum(Beginn) + " - " + Datum(Ende));
                         col3.Add(timespan + " / " + b.Abrechnungszeitspanne.ToString());
                         col4.Add(Prozent(rechnungsgruppe.PersonenZeitanteil[i].Anteil));
@@ -595,7 +595,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             p.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
-        public static void ErmittlungWarmanteil(BetriebskostenabrechnungService.Betriebskostenabrechnung b, IRechnungsgruppe gruppe, IPrint<T> p)
+        public static void ErmittlungWarmanteil(IRechnungsgruppe gruppe, IPrint<T> p)
         {
             var widths = new int[] { 24, 13, 9, 14, 14, 13, 13 };
             var col1 = new List<string> { "Kostenanteil" };
@@ -713,9 +713,9 @@ namespace Deeplex.Saverwalter.PrintService
             var cols = new List<List<string>> { col1, col2 }.Select(w => w.ToArray()).ToArray();
             var justification = new int[] { 0, 2 };
             var bold = Enumerable.Repeat(false, col1.Count).ToArray();
-            bold[bold.Length - 1] = true;
+            bold[^1] = true;
             var underlined = Enumerable.Repeat(true, col1.Count).ToArray();
-            underlined[underlined.Length - 1] = false;
+            underlined[^1] = false;
 
             p.Table(widths, justification, bold, underlined, cols);
         }
@@ -806,7 +806,7 @@ namespace Deeplex.Saverwalter.PrintService
                         ErmittlungWarmeEinheiten(betriebskostenabrechnung, gruppe, printImpl);
                         printImpl.Break();
                         printImpl.SubHeading("Ermittlung der warmen Betriebskosten");
-                        ErmittlungWarmanteil(betriebskostenabrechnung, gruppe, printImpl);
+                        ErmittlungWarmanteil(gruppe, printImpl);
                     }
                 }
             }
