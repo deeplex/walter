@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Deeplex.Saverwalter.Betriebskostenabrechnung\Deeplex.Saverwalter.BetriebskostenabrechnungService.csproj" />
+    <ProjectReference Include="..\Deeplex.Saverwalter.ErhaltungsaufwendungService\Deeplex.Saverwalter.ErhaltungsaufwendungService.csproj" />
     <ProjectReference Include="..\Deeplex.Saverwalter.Model\Deeplex.Saverwalter.Model.csproj" />
   </ItemGroup>
 

@@ -1,4 +1,5 @@
-﻿using FakeItEasy;
+﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+using FakeItEasy;
 using FluentAssertions;
 using Xunit;
 
@@ -57,7 +58,7 @@ namespace Deeplex.Saverwalter.Model.Tests
         [InlineData("Betriebskostenabrechnung 31232", 31232)]
         public void TitleTest(string title, int year)
         {
-            var fake = A.Fake<BetriebskostenabrechnungService>();
+            var fake = A.Fake<Betriebskostenabrechnung>();
             fake.Title().Should().Be(title);
         }
 
