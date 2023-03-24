@@ -1,8 +1,7 @@
 ﻿using FluentAssertions;
-using System;
 using Xunit;
 
-namespace Deeplex.Saverwalter.Print.Tests
+namespace Deeplex.Saverwalter.PrintService.Tests
 {
     public class UtilsTests
     {

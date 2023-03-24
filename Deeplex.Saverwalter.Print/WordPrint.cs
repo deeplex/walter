@@ -2,7 +2,7 @@
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
 
-namespace Deeplex.Saverwalter.Print
+namespace Deeplex.Saverwalter.PrintService
 {
 
     public sealed class WordPrint : IPrint<Body>

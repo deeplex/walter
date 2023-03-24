@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Deeplex.Saverwalter.Model
+﻿namespace Deeplex.Saverwalter.Model
 {
     public sealed class ErhaltungsaufwendungListeEntry
     {

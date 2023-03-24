@@ -1,14 +1,14 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
+using Deeplex.Saverwalter.WalterDbService;
 using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.WebAPI
 {
-    public sealed class WalterDbServiceImpl : WalterDbService
+    public sealed class WalterDbImpl : WalterDb
     {
         public SaverwalterContext ctx { get; set; }
 
-        public WalterDbServiceImpl()
+        public WalterDbImpl()
         {
             DotNetEnv.Env.Load();
 

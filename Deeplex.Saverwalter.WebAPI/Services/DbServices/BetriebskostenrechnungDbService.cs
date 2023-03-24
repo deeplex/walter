@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 
@@ -7,10 +6,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class BetriebskostenrechnungDbService : IControllerService<BetriebskostenrechnungEntry>
     {
-        public WalterDbService DbService { get; }
+        public WalterDbService.WalterDb DbService { get; }
         public SaverwalterContext ctx => DbService.ctx;
 
-        public BetriebskostenrechnungDbService(WalterDbService dbService)
+        public BetriebskostenrechnungDbService(WalterDbService.WalterDb dbService)
         {
             DbService = dbService;
         }

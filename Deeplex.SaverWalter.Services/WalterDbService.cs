@@ -1,7 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
-namespace Deeplex.Saverwalter.Services
+namespace Deeplex.Saverwalter.WalterDbService
 {
-    public interface WalterDbService
+    public interface WalterDb
     {
         SaverwalterContext ctx { get; set; }
         public void SaveWalter();

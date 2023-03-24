@@ -1,23 +1,23 @@
-﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Print;
-using Deeplex.Saverwalter.Services;
+﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.PrintService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Utils.BetriebskostenabrechnungController;
 
 namespace Deeplex.Saverwalter.WebAPI
 {
-    public sealed class BetriebskostenabrechnungSerivce
+    public sealed class BetriebskostenabrechnungHandler
     {
-        private Betriebskostenabrechnung.Betriebskostenabrechnung createAbrechnung(int id, int Jahr, SaverwalterContext ctx)
+        private Betriebskostenabrechnung createAbrechnung(int vertragId, int Jahr, SaverwalterContext ctx)
         {
-            var vertrag = ctx.Vertraege.Find(id);
+            var vertrag = ctx.Vertraege.Find(vertragId);
             var beginn = new DateTime(Jahr, 1, 1);
             var ende = new DateTime(Jahr, 12, 31);
 
-            return new Betriebskostenabrechnung.BetriebskostenabrechnungImpl(ctx, vertrag, Jahr, beginn, ende);
+            return new BetriebskostenabrechnungImpl(ctx, vertrag, Jahr, beginn, ende);
         }
 
-        public IActionResult Get(int id, int Jahr, WalterDbService dbService)
+        public IActionResult Get(int id, int Jahr, WalterDbService.WalterDb dbService)
         {
             try
             {
@@ -51,9 +51,9 @@ namespace Deeplex.Saverwalter.WebAPI
             }
         }
 
-        public WalterDbService DbService { get; }
+        public WalterDbService.WalterDb DbService { get; }
 
-        public BetriebskostenabrechnungSerivce(WalterDbService dbService)
+        public BetriebskostenabrechnungHandler(WalterDbService.WalterDb dbService)
         {
             DbService = dbService;
         }

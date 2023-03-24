@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
@@ -43,12 +42,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class BetriebskostenrechnungEntry : BetriebskostenrechnungEntryBase
         {
-            private WalterDbService? DbService { get; }
+            private WalterDbService.WalterDb? DbService { get; }
 
             public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Umlage.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!));
 
             public BetriebskostenrechnungEntry() : base() { }
-            public BetriebskostenrechnungEntry(Betriebskostenrechnung entity, WalterDbService dbService) : base(entity)
+            public BetriebskostenrechnungEntry(Betriebskostenrechnung entity, WalterDbService.WalterDb dbService) : base(entity)
             {
                 DbService = dbService;
             }

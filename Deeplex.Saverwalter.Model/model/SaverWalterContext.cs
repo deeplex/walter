@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal;
-using System;
-using System.Linq;
 using System.Text;
 
 namespace Deeplex.Saverwalter.Model

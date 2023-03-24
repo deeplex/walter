@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
@@ -9,9 +8,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
     public class MieterController : ControllerBase
     {
         private readonly ILogger<MieterController> _logger;
-        private WalterDbService DbService { get; }
+        private WalterDbService.WalterDb DbService { get; }
 
-        public MieterController(ILogger<MieterController> logger, WalterDbService dbService)
+        public MieterController(ILogger<MieterController> logger, WalterDbService.WalterDb dbService)
         {
             DbService = dbService;
             _logger = logger;

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Deeplex.Saverwalter.Model
+﻿namespace Deeplex.Saverwalter.Model
 {
     // JuristischePerson is a Name. Kontakte may subscribe to this and is used for dashboards and stuff... nothing wild really.
     public class JuristischePerson : IPerson

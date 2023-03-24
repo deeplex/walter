@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
@@ -41,7 +40,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class AdresseEntry : AdresseEntryBase
         {
-            private WalterDbService? DbService { get; }
+            private WalterDbService.WalterDb? DbService { get; }
 
             public IEnumerable<WohnungEntryBase>? Wohnungen
                 => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!));
@@ -53,7 +52,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
 
             public AdresseEntry() : base() { }
-            public AdresseEntry(Adresse entity, WalterDbService dbService) : base(entity)
+            public AdresseEntry(Adresse entity, WalterDbService.WalterDb dbService) : base(entity)
             {
                 DbService = dbService;
             }

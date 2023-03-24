@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Deeplex.Saverwalter.Model
+﻿namespace Deeplex.Saverwalter.Model
 {
     // JOIN_TABLE
     public class Mieter

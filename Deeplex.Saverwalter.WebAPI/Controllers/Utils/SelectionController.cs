@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,9 +29,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         private readonly ILogger<SelectionListController> _logger;
-        private WalterDbService DbService { get; }
+        private WalterDbService.WalterDb DbService { get; }
 
-        public SelectionListController(ILogger<SelectionListController> logger, WalterDbService dbService)
+        public SelectionListController(ILogger<SelectionListController> logger, WalterDbService.WalterDb dbService)
         {
             DbService = dbService;
             _logger = logger;

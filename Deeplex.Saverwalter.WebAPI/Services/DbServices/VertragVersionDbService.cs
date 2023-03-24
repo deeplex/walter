@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragVersionController;
 
@@ -7,10 +6,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class VertragVersionDbService : IControllerService<VertragVersionEntryBase>
     {
-        public WalterDbService DbService { get; }
+        public WalterDbService.WalterDb DbService { get; }
         public SaverwalterContext ctx => DbService.ctx;
 
-        public VertragVersionDbService(WalterDbService dbService)
+        public VertragVersionDbService(WalterDbService.WalterDb dbService)
         {
             DbService = dbService;
         }

@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
@@ -8,10 +7,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class UmlageDbService : IControllerService<UmlageEntry>
     {
-        public WalterDbService DbService { get; }
+        public WalterDbService.WalterDb DbService { get; }
         public SaverwalterContext ctx => DbService.ctx;
 
-        public UmlageDbService(WalterDbService dbService)
+        public UmlageDbService(WalterDbService.WalterDb dbService)
         {
             DbService = dbService;
         }

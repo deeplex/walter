@@ -4,7 +4,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System.Collections.Immutable;
 
-namespace Deeplex.Saverwalter.Print
+namespace Deeplex.Saverwalter.PrintService
 {
     public static class OpenXMLIntegration
     {
@@ -68,14 +68,14 @@ namespace Deeplex.Saverwalter.Print
             CreateWordDocument(filepath, body);
         }
 
-        public static void SaveAsDocx(this Betriebskostenabrechnung.Betriebskostenabrechnung b, Stream stream)
+        public static void SaveAsDocx(this BetriebskostenabrechnungService.Betriebskostenabrechnung b, Stream stream)
         {
             var body = TPrint<Body>.Print(b, new WordPrint());
 
             CreateWordDocument(stream, body);
         }
 
-        public static void SaveAsDocx(this Betriebskostenabrechnung.Betriebskostenabrechnung b, string filepath)
+        public static void SaveAsDocx(this BetriebskostenabrechnungService.Betriebskostenabrechnung b, string filepath)
         {
             var body = TPrint<Body>.Print(b, new WordPrint());
 

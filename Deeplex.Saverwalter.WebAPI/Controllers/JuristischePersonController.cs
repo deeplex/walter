@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
@@ -19,7 +18,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<SelectionEntry>? SelectedMitglieder { get; set; }
 
             public JuristischePersonEntry() : base() { }
-            public JuristischePersonEntry(JuristischePerson entity, WalterDbService dbService) : base(entity, dbService)
+            public JuristischePersonEntry(JuristischePerson entity, WalterDbService.WalterDb dbService) : base(entity, dbService)
             {
                 Entity = entity;
                 SelectedMitglieder = Entity!.Mitglieder.Select(e => new SelectionEntry(e.PersonId, dbService.ctx.FindPerson(e.PersonId).Bezeichnung));

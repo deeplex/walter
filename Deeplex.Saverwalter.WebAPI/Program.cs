@@ -1,4 +1,4 @@
-using Deeplex.Saverwalter.Services;
+using Deeplex.Saverwalter.WalterDbService;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.WebAPI
         {
             var container = new Container();
             container.Options.DefaultScopedLifestyle = new SimpleInjector.Lifestyles.ThreadScopedLifestyle();
-            container.Register<WalterDbService, WalterDbServiceImpl>(Lifestyle.Scoped);
+            container.Register<WalterDb, WalterDbImpl>(Lifestyle.Scoped);
 
             container.Register<AdresseDbService>(Lifestyle.Scoped);
             container.Register<BetriebskostenrechnungDbService>(Lifestyle.Scoped);
@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<ZaehlerDbService>(Lifestyle.Scoped);
             container.Register<ZaehlerstandDbService>(Lifestyle.Scoped);
 
-            container.Register<BetriebskostenabrechnungSerivce>(Lifestyle.Scoped);
+            container.Register<BetriebskostenabrechnungHandler>(Lifestyle.Scoped);
 
             var builder = WebApplication.CreateBuilder(args);
 

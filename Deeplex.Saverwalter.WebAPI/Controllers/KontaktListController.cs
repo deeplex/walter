@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
@@ -84,7 +83,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 return asOther.AsQueryable().DistinctBy(e => e.VertragId);
             }
 
-            private WalterDbService? DbService { get; set; }
+            private WalterDbService.WalterDb? DbService { get; set; }
 
             public IEnumerable<SelectionEntry>? SelectedJuristischePersonen { get; set; }
             public IEnumerable<PersonEntryBase>? JuristischePersonen
@@ -95,7 +94,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 => GetVertraege()?.Select(e => e.Wohnung).Distinct().Select(e => new WohnungEntryBase(e, DbService!));
 
             protected PersonEntry() : base() { }
-            public PersonEntry(IPerson entity, WalterDbService dbService) : base(entity)
+            public PersonEntry(IPerson entity, WalterDbService.WalterDb dbService) : base(entity)
             {
                 DbService = dbService;
                 SelectedJuristischePersonen = Entity!.JuristischePersonen.Select(e => new SelectionEntry(e.PersonId, dbService.ctx.FindPerson(e.PersonId).Bezeichnung));
@@ -103,9 +102,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<KontaktListController> _logger;
-        private WalterDbService DbService { get; }
+        private WalterDbService.WalterDb DbService { get; }
 
-        public KontaktListController(ILogger<KontaktListController> logger, WalterDbService dbService)
+        public KontaktListController(ILogger<KontaktListController> logger, WalterDbService.WalterDb dbService)
         {
             DbService = dbService;
             _logger = logger;

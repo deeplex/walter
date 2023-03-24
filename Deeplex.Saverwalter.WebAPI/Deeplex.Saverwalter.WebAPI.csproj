@@ -20,10 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Deeplex.Saverwalter.Betriebskostenabrechnung\Deeplex.Saverwalter.Betriebskostenabrechnung.csproj" />
+    <ProjectReference Include="..\Deeplex.Saverwalter.Betriebskostenabrechnung\Deeplex.Saverwalter.BetriebskostenabrechnungService.csproj" />
     <ProjectReference Include="..\Deeplex.Saverwalter.Model\Deeplex.Saverwalter.Model.csproj" />
-    <ProjectReference Include="..\Deeplex.Saverwalter.Print\Deeplex.Saverwalter.Print.csproj" />
-    <ProjectReference Include="..\Deeplex.SaverWalter.Services\Deeplex.Saverwalter.Services.csproj" />
+    <ProjectReference Include="..\Deeplex.Saverwalter.Print\Deeplex.Saverwalter.PrintService.csproj" />
+    <ProjectReference Include="..\Deeplex.SaverWalter.Services\Deeplex.Saverwalter.WalterDbService.csproj" />
   </ItemGroup>
 
 </Project>

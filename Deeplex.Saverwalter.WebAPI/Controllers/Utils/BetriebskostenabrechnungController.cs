@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
@@ -10,7 +9,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
     public class BetriebskostenabrechnungController : ControllerBase
     {
         private readonly ILogger<BetriebskostenabrechnungController> _logger;
-        private BetriebskostenabrechnungSerivce Service { get; }
+        private BetriebskostenabrechnungHandler Service { get; }
 
         public class RechnungsgruppeEntry
         {
@@ -33,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double GesamtBetragWarm { get; }
             public double BetragWarm { get; }
 
-            public RechnungsgruppeEntry(IRechnungsgruppe g, WalterDbService dbService)
+            public RechnungsgruppeEntry(IRechnungsgruppe g, WalterDbService.WalterDb dbService)
             {
                 Umlagen = g.Umlagen.Select(e => new UmlageEntry(e, dbService)).ToList();
                 Bezeichnung = g.Bezeichnung;
@@ -82,7 +81,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double Result { get; }
             public double AllgStromFaktor { get; set; }
 
-            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung.Betriebskostenabrechnung b, WalterDbService dbService)
+            public BetriebskostenabrechnungEntry(BetriebskostenabrechnungService.Betriebskostenabrechnung b, WalterDbService.WalterDb dbService)
             {
                 notes = b.notes;
                 Jahr = b.Jahr;
@@ -114,7 +113,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             }
         }
 
-        public BetriebskostenabrechnungController(ILogger<BetriebskostenabrechnungController> logger, BetriebskostenabrechnungSerivce service)
+        public BetriebskostenabrechnungController(ILogger<BetriebskostenabrechnungController> logger, BetriebskostenabrechnungHandler service)
         {
             Service = service;
             _logger = logger;

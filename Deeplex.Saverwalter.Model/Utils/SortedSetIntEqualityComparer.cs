@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Deeplex.Saverwalter.Model
+﻿namespace Deeplex.Saverwalter.Model
 {
     // Used to determine Betriebskostengruppen.
     public sealed class SortedSetIntEqualityComparer : EqualityComparer<SortedSet<int>>

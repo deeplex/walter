@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Deeplex.Saverwalter.Betriebskostenabrechnung\Deeplex.Saverwalter.Betriebskostenabrechnung.csproj" />
+    <ProjectReference Include="..\Deeplex.Saverwalter.Betriebskostenabrechnung\Deeplex.Saverwalter.BetriebskostenabrechnungService.csproj" />
     <ProjectReference Include="..\Deeplex.Saverwalter.Model\Deeplex.Saverwalter.Model.csproj" />
   </ItemGroup>
 

@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.JuristischePersonController;
@@ -10,10 +9,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class JuristischePersonDbService : IControllerService<JuristischePersonEntry>
     {
-        public WalterDbService DbService { get; }
+        public WalterDbService.WalterDb DbService { get; }
         public SaverwalterContext ctx => DbService.ctx;
 
-        public JuristischePersonDbService(WalterDbService dbService)
+        public JuristischePersonDbService(WalterDbService.WalterDb dbService)
         {
             DbService = dbService;
         }

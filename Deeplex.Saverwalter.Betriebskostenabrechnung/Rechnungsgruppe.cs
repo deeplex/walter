@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.Model
         public double Anteil { get; }
         public int Personenzahl { get; }
 
-        public PersonenZeitanteil(PersonenZeitIntervall interval, List<PersonenZeitIntervall> l, Betriebskostenabrechnung.Betriebskostenabrechnung b)
+        public PersonenZeitanteil(PersonenZeitIntervall interval, List<PersonenZeitIntervall> l, BetriebskostenabrechnungService.Betriebskostenabrechnung b)
         {
             Beginn = interval.Beginn;
             Ende = interval.Ende;
@@ -74,7 +74,7 @@ namespace Deeplex.Saverwalter.Model
         public double GesamtBetragWarm { get; }
         public double BetragWarm { get; }
 
-        public Rechnungsgruppe(SaverwalterContext ctx, Betriebskostenabrechnung.Betriebskostenabrechnung b, List<Umlage> gruppe)
+        public Rechnungsgruppe(SaverwalterContext ctx, BetriebskostenabrechnungService.Betriebskostenabrechnung b, List<Umlage> gruppe)
         {
             Umlagen = gruppe;
             Wohnungen = Umlagen.First().Wohnungen.ToList();
@@ -148,7 +148,7 @@ namespace Deeplex.Saverwalter.Model
             BetragWarm = Heizkosten.Sum(h => h.Kosten);
         }
 
-        private double checkVerbrauch(Betriebskostenabrechnung.Betriebskostenabrechnung b, Betriebskostentyp t)
+        private double checkVerbrauch(BetriebskostenabrechnungService.Betriebskostenabrechnung b, Betriebskostentyp t)
         {
             if (VerbrauchAnteil.ContainsKey(t))
             {
@@ -163,7 +163,7 @@ namespace Deeplex.Saverwalter.Model
 
         private static Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> GetVerbrauch(
             SaverwalterContext ctx,
-            Betriebskostenabrechnung.Betriebskostenabrechnung b,
+            BetriebskostenabrechnungService.Betriebskostenabrechnung b,
             List<Umlage> Umlagen,
             Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch)
         {
@@ -193,7 +193,7 @@ namespace Deeplex.Saverwalter.Model
 
         private static List<PersonenZeitIntervall> VertraegeIntervallPersonenzahl(
             List<VertragVersion> vertraege,
-            Betriebskostenabrechnung.Betriebskostenabrechnung b,
+            BetriebskostenabrechnungService.Betriebskostenabrechnung b,
             Rechnungsgruppe parent)
         {
             var merged = vertraege

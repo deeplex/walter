@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
@@ -23,7 +22,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry? Wohnung { get; set; }
 
             public ErhaltungsaufwendungEntryBase() { }
-            public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity, WalterDbService dbService)
+            public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity, WalterDbService.WalterDb dbService)
             {
                 Entity = entity;
 
@@ -40,7 +39,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class ErhaltungsaufwendungEntry : ErhaltungsaufwendungEntryBase
         {
             public ErhaltungsaufwendungEntry() { }
-            public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity, WalterDbService dbService) : base(entity, dbService)
+            public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity, WalterDbService.WalterDb dbService) : base(entity, dbService)
             {
             }
         }

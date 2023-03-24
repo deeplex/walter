@@ -57,7 +57,7 @@ namespace Deeplex.Saverwalter.Model.Tests
         [InlineData("Betriebskostenabrechnung 31232", 31232)]
         public void TitleTest(string title, int year)
         {
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService>();
             fake.Title().Should().Be(title);
         }
 
@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.Model.Tests
             };
 
 
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
 
             // Skip
 
@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.Model.Tests
                 Bezeichnung = "Musterwohnung"
             };
 
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
 
             // Skip
 
@@ -112,91 +112,91 @@ namespace Deeplex.Saverwalter.Model.Tests
         public void AbrechnungszeitraumTest()
         {
             Assert.True(false, "This test needs an implementation");
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
         }
 
         [Fact(Skip = "TODO")]
         public void NutzungszeitraumTest()
         {
             Assert.True(false, "This test needs an implementation");
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
         }
 
         [Fact(Skip = "TODO")]
         public void GrussTest()
         {
             Assert.True(false, "This test needs an implementation");
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
         }
 
         [Fact(Skip = "TODO")]
         public void ResultTxtTest()
         {
             Assert.True(false, "This test needs an implementation");
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
         }
 
         [Fact(Skip = "TODO")]
         public void RefundDemandTest()
         {
             Assert.True(false, "This test needs an implementation");
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
         }
 
         [Fact(Skip = "TODO")]
         public void GenerischerTextTest()
         {
             Assert.True(false, "This test needs an implementation");
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
         }
 
         [Fact(Skip = "TODO")]
         public void dirTest()
         {
             Assert.True(false, "This test needs an implementation");
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
         }
 
         [Fact(Skip = "TODO")]
         public void nWFTest()
         {
             Assert.True(false, "This test needs an implementation");
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
         }
 
         [Fact(Skip = "TODO")]
         public void nNFTest()
         {
             Assert.True(false, "This test needs an implementation");
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
         }
 
         [Fact(Skip = "TODO")]
         public void nNETest()
         {
             Assert.True(false, "This test needs an implementation");
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
         }
 
         [Fact(Skip = "TODO")]
         public void nPZTest()
         {
             Assert.True(false, "This test needs an implementation");
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
         }
 
         [Fact(Skip = "TODO")]
         public void nVbTest()
         {
             Assert.True(false, "This test needs an implementation");
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
         }
 
         [Fact(Skip = "TODO")]
         public void AnmerkungTest()
         {
             Assert.True(false, "This test needs an implementation");
-            var fake = A.Fake<Betriebskostenabrechnung.Betriebskostenabrechnung>();
+            var fake = A.Fake<BetriebskostenabrechnungService.Betriebskostenabrechnung>();
         }
     }
 }

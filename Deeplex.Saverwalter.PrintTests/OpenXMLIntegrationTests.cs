@@ -4,7 +4,7 @@ using FakeItEasy;
 using FluentAssertions;
 using Xunit;
 
-namespace Deeplex.Saverwalter.Print.Tests
+namespace Deeplex.Saverwalter.PrintService.Tests
 {
     public class OpenXMLIntegrationTests
     {

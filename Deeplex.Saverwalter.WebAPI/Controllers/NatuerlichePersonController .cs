@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
@@ -19,7 +18,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Nachname { get; set; }
 
             protected NatuerlichePersonEntryBase() : base() { }
-            public NatuerlichePersonEntryBase(NatuerlichePerson entity, WalterDbService dbService) : base(entity, dbService)
+            public NatuerlichePersonEntryBase(NatuerlichePerson entity, WalterDbService.WalterDb dbService) : base(entity, dbService)
             {
                 Entity = entity;
                 Id = entity.NatuerlichePersonId;
@@ -33,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public sealed class NatuerlichePersonEntry : NatuerlichePersonEntryBase
         {
             public NatuerlichePersonEntry() : base() { }
-            public NatuerlichePersonEntry(NatuerlichePerson entity, WalterDbService dbService) : base(entity, dbService) { }
+            public NatuerlichePersonEntry(NatuerlichePerson entity, WalterDbService.WalterDb dbService) : base(entity, dbService) { }
         }
 
         private readonly ILogger<NatuerlichePersonController> _logger;

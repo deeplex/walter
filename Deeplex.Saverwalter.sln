@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.Model",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.CLI", "Deeplex.Saverwalter.CLI\Deeplex.Saverwalter.CLI.csproj", "{8293BA49-2BD2-4888-A742-DC576DB19BD1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.Print", "Deeplex.Saverwalter.Print\Deeplex.Saverwalter.Print.csproj", "{54CAB3F2-F07C-4D88-B50C-D140C0F799E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.PrintService", "Deeplex.Saverwalter.Print\Deeplex.Saverwalter.PrintService.csproj", "{54CAB3F2-F07C-4D88-B50C-D140C0F799E0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Utils.ObjectModel", "Deeplex.Utils.ObjectModel\Deeplex.Utils.ObjectModel.csproj", "{81840D1D-EB12-40CE-BCD1-84E2B2E12ED9}"
 EndProject
@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.ModelTe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.PrintTests", "Deeplex.Saverwalter.PrintTests\Deeplex.Saverwalter.PrintTests.csproj", "{6DDE0FE7-E880-4976-924C-44C3256E8A42}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.Services", "Deeplex.SaverWalter.Services\Deeplex.Saverwalter.Services.csproj", "{00080445-D5B6-4E16-A43E-E8DEED032A1F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.WalterDbService", "Deeplex.SaverWalter.Services\Deeplex.Saverwalter.WalterDbService.csproj", "{00080445-D5B6-4E16-A43E-E8DEED032A1F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.ServicesTests", "Deeplex.Saverwalter.ServicesTests\Deeplex.Saverwalter.ServicesTests.csproj", "{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}"
 EndProject
@@ -23,9 +23,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{254288C9
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.WebAPI", "Deeplex.Saverwalter.WebAPI\Deeplex.Saverwalter.WebAPI.csproj", "{82004177-6EF1-42DE-911B-BD4917BB4B81}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deeplex.Saverwalter.Betriebskostenabrechnung", "Deeplex.Saverwalter.Betriebskostenabrechnung\Deeplex.Saverwalter.Betriebskostenabrechnung.csproj", "{DD438273-69A1-4266-901F-734457524A37}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deeplex.Saverwalter.BetriebskostenabrechnungService", "Deeplex.Saverwalter.Betriebskostenabrechnung\Deeplex.Saverwalter.BetriebskostenabrechnungService.csproj", "{DD438273-69A1-4266-901F-734457524A37}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deeplex.Saverwalter.BetriebskostenrechnungTests", "Deeplex.Saverwalter.BetriebskostenrechnungTests\Deeplex.Saverwalter.BetriebskostenrechnungTests.csproj", "{D8B0B7AE-4C22-4C68-9079-5B429A4F3522}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deeplex.Saverwalter.BetriebskostenrechnungServiceTests", "Deeplex.Saverwalter.BetriebskostenrechnungTests\Deeplex.Saverwalter.BetriebskostenrechnungServiceTests.csproj", "{D8B0B7AE-4C22-4C68-9079-5B429A4F3522}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

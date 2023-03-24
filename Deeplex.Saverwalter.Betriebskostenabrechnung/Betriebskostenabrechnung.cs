@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using static Deeplex.Saverwalter.Model.Utils;
 
-namespace Deeplex.Saverwalter.Betriebskostenabrechnung
+namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
     public interface Betriebskostenabrechnung
     {

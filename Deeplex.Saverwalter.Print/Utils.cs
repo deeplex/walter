@@ -1,6 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 
-namespace Deeplex.Saverwalter.Print
+namespace Deeplex.Saverwalter.PrintService
 {
     public static class Utils
     {

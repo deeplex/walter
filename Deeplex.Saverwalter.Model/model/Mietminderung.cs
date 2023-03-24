@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Deeplex.Saverwalter.Model
+﻿namespace Deeplex.Saverwalter.Model
 {
     // Mietminderung is later taken away from the result of the Betriebskostenabrechnug.
     public class Mietminderung

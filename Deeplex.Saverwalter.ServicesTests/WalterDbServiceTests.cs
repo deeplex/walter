@@ -1,3 +1,3 @@
-﻿namespace Deeplex.Saverwalter.Services.Tests
+﻿namespace Deeplex.Saverwalter.WalterDbService.Tests
 {
 }
