@@ -1,8 +1,6 @@
-﻿using Castle.Core.Internal;
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
 using System.Collections.Immutable;
 using static Deeplex.Saverwalter.Model.Utils;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {

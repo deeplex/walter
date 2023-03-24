@@ -94,17 +94,25 @@
             return t;
         }
 
-        public static bool dir(this BetriebskostenabrechnungService.Betriebskostenabrechnung b)
-            => b.Gruppen.Any(g => g.Umlagen.Any(r => r.Wohnungen.Count == 1));
+        public static bool direkteZuordnung(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+            => betriebskostenabrechnung.Gruppen.Any(rechnungsgruppe => rechnungsgruppe.Umlagen.Any(umlage => umlage.Wohnungen.Count == 1));
 
-        private static bool uml(this BetriebskostenabrechnungService.Betriebskostenabrechnung b, Umlageschluessel k) =>
-            b.Gruppen.Any(g => g.Umlagen.Where(r => r.Wohnungen.Count > 1).Any(r => r.Schluessel == k));
+        private static bool umlageSchluesselExistsInBetriebskostenabrechnung(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenrechnung, Umlageschluessel umlageSchluessel) =>
+            betriebskostenrechnung.Gruppen
+                .Any(rechnungsgruppe => rechnungsgruppe.Umlagen
+                    .Where(umlage => umlage.Wohnungen.Count > 1)
+                    .Any(umlage => umlage.Schluessel == umlageSchluessel));
 
-        public static bool nWF(this BetriebskostenabrechnungService.Betriebskostenabrechnung b) => b.uml(Umlageschluessel.NachWohnflaeche);
-        public static bool nNF(this BetriebskostenabrechnungService.Betriebskostenabrechnung b) => b.uml(Umlageschluessel.NachNutzflaeche);
-        public static bool nNE(this BetriebskostenabrechnungService.Betriebskostenabrechnung b) => b.uml(Umlageschluessel.NachNutzeinheit);
-        public static bool nPZ(this BetriebskostenabrechnungService.Betriebskostenabrechnung b) => b.uml(Umlageschluessel.NachPersonenzahl);
-        public static bool nVb(this BetriebskostenabrechnungService.Betriebskostenabrechnung b) => b.uml(Umlageschluessel.NachVerbrauch);
+        public static bool nachWohnflaeche(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+            => betriebskostenabrechnung.umlageSchluesselExistsInBetriebskostenabrechnung(Umlageschluessel.NachWohnflaeche);
+        public static bool nachNutzflaeche(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+            => betriebskostenabrechnung.umlageSchluesselExistsInBetriebskostenabrechnung(Umlageschluessel.NachNutzflaeche);
+        public static bool nachNutzeinheiten(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+            => betriebskostenabrechnung.umlageSchluesselExistsInBetriebskostenabrechnung(Umlageschluessel.NachNutzeinheit);
+        public static bool nachPersonenzahl(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+            => betriebskostenabrechnung.umlageSchluesselExistsInBetriebskostenabrechnung(Umlageschluessel.NachPersonenzahl);
+        public static bool nachVerbrauch(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+            => betriebskostenabrechnung.umlageSchluesselExistsInBetriebskostenabrechnung(Umlageschluessel.NachVerbrauch);
 
         public static string Anmerkung(this BetriebskostenabrechnungService.Betriebskostenabrechnung b)
             => "Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger) Kostenanteil";
