@@ -7,10 +7,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class MieteDbService : IControllerService<MieteEntryBase>
     {
-        public IWalterDbService DbService { get; }
+        public WalterDbService DbService { get; }
         public SaverwalterContext ctx => DbService.ctx;
 
-        public MieteDbService(IWalterDbService dbService)
+        public MieteDbService(WalterDbService dbService)
         {
             DbService = dbService;
         }

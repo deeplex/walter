@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry? Besitzer { get; set; }
 
             public WohnungEntryBase() { }
-            public WohnungEntryBase(Wohnung entity, IWalterDbService dbService)
+            public WohnungEntryBase(Wohnung entity, WalterDbService dbService)
             {
                 Entity = entity;
 
@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class WohnungEntry : WohnungEntryBase
         {
-            private IWalterDbService? DbService { get; }
+            private WalterDbService? DbService { get; }
 
             public IEnumerable<WohnungEntryBase>? Haus => Entity?.Adresse?.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!));
             public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 => Entity?.Umlagen.SelectMany(e => e.Betriebskostenrechnungen.Select(f => new BetriebskostenrechnungEntryBase(f)));
 
             public WohnungEntry() : base() { }
-            public WohnungEntry(Wohnung entity, IWalterDbService dbService) : base(entity, dbService)
+            public WohnungEntry(Wohnung entity, WalterDbService dbService) : base(entity, dbService)
             {
                 DbService = dbService;
             }

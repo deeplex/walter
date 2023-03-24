@@ -23,7 +23,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry? Wohnung { get; set; }
 
             public ErhaltungsaufwendungEntryBase() { }
-            public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity, IWalterDbService dbService)
+            public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity, WalterDbService dbService)
             {
                 Entity = entity;
 
@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class ErhaltungsaufwendungEntry : ErhaltungsaufwendungEntryBase
         {
             public ErhaltungsaufwendungEntry() { }
-            public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity, IWalterDbService dbService) : base(entity, dbService)
+            public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity, WalterDbService dbService) : base(entity, dbService)
             {
             }
         }

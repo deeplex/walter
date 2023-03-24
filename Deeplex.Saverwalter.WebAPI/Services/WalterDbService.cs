@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.WebAPI
 {
-    public sealed class WalterDbService : IWalterDbService
+    public sealed class WalterDbServiceImpl : WalterDbService
     {
         public SaverwalterContext ctx { get; set; }
 
-        public WalterDbService()
+        public WalterDbServiceImpl()
         {
             DotNetEnv.Env.Load();
 

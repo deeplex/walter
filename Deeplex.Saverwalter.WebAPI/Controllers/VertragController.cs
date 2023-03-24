@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<SelectionEntry>? SelectedMieter { get; set; }
 
             public VertragEntryBase() { }
-            public VertragEntryBase(Vertrag entity, IWalterDbService dbService)
+            public VertragEntryBase(Vertrag entity, WalterDbService dbService)
             {
                 Entity = entity;
 
@@ -57,7 +57,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class VertragEntry : VertragEntryBase
         {
             // TODO Versionen
-            private IWalterDbService? DbService { get; }
+            private WalterDbService? DbService { get; }
 
             public IEnumerable<MieteEntryBase>? Mieten => Entity?.Mieten.Select(e => new MieteEntryBase(e));
             public IEnumerable<MietminderungEntryBase>? Mietminderungen => Entity?.Mietminderungen.Select(e => new MietminderungEntryBase(e));
@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             // TODO Garagen
 
             public VertragEntry() : base() { }
-            public VertragEntry(Vertrag entity, IWalterDbService dbService) : base(entity, dbService)
+            public VertragEntry(Vertrag entity, WalterDbService dbService) : base(entity, dbService)
             {
                 DbService = dbService;
                 Versionen = Entity?.Versionen.Select(e => new VertragVersionEntryBase(e));

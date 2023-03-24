@@ -9,9 +9,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
     public class MieterController : ControllerBase
     {
         private readonly ILogger<MieterController> _logger;
-        private IWalterDbService DbService { get; }
+        private WalterDbService DbService { get; }
 
-        public MieterController(ILogger<MieterController> logger, IWalterDbService dbService)
+        public MieterController(ILogger<MieterController> logger, WalterDbService dbService)
         {
             DbService = dbService;
             _logger = logger;

@@ -10,10 +10,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class ZaehlerDbService : IControllerService<ZaehlerEntry>
     {
-        public IWalterDbService DbService { get; }
+        public WalterDbService DbService { get; }
         public SaverwalterContext ctx => DbService.ctx;
 
-        public ZaehlerDbService(IWalterDbService dbService)
+        public ZaehlerDbService(WalterDbService dbService)
         {
             DbService = dbService;
         }

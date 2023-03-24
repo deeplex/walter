@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.WebAPI
         {
             var container = new Container();
             container.Options.DefaultScopedLifestyle = new SimpleInjector.Lifestyles.ThreadScopedLifestyle();
-            container.Register<IWalterDbService, WalterDbService>(Lifestyle.Scoped);
+            container.Register<WalterDbService, WalterDbServiceImpl>(Lifestyle.Scoped);
 
             container.Register<AdresseDbService>(Lifestyle.Scoped);
             container.Register<BetriebskostenrechnungDbService>(Lifestyle.Scoped);

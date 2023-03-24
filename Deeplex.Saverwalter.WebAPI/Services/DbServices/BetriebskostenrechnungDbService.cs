@@ -7,10 +7,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class BetriebskostenrechnungDbService : IControllerService<BetriebskostenrechnungEntry>
     {
-        public IWalterDbService DbService { get; }
+        public WalterDbService DbService { get; }
         public SaverwalterContext ctx => DbService.ctx;
 
-        public BetriebskostenrechnungDbService(IWalterDbService dbService)
+        public BetriebskostenrechnungDbService(WalterDbService dbService)
         {
             DbService = dbService;
         }

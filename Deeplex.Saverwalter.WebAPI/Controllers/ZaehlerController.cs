@@ -41,12 +41,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class ZaehlerEntry : ZaehlerEntryBase
         {
-            private IWalterDbService? DbService { get; }
+            private WalterDbService? DbService { get; }
             public IEnumerable<ZaehlerEntryBase>? Einzelzaehler => Entity?.EinzelZaehler.ToList().Select(e => new ZaehlerEntryBase(e));
             public IEnumerable<ZaehlerstandEntryBase>? Staende => Entity?.Staende.ToList().Select(e => new ZaehlerstandEntryBase(e));
 
             public ZaehlerEntry() : base() { }
-            public ZaehlerEntry(Zaehler entity, IWalterDbService dbService) : base(entity)
+            public ZaehlerEntry(Zaehler entity, WalterDbService dbService) : base(entity)
             {
                 DbService = dbService;
             }

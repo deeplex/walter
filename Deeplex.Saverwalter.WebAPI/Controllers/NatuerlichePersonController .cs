@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Nachname { get; set; }
 
             protected NatuerlichePersonEntryBase() : base() { }
-            public NatuerlichePersonEntryBase(NatuerlichePerson entity, IWalterDbService dbService) : base(entity, dbService)
+            public NatuerlichePersonEntryBase(NatuerlichePerson entity, WalterDbService dbService) : base(entity, dbService)
             {
                 Entity = entity;
                 Id = entity.NatuerlichePersonId;
@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public sealed class NatuerlichePersonEntry : NatuerlichePersonEntryBase
         {
             public NatuerlichePersonEntry() : base() { }
-            public NatuerlichePersonEntry(NatuerlichePerson entity, IWalterDbService dbService) : base(entity, dbService) { }
+            public NatuerlichePersonEntry(NatuerlichePerson entity, WalterDbService dbService) : base(entity, dbService) { }
         }
 
         private readonly ILogger<NatuerlichePersonController> _logger;

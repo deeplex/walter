@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double GesamtBetragWarm { get; }
             public double BetragWarm { get; }
 
-            public RechnungsgruppeEntry(IRechnungsgruppe g, IWalterDbService dbService)
+            public RechnungsgruppeEntry(IRechnungsgruppe g, WalterDbService dbService)
             {
                 Umlagen = g.Umlagen.Select(e => new UmlageEntry(e, dbService)).ToList();
                 Bezeichnung = g.Bezeichnung;
@@ -82,7 +82,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double Result { get; }
             public double AllgStromFaktor { get; set; }
 
-            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung.Betriebskostenabrechnung b, IWalterDbService dbService)
+            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung.Betriebskostenabrechnung b, WalterDbService dbService)
             {
                 notes = b.notes;
                 Jahr = b.Jahr;

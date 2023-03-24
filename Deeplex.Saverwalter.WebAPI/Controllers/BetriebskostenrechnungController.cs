@@ -43,12 +43,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class BetriebskostenrechnungEntry : BetriebskostenrechnungEntryBase
         {
-            private IWalterDbService? DbService { get; }
+            private WalterDbService? DbService { get; }
 
             public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Umlage.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!));
 
             public BetriebskostenrechnungEntry() : base() { }
-            public BetriebskostenrechnungEntry(Betriebskostenrechnung entity, IWalterDbService dbService) : base(entity)
+            public BetriebskostenrechnungEntry(Betriebskostenrechnung entity, WalterDbService dbService) : base(entity)
             {
                 DbService = dbService;
             }

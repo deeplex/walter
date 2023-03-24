@@ -30,9 +30,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         private readonly ILogger<SelectionListController> _logger;
-        private IWalterDbService DbService { get; }
+        private WalterDbService DbService { get; }
 
-        public SelectionListController(ILogger<SelectionListController> logger, IWalterDbService dbService)
+        public SelectionListController(ILogger<SelectionListController> logger, WalterDbService dbService)
         {
             DbService = dbService;
             _logger = logger;

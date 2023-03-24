@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.WebAPI
             return new Betriebskostenabrechnung.BetriebskostenabrechnungImpl(ctx, vertrag, Jahr, beginn, ende);
         }
 
-        public IActionResult Get(int id, int Jahr, IWalterDbService dbService)
+        public IActionResult Get(int id, int Jahr, WalterDbService dbService)
         {
             try
             {
@@ -51,9 +51,9 @@ namespace Deeplex.Saverwalter.WebAPI
             }
         }
 
-        public IWalterDbService DbService { get; }
+        public WalterDbService DbService { get; }
 
-        public BetriebskostenabrechnungSerivce(IWalterDbService dbService)
+        public BetriebskostenabrechnungSerivce(WalterDbService dbService)
         {
             DbService = dbService;
         }

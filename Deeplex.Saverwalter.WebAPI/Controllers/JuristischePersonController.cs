@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<SelectionEntry>? SelectedMitglieder { get; set; }
 
             public JuristischePersonEntry() : base() { }
-            public JuristischePersonEntry(JuristischePerson entity, IWalterDbService dbService) : base(entity, dbService)
+            public JuristischePersonEntry(JuristischePerson entity, WalterDbService dbService) : base(entity, dbService)
             {
                 Entity = entity;
                 SelectedMitglieder = Entity!.Mitglieder.Select(e => new SelectionEntry(e.PersonId, dbService.ctx.FindPerson(e.PersonId).Bezeichnung));

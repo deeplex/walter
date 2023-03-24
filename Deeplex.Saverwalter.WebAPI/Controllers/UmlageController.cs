@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class UmlageEntry : UmlageEntryBase
         {
-            private IWalterDbService? DbService { get; }
+            private WalterDbService? DbService { get; }
 
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen => Entity?.Betriebskostenrechnungen
                 .Select(e => new BetriebskostenrechnungEntryBase(e));
@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             // TODO HKVO
 
             public UmlageEntry() : base() { }
-            public UmlageEntry(Umlage entity, IWalterDbService dbService) : base(entity)
+            public UmlageEntry(Umlage entity, WalterDbService dbService) : base(entity)
             {
                 DbService = dbService;
             }
