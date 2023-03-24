@@ -8,7 +8,7 @@
 	import type {
 		WalterBetriebskostenrechnungEntry,
 		WalterSelectionEntry
-	} from '$WalterTypes';
+	} from '$WalterLib';
 
 	export let a: Partial<WalterBetriebskostenrechnungEntry> = {};
 	export let betriebskostentypen: WalterSelectionEntry[];

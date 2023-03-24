@@ -15,14 +15,17 @@
 				"./src/components/index.ts",
 			],
 			"$WalterStore": [
-				"./src/store.ts"
+				"./src/store.ts",
 			],
 			"$WalterServices/*": [
-				"./src/services/*"
+				"./src/services/*",
 			],
 			"$WalterTypes": [
 				"./src/types/index.ts",
 			],
+			"$WalterLib": [
+				"./src/lib/index.ts",
+			]
 		}
 	}
 	// Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias

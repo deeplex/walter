@@ -13,13 +13,7 @@
 		WalterNumberInput,
 		WalterAbrechnung
 	} from '$WalterComponents';
-	import type {
-		WalterBetriebskostenabrechnungKostengruppenEntry,
-		WalterMieteEntry,
-		WalterMietminderungEntry,
-		WalterPersonEntry,
-		WalterVertragVersionEntry
-	} from '$WalterTypes';
+	import type { WalterBetriebskostenabrechnungKostengruppenEntry } from '$WalterTypes';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
@@ -29,6 +23,12 @@
 		getVertragversionEntry,
 		loadAbrechnung
 	} from './utils';
+	import type {
+		WalterMieteEntry,
+		WalterMietminderungEntry,
+		WalterPersonEntry,
+		WalterVertragVersionEntry
+	} from '$WalterLib';
 
 	export let data: PageData;
 
@@ -61,7 +61,7 @@
 	}
 
 	let title = `${data.a.wohnung?.text} - ${data.a.mieter
-		?.map((m) => m.name)
+		?.map((mieter) => mieter.name)
 		.join(', ')}`;
 
 	console.log(data.a);

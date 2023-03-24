@@ -10,9 +10,8 @@
 	import type {
 		WalterJuristischePersonEntry,
 		WalterNatuerlichePersonEntry,
-		WalterPersonEntry,
-		WalterSelectionEntry
-	} from '$WalterTypes';
+		WalterPersonEntry
+	} from '$WalterLib';
 	import { ContentSwitcher, Row, Switch } from 'carbon-components-svelte';
 
 	const headers = [

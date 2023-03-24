@@ -3,7 +3,7 @@
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
 	import { WalterDataWrapper, WalterZaehler } from '$WalterComponents';
-	import type { WalterSelectionEntry, WalterZaehlerEntry } from '$WalterTypes';
+	import type { WalterSelectionEntry, WalterZaehlerEntry } from '$WalterLib';
 
 	const headers = [
 		{ key: 'kennnummer', value: 'Kennnummer' },

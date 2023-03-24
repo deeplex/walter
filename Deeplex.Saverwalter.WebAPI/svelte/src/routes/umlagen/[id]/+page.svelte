@@ -8,11 +8,11 @@
 		WalterWohnungen,
 		WalterUmlage
 	} from '$WalterComponents';
+	import { toLocaleIsoString } from '$WalterServices/utils';
 	import type {
 		WalterBetriebskostenrechnungEntry,
 		WalterSelectionEntry
-	} from '$WalterTypes';
-	import { toLocaleIsoString } from '$WalterServices/utils';
+	} from '$WalterLib';
 
 	export let data: PageData;
 
@@ -39,7 +39,7 @@
 	files={data.anhaenge}
 	a={data.a}
 	apiURL={data.apiURL}
-	title={data.a.typ.text + ' - ' + data.a.wohnungenBezeichnung}
+	title={`${data.a.typ.text} - ${data.a.wohnungenBezeichnung}`}
 />
 
 <WalterGrid>

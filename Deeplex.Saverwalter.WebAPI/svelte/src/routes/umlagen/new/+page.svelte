@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WalterGrid, WalterUmlage, WalterHeaderNew } from '$WalterComponents';
-	import type { WalterUmlageEntry } from '$WalterTypes';
+	import type { WalterUmlageEntry } from '$WalterLib';
 	import type { PageData } from './$types';
 
 	const entry: Partial<WalterUmlageEntry> = {};

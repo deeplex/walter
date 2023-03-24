@@ -4,7 +4,7 @@
 		WalterHeaderNew,
 		WalterZaehlerstand
 	} from '$WalterComponents';
-	import type { WalterZaehlerstandEntry } from '$WalterTypes';
+	import type { WalterZaehlerstandEntry } from '$WalterLib';
 
 	const apiURL = `/api/zaehlerstaende`;
 	const title = 'Neuer Zählerstand';

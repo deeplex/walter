@@ -8,11 +8,8 @@
 		WalterZaehlerstaende,
 		WalterZaehlerList
 	} from '$WalterComponents';
-	import type {
-		WalterZaehlerEntry,
-		WalterZaehlerstandEntry
-	} from '$WalterTypes';
 	import { toLocaleIsoString } from '$WalterServices/utils';
+	import type { WalterZaehlerEntry, WalterZaehlerstandEntry } from '$WalterLib';
 
 	export let data: PageData;
 

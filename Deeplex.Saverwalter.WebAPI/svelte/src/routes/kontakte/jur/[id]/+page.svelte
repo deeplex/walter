@@ -12,7 +12,7 @@
 	import type {
 		WalterJuristischePersonEntry,
 		WalterNatuerlichePersonEntry
-	} from '$WalterTypes';
+	} from '$WalterLib';
 
 	export let data: PageData;
 

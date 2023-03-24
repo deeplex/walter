@@ -14,19 +14,19 @@
 		WalterHeaderDetail,
 		WalterWohnung
 	} from '$WalterComponents';
+	import { toLocaleIsoString } from '$WalterServices/utils';
 	import type {
 		WalterErhaltungsaufwendungEntry,
 		WalterUmlageEntry,
 		WalterZaehlerEntry
-	} from '$WalterTypes';
-	import { toLocaleIsoString } from '$WalterServices/utils';
+	} from '$WalterLib';
 
 	export let data: PageData;
 
 	const zaehlerEntry: Partial<WalterZaehlerEntry> = {
 		wohnung: {
-			id: '' + data.a.id,
-			text: data.a.adresse?.anschrift + ' - ' + data.a.bezeichnung
+			id: `${data.a.id}`,
+			text: `${data.a.adresse?.anschrift} - ${data.a.bezeichnung}`
 		},
 		adresse: data.a.adresse ? { ...data.a.adresse } : undefined
 	};

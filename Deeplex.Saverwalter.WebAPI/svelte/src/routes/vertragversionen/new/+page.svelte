@@ -5,7 +5,7 @@
 		WalterMiete,
 		WalterVertragVersion
 	} from '$WalterComponents';
-	import type { WalterMieteEntry } from '$WalterTypes';
+	import type { WalterMieteEntry } from '$WalterLib';
 
 	const apiURL = `/api/vertragversionen`;
 	const title = 'Vertragsänderung';

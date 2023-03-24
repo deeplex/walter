@@ -5,7 +5,7 @@
 		WalterTextArea
 	} from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
-	import type { WalterSelectionEntry, WalterUmlageEntry } from '$WalterTypes';
+	import type { WalterSelectionEntry, WalterUmlageEntry } from '$WalterLib';
 
 	export let betriebskostentypen: WalterSelectionEntry[];
 	export let umlageschluessel: WalterSelectionEntry[];

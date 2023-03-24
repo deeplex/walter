@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Accordion, Row } from 'carbon-components-svelte';
+	import { Accordion } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 	import {
 		WalterGrid,

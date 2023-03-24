@@ -10,7 +10,7 @@
 	import type {
 		WalterErhaltungsaufwendungEntry,
 		WalterSelectionEntry
-	} from '$WalterTypes';
+	} from '$WalterLib';
 
 	export let kontakte: WalterSelectionEntry[];
 	export let wohnungen: WalterSelectionEntry[];

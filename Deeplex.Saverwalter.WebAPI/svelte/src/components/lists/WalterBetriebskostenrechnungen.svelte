@@ -9,7 +9,7 @@
 	import type {
 		WalterBetriebskostenrechnungEntry,
 		WalterSelectionEntry
-	} from '$WalterTypes';
+	} from '$WalterLib';
 
 	export let rows: WalterBetriebskostenrechnungEntry[];
 	export let search: boolean = false;

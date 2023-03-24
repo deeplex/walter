@@ -8,7 +8,7 @@
 	import type {
 		WalterNatuerlichePersonEntry,
 		WalterSelectionEntry
-	} from '$WalterTypes';
+	} from '$WalterLib';
 	import { Row } from 'carbon-components-svelte';
 
 	export let a: Partial<WalterNatuerlichePersonEntry>;

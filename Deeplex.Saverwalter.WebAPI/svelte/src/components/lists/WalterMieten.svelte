@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { WalterDataWrapper, WalterMiete } from '$WalterComponents';
-	import type { WalterMieteEntry } from '$WalterTypes';
+	import type { WalterMieteEntry } from '$WalterLib';
 
 	const headers = [
 		{ key: 'betreffenderMonat', value: 'Betreffender Monat' },

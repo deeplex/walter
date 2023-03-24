@@ -1,7 +1,8 @@
+import type { WalterVertragVersionEntry } from "$WalterLib";
 import { getKostenpunkt } from "$WalterServices/abrechnung";
 import { walter_get } from "$WalterServices/requests";
 import { toLocaleIsoString } from "$WalterServices/utils";
-import type { WalterBetriebskostenabrechnungEntry, WalterBetriebskostenabrechnungKostengruppenEntry, WalterVertragVersionEntry } from "$WalterTypes";
+import type { WalterBetriebskostenabrechnungEntry, WalterBetriebskostenabrechnungKostengruppenEntry } from "$WalterTypes";
 
 export function getMietminderungEntry(vertragId: string) {
     const today = new Date();

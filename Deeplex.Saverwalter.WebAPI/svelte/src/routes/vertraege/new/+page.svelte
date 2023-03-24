@@ -8,7 +8,7 @@
 	import type {
 		WalterVertragEntry,
 		WalterVertragVersionEntry
-	} from '$WalterTypes';
+	} from '$WalterLib';
 	import { Tile } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 

@@ -4,7 +4,7 @@
 		WalterGrid,
 		WalterHeaderNew
 	} from '$WalterComponents';
-	import type { WalterAdresseEntry } from '$WalterTypes';
+	import type { WalterAdresseEntry } from '$WalterLib';
 
 	const apiURL = `/api/adressen`;
 	const title = 'Neue Adresse';

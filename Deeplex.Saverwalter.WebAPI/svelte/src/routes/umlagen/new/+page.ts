@@ -1,5 +1,4 @@
-import { walter_get, walter_selection } from "$WalterServices/requests";
-import type { WalterSelectionEntry, WalterUmlageEntry } from "$WalterTypes";
+import { walter_selection } from "$WalterServices/requests";
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, fetch }) => {

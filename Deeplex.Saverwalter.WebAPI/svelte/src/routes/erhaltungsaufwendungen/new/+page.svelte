@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { WalterErhaltungsaufwendungEntry } from '$WalterTypes';
 	import {
 		WalterGrid,
 		WalterErhaltungsaufwendung,
 		WalterHeaderNew
 	} from '$WalterComponents';
+	import type { WalterErhaltungsaufwendungEntry } from '$WalterLib';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { WalterDataWrapper, WalterVertragVersion } from '$WalterComponents';
-	import type { WalterVertragVersionEntry } from '$WalterTypes';
+	import type { WalterVertragVersionEntry } from '$WalterLib';
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
 	const headers = [

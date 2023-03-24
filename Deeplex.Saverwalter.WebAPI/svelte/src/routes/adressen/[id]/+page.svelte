@@ -7,7 +7,7 @@
 		WalterWohnungen,
 		WalterZaehlerList
 	} from '$WalterComponents';
-	import type { WalterWohnungEntry } from '$WalterTypes';
+	import type { WalterWohnungEntry } from '$WalterLib';
 	import { Accordion } from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 

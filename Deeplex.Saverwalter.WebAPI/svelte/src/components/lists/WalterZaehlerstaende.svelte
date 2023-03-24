@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { WalterDataWrapper, WalterZaehlerstand } from '$WalterComponents';
 
-	import type { WalterZaehlerstandEntry } from '$WalterTypes';
+	import type { WalterZaehlerstandEntry } from '$WalterLib';
 
 	const headers = [
 		{ key: 'datum', value: 'Datum' },

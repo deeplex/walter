@@ -1,6 +1,7 @@
-import { walter_get, walter_selection } from "$WalterServices/requests";
+import { WalterJuristischePersonEntry } from "$WalterLib";
+import { walter_selection } from "$WalterServices/requests";
 import { walter_s3_get_files } from "$WalterServices/s3";
-import type { WalterJuristischePersonEntry, WalterS3File, WalterSelectionEntry } from "$WalterTypes";
+import type { WalterS3File } from "$WalterTypes";
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, fetch }) => {
@@ -11,7 +12,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
                 id: params.id,
                 S3URL: S3URL,
                 apiURL: apiURL,
-                a: walter_get(apiURL, fetch) as Promise<WalterJuristischePersonEntry>,
+                a: WalterJuristischePersonEntry.GetOne<WalterJuristischePersonEntry>(`jur/${params.id}`, fetch),
 
                 kontakte: walter_selection.kontakte(fetch),
                 wohnungen: walter_selection.wohnungen(fetch),

@@ -1,10 +1,6 @@
 <script lang="ts">
 	import { ContentSwitcher, Row, Switch } from 'carbon-components-svelte';
 
-	import type {
-		WalterJuristischePersonEntry,
-		WalterNatuerlichePersonEntry
-	} from '$WalterTypes';
 	import {
 		WalterGrid,
 		WalterHeaderNew,
@@ -12,6 +8,10 @@
 		WalterNatuerlichePerson
 	} from '$WalterComponents';
 	import type { PageData } from './$types';
+	import type {
+		WalterJuristischePersonEntry,
+		WalterNatuerlichePersonEntry
+	} from '$WalterLib';
 
 	export let data: PageData;
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WalterGrid, WalterHeaderNew, WalterMiete } from '$WalterComponents';
-	import type { WalterMieteEntry } from '$WalterTypes';
+	import type { WalterMieteEntry } from '$WalterLib';
 
 	const apiURL = `/api/miete`;
 	const title = 'Neue Miete';

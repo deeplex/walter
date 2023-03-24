@@ -4,7 +4,7 @@
 		WalterZaehler,
 		WalterHeaderNew
 	} from '$WalterComponents';
-	import type { WalterZaehlerEntry } from '$WalterTypes';
+	import type { WalterZaehlerEntry } from '$WalterLib';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

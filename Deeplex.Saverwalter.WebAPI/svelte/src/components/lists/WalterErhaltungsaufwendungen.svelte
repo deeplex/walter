@@ -9,7 +9,7 @@
 	import type {
 		WalterErhaltungsaufwendungEntry,
 		WalterSelectionEntry
-	} from '$WalterTypes';
+	} from '$WalterLib';
 
 	const headers = [
 		{ key: 'bezeichnung', value: 'Bezeichnung' },

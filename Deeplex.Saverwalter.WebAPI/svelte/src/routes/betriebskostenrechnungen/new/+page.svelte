@@ -5,8 +5,8 @@
 		WalterHeaderNew,
 		WalterBetriebskostenrechnung
 	} from '$WalterComponents';
+	import type { WalterBetriebskostenrechnungEntry } from '$WalterLib';
 	import { toLocaleIsoString } from '$WalterServices/utils';
-	import type { WalterBetriebskostenrechnungEntry } from '$WalterTypes';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

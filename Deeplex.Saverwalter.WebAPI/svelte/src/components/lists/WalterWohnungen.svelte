@@ -3,7 +3,7 @@
 	import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
 	import { WalterDataWrapper, WalterWohnung } from '$WalterComponents';
-	import type { WalterSelectionEntry, WalterWohnungEntry } from '$WalterTypes';
+	import type { WalterSelectionEntry, WalterWohnungEntry } from '$WalterLib';
 
 	const headers = [
 		{ key: 'adresse.anschrift', value: 'Anschrift' },

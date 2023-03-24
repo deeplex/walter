@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Row } from 'carbon-components-svelte';
 
-	import type { WalterPersonEntry, WalterSelectionEntry } from '$WalterTypes';
+	import type { WalterPersonEntry } from '$WalterLib';
 	import { WalterAdresse, WalterTextInput } from '$WalterComponents';
 
 	export let value: Partial<WalterPersonEntry>;

@@ -5,7 +5,7 @@
 		WalterTextArea
 	} from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
-	import type { WalterMieteEntry } from '$WalterTypes';
+	import type { WalterMieteEntry } from '$WalterLib';
 
 	export let a: Partial<WalterMieteEntry> = {};
 </script>

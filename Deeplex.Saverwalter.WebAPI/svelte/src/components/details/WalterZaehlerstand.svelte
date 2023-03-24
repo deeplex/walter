@@ -5,7 +5,7 @@
 		WalterTextArea
 	} from '$WalterComponents';
 	import { Row } from 'carbon-components-svelte';
-	import type { WalterZaehlerstandEntry } from '$WalterTypes';
+	import type { WalterZaehlerstandEntry } from '$WalterLib';
 	import WalterTextInput from '../elements/WalterTextInput.svelte';
 
 	export let a: Partial<WalterZaehlerstandEntry> = {};
