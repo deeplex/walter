@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Deeplex.Saverwalter.Betriebskostenabrechnung;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Deeplex.Saverwalter.Model
 {

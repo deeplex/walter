@@ -3,18 +3,19 @@ using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.Print;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Utils.BetriebskostenabrechnungController;
+using Deeplex.Saverwalter.Betriebskostenabrechnung;
 
 namespace Deeplex.Saverwalter.WebAPI
 {
     public sealed class BetriebskostenabrechnungSerivce
     {
-        private Betriebskostenabrechnung createAbrechnung(int id, int Jahr, SaverwalterContext ctx)
+        private IBetriebskostenabrechnung createAbrechnung(int id, int Jahr, SaverwalterContext ctx)
         {
             var vertrag = ctx.Vertraege.Find(id);
             var beginn = new DateTime(Jahr, 1, 1);
             var ende = new DateTime(Jahr, 12, 31);
 
-            return new Betriebskostenabrechnung(ctx, vertrag, Jahr, beginn, ende);
+            return new Betriebskostenabrechnung.Betriebskostenabrechnung(ctx, vertrag, Jahr, beginn, ende);
         }
 
         public IActionResult Get(int id, int Jahr, IWalterDbService dbService)

@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{254288C9
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.WebAPI", "Deeplex.Saverwalter.WebAPI\Deeplex.Saverwalter.WebAPI.csproj", "{82004177-6EF1-42DE-911B-BD4917BB4B81}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deeplex.Saverwalter.Betriebskostenabrechnung", "Deeplex.Saverwalter.Betriebskostenabrechnung\Deeplex.Saverwalter.Betriebskostenabrechnung.csproj", "{DD438273-69A1-4266-901F-734457524A37}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -217,6 +219,26 @@ Global
 		{82004177-6EF1-42DE-911B-BD4917BB4B81}.Release|x64.Build.0 = Release|Any CPU
 		{82004177-6EF1-42DE-911B-BD4917BB4B81}.Release|x86.ActiveCfg = Release|Any CPU
 		{82004177-6EF1-42DE-911B-BD4917BB4B81}.Release|x86.Build.0 = Release|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Debug|ARM.Build.0 = Debug|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Debug|x64.Build.0 = Debug|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Debug|x86.Build.0 = Debug|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Release|ARM.ActiveCfg = Release|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Release|ARM.Build.0 = Release|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Release|ARM64.Build.0 = Release|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Release|x64.ActiveCfg = Release|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Release|x64.Build.0 = Release|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Release|x86.ActiveCfg = Release|Any CPU
+		{DD438273-69A1-4266-901F-734457524A37}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

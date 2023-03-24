@@ -1,11 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
+﻿using Deeplex.Saverwalter.Model;
 using System.Collections.Immutable;
-using System.Linq;
 using static Deeplex.Saverwalter.Model.Utils;
 
-namespace Deeplex.Saverwalter.Model
+namespace Deeplex.Saverwalter.Betriebskostenabrechnung
 {
     public interface IBetriebskostenabrechnung
     {
