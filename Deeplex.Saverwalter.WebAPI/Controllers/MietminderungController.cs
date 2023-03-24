@@ -1,10 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Services;
 using Deeplex.Saverwalter.WebAPI.Helper;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
@@ -17,11 +14,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             private Mietminderung? Entity { get; }
 
-            public int Id { get; set; } 
+            public int Id { get; set; }
             public DateTime? Beginn { get; set; }
             public DateTime? Ende { get; set; }
             public double? Minderung { get; set; }
-            public string? Notiz {get; set;}
+            public string? Notiz { get; set; }
             public SelectionEntry? Vertrag { get; set; }
 
             public MietminderungEntryBase() { }

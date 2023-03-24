@@ -1,8 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
-using System;
-using System.Linq;
 
 namespace Deeplex.Saverwalter.Print
 {

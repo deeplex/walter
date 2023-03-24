@@ -1,9 +1,9 @@
 using Deeplex.Saverwalter.Services;
-using SimpleInjector;
+using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using SimpleInjector;
 
 namespace Deeplex.Saverwalter.WebAPI
 {
@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.WebAPI
             });
 
             var app = builder.Build();
-            
+
             app.Services.UseSimpleInjector(container);
 
             // Configure the HTTP request pipeline.

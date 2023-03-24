@@ -1,6 +1,4 @@
-﻿using Deeplex.Saverwalter.Betriebskostenabrechnung;
-
-namespace Deeplex.Saverwalter.Model
+﻿namespace Deeplex.Saverwalter.Model
 {
     public static class Utils
     {

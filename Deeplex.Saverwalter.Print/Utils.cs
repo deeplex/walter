@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using System;
 
 namespace Deeplex.Saverwalter.Print
 {

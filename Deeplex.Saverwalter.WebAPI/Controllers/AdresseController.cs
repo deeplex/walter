@@ -30,9 +30,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Entity = entity;
                 Id = Entity.AdresseId;
 
-                Strasse= Entity.Strasse;
+                Strasse = Entity.Strasse;
                 Hausnummer = Entity.Hausnummer;
-                Postleitzahl   = Entity.Postleitzahl;
+                Postleitzahl = Entity.Postleitzahl;
                 Stadt = Entity.Stadt;
                 Anschrift = Entity.Anschrift;
                 Notiz = Entity.Notiz;

@@ -1,7 +1,6 @@
 ﻿using FakeItEasy;
 using FluentAssertions;
 using Xunit;
-using static Deeplex.Saverwalter.Model.Utils;
 
 namespace Deeplex.Saverwalter.Model.Tests
 {

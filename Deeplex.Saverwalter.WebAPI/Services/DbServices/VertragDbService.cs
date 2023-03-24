@@ -58,7 +58,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 // Get a list of all mieter
                 var mieter = DbService.ctx.MieterSet.Where(m => m.Vertrag.VertragId == entity.VertragId).ToList();
                 // Add missing mieter
-                foreach(var selectedMieter in l)
+                foreach (var selectedMieter in l)
                 {
                     if (!mieter.Any(m => m.PersonId.ToString() == selectedMieter.Id))
                     {
@@ -66,7 +66,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     }
                 }
                 // Remove mieter
-                foreach(var m in mieter)
+                foreach (var m in mieter)
                 {
                     if (!l.Any(e => m.PersonId.ToString() == e.Id))
                     {

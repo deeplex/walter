@@ -1,10 +1,10 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Services;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.NatuerlichePersonController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             entity.Vorname = entry.Vorname;
             entity.Nachname = entry.Nachname!;
-            entity.Email= entry.Email;
+            entity.Email = entry.Email;
             entity.Fax = entry.Fax;
             entity.Notiz = entry.Notiz;
             entity.Telefon = entry.Telefon;
