@@ -8,22 +8,6 @@ namespace Deeplex.Saverwalter.Model.Tests
     public class UtilsTests
     {
         [Theory]
-        [InlineData(1, 3, 3)]
-        [InlineData(0, 3, 3)]
-        public void MaxTest(double a, double b, double r)
-        {
-            Max(a, b).Should().Be(r);
-        }
-
-        [Theory]
-        [InlineData(1, 3, 1)]
-        [InlineData(0, 3, 0)]
-        public void MinTest(double a, double b, double r)
-        {
-            Min(a, b).Should().Be(r);
-        }
-
-        [Theory]
         [InlineData(1, "Frau Erika Mustermann")]
         [InlineData(0, "Herrn Erika Mustermann")]
         [InlineData(2, "Erika Mustermann")]
