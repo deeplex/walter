@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.Print
 {
     public static class TPrint<T>
     {
-        private static void Header(IBetriebskostenabrechnung b, IPrint<T> p)
+        private static void Header(Betriebskostenabrechnung.Betriebskostenabrechnung b, IPrint<T> p)
         {
             var AnsprechpartnerBezeichnung = b.Ansprechpartner is IPerson a ? a.Bezeichnung : "";
 
@@ -78,7 +78,7 @@ namespace Deeplex.Saverwalter.Print
 
             p.Table(widths, j, bold, underlined, new string[][] { left.ToArray(), right.ToArray() });
         }
-        private static void ExplainUmlageschluessel(IBetriebskostenabrechnung b, IPrint<T> p)
+        private static void ExplainUmlageschluessel(Betriebskostenabrechnung.Betriebskostenabrechnung b, IPrint<T> p)
         {
             var left1 = new List<string> { "Umlageschlüssel" };
             var right1 = new List<string> { "Bedeutung" };
@@ -145,7 +145,7 @@ namespace Deeplex.Saverwalter.Print
             p.Table(widths, j, bold, underlined, new string[][] { left1.ToArray(), right1.ToArray() });
             p.Table(widths, j, bold, underlined, new string[][] { left2.ToArray(), right2.ToArray() });
         }
-        private static void ExplainKalteBetriebskosten(IBetriebskostenabrechnung b, IPrint<T> p)
+        private static void ExplainKalteBetriebskosten(Betriebskostenabrechnung.Betriebskostenabrechnung b, IPrint<T> p)
         {
             var runs = b.Wohnung.Umlagen
                 .Where(r => r.Beschreibung != null && r.Beschreibung.Trim() != "")
@@ -158,7 +158,7 @@ namespace Deeplex.Saverwalter.Print
 
             p.Paragraph(runs);
         }
-        private static void AbrechnungWohnung(IBetriebskostenabrechnung b, IRechnungsgruppe g, IPrint<T> p)
+        private static void AbrechnungWohnung(Betriebskostenabrechnung.Betriebskostenabrechnung b, IRechnungsgruppe g, IPrint<T> p)
         {
             if (g == null) return;
 
@@ -193,7 +193,7 @@ namespace Deeplex.Saverwalter.Print
 
             p.Table(widths, justification, bold, underlined, cols); ;
         }
-        private static void AbrechnungEinheit(IBetriebskostenabrechnung b, IRechnungsgruppe g, IPrint<T> p)
+        private static void AbrechnungEinheit(Betriebskostenabrechnung.Betriebskostenabrechnung b, IRechnungsgruppe g, IPrint<T> p)
         {
             p.SubHeading("Angaben zur Abrechnungseinheit:");
             p.Text(g.Bezeichnung);
@@ -231,7 +231,7 @@ namespace Deeplex.Saverwalter.Print
 
             p.Table(widths, justification, bold, underlined, cols);
         }
-        private static void ErmittlungKalteEinheiten(IBetriebskostenabrechnung b, IRechnungsgruppe g, IPrint<T> p)
+        private static void ErmittlungKalteEinheiten(Betriebskostenabrechnung.Betriebskostenabrechnung b, IRechnungsgruppe g, IPrint<T> p)
         {
             var widths = new int[] { 41, 22, 24, 13 };
             var col1 = new List<string> { "Ermittlung Ihrer Einheiten" };
@@ -375,7 +375,7 @@ namespace Deeplex.Saverwalter.Print
 
             p.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
-        public static void ErmittlungKalteKosten(IBetriebskostenabrechnung b, IRechnungsgruppe g, IPrint<T> p)
+        public static void ErmittlungKalteKosten(Betriebskostenabrechnung.Betriebskostenabrechnung b, IRechnungsgruppe g, IPrint<T> p)
         {
             var widths = new int[] { 32, 9, 22, 13, 11, 13 };
 
@@ -465,7 +465,7 @@ namespace Deeplex.Saverwalter.Print
 
             p.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
-        private static void ErmittlungWarmeKosten(IBetriebskostenabrechnung b, IRechnungsgruppe g, IPrint<T> p)
+        private static void ErmittlungWarmeKosten(Betriebskostenabrechnung.Betriebskostenabrechnung b, IRechnungsgruppe g, IPrint<T> p)
         {
             var widths = new int[] { 50, 10 };
 
@@ -496,7 +496,7 @@ namespace Deeplex.Saverwalter.Print
                 p.Table(widths, justification, bold, underlined, cols);
             }
         }
-        private static void ErmittlungWarmeEinheiten(IBetriebskostenabrechnung b, IRechnungsgruppe g, IPrint<T> p)
+        private static void ErmittlungWarmeEinheiten(Betriebskostenabrechnung.Betriebskostenabrechnung b, IRechnungsgruppe g, IPrint<T> p)
         {
             var widths = new int[] { 41, 22, 24, 13 };
             var col1 = new List<string> { "Ermittlung Ihrer Einheiten" };
@@ -587,7 +587,7 @@ namespace Deeplex.Saverwalter.Print
 
             p.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
-        public static void ErmittlungWarmanteil(IBetriebskostenabrechnung b, IRechnungsgruppe gruppe, IPrint<T> p)
+        public static void ErmittlungWarmanteil(Betriebskostenabrechnung.Betriebskostenabrechnung b, IRechnungsgruppe gruppe, IPrint<T> p)
         {
             var widths = new int[] { 24, 13, 9, 14, 14, 13, 13 };
             var col1 = new List<string> { "Kostenanteil" };
@@ -658,7 +658,7 @@ namespace Deeplex.Saverwalter.Print
 
             p.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
-        private static void GesamtErgebnis(IBetriebskostenabrechnung b, IPrint<T> p)
+        private static void GesamtErgebnis(Betriebskostenabrechnung.Betriebskostenabrechnung b, IPrint<T> p)
         {
             var widths = new int[] { 40, 10 };
 
@@ -712,7 +712,7 @@ namespace Deeplex.Saverwalter.Print
             p.Table(widths, justification, bold, underlined, cols);
         }
 
-        private static void Introtext(IBetriebskostenabrechnung b, IPrint<T> p)
+        private static void Introtext(Betriebskostenabrechnung.Betriebskostenabrechnung b, IPrint<T> p)
         {
             p.Paragraph(
                 new PrintRun(b.Title(), true),
@@ -732,7 +732,7 @@ namespace Deeplex.Saverwalter.Print
             p.Paragraph(new PrintRun(b.GenerischerText()));
         }
 
-        public static T Print(IBetriebskostenabrechnung b, IPrint<T> p)
+        public static T Print(Betriebskostenabrechnung.Betriebskostenabrechnung b, IPrint<T> p)
         {
             Header(b, p);
             Introtext(b, p);

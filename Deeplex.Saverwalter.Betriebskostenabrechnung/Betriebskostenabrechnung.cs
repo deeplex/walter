@@ -4,7 +4,7 @@ using static Deeplex.Saverwalter.Model.Utils;
 
 namespace Deeplex.Saverwalter.Betriebskostenabrechnung
 {
-    public interface IBetriebskostenabrechnung
+    public interface Betriebskostenabrechnung
     {
         IPerson Ansprechpartner { get; }
         List<Rechnungsgruppe> Gruppen { get; }
@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.Betriebskostenabrechnung
         List<Zaehler> Zaehler { get; }
     }
 
-    public sealed class Betriebskostenabrechnung : IBetriebskostenabrechnung
+    public sealed class BetriebskostenabrechnungImpl : Betriebskostenabrechnung
     {
         public List<Note> notes { get; } = new List<Note>();
         public int Jahr { get; set; }
@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.Betriebskostenabrechnung
 
         public double AllgStromFaktor { get; set; }
 
-        public Betriebskostenabrechnung(SaverwalterContext ctx, Vertrag v, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
+        public BetriebskostenabrechnungImpl(SaverwalterContext ctx, Vertrag v, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
         {
             Abrechnungsbeginn = abrechnungsbeginn;
             Abrechnungsende = abrechnungsende;

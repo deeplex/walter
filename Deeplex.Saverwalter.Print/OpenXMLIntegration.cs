@@ -71,14 +71,14 @@ namespace Deeplex.Saverwalter.Print
             CreateWordDocument(filepath, body);
         }
 
-        public static void SaveAsDocx(this IBetriebskostenabrechnung b, Stream stream)
+        public static void SaveAsDocx(this Betriebskostenabrechnung.Betriebskostenabrechnung b, Stream stream)
         {
             var body = TPrint<Body>.Print(b, new WordPrint());
 
             CreateWordDocument(stream, body);
         }
 
-        public static void SaveAsDocx(this IBetriebskostenabrechnung b, string filepath)
+        public static void SaveAsDocx(this Betriebskostenabrechnung.Betriebskostenabrechnung b, string filepath)
         {
             var body = TPrint<Body>.Print(b, new WordPrint());
 

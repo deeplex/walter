@@ -85,7 +85,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double Result { get; }
             public double AllgStromFaktor { get; set; }
 
-            public BetriebskostenabrechnungEntry(IBetriebskostenabrechnung b, IWalterDbService dbService)
+            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung.Betriebskostenabrechnung b, IWalterDbService dbService)
             {
                 notes = b.notes;
                 Jahr = b.Jahr;
