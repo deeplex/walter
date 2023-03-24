@@ -74,28 +74,30 @@ namespace Deeplex.Saverwalter.Model
                 var ende = (ganzeGruppe ? b.Abrechnungsende : b.Nutzungsende).Date;
                 var ret = z.Select(z => z.Staende.OrderBy(s => s.Datum)
                     .LastOrDefault(l => l.Datum.Date <= ende && (ende - l.Datum.Date).Days < 30))
-                    .Where(zs => zs != null)
+                    .Where(zaehlerstand => zaehlerstand != null)
+                    .Select(zaehlerstand => zaehlerstand!)
                     .ToImmutableList();
 
                 return ret;
             }
 
-            ImmutableList<Zaehlerstand> Beginn(IEnumerable<Zaehler> z, bool ganzeGruppe = false)
+            ImmutableList<Zaehlerstand> Beginn(IEnumerable<Zaehler> zaehlerList, bool ganzeGruppe = false)
             {
                 var beginn = (ganzeGruppe ? b.Abrechnungsbeginn : b.Nutzungsbeginn).Date.AddDays(-1);
-                var ret = z.Select(z => z.Staende.OrderBy(s => s.Datum)
+                var ret = zaehlerList.Select(z => z.Staende.OrderBy(s => s.Datum)
                     .LastOrDefault(l => l.Datum.Date <= beginn && (beginn - l.Datum.Date).Days < 30))
-                    .Where(zs => zs != null)
+                    .Where(zaehlerstand => zaehlerstand != null)
+                    .Select(zaehlerstand => zaehlerstand!)
                     .ToImmutableList();
 
                 return ret;
             }
 
-            V = Ende(AlleWarmwasserZaehler, true).Sum(w => w.Stand) -
-                Beginn(AlleWarmwasserZaehler, true).Sum(w => w.Stand);
+            V = Ende(AlleWarmwasserZaehler, true).Sum(zaehlerstand => zaehlerstand.Stand) -
+                Beginn(AlleWarmwasserZaehler, true).Sum(zaehlerstand => zaehlerstand.Stand);
 
-            Q = Ende(new List<Zaehler>() { Allgemeinzaehler }, true).Sum(w => w.Stand) -
-                Beginn(new List<Zaehler>() { Allgemeinzaehler }, true).Sum(w => w.Stand);
+            Q = Ende(new List<Zaehler>() { Allgemeinzaehler }, true).Sum(zaehlerstand => zaehlerstand.Stand) -
+                Beginn(new List<Zaehler>() { Allgemeinzaehler }, true).Sum(zaehlerstand => zaehlerstand.Stand);
 
             if (Q == 0)
             {

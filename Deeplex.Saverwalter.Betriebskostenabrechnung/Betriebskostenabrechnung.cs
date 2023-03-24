@@ -1,6 +1,8 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Castle.Core.Internal;
+using Deeplex.Saverwalter.Model;
 using System.Collections.Immutable;
 using static Deeplex.Saverwalter.Model.Utils;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
@@ -29,7 +31,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         List<Note> notes { get; }
         Vertrag Vertrag { get; }
         List<VertragVersion> Versionen { get; }
-        List<Verbrauch> GetVerbrauch(SaverwalterContext ctx, Umlage u, bool ganzeGruppe = false);
+        List<Verbrauch> GetVerbrauchWohnung(SaverwalterContext ctx, Umlage u);
+        List<Verbrauch> GetVerbrauchGanzeGruppe(SaverwalterContext ctx, Umlage u);
         double AllgStromFaktor { get; set; }
         List<Zaehler> Zaehler { get; }
     }
@@ -173,66 +176,93 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 });
         }
 
-        public List<Verbrauch> GetVerbrauch(SaverwalterContext db, Umlage u, bool ganzeGruppe = false)
+        private List<Zaehler> GetAllZaehlerForVerbrauch(SaverwalterContext ctx, Betriebskostentyp typ)
         {
-            var Zaehler = u.Typ switch
+            return typ switch
             {
                 Betriebskostentyp.EntwaesserungSchmutzwasser =>
-                    db.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
+                    ctx.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
                 Betriebskostentyp.WasserversorgungKalt =>
-                    db.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
+                    ctx.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
                 Betriebskostentyp.Heizkosten => // TODO Man kann auch mit was anderem als Gas heizen...
-                    db.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Gas || z.Typ == Zaehlertyp.Warmwasser).ToList(),
+                    ctx.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Gas || z.Typ == Zaehlertyp.Warmwasser).ToList(),
                 _ => null
-            };
+            } ?? new List<Zaehler> { };
+        }
 
-            var fZaehler = Zaehler.Where(z =>
-                ganzeGruppe ?
-                    u.Wohnungen.Contains(z.Wohnung!) :
-                    z.Wohnung?.WohnungId == Wohnung.WohnungId)
-                .ToList();
-
-            var ende = (ganzeGruppe ? Abrechnungsende : Nutzungsende).Date;
-            var beginn = (ganzeGruppe ? Abrechnungsbeginn : Nutzungsbeginn).Date.AddDays(-1);
-
-            var Ende = fZaehler
+        private ImmutableList<Zaehlerstand> GetZaehlerEndStaendeFuerBerechnung(List<Zaehler> zaehler)
+        {
+            return zaehler
                 .Select(z => z.Staende
                     .OrderBy(s => s.Datum)
-                    .LastOrDefault(l => l.Datum.Date <= ende && (ende - l.Datum.Date).Days < 30))
+                    .LastOrDefault(l => l.Datum.Date <= Nutzungsende.Date && (Nutzungsende.Date - l.Datum.Date).Days < 30))
                 .ToList()
-                .Where(zs => zs != null)
-                .ToImmutableList();
+                .Where(zaehlerstand => zaehlerstand is not null)
+                .Select(e => e!) // still necessary to make sure not null?
+                .ToImmutableList() ?? new List<Zaehlerstand>() { }.ToImmutableList();
+        }
 
-            var Beginn = fZaehler
+        private ImmutableList<Zaehlerstand> GetZaehlerAnfangsStaendeFuerBerechnung(List<Zaehler> zaehler)
+        {
+            return zaehler
                 .Select(z => z.Staende.OrderBy(s => s.Datum)
                     .ToList()
-                    .Where(l => Math.Abs((l.Datum - beginn).Days) < 30)
+                    .Where(l => Math.Abs((l.Datum - Nutzungsbeginn.Date.AddDays(-1)).Days) < 30)
                     .ToList()
                 .FirstOrDefault())
                 .Where(zs => zs != null)
+                .Select(e => e!) // still necessary to make sure not null?
                 .ToImmutableList();
+        }
 
+        private List<Verbrauch> GetVerbrauchForZaehlerStaende(Umlage umlage, ImmutableList<Zaehlerstand> Beginne, ImmutableList<Zaehlerstand> Enden)
+        {
             List<Verbrauch> Deltas = new List<Verbrauch>();
 
-            if (Ende.IsEmpty)
+            if (Enden.IsEmpty)
             {
                 notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
             }
-            else if (Beginn.IsEmpty)
+            else if (Enden.IsEmpty)
             {
                 notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
             }
-            else if (Ende.Count() != Beginn.Count())
+            else if (Enden.Count() != Beginne.Count())
             {
                 notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
             }
             else
             {
-                for (var i = 0; i < Ende.Count(); ++i)
+                for (var i = 0; i < Enden.Count(); ++i)
                 {
-                    Deltas.Add(new Verbrauch(u.Typ, Ende[i].Zaehler.Kennnummer, Ende[i].Zaehler.Typ, Ende[i].Stand - Beginn[i].Stand));
+                    var end = Enden[i];
+                    Deltas.Add(new Verbrauch(umlage.Typ, Enden[i].Zaehler.Kennnummer, Enden[i].Zaehler.Typ, Enden[i].Stand - Beginne[i].Stand));
                 }
             }
+
+            return Deltas;
+        }
+
+        public List<Verbrauch> GetVerbrauchGanzeGruppe(SaverwalterContext ctx, Umlage umlage)
+        {
+            var Zaehler = GetAllZaehlerForVerbrauch(ctx, umlage.Typ);
+
+            var ZaehlerMitVerbrauchForGanzeGruppe = Zaehler.Where(z => umlage.Wohnungen.Contains(z.Wohnung!)).ToList();
+            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(ZaehlerMitVerbrauchForGanzeGruppe);
+            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(ZaehlerMitVerbrauchForGanzeGruppe);
+            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerEndStaende, ZaehlerAnfangsStaende);
+
+            return Deltas;
+        }
+
+        public List<Verbrauch> GetVerbrauchWohnung(SaverwalterContext ctx, Umlage umlage)
+        {
+            var AlleZaehler = GetAllZaehlerForVerbrauch(ctx, umlage.Typ);
+
+            var ZaehlerMitVerbrauchForThisWohnung = AlleZaehler.Where(z => z.Wohnung?.WohnungId == Wohnung.WohnungId).ToList();
+            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(ZaehlerMitVerbrauchForThisWohnung);
+            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(ZaehlerMitVerbrauchForThisWohnung);
+            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerEndStaende, ZaehlerAnfangsStaende);
 
             return Deltas;
         }

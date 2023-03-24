@@ -11,14 +11,18 @@ namespace Deeplex.Saverwalter.Model
         public double Anteil { get; }
         public int Personenzahl { get; }
 
-        public PersonenZeitanteil(PersonenZeitIntervall interval, List<PersonenZeitIntervall> l, BetriebskostenabrechnungService.Betriebskostenabrechnung b)
+        public PersonenZeitanteil(
+            PersonenZeitIntervall interval,
+            List<PersonenZeitIntervall> personenZeitIntervallList,
+            BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
         {
             Beginn = interval.Beginn;
             Ende = interval.Ende;
             Personenzahl = interval.Personenzahl;
 
-            double personenAnteil = (double)(l.FirstOrDefault(p => p.Beginn <= Beginn)?.Personenzahl ?? 0) / Personenzahl;
-            double zeitAnteil = (double)((Ende - Beginn).Days + 1) / b.Abrechnungszeitspanne;
+            double personenAnteil = (double)(personenZeitIntervallList.FirstOrDefault(personenZeitIntervall =>
+                personenZeitIntervall.Beginn <= Beginn)?.Personenzahl ?? 0) / Personenzahl;
+            double zeitAnteil = (double)((Ende - Beginn).Days + 1) / betriebskostenabrechnung.Abrechnungszeitspanne;
 
             Anteil = personenAnteil * zeitAnteil;
         }
@@ -74,140 +78,152 @@ namespace Deeplex.Saverwalter.Model
         public double GesamtBetragWarm { get; }
         public double BetragWarm { get; }
 
-        public Rechnungsgruppe(SaverwalterContext ctx, BetriebskostenabrechnungService.Betriebskostenabrechnung b, List<Umlage> gruppe)
+        public Rechnungsgruppe(SaverwalterContext ctx, BetriebskostenabrechnungService.Betriebskostenabrechnung betriebkostenabrechnung, List<Umlage> gruppe)
         {
             Umlagen = gruppe;
             Wohnungen = Umlagen.First().Wohnungen.ToList();
             alleVertraege = Wohnungen
                 .SelectMany(w => w.Vertraege.SelectMany(e => e.Versionen))
                 .ToList()
-                .Where(v => v.Beginn <= b.Abrechnungsende && (v.Ende() is null || v.Ende() >= b.Abrechnungsbeginn))
+                .Where(v => v.Beginn <= betriebkostenabrechnung.Abrechnungsende && (v.Ende() is null || v.Ende() >= betriebkostenabrechnung.Abrechnungsbeginn))
                 .ToList();
             Bezeichnung = Umlagen.First().GetWohnungenBezeichnung();
             GesamtWohnflaeche = Wohnungen.Sum(w => w.Wohnflaeche);
             GesamtNutzflaeche = Wohnungen.Sum(w => w.Nutzflaeche);
-            WFZeitanteil = b.Wohnung.Wohnflaeche / GesamtWohnflaeche * b.Zeitanteil;
-            NFZeitanteil = b.Wohnung.Nutzflaeche / GesamtNutzflaeche * b.Zeitanteil;
+            WFZeitanteil = betriebkostenabrechnung.Wohnung.Wohnflaeche / GesamtWohnflaeche * betriebkostenabrechnung.Zeitanteil;
+            NFZeitanteil = betriebkostenabrechnung.Wohnung.Nutzflaeche / GesamtNutzflaeche * betriebkostenabrechnung.Zeitanteil;
             GesamtNutzflaeche = Wohnungen.Sum(w => w.Nutzflaeche);
             GesamtEinheiten = Wohnungen.Sum(w => w.Nutzeinheit);
-            NEZeitanteil = (double)b.Wohnung.Nutzeinheit / GesamtEinheiten * b.Zeitanteil;
-            GesamtPersonenIntervall = VertraegeIntervallPersonenzahl(alleVertraege, b, this).ToList();
-            PersonenIntervall = VertraegeIntervallPersonenzahl(b.Versionen, b, this).ToList();
+            NEZeitanteil = (double)betriebkostenabrechnung.Wohnung.Nutzeinheit / GesamtEinheiten * betriebkostenabrechnung.Zeitanteil;
+            GesamtPersonenIntervall = VertraegeIntervallPersonenzahl(alleVertraege, betriebkostenabrechnung, this).ToList();
+            PersonenIntervall = VertraegeIntervallPersonenzahl(betriebkostenabrechnung.Versionen, betriebkostenabrechnung, this).ToList();
 
             PersonenZeitanteil = GesamtPersonenIntervall
-                .Where(g => g.Beginn < b.Nutzungsende && g.Ende >= b.Nutzungsbeginn)
+                .Where(g => g.Beginn < betriebkostenabrechnung.Nutzungsende && g.Ende >= betriebkostenabrechnung.Nutzungsbeginn)
                 .ToList()
-                .Select((w, i) => new PersonenZeitanteil(w, PersonenIntervall, b))
+                .Select((w, i) => new PersonenZeitanteil(w, PersonenIntervall, betriebkostenabrechnung))
                 .ToList();
 
             GesamtVerbrauch = Umlagen
-                .Where(g => g.Schluessel == Umlageschluessel.NachVerbrauch)
+                .Where(umlage => umlage.Schluessel == Umlageschluessel.NachVerbrauch)
                 .ToList()
-                .Select(r => b.GetVerbrauch(ctx, r, true))
+                .Select(r => betriebkostenabrechnung.GetVerbrauchWohnung(ctx, r))
                 .ToList()
-                .Where(g => g.Count > 0)
+                .Where(verbrauchList => verbrauchList.Count > 0)
                 .ToList()
-                .ToDictionary(g => g.First().Betriebskostentyp, g => g.GroupBy(gg => gg.Zaehlertyp)
-                .Select(gg => (gg.Key, gg.Sum(ggg => ggg.Delta))).ToList());
-            Verbrauch = GetVerbrauch(ctx, b, Umlagen, GesamtVerbrauch);
+                .ToDictionary(
+                    verbrauchList => verbrauchList.First().Betriebskostentyp,
+                    verbrauchList => verbrauchList.GroupBy(gg => gg.Zaehlertyp)
+                .Select(typVerbrauchGrouping => (typVerbrauchGrouping.Key, typVerbrauchGrouping
+                    .Sum(verbrauch => verbrauch.Delta)))
+                .ToList());
+            Verbrauch = GetVerbrauch(ctx, betriebkostenabrechnung, Umlagen, GesamtVerbrauch);
 
             VerbrauchAnteil = Verbrauch
-                .Select(v => (v.Key, v.Value.Sum(vv => vv.Delta), v.Value.Sum(vv => vv.Delta / vv.Anteil)))
+                .Select(typVerbrauchAnteilPair => (
+                    typVerbrauchAnteilPair.Key,
+                    typVerbrauchAnteilPair.Value.Sum(verbrauchAnteil => verbrauchAnteil.Delta),
+                    typVerbrauchAnteilPair.Value.Sum(verbrauchAnteil => verbrauchAnteil.Delta / verbrauchAnteil.Anteil)))
                 .ToList()
-                .ToDictionary(v => v.Key, v => v.Item2 / v.Item3);
+                .ToDictionary(typ => typ.Key, typ => typ.Item2 / typ.Item3);
 
             Heizkosten = Umlagen
                 .Where(r => (int)r.Typ % 2 == 1)
                 .ToList()
-                .SelectMany(u => u.Betriebskostenrechnungen)
+                .SelectMany(umlage => umlage.Betriebskostenrechnungen)
                 .ToList()
-                .Where(r => r.BetreffendesJahr == b.Jahr)
+                .Where(rechnung => rechnung.BetreffendesJahr == betriebkostenabrechnung.Jahr)
                 .ToList()
-                .Select(r => new Heizkostenberechnung(ctx, r, b))
+                .Select(rechnung => new Heizkostenberechnung(ctx, rechnung, betriebkostenabrechnung))
                 .ToList();
 
             var kalteUmlagen = Umlagen
-                .Where(r => (int)r.Typ % 2 == 0)
+                .Where(umlage => (int)umlage.Typ % 2 == 0)
                 .ToList()
-                .SelectMany(u => u.Betriebskostenrechnungen)
+                .SelectMany(umlage => umlage.Betriebskostenrechnungen)
                 .ToList()
-                .Where(r => r.BetreffendesJahr == b.Jahr)
+                .Where(rechnung => rechnung.BetreffendesJahr == betriebkostenabrechnung.Jahr)
                 .ToList();
 
-            GesamtBetragKalt = kalteUmlagen.Sum(r => r.Betrag);
-            BetragKalt = kalteUmlagen.Sum(r => r.Umlage.Schluessel switch
+            GesamtBetragKalt = kalteUmlagen.Sum(rechnung => rechnung.Betrag);
+            BetragKalt = kalteUmlagen.Sum(rechnung => rechnung.Umlage.Schluessel switch
                 {
-                    Umlageschluessel.NachWohnflaeche => r.Betrag * WFZeitanteil,
-                    Umlageschluessel.NachNutzeinheit => r.Betrag * NEZeitanteil,
-                    Umlageschluessel.NachPersonenzahl => PersonenZeitanteil.Sum(z => z.Anteil * r.Betrag),
-                    Umlageschluessel.NachVerbrauch => r.Betrag * checkVerbrauch(b, r.Umlage.Typ),
+                    Umlageschluessel.NachWohnflaeche => rechnung.Betrag * WFZeitanteil,
+                    Umlageschluessel.NachNutzeinheit => rechnung.Betrag * NEZeitanteil,
+                    Umlageschluessel.NachPersonenzahl => PersonenZeitanteil.Sum(z => z.Anteil * rechnung.Betrag),
+                    Umlageschluessel.NachVerbrauch => rechnung.Betrag * checkVerbrauch(betriebkostenabrechnung, rechnung.Umlage.Typ),
                     _ => 0
                 });
 
-            GesamtBetragWarm = Heizkosten.Sum(h => h.PauschalBetrag);
-            BetragWarm = Heizkosten.Sum(h => h.Kosten);
+            GesamtBetragWarm = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.PauschalBetrag);
+            BetragWarm = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.Kosten);
         }
 
-        private double checkVerbrauch(BetriebskostenabrechnungService.Betriebskostenabrechnung b, Betriebskostentyp t)
+        private double checkVerbrauch(BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung, Betriebskostentyp typ)
         {
-            if (VerbrauchAnteil.ContainsKey(t))
+            if (VerbrauchAnteil.ContainsKey(typ))
             {
-                return VerbrauchAnteil[t];
+                return VerbrauchAnteil[typ];
             }
             else
             {
-                b.notes.Add(new Note("Konnte keinen Anteil für " + t.ToDescriptionString() + " feststellen.", Severity.Error));
+                betriebskostenabrechnung.notes.Add(new Note("Konnte keinen Anteil für " + typ.ToDescriptionString() + " feststellen.", Severity.Error));
                 return 0;
             }
         }
 
         private static Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> GetVerbrauch(
             SaverwalterContext ctx,
-            BetriebskostenabrechnungService.Betriebskostenabrechnung b,
+            BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung,
             List<Umlage> Umlagen,
             Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch)
         {
             var VerbrauchList = Umlagen
                     .Where(g => g.Schluessel == Umlageschluessel.NachVerbrauch)
                     .ToList()
-                    .Select(r => b.GetVerbrauch(ctx, r))
+                    .Select(umlage => betriebskostenabrechnung.GetVerbrauchGanzeGruppe(ctx, umlage))
                     .ToList();
 
             if (VerbrauchList.Any(w => w.Count() == 0))
             {
                 // TODO this can be made even more explicit.
-                b.notes.Add(new Note("Für eine Rechnung konnte keine Zuordnung erstellt werden.", Severity.Error));
+                betriebskostenabrechnung.notes.Add(new Note("Für eine Rechnung konnte keine Zuordnung erstellt werden.", Severity.Error));
                 return new Dictionary<Betriebskostentyp, List<VerbrauchAnteil>>();
             }
 
             return VerbrauchList
-                .Where(r => r.Count > 0 && GesamtVerbrauch.ContainsKey(r.First().Betriebskostentyp))
+                .Where(verbrauchList => verbrauchList.Count > 0 && GesamtVerbrauch.ContainsKey(verbrauchList.First().Betriebskostentyp))
                 .ToList()
-                .ToDictionary(r => r.First().Betriebskostentyp, r => r.Select(rr => new VerbrauchAnteil(
-                    rr.Kennnummer,
-                    rr.Zaehlertyp,
-                    rr.Delta,
-                    rr.Delta / GesamtVerbrauch[r.First().Betriebskostentyp].First(rrr => rrr.Typ == rr.Zaehlertyp).Delta))
+                .ToDictionary(
+                    verbrauchList => verbrauchList.First().Betriebskostentyp,
+                    verbrauchList => verbrauchList.Select(verbrauch => new VerbrauchAnteil(
+                        verbrauch.Kennnummer,
+                        verbrauch.Zaehlertyp,
+                        verbrauch.Delta,
+                        verbrauch.Delta / GesamtVerbrauch[verbrauchList.First().Betriebskostentyp]
+                            .First(typDeltaGroup => typDeltaGroup.Typ == verbrauch.Zaehlertyp).Delta))
                 .ToList());
         }
 
         private static List<PersonenZeitIntervall> VertraegeIntervallPersonenzahl(
             List<VertragVersion> vertraege,
-            BetriebskostenabrechnungService.Betriebskostenabrechnung b,
+            BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung,
             Rechnungsgruppe parent)
         {
             var merged = vertraege
-                .Where(v => v.Beginn <= b.Abrechnungsende && (v.Ende() is null || v.Ende() >= b.Abrechnungsbeginn))
+                .Where(vertragVersion =>
+                    vertragVersion.Beginn <= betriebskostenabrechnung.Abrechnungsende
+                    && (vertragVersion.Ende() is null || vertragVersion.Ende() >= betriebskostenabrechnung.Abrechnungsbeginn))
                 .ToList()
                 .SelectMany(v => new[]
                 {
-                    (Max(v.Beginn, b.Abrechnungsbeginn), v.Personenzahl),
-                    (Min(v.Ende() ?? b.Abrechnungsende, b.Abrechnungsende).AddDays(1), -v.Personenzahl)
+                    (Max(v.Beginn, betriebskostenabrechnung.Abrechnungsbeginn), v.Personenzahl),
+                    (Min(v.Ende() ?? betriebskostenabrechnung.Abrechnungsende, betriebskostenabrechnung.Abrechnungsende).AddDays(1), -v.Personenzahl)
                 })
                 .ToList()
                 .GroupBy(t => t.Item1.Date)
                 .ToList()
-                .Select(g => new PersonenZeitIntervall(g.Key, b.Abrechnungsende, g.Sum(t => t.Item2), parent))
+                .Select(g => new PersonenZeitIntervall(g.Key, betriebskostenabrechnung.Abrechnungsende, g.Sum(t => t.Item2), parent))
                 .ToList()
                 .OrderBy(t => t.Beginn)
                 .ToList();
@@ -216,7 +232,7 @@ namespace Deeplex.Saverwalter.Model
             {
                 merged[i] = new PersonenZeitIntervall(
                     merged[i].Beginn,
-                    i + 1 < merged.Count ? merged[i + 1].Beginn.AddDays(-1) : b.Abrechnungsende,
+                    i + 1 < merged.Count ? merged[i + 1].Beginn.AddDays(-1) : betriebskostenabrechnung.Abrechnungsende,
                     i - 1 >= 0 ? merged[i - 1].Personenzahl + merged[i].Personenzahl : merged[i].Personenzahl, parent);
             }
             if (merged.Count > 0)
@@ -225,7 +241,12 @@ namespace Deeplex.Saverwalter.Model
             }
 
             // TODO refactor function to switch from tuple to class - or replace this function by constructor
-            var ret = merged.Select(m => new PersonenZeitIntervall(m.Beginn, m.Ende, m.Personenzahl, parent)).ToList();
+            var ret = merged.Select(personenZeitIntervall => new PersonenZeitIntervall(
+                personenZeitIntervall.Beginn,
+                personenZeitIntervall.Ende,
+                personenZeitIntervall.Personenzahl,
+                parent))
+                .ToList();
 
             return ret;
         }

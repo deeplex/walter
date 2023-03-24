@@ -154,11 +154,9 @@ namespace Deeplex.Saverwalter.PrintService
 
             p.Paragraph(runs);
         }
-        private static void AbrechnungWohnung(BetriebskostenabrechnungService.Betriebskostenabrechnung b, IRechnungsgruppe g, IPrint<T> p)
+        private static void AbrechnungWohnung(BetriebskostenabrechnungService.Betriebskostenabrechnung b, IRechnungsgruppe rechnungsgruppe, IPrint<T> printImpl)
         {
-            if (g == null) return;
-
-            p.SubHeading("Angaben zu Ihrer Einheit:");
+            printImpl.SubHeading("Angaben zu Ihrer Einheit:");
 
             var widths = new int[] { 14, 19, 19, 12, 28, 8 };
             var col1 = new List<string> { "Nutzeinheiten" };
@@ -168,9 +166,9 @@ namespace Deeplex.Saverwalter.PrintService
             var col5 = new List<string> { "Nutzungsintervall" };
             var col6 = new List<string> { "Tage" };
 
-            for (var i = 0; i < g.PersonenIntervall.Count(); ++i)
+            for (var i = 0; i < rechnungsgruppe.PersonenIntervall.Count(); ++i)
             {
-                var z = g.PersonenIntervall[i];
+                var z = rechnungsgruppe.PersonenIntervall[i];
                 var f = z.Beginn.Date == b.Nutzungsbeginn.Date;
 
                 col1.Add(f ? 1.ToString() : "");
@@ -187,7 +185,7 @@ namespace Deeplex.Saverwalter.PrintService
             var underlined = Enumerable.Repeat(false, widths.Length).ToArray();
             var justification = Enumerable.Repeat(1, widths.Length).ToArray();
 
-            p.Table(widths, justification, bold, underlined, cols); ;
+            printImpl.Table(widths, justification, bold, underlined, cols); ;
         }
         private static void AbrechnungEinheit(BetriebskostenabrechnungService.Betriebskostenabrechnung b, IRechnungsgruppe g, IPrint<T> p)
         {
@@ -728,83 +726,86 @@ namespace Deeplex.Saverwalter.PrintService
             p.Paragraph(new PrintRun(b.GenerischerText()));
         }
 
-        public static T Print(BetriebskostenabrechnungService.Betriebskostenabrechnung b, IPrint<T> p)
+        public static T Print(BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
         {
-            Header(b, p);
-            Introtext(b, p);
-            p.PageBreak();
+            Header(betriebskostenabrechnung, printImpl);
+            Introtext(betriebskostenabrechnung, printImpl);
+            printImpl.PageBreak();
 
-            p.Heading("Abrechnung der Nebenkosten");
-            ExplainUmlageschluessel(b, p);
-            p.Break();
-            p.Text("Anmerkung:");
-            p.Text(b.Anmerkung());
-            p.Heading("Erläuterungen zu einzelnen Betriebskostenarten");
-            ExplainKalteBetriebskosten(b, p);
+            printImpl.Heading("Abrechnung der Nebenkosten");
+            ExplainUmlageschluessel(betriebskostenabrechnung, printImpl);
+            printImpl.Break();
+            printImpl.Text("Anmerkung:");
+            printImpl.Text(betriebskostenabrechnung.Anmerkung());
+            printImpl.Heading("Erläuterungen zu einzelnen Betriebskostenarten");
+            ExplainKalteBetriebskosten(betriebskostenabrechnung, printImpl);
 
-            p.PageBreak();
+            printImpl.PageBreak();
 
-            AbrechnungWohnung(b, b.Gruppen.FirstOrDefault(), p);
-
-            p.Break();
-            p.Heading("Abrechnung der Nebenkosten (kalte Betriebskosten)");
-
-            foreach (var gruppe in b.Gruppen.Where(g => g.GesamtEinheiten == 1))
+            if (betriebskostenabrechnung.Gruppen.FirstOrDefault() is Rechnungsgruppe rechnungsgruppe)
             {
-                AbrechnungEinheit(b, gruppe, p);
-                p.Break();
-                ErmittlungKalteEinheiten(b, gruppe, p);
-                p.Break();
-
-                ErmittlungKalteKosten(b, gruppe, p);
-            }
-            p.Break();
-
-            foreach (var gruppe in b.Gruppen.Where(g => g.GesamtEinheiten > 1))
-            {
-                AbrechnungEinheit(b, gruppe, p);
-                p.Break();
-                ErmittlungKalteEinheiten(b, gruppe, p);
-                p.Break();
-
-                ErmittlungKalteKosten(b, gruppe, p);
+                AbrechnungWohnung(betriebskostenabrechnung, rechnungsgruppe, printImpl);
             }
 
-            p.PageBreak();
-            p.Heading("Abrechnung der Nebenkosten (warme Betriebskosten)");
+            printImpl.Break();
+            printImpl.Heading("Abrechnung der Nebenkosten (kalte Betriebskosten)");
 
-            foreach (var gruppe in b.Gruppen)
+            foreach (var gruppe in betriebskostenabrechnung.Gruppen.Where(rechnungsgruppe => rechnungsgruppe.GesamtEinheiten == 1))
+            {
+                AbrechnungEinheit(betriebskostenabrechnung, gruppe, printImpl);
+                printImpl.Break();
+                ErmittlungKalteEinheiten(betriebskostenabrechnung, gruppe, printImpl);
+                printImpl.Break();
+
+                ErmittlungKalteKosten(betriebskostenabrechnung, gruppe, printImpl);
+            }
+            printImpl.Break();
+
+            foreach (var gruppe in betriebskostenabrechnung.Gruppen.Where(rechnungsgruppe => rechnungsgruppe.GesamtEinheiten > 1))
+            {
+                AbrechnungEinheit(betriebskostenabrechnung, gruppe, printImpl);
+                printImpl.Break();
+                ErmittlungKalteEinheiten(betriebskostenabrechnung, gruppe, printImpl);
+                printImpl.Break();
+
+                ErmittlungKalteKosten(betriebskostenabrechnung, gruppe, printImpl);
+            }
+
+            printImpl.PageBreak();
+            printImpl.Heading("Abrechnung der Nebenkosten (warme Betriebskosten)");
+
+            foreach (var gruppe in betriebskostenabrechnung.Gruppen)
             {
                 if (gruppe.GesamtBetragWarm > 0)
                 {
                     if (gruppe.GesamtEinheiten == 1)
                     {
-                        p.SubHeading("Direkt zugeordnet:");
-                        ErmittlungWarmeKosten(b, gruppe, p);
+                        printImpl.SubHeading("Direkt zugeordnet:");
+                        ErmittlungWarmeKosten(betriebskostenabrechnung, gruppe, printImpl);
                     }
                     else
                     {
-                        AbrechnungEinheit(b, gruppe, p);
-                        p.Break();
-                        ErmittlungWarmeKosten(b, gruppe, p);
-                        p.EqHeizkostenV9_2(gruppe);
-                        ErmittlungWarmeEinheiten(b, gruppe, p);
-                        p.Break();
-                        p.SubHeading("Ermittlung der warmen Betriebskosten");
-                        ErmittlungWarmanteil(b, gruppe, p);
+                        AbrechnungEinheit(betriebskostenabrechnung, gruppe, printImpl);
+                        printImpl.Break();
+                        ErmittlungWarmeKosten(betriebskostenabrechnung, gruppe, printImpl);
+                        printImpl.EqHeizkostenV9_2(gruppe);
+                        ErmittlungWarmeEinheiten(betriebskostenabrechnung, gruppe, printImpl);
+                        printImpl.Break();
+                        printImpl.SubHeading("Ermittlung der warmen Betriebskosten");
+                        ErmittlungWarmanteil(betriebskostenabrechnung, gruppe, printImpl);
                     }
                 }
             }
 
-            p.Heading("Gesamtergebnis der Abrechnung");
-            GesamtErgebnis(b, p);
+            printImpl.Heading("Gesamtergebnis der Abrechnung");
+            GesamtErgebnis(betriebskostenabrechnung, printImpl);
 
-            return p.body;
+            return printImpl.body;
         }
 
-        public static T Print(IErhaltungsaufwendungWohnung e, IPrint<T> p)
+        public static T Print(IErhaltungsaufwendungWohnung erhaltungsaufwendungen, IPrint<T> printImpl)
         {
-            p.Heading(Anschrift(e.Wohnung.Adresse) + ", " + e.Wohnung.Bezeichnung);
+            printImpl.Heading(Anschrift(erhaltungsaufwendungen.Wohnung.Adresse) + ", " + erhaltungsaufwendungen.Wohnung.Bezeichnung);
 
             var widths = new int[] { 40, 15, 31, 13 };
             var col1 = new List<string> { "Aussteller" };
@@ -814,7 +815,7 @@ namespace Deeplex.Saverwalter.PrintService
             var bold = new List<bool> { true };
             var underlined = new List<bool> { true };
 
-            foreach (var a in e.Liste)
+            foreach (var a in erhaltungsaufwendungen.Liste)
             {
                 col1.Add(a.Aussteller.Bezeichnung);
                 col2.Add(a.Datum.ToString("dd.MM.yyyy"));
@@ -827,14 +828,14 @@ namespace Deeplex.Saverwalter.PrintService
             col1.Add("");
             col2.Add("");
             col3.Add("Summe:");
-            col4.Add(Euro(e.Summe));
+            col4.Add(Euro(erhaltungsaufwendungen.Summe));
 
             var justification = new int[] { 0, 1, 1, 2 };
             var cols = new List<List<string>> { col1, col2, col3, col4 }.Select(w => w.ToArray()).ToArray();
 
-            p.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
+            printImpl.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
 
-            return p.body;
+            return printImpl.body;
         }
     }
 }
