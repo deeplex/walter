@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.PrintService
 {
     public static class TPrint<T>
     {
-        private static void Header(Betriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
+        private static void Header(IBetriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
         {
             var AnsprechpartnerBezeichnung = betriebskostenabrechnung.Ansprechpartner is IPerson a ? a.Bezeichnung : "";
 
@@ -75,7 +75,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             printImpl.Table(widths, j, bold, underlined, new string[][] { left.ToArray(), right.ToArray() });
         }
-        private static void ExplainUmlageschluessel(Betriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
+        private static void ExplainUmlageschluessel(IBetriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
         {
             var left1 = new List<string> { "Umlageschlüssel" };
             var right1 = new List<string> { "Bedeutung" };
@@ -142,7 +142,7 @@ namespace Deeplex.Saverwalter.PrintService
             printImpl.Table(widths, j, bold, underlined, new string[][] { left1.ToArray(), right1.ToArray() });
             printImpl.Table(widths, j, bold, underlined, new string[][] { left2.ToArray(), right2.ToArray() });
         }
-        private static void ExplainKalteBetriebskosten(Betriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
+        private static void ExplainKalteBetriebskosten(IBetriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
         {
             var runs = betriebskostenabrechnung.Wohnung.Umlagen
                 .Where(r => r.Beschreibung != null && r.Beschreibung.Trim() != "")
@@ -156,7 +156,7 @@ namespace Deeplex.Saverwalter.PrintService
             printImpl.Paragraph(runs);
         }
         private static void AbrechnungWohnung(
-            Betriebskostenabrechnung betriebskostenabrechnung,
+            IBetriebskostenabrechnung betriebskostenabrechnung,
             IRechnungsgruppe rechnungsgruppe,
             IPrint<T> printImpl)
         {
@@ -191,7 +191,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             printImpl.Table(widths, justification, bold, underlined, cols); ;
         }
-        private static void AbrechnungEinheit(Betriebskostenabrechnung betriebskostenabrechnung, IRechnungsgruppe rechnungsgruppe, IPrint<T> printImpl)
+        private static void AbrechnungEinheit(IBetriebskostenabrechnung betriebskostenabrechnung, IRechnungsgruppe rechnungsgruppe, IPrint<T> printImpl)
         {
             printImpl.SubHeading("Angaben zur Abrechnungseinheit:");
             printImpl.Text(rechnungsgruppe.Bezeichnung);
@@ -230,7 +230,7 @@ namespace Deeplex.Saverwalter.PrintService
             printImpl.Table(widths, justification, bold, underlined, cols);
         }
         private static void ErmittlungKalteEinheiten(
-            Betriebskostenabrechnung betriebskostenabrechnung,
+            IBetriebskostenabrechnung betriebskostenabrechnung,
             IRechnungsgruppe rechnungsgruppe,
             IPrint<T> printImpl)
         {
@@ -377,7 +377,7 @@ namespace Deeplex.Saverwalter.PrintService
             printImpl.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
         public static void ErmittlungKalteKosten(
-            BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenrechnung,
+            BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenrechnung,
             IRechnungsgruppe rechnungsgruppe,
             IPrint<T> printImpl)
         {
@@ -471,7 +471,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             printImpl.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
-        private static void ErmittlungWarmeKosten(BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung, IRechnungsgruppe rechnungsgruppe, IPrint<T> p)
+        private static void ErmittlungWarmeKosten(BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung, IRechnungsgruppe rechnungsgruppe, IPrint<T> p)
         {
             var widths = new int[] { 50, 10 };
 
@@ -504,7 +504,7 @@ namespace Deeplex.Saverwalter.PrintService
                 p.Table(widths, justification, bold, underlined, cols);
             }
         }
-        private static void ErmittlungWarmeEinheiten(BetriebskostenabrechnungService.Betriebskostenabrechnung b, IRechnungsgruppe rechnungsgruppe, IPrint<T> p)
+        private static void ErmittlungWarmeEinheiten(BetriebskostenabrechnungService.IBetriebskostenabrechnung b, IRechnungsgruppe rechnungsgruppe, IPrint<T> p)
         {
             var widths = new int[] { 41, 22, 24, 13 };
             var col1 = new List<string> { "Ermittlung Ihrer Einheiten" };
@@ -666,7 +666,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             p.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
-        private static void GesamtErgebnis(BetriebskostenabrechnungService.Betriebskostenabrechnung b, IPrint<T> p)
+        private static void GesamtErgebnis(BetriebskostenabrechnungService.IBetriebskostenabrechnung b, IPrint<T> p)
         {
             var widths = new int[] { 40, 10 };
 
@@ -720,7 +720,7 @@ namespace Deeplex.Saverwalter.PrintService
             p.Table(widths, justification, bold, underlined, cols);
         }
 
-        private static void Introtext(BetriebskostenabrechnungService.Betriebskostenabrechnung b, IPrint<T> p)
+        private static void Introtext(BetriebskostenabrechnungService.IBetriebskostenabrechnung b, IPrint<T> p)
         {
             p.Paragraph(
                 new PrintRun(b.Title(), true),
@@ -740,7 +740,7 @@ namespace Deeplex.Saverwalter.PrintService
             p.Paragraph(new PrintRun(b.GenerischerText()));
         }
 
-        public static T Print(BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
+        public static T Print(BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
         {
             Header(betriebskostenabrechnung, printImpl);
             Introtext(betriebskostenabrechnung, printImpl);

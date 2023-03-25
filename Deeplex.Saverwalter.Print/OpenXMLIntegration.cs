@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.PrintService
 {
     public static class OpenXMLIntegration
     {
-        private static void fillDocumentWithContent(WordprocessingDocument wordDocument, Body body)
+        private static void FillDocumentWithContent(WordprocessingDocument wordDocument, Body body)
         {
             try
             {
@@ -26,17 +26,17 @@ namespace Deeplex.Saverwalter.PrintService
         private static void CreateWordDocument(Stream stream, Body body)
         {
             using var wordDocument = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
-            fillDocumentWithContent(wordDocument, body);
+            FillDocumentWithContent(wordDocument, body);
         }
 
         private static void CreateWordDocument(string filepath, Body body)
         {
             using var wordDocument = WordprocessingDocument.Create(filepath, WordprocessingDocumentType.Document);
-            fillDocumentWithContent(wordDocument, body);
+            FillDocumentWithContent(wordDocument, body);
         }
 
         public static Body DinA4()
-            => new Body(
+            => new(
                 new SectionProperties(
                 // Margins after DIN5008
                 new PageMargin() { Left = 1418, Right = 567, Top = 958, Bottom = 958, },
@@ -68,14 +68,14 @@ namespace Deeplex.Saverwalter.PrintService
             CreateWordDocument(filepath, body);
         }
 
-        public static void SaveAsDocx(this BetriebskostenabrechnungService.Betriebskostenabrechnung b, Stream stream)
+        public static void SaveAsDocx(this BetriebskostenabrechnungService.IBetriebskostenabrechnung b, Stream stream)
         {
             var body = TPrint<Body>.Print(b, new WordPrint());
 
             CreateWordDocument(stream, body);
         }
 
-        public static void SaveAsDocx(this BetriebskostenabrechnungService.Betriebskostenabrechnung b, string filepath)
+        public static void SaveAsDocx(this BetriebskostenabrechnungService.IBetriebskostenabrechnung b, string filepath)
         {
             var body = TPrint<Body>.Print(b, new WordPrint());
 

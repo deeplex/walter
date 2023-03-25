@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.Model
         // TODO Zähler sind hier noch nicht so richtig drin. Aktuell werden einfach alle Zähler eines
         // Typen in einen Topf geworfen, aber Zähler referenzieren jetzt jeweils die Allgemeinzähler.
         // Man kann also auch direkt die Zähler des Allgemeinzählers der Rechnung nehmen
-        public Heizkostenberechnung(SaverwalterContext ctx, Betriebskostenrechnung r, BetriebskostenabrechnungService.Betriebskostenabrechnung b)
+        public Heizkostenberechnung(SaverwalterContext ctx, Betriebskostenrechnung r, BetriebskostenabrechnungService.IBetriebskostenabrechnung b)
         {
             Betrag = r.Betrag;
             PauschalBetrag = r.Betrag * 1.05;
@@ -101,14 +101,14 @@ namespace Deeplex.Saverwalter.Model
 
             if (Q == 0)
             {
-                b.notes.Add(new Note("Gesamtzähler steht auf 0.", Severity.Error));
+                b.Notes.Add(new Note("Gesamtzähler steht auf 0.", Severity.Error));
             }
 
             Para9_2 = 2.5 * (V / Q) * (tw - 10); // TODO HeizkostenV §9
 
             if (Para9_2 > 1)
             {
-                b.notes.Add(new Note("Heizkostenverteilung nach §9 ist über 100%.", Severity.Error));
+                b.Notes.Add(new Note("Heizkostenverteilung nach §9 ist über 100%.", Severity.Error));
             }
 
             GesamtNutzflaeche = r.Umlage.Wohnungen.Sum(w => w.Nutzflaeche);

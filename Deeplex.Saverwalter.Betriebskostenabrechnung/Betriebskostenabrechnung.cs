@@ -4,7 +4,7 @@ using static Deeplex.Saverwalter.Model.Utils;
 
 namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
-    public interface Betriebskostenabrechnung
+    public interface IBetriebskostenabrechnung
     {
         IPerson Ansprechpartner { get; }
         List<Rechnungsgruppe> Gruppen { get; }
@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         DateTime Abrechnungsbeginn { get; }
         DateTime Abrechnungsende { get; }
         double Zeitanteil { get; }
-        List<Note> notes { get; }
+        List<Note> Notes { get; }
         Vertrag Vertrag { get; }
         List<VertragVersion> Versionen { get; }
         List<Verbrauch> GetVerbrauchWohnung(SaverwalterContext ctx, Umlage u);
@@ -35,9 +35,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         List<Zaehler> Zaehler { get; }
     }
 
-    public sealed class BetriebskostenabrechnungImpl : Betriebskostenabrechnung
+    public sealed class Betriebskostenabrechnung : IBetriebskostenabrechnung
     {
-        public List<Note> notes { get; } = new List<Note>();
+        public List<Note> Notes { get; } = new List<Note>();
         public int Jahr { get; set; }
         public DateTime Abrechnungsbeginn { get; set; }
         public DateTime Abrechnungsende { get; set; }
@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         public double AllgStromFaktor { get; set; }
 
-        public BetriebskostenabrechnungImpl(SaverwalterContext ctx, Vertrag v, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
+        public Betriebskostenabrechnung(SaverwalterContext ctx, Vertrag v, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
         {
             Abrechnungsbeginn = abrechnungsbeginn;
             Abrechnungsende = abrechnungsende;
@@ -174,7 +174,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 });
         }
 
-        private List<Zaehler> GetAllZaehlerForVerbrauch(SaverwalterContext ctx, Betriebskostentyp typ)
+        private static List<Zaehler> GetAllZaehlerForVerbrauch(SaverwalterContext ctx, Betriebskostentyp typ)
         {
             return typ switch
             {
@@ -215,25 +215,24 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         private List<Verbrauch> GetVerbrauchForZaehlerStaende(Umlage umlage, ImmutableList<Zaehlerstand> Beginne, ImmutableList<Zaehlerstand> Enden)
         {
-            List<Verbrauch> Deltas = new List<Verbrauch>();
+            List<Verbrauch> Deltas = new();
 
             if (Enden.IsEmpty)
             {
-                notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
+                Notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
             }
-            else if (Enden.IsEmpty)
+            else if (Beginne.IsEmpty)
             {
-                notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
+                Notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
             }
-            else if (Enden.Count() != Beginne.Count())
+            else if (Enden.Count != Beginne.Count)
             {
-                notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
+                Notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
             }
             else
             {
-                for (var i = 0; i < Enden.Count(); ++i)
+                for (var i = 0; i < Enden.Count; ++i)
                 {
-                    var end = Enden[i];
                     Deltas.Add(new Verbrauch(umlage.Typ, Enden[i].Zaehler.Kennnummer, Enden[i].Zaehler.Typ, Enden[i].Stand - Beginne[i].Stand));
                 }
             }
@@ -244,7 +243,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public List<Verbrauch> GetVerbrauchGanzeGruppe(SaverwalterContext ctx, Umlage umlage)
         {
             var Zaehler = GetAllZaehlerForVerbrauch(ctx, umlage.Typ);
-
             var ZaehlerMitVerbrauchForGanzeGruppe = Zaehler.Where(z => umlage.Wohnungen.Contains(z.Wohnung!)).ToList();
             var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(ZaehlerMitVerbrauchForGanzeGruppe);
             var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(ZaehlerMitVerbrauchForGanzeGruppe);
@@ -256,7 +254,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public List<Verbrauch> GetVerbrauchWohnung(SaverwalterContext ctx, Umlage umlage)
         {
             var AlleZaehler = GetAllZaehlerForVerbrauch(ctx, umlage.Typ);
-
             var ZaehlerMitVerbrauchForThisWohnung = AlleZaehler.Where(z => z.Wohnung?.WohnungId == Wohnung.WohnungId).ToList();
             var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(ZaehlerMitVerbrauchForThisWohnung);
             var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(ZaehlerMitVerbrauchForThisWohnung);

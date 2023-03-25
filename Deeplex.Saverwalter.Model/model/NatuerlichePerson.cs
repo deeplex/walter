@@ -15,7 +15,7 @@
         public string? Fax { get; set; }
         public string? Email { get; set; }
         public int? AdresseId { get; set; }
-        public virtual Adresse? Adresse { get; set; }
+        public virtual Adresse Adresse { get; set; } = null!;
         public virtual List<JuristischePerson> JuristischePersonen { get; set; } = new List<JuristischePerson>();
         public string? Notiz { get; set; }
 

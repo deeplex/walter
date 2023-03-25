@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Deeplex.SaverWalter.Services\Deeplex.Saverwalter.WalterDbService.csproj" />
+    <ProjectReference Include="..\Deeplex.SaverWalter.WalterDbService\Deeplex.Saverwalter.WalterDbService.csproj" />
   </ItemGroup>
 
 </Project>

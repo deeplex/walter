@@ -26,22 +26,22 @@
             return text;
         }
 
-        public static string Title(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static string Title(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
             => "Betriebskostenabrechnung " + betriebskostenabrechnung.Jahr.ToString();
 
-        public static string Mieterliste(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static string Mieterliste(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
             => "Mieter: " + string.Join(", ", betriebskostenabrechnung.Mieter.Select(person => person.Bezeichnung));
 
-        public static string Mietobjekt(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static string Mietobjekt(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
             => "Mietobjekt: " + betriebskostenabrechnung.Adresse.Strasse + " " + betriebskostenabrechnung.Adresse.Hausnummer + ", " + betriebskostenabrechnung.Wohnung.Bezeichnung;
 
-        public static string Abrechnungszeitraum(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static string Abrechnungszeitraum(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
             => betriebskostenabrechnung.Abrechnungsbeginn.ToString("dd.MM.yyyy") + " - " + betriebskostenabrechnung.Abrechnungsende.ToString("dd.MM.yyyy");
 
-        public static string Nutzungszeitraum(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static string Nutzungszeitraum(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
             => betriebskostenabrechnung.Nutzungsbeginn.ToString("dd.MM.yyyy") + " - " + betriebskostenabrechnung.Nutzungsende.ToString("dd.MM.yyyy");
 
-        public static string Gruss(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static string Gruss(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
         {
             var gruss = betriebskostenabrechnung.Mieter.Aggregate("", (text, mieter) =>
             {
@@ -60,17 +60,17 @@
             return gruss.Remove(1).ToUpper() + gruss[1..];
         }
 
-        public static string ResultTxt(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static string ResultTxt(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
             => "wir haben die Kosten, die im Abrechnungszeitraum angefallen sind, berechnet. " +
                 "Die Abrechnung schließt mit " + (betriebskostenabrechnung.Result > 0 ?
                 "einem Guthaben" : "einer Nachforderung") + " in Höhe von: ";
 
-        public static string RefundDemand(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static string RefundDemand(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
             => betriebskostenabrechnung.Result > 0 ?
             "Dieser Betrag wird über die von Ihnen angegebene Bankverbindung erstattet." :
             "Bitte überweisen Sie diesen Betrag auf das Ihnen bekannte Konto.";
 
-        public static string GenerischerText(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static string GenerischerText(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
         {
             // TODO Text auf Anwesenheit von Heizung oder so testen und anpassen.
 
@@ -94,27 +94,27 @@
             return text;
         }
 
-        public static bool DirekteZuordnung(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static bool DirekteZuordnung(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
             => betriebskostenabrechnung.Gruppen.Any(rechnungsgruppe => rechnungsgruppe.Umlagen.Any(umlage => umlage.Wohnungen.Count == 1));
 
-        private static bool UmlageSchluesselExistsInBetriebskostenabrechnung(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenrechnung, Umlageschluessel umlageSchluessel) =>
+        private static bool UmlageSchluesselExistsInBetriebskostenabrechnung(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenrechnung, Umlageschluessel umlageSchluessel) =>
             betriebskostenrechnung.Gruppen
                 .Any(rechnungsgruppe => rechnungsgruppe.Umlagen
                     .Where(umlage => umlage.Wohnungen.Count > 1)
                     .Any(umlage => umlage.Schluessel == umlageSchluessel));
 
-        public static bool NachWohnflaeche(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static bool NachWohnflaeche(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
             => betriebskostenabrechnung.UmlageSchluesselExistsInBetriebskostenabrechnung(Umlageschluessel.NachWohnflaeche);
-        public static bool NachNutzflaeche(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static bool NachNutzflaeche(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
             => betriebskostenabrechnung.UmlageSchluesselExistsInBetriebskostenabrechnung(Umlageschluessel.NachNutzflaeche);
-        public static bool NachNutzeinheiten(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static bool NachNutzeinheiten(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
             => betriebskostenabrechnung.UmlageSchluesselExistsInBetriebskostenabrechnung(Umlageschluessel.NachNutzeinheit);
-        public static bool NachPersonenzahl(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static bool NachPersonenzahl(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
             => betriebskostenabrechnung.UmlageSchluesselExistsInBetriebskostenabrechnung(Umlageschluessel.NachPersonenzahl);
-        public static bool NachVerbrauch(this BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+        public static bool NachVerbrauch(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
             => betriebskostenabrechnung.UmlageSchluesselExistsInBetriebskostenabrechnung(Umlageschluessel.NachVerbrauch);
 
-        public static string Anmerkung(this BetriebskostenabrechnungService.Betriebskostenabrechnung _)
+        public static string Anmerkung(this BetriebskostenabrechnungService.IBetriebskostenabrechnung _)
             => "Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger) Kostenanteil";
 
     }

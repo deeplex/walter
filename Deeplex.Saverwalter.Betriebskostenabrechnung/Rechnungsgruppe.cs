@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.Model
         public PersonenZeitanteil(
             PersonenZeitIntervall interval,
             List<PersonenZeitIntervall> personenZeitIntervallList,
-            BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung)
+            BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
         {
             Beginn = interval.Beginn;
             Ende = interval.Ende;
@@ -78,7 +78,7 @@ namespace Deeplex.Saverwalter.Model
         public double GesamtBetragWarm { get; }
         public double BetragWarm { get; }
 
-        public Rechnungsgruppe(SaverwalterContext ctx, BetriebskostenabrechnungService.Betriebskostenabrechnung betriebkostenabrechnung, List<Umlage> gruppe)
+        public Rechnungsgruppe(SaverwalterContext ctx, BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebkostenabrechnung, List<Umlage> gruppe)
         {
             Umlagen = gruppe;
             Wohnungen = Umlagen.First().Wohnungen.ToList();
@@ -159,7 +159,7 @@ namespace Deeplex.Saverwalter.Model
             BetragWarm = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.Kosten);
         }
 
-        private double checkVerbrauch(BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung, Betriebskostentyp typ)
+        private double checkVerbrauch(BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung, Betriebskostentyp typ)
         {
             if (VerbrauchAnteil.ContainsKey(typ))
             {
@@ -167,14 +167,14 @@ namespace Deeplex.Saverwalter.Model
             }
             else
             {
-                betriebskostenabrechnung.notes.Add(new Note("Konnte keinen Anteil für " + typ.ToDescriptionString() + " feststellen.", Severity.Error));
+                betriebskostenabrechnung.Notes.Add(new Note("Konnte keinen Anteil für " + typ.ToDescriptionString() + " feststellen.", Severity.Error));
                 return 0;
             }
         }
 
         private static Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> GetVerbrauch(
             SaverwalterContext ctx,
-            BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung,
+            BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung,
             List<Umlage> Umlagen,
             Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch)
         {
@@ -187,7 +187,7 @@ namespace Deeplex.Saverwalter.Model
             if (VerbrauchList.Any(w => w.Count() == 0))
             {
                 // TODO this can be made even more explicit.
-                betriebskostenabrechnung.notes.Add(new Note("Für eine Rechnung konnte keine Zuordnung erstellt werden.", Severity.Error));
+                betriebskostenabrechnung.Notes.Add(new Note("Für eine Rechnung konnte keine Zuordnung erstellt werden.", Severity.Error));
                 return new Dictionary<Betriebskostentyp, List<VerbrauchAnteil>>();
             }
 
@@ -207,7 +207,7 @@ namespace Deeplex.Saverwalter.Model
 
         private static List<PersonenZeitIntervall> VertraegeIntervallPersonenzahl(
             List<VertragVersion> vertraege,
-            BetriebskostenabrechnungService.Betriebskostenabrechnung betriebskostenabrechnung,
+            BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung,
             Rechnungsgruppe parent)
         {
             var merged = vertraege
