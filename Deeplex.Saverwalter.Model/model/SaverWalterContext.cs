@@ -67,12 +67,19 @@ namespace Deeplex.Saverwalter.Model
 
         public IPerson FindPerson(Guid PersonId)
         {
-            var left = JuristischePersonen.SingleOrDefault(j => PersonId == j.PersonId);
-            if (left != null)
+            
+            if (JuristischePersonen.SingleOrDefault(j => j.PersonId == PersonId) is JuristischePerson j)
             {
-                return left;
+                return j;
             }
-            return NatuerlichePersonen.SingleOrDefault(n => PersonId == n.PersonId);
+            else if(NatuerlichePersonen.SingleOrDefault(n => n.PersonId == PersonId) is NatuerlichePerson n)
+            {
+                return n;
+            }
+            else
+            {
+                throw new ArgumentException("FindPerson: PersonId does not belong to a NatuerlichePerson or JuristischePerson");
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
