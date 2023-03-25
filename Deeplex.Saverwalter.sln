@@ -13,9 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.ModelTe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.PrintTests", "Deeplex.Saverwalter.PrintTests\Deeplex.Saverwalter.PrintTests.csproj", "{6DDE0FE7-E880-4976-924C-44C3256E8A42}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.WalterDbService", "Deeplex.SaverWalter.Services\Deeplex.Saverwalter.WalterDbService.csproj", "{00080445-D5B6-4E16-A43E-E8DEED032A1F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.WalterDbService", "Deeplex.SaverWalter.WalterDbService\Deeplex.Saverwalter.WalterDbService.csproj", "{00080445-D5B6-4E16-A43E-E8DEED032A1F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.ServicesTests", "Deeplex.Saverwalter.ServicesTests\Deeplex.Saverwalter.ServicesTests.csproj", "{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.ServicesTests", "Deeplex.Saverwalter.WalterDbServiceTests\Deeplex.Saverwalter.ServicesTests.csproj", "{CDAEE66D-FB41-4B5F-95AA-A7F70D5E3404}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{254288C9-5B4B-43B9-B05C-A9DE827D1D68}"
 EndProject
@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.WebAPI"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.BetriebskostenabrechnungService", "Deeplex.Saverwalter.Betriebskostenabrechnung\Deeplex.Saverwalter.BetriebskostenabrechnungService.csproj", "{DD438273-69A1-4266-901F-734457524A37}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.BetriebskostenrechnungServiceTests", "Deeplex.Saverwalter.BetriebskostenrechnungTests\Deeplex.Saverwalter.BetriebskostenrechnungServiceTests.csproj", "{D8B0B7AE-4C22-4C68-9079-5B429A4F3522}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.BetriebskostenabrechnungServiceTests", "Deeplex.Saverwalter.BetriebskostenabrechnungTests\Deeplex.Saverwalter.BetriebskostenabrechnungServiceTests.csproj", "{D8B0B7AE-4C22-4C68-9079-5B429A4F3522}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.ErhaltungsaufwendungService", "Deeplex.Saverwalter.ErhaltungsaufwendungService\Deeplex.Saverwalter.ErhaltungsaufwendungService.csproj", "{F4212F3A-4F71-4CB2-9C21-BD2B293A19D2}"
 EndProject
