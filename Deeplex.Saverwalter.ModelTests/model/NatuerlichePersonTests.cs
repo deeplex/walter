@@ -75,8 +75,8 @@ namespace Deeplex.Saverwalter.ModelTests.model
             DatabaseContext.Set<NatuerlichePerson>().Should().Contain(entity);
         }
 
-        public static IEnumerable<object[]> ShouldNotWorkData =>
-            new List<object[]>
+        public static IEnumerable<object[]> ShouldNotWorkData
+            => new List<object[]>
             {
                 new object[] { new NatuerlichePerson("Test Nachname")
                 {
@@ -100,15 +100,77 @@ namespace Deeplex.Saverwalter.ModelTests.model
         {
             // Arrange
 
-            //Act
-            var result = DatabaseContext.Add(entity);
+            // Act
+            DatabaseContext.Add(entity);
+            var result = DatabaseContext.Set<NatuerlichePerson>().FirstOrDefault(e => e.NatuerlichePersonId == entity.NatuerlichePersonId);
 
-            Action saveAction = () => DatabaseContext.SaveChanges();
-            saveAction.Should().Throw<DbUpdateException>();
-            entity.NatuerlichePersonId.Should().Be(0);
+            // Assert
+            try
+            {
+                DatabaseContext.SaveChanges();
+                Assert.True(false, "Expected DbUpdateException was not thrown.");
+            }
+            catch (DbUpdateException ex)
+            {
+                ex.Should().NotBeNull();
+            }
 
+            result.Should().BeNull();
             DatabaseContext.Set<NatuerlichePerson>().Should().NotContain(entity);
         }
 
+        [Theory]
+        [MemberData(nameof(ShouldWorkData))]
+        public void ShouldUpdateNatuerlichePerson(NatuerlichePerson entity)
+        {
+            // Arrange
+            DatabaseContext.Add(entity);
+            DatabaseContext.SaveChanges();
+            var testEntity = DatabaseContext.Set<NatuerlichePerson>().FirstOrDefault(e => e.NatuerlichePersonId == entity.NatuerlichePersonId)!;
+            testEntity.Email = "Updated Test Email";
+
+            // Assert
+            var result = DatabaseContext.Update(entity);
+            DatabaseContext.SaveChanges();
+
+            // Assert
+            result.Entity.Should().BeEquivalentTo(testEntity, options => options.ExcludingMissingMembers());
+            result.Entity.NatuerlichePersonId.Should().Be(entity.NatuerlichePersonId);
+            result.Entity.Email.Should().Be(testEntity.Email);
+            DatabaseContext.Set<NatuerlichePerson>().Should().Contain(entity);
+        }
+
+        [Theory]
+        [MemberData(nameof(ShouldWorkData))]
+        public void ShouldNotUpdateNatuerlichePerson(NatuerlichePerson entity)
+        {
+            // Arrange
+            DatabaseContext.Add(entity);
+            DatabaseContext.SaveChanges();
+            var testEntity = DatabaseContext.Set<NatuerlichePerson>().FirstOrDefault(e => e.NatuerlichePersonId == entity.NatuerlichePersonId)!;
+            testEntity.Email = "Updated Test Email";
+            testEntity.Nachname = null!;
+            DatabaseContext.NatuerlichePersonen.Update(testEntity);
+
+            // Act
+            try
+            {
+                DatabaseContext.SaveChanges();
+                Assert.True(false, "Expected DbUpdateException was not thrown.");
+            }
+            catch (DbUpdateException ex)
+            {
+                ex.Should().NotBeNull();
+            }
+            var result = DatabaseContext.Set<NatuerlichePerson>().FirstOrDefault(e => e.NatuerlichePersonId == entity.NatuerlichePersonId)!;
+
+            // Assert
+
+            result.Should().NotBeNull();
+            DatabaseContext.Set<NatuerlichePerson>().Should().Contain(result);
+            result.Should().NotBeEquivalentTo(testEntity, options => options.ExcludingMissingMembers());
+            result.Email.Should().NotBe(testEntity.Email);
+            DatabaseContext.Set<NatuerlichePerson>().Should().Contain(result);
+        }
     }
 }

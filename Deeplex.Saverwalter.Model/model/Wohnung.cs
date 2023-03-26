@@ -1,14 +1,20 @@
-﻿namespace Deeplex.Saverwalter.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Deeplex.Saverwalter.Model
 {
     public class Wohnung
     {
         public int WohnungId { get; set; }
-        public virtual Adresse? Adresse { get; set; }
+        [Required]
         public string Bezeichnung { get; set; }
-        public Guid BesitzerId { get; set; }
+        [Required]
         public double Wohnflaeche { get; set; }
+        [Required]
         public double Nutzflaeche { get; set; }
+        [Required]
         public int Nutzeinheit { get; set; } // TODO Rename to Nutzeinheiten
+        public virtual Adresse? Adresse { get; set; }
+        public Guid BesitzerId { get; set; }
         public string? Notiz { get; set; }
 
         public virtual List<Vertrag> Vertraege { get; private set; } = new List<Vertrag>();

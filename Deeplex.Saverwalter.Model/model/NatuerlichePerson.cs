@@ -1,14 +1,16 @@
-﻿namespace Deeplex.Saverwalter.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Deeplex.Saverwalter.Model
 {
     public class NatuerlichePerson : IPerson
     {
         public string Bezeichnung => string.Join(" ", Vorname ?? "", Nachname);
 
-
-        public Guid PersonId { get; set; }
         public int NatuerlichePersonId { get; set; }
-        public string? Vorname { get; set; }
+        public Guid PersonId { get; set; }
+        [Required]
         public string Nachname { get; set; }
+        public string? Vorname { get; set; }
         public Titel Titel { get; set; }
         public Anrede Anrede { get; set; }
         public string? Telefon { get; set; }

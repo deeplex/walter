@@ -15,16 +15,16 @@ namespace Deeplex.Saverwalter.Model
         public ImmutableList<ErhaltungsaufwendungListeEntry> Liste { get; set; }
         public Wohnung Wohnung { get; }
 
-        public ErhaltungsaufwendungWohnung(SaverwalterContext _db, int WohnungId, int Jahr)
+        public ErhaltungsaufwendungWohnung(SaverwalterContext ctx, int WohnungId, int Jahr)
         {
-            Wohnung = _db.Wohnungen.Find(WohnungId);
+            Wohnung = ctx.Wohnungen.Find(WohnungId)!;
 
             // TODO sort by... Aussteller, then Datum, then Bezeichnung
-            Liste = _db.Erhaltungsaufwendungen
+            Liste = ctx.Erhaltungsaufwendungen
                 .Include(e => e.Wohnung)
                 .Where(e => e.Wohnung.WohnungId == WohnungId)
                 .Where(e => e.Datum.Year == Jahr)
-                .Select(e => new ErhaltungsaufwendungListeEntry(e, _db))
+                .Select(e => new ErhaltungsaufwendungListeEntry(e, ctx))
                 .ToImmutableList();
         }
     }

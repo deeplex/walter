@@ -1,9 +1,13 @@
-﻿namespace Deeplex.Saverwalter.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Deeplex.Saverwalter.Model
 {
     public class Umlage
     {
         public int UmlageId { get; set; }
+        [Required]
         public Betriebskostentyp Typ { get; set; }
+        [Required]
         public Umlageschluessel Schluessel { get; set; }
         public string? Beschreibung { get; set; }
         public string? Notiz { get; set; }

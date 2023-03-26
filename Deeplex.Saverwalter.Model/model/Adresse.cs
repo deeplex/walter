@@ -1,4 +1,6 @@
-﻿namespace Deeplex.Saverwalter.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Deeplex.Saverwalter.Model
 {
     public class Adresse
     {
@@ -7,9 +9,13 @@
             string.Join(" ", Postleitzahl, Stadt));
 
         public int AdresseId { get; set; }
+        [Required]
         public string Hausnummer { get; set; }
+        [Required]
         public string Strasse { get; set; }
+        [Required]
         public string Postleitzahl { get; set; }
+        [Required]
         public string Stadt { get; set; }
         public string? Notiz { get; set; }
 

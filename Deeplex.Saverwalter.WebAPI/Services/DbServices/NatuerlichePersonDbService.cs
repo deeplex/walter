@@ -129,7 +129,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 // Add new
                 entity.JuristischePersonen
                     .AddRange(l.Where(w => !entity.JuristischePersonen.Exists(e => w.Id == e.JuristischePersonId.ToString()))
-                    .Select(w => ctx.JuristischePersonen.Find(new Guid(w.Id!))));
+                    .Select(w => ctx.JuristischePersonen.Find(new Guid(w.Id))!));
                 // Remove old
                 entity.JuristischePersonen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.JuristischePersonen.ToString()));
             }

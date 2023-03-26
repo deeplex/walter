@@ -1,8 +1,11 @@
-﻿namespace Deeplex.Saverwalter.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Deeplex.Saverwalter.Model
 {
     public class Vertrag
     {
         public int VertragId { get; set; }
+        [Required]
         public virtual Wohnung Wohnung { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
         public Guid? AnsprechpartnerId { get; set; }
         public string? Notiz { get; set; }
@@ -21,9 +24,13 @@
     public class VertragVersion
     {
         public int VertragVersionId { get; set; }
+        [Required]
         public int Personenzahl { get; set; }
+        [Required]
         public virtual Vertrag Vertrag { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
+        [Required]
         public DateTime Beginn { get; set; }
+        [Required]
         public double Grundmiete { get; set; }
         public string? Notiz { get; set; }
 

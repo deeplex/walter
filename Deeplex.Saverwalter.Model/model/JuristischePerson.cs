@@ -1,10 +1,12 @@
-﻿namespace Deeplex.Saverwalter.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Deeplex.Saverwalter.Model
 {
-    // JuristischePerson is a Name. Kontakte may subscribe to this and is used for dashboards and stuff... nothing wild really.
     public class JuristischePerson : IPerson
     {
-        public Guid PersonId { get; set; }
         public int JuristischePersonId { get; set; }
+        public Guid PersonId { get; set; }
+        [Required]
         public string Bezeichnung { get; set; }
         public string? Telefon { get; set; }
         public string? Mobil { get; set; }

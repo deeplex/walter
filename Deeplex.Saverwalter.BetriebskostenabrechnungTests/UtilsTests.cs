@@ -13,11 +13,10 @@ namespace Deeplex.Saverwalter.Model.Tests
         [InlineData(2, "Erika Mustermann")]
         public void GetBriefAnredeNatuerlichePersonTest(int anrede, string s)
         {
-            var mock = new NatuerlichePerson()
+            var mock = new NatuerlichePerson("Mustermann")
             {
                 Anrede = (Anrede)anrede,
                 Vorname = "Erika",
-                Nachname = "Mustermann"
             };
 
             mock.GetBriefAnrede().Should().Be(s);
@@ -27,39 +26,20 @@ namespace Deeplex.Saverwalter.Model.Tests
         [InlineData("Muster AG")]
         public void GetBriefAnredeJuristischePersonTest(string s)
         {
-            var mock = new JuristischePerson()
-            {
-                Bezeichnung = "Muster AG"
-            };
+            var mock = new JuristischePerson("Muster AG");
 
             mock.GetBriefAnrede().Should().Be(s);
-        }
-
-        [Theory(Skip = "Find a way to inject year")]
-        [InlineData("Betriebskostenabrechnung 0", 0)]
-        [InlineData("Betriebskostenabrechnung 1", 1)]
-        [InlineData("Betriebskostenabrechnung 2022", 2022)]
-        [InlineData("Betriebskostenabrechnung 31232", 31232)]
-        public void TitleTest(string title, int year)
-        {
-            var fake = A.Fake<IBetriebskostenabrechnung>();
-            fake.Title().Should().Be(title);
         }
 
         [Theory(Skip = "How to set Mieterliste to fake?")]
         [InlineData("Mieter: Erika Mustermann, Max Mustermann")]
         public void MieterlisteTest(string s)
         {
-            var mock1 = new NatuerlichePerson()
+            var mock1 = new NatuerlichePerson("Mustermann")
             {
                 Vorname = "Erika",
-                Nachname = "Mustermann"
             };
-            var mock2 = new NatuerlichePerson()
-            {
-                Vorname = "Max",
-                Nachname = "Mustermann"
-            };
+            var mock2 = new NatuerlichePerson("Mustermann") { Vorname = "Max" };
 
 
             var fake = A.Fake<BetriebskostenabrechnungService.IBetriebskostenabrechnung>();
@@ -73,17 +53,10 @@ namespace Deeplex.Saverwalter.Model.Tests
         [InlineData("Mietobjekt: Musterstraße 3, 12345 Musterstadt - Musterwohnung")]
         public void MietobjektTest(string s)
         {
-            var mockAdresse = new Adresse()
-            {
-                Strasse = "Musterstraße",
-                Hausnummer = "3",
-                Postleitzahl = "12345",
-                Stadt = "Musterstadt"
-            };
-            var mock = new Wohnung()
+            var mockAdresse = new Adresse("Musterstraße", "3", "12345", "Musterstadt");
+            var mock = new Wohnung("Musterwohnung", 100, 100, 1)
             {
                 Adresse = mockAdresse,
-                Bezeichnung = "Musterwohnung"
             };
 
             var fake = A.Fake<BetriebskostenabrechnungService.IBetriebskostenabrechnung>();

@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             protected Wohnung? Entity { get; }
 
             public int Id { get; set; }
-            public string? Bezeichnung { get; set; } = null!;
+            public string Bezeichnung { get; set; } = null!;
             public double Wohnflaeche { get; set; }
             public double Nutzflaeche { get; set; }
             public int Einheiten { get; set; }

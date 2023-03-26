@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.PrintService
             for (var i = 1; i < max; ++i)
             {
                 var cellrow = new TableRow();
-                var row = cols.Select(w => w.Skip(i).FirstOrDefault()).ToList();
+                var row = cols.Select(w => w.Skip(i).First()).ToList();
                 for (var k = 0; k < row.Count(); ++k)
                 {
                     if (bold[i])

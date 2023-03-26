@@ -121,8 +121,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 // Add missing Wohnungen
                 entity.Wohnungen
-                    .AddRange(l.Where(w => !entity.Wohnungen.Exists(e => w.Id == e.WohnungId.ToString()))
-                    .Select(w => ctx.Wohnungen.Find(int.Parse(w.Id!))));
+                    .AddRange(l
+                    .Where(w => !entity.Wohnungen.Exists(e => w.Id == e.WohnungId.ToString()))
+                    .Select(w => ctx.Wohnungen.Find(int.Parse(w.Id))!));
                 // Remove old Wohnungen
                 entity.Wohnungen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.WohnungId.ToString()));
             }

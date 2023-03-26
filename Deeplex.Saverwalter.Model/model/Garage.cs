@@ -1,10 +1,13 @@
-﻿namespace Deeplex.Saverwalter.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Deeplex.Saverwalter.Model
 {
     public class Garage
     {
         public int GarageId { get; set; }
-        public virtual Adresse Adresse { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
+        [Required]
         public string Kennung { get; set; }
+        public virtual Adresse? Adresse { get; set; }
         public Guid BesitzerId { get; set; }
         public string? Notiz { get; set; }
 

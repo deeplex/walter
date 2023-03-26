@@ -1,13 +1,17 @@
-﻿namespace Deeplex.Saverwalter.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Deeplex.Saverwalter.Model
 {
     public class Zaehler
     {
         public int ZaehlerId { get; set; }
-        public string Kennnummer { get; set; } = null!;
+        [Required]
+        public string Kennnummer { get; set; }
+        [Required]
+        public Zaehlertyp Typ { get; set; }
         public virtual Wohnung? Wohnung { get; set; }
         public virtual Adresse? Adresse { get; set; }
         public virtual Zaehler? Allgemeinzaehler { get; set; }
-        public Zaehlertyp Typ { get; set; }
         public string? Notiz { get; set; }
 
         public virtual List<Zaehlerstand> Staende { get; private set; } = new List<Zaehlerstand>();
