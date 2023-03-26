@@ -10,17 +10,6 @@
 	import { Row, Tile } from 'carbon-components-svelte';
 
 	export let abrechnung: WalterBetriebskostenabrechnungKostengruppenEntry;
-
-	// create_abrechnung(id, j, title).then((e) => {
-	// 	const file = create_walter_s3_file_from_file(e, data.S3URL);
-	// 	walter_s3_post(new File([e], file.FileName), `${data.S3URL}`).then(
-	// 		(e) => {
-	// 			if (e.ok) {
-	// 				data.anhaenge = [...data.anhaenge, file];
-	// 			}
-	// 		}
-	// 	);
-	// });
 </script>
 
 {#await abrechnung then}

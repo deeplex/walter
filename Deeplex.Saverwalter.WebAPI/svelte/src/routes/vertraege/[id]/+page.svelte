@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { Accordion, Button, Row, Truncate } from 'carbon-components-svelte';
+	import {
+		Accordion,
+		Button,
+		ButtonSet,
+		Row,
+		Truncate
+	} from 'carbon-components-svelte';
 	import type { PageData } from './$types';
 
 	import {
@@ -29,6 +35,11 @@
 		WalterPersonEntry,
 		WalterVertragVersionEntry
 	} from '$WalterLib';
+	import {
+		create_walter_s3_file_from_file,
+		walter_s3_post
+	} from '$WalterServices/s3';
+	import { create_abrechnung } from '$WalterServices/abrechnung';
 
 	export let data: PageData;
 
@@ -64,7 +75,19 @@
 		?.map((mieter) => mieter.name)
 		.join(', ')}`;
 
-	console.log(data.a);
+	function dokument_erstellen_click() {
+		create_abrechnung(data.id, year, title).then((e) => {
+			const file = create_walter_s3_file_from_file(e, data.S3URL);
+			walter_s3_post(new File([e], file.FileName), data.S3URL).then((e) => {
+				if (e.ok) {
+					if (data.anhaenge.some((e) => e.FileName == file.FileName)) {
+						return;
+					}
+					data.anhaenge = [...data.anhaenge, file];
+				}
+			});
+		});
+	}
 </script>
 
 <WalterHeaderDetail
@@ -107,7 +130,12 @@
 			label="Jahr"
 			hideSteppers={false}
 		/>
-		<Button on:click={abrechnung_click}>Bestätigen</Button>
+		<ButtonSet style="margin: auto">
+			<Button on:click={abrechnung_click}>Vorschau anzeigen</Button>
+			<Button on:click={dokument_erstellen_click}
+				>Word-Dokument erstellen</Button
+			>
+		</ButtonSet>
 	</Row>
 
 	{#if abrechnung}
