@@ -1,8 +1,8 @@
-﻿using FluentAssertions;
-using System;
+﻿using Deeplex.Saverwalter.Model;
+using FluentAssertions;
 using Xunit;
 
-namespace Deeplex.Saverwalter.Model.Tests
+namespace Deeplex.Saverwalter.ModelTests
 {
     public class KalteBetriebskostenExtensionsTests
     {

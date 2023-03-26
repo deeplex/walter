@@ -1,30 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public sealed class Vertrag : IAnhang
+    public class Vertrag
     {
         public int VertragId { get; set; }
-        public Wohnung Wohnung { get; set; } = null!;
+        [Required]
+        public virtual Wohnung Wohnung { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
         public Guid? AnsprechpartnerId { get; set; }
         public string? Notiz { get; set; }
         public DateTime? Ende { get; set; }
-        public List<VertragVersion> Versionen { get; private set; } = new List<VertragVersion>();
-        public List<Miete> Mieten { get; private set; } = new List<Miete>();
-        public List<Mietminderung> Mietminderungen { get; private set; } = new List<Mietminderung>();
-        public List<Garage> Garagen { get; private set; } = new List<Garage>();
-        public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
+
+        public virtual List<VertragVersion> Versionen { get; private set; } = new List<VertragVersion>();
+        public virtual List<Miete> Mieten { get; private set; } = new List<Miete>();
+        public virtual List<Mietminderung> Mietminderungen { get; private set; } = new List<Mietminderung>();
+        public virtual List<Garage> Garagen { get; private set; } = new List<Garage>();
+
+        public Vertrag()
+        {
+        }
     }
 
-    public sealed class VertragVersion : IAnhang
+    public class VertragVersion
     {
         public int VertragVersionId { get; set; }
+        [Required]
         public int Personenzahl { get; set; }
-        public Vertrag Vertrag { get; set; } = null!;
+        [Required]
+        public virtual Vertrag Vertrag { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
+        [Required]
         public DateTime Beginn { get; set; }
+        [Required]
         public double Grundmiete { get; set; }
         public string? Notiz { get; set; }
-        public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
+
+        public VertragVersion(DateTime beginn, double grundmiete, int personenzahl)
+        {
+            Beginn = beginn;
+            Grundmiete = grundmiete;
+            Personenzahl = personenzahl;
+        }
     }
 }

@@ -1,25 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public sealed class Betriebskostenrechnung : IAnhang
+    public class Betriebskostenrechnung
     {
-        // TODO this should be in extensions...
-        public Betriebskostenrechnung ShallowCopy()
-        {
-            return (Betriebskostenrechnung)MemberwiseClone();
-        }
-
         public int BetriebskostenrechnungId { get; set; }
+        [Required]
         public double Betrag { get; set; }
+        [Required]
         public DateTime Datum { get; set; }
+        [Required]
         public int BetreffendesJahr { get; set; }
-        public Umlage Umlage { get; set; } = null!;
-        public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
-
+        [Required]
+        public virtual Umlage Umlage { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
         public string? Notiz { get; set; }
+
+        public Betriebskostenrechnung(double betrag, DateTime datum, int betreffendesJahr)
+        {
+            Betrag = betrag;
+            Datum = datum;
+            BetreffendesJahr = betreffendesJahr;
+        }
     }
 
     public enum HKVO_P9A2

@@ -1,24 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public sealed class Wohnung : IAdresse, IAnhang
+    public class Wohnung
     {
         public int WohnungId { get; set; }
-        public int AdresseId { get; set; }
-        public Adresse Adresse { get; set; } = null!;
-        public string Bezeichnung { get; set; } = null!;
-        public Guid BesitzerId { get; set; }
+        [Required]
+        public string Bezeichnung { get; set; }
+        [Required]
         public double Wohnflaeche { get; set; }
+        [Required]
         public double Nutzflaeche { get; set; }
-        // Nutzeinheit is always 1, but dummies may have more... Or really big Wohnungen, who knows.
-        public int Nutzeinheit { get; set; } = 1;
+        [Required]
+        public int Nutzeinheit { get; set; } // TODO Rename to Nutzeinheiten
+        public virtual Adresse? Adresse { get; set; }
+        public Guid BesitzerId { get; set; }
         public string? Notiz { get; set; }
-        public List<Vertrag> Vertraege { get; private set; } = new List<Vertrag>();
-        public List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
-        public List<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; private set; } = new List<Erhaltungsaufwendung>();
-        public List<Umlage> Umlagen { get; private set; } = new List<Umlage>();
-        public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
+
+        public virtual List<Vertrag> Vertraege { get; private set; } = new List<Vertrag>();
+        public virtual List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
+        public virtual List<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; private set; } = new List<Erhaltungsaufwendung>();
+        public virtual List<Umlage> Umlagen { get; private set; } = new List<Umlage>();
+
+        public Wohnung(string bezeichnung, double wohnflaeche, double nutzflaeche, int nutzeinheit)
+        {
+            Bezeichnung = bezeichnung;
+            Wohnflaeche = wohnflaeche;
+            Nutzflaeche = nutzflaeche;
+            Nutzeinheit = nutzeinheit;
+        }
     }
 }

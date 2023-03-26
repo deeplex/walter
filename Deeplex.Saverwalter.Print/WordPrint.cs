@@ -1,10 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
-using System;
-using System.Linq;
 
-namespace Deeplex.Saverwalter.Print
+namespace Deeplex.Saverwalter.PrintService
 {
 
     public sealed class WordPrint : IPrint<Body>
@@ -71,7 +69,7 @@ namespace Deeplex.Saverwalter.Print
             for (var i = 1; i < max; ++i)
             {
                 var cellrow = new TableRow();
-                var row = cols.Select(w => w.Skip(i).FirstOrDefault()).ToList();
+                var row = cols.Select(w => w.Skip(i).First()).ToList();
                 for (var k = 0; k < row.Count(); ++k)
                 {
                     if (bold[i])

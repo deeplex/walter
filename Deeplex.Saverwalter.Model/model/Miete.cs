@@ -1,19 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public sealed class Miete : IAnhang
+    public class Miete
     {
         public int MieteId { get; set; }
-        public Vertrag Vertrag { get; set; } = null!;
-
-        // Zahlungsdatum may be used to determine if the last Zahlung is more than a month ago (+ tolerance).
+        [Required]
+        public virtual Vertrag Vertrag { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
+        [Required]
         public DateTime Zahlungsdatum { get; set; }
-        // BetreffenderMonat to be able to track single Mietsausfälle in specific months.
+        [Required]
         public DateTime BetreffenderMonat { get; set; }
-        public double? Betrag { get; set; }
+        [Required]
+        public double Betrag { get; set; }
         public string? Notiz { get; set; }
-        public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
+
+        public Miete(DateTime zahlungsdatum, DateTime betreffenderMonat, double betrag)
+        {
+            Zahlungsdatum = zahlungsdatum;
+            BetreffenderMonat = betreffenderMonat;
+            Betrag = betrag;
+        }
     }
 }

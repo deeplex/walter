@@ -1,0 +1,15 @@
+export { WalterPersonEntry } from './WalterPerson';
+export { WalterAdresseEntry } from './WalterAdresse';
+export { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
+export { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
+export { WalterJuristischePersonEntry } from './WalterJuristischePerson';
+export { WalterMieteEntry } from './WalterMiete';
+export { WalterMietminderungEntry } from './WalterMietminderung';
+export { WalterNatuerlichePersonEntry } from './WalterNatuerlichePerson';
+export { WalterSelectionEntry } from './WalterSelection';
+export { WalterUmlageEntry } from './WalterUmlage';
+export { WalterVertragEntry } from './WalterVertrag';
+export { WalterVertragVersionEntry } from './WalterVertragVersion';
+export { WalterWohnungEntry } from './WalterWohnung';
+export { WalterZaehlerEntry } from './WalterZaehler';
+export { WalterZaehlerstandEntry } from './WalterZaehlerstand';

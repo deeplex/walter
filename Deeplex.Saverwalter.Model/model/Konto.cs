@@ -1,13 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public sealed class Konto : IAnhang
+    public class Konto
     {
         public int KontoId { get; set; }
-        public string Bank { get; set; } = null!;
-        public string Iban { get; set; } = null!;
+        [Required]
+        public string Bank { get; set; }
+        [Required]
+        public string Iban { get; set; }
         public string? Notiz { get; set; }
-        public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
+
+        public Konto(string bank, string iban)
+        {
+            Bank = bank;
+            Iban = iban;
+        }
     }
 }

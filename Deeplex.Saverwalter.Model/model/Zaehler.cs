@@ -1,19 +1,27 @@
-﻿using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
-    public sealed class Zaehler : IAnhang
+    public class Zaehler
     {
         public int ZaehlerId { get; set; }
-        public string Kennnummer { get; set; } = null!;
-        public Wohnung? Wohnung { get; set; } = null!;
-        public Adresse Adresse { get; set; } = null!;
-        public Zaehler? Allgemeinzaehler { get; set; } = null!;
-        public List<Zaehler> EinzelZaehler { get; private set; } = new List<Zaehler>();
+        [Required]
+        public string Kennnummer { get; set; }
+        [Required]
         public Zaehlertyp Typ { get; set; }
-        public List<Zaehlerstand> Staende { get; private set; } = new List<Zaehlerstand>();
+        public virtual Wohnung? Wohnung { get; set; }
+        public virtual Adresse? Adresse { get; set; }
+        public virtual Zaehler? Allgemeinzaehler { get; set; }
         public string? Notiz { get; set; }
-        public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
+
+        public virtual List<Zaehlerstand> Staende { get; private set; } = new List<Zaehlerstand>();
+        public virtual List<Zaehler> EinzelZaehler { get; private set; } = new List<Zaehler>();
+
+        public Zaehler(string kennnummer, Zaehlertyp typ)
+        {
+            Kennnummer = kennnummer;
+            Typ = typ;
+        }
     }
 
     public enum Zaehlertyp

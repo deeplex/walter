@@ -1,9 +1,9 @@
-﻿using FakeItEasy;
+﻿using Deeplex.Saverwalter.Model;
+using FakeItEasy;
 using FluentAssertions;
-using System.Collections.Generic;
 using Xunit;
 
-namespace Deeplex.Saverwalter.Model.Tests
+namespace Deeplex.Saverwalter.ModelTests
 {
     public class SortedSetIntEqualityComparerTests
     {

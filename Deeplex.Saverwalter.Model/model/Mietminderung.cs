@@ -1,17 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
     // Mietminderung is later taken away from the result of the Betriebskostenabrechnug.
-    public sealed class Mietminderung : IAnhang
+    public class Mietminderung
     {
         public int MietminderungId { get; set; }
-        public Vertrag Vertrag { get; set; } = null!;
+        [Required]
+        public virtual Vertrag Vertrag { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
+        [Required]
         public DateTime Beginn { get; set; }
-        public DateTime? Ende { get; set; } = null!;
+        [Required]
         public double Minderung { get; set; }
+        public DateTime? Ende { get; set; }
         public string? Notiz { get; set; }
-        public List<Anhang> Anhaenge { get; set; } = new List<Anhang>();
+
+        public Mietminderung(DateTime beginn, double minderung)
+        {
+            Beginn = beginn;
+            Minderung = minderung;
+        }
     }
 }

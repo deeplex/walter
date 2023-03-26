@@ -1,4 +1,4 @@
-﻿namespace Deeplex.Saverwalter.Print
+﻿namespace Deeplex.Saverwalter.PrintService
 {
     public class PrintRun
     {
