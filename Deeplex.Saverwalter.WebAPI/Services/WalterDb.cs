@@ -19,12 +19,22 @@ namespace Deeplex.Saverwalter.WebAPI
 
             var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
             optionsBuilder.UseNpgsql(
-                $@"Server={databaseURL}
+                 $@"Server={databaseURL}
                 ;Port={databasePort}
-                ;Database=postgres;Username={databaseUser}
+                ;Database=postgres
+                ;Username={databaseUser}
                 ;Password={databasePass}");
-
+         
             ctx = new SaverwalterContext(optionsBuilder.Options);
+
+            //if (ctx.Database.EnsureCreated())
+            //{
+                // The database did not exist and has been created
+            //}
+            //else
+            //{
+                //ctx.Database.Migrate();
+            //}
         }
 
         public void SaveWalter()

@@ -14,27 +14,27 @@ namespace Deeplex.Saverwalter.WebAPI.Helper
         public static string Zeit(this DateTime d) => d.ToString("dd.MM.yyyy HH:mm:ss");
         public static string? Zeit(this DateTime? d) => d?.ToString("dd.MM.yyyy HH:mm:ss") ?? null;
 
-        public static Adresse? GetAdresse(AdresseEntryBase a, SaverwalterContext ctx)
+        public static Adresse? GetAdresse(AdresseEntryBase adresse, SaverwalterContext ctx)
         {
-            if (a.Strasse.IsNullOrEmpty() ||
-                a.Hausnummer.IsNullOrEmpty() ||
-                a.Postleitzahl.IsNullOrEmpty() ||
-                a.Stadt.IsNullOrEmpty())
+            if (adresse.Strasse.IsNullOrEmpty() ||
+                adresse.Hausnummer.IsNullOrEmpty() ||
+                adresse.Postleitzahl.IsNullOrEmpty() ||
+                adresse.Stadt.IsNullOrEmpty())
             {
                 return null;
             }
 
             return ctx.Adressen.SingleOrDefault(e =>
-                e.Strasse == a.Strasse &&
-                e.Hausnummer == a.Hausnummer &&
-                e.Postleitzahl == a.Postleitzahl &&
-                e.Stadt == a.Stadt) ??
+                e.Strasse == adresse!.Strasse &&
+                e.Hausnummer == adresse!.Hausnummer &&
+                e.Postleitzahl == adresse!.Postleitzahl &&
+                e.Stadt == adresse!.Stadt) ??
                 new Adresse()
                 {
-                    Strasse = a.Strasse!,
-                    Hausnummer = a.Hausnummer!,
-                    Postleitzahl = a.Postleitzahl!,
-                    Stadt = a.Stadt!
+                    Strasse = adresse.Strasse!,
+                    Hausnummer = adresse.Hausnummer!,
+                    Postleitzahl = adresse.Postleitzahl!,
+                    Stadt = adresse.Stadt!
                 };
         }
     }

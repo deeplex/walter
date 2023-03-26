@@ -5,26 +5,24 @@ using System.Text;
 
 namespace Deeplex.Saverwalter.Model
 {
-    /// <summary>A replacement for <see cref="NpgsqlSqlGenerationHelper"/>
-    /// to convert PascalCaseCsharpyIdentifiers to alllowercasenames.
-    /// So table and column names with no embedded punctuation
-    /// get generated with no quotes or delimiters.</summary>
-    public class NpgsqlSqlGenerationLowercasingHelper : NpgsqlSqlGenerationHelper
-    {
-        //Don't lowercase ef's migration table
-        const string dontAlter = "__EFMigrationsHistory";
-        static string Customize(string input) => input == dontAlter ? input : input.ToLower();
-        public NpgsqlSqlGenerationLowercasingHelper(RelationalSqlGenerationHelperDependencies dependencies)
-            : base(dependencies) { }
-        public override string DelimitIdentifier(string identifier)
-            => base.DelimitIdentifier(Customize(identifier));
-        public override void DelimitIdentifier(StringBuilder builder, string identifier)
-            => base.DelimitIdentifier(builder, Customize(identifier));
-    }
-
     public sealed class SaverwalterContext : DbContext
     {
-        private bool mPreconfigured = false;
+        /// <summary>A replacement for <see cref="NpgsqlSqlGenerationHelper"/>
+        /// to convert PascalCaseCsharpyIdentifiers to alllowercasenames.
+        /// So table and column names with no embedded punctuation
+        /// get generated with no quotes or delimiters.</summary>
+        public class NpgsqlSqlGenerationLowercasingHelper : NpgsqlSqlGenerationHelper
+        {
+            //Don't lowercase ef's migration table
+            const string dontAlter = "__EFMigrationsHistory";
+            static string Customize(string input) => input == dontAlter ? input : input.ToLower();
+            public NpgsqlSqlGenerationLowercasingHelper(RelationalSqlGenerationHelperDependencies dependencies)
+                : base(dependencies) { }
+            public override string DelimitIdentifier(string identifier)
+                => base.DelimitIdentifier(Customize(identifier));
+            public override void DelimitIdentifier(StringBuilder builder, string identifier)
+                => base.DelimitIdentifier(builder, Customize(identifier));
+        }
 
         public DbSet<Adresse> Adressen { get; set; } = null!;
         public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
@@ -50,7 +48,6 @@ namespace Deeplex.Saverwalter.Model
         public SaverwalterContext(DbContextOptions<SaverwalterContext> options)
             : base(options)
         {
-            mPreconfigured = true;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
@@ -58,21 +55,18 @@ namespace Deeplex.Saverwalter.Model
             options
                 .UseLazyLoadingProxies()
                 .ReplaceService<ISqlGenerationHelper, NpgsqlSqlGenerationLowercasingHelper>();
-
-            if (!mPreconfigured)
-            {
-                //options.UseSqlite("Data Source=walter.db");
-            }
+            // Needs EFCoreNamingConvention
+            //.UseSnakeCaseNamingConvention()
         }
 
         public IPerson FindPerson(Guid PersonId)
         {
-            
+
             if (JuristischePersonen.SingleOrDefault(j => j.PersonId == PersonId) is JuristischePerson j)
             {
                 return j;
             }
-            else if(NatuerlichePersonen.SingleOrDefault(n => n.PersonId == PersonId) is NatuerlichePerson n)
+            else if (NatuerlichePersonen.SingleOrDefault(n => n.PersonId == PersonId) is NatuerlichePerson n)
             {
                 return n;
             }
@@ -84,10 +78,8 @@ namespace Deeplex.Saverwalter.Model
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<JuristischePerson>()
-                .HasAlternateKey(jp => jp.PersonId);
-            modelBuilder.Entity<NatuerlichePerson>()
-                .HasAlternateKey(np => np.PersonId);
+            modelBuilder.Entity<JuristischePerson>().HasAlternateKey(person => person.PersonId);
+            modelBuilder.Entity<NatuerlichePerson>().HasAlternateKey(person => person.PersonId);
 
             base.OnModelCreating(modelBuilder);
             modelBuilder.HasPostgresExtension("uuid-ossp");
