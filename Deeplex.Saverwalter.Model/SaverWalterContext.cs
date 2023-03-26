@@ -7,23 +7,6 @@ namespace Deeplex.Saverwalter.Model
 {
     public sealed class SaverwalterContext : DbContext
     {
-        /// <summary>A replacement for <see cref="NpgsqlSqlGenerationHelper"/>
-        /// to convert PascalCaseCsharpyIdentifiers to alllowercasenames.
-        /// So table and column names with no embedded punctuation
-        /// get generated with no quotes or delimiters.</summary>
-        public class NpgsqlSqlGenerationLowercasingHelper : NpgsqlSqlGenerationHelper
-        {
-            //Don't lowercase ef's migration table
-            const string dontAlter = "__EFMigrationsHistory";
-            static string Customize(string input) => input == dontAlter ? input : input.ToLower();
-            public NpgsqlSqlGenerationLowercasingHelper(RelationalSqlGenerationHelperDependencies dependencies)
-                : base(dependencies) { }
-            public override string DelimitIdentifier(string identifier)
-                => base.DelimitIdentifier(Customize(identifier));
-            public override void DelimitIdentifier(StringBuilder builder, string identifier)
-                => base.DelimitIdentifier(builder, Customize(identifier));
-        }
-
         public DbSet<Adresse> Adressen { get; set; } = null!;
         public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
         public DbSet<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; set; } = null!;
@@ -54,9 +37,8 @@ namespace Deeplex.Saverwalter.Model
         {
             options
                 .UseLazyLoadingProxies()
-                .ReplaceService<ISqlGenerationHelper, NpgsqlSqlGenerationLowercasingHelper>();
-            // Needs EFCoreNamingConvention
-            //.UseSnakeCaseNamingConvention()
+                .UseLowerCaseNamingConvention();
+
         }
 
         public IPerson FindPerson(Guid PersonId)
