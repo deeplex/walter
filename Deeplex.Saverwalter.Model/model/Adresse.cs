@@ -1,11 +1,5 @@
 ﻿namespace Deeplex.Saverwalter.Model
 {
-    public interface IAdresse
-    {
-        public Adresse Adresse { get; set; }
-    }
-
-    // An Adresse is pointed at by a Wohnung, Garage or Kontakt.
     public class Adresse
     {
         public string Anschrift => string.Join(", ",
@@ -13,15 +7,24 @@
             string.Join(" ", Postleitzahl, Stadt));
 
         public int AdresseId { get; set; }
-        public string Hausnummer { get; set; } = null!;
-        public string Strasse { get; set; } = null!;
-        public string Postleitzahl { get; set; } = null!;
-        public string Stadt { get; set; } = null!;
+        public string Hausnummer { get; set; }
+        public string Strasse { get; set; }
+        public string Postleitzahl { get; set; }
+        public string Stadt { get; set; }
         public string? Notiz { get; set; }
+
         public virtual List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
         public virtual List<Garage> Garagen { get; private set; } = new List<Garage>();
         public virtual List<JuristischePerson> JuristischePersonen { get; private set; } = new List<JuristischePerson>();
         public virtual List<NatuerlichePerson> NatuerlichePersonen { get; private set; } = new List<NatuerlichePerson>();
         public virtual List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
+
+        public Adresse(string strasse, string hausnummer, string postleitzahl, string stadt)
+        {
+            Strasse= strasse;
+            Hausnummer= hausnummer;
+            Postleitzahl = postleitzahl;
+            Stadt = stadt;
+        }
     }
 }

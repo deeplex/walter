@@ -819,7 +819,8 @@ namespace Deeplex.Saverwalter.PrintService
 
         public static T Print(IErhaltungsaufwendungWohnung erhaltungsaufwendungen, IPrint<T> printImpl)
         {
-            printImpl.Heading(Anschrift(erhaltungsaufwendungen.Wohnung.Adresse) + ", " + erhaltungsaufwendungen.Wohnung.Bezeichnung);
+            var anschrift = erhaltungsaufwendungen.Wohnung.Adresse!.Anschrift; // TODO Adresse shouldn't be null here
+            printImpl.Heading($"{anschrift}, {erhaltungsaufwendungen.Wohnung.Bezeichnung}");
 
             var widths = new int[] { 40, 15, 31, 13 };
             var col1 = new List<string> { "Aussteller" };

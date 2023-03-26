@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public int Id { get; set; }
             public Guid Guid { get; set; }
-            public string? Name { get; set; }
+            public string Name { get; set; } = null!;
             public string? Email { get; set; }
             public string? Fax { get; set; }
             public string? Notiz { get; set; }

@@ -14,20 +14,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             DbService = dbService;
         }
 
-        private void SetValues(Zaehlerstand entity, ZaehlerstandEntryBase entry)
-        {
-            if (entity.ZaehlerstandId != entry.Id)
-            {
-                throw new Exception();
-            }
-
-            entity.Stand = entry.Stand;
-            entity.Datum = (DateTime)entry.Datum!;
-            entity.Notiz = entry.Notiz;
-            entity.Zaehler = ctx.ZaehlerSet.Find(int.Parse(entry.Zaehler!.Id!));
-        }
-
-
         public IActionResult Get(int id)
         {
             var entity = DbService.ctx.Zaehlerstaende.Find(id);
@@ -67,21 +53,29 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 return new BadRequestResult();
             }
-            var entity = new Zaehlerstand();
 
             try
             {
-                SetValues(entity, entry);
-                DbService.ctx.Zaehlerstaende.Add(entity);
-                DbService.SaveWalter();
-
-                return new OkObjectResult(new ZaehlerstandEntryBase(entity));
+                return new OkObjectResult(Add(entry));
             }
             catch
             {
                 return new BadRequestResult();
             }
+        }
 
+        private ZaehlerstandEntryBase Add(ZaehlerstandEntryBase entry)
+        {
+            var zaehler = ctx.ZaehlerSet.Find(int.Parse(entry.Zaehler!.Id!));
+            var entity = new Zaehlerstand(entry.Datum, entry.Stand)
+            {
+                Zaehler = zaehler!
+            };
+            SetOptionalValues(entity, entry);
+            DbService.ctx.Zaehlerstaende.Add(entity);
+            DbService.SaveWalter();
+
+            return new ZaehlerstandEntryBase(entity);
         }
 
         public IActionResult Put(int id, ZaehlerstandEntryBase entry)
@@ -94,17 +88,30 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                SetValues(entity, entry);
-                DbService.ctx.Zaehlerstaende.Update(entity);
-                DbService.SaveWalter();
-
-                return new OkObjectResult(new ZaehlerstandEntryBase(entity));
+                return new OkObjectResult(Update(entry, entity));
             }
             catch
             {
                 return new BadRequestResult();
             }
+        }
 
+        private ZaehlerstandEntryBase Update(ZaehlerstandEntryBase entry, Zaehlerstand entity)
+        {
+            entity.Datum = entry.Datum;
+            entity.Stand = entry.Stand;
+
+            SetOptionalValues(entity, entry);
+            DbService.ctx.Zaehlerstaende.Update(entity);
+            DbService.SaveWalter();
+
+            return new ZaehlerstandEntryBase(entity);
+        }
+
+        private void SetOptionalValues(Zaehlerstand entity, ZaehlerstandEntryBase entry)
+        {
+            entity.Stand = entry.Stand;
+            entity.Notiz = entry.Notiz;
         }
     }
 }

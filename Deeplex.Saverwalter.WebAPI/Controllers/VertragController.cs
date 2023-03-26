@@ -15,12 +15,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     {
         public class VertragEntryBase
         {
-            protected Vertrag? Entity { get; }
-
             public int Id { get; set; }
-            public DateTime? Beginn { get; set; }
+            public DateTime Beginn { get; set; }
             public DateTime? Ende { get; set; }
-            public SelectionEntry? Wohnung { get; set; }
+            public SelectionEntry Wohnung { get; set; } = null!;
             public SelectionEntry? Ansprechpartner { get; set; }
             public string? Notiz { get; set; }
             public string? MieterAuflistung { get; set; }
@@ -29,22 +27,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public VertragEntryBase() { }
             public VertragEntryBase(Vertrag entity, WalterDbService.WalterDb dbService)
             {
-                Entity = entity;
-
-                Id = Entity.VertragId;
-                Beginn = Entity.Beginn();
-                Ende = Entity.Ende;
+                Id = entity.VertragId;
+                Beginn = entity.Beginn();
+                Ende = entity.Ende;
+                var anschrift = entity.Wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift";
                 Wohnung = new(
-                    Entity.Wohnung.WohnungId,
-                    Entity.Wohnung.Adresse.Anschrift + " - " + Entity.Wohnung.Bezeichnung,
-                    Entity.Wohnung.BesitzerId.ToString());
-                Ansprechpartner = Entity.AnsprechpartnerId is Guid id && id != Guid.Empty
+                    entity.Wohnung.WohnungId,
+                    $"{anschrift} - {entity.Wohnung.Bezeichnung}",
+                    entity.Wohnung.BesitzerId.ToString());
+                Ansprechpartner = entity.AnsprechpartnerId is Guid id && id != Guid.Empty
                     ? new(id, dbService.ctx.FindPerson(id).Bezeichnung)
                     : null;
-                Notiz = Entity.Notiz;
+                Notiz = entity.Notiz;
 
                 var Mieter = dbService.ctx.MieterSet
-                    .Where(m => m.Vertrag.VertragId == Entity.VertragId)
+                    .Where(m => m.Vertrag.VertragId == entity.VertragId)
                     .ToList();
                 MieterAuflistung = string.Join(", ", Mieter
                     .Select(a => dbService.ctx.FindPerson(a.PersonId).Bezeichnung));
@@ -55,8 +52,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class VertragEntry : VertragEntryBase
         {
-            // TODO Versionen
             private WalterDbService.WalterDb? DbService { get; }
+            private Vertrag Entity { get; } = null!;
 
             public IEnumerable<MieteEntryBase>? Mieten => Entity?.Mieten.Select(e => new MieteEntryBase(e));
             public IEnumerable<MietminderungEntryBase>? Mietminderungen => Entity?.Mietminderungen.Select(e => new MietminderungEntryBase(e));
@@ -70,6 +67,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public VertragEntry() : base() { }
             public VertragEntry(Vertrag entity, WalterDbService.WalterDb dbService) : base(entity, dbService)
             {
+                Entity = entity;
                 DbService = dbService;
                 Versionen = Entity?.Versionen.Select(e => new VertragVersionEntryBase(e));
             }

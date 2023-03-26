@@ -16,10 +16,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             protected Zaehler? Entity { get; }
 
             public int Id { get; set; }
-            public string? Kennnummer { get; set; }
+            public string Kennnummer { get; set; } = null!;
             public AdresseEntryBase? Adresse { get; set; }
             public string? Notiz { get; set; }
-            public SelectionEntry? Typ { get; set; }
+            public SelectionEntry Typ { get; set; } = null!;
             public SelectionEntry? Wohnung { get; set; }
             public SelectionEntry? AllgemeinZaehler { get; set; }
 
@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Kennnummer = Entity.Kennnummer;
                 Typ = new((int)Entity.Typ, Entity.Typ.ToString());
                 Adresse = Entity.Adresse is Adresse a ? new AdresseEntryBase(a) : null;
-                Wohnung = Entity.Wohnung is Wohnung w ? new(w.WohnungId, w.Adresse.Anschrift + ", " + w.Bezeichnung) : null;
+                Wohnung = Entity.Wohnung is Wohnung w ? new(w.WohnungId, $"{w.Adresse?.Anschrift ?? "Unbekannte Anschrift"}, {w.Bezeichnung}") : null;
                 Notiz = Entity.Notiz;
                 AllgemeinZaehler = Entity?.Allgemeinzaehler is Zaehler z ? new(z.ZaehlerId, z.Kennnummer) : null;
             }

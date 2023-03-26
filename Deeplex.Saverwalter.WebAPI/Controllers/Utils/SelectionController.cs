@@ -8,8 +8,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
     {
         public class SelectionEntry
         {
-            public string? Id { get; set; }
-            public string? Text { get; set; }
+            public string Id { get; set; } = null!;
+            public string Text { get; set; } = null!;
             public string? Filter { get; set; }
 
             public SelectionEntry() { }
@@ -75,12 +75,19 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         [Route("api/selection/wohnungen")]
         public IActionResult GetWohnungen()
         {
+
             // Filter is used for Besitzer in Vertrag. TODO find a better name than filter.
-            return new OkObjectResult(DbService.ctx.Wohnungen
-                .Select(e => new SelectionEntry(
-                    e.WohnungId, e.Adresse.Anschrift + " - " + e.Bezeichnung,
-                    e.BesitzerId.ToString()))
-                .ToList());
+            var entries = DbService.ctx.Wohnungen
+                .ToList()
+                .Select(e =>
+                    new SelectionEntry(
+                            e.WohnungId,
+                            $"{e.Adresse?.Anschrift ?? ""} - {e.Bezeichnung}",
+                            e.BesitzerId.ToString()))
+                .ToList();
+
+
+            return new OkObjectResult(entries);
         }
 
         [HttpGet]

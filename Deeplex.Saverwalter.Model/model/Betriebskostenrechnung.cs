@@ -4,19 +4,19 @@ namespace Deeplex.Saverwalter.Model
 {
     public class Betriebskostenrechnung
     {
-        // TODO this should be in extensions...
-        public Betriebskostenrechnung ShallowCopy()
-        {
-            return (Betriebskostenrechnung)MemberwiseClone();
-        }
-
         public int BetriebskostenrechnungId { get; set; }
         public double Betrag { get; set; }
         public DateTime Datum { get; set; }
         public int BetreffendesJahr { get; set; }
-        public virtual Umlage Umlage { get; set; } = null!;
-
+        public virtual Umlage Umlage { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
         public string? Notiz { get; set; }
+
+        public Betriebskostenrechnung(double betrag, DateTime datum, int betreffendesJahr)
+        {
+            Betrag = betrag;
+            Datum = datum;
+            BetreffendesJahr = betreffendesJahr;
+        }
     }
 
     public enum HKVO_P9A2

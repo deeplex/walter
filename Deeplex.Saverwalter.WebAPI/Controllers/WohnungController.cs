@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
@@ -20,7 +21,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             protected Wohnung? Entity { get; }
 
             public int Id { get; set; }
-            public string? Bezeichnung { get; set; }
+            public string? Bezeichnung { get; set; } = null!;
             public double Wohnflaeche { get; set; }
             public double Nutzflaeche { get; set; }
             public int Einheiten { get; set; }

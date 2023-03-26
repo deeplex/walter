@@ -17,40 +17,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             DbService = dbService;
         }
 
-        private void SetValues(Zaehler entity, ZaehlerEntry entry)
-        {
-            if (entity.ZaehlerId != entry.Id)
-            {
-                throw new Exception();
-            }
-
-            entity.Kennnummer = entry.Kennnummer!;
-            if (entry.Typ is SelectionEntry t)
-            {
-                entity.Typ = (Zaehlertyp)int.Parse(t.Id!);
-            }
-            else
-            {
-                throw new Exception();
-            }
-            entity.Wohnung = entry.Wohnung is SelectionEntry w ? DbService.ctx.Wohnungen.Find(int.Parse(w.Id!)) : null;
-            if (entry.AllgemeinZaehler is SelectionEntry z)
-            {
-                entity.Allgemeinzaehler = DbService.ctx.ZaehlerSet.Find(int.Parse(z.Id!));
-            }
-            else
-            {
-                entity.Allgemeinzaehler = null;
-            }
-
-            if (entry.Adresse is AdresseEntryBase a)
-            {
-                entity.Adresse = GetAdresse(a, ctx)!;
-            }
-            entity.Notiz = entry.Notiz;
-        }
-
-
         public IActionResult Get(int id)
         {
             var entity = DbService.ctx.ZaehlerSet.Find(id);
@@ -90,21 +56,28 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 return new BadRequestResult();
             }
-            var entity = new Zaehler();
 
             try
             {
-                SetValues(entity, entry);
-                DbService.ctx.ZaehlerSet.Add(entity);
-                DbService.SaveWalter();
-
-                return new OkObjectResult(new ZaehlerEntry(entity, DbService));
+                return new OkObjectResult(Add(entry));
             }
             catch
             {
                 return new BadRequestResult();
             }
 
+        }
+
+        private ZaehlerEntry Add(ZaehlerEntry entry)
+        {
+            var typ = (Zaehlertyp)int.Parse(entry.Typ.Id);
+            var entity = new Zaehler(entry.Kennnummer, typ);
+
+            SetOptionalValues(entity, entry);
+            DbService.ctx.ZaehlerSet.Add(entity);
+            DbService.SaveWalter();
+
+            return new ZaehlerEntry(entity, DbService);
         }
 
         public IActionResult Put(int id, ZaehlerEntry entry)
@@ -117,17 +90,33 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                SetValues(entity, entry);
-                DbService.ctx.ZaehlerSet.Update(entity);
-                DbService.SaveWalter();
-
-                return new OkObjectResult(new ZaehlerEntry(entity, DbService));
+                return new OkObjectResult(Update(entry, entity));
             }
             catch
             {
                 return new BadRequestResult();
             }
 
+        }
+
+        private ZaehlerEntry Update(ZaehlerEntry entry, Zaehler entity)
+        {
+            entity.Kennnummer = entry.Kennnummer;
+            entity.Typ = (Zaehlertyp)int.Parse(entry.Typ.Id);
+
+            SetOptionalValues(entity, entry);
+            DbService.ctx.ZaehlerSet.Update(entity);
+            DbService.SaveWalter();
+
+            return new ZaehlerEntry(entity, DbService);
+        }
+
+        private void SetOptionalValues(Zaehler entity, ZaehlerEntry entry)
+        {
+            entity.Wohnung = entry.Wohnung is SelectionEntry w ? DbService.ctx.Wohnungen.Find(int.Parse(w.Id!)) : null;
+            entity.Allgemeinzaehler = entry.AllgemeinZaehler is SelectionEntry z ? DbService.ctx.ZaehlerSet.Find(int.Parse(z.Id)) : null;
+            entity.Adresse = entry.Adresse is AdresseEntryBase a ? GetAdresse(a, ctx) : null;
+            entity.Notiz = entry.Notiz;
         }
     }
 }

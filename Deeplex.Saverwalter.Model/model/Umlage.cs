@@ -12,6 +12,12 @@
 
         public virtual List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
         public virtual List<Betriebskostenrechnung> Betriebskostenrechnungen { get; private set; } = new List<Betriebskostenrechnung>();
+
+        public Umlage(Betriebskostentyp typ, Umlageschluessel schluessel)
+        {
+            Typ = typ;
+            Schluessel = schluessel;
+        }
     }
 
     public class HKVO

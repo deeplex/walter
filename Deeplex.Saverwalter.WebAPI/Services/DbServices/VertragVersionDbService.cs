@@ -14,20 +14,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             DbService = dbService;
         }
 
-        private void SetValues(VertragVersion entity, VertragVersionEntryBase entry)
-        {
-            if (entity.VertragVersionId != entry.Id)
-            {
-                throw new Exception();
-            }
-
-            entity.Grundmiete = entry.Grundmiete;
-            entity.Personenzahl = entry.Personenzahl;
-            entity.Beginn = (DateTime)entry.Beginn!;
-            entity.Notiz = entry.Notiz;
-            entity.Vertrag = ctx.Vertraege.Find(int.Parse(entry.Vertrag!.Id!));
-        }
-
         public IActionResult Get(int id)
         {
             var entity = DbService.ctx.VertragVersionen.Find(id);
@@ -67,21 +53,30 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 return new BadRequestResult();
             }
-            var entity = new VertragVersion();
 
             try
             {
-                SetValues(entity, entry);
-                DbService.ctx.VertragVersionen.Add(entity);
-                DbService.SaveWalter();
-
-                return new OkObjectResult(new VertragVersionEntryBase(entity));
+                return new OkObjectResult(Add(entry));
             }
             catch
             {
                 return new BadRequestResult();
             }
+        }
 
+        private VertragVersionEntryBase Add(VertragVersionEntryBase entry)
+        {
+            var vertrag = ctx.Vertraege.Find(int.Parse(entry.Vertrag!.Id!));
+            var entity = new VertragVersion(entry.Beginn, entry.Grundmiete, entry.Personenzahl)
+            {
+                Vertrag = vertrag!
+            };
+
+            SetOptionalValues(entity, entry);
+            DbService.ctx.VertragVersionen.Add(entity);
+            DbService.SaveWalter();
+
+            return new VertragVersionEntryBase(entity);
         }
 
         public IActionResult Put(int id, VertragVersionEntryBase entry)
@@ -94,17 +89,35 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                SetValues(entity, entry);
-                DbService.ctx.VertragVersionen.Update(entity);
-                DbService.SaveWalter();
-
-                return new OkObjectResult(new VertragVersionEntryBase(entity));
+                return new OkObjectResult(Update(entry, entity));
             }
             catch
             {
                 return new BadRequestResult();
             }
+        }
 
+        private VertragVersionEntryBase Update(VertragVersionEntryBase entry, VertragVersion entity)
+        {
+            entity.Beginn = entry.Beginn;
+            entity.Grundmiete = entry.Grundmiete;
+            entity.Personenzahl = entry.Personenzahl;
+
+            SetOptionalValues(entity, entry);
+            DbService.ctx.VertragVersionen.Update(entity);
+            DbService.SaveWalter();
+
+            return new VertragVersionEntryBase(entity);
+        }
+
+        private void SetOptionalValues(VertragVersion entity, VertragVersionEntryBase entry)
+        {
+            if (entity.VertragVersionId != entry.Id)
+            {
+                throw new Exception();
+            }
+
+            entity.Notiz = entry.Notiz;
         }
     }
 }

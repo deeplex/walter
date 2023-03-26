@@ -18,8 +18,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int? Id { get; set; }
             public string? Notiz { get; set; }
             public string? Beschreibung { get; set; }
-            public SelectionEntry? Schluessel { get; set; }
-            public SelectionEntry? Typ { get; set; }
+            public SelectionEntry Schluessel { get; set; } = null!;
+            public SelectionEntry Typ { get; set; } = null!;
             public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
             public string? WohnungenBezeichnung { get; set; }
 
@@ -34,7 +34,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Schluessel = new SelectionEntry((int)Entity.Schluessel, Entity.Schluessel.ToDescriptionString());
                 Typ = new SelectionEntry((int)Entity.Typ, Entity.Typ.ToDescriptionString());
                 WohnungenBezeichnung = Entity.GetWohnungenBezeichnung() ?? "";
-                SelectedWohnungen = Entity.Wohnungen.Select(e => new SelectionEntry(e.WohnungId, e.Adresse.Anschrift + " - " + e.Bezeichnung));
+
+                SelectedWohnungen = Entity.Wohnungen.Select(e =>
+                    new SelectionEntry(
+                        e.WohnungId,
+                        $"{e.Adresse?.Anschrift ?? "Unbekannte Anschrift"} - {e.Bezeichnung}"));
             }
         }
 

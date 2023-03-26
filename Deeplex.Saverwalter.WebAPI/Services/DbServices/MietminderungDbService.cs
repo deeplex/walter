@@ -14,20 +14,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             DbService = dbService;
         }
 
-        private void SetValues(Mietminderung entity, MietminderungEntryBase entry)
-        {
-            if (entity.MietminderungId != entry.Id)
-            {
-                throw new Exception();
-            }
-
-            entity.Beginn = (DateTime)entry.Beginn!;
-            entity.Ende = entry.Ende;
-            entity.Minderung = (double)entry.Minderung!;
-            entity.Notiz = entry.Notiz;
-            entity.Vertrag = ctx.Vertraege.Find(int.Parse(entry.Vertrag!.Id!));
-        }
-
         public IActionResult Get(int id)
         {
             var entity = DbService.ctx.Mietminderungen.Find(id);
@@ -67,21 +53,30 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 return new BadRequestResult();
             }
-            var entity = new Mietminderung();
 
             try
             {
-                SetValues(entity, entry);
-                DbService.ctx.Mietminderungen.Add(entity);
-                DbService.SaveWalter();
-
-                return new OkObjectResult(new MietminderungEntryBase(entity));
+                return new OkObjectResult(Add(entry));
             }
             catch
             {
                 return new BadRequestResult();
             }
+        }
 
+        private MietminderungEntryBase Add(MietminderungEntryBase entry)
+        {
+            var vertrag = ctx.Vertraege.Find(int.Parse(entry.Vertrag.Id));
+            var entity = new Mietminderung(entry.Beginn, entry.Minderung)
+            {
+                Vertrag = vertrag!
+            };
+
+            SetOptionalValues(entity, entry);
+            DbService.ctx.Mietminderungen.Add(entity);
+            DbService.SaveWalter();
+
+            return new MietminderungEntryBase(entity);
         }
 
         public IActionResult Put(int id, MietminderungEntryBase entry)
@@ -94,17 +89,35 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                SetValues(entity, entry);
-                DbService.ctx.Mietminderungen.Update(entity);
-                DbService.SaveWalter();
-
-                return new OkObjectResult(new MietminderungEntryBase(entity));
+                return new OkObjectResult(Update(entry, entity));
             }
             catch
             {
                 return new BadRequestResult();
             }
+        }
 
+        private MietminderungEntryBase Update(MietminderungEntryBase entry, Mietminderung entity)
+        {
+            entity.Ende = entry.Ende;
+            entity.Beginn = entry.Beginn;
+            entity.Minderung = entry.Minderung;
+
+            SetOptionalValues(entity, entry);
+            DbService.ctx.Mietminderungen.Update(entity);
+            DbService.SaveWalter();
+
+            return new MietminderungEntryBase(entity);
+        }
+
+        private void SetOptionalValues(Mietminderung entity, MietminderungEntryBase entry)
+        {
+            if (entity.MietminderungId != entry.Id)
+            {
+                throw new Exception();
+            }
+
+            entity.Notiz = entry.Notiz;
         }
     }
 }

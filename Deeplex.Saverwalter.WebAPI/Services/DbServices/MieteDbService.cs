@@ -14,20 +14,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             DbService = dbService;
         }
 
-        private void SetValues(Miete entity, MieteEntryBase entry)
-        {
-            if (entity.MieteId != entry.Id)
-            {
-                throw new Exception();
-            }
-
-            entity.BetreffenderMonat = (DateTime)entry.BetreffenderMonat!;
-            entity.Betrag = entry.Betrag;
-            entity.Notiz = entry.Notiz;
-            entity.Zahlungsdatum = (DateTime)entry.Zahlungsdatum!;
-            entity.Vertrag = ctx.Vertraege.Find(int.Parse(entry.Vertrag!.Id!));
-        }
-
         public IActionResult Get(int id)
         {
             var entity = DbService.ctx.Mieten.Find(id);
@@ -67,22 +53,33 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 return new BadRequestResult();
             }
-            var entity = new Miete();
 
             try
             {
-                SetValues(entity, entry);
-                DbService.ctx.Mieten.Add(entity);
-                DbService.SaveWalter();
-
-                return new OkObjectResult(new MieteEntryBase(entity));
+                return new OkObjectResult(Add(entry));
             }
             catch
             {
                 return new BadRequestResult();
             }
-
         }
+
+        private MieteEntryBase Add(MieteEntryBase entry)
+        {
+
+            var vertrag = ctx.Vertraege.Find(int.Parse(entry.Vertrag.Id));
+            var entity = new Miete(entry.Zahlungsdatum, entry.BetreffenderMonat, entry.Betrag)
+            {
+                Vertrag = vertrag!
+            };
+
+            SetOptionalValues(entity, entry);
+            DbService.ctx.Mieten.Add(entity);
+            DbService.SaveWalter();
+
+            return new MieteEntryBase(entity);
+        }
+
 
         public IActionResult Put(int id, MieteEntryBase entry)
         {
@@ -94,17 +91,35 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                SetValues(entity, entry);
-                DbService.ctx.Mieten.Update(entity);
-                DbService.SaveWalter();
-
-                return new OkObjectResult(new MieteEntryBase(entity));
+                return new OkObjectResult(Update(entry, entity));
             }
             catch
             {
                 return new BadRequestResult();
             }
+        }
 
+        private MieteEntryBase Update(MieteEntryBase entry, Miete entity)
+        {
+            entity.BetreffenderMonat = entry.BetreffenderMonat;
+            entity.Betrag = entry.Betrag;
+            entity.Zahlungsdatum = entry.Zahlungsdatum;
+
+            SetOptionalValues(entity, entry);
+            DbService.ctx.Mieten.Update(entity);
+            DbService.SaveWalter();
+
+            return new MieteEntryBase(entity);
+        }
+
+        private void SetOptionalValues(Miete entity, MieteEntryBase entry)
+        {
+            if (entity.MieteId != entry.Id)
+            {
+                throw new Exception();
+            }
+
+            entity.Notiz = entry.Notiz;
         }
     }
 }

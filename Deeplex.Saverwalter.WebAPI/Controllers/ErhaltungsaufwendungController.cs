@@ -17,9 +17,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public double Betrag { get; set; }
             public DateTime Datum { get; set; }
             public string? Notiz { get; set; }
-            public string? Bezeichnung { get; set; }
-            public SelectionEntry? Aussteller { get; set; }
-            public SelectionEntry? Wohnung { get; set; }
+            public string Bezeichnung { get; set; } = null!;
+            public SelectionEntry Aussteller { get; set; } = null!;
+            public SelectionEntry Wohnung { get; set; } = null!;
 
             public ErhaltungsaufwendungEntryBase() { }
             public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity, WalterDbService.WalterDb dbService)
@@ -32,7 +32,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Notiz = Entity.Notiz;
                 Bezeichnung = Entity.Bezeichnung;
                 Aussteller = new(Entity.AusstellerId, dbService.ctx.FindPerson(Entity.AusstellerId).Bezeichnung);
-                Wohnung = new(Entity.Wohnung.WohnungId, Entity.Wohnung.Adresse.Anschrift + " - " + Entity.Wohnung.Bezeichnung);
+                var anschrift = Entity.Wohnung.Adresse is Adresse a ? a.Anschrift : "Unbekannte Anschrift";
+                Wohnung = new(Entity.Wohnung.WohnungId, $"{anschrift} - {Entity.Wohnung.Bezeichnung}");
             }
         }
 

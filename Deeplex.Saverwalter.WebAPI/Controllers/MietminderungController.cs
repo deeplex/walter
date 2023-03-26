@@ -12,28 +12,24 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     {
         public class MietminderungEntryBase
         {
-            private Mietminderung? Entity { get; }
-
             public int Id { get; set; }
-            public DateTime? Beginn { get; set; }
+            public DateTime Beginn { get; set; }
             public DateTime? Ende { get; set; }
-            public double? Minderung { get; set; }
+            public double Minderung { get; set; }
             public string? Notiz { get; set; }
-            public SelectionEntry? Vertrag { get; set; }
+            public SelectionEntry Vertrag { get; set; } = null!;
 
             public MietminderungEntryBase() { }
             public MietminderungEntryBase(Mietminderung entity)
             {
-                Entity = entity;
-
                 Id = entity.MietminderungId;
                 Beginn = entity.Beginn;
                 Ende = entity.Ende;
                 Minderung = entity.Minderung;
                 Notiz = entity.Notiz;
-                var v = entity.Vertrag;
-                var a = v.Wohnung.Adresse.Anschrift;
-                Vertrag = new(v.VertragId, a + " - " + v.Wohnung.Bezeichnung + " - " + Beginn.Datum());
+                var anschrift = entity.Vertrag.Wohnung.Adresse is Adresse a ? a.Anschrift : "Unbekannte Anschrift";
+                var vertragTitle = $"{anschrift} - {entity.Vertrag.Wohnung.Bezeichnung} - {Beginn.Datum()}";
+                Vertrag = new(entity.Vertrag.VertragId, vertragTitle);
             }
         }
 

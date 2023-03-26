@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -14,30 +15,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             DbService = dbService;
         }
-
-        private void SetValues(Umlage entity, UmlageEntry entry)
-        {
-            if (entity.UmlageId != entry.Id)
-            {
-                throw new Exception();
-            }
-
-            entity.Beschreibung = entry.Beschreibung;
-            entity.Typ = (Betriebskostentyp)int.Parse(entry.Typ!.Id!);
-            entity.Schluessel = (Umlageschluessel)int.Parse(entry.Schluessel!.Id!);
-            if (entry.SelectedWohnungen is IEnumerable<SelectionEntry> l)
-            {
-                // Add missing Wohnungen
-                entity.Wohnungen
-                    .AddRange(l.Where(w => !entity.Wohnungen.Exists(e => w.Id == e.WohnungId.ToString()))
-                    .Select(w => ctx.Wohnungen.Find(int.Parse(w.Id!))));
-                // Remove old Wohnungen
-                entity.Wohnungen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.WohnungId.ToString()));
-            }
-            //entity.Zaehler = entry
-            entity.Notiz = entry.Notiz;
-        }
-
 
         public IActionResult Get(int id)
         {
@@ -78,21 +55,28 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 return new BadRequestResult();
             }
-            var entity = new Umlage();
 
             try
             {
-                SetValues(entity, entry);
-                DbService.ctx.Umlagen.Add(entity);
-                DbService.SaveWalter();
-
-                return new OkObjectResult(new UmlageEntry(entity, DbService));
+                return new OkObjectResult(Add(entry));
             }
             catch
             {
                 return new BadRequestResult();
             }
+        }
 
+        private UmlageEntry Add(UmlageEntry entry)
+        {
+            var typ = (Betriebskostentyp)int.Parse(entry.Typ.Id);
+            var schluessel = (Umlageschluessel)int.Parse(entry.Schluessel.Id);
+            var entity = new Umlage(typ, schluessel);
+
+            SetOptionalValues(entity, entry);
+            DbService.ctx.Umlagen.Add(entity);
+            DbService.SaveWalter();
+
+            return new UmlageEntry(entity, DbService);
         }
 
         public IActionResult Put(int id, UmlageEntry entry)
@@ -105,17 +89,45 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                SetValues(entity, entry);
-                DbService.ctx.Umlagen.Update(entity);
-                DbService.SaveWalter();
-
-                return new OkObjectResult(new UmlageEntry(entity, DbService));
+                return new OkObjectResult(Update(entry, entity));
             }
             catch
             {
                 return new BadRequestResult();
             }
+        }
 
+        private UmlageEntry Update(UmlageEntry entry, Umlage entity)
+        {
+            entity.Typ = (Betriebskostentyp)int.Parse(entry.Typ.Id);
+            entity.Schluessel = (Umlageschluessel)int.Parse(entry.Schluessel.Id);
+
+            SetOptionalValues(entity, entry);
+            DbService.ctx.Umlagen.Update(entity);
+            DbService.SaveWalter();
+
+            return new UmlageEntry(entity, DbService);
+        }
+
+        private void SetOptionalValues(Umlage entity, UmlageEntry entry)
+        {
+            if (entity.UmlageId != entry.Id)
+            {
+                throw new Exception();
+            }
+
+            entity.Beschreibung = entry.Beschreibung;
+            if (entry.SelectedWohnungen is IEnumerable<SelectionEntry> l)
+            {
+                // Add missing Wohnungen
+                entity.Wohnungen
+                    .AddRange(l.Where(w => !entity.Wohnungen.Exists(e => w.Id == e.WohnungId.ToString()))
+                    .Select(w => ctx.Wohnungen.Find(int.Parse(w.Id!))));
+                // Remove old Wohnungen
+                entity.Wohnungen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.WohnungId.ToString()));
+            }
+            //entity.Zaehler = entry
+            entity.Notiz = entry.Notiz;
         }
     }
 }

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Xunit;
 using FluentAssertions;
 
-namespace Deeplex.Saverwalter.ModelTests
+namespace Deeplex.Saverwalter.ModelTests.model
 {
     public class NatuerlichePersonTests
     {
@@ -21,39 +21,35 @@ namespace Deeplex.Saverwalter.ModelTests
         public static IEnumerable<object[]> ShouldWorkData =>
             new List<object[]>
             {
-                new object[] { new NatuerlichePerson { Nachname = "Test Nachname" } },
-                new object[] { new NatuerlichePerson { Vorname = "Test Vorname", Nachname = "Test Nachname"} },
-                new object[] { new NatuerlichePerson
+                new object[] { new NatuerlichePerson("Test Nachname") },
+                new object[] { new NatuerlichePerson("Test Nachname") { Vorname = "Test Vorname" } },
+                new object[] { new NatuerlichePerson("Test Nachname")
                 {
                     Vorname = "Test Vorname",
-                    Nachname = "Test Nachname",
                     Telefon = "Test Telefon",
                     Email = "Test Email@testmail.test",
                     Fax = "Test Fax",
                     Mobil = "Test Mobil",
                     Notiz = "Test Notiz",
                 } },
-                new object[] { new NatuerlichePerson
+                new object[] { new NatuerlichePerson("Test Nachname")
                 {
-                    Nachname = "Test Nachname",
                     Anrede = Anrede.Frau,
                 } },
-                new object[] { new NatuerlichePerson
+                new object[] { new NatuerlichePerson("Test Nachname")
                 {
-                    Nachname = "Test Nachname",
                     Anrede = Anrede.Herr,
                 } },
-                new object[] { new NatuerlichePerson
+                new object[] { new NatuerlichePerson("Test Nachname")
                 {
-                    Nachname = "Test Nachname",
                     Anrede = Anrede.Keine,
                 } },
-                new object[] { new NatuerlichePerson
+                new object[] { new NatuerlichePerson("Test Nachname")
                 {
                     Nachname = "Test Nachname",
                     JuristischePersonen = new List<JuristischePerson>()
                     {
-                        new JuristischePerson
+                        new JuristischePerson("Test Nachname")
                         {
                             Bezeichnung = "Test JuristischePerson"
                         }
@@ -82,30 +78,19 @@ namespace Deeplex.Saverwalter.ModelTests
         public static IEnumerable<object[]> ShouldNotWorkData =>
             new List<object[]>
             {
-                new object[] { new NatuerlichePerson { } },
-                new object[] { new NatuerlichePerson { Vorname = "Test Vorname" } },
-                new object[] { new NatuerlichePerson
+                new object[] { new NatuerlichePerson("Test Nachname")
                 {
+                Nachname = null!
+                } },
+                new object[] { new NatuerlichePerson("Test Nachname")
+                {
+                    Nachname = null!,
                     Vorname = "Test Vorname",
                     Telefon = "Test Telefon",
                     Email = "Test Email@testmail.test",
                     Fax = "Test Fax",
                     Mobil = "Test Mobil",
                     Notiz = "Test Notiz",
-                } },
-                new object[] { new NatuerlichePerson
-                {
-                    Anrede = Anrede.Frau,
-                } },
-                new object[] { new NatuerlichePerson
-                {
-                    JuristischePersonen = new List<JuristischePerson>()
-                    {
-                        new JuristischePerson
-                        {
-                            Bezeichnung = "Test JuristischePerson"
-                        }
-                    }
                 } }
             };
 

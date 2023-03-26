@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             Vertrag = v;
             Wohnung = v.Wohnung;
-            Adresse = Wohnung.Adresse;
+            Adresse = Wohnung.Adresse!; // TODO the Adresse here shouldn't be null, this should be catched.
             Zaehler = Wohnung.Zaehler.ToList();
             Versionen = v.Versionen.OrderBy(v => v.Beginn).ToList();
 
@@ -94,7 +94,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Gezahlt = Vertrag.Mieten
                 .Where(m => m.BetreffenderMonat >= Abrechnungsbeginn && m.BetreffenderMonat < Abrechnungsende)
                 .ToList()
-                .Sum(z => z.Betrag ?? 0);
+                .Sum(z => z.Betrag);
 
             KaltMiete = GetKaltMiete(v);
 

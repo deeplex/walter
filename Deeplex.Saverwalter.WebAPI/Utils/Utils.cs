@@ -16,10 +16,10 @@ namespace Deeplex.Saverwalter.WebAPI.Helper
 
         public static Adresse? GetAdresse(AdresseEntryBase adresse, SaverwalterContext ctx)
         {
-            if (adresse.Strasse.IsNullOrEmpty() ||
-                adresse.Hausnummer.IsNullOrEmpty() ||
-                adresse.Postleitzahl.IsNullOrEmpty() ||
-                adresse.Stadt.IsNullOrEmpty())
+            if (adresse.Strasse == "" ||
+                adresse.Hausnummer == "" ||
+                adresse.Postleitzahl == "" ||
+                adresse.Stadt == "")
             {
                 return null;
             }
@@ -29,13 +29,7 @@ namespace Deeplex.Saverwalter.WebAPI.Helper
                 e.Hausnummer == adresse!.Hausnummer &&
                 e.Postleitzahl == adresse!.Postleitzahl &&
                 e.Stadt == adresse!.Stadt) ??
-                new Adresse()
-                {
-                    Strasse = adresse.Strasse!,
-                    Hausnummer = adresse.Hausnummer!,
-                    Postleitzahl = adresse.Postleitzahl!,
-                    Stadt = adresse.Stadt!
-                };
+                new Adresse(adresse.Strasse, adresse.Hausnummer, adresse.Postleitzahl, adresse.Stadt);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public Anrede? Anrede { get; set; }
             public string? Vorname { get; set; }
-            public string? Nachname { get; set; }
+            public string Nachname { get; set; } = null!;
 
             protected NatuerlichePersonEntryBase() : base() { }
             public NatuerlichePersonEntryBase(NatuerlichePerson entity, WalterDbService.WalterDb dbService) : base(entity, dbService)
