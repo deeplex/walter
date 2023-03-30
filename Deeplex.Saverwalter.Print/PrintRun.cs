@@ -3,17 +3,13 @@
     public class PrintRun
     {
         public string Text;
-        public bool Bold;
-        public bool Underlined;
-        public bool NoBreak;
-        public bool Tab;
-        public PrintRun(string text, bool bold = false, bool underlined = false, bool noBreak = false, bool tab = false)
+        public bool Bold = false;
+        public bool Underlined = false;
+        public bool NoBreak = false;
+        public bool Tab = false;
+        public PrintRun(string text)
         {
             Text = text;
-            Bold = bold;
-            Underlined = underlined;
-            NoBreak = noBreak;
-            Tab = tab;
         }
     }
 }

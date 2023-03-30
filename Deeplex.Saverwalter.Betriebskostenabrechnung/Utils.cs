@@ -61,9 +61,7 @@
         }
 
         public static string ResultTxt(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
-            => "wir haben die Kosten, die im Abrechnungszeitraum angefallen sind, berechnet. " +
-                "Die Abrechnung schließt mit " + (betriebskostenabrechnung.Result > 0 ?
-                "einem Guthaben" : "einer Nachforderung") + " in Höhe von: ";
+            => "wir haben die Kosten, die im Abrechnungszeitraum angefallen sind, berechnet. Die Abrechnung schließt mit " + (betriebskostenabrechnung.Result > 0 ? "einem Guthaben" : "einer Nachforderung") + " in Höhe von: ";
 
         public static string RefundDemand(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
             => betriebskostenabrechnung.Result > 0 ?
@@ -78,18 +76,10 @@
 
             if (betriebskostenabrechnung.Gruppen.Any(rechnungsgruppe => rechnungsgruppe.GesamtBetragWarm != 0 && rechnungsgruppe.BetragWarm != 0))
             {
-                text += "Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses (warme Betriebskosten) " +
-                "werden gesondert berechnet, nach Verbrauch und Wohn -/ Nutzfläche auf die einzelnen Wohnungen " +
-                "umgelegt („Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der " +
-                "von Ihnen geleisteten Vorauszahlungen verrechnet. ";
+                text += "Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses (warme Betriebskosten) werden gesondert berechnet, nach Verbrauch und Wohn -/ Nutzfläche auf die einzelnen Wohnungen umgelegt („Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der von Ihnen geleisteten Vorauszahlungen verrechnet.";
             }
 
-            text += "Bei bestehenden Mietrückständen ist das Ergebnis der Abrechnung " +
-                "zusätzlich mit den Mietrückständen verrechnet. Gegebenenfalls bestehende Mietminderungen / Ratenzahlungsvereinbarungen " +
-                "sind hier nicht berücksichtigt, haben aber weiterhin für den vereinbarten Zeitraum Bestand. Aufgelöste oder gekündigte " +
-                "Mietverhältnisse werden durch dieses Schreiben nicht neu begründet. Die Aufstellung, Verteilung und Erläuterung der " +
-                "Gesamtkosten, die Berechnung der Kostenanteile, die Verrechnung der geleisteten Vorauszahlungen und gegebenenfalls die " +
-                "Neuberechnung der monatlichen Vorauszahlungen entnehmen Sie bitte den folgenden Seiten.";
+            text += "Bei bestehenden Mietrückständen ist das Ergebnis der Abrechnung zusätzlich mit den Mietrückständen verrechnet. Gegebenenfalls bestehende Mietminderungen / Ratenzahlungsvereinbarungen sind hier nicht berücksichtigt, haben aber weiterhin für den vereinbarten Zeitraum Bestand. Aufgelöste oder gekündigte Mietverhältnisse werden durch dieses Schreiben nicht neu begründet. Die Aufstellung, Verteilung und Erläuterung der Gesamtkosten, die Berechnung der Kostenanteile, die Verrechnung der geleisteten Vorauszahlungen und gegebenenfalls die Neuberechnung der monatlichen Vorauszahlungen entnehmen Sie bitte den folgenden Seiten.";
 
             return text;
         }

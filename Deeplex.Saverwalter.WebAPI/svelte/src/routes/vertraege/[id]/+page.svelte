@@ -119,7 +119,7 @@
 
 <WalterHeaderDetail
 	S3URL={data.S3URL}
-	files={data.anhaenge}
+	bind:files={data.anhaenge}
 	bind:a={data.a}
 	apiURL={data.apiURL}
 	{title}
@@ -162,7 +162,7 @@
 			<Button on:click={word_dokument_erstellen_click}
 				>Word-Dokument erstellen</Button
 			>
-			<Button disabled on:click={pdf_dokument_erstellen_click}
+			<Button on:click={pdf_dokument_erstellen_click}
 				>PDF-Dokument erstellen</Button
 			>
 		</ButtonSet>

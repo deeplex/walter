@@ -148,7 +148,7 @@ namespace Deeplex.Saverwalter.PrintService
                 .Where(r => r.Beschreibung != null && r.Beschreibung.Trim() != "")
                 .SelectMany(t => new List<PrintRun>()
                 {
-                    new PrintRun(t.Typ.ToDescriptionString() + ": ", true, false, true),
+                    new PrintRun(t.Typ.ToDescriptionString() + ": ") { Bold = true },
                     new PrintRun(t.Beschreibung ?? "")
                 })
                 .ToArray();
@@ -595,7 +595,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             p.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
-        public static void ErmittlungWarmanteil(IRechnungsgruppe gruppe, IPrint<T> p)
+        private static void ErmittlungWarmanteil(IRechnungsgruppe gruppe, IPrint<T> p)
         {
             var widths = new int[] { 24, 13, 9, 14, 14, 13, 13 };
             var col1 = new List<string> { "Kostenanteil" };
@@ -723,18 +723,18 @@ namespace Deeplex.Saverwalter.PrintService
         private static void Introtext(BetriebskostenabrechnungService.IBetriebskostenabrechnung b, IPrint<T> p)
         {
             p.Paragraph(
-                new PrintRun(b.Title(), true),
+                new PrintRun(b.Title()) { Bold = true },
                 new PrintRun(b.Mieterliste()),
                 new PrintRun(b.Mietobjekt()),
-                new PrintRun("Abrechnungszeitraum: ", false, false, true, true),
+                new PrintRun("Abrechnungszeitraum: ") { NoBreak = true, Tab = true },
                 new PrintRun(b.Abrechnungszeitraum()),
-                new PrintRun("Nutzungszeitraum: ", false, false, true, true),
+                new PrintRun("Nutzungszeitraum: ") { NoBreak = true, Tab = true },
                 new PrintRun(b.Nutzungszeitraum()));
 
             p.Paragraph(
                 new PrintRun(b.Gruss()),
-                new PrintRun(b.ResultTxt(), false, false, true, true),
-                new PrintRun(Euro(Math.Abs(b.Result)), true, true),
+                new PrintRun(b.ResultTxt()) { NoBreak = true, Tab = true },
+                new PrintRun(Euro(Math.Abs(b.Result))) { Bold = true, Underlined = true },
                 new PrintRun(b.RefundDemand()));
 
             p.Paragraph(new PrintRun(b.GenerischerText()));

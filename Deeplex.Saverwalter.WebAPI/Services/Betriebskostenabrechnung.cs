@@ -54,23 +54,20 @@ namespace Deeplex.Saverwalter.WebAPI
 
         public IActionResult GetPdfDocument(int id, int Jahr, SaverwalterContext ctx)
         {
-            // NOT Implemented
-            return new NotFoundResult();
+            try
+            {
+                var stream = new MemoryStream();
+                StreamWriter writer = new StreamWriter(stream);
+                var abrechnung = createAbrechnung(id, Jahr, ctx);
+                abrechnung.SaveAsPdf(stream);
+                stream.Position = 0;
 
-            //try
-            //{
-            //    var stream = new MemoryStream();
-            //    StreamWriter writer = new StreamWriter(stream);
-            //    var abrechnung = createAbrechnung(id, Jahr, ctx);
-            //    abrechnung.SaveAsPDF(stream);
-            //    stream.Position = 0;
-
-            //    return new OkObjectResult(stream);
-            //}
-            //catch
-            //{
-            //    return new BadRequestResult();
-            //}
+                return new OkObjectResult(stream);
+            }
+            catch(Exception ex)
+            {
+                return new BadRequestObjectResult(ex);
+            }
         }
 
         public WalterDb DbService { get; }

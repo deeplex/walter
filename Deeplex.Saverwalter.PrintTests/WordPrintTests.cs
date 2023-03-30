@@ -56,21 +56,21 @@ namespace Deeplex.Saverwalter.PrintService.Tests
         [Fact(Skip = "Check for properties")]
         public void FontTest()
         {
-            var stub = WordPrint.Font();
+            var stub = DocxPrint.Font();
             stub.Should().NotBeNull();
         }
 
         [Fact]
         public void BoldTest()
         {
-            var stub = WordPrint.Bold();
+            var stub = DocxPrint.Bold();
             stub.Should().NotBeNull();
         }
 
         [Fact]
         public void NoSpaceTest()
         {
-            var stub = WordPrint.NoSpace();
+            var stub = DocxPrint.NoSpace();
             stub.Should().NotBeNull();
         }
     }

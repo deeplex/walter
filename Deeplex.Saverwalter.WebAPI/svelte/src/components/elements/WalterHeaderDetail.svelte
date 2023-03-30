@@ -51,7 +51,7 @@
 			{/await}
 		</HeaderNav>
 		{#if files}
-			<WalterAnhaenge {S3URL} {files} />
+			<WalterAnhaenge {S3URL} bind:files />
 		{/if}
 	{/await}
 </WalterHeader>

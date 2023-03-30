@@ -5,9 +5,14 @@ using DocumentFormat.OpenXml.Wordprocessing;
 namespace Deeplex.Saverwalter.PrintService
 {
 
-    public sealed class WordPrint : IPrint<Body>
+    public sealed class DocxPrint : IPrint<Body>
     {
-        public Body body { get; } = OpenXMLIntegration.DinA4();
+        public Body body { get; } = new(
+            new SectionProperties(
+            // Margins after DIN5008
+            new PageMargin() { Left = 1418, Right = 567, Top = 958, Bottom = 958, },
+            // DIN A4
+            new PageSize() { Code = 9, Width = 11906, Height = 16838 }));
 
         public void Table(int[] widths, int[] justification, bool[] bold, bool[] underlined, string[][] cols)
         {
@@ -187,14 +192,13 @@ namespace Deeplex.Saverwalter.PrintService
             body.Append(para);
         }
 
-        public static RunProperties Font()
-        {
-            var font = "Times New Roman";
-            return new RunProperties(
+        private static string font = "Times New Roman";
+        private static int fontSize = 11; 
+     
+        private static RunProperties Font() => new RunProperties(
                 new RunFonts() { Ascii = font, HighAnsi = font, ComplexScript = font, },
-                new FontSize() { Val = "22" }); // Size = 11
-        }
-        public static RunProperties Bold() => new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) });
-        public static ParagraphProperties NoSpace() => new ParagraphProperties(new SpacingBetweenLines() { After = "0" });
+                new FontSize() { Val = (fontSize * 2).ToString() }); // Don't know why * 2 
+        private static RunProperties Bold() => new RunProperties(new Bold() { Val = OnOffValue.FromBoolean(true) });
+        private static ParagraphProperties NoSpace() => new ParagraphProperties(new SpacingBetweenLines() { After = "0" });
     }
 }
