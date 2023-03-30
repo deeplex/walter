@@ -1,13 +1,7 @@
 ﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
-using Deeplex.Saverwalter.Model;
-using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
-using System.Collections.Immutable;
-using PdfSharpCore.Pdf;
-using PdfSharpCore;
-using PdfSharpCore.Drawing;
-using System.IO;
+using MigraDoc.DocumentObjectModel;
+using MigraDoc.Rendering;
+using System.Text;
 
 namespace Deeplex.Saverwalter.PrintService
 {
@@ -15,9 +9,15 @@ namespace Deeplex.Saverwalter.PrintService
     {
         public static void SaveAsPdf(this IBetriebskostenabrechnung b, Stream stream)
         {
-            var document = TPrint<PdfDocument>.Print(b, new PdfPrint());
+            var document = TPrint<Document>.Print(b, new PdfPrint());
+
+            var renderer = new PdfDocumentRenderer(true);
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            renderer.Document = document;
+            renderer.DocumentRenderer = new DocumentRenderer(document);
+            renderer.RenderDocument();
             // Second argument states that the stream shouldn't be closed yet.
-            document.Save(stream, false);
+            renderer.PdfDocument.Save(stream, false);
         }
     }
 

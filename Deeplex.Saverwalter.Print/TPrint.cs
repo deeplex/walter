@@ -148,7 +148,7 @@ namespace Deeplex.Saverwalter.PrintService
                 .Where(r => r.Beschreibung != null && r.Beschreibung.Trim() != "")
                 .SelectMany(t => new List<PrintRun>()
                 {
-                    new PrintRun(t.Typ.ToDescriptionString() + ": ") { Bold = true },
+                    new PrintRun(t.Typ.ToDescriptionString() + ": ") { Bold = true, NoBreak = true },
                     new PrintRun(t.Beschreibung ?? "")
                 })
                 .ToArray();
@@ -234,7 +234,7 @@ namespace Deeplex.Saverwalter.PrintService
             IRechnungsgruppe rechnungsgruppe,
             IPrint<T> printImpl)
         {
-            var widths = new int[] { 41, 22, 24, 13 };
+            var widths = new int[] { 41, 25, 17, 17 };
             var col1 = new List<string> { "Ermittlung Ihrer Einheiten" };
             var col2 = new List<string> { "Nutzungsintervall" };
             var col3 = new List<string> { "Tage" };
@@ -381,7 +381,7 @@ namespace Deeplex.Saverwalter.PrintService
             IRechnungsgruppe rechnungsgruppe,
             IPrint<T> printImpl)
         {
-            var widths = new int[] { 32, 9, 22, 13, 11, 13 };
+            var widths = new int[] { 32, 9, 25, 10, 11, 13 };
 
             var col1 = new List<string> { "Kostenanteil" };
             var col2 = new List<string> { "Schlüssel" };
@@ -504,9 +504,9 @@ namespace Deeplex.Saverwalter.PrintService
                 p.Table(widths, justification, bold, underlined, cols);
             }
         }
-        private static void ErmittlungWarmeEinheiten(BetriebskostenabrechnungService.IBetriebskostenabrechnung b, IRechnungsgruppe rechnungsgruppe, IPrint<T> p)
+        private static void ErmittlungWarmeEinheiten(IBetriebskostenabrechnung b, IRechnungsgruppe rechnungsgruppe, IPrint<T> p)
         {
-            var widths = new int[] { 41, 22, 24, 13 };
+            var widths = new int[] { 41, 25, 17, 17 };
             var col1 = new List<string> { "Ermittlung Ihrer Einheiten" };
             var col2 = new List<string> { "Nutzungsintervall" };
             var col3 = new List<string> { "Tage" };
@@ -666,7 +666,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             p.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
-        private static void GesamtErgebnis(BetriebskostenabrechnungService.IBetriebskostenabrechnung b, IPrint<T> p)
+        private static void GesamtErgebnis(IBetriebskostenabrechnung b, IPrint<T> p)
         {
             var widths = new int[] { 40, 10 };
 
