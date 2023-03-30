@@ -1,19 +1,36 @@
 import type { WalterUmlageEntry } from "$WalterLib";
 import type { WalterBetriebskostenabrechnungKostenpunkt } from "$WalterTypes";
+import { finish_s3_post } from "./s3";
 
 const headers = {
     'Content-Type': 'application/octet-stream'
 };
 
-export function create_abrechnung(id: string, jahr: number, fileNameBase: string) {
-    const apiURL = `/api/betriebskostenabrechnung/${id}/${jahr}`;
+export function create_abrechnung_word(vertrag_id: string, jahr: number, fileNameBase: string) {
+    const apiURL = `/api/betriebskostenabrechnung/${vertrag_id}/${jahr}/word_document`;
     const fileName = `Abrechnung ${jahr} - ${fileNameBase}.docx`;
-    return fetch(apiURL, {
+    return create_abrechnung_file(apiURL, fileName);
+}
+
+export function create_abrechnung_pdf(vertrag_id: string, jahr: number, fileNameBase: string) {
+    const apiURL = `/api/betriebskostenabrechnung/${vertrag_id}/${jahr}/pdf_document`;
+    const fileName = `Abrechnung ${jahr} - ${fileNameBase}.pdf`;
+    return create_abrechnung_file(apiURL, fileName);
+}
+
+async function create_abrechnung_file(apiURL: string, fileName: string) {
+    const fetchOptions = {
         method: 'GET',
         headers
-    })
-        .then((e) => e.blob())
-        .then(e => new File([e], fileName));
+    };
+    const response = await fetch(apiURL, fetchOptions);
+
+    if (response.status === 200) {
+        return response.blob().then(e => new File([e], fileName));
+    }
+    else {
+        return finish_s3_post(response, "Fehler beim Erstellen der Abrechnung. Vorgang wurde abgebrochen.");
+    }
 }
 
 export function getKostenpunkt(

@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.PrintService;
+using Deeplex.Saverwalter.WalterDbService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Utils.BetriebskostenabrechnungController;
 
@@ -17,13 +18,12 @@ namespace Deeplex.Saverwalter.WebAPI
             return new Betriebskostenabrechnung(ctx, vertrag, Jahr, beginn, ende);
         }
 
-        public IActionResult Get(int id, int Jahr, WalterDbService.WalterDb dbService)
+        public IActionResult Get(int id, int Jahr, WalterDb dbService)
         {
             try
             {
-                var controller = new BetriebskostenabrechnungEntry(
-                    createAbrechnung(id, Jahr, dbService.ctx),
-                    dbService);
+                var abrechnung = createAbrechnung(id, Jahr, dbService.ctx);
+                var controller = new BetriebskostenabrechnungEntry(abrechnung, dbService);
 
                 return new OkObjectResult(controller);
             }
@@ -33,14 +33,15 @@ namespace Deeplex.Saverwalter.WebAPI
             }
         }
 
-        // TODO not used!
-        public IActionResult GetDocument(int id, int Jahr, SaverwalterContext ctx)
+        public IActionResult GetWordDocument(int id, int Jahr, SaverwalterContext ctx)
         {
+
             try
             {
                 var stream = new MemoryStream();
                 StreamWriter writer = new StreamWriter(stream);
-                createAbrechnung(id, Jahr, ctx).SaveAsDocx(stream);
+                var abrechnung = createAbrechnung(id, Jahr, ctx);
+                abrechnung.SaveAsDocx(stream);
                 stream.Position = 0;
 
                 return new OkObjectResult(stream);
@@ -51,9 +52,30 @@ namespace Deeplex.Saverwalter.WebAPI
             }
         }
 
-        public WalterDbService.WalterDb DbService { get; }
+        public IActionResult GetPdfDocument(int id, int Jahr, SaverwalterContext ctx)
+        {
+            // NOT Implemented
+            return new NotFoundResult();
 
-        public BetriebskostenabrechnungHandler(WalterDbService.WalterDb dbService)
+            //try
+            //{
+            //    var stream = new MemoryStream();
+            //    StreamWriter writer = new StreamWriter(stream);
+            //    var abrechnung = createAbrechnung(id, Jahr, ctx);
+            //    abrechnung.SaveAsPDF(stream);
+            //    stream.Position = 0;
+
+            //    return new OkObjectResult(stream);
+            //}
+            //catch
+            //{
+            //    return new BadRequestResult();
+            //}
+        }
+
+        public WalterDb DbService { get; }
+
+        public BetriebskostenabrechnungHandler(WalterDb dbService)
         {
             DbService = dbService;
         }

@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -68,14 +69,14 @@ namespace Deeplex.Saverwalter.PrintService
             CreateWordDocument(filepath, body);
         }
 
-        public static void SaveAsDocx(this BetriebskostenabrechnungService.IBetriebskostenabrechnung b, Stream stream)
+        public static void SaveAsDocx(this IBetriebskostenabrechnung b, Stream stream)
         {
             var body = TPrint<Body>.Print(b, new WordPrint());
 
             CreateWordDocument(stream, body);
         }
 
-        public static void SaveAsDocx(this BetriebskostenabrechnungService.IBetriebskostenabrechnung b, string filepath)
+        public static void SaveAsDocx(this IBetriebskostenabrechnung b, string filepath)
         {
             var body = TPrint<Body>.Print(b, new WordPrint());
 

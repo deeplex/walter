@@ -18,12 +18,10 @@ export const walter_s3_post = (file: File, path: string) => fetch(
     }
 ).then(finish_s3_post);
 
-async function finish_s3_post(e: Response) {
+export async function finish_s3_post(e: Response, subtitle: string = "TODO parse response body.") {
     const ok = e.status === 200;
     const kind = ok ? "success" : "error";
     const title = ok ? "Hochladen erfolgreich" : "Fehler";
-
-    const subtitle = "TODO parse response body." // JSON.stringify(j);
 
     addToast({ title, kind, subtitle });
     return e;

@@ -69,16 +69,16 @@ namespace Deeplex.Saverwalter.PrintService
             for (var i = 1; i < max; ++i)
             {
                 var cellrow = new TableRow();
-                var row = cols.Select(w => w.Skip(i).First()).ToList();
-                for (var k = 0; k < row.Count(); ++k)
+                var row = cols.Select(w => w.Skip(i).FirstOrDefault()).ToList();
+                for (var k = 0; k < row.Count; ++k)
                 {
                     if (bold[i])
                     {
-                        cellrow.Append(ContentHead(row[k], j[k], underlined[i] ? BorderValues.Single : BorderValues.None));
+                        cellrow.Append(ContentHead(row[k] ?? "", j[k], underlined[i] ? BorderValues.Single : BorderValues.None));
                     }
                     else
                     {
-                        cellrow.Append(ContentCell(row[k], j[k], underlined[i] ? BorderValues.Single : BorderValues.None));
+                        cellrow.Append(ContentCell(row[k] ?? "", j[k], underlined[i] ? BorderValues.Single : BorderValues.None));
                     }
                 }
                 table.Append(cellrow);

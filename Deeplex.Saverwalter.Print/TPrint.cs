@@ -740,7 +740,7 @@ namespace Deeplex.Saverwalter.PrintService
             p.Paragraph(new PrintRun(b.GenerischerText()));
         }
 
-        public static T Print(BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
+        public static T Print(IBetriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
         {
             Header(betriebskostenabrechnung, printImpl);
             Introtext(betriebskostenabrechnung, printImpl);

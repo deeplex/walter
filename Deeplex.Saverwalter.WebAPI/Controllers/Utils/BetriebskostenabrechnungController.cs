@@ -1,4 +1,6 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WalterDbService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
@@ -32,7 +34,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double GesamtBetragWarm { get; }
             public double BetragWarm { get; }
 
-            public RechnungsgruppeEntry(IRechnungsgruppe g, WalterDbService.WalterDb dbService)
+            public RechnungsgruppeEntry(IRechnungsgruppe g, WalterDb dbService)
             {
                 Umlagen = g.Umlagen.Select(e => new UmlageEntry(e, dbService)).ToList();
                 Bezeichnung = g.Bezeichnung;
@@ -81,7 +83,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double Result { get; }
             public double AllgStromFaktor { get; set; }
 
-            public BetriebskostenabrechnungEntry(BetriebskostenabrechnungService.IBetriebskostenabrechnung b, WalterDbService.WalterDb dbService)
+            public BetriebskostenabrechnungEntry(IBetriebskostenabrechnung b, WalterDb dbService)
             {
                 notes = b.Notes;
                 Jahr = b.Jahr;
@@ -124,6 +126,20 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         public IActionResult GetBetriebskostenabrechnung(int vertrag_id, int jahr)
         {
             return Service.Get(vertrag_id, jahr, Service.DbService);
+        }
+
+        [HttpGet]
+        [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}/word_document")]
+        public IActionResult GetBetriebskostenabrechnungWordDocument(int vertrag_id, int jahr)
+        {
+            return Service.GetWordDocument(vertrag_id, jahr, Service.DbService.ctx);
+        }
+
+        [HttpGet]
+        [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}/pdf_document")]
+        public IActionResult GetBetriebskostenabrechnungPdfDocument(int vertrag_id, int jahr)
+        {
+            return Service.GetPdfDocument(vertrag_id, jahr, Service.DbService.ctx);
         }
     }
 }

@@ -19,7 +19,10 @@
 		WalterNumberInput,
 		WalterAbrechnung
 	} from '$WalterComponents';
-	import type { WalterBetriebskostenabrechnungKostengruppenEntry } from '$WalterTypes';
+	import type {
+		WalterBetriebskostenabrechnungKostengruppenEntry,
+		WalterS3File
+	} from '$WalterTypes';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
@@ -39,7 +42,10 @@
 		create_walter_s3_file_from_file,
 		walter_s3_post
 	} from '$WalterServices/s3';
-	import { create_abrechnung } from '$WalterServices/abrechnung';
+	import {
+		create_abrechnung_pdf,
+		create_abrechnung_word
+	} from '$WalterServices/abrechnung';
 
 	export let data: PageData;
 
@@ -75,18 +81,39 @@
 		?.map((mieter) => mieter.name)
 		.join(', ')}`;
 
-	function dokument_erstellen_click() {
-		create_abrechnung(data.id, year, title).then((e) => {
-			const file = create_walter_s3_file_from_file(e, data.S3URL);
-			walter_s3_post(new File([e], file.FileName), data.S3URL).then((e) => {
-				if (e.ok) {
-					if (data.anhaenge.some((e) => e.FileName == file.FileName)) {
-						return;
-					}
-					data.anhaenge = [...data.anhaenge, file];
-				}
-			});
-		});
+	function addToAnhang(file: WalterS3File) {
+		if (data.anhaenge.some((e) => e.FileName == file.FileName)) {
+			return;
+		}
+		data.anhaenge = [...data.anhaenge, file];
+	}
+
+	async function word_dokument_erstellen_click() {
+		const abrechnung = await create_abrechnung_word(data.id, year, title);
+		if (abrechnung instanceof File) {
+			const file = create_walter_s3_file_from_file(abrechnung, data.S3URL);
+			var response = await walter_s3_post(
+				new File([abrechnung], file.FileName),
+				data.S3URL
+			);
+			if (response.ok) {
+				addToAnhang(file);
+			}
+		}
+	}
+
+	async function pdf_dokument_erstellen_click() {
+		const abrechnung = await create_abrechnung_pdf(data.id, year, title);
+		if (abrechnung instanceof File) {
+			const file = create_walter_s3_file_from_file(abrechnung, data.S3URL);
+			var response = await walter_s3_post(
+				new File([abrechnung], file.FileName),
+				data.S3URL
+			);
+			if (response.ok) {
+				addToAnhang(file);
+			}
+		}
 	}
 </script>
 
@@ -132,8 +159,11 @@
 		/>
 		<ButtonSet style="margin: auto">
 			<Button on:click={abrechnung_click}>Vorschau anzeigen</Button>
-			<Button on:click={dokument_erstellen_click}
+			<Button on:click={word_dokument_erstellen_click}
 				>Word-Dokument erstellen</Button
+			>
+			<Button disabled on:click={pdf_dokument_erstellen_click}
+				>PDF-Dokument erstellen</Button
 			>
 		</ButtonSet>
 	</Row>
