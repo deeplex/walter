@@ -1,5 +1,5 @@
+import type { WalterSelectionEntry } from "$WalterLib";
 import { addToast } from "$WalterStore";
-import type { WalterSelectionEntry } from "$WalterTypes";
 
 export const walter_selection = {
     betriebskostentypen(f: fetchType): Promise<WalterSelectionEntry[]> {
@@ -28,8 +28,13 @@ export const walter_selection = {
     },
 }
 
+const username = "username";
+const password = "password";
+const authHeader = 'Basic ' + btoa(`${username}:${password}`);
+
 const headers = {
-    'Content-Type': 'text/json'
+    'Content-Type': 'text/json',
+    'Authorization': authHeader
 };
 
 // =================================== GET ====================================
