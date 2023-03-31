@@ -28,13 +28,8 @@ export const walter_selection = {
     },
 }
 
-const username = "username";
-const password = "password";
-const authHeader = 'Basic ' + btoa(`${username}:${password}`);
-
 const headers = {
     'Content-Type': 'text/json',
-    'Authorization': authHeader
 };
 
 // =================================== GET ====================================
