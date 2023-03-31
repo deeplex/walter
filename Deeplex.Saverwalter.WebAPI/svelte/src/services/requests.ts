@@ -1,5 +1,6 @@
 import type { WalterSelectionEntry } from "$WalterLib";
 import { addToast } from "$WalterStore";
+import { goto } from "$app/navigation";
 
 export const walter_selection = {
     betriebskostentypen(f: fetchType): Promise<WalterSelectionEntry[]> {
@@ -32,19 +33,29 @@ const headers = {
     'Content-Type': 'text/json',
 };
 
+function handleUnauthorized(e: Response) {
+    if (e.status === 401) {
+        goto("/login");
+        throw new Error("Unauthorized access. Redirecting to login page.");
+    }
+    return e;
+}
+
 // =================================== GET ====================================
 
 // Get fetch from svelte:
 type fetchType = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>
-export const walter_get = (url: string, f: fetchType): Promise<any> =>
-    f(url, { method: 'GET', headers }).then(e => e.json());
+export const walter_get = (url: string, fetch: fetchType): Promise<any> =>
+    fetch(url, { method: 'GET', headers })
+        .then(handleUnauthorized)
+        .then(e => e.json());
 
 // =================================== PUT ===================================
 
-export const walter_put = (url: string, body: any) => fetch(
-    url,
-    { method: 'PUT', headers, body: JSON.stringify(body) }
-).then(finishPut);
+export const walter_put = (url: string, body: any) =>
+    fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) })
+        .then(handleUnauthorized)
+        .then(finishPut);
 
 async function finishPut(e: Response) {
     const ok = e.status === 200;
@@ -60,10 +71,10 @@ async function finishPut(e: Response) {
 
 // =================================== POST ====================================
 
-export const walter_post = (url: string, body: any) => fetch(
-    url,
-    { method: 'POST', headers, body: JSON.stringify(body) }
-).then(finishPost);
+export const walter_post = (url: string, body: any) =>
+    fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
+        .then(handleUnauthorized)
+        .then(finishPost);
 
 async function finishPost(e: Response) {
     const ok = e.status === 200;
@@ -79,9 +90,10 @@ async function finishPost(e: Response) {
 
 // =================================== DELETE =================================
 
-export function walter_delete(url: string) {
-    return fetch(url, { method: 'DELETE', headers }).then((e) => finishDelete(e));
-}
+export const walter_delete = (url: string) =>
+    fetch(url, { method: 'DELETE', headers })
+        .then(handleUnauthorized)
+        .then((e) => finishDelete(e));
 
 function finishDelete(e: Response) {
     const ok = e.status === 200 || e.status === 204;

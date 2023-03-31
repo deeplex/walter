@@ -2,7 +2,7 @@
 	// import 'carbon-components-svelte/css/white.css';
 	import 'carbon-components-svelte/css/all.css';
 
-	import { WalterSideNav, WalterToasts } from '$WalterComponents';
+	import { WalterSideNav } from '$WalterComponents';
 	import { Modal } from 'carbon-components-svelte';
 	import type { WalterModalControl } from '$WalterTypes';
 	import { walterModalControl } from '$WalterStore';
@@ -14,7 +14,6 @@
 </script>
 
 <WalterSideNav />
-<WalterToasts />
 <Modal
 	{...modalControl}
 	bind:open={modalControl.open}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { WalterSelectionEntry } from '$WalterTypes';
+	import type { WalterSelectionEntry } from '$WalterLib';
 	import { MultiSelect, TextInputSkeleton } from 'carbon-components-svelte';
 
 	export let value: WalterSelectionEntry[] | undefined;

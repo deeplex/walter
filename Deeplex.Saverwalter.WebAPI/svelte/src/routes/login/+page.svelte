@@ -11,6 +11,7 @@
 		TextInput
 	} from 'carbon-components-svelte';
 	import { Login } from 'carbon-icons-svelte';
+	import { goto } from '$app/navigation';
 
 	const login = {
 		username: '',
@@ -29,6 +30,7 @@
 				secure: import.meta.env.PROD,
 				expires: 7 // days
 			});
+			goto('/');
 		} else {
 			invalid = true;
 		}

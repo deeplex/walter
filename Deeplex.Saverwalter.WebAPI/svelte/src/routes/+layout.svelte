@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { WalterToasts } from '$WalterComponents';
 	import { Theme } from 'carbon-components-svelte';
 	import 'carbon-components-svelte/css/all.css';
 </script>
@@ -14,7 +15,7 @@
 		'hover-primary': '#388E3C' // slightly lighter green hover color
 	}}
 />
-
+<WalterToasts />
 <slot />
 
 <style>
