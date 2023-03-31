@@ -15,6 +15,56 @@ namespace Deeplex.Saverwalter.WebAPI
 
         public static void Main(string[] args)
         {
+            var builder = WebApplication.CreateBuilder(args);
+            var container = GetServiceContainer();
+
+            AddServices(builder, container);
+
+            var app = builder.Build();
+
+            app.Services.UseSimpleInjector(container);
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            // app.UseStaticFiles();
+            // app.UseAuthorization();
+            app.MapControllers();
+
+            container.Verify();
+            app.Run();
+        }
+
+        private static void AddServices(WebApplicationBuilder builder, Container container)
+        {
+            builder.Services.AddOpenTelemetry()
+                .WithTracing(tracerProviderBuilder => tracerProviderBuilder
+                .AddSource(AppName)
+                .AddOtlpExporter(opt =>
+                {
+                    opt.Endpoint = new Uri(APMServer);
+                    opt.Protocol = OtlpExportProtocol.Grpc;
+                })
+                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName: AppName, serviceVersion: AppVersion))
+                .AddHttpClientInstrumentation()
+                .AddAspNetCoreInstrumentation()
+                .AddSqlClientInstrumentation());
+
+            builder.Services.AddControllers();
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+            builder.Services.AddSimpleInjector(container, options =>
+            {
+                options.AddAspNetCore().AddControllerActivation();
+            });
+        }
+
+        private static Container GetServiceContainer()
+        {
             var container = new Container();
             container.Options.DefaultScopedLifestyle = new SimpleInjector.Lifestyles.ThreadScopedLifestyle();
             container.Register<WalterDb, WalterDbImpl>(Lifestyle.Scoped);
@@ -35,49 +85,7 @@ namespace Deeplex.Saverwalter.WebAPI
 
             container.Register<BetriebskostenabrechnungHandler>(Lifestyle.Scoped);
 
-            var builder = WebApplication.CreateBuilder(args);
-
-            // Add services to the container.
-            builder.Services.AddOpenTelemetry()
-                .WithTracing(tracerProviderBuilder => tracerProviderBuilder
-                    .AddSource(AppName)
-                    .AddOtlpExporter(opt =>
-                    {
-                        opt.Endpoint = new Uri(APMServer);
-                        opt.Protocol = OtlpExportProtocol.Grpc;
-                    })
-                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName: AppName, serviceVersion: AppVersion))
-                    .AddHttpClientInstrumentation()
-                    .AddAspNetCoreInstrumentation()
-                    .AddSqlClientInstrumentation());
-
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-            builder.Services.AddSimpleInjector(container, options =>
-            {
-                options.AddAspNetCore().AddControllerActivation();
-            });
-
-            var app = builder.Build();
-
-            app.Services.UseSimpleInjector(container);
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
-            // app.UseStaticFiles();
-
-            //app.UseAuthorization();
-            app.MapControllers();
-
-            container.Verify();
-            app.Run();
+            return container;
         }
     }
 }
