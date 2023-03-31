@@ -1,5 +1,8 @@
 using Deeplex.Saverwalter.WalterDbService;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -18,6 +21,14 @@ namespace Deeplex.Saverwalter.WebAPI
             var builder = WebApplication.CreateBuilder(args);
             var container = GetServiceContainer();
 
+            var app = Configure(builder, container);
+
+            container.Verify();
+            app.Run();
+        }
+
+        private static WebApplication Configure(WebApplicationBuilder builder, Container container)
+        {
             AddServices(builder, container);
 
             var app = builder.Build();
@@ -30,12 +41,13 @@ namespace Deeplex.Saverwalter.WebAPI
                 app.UseSwaggerUI();
             }
 
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             // app.UseStaticFiles();
-            // app.UseAuthorization();
             app.MapControllers();
 
-            container.Verify();
-            app.Run();
+            return app;
         }
 
         private static void AddServices(WebApplicationBuilder builder, Container container)
@@ -53,7 +65,10 @@ namespace Deeplex.Saverwalter.WebAPI
                 .AddAspNetCoreInstrumentation()
                 .AddSqlClientInstrumentation());
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers(options =>
+            {
+                options.Filters.Add(new AuthorizeFilter("RequireAuthenticatedUser"));
+            });
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -61,6 +76,18 @@ namespace Deeplex.Saverwalter.WebAPI
             {
                 options.AddAspNetCore().AddControllerActivation();
             });
+
+            builder.Services.AddAuthentication("BasicAuthentication")
+                .AddScheme<AuthenticationSchemeOptions, BasicAuthentication>("BasicAuthentication", null);
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAuthenticatedUser", policy =>
+                {
+                    policy.AddAuthenticationSchemes("BasicAuthentication");
+                    policy.RequireAuthenticatedUser();
+                });
+            }); 
         }
 
         private static Container GetServiceContainer()
