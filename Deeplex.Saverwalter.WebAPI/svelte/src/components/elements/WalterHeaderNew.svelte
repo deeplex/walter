@@ -5,13 +5,23 @@
 	import { WalterHeader } from '$WalterComponents';
 	import { walter_post } from '$WalterServices/requests';
 	import { goto } from '$app/navigation';
+	import { WalterToastContent } from '$WalterLib';
 
 	export let title: string = 'Neu...';
 	export let apiURL: string;
 	export let entry: any;
 
+	const SaveToast = new WalterToastContent(
+		'Speichern erfolgreich',
+		'Speichern fehlgeschlagen',
+		(a: any) => a,
+		(a: any) =>
+			`Folgende Einträge sind erforderlich:
+			${Object.keys(a.errors).join(', \n')}`
+	);
+
 	async function click_post() {
-		const j = await walter_post(apiURL, entry);
+		const j = await walter_post(apiURL, entry, SaveToast);
 		if (j.id) {
 			goto(`${apiURL}/${j.id}`.replace('api/', ''));
 		}

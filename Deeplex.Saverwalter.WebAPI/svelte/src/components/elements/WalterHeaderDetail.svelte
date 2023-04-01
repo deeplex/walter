@@ -9,6 +9,7 @@
 	import { walter_delete, walter_put } from '$WalterServices/requests';
 	import { openModal } from '$WalterStore';
 	import type { WalterS3File } from '$WalterTypes';
+	import { WalterToastContent } from '$WalterLib';
 
 	export let title: Promise<string> | string = 'Saverwalter';
 	export let a: any;
@@ -16,8 +17,18 @@
 	export let S3URL: string;
 	export let files: WalterS3File[] | undefined = undefined;
 
+	const SaveToast = new WalterToastContent(
+		'Speichern erfolgreich',
+		'Speichern fehlgeschlagen',
+		(a: any) => a,
+		(a: any) =>
+			`Speichern fehlgeschlagen.\nFolgende Einträge sind erforderlich:\n${Object.keys(
+				a.errors
+			).join(', \n')}`
+	);
+
 	function click_save() {
-		walter_put(apiURL, a);
+		walter_put(apiURL, a, SaveToast);
 	}
 
 	function click_delete(title: string) {

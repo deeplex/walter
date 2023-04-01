@@ -12,6 +12,7 @@
 	} from 'carbon-components-svelte';
 	import { Login } from 'carbon-icons-svelte';
 	import { goto } from '$app/navigation';
+	import { WalterToastContent } from '$WalterLib';
 
 	const login = {
 		username: '',
@@ -20,8 +21,15 @@
 
 	let invalid = false;
 
+	const LoginToast = new WalterToastContent(
+		'Anmeldung erfolgreich',
+		'Anmeldung fehlgeschlagen',
+		() => `Anmeldung für Nutzer ${login.username} erfolgreich.`,
+		() => 'Nutzername oder Passwort falsch.'
+	);
+
 	async function submit() {
-		const response = await walter_post('/api/login', login);
+		const response = await walter_post('/api/login', login, LoginToast);
 		invalid = !response.succeeded;
 		if (response.succeeded) {
 			Cookies.set('access_token', response.accessToken, {
@@ -33,6 +41,12 @@
 			goto('/');
 		} else {
 			invalid = true;
+		}
+	}
+
+	function handleEnterKey(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			submit();
 		}
 	}
 </script>
@@ -56,6 +70,7 @@
 			type="password"
 			labelText="Passwort"
 			placeholder="Passwort eintragen..."
+			on:keydown={handleEnterKey}
 		/>
 		<Button on:click={submit} icon={Login}>Anmelden</Button>
 	</FluidForm>

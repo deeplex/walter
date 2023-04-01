@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { addToast } from '$WalterStore';
 
 	import {
 		SideNav,
@@ -23,8 +24,10 @@
 		UserMultiple
 	} from 'carbon-icons-svelte';
 	import Cookies from 'js-cookie';
+	import { WalterToastContent } from '../../lib/WalterToastContent';
 
 	function logout() {
+		addToast(new WalterToastContent('Abmelden erfolgreich'), true);
 		Cookies.remove('access_token');
 		goto('/login');
 	}

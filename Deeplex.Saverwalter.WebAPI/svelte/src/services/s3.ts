@@ -2,12 +2,13 @@ import { addToast } from '$WalterStore';
 import type { WalterS3File } from '$WalterTypes';
 import * as parser from 'fast-xml-parser';
 import { walter_delete } from './requests';
+import type { WalterToastContent } from '../lib/WalterToastContent';
 
 const baseURL = "http://192.168.178.61:9002/saverwalter";
 type fetchType = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>
 type XMLResult = { ListBucketResult?: { Contents?: WalterS3File | WalterS3File[] } }
 
-export const walter_s3_post = (file: File, path: string) => fetch(
+export const walter_s3_post = (file: File, path: string, toast?: WalterToastContent) => fetch(
     `${baseURL}/${path}/${file.name}`,
     {
         method: 'PUT',
@@ -16,15 +17,10 @@ export const walter_s3_post = (file: File, path: string) => fetch(
         },
         body: file
     }
-).then(finish_s3_post);
+).then(e => finish_s3_post(e, toast));
 
-export async function finish_s3_post(e: Response, subtitle: string = "TODO parse response body.") {
-    const ok = e.status === 200;
-    const kind = ok ? "success" : "error";
-    const title = ok ? "Hochladen erfolgreich" : `Fehler ${e.status}`;
-    // subtitle = await e.json();
-
-    addToast({ title, kind, subtitle });
+export async function finish_s3_post(e: Response, toast?: WalterToastContent) {
+    toast && addToast(toast, e.status === 200);
     return e;
 }
 

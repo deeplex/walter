@@ -11,6 +11,7 @@
 	import { WalterDataTable } from '$WalterComponents';
 	import { Add } from 'carbon-icons-svelte';
 	import { walter_post } from '$WalterServices/requests';
+	import { WalterToastContent } from '../../lib/WalterToastContent';
 
 	export let addUrl: string | undefined = undefined;
 	export let addEntry: any | undefined = undefined;
@@ -26,11 +27,18 @@
 	let addModalOpen: boolean = false;
 	let open: boolean = false;
 
+	const SaveToast = new WalterToastContent(
+		'Speichern erfolgreich',
+		'Speichern fehlgeschlagen',
+		(a: any) => a,
+		(a: any) => `Konnte ${a} nicht speichern.`
+	);
+
 	async function click_post(url: string | undefined, body: any) {
 		if (!url) {
 			return;
 		}
-		const j = await walter_post(url, body);
+		const j = await walter_post(url, body, SaveToast);
 		rows = [...rows, j];
 		open = true;
 	}

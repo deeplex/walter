@@ -1,3 +1,4 @@
+export { WalterToastContent } from './WalterToastContent';
 export { WalterPersonEntry } from './WalterPerson';
 export { WalterAdresseEntry } from './WalterAdresse';
 export { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';

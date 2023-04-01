@@ -1,4 +1,4 @@
-import type { WalterSelectionEntry } from "$WalterLib";
+import type { WalterSelectionEntry, WalterToastContent } from "$WalterLib";
 import { addToast } from "$WalterStore";
 import { goto } from "$app/navigation";
 
@@ -52,57 +52,42 @@ export const walter_get = (url: string, fetch: fetchType): Promise<any> =>
 
 // =================================== PUT ===================================
 
-export const walter_put = (url: string, body: any) =>
+export const walter_put = (url: string, body: any, toast?: WalterToastContent) =>
     fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) })
         .then(handleUnauthorized)
-        .then(finishPut);
+        .then(e => finishPut(e, toast));
 
-async function finishPut(e: Response) {
-    const ok = e.status === 200;
-    const kind = ok ? "success" : "error";
-    const title = ok ? "Speichern Erfolgreich" : "Fehler";
+async function finishPut(e: Response, toast?: WalterToastContent) {
     const j = await e.json();
 
-    const subtitle = "TODO parse response body." // JSON.stringify(j);
+    toast && addToast(toast, e.status === 200, j);
 
-    addToast({ title, kind, subtitle });
     return j;
 }
 
 // =================================== POST ====================================
 
-export const walter_post = (url: string, body: any) =>
+export const walter_post = (url: string, body: any, toast?: WalterToastContent) =>
     fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
         .then(handleUnauthorized)
-        .then(finishPost);
+        .then(e => finishPost(e, toast));
 
-async function finishPost(e: Response) {
-    const ok = e.status === 200;
-    const kind = ok ? "success" : "error";
-    const title = ok ? "Speichern erfolgreich" : "Fehler";
+async function finishPost(e: Response, toast?: WalterToastContent) {
     const j = await e.json();
 
-    const subtitle = "TODO parse response body." // JSON.stringify(j);
+    toast && addToast(toast, e.status === 200, j);
 
-    addToast({ title, kind, subtitle });
     return j;
 }
 
 // =================================== DELETE =================================
 
-export const walter_delete = (url: string) =>
+export const walter_delete = (url: string, toast?: WalterToastContent) =>
     fetch(url, { method: 'DELETE', headers })
         .then(handleUnauthorized)
-        .then((e) => finishDelete(e));
+        .then((e) => finishDelete(e, toast));
 
-function finishDelete(e: Response) {
-    const ok = e.status === 200 || e.status === 204;
-    const kind = ok ? "success" : "error";
-    const title = ok ? "Löschen Erfolgreich" : "Fehler";
-    // const j = await e.json();
-
-    const subtitle = "TODO parse response body." // JSON.stringify(j);
-
-    addToast({ title, kind, subtitle });
+function finishDelete(e: Response, toast?: WalterToastContent) {
+    toast && addToast(toast, e.status === 200);
     return e;
 }

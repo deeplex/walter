@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             return AuthenticateResult.Success(ticket);
         }
 
-        private static bool ValidateAccessToken(string token)
+        public static bool ValidateAccessToken(string token)
         {
             var validationParameters = new TokenValidationParameters
             {

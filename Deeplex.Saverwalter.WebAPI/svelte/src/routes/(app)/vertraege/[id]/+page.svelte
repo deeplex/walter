@@ -32,11 +32,12 @@
 		getVertragversionEntry,
 		loadAbrechnung
 	} from './utils';
-	import type {
-		WalterMieteEntry,
-		WalterMietminderungEntry,
-		WalterPersonEntry,
-		WalterVertragVersionEntry
+	import {
+		WalterToastContent,
+		type WalterMieteEntry,
+		type WalterMietminderungEntry,
+		type WalterPersonEntry,
+		type WalterVertragVersionEntry
 	} from '$WalterLib';
 	import {
 		create_walter_s3_file_from_file,
@@ -88,31 +89,38 @@
 		data.anhaenge = [...data.anhaenge, file];
 	}
 
+	async function create_abrechnung(abrechnung: File) {
+		const file = create_walter_s3_file_from_file(abrechnung, data.S3URL);
+
+		const toast = new WalterToastContent(
+			'Hochladen erfolgreich',
+			'Hochladen fehlgeschlagen',
+			() => `Die Datei: ${file.FileName} wurde erfolgreich hochgeladen`,
+			() => `Die Datei: ${file.FileName} konnte nicht hochgeladen werden.`
+		);
+
+		var response = await walter_s3_post(
+			new File([abrechnung], file.FileName),
+			data.S3URL,
+			toast
+		);
+
+		if (response.ok) {
+			addToAnhang(file);
+		}
+	}
+
 	async function word_dokument_erstellen_click() {
 		const abrechnung = await create_abrechnung_word(data.id, year, title);
 		if (abrechnung instanceof File) {
-			const file = create_walter_s3_file_from_file(abrechnung, data.S3URL);
-			var response = await walter_s3_post(
-				new File([abrechnung], file.FileName),
-				data.S3URL
-			);
-			if (response.ok) {
-				addToAnhang(file);
-			}
+			create_abrechnung(abrechnung);
 		}
 	}
 
 	async function pdf_dokument_erstellen_click() {
 		const abrechnung = await create_abrechnung_pdf(data.id, year, title);
 		if (abrechnung instanceof File) {
-			const file = create_walter_s3_file_from_file(abrechnung, data.S3URL);
-			var response = await walter_s3_post(
-				new File([abrechnung], file.FileName),
-				data.S3URL
-			);
-			if (response.ok) {
-				addToAnhang(file);
-			}
+			create_abrechnung(abrechnung);
 		}
 	}
 </script>

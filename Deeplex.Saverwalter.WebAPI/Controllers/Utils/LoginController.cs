@@ -21,6 +21,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             public string? Username { get; set; }
             public string? Password { get; set; }
+            public string? Token { get; set; }
 
             public LoginEntry() { }
         }
@@ -35,6 +36,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] LoginEntry entry)
         {
+            if (entry.Token != null)
+            {
+                var tokenValid = BasicAuthentication.ValidateAccessToken(entry.Token);
+                return new OkObjectResult(new { succeeded = tokenValid });
+            }
+
             var result = BasicAuthentication.Authenticate(entry.Username!, entry.Password!, "Basic");
             if (result.Succeeded)
             {
@@ -45,7 +52,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 return new BadRequestObjectResult(result);
             }
-
         }
     }
 }
