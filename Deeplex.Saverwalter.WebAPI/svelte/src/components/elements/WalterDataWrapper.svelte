@@ -27,10 +27,10 @@
 	let addModalOpen: boolean = false;
 	let open: boolean = false;
 
-	const SaveToast = new WalterToastContent(
+	const PostToast = new WalterToastContent(
 		'Speichern erfolgreich',
 		'Speichern fehlgeschlagen',
-		(a: any) => a,
+		() => `${title} erfolgreich gespeichert.`,
 		(a: any) => `Konnte ${a} nicht speichern.`
 	);
 
@@ -38,7 +38,7 @@
 		if (!url) {
 			return;
 		}
-		const j = await walter_post(url, body, SaveToast);
+		const j = await walter_post(url, body, PostToast);
 		rows = [...rows, j];
 		open = true;
 	}

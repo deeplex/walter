@@ -16,8 +16,11 @@
 		'Speichern fehlgeschlagen',
 		(a: any) => a,
 		(a: any) =>
-			`Folgende Einträge sind erforderlich:
-			${Object.keys(a.errors).join(', \n')}`
+			`Speichern fehlgeschlagen.
+			Folgende Einträge sind erforderlich:
+			${Object.keys(a.errors)
+				.map((e) => e.split('.').pop())
+				.join(', \n')}`
 	);
 
 	async function click_post() {

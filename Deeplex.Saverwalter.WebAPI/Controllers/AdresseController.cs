@@ -16,10 +16,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             protected Adresse? Entity { get; }
 
             public int Id { get; set; }
-            public string Strasse { get; set; } = null!;
-            public string Hausnummer { get; set; } = null!;
-            public string Postleitzahl { get; set; } = null!;
-            public string Stadt { get; set; } = null!;
+            public string Strasse { get; set; } = string.Empty;
+            public string Hausnummer { get; set; } = string.Empty;
+            public string Postleitzahl { get; set; } = string.Empty;
+            public string Stadt { get; set; } = string.Empty;
             public string? Anschrift { get; set; }
             public string? Notiz { get; set; }
 

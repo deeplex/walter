@@ -17,19 +17,27 @@
 	export let S3URL: string;
 	export let files: WalterS3File[] | undefined = undefined;
 
-	const SaveToast = new WalterToastContent(
+	const PutToast = new WalterToastContent(
 		'Speichern erfolgreich',
 		'Speichern fehlgeschlagen',
-		(a: any) => a,
+		(a: any) => `${title} erfolgreich gespeichert.`,
 		(a: any) =>
-			`Speichern fehlgeschlagen.\nFolgende Einträge sind erforderlich:\n${Object.keys(
-				a.errors
-			).join(', \n')}`
+			`Folgende Einträge sind erforderlich:
+			${Object.keys(a.errors)
+				.map((e) => e.split('.').pop())
+				.join(', \n')}`
 	);
 
 	function click_save() {
-		walter_put(apiURL, a, SaveToast);
+		walter_put(apiURL, a, PutToast);
 	}
+
+	const DeleteToast = new WalterToastContent(
+		'Löschen erfolgreich',
+		'Löschen fehlgeschlagen',
+		(a: any) => `${title} erfolgreich gelöscht.`,
+		(a: any) => ''
+	);
 
 	function click_delete(title: string) {
 		const content = `Bist du sicher, dass du ${title} löschen möchtest?
@@ -40,7 +48,8 @@
 			content,
 			danger: true,
 			primaryButtonText: 'Löschen',
-			submit: () => walter_delete(apiURL).then(() => history.back())
+			submit: () =>
+				walter_delete(apiURL, DeleteToast).then(() => history.back())
 		});
 	}
 </script>
