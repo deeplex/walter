@@ -1,8 +1,7 @@
 <script lang="ts">
 	import {
 		HeaderGlobalAction,
-		HeaderNav,
-		Loading
+		HeaderUtilities
 	} from 'carbon-components-svelte';
 	import { Save, TrashCan } from 'carbon-icons-svelte';
 
@@ -37,19 +36,10 @@
 
 <WalterHeader {title}>
 	{#await title then x}
-		<HeaderNav>
-			{#await a}
-				<HeaderGlobalAction>
-					<Loading style="margin-left: 33%" withOverlay={false} small />
-				</HeaderGlobalAction>
-				<HeaderGlobalAction>
-					<Loading style="margin-left: 33%" withOverlay={false} small />
-				</HeaderGlobalAction>
-			{:then}
-				<HeaderGlobalAction on:click={click_save} icon={Save} />
-				<HeaderGlobalAction on:click={() => click_delete(x)} icon={TrashCan} />
-			{/await}
-		</HeaderNav>
+		<HeaderUtilities>
+			<HeaderGlobalAction on:click={click_save} icon={Save} />
+			<HeaderGlobalAction on:click={() => click_delete(x)} icon={TrashCan} />
+		</HeaderUtilities>
 		{#if files}
 			<WalterAnhaenge {S3URL} bind:files />
 		{/if}

@@ -1,19 +1,15 @@
 <script lang="ts">
-	import { Header, HeaderUtilities, Loading } from 'carbon-components-svelte';
+	import { Header, Loading, SkipToContent } from 'carbon-components-svelte';
 
 	export let title: Promise<string> | string = 'Saverwalter';
-
-	const company = 'SaverWalter | ';
 </script>
 
 {#await title}
-	<Header href="/" {company} platformName="Lade...">
+	<Header href="/" platformName="Lade...">
 		<Loading withOverlay={false} small />
 	</Header>
 {:then x}
-	<Header href="/" {company} platformName={x}>
-		<HeaderUtilities>
-			<slot />
-		</HeaderUtilities>
+	<Header href="/" platformName={x}>
+		<slot />
 	</Header>
 {/await}

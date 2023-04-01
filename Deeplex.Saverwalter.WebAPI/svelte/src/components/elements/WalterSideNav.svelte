@@ -1,23 +1,33 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 
 	import {
 		SideNav,
 		SideNavDivider,
 		SideNavItems,
-		SideNavLink
+		SideNavLink,
+		SideNavMenu,
+		SideNavMenuItem
 	} from 'carbon-components-svelte';
 	import {
 		Building,
 		ChartRelationship,
 		Document,
-		DocumentAttachment,
 		Location,
+		Logout,
 		Meter,
 		Money,
+		Settings,
 		Tools,
 		UserMultiple
 	} from 'carbon-icons-svelte';
+	import Cookies from 'js-cookie';
+
+	function logout() {
+		Cookies.remove('access_token');
+		goto('/login');
+	}
 </script>
 
 <SideNav rail>
@@ -72,6 +82,16 @@
 			text="Adressen"
 			href="/adressen"
 		/>
+
 		<SideNavDivider />
+
+		<SideNavMenu text="Einstellungen" icon={Settings}>
+			<SideNavLink
+				icon={Logout}
+				on:click={logout}
+				text="Abmelden"
+				style="padding-left: 4em"
+			/>
+		</SideNavMenu>
 	</SideNavItems>
 </SideNav>

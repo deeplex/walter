@@ -4,7 +4,7 @@
 	import { WalterHeader } from '$WalterComponents';
 </script>
 
-<WalterHeader title="Home" />
+<WalterHeader title="SaverWalter" />
 <Content>
 	<h1 style="text-align: center; margin-top: 40vh">Willkommen</h1>
 </Content>

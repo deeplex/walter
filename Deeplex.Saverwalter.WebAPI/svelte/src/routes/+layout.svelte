@@ -4,6 +4,7 @@
 	import 'carbon-components-svelte/css/all.css';
 </script>
 
+<!-- Theming as suggested. Sidenav bg color is set in <style> -->
 <Theme
 	theme="g10"
 	tokens={{
@@ -19,6 +20,7 @@
 <slot />
 
 <style>
+	/* Sidenav theming doesn't seem to have a token */
 	:global(
 			a.bx--side-nav__link[aria-current='page']::before,
 			a.bx--side-nav__link--current::before
@@ -26,16 +28,30 @@
 		background-color: #2e7d32;
 	}
 
+	/* Override svelte Hamburger Menu -> Seems to be buggy with rail */
+	:global(.bx--header__menu-toggle) {
+		visibility: hidden;
+		width: 8px;
+	}
+
+	/* Make content use the whole screen */
 	slot {
 		height: 100vh - 3rem - 5px;
 		width: 100vw;
 		position: relative;
 	}
 
+	/* Make Lists use complete screen */
+	:global(.bx--data-table--sticky-header) {
+		max-height: calc(100vh - 3rem - 5px);
+	}
+
+	/* Adjust accordion for detail views */
 	:global(.bx--content, .bx--accordion__content) {
 		padding: 0 !important;
 	}
 
+	/* Adjust size of content in detail view */
 	:global(.bx--text-input-wrapper, .bx--form-item, .bx--list-box__wrapper) {
 		margin: 10px;
 		flex: 1 1 auto;
@@ -45,6 +61,7 @@
 		align-items: flex-start;
 	}
 
+	/* Align datepicker to rest of elements */
 	:global(
 			.bx--date-picker-container,
 			.flatpickr-input,
@@ -53,10 +70,8 @@
 		) {
 		width: 100%;
 	}
-	:global(.bx--data-table--sticky-header) {
-		max-height: calc(100vh - 3rem - 5px);
-	}
 
+	/* Properly display lists */
 	:global(.bx--data-table-container) {
 		min-width: 50rem;
 		padding-top: 0;
@@ -66,12 +81,13 @@
 		visibility: hidden;
 	}
 
+	/* Add border to sidenav */
 	:global(.bx--side-nav) {
-		border-color: #666;
 		border-right: 1px;
 		border-style: solid;
 	}
 
+	/* Adjust size of number inputs (because +1 -1 buttons) */
 	:global(.bx--number input[type='number']) {
 		min-width: 6.375rem;
 		padding-right: 4em;
