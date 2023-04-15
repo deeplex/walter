@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Deeplex.Saverwalter.Model.Auth;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal;
 using System.Text;
@@ -24,6 +25,9 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Wohnung> Wohnungen { get; set; } = null!;
         public DbSet<Zaehler> ZaehlerSet { get; set; } = null!;
         public DbSet<Zaehlerstand> Zaehlerstaende { get; set; } = null!;
+
+        public DbSet<UserAccount> UserAccounts { get; set; } = null!;
+        public DbSet<Pbkdf2PasswordCredential> Pbkdf2PasswordCredentials { get; set; } = null!;
 
         public SaverwalterContext()
             : base()

@@ -1,3 +1,4 @@
+using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WalterDbService;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
@@ -77,24 +78,28 @@ namespace Deeplex.Saverwalter.WebAPI
                 options.AddAspNetCore().AddControllerActivation();
             });
 
-            builder.Services.AddAuthentication("BasicAuthentication")
-                .AddScheme<AuthenticationSchemeOptions, BasicAuthentication>("BasicAuthentication", null);
+            builder.Services.AddAuthentication("TokenAuthentication")
+                .AddScheme<AuthenticationSchemeOptions, TokenAuthenticationHandler>("TokenAuthentication", null);
 
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("RequireAuthenticatedUser", policy =>
                 {
-                    policy.AddAuthenticationSchemes("BasicAuthentication");
+                    policy.AddAuthenticationSchemes("TokenAuthentication");
                     policy.RequireAuthenticatedUser();
                 });
-            }); 
+            });
+
+            builder.Services.AddTransient(c => container.GetInstance<TokenService>());
+            builder.Services.AddTransient(c => container.GetInstance<SaverwalterContext>());
         }
 
         private static Container GetServiceContainer()
         {
             var container = new Container();
-            container.Options.DefaultScopedLifestyle = new SimpleInjector.Lifestyles.ThreadScopedLifestyle();
+            container.Options.DefaultScopedLifestyle = new SimpleInjector.Lifestyles.AsyncScopedLifestyle();
             container.Register<WalterDb, WalterDbImpl>(Lifestyle.Scoped);
+            container.Register(() => container.GetInstance<WalterDb>().ctx, Lifestyle.Scoped);
 
             container.Register<AdresseDbService>(Lifestyle.Scoped);
             container.Register<BetriebskostenrechnungDbService>(Lifestyle.Scoped);
@@ -111,6 +116,9 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<ZaehlerstandDbService>(Lifestyle.Scoped);
 
             container.Register<BetriebskostenabrechnungHandler>(Lifestyle.Scoped);
+
+            container.Register<TokenService>(Lifestyle.Singleton);
+            container.Register<UserService>(Lifestyle.Scoped);
 
             return container;
         }
