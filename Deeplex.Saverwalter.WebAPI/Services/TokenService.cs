@@ -43,7 +43,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             var tokenInfo = account.Id.ToByteArray();
 
             var token = new byte[tokenSize];
-            tokenSalt.CopyTo(token.AsSpan(tokenSaltSize));
+            tokenSalt.CopyTo(token.AsSpan(0, tokenSaltSize));
             var ciphertext = token.AsSpan(tokenInfoOffset, tokenInfoSize);
             var additionalData = token.AsSpan(additionalDataOffset, additionalDataSize);
             Encoding.UTF8.GetBytes(
@@ -66,7 +66,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 return false;
             }
 
-            var tokenSalt = token.AsSpan(tokenSaltSize);
+            var tokenSalt = token.AsSpan(0, tokenSaltSize);
             var keyNonce = new byte[384 / 8];
             HKDF.Extract(HashAlgorithmName.SHA384, authKey, tokenSalt, keyNonce);
             using var key = new AesGcm(keyNonce.AsSpan(0, 32));
