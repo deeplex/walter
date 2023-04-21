@@ -2,18 +2,23 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
+using System.Security.Claims;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 {
-    [Route("api/[controller]")]
+    [Route("api/account")]
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly UserService userService;
+        private readonly TokenService _tokenService;
+        private readonly UserService _userService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AccountController(UserService userService)
+        public AccountController(TokenService tokenService, UserService userService, IHttpContextAccessor httpContextAccessor)
         {
-            this.userService = userService;
+            _tokenService = tokenService;
+            _userService = userService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public class LoginRequest
@@ -27,18 +32,36 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public string? Token { get; set; }
         }
 
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<string>> RefreshToken()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user == null) // this is always false if aspnet core is properly configured
+            {
+                return Unauthorized();
+            }
+            var userIdClaim = user.Claims.Single((claim) => claim.ValueType == ClaimTypes.NameIdentifier);
+            var account = await _userService.GetUserById(Guid.Parse(userIdClaim.Value));
+            if (account == null)
+            {
+                return Unauthorized();
+            }
+
+            return _tokenService.CreateTokenFor(account);
+        }
+
         [HttpPost("sign-in")]
         [AllowAnonymous]
-        public async Task<IActionResult> SignIn([FromBody] LoginRequest loginRequest)
+        public async Task<ActionResult<LoginResult>> SignIn([FromBody] LoginRequest loginRequest)
         {
-            var result = await userService.SignInAsync(loginRequest.Username, loginRequest.Password);
+            var result = await _userService.SignInAsync(loginRequest.Username, loginRequest.Password);
             if (result.Succeeded)
             {
-                return Ok(new LoginResult
+                return new LoginResult
                 {
                     Token = result.SessionToken,
                     UserId = result.Account!.Id.ToString("D", CultureInfo.InvariantCulture)
-                });
+                };
             }
             return Unauthorized();
         }

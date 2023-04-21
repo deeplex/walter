@@ -33,6 +33,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             this.tokenService = tokenService;
         }
 
+        public ValueTask<UserAccount?> GetUserById(Guid id)
+        {
+            return walterContext.UserAccounts.FindAsync(id);
+        }
+
         public async Task<SignInResult> SignInAsync(string username, string password)
         {
             var account = await walterContext.UserAccounts
