@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { WalterHeader } from '$WalterComponents';
-	import { walter_post } from '$WalterServices/requests';
-	import Cookies from 'js-cookie';
 
 	import {
 		Button,
@@ -13,6 +11,7 @@
 	import { Login } from 'carbon-icons-svelte';
 	import { goto } from '$app/navigation';
 	import { WalterToastContent } from '$WalterLib';
+	import { walter_sign_in } from '$WalterServices/auth';
 
 	const login = {
 		username: '',
@@ -29,18 +28,11 @@
 	);
 
 	async function submit() {
-		const response = await walter_post('/api/login', login, LoginToast);
-		invalid = !response.succeeded;
-		if (response.succeeded) {
-			Cookies.set('access_token', response.accessToken, {
-				path: '/',
-				sameSite: 'strict',
-				secure: import.meta.env.PROD,
-				expires: 7 // days
-			});
-			goto('/');
-		} else {
+		const response = await walter_sign_in(fetch, login.username, login.password, LoginToast);	
+		if (response == null) {
 			invalid = true;
+		} else {
+			goto('/');
 		}
 	}
 
