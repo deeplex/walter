@@ -9,6 +9,8 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using SimpleInjector;
+using SimpleInjector.Lifestyles;
+using System.Text;
 
 namespace Deeplex.Saverwalter.WebAPI
 {
@@ -18,7 +20,7 @@ namespace Deeplex.Saverwalter.WebAPI
         public static string AppName = "Saverwalter";
         private static string APMServer = Environment.GetEnvironmentVariable("APM-Server") ?? "http://192.168.178.61:8200"; // TODO change to localhost...
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             var container = GetServiceContainer();
@@ -26,6 +28,11 @@ namespace Deeplex.Saverwalter.WebAPI
             var app = Configure(builder, container);
 
             container.Verify();
+
+            await using (AsyncScopedLifestyle.BeginScope(container))
+            {
+                await MigrateDb(container);
+            }
             app.Run();
         }
 
@@ -143,6 +150,31 @@ namespace Deeplex.Saverwalter.WebAPI
                 ;Password={databasePass}");
 
             return optionsBuilder.Options;
+        }
+
+        private static async Task MigrateDb(Container container)
+        {
+            var dbContext = container.GetInstance<SaverwalterContext>();
+            await dbContext.Database.MigrateAsync();
+            if (await dbContext.UserAccounts.CountAsync() > 0)
+            {
+                return;
+            }
+
+            var rootPassword = Environment.GetEnvironmentVariable("WALTER_PASSWORD");
+            if (string.IsNullOrEmpty(rootPassword))
+            {
+                return;
+            }
+
+            // either create the account _and_ associate a password or do nothing
+            using var tx = await dbContext.Database.BeginTransactionAsync();
+
+            var userService = container.GetInstance<UserService>();
+            var rootAccount = await userService.CreateUserAccount("root");
+            await userService.UpdateUserPassword(rootAccount, Encoding.UTF8.GetBytes(rootPassword));
+
+            await tx.CommitAsync();
         }
     }
 }
