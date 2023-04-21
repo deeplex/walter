@@ -4,6 +4,7 @@ using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -98,8 +99,9 @@ namespace Deeplex.Saverwalter.WebAPI
         {
             var container = new Container();
             container.Options.DefaultScopedLifestyle = new SimpleInjector.Lifestyles.AsyncScopedLifestyle();
+            container.Register(CreateDbContextOptions, Lifestyle.Singleton);
+            container.Register<SaverwalterContext>(Lifestyle.Scoped);
             container.Register<WalterDb, WalterDbImpl>(Lifestyle.Scoped);
-            container.Register(() => container.GetInstance<WalterDb>().ctx, Lifestyle.Scoped);
 
             container.Register<AdresseDbService>(Lifestyle.Scoped);
             container.Register<BetriebskostenrechnungDbService>(Lifestyle.Scoped);
@@ -121,6 +123,26 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<UserService>(Lifestyle.Scoped);
 
             return container;
+        }
+
+        private static DbContextOptions<SaverwalterContext> CreateDbContextOptions()
+        {
+            DotNetEnv.Env.Load();
+
+            var databaseURL = Environment.GetEnvironmentVariable("DATABASE_URL");
+            var databasePort = Environment.GetEnvironmentVariable("DATABASE_PORT");
+            var databaseUser = Environment.GetEnvironmentVariable("DATABASE_USER");
+            var databasePass = Environment.GetEnvironmentVariable("DATABASE_PASS");
+
+            var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
+            optionsBuilder.UseNpgsql(
+                 $@"Server={databaseURL}
+                ;Port={databasePort}
+                ;Database=saverdb
+                ;Username={databaseUser}
+                ;Password={databasePass}");
+
+            return optionsBuilder.Options;
         }
     }
 }

@@ -29,10 +29,6 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<UserAccount> UserAccounts { get; set; } = null!;
         public DbSet<Pbkdf2PasswordCredential> Pbkdf2PasswordCredentials { get; set; } = null!;
 
-        public SaverwalterContext()
-            : base()
-        {
-        }
         public SaverwalterContext(DbContextOptions<SaverwalterContext> options)
             : base(options)
         {
