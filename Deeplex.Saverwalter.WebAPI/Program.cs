@@ -3,6 +3,7 @@ using Deeplex.Saverwalter.WalterDbService;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Exporter;
@@ -11,6 +12,8 @@ using OpenTelemetry.Trace;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
 using System.Text;
+
+[assembly: ApiController]
 
 namespace Deeplex.Saverwalter.WebAPI
 {

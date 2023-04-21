@@ -7,7 +7,6 @@ using System.Security.Claims;
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 {
     [Route("api/account")]
-    [ApiController]
     public class AccountController : ControllerBase
     {
         private readonly TokenService _tokenService;
