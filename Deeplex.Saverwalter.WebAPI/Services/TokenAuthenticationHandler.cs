@@ -1,7 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 
@@ -22,12 +21,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            if (Request.Headers.Authorization.IsNullOrEmpty() || Request.Headers.Authorization.Count > 1)
+            if (Request.Headers.Authorization.Count != 1)
             {
                 return AuthenticateResult.NoResult();
             }
             var authorizationHeader = Request.Headers.Authorization[0]!;
-            if (!authorizationHeader.StartsWith(HttpAuthScheme))
+            if (authorizationHeader == null || !authorizationHeader.StartsWith(HttpAuthScheme))
             {
                 return AuthenticateResult.NoResult();
             }
