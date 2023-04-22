@@ -139,8 +139,9 @@ namespace Deeplex.Saverwalter.WebAPI
         {
             DotNetEnv.Env.Load();
 
-            var databaseURL = Environment.GetEnvironmentVariable("DATABASE_URL");
+            var databaseURL = Environment.GetEnvironmentVariable("DATABASE_HOST");
             var databasePort = Environment.GetEnvironmentVariable("DATABASE_PORT");
+            var databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME");
             var databaseUser = Environment.GetEnvironmentVariable("DATABASE_USER");
             var databasePass = Environment.GetEnvironmentVariable("DATABASE_PASS");
 
@@ -148,7 +149,7 @@ namespace Deeplex.Saverwalter.WebAPI
             optionsBuilder.UseNpgsql(
                  $@"Server={databaseURL}
                 ;Port={databasePort}
-                ;Database=saverdb2
+                ;Database={databaseName}
                 ;Username={databaseUser}
                 ;Password={databasePass}");
 
