@@ -41,6 +41,13 @@ export function getAccessToken(): string | undefined {
   return _accessToken;
 }
 
+export function walter_sign_out(toast?: WalterToastContent) {
+  getAuthState().set(null);
+  _accessToken = undefined;
+  localStorage.removeItem('auth-state');
+  toast && addToast(toast, true, 'Abmelden erfolgreich');
+}
+
 export async function walter_sign_in(
   fetchImpl: typeof fetch,
   username: string,

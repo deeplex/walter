@@ -8,8 +8,7 @@
     SideNavDivider,
     SideNavItems,
     SideNavLink,
-    SideNavMenu,
-    SideNavMenuItem
+    SideNavMenu
   } from 'carbon-components-svelte';
   import {
     Building,
@@ -23,12 +22,12 @@
     Tools,
     UserMultiple
   } from 'carbon-icons-svelte';
-  import Cookies from 'js-cookie';
-  import { WalterToastContent } from '../../lib/WalterToastContent';
+  import { WalterToastContent } from '$WalterLib';
+  import { walter_sign_out } from '$WalterServices/auth';
 
   function logout() {
-    addToast(new WalterToastContent('Abmelden erfolgreich'), true);
-    Cookies.remove('access_token');
+    const LogoutToast = new WalterToastContent('Abmeldung erfolgreich');
+    walter_sign_out(LogoutToast);
     goto('/login');
   }
 </script>

@@ -35,7 +35,6 @@
   },
   "type": "module",
   "dependencies": {
-    "js-cookie": "^3.0.1",
     "svelte-preprocess": "^5.0.1"
   }
 }
