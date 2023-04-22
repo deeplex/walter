@@ -2,6 +2,7 @@
   "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
     "target": "ES2021",
+    "ignoreDeprecations": "5.0", // Option 'importsNotUsedAsValues' is deprecated and will stop functioning in TS 5.5
     "allowJs": true,
     "checkJs": true,
     "esModuleInterop": true,
@@ -15,7 +16,9 @@
       "$WalterStore": ["./src/store.ts"],
       "$WalterServices/*": ["./src/services/*"],
       "$WalterTypes": ["./src/types/index.ts"],
-      "$WalterLib": ["./src/lib/index.ts"]
+      "$WalterLib": ["./src/lib/index.ts"],
+      "$lib": ["./src/lib"], // vite dev output wants this
+      "$lib/*": ["./src/lib/*"] // vite dev output wants this
     }
   }
   // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
