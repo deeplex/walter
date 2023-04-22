@@ -9,10 +9,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Deeplex.Saverwalter.Model.Migrations
+namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 {
     [DbContext(typeof(SaverwalterContext))]
-    [Migration("20230421140123_InitialCreate")]
+    [Migration("20230422121505_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("AdresseId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("adresseid");
+                        .HasColumnName("adresse_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AdresseId"));
 
@@ -85,7 +85,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("bytea")
-                        .HasColumnName("passwordhash");
+                        .HasColumnName("password_hash");
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
@@ -95,16 +95,16 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
-                        .HasColumnName("userid");
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_pbkdf2passwordcredentials");
+                        .HasName("pk_pbkdf2password_credentials");
 
                     b.HasIndex("UserId")
                         .IsUnique()
-                        .HasDatabaseName("ix_pbkdf2passwordcredentials_userid");
+                        .HasDatabaseName("ix_pbkdf2password_credentials_user_id");
 
-                    b.ToTable("pbkdf2passwordcredentials", (string)null);
+                    b.ToTable("pbkdf2password_credentials", (string)null);
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Auth.UserAccount", b =>
@@ -120,13 +120,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasColumnName("username");
 
                     b.HasKey("Id")
-                        .HasName("pk_useraccounts");
+                        .HasName("pk_user_accounts");
 
                     b.HasIndex("Username")
                         .IsUnique()
-                        .HasDatabaseName("ix_useraccounts_username");
+                        .HasDatabaseName("ix_user_accounts_username");
 
-                    b.ToTable("useraccounts", (string)null);
+                    b.ToTable("user_accounts", (string)null);
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Betriebskostenrechnung", b =>
@@ -134,7 +134,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("BetriebskostenrechnungId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("betriebskostenrechnungid");
+                        .HasColumnName("betriebskostenrechnung_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BetriebskostenrechnungId"));
 
@@ -144,10 +144,10 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<int>("BetreffendesJahr")
                         .HasColumnType("integer")
-                        .HasColumnName("betreffendesjahr");
+                        .HasColumnName("betreffendes_jahr");
 
-                    b.Property<DateTime>("Datum")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly>("Datum")
+                        .HasColumnType("date")
                         .HasColumnName("datum");
 
                     b.Property<string>("Notiz")
@@ -156,13 +156,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<int>("UmlageId")
                         .HasColumnType("integer")
-                        .HasColumnName("umlageid");
+                        .HasColumnName("umlage_id");
 
                     b.HasKey("BetriebskostenrechnungId")
                         .HasName("pk_betriebskostenrechnungen");
 
                     b.HasIndex("UmlageId")
-                        .HasDatabaseName("ix_betriebskostenrechnungen_umlageid");
+                        .HasDatabaseName("ix_betriebskostenrechnungen_umlage_id");
 
                     b.ToTable("betriebskostenrechnungen", (string)null);
                 });
@@ -172,13 +172,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("ErhaltungsaufwendungId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("erhaltungsaufwendungid");
+                        .HasColumnName("erhaltungsaufwendung_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ErhaltungsaufwendungId"));
 
                     b.Property<Guid>("AusstellerId")
                         .HasColumnType("uuid")
-                        .HasColumnName("ausstellerid");
+                        .HasColumnName("aussteller_id");
 
                     b.Property<double>("Betrag")
                         .HasColumnType("double precision")
@@ -189,8 +189,8 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasColumnType("text")
                         .HasColumnName("bezeichnung");
 
-                    b.Property<DateTime>("Datum")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly>("Datum")
+                        .HasColumnType("date")
                         .HasColumnName("datum");
 
                     b.Property<string>("Notiz")
@@ -199,13 +199,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<int>("WohnungId")
                         .HasColumnType("integer")
-                        .HasColumnName("wohnungid");
+                        .HasColumnName("wohnung_id");
 
                     b.HasKey("ErhaltungsaufwendungId")
                         .HasName("pk_erhaltungsaufwendungen");
 
                     b.HasIndex("WohnungId")
-                        .HasDatabaseName("ix_erhaltungsaufwendungen_wohnungid");
+                        .HasDatabaseName("ix_erhaltungsaufwendungen_wohnung_id");
 
                     b.ToTable("erhaltungsaufwendungen", (string)null);
                 });
@@ -215,21 +215,21 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("GarageId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("garageid");
+                        .HasColumnName("garage_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("GarageId"));
 
                     b.Property<int?>("AdresseId")
                         .HasColumnType("integer")
-                        .HasColumnName("adresseid");
+                        .HasColumnName("adresse_id");
 
                     b.Property<Guid>("BesitzerId")
                         .HasColumnType("uuid")
-                        .HasColumnName("besitzerid");
+                        .HasColumnName("besitzer_id");
 
                     b.Property<int?>("JuristischePersonId")
                         .HasColumnType("integer")
-                        .HasColumnName("juristischepersonid");
+                        .HasColumnName("juristische_person_id");
 
                     b.Property<string>("Kennung")
                         .IsRequired()
@@ -244,10 +244,10 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasName("pk_garagen");
 
                     b.HasIndex("AdresseId")
-                        .HasDatabaseName("ix_garagen_adresseid");
+                        .HasDatabaseName("ix_garagen_adresse_id");
 
                     b.HasIndex("JuristischePersonId")
-                        .HasDatabaseName("ix_garagen_juristischepersonid");
+                        .HasDatabaseName("ix_garagen_juristische_person_id");
 
                     b.ToTable("garagen", (string)null);
                 });
@@ -257,7 +257,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("HKVOId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("hkvoid");
+                        .HasColumnName("hkvo_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("HKVOId"));
 
@@ -279,13 +279,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<int?>("ZaehlerId")
                         .HasColumnType("integer")
-                        .HasColumnName("zaehlerid");
+                        .HasColumnName("zaehler_id");
 
                     b.HasKey("HKVOId")
                         .HasName("pk_hkvo");
 
                     b.HasIndex("ZaehlerId")
-                        .HasDatabaseName("ix_hkvo_zaehlerid");
+                        .HasDatabaseName("ix_hkvo_zaehler_id");
 
                     b.ToTable("hkvo", (string)null);
                 });
@@ -295,13 +295,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("JuristischePersonId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("juristischepersonid");
+                        .HasColumnName("juristische_person_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("JuristischePersonId"));
 
                     b.Property<int?>("AdresseId")
                         .HasColumnType("integer")
-                        .HasColumnName("adresseid");
+                        .HasColumnName("adresse_id");
 
                     b.Property<string>("Bezeichnung")
                         .IsRequired()
@@ -326,22 +326,22 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uuid")
-                        .HasColumnName("personid");
+                        .HasColumnName("person_id");
 
                     b.Property<string>("Telefon")
                         .HasColumnType("text")
                         .HasColumnName("telefon");
 
                     b.HasKey("JuristischePersonId")
-                        .HasName("pk_juristischepersonen");
+                        .HasName("pk_juristische_personen");
 
                     b.HasAlternateKey("PersonId")
-                        .HasName("ak_juristischepersonen_personid");
+                        .HasName("ak_juristische_personen_person_id");
 
                     b.HasIndex("AdresseId")
-                        .HasDatabaseName("ix_juristischepersonen_adresseid");
+                        .HasDatabaseName("ix_juristische_personen_adresse_id");
 
-                    b.ToTable("juristischepersonen", (string)null);
+                    b.ToTable("juristische_personen", (string)null);
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Konto", b =>
@@ -349,7 +349,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("KontoId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("kontoid");
+                        .HasColumnName("konto_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("KontoId"));
 
@@ -378,7 +378,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("MieteId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("mieteid");
+                        .HasColumnName("miete_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MieteId"));
 
@@ -386,9 +386,9 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasColumnType("double precision")
                         .HasColumnName("betrag");
 
-                    b.Property<DateTime>("BetreffenderMonat")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("betreffendermonat");
+                    b.Property<DateOnly>("BetreffenderMonat")
+                        .HasColumnType("date")
+                        .HasColumnName("betreffender_monat");
 
                     b.Property<string>("Notiz")
                         .HasColumnType("text")
@@ -396,17 +396,17 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<int>("VertragId")
                         .HasColumnType("integer")
-                        .HasColumnName("vertragid");
+                        .HasColumnName("vertrag_id");
 
-                    b.Property<DateTime>("Zahlungsdatum")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly>("Zahlungsdatum")
+                        .HasColumnType("date")
                         .HasColumnName("zahlungsdatum");
 
                     b.HasKey("MieteId")
                         .HasName("pk_mieten");
 
                     b.HasIndex("VertragId")
-                        .HasDatabaseName("ix_mieten_vertragid");
+                        .HasDatabaseName("ix_mieten_vertrag_id");
 
                     b.ToTable("mieten", (string)null);
                 });
@@ -416,25 +416,25 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("MieterId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("mieterid");
+                        .HasColumnName("mieter_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MieterId"));
 
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uuid")
-                        .HasColumnName("personid");
+                        .HasColumnName("person_id");
 
                     b.Property<int>("VertragId")
                         .HasColumnType("integer")
-                        .HasColumnName("vertragid");
+                        .HasColumnName("vertrag_id");
 
                     b.HasKey("MieterId")
-                        .HasName("pk_mieterset");
+                        .HasName("pk_mieter_set");
 
                     b.HasIndex("VertragId")
-                        .HasDatabaseName("ix_mieterset_vertragid");
+                        .HasDatabaseName("ix_mieter_set_vertrag_id");
 
-                    b.ToTable("mieterset", (string)null);
+                    b.ToTable("mieter_set", (string)null);
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Mietminderung", b =>
@@ -442,16 +442,16 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("MietminderungId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("mietminderungid");
+                        .HasColumnName("mietminderung_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MietminderungId"));
 
-                    b.Property<DateTime>("Beginn")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly>("Beginn")
+                        .HasColumnType("date")
                         .HasColumnName("beginn");
 
-                    b.Property<DateTime?>("Ende")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly?>("Ende")
+                        .HasColumnType("date")
                         .HasColumnName("ende");
 
                     b.Property<double>("Minderung")
@@ -464,13 +464,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<int>("VertragId")
                         .HasColumnType("integer")
-                        .HasColumnName("vertragid");
+                        .HasColumnName("vertrag_id");
 
                     b.HasKey("MietminderungId")
                         .HasName("pk_mietminderungen");
 
                     b.HasIndex("VertragId")
-                        .HasDatabaseName("ix_mietminderungen_vertragid");
+                        .HasDatabaseName("ix_mietminderungen_vertrag_id");
 
                     b.ToTable("mietminderungen", (string)null);
                 });
@@ -480,13 +480,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("NatuerlichePersonId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("natuerlichepersonid");
+                        .HasColumnName("natuerliche_person_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("NatuerlichePersonId"));
 
                     b.Property<int?>("AdresseId")
                         .HasColumnType("integer")
-                        .HasColumnName("adresseid");
+                        .HasColumnName("adresse_id");
 
                     b.Property<int>("Anrede")
                         .HasColumnType("integer")
@@ -515,7 +515,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uuid")
-                        .HasColumnName("personid");
+                        .HasColumnName("person_id");
 
                     b.Property<string>("Telefon")
                         .HasColumnType("text")
@@ -530,15 +530,15 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasColumnName("vorname");
 
                     b.HasKey("NatuerlichePersonId")
-                        .HasName("pk_natuerlichepersonen");
+                        .HasName("pk_natuerliche_personen");
 
                     b.HasAlternateKey("PersonId")
-                        .HasName("ak_natuerlichepersonen_personid");
+                        .HasName("ak_natuerliche_personen_person_id");
 
                     b.HasIndex("AdresseId")
-                        .HasDatabaseName("ix_natuerlichepersonen_adresseid");
+                        .HasDatabaseName("ix_natuerliche_personen_adresse_id");
 
-                    b.ToTable("natuerlichepersonen", (string)null);
+                    b.ToTable("natuerliche_personen", (string)null);
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Umlage", b =>
@@ -546,7 +546,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("UmlageId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("umlageid");
+                        .HasColumnName("umlage_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UmlageId"));
 
@@ -556,7 +556,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<int?>("HKVOId")
                         .HasColumnType("integer")
-                        .HasColumnName("hkvoid");
+                        .HasColumnName("hkvo_id");
 
                     b.Property<string>("Notiz")
                         .HasColumnType("text")
@@ -572,16 +572,16 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<int?>("ZaehlerId")
                         .HasColumnType("integer")
-                        .HasColumnName("zaehlerid");
+                        .HasColumnName("zaehler_id");
 
                     b.HasKey("UmlageId")
                         .HasName("pk_umlagen");
 
                     b.HasIndex("HKVOId")
-                        .HasDatabaseName("ix_umlagen_hkvoid");
+                        .HasDatabaseName("ix_umlagen_hkvo_id");
 
                     b.HasIndex("ZaehlerId")
-                        .HasDatabaseName("ix_umlagen_zaehlerid");
+                        .HasDatabaseName("ix_umlagen_zaehler_id");
 
                     b.ToTable("umlagen", (string)null);
                 });
@@ -591,16 +591,16 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("VertragId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("vertragid");
+                        .HasColumnName("vertrag_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("VertragId"));
 
                     b.Property<Guid?>("AnsprechpartnerId")
                         .HasColumnType("uuid")
-                        .HasColumnName("ansprechpartnerid");
+                        .HasColumnName("ansprechpartner_id");
 
-                    b.Property<DateTime?>("Ende")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly?>("Ende")
+                        .HasColumnType("date")
                         .HasColumnName("ende");
 
                     b.Property<string>("Notiz")
@@ -609,13 +609,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<int>("WohnungId")
                         .HasColumnType("integer")
-                        .HasColumnName("wohnungid");
+                        .HasColumnName("wohnung_id");
 
                     b.HasKey("VertragId")
                         .HasName("pk_vertraege");
 
                     b.HasIndex("WohnungId")
-                        .HasDatabaseName("ix_vertraege_wohnungid");
+                        .HasDatabaseName("ix_vertraege_wohnung_id");
 
                     b.ToTable("vertraege", (string)null);
                 });
@@ -625,12 +625,12 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("VertragVersionId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("vertragversionid");
+                        .HasColumnName("vertrag_version_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("VertragVersionId"));
 
-                    b.Property<DateTime>("Beginn")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly>("Beginn")
+                        .HasColumnType("date")
                         .HasColumnName("beginn");
 
                     b.Property<double>("Grundmiete")
@@ -647,15 +647,15 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<int>("VertragId")
                         .HasColumnType("integer")
-                        .HasColumnName("vertragid");
+                        .HasColumnName("vertrag_id");
 
                     b.HasKey("VertragVersionId")
-                        .HasName("pk_vertragversionen");
+                        .HasName("pk_vertrag_versionen");
 
                     b.HasIndex("VertragId")
-                        .HasDatabaseName("ix_vertragversionen_vertragid");
+                        .HasDatabaseName("ix_vertrag_versionen_vertrag_id");
 
-                    b.ToTable("vertragversionen", (string)null);
+                    b.ToTable("vertrag_versionen", (string)null);
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Wohnung", b =>
@@ -663,17 +663,17 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("WohnungId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("wohnungid");
+                        .HasColumnName("wohnung_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("WohnungId"));
 
                     b.Property<int?>("AdresseId")
                         .HasColumnType("integer")
-                        .HasColumnName("adresseid");
+                        .HasColumnName("adresse_id");
 
                     b.Property<Guid>("BesitzerId")
                         .HasColumnType("uuid")
-                        .HasColumnName("besitzerid");
+                        .HasColumnName("besitzer_id");
 
                     b.Property<string>("Bezeichnung")
                         .IsRequired()
@@ -682,7 +682,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<int?>("JuristischePersonId")
                         .HasColumnType("integer")
-                        .HasColumnName("juristischepersonid");
+                        .HasColumnName("juristische_person_id");
 
                     b.Property<string>("Notiz")
                         .HasColumnType("text")
@@ -704,10 +704,10 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasName("pk_wohnungen");
 
                     b.HasIndex("AdresseId")
-                        .HasDatabaseName("ix_wohnungen_adresseid");
+                        .HasDatabaseName("ix_wohnungen_adresse_id");
 
                     b.HasIndex("JuristischePersonId")
-                        .HasDatabaseName("ix_wohnungen_juristischepersonid");
+                        .HasDatabaseName("ix_wohnungen_juristische_person_id");
 
                     b.ToTable("wohnungen", (string)null);
                 });
@@ -717,17 +717,17 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("ZaehlerId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("zaehlerid");
+                        .HasColumnName("zaehler_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ZaehlerId"));
 
                     b.Property<int?>("AdresseId")
                         .HasColumnType("integer")
-                        .HasColumnName("adresseid");
+                        .HasColumnName("adresse_id");
 
                     b.Property<int?>("AllgemeinzaehlerZaehlerId")
                         .HasColumnType("integer")
-                        .HasColumnName("allgemeinzaehlerzaehlerid");
+                        .HasColumnName("allgemeinzaehler_zaehler_id");
 
                     b.Property<string>("Kennnummer")
                         .IsRequired()
@@ -744,21 +744,21 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<int?>("WohnungId")
                         .HasColumnType("integer")
-                        .HasColumnName("wohnungid");
+                        .HasColumnName("wohnung_id");
 
                     b.HasKey("ZaehlerId")
-                        .HasName("pk_zaehlerset");
+                        .HasName("pk_zaehler_set");
 
                     b.HasIndex("AdresseId")
-                        .HasDatabaseName("ix_zaehlerset_adresseid");
+                        .HasDatabaseName("ix_zaehler_set_adresse_id");
 
                     b.HasIndex("AllgemeinzaehlerZaehlerId")
-                        .HasDatabaseName("ix_zaehlerset_allgemeinzaehlerzaehlerid");
+                        .HasDatabaseName("ix_zaehler_set_allgemeinzaehler_zaehler_id");
 
                     b.HasIndex("WohnungId")
-                        .HasDatabaseName("ix_zaehlerset_wohnungid");
+                        .HasDatabaseName("ix_zaehler_set_wohnung_id");
 
-                    b.ToTable("zaehlerset", (string)null);
+                    b.ToTable("zaehler_set", (string)null);
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Zaehlerstand", b =>
@@ -766,12 +766,12 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.Property<int>("ZaehlerstandId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("zaehlerstandid");
+                        .HasColumnName("zaehlerstand_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ZaehlerstandId"));
 
-                    b.Property<DateTime>("Datum")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly>("Datum")
+                        .HasColumnType("date")
                         .HasColumnName("datum");
 
                     b.Property<string>("Notiz")
@@ -784,13 +784,13 @@ namespace Deeplex.Saverwalter.Model.Migrations
 
                     b.Property<int>("ZaehlerId")
                         .HasColumnType("integer")
-                        .HasColumnName("zaehlerid");
+                        .HasColumnName("zaehler_id");
 
                     b.HasKey("ZaehlerstandId")
                         .HasName("pk_zaehlerstaende");
 
                     b.HasIndex("ZaehlerId")
-                        .HasDatabaseName("ix_zaehlerstaende_zaehlerid");
+                        .HasDatabaseName("ix_zaehlerstaende_zaehler_id");
 
                     b.ToTable("zaehlerstaende", (string)null);
                 });
@@ -799,76 +799,76 @@ namespace Deeplex.Saverwalter.Model.Migrations
                 {
                     b.Property<int>("GaragenGarageId")
                         .HasColumnType("integer")
-                        .HasColumnName("garagengarageid");
+                        .HasColumnName("garagen_garage_id");
 
                     b.Property<int>("VertraegeVertragId")
                         .HasColumnType("integer")
-                        .HasColumnName("vertraegevertragid");
+                        .HasColumnName("vertraege_vertrag_id");
 
                     b.HasKey("GaragenGarageId", "VertraegeVertragId")
-                        .HasName("pk_garagevertrag");
+                        .HasName("pk_garage_vertrag");
 
                     b.HasIndex("VertraegeVertragId")
-                        .HasDatabaseName("ix_garagevertrag_vertraegevertragid");
+                        .HasDatabaseName("ix_garage_vertrag_vertraege_vertrag_id");
 
-                    b.ToTable("garagevertrag", (string)null);
+                    b.ToTable("garage_vertrag", (string)null);
                 });
 
             modelBuilder.Entity("JuristischePersonJuristischePerson", b =>
                 {
                     b.Property<int>("JuristischeMitgliederJuristischePersonId")
                         .HasColumnType("integer")
-                        .HasColumnName("juristischemitgliederjuristischepersonid");
+                        .HasColumnName("juristische_mitglieder_juristische_person_id");
 
                     b.Property<int>("JuristischePersonenJuristischePersonId")
                         .HasColumnType("integer")
-                        .HasColumnName("juristischepersonenjuristischepersonid");
+                        .HasColumnName("juristische_personen_juristische_person_id");
 
                     b.HasKey("JuristischeMitgliederJuristischePersonId", "JuristischePersonenJuristischePersonId")
-                        .HasName("pk_juristischepersonjuristischeperson");
+                        .HasName("pk_juristische_person_juristische_person");
 
                     b.HasIndex("JuristischePersonenJuristischePersonId")
-                        .HasDatabaseName("ix_juristischepersonjuristischeperson_juristischepersonenjuris~");
+                        .HasDatabaseName("ix_juristische_person_juristische_person_juristische_personen_");
 
-                    b.ToTable("juristischepersonjuristischeperson", (string)null);
+                    b.ToTable("juristische_person_juristische_person", (string)null);
                 });
 
             modelBuilder.Entity("JuristischePersonNatuerlichePerson", b =>
                 {
                     b.Property<int>("JuristischePersonenJuristischePersonId")
                         .HasColumnType("integer")
-                        .HasColumnName("juristischepersonenjuristischepersonid");
+                        .HasColumnName("juristische_personen_juristische_person_id");
 
                     b.Property<int>("NatuerlicheMitgliederNatuerlichePersonId")
                         .HasColumnType("integer")
-                        .HasColumnName("natuerlichemitgliedernatuerlichepersonid");
+                        .HasColumnName("natuerliche_mitglieder_natuerliche_person_id");
 
                     b.HasKey("JuristischePersonenJuristischePersonId", "NatuerlicheMitgliederNatuerlichePersonId")
-                        .HasName("pk_juristischepersonnatuerlicheperson");
+                        .HasName("pk_juristische_person_natuerliche_person");
 
                     b.HasIndex("NatuerlicheMitgliederNatuerlichePersonId")
-                        .HasDatabaseName("ix_juristischepersonnatuerlicheperson_natuerlichemitgliedernat~");
+                        .HasDatabaseName("ix_juristische_person_natuerliche_person_natuerliche_mitgliede");
 
-                    b.ToTable("juristischepersonnatuerlicheperson", (string)null);
+                    b.ToTable("juristische_person_natuerliche_person", (string)null);
                 });
 
             modelBuilder.Entity("UmlageWohnung", b =>
                 {
                     b.Property<int>("UmlagenUmlageId")
                         .HasColumnType("integer")
-                        .HasColumnName("umlagenumlageid");
+                        .HasColumnName("umlagen_umlage_id");
 
                     b.Property<int>("WohnungenWohnungId")
                         .HasColumnType("integer")
-                        .HasColumnName("wohnungenwohnungid");
+                        .HasColumnName("wohnungen_wohnung_id");
 
                     b.HasKey("UmlagenUmlageId", "WohnungenWohnungId")
-                        .HasName("pk_umlagewohnung");
+                        .HasName("pk_umlage_wohnung");
 
                     b.HasIndex("WohnungenWohnungId")
-                        .HasDatabaseName("ix_umlagewohnung_wohnungenwohnungid");
+                        .HasDatabaseName("ix_umlage_wohnung_wohnungen_wohnung_id");
 
-                    b.ToTable("umlagewohnung", (string)null);
+                    b.ToTable("umlage_wohnung", (string)null);
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Auth.Pbkdf2PasswordCredential", b =>
@@ -878,7 +878,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("Deeplex.Saverwalter.Model.Auth.Pbkdf2PasswordCredential", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_pbkdf2passwordcredentials_useraccounts_userid");
+                        .HasConstraintName("fk_pbkdf2password_credentials_user_accounts_user_id");
 
                     b.Navigation("User");
                 });
@@ -890,7 +890,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("UmlageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_betriebskostenrechnungen_umlagen_umlageid");
+                        .HasConstraintName("fk_betriebskostenrechnungen_umlagen_umlage_id");
 
                     b.Navigation("Umlage");
                 });
@@ -902,7 +902,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("WohnungId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_erhaltungsaufwendungen_wohnungen_wohnungid");
+                        .HasConstraintName("fk_erhaltungsaufwendungen_wohnungen_wohnung_id");
 
                     b.Navigation("Wohnung");
                 });
@@ -912,12 +912,12 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasOne("Deeplex.Saverwalter.Model.Adresse", "Adresse")
                         .WithMany("Garagen")
                         .HasForeignKey("AdresseId")
-                        .HasConstraintName("fk_garagen_adressen_adresseid");
+                        .HasConstraintName("fk_garagen_adressen_adresse_id");
 
                     b.HasOne("Deeplex.Saverwalter.Model.JuristischePerson", null)
                         .WithMany("Garagen")
                         .HasForeignKey("JuristischePersonId")
-                        .HasConstraintName("fk_garagen_juristischepersonen_juristischepersonid");
+                        .HasConstraintName("fk_garagen_juristische_personen_juristische_person_id");
 
                     b.Navigation("Adresse");
                 });
@@ -927,7 +927,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasOne("Deeplex.Saverwalter.Model.Zaehler", "Zaehler")
                         .WithMany()
                         .HasForeignKey("ZaehlerId")
-                        .HasConstraintName("fk_hkvo_zaehlerset_zaehlerid");
+                        .HasConstraintName("fk_hkvo_zaehler_set_zaehler_id");
 
                     b.Navigation("Zaehler");
                 });
@@ -937,7 +937,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasOne("Deeplex.Saverwalter.Model.Adresse", "Adresse")
                         .WithMany("JuristischePersonen")
                         .HasForeignKey("AdresseId")
-                        .HasConstraintName("fk_juristischepersonen_adressen_adresseid");
+                        .HasConstraintName("fk_juristische_personen_adressen_adresse_id");
 
                     b.Navigation("Adresse");
                 });
@@ -949,7 +949,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("VertragId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_mieten_vertraege_vertragid");
+                        .HasConstraintName("fk_mieten_vertraege_vertrag_id");
 
                     b.Navigation("Vertrag");
                 });
@@ -961,7 +961,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("VertragId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_mieterset_vertraege_vertragid");
+                        .HasConstraintName("fk_mieter_set_vertraege_vertrag_id");
 
                     b.Navigation("Vertrag");
                 });
@@ -973,7 +973,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("VertragId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_mietminderungen_vertraege_vertragid");
+                        .HasConstraintName("fk_mietminderungen_vertraege_vertrag_id");
 
                     b.Navigation("Vertrag");
                 });
@@ -983,7 +983,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasOne("Deeplex.Saverwalter.Model.Adresse", "Adresse")
                         .WithMany("NatuerlichePersonen")
                         .HasForeignKey("AdresseId")
-                        .HasConstraintName("fk_natuerlichepersonen_adressen_adresseid");
+                        .HasConstraintName("fk_natuerliche_personen_adressen_adresse_id");
 
                     b.Navigation("Adresse");
                 });
@@ -993,12 +993,12 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasOne("Deeplex.Saverwalter.Model.HKVO", "HKVO")
                         .WithMany()
                         .HasForeignKey("HKVOId")
-                        .HasConstraintName("fk_umlagen_hkvo_hkvoid");
+                        .HasConstraintName("fk_umlagen_hkvo_hkvo_id");
 
                     b.HasOne("Deeplex.Saverwalter.Model.Zaehler", "Zaehler")
                         .WithMany()
                         .HasForeignKey("ZaehlerId")
-                        .HasConstraintName("fk_umlagen_zaehlerset_zaehlerid");
+                        .HasConstraintName("fk_umlagen_zaehler_set_zaehler_id");
 
                     b.Navigation("HKVO");
 
@@ -1012,7 +1012,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("WohnungId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_vertraege_wohnungen_wohnungid");
+                        .HasConstraintName("fk_vertraege_wohnungen_wohnung_id");
 
                     b.Navigation("Wohnung");
                 });
@@ -1024,7 +1024,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("VertragId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_vertragversionen_vertraege_vertragid");
+                        .HasConstraintName("fk_vertrag_versionen_vertraege_vertrag_id");
 
                     b.Navigation("Vertrag");
                 });
@@ -1034,12 +1034,12 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasOne("Deeplex.Saverwalter.Model.Adresse", "Adresse")
                         .WithMany("Wohnungen")
                         .HasForeignKey("AdresseId")
-                        .HasConstraintName("fk_wohnungen_adressen_adresseid");
+                        .HasConstraintName("fk_wohnungen_adressen_adresse_id");
 
                     b.HasOne("Deeplex.Saverwalter.Model.JuristischePerson", null)
                         .WithMany("Wohnungen")
                         .HasForeignKey("JuristischePersonId")
-                        .HasConstraintName("fk_wohnungen_juristischepersonen_juristischepersonid");
+                        .HasConstraintName("fk_wohnungen_juristische_personen_juristische_person_id");
 
                     b.Navigation("Adresse");
                 });
@@ -1049,17 +1049,17 @@ namespace Deeplex.Saverwalter.Model.Migrations
                     b.HasOne("Deeplex.Saverwalter.Model.Adresse", "Adresse")
                         .WithMany("Zaehler")
                         .HasForeignKey("AdresseId")
-                        .HasConstraintName("fk_zaehlerset_adressen_adresseid");
+                        .HasConstraintName("fk_zaehler_set_adressen_adresse_id");
 
                     b.HasOne("Deeplex.Saverwalter.Model.Zaehler", "Allgemeinzaehler")
                         .WithMany("EinzelZaehler")
                         .HasForeignKey("AllgemeinzaehlerZaehlerId")
-                        .HasConstraintName("fk_zaehlerset_zaehlerset_allgemeinzaehlerzaehlerid");
+                        .HasConstraintName("fk_zaehler_set_zaehler_set_allgemeinzaehler_zaehler_id");
 
                     b.HasOne("Deeplex.Saverwalter.Model.Wohnung", "Wohnung")
                         .WithMany("Zaehler")
                         .HasForeignKey("WohnungId")
-                        .HasConstraintName("fk_zaehlerset_wohnungen_wohnungid");
+                        .HasConstraintName("fk_zaehler_set_wohnungen_wohnung_id");
 
                     b.Navigation("Adresse");
 
@@ -1075,7 +1075,7 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("ZaehlerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_zaehlerstaende_zaehlerset_zaehlerid");
+                        .HasConstraintName("fk_zaehlerstaende_zaehler_set_zaehler_id");
 
                     b.Navigation("Zaehler");
                 });
@@ -1087,14 +1087,14 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("GaragenGarageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_garagevertrag_garagen_garagengarageid");
+                        .HasConstraintName("fk_garage_vertrag_garagen_garagen_garage_id");
 
                     b.HasOne("Deeplex.Saverwalter.Model.Vertrag", null)
                         .WithMany()
                         .HasForeignKey("VertraegeVertragId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_garagevertrag_vertraege_vertraegevertragid");
+                        .HasConstraintName("fk_garage_vertrag_vertraege_vertraege_vertrag_id");
                 });
 
             modelBuilder.Entity("JuristischePersonJuristischePerson", b =>
@@ -1104,14 +1104,14 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("JuristischeMitgliederJuristischePersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_juristischepersonjuristischeperson_juristischepersonen_juri~");
+                        .HasConstraintName("fk_juristische_person_juristische_person_juristische_personen_");
 
                     b.HasOne("Deeplex.Saverwalter.Model.JuristischePerson", null)
                         .WithMany()
                         .HasForeignKey("JuristischePersonenJuristischePersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_juristischepersonjuristischeperson_juristischepersonen_jur~1");
+                        .HasConstraintName("fk_juristische_person_juristische_person_juristische_personen_1");
                 });
 
             modelBuilder.Entity("JuristischePersonNatuerlichePerson", b =>
@@ -1121,14 +1121,14 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("JuristischePersonenJuristischePersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_juristischepersonnatuerlicheperson_juristischepersonen_juri~");
+                        .HasConstraintName("fk_juristische_person_natuerliche_person_juristische_personen_");
 
                     b.HasOne("Deeplex.Saverwalter.Model.NatuerlichePerson", null)
                         .WithMany()
                         .HasForeignKey("NatuerlicheMitgliederNatuerlichePersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_juristischepersonnatuerlicheperson_natuerlichepersonen_natu~");
+                        .HasConstraintName("fk_juristische_person_natuerliche_person_natuerliche_personen_");
                 });
 
             modelBuilder.Entity("UmlageWohnung", b =>
@@ -1138,14 +1138,14 @@ namespace Deeplex.Saverwalter.Model.Migrations
                         .HasForeignKey("UmlagenUmlageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_umlagewohnung_umlagen_umlagenumlageid");
+                        .HasConstraintName("fk_umlage_wohnung_umlagen_umlagen_umlage_id");
 
                     b.HasOne("Deeplex.Saverwalter.Model.Wohnung", null)
                         .WithMany()
                         .HasForeignKey("WohnungenWohnungId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_umlagewohnung_wohnungen_wohnungenwohnungid");
+                        .HasConstraintName("fk_umlage_wohnung_wohnungen_wohnungen_wohnung_id");
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Adresse", b =>
