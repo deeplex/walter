@@ -1,26 +1,29 @@
-﻿using Deeplex.Saverwalter.WebAPI.Services;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Security.Claims;
+using System.Text;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 {
     [Route("api/account")]
     public class AccountController : ControllerBase
     {
+        private readonly SaverwalterContext _dbContext;
         private readonly TokenService _tokenService;
         private readonly UserService _userService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AccountController(TokenService tokenService, UserService userService, IHttpContextAccessor httpContextAccessor)
+        public AccountController(SaverwalterContext dbContext, TokenService tokenService, UserService userService)
         {
+            _dbContext = dbContext;
             _tokenService = tokenService;
             _userService = userService;
-            _httpContextAccessor = httpContextAccessor;
         }
 
-        public class LoginRequest
+        public class SignInRequest
         {
             public string Username { get; set; } = null!;
             public string Password { get; set; } = null!;
@@ -38,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<string>> RefreshToken()
         {
-            var user = _httpContextAccessor.HttpContext?.User;
+            var user = User;
             if (user == null) // this is always false if aspnet core is properly configured
             {
                 return Unauthorized();
@@ -59,7 +62,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         [ProducesErrorResponseType(typeof(void))] // https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/1752#issue-663991077
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<LoginResult>> SignIn([FromBody] LoginRequest loginRequest)
+        public async Task<ActionResult<LoginResult>> SignIn([FromBody] SignInRequest loginRequest)
         {
             var result = await _userService.SignInAsync(loginRequest.Username, loginRequest.Password);
             if (result.Succeeded)
@@ -71,6 +74,63 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 };
             }
             return Unauthorized();
+        }
+
+        public class CreateRequest
+        {
+            public string Username { get; set; }
+            public string Password { get; set; }
+        }
+
+        [HttpPost("create")]
+        [ProducesErrorResponseType(typeof(void))] // https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/1752#issue-663991077
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<ActionResult> Create([FromBody] CreateRequest createRequest)
+        {
+            // either create the account _and_ associate a password or do nothing
+            using var tx = await _dbContext.Database.BeginTransactionAsync();
+
+            try
+            {
+                var account = await _userService.CreateUserAccount(createRequest.Username);
+                await _userService.UpdateUserPassword(account, Encoding.UTF8.GetBytes(createRequest.Password));
+
+                await tx.CommitAsync();
+                return Ok();
+            }
+            catch (DbUpdateException)
+            {
+                return Conflict();
+            }
+        }
+
+        public class UpdatePasswordRequest
+        {
+            public string Password { get; set; }
+        }
+
+        [HttpPost("update-password")]
+        [ProducesErrorResponseType(typeof(void))] // https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/1752#issue-663991077
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult> UpdatePassword([FromBody] UpdatePasswordRequest updatePasswordRequest)
+        {
+            var user = User;
+            if (user == null) // this is always false if aspnet core is properly configured
+            {
+                return Unauthorized();
+            }
+            var userIdClaim = user.Claims.Single((claim) => claim.ValueType == ClaimTypes.NameIdentifier);
+            var account = await _userService.GetUserById(Guid.Parse(userIdClaim.Value));
+            if (account == null)
+            {
+                return Unauthorized();
+            }
+
+            await _userService.UpdateUserPassword(account, Encoding.UTF8.GetBytes(updatePasswordRequest.Password));
+            return Ok();
         }
     }
 }
