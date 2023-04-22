@@ -9,10 +9,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         IPerson Ansprechpartner { get; }
         List<Rechnungsgruppe> Gruppen { get; }
         Wohnung Wohnung => Vertrag.Wohnung;
-        DateTime Nutzungsbeginn { get; }
+        DateOnly Nutzungsbeginn { get; }
         int Nutzungszeitspanne { get; }
         int Abrechnungszeitspanne { get; }
-        DateTime Nutzungsende { get; }
+        DateOnly Nutzungsende { get; }
         int Jahr { get; }
         IPerson Vermieter { get; }
         List<IPerson> Mieter { get; }
@@ -23,8 +23,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         double NebenkostenMinderung { get; }
         double Result { get; }
         Adresse Adresse { get; }
-        DateTime Abrechnungsbeginn { get; }
-        DateTime Abrechnungsende { get; }
+        DateOnly Abrechnungsbeginn { get; }
+        DateOnly Abrechnungsende { get; }
         double Zeitanteil { get; }
         List<Note> Notes { get; }
         Vertrag Vertrag { get; }
@@ -39,8 +39,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
     {
         public List<Note> Notes { get; } = new List<Note>();
         public int Jahr { get; set; }
-        public DateTime Abrechnungsbeginn { get; set; }
-        public DateTime Abrechnungsende { get; set; }
+        public DateOnly Abrechnungsbeginn { get; set; }
+        public DateOnly Abrechnungsende { get; set; }
         public List<VertragVersion> Versionen { get; }
         public IPerson Vermieter { get; }
         public IPerson Ansprechpartner { get; }
@@ -55,8 +55,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public double Minderung { get; }
         public double NebenkostenMinderung { get; }
         public double KaltMinderung { get; }
-        public DateTime Nutzungsbeginn { get; }
-        public DateTime Nutzungsende { get; }
+        public DateOnly Nutzungsbeginn { get; }
+        public DateOnly Nutzungsende { get; }
         public List<Zaehler> Zaehler { get; }
 
         public int Abrechnungszeitspanne { get; }
@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         public double AllgStromFaktor { get; set; }
 
-        public Betriebskostenabrechnung(SaverwalterContext ctx, Vertrag v, int jahr, DateTime abrechnungsbeginn, DateTime abrechnungsende)
+        public Betriebskostenabrechnung(SaverwalterContext ctx, Vertrag v, int jahr, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
         {
             Abrechnungsbeginn = abrechnungsbeginn;
             Abrechnungsende = abrechnungsende;
@@ -84,8 +84,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Nutzungsbeginn = Max(Vertrag.Beginn(), Abrechnungsbeginn);
             Nutzungsende = Min(Vertrag.Ende ?? Abrechnungsende, Abrechnungsende);
 
-            Abrechnungszeitspanne = (Abrechnungsende - Abrechnungsbeginn).Days + 1;
-            Nutzungszeitspanne = (Nutzungsende - Nutzungsbeginn).Days + 1;
+            Abrechnungszeitspanne = Abrechnungsende.DayNumber - Abrechnungsbeginn.DayNumber + 1;
+            Nutzungszeitspanne = Nutzungsende.DayNumber - Nutzungsbeginn.DayNumber + 1;
             Zeitanteil = (double)Nutzungszeitspanne / Abrechnungszeitspanne;
 
             Vermieter = ctx.FindPerson(Wohnung.BesitzerId);
@@ -146,14 +146,14 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     var endDate = Min(m.Ende ?? Abrechnungsende, Abrechnungsende);
                     var beginDate = Max(m.Beginn, Abrechnungsbeginn);
 
-                    return m.Minderung * ((endDate - beginDate).Days + 1);
+                    return m.Minderung * (endDate.DayNumber - beginDate.DayNumber + 1);
                 }) / Abrechnungszeitspanne;
         }
 
         private double GetKaltMiete(Vertrag v)
         {
             if (Jahr < v.Beginn().Year ||
-               (Vertrag.Ende is DateTime d && d.Year < Jahr))
+               (Vertrag.Ende is DateOnly d && d.Year < Jahr))
             {
                 return 0;
             }
@@ -161,7 +161,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .Sum(v =>
                 {
                     var ende = v.Ende();
-                    if (ende is DateTime d && d < Abrechnungsbeginn)
+                    if (ende is DateOnly d && d < Abrechnungsbeginn)
                     {
                         return 0;
                     }
@@ -193,7 +193,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             return zaehler
                 .Select(z => z.Staende
                     .OrderBy(s => s.Datum)
-                    .LastOrDefault(l => l.Datum.Date <= Nutzungsende.Date && (Nutzungsende.Date - l.Datum.Date).Days < 30))
+                    .LastOrDefault(l => l.Datum <= Nutzungsende && (Nutzungsende.DayNumber - l.Datum.DayNumber) < 30))
                 .ToList()
                 .Where(zaehlerstand => zaehlerstand is not null)
                 .Select(e => e!) // still necessary to make sure not null?
@@ -205,7 +205,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             return zaehler
                 .Select(z => z.Staende.OrderBy(s => s.Datum)
                     .ToList()
-                    .Where(l => Math.Abs((l.Datum - Nutzungsbeginn.Date.AddDays(-1)).Days) < 30)
+                    .Where(l => Math.Abs(l.Datum.DayNumber - Nutzungsbeginn.AddDays(-1).DayNumber) < 30)
                     .ToList()
                 .FirstOrDefault())
                 .Where(zs => zs != null)

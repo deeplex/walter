@@ -1,8 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal;
-using System.Text;
-using System.Xml;
+﻿using Deeplex.Saverwalter.Model.Auth;
+using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -25,10 +22,9 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Zaehler> ZaehlerSet { get; set; } = null!;
         public DbSet<Zaehlerstand> Zaehlerstaende { get; set; } = null!;
 
-        public SaverwalterContext()
-            : base()
-        {
-        }
+        public DbSet<UserAccount> UserAccounts { get; set; } = null!;
+        public DbSet<Pbkdf2PasswordCredential> Pbkdf2PasswordCredentials { get; set; } = null!;
+
         public SaverwalterContext(DbContextOptions<SaverwalterContext> options)
             : base(options)
         {
@@ -38,7 +34,7 @@ namespace Deeplex.Saverwalter.Model
         {
             options
                 .UseLazyLoadingProxies()
-                .UseLowerCaseNamingConvention();
+                .UseSnakeCaseNamingConvention();
 
         }
 

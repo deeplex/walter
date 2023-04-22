@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public int Id { get; set; }
             public double Betrag { get; set; }
-            public DateTime Datum { get; set; }
+            public DateOnly Datum { get; set; }
             public string? Notiz { get; set; }
             public string Bezeichnung { get; set; } = null!;
             public SelectionEntry Aussteller { get; set; } = null!;

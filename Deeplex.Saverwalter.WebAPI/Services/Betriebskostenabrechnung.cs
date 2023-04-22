@@ -12,8 +12,8 @@ namespace Deeplex.Saverwalter.WebAPI
         private IBetriebskostenabrechnung createAbrechnung(int vertragId, int Jahr, SaverwalterContext ctx)
         {
             var vertrag = ctx.Vertraege.Find(vertragId)!;
-            var beginn = new DateTime(Jahr, 1, 1);
-            var ende = new DateTime(Jahr, 12, 31);
+            var beginn = new DateOnly(Jahr, 1, 1);
+            var ende = new DateOnly(Jahr, 12, 31);
 
             return new Betriebskostenabrechnung(ctx, vertrag, Jahr, beginn, ende);
         }

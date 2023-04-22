@@ -1,12 +1,19 @@
+using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WalterDbService;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using SimpleInjector;
+using SimpleInjector.Lifestyles;
+using System.Text;
+
+[assembly: ApiController]
 
 namespace Deeplex.Saverwalter.WebAPI
 {
@@ -16,7 +23,7 @@ namespace Deeplex.Saverwalter.WebAPI
         public static string AppName = "Saverwalter";
         private static string APMServer = Environment.GetEnvironmentVariable("APM-Server") ?? "http://192.168.178.61:8200"; // TODO change to localhost...
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             var container = GetServiceContainer();
@@ -24,6 +31,11 @@ namespace Deeplex.Saverwalter.WebAPI
             var app = Configure(builder, container);
 
             container.Verify();
+
+            await using (AsyncScopedLifestyle.BeginScope(container))
+            {
+                await MigrateDb(container);
+            }
             app.Run();
         }
 
@@ -77,23 +89,28 @@ namespace Deeplex.Saverwalter.WebAPI
                 options.AddAspNetCore().AddControllerActivation();
             });
 
-            builder.Services.AddAuthentication("BasicAuthentication")
-                .AddScheme<AuthenticationSchemeOptions, BasicAuthentication>("BasicAuthentication", null);
+            builder.Services.AddAuthentication("TokenAuthentication")
+                .AddScheme<AuthenticationSchemeOptions, TokenAuthenticationHandler>("TokenAuthentication", null);
 
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("RequireAuthenticatedUser", policy =>
                 {
-                    policy.AddAuthenticationSchemes("BasicAuthentication");
+                    policy.AddAuthenticationSchemes("TokenAuthentication");
                     policy.RequireAuthenticatedUser();
                 });
-            }); 
+            });
+
+            builder.Services.AddTransient(c => container.GetInstance<TokenService>());
+            builder.Services.AddTransient(c => container.GetInstance<SaverwalterContext>());
         }
 
         private static Container GetServiceContainer()
         {
             var container = new Container();
-            container.Options.DefaultScopedLifestyle = new SimpleInjector.Lifestyles.ThreadScopedLifestyle();
+            container.Options.DefaultScopedLifestyle = new SimpleInjector.Lifestyles.AsyncScopedLifestyle();
+            container.Register(CreateDbContextOptions, Lifestyle.Singleton);
+            container.Register<SaverwalterContext>(Lifestyle.Scoped);
             container.Register<WalterDb, WalterDbImpl>(Lifestyle.Scoped);
 
             container.Register<AdresseDbService>(Lifestyle.Scoped);
@@ -112,7 +129,56 @@ namespace Deeplex.Saverwalter.WebAPI
 
             container.Register<BetriebskostenabrechnungHandler>(Lifestyle.Scoped);
 
+            container.Register<TokenService>(Lifestyle.Singleton);
+            container.Register<UserService>(Lifestyle.Scoped);
+
             return container;
+        }
+
+        private static DbContextOptions<SaverwalterContext> CreateDbContextOptions()
+        {
+            DotNetEnv.Env.Load();
+
+            var databaseHost = Environment.GetEnvironmentVariable("DATABASE_HOST");
+            var databasePort = Environment.GetEnvironmentVariable("DATABASE_PORT");
+            var databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME");
+            var databaseUser = Environment.GetEnvironmentVariable("DATABASE_USER");
+            var databasePass = Environment.GetEnvironmentVariable("DATABASE_PASS");
+
+            var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
+            optionsBuilder.UseNpgsql(
+                 $@"Server={databaseHost}
+                ;Port={databasePort}
+                ;Database={databaseName}
+                ;Username={databaseUser}
+                ;Password={databasePass}");
+
+            return optionsBuilder.Options;
+        }
+
+        private static async Task MigrateDb(Container container)
+        {
+            var dbContext = container.GetInstance<SaverwalterContext>();
+            await dbContext.Database.MigrateAsync();
+            if (await dbContext.UserAccounts.CountAsync() > 0)
+            {
+                return;
+            }
+
+            var rootPassword = Environment.GetEnvironmentVariable("WALTER_PASSWORD");
+            if (string.IsNullOrEmpty(rootPassword))
+            {
+                return;
+            }
+
+            // either create the account _and_ associate a password or do nothing
+            using var tx = await dbContext.Database.BeginTransactionAsync();
+
+            var userService = container.GetInstance<UserService>();
+            var rootAccount = await userService.CreateUserAccount("root");
+            await userService.UpdateUserPassword(rootAccount, Encoding.UTF8.GetBytes(rootPassword));
+
+            await tx.CommitAsync();
         }
     }
 }

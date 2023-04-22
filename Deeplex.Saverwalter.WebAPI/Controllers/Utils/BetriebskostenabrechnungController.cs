@@ -58,8 +58,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         {
             public List<Note> notes { get; } = new List<Note>();
             public int Jahr { get; set; }
-            public DateTime Abrechnungsbeginn { get; set; }
-            public DateTime Abrechnungsende { get; set; }
+            public DateOnly Abrechnungsbeginn { get; set; }
+            public DateOnly Abrechnungsende { get; set; }
             public SelectionEntry? Vermieter { get; }
             public SelectionEntry? Ansprechpartner { get; }
             public List<SelectionEntry>? Mieter { get; }
@@ -73,8 +73,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double Minderung { get; }
             public double NebenkostenMinderung { get; }
             public double KaltMinderung { get; }
-            public DateTime Nutzungsbeginn { get; }
-            public DateTime Nutzungsende { get; }
+            public DateOnly Nutzungsbeginn { get; }
+            public DateOnly Nutzungsende { get; }
             public List<SelectionEntry>? Zaehler { get; }
             public int Abrechnungszeitspanne { get; }
             public int Nutzungszeitspanne { get; }

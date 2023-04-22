@@ -13,8 +13,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class MietminderungEntryBase
         {
             public int Id { get; set; }
-            public DateTime Beginn { get; set; }
-            public DateTime? Ende { get; set; }
+            public DateOnly Beginn { get; set; }
+            public DateOnly? Ende { get; set; }
             public double Minderung { get; set; }
             public string? Notiz { get; set; }
             public SelectionEntry Vertrag { get; set; } = null!;

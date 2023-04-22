@@ -6,8 +6,8 @@ namespace Deeplex.Saverwalter.Model
     // List<(DateTime Beginn, DateTime Ende, double Anteil)> PersZeitanteil { get; }
     public class PersonenZeitanteil
     {
-        public DateTime Beginn { get; }
-        public DateTime Ende { get; }
+        public DateOnly Beginn { get; }
+        public DateOnly Ende { get; }
         public double Anteil { get; }
         public int Personenzahl { get; }
 
@@ -22,7 +22,7 @@ namespace Deeplex.Saverwalter.Model
 
             double personenAnteil = (double)(personenZeitIntervallList.FirstOrDefault(personenZeitIntervall =>
                 personenZeitIntervall.Beginn <= Beginn)?.Personenzahl ?? 0) / Personenzahl;
-            double zeitAnteil = (double)((Ende - Beginn).Days + 1) / betriebskostenabrechnung.Abrechnungszeitspanne;
+            double zeitAnteil = (double)(Ende.DayNumber - Beginn.DayNumber + 1) / betriebskostenabrechnung.Abrechnungszeitspanne;
 
             Anteil = personenAnteil * zeitAnteil;
         }
@@ -221,7 +221,7 @@ namespace Deeplex.Saverwalter.Model
                     (Min(v.Ende() ?? betriebskostenabrechnung.Abrechnungsende, betriebskostenabrechnung.Abrechnungsende).AddDays(1), -v.Personenzahl)
                 })
                 .ToList()
-                .GroupBy(t => t.Item1.Date)
+                .GroupBy(t => t.Item1)
                 .ToList()
                 .Select(g => new PersonenZeitIntervall(g.Key, betriebskostenabrechnung.Abrechnungsende, g.Sum(t => t.Item2), parent))
                 .ToList()

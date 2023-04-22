@@ -6,7 +6,7 @@ namespace Deeplex.Saverwalter.Model
     {
         public int ErhaltungsaufwendungId { get; set; }
         [Required]
-        public DateTime Datum { get; set; }
+        public DateOnly Datum { get; set; }
         [Required]
         public Guid AusstellerId { get; set; }
         [Required]
@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.Model
 
         public string? Notiz { get; set; }
 
-        public Erhaltungsaufwendung(double betrag, string bezeichnung, Guid ausstellerId, DateTime datum)
+        public Erhaltungsaufwendung(double betrag, string bezeichnung, Guid ausstellerId, DateOnly datum)
         {
             Betrag = betrag;
             Bezeichnung = bezeichnung;

@@ -14,8 +14,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             public int Id { get; set; }
             public double Betrag { get; set; }
-            public DateTime BetreffenderMonat { get; set; }
-            public DateTime Zahlungsdatum { get; set; }
+            public DateOnly BetreffenderMonat { get; set; }
+            public DateOnly Zahlungsdatum { get; set; }
             public string? Notiz { get; set; }
             public SelectionEntry Vertrag { get; set; } = null!;
 

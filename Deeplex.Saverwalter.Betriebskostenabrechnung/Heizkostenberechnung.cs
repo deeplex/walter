@@ -71,9 +71,9 @@ namespace Deeplex.Saverwalter.Model
 
             ImmutableList<Zaehlerstand> Ende(IEnumerable<Zaehler> z, bool ganzeGruppe = false)
             {
-                var ende = (ganzeGruppe ? b.Abrechnungsende : b.Nutzungsende).Date;
+                var ende = ganzeGruppe ? b.Abrechnungsende : b.Nutzungsende;
                 var ret = z.Select(z => z.Staende.OrderBy(s => s.Datum)
-                    .LastOrDefault(l => l.Datum.Date <= ende && (ende - l.Datum.Date).Days < 30))
+                    .LastOrDefault(l => l.Datum <= ende && (ende.DayNumber - l.Datum.DayNumber) < 30))
                     .Where(zaehlerstand => zaehlerstand != null)
                     .Select(zaehlerstand => zaehlerstand!)
                     .ToImmutableList();
@@ -83,9 +83,9 @@ namespace Deeplex.Saverwalter.Model
 
             ImmutableList<Zaehlerstand> Beginn(IEnumerable<Zaehler> zaehlerList, bool ganzeGruppe = false)
             {
-                var beginn = (ganzeGruppe ? b.Abrechnungsbeginn : b.Nutzungsbeginn).Date.AddDays(-1);
+                var beginn = (ganzeGruppe ? b.Abrechnungsbeginn : b.Nutzungsbeginn).AddDays(-1);
                 var ret = zaehlerList.Select(z => z.Staende.OrderBy(s => s.Datum)
-                    .LastOrDefault(l => l.Datum.Date <= beginn && (beginn - l.Datum.Date).Days < 30))
+                    .LastOrDefault(l => l.Datum <= beginn && (beginn.DayNumber - l.Datum.DayNumber) < 30))
                     .Where(zaehlerstand => zaehlerstand != null)
                     .Select(zaehlerstand => zaehlerstand!)
                     .ToImmutableList();

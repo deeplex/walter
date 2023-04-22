@@ -7,7 +7,7 @@
         public Wohnung Wohnung => Entity.Wohnung;
         public IPerson Aussteller => db.FindPerson(Entity.AusstellerId);
         public string Bezeichnung => Entity.Bezeichnung;
-        public DateTimeOffset Datum => Entity.Datum;
+        public DateOnly Datum => Entity.Datum;
         public double Betrag => Entity.Betrag;
         public bool active = true;
         //public string color => active ? "

@@ -6,6 +6,11 @@
 	import { Modal } from 'carbon-components-svelte';
 	import type { WalterModalControl } from '$WalterTypes';
 	import { walterModalControl } from '$WalterStore';
+	import { getAccessToken } from '$WalterServices/auth';
+	import { goto } from '$app/navigation';
+	if (getAccessToken() == null) {
+		goto('/login');
+	}
 
 	let modalControl: WalterModalControl;
 	walterModalControl.subscribe((value) => {

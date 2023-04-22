@@ -9,14 +9,14 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public double Betrag { get; set; }
         [Required]
-        public DateTime Datum { get; set; }
+        public DateOnly Datum { get; set; }
         [Required]
         public int BetreffendesJahr { get; set; }
         [Required]
         public virtual Umlage Umlage { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
         public string? Notiz { get; set; }
 
-        public Betriebskostenrechnung(double betrag, DateTime datum, int betreffendesJahr)
+        public Betriebskostenrechnung(double betrag, DateOnly datum, int betreffendesJahr)
         {
             Betrag = betrag;
             Datum = datum;
