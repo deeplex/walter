@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             private Zaehlerstand? Entity { get; }
             public int Id { get; set; }
             public double Stand { get; set; }
-            public DateTime Datum { get; set; }
+            public DateOnly Datum { get; set; }
             public SelectionEntry Zaehler { get; set; } = null!;
             public string? Einheit { get; set; }
             public string? Notiz { get; set; }

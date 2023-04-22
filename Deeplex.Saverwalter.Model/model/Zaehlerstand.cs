@@ -8,12 +8,12 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public virtual Zaehler Zaehler { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
         [Required]
-        public DateTime Datum { get; set; }
+        public DateOnly Datum { get; set; }
         [Required]
         public double Stand { get; set; }
         public string? Notiz { get; set; }
 
-        public Zaehlerstand(DateTime datum, double stand)
+        public Zaehlerstand(DateOnly datum, double stand)
         {
             Datum = datum;
             Stand = stand;

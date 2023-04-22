@@ -2,19 +2,19 @@
 {
     public sealed class PersonenZeitIntervall
     {
-        public DateTime Beginn { get; }
-        public DateTime Ende { get; }
+        public DateOnly Beginn { get; }
+        public DateOnly Ende { get; }
         public int Tage { get; }
         public int GesamtTage { get; }
         public int Personenzahl { get; }
 
-        public PersonenZeitIntervall(DateTime beginn, DateTime ende, int personenzahl, Rechnungsgruppe parent)
+        public PersonenZeitIntervall(DateOnly beginn, DateOnly ende, int personenzahl, Rechnungsgruppe parent)
         {
             Beginn = beginn;
             Ende = ende;
             Personenzahl = personenzahl;
-            Tage = (Ende - Beginn).Days + 1;
-            GesamtTage = (new DateTime(Ende.Year, 12, 31) - new DateTime(Ende.Year, 1, 1)).Days + 1;
+            Tage = Ende.DayNumber - Beginn.DayNumber + 1;
+            GesamtTage = new DateOnly(Ende.Year, 12, 31).DayNumber - new DateOnly(Ende.Year, 1, 1).DayNumber;
         }
     }
 

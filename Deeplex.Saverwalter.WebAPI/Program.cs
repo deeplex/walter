@@ -148,7 +148,7 @@ namespace Deeplex.Saverwalter.WebAPI
             optionsBuilder.UseNpgsql(
                  $@"Server={databaseURL}
                 ;Port={databasePort}
-                ;Database=saverdb
+                ;Database=saverdb2
                 ;Username={databaseUser}
                 ;Password={databasePass}");
 

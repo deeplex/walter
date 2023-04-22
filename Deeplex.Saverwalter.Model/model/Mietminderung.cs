@@ -9,13 +9,13 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public virtual Vertrag Vertrag { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
         [Required]
-        public DateTime Beginn { get; set; }
+        public DateOnly Beginn { get; set; }
         [Required]
         public double Minderung { get; set; }
-        public DateTime? Ende { get; set; }
+        public DateOnly? Ende { get; set; }
         public string? Notiz { get; set; }
 
-        public Mietminderung(DateTime beginn, double minderung)
+        public Mietminderung(DateOnly beginn, double minderung)
         {
             Beginn = beginn;
             Minderung = minderung;

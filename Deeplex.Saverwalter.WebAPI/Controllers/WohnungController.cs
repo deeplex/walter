@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Adresse = Entity.Adresse is Adresse a ? new AdresseEntryBase(a) : null;
                 Besitzer = Entity.BesitzerId is Guid id && id != Guid.Empty ? new(id, dbService.ctx.FindPerson(id).Bezeichnung) : null;
 
-                var v = Entity.Vertraege.FirstOrDefault(e => e.Ende == null || e.Ende < DateTime.Now);
+                var v = Entity.Vertraege.FirstOrDefault(e => e.Ende == null || e.Ende < DateOnly.FromDateTime(DateTime.Now));
                 Bewohner = v != null ?
                     string.Join(", ", dbService.ctx.MieterSet
                         .Where(m => m.Vertrag.VertragId == v.VertragId)

@@ -12,6 +12,6 @@ namespace Deeplex.Saverwalter.PrintService
         public static string Celsius(double d) => string.Format("{0:N2}°C", d);
         public static string Celsius(int d) => Celsius((double)d);
         public static string Quadrat(double d) => string.Format("{0:N2}m²", d);
-        public static string Datum(DateTime d) => d.ToString("dd.MM.yyyy");
+        public static string Datum(DateOnly d) => d.ToString("dd.MM.yyyy");
     }
 }

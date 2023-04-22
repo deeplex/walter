@@ -173,7 +173,7 @@ namespace Deeplex.Saverwalter.PrintService
             for (var i = 0; i < rechnungsgruppe.PersonenIntervall.Count; ++i)
             {
                 var personenZeitIntervall = rechnungsgruppe.PersonenIntervall[i];
-                var firstLine = personenZeitIntervall.Beginn.Date == betriebskostenabrechnung.Nutzungsbeginn.Date;
+                var firstLine = personenZeitIntervall.Beginn == betriebskostenabrechnung.Nutzungsbeginn;
 
                 col1.Add(firstLine ? 1.ToString() : "");
                 col2.Add(firstLine ? Quadrat(betriebskostenabrechnung.Wohnung.Wohnflaeche) : "");
@@ -207,9 +207,9 @@ namespace Deeplex.Saverwalter.PrintService
             for (var i = 0; i < rechnungsgruppe.GesamtPersonenIntervall.Count; ++i)
             {
                 var personenZeitIntervall = rechnungsgruppe.GesamtPersonenIntervall[i];
-                var firstLine = personenZeitIntervall.Beginn.Date == betriebskostenabrechnung.Nutzungsbeginn.Date;
+                var firstLine = personenZeitIntervall.Beginn == betriebskostenabrechnung.Nutzungsbeginn;
 
-                var timespan = ((personenZeitIntervall.Ende - personenZeitIntervall.Beginn).Days + 1).ToString();
+                var timespan = (personenZeitIntervall.Ende.DayNumber - personenZeitIntervall.Beginn.DayNumber + 1).ToString();
 
                 col1.Add(firstLine ? rechnungsgruppe.GesamtEinheiten.ToString() : "");
                 col2.Add(firstLine ? Quadrat(rechnungsgruppe.GesamtWohnflaeche) : "");
@@ -318,9 +318,9 @@ namespace Deeplex.Saverwalter.PrintService
                     {
                         var Beginn = rechnungsgruppe.PersonenZeitanteil[i].Beginn;
                         var Ende = rechnungsgruppe.PersonenZeitanteil[i].Ende;
-                        var GesamtPersonenzahl = rechnungsgruppe.GesamtPersonenIntervall.Last(gs => gs.Beginn.Date <= rechnungsgruppe.PersonenZeitanteil[i].Beginn.Date).Personenzahl;
-                        var Personenzahl = rechnungsgruppe.PersonenIntervall.LastOrDefault(p => p.Beginn.Date <= rechnungsgruppe.PersonenZeitanteil[i].Beginn)?.Personenzahl ?? 0;
-                        var timespan = ((Ende - Beginn).Days + 1).ToString();
+                        var GesamtPersonenzahl = rechnungsgruppe.GesamtPersonenIntervall.Last(gs => gs.Beginn <= rechnungsgruppe.PersonenZeitanteil[i].Beginn).Personenzahl;
+                        var Personenzahl = rechnungsgruppe.PersonenIntervall.LastOrDefault(p => p.Beginn <= rechnungsgruppe.PersonenZeitanteil[i].Beginn)?.Personenzahl ?? 0;
+                        var timespan = (Ende.DayNumber - Beginn.DayNumber + 1).ToString();
 
                         col1.Add(SingularOrPluralPerson(Personenzahl) + " / " + SingularOrPluralPerson(GesamtPersonenzahl));
                         col2.Add(Datum(Beginn) + " - " + Datum(Ende));
@@ -542,9 +542,9 @@ namespace Deeplex.Saverwalter.PrintService
                 {
                     var Beginn = rechnungsgruppe.PersonenZeitanteil[i].Beginn;
                     var Ende = rechnungsgruppe.PersonenZeitanteil[i].Ende;
-                    var GesamtPersonenzahl = rechnungsgruppe.GesamtPersonenIntervall.Last(gs => gs.Beginn.Date <= rechnungsgruppe.PersonenZeitanteil[i].Beginn.Date).Personenzahl;
-                    var Personenzahl = rechnungsgruppe.PersonenIntervall.Last(p => p.Beginn.Date <= rechnungsgruppe.PersonenZeitanteil[i].Beginn).Personenzahl;
-                    var timespan = ((Ende - Beginn).Days + 1).ToString();
+                    var GesamtPersonenzahl = rechnungsgruppe.GesamtPersonenIntervall.Last(gs => gs.Beginn <= rechnungsgruppe.PersonenZeitanteil[i].Beginn).Personenzahl;
+                    var Personenzahl = rechnungsgruppe.PersonenIntervall.Last(p => p.Beginn <= rechnungsgruppe.PersonenZeitanteil[i].Beginn).Personenzahl;
+                    var timespan = (Ende.DayNumber - Beginn.DayNumber + 1).ToString();
 
                     if (i == rechnungsgruppe.PersonenZeitanteil.Count - 1)
                     {

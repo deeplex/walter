@@ -16,8 +16,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class VertragEntryBase
         {
             public int Id { get; set; }
-            public DateTime Beginn { get; set; }
-            public DateTime? Ende { get; set; }
+            public DateOnly Beginn { get; set; }
+            public DateOnly? Ende { get; set; }
             public SelectionEntry Wohnung { get; set; } = null!;
             public SelectionEntry? Ansprechpartner { get; set; }
             public string? Notiz { get; set; }
