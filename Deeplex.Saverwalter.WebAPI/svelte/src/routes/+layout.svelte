@@ -25,25 +25,25 @@
       a.bx--side-nav__link[aria-current='page']::before,
       a.bx--side-nav__link--current::before
     ) {
-    background-color: #2e7d32;
+    background-color: #2e7d32 !important;
   }
 
   /* Override svelte Hamburger Menu -> Seems to be buggy with rail */
   :global(.bx--header__menu-toggle) {
-    visibility: hidden;
-    width: 8px;
+    visibility: hidden !important;
+    width: 8px !important;
   }
 
   /* Make content use the whole screen */
   slot {
-    height: 100vh - 3rem - 5px;
-    width: 100vw;
-    position: relative;
+    height: 100vh - 3rem - 5px !important;
+    width: 100vw !important;
+    position: relative !important;
   }
 
   /* Make Lists use complete screen */
   :global(.bx--data-table--sticky-header) {
-    max-height: calc(100vh - 3rem - 5px);
+    max-height: calc(100vh - 3rem - 5px) !important;
   }
 
   /* Adjust accordion for detail views */
@@ -53,12 +53,12 @@
 
   /* Adjust size of content in detail view */
   :global(.bx--text-input-wrapper, .bx--form-item, .bx--list-box__wrapper) {
-    margin: 10px;
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-items: flex-start;
+    margin: 10px !important;
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
   }
 
   /* Align datepicker to rest of elements */
@@ -68,28 +68,28 @@
       .flatpickr-wrapper,
       .bx--date-picker.bx--date-picker--single
     ) {
-    width: 100%;
+    width: 100% !important;
   }
 
   /* Properly display lists */
   :global(.bx--data-table-container) {
-    min-width: 50rem;
-    padding-top: 0;
+    min-width: 50rem !important;
+    padding-top: 0 !important;
   }
 
   :global(.bx--list-box__menu-icon, .bx--list-box__selection) {
-    visibility: hidden;
+    visibility: hidden !important;
   }
 
   /* Add border to sidenav */
   :global(.bx--side-nav) {
-    border-right: 1px;
-    border-style: solid;
+    border-right: 1px !important;
+    border-style: solid !important;
   }
 
   /* Adjust size of number inputs (because +1 -1 buttons) */
   :global(.bx--number input[type='number']) {
-    min-width: 6.375rem;
-    padding-right: 4em;
+    min-width: 6.375rem !important;
+    padding-right: 4em !important;
   }
 </style>
