@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { TextInput, TextInputSkeleton } from 'carbon-components-svelte';
+  import { TextInput, TextInputSkeleton } from 'carbon-components-svelte';
 
-	export let value: string | undefined = undefined;
-	export let labelText: string | undefined;
-	export let readonly: boolean = false;
+  export let value: string | undefined = undefined;
+  export let labelText: string | undefined;
+  export let readonly: boolean = false;
 
-	export let change = (e: CustomEvent<string | number | null>) => {
-		value = '' + e.detail || undefined;
-	};
+  export let change = (e: CustomEvent<string | number | null>) => {
+    value = '' + e.detail || undefined;
+  };
 </script>
 
 {#await value}
-	<TextInputSkeleton />
+  <TextInputSkeleton />
 {:then x}
-	<TextInput {readonly} on:change={change} {labelText} value={x} />
+  <TextInput {readonly} on:change={change} {labelText} value={x} />
 {/await}

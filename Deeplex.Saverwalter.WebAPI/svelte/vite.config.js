@@ -2,12 +2,12 @@ import { sveltekit } from '@sveltejs/kit/vite';
 
 /** @type {import('vite').UserConfig} */
 const config = {
-	plugins: [sveltekit()],
-	server: {
-		proxy: {
-			'/api': 'http://localhost:5254'
-		},
-	}
+  plugins: [sveltekit()],
+  server: {
+    proxy: {
+      '/api': 'http://localhost:5254'
+    }
+  }
 };
 
 export default config;

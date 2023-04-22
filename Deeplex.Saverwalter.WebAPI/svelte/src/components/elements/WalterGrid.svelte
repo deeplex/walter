@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Content, Grid } from 'carbon-components-svelte';
+  import { Content, Grid } from 'carbon-components-svelte';
 </script>
 
 <Content>
-	<Grid>
-		<slot />
-	</Grid>
+  <Grid>
+    <slot />
+  </Grid>
 </Content>

@@ -1,26 +1,26 @@
 <script lang="ts">
-	import { Add } from 'carbon-icons-svelte';
-	import {
-		HeaderGlobalAction,
-		HeaderUtilities
-	} from 'carbon-components-svelte';
+  import { Add } from 'carbon-icons-svelte';
+  import {
+    HeaderGlobalAction,
+    HeaderUtilities
+  } from 'carbon-components-svelte';
 
-	import { goto } from '$app/navigation';
+  import { goto } from '$app/navigation';
 
-	import { WalterHeader } from '$WalterComponents';
-	import { page } from '$app/stores';
+  import { WalterHeader } from '$WalterComponents';
+  import { page } from '$app/stores';
 
-	export let title: Promise<string> | string = 'Saverwalter';
+  export let title: Promise<string> | string = 'Saverwalter';
 
-	function click_new() {
-		goto(`${$page.url.pathname}/new`);
-	}
+  function click_new() {
+    goto(`${$page.url.pathname}/new`);
+  }
 </script>
 
 <WalterHeader {title}>
-	{#await title then}
-		<HeaderUtilities>
-			<HeaderGlobalAction on:click={click_new} icon={Add} />
-		</HeaderUtilities>
-	{/await}
+  {#await title then}
+    <HeaderUtilities>
+      <HeaderGlobalAction on:click={click_new} icon={Add} />
+    </HeaderUtilities>
+  {/await}
 </WalterHeader>

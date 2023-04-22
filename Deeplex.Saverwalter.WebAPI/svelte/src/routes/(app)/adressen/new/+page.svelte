@@ -1,19 +1,19 @@
 <script lang="ts">
-	import {
-		WalterAdresse,
-		WalterGrid,
-		WalterHeaderNew
-	} from '$WalterComponents';
-	import type { WalterAdresseEntry } from '$WalterLib';
+  import {
+    WalterAdresse,
+    WalterGrid,
+    WalterHeaderNew
+  } from '$WalterComponents';
+  import type { WalterAdresseEntry } from '$WalterLib';
 
-	const apiURL = `/api/adressen`;
-	const title = 'Neue Adresse';
+  const apiURL = `/api/adressen`;
+  const title = 'Neue Adresse';
 
-	const entry: Partial<WalterAdresseEntry> = {};
+  const entry: Partial<WalterAdresseEntry> = {};
 </script>
 
 <WalterHeaderNew {apiURL} {entry} {title} />
 
 <WalterGrid>
-	<WalterAdresse value={entry} />
+  <WalterAdresse value={entry} />
 </WalterGrid>
