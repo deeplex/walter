@@ -12,6 +12,9 @@
   import { goto } from '$app/navigation';
   import { WalterToastContent } from '$WalterLib';
   import { walter_sign_in } from '$WalterServices/auth';
+  import type { PageData } from './$types';
+
+  export let data: PageData;
 
   const login = {
     username: '',
@@ -29,7 +32,7 @@
 
   async function submit() {
     const response = await walter_sign_in(
-      fetch,
+      data.fetch,
       login.username,
       login.password,
       LoginToast

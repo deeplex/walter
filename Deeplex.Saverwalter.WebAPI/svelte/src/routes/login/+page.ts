@@ -4,12 +4,16 @@ import { browser } from '$app/environment';
 
 export const load: PageLoad = async ({ fetch }) => {
   if (!browser) {
-    return;
+    return {
+      fetch
+    };
   }
 
   const accessToken = (await import('$WalterServices/auth')).getAccessToken();
   if (accessToken == null) {
-    return;
+    return {
+      fetch
+    };
   }
   const response = await fetch('/api/account/refresh-token', {
     method: 'POST',
@@ -20,4 +24,8 @@ export const load: PageLoad = async ({ fetch }) => {
   if (response.ok) {
     await goto('/');
   }
+
+  return {
+    fetch
+  };
 };
