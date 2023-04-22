@@ -1,13 +1,11 @@
-import {
-  WalterAdresseEntry,
-  WalterBetriebskostenrechnungEntry,
-  WalterErhaltungsaufwendungEntry,
-  WalterSelectionEntry,
-  WalterUmlageEntry,
-  WalterVertragEntry,
-  WalterZaehlerEntry
-} from '$WalterLib';
+import { WalterAdresseEntry } from './WalterAdresse';
 import { WalterApiHandler } from './WalterApiHandler';
+import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
+import { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
+import { WalterSelectionEntry } from './WalterSelection';
+import { WalterUmlageEntry } from './WalterUmlage';
+import { WalterVertragEntry } from './WalterVertrag';
+import { WalterZaehlerEntry } from './WalterZaehler';
 
 export class WalterWohnungEntry extends WalterApiHandler {
   public static ApiURL: string = `/api/wohnungen`;

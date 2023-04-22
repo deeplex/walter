@@ -1,11 +1,9 @@
-import {
-  WalterAdresseEntry,
-  WalterJuristischePersonEntry,
-  WalterSelectionEntry,
-  WalterVertragEntry,
-  WalterWohnungEntry
-} from '$WalterLib';
+import { WalterAdresseEntry } from './WalterAdresse';
 import { WalterApiHandler } from './WalterApiHandler';
+import { WalterJuristischePersonEntry } from './WalterJuristischePerson';
+import { WalterSelectionEntry } from './WalterSelection';
+import { WalterVertragEntry } from './WalterVertrag';
+import { WalterWohnungEntry } from './WalterWohnung';
 
 export class WalterPersonEntry extends WalterApiHandler {
   public static ApiURL: string = `/api/kontakte`;

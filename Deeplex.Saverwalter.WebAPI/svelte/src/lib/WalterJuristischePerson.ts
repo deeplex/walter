@@ -1,11 +1,9 @@
-import {
-  WalterAdresseEntry,
-  WalterPersonEntry,
-  WalterSelectionEntry,
-  WalterVertragEntry,
-  WalterWohnungEntry
-} from '$WalterLib';
+import { WalterAdresseEntry } from './WalterAdresse';
 import { WalterApiHandler } from './WalterApiHandler';
+import type { WalterPersonEntry } from './WalterPerson';
+import { WalterSelectionEntry } from './WalterSelection';
+import { WalterVertragEntry } from './WalterVertrag';
+import { WalterWohnungEntry } from './WalterWohnung';
 
 export class WalterJuristischePersonEntry
   extends WalterApiHandler

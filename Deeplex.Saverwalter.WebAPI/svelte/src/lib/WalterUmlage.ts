@@ -1,9 +1,7 @@
-import {
-  WalterBetriebskostenrechnungEntry,
-  WalterSelectionEntry,
-  WalterWohnungEntry
-} from '$WalterLib';
 import { WalterApiHandler } from './WalterApiHandler';
+import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
+import { WalterSelectionEntry } from './WalterSelection';
+import { WalterWohnungEntry } from './WalterWohnung';
 
 export class WalterUmlageEntry extends WalterApiHandler {
   public static ApiURL: string = `/api/umlagen`;
