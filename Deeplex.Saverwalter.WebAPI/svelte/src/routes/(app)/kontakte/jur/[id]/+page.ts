@@ -9,6 +9,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
   const S3URL = `kontakte/jur/${params.id}`;
 
   return {
+    fetch,
     id: params.id,
     S3URL: S3URL,
     apiURL: apiURL,

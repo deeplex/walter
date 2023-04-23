@@ -16,6 +16,7 @@
   import { WalterPreview } from '$WalterComponents';
   import type { WalterS3File } from '$WalterTypes';
 
+  export let f: typeof fetch;
   export let S3URL: string;
   export let files: WalterS3File[];
 
@@ -35,7 +36,7 @@
     fileUploadComplete = false;
     for (const file of newFiles) {
       {
-        walter_s3_post(file, S3URL).then(() => upload_finished(file));
+        walter_s3_post(file, S3URL, f).then(() => upload_finished(file));
       }
     }
   }

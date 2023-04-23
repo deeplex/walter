@@ -15,6 +15,7 @@
   a={data.a}
   apiURL={data.apiURL}
   title={data.a.aussteller?.text + ' - ' + data.a.bezeichnung}
+  f={data.fetch}
 />
 
 <WalterGrid>

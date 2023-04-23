@@ -8,6 +8,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
   const S3URL = `vertragversionen/${params.id}`;
 
   return {
+    fetch,
     id: params.id,
     apiURL: apiURL,
     S3URL: S3URL,

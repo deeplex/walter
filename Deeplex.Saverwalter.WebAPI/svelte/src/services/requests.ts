@@ -4,28 +4,28 @@ import { goto } from '$app/navigation';
 import { getAccessToken } from './auth';
 
 export const walter_selection = {
-  betriebskostentypen(f: fetchType): Promise<WalterSelectionEntry[]> {
+  betriebskostentypen(f: typeof fetch): Promise<WalterSelectionEntry[]> {
     return walter_get('/api/selection/betriebskostentypen', f);
   },
-  umlagen(f: fetchType): Promise<WalterSelectionEntry[]> {
+  umlagen(f: typeof fetch): Promise<WalterSelectionEntry[]> {
     return walter_get('/api/selection/umlagen', f);
   },
-  kontakte(f: fetchType): Promise<WalterSelectionEntry[]> {
+  kontakte(f: typeof fetch): Promise<WalterSelectionEntry[]> {
     return walter_get('/api/selection/kontakte', f);
   },
-  juristischePersonen(f: fetchType): Promise<WalterSelectionEntry[]> {
+  juristischePersonen(f: typeof fetch): Promise<WalterSelectionEntry[]> {
     return walter_get('/api/selection/juristischepersonen', f);
   },
-  wohnungen(f: fetchType): Promise<WalterSelectionEntry[]> {
+  wohnungen(f: typeof fetch): Promise<WalterSelectionEntry[]> {
     return walter_get('/api/selection/wohnungen', f);
   },
-  umlageschluessel(f: fetchType): Promise<WalterSelectionEntry[]> {
+  umlageschluessel(f: typeof fetch): Promise<WalterSelectionEntry[]> {
     return walter_get('/api/selection/umlageschluessel', f);
   },
-  zaehler(f: fetchType): Promise<WalterSelectionEntry[]> {
+  zaehler(f: typeof fetch): Promise<WalterSelectionEntry[]> {
     return walter_get('/api/selection/zaehler', f);
   },
-  zaehlertypen(f: fetchType): Promise<WalterSelectionEntry[]> {
+  zaehlertypen(f: typeof fetch): Promise<WalterSelectionEntry[]> {
     return walter_get('/api/selection/zaehlertypen', f);
   }
 };
@@ -53,13 +53,8 @@ export async function walter_fetch(
 
 // =================================== GET ====================================
 
-// Get fetch from svelte:
-type fetchType = (
-  input: RequestInfo | URL,
-  init?: RequestInit | undefined
-) => Promise<Response>;
-export const walter_get = (url: string, fetch: fetchType): Promise<any> =>
-  walter_fetch(fetch, url, { method: 'GET' }).then((e) => e.json());
+export const walter_get = (url: string, f: typeof fetch): Promise<any> =>
+  walter_fetch(f, url, { method: 'GET' }).then((e) => e.json());
 
 // =================================== PUT ===================================
 

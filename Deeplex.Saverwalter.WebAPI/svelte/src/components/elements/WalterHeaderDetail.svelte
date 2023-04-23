@@ -16,6 +16,7 @@
   export let apiURL: string;
   export let S3URL: string;
   export let files: WalterS3File[] | undefined = undefined;
+  export let f: typeof fetch;
 
   const PutToast = new WalterToastContent(
     'Speichern erfolgreich',
@@ -61,7 +62,7 @@
       <HeaderGlobalAction on:click={() => click_delete(x)} icon={TrashCan} />
     </HeaderUtilities>
     {#if files}
-      <WalterAnhaenge {S3URL} bind:files />
+      <WalterAnhaenge {S3URL} bind:files {f} />
     {/if}
   {/await}
 </WalterHeader>

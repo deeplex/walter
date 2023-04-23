@@ -16,6 +16,7 @@
   a={data.a}
   apiURL={data.apiURL}
   title={data.a.vertrag.text}
+  f={data.fetch}
 />
 
 <WalterGrid>

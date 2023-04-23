@@ -20,6 +20,7 @@
   a={data.a}
   apiURL={data.apiURL}
   title={data.a.anschrift}
+  f={data.fetch}
 />
 
 <WalterGrid>

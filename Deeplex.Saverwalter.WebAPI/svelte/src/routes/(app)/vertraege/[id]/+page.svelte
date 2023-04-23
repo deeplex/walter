@@ -102,6 +102,7 @@
     var response = await walter_s3_post(
       new File([abrechnung], file.FileName),
       data.S3URL,
+      data.fetch,
       toast
     );
 
@@ -131,6 +132,7 @@
   bind:a={data.a}
   apiURL={data.apiURL}
   {title}
+  f={data.fetch}
 />
 
 <WalterGrid>

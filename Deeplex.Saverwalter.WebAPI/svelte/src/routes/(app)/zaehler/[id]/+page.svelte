@@ -38,6 +38,7 @@
   a={data.a}
   apiURL={data.apiURL}
   title={data.a.kennnummer}
+  f={data.fetch}
 />
 
 <WalterGrid>

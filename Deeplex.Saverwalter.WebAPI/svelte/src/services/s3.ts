@@ -1,14 +1,10 @@
 import { addToast } from '$WalterStore';
 import type { WalterS3File } from '$WalterTypes';
 import * as parser from 'fast-xml-parser';
-import { walter_delete } from './requests';
+import { walter_delete, walter_fetch } from './requests';
 import type { WalterToastContent } from '../lib/WalterToastContent';
 
-const baseURL = 'http://192.168.178.61:9002/saverwalter';
-type fetchType = (
-  input: RequestInfo | URL,
-  init?: RequestInit | undefined
-) => Promise<Response>;
+const baseURL = '/api/files';
 type XMLResult = {
   ListBucketResult?: { Contents?: WalterS3File | WalterS3File[] };
 };
@@ -16,11 +12,13 @@ type XMLResult = {
 export const walter_s3_post = (
   file: File,
   path: string,
+  f: typeof fetch,
   toast?: WalterToastContent
 ) =>
-  fetch(`${baseURL}/${path}/${file.name}`, {
+  walter_fetch(f, `${baseURL}/${path}/${file.name}`, {
     method: 'PUT',
     headers: {
+      // Ignored, due to header being replaced in walter_fetch
       'Content-Type': `${file.type}`
     },
     body: file
@@ -31,11 +29,10 @@ export async function finish_s3_post(e: Response, toast?: WalterToastContent) {
   return e;
 }
 
-export const walter_s3_get = (S3URL: string) =>
-  fetch(`${baseURL}/${S3URL}`, {
-    method: 'GET',
-    headers: {}
-  }).then((e) => e.blob());
+export const walter_s3_get = (S3URL: string): Promise<any> =>
+  walter_fetch(fetch, `${baseURL}/${S3URL}`, { method: 'GET' }).then((e) =>
+    e.blob()
+  );
 
 export function walter_s3_delete(file: WalterS3File) {
   return walter_delete(`${baseURL}/${file.Key}`);
@@ -52,11 +49,11 @@ export function download_file_blob(blob: Blob, fileName: string) {
   URL.revokeObjectURL(url);
 }
 
-export function walter_s3_get_files(S3prefixURL: string, f: fetchType) {
+export function walter_s3_get_files(S3prefixURL: string, f: typeof fetch) {
   const url = `${baseURL}?prefix=${S3prefixURL}`;
-  const requestInit = { method: 'GET', headers: {} };
+  const requestInit = { method: 'GET' };
 
-  return f(url, requestInit)
+  return walter_fetch(f, url, requestInit)
     .then((e) => e.body?.getReader().read())
     .then(parse_stream_into_walter_s3_files);
 }

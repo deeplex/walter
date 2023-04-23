@@ -22,6 +22,7 @@
     data.a.betreffendesJahr +
     ' - ' +
     data.a.umlage?.text}
+  f={data.fetch}
 />
 
 <WalterGrid>
