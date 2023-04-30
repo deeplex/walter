@@ -7,9 +7,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
     [Route("api/files")]
     public class FileController : ControllerBase
     {
-        private string baseUrl = "http://192.168.178.61:9002/saverwalter"; // TODO replace with env variable
-
         private readonly ILogger<FileController> _logger;
+        private static string? baseUrl = Environment.GetEnvironmentVariable("S3_PROVIDER");
 
         public FileController(ILogger<FileController> logger)
         {
@@ -19,7 +18,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         private string GetMimeTypeFromExtension(string extension)
         {
             var provider = new FileExtensionContentTypeProvider();
-            if (!provider.TryGetContentType(extension, out string contentType))
+            if (!provider.TryGetContentType(extension, out string? contentType))
             {
                 contentType = "application/octet-stream";
             }
@@ -28,6 +27,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 
         private async Task<IActionResult> RedirectToFileServer(string path)
         {
+            if (baseUrl is null)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable);
+            }
+
             using (var httpClient = new HttpClient())
             {
                 var resourceUrl = baseUrl + path;
@@ -47,7 +51,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                     }
 
                     request.Content = content;
-                    new FileExtensionContentTypeProvider().TryGetContentType(Path.GetExtension(path), out string contentType);
+                    new FileExtensionContentTypeProvider()
+                        .TryGetContentType(Path.GetExtension(path), out string? contentType);
                     content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
                 }
 

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -20,9 +19,8 @@ namespace Deeplex.Saverwalter.WebAPI
 {
     public class Program
     {
-        public static string AppVersion = Environment.GetEnvironmentVariable("WalterVersion") ?? "v0.0.0";
+        public static string AppVersion = Environment.GetEnvironmentVariable("WALTER_VERSION") ?? "v0.0.0";
         public static string AppName = "Saverwalter";
-        private static string APMServer = Environment.GetEnvironmentVariable("APM-Server") ?? "http://192.168.178.61:8200"; // TODO change to localhost...
 
         public static async Task Main(string[] args)
         {
@@ -68,18 +66,21 @@ namespace Deeplex.Saverwalter.WebAPI
 
         private static void AddServices(WebApplicationBuilder builder, Container container)
         {
-            builder.Services.AddOpenTelemetry()
-                .WithTracing(tracerProviderBuilder => tracerProviderBuilder
-                .AddSource(AppName)
-                .AddOtlpExporter(opt =>
-                {
-                    opt.Endpoint = new Uri(APMServer);
-                    opt.Protocol = OtlpExportProtocol.Grpc;
-                })
-                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName: AppName, serviceVersion: AppVersion))
-                .AddHttpClientInstrumentation()
-                .AddAspNetCoreInstrumentation()
-                .AddSqlClientInstrumentation());
+            if (Environment.GetEnvironmentVariable("APM_SERVER") is string apm_server)
+            {
+                builder.Services.AddOpenTelemetry()
+                    .WithTracing(tracerProviderBuilder => tracerProviderBuilder
+                    .AddSource(AppName)
+                    .AddOtlpExporter(opt =>
+                    {
+                        opt.Endpoint = new Uri(apm_server);
+                        opt.Protocol = OtlpExportProtocol.Grpc;
+                    })
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName: AppName, serviceVersion: AppVersion))
+                    .AddHttpClientInstrumentation()
+                    .AddAspNetCoreInstrumentation()
+                    .AddSqlClientInstrumentation());
+            }
 
             builder.Services.AddControllers(options =>
             {

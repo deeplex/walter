@@ -26,7 +26,9 @@
                 "DATABASE_NAME": "saverdb",
                 "DATABASE_USER": "postgres",
                 "DATABASE_PASS": "postgres",
-                "WALTER_PASSWORD": "securepw"
+                "WALTER_PASSWORD": "securepw",
+                "APM_SERVER": "apm-server",
+                "S3_PROVIDER": "s3:9200",
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
