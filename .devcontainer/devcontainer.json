@@ -10,7 +10,7 @@
 			"version": "lts"
 		}
 	},
-	"postCreateCommand": "dotnet restore",
+	"postCreateCommand": "dotnet restore"
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
