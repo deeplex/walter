@@ -82,7 +82,7 @@ namespace Deeplex.Saverwalter.PrintService.Tests
         [Fact]
         public void DatumTest()
         {
-            var mock = new DateTime(1516, 3, 14);
+            var mock = new DateOnly(1516, 3, 14);
             var stub = Utils.Datum(mock);
             stub.Should().Be("14.03.1516");
         }

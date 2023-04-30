@@ -8,13 +8,13 @@ namespace Deeplex.Saverwalter.PrintService.Tests
         [Fact]
         public void PrintRunTest()
         {
-            var stub = new PrintRun("test", true, true, true);
+            var stub = new PrintRun("test");
             stub.Should().NotBeNull();
         }
         [Fact]
         public void PrintRunTest2()
         {
-            var stub = new PrintRun("test", true, true, true, true);
+            var stub = new PrintRun("test");
             stub.Should().NotBeNull();
         }
     }
