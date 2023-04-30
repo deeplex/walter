@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -56,14 +57,21 @@ namespace Deeplex.Saverwalter.WebAPI
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // app.UseStaticFiles();
             app.MapControllers();
+            app.UseRouting();
+
+            app.UseSpaStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"svelte/build"))
+            });
 
             return app;
         }
 
         private static void AddServices(WebApplicationBuilder builder, Container container)
         {
+            builder.Services.AddSpaStaticFiles();
+
             builder.Services.AddOpenTelemetry()
                 .WithTracing(tracerProviderBuilder => tracerProviderBuilder
                 .AddSource(AppName)
