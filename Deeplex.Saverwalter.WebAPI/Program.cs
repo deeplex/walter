@@ -60,18 +60,14 @@ namespace Deeplex.Saverwalter.WebAPI
             app.MapControllers();
             app.UseRouting();
 
-            app.UseSpaStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"svelte/build"))
-            });
+            app.UseStaticFiles();
+            app.MapFallbackToFile("index.html");
 
             return app;
         }
 
         private static void AddServices(WebApplicationBuilder builder, Container container)
         {
-            builder.Services.AddSpaStaticFiles();
-
             builder.Services.AddOpenTelemetry()
                 .WithTracing(tracerProviderBuilder => tracerProviderBuilder
                 .AddSource(AppName)

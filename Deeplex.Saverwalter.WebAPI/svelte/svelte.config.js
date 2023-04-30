@@ -10,7 +10,9 @@ const config = {
 
   kit: {
     adapter: adapter({
-      fallback: 'index.html'
+      fallback: 'index.html',
+      pages: '../wwwroot',
+      assets: '../wwwroot'
     }),
     alias: {
       $WalterComponents: resolve('./src/components/index'),
