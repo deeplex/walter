@@ -20,7 +20,13 @@
                 "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
             },
             "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "DATABASE_HOST": "db",
+                "DATABASE_PORT": "5432",
+                "DATABASE_NAME": "saverdb",
+                "DATABASE_USER": "postgres",
+                "DATABASE_PASS": "postgres",
+                "WALTER_PASSWORD": "securepw"
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"

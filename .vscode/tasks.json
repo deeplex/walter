@@ -2,6 +2,18 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "release",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Deeplex.Saverwalter.WebAPI/Deeplex.Saverwalter.WebAPI.csproj",
+                "-c",
+                "release"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
             "label": "build",
             "command": "dotnet",
             "type": "process",
@@ -36,6 +48,18 @@
                 "${workspaceFolder}/Deeplex.Saverwalter.WebAPI/Deeplex.Saverwalter.WebAPI.csproj"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build_svelte",
+            "command": "yarn",
+            "type": "process",
+            "args": [
+                "build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/Deeplex.Saverwalter.WebAPI/svelte"
+            },
+            "problemMatcher": "$tsc"
         }
     ]
 }

@@ -141,8 +141,6 @@ namespace Deeplex.Saverwalter.WebAPI
 
         private static DbContextOptions<SaverwalterContext> CreateDbContextOptions()
         {
-            DotNetEnv.Env.Load();
-
             var databaseHost = Environment.GetEnvironmentVariable("DATABASE_HOST");
             var databasePort = Environment.GetEnvironmentVariable("DATABASE_PORT");
             var databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME");
