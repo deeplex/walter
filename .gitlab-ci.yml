@@ -1,0 +1,19 @@
+stages:
+  - test_runner
+  # - build
+
+variables:
+  GITLAB_RUNNER_TOKEN: ${{GITLAB_RUNNER_TOKEN}}
+
+test_runner:
+  stage: test_runner
+  image: alpine:latest
+  script:
+    - echo "The GitLab runner is working properly."
+# build:
+#   stage: build
+#   image: mcr.microsoft.com/devcontainers/dotnet:0-6.0
+#   script:
+#     ls
+#     # dotnet build
+#     docker info
