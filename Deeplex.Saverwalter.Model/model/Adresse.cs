@@ -27,8 +27,8 @@ namespace Deeplex.Saverwalter.Model
 
         public Adresse(string strasse, string hausnummer, string postleitzahl, string stadt)
         {
-            Strasse= strasse;
-            Hausnummer= hausnummer;
+            Strasse = strasse;
+            Hausnummer = hausnummer;
             Postleitzahl = postleitzahl;
             Stadt = stadt;
         }

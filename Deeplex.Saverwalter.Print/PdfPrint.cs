@@ -126,7 +126,7 @@ namespace Deeplex.Saverwalter.PrintService
         {
             Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):");
 
-            foreach(var hk in gruppe.Heizkosten)
+            foreach (var hk in gruppe.Heizkosten)
             {
                 // TODO implement...
                 Text(Utils.Prozent(hk.Para9_2));

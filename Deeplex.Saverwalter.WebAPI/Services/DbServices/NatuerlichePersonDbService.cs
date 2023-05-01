@@ -70,7 +70,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         private NatuerlichePersonEntry Add(NatuerlichePersonEntry entry)
         {
             var entity = new NatuerlichePerson(entry.Nachname);
-            
+
             SetOptionalValues(entity, entry);
             DbService.ctx.NatuerlichePersonen.Add(entity);
             DbService.SaveWalter();

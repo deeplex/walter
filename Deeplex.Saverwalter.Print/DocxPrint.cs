@@ -193,8 +193,8 @@ namespace Deeplex.Saverwalter.PrintService
         }
 
         private static string font = "Times New Roman";
-        private static int fontSize = 11; 
-     
+        private static int fontSize = 11;
+
         private static RunProperties Font() => new RunProperties(
                 new RunFonts() { Ascii = font, HighAnsi = font, ComplexScript = font, },
                 new FontSize() { Val = (fontSize * 2).ToString() }); // Don't know why * 2 

@@ -64,7 +64,7 @@ namespace Deeplex.Saverwalter.WebAPI
 
                 return new OkObjectResult(stream);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new BadRequestObjectResult(ex);
             }
