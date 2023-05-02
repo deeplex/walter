@@ -4,7 +4,7 @@ stages:
   - build-docker
 
 variables:
-  IMAGE_TAG: 0.0.1
+  IMAGE_TAG: v0.0.2
   IMAGE_NAME: saverwalter
 
 build-svelte:
@@ -34,4 +34,9 @@ build-docker:
   image: docker:23.0
   script:
     - cd Deeplex.Saverwalter.WebAPI
-    - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+    - if docker image inspect "${IMAGE_NAME}:${IMAGE_TAG}" >/dev/null 2>&1; then
+    - echo "Image ${IMAGE_NAME}:${IMAGE_TAG} already exists. Skipping build."
+    - else
+    - echo "Image ${IMAGE_NAME}:${IMAGE_TAG} does not exist. Building..."
+    - docker build -t "${IMAGE_NAME}:${IMAGE_TAG}" .
+    - fi
