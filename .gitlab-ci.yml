@@ -1,14 +1,13 @@
 stages:
-  - build-svelte
-  - build-dotnet
-  - build-docker
+  - build
+  - notify
 
 variables:
-  IMAGE_TAG: v0.0.2
+  IMAGE_TAG: v0.0.3
   IMAGE_NAME: saverwalter
 
 build-svelte:
-  stage: build-svelte
+  stage: build
   image: node:18-alpine3.17
   script:
     - cd Deeplex.Saverwalter.WebAPI/svelte
@@ -16,10 +15,10 @@ build-svelte:
     - yarn build
   artifacts:
     paths:
-      - /builds/klawr/saverwalter/Deeplex.Saverwalter.WebAPI/wwwroot
+      - $CI_PROJECT_DIR/Deeplex.Saverwalter.WebAPI/wwwroot
 
 build-dotnet:
-  stage: build-dotnet
+  stage: build
   image: mcr.microsoft.com/devcontainers/dotnet:0-6.0
   script:
     - cd Deeplex.Saverwalter.WebAPI
@@ -27,16 +26,48 @@ build-dotnet:
     - dotnet publish -c release
   artifacts:
     paths:
-      - /builds/klawr/saverwalter/Deeplex.Saverwalter.WebAPI/bin
+      - $CI_PROJECT_DIR/Deeplex.Saverwalter.WebAPI/bin
 
 build-docker:
-  stage: build-docker
+  stage: build
   image: docker:23.0
+  needs:
+    - build-svelte
+    - build-dotnet
   script:
     - cd Deeplex.Saverwalter.WebAPI
     - if docker image inspect "${IMAGE_NAME}:${IMAGE_TAG}" >/dev/null 2>&1; then
-    - echo "Image ${IMAGE_NAME}:${IMAGE_TAG} already exists. Skipping build."
+    - echo "Image $IMAGE_NAME:$IMAGE_TAG already exists. Skipping build."
     - else
-    - echo "Image ${IMAGE_NAME}:${IMAGE_TAG} does not exist. Building..."
-    - docker build -t "${IMAGE_NAME}:${IMAGE_TAG}" .
+    - echo "Image $IMAGE_NAME:$IMAGE_TAG does not exist. Building..."
+    - docker build -t "$IMAGE_NAME:$IMAGE_TAG" .
     - fi
+
+gotify-failure:
+  stage: notify
+  image: alpine:3.17
+  before_script:
+    - apk --no-cache add curl
+  allow_failure: true
+  when: on_failure
+  script:
+    - URL="https://gotify.klawr.de/message?token=$GOTIFY_TOKEN"
+    - TITLE="\"gitlab $CI_PROJECT_NAME\""
+    - MSG="\"pipeline $CI_PIPELINE_ID for project $CI_PROJECT_NAME failed\""
+    - echo $MSG
+    - BODY="{\"message\":$MSG, \"priority\":1, \"title\":$TITLE}"
+    - curl -v --header "Content-Type:application/json" --data "$BODY" $URL
+
+gotify-success:
+  stage: notify
+  image: alpine:3.17
+  before_script:
+    - apk --no-cache add curl
+  allow_failure: true
+  script:
+    - URL="https://gotify.klawr.de/message?token=$GOTIFY_TOKEN"
+    - TITLE="\"gitlab $CI_PROJECT_NAME\""
+    - MSG="\"pipeline $CI_PIPELINE_ID for project $CI_PROJECT_NAME successful\""
+    - echo $MSG
+    - BODY="{\"message\":$MSG, \"priority\":1, \"title\":$TITLE}"
+    - curl -v --header "Content-Type:application/json" --data "$BODY" $URL
