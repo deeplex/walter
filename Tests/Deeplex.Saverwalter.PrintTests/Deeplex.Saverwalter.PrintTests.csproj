@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Deeplex.Saverwalter.Print\Deeplex.Saverwalter.PrintService.csproj" />
+    <ProjectReference Include="..\..\Deeplex.Saverwalter.Print\Deeplex.Saverwalter.PrintService.csproj" />
   </ItemGroup>
 
 </Project>

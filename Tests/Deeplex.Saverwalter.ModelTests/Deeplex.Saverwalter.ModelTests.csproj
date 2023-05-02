@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Deeplex.Saverwalter.Model\Deeplex.Saverwalter.Model.csproj" />
+    <ProjectReference Include="..\..\Deeplex.Saverwalter.Model\Deeplex.Saverwalter.Model.csproj" />
   </ItemGroup>
 
 </Project>
