@@ -6,17 +6,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class MieteDbService : IControllerService<MieteEntryBase>
     {
-        public WalterDbService.WalterDb DbService { get; }
-        public SaverwalterContext ctx => DbService.ctx;
+        public SaverwalterContext Ctx { get; }
 
-        public MieteDbService(WalterDbService.WalterDb dbService)
+        public MieteDbService(SaverwalterContext ctx)
         {
-            DbService = dbService;
+            Ctx = ctx;
         }
 
         public IActionResult Get(int id)
         {
-            var entity = DbService.ctx.Mieten.Find(id);
+            var entity = Ctx.Mieten.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -35,14 +34,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = DbService.ctx.Mieten.Find(id);
+            var entity = Ctx.Mieten.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            DbService.ctx.Mieten.Remove(entity);
-            DbService.SaveWalter();
+            Ctx.Mieten.Remove(entity);
+            Ctx.SaveChanges();
 
             return new OkResult();
         }
@@ -67,15 +66,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         private MieteEntryBase Add(MieteEntryBase entry)
         {
 
-            var vertrag = ctx.Vertraege.Find(int.Parse(entry.Vertrag.Id));
+            var vertrag = Ctx.Vertraege.Find(int.Parse(entry.Vertrag.Id));
             var entity = new Miete(entry.Zahlungsdatum, entry.BetreffenderMonat, entry.Betrag)
             {
                 Vertrag = vertrag!
             };
 
             SetOptionalValues(entity, entry);
-            DbService.ctx.Mieten.Add(entity);
-            DbService.SaveWalter();
+            Ctx.Mieten.Add(entity);
+            Ctx.SaveChanges();
 
             return new MieteEntryBase(entity);
         }
@@ -83,7 +82,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Put(int id, MieteEntryBase entry)
         {
-            var entity = DbService.ctx.Mieten.Find(id);
+            var entity = Ctx.Mieten.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -106,8 +105,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Zahlungsdatum = entry.Zahlungsdatum;
 
             SetOptionalValues(entity, entry);
-            DbService.ctx.Mieten.Update(entity);
-            DbService.SaveWalter();
+            Ctx.Mieten.Update(entity);
+            Ctx.SaveChanges();
 
             return new MieteEntryBase(entity);
         }

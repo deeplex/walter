@@ -29,11 +29,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         private readonly ILogger<SelectionListController> _logger;
-        private WalterDbService.WalterDb DbService { get; }
+        private SaverwalterContext Ctx { get; }
 
-        public SelectionListController(ILogger<SelectionListController> logger, WalterDbService.WalterDb dbService)
+        public SelectionListController(ILogger<SelectionListController> logger, SaverwalterContext ctx)
         {
-            DbService = dbService;
+            Ctx = ctx;
             _logger = logger;
         }
 
@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         [Route("api/selection/umlagen")]
         public IEnumerable<SelectionEntry> GetUmlagen()
         {
-            return DbService.ctx.Umlagen.ToList().Select(e =>
+            return Ctx.Umlagen.ToList().Select(e =>
                 new SelectionEntry(
                     e.UmlageId,
                     e.Wohnungen.ToList().GetWohnungenBezeichnung(),
@@ -53,10 +53,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         [Route("api/selection/kontakte")]
         public IEnumerable<SelectionEntry> GetKontakte()
         {
-            var nat = DbService.ctx.NatuerlichePersonen
+            var nat = Ctx.NatuerlichePersonen
                 .Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung, null))
                 .ToList();
-            var jur = DbService.ctx.JuristischePersonen
+            var jur = Ctx.JuristischePersonen
                 .Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung, null))
                 .ToList();
             return nat.Concat(jur);
@@ -66,7 +66,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         [Route("api/selection/juristischepersonen")]
         public IEnumerable<SelectionEntry> GetJuristischePersonen()
         {
-            return DbService.ctx.JuristischePersonen
+            return Ctx.JuristischePersonen
                 .Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung, null))
                 .ToList();
         }
@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         {
 
             // Filter is used for Besitzer in Vertrag. TODO find a better name than filter.
-            var entries = DbService.ctx.Wohnungen
+            var entries = Ctx.Wohnungen
                 .ToList()
                 .Select(e =>
                     new SelectionEntry(
@@ -94,7 +94,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         [Route("api/selection/zaehler")]
         public IActionResult GetZaehler()
         {
-            return new OkObjectResult(DbService.ctx.ZaehlerSet
+            return new OkObjectResult(Ctx.ZaehlerSet
                 .Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer, null))
                 .ToList());
         }

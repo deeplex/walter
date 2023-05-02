@@ -6,17 +6,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class AdresseDbService : IControllerService<AdresseEntry>
     {
-        public WalterDbService.WalterDb DbService { get; }
-        public SaverwalterContext ctx => DbService.ctx;
+        public SaverwalterContext Ctx { get; }
+        public SaverwalterContext ctx => ctx;
 
-        public AdresseDbService(WalterDbService.WalterDb dbService)
+        public AdresseDbService(SaverwalterContext ctx)
         {
-            DbService = dbService;
+            Ctx = ctx;
         }
 
         public IActionResult Get(int id)
         {
-            var entity = DbService.ctx.Adressen.Find(id);
+            var entity = ctx.Adressen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new AdresseEntry(entity, DbService);
+                var entry = new AdresseEntry(entity, ctx);
                 return new OkObjectResult(entry);
             }
             catch
@@ -35,14 +35,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = DbService.ctx.Adressen.Find(id);
+            var entity = ctx.Adressen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            DbService.ctx.Adressen.Remove(entity);
-            DbService.SaveWalter();
+            ctx.Adressen.Remove(entity);
+            ctx.SaveChanges();
 
             return new OkResult();
         }
@@ -68,15 +68,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             var entity = new Adresse(entry.Strasse, entry.Hausnummer, entry.Postleitzahl, entry.Stadt);
             SetOptionalValues(entity, entry);
-            DbService.ctx.Adressen.Add(entity);
-            DbService.SaveWalter();
+            Ctx.Adressen.Add(entity);
+            Ctx.SaveChanges();
 
-            return new AdresseEntry(entity, DbService);
+            return new AdresseEntry(entity, Ctx);
         }
 
         public IActionResult Put(int id, AdresseEntry entry)
         {
-            var entity = DbService.ctx.Adressen.Find(id);
+            var entity = ctx.Adressen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -100,10 +100,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Stadt = entry.Stadt;
 
             SetOptionalValues(entity, entry);
-            DbService.ctx.Adressen.Update(entity);
-            DbService.SaveWalter();
+            Ctx.Adressen.Update(entity);
+            Ctx.SaveChanges();
 
-            return new AdresseEntry(entity, DbService);
+            return new AdresseEntry(entity, Ctx);
         }
 
         private void SetOptionalValues(Adresse entity, AdresseEntry entry)

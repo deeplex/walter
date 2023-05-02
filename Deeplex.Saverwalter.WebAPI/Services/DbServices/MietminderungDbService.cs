@@ -6,17 +6,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class MietminderungDbService : IControllerService<MietminderungEntryBase>
     {
-        public WalterDbService.WalterDb DbService { get; }
-        public SaverwalterContext ctx => DbService.ctx;
+        public SaverwalterContext Ctx { get; }
 
-        public MietminderungDbService(WalterDbService.WalterDb dbService)
+        public MietminderungDbService(SaverwalterContext ctx)
         {
-            DbService = dbService;
+            Ctx = ctx;
         }
 
         public IActionResult Get(int id)
         {
-            var entity = DbService.ctx.Mietminderungen.Find(id);
+            var entity = Ctx.Mietminderungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -35,14 +34,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = DbService.ctx.Mietminderungen.Find(id);
+            var entity = Ctx.Mietminderungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            DbService.ctx.Mietminderungen.Remove(entity);
-            DbService.SaveWalter();
+            Ctx.Mietminderungen.Remove(entity);
+            Ctx.SaveChanges();
 
             return new OkResult();
         }
@@ -66,22 +65,22 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private MietminderungEntryBase Add(MietminderungEntryBase entry)
         {
-            var vertrag = ctx.Vertraege.Find(int.Parse(entry.Vertrag.Id));
+            var vertrag = Ctx.Vertraege.Find(int.Parse(entry.Vertrag.Id));
             var entity = new Mietminderung(entry.Beginn, entry.Minderung)
             {
                 Vertrag = vertrag!
             };
 
             SetOptionalValues(entity, entry);
-            DbService.ctx.Mietminderungen.Add(entity);
-            DbService.SaveWalter();
+            Ctx.Mietminderungen.Add(entity);
+            Ctx.SaveChanges();
 
             return new MietminderungEntryBase(entity);
         }
 
         public IActionResult Put(int id, MietminderungEntryBase entry)
         {
-            var entity = DbService.ctx.Mietminderungen.Find(id);
+            var entity = Ctx.Mietminderungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -104,8 +103,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Minderung = entry.Minderung;
 
             SetOptionalValues(entity, entry);
-            DbService.ctx.Mietminderungen.Update(entity);
-            DbService.SaveWalter();
+            Ctx.Mietminderungen.Update(entity);
+            Ctx.SaveChanges();
 
             return new MietminderungEntryBase(entity);
         }

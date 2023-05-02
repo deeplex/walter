@@ -6,17 +6,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class ZaehlerstandDbService : IControllerService<ZaehlerstandEntryBase>
     {
-        public WalterDbService.WalterDb DbService { get; }
-        public SaverwalterContext ctx => DbService.ctx;
+        public SaverwalterContext Ctx { get; }
 
-        public ZaehlerstandDbService(WalterDbService.WalterDb dbService)
+        public ZaehlerstandDbService(SaverwalterContext ctx)
         {
-            DbService = dbService;
+            Ctx = ctx;
         }
 
         public IActionResult Get(int id)
         {
-            var entity = DbService.ctx.Zaehlerstaende.Find(id);
+            var entity = Ctx.Zaehlerstaende.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -35,14 +34,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = DbService.ctx.Zaehlerstaende.Find(id);
+            var entity = Ctx.Zaehlerstaende.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            DbService.ctx.Zaehlerstaende.Remove(entity);
-            DbService.SaveWalter();
+            Ctx.Zaehlerstaende.Remove(entity);
+            Ctx.SaveChanges();
 
             return new OkResult();
         }
@@ -66,21 +65,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private ZaehlerstandEntryBase Add(ZaehlerstandEntryBase entry)
         {
-            var zaehler = ctx.ZaehlerSet.Find(int.Parse(entry.Zaehler!.Id!));
+            var zaehler = Ctx.ZaehlerSet.Find(int.Parse(entry.Zaehler!.Id!));
             var entity = new Zaehlerstand(entry.Datum, entry.Stand)
             {
                 Zaehler = zaehler!
             };
             SetOptionalValues(entity, entry);
-            DbService.ctx.Zaehlerstaende.Add(entity);
-            DbService.SaveWalter();
+            Ctx.Zaehlerstaende.Add(entity);
+            Ctx.SaveChanges();
 
             return new ZaehlerstandEntryBase(entity);
         }
 
         public IActionResult Put(int id, ZaehlerstandEntryBase entry)
         {
-            var entity = DbService.ctx.Zaehlerstaende.Find(id);
+            var entity = Ctx.Zaehlerstaende.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -102,8 +101,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Stand = entry.Stand;
 
             SetOptionalValues(entity, entry);
-            DbService.ctx.Zaehlerstaende.Update(entity);
-            DbService.SaveWalter();
+            Ctx.Zaehlerstaende.Update(entity);
+            Ctx.SaveChanges();
 
             return new ZaehlerstandEntryBase(entity);
         }

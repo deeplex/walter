@@ -22,7 +22,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry Wohnung { get; set; } = null!;
 
             public ErhaltungsaufwendungEntryBase() { }
-            public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity, WalterDbService.WalterDb dbService)
+            public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity, SaverwalterContext ctx)
             {
                 Entity = entity;
 
@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Datum = Entity.Datum;
                 Notiz = Entity.Notiz;
                 Bezeichnung = Entity.Bezeichnung;
-                Aussteller = new(Entity.AusstellerId, dbService.ctx.FindPerson(Entity.AusstellerId).Bezeichnung);
+                Aussteller = new(Entity.AusstellerId, ctx.FindPerson(Entity.AusstellerId).Bezeichnung);
                 var anschrift = Entity.Wohnung.Adresse is Adresse a ? a.Anschrift : "Unbekannte Anschrift";
                 Wohnung = new(Entity.Wohnung.WohnungId, $"{anschrift} - {Entity.Wohnung.Bezeichnung}");
             }
@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class ErhaltungsaufwendungEntry : ErhaltungsaufwendungEntryBase
         {
             public ErhaltungsaufwendungEntry() { }
-            public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity, WalterDbService.WalterDb dbService) : base(entity, dbService)
+            public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity, SaverwalterContext ctx) : base(entity, ctx)
             {
             }
         }
@@ -55,9 +55,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get() => new OkObjectResult(DbService.ctx.Erhaltungsaufwendungen
+        public IActionResult Get() => new OkObjectResult(DbService.Ctx.Erhaltungsaufwendungen
             .ToList()
-            .Select(e => new ErhaltungsaufwendungEntryBase(e, DbService.DbService))
+            .Select(e => new ErhaltungsaufwendungEntryBase(e, DbService.Ctx))
             .ToList());
         [HttpPost]
         public IActionResult Post([FromBody] ErhaltungsaufwendungEntry entry) => DbService.Post(entry);

@@ -1,7 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
@@ -31,7 +30,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry? Besitzer { get; set; }
 
             public WohnungEntryBase() { }
-            public WohnungEntryBase(Wohnung entity, WalterDbService.WalterDb dbService)
+            public WohnungEntryBase(Wohnung entity, SaverwalterContext ctx)
             {
                 Entity = entity;
 
@@ -42,35 +41,35 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Einheiten = Entity.Nutzeinheit;
                 Notiz = Entity.Notiz;
                 Adresse = Entity.Adresse is Adresse a ? new AdresseEntryBase(a) : null;
-                Besitzer = Entity.BesitzerId is Guid id && id != Guid.Empty ? new(id, dbService.ctx.FindPerson(id).Bezeichnung) : null;
+                Besitzer = Entity.BesitzerId is Guid id && id != Guid.Empty ? new(id, ctx.FindPerson(id).Bezeichnung) : null;
 
                 var v = Entity.Vertraege.FirstOrDefault(e => e.Ende == null || e.Ende < DateOnly.FromDateTime(DateTime.Now));
                 Bewohner = v != null ?
-                    string.Join(", ", dbService.ctx.MieterSet
+                    string.Join(", ", ctx.MieterSet
                         .Where(m => m.Vertrag.VertragId == v.VertragId)
                         .ToList()
-                        .Select(a => dbService.ctx.FindPerson(a.PersonId).Bezeichnung)) :
+                        .Select(a => ctx.FindPerson(a.PersonId).Bezeichnung)) :
                     null;
             }
         }
 
         public class WohnungEntry : WohnungEntryBase
         {
-            private WalterDbService.WalterDb? DbService { get; }
+            private SaverwalterContext? Ctx { get; }
 
-            public IEnumerable<WohnungEntryBase>? Haus => Entity?.Adresse?.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!));
+            public IEnumerable<WohnungEntryBase>? Haus => Entity?.Adresse?.Wohnungen.Select(e => new WohnungEntryBase(e, Ctx!));
             public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
-            public IEnumerable<VertragEntryBase>? Vertraege => Entity?.Vertraege.Select(e => new VertragEntryBase(e, DbService!));
+            public IEnumerable<VertragEntryBase>? Vertraege => Entity?.Vertraege.Select(e => new VertragEntryBase(e, Ctx!));
             public IEnumerable<ErhaltungsaufwendungEntryBase>? Erhaltungsaufwendungen
-                => Entity?.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungEntryBase(e, DbService!));
+                => Entity?.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungEntryBase(e, Ctx!));
             public IEnumerable<UmlageEntryBase>? Umlagen => Entity?.Umlagen.Select(e => new UmlageEntryBase(e));
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen
                 => Entity?.Umlagen.SelectMany(e => e.Betriebskostenrechnungen.Select(f => new BetriebskostenrechnungEntryBase(f)));
 
             public WohnungEntry() : base() { }
-            public WohnungEntry(Wohnung entity, WalterDbService.WalterDb dbService) : base(entity, dbService)
+            public WohnungEntry(Wohnung entity, SaverwalterContext ctx) : base(entity, ctx)
             {
-                DbService = dbService;
+                Ctx = ctx;
             }
         }
 
@@ -83,9 +82,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             _logger = logger;
         }
         [HttpGet]
-        public IActionResult Get() => new OkObjectResult(DbService.ctx.Wohnungen
+        public IActionResult Get() => new OkObjectResult(DbService.Ctx.Wohnungen
             .ToList()
-            .Select(e => new WohnungEntryBase(e, DbService.DbService))
+            .Select(e => new WohnungEntryBase(e, DbService.Ctx))
             .ToList());
         [HttpPost]
         public IActionResult Post([FromBody] WohnungEntry entry) => DbService.Post(entry);

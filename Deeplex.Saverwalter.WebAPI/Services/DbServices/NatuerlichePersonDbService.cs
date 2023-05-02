@@ -9,17 +9,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class NatuerlichePersonDbService : IControllerService<NatuerlichePersonEntry>
     {
-        public WalterDbService.WalterDb DbService { get; }
-        public SaverwalterContext ctx => DbService.ctx;
+        public SaverwalterContext Ctx { get; }
 
-        public NatuerlichePersonDbService(WalterDbService.WalterDb dbService)
+        public NatuerlichePersonDbService(SaverwalterContext ctx)
         {
-            DbService = dbService;
+            Ctx = ctx;
         }
 
         public IActionResult Get(int id)
         {
-            var entity = DbService.ctx.NatuerlichePersonen.Find(id);
+            var entity = Ctx.NatuerlichePersonen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -27,7 +26,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new NatuerlichePersonEntry(entity, DbService);
+                var entry = new NatuerlichePersonEntry(entity, Ctx);
                 return new OkObjectResult(entry);
             }
             catch
@@ -38,14 +37,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = DbService.ctx.NatuerlichePersonen.Find(id);
+            var entity = Ctx.NatuerlichePersonen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            DbService.ctx.NatuerlichePersonen.Remove(entity);
-            DbService.SaveWalter();
+            Ctx.NatuerlichePersonen.Remove(entity);
+            Ctx.SaveChanges();
 
             return new OkResult();
         }
@@ -72,15 +71,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             var entity = new NatuerlichePerson(entry.Nachname);
 
             SetOptionalValues(entity, entry);
-            DbService.ctx.NatuerlichePersonen.Add(entity);
-            DbService.SaveWalter();
+            Ctx.NatuerlichePersonen.Add(entity);
+            Ctx.SaveChanges();
 
-            return new NatuerlichePersonEntry(entity, DbService);
+            return new NatuerlichePersonEntry(entity, Ctx);
         }
 
         public IActionResult Put(int id, NatuerlichePersonEntry entry)
         {
-            var entity = DbService.ctx.NatuerlichePersonen.Find(id);
+            var entity = Ctx.NatuerlichePersonen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -101,10 +100,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Nachname = entry.Nachname;
 
             SetOptionalValues(entity, entry);
-            DbService.ctx.NatuerlichePersonen.Update(entity);
-            DbService.SaveWalter();
+            Ctx.NatuerlichePersonen.Update(entity);
+            Ctx.SaveChanges();
 
-            return new NatuerlichePersonEntry(entity, DbService);
+            return new NatuerlichePersonEntry(entity, Ctx);
         }
 
         private void SetOptionalValues(NatuerlichePerson entity, NatuerlichePersonEntry entry)
@@ -122,14 +121,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Mobil = entry.Mobil;
             if (entry.Adresse is AdresseEntryBase a)
             {
-                entity.Adresse = GetAdresse(a, ctx);
+                entity.Adresse = GetAdresse(a, Ctx);
             }
             if (entry.SelectedJuristischePersonen is IEnumerable<SelectionEntry> l)
             {
                 // Add new
                 entity.JuristischePersonen
                     .AddRange(l.Where(w => !entity.JuristischePersonen.Exists(e => w.Id == e.JuristischePersonId.ToString()))
-                    .Select(w => ctx.JuristischePersonen.Find(new Guid(w.Id))!));
+                    .Select(w => Ctx.JuristischePersonen.Find(new Guid(w.Id))!));
                 // Remove old
                 entity.JuristischePersonen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.JuristischePersonen.ToString()));
             }

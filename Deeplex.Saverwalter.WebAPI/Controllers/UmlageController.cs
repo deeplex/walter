@@ -44,18 +44,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class UmlageEntry : UmlageEntryBase
         {
-            private WalterDbService.WalterDb? DbService { get; }
+            private SaverwalterContext? Ctx { get; }
 
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen => Entity?.Betriebskostenrechnungen
                 .Select(e => new BetriebskostenrechnungEntryBase(e));
-            public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!));
+            public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, Ctx!));
             // TODO Zaehler
             // TODO HKVO
 
             public UmlageEntry() : base() { }
-            public UmlageEntry(Umlage entity, WalterDbService.WalterDb dbService) : base(entity)
+            public UmlageEntry(Umlage entity, SaverwalterContext ctx) : base(entity)
             {
-                DbService = dbService;
+                Ctx = ctx;
             }
         }
 
@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get() => new OkObjectResult(DbService.ctx.Umlagen.ToList().Select(e => new UmlageEntryBase(e)).ToList());
+        public IActionResult Get() => new OkObjectResult(DbService.Ctx.Umlagen.ToList().Select(e => new UmlageEntryBase(e)).ToList());
         [HttpPost]
         public IActionResult Post([FromBody] UmlageEntry entry) => DbService.Post(entry);
 

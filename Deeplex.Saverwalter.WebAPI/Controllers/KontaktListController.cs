@@ -18,7 +18,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public int Id { get; set; }
             public Guid Guid { get; set; }
-            public string? Name { get; set; }
+            public string Name { get; set; } = null!;
             public string? Email { get; set; }
             public string? Fax { get; set; }
             public string? Notiz { get; set; }
@@ -66,13 +66,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             private IEnumerable<Vertrag>? GetVertraege()
             {
-                if (DbService == null)
+                if (Ctx == null)
                 {
                     return null;
                 }
-                var Person = DbService!.ctx.FindPerson(Guid).JuristischePersonen.Select(e => e.PersonId).ToList();
-                var asMieter = DbService!.ctx.MieterSet.Where(e => e.PersonId == Guid || Person!.Contains(e.PersonId)).Select(e => e.Vertrag).ToList();
-                var asOther = DbService!.ctx.Vertraege.Where(e =>
+                var Person = Ctx!.FindPerson(Guid).JuristischePersonen.Select(e => e.PersonId).ToList();
+                var asMieter = Ctx!.MieterSet.Where(e => e.PersonId == Guid || Person!.Contains(e.PersonId)).Select(e => e.Vertrag).ToList();
+                var asOther = Ctx!.Vertraege.Where(e =>
                     Guid == e.Wohnung.BesitzerId ||
                     Guid == e.AnsprechpartnerId ||
                     Person.Contains(e.Wohnung.BesitzerId) ||
@@ -83,38 +83,38 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 return asOther.AsQueryable().DistinctBy(e => e.VertragId);
             }
 
-            private WalterDbService.WalterDb? DbService { get; set; }
+            private SaverwalterContext? Ctx { get; set; }
 
             public IEnumerable<SelectionEntry>? SelectedJuristischePersonen { get; set; }
             public IEnumerable<PersonEntryBase>? JuristischePersonen
                 => Entity?.JuristischePersonen.Select(e => new PersonEntryBase(e));
             public IEnumerable<VertragEntryBase>? Vertraege
-                => GetVertraege()?.Select(e => new VertragEntryBase(e, DbService!));
+                => GetVertraege()?.Select(e => new VertragEntryBase(e, Ctx!));
             public IEnumerable<WohnungEntryBase>? Wohnungen
-                => GetVertraege()?.Select(e => e.Wohnung).Distinct().Select(e => new WohnungEntryBase(e, DbService!));
+                => GetVertraege()?.Select(e => e.Wohnung).Distinct().Select(e => new WohnungEntryBase(e, Ctx!));
 
             protected PersonEntry() : base() { }
-            public PersonEntry(IPerson entity, WalterDbService.WalterDb dbService) : base(entity)
+            public PersonEntry(IPerson entity, SaverwalterContext ctx) : base(entity)
             {
-                DbService = dbService;
-                SelectedJuristischePersonen = Entity!.JuristischePersonen.Select(e => new SelectionEntry(e.PersonId, dbService.ctx.FindPerson(e.PersonId).Bezeichnung));
+                Ctx = ctx;
+                SelectedJuristischePersonen = Entity!.JuristischePersonen.Select(e => new SelectionEntry(e.PersonId, ctx.FindPerson(e.PersonId).Bezeichnung));
             }
         }
 
         private readonly ILogger<KontaktListController> _logger;
-        private WalterDbService.WalterDb DbService { get; }
+        private SaverwalterContext Ctx { get; }
 
-        public KontaktListController(ILogger<KontaktListController> logger, WalterDbService.WalterDb dbService)
+        public KontaktListController(ILogger<KontaktListController> logger, SaverwalterContext ctx)
         {
-            DbService = dbService;
+            Ctx = ctx;
             _logger = logger;
         }
 
         [HttpGet]
         public IActionResult Get()
         {
-            var np = DbService.ctx.NatuerlichePersonen.ToList().Select(e => new PersonEntryBase(e)).ToList();
-            var jp = DbService.ctx.JuristischePersonen.ToList().Select(e => new PersonEntryBase(e)).ToList();
+            var np = Ctx.NatuerlichePersonen.ToList().Select(e => new PersonEntryBase(e)).ToList();
+            var jp = Ctx.JuristischePersonen.ToList().Select(e => new PersonEntryBase(e)).ToList();
             return new OkObjectResult(np.Concat(jp));
         }
     }

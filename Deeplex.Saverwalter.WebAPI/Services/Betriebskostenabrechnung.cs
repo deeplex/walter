@@ -1,7 +1,6 @@
 ﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.PrintService;
-using Deeplex.Saverwalter.WalterDbService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Utils.BetriebskostenabrechnungController;
 
@@ -18,12 +17,12 @@ namespace Deeplex.Saverwalter.WebAPI
             return new Betriebskostenabrechnung(ctx, vertrag, Jahr, beginn, ende);
         }
 
-        public IActionResult Get(int id, int Jahr, WalterDb dbService)
+        public IActionResult Get(int id, int Jahr, SaverwalterContext ctx)
         {
             try
             {
-                var abrechnung = createAbrechnung(id, Jahr, dbService.ctx);
-                var controller = new BetriebskostenabrechnungEntry(abrechnung, dbService);
+                var abrechnung = createAbrechnung(id, Jahr, ctx);
+                var controller = new BetriebskostenabrechnungEntry(abrechnung, ctx);
 
                 return new OkObjectResult(controller);
             }
@@ -70,11 +69,11 @@ namespace Deeplex.Saverwalter.WebAPI
             }
         }
 
-        public WalterDb DbService { get; }
+        public SaverwalterContext Ctx { get; }
 
-        public BetriebskostenabrechnungHandler(WalterDb dbService)
+        public BetriebskostenabrechnungHandler(SaverwalterContext ctx)
         {
-            DbService = dbService;
+            Ctx = ctx;
         }
     }
 }

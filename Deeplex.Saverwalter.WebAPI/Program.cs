@@ -1,5 +1,4 @@
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WalterDbService;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authentication;
@@ -116,7 +115,6 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Options.DefaultScopedLifestyle = new SimpleInjector.Lifestyles.AsyncScopedLifestyle();
             container.Register(CreateDbContextOptions, Lifestyle.Singleton);
             container.Register<SaverwalterContext>(Lifestyle.Scoped);
-            container.Register<WalterDb, WalterDbImpl>(Lifestyle.Scoped);
 
             container.Register<AdresseDbService>(Lifestyle.Scoped);
             container.Register<BetriebskostenrechnungDbService>(Lifestyle.Scoped);

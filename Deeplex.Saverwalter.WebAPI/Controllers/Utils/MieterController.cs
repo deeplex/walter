@@ -8,19 +8,19 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
     public class MieterController : ControllerBase
     {
         private readonly ILogger<MieterController> _logger;
-        private WalterDbService.WalterDb DbService { get; }
+        private SaverwalterContext Ctx { get; }
 
-        public MieterController(ILogger<MieterController> logger, WalterDbService.WalterDb dbService)
+        public MieterController(ILogger<MieterController> logger, SaverwalterContext ctx)
         {
-            DbService = dbService;
+            Ctx = ctx;
             _logger = logger;
         }
 
         private IQueryable<Vertrag> GetQueryableVertrag(Guid id)
         {
-            var Person = DbService.ctx.FindPerson(id).JuristischePersonen.Select(e => e.PersonId).ToList();
-            var asMieter = DbService.ctx.MieterSet.Where(e => e.PersonId == id || Person.Contains(e.PersonId)).Select(e => e.Vertrag).ToList();
-            var asOther = DbService.ctx.Vertraege.Where(e =>
+            var Person = Ctx.FindPerson(id).JuristischePersonen.Select(e => e.PersonId).ToList();
+            var asMieter = Ctx.MieterSet.Where(e => e.PersonId == id || Person.Contains(e.PersonId)).Select(e => e.Vertrag).ToList();
+            var asOther = Ctx.Vertraege.Where(e =>
                 id == e.Wohnung.BesitzerId ||
                 id == e.AnsprechpartnerId ||
                 Person.Contains(e.Wohnung.BesitzerId) ||
@@ -40,14 +40,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         [Route("api/wohnungen/mieter/{id}")]
         public IEnumerable<WohnungEntryBase> GetWohnungen(Guid id)
         {
-            return GetQueryableWohnung(id).Select(e => new WohnungEntryBase(e, DbService)).ToList();
+            return GetQueryableWohnung(id).Select(e => new WohnungEntryBase(e, Ctx)).ToList();
         }
 
         [HttpGet]
         [Route("api/vertraege/mieter/{id}")]
         public IEnumerable<VertragEntryBase> GetVertraege(Guid id)
         {
-            return GetQueryableVertrag(id).Select(e => new VertragEntryBase(e, DbService)).ToList();
+            return GetQueryableVertrag(id).Select(e => new VertragEntryBase(e, Ctx)).ToList();
         }
     }
 }

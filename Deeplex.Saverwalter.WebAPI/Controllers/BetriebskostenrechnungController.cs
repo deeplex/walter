@@ -42,14 +42,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class BetriebskostenrechnungEntry : BetriebskostenrechnungEntryBase
         {
-            private WalterDbService.WalterDb? DbService { get; }
+            private SaverwalterContext? Ctx { get; }
 
-            public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Umlage.Wohnungen.Select(e => new WohnungEntryBase(e, DbService!));
+            public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Umlage.Wohnungen.Select(e => new WohnungEntryBase(e, Ctx!));
 
             public BetriebskostenrechnungEntry() : base() { }
-            public BetriebskostenrechnungEntry(Betriebskostenrechnung entity, WalterDbService.WalterDb dbService) : base(entity)
+            public BetriebskostenrechnungEntry(Betriebskostenrechnung entity, SaverwalterContext ctx) : base(entity)
             {
-                DbService = dbService;
+                Ctx = ctx;
             }
         }
 
@@ -64,7 +64,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         [HttpGet]
         public IActionResult Get()
-            => new OkObjectResult(DbService.ctx.Betriebskostenrechnungen
+            => new OkObjectResult(DbService.Ctx.Betriebskostenrechnungen
             .ToList()
             .Select(e => new BetriebskostenrechnungEntryBase(e))
             .ToList());

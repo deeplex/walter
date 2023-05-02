@@ -6,17 +6,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class ErhaltungsaufwendungDbService : IControllerService<ErhaltungsaufwendungEntry>
     {
-        public WalterDbService.WalterDb DbService { get; }
-        public SaverwalterContext ctx => DbService.ctx;
+        public SaverwalterContext Ctx { get; }
 
-        public ErhaltungsaufwendungDbService(WalterDbService.WalterDb dbService)
+        public ErhaltungsaufwendungDbService(SaverwalterContext ctx)
         {
-            DbService = dbService;
+            Ctx = ctx;
         }
 
         public IActionResult Get(int id)
         {
-            var entity = DbService.ctx.Erhaltungsaufwendungen.Find(id);
+            var entity = Ctx.Erhaltungsaufwendungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -24,7 +23,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new ErhaltungsaufwendungEntry(entity, DbService);
+                var entry = new ErhaltungsaufwendungEntry(entity, Ctx);
                 return new OkObjectResult(entry);
             }
             catch
@@ -35,14 +34,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = DbService.ctx.Erhaltungsaufwendungen.Find(id);
+            var entity = Ctx.Erhaltungsaufwendungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            DbService.ctx.Erhaltungsaufwendungen.Remove(entity);
-            DbService.SaveWalter();
+            Ctx.Erhaltungsaufwendungen.Remove(entity);
+            Ctx.SaveChanges();
 
             return new OkResult();
         }
@@ -67,22 +66,22 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         private ErhaltungsaufwendungEntry Add(ErhaltungsaufwendungEntry entry)
         {
             var ausstellerId = new Guid(entry.Aussteller.Id);
-            var wohnung = DbService.ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id));
+            var wohnung = Ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id));
             var entity = new Erhaltungsaufwendung(entry.Betrag, entry.Bezeichnung, ausstellerId, entry.Datum)
             {
                 Wohnung = wohnung!
             };
 
             SetOptionalValues(entity, entry);
-            DbService.ctx.Erhaltungsaufwendungen.Add(entity);
-            DbService.SaveWalter();
+            Ctx.Erhaltungsaufwendungen.Add(entity);
+            Ctx.SaveChanges();
 
-            return new ErhaltungsaufwendungEntry(entity, DbService);
+            return new ErhaltungsaufwendungEntry(entity, Ctx);
         }
 
         public IActionResult Put(int id, ErhaltungsaufwendungEntry entry)
         {
-            var entity = DbService.ctx.Erhaltungsaufwendungen.Find(id);
+            var entity = Ctx.Erhaltungsaufwendungen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -101,16 +100,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         private ErhaltungsaufwendungEntry Update(ErhaltungsaufwendungEntry entry, Erhaltungsaufwendung entity)
         {
             entity.Betrag = entry.Betrag;
-            entity.Wohnung = DbService.ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id))!;
+            entity.Wohnung = Ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id))!;
             entity.Bezeichnung = entry.Bezeichnung;
             entity.AusstellerId = new Guid(entry.Aussteller.Id);
             entity.Datum = entry.Datum;
 
             SetOptionalValues(entity, entry);
-            DbService.ctx.Erhaltungsaufwendungen.Update(entity);
-            DbService.SaveWalter();
+            Ctx.Erhaltungsaufwendungen.Update(entity);
+            Ctx.SaveChanges();
 
-            return new ErhaltungsaufwendungEntry(entity, DbService);
+            return new ErhaltungsaufwendungEntry(entity, Ctx);
         }
 
         private void SetOptionalValues(Erhaltungsaufwendung entity, ErhaltungsaufwendungEntry entry)

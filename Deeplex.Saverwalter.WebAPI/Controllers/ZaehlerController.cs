@@ -40,14 +40,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class ZaehlerEntry : ZaehlerEntryBase
         {
-            private WalterDbService.WalterDb? DbService { get; }
+            private SaverwalterContext? Ctx { get; }
             public IEnumerable<ZaehlerEntryBase>? Einzelzaehler => Entity?.EinzelZaehler.ToList().Select(e => new ZaehlerEntryBase(e));
             public IEnumerable<ZaehlerstandEntryBase>? Staende => Entity?.Staende.ToList().Select(e => new ZaehlerstandEntryBase(e));
 
             public ZaehlerEntry() : base() { }
-            public ZaehlerEntry(Zaehler entity, WalterDbService.WalterDb dbService) : base(entity)
+            public ZaehlerEntry(Zaehler entity, SaverwalterContext ctx) : base(entity)
             {
-                DbService = dbService;
+                Ctx = ctx;
             }
         }
 
@@ -62,7 +62,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         [HttpGet]
         public IActionResult Get()
-            => new OkObjectResult(DbService.ctx.ZaehlerSet.ToList().Select(e
+            => new OkObjectResult(DbService.Ctx.ZaehlerSet.ToList().Select(e
                 => new ZaehlerEntryBase(e)).ToList());
         [HttpPost]
         public IActionResult Post([FromBody] ZaehlerEntry entry) => DbService.Post(entry);

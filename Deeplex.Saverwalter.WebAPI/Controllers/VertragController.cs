@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<SelectionEntry>? SelectedMieter { get; set; }
 
             public VertragEntryBase() { }
-            public VertragEntryBase(Vertrag entity, WalterDbService.WalterDb dbService)
+            public VertragEntryBase(Vertrag entity, SaverwalterContext ctx)
             {
                 Id = entity.VertragId;
                 Beginn = entity.Beginn();
@@ -36,39 +36,39 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     $"{anschrift} - {entity.Wohnung.Bezeichnung}",
                     entity.Wohnung.BesitzerId.ToString());
                 Ansprechpartner = entity.AnsprechpartnerId is Guid id && id != Guid.Empty
-                    ? new(id, dbService.ctx.FindPerson(id).Bezeichnung)
+                    ? new(id, ctx.FindPerson(id).Bezeichnung)
                     : null;
                 Notiz = entity.Notiz;
 
-                var Mieter = dbService.ctx.MieterSet
+                var Mieter = ctx.MieterSet
                     .Where(m => m.Vertrag.VertragId == entity.VertragId)
                     .ToList();
                 MieterAuflistung = string.Join(", ", Mieter
-                    .Select(a => dbService.ctx.FindPerson(a.PersonId).Bezeichnung));
+                    .Select(a => ctx.FindPerson(a.PersonId).Bezeichnung));
                 SelectedMieter = Mieter.Select(e
-                    => new SelectionEntry(e.PersonId, dbService.ctx.FindPerson(e.PersonId).Bezeichnung));
+                    => new SelectionEntry(e.PersonId, ctx.FindPerson(e.PersonId).Bezeichnung));
             }
         }
 
         public class VertragEntry : VertragEntryBase
         {
-            private WalterDbService.WalterDb? DbService { get; }
+            private SaverwalterContext Ctx { get; } = null!;
             private Vertrag Entity { get; } = null!;
 
             public IEnumerable<MieteEntryBase>? Mieten => Entity?.Mieten.Select(e => new MieteEntryBase(e));
             public IEnumerable<MietminderungEntryBase>? Mietminderungen => Entity?.Mietminderungen.Select(e => new MietminderungEntryBase(e));
-            public IEnumerable<PersonEntryBase>? Mieter => DbService?.ctx.MieterSet
+            public IEnumerable<PersonEntryBase>? Mieter => Ctx.MieterSet
                 .Where(m => Entity != null && m.Vertrag.VertragId == Entity.VertragId)
                 .ToList()
-                .Select(e => new PersonEntryBase(DbService.ctx.FindPerson(e.PersonId)));
+                .Select(e => new PersonEntryBase(Ctx.FindPerson(e.PersonId)));
             public IEnumerable<VertragVersionEntryBase>? Versionen { get; set; }
             // TODO Garagen
 
             public VertragEntry() : base() { }
-            public VertragEntry(Vertrag entity, WalterDbService.WalterDb dbService) : base(entity, dbService)
+            public VertragEntry(Vertrag entity, SaverwalterContext ctx) : base(entity, ctx)
             {
                 Entity = entity;
-                DbService = dbService;
+                Ctx = ctx;
                 Versionen = Entity?.Versionen.Select(e => new VertragVersionEntryBase(e));
             }
         }
@@ -83,9 +83,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get() => new OkObjectResult(DbService.ctx.Vertraege
+        public IActionResult Get() => new OkObjectResult(DbService.Ctx.Vertraege
             .ToList()
-            .Select(e => new VertragEntryBase(e, DbService.DbService))
+            .Select(e => new VertragEntryBase(e, DbService.Ctx))
             .ToList());
         [HttpPost]
         public IActionResult Post([FromBody] VertragEntry entry) => DbService.Post(entry);

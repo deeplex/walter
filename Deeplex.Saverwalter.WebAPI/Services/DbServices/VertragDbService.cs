@@ -7,17 +7,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class VertragDbService : IControllerService<VertragEntry>
     {
-        public WalterDbService.WalterDb DbService { get; }
-        public SaverwalterContext ctx => DbService.ctx;
+        public SaverwalterContext Ctx { get; }
 
-        public VertragDbService(WalterDbService.WalterDb dbService)
+        public VertragDbService(SaverwalterContext ctx)
         {
-            DbService = dbService;
+            Ctx = ctx;
         }
 
         public IActionResult Get(int id)
         {
-            var entity = DbService.ctx.Vertraege.Find(id);
+            var entity = Ctx.Vertraege.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -25,7 +24,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new VertragEntry(entity, DbService);
+                var entry = new VertragEntry(entity, Ctx);
                 return new OkObjectResult(entry);
             }
             catch
@@ -36,14 +35,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = DbService.ctx.Vertraege.Find(id);
+            var entity = Ctx.Vertraege.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            DbService.ctx.Vertraege.Remove(entity);
-            DbService.SaveWalter();
+            Ctx.Vertraege.Remove(entity);
+            Ctx.SaveChanges();
 
             return new OkResult();
         }
@@ -67,19 +66,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private VertragEntry Add(VertragEntry entry)
         {
-            var wohnung = DbService.ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id!));
+            var wohnung = Ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id!));
             var entity = new Vertrag() { Wohnung = wohnung! };
 
             SetOptionalValues(entity, entry);
-            DbService.ctx.Vertraege.Add(entity);
-            DbService.SaveWalter();
+            Ctx.Vertraege.Add(entity);
+            Ctx.SaveChanges();
 
-            return new VertragEntry(entity, DbService);
+            return new VertragEntry(entity, Ctx);
         }
 
         public IActionResult Put(int id, VertragEntry entry)
         {
-            var entity = DbService.ctx.Vertraege.Find(id);
+            var entity = Ctx.Vertraege.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -97,13 +96,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private VertragEntry Update(VertragEntry entry, Vertrag entity)
         {
-            entity.Wohnung = DbService.ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id))!;
+            entity.Wohnung = Ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id))!;
 
             SetOptionalValues(entity, entry);
-            DbService.ctx.Vertraege.Update(entity);
-            DbService.SaveWalter();
+            Ctx.Vertraege.Update(entity);
+            Ctx.SaveChanges();
 
-            return new VertragEntry(entity, DbService);
+            return new VertragEntry(entity, Ctx);
         }
 
         private void SetOptionalValues(Vertrag entity, VertragEntry entry)
@@ -135,7 +134,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             if (entry.SelectedMieter is IEnumerable<SelectionEntry> l)
             {
                 // Get a list of all mieter
-                var mieter = DbService.ctx.MieterSet.Where(m => m.Vertrag.VertragId == entity.VertragId).ToList();
+                var mieter = Ctx.MieterSet.Where(m => m.Vertrag.VertragId == entity.VertragId).ToList();
                 // Add missing mieter
                 foreach (var selectedMieter in l)
                 {
@@ -145,7 +144,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                         {
                             Vertrag = entity
                         };
-                        DbService.ctx.MieterSet.Add(newMieter); ;
+                        Ctx.MieterSet.Add(newMieter); ;
                     }
                 }
                 // Remove mieter
@@ -153,7 +152,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 {
                     if (!l.Any(e => m.PersonId.ToString() == e.Id))
                     {
-                        DbService.ctx.MieterSet.Remove(m);
+                        Ctx.MieterSet.Remove(m);
                     }
                 }
             }

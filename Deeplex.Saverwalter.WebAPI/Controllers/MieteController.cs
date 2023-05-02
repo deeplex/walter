@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         [HttpGet]
         public IActionResult Get()
-            => new OkObjectResult(DbService.ctx.Mieten.ToList().Select(e => new MieteEntryBase(e)).ToList());
+            => new OkObjectResult(DbService.Ctx.Mieten.ToList().Select(e => new MieteEntryBase(e)).ToList());
         [HttpPost]
         public IActionResult Post([FromBody] MieteEntryBase entry) => DbService.Post(entry);
 
