@@ -1,7 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
-using FluentAssertions;
 
 namespace Deeplex.Saverwalter.ModelTests.model
 {

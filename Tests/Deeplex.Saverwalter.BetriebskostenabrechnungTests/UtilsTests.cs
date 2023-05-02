@@ -1,5 +1,4 @@
-﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
-using FakeItEasy;
+﻿using FakeItEasy;
 using FluentAssertions;
 using Xunit;
 

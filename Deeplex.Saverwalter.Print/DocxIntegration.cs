@@ -1,9 +1,7 @@
 ﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
-using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
-using System.Collections.Immutable;
 
 namespace Deeplex.Saverwalter.PrintService
 {
