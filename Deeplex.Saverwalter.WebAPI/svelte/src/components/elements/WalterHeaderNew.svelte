@@ -6,6 +6,7 @@
   import { walter_post } from '$WalterServices/requests';
   import { goto } from '$app/navigation';
   import { WalterToastContent } from '$WalterLib';
+  import { addToast } from '$WalterStore';
 
   export let title: string = 'Neu...';
   export let apiURL: string;
@@ -24,9 +25,12 @@
   );
 
   async function click_post() {
-    const j = await walter_post(apiURL, entry, SaveToast);
-    if (j.id) {
-      goto(`${apiURL}/${j.id}`.replace('api/', ''));
+    const response = await walter_post(apiURL, entry);
+    const parsed = await response.json();
+    addToast(SaveToast, response.ok, response.json());
+
+    if (parsed.id) {
+      goto(`${apiURL}/${parsed.id}`.replace('api/', ''));
     }
   }
 </script>

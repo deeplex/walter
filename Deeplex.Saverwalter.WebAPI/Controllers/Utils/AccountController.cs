@@ -78,8 +78,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 
         public class CreateRequest
         {
-            public string Username { get; set; }
-            public string Password { get; set; }
+            public string Username { get; set; } = null!;
+            public string Password { get; set; } = null!;
         }
 
         [HttpPost("create")]
@@ -108,7 +108,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 
         public class UpdatePasswordRequest
         {
-            public string Password { get; set; }
+            public string OldPassword { get; set; } = null!;
+            public string NewPassword { get; set; } = null!;
         }
 
         [HttpPost("update-password")]
@@ -122,14 +123,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             {
                 return Unauthorized();
             }
-            var userIdClaim = user.Claims.Single((claim) => claim.ValueType == ClaimTypes.NameIdentifier);
+            var userIdClaim = user.Claims.Single((claim) => claim.Type == ClaimTypes.NameIdentifier);
             var account = await _userService.GetUserById(Guid.Parse(userIdClaim.Value));
-            if (account == null)
+            if (account?.Pbkdf2PasswordCredential == null)
             {
                 return Unauthorized();
             }
 
-            await _userService.UpdateUserPassword(account, Encoding.UTF8.GetBytes(updatePasswordRequest.Password));
+            if (!_userService.ValidatePbkdf2PasswordCredentials(
+                account.Pbkdf2PasswordCredential,
+                Encoding.UTF8.GetBytes(updatePasswordRequest.OldPassword)))
+            {
+                return BadRequest();
+            }
+
+            await _userService.UpdateUserPassword(account, Encoding.UTF8.GetBytes(updatePasswordRequest.NewPassword));
             return Ok();
         }
     }

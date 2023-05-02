@@ -12,6 +12,7 @@
   import { Add } from 'carbon-icons-svelte';
   import { walter_post } from '$WalterServices/requests';
   import { WalterToastContent } from '../../lib/WalterToastContent';
+  import { addToast } from '$WalterStore';
 
   export let addUrl: string | undefined = undefined;
   export let addEntry: any | undefined = undefined;
@@ -38,8 +39,11 @@
     if (!url) {
       return;
     }
-    const j = await walter_post(url, body, PostToast);
-    rows = [...rows, j];
+    const response = await walter_post(url, body);
+    const parsed = await response.json();
+    addToast(PostToast, response.ok, parsed);
+
+    rows = [...rows, parsed];
     open = true;
   }
 </script>

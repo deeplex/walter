@@ -77,17 +77,13 @@ async function finishPut(e: Response, toast?: WalterToastContent) {
 
 // =================================== POST ====================================
 
-export async function walter_post<
-  Result extends object = Record<string, string>
->(url: string, body: any, toast?: WalterToastContent): Promise<Result> {
+export async function walter_post(url: string, body: unknown): Promise<Response> {
   const response = await walter_fetch(fetch, url, {
     method: 'POST',
     body: JSON.stringify(body)
   });
-  const parsed = await response.json();
 
-  toast && addToast(toast, response.ok, parsed);
-  return parsed;
+  return response;
 }
 
 // =================================== DELETE =================================

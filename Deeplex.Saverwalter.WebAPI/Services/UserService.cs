@@ -78,7 +78,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             await walterContext.SaveChangesAsync();
         }
 
-        private bool ValidatePbkdf2PasswordCredentials(Pbkdf2PasswordCredential credential, byte[] utf8Password)
+        public bool ValidatePbkdf2PasswordCredentials(Pbkdf2PasswordCredential credential, byte[] utf8Password)
         {
             var passwordHash = HashPassword(utf8Password, credential.Salt, credential.Iterations);
             // TODO: Sleep(CSPRNG.random(0, 200))

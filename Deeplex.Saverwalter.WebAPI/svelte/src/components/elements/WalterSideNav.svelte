@@ -20,6 +20,7 @@
     Money,
     Settings,
     Tools,
+    User,
     UserMultiple
   } from 'carbon-icons-svelte';
   import { WalterToastContent } from '$WalterLib';
@@ -89,10 +90,17 @@
 
     <SideNavMenu text="Einstellungen" icon={Settings}>
       <SideNavLink
+        isSelected={$page.route.id?.includes('/account')}
+        text="Nutzereinstellungen"
+        icon={User}
+        href="/account"
+        style="padding-left: 1em"
+      />
+      <SideNavLink
         icon={Logout}
         on:click={logout}
         text="Abmelden"
-        style="padding-left: 4em"
+        style="padding-left: 1em"
       />
     </SideNavMenu>
   </SideNavItems>
