@@ -15,7 +15,7 @@ export function convertTime(text: string | undefined): string | undefined {
 }
 
 export function toLocaleIsoString(date: Date) {
-  var locale = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  const locale = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
   return locale.toISOString();
 }
 

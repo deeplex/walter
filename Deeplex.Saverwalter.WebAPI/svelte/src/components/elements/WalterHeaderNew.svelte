@@ -27,7 +27,7 @@
   async function click_post() {
     const response = await walter_post(apiURL, entry);
     const parsed = await response.json();
-    addToast(SaveToast, response.ok, response.json());
+    addToast(SaveToast, response.ok, parsed);
 
     if (parsed.id) {
       goto(`${apiURL}/${parsed.id}`.replace('api/', ''));

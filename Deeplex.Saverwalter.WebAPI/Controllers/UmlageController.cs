@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             protected Umlage? Entity { get; }
 
-            public int? Id { get; set; }
+            public int Id { get; set; }
             public string? Notiz { get; set; }
             public string? Beschreibung { get; set; }
             public SelectionEntry Schluessel { get; set; } = null!;

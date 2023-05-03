@@ -10,7 +10,13 @@
 			"version": "lts"
 		}
 	},
-	"postCreateCommand": "dotnet restore"
+	"postCreateCommand": "dotnet restore",
+
+	"customizations": {
+		"vscode": {
+		  "extensions": ["svelte.svelte-vscode", "mhutchie.git-graph"]
+		}
+	  }
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},

@@ -57,7 +57,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public IEnumerable<MieteEntryBase>? Mieten => Entity?.Mieten.Select(e => new MieteEntryBase(e));
             public IEnumerable<MietminderungEntryBase>? Mietminderungen => Entity?.Mietminderungen.Select(e => new MietminderungEntryBase(e));
-            public IEnumerable<PersonEntryBase>? Mieter => Ctx.MieterSet
+            public IEnumerable<PersonEntryBase>? Mieter => Ctx?.MieterSet
                 .Where(m => Entity != null && m.Vertrag.VertragId == Entity.VertragId)
                 .ToList()
                 .Select(e => new PersonEntryBase(Ctx.FindPerson(e.PersonId)));

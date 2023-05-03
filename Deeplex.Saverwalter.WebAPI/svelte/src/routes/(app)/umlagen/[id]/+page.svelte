@@ -17,7 +17,9 @@
   export let data: PageData;
 
   const lastBetriebskostenrechnung =
-    data.a.betriebskostenrechnungen[data.a.betriebskostenrechnungen.length - 1];
+    data.a.betriebskostenrechnungen[
+      data.a.betriebskostenrechnungen.length - 1
+    ] || undefined;
 
   const umlage: WalterSelectionEntry = {
     id: '' + data.a.id,
@@ -28,8 +30,10 @@
     {
       typ: data.a.typ,
       umlage: umlage,
-      betrag: lastBetriebskostenrechnung.betrag,
-      betreffendesJahr: lastBetriebskostenrechnung.betreffendesJahr + 1,
+      betrag: lastBetriebskostenrechnung?.betrag || 0,
+      betreffendesJahr:
+        lastBetriebskostenrechnung?.betreffendesJahr + 1 ||
+        new Date().getFullYear(),
       datum: toLocaleIsoString(new Date())
     };
 </script>

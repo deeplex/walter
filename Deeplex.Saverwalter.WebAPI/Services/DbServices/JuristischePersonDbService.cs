@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private JuristischePersonEntry Add(JuristischePersonEntry entry)
         {
-            var entity = new JuristischePerson(entry.Name);
+            var entity = new JuristischePerson(entry.Name!);
 
             SetOptionalValues(entity, entry);
             Ctx.JuristischePersonen.Add(entity);
@@ -97,7 +97,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private JuristischePersonEntry Update(JuristischePersonEntry entry, JuristischePerson entity)
         {
-            entity.Bezeichnung = entry.Name;
+            entity.Bezeichnung = entry.Name!;
 
             SetOptionalValues(entity, entry);
             Ctx.JuristischePersonen.Update(entity);
