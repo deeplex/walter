@@ -27,9 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Deeplex.Saverwalter.Betriebskostenabrechnung\Deeplex.Saverwalter.BetriebskostenabrechnungService.csproj" />
+    <ProjectReference Include="..\Deeplex.Saverwalter.BetriebskostenabrechnungService\Deeplex.Saverwalter.BetriebskostenabrechnungService.csproj" />
     <ProjectReference Include="..\Deeplex.Saverwalter.Model\Deeplex.Saverwalter.Model.csproj" />
-    <ProjectReference Include="..\Deeplex.Saverwalter.Print\Deeplex.Saverwalter.PrintService.csproj" />
+    <ProjectReference Include="..\Deeplex.Saverwalter.PrintService\Deeplex.Saverwalter.PrintService.csproj" />
   </ItemGroup>
 
 </Project>
