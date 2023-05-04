@@ -2,6 +2,8 @@ stages:
   - build
   - notify
 
+include: 'https://git.klawr.de/deeplex/templates/.notify-template.yml
+
 variables:
   IMAGE_TAG: v0.0.3
   IMAGE_NAME: saverwalter
@@ -42,32 +44,3 @@ build-docker:
     - echo "Image $IMAGE_NAME:$IMAGE_TAG does not exist. Building..."
     - docker build -t "$IMAGE_NAME:$IMAGE_TAG" .
     - fi
-
-gotify-failure:
-  stage: notify
-  image: alpine:3.17
-  before_script:
-    - apk --no-cache add curl
-  allow_failure: true
-  when: on_failure
-  script:
-    - URL="https://gotify.klawr.de/message?token=$GOTIFY_TOKEN"
-    - TITLE="\"gitlab $CI_PROJECT_NAME\""
-    - MSG="\"pipeline $CI_PIPELINE_ID for project $CI_PROJECT_NAME failed\""
-    - echo $MSG
-    - BODY="{\"message\":$MSG, \"priority\":1, \"title\":$TITLE}"
-    - curl -v --header "Content-Type:application/json" --data "$BODY" $URL
-
-gotify-success:
-  stage: notify
-  image: alpine:3.17
-  before_script:
-    - apk --no-cache add curl
-  allow_failure: true
-  script:
-    - URL="https://gotify.klawr.de/message?token=$GOTIFY_TOKEN"
-    - TITLE="\"gitlab $CI_PROJECT_NAME\""
-    - MSG="\"pipeline $CI_PIPELINE_ID for project $CI_PROJECT_NAME successful\""
-    - echo $MSG
-    - BODY="{\"message\":$MSG, \"priority\":1, \"title\":$TITLE}"
-    - curl -v --header "Content-Type:application/json" --data "$BODY" $URL
