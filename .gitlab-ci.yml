@@ -2,7 +2,9 @@ stages:
   - build
   - notify
 
-include: 'https://git.klawr.de/deeplex/templates/.notify-template.yml
+include:
+  project: deeplex/templates
+  file: Notify.gitlab-ci.yml
 
 variables:
   IMAGE_TAG: v0.0.3
