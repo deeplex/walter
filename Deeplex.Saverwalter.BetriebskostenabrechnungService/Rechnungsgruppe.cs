@@ -20,11 +20,19 @@ namespace Deeplex.Saverwalter.Model
             Ende = interval.Ende;
             Personenzahl = interval.Personenzahl;
 
-            double personenAnteil = (double)(personenZeitIntervallList.FirstOrDefault(personenZeitIntervall =>
-                personenZeitIntervall.Beginn <= Beginn)?.Personenzahl ?? 0) / Personenzahl;
-            double zeitAnteil = (double)(Ende.DayNumber - Beginn.DayNumber + 1) / betriebskostenabrechnung.Abrechnungszeitspanne;
+            if (Personenzahl == 0)
+            {
+                Anteil = 0;
+            }
+            else
+            {
+                var personenAnteil = (double)(personenZeitIntervallList.FirstOrDefault(personenZeitIntervall =>
+                    personenZeitIntervall.Beginn <= Beginn)?.Personenzahl ?? 0) / Personenzahl;
+                var zeitAnteil = (double)(Ende.DayNumber - Beginn.DayNumber + 1) / betriebskostenabrechnung.Abrechnungszeitspanne;
 
-            Anteil = personenAnteil * zeitAnteil;
+                Anteil = personenAnteil * zeitAnteil;
+
+            }
         }
     }
 

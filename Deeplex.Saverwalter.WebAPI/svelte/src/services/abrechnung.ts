@@ -1,5 +1,6 @@
 import type { WalterUmlageEntry } from '$WalterLib';
-import type { WalterBetriebskostenabrechnungKostenpunkt } from '$WalterTypes';
+import type { WalterBetriebskostenabrechnungEntry, WalterBetriebskostenabrechnungKostengruppenEntry, WalterBetriebskostenabrechnungKostenpunkt } from '$WalterTypes';
+import { walter_get } from './requests';
 import { finish_s3_post } from './s3';
 
 const headers = {
@@ -38,6 +39,46 @@ async function create_abrechnung_file(apiURL: string, fileName: string) {
   } else {
     return finish_s3_post(response);
   }
+}
+
+export async function loadAbrechnung(
+  vertragId: string,
+  year: string,
+  fetchImpl: typeof fetch
+) {
+  const abrechnungURL = `/api/betriebskostenabrechnung/${vertragId}/${year}`;
+
+  const abrechnung = await (walter_get(
+    abrechnungURL,
+    fetchImpl
+  ) as Promise<WalterBetriebskostenabrechnungEntry>);
+
+  return {
+    ...abrechnung,
+    kostengruppen: getKostengruppen(abrechnung)
+  } as WalterBetriebskostenabrechnungKostengruppenEntry;
+}
+
+export function getKostengruppen(
+  abrechnung: WalterBetriebskostenabrechnungEntry
+) {
+  return abrechnung.gruppen.map((e) => {
+    const kostenpunkte = e.umlagen.map((u, i) =>
+      getKostenpunkt(
+        i,
+        u,
+        new Date(abrechnung.nutzungsbeginn).toLocaleDateString('de-De'),
+        new Date(abrechnung.nutzungsende).toLocaleDateString('de-De'),
+        abrechnung.jahr,
+        e.wfZeitanteil
+      )
+    );
+
+    return {
+      kostenpunkte,
+      ...e
+    };
+  });
 }
 
 export function getKostenpunkt(
