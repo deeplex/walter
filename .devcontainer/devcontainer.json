@@ -14,7 +14,7 @@
 
 	"customizations": {
 		"vscode": {
-		  "extensions": ["svelte.svelte-vscode", "mhutchie.git-graph"]
+		  "extensions": ["svelte.svelte-vscode", "mhutchie.git-graph", "eamodio.gitlens"]
 		}
 	  }
 

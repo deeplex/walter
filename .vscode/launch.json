@@ -2,13 +2,13 @@
     "version": "0.2.0",
     "compounds": [
         {
-            "name": "Svelte + ASP.net",
-            "configurations": ["Debug SvelteKit", ".NET Core Launch (web)"]
+            "name": "svelte + asp.net",
+            "configurations": ["sveltekit", "asp.net"]
         }
     ],
     "configurations": [
         {
-            "name": "Debug SvelteKit",
+            "name": "sveltekit",
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}/Deeplex.Saverwalter.WebAPI/svelte",
@@ -30,7 +30,7 @@
             ]
         },
         {
-            "name": ".NET Core Launch (web)",
+            "name": "asp.net",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
@@ -38,10 +38,10 @@
             "args": [],
             "cwd": "${workspaceFolder}/Deeplex.Saverwalter.WebAPI",
             "stopAtEntry": false,
-            "serverReadyAction": {
-                "action": "openExternally",
-                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
-            },
+            // "serverReadyAction": {
+            //     "action": "debugWithEdge",
+            //     "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            // },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "DATABASE_HOST": "db",
@@ -55,11 +55,6 @@
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
             }
-        },
-        {
-            "name": ".NET Core Attach",
-            "type": "coreclr",
-            "request": "attach"
         }
     ]
 }
