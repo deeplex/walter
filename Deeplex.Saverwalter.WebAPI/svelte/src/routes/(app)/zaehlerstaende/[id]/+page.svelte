@@ -16,7 +16,7 @@
   files={data.anhaenge}
   a={data.a}
   apiURL={data.apiURL}
-  title={data.a.zaehler.text + ' - ' + convertDate(data.a.datum)}
+  title={data.a.zaehler.text + ' - ' + convertDate(new Date(data.a.datum))}
   f={data.fetch}
 />
 

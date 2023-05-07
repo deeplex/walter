@@ -73,7 +73,11 @@
         {#if cell.value === null || cell.value === undefined || cell.value === ''}
           ---
         {:else if dates(cell.key)}
-          {convertDate(cell.value)}
+          {new Date(cell.value).toLocaleDateString('de-DE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          })}
         {:else if cell.key === 'creationTime'}
           {convertTime(cell.value)}
         {:else if cell.key === 'betrag' || cell.key === 'grundmiete' || cell.key === 'kosten'}

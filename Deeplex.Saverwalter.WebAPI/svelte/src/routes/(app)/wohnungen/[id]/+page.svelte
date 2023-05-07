@@ -14,7 +14,7 @@
     WalterHeaderDetail,
     WalterWohnung
   } from '$WalterComponents';
-  import { toLocaleIsoString } from '$WalterServices/utils';
+  import { convertDate } from '$WalterServices/utils';
   import type {
     WalterErhaltungsaufwendungEntry,
     WalterUmlageEntry,
@@ -43,7 +43,7 @@
       id: '' + data.a.id,
       text: data.a.adresse?.anschrift + ' - ' + data.a.bezeichnung
     },
-    datum: toLocaleIsoString(new Date())
+    datum: convertDate(new Date())
   };
 </script>
 

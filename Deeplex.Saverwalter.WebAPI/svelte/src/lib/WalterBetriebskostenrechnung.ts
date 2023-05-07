@@ -3,7 +3,7 @@ import { WalterSelectionEntry } from './WalterSelection';
 import { WalterWohnungEntry } from './WalterWohnung';
 
 export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
-  public static ApiURL: string = `/api/betriebskostenrechnungen`;
+  public static ApiURL = `/api/betriebskostenrechnungen`;
 
   constructor(
     public id: number,

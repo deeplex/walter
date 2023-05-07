@@ -11,12 +11,25 @@
   export let value: string | undefined = undefined;
   export let placeholder: string | undefined = undefined;
   export let disabled: boolean | undefined = false;
+
+  function change(e: any) {
+    value = convertDate(new Date(e.detail?.selectedDates[0]));
+  }
+
+  function getDateForDatePicker(date: string | undefined) {
+    return date ? new Date(date).toLocaleDateString() : undefined;
+  }
 </script>
 
 {#await value}
   <DatePickerSkeleton />
 {:then x}
-  <DatePicker value={convertDate(x)} dateFormat="d.m.Y" datePickerType="single">
+  <DatePicker
+    value={getDateForDatePicker(x)}
+    dateFormat="d.m.Y"
+    datePickerType="single"
+    on:change={change}
+  >
     <DatePickerInput
       {disabled}
       style="width: 100%"

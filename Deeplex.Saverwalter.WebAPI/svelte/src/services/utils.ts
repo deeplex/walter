@@ -1,6 +1,7 @@
-export function convertDate(text: string | undefined): string | undefined {
-  if (text) {
-    return new Date(text).toLocaleDateString('de-DE');
+export function convertDate(date: Date | undefined): string | undefined {
+  if (date) {
+    // en-CA is yyyy-MM-dd, which is requested by C# DateOnly
+    return date.toLocaleDateString('en-CA');
   } else {
     return undefined;
   }
@@ -12,11 +13,6 @@ export function convertTime(text: string | undefined): string | undefined {
   } else {
     return undefined;
   }
-}
-
-export function toLocaleIsoString(date: Date) {
-  const locale = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return locale.toISOString();
 }
 
 export function convertEuro(value: number | undefined): string | undefined {

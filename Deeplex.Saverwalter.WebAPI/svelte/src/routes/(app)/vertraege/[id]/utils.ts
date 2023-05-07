@@ -1,7 +1,7 @@
 import type { WalterVertragVersionEntry } from '$WalterLib';
 import { getKostenpunkt } from '$WalterServices/abrechnung';
 import { walter_get } from '$WalterServices/requests';
-import { toLocaleIsoString } from '$WalterServices/utils';
+import { convertDate } from '$WalterServices/utils';
 import type {
   WalterBetriebskostenabrechnungEntry,
   WalterBetriebskostenabrechnungKostengruppenEntry
@@ -11,8 +11,8 @@ export function getMietminderungEntry(vertragId: string) {
   const today = new Date();
   return {
     vertrag: { id: vertragId, text: '' },
-    beginn: toLocaleIsoString(today),
-    ende: toLocaleIsoString(new Date(today.setMonth(today.getMonth() + 1)))
+    beginn: convertDate(today),
+    ende: convertDate(new Date(today.setMonth(today.getMonth() + 1)))
   };
 }
 
@@ -22,7 +22,7 @@ export function getVertragversionEntry(
 ) {
   return {
     vertrag: { id: vertragId, text: '' },
-    beginn: toLocaleIsoString(new Date()),
+    beginn: convertDate(new Date()),
     personenzahl: lastVersion?.personenzahl,
     grundmiete: lastVersion?.grundmiete
   };
@@ -34,7 +34,7 @@ export function getMieteEntry(
 ) {
   return {
     vertrag: { id: vertragId, text: '' },
-    zahlungsdatum: toLocaleIsoString(new Date()),
+    zahlungsdatum: convertDate(new Date()),
     betrag: lastVersion?.grundmiete || 0
   };
 }

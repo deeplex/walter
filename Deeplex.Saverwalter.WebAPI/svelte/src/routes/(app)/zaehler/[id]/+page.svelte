@@ -8,7 +8,7 @@
     WalterZaehlerstaende,
     WalterZaehlerList
   } from '$WalterComponents';
-  import { toLocaleIsoString } from '$WalterServices/utils';
+  import { convertDate } from '$WalterServices/utils';
   import type { WalterZaehlerEntry, WalterZaehlerstandEntry } from '$WalterLib';
 
   export let data: PageData;
@@ -20,7 +20,7 @@
     : undefined;
   const zaehlerstandEntry: Partial<WalterZaehlerstandEntry> = {
     zaehler: { id: '' + data.a.id, text: data.a.kennnummer },
-    datum: toLocaleIsoString(new Date()),
+    datum: convertDate(new Date()),
     stand: lastZaehlerstand?.stand || 0,
     einheit: lastZaehlerstand?.einheit
   };

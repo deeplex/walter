@@ -6,13 +6,13 @@
     WalterBetriebskostenrechnung
   } from '$WalterComponents';
   import type { WalterBetriebskostenrechnungEntry } from '$WalterLib';
-  import { toLocaleIsoString } from '$WalterServices/utils';
+  import { convertDate } from '$WalterServices/utils';
   import type { PageData } from './$types';
 
   export let data: PageData;
 
   const entry: Partial<WalterBetriebskostenrechnungEntry> = {
-    datum: toLocaleIsoString(new Date())
+    datum: convertDate(new Date())
   };
   let searchParams: URLSearchParams = new URL($page.url).searchParams;
 
@@ -30,6 +30,8 @@
   const jahr = searchParams.get('jahr');
   if (jahr) {
     entry.betreffendesJahr = +jahr;
+  } else {
+    entry.betreffendesJahr = new Date().getFullYear() - 1;
   }
 
   const betrag = searchParams.get('betrag');

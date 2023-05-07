@@ -8,7 +8,7 @@
     WalterWohnungen,
     WalterUmlage
   } from '$WalterComponents';
-  import { toLocaleIsoString } from '$WalterServices/utils';
+  import { convertDate } from '$WalterServices/utils';
   import type {
     WalterBetriebskostenrechnungEntry,
     WalterSelectionEntry
@@ -34,7 +34,7 @@
       betreffendesJahr:
         lastBetriebskostenrechnung?.betreffendesJahr + 1 ||
         new Date().getFullYear(),
-      datum: toLocaleIsoString(new Date())
+      datum: convertDate(new Date())
     };
 </script>
 
