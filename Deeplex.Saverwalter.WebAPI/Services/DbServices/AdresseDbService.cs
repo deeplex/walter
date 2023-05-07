@@ -7,7 +7,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
     public class AdresseDbService : IControllerService<AdresseEntry>
     {
         public SaverwalterContext Ctx { get; }
-        public SaverwalterContext ctx => ctx;
 
         public AdresseDbService(SaverwalterContext ctx)
         {
@@ -16,7 +15,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Get(int id)
         {
-            var entity = ctx.Adressen.Find(id);
+            var entity = Ctx.Adressen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -24,7 +23,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new AdresseEntry(entity, ctx);
+                var entry = new AdresseEntry(entity, Ctx);
                 return new OkObjectResult(entry);
             }
             catch
@@ -35,14 +34,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = ctx.Adressen.Find(id);
+            var entity = Ctx.Adressen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            ctx.Adressen.Remove(entity);
-            ctx.SaveChanges();
+            Ctx.Adressen.Remove(entity);
+            Ctx.SaveChanges();
 
             return new OkResult();
         }
@@ -76,7 +75,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Put(int id, AdresseEntry entry)
         {
-            var entity = ctx.Adressen.Find(id);
+            var entity = Ctx.Adressen.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();

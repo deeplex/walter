@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         [HttpGet]
         public IActionResult Get()
-            => new OkObjectResult(DbService.ctx.Adressen
+            => new OkObjectResult(DbService.Ctx.Adressen
             .ToList()
             .Select(e => new AdresseEntryBase(e))
             .ToList());
