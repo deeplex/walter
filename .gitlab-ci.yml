@@ -38,6 +38,9 @@ build-docker:
   needs:
     - build-svelte
     - build-dotnet
+  dependencies:
+    - build-svelte
+    - build-dotnet
   script:
     - cd Deeplex.Saverwalter.WebAPI
     - if docker image inspect "${IMAGE_NAME}:${IMAGE_TAG}" >/dev/null 2>&1; then
