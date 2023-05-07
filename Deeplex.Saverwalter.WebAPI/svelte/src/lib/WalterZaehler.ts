@@ -4,7 +4,7 @@ import { WalterSelectionEntry } from './WalterSelection';
 import { WalterZaehlerstandEntry } from './WalterZaehlerstand';
 
 export class WalterZaehlerEntry extends WalterApiHandler {
-  public static ApiURL: string = `/api/zaehler`;
+  public static ApiURL = `/api/zaehler`;
 
   constructor(
     public id: number,

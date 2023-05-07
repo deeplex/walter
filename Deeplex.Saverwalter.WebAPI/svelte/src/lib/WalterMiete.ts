@@ -2,7 +2,7 @@ import { WalterApiHandler } from './WalterApiHandler';
 import { WalterSelectionEntry } from './WalterSelection';
 
 export class WalterMieteEntry extends WalterApiHandler {
-  public static ApiURL: string = `/api/mieten`;
+  public static ApiURL = `/api/mieten`;
 
   constructor(
     public id: number,

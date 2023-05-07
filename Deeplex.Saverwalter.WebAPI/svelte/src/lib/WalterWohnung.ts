@@ -8,7 +8,7 @@ import { WalterVertragEntry } from './WalterVertrag';
 import { WalterZaehlerEntry } from './WalterZaehler';
 
 export class WalterWohnungEntry extends WalterApiHandler {
-  public static ApiURL: string = `/api/wohnungen`;
+  public static ApiURL = `/api/wohnungen`;
 
   constructor(
     public adresse: WalterAdresseEntry,

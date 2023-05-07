@@ -6,7 +6,7 @@ import { WalterSelectionEntry } from './WalterSelection';
 import { WalterVertragVersionEntry } from './WalterVertragVersion';
 
 export class WalterVertragEntry extends WalterApiHandler {
-  public static ApiURL: string = `/api/vertraege`;
+  public static ApiURL = `/api/vertraege`;
 
   constructor(
     public id: number,
