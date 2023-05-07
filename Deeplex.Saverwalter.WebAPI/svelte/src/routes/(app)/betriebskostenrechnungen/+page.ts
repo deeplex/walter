@@ -2,7 +2,7 @@ import { walter_selection } from '$WalterServices/requests';
 import { WalterBetriebskostenrechnungEntry } from '$WalterLib';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ params, fetch }) => {
+export const load: PageLoad = async ({ fetch }) => {
   const apiURL = `/api/betriebskostenrechnungen`;
   return {
     apiURL: apiURL,

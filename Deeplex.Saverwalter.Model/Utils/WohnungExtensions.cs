@@ -7,7 +7,8 @@
 
         public static string GetWohnungenBezeichnung(this List<Wohnung> Wohnungen)
             => string.Join(" — ", Wohnungen
-                .GroupBy(w => w.Adresse)
+                .Where(w => w.Adresse != null)
+                .GroupBy(w => w.Adresse!)
                 .ToDictionary(g => g.Key, g => g.ToList())
                 .Select(adr =>
                 {

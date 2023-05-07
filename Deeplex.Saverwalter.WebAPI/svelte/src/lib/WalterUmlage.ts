@@ -4,7 +4,7 @@ import { WalterSelectionEntry } from './WalterSelection';
 import { WalterWohnungEntry } from './WalterWohnung';
 
 export class WalterUmlageEntry extends WalterApiHandler {
-  public static ApiURL: string = `/api/umlagen`;
+  public static ApiURL = `/api/umlagen`;
 
   constructor(
     public id: number,
