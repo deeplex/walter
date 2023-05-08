@@ -46,6 +46,7 @@ build-docker:
     - echo "CI_COMMIT_TAG is empty. Skipping build.";
     - elif [[ ! "$CI_COMMIT_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     - echo "CI_COMMIT_TAG ($CI_COMMIT_TAG) does not match pattern v0.0.0. Skipping build.";
+    - exit 1
     - elif docker image inspect "${IMAGE_NAME}:${CI_COMMIT_TAG}" >/dev/null 2>&1; then
     - echo "Image $IMAGE_NAME:$CI_COMMIT_TAG already exists. Skipping build.";
     - else
