@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             {
                 return Unauthorized();
             }
-            var userIdClaim = user.Claims.Single((claim) => claim.ValueType == ClaimTypes.NameIdentifier);
+            var userIdClaim = user.Claims.Single((claim) => claim.Type == ClaimTypes.NameIdentifier);
             var account = await _userService.GetUserById(Guid.Parse(userIdClaim.Value));
             if (account == null)
             {
