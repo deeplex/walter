@@ -40,7 +40,7 @@
     if (response == null) {
       invalid = true;
     } else {
-      goto('/');
+      history.back();
     }
   }
 
