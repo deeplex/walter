@@ -13,6 +13,7 @@
   import { WalterToastContent } from '$WalterLib';
   import { walter_sign_in } from '$WalterServices/auth';
   import type { PageData } from './$types';
+  import { page } from '$app/stores';
 
   export let data: PageData;
 
@@ -40,7 +41,11 @@
     if (response == null) {
       invalid = true;
     } else {
-      history.back();
+      if (document.referrer.includes($page.url.host)) {
+        history.back();
+      } else {
+        goto('/');
+      }
     }
   }
 
