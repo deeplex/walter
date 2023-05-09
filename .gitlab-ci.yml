@@ -1,5 +1,6 @@
 stages:
   - build
+  - dockerize
   - notify
 
 include:
@@ -32,7 +33,7 @@ build-dotnet:
       - $CI_PROJECT_DIR/Deeplex.Saverwalter.WebAPI/bin
 
 build-docker:
-  stage: build
+  stage: dockerize
   image: docker:23.0
   needs:
     - build-svelte
