@@ -34,6 +34,13 @@
             ]
         },
         {
+            "name": "chrome",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:5137",
+            "webRoot": "${workspaceFolder}/Deeplex.Saverwalter.WebAPI/svelte/src",
+        },
+        {
             "name": "msedge",
             "type": "msedge",
             "request": "launch",
