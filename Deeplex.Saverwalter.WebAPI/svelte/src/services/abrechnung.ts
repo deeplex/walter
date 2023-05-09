@@ -1,6 +1,6 @@
 import type { WalterUmlageEntry } from '$WalterLib';
 import type { WalterBetriebskostenabrechnungEntry, WalterBetriebskostenabrechnungKostengruppenEntry, WalterBetriebskostenabrechnungKostenpunkt } from '$WalterTypes';
-import { walter_get } from './requests';
+import { walter_fetch, walter_get } from './requests';
 import { finish_s3_post } from './s3';
 
 const headers = {
@@ -32,7 +32,7 @@ async function create_abrechnung_file(apiURL: string, fileName: string) {
     method: 'GET',
     headers
   };
-  const response = await fetch(apiURL, fetchOptions);
+  const response = await walter_fetch(fetch, apiURL, fetchOptions);
 
   if (response.status === 200) {
     return response.blob().then((e) => new File([e], fileName));
