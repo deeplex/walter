@@ -2,8 +2,11 @@
     "version": "0.2.0",
     "compounds": [
         {
-            "name": "svelte + asp.net",
-            "configurations": ["sveltekit", "asp.net"]
+            "name": "svelte + .net + edge",
+            "configurations": [
+                "sveltekit",
+                "asp.net"
+            ]
         }
     ],
     "configurations": [
@@ -11,13 +14,14 @@
             "name": "sveltekit",
             "type": "node",
             "request": "launch",
+            "stopOnEntry": false,
             "cwd": "${workspaceFolder}/Deeplex.Saverwalter.WebAPI/svelte",
             "runtimeExecutable": "yarn",
             "runtimeArgs": [
                 "run",
                 "dev",
                 "--",
-                "--inspect-brk"
+                "--inspect-brk=0.0.0.0:5137"
             ],
             "console": "integratedTerminal",
             "sourceMaps": true,
@@ -28,6 +32,13 @@
             "outFiles": [
                 "${workspaceFolder}/Deeplex.Saverwalter.WebAPI/wwwroot"
             ]
+        },
+        {
+            "name": "msedge",
+            "type": "msedge",
+            "request": "launch",
+            "url": "http://localhost:5137",
+            "webRoot": "${workspaceFolder}/Deeplex.Saverwalter.WebAPI/svelte/src"
         },
         {
             "name": "asp.net",
