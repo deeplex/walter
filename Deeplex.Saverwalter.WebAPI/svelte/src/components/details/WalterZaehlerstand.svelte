@@ -14,7 +14,7 @@
 <Row>
   <WalterNumberInput bind:value={a.stand} label="Zählerstand" />
   <WalterDatePicker bind:value={a.datum} labelText="Ablesedatum" />
-  <WalterTextInput readonly bind:value={a.einheit} labelText="Einehit" />
+  <WalterTextInput readonly bind:value={a.einheit} labelText="Einheit" />
 </Row>
 <Row>
   <WalterTextArea labelText="Notiz" bind:value={a.notiz} />

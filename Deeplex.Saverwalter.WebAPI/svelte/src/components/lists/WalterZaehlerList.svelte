@@ -8,7 +8,10 @@
   const headers = [
     { key: 'kennnummer', value: 'Kennnummer' },
     { key: 'wohnung.text', value: 'Wohnung' },
-    { key: 'typ.text', value: 'Typ' }
+    { key: 'typ.text', value: 'Typ' },
+    { key: 'lastZaehlerstand.datum', value: 'Letztes Ablesedatum' },
+    { key: 'lastZaehlerstand.stand', value: 'Letzter Stand' },
+    { key: 'lastZaehlerstand.einheit', value: 'Einheit' }
   ];
 
   const addUrl = `/api/zaehler/`;

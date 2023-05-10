@@ -52,7 +52,7 @@
 <ComposedModal bind:open on:submit>
   <ModalHeader bind:title={file.FileName} />
   <ModalBody>
-    {#if file.Type === 'image/png'}
+    {#if file.Type?.includes('image/')}
       <WalterPreviewImage {file} />
     {:else if file.Type === 'text/plain' || file.Type === 'application/json'}
       <WalterPreviewText {file} />

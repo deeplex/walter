@@ -22,6 +22,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry Typ { get; set; } = null!;
             public SelectionEntry? Wohnung { get; set; }
             public SelectionEntry? AllgemeinZaehler { get; set; }
+            public ZaehlerstandEntryBase? LastZaehlerstand { get; set; }
 
             public ZaehlerEntryBase() { }
             public ZaehlerEntryBase(Zaehler entity)
@@ -35,6 +36,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Wohnung = Entity.Wohnung is Wohnung w ? new(w.WohnungId, $"{w.Adresse?.Anschrift ?? "Unbekannte Anschrift"}, {w.Bezeichnung}") : null;
                 Notiz = Entity.Notiz;
                 AllgemeinZaehler = Entity?.Allgemeinzaehler is Zaehler z ? new(z.ZaehlerId, z.Kennnummer) : null;
+                var letzterStand = Entity?.Staende?.OrderBy(s => s.Stand).LastOrDefault();
+                if (letzterStand is Zaehlerstand stand)
+                {
+                    LastZaehlerstand = new ZaehlerstandEntryBase(letzterStand);
+                }
             }
         }
 
