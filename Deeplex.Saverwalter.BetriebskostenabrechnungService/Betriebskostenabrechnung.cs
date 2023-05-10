@@ -246,7 +246,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var ZaehlerMitVerbrauchForGanzeGruppe = Zaehler.Where(z => umlage.Wohnungen.Contains(z.Wohnung!)).ToList();
             var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(ZaehlerMitVerbrauchForGanzeGruppe);
             var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(ZaehlerMitVerbrauchForGanzeGruppe);
-            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerEndStaende, ZaehlerAnfangsStaende);
+            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerAnfangsStaende, ZaehlerEndStaende);
 
             return Deltas;
         }
@@ -257,7 +257,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var ZaehlerMitVerbrauchForThisWohnung = AlleZaehler.Where(z => z.Wohnung?.WohnungId == Wohnung.WohnungId).ToList();
             var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(ZaehlerMitVerbrauchForThisWohnung);
             var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(ZaehlerMitVerbrauchForThisWohnung);
-            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerEndStaende, ZaehlerAnfangsStaende);
+            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerAnfangsStaende, ZaehlerEndStaende);
 
             return Deltas;
         }

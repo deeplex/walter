@@ -120,6 +120,7 @@ namespace Deeplex.Saverwalter.Model
                 .ToList()
                 .Where(verbrauchList => verbrauchList.Count > 0)
                 .ToList()
+                .Select(e => e)
                 .ToDictionary(
                     verbrauchList => verbrauchList.First().Betriebskostentyp,
                     verbrauchList => verbrauchList.GroupBy(gg => gg.Zaehlertyp)
