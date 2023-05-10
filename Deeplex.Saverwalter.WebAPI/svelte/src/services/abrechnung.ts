@@ -64,10 +64,10 @@ function getZeitanteil(rechnungsgruppe: WalterBetriebskostenabrechnungsRechnungs
     case "0":
       return rechnungsgruppe.wfZeitanteil;
     case "1":
-      return rechnungsgruppe.nEZeitanteil;
+      return rechnungsgruppe.neZeitanteil;
     case "2":
       return rechnungsgruppe.personenZeitanteil
-        .reduce((pre, cur) => pre + (cur.tage / cur.gesamtTage) * cur.personenzahl, 0);
+        .reduce((pre, cur) => pre + cur.anteil, 0)
     case "3":
       console.error(`Berechnung nach Verbrauch ist noch nicht implementiert.`);
       return 0;

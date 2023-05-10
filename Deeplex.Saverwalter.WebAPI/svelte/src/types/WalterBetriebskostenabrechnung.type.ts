@@ -50,6 +50,13 @@ export type WalterBetriebskostenabrechnungPersonenZeitIntervall = {
   personenzahl: number;
 };
 
+export type WalterBetriebskostenabrechnungPersonenZeitanteil = {
+  beginn: Date;
+  ende: Date;
+  anteil: number;
+  personenzahl: number;
+}
+
 export type WalterBetriebskostenabrechnungsRechnungsgruppe = {
   umlagen: WalterUmlageEntry[];
 
@@ -59,10 +66,10 @@ export type WalterBetriebskostenabrechnungsRechnungsgruppe = {
   nfZeitanteil: number;
   gesamtNutzflaeche: number;
   gesamtEinheiten: number;
-  nEZeitanteil: number;
+  neZeitanteil: number;
   gesamtPersonenIntervall: WalterBetriebskostenabrechnungPersonenZeitIntervall[];
   personenIntervall: WalterBetriebskostenabrechnungPersonenZeitIntervall[];
-  personenZeitanteil: WalterBetriebskostenabrechnungPersonenZeitIntervall[];
+  personenZeitanteil: WalterBetriebskostenabrechnungPersonenZeitanteil[];
   heizkosten: WalterBetriebskostenabrechnungHeizkostenberechnungEntry[];
   gesamtBetragKalt: number;
   betragKalt: number;

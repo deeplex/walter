@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.Model
 
         public PersonenZeitanteil(
             PersonenZeitIntervall interval,
-            List<PersonenZeitIntervall> personenZeitIntervallList,
+            List<PersonenZeitIntervall> gesamtPersonenZeitIntervallList,
             BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
         {
             Beginn = interval.Beginn;
@@ -26,12 +26,13 @@ namespace Deeplex.Saverwalter.Model
             }
             else
             {
-                var personenAnteil = (double)(personenZeitIntervallList.FirstOrDefault(personenZeitIntervall =>
-                    personenZeitIntervall.Beginn <= Beginn)?.Personenzahl ?? 0) / Personenzahl;
-                var zeitAnteil = (double)(Ende.DayNumber - Beginn.DayNumber + 1) / betriebskostenabrechnung.Abrechnungszeitspanne;
+                var gesamtPersonenZahl = gesamtPersonenZeitIntervallList
+                    .FirstOrDefault(pzi => Beginn <= pzi.Beginn)?.Personenzahl ?? 0;
+                var personenAnteil = (double)Personenzahl / gesamtPersonenZahl;
+                var zeitSpanne = Ende.DayNumber - Beginn.DayNumber + 1;
+                var zeitAnteil = (double)zeitSpanne / betriebskostenabrechnung.Abrechnungszeitspanne;
 
                 Anteil = personenAnteil * zeitAnteil;
-
             }
         }
     }
@@ -106,10 +107,10 @@ namespace Deeplex.Saverwalter.Model
             GesamtPersonenIntervall = VertraegeIntervallPersonenzahl(alleVertraege, betriebkostenabrechnung, this).ToList();
             PersonenIntervall = VertraegeIntervallPersonenzahl(betriebkostenabrechnung.Versionen, betriebkostenabrechnung, this).ToList();
 
-            PersonenZeitanteil = GesamtPersonenIntervall
+            PersonenZeitanteil = PersonenIntervall
                 .Where(g => g.Beginn < betriebkostenabrechnung.Nutzungsende && g.Ende >= betriebkostenabrechnung.Nutzungsbeginn)
                 .ToList()
-                .Select((w, i) => new PersonenZeitanteil(w, PersonenIntervall, betriebkostenabrechnung))
+                .Select((w, i) => new PersonenZeitanteil(w, GesamtPersonenIntervall, betriebkostenabrechnung))
                 .ToList();
 
             GesamtVerbrauch = Umlagen
