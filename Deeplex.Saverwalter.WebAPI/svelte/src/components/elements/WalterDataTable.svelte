@@ -28,6 +28,7 @@
   ) => Promise<void> | void = () => {};
   export let search: boolean = false;
 
+  // TODO make that smarter...
   function dates(key: string) {
     switch (key) {
       case 'beginn':
