@@ -1,5 +1,5 @@
 import type { WalterUmlageEntry } from '$WalterLib';
-import type { WalterBetriebskostenabrechnungEntry, WalterBetriebskostenabrechnungKostengruppenEntry, WalterBetriebskostenabrechnungKostenpunkt } from '$WalterTypes';
+import type { WalterBetriebskostenabrechnungEntry, WalterBetriebskostenabrechnungKostengruppenEntry, WalterBetriebskostenabrechnungKostenpunkt, WalterBetriebskostenabrechnungsRechnungsgruppe } from '$WalterTypes';
 import { walter_fetch, walter_get } from './requests';
 import { finish_s3_post } from './s3';
 
@@ -59,24 +59,44 @@ export async function loadAbrechnung(
   } as WalterBetriebskostenabrechnungKostengruppenEntry;
 }
 
+function getZeitanteil(rechnungsgruppe: WalterBetriebskostenabrechnungsRechnungsgruppe, umlage: WalterUmlageEntry) {
+  switch (umlage.schluessel.id) {
+    case "0":
+      return rechnungsgruppe.wfZeitanteil;
+    case "1":
+      return rechnungsgruppe.nEZeitanteil;
+    case "2":
+      return rechnungsgruppe.personenZeitanteil
+        .reduce((pre, cur) => pre + (cur.tage / cur.gesamtTage) * cur.personenzahl, 0);
+    case "3":
+      console.error(`Berechnung nach Verbrauch ist noch nicht implementiert.`);
+      return 0;
+    case "4":
+      return rechnungsgruppe.nfZeitanteil;
+    default:
+      console.error(`Umlageschlüssel ${umlage.schluessel.text} kann nicht zugeordnet werden.`);
+      return 0;
+  }
+}
+
 export function getKostengruppen(
   abrechnung: WalterBetriebskostenabrechnungEntry
 ) {
-  return abrechnung.gruppen.map((e) => {
-    const kostenpunkte = e.umlagen.map((u, i) =>
+  return abrechnung.gruppen.map((rechnungsgruppe) => {
+    const kostenpunkte = rechnungsgruppe.umlagen.map((umlageEntry, index) =>
       getKostenpunkt(
-        i,
-        u,
+        index,
+        umlageEntry,
         new Date(abrechnung.nutzungsbeginn).toLocaleDateString('de-De'),
         new Date(abrechnung.nutzungsende).toLocaleDateString('de-De'),
         abrechnung.jahr,
-        e.wfZeitanteil
+        getZeitanteil(rechnungsgruppe, umlageEntry)
       )
     );
 
     return {
       kostenpunkte,
-      ...e
+      ...rechnungsgruppe
     };
   });
 }
