@@ -70,7 +70,7 @@ function getZeitanteil(rechnungsgruppe: WalterBetriebskostenabrechnungsRechnungs
         .reduce((pre, cur) => pre + cur.anteil, 0)
     case "3":
       console.warn(`Anzeige nach Verbrauch ist noch nicht implementiert. Dies ist nur vielleicht korrekt`);
-      return Object.values(rechnungsgruppe.verbrauchAnteil)[0]
+      return Object.values(rechnungsgruppe.verbrauchAnteil)[0] as number
     case "4":
       return rechnungsgruppe.nfZeitanteil;
     default:

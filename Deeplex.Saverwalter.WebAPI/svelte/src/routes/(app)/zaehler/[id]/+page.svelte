@@ -6,10 +6,12 @@
     WalterGrid,
     WalterZaehler,
     WalterZaehlerstaende,
-    WalterZaehlerList
+    WalterZaehlerList,
+    WalterUmlagen
   } from '$WalterComponents';
   import { convertDate } from '$WalterServices/utils';
   import type { WalterZaehlerEntry, WalterZaehlerstandEntry } from '$WalterLib';
+  import WalterUmlage from '../../../../components/details/WalterUmlage.svelte';
 
   export let data: PageData;
 
@@ -24,12 +26,6 @@
     stand: lastZaehlerstand?.stand || 0,
     einheit: lastZaehlerstand?.einheit
   };
-
-  const einzelzaehlerEntry: Partial<WalterZaehlerEntry> = {
-    adresse: { ...data.a.adresse },
-    typ: data.a.typ,
-    allgemeinZaehler: { id: '' + data.a.id, text: data.a.kennnummer }
-  };
 </script>
 
 <WalterHeaderDetail
@@ -43,7 +39,7 @@
 
 <WalterGrid>
   <WalterZaehler
-    zaehler={data.zaehler}
+    umlagen={data.umlagen}
     zaehlertypen={data.zaehlertypen}
     wohnungen={data.wohnungen}
     a={data.a}
@@ -54,14 +50,6 @@
       a={zaehlerstandEntry}
       title="Zählerstände"
       rows={data.a.staende}
-    />
-    <WalterZaehlerList
-      zaehlertypen={data.zaehlertypen}
-      zaehler={data.zaehler}
-      wohnungen={data.wohnungen}
-      a={einzelzaehlerEntry}
-      title="Einzelzähler"
-      rows={data.a.einzelzaehler}
     />
   </Accordion>
 </WalterGrid>

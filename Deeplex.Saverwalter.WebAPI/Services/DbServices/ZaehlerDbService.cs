@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new ZaehlerEntry(entity, Ctx);
+                var entry = new ZaehlerEntry(entity);
                 return new OkObjectResult(entry);
             }
             catch
@@ -76,7 +76,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.ZaehlerSet.Add(entity);
             Ctx.SaveChanges();
 
-            return new ZaehlerEntry(entity, Ctx);
+            return new ZaehlerEntry(entity);
         }
 
         public IActionResult Put(int id, ZaehlerEntry entry)
@@ -107,15 +107,25 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.ZaehlerSet.Update(entity);
             Ctx.SaveChanges();
 
-            return new ZaehlerEntry(entity, Ctx);
+            return new ZaehlerEntry(entity);
         }
 
         private void SetOptionalValues(Zaehler entity, ZaehlerEntry entry)
         {
             entity.Wohnung = entry.Wohnung is SelectionEntry w ? Ctx.Wohnungen.Find(int.Parse(w.Id!)) : null;
-            entity.Allgemeinzaehler = entry.AllgemeinZaehler is SelectionEntry z ? Ctx.ZaehlerSet.Find(int.Parse(z.Id)) : null;
+            
             entity.Adresse = entry.Adresse is AdresseEntryBase a ? GetAdresse(a, Ctx) : null;
             entity.Notiz = entry.Notiz;
+
+            if (entry.SelectedUmlagen is IEnumerable<SelectionEntry> umlagen)
+            {
+                // Add missing umlagen
+                entity.Umlagen.AddRange(umlagen
+                    .Where(umlage => !entity.Umlagen.Exists(e => umlage.Id == e.UmlageId.ToString()))
+                    .Select(w => Ctx.Umlagen.Find(int.Parse(w.Id))!));
+                // Remove old umlagen
+                entity.Umlagen.RemoveAll(w => !umlagen.ToList().Exists(e => e.Id == w.UmlageId.ToString()));
+            }
         }
     }
 }

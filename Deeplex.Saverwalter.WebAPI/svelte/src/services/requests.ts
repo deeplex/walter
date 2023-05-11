@@ -10,6 +10,9 @@ export const walter_selection = {
   umlagen(f: typeof fetch): Promise<WalterSelectionEntry[]> {
     return walter_get('/api/selection/umlagen', f);
   },
+  umlagen_verbrauch(f: typeof fetch): Promise<WalterSelectionEntry[]> {
+    return walter_get('/api/selection/umlagen_verbrauch', f);
+  },
   kontakte(f: typeof fetch): Promise<WalterSelectionEntry[]> {
     return walter_get('/api/selection/kontakte', f);
   },

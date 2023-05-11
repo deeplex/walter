@@ -66,7 +66,7 @@ namespace Deeplex.Saverwalter.Model
                 new Note("Kein Zähler für die Umlage vorhanden", Severity.Error);
                 //return;
             }
-            var Allgemeinzaehler = rechnung.Umlage.HKVO?.Zaehler;
+            var Allgemeinzaehler = rechnung.Umlage.Zaehler.Where(e => e.Wohnung is null);
 
             if (Allgemeinzaehler == null)
             {
@@ -75,11 +75,11 @@ namespace Deeplex.Saverwalter.Model
             }
 
             // Get all Zaehler for this Umlage for this Wohnung
-            var WohnungWaermeZaehler = alleZaehler.Where(z =>
-               z.Typ == Zaehlertyp.Gas && z.Wohnung == wohnung).ToList();
-            //var WohnungWaermeZaehler = Allgemeinzaehler?.EinzelZaehler
-            //    .Where(z => z.Wohnung == wohnung)
-            //    .ToImmutableList();
+            //var WohnungWaermeZaehler = alleZaehler.Where(z =>
+            //   z.Typ == Zaehlertyp.Gas && z.Wohnung == wohnung).ToList();
+            var WohnungWaermeZaehler = rechnung.Umlage.Zaehler
+                .Where(z => z.Wohnung == wohnung)
+                .ToImmutableList();
 
             ImmutableList<Zaehlerstand> Ende(IEnumerable<Zaehler> z, bool ganzeGruppe = false)
             {

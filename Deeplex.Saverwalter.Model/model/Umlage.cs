@@ -12,10 +12,10 @@ namespace Deeplex.Saverwalter.Model
         public string? Beschreibung { get; set; }
         public string? Notiz { get; set; }
         public virtual HKVO? HKVO { get; set; }
-        public virtual Zaehler? Zaehler { get; set; }
 
         public virtual List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
         public virtual List<Betriebskostenrechnung> Betriebskostenrechnungen { get; private set; } = new List<Betriebskostenrechnung>();
+        public virtual List<Zaehler> Zaehler { get; set; } = new List<Zaehler>();
 
         public Umlage(Betriebskostentyp typ, Umlageschluessel schluessel)
         {
@@ -31,7 +31,6 @@ namespace Deeplex.Saverwalter.Model
         public double? HKVO_P7 { get; set; }
         public double? HKVO_P8 { get; set; }
         public HKVO_P9A2? HKVO_P9 { get; set; }
-        public virtual Zaehler? Zaehler { get; set; } // not used? Is implemented in Umlage anyway (for nach Verbrauch)
 
         public string? Notiz { get; set; }
     }

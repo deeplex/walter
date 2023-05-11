@@ -115,6 +115,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
 
             entity.Beschreibung = entry.Beschreibung;
+
             if (entry.SelectedWohnungen is IEnumerable<SelectionEntry> l)
             {
                 // Add missing Wohnungen
@@ -125,7 +126,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 // Remove old Wohnungen
                 entity.Wohnungen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.WohnungId.ToString()));
             }
-            //entity.Zaehler = entry
+
+            if (entry.SelectedZaehler is IEnumerable<SelectionEntry> zaehler)
+            {
+                // Add missing zaehler
+                entity.Zaehler.AddRange(zaehler
+                    .Where(z => !entity.Zaehler.Exists(e => z.Id == e.ZaehlerId.ToString()))
+                    .Select(w => Ctx.ZaehlerSet.Find(int.Parse(w.Id))!));
+                // Remove old zaehler
+                entity.Zaehler.RemoveAll(w => !zaehler.ToList().Exists(e => e.Id == w.ZaehlerId.ToString()));
+            }
+
             entity.Notiz = entry.Notiz;
         }
     }

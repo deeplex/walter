@@ -10,6 +10,7 @@
   export let betriebskostentypen: WalterSelectionEntry[];
   export let umlageschluessel: WalterSelectionEntry[];
   export let wohnungen: WalterSelectionEntry[];
+  export let zaehler: WalterSelectionEntry[];
 
   export let a: Partial<WalterUmlageEntry> = {};
 </script>
@@ -29,6 +30,15 @@
     titleText="Wohnungen"
   />
 </Row>
+{#if a.schluessel?.id === '3'}
+  <Row>
+    <WalterMultiSelect
+      bind:value={a.selectedZaehler}
+      a={zaehler}
+      titleText="Zähler"
+    />
+  </Row>
+{/if}
 <Row>
   <WalterTextArea labelText="Notiz" bind:value={a.notiz} />
 </Row>
