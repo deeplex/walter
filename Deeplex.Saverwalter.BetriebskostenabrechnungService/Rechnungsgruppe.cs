@@ -1,4 +1,5 @@
-﻿using static Deeplex.Saverwalter.Model.Utils;
+﻿using System.Collections.Immutable;
+using static Deeplex.Saverwalter.Model.Utils;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -116,7 +117,7 @@ namespace Deeplex.Saverwalter.Model
             GesamtVerbrauch = Umlagen
                 .Where(umlage => umlage.Schluessel == Umlageschluessel.NachVerbrauch)
                 .ToList()
-                .Select(r => betriebkostenabrechnung.GetVerbrauchWohnung(ctx, r))
+                .Select(r => GetVerbrauchWohnung(ctx, r, betriebkostenabrechnung.Wohnung, betriebkostenabrechnung.Nutzungsbeginn, betriebkostenabrechnung.Nutzungsende, betriebkostenabrechnung.Notes))
                 .ToList()
                 .Where(verbrauchList => verbrauchList.Count > 0)
                 .ToList()
@@ -182,6 +183,94 @@ namespace Deeplex.Saverwalter.Model
             }
         }
 
+        public static List<Verbrauch> GetVerbrauchGanzeGruppe(SaverwalterContext ctx, Umlage umlage, DateOnly nutzungsbeginn, DateOnly nutzungsende, List<Note> notes)
+        {
+            var Zaehler = GetAllZaehlerForVerbrauch(ctx, umlage.Typ);
+            var ZaehlerMitVerbrauchForGanzeGruppe = Zaehler.Where(z => umlage.Wohnungen.Contains(z.Wohnung!)).ToList();
+            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(ZaehlerMitVerbrauchForGanzeGruppe, nutzungsende);
+            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(ZaehlerMitVerbrauchForGanzeGruppe, nutzungsbeginn);
+            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerAnfangsStaende, ZaehlerEndStaende, notes);
+
+            return Deltas;
+        }
+
+        private static List<Verbrauch> GetVerbrauchWohnung(SaverwalterContext ctx, Umlage umlage, Wohnung wohnung, DateOnly nutzungsbeginn, DateOnly nutzungsende, List<Note> notes)
+        {
+            var AlleZaehler = GetAllZaehlerForVerbrauch(ctx, umlage.Typ);
+            var ZaehlerMitVerbrauchForThisWohnung = AlleZaehler.Where(z => z.Wohnung?.WohnungId == wohnung.WohnungId).ToList();
+            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(ZaehlerMitVerbrauchForThisWohnung, nutzungsende);
+            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(ZaehlerMitVerbrauchForThisWohnung, nutzungsbeginn);
+            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerAnfangsStaende, ZaehlerEndStaende, notes);
+
+            return Deltas;
+        }
+
+        private static List<Zaehler> GetAllZaehlerForVerbrauch(SaverwalterContext ctx, Betriebskostentyp typ)
+        {
+            return typ switch
+            {
+                Betriebskostentyp.EntwaesserungSchmutzwasser =>
+                    ctx.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
+                Betriebskostentyp.WasserversorgungKalt =>
+                    ctx.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
+                Betriebskostentyp.Heizkosten => // TODO Man kann auch mit was anderem als Gas heizen...
+                    ctx.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Gas || z.Typ == Zaehlertyp.Warmwasser).ToList(),
+                _ => null
+            } ?? new List<Zaehler> { };
+        }
+
+        private static ImmutableList<Zaehlerstand> GetZaehlerEndStaendeFuerBerechnung(List<Zaehler> zaehler, DateOnly nutzungsende)
+        {
+            return zaehler
+                .Select(z => z.Staende
+                    .OrderBy(s => s.Datum)
+                    .LastOrDefault(l => l.Datum <= nutzungsende && (nutzungsende.DayNumber - l.Datum.DayNumber) < 30))
+                .ToList()
+                .Where(zaehlerstand => zaehlerstand is not null)
+                .Select(e => e!) // still necessary to make sure not null?
+                .ToImmutableList() ?? new List<Zaehlerstand>() { }.ToImmutableList();
+        }
+
+        private static ImmutableList<Zaehlerstand> GetZaehlerAnfangsStaendeFuerBerechnung(List<Zaehler> zaehler, DateOnly nutzungsbeginn)
+        {
+            return zaehler
+                .Select(z => z.Staende.OrderBy(s => s.Datum)
+                    .ToList()
+                    .Where(l => Math.Abs(l.Datum.DayNumber - nutzungsbeginn.AddDays(-1).DayNumber) < 30)
+                    .ToList()
+                .FirstOrDefault())
+                .Where(zs => zs != null)
+                .Select(e => e!) // still necessary to make sure not null?
+                .ToImmutableList();
+        }
+
+        private static List<Verbrauch> GetVerbrauchForZaehlerStaende(Umlage umlage, ImmutableList<Zaehlerstand> beginne, ImmutableList<Zaehlerstand> enden, List<Note> notes)
+        {
+            List<Verbrauch> Deltas = new();
+
+            if (enden.IsEmpty)
+            {
+                notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
+            }
+            else if (beginne.IsEmpty)
+            {
+                notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
+            }
+            else if (enden.Count != beginne.Count)
+            {
+                notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
+            }
+            else
+            {
+                for (var i = 0; i < enden.Count; ++i)
+                {
+                    Deltas.Add(new Verbrauch(umlage.Typ, enden[i].Zaehler.Kennnummer, enden[i].Zaehler.Typ, enden[i].Stand - beginne[i].Stand));
+                }
+            }
+
+            return Deltas;
+        }
+
         private static Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> GetVerbrauch(
             SaverwalterContext ctx,
             BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung,
@@ -191,7 +280,7 @@ namespace Deeplex.Saverwalter.Model
             var VerbrauchList = Umlagen
                     .Where(g => g.Schluessel == Umlageschluessel.NachVerbrauch)
                     .ToList()
-                    .Select(umlage => betriebskostenabrechnung.GetVerbrauchGanzeGruppe(ctx, umlage))
+                    .Select(umlage => GetVerbrauchGanzeGruppe(ctx, umlage, betriebskostenabrechnung.Nutzungsbeginn, betriebskostenabrechnung.Nutzungsende, betriebskostenabrechnung.Notes))
                     .ToList();
 
             if (VerbrauchList.Any(w => w.Count() == 0))
