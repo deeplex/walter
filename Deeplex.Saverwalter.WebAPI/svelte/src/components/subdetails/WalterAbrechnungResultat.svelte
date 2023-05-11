@@ -25,24 +25,30 @@
       </StructuredListRow>
     </StructuredListHead>
     <StructuredListBody>
-      {#each entry.gruppen as gruppe, index}
-        {#if gruppe.betragKalt}
+      {#each entry.abrechnungseinheiten as abrechnungseinheit}
+        {#if abrechnungseinheit.betragKalteNebenkosten}
           <StructuredListRow>
             <StructuredListCell
-              >Abrechnungseinheit: {gruppe.bezeichnung} (kalte Nebenkosten) :</StructuredListCell
+              >Abrechnungseinheit: {abrechnungseinheit.bezeichnung} (kalte Nebenkosten)
+              :</StructuredListCell
             >
             <StructuredListCell style="text-align: right"
-              >{convertEuro(gruppe.betragKalt || 0)}</StructuredListCell
+              >{convertEuro(
+                abrechnungseinheit.betragKalteNebenkosten || 0
+              )}</StructuredListCell
             >
           </StructuredListRow>
         {/if}
-        {#if gruppe.betragWarm}
+        {#if abrechnungseinheit.betragWarmeNebenkosten}
           <StructuredListRow>
             <StructuredListCell
-              >Abrechnungseinheit: {gruppe.bezeichnung} (warme Nebenkosten) :</StructuredListCell
+              >Abrechnungseinheit: {abrechnungseinheit.bezeichnung} (warme Nebenkosten)
+              :</StructuredListCell
             >
             <StructuredListCell style="text-align: right"
-              >{convertEuro(gruppe.betragWarm)}</StructuredListCell
+              >{convertEuro(
+                abrechnungseinheit.betragWarmeNebenkosten
+              )}</StructuredListCell
             >
           </StructuredListRow>
         {/if}

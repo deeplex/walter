@@ -122,7 +122,7 @@ namespace Deeplex.Saverwalter.PrintService
             var section = body.AddSection();
             section.AddPageBreak();
         }
-        public void EqHeizkostenV9_2(Rechnungsgruppe gruppe)
+        public void EqHeizkostenV9_2(Abrechnungseinheit gruppe)
         {
             Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):");
 

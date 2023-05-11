@@ -69,8 +69,8 @@ function getZeitanteil(rechnungsgruppe: WalterBetriebskostenabrechnungsRechnungs
       return rechnungsgruppe.personenZeitanteil
         .reduce((pre, cur) => pre + cur.anteil, 0)
     case "3":
-      console.error(`Berechnung nach Verbrauch ist noch nicht implementiert.`);
-      return 0;
+      console.warn(`Anzeige nach Verbrauch ist noch nicht implementiert. Dies ist nur vielleicht korrekt`);
+      return Object.values(rechnungsgruppe.verbrauchAnteil)[0]
     case "4":
       return rechnungsgruppe.nfZeitanteil;
     default:
@@ -82,21 +82,21 @@ function getZeitanteil(rechnungsgruppe: WalterBetriebskostenabrechnungsRechnungs
 export function getKostengruppen(
   abrechnung: WalterBetriebskostenabrechnungEntry
 ) {
-  return abrechnung.gruppen.map((rechnungsgruppe) => {
-    const kostenpunkte = rechnungsgruppe.umlagen.map((umlageEntry, index) =>
+  return abrechnung.abrechnungseinheiten.map((abrechnungseinheit) => {
+    const kostenpunkte = abrechnungseinheit.umlagen.map((umlageEntry, index) =>
       getKostenpunkt(
         index,
         umlageEntry,
         new Date(abrechnung.nutzungsbeginn).toLocaleDateString('de-De'),
         new Date(abrechnung.nutzungsende).toLocaleDateString('de-De'),
         abrechnung.jahr,
-        getZeitanteil(rechnungsgruppe, umlageEntry)
+        getZeitanteil(abrechnungseinheit, umlageEntry)
       )
     );
 
     return {
       kostenpunkte,
-      ...rechnungsgruppe
+      ...abrechnungseinheit
     };
   });
 }

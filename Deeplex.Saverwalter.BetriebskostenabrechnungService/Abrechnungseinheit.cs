@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Linq;
 using static Deeplex.Saverwalter.Model.Utils;
 
 namespace Deeplex.Saverwalter.Model
@@ -37,7 +36,7 @@ namespace Deeplex.Saverwalter.Model
         }
     }
 
-    public interface IRechnungsgruppe
+    public interface IAbrechnungseinheit
     {
         string Bezeichnung { get; }
         List<PersonenZeitIntervall> PersonenIntervall { get; }
@@ -55,11 +54,11 @@ namespace Deeplex.Saverwalter.Model
         double BetragKalteNebenkosten { get; }
         double GesamtBetragKalteNebenkosten { get; }
         List<Heizkostenberechnung> Heizkosten { get; }
-        double BetragWarm { get; }
-        double GesamtBetragWarm { get; }
+        double BetragWarmeNebenkosten { get; }
+        double GesamtBetragWarmeNebenkosten { get; }
     }
 
-    public sealed class Rechnungsgruppe : IRechnungsgruppe
+    public sealed class Abrechnungseinheit : IAbrechnungseinheit
     {
         public List<Umlage> Umlagen { get; }
         private List<Wohnung> Wohnungen { get; }
@@ -86,12 +85,12 @@ namespace Deeplex.Saverwalter.Model
         public double BetragKalteNebenkosten { get; }
 
         public List<Heizkostenberechnung> Heizkosten { get; }
-        public double GesamtBetragWarm { get; }
-        public double BetragWarm { get; }
+        public double GesamtBetragWarmeNebenkosten { get; }
+        public double BetragWarmeNebenkosten { get; }
 
-        public Rechnungsgruppe(
-            SaverwalterContext ctx,
+        public Abrechnungseinheit(
             List<Umlage> umlagen,
+            List<Zaehler> alleZaehler,
             Wohnung wohnung,
             List<VertragVersion> versionen,
             int jahr,
@@ -115,10 +114,10 @@ namespace Deeplex.Saverwalter.Model
             GesamtNutzflaeche = Wohnungen.Sum(w => w.Nutzflaeche);
             GesamtEinheiten = Wohnungen.Sum(w => w.Nutzeinheit);
             GesamtPersonenIntervall = VertraegeIntervallPersonenzahl(alleVertraege, abrechnungsbeginn, abrechnungsende);
-            GesamtVerbrauch = CalculateGesamtVerbrauch(ctx, umlagen, wohnung, nutzungsbeginn, nutzungsende, notes);
+            GesamtVerbrauch = CalculateAbrechnungseinheitVerbrauch(umlagen, alleZaehler, nutzungsbeginn, nutzungsende, notes);
 
             PersonenIntervall = VertraegeIntervallPersonenzahl(versionen, abrechnungsbeginn, abrechnungsende);
-            Verbrauch = GetVerbrauch(ctx, umlagen, nutzungsbeginn, nutzungsende, GesamtVerbrauch, notes);
+            Verbrauch = CalculateWohnungVerbrauch(umlagen, alleZaehler, wohnung, nutzungsbeginn, nutzungsende, GesamtVerbrauch, notes);
 
             WFZeitanteil = wohnung.Wohnflaeche / GesamtWohnflaeche * zeitanteil;
             NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitanteil;
@@ -128,9 +127,9 @@ namespace Deeplex.Saverwalter.Model
 
             BetragKalteNebenkosten = CalculateBetragKalteNebenkosten(kalteNebenkosten, WFZeitanteil, NEZeitanteil, PersonenZeitanteil, VerbrauchAnteil, notes);
 
-            Heizkosten = CalculateHeizkosten(ctx, umlagen, jahr, wohnung, abrechnungsbeginn, abrechnungsende, nutzungsbeginn, nutzungsende, zeitanteil, notes);
-            GesamtBetragWarm = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.PauschalBetrag);
-            BetragWarm = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.Kosten);
+            Heizkosten = CalculateHeizkosten(umlagen, alleZaehler, jahr, wohnung, abrechnungsbeginn, abrechnungsende, nutzungsbeginn, nutzungsende, zeitanteil, notes);
+            GesamtBetragWarmeNebenkosten = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.PauschalBetrag);
+            BetragWarmeNebenkosten = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.Kosten);
         }
 
         private static List<VertragVersion> getAllVertragVersionen(List<Wohnung> wohnungen, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
@@ -155,9 +154,9 @@ namespace Deeplex.Saverwalter.Model
             }
         }
 
-        public static List<Verbrauch> GetVerbrauchGanzeGruppe(SaverwalterContext ctx, Umlage umlage, DateOnly nutzungsbeginn, DateOnly nutzungsende, List<Note> notes)
+        public static List<Verbrauch> GetVerbrauchAbrechnungseinheit(Umlage umlage, List<Zaehler> zaehler, DateOnly nutzungsbeginn, DateOnly nutzungsende, List<Note> notes)
         {
-            var Zaehler = GetAllZaehlerForVerbrauch(ctx, umlage.Typ);
+            var Zaehler = GetAllZaehlerForVerbrauch(umlage.Typ, zaehler);
             var ZaehlerMitVerbrauchForGanzeGruppe = Zaehler.Where(z => umlage.Wohnungen.Contains(z.Wohnung!)).ToList();
             var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(ZaehlerMitVerbrauchForGanzeGruppe, nutzungsende);
             var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(ZaehlerMitVerbrauchForGanzeGruppe, nutzungsbeginn);
@@ -166,9 +165,9 @@ namespace Deeplex.Saverwalter.Model
             return Deltas;
         }
 
-        private static List<Verbrauch> GetVerbrauchWohnung(SaverwalterContext ctx, Umlage umlage, Wohnung wohnung, DateOnly nutzungsbeginn, DateOnly nutzungsende, List<Note> notes)
+        private static List<Verbrauch> GetVerbrauchWohnung(Umlage umlage, List<Zaehler> alleZaehler, Wohnung wohnung, DateOnly nutzungsbeginn, DateOnly nutzungsende, List<Note> notes)
         {
-            var AlleZaehler = GetAllZaehlerForVerbrauch(ctx, umlage.Typ);
+            var AlleZaehler = GetAllZaehlerForVerbrauch(umlage.Typ, alleZaehler);
             var ZaehlerMitVerbrauchForThisWohnung = AlleZaehler.Where(z => z.Wohnung?.WohnungId == wohnung.WohnungId).ToList();
             var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(ZaehlerMitVerbrauchForThisWohnung, nutzungsende);
             var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(ZaehlerMitVerbrauchForThisWohnung, nutzungsbeginn);
@@ -177,16 +176,16 @@ namespace Deeplex.Saverwalter.Model
             return Deltas;
         }
 
-        private static List<Zaehler> GetAllZaehlerForVerbrauch(SaverwalterContext ctx, Betriebskostentyp typ)
+        private static List<Zaehler> GetAllZaehlerForVerbrauch(Betriebskostentyp typ, List<Zaehler> alleZaehler)
         {
             return typ switch
             {
                 Betriebskostentyp.EntwaesserungSchmutzwasser =>
-                    ctx.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
+                    alleZaehler.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
                 Betriebskostentyp.WasserversorgungKalt =>
-                    ctx.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
+                    alleZaehler.Where(z => z.Typ == Zaehlertyp.Kaltwasser || z.Typ == Zaehlertyp.Warmwasser).ToList(),
                 Betriebskostentyp.Heizkosten => // TODO Man kann auch mit was anderem als Gas heizen...
-                    ctx.ZaehlerSet.Where(z => z.Typ == Zaehlertyp.Gas || z.Typ == Zaehlertyp.Warmwasser).ToList(),
+                    alleZaehler.Where(z => z.Typ == Zaehlertyp.Gas || z.Typ == Zaehlertyp.Warmwasser).ToList(),
                 _ => null
             } ?? new List<Zaehler> { };
         }
@@ -243,9 +242,10 @@ namespace Deeplex.Saverwalter.Model
             return Deltas;
         }
 
-        private static Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> GetVerbrauch(
-            SaverwalterContext ctx,
+        private static Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> CalculateWohnungVerbrauch(
             List<Umlage> Umlagen,
+            List<Zaehler> zaehler,
+            Wohnung wohnung,
             DateOnly nutzungsbeginn,
             DateOnly nutzungsende,
             Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch,
@@ -254,14 +254,14 @@ namespace Deeplex.Saverwalter.Model
             var VerbrauchList = Umlagen
                     .Where(g => g.Schluessel == Umlageschluessel.NachVerbrauch)
                     .ToList()
-                    .Select(umlage => GetVerbrauchGanzeGruppe(ctx, umlage, nutzungsbeginn, nutzungsende, notes))
+                    .Select(umlage => GetVerbrauchWohnung(umlage, zaehler, wohnung, nutzungsbeginn, nutzungsende, notes))
                     .ToList();
 
-            if (VerbrauchList.Any(w => w.Count() == 0))
+            if (VerbrauchList.Any(w => w.Count == 0))
             {
                 // TODO this can be made even more explicit.
                 notes.Add(new Note("Für eine Rechnung konnte keine Zuordnung erstellt werden.", Severity.Error));
-                return new Dictionary<Betriebskostentyp, List<VerbrauchAnteil>>();
+                VerbrauchList = VerbrauchList.Where(w => w.Count > 0).ToList();
             }
 
             return VerbrauchList
@@ -337,10 +337,9 @@ namespace Deeplex.Saverwalter.Model
                 .ToList();
         }
 
-        private static Dictionary<Betriebskostentyp, List<(Zaehlertyp, double)>> CalculateGesamtVerbrauch(
-            SaverwalterContext ctx,
+        private static Dictionary<Betriebskostentyp, List<(Zaehlertyp, double)>> CalculateAbrechnungseinheitVerbrauch(
             List<Umlage> umlagen,
-            Wohnung wohnung,
+            List<Zaehler> alleZaehler,
             DateOnly nutzungsbeginn,
             DateOnly nutzungsende,
             List<Note> notes)
@@ -348,7 +347,7 @@ namespace Deeplex.Saverwalter.Model
             return umlagen
                 .Where(umlage => umlage.Schluessel == Umlageschluessel.NachVerbrauch)
                 .ToList()
-                .Select(r => GetVerbrauchWohnung(ctx, r, wohnung, nutzungsbeginn, nutzungsende, notes))
+                .Select(umlage => GetVerbrauchAbrechnungseinheit(umlage, alleZaehler, nutzungsbeginn, nutzungsende, notes))
                 .ToList()
                 .Where(verbrauchList => verbrauchList.Count > 0)
                 .ToList()
@@ -372,8 +371,8 @@ namespace Deeplex.Saverwalter.Model
         }
 
         private static List<Heizkostenberechnung> CalculateHeizkosten(
-            SaverwalterContext ctx,
             List<Umlage> umlagen,
+            List<Zaehler> zaehler,
             int jahr,
             Wohnung wohnung,
             DateOnly abrechnungsbeginn,
@@ -390,7 +389,7 @@ namespace Deeplex.Saverwalter.Model
                 .ToList()
                 .Where(rechnung => rechnung.BetreffendesJahr == jahr)
                 .ToList()
-                .Select(rechnung => new Heizkostenberechnung(ctx, rechnung, wohnung, abrechnungsbeginn, abrechnungsende, nutzungsbeginn, nutzungsende, zeitanteil, notes))
+                .Select(rechnung => new Heizkostenberechnung(rechnung, zaehler, wohnung, abrechnungsbeginn, abrechnungsende, nutzungsbeginn, nutzungsende, zeitanteil, notes))
                 .ToList();
         }
 

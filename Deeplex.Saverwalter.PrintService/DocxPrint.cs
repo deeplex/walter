@@ -128,7 +128,7 @@ namespace Deeplex.Saverwalter.PrintService
         {
             body.Append(new Break() { Type = BreakValues.Page });
         }
-        public void EqHeizkostenV9_2(Rechnungsgruppe gruppe)
+        public void EqHeizkostenV9_2(Abrechnungseinheit gruppe)
         {
             RunProperties rp() => new RunProperties(new RunFonts() { Ascii = "Cambria Math", HighAnsi = "Cambria Math" });
             DocumentFormat.OpenXml.Math.Run t(string str) => new DocumentFormat.OpenXml.Math.Run(rp(), new DocumentFormat.OpenXml.Math.Text(str));

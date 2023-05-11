@@ -33,8 +33,8 @@ namespace Deeplex.Saverwalter.Model
         // Typen in einen Topf geworfen, aber Zähler referenzieren jetzt jeweils die Allgemeinzähler.
         // Man kann also auch direkt die Zähler des Allgemeinzählers der Rechnung nehmen
         public Heizkostenberechnung(
-            SaverwalterContext ctx,
-            Betriebskostenrechnung r,
+            Betriebskostenrechnung rechnung,
+            List<Zaehler> alleZaehler,
             Wohnung wohnung,
             DateOnly abrechnungsbeginn,
             DateOnly abrechnungsende,
@@ -43,40 +43,43 @@ namespace Deeplex.Saverwalter.Model
             double zeitanteil,
             List<Note> notes)
         {
-            Betrag = r.Betrag;
-            PauschalBetrag = r.Betrag * 1.05;
+            Betrag = rechnung.Betrag;
+            PauschalBetrag = rechnung.Betrag * 1.05;
 
             // TODO These should be variable
             tw = 60;
-            Para7 = r.Umlage.HKVO?.HKVO_P7 ?? 0.5; // HeizkostenV §7
-            Para8 = r.Umlage.HKVO?.HKVO_P8 ?? 0.5; // HeizkostenV §8
+            Para7 = rechnung.Umlage.HKVO?.HKVO_P7 ?? 0.5; // HeizkostenV §7
+            Para8 = rechnung.Umlage.HKVO?.HKVO_P8 ?? 0.5; // HeizkostenV §8
 
             // Alle Warmwasserzähler die in dieser Umlage betroffen sind
-            var AlleWarmwasserZaehler = ctx.ZaehlerSet.Where(z =>
-                z.Typ == Zaehlertyp.Warmwasser && r.Umlage.Wohnungen.Contains(z.Wohnung!)).ToImmutableList();
+            var AlleWarmwasserZaehler = alleZaehler.Where(z =>
+                z.Typ == Zaehlertyp.Warmwasser && rechnung.Umlage.Wohnungen.Contains(z.Wohnung!)).ToImmutableList();
 
             // Der Warmwasserzähler der Wohnung der Abrechnung
             var WarmwasserZaehler = AlleWarmwasserZaehler
                 .Where(z => z.Wohnung == wohnung)
                 .ToImmutableList();
 
-            if (r.Umlage.HKVO == null)
+            // TODO Fix this...
+            if (rechnung.Umlage.HKVO == null)
             {
                 new Note("Kein Zähler für die Umlage vorhanden", Severity.Error);
-                return;
+                //return;
             }
-            var Allgemeinzaehler = r.Umlage.HKVO!.Zaehler;
+            var Allgemeinzaehler = rechnung.Umlage.HKVO?.Zaehler;
 
             if (Allgemeinzaehler == null)
             {
                 new Note("Notwendiger Zähler für Umlage ist nicht definiert", Severity.Error);
-                return;
+                //return;
             }
 
             // Get all Zaehler for this Umlage for this Wohnung
-            var WohnungWaermeZaehler = Allgemeinzaehler!.EinzelZaehler
-                .Where(z => z.Wohnung == wohnung)
-                .ToImmutableList();
+            var WohnungWaermeZaehler = alleZaehler.Where(z =>
+               z.Typ == Zaehlertyp.Gas && z.Wohnung == wohnung).ToList();
+            //var WohnungWaermeZaehler = Allgemeinzaehler?.EinzelZaehler
+            //    .Where(z => z.Wohnung == wohnung)
+            //    .ToImmutableList();
 
             ImmutableList<Zaehlerstand> Ende(IEnumerable<Zaehler> z, bool ganzeGruppe = false)
             {
@@ -105,8 +108,15 @@ namespace Deeplex.Saverwalter.Model
             V = Ende(AlleWarmwasserZaehler, true).Sum(zaehlerstand => zaehlerstand.Stand) -
                 Beginn(AlleWarmwasserZaehler, true).Sum(zaehlerstand => zaehlerstand.Stand);
 
-            Q = Ende(new List<Zaehler>() { Allgemeinzaehler }, true).Sum(zaehlerstand => zaehlerstand.Stand) -
-                Beginn(new List<Zaehler>() { Allgemeinzaehler }, true).Sum(zaehlerstand => zaehlerstand.Stand);
+            //Q = Ende(new List<Zaehler>() { Allgemeinzaehler }, true).Sum(zaehlerstand => zaehlerstand.Stand) -
+            //    Beginn(new List<Zaehler>() { Allgemeinzaehler }, true).Sum(zaehlerstand => zaehlerstand.Stand);
+            
+            var alleWaermeZaehler = alleZaehler.Where(z =>
+                z.Typ == Zaehlertyp.Gas && rechnung.Umlage.Wohnungen.Contains(z.Wohnung!)).ToList();
+
+            Q = Ende(alleWaermeZaehler, true).Sum(zaehlerstand => zaehlerstand.Stand) -
+                Beginn(alleWaermeZaehler, true).Sum(zaehlerstand => zaehlerstand.Stand);
+
 
             if (Q == 0)
             {
@@ -120,7 +130,7 @@ namespace Deeplex.Saverwalter.Model
                 notes.Add(new Note("Heizkostenverteilung nach §9 ist über 100%.", Severity.Error));
             }
 
-            GesamtNutzflaeche = r.Umlage.Wohnungen.Sum(w => w.Nutzflaeche);
+            GesamtNutzflaeche = rechnung.Umlage.Wohnungen.Sum(w => w.Nutzflaeche);
             NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitanteil;
 
             HeizkostenVerbrauchAnteil = (Ende(WohnungWaermeZaehler).Sum(w => w.Stand) - Beginn(WohnungWaermeZaehler).Sum(w => w.Stand)) / Q;

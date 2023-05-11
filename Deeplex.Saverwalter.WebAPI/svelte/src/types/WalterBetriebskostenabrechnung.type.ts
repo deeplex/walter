@@ -32,7 +32,7 @@ export type WalterBetriebskostenabrechnungEntry = {
   abrechnungszeitspanne: number;
   nutzungszeitspanne: number;
   zeitanteil: number;
-  gruppen: WalterBetriebskostenabrechnungsRechnungsgruppe[];
+  abrechnungseinheiten: WalterBetriebskostenabrechnungsRechnungsgruppe[];
   result: number;
   allgStromFaktor: number;
 };
@@ -58,23 +58,24 @@ export type WalterBetriebskostenabrechnungPersonenZeitanteil = {
 }
 
 export type WalterBetriebskostenabrechnungsRechnungsgruppe = {
-  umlagen: WalterUmlageEntry[];
-
   bezeichnung: string;
+  personenIntervall: WalterBetriebskostenabrechnungPersonenZeitIntervall[];
+  gesamtPersonenIntervall: WalterBetriebskostenabrechnungPersonenZeitIntervall[];
   gesamtWohnflaeche: number;
-  wfZeitanteil: number;
-  nfZeitanteil: number;
   gesamtNutzflaeche: number;
   gesamtEinheiten: number;
+  wfZeitanteil: number;
+  nfZeitanteil: number;
   neZeitanteil: number;
-  gesamtPersonenIntervall: WalterBetriebskostenabrechnungPersonenZeitIntervall[];
-  personenIntervall: WalterBetriebskostenabrechnungPersonenZeitIntervall[];
+  umlagen: WalterUmlageEntry[];
   personenZeitanteil: WalterBetriebskostenabrechnungPersonenZeitanteil[];
-  heizkosten: WalterBetriebskostenabrechnungHeizkostenberechnungEntry[];
-  gesamtBetragKalt: number;
-  betragKalt: number;
-  gesamtBetragWarm: number;
-  betragWarm: number;
+  verbrauch: any;
+  verbrauchAnteil: any;
+  // heizkosten: WalterBetriebskostenabrechnungHeizkostenberechnungEntry[]; // ?
+  gesamtBetragKalteNebenkosten: number;
+  betragKalteNebenkosten: number;
+  gesamtBetragWarmeNebenkosten: number;
+  betragWarmeNebenkosten: number;
 };
 
 export type WalterBetriebskostenabrechnungsRechnungsgruppeEntry = {

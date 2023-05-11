@@ -12,44 +12,46 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         private readonly ILogger<BetriebskostenabrechnungController> _logger;
         private BetriebskostenabrechnungHandler Service { get; }
 
-        public class RechnungsgruppeEntry
+        public class AbrechnungseinheitEntry
         {
-            public List<UmlageEntry>? Umlagen { get; }
-
             public string? Bezeichnung { get; }
+            public List<PersonenZeitIntervall>? PersonenIntervall { get; }
+            public List<PersonenZeitIntervall>? GesamtPersonenIntervall { get; }
             public double GesamtWohnflaeche { get; }
-            public double WFZeitanteil { get; }
-            public double NFZeitanteil { get; }
             public double GesamtNutzflaeche { get; }
             public int GesamtEinheiten { get; }
+            public double WFZeitanteil { get; }
+            public double NFZeitanteil { get; }
             public double NEZeitanteil { get; }
-            public List<PersonenZeitIntervall>? GesamtPersonenIntervall { get; }
-            public List<PersonenZeitIntervall>? PersonenIntervall { get; }
+            public List<UmlageEntry>? Umlagen { get; }
             public List<PersonenZeitanteil>? PersonenZeitanteil { get; }
-
+            public Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch { get; }
+            public Dictionary<Betriebskostentyp, double> VerbrauchAnteil { get; }
+            public double BetragKalteNebenkosten { get; }
+            public double GesamtBetragKalteNebenkosten { get; }
             public List<Heizkostenberechnung>? Heizkosten { get; }
-            public double GesamtBetragKalt { get; }
-            public double BetragKalt { get; }
-            public double GesamtBetragWarm { get; }
-            public double BetragWarm { get; }
+            public double BetragWarmeNebenkosten { get; }
+            public double GesamtBetragWarmeNebenkosten { get; }
 
-            public RechnungsgruppeEntry(IRechnungsgruppe g, SaverwalterContext ctx)
+            public AbrechnungseinheitEntry(IAbrechnungseinheit g, SaverwalterContext ctx)
             {
-                Umlagen = g.Umlagen.Select(e => new UmlageEntry(e, ctx)).ToList();
                 Bezeichnung = g.Bezeichnung;
+                PersonenIntervall = g.PersonenIntervall;
+                GesamtPersonenIntervall = g.GesamtPersonenIntervall;
                 GesamtWohnflaeche = g.GesamtWohnflaeche;
-                WFZeitanteil = g.WFZeitanteil;
-                NFZeitanteil = g.NFZeitanteil;
                 GesamtNutzflaeche = g.GesamtNutzflaeche;
                 GesamtEinheiten = g.GesamtEinheiten;
+                WFZeitanteil = g.WFZeitanteil;
+                NFZeitanteil = g.NFZeitanteil;
                 NEZeitanteil = g.NEZeitanteil;
-                GesamtPersonenIntervall = g.GesamtPersonenIntervall;
-                PersonenIntervall = g.PersonenIntervall;
+                Umlagen = g.Umlagen.Select(e => new UmlageEntry(e, ctx)).ToList();
                 PersonenZeitanteil = g.PersonenZeitanteil;
-                GesamtBetragKalt = g.GesamtBetragKalteNebenkosten;
-                GesamtBetragWarm = g.GesamtBetragWarm;
-                BetragWarm = g.BetragWarm;
-                BetragKalt = g.BetragKalteNebenkosten;
+                Verbrauch = g.Verbrauch;
+                VerbrauchAnteil = g.VerbrauchAnteil;
+                BetragKalteNebenkosten = g.BetragKalteNebenkosten;
+                GesamtBetragKalteNebenkosten = g.GesamtBetragKalteNebenkosten;
+                BetragWarmeNebenkosten = g.BetragWarmeNebenkosten;
+                GesamtBetragWarmeNebenkosten = g.GesamtBetragWarmeNebenkosten;
             }
         }
 
@@ -78,7 +80,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public int Abrechnungszeitspanne { get; }
             public int Nutzungszeitspanne { get; }
             public double Zeitanteil { get; }
-            public List<RechnungsgruppeEntry>? Gruppen { get; }
+            public List<AbrechnungseinheitEntry>? Abrechnungseinheiten { get; }
             public double Result { get; }
             public double AllgStromFaktor { get; set; }
 
@@ -97,9 +99,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 Adresse = new AdresseEntryBase(b.Adresse);
                 Gezahlt = b.GezahlteMiete;
                 KaltMiete = b.KaltMiete;
-                Minderung = b.Minderung;
-                NebenkostenMinderung = b.NebenkostenMinderung;
-                KaltMinderung = b.KaltMinderung;
+                Minderung = b.Mietminderung;
+                NebenkostenMinderung = b.NebenkostenMietminderung;
+                KaltMinderung = b.KaltMietminderung;
                 Nutzungsbeginn = b.Nutzungsbeginn;
                 Nutzungsende = b.Nutzungsende;
                 Zaehler = b.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer)).ToList();
@@ -110,7 +112,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 Result = b.Result;
                 AllgStromFaktor = b.AllgStromFaktor;
 
-                Gruppen = b.Gruppen.Select(e => new RechnungsgruppeEntry(e, ctx)).ToList();
+                Abrechnungseinheiten = b.Abrechnungseinheiten.Select(e => new AbrechnungseinheitEntry(e, ctx)).ToList();
             }
         }
 

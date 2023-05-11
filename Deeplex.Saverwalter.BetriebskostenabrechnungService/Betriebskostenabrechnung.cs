@@ -7,8 +7,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
     public interface IBetriebskostenabrechnung
     {
         IPerson Ansprechpartner { get; }
-        List<Rechnungsgruppe> Gruppen { get; }
-        Wohnung Wohnung => Vertrag.Wohnung;
+        List<Abrechnungseinheit> Abrechnungseinheiten { get; }
+        Wohnung Wohnung { get; }
         DateOnly Nutzungsbeginn { get; }
         int Nutzungszeitspanne { get; }
         int Abrechnungszeitspanne { get; }
@@ -17,10 +17,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         IPerson Vermieter { get; }
         List<IPerson> Mieter { get; }
         double GezahlteMiete { get; }
-        double KaltMinderung { get; }
+        double KaltMietminderung { get; }
         double KaltMiete { get; }
-        double Minderung { get; }
-        double NebenkostenMinderung { get; }
+        double Mietminderung { get; }
+        double NebenkostenMietminderung { get; }
         double Result { get; }
         Adresse Adresse { get; }
         DateOnly Abrechnungsbeginn { get; }
@@ -50,9 +50,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public double KaltMiete { get; }
         public double BetragNebenkosten { get; }
         public double BezahltNebenkosten { get; }
-        public double Minderung { get; }
-        public double NebenkostenMinderung { get; }
-        public double KaltMinderung { get; }
+        public double Mietminderung { get; }
+        public double NebenkostenMietminderung { get; }
+        public double KaltMietminderung { get; }
         public DateOnly Nutzungsbeginn { get; }
         public DateOnly Nutzungsende { get; }
         public List<Zaehler> Zaehler { get; }
@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public int Nutzungszeitspanne { get; }
         public double Zeitanteil { get; }
 
-        public List<Rechnungsgruppe> Gruppen { get; }
+        public List<Abrechnungseinheit> Abrechnungseinheiten { get; }
 
         public double Result { get; }
 
@@ -69,11 +69,13 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         public Betriebskostenabrechnung(SaverwalterContext ctx, Vertrag vertrag, int jahr, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
         {
+            Vertrag = vertrag;
+            Jahr = jahr;
+            
             Abrechnungsbeginn = abrechnungsbeginn;
             Abrechnungsende = abrechnungsende;
-            Jahr = jahr;
+            Abrechnungszeitspanne = abrechnungsende.DayNumber - abrechnungsbeginn.DayNumber + 1;
 
-            Vertrag = vertrag;
             Wohnung = vertrag.Wohnung;
             Adresse = Wohnung.Adresse!; // TODO the Adresse here shouldn't be null, this should be catched.
             Zaehler = Wohnung.Zaehler.ToList();
@@ -81,8 +83,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             Nutzungsbeginn = Max(vertrag.Beginn(), abrechnungsbeginn);
             Nutzungsende = Min(vertrag.Ende ?? abrechnungsende, abrechnungsende);
-
-            Abrechnungszeitspanne = abrechnungsende.DayNumber - abrechnungsbeginn.DayNumber + 1;
             Nutzungszeitspanne = Nutzungsende.DayNumber - Nutzungsbeginn.DayNumber + 1;
             Zeitanteil = (double)Nutzungszeitspanne / Abrechnungszeitspanne;
 
@@ -96,28 +96,31 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             AllgStromFaktor = CalcAllgStromFactor(vertrag, jahr);
 
-            Gruppen = GroupUpRechnungsgruppen(ctx, vertrag);
+            var alleZaehler = ctx.ZaehlerSet.ToList();
+            Abrechnungseinheiten = DetermineAbrechnungseinheiten(vertrag, alleZaehler);
 
-            BetragNebenkosten = Gruppen.Sum(g => g.BetragKalteNebenkosten + g.BetragWarm);
+            BetragNebenkosten = Abrechnungseinheiten.Sum(g => g.BetragKalteNebenkosten + g.BetragWarmeNebenkosten);
 
-            Minderung = GetMinderung(vertrag, abrechnungsbeginn, abrechnungsende);
-            NebenkostenMinderung = BetragNebenkosten * Minderung;
-            KaltMinderung = KaltMiete * Minderung;
+            Mietminderung = GetMietminderung(vertrag, abrechnungsbeginn, abrechnungsende);
+            NebenkostenMietminderung = BetragNebenkosten * Mietminderung;
+            KaltMietminderung = KaltMiete * Mietminderung;
 
-            BezahltNebenkosten = GezahlteMiete - KaltMiete + KaltMinderung;
+            BezahltNebenkosten = GezahlteMiete - KaltMiete + KaltMietminderung;
 
-            Result = BezahltNebenkosten - BetragNebenkosten + NebenkostenMinderung;
+            Result = BezahltNebenkosten - BetragNebenkosten + NebenkostenMietminderung;
         }
 
-        private List<Rechnungsgruppe> GroupUpRechnungsgruppen(SaverwalterContext ctx, Vertrag vertrag)
+        private List<Abrechnungseinheit> DetermineAbrechnungseinheiten(Vertrag vertrag, List<Zaehler> alleZaehler)
         {
             // Group up all Wohnungen sharing the same Umlage
-            var groups = vertrag.Wohnung.Umlagen
-                .GroupBy(p => new SortedSet<int>(p.Wohnungen.Select(gr => gr.WohnungId).ToList()), new SortedSetIntEqualityComparer())
+            var einheiten = vertrag.Wohnung.Umlagen
+                .GroupBy(umlage =>
+                    new SortedSet<int>(umlage.Wohnungen.Select(gr => gr.WohnungId).ToList()),
+                    new SortedSetIntEqualityComparer())
                 .ToList();
             // Then create Rechnungsgruppen for every single one of those groups with respective information to calculate the distribution
-            return groups
-                .Select(g => new Rechnungsgruppe(ctx, g.ToList(), Wohnung, Versionen, Jahr, Abrechnungsbeginn, Abrechnungsende, Abrechnungszeitspanne, Nutzungsbeginn, Nutzungsende, Zeitanteil, Notes))
+            return einheiten
+                .Select(umlagen => new Abrechnungseinheit(umlagen.ToList(), alleZaehler, Wohnung, Versionen, Jahr, Abrechnungsbeginn, Abrechnungsende, Abrechnungszeitspanne, Nutzungsbeginn, Nutzungsende, Zeitanteil, Notes))
                 .ToList();
         }
 
@@ -138,9 +141,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .ToList();
         }
 
-        private static double CalcAllgStromFactor(Vertrag v, int Jahr)
+        private static double CalcAllgStromFactor(Vertrag vertrag, int Jahr)
         {
-            return v.Wohnung.Umlagen
+            return vertrag.Wohnung.Umlagen
                 .Where(s => s.Typ == Betriebskostentyp.Heizkosten)
                 .ToList()
                 .SelectMany(u => u.Betriebskostenrechnungen)
@@ -149,7 +152,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .Sum(e => e.Betrag) * 0.05;
         }
 
-        private static double GetMinderung(Vertrag vertrag, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
+        private static double GetMietminderung(Vertrag vertrag, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
         {
             var Minderungen = vertrag.Mietminderungen
                 .Where(m =>
