@@ -98,7 +98,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             Gruppen = GroupUpRechnungsgruppen(ctx, vertrag);
 
-            BetragNebenkosten = Gruppen.Sum(g => g.BetragKalt + g.BetragWarm);
+            BetragNebenkosten = Gruppen.Sum(g => g.BetragKalteNebenkosten + g.BetragWarm);
 
             Minderung = GetMinderung(vertrag, abrechnungsbeginn, abrechnungsende);
             NebenkostenMinderung = BetragNebenkosten * Minderung;

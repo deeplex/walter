@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Linq;
 using static Deeplex.Saverwalter.Model.Utils;
 
 namespace Deeplex.Saverwalter.Model
@@ -51,8 +52,8 @@ namespace Deeplex.Saverwalter.Model
         List<PersonenZeitanteil> PersonenZeitanteil { get; }
         Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch { get; }
         Dictionary<Betriebskostentyp, double> VerbrauchAnteil { get; }
-        double BetragKalt { get; }
-        double GesamtBetragKalt { get; }
+        double BetragKalteNebenkosten { get; }
+        double GesamtBetragKalteNebenkosten { get; }
         List<Heizkostenberechnung> Heizkosten { get; }
         double BetragWarm { get; }
         double GesamtBetragWarm { get; }
@@ -61,28 +62,30 @@ namespace Deeplex.Saverwalter.Model
     public sealed class Rechnungsgruppe : IRechnungsgruppe
     {
         public List<Umlage> Umlagen { get; }
-
         private List<Wohnung> Wohnungen { get; }
         private List<VertragVersion> alleVertraege { get; }
-
         public string Bezeichnung { get; }
+
+        public double GesamtBetragKalteNebenkosten { get; }
+
         public double GesamtWohnflaeche { get; }
-        public double WFZeitanteil { get; }
-        public double NFZeitanteil { get; }
         public double GesamtNutzflaeche { get; }
         public int GesamtEinheiten { get; }
-        public double NEZeitanteil { get; }
         public List<PersonenZeitIntervall> GesamtPersonenIntervall { get; }
-        public List<PersonenZeitIntervall> PersonenIntervall { get; }
-        public List<PersonenZeitanteil> PersonenZeitanteil { get; }
-        public Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch { get; }
-
         public Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch { get; }
 
+        public List<PersonenZeitIntervall> PersonenIntervall { get; }
+        public Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch { get; }
+
+        public double WFZeitanteil { get; }
+        public double NFZeitanteil { get; }
+        public double NEZeitanteil { get; }
+        public List<PersonenZeitanteil> PersonenZeitanteil { get; }
         public Dictionary<Betriebskostentyp, double> VerbrauchAnteil { get; }
+
+        public double BetragKalteNebenkosten { get; }
+
         public List<Heizkostenberechnung> Heizkosten { get; }
-        public double GesamtBetragKalt { get; }
-        public double BetragKalt { get; }
         public double GesamtBetragWarm { get; }
         public double BetragWarm { get; }
 
@@ -102,82 +105,41 @@ namespace Deeplex.Saverwalter.Model
         {
             Umlagen = umlagen;
             Wohnungen = umlagen.First().Wohnungen.ToList();
-            alleVertraege = Wohnungen
+            alleVertraege = getAllVertragVersionen(Wohnungen, abrechnungsbeginn, abrechnungsende);
+            Bezeichnung = umlagen.First().GetWohnungenBezeichnung();
+
+            var kalteNebenkosten = GetKalteNebenkosten(umlagen, jahr);
+            GesamtBetragKalteNebenkosten = kalteNebenkosten.Sum(rechnung => rechnung.Betrag);
+
+            GesamtWohnflaeche = Wohnungen.Sum(w => w.Wohnflaeche);
+            GesamtNutzflaeche = Wohnungen.Sum(w => w.Nutzflaeche);
+            GesamtEinheiten = Wohnungen.Sum(w => w.Nutzeinheit);
+            GesamtPersonenIntervall = VertraegeIntervallPersonenzahl(alleVertraege, abrechnungsbeginn, abrechnungsende);
+            GesamtVerbrauch = CalculateGesamtVerbrauch(ctx, umlagen, wohnung, nutzungsbeginn, nutzungsende, notes);
+
+            PersonenIntervall = VertraegeIntervallPersonenzahl(versionen, abrechnungsbeginn, abrechnungsende);
+            Verbrauch = GetVerbrauch(ctx, umlagen, nutzungsbeginn, nutzungsende, GesamtVerbrauch, notes);
+
+            WFZeitanteil = wohnung.Wohnflaeche / GesamtWohnflaeche * zeitanteil;
+            NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitanteil;
+            NEZeitanteil = (double)wohnung.Nutzeinheit / GesamtEinheiten * zeitanteil;
+            PersonenZeitanteil = GetPersonenZeitanteil(PersonenIntervall, GesamtPersonenIntervall, nutzungsbeginn, nutzungsende, abrechnungszeitspanne);
+            VerbrauchAnteil = CalculateVerbrauchAnteil(Verbrauch);
+
+            BetragKalteNebenkosten = CalculateBetragKalteNebenkosten(kalteNebenkosten, WFZeitanteil, NEZeitanteil, PersonenZeitanteil, VerbrauchAnteil, notes);
+
+            Heizkosten = CalculateHeizkosten(ctx, umlagen, jahr, wohnung, abrechnungsbeginn, abrechnungsende, nutzungsbeginn, nutzungsende, zeitanteil, notes);
+            GesamtBetragWarm = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.PauschalBetrag);
+            BetragWarm = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.Kosten);
+        }
+
+        private static List<VertragVersion> getAllVertragVersionen(List<Wohnung> wohnungen, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
+        {
+            return wohnungen
                 .SelectMany(w => w.Vertraege.SelectMany(e => e.Versionen))
                 .ToList()
                 .Where(v => v.Beginn <= abrechnungsende && (v.Ende() is null || v.Ende() >= abrechnungsbeginn))
                 .ToList();
-            Bezeichnung = umlagen.First().GetWohnungenBezeichnung();
-            GesamtWohnflaeche = Wohnungen.Sum(w => w.Wohnflaeche);
-            GesamtNutzflaeche = Wohnungen.Sum(w => w.Nutzflaeche);
-            WFZeitanteil = wohnung.Wohnflaeche / GesamtWohnflaeche * zeitanteil;
-            NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitanteil;
-            GesamtNutzflaeche = Wohnungen.Sum(w => w.Nutzflaeche);
-            GesamtEinheiten = Wohnungen.Sum(w => w.Nutzeinheit);
-            NEZeitanteil = (double)wohnung.Nutzeinheit / GesamtEinheiten * zeitanteil;
-            GesamtPersonenIntervall = VertraegeIntervallPersonenzahl(alleVertraege, abrechnungsbeginn, abrechnungsende).ToList();
-            PersonenIntervall = VertraegeIntervallPersonenzahl(versionen, abrechnungsbeginn, abrechnungsende).ToList();
-
-            PersonenZeitanteil = PersonenIntervall
-                .Where(g => g.Beginn < nutzungsende && g.Ende >= nutzungsbeginn)
-                .ToList()
-                .Select((w, i) => new PersonenZeitanteil(w, GesamtPersonenIntervall, abrechnungszeitspanne))
-                .ToList();
-
-            GesamtVerbrauch = umlagen
-                .Where(umlage => umlage.Schluessel == Umlageschluessel.NachVerbrauch)
-                .ToList()
-                .Select(r => GetVerbrauchWohnung(ctx, r, wohnung, nutzungsbeginn, nutzungsende, notes))
-                .ToList()
-                .Where(verbrauchList => verbrauchList.Count > 0)
-                .ToList()
-                .Select(e => e)
-                .ToDictionary(
-                    verbrauchList => verbrauchList.First().Betriebskostentyp,
-                    verbrauchList => verbrauchList.GroupBy(gg => gg.Zaehlertyp)
-                .Select(typVerbrauchGrouping => (typVerbrauchGrouping.Key, typVerbrauchGrouping
-                    .Sum(verbrauch => verbrauch.Delta)))
-                .ToList());
-            Verbrauch = GetVerbrauch(ctx, umlagen, nutzungsbeginn, nutzungsende, GesamtVerbrauch, notes);
-
-            VerbrauchAnteil = Verbrauch
-                .Select(typVerbrauchAnteilPair => (
-                    typVerbrauchAnteilPair.Key,
-                    typVerbrauchAnteilPair.Value.Sum(verbrauchAnteil => verbrauchAnteil.Delta),
-                    typVerbrauchAnteilPair.Value.Sum(verbrauchAnteil => verbrauchAnteil.Delta / verbrauchAnteil.Anteil)))
-                .ToList()
-                .ToDictionary(typ => typ.Key, typ => typ.Item2 / typ.Item3);
-
-            Heizkosten = umlagen
-                .Where(r => (int)r.Typ % 2 == 1)
-                .ToList()
-                .SelectMany(umlage => umlage.Betriebskostenrechnungen)
-                .ToList()
-                .Where(rechnung => rechnung.BetreffendesJahr == jahr)
-                .ToList()
-                .Select(rechnung => new Heizkostenberechnung(ctx, rechnung, wohnung, abrechnungsbeginn, abrechnungsende, nutzungsbeginn, nutzungsende, zeitanteil, notes))
-                .ToList();
-
-            var kalteUmlagen = umlagen
-                .Where(umlage => (int)umlage.Typ % 2 == 0)
-                .ToList()
-                .SelectMany(umlage => umlage.Betriebskostenrechnungen)
-                .ToList()
-                .Where(rechnung => rechnung.BetreffendesJahr == jahr)
-                .ToList();
-
-            GesamtBetragKalt = kalteUmlagen.Sum(rechnung => rechnung.Betrag);
-            BetragKalt = kalteUmlagen.Sum(rechnung => rechnung.Umlage.Schluessel switch
-                {
-                    Umlageschluessel.NachWohnflaeche => rechnung.Betrag * WFZeitanteil,
-                    Umlageschluessel.NachNutzeinheit => rechnung.Betrag * NEZeitanteil,
-                    Umlageschluessel.NachPersonenzahl => PersonenZeitanteil.Sum(z => z.Anteil * rechnung.Betrag),
-                    Umlageschluessel.NachVerbrauch => rechnung.Betrag * checkVerbrauch(VerbrauchAnteil, rechnung.Umlage.Typ, notes),
-                    _ => 0
-                });
-
-            GesamtBetragWarm = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.PauschalBetrag);
-            BetragWarm = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.Kosten);
         }
 
         private static double checkVerbrauch(Dictionary<Betriebskostentyp, double> verbrauchAnteil, Betriebskostentyp typ, List<Note> notes)
@@ -359,6 +321,107 @@ namespace Deeplex.Saverwalter.Model
                 .ToList();
 
             return ret;
+        }
+
+        private static List<PersonenZeitanteil> GetPersonenZeitanteil(
+            List<PersonenZeitIntervall> intervalle,
+            List<PersonenZeitIntervall> gesamtIntervalle,
+            DateOnly nutzungsbeginn,
+            DateOnly nutzungsende,
+            int abrechnungszeitspanne)
+        {
+            return intervalle
+                .Where(g => g.Beginn < nutzungsende && g.Ende >= nutzungsbeginn)
+                .ToList()
+                .Select((w, i) => new PersonenZeitanteil(w, gesamtIntervalle, abrechnungszeitspanne))
+                .ToList();
+        }
+
+        private static Dictionary<Betriebskostentyp, List<(Zaehlertyp, double)>> CalculateGesamtVerbrauch(
+            SaverwalterContext ctx,
+            List<Umlage> umlagen,
+            Wohnung wohnung,
+            DateOnly nutzungsbeginn,
+            DateOnly nutzungsende,
+            List<Note> notes)
+        {
+            return umlagen
+                .Where(umlage => umlage.Schluessel == Umlageschluessel.NachVerbrauch)
+                .ToList()
+                .Select(r => GetVerbrauchWohnung(ctx, r, wohnung, nutzungsbeginn, nutzungsende, notes))
+                .ToList()
+                .Where(verbrauchList => verbrauchList.Count > 0)
+                .ToList()
+                .ToDictionary(
+                    verbrauchList => verbrauchList.First().Betriebskostentyp,
+                    verbrauchList => verbrauchList.GroupBy(gg => gg.Zaehlertyp)
+                .Select(typVerbrauchGrouping => (typVerbrauchGrouping.Key, typVerbrauchGrouping
+                    .Sum(verbrauch => verbrauch.Delta)))
+                .ToList());
+        }
+
+        private static Dictionary<Betriebskostentyp, double> CalculateVerbrauchAnteil(Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> verbrauch)
+        {
+            return verbrauch
+                .Select(typVerbrauchAnteilPair => (
+                    typVerbrauchAnteilPair.Key,
+                    typVerbrauchAnteilPair.Value.Sum(verbrauchAnteil => verbrauchAnteil.Delta),
+                    typVerbrauchAnteilPair.Value.Sum(verbrauchAnteil => verbrauchAnteil.Delta / verbrauchAnteil.Anteil)))
+                .ToList()
+                .ToDictionary(typ => typ.Key, typ => typ.Item2 / typ.Item3);
+        }
+
+        private static List<Heizkostenberechnung> CalculateHeizkosten(
+            SaverwalterContext ctx,
+            List<Umlage> umlagen,
+            int jahr,
+            Wohnung wohnung,
+            DateOnly abrechnungsbeginn,
+            DateOnly abrechnungsende,
+            DateOnly nutzungsbeginn,
+            DateOnly nutzungsende,
+            double zeitanteil,
+            List<Note> notes)
+        {
+            return umlagen
+                .Where(r => (int)r.Typ % 2 == 1)
+                .ToList()
+                .SelectMany(umlage => umlage.Betriebskostenrechnungen)
+                .ToList()
+                .Where(rechnung => rechnung.BetreffendesJahr == jahr)
+                .ToList()
+                .Select(rechnung => new Heizkostenberechnung(ctx, rechnung, wohnung, abrechnungsbeginn, abrechnungsende, nutzungsbeginn, nutzungsende, zeitanteil, notes))
+                .ToList();
+        }
+
+        private static List<Betriebskostenrechnung> GetKalteNebenkosten(List<Umlage> umlagen, int jahr)
+        {
+            return umlagen
+                .Where(umlage => (int)umlage.Typ % 2 == 0)
+                .ToList()
+                .SelectMany(umlage => umlage.Betriebskostenrechnungen)
+                .ToList()
+                .Where(rechnung => rechnung.BetreffendesJahr == jahr)
+                .ToList();
+        }
+
+        private static double CalculateBetragKalteNebenkosten(
+            List<Betriebskostenrechnung> kalteUmlagen,
+            double wfZeitanteil,
+            double neZeitanteil,
+            List<PersonenZeitanteil>
+            personenZeitanteil,
+            Dictionary<Betriebskostentyp, double> verbrauchAnteil,
+            List<Note> notes)
+        {
+            return kalteUmlagen.Sum(rechnung => rechnung.Umlage.Schluessel switch
+            {
+                Umlageschluessel.NachWohnflaeche => rechnung.Betrag * wfZeitanteil,
+                Umlageschluessel.NachNutzeinheit => rechnung.Betrag * neZeitanteil,
+                Umlageschluessel.NachPersonenzahl => personenZeitanteil.Sum(z => z.Anteil * rechnung.Betrag),
+                Umlageschluessel.NachVerbrauch => rechnung.Betrag * checkVerbrauch(verbrauchAnteil, rechnung.Umlage.Typ, notes),
+                _ => 0
+            });
         }
     }
 }

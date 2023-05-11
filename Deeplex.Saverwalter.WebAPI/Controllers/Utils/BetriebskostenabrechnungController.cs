@@ -46,10 +46,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 GesamtPersonenIntervall = g.GesamtPersonenIntervall;
                 PersonenIntervall = g.PersonenIntervall;
                 PersonenZeitanteil = g.PersonenZeitanteil;
-                GesamtBetragKalt = g.GesamtBetragKalt;
+                GesamtBetragKalt = g.GesamtBetragKalteNebenkosten;
                 GesamtBetragWarm = g.GesamtBetragWarm;
                 BetragWarm = g.BetragWarm;
-                BetragKalt = g.BetragKalt;
+                BetragKalt = g.BetragKalteNebenkosten;
             }
         }
 

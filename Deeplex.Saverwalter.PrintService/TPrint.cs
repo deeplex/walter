@@ -459,7 +459,7 @@ namespace Deeplex.Saverwalter.PrintService
             col3.Add("");
             col4.Add("");
             col5.Add("Summe: ");
-            col6.Add(Euro(rechnungsgruppe.BetragKalt));
+            col6.Add(Euro(rechnungsgruppe.BetragKalteNebenkosten));
             bold.Add(true);
             underlined.Add(false);
 
@@ -683,10 +683,10 @@ namespace Deeplex.Saverwalter.PrintService
             var f = true;
             foreach (var gruppe in b.Gruppen)
             {
-                if (gruppe.BetragKalt > 0)
+                if (gruppe.BetragKalteNebenkosten > 0)
                 {
                     col1.Add(f ? "Abzüglich Ihrer Nebenkostenanteile: " : "");
-                    col2.Add("-" + Euro(gruppe.BetragKalt));
+                    col2.Add("-" + Euro(gruppe.BetragKalteNebenkosten));
                     f = false;
                 }
             }
