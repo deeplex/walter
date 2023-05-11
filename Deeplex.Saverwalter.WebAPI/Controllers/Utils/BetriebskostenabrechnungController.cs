@@ -95,7 +95,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 Vertrag = new SelectionEntry(b.Vertrag.VertragId, "Vertrag");
                 Wohnung = new SelectionEntry(b.Wohnung.WohnungId, b.Wohnung.Bezeichnung);
                 Adresse = new AdresseEntryBase(b.Adresse);
-                Gezahlt = b.Gezahlt;
+                Gezahlt = b.GezahlteMiete;
                 KaltMiete = b.KaltMiete;
                 Minderung = b.Minderung;
                 NebenkostenMinderung = b.NebenkostenMinderung;

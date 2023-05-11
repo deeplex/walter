@@ -677,7 +677,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             var col2 = new List<string>
             {
-                Euro(b.Gezahlt - b.KaltMiete)
+                Euro(b.GezahlteMiete - b.KaltMiete)
             };
 
             var f = true;

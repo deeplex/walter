@@ -16,7 +16,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         int Jahr { get; }
         IPerson Vermieter { get; }
         List<IPerson> Mieter { get; }
-        double Gezahlt { get; }
+        double GezahlteMiete { get; }
         double KaltMinderung { get; }
         double KaltMiete { get; }
         double Minderung { get; }
@@ -48,7 +48,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public Vertrag Vertrag { get; }
         public Wohnung Wohnung { get; }
         public Adresse Adresse { get; }
-        public double Gezahlt { get; }
+        public double GezahlteMiete { get; }
         public double KaltMiete { get; }
         public double BetragNebenkosten { get; }
         public double BezahltNebenkosten { get; }
@@ -69,73 +69,114 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         public double AllgStromFaktor { get; set; }
 
-        public Betriebskostenabrechnung(SaverwalterContext ctx, Vertrag v, int jahr, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
+        public Betriebskostenabrechnung(SaverwalterContext ctx, Vertrag vertrag, int jahr, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
         {
             Abrechnungsbeginn = abrechnungsbeginn;
             Abrechnungsende = abrechnungsende;
             Jahr = jahr;
 
-            Vertrag = v;
-            Wohnung = v.Wohnung;
+            Vertrag = vertrag;
+            Wohnung = vertrag.Wohnung;
             Adresse = Wohnung.Adresse!; // TODO the Adresse here shouldn't be null, this should be catched.
             Zaehler = Wohnung.Zaehler.ToList();
-            Versionen = v.Versionen.OrderBy(v => v.Beginn).ToList();
+            Versionen = vertrag.Versionen.OrderBy(v => v.Beginn).ToList();
 
-            Nutzungsbeginn = Max(Vertrag.Beginn(), Abrechnungsbeginn);
-            Nutzungsende = Min(Vertrag.Ende ?? Abrechnungsende, Abrechnungsende);
+            Nutzungsbeginn = Max(vertrag.Beginn(), abrechnungsbeginn);
+            Nutzungsende = Min(vertrag.Ende ?? abrechnungsende, abrechnungsende);
 
-            Abrechnungszeitspanne = Abrechnungsende.DayNumber - Abrechnungsbeginn.DayNumber + 1;
+            Abrechnungszeitspanne = abrechnungsende.DayNumber - abrechnungsbeginn.DayNumber + 1;
             Nutzungszeitspanne = Nutzungsende.DayNumber - Nutzungsbeginn.DayNumber + 1;
             Zeitanteil = (double)Nutzungszeitspanne / Abrechnungszeitspanne;
 
             Vermieter = ctx.FindPerson(Wohnung.BesitzerId);
-            Ansprechpartner = ctx.FindPerson(Vertrag.AnsprechpartnerId!.Value) ?? Vermieter;
+            Ansprechpartner = ctx.FindPerson(vertrag.AnsprechpartnerId!.Value) ?? Vermieter;
 
-            Gezahlt = Vertrag.Mieten
-                .Where(m => m.BetreffenderMonat >= Abrechnungsbeginn && m.BetreffenderMonat < Abrechnungsende)
+            GezahlteMiete = Mietzahlungen(vertrag, abrechnungsbeginn, abrechnungsende);
+            KaltMiete = GetKaltMiete(vertrag, Versionen, jahr, abrechnungsbeginn, abrechnungsende);
+
+            Mieter = GetMieter(ctx, vertrag);
+
+            AllgStromFaktor = CalcAllgStromFactor(vertrag, jahr);
+
+            Gruppen = GroupUpRechnungsgruppen(ctx, vertrag, this); // TODO: This this has a smell...
+
+            BetragNebenkosten = Gruppen.Sum(g => g.BetragKalt + g.BetragWarm);
+
+            Minderung = GetMinderung(vertrag, abrechnungsbeginn, abrechnungsende);
+            NebenkostenMinderung = BetragNebenkosten * Minderung;
+            KaltMinderung = KaltMiete * Minderung;
+
+            BezahltNebenkosten = GezahlteMiete - KaltMiete + KaltMinderung;
+
+            Result = BezahltNebenkosten - BetragNebenkosten + NebenkostenMinderung;
+        }
+
+        public List<Verbrauch> GetVerbrauchGanzeGruppe(SaverwalterContext ctx, Umlage umlage)
+        {
+            var Zaehler = GetAllZaehlerForVerbrauch(ctx, umlage.Typ);
+            var ZaehlerMitVerbrauchForGanzeGruppe = Zaehler.Where(z => umlage.Wohnungen.Contains(z.Wohnung!)).ToList();
+            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(ZaehlerMitVerbrauchForGanzeGruppe, Nutzungsende);
+            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(ZaehlerMitVerbrauchForGanzeGruppe, Nutzungsbeginn);
+            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerAnfangsStaende, ZaehlerEndStaende, Notes);
+
+            return Deltas;
+        }
+
+        public List<Verbrauch> GetVerbrauchWohnung(SaverwalterContext ctx, Umlage umlage)
+        {
+            var AlleZaehler = GetAllZaehlerForVerbrauch(ctx, umlage.Typ);
+            var ZaehlerMitVerbrauchForThisWohnung = AlleZaehler.Where(z => z.Wohnung?.WohnungId == Wohnung.WohnungId).ToList();
+            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(ZaehlerMitVerbrauchForThisWohnung, Nutzungsende);
+            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(ZaehlerMitVerbrauchForThisWohnung, Nutzungsbeginn);
+            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerAnfangsStaende, ZaehlerEndStaende, Notes);
+
+            return Deltas;
+        }
+
+        private static List<Rechnungsgruppe> GroupUpRechnungsgruppen(SaverwalterContext ctx, Vertrag vertrag, Betriebskostenabrechnung b)
+        {
+            return vertrag.Wohnung.Umlagen
+                .GroupBy(p => new SortedSet<int>(p.Wohnungen.Select(gr => gr.WohnungId).ToList()), new SortedSetIntEqualityComparer())
+                .ToList()
+                .Select(g => new Rechnungsgruppe(ctx, b, g.ToList()))
+                .ToList();
+        }
+
+        private static double Mietzahlungen(Vertrag vertrag, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
+        {
+            return vertrag.Mieten
+                .Where(m => m.BetreffenderMonat >= abrechnungsbeginn && m.BetreffenderMonat < abrechnungsende)
                 .ToList()
                 .Sum(z => z.Betrag);
+        }
 
-            KaltMiete = GetKaltMiete(v);
-
-            Mieter = ctx.MieterSet
-                .Where(m => m.Vertrag.VertragId == Vertrag.VertragId)
+        private static List<IPerson> GetMieter(SaverwalterContext ctx, Vertrag vertrag)
+        {
+            return ctx.MieterSet
+                .Where(m => m.Vertrag.VertragId == vertrag.VertragId)
                 .ToList()
                 .Select(m => ctx.FindPerson(m.PersonId))
                 .ToList();
+        }
 
-            AllgStromFaktor = Vertrag.Wohnung.Umlagen
+        private static double CalcAllgStromFactor(Vertrag v, int Jahr)
+        {
+            return v.Wohnung.Umlagen
                 .Where(s => s.Typ == Betriebskostentyp.Heizkosten)
                 .ToList()
                 .SelectMany(u => u.Betriebskostenrechnungen)
                 .ToList()
                 .Where(u => u.BetreffendesJahr == Jahr)
                 .Sum(e => e.Betrag) * 0.05;
-
-            Gruppen = Vertrag.Wohnung.Umlagen
-                .GroupBy(p => new SortedSet<int>(p.Wohnungen.Select(gr => gr.WohnungId).ToList()), new SortedSetIntEqualityComparer())
-                .ToList()
-                .Select(g => new Rechnungsgruppe(ctx, this, g.ToList()))
-                .ToList();
-
-            BetragNebenkosten = Gruppen.Sum(g => g.BetragKalt + g.BetragWarm);
-
-            Minderung = GetMinderung(v);
-            NebenkostenMinderung = BetragNebenkosten * Minderung;
-            KaltMinderung = KaltMiete * Minderung;
-
-            BezahltNebenkosten = Gezahlt - KaltMiete + KaltMinderung;
-
-            Result = BezahltNebenkosten - BetragNebenkosten + NebenkostenMinderung;
         }
 
-        private double GetMinderung(Vertrag v)
+        private static double GetMinderung(Vertrag vertrag, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
         {
-            var Minderungen = v.Mietminderungen
+            var Minderungen = vertrag.Mietminderungen
                 .Where(m =>
                 {
-                    var beginBeforeEnd = m.Beginn <= Abrechnungsende;
-                    var endAfterBegin = m.Ende == null || m.Ende > Abrechnungsbeginn;
+                    var beginBeforeEnd = m.Beginn <= abrechnungsende;
+                    var endAfterBegin = m.Ende == null || m.Ende > abrechnungsbeginn;
 
                     return beginBeforeEnd && endAfterBegin;
                 }).ToList();
@@ -143,33 +184,33 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             return Minderungen
                 .Sum(m =>
                 {
-                    var endDate = Min(m.Ende ?? Abrechnungsende, Abrechnungsende);
-                    var beginDate = Max(m.Beginn, Abrechnungsbeginn);
+                    var endDate = Min(m.Ende ?? abrechnungsende, abrechnungsende);
+                    var beginDate = Max(m.Beginn, abrechnungsbeginn);
 
                     return m.Minderung * (endDate.DayNumber - beginDate.DayNumber + 1);
-                }) / Abrechnungszeitspanne;
+                }) / (abrechnungsende.DayNumber - abrechnungsbeginn.DayNumber + 1);
         }
 
-        private double GetKaltMiete(Vertrag v)
+        private static double GetKaltMiete(Vertrag vertrag, List<VertragVersion> versionen, int jahr, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
         {
-            if (Jahr < v.Beginn().Year ||
-               (Vertrag.Ende is DateOnly d && d.Year < Jahr))
+            if (jahr < vertrag.Beginn().Year ||
+               (vertrag.Ende is DateOnly d && d.Year < jahr))
             {
                 return 0;
             }
-            return Versionen
-                .Sum(v =>
+            return versionen
+                .Sum(version =>
                 {
-                    var ende = v.Ende();
-                    if (ende is DateOnly d && d < Abrechnungsbeginn)
+                    var versionEnde = version.Ende();
+                    if (versionEnde is DateOnly d && d < abrechnungsbeginn)
                     {
                         return 0;
                     }
                     else
                     {
-                        var last = Min(ende ?? Abrechnungsende, Abrechnungsende).Month;
-                        var first = Max(v.Beginn, Abrechnungsbeginn).Month - 1;
-                        return (last - first) * v.Grundmiete;
+                        var last = Min(versionEnde ?? abrechnungsende, abrechnungsende).Month;
+                        var first = Max(version.Beginn, abrechnungsbeginn).Month - 1;
+                        return (last - first) * version.Grundmiete;
                     }
                 });
         }
@@ -188,24 +229,24 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             } ?? new List<Zaehler> { };
         }
 
-        private ImmutableList<Zaehlerstand> GetZaehlerEndStaendeFuerBerechnung(List<Zaehler> zaehler)
+        private static ImmutableList<Zaehlerstand> GetZaehlerEndStaendeFuerBerechnung(List<Zaehler> zaehler, DateOnly nutzungsende)
         {
             return zaehler
                 .Select(z => z.Staende
                     .OrderBy(s => s.Datum)
-                    .LastOrDefault(l => l.Datum <= Nutzungsende && (Nutzungsende.DayNumber - l.Datum.DayNumber) < 30))
+                    .LastOrDefault(l => l.Datum <= nutzungsende && (nutzungsende.DayNumber - l.Datum.DayNumber) < 30))
                 .ToList()
                 .Where(zaehlerstand => zaehlerstand is not null)
                 .Select(e => e!) // still necessary to make sure not null?
                 .ToImmutableList() ?? new List<Zaehlerstand>() { }.ToImmutableList();
         }
 
-        private ImmutableList<Zaehlerstand> GetZaehlerAnfangsStaendeFuerBerechnung(List<Zaehler> zaehler)
+        private static ImmutableList<Zaehlerstand> GetZaehlerAnfangsStaendeFuerBerechnung(List<Zaehler> zaehler, DateOnly nutzungsbeginn)
         {
             return zaehler
                 .Select(z => z.Staende.OrderBy(s => s.Datum)
                     .ToList()
-                    .Where(l => Math.Abs(l.Datum.DayNumber - Nutzungsbeginn.AddDays(-1).DayNumber) < 30)
+                    .Where(l => Math.Abs(l.Datum.DayNumber - nutzungsbeginn.AddDays(-1).DayNumber) < 30)
                     .ToList()
                 .FirstOrDefault())
                 .Where(zs => zs != null)
@@ -213,51 +254,29 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .ToImmutableList();
         }
 
-        private List<Verbrauch> GetVerbrauchForZaehlerStaende(Umlage umlage, ImmutableList<Zaehlerstand> Beginne, ImmutableList<Zaehlerstand> Enden)
+        private static List<Verbrauch> GetVerbrauchForZaehlerStaende(Umlage umlage, ImmutableList<Zaehlerstand> beginne, ImmutableList<Zaehlerstand> enden, List<Note> notes)
         {
             List<Verbrauch> Deltas = new();
 
-            if (Enden.IsEmpty)
+            if (enden.IsEmpty)
             {
-                Notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
+                notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
             }
-            else if (Beginne.IsEmpty)
+            else if (beginne.IsEmpty)
             {
-                Notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
+                notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
             }
-            else if (Enden.Count != Beginne.Count)
+            else if (enden.Count != beginne.Count)
             {
-                Notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
+                notes.Add(new Note("Kein Zähler für Nutzungsbeginn gefunden.", Severity.Error));
             }
             else
             {
-                for (var i = 0; i < Enden.Count; ++i)
+                for (var i = 0; i < enden.Count; ++i)
                 {
-                    Deltas.Add(new Verbrauch(umlage.Typ, Enden[i].Zaehler.Kennnummer, Enden[i].Zaehler.Typ, Enden[i].Stand - Beginne[i].Stand));
+                    Deltas.Add(new Verbrauch(umlage.Typ, enden[i].Zaehler.Kennnummer, enden[i].Zaehler.Typ, enden[i].Stand - beginne[i].Stand));
                 }
             }
-
-            return Deltas;
-        }
-
-        public List<Verbrauch> GetVerbrauchGanzeGruppe(SaverwalterContext ctx, Umlage umlage)
-        {
-            var Zaehler = GetAllZaehlerForVerbrauch(ctx, umlage.Typ);
-            var ZaehlerMitVerbrauchForGanzeGruppe = Zaehler.Where(z => umlage.Wohnungen.Contains(z.Wohnung!)).ToList();
-            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(ZaehlerMitVerbrauchForGanzeGruppe);
-            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(ZaehlerMitVerbrauchForGanzeGruppe);
-            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerAnfangsStaende, ZaehlerEndStaende);
-
-            return Deltas;
-        }
-
-        public List<Verbrauch> GetVerbrauchWohnung(SaverwalterContext ctx, Umlage umlage)
-        {
-            var AlleZaehler = GetAllZaehlerForVerbrauch(ctx, umlage.Typ);
-            var ZaehlerMitVerbrauchForThisWohnung = AlleZaehler.Where(z => z.Wohnung?.WohnungId == Wohnung.WohnungId).ToList();
-            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(ZaehlerMitVerbrauchForThisWohnung);
-            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(ZaehlerMitVerbrauchForThisWohnung);
-            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerAnfangsStaende, ZaehlerEndStaende);
 
             return Deltas;
         }
