@@ -8,7 +8,7 @@
         public int GesamtTage { get; }
         public int Personenzahl { get; }
 
-        public PersonenZeitIntervall(DateOnly beginn, DateOnly ende, int personenzahl, Rechnungsgruppe parent)
+        public PersonenZeitIntervall(DateOnly beginn, DateOnly ende, int personenzahl)
         {
             Beginn = beginn;
             Ende = ende;

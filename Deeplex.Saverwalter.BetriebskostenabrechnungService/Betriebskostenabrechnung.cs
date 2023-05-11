@@ -96,7 +96,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             AllgStromFaktor = CalcAllgStromFactor(vertrag, jahr);
 
-            Gruppen = GroupUpRechnungsgruppen(ctx, vertrag, this); // TODO: This this has a smell...
+            Gruppen = GroupUpRechnungsgruppen(ctx, vertrag);
 
             BetragNebenkosten = Gruppen.Sum(g => g.BetragKalt + g.BetragWarm);
 
@@ -109,12 +109,15 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Result = BezahltNebenkosten - BetragNebenkosten + NebenkostenMinderung;
         }
 
-        private static List<Rechnungsgruppe> GroupUpRechnungsgruppen(SaverwalterContext ctx, Vertrag vertrag, Betriebskostenabrechnung b)
+        private List<Rechnungsgruppe> GroupUpRechnungsgruppen(SaverwalterContext ctx, Vertrag vertrag)
         {
-            return vertrag.Wohnung.Umlagen
+            // Group up all Wohnungen sharing the same Umlage
+            var groups = vertrag.Wohnung.Umlagen
                 .GroupBy(p => new SortedSet<int>(p.Wohnungen.Select(gr => gr.WohnungId).ToList()), new SortedSetIntEqualityComparer())
-                .ToList()
-                .Select(g => new Rechnungsgruppe(ctx, b, g.ToList()))
+                .ToList();
+            // Then create Rechnungsgruppen for every single one of those groups with respective information to calculate the distribution
+            return groups
+                .Select(g => new Rechnungsgruppe(ctx, g.ToList(), Wohnung, Versionen, Jahr, Abrechnungsbeginn, Abrechnungsende, Abrechnungszeitspanne, Nutzungsbeginn, Nutzungsende, Zeitanteil, Notes))
                 .ToList();
         }
 
