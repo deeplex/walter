@@ -7,7 +7,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
     title: 'Neuer Zähler',
 
     wohnungen: walter_selection.wohnungen(fetch),
-    zaehler: walter_selection.zaehler(fetch),
+    umlagen: walter_selection.umlagen(fetch),
     zaehlertypen: walter_selection.zaehlertypen(fetch)
   };
 };

@@ -6,7 +6,8 @@
     WalterHeaderDetail,
     WalterGrid,
     WalterWohnungen,
-    WalterUmlage
+    WalterUmlage,
+    WalterZaehlerList
   } from '$WalterComponents';
   import { convertDate } from '$WalterServices/utils';
   import type {
@@ -53,7 +54,7 @@
     betriebskostentypen={data.betriebskostentypen}
     wohnungen={data.wohnungen}
     umlageschluessel={data.umlageschluessel}
-    a={data.a}
+    bind:a={data.a}
   />
 
   <Accordion>
@@ -69,5 +70,15 @@
       title="Betriebskostenrechnungen"
       rows={data.a.betriebskostenrechnungen}
     />
+    <!-- Only show if Schlüssel is "nach Verbrauch" -->
+    {#if data.a?.schluessel?.id === '3'}
+      <WalterZaehlerList
+        title="Zähler"
+        wohnungen={data.wohnungen}
+        umlagen={data.umlagen}
+        zaehlertypen={data.zaehlertypen}
+        rows={data.a.zaehler}
+      />
+    {/if}
   </Accordion>
 </WalterGrid>

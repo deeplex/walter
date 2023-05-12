@@ -12,6 +12,7 @@ export class WalterUmlageEntry extends WalterApiHandler {
     public notiz: string,
     public beschreibung: string,
     public wohnungenBezeichnung: string,
+    public zaehler: WalterZaehlerEntry[],
     public selectedZaehler: WalterSelectionEntry[],
     public typ: WalterSelectionEntry,
     public schluessel: WalterSelectionEntry,
@@ -33,13 +34,15 @@ export class WalterUmlageEntry extends WalterApiHandler {
     const betriebskostenrechnungen = json.betriebskostenrechnungen?.map(
       WalterBetriebskostenrechnungEntry.fromJson
     );
-    const selectedZaehler = json.selectedZaehler?.map(WalterZaehlerEntry.fromJson);
+    const selectedZaehler = json.selectedZaehler?.map(WalterSelectionEntry.fromJson);
+    const zaehler = json.zaehler?.map(WalterZaehlerEntry.fromJson);
 
     return new WalterUmlageEntry(
       json.id,
       json.notiz,
       json.beschreibung,
       json.wohnungenBezeichnung,
+      zaehler,
       selectedZaehler,
       typ,
       schluessel,

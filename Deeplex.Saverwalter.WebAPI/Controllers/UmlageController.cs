@@ -53,6 +53,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen => Entity?.Betriebskostenrechnungen
                 .Select(e => new BetriebskostenrechnungEntryBase(e));
             public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, Ctx!));
+            public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
             // TODO HKVO
 
             public UmlageEntry() : base() { }

@@ -6,12 +6,10 @@
     WalterGrid,
     WalterZaehler,
     WalterZaehlerstaende,
-    WalterZaehlerList,
     WalterUmlagen
   } from '$WalterComponents';
   import { convertDate } from '$WalterServices/utils';
-  import type { WalterZaehlerEntry, WalterZaehlerstandEntry } from '$WalterLib';
-  import WalterUmlage from '../../../../components/details/WalterUmlage.svelte';
+  import type { WalterZaehlerstandEntry } from '$WalterLib';
 
   export let data: PageData;
 
@@ -50,6 +48,14 @@
       a={zaehlerstandEntry}
       title="Zählerstände"
       rows={data.a.staende}
+    />
+    <WalterUmlagen
+      title="Umlagen"
+      zaehler={data.zaehler}
+      umlageschluessel={data.umlageschluessel}
+      wohnungen={data.wohnungen}
+      betriebskostentypen={data.betriebskostentypen}
+      rows={data.a.umlagen}
     />
   </Accordion>
 </WalterGrid>

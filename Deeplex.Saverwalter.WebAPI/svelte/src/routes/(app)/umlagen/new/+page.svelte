@@ -12,6 +12,7 @@
 
 <WalterGrid>
   <WalterUmlage
+    zaehler={data.zaehler}
     wohnungen={data.wohnungen}
     betriebskostentypen={data.betriebskostentypen}
     umlageschluessel={data.umlageschluessel}

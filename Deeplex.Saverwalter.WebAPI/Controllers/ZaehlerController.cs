@@ -50,6 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class ZaehlerEntry : ZaehlerEntryBase
         {
             public IEnumerable<ZaehlerstandEntryBase>? Staende => Entity?.Staende.ToList().Select(e => new ZaehlerstandEntryBase(e));
+            public IEnumerable<UmlageEntryBase>? Umlagen => Entity?.Umlagen.ToList().Select(e => new UmlageEntryBase(e));
 
             public ZaehlerEntry() : base() { }
             public ZaehlerEntry(Zaehler entity) : base(entity)

@@ -13,6 +13,7 @@ export class WalterZaehlerEntry extends WalterApiHandler {
     public adresse: WalterAdresseEntry,
     public typ: WalterSelectionEntry | undefined,
     public wohnung: WalterSelectionEntry | undefined,
+    public umlagen: WalterUmlageEntry[],
     public selectedUmlagen: WalterSelectionEntry[],
     public notiz: string,
     public staende: WalterZaehlerstandEntry[],
@@ -25,6 +26,7 @@ export class WalterZaehlerEntry extends WalterApiHandler {
     const adresse = json.adresse && WalterAdresseEntry.fromJson(json.adresse);
     const typ = json.typ && WalterSelectionEntry.fromJson(json.typ);
     const wohnung = json.wohnung && WalterSelectionEntry.fromJson(json.wohnung);
+    const umlagen = json.umlagen?.map(WalterUmlageEntry.fromJson);
     const selectedUmlagen = json.selectedUmlagen?.map(WalterUmlageEntry.fromJson);
     const staende = json.staende?.map(WalterZaehlerstandEntry.fromJson);
     const lastZaehlerstand = json.lastZaehlerstand && WalterZaehlerstandEntry.fromJson(json.lastZaehlerstand);
@@ -35,6 +37,7 @@ export class WalterZaehlerEntry extends WalterApiHandler {
       adresse,
       typ,
       wohnung,
+      umlagen,
       selectedUmlagen,
       json.notiz,
       staende,

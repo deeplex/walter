@@ -21,6 +21,7 @@
   export let betriebskostentypen: WalterSelectionEntry[];
   export let umlageschluessel: WalterSelectionEntry[];
   export let wohnungen: WalterSelectionEntry[];
+  export let zaehler: WalterSelectionEntry[];
   export let a: Partial<WalterUmlageEntry> | undefined = undefined;
 </script>
 
@@ -34,6 +35,12 @@
   {headers}
 >
   {#if a}
-    <WalterUmlage {betriebskostentypen} {umlageschluessel} {wohnungen} {a} />
+    <WalterUmlage
+      {zaehler}
+      {betriebskostentypen}
+      {umlageschluessel}
+      {wohnungen}
+      {a}
+    />
   {/if}
 </WalterDataWrapper>
