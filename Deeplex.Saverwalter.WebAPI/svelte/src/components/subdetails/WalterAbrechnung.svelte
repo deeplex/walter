@@ -35,7 +35,7 @@
     <WalterAbrechnungGruppe rows={gruppe.kostenpunkte} year={abrechnung.jahr} />
     <Tile light>
       <h5 style="display: flex; justify-content: center">
-        Zwischensumme: {convertEuro(gruppe.betragKalt)}
+        Zwischensumme: {convertEuro(gruppe.betragKalteNebenkosten)}
       </h5>
     </Tile>
   {/each}

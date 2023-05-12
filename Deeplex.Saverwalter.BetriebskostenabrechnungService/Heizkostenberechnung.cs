@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-namespace Deeplex.Saverwalter.Model
+﻿namespace Deeplex.Saverwalter.Model
 {
     public sealed class Heizkostenberechnung
     {
@@ -9,7 +7,6 @@ namespace Deeplex.Saverwalter.Model
 
         public double tw;
         public double V;
-        //public double W;
         public double Q;
 
         public double Para7;
@@ -29,93 +26,67 @@ namespace Deeplex.Saverwalter.Model
 
         public double Kosten;
 
-        // TODO Zähler sind hier noch nicht so richtig drin. Aktuell werden einfach alle Zähler eines
-        // Typen in einen Topf geworfen, aber Zähler referenzieren jetzt jeweils die Allgemeinzähler.
-        // Man kann also auch direkt die Zähler des Allgemeinzählers der Rechnung nehmen
-        public Heizkostenberechnung(SaverwalterContext ctx, Betriebskostenrechnung r, BetriebskostenabrechnungService.IBetriebskostenabrechnung b)
+        public Heizkostenberechnung(
+            Betriebskostenrechnung rechnung,
+            Wohnung wohnung,
+            DateOnly abrechnungsbeginn,
+            DateOnly abrechnungsende,
+            DateOnly nutzungsbeginn,
+            DateOnly nutzungsende,
+            double zeitanteil,
+            List<Note> notes)
         {
-            Betrag = r.Betrag;
-            PauschalBetrag = r.Betrag * 1.05;
+            Betrag = rechnung.Betrag;
+            PauschalBetrag = rechnung.Betrag * 1.05;
 
-            // TODO These should be variable
             tw = 60;
-            Para7 = r.Umlage.HKVO?.HKVO_P7 ?? 0.5; // HeizkostenV §7
-            Para8 = r.Umlage.HKVO?.HKVO_P8 ?? 0.5; // HeizkostenV §8
+            Para7 = rechnung.Umlage.HKVO?.HKVO_P7 ?? 0.5; // HeizkostenV §7
+            Para8 = rechnung.Umlage.HKVO?.HKVO_P8 ?? 0.5; // HeizkostenV §8
 
-            // Alle Warmwasserzähler die in dieser Umlage betroffen sind
-            var AlleWarmwasserZaehler = ctx.ZaehlerSet.Where(z =>
-                z.Typ == Zaehlertyp.Warmwasser && r.Umlage.Wohnungen.Contains(z.Wohnung!)).ToImmutableList();
-
-            // Der Warmwasserzähler der Wohnung der Abrechnung
-            var WarmwasserZaehler = AlleWarmwasserZaehler
-                .Where(z => z.Wohnung == b.Wohnung)
-                .ToImmutableList();
-
-            if (r.Umlage.HKVO == null)
+            var warmwasserZaehlerAbrechnungseinheit = rechnung.Umlage.Zaehler.Where(e => e.Typ == Zaehlertyp.Warmwasser).ToList();
+            if (warmwasserZaehlerAbrechnungseinheit.Count == 0)
             {
-                new Note("Kein Zähler für die Umlage vorhanden", Severity.Error);
-                return;
+                notes.Add(new Note("Keine Warmwasserzähler in Abrechnungseinheit gefunden.", Severity.Error));
             }
-            var Allgemeinzaehler = r.Umlage.HKVO!.Zaehler;
 
-            if (Allgemeinzaehler == null)
+            var warmwasserZaehlerWohnung = warmwasserZaehlerAbrechnungseinheit.Where(z => z.Wohnung == wohnung).ToList();
+            if (warmwasserZaehlerWohnung.Count == 0)
             {
-                new Note("Notwendiger Zähler für Umlage ist nicht definiert", Severity.Error);
+                notes.Add(new Note("Keine Warmwasserzähler für Wohnung.", Severity.Error));
+            }
+
+            var allgemeinZaehler = rechnung.Umlage.Zaehler.Where(e => e.Wohnung is null).ToList();
+            if (allgemeinZaehler.Count == 0)
+            {
+                new Note("Notwendiger Zähler für Umlage ist nicht definiert.", Severity.Error);
                 return;
             }
 
-            // Get all Zaehler for this Umlage for this Wohnung
-            var WohnungWaermeZaehler = Allgemeinzaehler!.EinzelZaehler
-                .Where(z => z.Wohnung == b.Wohnung)
-                .ToImmutableList();
+            var gasZaehlerAbrechnungseinheit = rechnung.Umlage.Zaehler.Where(e => e.Typ == Zaehlertyp.Gas && e.Wohnung != null).ToList();
+            var gasZaehlerWohnung = gasZaehlerAbrechnungseinheit.Where(e => e.Wohnung == wohnung).ToList();
+            var gasZaehlerVerbrauchWohnung = Delta(gasZaehlerWohnung, nutzungsbeginn, nutzungsende);
+            var gasAllgemeinZaehler = rechnung.Umlage.Zaehler.Where(z => z.Wohnung == null && z.Typ == Zaehlertyp.Gas).ToList();
 
-            ImmutableList<Zaehlerstand> Ende(IEnumerable<Zaehler> z, bool ganzeGruppe = false)
-            {
-                var ende = ganzeGruppe ? b.Abrechnungsende : b.Nutzungsende;
-                var ret = z.Select(z => z.Staende.OrderBy(s => s.Datum)
-                    .LastOrDefault(l => l.Datum <= ende && (ende.DayNumber - l.Datum.DayNumber) < 30))
-                    .Where(zaehlerstand => zaehlerstand != null)
-                    .Select(zaehlerstand => zaehlerstand!)
-                    .ToImmutableList();
-
-                return ret;
-            }
-
-            ImmutableList<Zaehlerstand> Beginn(IEnumerable<Zaehler> zaehlerList, bool ganzeGruppe = false)
-            {
-                var beginn = (ganzeGruppe ? b.Abrechnungsbeginn : b.Nutzungsbeginn).AddDays(-1);
-                var ret = zaehlerList.Select(z => z.Staende.OrderBy(s => s.Datum)
-                    .LastOrDefault(l => l.Datum <= beginn && (beginn.DayNumber - l.Datum.DayNumber) < 30))
-                    .Where(zaehlerstand => zaehlerstand != null)
-                    .Select(zaehlerstand => zaehlerstand!)
-                    .ToImmutableList();
-
-                return ret;
-            }
-
-            V = Ende(AlleWarmwasserZaehler, true).Sum(zaehlerstand => zaehlerstand.Stand) -
-                Beginn(AlleWarmwasserZaehler, true).Sum(zaehlerstand => zaehlerstand.Stand);
-
-            Q = Ende(new List<Zaehler>() { Allgemeinzaehler }, true).Sum(zaehlerstand => zaehlerstand.Stand) -
-                Beginn(new List<Zaehler>() { Allgemeinzaehler }, true).Sum(zaehlerstand => zaehlerstand.Stand);
+            V = Delta(warmwasserZaehlerAbrechnungseinheit, abrechnungsbeginn, abrechnungsende);
+            Q = Delta(gasAllgemeinZaehler, abrechnungsbeginn, abrechnungsende);
 
             if (Q == 0)
             {
-                b.Notes.Add(new Note("Gesamtzähler steht auf 0.", Severity.Error));
+                notes.Add(new Note("Gesamtzähler steht auf 0.", Severity.Error));
             }
 
             Para9_2 = 2.5 * (V / Q) * (tw - 10); // TODO HeizkostenV §9
 
             if (Para9_2 > 1)
             {
-                b.Notes.Add(new Note("Heizkostenverteilung nach §9 ist über 100%.", Severity.Error));
+                notes.Add(new Note("Heizkostenverteilung nach §9 ist über 100%.", Severity.Error));
             }
 
-            GesamtNutzflaeche = r.Umlage.Wohnungen.Sum(w => w.Nutzflaeche);
-            NFZeitanteil = b.Wohnung.Nutzflaeche / GesamtNutzflaeche * b.Zeitanteil;
+            GesamtNutzflaeche = rechnung.Umlage.Wohnungen.Sum(w => w.Nutzflaeche);
+            NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitanteil;
 
-            HeizkostenVerbrauchAnteil = (Ende(WohnungWaermeZaehler).Sum(w => w.Stand) - Beginn(WohnungWaermeZaehler).Sum(w => w.Stand)) / Q;
-            WarmwasserVerbrauchAnteil = (Ende(WarmwasserZaehler).Sum(w => w.Stand) - Beginn(WarmwasserZaehler).Sum(w => w.Stand)) / V;
+            HeizkostenVerbrauchAnteil = Delta(gasZaehlerWohnung, nutzungsbeginn, nutzungsende) / Delta(gasZaehlerAbrechnungseinheit, nutzungsbeginn, nutzungsende);
+            WarmwasserVerbrauchAnteil = Delta(warmwasserZaehlerWohnung, nutzungsbeginn, nutzungsende) / V;
 
             WaermeAnteilNF = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * NFZeitanteil;
             WaermeAnteilVerb = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * HeizkostenVerbrauchAnteil;
@@ -123,6 +94,23 @@ namespace Deeplex.Saverwalter.Model
             WarmwasserAnteilVerb = PauschalBetrag * Para9_2 * Para8 * WarmwasserVerbrauchAnteil;
 
             Kosten = WaermeAnteilNF + WaermeAnteilVerb + WarmwasserAnteilNF + WarmwasserAnteilVerb;
+        }
+
+        private static double Delta(IEnumerable<Zaehler> zaehlerList, DateOnly beginn, DateOnly ende)
+        {
+            var beginnValue = zaehlerList.Select(z => z.Staende.OrderBy(s => s.Datum)
+                .LastOrDefault(l => l.Datum <= beginn && (beginn.DayNumber - l.Datum.DayNumber) < 30))
+                .Where(zaehlerstand => zaehlerstand != null)
+                .Select(zaehlerstand => zaehlerstand!)
+                .Sum(w => w.Stand);
+
+            var endeValue = zaehlerList.Select(z => z.Staende.OrderBy(s => s.Datum)
+                .LastOrDefault(l => l.Datum <= ende && (ende.DayNumber - l.Datum.DayNumber) < 30))
+                .Where(zaehlerstand => zaehlerstand != null)
+                .Select(zaehlerstand => zaehlerstand!)
+                .Sum(w => w.Stand);
+
+            return endeValue - beginnValue;
         }
     }
 }

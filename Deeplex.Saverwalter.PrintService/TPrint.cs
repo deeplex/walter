@@ -99,7 +99,7 @@ namespace Deeplex.Saverwalter.PrintService
             }
 
             // There is a Umlage nach Nutzfläche in the Heizkostenberechnung:
-            if (betriebskostenabrechnung.NachNutzflaeche() || betriebskostenabrechnung.Gruppen.Any(g => g.Umlagen.Where(r => r.Wohnungen.Count > 1).Any(r => (int)r.Typ % 2 == 1)))
+            if (betriebskostenabrechnung.NachNutzflaeche() || betriebskostenabrechnung.Abrechnungseinheiten.Any(g => g.Umlagen.Where(r => r.Wohnungen.Count > 1).Any(r => (int)r.Typ % 2 == 1)))
             {
                 left1.Add("n. NF");
                 left2.Add("n. NF");
@@ -157,7 +157,7 @@ namespace Deeplex.Saverwalter.PrintService
         }
         private static void AbrechnungWohnung(
             IBetriebskostenabrechnung betriebskostenabrechnung,
-            IRechnungsgruppe rechnungsgruppe,
+            IAbrechnungseinheit rechnungsgruppe,
             IPrint<T> printImpl)
         {
             printImpl.SubHeading("Angaben zu Ihrer Einheit:");
@@ -191,7 +191,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             printImpl.Table(widths, justification, bold, underlined, cols); ;
         }
-        private static void AbrechnungEinheit(IBetriebskostenabrechnung betriebskostenabrechnung, IRechnungsgruppe rechnungsgruppe, IPrint<T> printImpl)
+        private static void AbrechnungEinheit(IBetriebskostenabrechnung betriebskostenabrechnung, IAbrechnungseinheit rechnungsgruppe, IPrint<T> printImpl)
         {
             printImpl.SubHeading("Angaben zur Abrechnungseinheit:");
             printImpl.Text(rechnungsgruppe.Bezeichnung);
@@ -231,7 +231,7 @@ namespace Deeplex.Saverwalter.PrintService
         }
         private static void ErmittlungKalteEinheiten(
             IBetriebskostenabrechnung betriebskostenabrechnung,
-            IRechnungsgruppe rechnungsgruppe,
+            IAbrechnungseinheit rechnungsgruppe,
             IPrint<T> printImpl)
         {
             var widths = new int[] { 41, 25, 17, 17 };
@@ -378,7 +378,7 @@ namespace Deeplex.Saverwalter.PrintService
         }
         public static void ErmittlungKalteKosten(
             BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenrechnung,
-            IRechnungsgruppe rechnungsgruppe,
+            IAbrechnungseinheit rechnungsgruppe,
             IPrint<T> printImpl)
         {
             var widths = new int[] { 32, 9, 25, 10, 11, 13 };
@@ -459,7 +459,7 @@ namespace Deeplex.Saverwalter.PrintService
             col3.Add("");
             col4.Add("");
             col5.Add("Summe: ");
-            col6.Add(Euro(rechnungsgruppe.BetragKalt));
+            col6.Add(Euro(rechnungsgruppe.BetragKalteNebenkosten));
             bold.Add(true);
             underlined.Add(false);
 
@@ -471,7 +471,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             printImpl.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
-        private static void ErmittlungWarmeKosten(BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung, IRechnungsgruppe rechnungsgruppe, IPrint<T> p)
+        private static void ErmittlungWarmeKosten(BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung, IAbrechnungseinheit rechnungsgruppe, IPrint<T> p)
         {
             var widths = new int[] { 50, 10 };
 
@@ -504,7 +504,7 @@ namespace Deeplex.Saverwalter.PrintService
                 p.Table(widths, justification, bold, underlined, cols);
             }
         }
-        private static void ErmittlungWarmeEinheiten(IBetriebskostenabrechnung b, IRechnungsgruppe rechnungsgruppe, IPrint<T> p)
+        private static void ErmittlungWarmeEinheiten(IBetriebskostenabrechnung b, IAbrechnungseinheit rechnungsgruppe, IPrint<T> p)
         {
             var widths = new int[] { 41, 25, 17, 17 };
             var col1 = new List<string> { "Ermittlung Ihrer Einheiten" };
@@ -595,7 +595,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             p.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
-        private static void ErmittlungWarmanteil(IRechnungsgruppe gruppe, IPrint<T> p)
+        private static void ErmittlungWarmanteil(IAbrechnungseinheit gruppe, IPrint<T> p)
         {
             var widths = new int[] { 24, 13, 9, 14, 14, 13, 13 };
             var col1 = new List<string> { "Kostenanteil" };
@@ -656,7 +656,7 @@ namespace Deeplex.Saverwalter.PrintService
                 col4.Add("");
                 col5.Add("");
                 col6.Add("Summe: ");
-                col7.Add(Euro(gruppe.BetragWarm));
+                col7.Add(Euro(gruppe.BetragWarmeNebenkosten));
                 bold.Add(true);
                 underlined.Add(false);
             }
@@ -677,34 +677,34 @@ namespace Deeplex.Saverwalter.PrintService
 
             var col2 = new List<string>
             {
-                Euro(b.Gezahlt - b.KaltMiete)
+                Euro(b.GezahlteMiete - b.KaltMiete)
             };
 
             var f = true;
-            foreach (var gruppe in b.Gruppen)
+            foreach (var gruppe in b.Abrechnungseinheiten)
             {
-                if (gruppe.BetragKalt > 0)
+                if (gruppe.BetragKalteNebenkosten > 0)
                 {
                     col1.Add(f ? "Abzüglich Ihrer Nebenkostenanteile: " : "");
-                    col2.Add("-" + Euro(gruppe.BetragKalt));
+                    col2.Add("-" + Euro(gruppe.BetragKalteNebenkosten));
                     f = false;
                 }
             }
 
-            foreach (var gruppe in b.Gruppen)
+            foreach (var gruppe in b.Abrechnungseinheiten)
             {
-                if (gruppe.BetragWarm > 0)
+                if (gruppe.BetragWarmeNebenkosten > 0)
                 {
                     col1.Add(f ? "Abzüglich Ihrer Nebenkostenanteile: " : "");
-                    col2.Add("-" + Euro(gruppe.BetragWarm));
+                    col2.Add("-" + Euro(gruppe.BetragWarmeNebenkosten));
                     f = false;
                 }
             }
 
-            if (b.Minderung > 0)
+            if (b.Mietminderung > 0)
             {
                 col1.Add("Verrechnung mit Mietminderung: ");
-                col2.Add("+" + Euro(b.NebenkostenMinderung));
+                col2.Add("+" + Euro(b.NebenkostenMietminderung));
             }
 
             col1.Add("Ergebnis:");
@@ -756,7 +756,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             printImpl.PageBreak();
 
-            if (betriebskostenabrechnung.Gruppen.FirstOrDefault() is Rechnungsgruppe rechnungsgruppe)
+            if (betriebskostenabrechnung.Abrechnungseinheiten.FirstOrDefault() is Abrechnungseinheit rechnungsgruppe)
             {
                 AbrechnungWohnung(betriebskostenabrechnung, rechnungsgruppe, printImpl);
             }
@@ -764,7 +764,7 @@ namespace Deeplex.Saverwalter.PrintService
             printImpl.Break();
             printImpl.Heading("Abrechnung der Nebenkosten (kalte Betriebskosten)");
 
-            foreach (var gruppe in betriebskostenabrechnung.Gruppen.Where(rechnungsgruppe => rechnungsgruppe.GesamtEinheiten == 1))
+            foreach (var gruppe in betriebskostenabrechnung.Abrechnungseinheiten.Where(rechnungsgruppe => rechnungsgruppe.GesamtEinheiten == 1))
             {
                 AbrechnungEinheit(betriebskostenabrechnung, gruppe, printImpl);
                 printImpl.Break();
@@ -775,7 +775,7 @@ namespace Deeplex.Saverwalter.PrintService
             }
             printImpl.Break();
 
-            foreach (var gruppe in betriebskostenabrechnung.Gruppen.Where(rechnungsgruppe => rechnungsgruppe.GesamtEinheiten > 1))
+            foreach (var gruppe in betriebskostenabrechnung.Abrechnungseinheiten.Where(rechnungsgruppe => rechnungsgruppe.GesamtEinheiten > 1))
             {
                 AbrechnungEinheit(betriebskostenabrechnung, gruppe, printImpl);
                 printImpl.Break();
@@ -788,9 +788,9 @@ namespace Deeplex.Saverwalter.PrintService
             printImpl.PageBreak();
             printImpl.Heading("Abrechnung der Nebenkosten (warme Betriebskosten)");
 
-            foreach (var gruppe in betriebskostenabrechnung.Gruppen)
+            foreach (var gruppe in betriebskostenabrechnung.Abrechnungseinheiten)
             {
-                if (gruppe.GesamtBetragWarm > 0)
+                if (gruppe.GesamtBetragWarmeNebenkosten > 0)
                 {
                     if (gruppe.GesamtEinheiten == 1)
                     {

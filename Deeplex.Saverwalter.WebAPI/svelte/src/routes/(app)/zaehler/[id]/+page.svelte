@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { Accordion } from 'carbon-components-svelte';
   import type { PageData } from './$types';
   import {
     WalterHeaderDetail,
     WalterGrid,
     WalterZaehler,
     WalterZaehlerstaende,
-    WalterZaehlerList
+    WalterUmlagen,
+    WalterLinks
   } from '$WalterComponents';
   import { convertDate } from '$WalterServices/utils';
-  import type { WalterZaehlerEntry, WalterZaehlerstandEntry } from '$WalterLib';
+  import type { WalterZaehlerstandEntry } from '$WalterLib';
 
   export let data: PageData;
 
@@ -24,12 +24,6 @@
     stand: lastZaehlerstand?.stand || 0,
     einheit: lastZaehlerstand?.einheit
   };
-
-  const einzelzaehlerEntry: Partial<WalterZaehlerEntry> = {
-    adresse: { ...data.a.adresse },
-    typ: data.a.typ,
-    allgemeinZaehler: { id: '' + data.a.id, text: data.a.kennnummer }
-  };
 </script>
 
 <WalterHeaderDetail
@@ -43,25 +37,25 @@
 
 <WalterGrid>
   <WalterZaehler
-    zaehler={data.zaehler}
+    umlagen={data.umlagen}
     zaehlertypen={data.zaehlertypen}
     wohnungen={data.wohnungen}
     a={data.a}
   />
 
-  <Accordion>
+  <WalterLinks>
     <WalterZaehlerstaende
       a={zaehlerstandEntry}
       title="Zählerstände"
       rows={data.a.staende}
     />
-    <WalterZaehlerList
-      zaehlertypen={data.zaehlertypen}
+    <WalterUmlagen
+      title="Umlagen"
       zaehler={data.zaehler}
+      umlageschluessel={data.umlageschluessel}
       wohnungen={data.wohnungen}
-      a={einzelzaehlerEntry}
-      title="Einzelzähler"
-      rows={data.a.einzelzaehler}
+      betriebskostentypen={data.betriebskostentypen}
+      rows={data.a.umlagen}
     />
-  </Accordion>
+  </WalterLinks>
 </WalterGrid>

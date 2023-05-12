@@ -41,11 +41,25 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         [Route("api/selection/umlagen")]
         public IEnumerable<SelectionEntry> GetUmlagen()
         {
-            return Ctx.Umlagen.ToList().Select(e =>
-                new SelectionEntry(
+            return Ctx.Umlagen.ToList()
+                .Select(e =>
+                    new SelectionEntry(
+                        e.UmlageId,
+                        e.Wohnungen.ToList().GetWohnungenBezeichnung(),
+                        ((int)e.Typ).ToString()))
+                .ToList();
+        }
+
+        [HttpGet]
+        [Route("api/selection/umlagen_verbrauch")]
+        public IEnumerable<SelectionEntry> GetUmlagenVerbrauch()
+        {
+            return Ctx.Umlagen.ToList()
+                .Where(e => e.Schluessel == Umlageschluessel.NachVerbrauch)
+                .Select(e => new SelectionEntry(
                     e.UmlageId,
-                    e.Wohnungen.ToList().GetWohnungenBezeichnung(),
-                    ((int)e.Typ).ToString()))
+                    e.Typ.ToDescriptionString() + " - " + e.Wohnungen.ToList().GetWohnungenBezeichnung(),
+                    null))
                 .ToList();
         }
 
@@ -95,8 +109,24 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         public IActionResult GetZaehler()
         {
             return new OkObjectResult(Ctx.ZaehlerSet
-                .Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer, null))
+                .ToList()
+                .Select(zaehler => new SelectionEntry(zaehler.ZaehlerId, getZaehlerName(zaehler), null))
                 .ToList());
+        }
+
+        private static string getZaehlerName(Zaehler zaehler)
+        {
+            var adresse = "Keine Adresse";
+            if (zaehler.Wohnung is Wohnung w && w.Adresse is Adresse wa)
+            {
+                adresse = wa.Strasse + " " + wa.Hausnummer + ", " + wa.Postleitzahl + " " + wa.Stadt;
+            }
+            else if (zaehler.Adresse is Adresse ad)
+            {
+                adresse = ad.Strasse + " " + ad.Hausnummer + ", " + ad.Postleitzahl + " " + ad.Stadt;
+            }
+            var wohnung = zaehler.Wohnung?.Bezeichnung ?? "Allgemeinzähler";
+            return zaehler.Kennnummer + " - " + adresse + " - " + wohnung;
         }
 
         [HttpGet]

@@ -74,7 +74,7 @@
 
             var text = "Die Abrechnung betrifft zunächst die mietvertraglich vereinbarten Nebenkosten (die kalten Betriebskosten). ";
 
-            if (betriebskostenabrechnung.Gruppen.Any(rechnungsgruppe => rechnungsgruppe.GesamtBetragWarm != 0 && rechnungsgruppe.BetragWarm != 0))
+            if (betriebskostenabrechnung.Abrechnungseinheiten.Any(rechnungsgruppe => rechnungsgruppe.GesamtBetragWarmeNebenkosten != 0 && rechnungsgruppe.BetragWarmeNebenkosten != 0))
             {
                 text += "Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses (warme Betriebskosten) werden gesondert berechnet, nach Verbrauch und Wohn -/ Nutzfläche auf die einzelnen Wohnungen umgelegt („Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der von Ihnen geleisteten Vorauszahlungen verrechnet.";
             }
@@ -85,10 +85,10 @@
         }
 
         public static bool DirekteZuordnung(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
-            => betriebskostenabrechnung.Gruppen.Any(rechnungsgruppe => rechnungsgruppe.Umlagen.Any(umlage => umlage.Wohnungen.Count == 1));
+            => betriebskostenabrechnung.Abrechnungseinheiten.Any(rechnungsgruppe => rechnungsgruppe.Umlagen.Any(umlage => umlage.Wohnungen.Count == 1));
 
         private static bool UmlageSchluesselExistsInBetriebskostenabrechnung(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenrechnung, Umlageschluessel umlageSchluessel) =>
-            betriebskostenrechnung.Gruppen
+            betriebskostenrechnung.Abrechnungseinheiten
                 .Any(rechnungsgruppe => rechnungsgruppe.Umlagen
                     .Where(umlage => umlage.Wohnungen.Count > 1)
                     .Any(umlage => umlage.Schluessel == umlageSchluessel));

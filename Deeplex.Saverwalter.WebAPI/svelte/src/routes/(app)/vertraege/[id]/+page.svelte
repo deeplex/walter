@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Accordion, Truncate } from 'carbon-components-svelte';
+  import { Truncate } from 'carbon-components-svelte';
   import type { PageData } from './$types';
 
   import {
@@ -28,6 +28,7 @@
     WalterVertragVersionEntry
   } from '$WalterLib';
   import { loadAbrechnung } from '$WalterServices/abrechnung';
+  import WalterLinks from '../../../../components/subdetails/WalterLinks.svelte';
   export let data: PageData;
 
   const ver = data.a.versionen;
@@ -72,7 +73,7 @@
     bind:a={data.a}
   />
 
-  <Accordion>
+  <WalterLinks>
     <WalterKontakte a={mieterEntry} title="Mieter" rows={data.a.mieter} />
     <WalterVertragVersionen
       a={vertragversionEntry}
@@ -85,7 +86,7 @@
       title="Mietminderungen"
       rows={data.a.mietminderungen}
     />
-  </Accordion>
+  </WalterLinks>
 
   <hr style="margin: 2em" />
   <Truncate>Betriebskostenabrechnung :</Truncate>

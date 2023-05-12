@@ -17,7 +17,7 @@
 <WalterGrid>
   <WalterZaehler
     wohnungen={data.wohnungen}
-    zaehler={data.zaehler}
+    umlagen={data.umlagen}
     zaehlertypen={data.zaehlertypen}
     a={entry}
   />

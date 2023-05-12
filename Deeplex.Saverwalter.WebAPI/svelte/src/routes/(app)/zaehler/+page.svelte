@@ -9,7 +9,7 @@
 <WalterZaehlerList
   zaehlertypen={data.zaehlertypen}
   wohnungen={data.wohnungen}
-  zaehler={data.zaehler}
+  umlagen={data.umlagen}
   search
   rows={data.rows}
 />

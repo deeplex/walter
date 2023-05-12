@@ -1,6 +1,7 @@
 import { WalterAdresseEntry } from './WalterAdresse';
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterSelectionEntry } from './WalterSelection';
+import { WalterUmlageEntry } from './WalterUmlage';
 import { WalterZaehlerstandEntry } from './WalterZaehlerstand';
 
 export class WalterZaehlerEntry extends WalterApiHandler {
@@ -11,11 +12,11 @@ export class WalterZaehlerEntry extends WalterApiHandler {
     public kennnummer: string,
     public adresse: WalterAdresseEntry,
     public typ: WalterSelectionEntry | undefined,
-    public allgemeinZaehler: WalterSelectionEntry | undefined,
     public wohnung: WalterSelectionEntry | undefined,
+    public umlagen: WalterUmlageEntry[],
+    public selectedUmlagen: WalterSelectionEntry[],
     public notiz: string,
     public staende: WalterZaehlerstandEntry[],
-    public einzelzaehler: WalterZaehlerEntry[],
     public lastZaehlerstand: WalterZaehlerEntry
   ) {
     super();
@@ -24,12 +25,10 @@ export class WalterZaehlerEntry extends WalterApiHandler {
   static fromJson(json: any) {
     const adresse = json.adresse && WalterAdresseEntry.fromJson(json.adresse);
     const typ = json.typ && WalterSelectionEntry.fromJson(json.typ);
-    const allgemeinZaehler =
-      json.allgemeinZaehler &&
-      WalterSelectionEntry.fromJson(json.allgemeinZaehler);
     const wohnung = json.wohnung && WalterSelectionEntry.fromJson(json.wohnung);
+    const umlagen = json.umlagen?.map(WalterUmlageEntry.fromJson);
+    const selectedUmlagen = json.selectedUmlagen?.map(WalterUmlageEntry.fromJson);
     const staende = json.staende?.map(WalterZaehlerstandEntry.fromJson);
-    const einzelzaehler = json.einzelzaehler?.map(WalterZaehlerEntry.fromJson);
     const lastZaehlerstand = json.lastZaehlerstand && WalterZaehlerstandEntry.fromJson(json.lastZaehlerstand);
 
     return new WalterZaehlerEntry(
@@ -37,11 +36,11 @@ export class WalterZaehlerEntry extends WalterApiHandler {
       json.kennnummer,
       adresse,
       typ,
-      allgemeinZaehler,
       wohnung,
+      umlagen,
+      selectedUmlagen,
       json.notiz,
       staende,
-      einzelzaehler,
       lastZaehlerstand
     );
   }

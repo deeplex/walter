@@ -1,8 +1,5 @@
 <script lang="ts">
-  import { Accordion } from 'carbon-components-svelte';
-
   import type { PageData } from './$types';
-
   import {
     WalterGrid,
     WalterWohnungen,
@@ -12,7 +9,8 @@
     WalterBetriebskostenrechnungen,
     WalterUmlagen,
     WalterHeaderDetail,
-    WalterWohnung
+    WalterWohnung,
+    WalterLinks
   } from '$WalterComponents';
   import { convertDate } from '$WalterServices/utils';
   import type {
@@ -59,7 +57,7 @@
 <WalterGrid>
   <WalterWohnung kontakte={data.kontakte} a={data.a} />
 
-  <Accordion>
+  <WalterLinks>
     <WalterWohnungen
       kontakte={data.kontakte}
       title="Wohnungen an der selben Adresse"
@@ -67,7 +65,7 @@
     />
     <WalterZaehlerList
       zaehlertypen={data.zaehlertypen}
-      zaehler={data.zaehler}
+      umlagen={data.umlagen}
       wohnungen={data.wohnungen}
       a={zaehlerEntry}
       title="Zähler"
@@ -80,6 +78,7 @@
       rows={data.a.vertraege}
     />
     <WalterUmlagen
+      zaehler={data.zaehler}
       wohnungen={data.wohnungen}
       umlageschluessel={data.umlageschluessel}
       betriebskostentypen={data.betriebskostentypen}
@@ -100,5 +99,5 @@
       title="Erhaltungsaufwendungen"
       rows={data.a.erhaltungsaufwendungen}
     />
-  </Accordion>
+  </WalterLinks>
 </WalterGrid>

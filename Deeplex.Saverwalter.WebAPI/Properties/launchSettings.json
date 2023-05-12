@@ -1,23 +1,19 @@
-﻿{
-  "$schema": "https://json.schemastore.org/launchsettings.json",
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:43234",
-      "sslPort": 44396
-    }
-  },
+{
   "profiles": {
     "Deeplex.Saverwalter.WebAPI": {
       "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": false,
       "launchUrl": "swagger",
-      "applicationUrl": "http://localhost:5254",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DATABASE_HOST": "192.168.178.61",
+        "DATABASE_PORT": "5432",
+        "DATABASE_NAME": "saverdb",
+        "DATABASE_USER": "postgres",
+        "DATABASE_PASS": "admin",
+        "S3_PROVIDER": "http://s3:9000/saverwalter"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5254"
     },
     "IIS Express": {
       "commandName": "IISExpress",
@@ -26,6 +22,15 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    }
+  },
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:43234",
+      "sslPort": 44396
     }
   }
 }

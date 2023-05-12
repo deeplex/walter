@@ -20,7 +20,7 @@
   export let search: boolean = false;
   export let title: string | undefined = undefined;
   export let wohnungen: WalterSelectionEntry[];
-  export let zaehler: WalterSelectionEntry[];
+  export let umlagen: WalterSelectionEntry[];
   export let zaehlertypen: WalterSelectionEntry[];
   export let a: Partial<WalterZaehlerEntry> | undefined = undefined;
 
@@ -38,6 +38,6 @@
   {headers}
 >
   {#if a}
-    <WalterZaehler {wohnungen} {zaehler} {zaehlertypen} {a} />
+    <WalterZaehler {wohnungen} {umlagen} {zaehlertypen} {a} />
   {/if}
 </WalterDataWrapper>

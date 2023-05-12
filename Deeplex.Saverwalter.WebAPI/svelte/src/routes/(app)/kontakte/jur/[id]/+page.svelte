@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Accordion, MultiSelect, Row } from 'carbon-components-svelte';
   import type { PageData } from './$types';
   import {
     WalterKontakte,
@@ -7,7 +6,8 @@
     WalterWohnungen,
     WalterVertraege,
     WalterHeaderDetail,
-    WalterJuristischePerson
+    WalterJuristischePerson,
+    WalterLinks
   } from '$WalterComponents';
   import type {
     WalterJuristischePersonEntry,
@@ -43,7 +43,7 @@
     juristischePersonen={data.juristischePersonen}
   />
 
-  <Accordion>
+  <WalterLinks>
     <WalterKontakte
       bind:a={mitglied}
       title="Mitglieder"
@@ -65,5 +65,5 @@
       title="Verträge"
       rows={data.a.vertraege}
     />
-  </Accordion>
+  </WalterLinks>
 </WalterGrid>

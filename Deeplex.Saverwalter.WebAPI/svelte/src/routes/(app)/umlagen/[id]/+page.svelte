@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { Accordion } from 'carbon-components-svelte';
   import type { PageData } from './$types';
   import {
     WalterBetriebskostenrechnungen,
     WalterHeaderDetail,
     WalterGrid,
     WalterWohnungen,
-    WalterUmlage
+    WalterUmlage,
+    WalterZaehlerList,
+    WalterLinks
   } from '$WalterComponents';
   import { convertDate } from '$WalterServices/utils';
   import type {
@@ -49,13 +50,14 @@
 
 <WalterGrid>
   <WalterUmlage
+    zaehler={data.zaehler}
     betriebskostentypen={data.betriebskostentypen}
     wohnungen={data.wohnungen}
     umlageschluessel={data.umlageschluessel}
-    a={data.a}
+    bind:a={data.a}
   />
 
-  <Accordion>
+  <WalterLinks>
     <WalterWohnungen
       kontakte={data.kontakte}
       title="Wohnungen"
@@ -68,5 +70,15 @@
       title="Betriebskostenrechnungen"
       rows={data.a.betriebskostenrechnungen}
     />
-  </Accordion>
+    <!-- Only show if Schlüssel is "nach Verbrauch" -->
+    {#if data.a?.schluessel?.id === '3'}
+      <WalterZaehlerList
+        title="Zähler"
+        wohnungen={data.wohnungen}
+        umlagen={data.umlagen}
+        zaehlertypen={data.zaehlertypen}
+        rows={data.a.zaehler}
+      />
+    {/if}
+  </WalterLinks>
 </WalterGrid>
