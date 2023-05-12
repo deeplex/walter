@@ -4,11 +4,11 @@
     WalterGrid,
     WalterHeaderDetail,
     WalterKontakte,
+    WalterLinks,
     WalterWohnungen,
     WalterZaehlerList
   } from '$WalterComponents';
   import type { WalterWohnungEntry } from '$WalterLib';
-  import { Accordion } from 'carbon-components-svelte';
   import type { PageData } from './$types';
 
   export let data: PageData;
@@ -26,7 +26,7 @@
 <WalterGrid>
   <WalterAdresse bind:value={data.a} />
 
-  <Accordion>
+  <WalterLinks>
     <WalterWohnungen
       kontakte={data.kontakte}
       a={wohnungEntry}
@@ -35,11 +35,11 @@
     />
     <WalterKontakte title="Personen" rows={data.a.kontakte} />
     <WalterZaehlerList
-      zaehler={data.zaehler}
+      umlagen={data.umlagen}
       zaehlertypen={data.zaehlertypen}
       wohnungen={data.wohnungen}
       title="Zähler"
       rows={data.a.zaehler}
     />
-  </Accordion>
+  </WalterLinks>
 </WalterGrid>

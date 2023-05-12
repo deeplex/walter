@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Accordion } from 'carbon-components-svelte';
   import type { PageData } from './$types';
   import {
     WalterGrid,
@@ -7,7 +6,8 @@
     WalterWohnungen,
     WalterVertraege,
     WalterHeaderDetail,
-    WalterNatuerlichePerson
+    WalterNatuerlichePerson,
+    WalterLinks
   } from '$WalterComponents';
 
   export let data: PageData;
@@ -28,7 +28,7 @@
     juristischePersonen={data.juristischePersonen}
   />
 
-  <Accordion>
+  <WalterLinks>
     <WalterKontakte
       title="Juristische Personen"
       rows={data.a.juristischePersonen}
@@ -44,5 +44,5 @@
       title="Verträge"
       rows={data.a.vertraege}
     />
-  </Accordion>
+  </WalterLinks>
 </WalterGrid>

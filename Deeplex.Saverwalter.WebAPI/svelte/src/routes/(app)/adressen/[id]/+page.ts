@@ -15,7 +15,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
     kontakte: walter_selection.kontakte(fetch),
     wohnungen: walter_selection.wohnungen(fetch),
     zaehlertypen: walter_selection.zaehlertypen(fetch),
-    zaehler: walter_selection.zaehler(fetch),
+    umlagen: walter_selection.umlagen(fetch),
     juristischePersonen: walter_selection.juristischePersonen(fetch),
     a: WalterAdresseEntry.GetOne<WalterAdresseEntry>(params.id, fetch),
 

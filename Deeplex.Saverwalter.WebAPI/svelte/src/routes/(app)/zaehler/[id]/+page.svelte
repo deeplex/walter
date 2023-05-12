@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { Accordion } from 'carbon-components-svelte';
   import type { PageData } from './$types';
   import {
     WalterHeaderDetail,
     WalterGrid,
     WalterZaehler,
     WalterZaehlerstaende,
-    WalterUmlagen
+    WalterUmlagen,
+    WalterLinks
   } from '$WalterComponents';
   import { convertDate } from '$WalterServices/utils';
   import type { WalterZaehlerstandEntry } from '$WalterLib';
@@ -43,7 +43,7 @@
     a={data.a}
   />
 
-  <Accordion>
+  <WalterLinks>
     <WalterZaehlerstaende
       a={zaehlerstandEntry}
       title="Zählerstände"
@@ -57,5 +57,5 @@
       betriebskostentypen={data.betriebskostentypen}
       rows={data.a.umlagen}
     />
-  </Accordion>
+  </WalterLinks>
 </WalterGrid>

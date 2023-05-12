@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { Accordion, Button } from 'carbon-components-svelte';
+  import { Button } from 'carbon-components-svelte';
   import type { PageData } from './$types';
 
   import {
     WalterGrid,
     WalterWohnungen,
     WalterHeaderDetail,
-    WalterBetriebskostenrechnung
+    WalterBetriebskostenrechnung,
+    WalterLinks
   } from '$WalterComponents';
 
   export let data: PageData;
@@ -32,13 +33,13 @@
     a={data.a}
   />
 
-  <Accordion>
+  <WalterLinks>
     <WalterWohnungen
       kontakte={data.kontakte}
       title="Wohnungen"
       rows={data.a.wohnungen}
     />
-  </Accordion>
+  </WalterLinks>
 
   <Button href={`/umlagen/${data.a.umlage?.id}`}>Zur Umlage</Button>
 </WalterGrid>
