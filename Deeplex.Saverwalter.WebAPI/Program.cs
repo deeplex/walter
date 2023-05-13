@@ -29,10 +29,15 @@ namespace Deeplex.Saverwalter.WebAPI
 
             container.Verify();
 
-            await using (AsyncScopedLifestyle.BeginScope(container))
+            // TODO check if this should even be done outside of development
+            if (!app.Environment.IsDevelopment())
             {
-                await MigrateDb(container);
+                await using (AsyncScopedLifestyle.BeginScope(container))
+                {
+                    await MigrateDb(container);
+                }
             }
+            
             app.Run();
         }
 
@@ -159,6 +164,7 @@ namespace Deeplex.Saverwalter.WebAPI
         private static async Task MigrateDb(Container container)
         {
             var dbContext = container.GetInstance<SaverwalterContext>();
+            
             await dbContext.Database.MigrateAsync();
             if (await dbContext.UserAccounts.CountAsync() > 0)
             {
