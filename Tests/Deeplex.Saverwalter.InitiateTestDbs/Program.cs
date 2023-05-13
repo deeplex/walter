@@ -20,15 +20,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
             var options = CreateDbContextOptions();
             var ctx = new SaverwalterContext(options);
             await ctx.Database.EnsureDeletedAsync();
+            await ctx.Database.EnsureCreatedAsync();
+            
             await ctx.SaveChangesAsync();
-            ctx.Dispose();
 
-            var options2 = CreateDbContextOptions();
-            var ctx2 = new SaverwalterContext(options2);
-            await ctx2.Database.MigrateAsync();
-            await ctx2.SaveChangesAsync();
-
-            await FullGenericDatabase.PopulateDatabase(ctx2, databaseUser, databasePass);
+            await FullGenericDatabase.PopulateDatabase(ctx, databaseUser, databasePass);
         }
 
         private static DbContextOptions<SaverwalterContext> CreateDbContextOptions()

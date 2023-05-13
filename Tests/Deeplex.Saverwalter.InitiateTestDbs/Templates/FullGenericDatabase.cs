@@ -12,33 +12,33 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             string databaseUser,
             string databasePass)
         {
-            await CreateUserAccount(ctx, databaseUser, databasePass);
-            var adressen = await FillAdressen(ctx);
-            var natuerlichePersonen = await FillNatuerlichePersonen(ctx, adressen);
-            var juristischePersonen = await FillJuristischePersonen(ctx, adressen);
-            var wohnungen = await FillWohnungen(ctx, adressen, natuerlichePersonen, juristischePersonen);
-            var vertraege = await FillVertraege(ctx, wohnungen, natuerlichePersonen, juristischePersonen);
-            var mieten = await FillMieten(ctx, vertraege);
-            var erhaltungsaufwendungen = await FillErhaltungsaufwendungen(ctx, wohnungen, juristischePersonen);
+            CreateUserAccount(ctx, databaseUser, databasePass);
+            var adressen = FillAdressen(ctx);
+            var natuerlichePersonen = FillNatuerlichePersonen(ctx, adressen);
+            var juristischePersonen = FillJuristischePersonen(ctx, adressen);
+            var wohnungen = FillWohnungen(ctx, adressen, natuerlichePersonen, juristischePersonen);
+            var vertraege = FillVertraege(ctx, wohnungen, natuerlichePersonen, juristischePersonen);
+            var mieten = FillMieten(ctx, vertraege);
+            var erhaltungsaufwendungen = FillErhaltungsaufwendungen(ctx, wohnungen, juristischePersonen);
 
             // Still empty
-            var mietminderungen = await FillMietminderungen(ctx);
-            var kontos = await FillKontos(ctx);
-            var garagen = await FillGaragen(ctx);
+            var mietminderungen = FillMietminderungen(ctx);
+            var kontos = FillKontos(ctx);
+            var garagen = FillGaragen(ctx);
 
             // TODO
-            var umlagen = await FillUmlagen(ctx);
-            var mieterSet = await FillMieterSet(ctx);
-            var zaehlerSet = await FillZaehlerSet(ctx);
-            var zaehlerstaende = await FillZaehlerstaende(ctx);
-            var betriebskostenrechnungen = await FillBetriebskostenrechnungen(ctx);
+            var umlagen = FillUmlagen(ctx);
+            var mieterSet = FillMieterSet(ctx);
+            var zaehlerSet = FillZaehlerSet(ctx);
+            var zaehlerstaende = FillZaehlerstaende(ctx);
+            var betriebskostenrechnungen = FillBetriebskostenrechnungen(ctx);
 
             Console.WriteLine("Lade erzeugte Daten in Datenbank...");
-            await ctx.SaveChangesAsync();
+            ctx.SaveChangesAsync();
             Console.WriteLine("Fertig!");
         }
 
-        private static async Task CreateUserAccount(SaverwalterContext ctx, string databaseUser, string databasePass)
+        private static void CreateUserAccount(SaverwalterContext ctx, string databaseUser, string databasePass)
         {
             Console.Write($"Erstelle Nutzer mit Nutzernamen {databaseUser} und Passwort {databasePass}");
             var account = new UserAccount { Username = databaseUser };
@@ -55,10 +55,9 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             credential.PasswordHash = Rfc2898DeriveBytes.Pbkdf2(utf8Password, credential.Salt, credential.Iterations, HashAlgorithmName.SHA512, 64);
             account.Pbkdf2PasswordCredential = credential;
             ctx.Pbkdf2PasswordCredentials.Add(credential);
-            await ctx.SaveChangesAsync();
         }
 
-        public static async Task<List<Adresse>> FillAdressen(SaverwalterContext ctx)
+        public static List<Adresse> FillAdressen(SaverwalterContext ctx)
         {
             Console.WriteLine("Füge Adressen hinzu:");
 
@@ -80,12 +79,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             }
             
             ctx.Adressen.AddRange(adressen);
-            //await ctx.SaveChangesAsync();
 
             return adressen;
         }
 
-        public static async Task<List<JuristischePerson>> FillJuristischePersonen(SaverwalterContext ctx, List<Adresse> adressen)
+        public static List<JuristischePerson> FillJuristischePersonen(SaverwalterContext ctx, List<Adresse> adressen)
         {
             Console.WriteLine("Füge juristische Personen hinzu:");
 
@@ -121,12 +119,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             }
 
             ctx.JuristischePersonen.AddRange(juristischePersonen);
-            //await ctx.SaveChangesAsync();
 
             return juristischePersonen;
         }
 
-        public static async Task<List<NatuerlichePerson>> FillNatuerlichePersonen(SaverwalterContext ctx, List<Adresse> adressen)
+        public static List<NatuerlichePerson> FillNatuerlichePersonen(SaverwalterContext ctx, List<Adresse> adressen)
         {
             Console.WriteLine("Füge natürliche Personen hinzu:");
 
@@ -192,12 +189,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             }
 
             ctx.NatuerlichePersonen.AddRange(natuerlichePersonen);
-            //await ctx.SaveChangesAsync();
 
             return natuerlichePersonen;
         }
 
-        public static async Task<List<Wohnung>> FillWohnungen(SaverwalterContext ctx, List<Adresse> adressen, List<NatuerlichePerson> natuerlichePersonen, List<JuristischePerson> juristischePersonen)
+        public static List<Wohnung> FillWohnungen(SaverwalterContext ctx, List<Adresse> adressen, List<NatuerlichePerson> natuerlichePersonen, List<JuristischePerson> juristischePersonen)
         {
             Console.WriteLine("Füge Wohnungen hinzu:");
 
@@ -222,12 +218,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             }
 
             ctx.Wohnungen.AddRange(wohnungen);
-            //await ctx.SaveChangesAsync();
 
             return wohnungen;
         }
 
-        public static async Task<List<Erhaltungsaufwendung>> FillErhaltungsaufwendungen(SaverwalterContext ctx, List<Wohnung> wohnungen, List<JuristischePerson> juristischePersonen)
+        public static List<Erhaltungsaufwendung> FillErhaltungsaufwendungen(SaverwalterContext ctx, List<Wohnung> wohnungen, List<JuristischePerson> juristischePersonen)
         {
             Console.WriteLine("Füge Erhaltungsaufwendungen hinzu:");
 
@@ -251,12 +246,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             }
 
             ctx.Erhaltungsaufwendungen.AddRange(erhaltungsaufwendungen);
-            //await ctx.SaveChangesAsync();
 
             return erhaltungsaufwendungen;
         }
 
-        public static async Task<List<Vertrag>> FillVertraege(
+        public static List<Vertrag> FillVertraege(
             SaverwalterContext ctx,
             List<Wohnung> wohnungen,
             List<NatuerlichePerson> natuerlichePersonen,
@@ -304,12 +298,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             }
 
             ctx.Vertraege.AddRange(vertraege);
-            //await ctx.SaveChangesAsync();
 
             return vertraege;
         }
 
-        public static async Task<List<Miete>> FillMieten(SaverwalterContext ctx, List<Vertrag> vertraege)
+        public static List<Miete> FillMieten(SaverwalterContext ctx, List<Vertrag> vertraege)
         {
             Console.WriteLine("Füge Mieten hinzu:");
 
@@ -336,96 +329,89 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return mieten;
         }
 
-        public static async Task<List<Garage>> FillGaragen(SaverwalterContext ctx)
+        public static List<Garage> FillGaragen(SaverwalterContext ctx)
         {
             var garagen = new List<Garage> { };
 
             // TODO still empty...
-            await ctx.SaveChangesAsync();
+            ctx.Garagen.AddRange(garagen);
 
             return garagen;
         }
 
-        public static async Task<List<Konto>> FillKontos(SaverwalterContext ctx)
+        public static List<Konto> FillKontos(SaverwalterContext ctx)
         {
             var kontos = new List<Konto> { };
 
             // TODO still empty...
 
             ctx.Kontos.AddRange(kontos);
-            //await ctx.SaveChangesAsync();
 
             return kontos;
         }
 
-        public static async Task<List<Mietminderung>> FillMietminderungen(SaverwalterContext ctx)
+        public static List<Mietminderung> FillMietminderungen(SaverwalterContext ctx)
         {
             var mietminderungen = new List<Mietminderung> { };
 
             // TODO still empty...
 
             ctx.Mietminderungen.AddRange(mietminderungen);
-            //await ctx.SaveChangesAsync();
 
             return mietminderungen;
         }
 
-        public static async Task<List<Betriebskostenrechnung>> FillBetriebskostenrechnungen(SaverwalterContext ctx)
+        public static List<Betriebskostenrechnung> FillBetriebskostenrechnungen(SaverwalterContext ctx)
         {
             var betriebskostenrechnungen = new List<Betriebskostenrechnung> { };
 
             // TODO
 
             ctx.Betriebskostenrechnungen.AddRange(betriebskostenrechnungen);
-            //await ctx.SaveChangesAsync();
 
             return betriebskostenrechnungen;
         }
 
-        public static async Task<List<Mieter>> FillMieterSet(SaverwalterContext ctx)
+        public static List<Mieter> FillMieterSet(SaverwalterContext ctx)
         {
             var mieter = new List<Mieter> { };
 
             // TODO
 
             ctx.MieterSet.AddRange(mieter);
-            //await ctx.SaveChangesAsync();
 
             return mieter;
         }
 
-        public static async Task<List<Umlage>> FillUmlagen(SaverwalterContext ctx)
+        public static List<Umlage> FillUmlagen(SaverwalterContext ctx)
         {
             var umlagen = new List<Umlage> { };
 
             // TODO
 
             ctx.Umlagen.AddRange(umlagen);
-            //await ctx.SaveChangesAsync();
 
             return umlagen;
         }
 
-        public static async Task<List<Zaehler>> FillZaehlerSet(SaverwalterContext ctx)
+        public static List<Zaehler> FillZaehlerSet(SaverwalterContext ctx)
         {
             var zaehler = new List<Zaehler> { };
 
             // TODO
 
             ctx.ZaehlerSet.AddRange(zaehler);
-            //await ctx.SaveChangesAsync();
 
             return zaehler;
         }
 
-        public static async Task<List<Zaehlerstand>> FillZaehlerstaende(SaverwalterContext ctx)
+        public static List<Zaehlerstand> FillZaehlerstaende(SaverwalterContext ctx)
         {
             var zaehlerstaende = new List<Zaehlerstand> { };
 
             // TODO
 
             ctx.Zaehlerstaende.AddRange(zaehlerstaende);
-            //await ctx.SaveChangesAsync();
 
             return zaehlerstaende;
         }

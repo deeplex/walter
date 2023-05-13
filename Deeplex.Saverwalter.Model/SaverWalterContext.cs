@@ -35,7 +35,6 @@ namespace Deeplex.Saverwalter.Model
             options
                 .UseLazyLoadingProxies()
                 .UseSnakeCaseNamingConvention();
-
         }
 
         public IPerson FindPerson(Guid PersonId)
