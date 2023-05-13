@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.Model
         public string? Email { get; set; }
         public virtual Adresse? Adresse { get; set; }
         public string? Notiz { get; set; }
-
+        // Remove Wohnungen and Garagen (deprecated)
         public virtual List<Wohnung> Wohnungen { get; private set; } = new List<Wohnung>();
         public virtual List<Garage> Garagen { get; private set; } = new List<Garage>();
         public virtual List<JuristischePerson> JuristischeMitglieder { get; private set; } = new List<JuristischePerson>();

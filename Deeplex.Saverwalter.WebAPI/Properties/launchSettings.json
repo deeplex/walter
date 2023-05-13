@@ -5,12 +5,12 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "DATABASE_HOST": "192.168.178.61",
+        "DATABASE_HOST": "localhost",
         "DATABASE_PORT": "5432",
-        "DATABASE_NAME": "saverdb",
-        "DATABASE_USER": "postgres",
-        "DATABASE_PASS": "admin",
-        "S3_PROVIDER": "http://s3:9000/saverwalter"
+        "DATABASE_NAME": "walter_dev_full_generic_db",
+        "DATABASE_USER": "root",
+        "DATABASE_PASS": "securepw",
+        "S3_PROVIDER": "http://localhost:9000/saverwalter"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5254"
