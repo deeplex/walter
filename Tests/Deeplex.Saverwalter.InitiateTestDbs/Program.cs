@@ -9,9 +9,9 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
 {
     internal class Program
     {
-        private static string databaseUser = "root";
-        private static string databasePass = "securepw";
-        private static string databaseHost = "localhost";
+        private static string databaseUser = "postgres";
+        private static string databasePass = "postgres";
+        private static string databaseHost = "db";
         private static string databasePort = "5432";
         private static string databaseName = "walter_dev_full_generic_db";
 
@@ -21,7 +21,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
             var ctx = new SaverwalterContext(options);
             await ctx.Database.EnsureDeletedAsync();
             await ctx.Database.EnsureCreatedAsync();
-            
+
+            // TODO is this necessary?
             await ctx.SaveChangesAsync();
 
             await FullGenericDatabase.PopulateDatabase(ctx, databaseUser, databasePass);

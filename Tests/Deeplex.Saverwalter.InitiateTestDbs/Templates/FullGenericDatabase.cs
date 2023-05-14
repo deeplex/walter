@@ -7,10 +7,12 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 {
     internal sealed class FullGenericDatabase
     {
+        private static DateOnly globalToday = new DateOnly(2023, 5, 14);
+
         public static async Task PopulateDatabase(
-            SaverwalterContext ctx,
-            string databaseUser,
-            string databasePass)
+           SaverwalterContext ctx,
+           string databaseUser,
+           string databasePass)
         {
             CreateUserAccount(ctx, databaseUser, databasePass);
             var adressen = FillAdressen(ctx);
@@ -18,6 +20,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             var juristischePersonen = FillJuristischePersonen(ctx, adressen);
             var wohnungen = FillWohnungen(ctx, adressen, natuerlichePersonen, juristischePersonen);
             var vertraege = FillVertraege(ctx, wohnungen, natuerlichePersonen, juristischePersonen);
+            var vertragVersionen = FillVertragversionen(ctx, vertraege);
             var mieten = FillMieten(ctx, vertraege);
             var erhaltungsaufwendungen = FillErhaltungsaufwendungen(ctx, wohnungen, juristischePersonen);
 
@@ -27,20 +30,20 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             var garagen = FillGaragen(ctx);
 
             // TODO
-            var umlagen = FillUmlagen(ctx);
+            var umlagen = FillUmlagen(ctx, adressen);
             var mieterSet = FillMieterSet(ctx);
-            var zaehlerSet = FillZaehlerSet(ctx);
-            var zaehlerstaende = FillZaehlerstaende(ctx);
+            var zaehlerSet = FillZaehlerSet(ctx, umlagen);
+            var zaehlerstaende = FillZaehlerstaende(ctx, vertraege);
             var betriebskostenrechnungen = FillBetriebskostenrechnungen(ctx);
 
             Console.WriteLine("Lade erzeugte Daten in Datenbank...");
-            ctx.SaveChangesAsync();
+            await ctx.SaveChangesAsync();
             Console.WriteLine("Fertig!");
         }
 
         private static void CreateUserAccount(SaverwalterContext ctx, string databaseUser, string databasePass)
         {
-            Console.Write($"Erstelle Nutzer mit Nutzernamen {databaseUser} und Passwort {databasePass}");
+            Console.WriteLine($"Erstelle Nutzer mit Nutzernamen {databaseUser} und Passwort {databasePass}");
             var account = new UserAccount { Username = databaseUser };
             ctx.UserAccounts.Add(account);
             var credential = new Pbkdf2PasswordCredential
@@ -57,9 +60,9 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             ctx.Pbkdf2PasswordCredentials.Add(credential);
         }
 
-        public static List<Adresse> FillAdressen(SaverwalterContext ctx)
+        static List<Adresse> FillAdressen(SaverwalterContext ctx)
         {
-            Console.WriteLine("Füge Adressen hinzu:");
+            Console.Write("Füge Adressen hinzu: ");
 
             var adressen = new List<Adresse> { };
 
@@ -77,15 +80,16 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                 adressen.Add(new Adresse(strasse, hausnummer, postleitzahl, stadt));
             }
-            
+
             ctx.Adressen.AddRange(adressen);
+            Console.WriteLine($"{adressen.Count} Adressen hinzugefügt");
 
             return adressen;
         }
 
-        public static List<JuristischePerson> FillJuristischePersonen(SaverwalterContext ctx, List<Adresse> adressen)
+        static List<JuristischePerson> FillJuristischePersonen(SaverwalterContext ctx, List<Adresse> adressen)
         {
-            Console.WriteLine("Füge juristische Personen hinzu:");
+            Console.Write("Füge juristische Personen hinzu: ");
 
             var juristischePersonen = new List<JuristischePerson> { };
 
@@ -119,13 +123,14 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             }
 
             ctx.JuristischePersonen.AddRange(juristischePersonen);
+            Console.WriteLine($"{juristischePersonen.Count} juristische Personen hinzugefügt");
 
             return juristischePersonen;
         }
 
-        public static List<NatuerlichePerson> FillNatuerlichePersonen(SaverwalterContext ctx, List<Adresse> adressen)
+        static List<NatuerlichePerson> FillNatuerlichePersonen(SaverwalterContext ctx, List<Adresse> adressen)
         {
-            Console.WriteLine("Füge natürliche Personen hinzu:");
+            Console.Write("Füge natürliche Personen hinzu: ");
 
             var natuerlichePersonen = new List<NatuerlichePerson> { };
 
@@ -189,13 +194,14 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             }
 
             ctx.NatuerlichePersonen.AddRange(natuerlichePersonen);
+            Console.WriteLine($"{natuerlichePersonen.Count} natürliche Personen hinzugefügt");
 
             return natuerlichePersonen;
         }
 
-        public static List<Wohnung> FillWohnungen(SaverwalterContext ctx, List<Adresse> adressen, List<NatuerlichePerson> natuerlichePersonen, List<JuristischePerson> juristischePersonen)
+        static List<Wohnung> FillWohnungen(SaverwalterContext ctx, List<Adresse> adressen, List<NatuerlichePerson> natuerlichePersonen, List<JuristischePerson> juristischePersonen)
         {
-            Console.WriteLine("Füge Wohnungen hinzu:");
+            Console.Write("Füge Wohnungen hinzu: ");
 
             var wohnungen = new List<Wohnung> { };
 
@@ -206,25 +212,26 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             {
                 var adresse = adressen[i * 3 % adressen.Count];
                 // Should run 200 times
-                for (var j = 1; j < (i%5) + 1; j++)
+                for (var j = 1; j < (i % 5) + 1; j++)
                 {
                     var bezeichnung = $"Wohnung Nr. {j}";
                     wohnungen.Add(new Wohnung(bezeichnung, i * 2, i * 2, 1)
                     {
                         Adresse = adresse,
-                        BesitzerId = personIds[i%personIds.Count],
+                        BesitzerId = personIds[i % personIds.Count],
                     });
                 }
             }
 
             ctx.Wohnungen.AddRange(wohnungen);
+            Console.WriteLine($"{wohnungen.Count} Wohnungen hinzugefügt");
 
             return wohnungen;
         }
 
-        public static List<Erhaltungsaufwendung> FillErhaltungsaufwendungen(SaverwalterContext ctx, List<Wohnung> wohnungen, List<JuristischePerson> juristischePersonen)
+        static List<Erhaltungsaufwendung> FillErhaltungsaufwendungen(SaverwalterContext ctx, List<Wohnung> wohnungen, List<JuristischePerson> juristischePersonen)
         {
-            Console.WriteLine("Füge Erhaltungsaufwendungen hinzu:");
+            Console.Write("Füge Erhaltungsaufwendungen hinzu: ");
 
             var erhaltungsaufwendungen = new List<Erhaltungsaufwendung> { };
 
@@ -232,7 +239,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             {
                 var betrag = 100;
                 var bezeichnung = $"Rechnungsnr. {i}";
-                var ausstellerId = juristischePersonen[i%juristischePersonen.Count].PersonId;
+                var ausstellerId = juristischePersonen[i % juristischePersonen.Count].PersonId;
                 var jahr = 2020 + i % 5;
                 var monat = 1 + i % 12;
                 var tag = 1 + i % DateTime.DaysInMonth(jahr, monat);
@@ -246,17 +253,18 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             }
 
             ctx.Erhaltungsaufwendungen.AddRange(erhaltungsaufwendungen);
+            Console.WriteLine($"{erhaltungsaufwendungen.Count} Erhaltungsaufwendungen hinzugefügt");
 
             return erhaltungsaufwendungen;
         }
 
-        public static List<Vertrag> FillVertraege(
-            SaverwalterContext ctx,
-            List<Wohnung> wohnungen,
-            List<NatuerlichePerson> natuerlichePersonen,
-            List<JuristischePerson> juristischePersonen)
+        static List<Vertrag> FillVertraege(
+           SaverwalterContext ctx,
+           List<Wohnung> wohnungen,
+           List<NatuerlichePerson> natuerlichePersonen,
+           List<JuristischePerson> juristischePersonen)
         {
-            Console.WriteLine("Füge Verträge hinzu:");
+            Console.Write("Füge Verträge hinzu: ");
 
             var vertraege = new List<Vertrag>();
 
@@ -282,29 +290,49 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     Wohnung = wohnung
                 };
 
-                var versionen = new List<VertragVersion> { };
-                for (var j = 0; j <= (j + 1) % 3; ++j)
-                {
-                    var grundmiete = wohnung.Wohnflaeche * (6 + i % 3 + j % 3);
-                    var personenzahl = (i + 1) % 3 * (j + 1) % 3;
-                    var beginn = ende.AddDays(-217 * ((j + 1) % 2) * j);
-                    versionen.Add(new VertragVersion(beginn, grundmiete, personenzahl)
-                    {
-                        Vertrag = vertrag
-                    });
-                }
-
                 vertraege.Add(vertrag);
             }
 
             ctx.Vertraege.AddRange(vertraege);
+            Console.WriteLine($"{vertraege.Count} Verträge hinzugefügt");
 
             return vertraege;
         }
 
-        public static List<Miete> FillMieten(SaverwalterContext ctx, List<Vertrag> vertraege)
+        static List<VertragVersion> FillVertragversionen(SaverwalterContext ctx, List<Vertrag> vertraege)
         {
-            Console.WriteLine("Füge Mieten hinzu:");
+            Console.Write("Füge Vertragversionen hinzu: ");
+
+            List<VertragVersion> vertragVersionen = new List<VertragVersion> { };
+
+            for (var i = 0; i < vertraege.Count; ++i)
+            {
+                var vertrag = vertraege[i];
+                var wohnung = vertrag.Wohnung;
+                var ende = vertrag.Ende ?? globalToday;
+
+                for (var j = 0; j <= (j + 1) % 3; ++j)
+                {
+                    var grundmiete = wohnung.Wohnflaeche * (6 + i % 3 + j % 3);
+                    var personenzahl = (i + 1) % 3 * (j + 1) % 3;
+                    var length = Math.Abs((vertraege.Count - i) * (i / 2) * (j + 1));
+                    var beginn = ende.AddMonths(-3).AddDays(-length);
+                    vertragVersionen.Add(new VertragVersion(beginn, grundmiete, personenzahl)
+                    {
+                        Vertrag = vertrag
+                    });
+                }
+            }
+
+            ctx.VertragVersionen.AddRange(vertragVersionen);
+            Console.WriteLine($"{vertragVersionen.Count} Vertragversionen hinzugefügt");
+
+            return vertragVersionen;
+        }
+
+        static List<Miete> FillMieten(SaverwalterContext ctx, List<Vertrag> vertraege)
+        {
+            Console.Write("Füge Mieten hinzu: ");
 
             var mieten = new List<Miete> { };
 
@@ -312,8 +340,9 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             {
                 foreach (var version in vertrag.Versionen)
                 {
-                    var today = DateOnly.FromDateTime(DateTime.Today);
-                    for (DateOnly date = version.Beginn; date <= version.Ende() || date <= today; date.AddMonths(1))
+                    var ende = version.Ende() ?? globalToday;
+
+                    for (DateOnly date = version.Beginn; date <= ende; date = date.AddMonths(1))
                     {
                         mieten.Add(new Miete(date, date, version.Grundmiete + 300 + (date.Day % 3) * 100)
                         {
@@ -324,94 +353,242 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             }
 
             ctx.Mieten.AddRange(mieten);
-            //await ctx.SaveChangesAsync();
+            Console.WriteLine($"{mieten.Count} Mieten hinzugefügt");
 
             return mieten;
         }
 
-        public static List<Garage> FillGaragen(SaverwalterContext ctx)
+        static List<Garage> FillGaragen(SaverwalterContext ctx)
         {
+            Console.Write("Füge Garagen hinzu: ");
+
             var garagen = new List<Garage> { };
 
             // TODO still empty...
             ctx.Garagen.AddRange(garagen);
+            Console.WriteLine($"{garagen.Count} Garagen hinzugefügt");
 
             return garagen;
         }
 
-        public static List<Konto> FillKontos(SaverwalterContext ctx)
+        static List<Konto> FillKontos(SaverwalterContext ctx)
         {
+            Console.Write("Füge Kontos hinzu: ");
+
             var kontos = new List<Konto> { };
 
             // TODO still empty...
 
             ctx.Kontos.AddRange(kontos);
+            Console.WriteLine($"{kontos.Count} Kontos hinzugefügt");
 
             return kontos;
         }
 
-        public static List<Mietminderung> FillMietminderungen(SaverwalterContext ctx)
+        static List<Mietminderung> FillMietminderungen(SaverwalterContext ctx)
         {
+            Console.Write("Füge Mietminderungen hinzu: ");
+
             var mietminderungen = new List<Mietminderung> { };
 
             // TODO still empty...
 
             ctx.Mietminderungen.AddRange(mietminderungen);
+            Console.WriteLine($"{mietminderungen.Count} Mietminderungen hinzugefügt");
 
             return mietminderungen;
         }
 
-        public static List<Betriebskostenrechnung> FillBetriebskostenrechnungen(SaverwalterContext ctx)
+        static List<Betriebskostenrechnung> FillBetriebskostenrechnungen(SaverwalterContext ctx)
         {
+            Console.Write("Füge Betriebskostenrechnung hinzu: ");
+
             var betriebskostenrechnungen = new List<Betriebskostenrechnung> { };
 
             // TODO
 
             ctx.Betriebskostenrechnungen.AddRange(betriebskostenrechnungen);
+            Console.WriteLine($"{betriebskostenrechnungen.Count} Betriebskostenrechnungen hinzugefügt");
 
             return betriebskostenrechnungen;
         }
 
-        public static List<Mieter> FillMieterSet(SaverwalterContext ctx)
+        private static List<Mieter> FillMieterSet(SaverwalterContext ctx)
         {
+            Console.Write("Füge Mieter hinzu: ");
+
             var mieter = new List<Mieter> { };
 
             // TODO
 
             ctx.MieterSet.AddRange(mieter);
+            Console.WriteLine($"{mieter.Count} Mieter hinzugefügt");
 
             return mieter;
         }
 
-        public static List<Umlage> FillUmlagen(SaverwalterContext ctx)
+        private static Umlage addUmlage(
+            Adresse adresse,
+            Betriebskostentyp typ,
+            Umlageschluessel schluessel)
         {
+            var umlage = new Umlage(typ, schluessel)
+            {
+                Beschreibung = $"{typ.ToDescriptionString()} wird über die Stadt {adresse.Stadt} abgerechnet.",
+                Wohnungen = adresse.Wohnungen,
+            };
+
+            return umlage;
+        }
+
+        private static List<Umlage> FillUmlagen(SaverwalterContext ctx, List<Adresse> adressen)
+        {
+            Console.Write("Füge Umlagen hinzu: ");
+
             var umlagen = new List<Umlage> { };
 
-            // TODO
+            for (var i = 0; i < adressen.Count; ++i)
+            {
+                var adresse = adressen[i];
+
+                umlagen.Add(addUmlage(adresse, Betriebskostentyp.AllgemeinstromHausbeleuchtung, Umlageschluessel.NachWohnflaeche));
+
+                if (i % 10 == 0)
+                {
+                    umlagen.Add(addUmlage(adresse, Betriebskostentyp.Breitbandkabelanschluss, Umlageschluessel.NachNutzeinheit));
+                }
+
+                umlagen.Add(addUmlage(adresse, Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachWohnflaeche));
+
+                umlagen.Add(addUmlage(adresse, Betriebskostentyp.EntwaesserungNiederschlagswasser, Umlageschluessel.NachWohnflaeche));
+
+                // Can also use Personen
+                umlagen.Add(addUmlage(adresse, Betriebskostentyp.EntwaesserungSchmutzwasser, Umlageschluessel.NachVerbrauch));
+
+                if (i % 2 == 0)
+                {
+                    umlagen.Add(addUmlage(adresse, Betriebskostentyp.Gartenpflege, Umlageschluessel.NachWohnflaeche));
+                }
+
+                // Can also be made direct
+                umlagen.Add(addUmlage(adresse, Betriebskostentyp.Grundsteuer, Umlageschluessel.NachWohnflaeche));
+
+                umlagen.Add(addUmlage(adresse, Betriebskostentyp.Haftpflichtversicherung, Umlageschluessel.NachWohnflaeche));
+
+                if (i % 3 == 0)
+                {
+                    umlagen.Add(addUmlage(adresse, Betriebskostentyp.Hauswartarbeiten, Umlageschluessel.NachWohnflaeche));
+                }
+
+                if (i % 3 == 0 || i % 7 == 0 || i % 11 == 0)
+                {
+                    umlagen.Add(addUmlage(adresse, Betriebskostentyp.Heizkosten, Umlageschluessel.NachVerbrauch));
+                    umlagen.Add(addUmlage(adresse, Betriebskostentyp.WartungThermenSpeicher, Umlageschluessel.NachWohnflaeche));
+                }
+
+                umlagen.Add(addUmlage(adresse, Betriebskostentyp.Muellbeseitigung, Umlageschluessel.NachPersonenzahl));
+
+                umlagen.Add(addUmlage(adresse, Betriebskostentyp.Sachversicherung, Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, Betriebskostentyp.SchornsteinfegerarbeitenKalt, Umlageschluessel.NachNutzeinheit));
+
+                umlagen.Add(addUmlage(adresse, Betriebskostentyp.Strassenreinigung, Umlageschluessel.NachWohnflaeche));
+
+                umlagen.Add(addUmlage(adresse, Betriebskostentyp.WasserversorgungKalt, Umlageschluessel.NachVerbrauch));
+                // umlagen.Add(addUmlage(adresse, Betriebskostentyp.WasserversorgungWarm, Umlageschluessel.NachVerbrauch))
+            }
 
             ctx.Umlagen.AddRange(umlagen);
+            Console.WriteLine($"{umlagen.Count} Umlagen hinzugefügt");
 
             return umlagen;
         }
 
-        public static List<Zaehler> FillZaehlerSet(SaverwalterContext ctx)
+        static List<Zaehler> FillZaehlerSet(SaverwalterContext ctx, List<Umlage> umlagen)
         {
+            Console.Write("Füge Zähler hinzu: ");
+
             var zaehler = new List<Zaehler> { };
 
-            // TODO
+            foreach (var umlage in umlagen)
+            {
+                if (umlage.Typ == Betriebskostentyp.WasserversorgungKalt)
+                {
+                    foreach (var wohnung in umlage.Wohnungen)
+                    {
+                        var kaltKennung = "Kaltwasserzähler " + wohnung.Bezeichnung;
+                        zaehler.Add(new Zaehler(kaltKennung, Zaehlertyp.Kaltwasser)
+                        {
+                            Wohnung = wohnung
+                        });
+                        var warmKennung = "Warmwasserzähler " + wohnung.Bezeichnung;
+                        zaehler.Add(new Zaehler(warmKennung, Zaehlertyp.Warmwasser)
+                        {
+                            Wohnung = wohnung
+                        });
+                    }
+                }
+                // Vielleicht brauchen die Zähler?
+                if (umlage.Typ == Betriebskostentyp.Heizkosten)
+                {
+                    var kennung = "Allgemein Heizung" + umlage.GetWohnungenBezeichnung();
+                    zaehler.Add(new Zaehler(kennung, Zaehlertyp.Gas)
+                    {
+                    });
+
+                    foreach (var wohnung in umlage.Wohnungen)
+                    {
+                        var kennungEinzeln = "Heizzähler " + wohnung.Bezeichnung;
+                        zaehler.Add(new Zaehler(kennungEinzeln, Zaehlertyp.Gas)
+                        {
+                            Wohnung = wohnung
+                        });
+                    }
+                }
+            }
 
             ctx.ZaehlerSet.AddRange(zaehler);
+            Console.WriteLine($"{zaehler.Count} Zähler hinzugefügt");
 
             return zaehler;
         }
 
-        public static List<Zaehlerstand> FillZaehlerstaende(SaverwalterContext ctx)
+        static List<Zaehlerstand> FillZaehlerstaende(SaverwalterContext ctx, List<Vertrag> vertraege)
         {
+            Console.Write("Füge Zählerstände hinzu: ");
+
             var zaehlerstaende = new List<Zaehlerstand> { };
 
-            // TODO
+            foreach (var vertrag in vertraege)
+            {
+                var beginn = vertrag.Beginn();
+                var ende = vertrag.Ende ?? globalToday;
+
+                // TODO wenn der Vertrag früher endet muss entsprechend noch ein Zählerstand dazwischen.
+                for (var date = beginn; date <= ende; date = date.AddYears(1))
+                {
+                    foreach (var zaehler in vertrag.Wohnung.Zaehler)
+                    {
+                        var lastStand = zaehler.Staende.ToList().OrderBy(e => e.Datum).LastOrDefault();
+                        var max = zaehler.Typ switch
+                        {
+                            Zaehlertyp.Warmwasser => 50,
+                            Zaehlertyp.Kaltwasser => 100,
+                            Zaehlertyp.Strom => 1000,
+                            Zaehlertyp.Gas => 20000,
+                            _ => 10000
+                        };
+                        var lastStandStand = lastStand?.Stand ?? (double)0;
+                        var stand = lastStandStand += date.DayNumber % max;
+                        zaehlerstaende.Add(new Zaehlerstand(date, stand)
+                        {
+                            Zaehler = zaehler
+                        });
+                    }
+                }
+            }
 
             ctx.Zaehlerstaende.AddRange(zaehlerstaende);
+            Console.WriteLine($"{zaehlerstaende.Count} Zählerstände hinzugefügt");
 
             return zaehlerstaende;
         }
