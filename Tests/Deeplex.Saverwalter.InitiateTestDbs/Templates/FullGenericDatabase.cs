@@ -16,13 +16,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
         {
             CreateUserAccount(ctx, databaseUser, databasePass);
             var adressen = FillAdressen(ctx);
-            var natuerlichePersonen = FillNatuerlichePersonen(ctx, adressen);
-            var juristischePersonen = FillJuristischePersonen(ctx, adressen);
-            var wohnungen = FillWohnungen(ctx, adressen, natuerlichePersonen, juristischePersonen);
-            var vertraege = FillVertraege(ctx, wohnungen, natuerlichePersonen, juristischePersonen);
+            var wohnungen = FillWohnungen(ctx, adressen);
+            var vertraege = FillVertraege(ctx, wohnungen);
             var vertragVersionen = FillVertragversionen(ctx, vertraege);
             var mieten = FillMieten(ctx, vertraege);
-            var erhaltungsaufwendungen = FillErhaltungsaufwendungen(ctx, wohnungen, juristischePersonen);
+            var erhaltungsaufwendungen = FillErhaltungsaufwendungen(ctx, wohnungen);
 
             // Still empty
             var mietminderungen = FillMietminderungen(ctx);
@@ -31,10 +29,10 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
             // TODO
             var umlagen = FillUmlagen(ctx, adressen);
-            var mieterSet = FillMieterSet(ctx);
+            var mieterSet = FillMieterSet(ctx, vertraege);
             var zaehlerSet = FillZaehlerSet(ctx, umlagen);
             var zaehlerstaende = FillZaehlerstaende(ctx, vertraege);
-            var betriebskostenrechnungen = FillBetriebskostenrechnungen(ctx);
+            var betriebskostenrechnungen = FillBetriebskostenrechnungen(ctx, umlagen);
 
             Console.WriteLine("Lade erzeugte Daten in Datenbank...");
             await ctx.SaveChangesAsync();
@@ -67,16 +65,15 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             var adressen = new List<Adresse> { };
 
             var strasseList = GenericData.strasseList;
-            var hausnummerList = GenericData.hausnummerList;
             var postleitzahlList = GenericData.postleitzahlList;
             var stadtList = GenericData.stadtList;
 
             for (int i = 0; i < 100; ++i)
             {
-                var strasse = strasseList[i % strasseList.Count];
-                var hausnummer = hausnummerList[i % hausnummerList.Count];
-                var postleitzahl = postleitzahlList[i % postleitzahlList.Count];
-                var stadt = stadtList[i % stadtList.Count];
+                var strasse = GetOne(strasseList, i);
+                var hausnummer = (Math.Ceiling((double)i * 3 / 2) + 1).ToString();
+                var postleitzahl = GetOne(postleitzahlList, i);
+                var stadt = GetOne(stadtList, i);
 
                 adressen.Add(new Adresse(strasse, hausnummer, postleitzahl, stadt));
             }
@@ -87,159 +84,148 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return adressen;
         }
 
-        static List<JuristischePerson> FillJuristischePersonen(SaverwalterContext ctx, List<Adresse> adressen)
+        private static T GetOne<T>(List<T> list, int seed)
         {
-            Console.Write("Füge juristische Personen hinzu: ");
-
-            var juristischePersonen = new List<JuristischePerson> { };
-
-            List<string> bezeichnungen = GenericData.companyNames;
-            List<string?> emailList = GenericData.companyEmails
-                .Select((e, i) => (i % 2 == 0) ? null : e).ToList();
-            List<string?> telefonList = GenericData.telefonnummerList
-                .Select((e, i) => (i * 2 % 3 == 0) ? null : e).ToList();
-            List<string?> mobilList = GenericData.telefonnummerList
-                .Select((e, i) => (i % 2 == 0) ? null : e).ToList();
-            List<string?> faxList = GenericData.telefonnummerList
-                .Select((e, i) => i % 10 == 0 ? null : e).ToList();
-
-            for (var i = 0; i < bezeichnungen.Count * 1.5; ++i)
-            {
-                var bezeichnung = bezeichnungen[i % bezeichnungen.Count];
-                var email = emailList[i % emailList.Count];
-                var telefon = telefonList[i % telefonList.Count];
-                var fax = faxList[i % faxList.Count];
-                var mobil = mobilList[i % mobilList.Count];
-                var adresse = adressen[i * 7 % adressen.Count];
-
-                juristischePersonen.Add(new JuristischePerson(bezeichnung)
-                {
-                    Telefon = telefon,
-                    Adresse = adresse,
-                    Email = email,
-                    Fax = fax,
-                    Mobil = mobil,
-                });
-            }
-
-            ctx.JuristischePersonen.AddRange(juristischePersonen);
-            Console.WriteLine($"{juristischePersonen.Count} juristische Personen hinzugefügt");
-
-            return juristischePersonen;
+            return list[seed * 37 % list.Count];
         }
 
-        static List<NatuerlichePerson> FillNatuerlichePersonen(SaverwalterContext ctx, List<Adresse> adressen)
+        private static NatuerlichePerson generateNatuerlichePerson(int seed)
         {
-            Console.Write("Füge natürliche Personen hinzu: ");
+            var nachname = GetOne(GenericData.lastNames, seed * 13);
 
-            var natuerlichePersonen = new List<NatuerlichePerson> { };
+            var anrede = seed % 50 == 0 || seed % 49 == 0 ?
+                Anrede.Keine : seed % 2 == 0 ? Anrede.Herr : Anrede.Frau;
 
-            List<string> vornamenMale = GenericData.FirstNamesMale;
-            List<string> vornamenFemale = GenericData.FirstNamesFemale;
-            List<string> vornamenAll = vornamenMale.Concat(vornamenFemale).ToList();
-            List<string> nachnamen = GenericData.lastNames;
-
-            List<string> reversedTelefonList = GenericData.telefonnummerList;
-            reversedTelefonList.Reverse();
-            List<string?> telefonList = reversedTelefonList
-                .Select((e, i) => (i * 2 % 3 == 0) ? null : e).ToList();
-
-            List<string> reversedMobilList = GenericData.mobilePhoneNumbers;
-            reversedMobilList.Reverse();
-            List<string?> mobilList = reversedMobilList
-                .Select((e, i) => (i % 2 == 0) ? null : e).ToList();
-
-            for (var i = 0; i < nachnamen.Count * 1.5; ++i)
+            string vorname = "";
+            if (anrede == Anrede.Herr || seed % 50 == 0)
             {
-                string nachname = nachnamen[i % nachnamen.Count];
-                Adresse adresse = adressen[i % adressen.Count];
-
-                for (var j = i; j < (i + (i % 4)); ++j)
-                {
-                    string vorname;
-                    Anrede anrede;
-
-                    if (i % 100 == 0 || i % 51 == 0)
-                    {
-                        vorname = vornamenAll[j % vornamenAll.Count];
-                        anrede = Anrede.Keine;
-                    }
-                    if (i % 2 == 0)
-                    {
-                        vorname = vornamenMale[j % vornamenMale.Count];
-                        anrede = Anrede.Herr;
-                    }
-                    else
-                    {
-                        vorname = vornamenFemale[j % vornamenMale.Count];
-                        anrede = Anrede.Frau;
-                    }
-
-                    var email = i % 3 == 0 ?
-                        $"{vorname}.{nachname}@{GenericData.emailProvider[i % GenericData.emailProvider.Count]}".ToLower() :
-                        null;
-                    var telefon = telefonList[i % telefonList.Count];
-                    var mobil = mobilList[i % mobilList.Count];
-
-                    natuerlichePersonen.Add(new NatuerlichePerson(nachname)
-                    {
-                        Telefon = telefon,
-                        Adresse = adresse,
-                        Anrede = anrede,
-                        Email = email,
-                        Mobil = mobil,
-                        Vorname = vorname,
-                    });
-                }
+                vorname = GetOne(GenericData.FirstNamesMale, seed * 17);
+            }
+            else if (anrede == Anrede.Frau || seed % 49 == 0)
+            {
+                vorname = GetOne(GenericData.FirstNamesFemale, seed * 19);
             }
 
-            ctx.NatuerlichePersonen.AddRange(natuerlichePersonen);
-            Console.WriteLine($"{natuerlichePersonen.Count} natürliche Personen hinzugefügt");
+            var person = new NatuerlichePerson(nachname)
+            {
+                Vorname = vorname,
+                Telefon = GetOne(GenericData.telefonnummerList, seed * 7),
+                Email = $"{vorname}.{nachname}@{GetOne(GenericData.emailProvider, seed * 3).ToLower()}",
+                Fax = GetOne(GenericData.telefonnummerList, seed * 21),
+                // TODO Adresse
+            };
 
-            return natuerlichePersonen;
+            return person;
         }
 
-        static List<Wohnung> FillWohnungen(SaverwalterContext ctx, List<Adresse> adressen, List<NatuerlichePerson> natuerlichePersonen, List<JuristischePerson> juristischePersonen)
+        private static JuristischePerson generateJuristischePerson(int seed)
+        {
+            var name = GetOne(GenericData.companyNames, seed * 13);
+
+            var person = new JuristischePerson(name)
+            {
+                Email = name.Replace(" ", "_").ToLower() + (GenericData.emailProvider, seed * 7),
+                Telefon = GetOne(GenericData.telefonnummerList, seed * 7),
+                // TODO Adresse
+            };
+
+            return person;
+        }
+
+        private static bool isPrime(int number)
+        {
+            if (number == 1) return false;
+            if (number == 2) return true;
+
+            var limit = Math.Ceiling(Math.Sqrt(number));
+
+            for (int i = 2; i <= limit; ++i)
+                if (number % i == 0)
+                    return false;
+            return true;
+        }
+
+        private static List<Wohnung> FillWohnungen(SaverwalterContext ctx, List<Adresse> adressen)
         {
             Console.Write("Füge Wohnungen hinzu: ");
 
             var wohnungen = new List<Wohnung> { };
-
-            var personIds = natuerlichePersonen.Select(e => e.PersonId)
-                .Concat(juristischePersonen.Select(e => e.PersonId)).ToList();
+            var besitzerIdList = new List<Guid> { };
 
             for (var i = 0; i < 100; i++)
             {
+                Guid besitzerId;
+                if (i != 0 && (i % 2 == 0 || isPrime(i)))
+                {
+                    besitzerId = besitzerIdList.Last();
+                }
+                else
+                {
+                    if (isPrime(i))
+                    {
+                        var besitzer = generateJuristischePerson(i * 3);
+                        ctx.JuristischePersonen.Add(besitzer);
+                        besitzerIdList.Add(besitzer.PersonId);
+                        besitzerId = besitzer.PersonId;
+                    }
+                    else
+                    {
+                        var besitzer = generateNatuerlichePerson(i * 3);
+                        ctx.NatuerlichePersonen.Add(besitzer);
+                        besitzerIdList.Add(besitzer.PersonId);
+                        besitzerId = besitzer.PersonId;
+                    }
+                }
+
                 var adresse = adressen[i * 3 % adressen.Count];
                 // Should run 200 times
-                for (var j = 1; j < (i % 5) + 1; j++)
+                for (var j = 1; j < (i % 5) + 1; ++j)
                 {
                     var bezeichnung = $"Wohnung Nr. {j}";
+                    var flaeche = 35 + (j * 35);
                     wohnungen.Add(new Wohnung(bezeichnung, i * 2, i * 2, 1)
                     {
                         Adresse = adresse,
-                        BesitzerId = personIds[i % personIds.Count],
+                        BesitzerId = besitzerId,
+                        Wohnflaeche = flaeche,
+                        Nutzflaeche = flaeche,
+                        Nutzeinheit = 1
                     });
                 }
             }
 
             ctx.Wohnungen.AddRange(wohnungen);
+            Console.WriteLine($"{ctx.JuristischePersonen.Count()} juristische Personen hinzugefügt,.");
+            Console.WriteLine($"{ctx.NatuerlichePersonen.Count()} natürliche Personen hinzugefügt,.");
             Console.WriteLine($"{wohnungen.Count} Wohnungen hinzugefügt");
 
             return wohnungen;
         }
 
-        static List<Erhaltungsaufwendung> FillErhaltungsaufwendungen(SaverwalterContext ctx, List<Wohnung> wohnungen, List<JuristischePerson> juristischePersonen)
+        static List<Erhaltungsaufwendung> FillErhaltungsaufwendungen(SaverwalterContext ctx, List<Wohnung> wohnungen)
         {
             Console.Write("Füge Erhaltungsaufwendungen hinzu: ");
 
             var erhaltungsaufwendungen = new List<Erhaltungsaufwendung> { };
 
+            var ausstellerIdList = new List<Guid> { };
+
             for (var i = 0; i < 3000; i++)
             {
+                Guid ausstellerId;
+                if (i < 100)
+                {
+                    var aussteller = generateJuristischePerson(11);
+                    ctx.JuristischePersonen.Add(aussteller);
+                    ausstellerIdList.Add(aussteller.PersonId);
+                    ausstellerId = aussteller.PersonId;
+                }
+                else
+                {
+                    ausstellerId = ausstellerIdList[i % ausstellerIdList.Count];
+                }
                 var betrag = 100;
                 var bezeichnung = $"Rechnungsnr. {i}";
-                var ausstellerId = juristischePersonen[i % juristischePersonen.Count].PersonId;
                 var jahr = 2020 + i % 5;
                 var monat = 1 + i % 12;
                 var tag = 1 + i % DateTime.DaysInMonth(jahr, monat);
@@ -253,6 +239,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             }
 
             ctx.Erhaltungsaufwendungen.AddRange(erhaltungsaufwendungen);
+            Console.WriteLine($"{ausstellerIdList.Count} juristische Personen hinzugefügt.");
             Console.WriteLine($"{erhaltungsaufwendungen.Count} Erhaltungsaufwendungen hinzugefügt");
 
             return erhaltungsaufwendungen;
@@ -260,16 +247,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
         static List<Vertrag> FillVertraege(
            SaverwalterContext ctx,
-           List<Wohnung> wohnungen,
-           List<NatuerlichePerson> natuerlichePersonen,
-           List<JuristischePerson> juristischePersonen)
+           List<Wohnung> wohnungen)
         {
             Console.Write("Füge Verträge hinzu: ");
 
             var vertraege = new List<Vertrag>();
-
-            var personIds = natuerlichePersonen.Select(i => i.PersonId)
-                .Concat(juristischePersonen.Select(i => i.PersonId)).ToList();
 
             for (var i = 0; i < wohnungen.Count; ++i)
             {
@@ -285,7 +267,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                 var vertrag = new Vertrag()
                 {
-                    AnsprechpartnerId = personIds[i * 33 % personIds.Count],
+                    AnsprechpartnerId = wohnung.BesitzerId, // TODO add some variation. Maybe a chance to add a new person
                     Ende = ende,
                     Wohnung = wohnung
                 };
@@ -399,13 +381,45 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return mietminderungen;
         }
 
-        static List<Betriebskostenrechnung> FillBetriebskostenrechnungen(SaverwalterContext ctx)
+        private static DateOnly getEarliestDate(List<Wohnung> wohnungen)
+        {
+            DateOnly earliest = globalToday;
+
+            foreach (var wohnung in wohnungen)
+            {
+                foreach (var vertrag in wohnung.Vertraege)
+                {
+                    var beginn = vertrag.Beginn();
+                    if (beginn < earliest)
+                    {
+                        earliest = beginn;
+                    }
+                }
+            }
+
+            return earliest;
+        }
+
+        private static List<Betriebskostenrechnung> FillBetriebskostenrechnungen(
+            SaverwalterContext ctx,
+            List<Umlage> umlagen)
         {
             Console.Write("Füge Betriebskostenrechnung hinzu: ");
 
             var betriebskostenrechnungen = new List<Betriebskostenrechnung> { };
 
-            // TODO
+            foreach (var umlage in umlagen)
+            {
+                var beginn = getEarliestDate(umlage.Wohnungen.ToList());
+                for (var date = beginn; date < globalToday; date = date.AddYears(1))
+                {
+                    var betrag = date.DayOfYear + date.Year - 700;
+                    betriebskostenrechnungen.Add(new Betriebskostenrechnung(betrag, date, date.Year)
+                    {
+                        Umlage = umlage,
+                    });
+                }
+            }
 
             ctx.Betriebskostenrechnungen.AddRange(betriebskostenrechnungen);
             Console.WriteLine($"{betriebskostenrechnungen.Count} Betriebskostenrechnungen hinzugefügt");
@@ -413,13 +427,26 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return betriebskostenrechnungen;
         }
 
-        private static List<Mieter> FillMieterSet(SaverwalterContext ctx)
+        private static List<Mieter> FillMieterSet(SaverwalterContext ctx, List<Vertrag> vertraege)
         {
             Console.Write("Füge Mieter hinzu: ");
 
             var mieter = new List<Mieter> { };
 
-            // TODO
+            for (var i = 0; i < vertraege.Count; ++i)
+            {
+                var anzahl = i % 5 + 1;
+
+                for (var j = 0; j < anzahl; ++j)
+                {
+                    var person = generateNatuerlichePerson((i + 1) * (j + 1));
+                    ctx.NatuerlichePersonen.Add(person);
+                    mieter.Add(new Mieter(person.PersonId)
+                    {
+                        Vertrag = vertraege[i]
+                    });
+                }
+            }
 
             ctx.MieterSet.AddRange(mieter);
             Console.WriteLine($"{mieter.Count} Mieter hinzugefügt");
