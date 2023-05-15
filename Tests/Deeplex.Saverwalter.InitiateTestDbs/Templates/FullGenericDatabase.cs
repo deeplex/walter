@@ -295,7 +295,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                 for (var j = 0; j <= (j + 1) % 3; ++j)
                 {
-                    var grundmiete = wohnung.Wohnflaeche * (6 + i % 3 + j % 3);
+                    var grundmiete = wohnung.Wohnflaeche * (6 - i % 3 + j % 3);
                     var personenzahl = (i + 1) % 3 * (j + 1) % 3;
                     var length = Math.Abs((vertraege.Count - i) * (i / 2) * (j + 1));
                     var beginn = ende.AddMonths(-3).AddDays(-length);
@@ -326,7 +326,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                     for (DateOnly date = version.Beginn; date <= ende; date = date.AddMonths(1))
                     {
-                        mieten.Add(new Miete(date, date, version.Grundmiete + 300 + (date.Day % 3) * 100)
+                        mieten.Add(new Miete(date, date, version.Grundmiete + 200 + (date.Day % 3) * 50)
                         {
                             Vertrag = vertrag
                         });
@@ -413,7 +413,20 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 var beginn = getEarliestDate(umlage.Wohnungen.ToList());
                 for (var date = beginn; date < globalToday; date = date.AddYears(1))
                 {
-                    var betrag = date.DayOfYear + date.Year - 700;
+                    double betrag = 100 + beginn.DayOfYear + (int)umlage.Typ * 13;
+                    if (umlage.Typ == Betriebskostentyp.Heizkosten)
+                    {
+                        betrag = umlage.Wohnungen.Sum(e => e.Wohnflaeche) * 12 + beginn.DayOfYear + (int)umlage.Typ;
+                    }
+                    else if (umlage.Typ == Betriebskostentyp.Grundsteuer)
+                    {
+                        betrag = umlage.Wohnungen.Sum(e => e.Wohnflaeche) * 5;
+                    }
+                    else if (umlage.Typ == Betriebskostentyp.EntwaesserungSchmutzwasser
+                        || umlage.Typ == Betriebskostentyp.WasserversorgungKalt)
+                    {
+                        betrag = umlage.Wohnungen.Sum(e => e.Wohnflaeche) * 5 + beginn.DayOfYear + (int)umlage.Typ * 13;
+                    }
                     betriebskostenrechnungen.Add(new Betriebskostenrechnung(betrag, date, date.Year)
                     {
                         Umlage = umlage,
