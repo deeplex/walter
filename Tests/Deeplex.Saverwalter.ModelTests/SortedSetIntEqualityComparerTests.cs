@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using FakeItEasy;
 using FluentAssertions;
 using Xunit;
 
@@ -52,7 +51,7 @@ namespace Deeplex.Saverwalter.ModelTests
         [Fact(Skip = "How? Has no reference anyway...")]
         public void GetHashCodeTest()
         {
-            var fake = A.Fake<SortedSet<int>>();
+            // TODO
         }
     }
 }

@@ -21,7 +21,7 @@
                 "run",
                 "dev",
                 "--",
-                "--inspect-brk=0.0.0.0:5137"
+                "--inspect-brk=0.0.0.0:5173"
             ],
             "console": "integratedTerminal",
             "sourceMaps": true,
@@ -37,14 +37,14 @@
             "name": "chrome",
             "type": "chrome",
             "request": "launch",
-            "url": "http://localhost:5137",
+            "url": "http://localhost:5173",
             "webRoot": "${workspaceFolder}/Deeplex.Saverwalter.WebAPI/svelte/src",
         },
         {
             "name": "msedge",
             "type": "msedge",
             "request": "launch",
-            "url": "http://localhost:5137",
+            "url": "http://localhost:5173",
             "webRoot": "${workspaceFolder}/Deeplex.Saverwalter.WebAPI/svelte/src"
         },
         {
@@ -64,10 +64,10 @@
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "DATABASE_HOST": "db",
                 "DATABASE_PORT": "5432",
-                "DATABASE_NAME": "saverdb",
+                "DATABASE_NAME": "walter_dev_full_generic_db",
                 "DATABASE_USER": "postgres",
                 "DATABASE_PASS": "postgres",
-                "WALTER_PASSWORD": "securepw",
+                "WALTER_PASSWORD": "postgres",
                 "S3_PROVIDER": "http://s3:9001/saverwalter"
             },
             "sourceFileMap": {

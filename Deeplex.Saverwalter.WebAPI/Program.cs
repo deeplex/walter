@@ -18,7 +18,6 @@ namespace Deeplex.Saverwalter.WebAPI
 {
     public class Program
     {
-        public static string AppVersion = Environment.GetEnvironmentVariable("WALTER_VERSION") ?? "v0.0.0";
         public static string AppName = "Saverwalter";
 
         public static async Task Main(string[] args)
@@ -30,10 +29,15 @@ namespace Deeplex.Saverwalter.WebAPI
 
             container.Verify();
 
-            await using (AsyncScopedLifestyle.BeginScope(container))
+            // TODO check if this should even be done outside of development
+            if (!app.Environment.IsDevelopment())
             {
-                await MigrateDb(container);
+                await using (AsyncScopedLifestyle.BeginScope(container))
+                {
+                    await MigrateDb(container);
+                }
             }
+            
             app.Run();
         }
 
@@ -75,7 +79,7 @@ namespace Deeplex.Saverwalter.WebAPI
                         opt.Endpoint = new Uri(apm_server);
                         opt.Protocol = OtlpExportProtocol.Grpc;
                     })
-                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName: AppName, serviceVersion: AppVersion))
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName: AppName))
                     .AddHttpClientInstrumentation()
                     .AddAspNetCoreInstrumentation()
                     .AddSqlClientInstrumentation());
@@ -112,7 +116,7 @@ namespace Deeplex.Saverwalter.WebAPI
         private static Container GetServiceContainer()
         {
             var container = new Container();
-            container.Options.DefaultScopedLifestyle = new SimpleInjector.Lifestyles.AsyncScopedLifestyle();
+            container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
             container.Register(CreateDbContextOptions, Lifestyle.Singleton);
             container.Register<SaverwalterContext>(Lifestyle.Scoped);
 
@@ -160,6 +164,7 @@ namespace Deeplex.Saverwalter.WebAPI
         private static async Task MigrateDb(Container container)
         {
             var dbContext = container.GetInstance<SaverwalterContext>();
+            
             await dbContext.Database.MigrateAsync();
             if (await dbContext.UserAccounts.CountAsync() > 0)
             {

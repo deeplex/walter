@@ -10,14 +10,15 @@ services:
     command: sleep infinity
 
   db:
-    image: postgres:14.3
+    image: postgres:14-alpine3.16
     restart: unless-stopped
     volumes:
       - postgres-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_DB: postgres
+      - POSTRES_DB=walter_dev_full_generic_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/var/lib/postgresql/data
 
   s3:
     image: minio/minio:RELEASE.2023-02-17T17-52-43Z
