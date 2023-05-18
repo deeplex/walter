@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             AllgStromFaktor = CalcAllgStromFactor(vertrag, jahr);
 
-            Abrechnungseinheiten = DetermineAbrechnungseinheiten(vertrag);
+            Abrechnungseinheiten = DetermineAbrechnungseinheiten(vertrag, Zeitraum, Notes);
 
             BetragNebenkosten = Abrechnungseinheiten.Sum(g => g.BetragKalteNebenkosten + g.BetragWarmeNebenkosten);
 
@@ -90,7 +90,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Result = BezahltNebenkosten - BetragNebenkosten + NebenkostenMietminderung;
         }
 
-        private List<Abrechnungseinheit> DetermineAbrechnungseinheiten(Vertrag vertrag)
+        private static List<Abrechnungseinheit> DetermineAbrechnungseinheiten(Vertrag vertrag, Zeitraum zeitraum, List<Note> notes)
         {
             // Group up all Wohnungen sharing the same Umlage
             var einheiten = vertrag.Wohnung.Umlagen
@@ -98,11 +98,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     new SortedSet<int>(umlage.Wohnungen.Select(gr => gr.WohnungId).ToList()),
                     new SortedSetIntEqualityComparer())
                 .ToList();
-            var versionen = vertrag.Versionen.ToList();
-            var wohnung = vertrag.Wohnung;
             // Then create Rechnungsgruppen for every single one of those groups with respective information to calculate the distribution
             return einheiten
-                .Select(umlagen => new Abrechnungseinheit(umlagen.ToList(), wohnung, versionen, Zeitraum, Notes))
+                .Select(umlagen => new Abrechnungseinheit(vertrag, zeitraum, umlagen.ToList(), notes))
                 .ToList();
         }
 

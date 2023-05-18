@@ -57,10 +57,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public double BetragWarmeNebenkosten { get; }
 
         public Abrechnungseinheit(
-            List<Umlage> umlagen,
-            Wohnung wohnung,
-            List<VertragVersion> versionen,
+            Vertrag vertrag,
             Zeitraum zeitraum,
+            List<Umlage> umlagen,
             List<Note> notes)
         {
             Umlagen = umlagen;
@@ -77,18 +76,18 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             GesamtPersonenIntervall = VertraegeIntervallPersonenzahl(alleVertraege, zeitraum);
             GesamtVerbrauch = CalculateAbrechnungseinheitVerbrauch(umlagen, zeitraum, notes);
 
-            PersonenIntervall = VertraegeIntervallPersonenzahl(versionen, zeitraum);
-            Verbrauch = CalculateWohnungVerbrauch(umlagen, wohnung, zeitraum, GesamtVerbrauch, notes);
+            PersonenIntervall = VertraegeIntervallPersonenzahl(vertrag.Versionen, zeitraum);
+            Verbrauch = CalculateWohnungVerbrauch(umlagen, vertrag.Wohnung, zeitraum, GesamtVerbrauch, notes);
 
-            WFZeitanteil = wohnung.Wohnflaeche / GesamtWohnflaeche * zeitraum.Zeitanteil;
-            NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitraum.Zeitanteil;
-            NEZeitanteil = (double)wohnung.Nutzeinheit / GesamtEinheiten * zeitraum.Zeitanteil;
+            WFZeitanteil = vertrag.Wohnung.Wohnflaeche / GesamtWohnflaeche * zeitraum.Zeitanteil;
+            NFZeitanteil = vertrag.Wohnung.Nutzflaeche / GesamtNutzflaeche * zeitraum.Zeitanteil;
+            NEZeitanteil = (double)vertrag.Wohnung.Nutzeinheit / GesamtEinheiten * zeitraum.Zeitanteil;
             PersonenZeitanteil = GetPersonenZeitanteil(PersonenIntervall, GesamtPersonenIntervall, zeitraum);
             VerbrauchAnteil = CalculateVerbrauchAnteil(Verbrauch);
 
             BetragKalteNebenkosten = CalculateBetragKalteNebenkosten(kalteNebenkosten, WFZeitanteil, NEZeitanteil, PersonenZeitanteil, VerbrauchAnteil, notes);
 
-            Heizkosten = CalculateHeizkosten(umlagen, wohnung, zeitraum, notes);
+            Heizkosten = CalculateHeizkosten(umlagen, vertrag.Wohnung, zeitraum, notes);
             GesamtBetragWarmeNebenkosten = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.PauschalBetrag);
             BetragWarmeNebenkosten = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.Kosten);
         }
