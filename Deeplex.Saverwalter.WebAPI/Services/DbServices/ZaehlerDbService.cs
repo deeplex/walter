@@ -113,7 +113,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         private void SetOptionalValues(Zaehler entity, ZaehlerEntry entry)
         {
             entity.Wohnung = entry.Wohnung is SelectionEntry w ? Ctx.Wohnungen.Find(int.Parse(w.Id!)) : null;
-            
+
             entity.Adresse = entry.Adresse is AdresseEntryBase a ? GetAdresse(a, Ctx) : null;
             entity.Notiz = entry.Notiz;
 

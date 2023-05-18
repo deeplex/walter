@@ -1,4 +1,4 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
 
@@ -122,7 +122,7 @@ namespace Deeplex.Saverwalter.PrintService
             var section = body.AddSection();
             section.AddPageBreak();
         }
-        public void EqHeizkostenV9_2(Abrechnungseinheit gruppe)
+        public void EqHeizkostenV9_2(IAbrechnungseinheit gruppe)
         {
             Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):");
 

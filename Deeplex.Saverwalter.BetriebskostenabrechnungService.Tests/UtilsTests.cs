@@ -1,8 +1,9 @@
-﻿using FakeItEasy;
+﻿using Deeplex.Saverwalter.Model;
+using FakeItEasy;
 using FluentAssertions;
 using Xunit;
 
-namespace Deeplex.Saverwalter.Model.Tests
+namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
 {
     public class UtilsTests
     {

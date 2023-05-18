@@ -42,9 +42,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     LastZaehlerstand = new ZaehlerstandEntryBase(letzterStand);
                 }
 
-                 SelectedUmlagen = entity.Umlagen.ToList()
-                    .Select(e => new SelectionEntry(e.UmlageId, e.Typ.ToDescriptionString() + " - " + e.GetWohnungenBezeichnung()));
-        }
+                SelectedUmlagen = entity.Umlagen.ToList()
+                   .Select(e => new SelectionEntry(e.UmlageId, e.Typ.ToDescriptionString() + " - " + e.GetWohnungenBezeichnung()));
+            }
         }
 
         public class ZaehlerEntry : ZaehlerEntryBase

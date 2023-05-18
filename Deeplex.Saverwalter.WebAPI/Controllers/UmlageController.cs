@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                         e.WohnungId,
                         $"{e.Adresse?.Anschrift ?? "Unbekannte Anschrift"} - {e.Bezeichnung}"));
 
-                 SelectedZaehler = Entity.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer));
+                SelectedZaehler = Entity.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer));
             }
         }
 

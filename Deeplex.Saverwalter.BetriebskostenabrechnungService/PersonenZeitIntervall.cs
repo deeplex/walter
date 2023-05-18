@@ -1,4 +1,4 @@
-﻿namespace Deeplex.Saverwalter.Model
+﻿namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
     public sealed class PersonenZeitIntervall
     {

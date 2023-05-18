@@ -1,6 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
-using System.Collections.Immutable;
-using static Deeplex.Saverwalter.Model.Utils;
+using static Deeplex.Saverwalter.BetriebskostenabrechnungService.Utils;
 
 namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
@@ -71,7 +70,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         {
             Vertrag = vertrag;
             Jahr = jahr;
-            
+
             Abrechnungsbeginn = abrechnungsbeginn;
             Abrechnungsende = abrechnungsende;
             Abrechnungszeitspanne = abrechnungsende.DayNumber - abrechnungsbeginn.DayNumber + 1;

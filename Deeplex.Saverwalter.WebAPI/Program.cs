@@ -37,7 +37,7 @@ namespace Deeplex.Saverwalter.WebAPI
                     await MigrateDb(container);
                 }
             }
-            
+
             app.Run();
         }
 
@@ -164,7 +164,7 @@ namespace Deeplex.Saverwalter.WebAPI
         private static async Task MigrateDb(Container container)
         {
             var dbContext = container.GetInstance<SaverwalterContext>();
-            
+
             await dbContext.Database.MigrateAsync();
             if (await dbContext.UserAccounts.CountAsync() > 0)
             {

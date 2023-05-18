@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
+﻿namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 {
     internal class GenericData
     {
@@ -174,7 +168,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             "Lars", "Leon", "Leonard",
             "Marco", "Mario", "Mark", "Marko", "Martin", "Marvin", "Mary", "Matheo","Mathias",
             "Matteo", "Matti", "Mattis", "Maurice", "Max", "Maximilian",
-            "Michael", "Michel", "Milan", "Miles", 
+            "Michael", "Michel", "Milan", "Miles",
             "Miro", "Moritz", "Nico",
             "Nicolas", "Nikita", "Niklas", "Niko", "Nikolai", "Nikolaus", "Nils",
             "Noah", "Noel",  "Ole", "Oliver", "Oscar", "Oskar", "Otto", "Pascal",
@@ -214,7 +208,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             "Vivian", "Vivien", "Valerie", "Vanessa", "Vera", "Verena", "Veronica", "Veronika", "Viktoria", "Viola",
             "Wiebke", "Wilhelmine", "Wilma",
             "Xenia",
-            "Yara", "Yasmin", "Yvonne", "Zara", "Zoe", 
+            "Yara", "Yasmin", "Yvonne", "Zara", "Zoe",
 
         };
 

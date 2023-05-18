@@ -1,4 +1,6 @@
-﻿namespace Deeplex.Saverwalter.Model
+﻿using Deeplex.Saverwalter.Model;
+
+namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
     public sealed class Heizkostenberechnung
     {
