@@ -60,51 +60,45 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             List<Umlage> umlagen,
             Wohnung wohnung,
             List<VertragVersion> versionen,
-            int jahr,
-            DateOnly abrechnungsbeginn,
-            DateOnly abrechnungsende,
-            int abrechnungszeitspanne,
-            DateOnly nutzungsbeginn,
-            DateOnly nutzungsende,
-            double zeitanteil,
+            Zeitraum zeitraum,
             List<Note> notes)
         {
             Umlagen = umlagen;
             Wohnungen = umlagen.First().Wohnungen.ToList();
-            alleVertraege = getAllVertragVersionen(Wohnungen, abrechnungsbeginn, abrechnungsende);
+            alleVertraege = getAllVertragVersionen(Wohnungen, zeitraum);
             Bezeichnung = umlagen.First().GetWohnungenBezeichnung();
 
-            var kalteNebenkosten = GetKalteNebenkosten(umlagen, jahr);
+            var kalteNebenkosten = GetKalteNebenkosten(umlagen, zeitraum);
             GesamtBetragKalteNebenkosten = kalteNebenkosten.Sum(rechnung => rechnung.Betrag);
 
             GesamtWohnflaeche = Wohnungen.Sum(w => w.Wohnflaeche);
             GesamtNutzflaeche = Wohnungen.Sum(w => w.Nutzflaeche);
             GesamtEinheiten = Wohnungen.Sum(w => w.Nutzeinheit);
-            GesamtPersonenIntervall = VertraegeIntervallPersonenzahl(alleVertraege, abrechnungsbeginn, abrechnungsende);
-            GesamtVerbrauch = CalculateAbrechnungseinheitVerbrauch(umlagen, nutzungsbeginn, nutzungsende, notes);
+            GesamtPersonenIntervall = VertraegeIntervallPersonenzahl(alleVertraege, zeitraum);
+            GesamtVerbrauch = CalculateAbrechnungseinheitVerbrauch(umlagen, zeitraum, notes);
 
-            PersonenIntervall = VertraegeIntervallPersonenzahl(versionen, abrechnungsbeginn, abrechnungsende);
-            Verbrauch = CalculateWohnungVerbrauch(umlagen, wohnung, nutzungsbeginn, nutzungsende, GesamtVerbrauch, notes);
+            PersonenIntervall = VertraegeIntervallPersonenzahl(versionen, zeitraum);
+            Verbrauch = CalculateWohnungVerbrauch(umlagen, wohnung, zeitraum, GesamtVerbrauch, notes);
 
-            WFZeitanteil = wohnung.Wohnflaeche / GesamtWohnflaeche * zeitanteil;
-            NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitanteil;
-            NEZeitanteil = (double)wohnung.Nutzeinheit / GesamtEinheiten * zeitanteil;
-            PersonenZeitanteil = GetPersonenZeitanteil(PersonenIntervall, GesamtPersonenIntervall, nutzungsbeginn, nutzungsende, abrechnungszeitspanne);
+            WFZeitanteil = wohnung.Wohnflaeche / GesamtWohnflaeche * zeitraum.Zeitanteil;
+            NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitraum.Zeitanteil;
+            NEZeitanteil = (double)wohnung.Nutzeinheit / GesamtEinheiten * zeitraum.Zeitanteil;
+            PersonenZeitanteil = GetPersonenZeitanteil(PersonenIntervall, GesamtPersonenIntervall, zeitraum);
             VerbrauchAnteil = CalculateVerbrauchAnteil(Verbrauch);
 
             BetragKalteNebenkosten = CalculateBetragKalteNebenkosten(kalteNebenkosten, WFZeitanteil, NEZeitanteil, PersonenZeitanteil, VerbrauchAnteil, notes);
 
-            Heizkosten = CalculateHeizkosten(umlagen, jahr, wohnung, abrechnungsbeginn, abrechnungsende, nutzungsbeginn, nutzungsende, zeitanteil, notes);
+            Heizkosten = CalculateHeizkosten(umlagen, wohnung, zeitraum, notes);
             GesamtBetragWarmeNebenkosten = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.PauschalBetrag);
             BetragWarmeNebenkosten = Heizkosten.Sum(heizkostenberechnung => heizkostenberechnung.Kosten);
         }
 
-        private static List<VertragVersion> getAllVertragVersionen(List<Wohnung> wohnungen, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
+        private static List<VertragVersion> getAllVertragVersionen(List<Wohnung> wohnungen, Zeitraum zeitraum)
         {
             return wohnungen
                 .SelectMany(w => w.Vertraege.SelectMany(e => e.Versionen))
                 .ToList()
-                .Where(v => v.Beginn <= abrechnungsende && (v.Ende() is null || v.Ende() >= abrechnungsbeginn))
+                .Where(v => v.Beginn <= zeitraum.Abrechnungsende && (v.Ende() is null || v.Ende() >= zeitraum.Abrechnungsbeginn))
                 .ToList();
         }
 
@@ -121,22 +115,22 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             }
         }
 
-        public static List<Verbrauch> GetVerbrauchAbrechnungseinheit(Umlage umlage, DateOnly nutzungsbeginn, DateOnly nutzungsende, List<Note> notes)
+        public static List<Verbrauch> GetVerbrauchAbrechnungseinheit(Umlage umlage, Zeitraum zeitraum, List<Note> notes)
         {
             var Zaehler = umlage.Zaehler.Where(z => z.Wohnung != null).ToList();
             // TODO check that all Zaehler have the Same typ
-            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(Zaehler, nutzungsende);
-            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(Zaehler, nutzungsbeginn);
+            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(Zaehler, zeitraum.Nutzungsende);
+            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(Zaehler, zeitraum.Nutzungsbeginn);
             List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerAnfangsStaende, ZaehlerEndStaende, notes);
 
             return Deltas;
         }
 
-        private static List<Verbrauch> GetVerbrauchWohnung(Umlage umlage, Wohnung wohnung, DateOnly nutzungsbeginn, DateOnly nutzungsende, List<Note> notes)
+        private static List<Verbrauch> GetVerbrauchWohnung(Umlage umlage, Wohnung wohnung, Zeitraum zeitraum, List<Note> notes)
         {
             var Zaehler = umlage.Zaehler.Where(z => z.Wohnung == wohnung).ToList();
-            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(Zaehler, nutzungsende);
-            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(Zaehler, nutzungsbeginn);
+            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(Zaehler, zeitraum.Nutzungsende);
+            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(Zaehler, zeitraum.Nutzungsbeginn);
             List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerAnfangsStaende, ZaehlerEndStaende, notes);
 
             return Deltas;
@@ -197,15 +191,14 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         private static Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> CalculateWohnungVerbrauch(
             List<Umlage> Umlagen,
             Wohnung wohnung,
-            DateOnly nutzungsbeginn,
-            DateOnly nutzungsende,
+            Zeitraum zeitraum,
             Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch,
             List<Note> notes)
         {
             var VerbrauchList = Umlagen
                     .Where(g => g.Schluessel == Umlageschluessel.NachVerbrauch)
                     .ToList()
-                    .Select(umlage => GetVerbrauchWohnung(umlage, wohnung, nutzungsbeginn, nutzungsende, notes))
+                    .Select(umlage => GetVerbrauchWohnung(umlage, wohnung, zeitraum, notes))
                     .ToList();
 
             if (VerbrauchList.Any(w => w.Count == 0))
@@ -231,23 +224,22 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         private static List<PersonenZeitIntervall> VertraegeIntervallPersonenzahl(
             List<VertragVersion> vertraege,
-            DateOnly abrechnungsbeginn,
-            DateOnly abrechnungsende)
+            Zeitraum zeitraum)
         {
             var merged = vertraege
                 .Where(vertragVersion =>
-                    vertragVersion.Beginn <= abrechnungsende
-                    && (vertragVersion.Ende() is null || vertragVersion.Ende() >= abrechnungsbeginn))
+                    vertragVersion.Beginn <= zeitraum.Abrechnungsende
+                    && (vertragVersion.Ende() is null || vertragVersion.Ende() >= zeitraum.Abrechnungsbeginn))
                 .ToList()
                 .SelectMany(v => new[]
                 {
-                    (Max(v.Beginn, abrechnungsbeginn), v.Personenzahl),
-                    (Min(v.Ende() ?? abrechnungsende, abrechnungsende).AddDays(1), -v.Personenzahl)
+                    (Max(v.Beginn, zeitraum.Abrechnungsbeginn), v.Personenzahl),
+                    (Min(v.Ende() ?? zeitraum.Abrechnungsende, zeitraum.Abrechnungsende).AddDays(1), -v.Personenzahl)
                 })
                 .ToList()
                 .GroupBy(t => t.Item1)
                 .ToList()
-                .Select(g => new PersonenZeitIntervall(g.Key, abrechnungsende, g.Sum(t => t.Item2)))
+                .Select(g => new PersonenZeitIntervall(g.Key, zeitraum.Abrechnungsende, g.Sum(t => t.Item2)))
                 .ToList()
                 .OrderBy(t => t.Beginn)
                 .ToList();
@@ -256,7 +248,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             {
                 merged[i] = new PersonenZeitIntervall(
                     merged[i].Beginn,
-                    i + 1 < merged.Count ? merged[i + 1].Beginn.AddDays(-1) : abrechnungsende,
+                    i + 1 < merged.Count ? merged[i + 1].Beginn.AddDays(-1) : zeitraum.Abrechnungsende,
                     i - 1 >= 0 ? merged[i - 1].Personenzahl + merged[i].Personenzahl : merged[i].Personenzahl);
             }
             if (merged.Count > 0)
@@ -277,27 +269,24 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         private static List<PersonenZeitanteil> GetPersonenZeitanteil(
             List<PersonenZeitIntervall> intervalle,
             List<PersonenZeitIntervall> gesamtIntervalle,
-            DateOnly nutzungsbeginn,
-            DateOnly nutzungsende,
-            int abrechnungszeitspanne)
+            Zeitraum zeitraum)
         {
             return intervalle
-                .Where(g => g.Beginn < nutzungsende && g.Ende >= nutzungsbeginn)
+                .Where(g => g.Beginn < zeitraum.Nutzungsende && g.Ende >= zeitraum.Nutzungsbeginn)
                 .ToList()
-                .Select((w, i) => new PersonenZeitanteil(w, gesamtIntervalle, abrechnungszeitspanne))
+                .Select((w, i) => new PersonenZeitanteil(w, gesamtIntervalle, zeitraum))
                 .ToList();
         }
 
         private static Dictionary<Betriebskostentyp, List<(Zaehlertyp, double)>> CalculateAbrechnungseinheitVerbrauch(
             List<Umlage> umlagen,
-            DateOnly nutzungsbeginn,
-            DateOnly nutzungsende,
+            Zeitraum zeitraum,
             List<Note> notes)
         {
             return umlagen
                 .Where(umlage => umlage.Schluessel == Umlageschluessel.NachVerbrauch)
                 .ToList()
-                .Select(umlage => GetVerbrauchAbrechnungseinheit(umlage, nutzungsbeginn, nutzungsende, notes))
+                .Select(umlage => GetVerbrauchAbrechnungseinheit(umlage, zeitraum, notes))
                 .ToList()
                 .Where(verbrauchList => verbrauchList.Count > 0)
                 .ToList()
@@ -322,13 +311,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         private static List<Heizkostenberechnung> CalculateHeizkosten(
             List<Umlage> umlagen,
-            int jahr,
             Wohnung wohnung,
-            DateOnly abrechnungsbeginn,
-            DateOnly abrechnungsende,
-            DateOnly nutzungsbeginn,
-            DateOnly nutzungsende,
-            double zeitanteil,
+            Zeitraum zeitraum,
             List<Note> notes)
         {
             return umlagen
@@ -336,20 +320,20 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .ToList()
                 .SelectMany(umlage => umlage.Betriebskostenrechnungen)
                 .ToList()
-                .Where(rechnung => rechnung.BetreffendesJahr == jahr)
+                .Where(rechnung => rechnung.BetreffendesJahr == zeitraum.Jahr)
                 .ToList()
-                .Select(rechnung => new Heizkostenberechnung(rechnung, wohnung, abrechnungsbeginn, abrechnungsende, nutzungsbeginn, nutzungsende, zeitanteil, notes))
+                .Select(rechnung => new Heizkostenberechnung(rechnung, wohnung, zeitraum, notes))
                 .ToList();
         }
 
-        private static List<Betriebskostenrechnung> GetKalteNebenkosten(List<Umlage> umlagen, int jahr)
+        private static List<Betriebskostenrechnung> GetKalteNebenkosten(List<Umlage> umlagen, Zeitraum zeitraum)
         {
             return umlagen
                 .Where(umlage => (int)umlage.Typ % 2 == 0)
                 .ToList()
                 .SelectMany(umlage => umlage.Betriebskostenrechnungen)
                 .ToList()
-                .Where(rechnung => rechnung.BetreffendesJahr == jahr)
+                .Where(rechnung => rechnung.BetreffendesJahr == zeitraum.Jahr)
                 .ToList();
         }
 

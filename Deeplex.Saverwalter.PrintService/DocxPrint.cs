@@ -128,7 +128,7 @@ namespace Deeplex.Saverwalter.PrintService
         {
             body.Append(new Break() { Type = BreakValues.Page });
         }
-        public void EqHeizkostenV9_2(IAbrechnungseinheit gruppe)
+        public void EqHeizkostenV9_2(IAbrechnungseinheit abrechnungseinheit)
         {
             RunProperties rp() => new RunProperties(new RunFonts() { Ascii = "Cambria Math", HighAnsi = "Cambria Math" });
             DocumentFormat.OpenXml.Math.Run t(string str) => new DocumentFormat.OpenXml.Math.Run(rp(), new DocumentFormat.OpenXml.Math.Text(str));
@@ -160,7 +160,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             var p = new Paragraph(Font(), new Run(Font(), new Break(), new Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):"), new Break(), new Break()));
 
-            foreach (var hk in gruppe.Heizkosten)
+            foreach (var hk in abrechnungseinheit.Heizkosten)
             {
                 p.Append(new DocumentFormat.OpenXml.Math.Paragraph(justifyLeft(),
                     new DocumentFormat.OpenXml.Math.OfficeMath(

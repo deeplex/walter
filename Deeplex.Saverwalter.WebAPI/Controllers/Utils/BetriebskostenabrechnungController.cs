@@ -87,9 +87,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public BetriebskostenabrechnungEntry(IBetriebskostenabrechnung b, SaverwalterContext ctx)
             {
                 notes = b.Notes;
-                Jahr = b.Jahr;
-                Abrechnungsbeginn = b.Abrechnungsbeginn;
-                Abrechnungsende = b.Abrechnungsende;
                 //Versionen = b.Versionen;
                 Vermieter = new SelectionEntry(b.Vermieter.PersonId, b.Vermieter.Bezeichnung);
                 Ansprechpartner = new SelectionEntry(b.Ansprechpartner.PersonId, b.Ansprechpartner.Bezeichnung);
@@ -102,12 +99,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 Minderung = b.Mietminderung;
                 NebenkostenMinderung = b.NebenkostenMietminderung;
                 KaltMinderung = b.KaltMietminderung;
-                Nutzungsbeginn = b.Nutzungsbeginn;
-                Nutzungsende = b.Nutzungsende;
                 Zaehler = b.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer)).ToList();
-                Abrechnungszeitspanne = b.Abrechnungszeitspanne;
-                Nutzungszeitspanne = b.Nutzungszeitspanne;
-                Zeitanteil = b.Zeitanteil;
+                //Zeitraum
 
                 Result = b.Result;
                 AllgStromFaktor = b.AllgStromFaktor;

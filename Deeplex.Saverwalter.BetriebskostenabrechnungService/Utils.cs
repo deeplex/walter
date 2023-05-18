@@ -28,22 +28,22 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             return text;
         }
 
-        public static string Title(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
-            => "Betriebskostenabrechnung " + betriebskostenabrechnung.Jahr.ToString();
+        public static string Title(this IBetriebskostenabrechnung betriebskostenabrechnung)
+            => "Betriebskostenabrechnung " + betriebskostenabrechnung.Zeitraum.Jahr.ToString();
 
-        public static string Mieterliste(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
+        public static string Mieterliste(this IBetriebskostenabrechnung betriebskostenabrechnung)
             => "Mieter: " + string.Join(", ", betriebskostenabrechnung.Mieter.Select(person => person.Bezeichnung));
 
-        public static string Mietobjekt(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
+        public static string Mietobjekt(this IBetriebskostenabrechnung betriebskostenabrechnung)
             => "Mietobjekt: " + betriebskostenabrechnung.Adresse.Strasse + " " + betriebskostenabrechnung.Adresse.Hausnummer + ", " + betriebskostenabrechnung.Wohnung.Bezeichnung;
 
-        public static string Abrechnungszeitraum(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
-            => betriebskostenabrechnung.Abrechnungsbeginn.ToString("dd.MM.yyyy") + " - " + betriebskostenabrechnung.Abrechnungsende.ToString("dd.MM.yyyy");
+        public static string Abrechnungszeitraum(this IBetriebskostenabrechnung betriebskostenabrechnung)
+            => betriebskostenabrechnung.Zeitraum.Abrechnungsbeginn.ToString("dd.MM.yyyy") + " - " + betriebskostenabrechnung.Zeitraum.Abrechnungsende.ToString("dd.MM.yyyy");
 
-        public static string Nutzungszeitraum(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
-            => betriebskostenabrechnung.Nutzungsbeginn.ToString("dd.MM.yyyy") + " - " + betriebskostenabrechnung.Nutzungsende.ToString("dd.MM.yyyy");
+        public static string Nutzungszeitraum(this IBetriebskostenabrechnung betriebskostenabrechnung)
+            => betriebskostenabrechnung.Zeitraum.Nutzungsbeginn.ToString("dd.MM.yyyy") + " - " + betriebskostenabrechnung.Zeitraum.Nutzungsende.ToString("dd.MM.yyyy");
 
-        public static string Gruss(this BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung)
+        public static string Gruss(this IBetriebskostenabrechnung betriebskostenabrechnung)
         {
             var gruss = betriebskostenabrechnung.Mieter.Aggregate("", (text, mieter) =>
             {

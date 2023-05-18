@@ -31,11 +31,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public Heizkostenberechnung(
             Betriebskostenrechnung rechnung,
             Wohnung wohnung,
-            DateOnly abrechnungsbeginn,
-            DateOnly abrechnungsende,
-            DateOnly nutzungsbeginn,
-            DateOnly nutzungsende,
-            double zeitanteil,
+            Zeitraum zeitraum,
             List<Note> notes)
         {
             Betrag = rechnung.Betrag;
@@ -66,11 +62,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             var gasZaehlerAbrechnungseinheit = rechnung.Umlage.Zaehler.Where(e => e.Typ == Zaehlertyp.Gas && e.Wohnung != null).ToList();
             var gasZaehlerWohnung = gasZaehlerAbrechnungseinheit.Where(e => e.Wohnung == wohnung).ToList();
-            var gasZaehlerVerbrauchWohnung = Delta(gasZaehlerWohnung, nutzungsbeginn, nutzungsende);
+            var gasZaehlerVerbrauchWohnung = Delta(gasZaehlerWohnung, zeitraum.Nutzungsbeginn, zeitraum.Nutzungsende);
             var gasAllgemeinZaehler = rechnung.Umlage.Zaehler.Where(z => z.Wohnung == null && z.Typ == Zaehlertyp.Gas).ToList();
 
-            V = Delta(warmwasserZaehlerAbrechnungseinheit, abrechnungsbeginn, abrechnungsende);
-            Q = Delta(gasAllgemeinZaehler, abrechnungsbeginn, abrechnungsende);
+            V = Delta(warmwasserZaehlerAbrechnungseinheit, zeitraum.Abrechnungsbeginn, zeitraum.Abrechnungsende);
+            Q = Delta(gasAllgemeinZaehler, zeitraum.Abrechnungsbeginn, zeitraum.Abrechnungsende);
 
             if (Q == 0)
             {
@@ -85,10 +81,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             }
 
             GesamtNutzflaeche = rechnung.Umlage.Wohnungen.Sum(w => w.Nutzflaeche);
-            NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitanteil;
+            NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitraum.Zeitanteil;
 
-            HeizkostenVerbrauchAnteil = Delta(gasZaehlerWohnung, nutzungsbeginn, nutzungsende) / Delta(gasZaehlerAbrechnungseinheit, nutzungsbeginn, nutzungsende);
-            WarmwasserVerbrauchAnteil = Delta(warmwasserZaehlerWohnung, nutzungsbeginn, nutzungsende) / V;
+            HeizkostenVerbrauchAnteil = Delta(gasZaehlerWohnung, zeitraum.Nutzungsbeginn, zeitraum.Nutzungsende) /
+                Delta(gasZaehlerAbrechnungseinheit, zeitraum.Nutzungsbeginn, zeitraum.Nutzungsende);
+            WarmwasserVerbrauchAnteil = Delta(warmwasserZaehlerWohnung, zeitraum.Nutzungsbeginn, zeitraum.Nutzungsende) / V;
 
             WaermeAnteilNF = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * NFZeitanteil;
             WaermeAnteilVerb = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * HeizkostenVerbrauchAnteil;

@@ -8,11 +8,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         IPerson Ansprechpartner { get; }
         List<Abrechnungseinheit> Abrechnungseinheiten { get; }
         Wohnung Wohnung { get; }
-        DateOnly Nutzungsbeginn { get; }
-        int Nutzungszeitspanne { get; }
-        int Abrechnungszeitspanne { get; }
-        DateOnly Nutzungsende { get; }
-        int Jahr { get; }
         IPerson Vermieter { get; }
         List<IPerson> Mieter { get; }
         double GezahlteMiete { get; }
@@ -22,22 +17,18 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         double NebenkostenMietminderung { get; }
         double Result { get; }
         Adresse Adresse { get; }
-        DateOnly Abrechnungsbeginn { get; }
-        DateOnly Abrechnungsende { get; }
-        double Zeitanteil { get; }
         List<Note> Notes { get; }
         Vertrag Vertrag { get; }
         List<VertragVersion> Versionen { get; }
         double AllgStromFaktor { get; set; }
         List<Zaehler> Zaehler { get; }
+        public Zeitraum Zeitraum { get; }
     }
 
     public sealed class Betriebskostenabrechnung : IBetriebskostenabrechnung
     {
         public List<Note> Notes { get; } = new List<Note>();
         public int Jahr { get; set; }
-        public DateOnly Abrechnungsbeginn { get; set; }
-        public DateOnly Abrechnungsende { get; set; }
         public List<VertragVersion> Versionen { get; }
         public IPerson Vermieter { get; }
         public IPerson Ansprechpartner { get; }
@@ -52,14 +43,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public double Mietminderung { get; }
         public double NebenkostenMietminderung { get; }
         public double KaltMietminderung { get; }
-        public DateOnly Nutzungsbeginn { get; }
-        public DateOnly Nutzungsende { get; }
         public List<Zaehler> Zaehler { get; }
-
-        public int Abrechnungszeitspanne { get; }
-        public int Nutzungszeitspanne { get; }
-        public double Zeitanteil { get; }
-
+        public Zeitraum Zeitraum { get; }
         public List<Abrechnungseinheit> Abrechnungseinheiten { get; }
 
         public double Result { get; }
@@ -71,20 +56,17 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Vertrag = vertrag;
             Jahr = jahr;
 
-            Abrechnungsbeginn = abrechnungsbeginn;
-            Abrechnungsende = abrechnungsende;
-            Abrechnungszeitspanne = abrechnungsende.DayNumber - abrechnungsbeginn.DayNumber + 1;
+            var nutzungsbeginn = Max(vertrag.Beginn(), abrechnungsbeginn);
+            var nutzungsende = Min(vertrag.Ende ?? abrechnungsende, abrechnungsende);
+
+            Zeitraum = new Zeitraum(jahr, nutzungsbeginn, nutzungsende, abrechnungsbeginn, abrechnungsende);
 
             Wohnung = vertrag.Wohnung;
             Adresse = Wohnung.Adresse!; // TODO the Adresse here shouldn't be null, this should be catched.
             Zaehler = Wohnung.Zaehler.ToList();
             Versionen = vertrag.Versionen.OrderBy(v => v.Beginn).ToList();
 
-            Nutzungsbeginn = Max(vertrag.Beginn(), abrechnungsbeginn);
-            Nutzungsende = Min(vertrag.Ende ?? abrechnungsende, abrechnungsende);
-            Nutzungszeitspanne = Nutzungsende.DayNumber - Nutzungsbeginn.DayNumber + 1;
-            Zeitanteil = (double)Nutzungszeitspanne / Abrechnungszeitspanne;
-
+            
             Vermieter = ctx.FindPerson(Wohnung.BesitzerId);
             Ansprechpartner = ctx.FindPerson(vertrag.AnsprechpartnerId!.Value) ?? Vermieter;
 
@@ -116,9 +98,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     new SortedSet<int>(umlage.Wohnungen.Select(gr => gr.WohnungId).ToList()),
                     new SortedSetIntEqualityComparer())
                 .ToList();
+            var versionen = vertrag.Versionen.ToList();
+            var wohnung = vertrag.Wohnung;
             // Then create Rechnungsgruppen for every single one of those groups with respective information to calculate the distribution
             return einheiten
-                .Select(umlagen => new Abrechnungseinheit(umlagen.ToList(), Wohnung, Versionen, Jahr, Abrechnungsbeginn, Abrechnungsende, Abrechnungszeitspanne, Nutzungsbeginn, Nutzungsende, Zeitanteil, Notes))
+                .Select(umlagen => new Abrechnungseinheit(umlagen.ToList(), wohnung, versionen, Zeitraum, Notes))
                 .ToList();
         }
 
