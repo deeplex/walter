@@ -62,7 +62,7 @@
             // },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
-                "DATABASE_HOST": "db",
+                "DATABASE_HOST": "walter_dev_db",
                 "DATABASE_PORT": "5432",
                 "DATABASE_NAME": "walter_dev_full_generic_db",
                 "DATABASE_USER": "postgres",

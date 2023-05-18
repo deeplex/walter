@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   app:
@@ -11,6 +11,7 @@ services:
 
   db:
     image: postgres:14-alpine3.16
+    container_name: walter_dev_db
     restart: unless-stopped
     volumes:
       - postgres-data:/var/lib/postgresql/data
