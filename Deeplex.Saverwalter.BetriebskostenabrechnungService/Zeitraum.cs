@@ -24,7 +24,7 @@
             Nutzungsende = nutzungsende;
             Abrechnungsbeginn = abrechnungsbeginn;
             Abrechnungsende = abrechnungsende;
-            
+
             Nutzungszeitraum = nutzungsende.DayNumber - nutzungsbeginn.DayNumber;
             Abrechnungszeitraum = abrechnungsende.DayNumber - abrechnungsbeginn.DayNumber;
             Zeitanteil = (double)Nutzungszeitraum / Abrechnungszeitraum;

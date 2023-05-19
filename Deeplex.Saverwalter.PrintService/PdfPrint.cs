@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
-using Deeplex.Saverwalter.Model;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
 

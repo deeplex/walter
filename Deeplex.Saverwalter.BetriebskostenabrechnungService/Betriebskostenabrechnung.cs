@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Adresse = Wohnung.Adresse!; // TODO the Adresse here shouldn't be null, this should be catched.
             Zaehler = Wohnung.Zaehler.ToList();
             var versionen = vertrag.Versionen.OrderBy(v => v.Beginn).ToList();
-            
+
             Vermieter = ctx.FindPerson(Wohnung.BesitzerId);
             Ansprechpartner = ctx.FindPerson(vertrag.AnsprechpartnerId!.Value) ?? Vermieter;
             GezahlteMiete = Mietzahlungen(vertrag, abrechnungsbeginn, abrechnungsende);
