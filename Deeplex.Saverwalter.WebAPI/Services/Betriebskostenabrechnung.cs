@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.WebAPI
 {
     public sealed class BetriebskostenabrechnungHandler
     {
-        private IBetriebskostenabrechnung createAbrechnung(int vertragId, int Jahr, SaverwalterContext ctx)
+        private Betriebskostenabrechnung createAbrechnung(int vertragId, int Jahr, SaverwalterContext ctx)
         {
             var vertrag = ctx.Vertraege.Find(vertragId)!;
             var beginn = new DateOnly(Jahr, 1, 1);

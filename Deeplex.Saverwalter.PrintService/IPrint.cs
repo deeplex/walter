@@ -10,7 +10,7 @@ namespace Deeplex.Saverwalter.PrintService
         public void Text(string s);
         public void PageBreak();
         public void Break();
-        public void EqHeizkostenV9_2(IAbrechnungseinheit gruppe);
+        public void EqHeizkostenV9_2(Betriebskostenabrechnung abrechnung, Abrechnungseinheit abrechnungseinheit);
         public void Heading(string str);
         public void SubHeading(string str);
         public void Paragraph(params PrintRun[] runs);

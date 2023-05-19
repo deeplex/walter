@@ -25,9 +25,9 @@ namespace Deeplex.Saverwalter.PrintService
             }
         }
 
-        public static void SaveAsDocx(this IBetriebskostenabrechnung betriebskostenabrechnung, Stream stream)
+        public static void SaveAsDocx(this Betriebskostenabrechnung abrechnung, Stream stream)
         {
-            var body = TPrint<Body>.Print(betriebskostenabrechnung, new DocxPrint());
+            var body = TPrint<Body>.Print(abrechnung, new DocxPrint());
 
             CreateWordDocument(stream, body);
         }

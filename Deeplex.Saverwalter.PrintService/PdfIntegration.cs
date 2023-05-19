@@ -7,9 +7,9 @@ namespace Deeplex.Saverwalter.PrintService
 {
     public static class PdfIntegration
     {
-        public static void SaveAsPdf(this IBetriebskostenabrechnung b, Stream stream)
+        public static void SaveAsPdf(this Betriebskostenabrechnung abrechnung, Stream stream)
         {
-            var document = TPrint<Document>.Print(b, new PdfPrint());
+            var document = TPrint<Document>.Print(abrechnung, new PdfPrint());
 
             var renderer = new PdfDocumentRenderer(true);
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);

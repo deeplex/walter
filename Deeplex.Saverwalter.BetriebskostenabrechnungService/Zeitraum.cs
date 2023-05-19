@@ -1,6 +1,6 @@
 ﻿namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
-    public sealed class Zeitraum
+    public class Zeitraum
     {
         public DateOnly Nutzungsbeginn { get; }
         public DateOnly Nutzungsende { get; }

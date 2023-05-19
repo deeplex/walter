@@ -7,35 +7,35 @@ namespace Deeplex.Saverwalter.PrintService
 {
     public static class TPrint<T>
     {
-        private static void Header(IBetriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
+        private static void Header(Betriebskostenabrechnung abrechnung, IPrint<T> printImpl)
         {
-            var AnsprechpartnerBezeichnung = betriebskostenabrechnung.Ansprechpartner is IPerson a ? a.Bezeichnung : "";
+            var AnsprechpartnerBezeichnung = abrechnung.Ansprechpartner is IPerson a ? a.Bezeichnung : "";
 
-            var ap = betriebskostenabrechnung.Ansprechpartner;
+            var ap = abrechnung.Ansprechpartner;
 
             var left = new List<string> { };
             var right = new List<string> { };
 
             var rows = 3; // 3 Are guaranteed
 
-            left.Add(betriebskostenabrechnung.Vermieter.Bezeichnung);
-            if (betriebskostenabrechnung.Vermieter.Bezeichnung != AnsprechpartnerBezeichnung)
+            left.Add(abrechnung.Vermieter.Bezeichnung);
+            if (abrechnung.Vermieter.Bezeichnung != AnsprechpartnerBezeichnung)
             {
                 left.Add("℅ " + AnsprechpartnerBezeichnung);
                 rows++;
             }
 
-            left.Add(betriebskostenabrechnung.Ansprechpartner.Adresse!.Strasse + " " + betriebskostenabrechnung.Ansprechpartner.Adresse.Hausnummer);
-            left.Add(betriebskostenabrechnung.Ansprechpartner.Adresse!.Postleitzahl + " " + betriebskostenabrechnung.Ansprechpartner.Adresse.Stadt);
+            left.Add(abrechnung.Ansprechpartner.Adresse!.Strasse + " " + abrechnung.Ansprechpartner.Adresse.Hausnummer);
+            left.Add(abrechnung.Ansprechpartner.Adresse!.Postleitzahl + " " + abrechnung.Ansprechpartner.Adresse.Stadt);
 
             for (; rows < 7; rows++) { left.Add(""); }
 
-            foreach (var m in betriebskostenabrechnung.Mieter)
+            foreach (var m in abrechnung.Mieter)
             {
                 left.Add(m.GetBriefAnrede());
                 rows++;
             }
-            var ad = betriebskostenabrechnung.Mieter.First().Adresse;
+            var ad = abrechnung.Mieter.First().Adresse;
             if (ad != null)
             {
                 left.Add(ad.Strasse + " " + ad.Hausnummer);
@@ -74,14 +74,14 @@ namespace Deeplex.Saverwalter.PrintService
 
             printImpl.Table(widths, j, bold, underlined, new string[][] { left.ToArray(), right.ToArray() });
         }
-        private static void ExplainUmlageschluessel(IBetriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
+        private static void ExplainUmlageschluessel(Betriebskostenabrechnung abrechnung, IPrint<T> printImpl)
         {
             var left1 = new List<string> { "Umlageschlüssel" };
             var right1 = new List<string> { "Bedeutung" };
             var left2 = new List<string> { "Umlageweg" };
             var right2 = new List<string> { "Beschreibung" };
 
-            if (betriebskostenabrechnung.DirekteZuordnung())
+            if (abrechnung.DirekteZuordnung())
             {
                 left1.Add("Direkt");
                 left2.Add("Direkt");
@@ -89,7 +89,7 @@ namespace Deeplex.Saverwalter.PrintService
                 right2.Add("Kostenanteil = Kosten werden Einheit direkt zugeordnet.");
             }
 
-            if (betriebskostenabrechnung.NachWohnflaeche())
+            if (abrechnung.NachWohnflaeche())
             {
                 left1.Add("n. WF.");
                 left2.Add("n. WF.");
@@ -98,7 +98,7 @@ namespace Deeplex.Saverwalter.PrintService
             }
 
             // There is a Umlage nach Nutzfläche in the Heizkostenberechnung:
-            if (betriebskostenabrechnung.NachNutzflaeche() || betriebskostenabrechnung.Abrechnungseinheiten.Any(g => g.Umlagen.Where(r => r.Wohnungen.Count > 1).Any(r => (int)r.Typ % 2 == 1)))
+            if (abrechnung.NachNutzflaeche() || abrechnung.Abrechnungseinheiten.Any(g => g.Umlagen.Where(r => r.Wohnungen.Count > 1).Any(r => (int)r.Typ % 2 == 1)))
             {
                 left1.Add("n. NF");
                 left2.Add("n. NF");
@@ -106,7 +106,7 @@ namespace Deeplex.Saverwalter.PrintService
                 right2.Add("Kostenanteil = Kosten je Quadratmeter Nutzfläche mal Anteil Fläche je Wohnung.");
             }
 
-            if (betriebskostenabrechnung.NachNutzeinheiten())
+            if (abrechnung.NachNutzeinheiten())
             {
                 left1.Add("n. NE");
                 left2.Add("n. NE");
@@ -114,7 +114,7 @@ namespace Deeplex.Saverwalter.PrintService
                 right2.Add("Kostenanteil = Kosten je Wohn-/Nutzeinheit.");
             }
 
-            if (betriebskostenabrechnung.NachPersonenzahl())
+            if (abrechnung.NachPersonenzahl())
             {
                 left1.Add("n. Pers.");
                 left2.Add("n. Pers.");
@@ -122,7 +122,7 @@ namespace Deeplex.Saverwalter.PrintService
                 right2.Add("Kostenanteil = Kosten je Hausbewohner mal Anzahl Bewohner je Wohnung.");
             }
 
-            if (betriebskostenabrechnung.NachVerbrauch())
+            if (abrechnung.NachVerbrauch())
             {
                 left1.Add("n. Verb");
                 left2.Add("n. Verb");
@@ -141,9 +141,9 @@ namespace Deeplex.Saverwalter.PrintService
             printImpl.Table(widths, j, bold, underlined, new string[][] { left1.ToArray(), right1.ToArray() });
             printImpl.Table(widths, j, bold, underlined, new string[][] { left2.ToArray(), right2.ToArray() });
         }
-        private static void ExplainKalteBetriebskosten(IBetriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
+        private static void ExplainKalteBetriebskosten(Betriebskostenabrechnung abrechnung, IPrint<T> printImpl)
         {
-            var runs = betriebskostenabrechnung.Wohnung.Umlagen
+            var runs = abrechnung.Wohnung.Umlagen
                 .Where(r => r.Beschreibung != null && r.Beschreibung.Trim() != "")
                 .SelectMany(t => new List<PrintRun>()
                 {
@@ -155,8 +155,8 @@ namespace Deeplex.Saverwalter.PrintService
             printImpl.Paragraph(runs);
         }
         private static void AbrechnungWohnung(
-            IBetriebskostenabrechnung betriebskostenabrechnung,
-            IAbrechnungseinheit abrechnungseinheit,
+            Betriebskostenabrechnung abrechnung,
+            Abrechnungseinheit abrechnungseinheit,
             IPrint<T> printImpl)
         {
             printImpl.SubHeading("Angaben zu Ihrer Einheit:");
@@ -169,17 +169,16 @@ namespace Deeplex.Saverwalter.PrintService
             var col5 = new List<string> { "Nutzungsintervall" };
             var col6 = new List<string> { "Tage" };
 
-            for (var i = 0; i < abrechnungseinheit.PersonenIntervall.Count; ++i)
+            foreach (var personenZeitIntervall in abrechnung.PersonenIntervall())
             {
-                var personenZeitIntervall = abrechnungseinheit.PersonenIntervall[i];
-                var firstLine = personenZeitIntervall.Beginn == betriebskostenabrechnung.Zeitraum.Nutzungsbeginn;
+                var firstLine = personenZeitIntervall.Beginn == abrechnung.Zeitraum.Nutzungsbeginn;
 
                 col1.Add(firstLine ? 1.ToString() : "");
-                col2.Add(firstLine ? Quadrat(betriebskostenabrechnung.Wohnung.Wohnflaeche) : "");
-                col3.Add(firstLine ? Quadrat(betriebskostenabrechnung.Wohnung.Nutzflaeche) : "");
+                col2.Add(firstLine ? Quadrat(abrechnung.Wohnung.Wohnflaeche) : "");
+                col3.Add(firstLine ? Quadrat(abrechnung.Wohnung.Nutzflaeche) : "");
                 col4.Add(personenZeitIntervall.Personenzahl.ToString());
                 col5.Add(Datum(personenZeitIntervall.Beginn) + " - " + Datum(personenZeitIntervall.Ende));
-                col6.Add(betriebskostenabrechnung.Zeitraum.Nutzungszeitraum + "/" + betriebskostenabrechnung.Zeitraum.Abrechnungszeitraum);
+                col6.Add(abrechnung.Zeitraum.Nutzungszeitraum + "/" + abrechnung.Zeitraum.Abrechnungszeitraum);
             }
 
             var cols = new List<List<string>> { col1, col2, col3, col4, col5, col6 }.Select(w => w.ToArray()).ToArray();
@@ -190,7 +189,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             printImpl.Table(widths, justification, bold, underlined, cols); ;
         }
-        private static void AbrechnungEinheit(IBetriebskostenabrechnung betriebskostenabrechnung, IAbrechnungseinheit abrechnungseinheit, IPrint<T> printImpl)
+        private static void AbrechnungEinheit(Betriebskostenabrechnung abrechnung, Abrechnungseinheit abrechnungseinheit, IPrint<T> printImpl)
         {
             printImpl.SubHeading("Angaben zur Abrechnungseinheit:");
             printImpl.Text(abrechnungseinheit.Bezeichnung);
@@ -203,10 +202,9 @@ namespace Deeplex.Saverwalter.PrintService
             var col5 = new List<string> { "Nutzungsintervall" };
             var col6 = new List<string> { "Tage" };
 
-            for (var i = 0; i < abrechnungseinheit.GesamtPersonenIntervall.Count; ++i)
+            foreach (var personenZeitIntervall in abrechnung.GesamtPersonenIntervall(abrechnungseinheit))
             {
-                var personenZeitIntervall = abrechnungseinheit.GesamtPersonenIntervall[i];
-                var firstLine = personenZeitIntervall.Beginn == betriebskostenabrechnung.Zeitraum.Nutzungsbeginn;
+                var firstLine = personenZeitIntervall.Beginn == abrechnung.Zeitraum.Nutzungsbeginn;
 
                 var timespan = (personenZeitIntervall.Ende.DayNumber - personenZeitIntervall.Beginn.DayNumber + 1).ToString();
 
@@ -215,7 +213,7 @@ namespace Deeplex.Saverwalter.PrintService
                 col3.Add(firstLine ? Quadrat(abrechnungseinheit.GesamtNutzflaeche) : "");
                 col4.Add(personenZeitIntervall.Personenzahl.ToString());
                 col5.Add(Datum(personenZeitIntervall.Beginn) + " - " + Datum(personenZeitIntervall.Ende));
-                col6.Add(timespan + "/" + betriebskostenabrechnung.Zeitraum.Abrechnungszeitraum);
+                col6.Add(timespan + "/" + abrechnung.Zeitraum.Abrechnungszeitraum);
             }
 
             var cols = new List<List<string>> { col1, col2, col3, col4, col5, col6 }
@@ -229,8 +227,8 @@ namespace Deeplex.Saverwalter.PrintService
             printImpl.Table(widths, justification, bold, underlined, cols);
         }
         private static void ErmittlungKalteEinheiten(
-            IBetriebskostenabrechnung betriebskostenabrechnung,
-            IAbrechnungseinheit abrechnungseinheit,
+            Betriebskostenabrechnung abrechnung,
+            Abrechnungseinheit abrechnungseinheit,
             IPrint<T> printImpl)
         {
             var widths = new int[] { 41, 25, 17, 17 };
@@ -244,9 +242,9 @@ namespace Deeplex.Saverwalter.PrintService
             if (abrechnungseinheit.GesamtEinheiten == 1)
             {
                 col1.Add("Direkte Zuordnung");
-                col2.Add(Datum(betriebskostenabrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(betriebskostenabrechnung.Zeitraum.Nutzungsende));
-                col3.Add(betriebskostenabrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + betriebskostenabrechnung.Zeitraum.Abrechnungszeitraum.ToString());
-                col4.Add(Prozent(abrechnungseinheit.WFZeitanteil));
+                col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
+                col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
+                col4.Add(Prozent(abrechnung.WFZeitanteil(abrechnungseinheit)));
                 bold.Add(false);
                 underlined.Add(true);
             }
@@ -261,10 +259,10 @@ namespace Deeplex.Saverwalter.PrintService
                     bold.Add(true);
                     underlined.Add(false);
 
-                    col1.Add(Quadrat(betriebskostenabrechnung.Wohnung.Wohnflaeche) + " / " + Quadrat(abrechnungseinheit.GesamtWohnflaeche));
-                    col2.Add(Datum(betriebskostenabrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(betriebskostenabrechnung.Zeitraum.Nutzungsende));
-                    col3.Add(betriebskostenabrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + betriebskostenabrechnung.Zeitraum.Abrechnungszeitraum.ToString());
-                    col4.Add(Prozent(abrechnungseinheit.WFZeitanteil));
+                    col1.Add(Quadrat(abrechnung.Wohnung.Wohnflaeche) + " / " + Quadrat(abrechnungseinheit.GesamtWohnflaeche));
+                    col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
+                    col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
+                    col4.Add(Prozent(abrechnung.WFZeitanteil(abrechnungseinheit)));
                     bold.Add(false);
                     underlined.Add(true);
                 }
@@ -278,10 +276,10 @@ namespace Deeplex.Saverwalter.PrintService
                     bold.Add(true);
                     underlined.Add(false);
 
-                    col1.Add(Quadrat(betriebskostenabrechnung.Wohnung.Nutzflaeche) + " / " + Quadrat(abrechnungseinheit.GesamtNutzflaeche));
-                    col2.Add(Datum(betriebskostenabrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(betriebskostenabrechnung.Zeitraum.Nutzungsende));
-                    col3.Add(betriebskostenabrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + betriebskostenabrechnung.Zeitraum.Abrechnungszeitraum.ToString());
-                    col4.Add(Prozent(abrechnungseinheit.NFZeitanteil));
+                    col1.Add(Quadrat(abrechnung.Wohnung.Nutzflaeche) + " / " + Quadrat(abrechnungseinheit.GesamtNutzflaeche));
+                    col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
+                    col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
+                    col4.Add(Prozent(abrechnung.NFZeitanteil(abrechnungseinheit)));
                     bold.Add(false);
                     underlined.Add(true);
                 }
@@ -295,10 +293,10 @@ namespace Deeplex.Saverwalter.PrintService
                     bold.Add(true);
                     underlined.Add(false);
 
-                    col1.Add(Quadrat(betriebskostenabrechnung.Wohnung.Nutzeinheit) + " / " + abrechnungseinheit.GesamtEinheiten);
-                    col2.Add(Datum(betriebskostenabrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(betriebskostenabrechnung.Zeitraum.Nutzungsende));
-                    col3.Add(betriebskostenabrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + betriebskostenabrechnung.Zeitraum.Abrechnungszeitraum.ToString());
-                    col4.Add(Prozent(abrechnungseinheit.NEZeitanteil));
+                    col1.Add(Quadrat(abrechnung.Wohnung.Nutzeinheit) + " / " + abrechnungseinheit.GesamtEinheiten);
+                    col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
+                    col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
+                    col4.Add(Prozent(abrechnung.NEZeitanteil(abrechnungseinheit)));
                     bold.Add(false);
                     underlined.Add(true);
                 }
@@ -313,20 +311,23 @@ namespace Deeplex.Saverwalter.PrintService
                     underlined.Add(false);
 
                     static string SingularOrPluralPerson(int i) => i.ToString() + (i > 1 ? " Personen" : " Person");
-                    for (var i = 0; i < abrechnungseinheit.PersonenZeitanteil.Count; ++i)
+                    var personenzeitanteile = abrechnung.PersonenZeitanteil(abrechnungseinheit);
+                    foreach (var personenzeitanteil in personenzeitanteile)
                     {
-                        var Beginn = abrechnungseinheit.PersonenZeitanteil[i].Beginn;
-                        var Ende = abrechnungseinheit.PersonenZeitanteil[i].Ende;
-                        var GesamtPersonenzahl = abrechnungseinheit.GesamtPersonenIntervall.Last(gs => gs.Beginn <= abrechnungseinheit.PersonenZeitanteil[i].Beginn).Personenzahl;
-                        var Personenzahl = abrechnungseinheit.PersonenIntervall.LastOrDefault(p => p.Beginn <= abrechnungseinheit.PersonenZeitanteil[i].Beginn)?.Personenzahl ?? 0;
+                        var Beginn = personenzeitanteil.Beginn;
+                        var Ende = personenzeitanteil.Ende;
+                        var GesamtPersonenzahl = abrechnung.GesamtPersonenIntervall(abrechnungseinheit)
+                            .Last(gs => gs.Beginn <= personenzeitanteil.Beginn).Personenzahl;
+                        var Personenzahl = abrechnung.PersonenIntervall()
+                            .LastOrDefault(p => p.Beginn <= personenzeitanteil.Beginn)?.Personenzahl ?? 0;
                         var timespan = (Ende.DayNumber - Beginn.DayNumber + 1).ToString();
 
                         col1.Add(SingularOrPluralPerson(Personenzahl) + " / " + SingularOrPluralPerson(GesamtPersonenzahl));
                         col2.Add(Datum(Beginn) + " - " + Datum(Ende));
-                        col3.Add(timespan + " / " + betriebskostenabrechnung.Zeitraum.Abrechnungszeitraum.ToString());
-                        col4.Add(Prozent(abrechnungseinheit.PersonenZeitanteil[i].Anteil));
+                        col3.Add(timespan + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
+                        col4.Add(Prozent(personenzeitanteil.Anteil));
                         bold.Add(false);
-                        underlined.Add(i == abrechnungseinheit.PersonenZeitanteil.Count - 1);
+                        underlined.Add(personenzeitanteil == personenzeitanteile.Last());
                     }
                 }
 
@@ -339,26 +340,26 @@ namespace Deeplex.Saverwalter.PrintService
                     bold.Add(true);
                     underlined.Add(false);
 
-                    foreach (var Verbrauch in abrechnungseinheit.Verbrauch.Where(v => (int)v.Key % 2 == 0)) // Kalte Betriebskosten are equal / warme are odd
+                    foreach (var verbrauch in abrechnung.Verbrauch(abrechnungseinheit).Where(v => (int)v.Key % 2 == 0)) // Kalte Betriebskosten are equal / warme are odd
                     {
-                        for (var i = 0; i < Verbrauch.Value.Count; ++i)
+                        for (var i = 0; i < verbrauch.Value.Count; ++i)
                         {
-                            var Value = Verbrauch.Value[i];
+                            var Value = verbrauch.Value[i];
                             var unit = Value.Typ.ToUnitString();
                             col1.Add(Unit(Value.Delta, unit) + " / " + Unit(Value.Delta / Value.Anteil, unit) + "\t(" + Value.Typ + ")");
-                            col2.Add(Datum(betriebskostenabrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(betriebskostenabrechnung.Zeitraum.Nutzungsende));
+                            col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
                             col3.Add(Value.Kennnummer);
-                            col4.Add(Verbrauch.Value.Count > 1 ? "" : Prozent(Value.Anteil));
+                            col4.Add(verbrauch.Value.Count > 1 ? "" : Prozent(Value.Anteil));
                             bold.Add(false);
-                            underlined.Add(i == Verbrauch.Value.Count - 1);
+                            underlined.Add(i == verbrauch.Value.Count - 1);
                         }
-                        if (Verbrauch.Value.Count > 1)
+                        if (verbrauch.Value.Count > 1)
                         {
-                            var unit = Verbrauch.Value[0].Typ.ToUnitString();
-                            col1.Add(Unit(Verbrauch.Value.Sum(v => v.Delta), unit) + " / " + Unit(Verbrauch.Value.Sum(v => v.Delta / v.Anteil), unit));
-                            col2.Add(Datum(betriebskostenabrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(betriebskostenabrechnung.Zeitraum.Nutzungsende));
-                            col3.Add(Verbrauch.Key.ToDescriptionString());
-                            col4.Add(Prozent(abrechnungseinheit.VerbrauchAnteil[Verbrauch.Key]));
+                            var unit = verbrauch.Value[0].Typ.ToUnitString();
+                            col1.Add(Unit(verbrauch.Value.Sum(v => v.Delta), unit) + " / " + Unit(verbrauch.Value.Sum(v => v.Delta / v.Anteil), unit));
+                            col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
+                            col3.Add(verbrauch.Key.ToDescriptionString());
+                            col4.Add(Prozent(abrechnung.VerbrauchAnteil(abrechnungseinheit)[verbrauch.Key])); // TODO inefficient...
                             bold.Add(false);
                             underlined.Add(true);
                         }
@@ -376,8 +377,8 @@ namespace Deeplex.Saverwalter.PrintService
             printImpl.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
         public static void ErmittlungKalteKosten(
-            IBetriebskostenabrechnung betriebskostenrechnung,
-            IAbrechnungseinheit abrechnungseinheit,
+            Betriebskostenabrechnung abrechnung,
+            Abrechnungseinheit abrechnungseinheit,
             IPrint<T> printImpl)
         {
             var widths = new int[] { 32, 9, 25, 10, 11, 13 };
@@ -394,11 +395,11 @@ namespace Deeplex.Saverwalter.PrintService
             void kostenPunkt(Umlage umlage, string zeitraum, int Jahr, double anteil, bool firstLine = true)
             {
                 var betrag = umlage.Betriebskostenrechnungen
-                    .Where(rechnung => rechnung.BetreffendesJahr == betriebskostenrechnung.Zeitraum.Jahr)
+                    .Where(rechnung => rechnung.BetreffendesJahr == abrechnung.Zeitraum.Jahr)
                     .Sum(b => b.Betrag);
                 if (umlage.Typ == Betriebskostentyp.AllgemeinstromHausbeleuchtung)
                 {
-                    betrag -= betriebskostenrechnung.AllgStromFaktor;
+                    betrag -= abrechnung.AllgStromFaktor;
                 }
                 col1.Add(firstLine ? umlage.Typ.ToDescriptionString() : "");
                 col2.Add(abrechnungseinheit.GesamtEinheiten == 1 ? "Direkt" : (firstLine ? umlage.Schluessel.ToDescriptionString() : ""));
@@ -417,25 +418,25 @@ namespace Deeplex.Saverwalter.PrintService
                     case Umlageschluessel.NachWohnflaeche:
                         kostenPunkt(
                             umlage,
-                            Datum(betriebskostenrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(betriebskostenrechnung.Zeitraum.Nutzungsende),
-                            betriebskostenrechnung.Zeitraum.Jahr,
-                            abrechnungseinheit.WFZeitanteil);
+                            Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende),
+                            abrechnung.Zeitraum.Jahr,
+                            abrechnung.WFZeitanteil(abrechnungseinheit));
                         break;
                     case Umlageschluessel.NachNutzeinheit:
                         kostenPunkt(
                             umlage,
-                            Datum(betriebskostenrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(betriebskostenrechnung.Zeitraum.Nutzungsende),
-                            betriebskostenrechnung.Zeitraum.Jahr,
-                            abrechnungseinheit.NEZeitanteil);
+                            Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende),
+                            abrechnung.Zeitraum.Jahr,
+                            abrechnung.NEZeitanteil(abrechnungseinheit));
                         break;
                     case Umlageschluessel.NachPersonenzahl:
                         var first = true;
-                        foreach (var a in abrechnungseinheit.PersonenZeitanteil)
+                        foreach (var a in abrechnung.PersonenZeitanteil(abrechnungseinheit))
                         {
                             kostenPunkt(
                                 umlage,
                                 Datum(a.Beginn) + " - " + Datum(a.Ende),
-                                betriebskostenrechnung.Zeitraum.Jahr,
+                                abrechnung.Zeitraum.Jahr,
                                 a.Anteil,
                                 first);
                             first = false;
@@ -444,9 +445,10 @@ namespace Deeplex.Saverwalter.PrintService
                     case Umlageschluessel.NachVerbrauch:
                         kostenPunkt(
                             umlage,
-                            Datum(betriebskostenrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(betriebskostenrechnung.Zeitraum.Nutzungsende),
-                            betriebskostenrechnung.Zeitraum.Jahr,
-                            abrechnungseinheit.VerbrauchAnteil.ContainsKey(umlage.Typ) ? abrechnungseinheit.VerbrauchAnteil[umlage.Typ] : 0);
+                            Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende),
+                            abrechnung.Zeitraum.Jahr,
+                            abrechnung.VerbrauchAnteil(abrechnungseinheit).ContainsKey(umlage.Typ) ?
+                                abrechnung.VerbrauchAnteil(abrechnungseinheit)[umlage.Typ] : 0);
                         break;
                     default:
                         break; // TODO or throw something...
@@ -458,7 +460,7 @@ namespace Deeplex.Saverwalter.PrintService
             col3.Add("");
             col4.Add("");
             col5.Add("Summe: ");
-            col6.Add(Euro(abrechnungseinheit.BetragKalteNebenkosten));
+            col6.Add(Euro(abrechnung.BetragKalteNebenkosten(abrechnungseinheit)));
             bold.Add(true);
             underlined.Add(false);
 
@@ -470,14 +472,14 @@ namespace Deeplex.Saverwalter.PrintService
 
             printImpl.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
-        private static void ErmittlungWarmeKosten(BetriebskostenabrechnungService.IBetriebskostenabrechnung betriebskostenabrechnung, IAbrechnungseinheit abrechnungseinheit, IPrint<T> p)
+        private static void ErmittlungWarmeKosten(Betriebskostenabrechnung abrechnung, Abrechnungseinheit abrechnungseinheit, IPrint<T> p)
         {
             var widths = new int[] { 50, 10 };
 
             foreach (var umlage in abrechnungseinheit.Umlagen.Where(umlage => (int)umlage.Typ % 2 == 1)) // Warme Betriebskosten
             {
                 var betrag = umlage.Betriebskostenrechnungen
-                    .Where(r => r.BetreffendesJahr == betriebskostenabrechnung.Zeitraum.Jahr)
+                    .Where(r => r.BetreffendesJahr == abrechnung.Zeitraum.Jahr)
                     .Sum(rechnung => rechnung.Betrag);
 
                 var col1 = new List<string>
@@ -491,8 +493,8 @@ namespace Deeplex.Saverwalter.PrintService
                 {
                     "Betrag",
                     Euro(betrag),
-                    Euro(betriebskostenabrechnung.AllgStromFaktor),
-                    Euro(betrag + betriebskostenabrechnung.AllgStromFaktor),
+                    Euro(abrechnung.AllgStromFaktor),
+                    Euro(betrag + abrechnung.AllgStromFaktor),
                 };
                 var cols = new List<List<string>> { col1, col2 }.Select(w => w.ToArray()).ToArray();
 
@@ -503,7 +505,7 @@ namespace Deeplex.Saverwalter.PrintService
                 p.Table(widths, justification, bold, underlined, cols);
             }
         }
-        private static void ErmittlungWarmeEinheiten(IBetriebskostenabrechnung b, IAbrechnungseinheit abrechnungseinheit, IPrint<T> p)
+        private static void ErmittlungWarmeEinheiten(Betriebskostenabrechnung b, Abrechnungseinheit abrechnungseinheit, IPrint<T> p)
         {
             var widths = new int[] { 41, 25, 17, 17 };
             var col1 = new List<string> { "Ermittlung Ihrer Einheiten" };
@@ -519,7 +521,7 @@ namespace Deeplex.Saverwalter.PrintService
             col1.Add(Quadrat(b.Wohnung.Nutzflaeche) + " / " + Quadrat(abrechnungseinheit.GesamtNutzflaeche));
             col2.Add(Datum(b.Zeitraum.Nutzungsbeginn) + " - " + Datum(b.Zeitraum.Nutzungsende));
             col3.Add(b.Zeitraum.Nutzungszeitraum.ToString() + " / " + b.Zeitraum.Abrechnungszeitraum.ToString());
-            col4.Add(Prozent(abrechnungseinheit.NFZeitanteil));
+            col4.Add(Prozent(b.NFZeitanteil(abrechnungseinheit)));
 
             var bold = new List<bool> { true, true, false };
             var underlined = new List<bool> { false, false, true };
@@ -537,31 +539,34 @@ namespace Deeplex.Saverwalter.PrintService
                 bold.Add(false);
 
                 static string SingularOrPluralPerson(int i) => i.ToString() + (i > 1 ? " Personen" : " Person");
-                for (var i = 0; i < abrechnungseinheit.PersonenZeitanteil.Count; ++i)
+                var personenzeitanteile = b.PersonenZeitanteil(abrechnungseinheit);
+                foreach (var personenzeitanteil in personenzeitanteile)
                 {
-                    var Beginn = abrechnungseinheit.PersonenZeitanteil[i].Beginn;
-                    var Ende = abrechnungseinheit.PersonenZeitanteil[i].Ende;
-                    var GesamtPersonenzahl = abrechnungseinheit.GesamtPersonenIntervall.Last(gs => gs.Beginn <= abrechnungseinheit.PersonenZeitanteil[i].Beginn).Personenzahl;
-                    var Personenzahl = abrechnungseinheit.PersonenIntervall.Last(p => p.Beginn <= abrechnungseinheit.PersonenZeitanteil[i].Beginn).Personenzahl;
+                    var Beginn = personenzeitanteil.Beginn;
+                    var Ende = personenzeitanteil.Ende;
+                    var GesamtPersonenzahl = b.GesamtPersonenIntervall(abrechnungseinheit)
+                        .Last(gs => gs.Beginn <= personenzeitanteil.Beginn).Personenzahl;
+                    var Personenzahl = b.PersonenIntervall()
+                        .Last(p => p.Beginn <= personenzeitanteil.Beginn).Personenzahl;
                     var timespan = (Ende.DayNumber - Beginn.DayNumber + 1).ToString();
 
-                    if (i == abrechnungseinheit.PersonenZeitanteil.Count - 1)
+                    if (personenzeitanteil == personenzeitanteile.Last())
                     {
 
                         col1.Add(SingularOrPluralPerson(Personenzahl) + " / " + SingularOrPluralPerson(GesamtPersonenzahl));
                         col2.Add(Datum(Beginn) + " - " + Datum(Ende));
                         col3.Add(timespan + " / " + b.Zeitraum.Abrechnungszeitraum.ToString());
-                        col4.Add(Prozent(abrechnungseinheit.PersonenZeitanteil[i].Anteil));
+                        col4.Add(Prozent(personenzeitanteil.Anteil));
                     }
                     else
                     {
                         col1.Add(SingularOrPluralPerson(Personenzahl) + " / " + SingularOrPluralPerson(GesamtPersonenzahl));
                         col2.Add(Datum(Beginn) + " - " + Datum(Ende));
                         col3.Add(timespan + " / " + b.Zeitraum.Abrechnungszeitraum.ToString());
-                        col4.Add(Prozent(abrechnungseinheit.PersonenZeitanteil[i].Anteil));
+                        col4.Add(Prozent(personenzeitanteil.Anteil));
                     }
                     bold.Add(false);
-                    underlined.Add(i == abrechnungseinheit.PersonenZeitanteil.Count - 1);
+                    underlined.Add(personenzeitanteil == personenzeitanteile.Last());
                 }
             }
 
@@ -574,7 +579,8 @@ namespace Deeplex.Saverwalter.PrintService
                 bold.Add(true);
                 underlined.Add(false);
 
-                foreach (var Verbrauch in abrechnungseinheit.Verbrauch.Where(v => (int)v.Key % 2 == 1)) // Kalte Betriebskosten are equal / warme are odd
+                foreach (var Verbrauch in b.Verbrauch(abrechnungseinheit)
+                    .Where(v => (int)v.Key % 2 == 1)) // Kalte Betriebskosten are equal / warme are odd
                 {
                     foreach (var Value in Verbrauch.Value)
                     {
@@ -594,7 +600,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             p.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
-        private static void ErmittlungWarmanteil(IAbrechnungseinheit abrechnungseinheit, IPrint<T> p)
+        private static void ErmittlungWarmanteil(Betriebskostenabrechnung abrechnung, Abrechnungseinheit abrechnungseinheit, IPrint<T> p)
         {
             var widths = new int[] { 24, 13, 9, 14, 14, 13, 13 };
             var col1 = new List<string> { "Kostenanteil" };
@@ -607,7 +613,7 @@ namespace Deeplex.Saverwalter.PrintService
             var bold = new List<bool> { true };
             var underlined = new List<bool> { true };
 
-            foreach (var heizkostenberechnung in abrechnungseinheit.Heizkosten)
+            foreach (var heizkostenberechnung in abrechnung.Heizkosten(abrechnungseinheit))
             {
                 col1.Add("Heizung");
                 col2.Add(Umlageschluessel.NachNutzflaeche.ToDescriptionString());
@@ -655,7 +661,7 @@ namespace Deeplex.Saverwalter.PrintService
                 col4.Add("");
                 col5.Add("");
                 col6.Add("Summe: ");
-                col7.Add(Euro(abrechnungseinheit.BetragWarmeNebenkosten));
+                col7.Add(Euro(abrechnung.BetragWarmeNebenkosten(abrechnungseinheit)));
                 bold.Add(true);
                 underlined.Add(false);
             }
@@ -665,7 +671,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             p.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
-        private static void GesamtErgebnis(IBetriebskostenabrechnung b, IPrint<T> p)
+        private static void GesamtErgebnis(Betriebskostenabrechnung abrechnung, IPrint<T> p)
         {
             var widths = new int[] { 40, 10 };
 
@@ -676,38 +682,38 @@ namespace Deeplex.Saverwalter.PrintService
 
             var col2 = new List<string>
             {
-                Euro(b.GezahlteMiete - b.KaltMiete)
+                Euro(abrechnung.GezahlteMiete - abrechnung.KaltMiete)
             };
 
             var f = true;
-            foreach (var abrechnungseinheit in b.Abrechnungseinheiten)
+            foreach (var abrechnungseinheit in abrechnung.Abrechnungseinheiten)
             {
-                if (abrechnungseinheit.BetragKalteNebenkosten > 0)
+                if (abrechnung.BetragKalteNebenkosten(abrechnungseinheit) > 0)
                 {
                     col1.Add(f ? "Abzüglich Ihrer Nebenkostenanteile: " : "");
-                    col2.Add("-" + Euro(abrechnungseinheit.BetragKalteNebenkosten));
+                    col2.Add("-" + Euro(abrechnung.BetragKalteNebenkosten(abrechnungseinheit)));
                     f = false;
                 }
             }
 
-            foreach (var abrechnungseinheit in b.Abrechnungseinheiten)
+            foreach (var abrechnungseinheit in abrechnung.Abrechnungseinheiten)
             {
-                if (abrechnungseinheit.BetragWarmeNebenkosten > 0)
+                if (abrechnung.BetragWarmeNebenkosten(abrechnungseinheit) > 0)
                 {
                     col1.Add(f ? "Abzüglich Ihrer Nebenkostenanteile: " : "");
-                    col2.Add("-" + Euro(abrechnungseinheit.BetragWarmeNebenkosten));
+                    col2.Add("-" + Euro(abrechnung.BetragWarmeNebenkosten(abrechnungseinheit)));
                     f = false;
                 }
             }
 
-            if (b.Mietminderung > 0)
+            if (abrechnung.Mietminderung > 0)
             {
                 col1.Add("Verrechnung mit Mietminderung: ");
-                col2.Add("+" + Euro(b.NebenkostenMietminderung));
+                col2.Add("+" + Euro(abrechnung.NebenkostenMietminderung));
             }
 
             col1.Add("Ergebnis:");
-            col2.Add(Euro(b.Result));
+            col2.Add(Euro(abrechnung.Result));
 
             var cols = new List<List<string>> { col1, col2 }.Select(w => w.ToArray()).ToArray();
             var justification = new int[] { 0, 2 };
@@ -719,99 +725,99 @@ namespace Deeplex.Saverwalter.PrintService
             p.Table(widths, justification, bold, underlined, cols);
         }
 
-        private static void Introtext(BetriebskostenabrechnungService.IBetriebskostenabrechnung b, IPrint<T> p)
+        private static void Introtext(Betriebskostenabrechnung abrechnung, IPrint<T> p)
         {
             p.Paragraph(
-                new PrintRun(b.Title()) { Bold = true },
-                new PrintRun(b.Mieterliste()),
-                new PrintRun(b.Mietobjekt()),
+                new PrintRun(abrechnung.Title()) { Bold = true },
+                new PrintRun(abrechnung.Mieterliste()),
+                new PrintRun(abrechnung.Mietobjekt()),
                 new PrintRun("Abrechnungszeitraum: ") { NoBreak = true, Tab = true },
-                new PrintRun(b.Abrechnungszeitraum()),
+                new PrintRun(abrechnung.Abrechnungszeitraum()),
                 new PrintRun("Nutzungszeitraum: ") { NoBreak = true, Tab = true },
-                new PrintRun(b.Nutzungszeitraum()));
+                new PrintRun(abrechnung.Nutzungszeitraum()));
 
             p.Paragraph(
-                new PrintRun(b.Gruss()),
-                new PrintRun(b.ResultTxt()) { NoBreak = true, Tab = true },
-                new PrintRun(Euro(Math.Abs(b.Result))) { Bold = true, Underlined = true },
-                new PrintRun(b.RefundDemand()));
+                new PrintRun(abrechnung.Gruss()),
+                new PrintRun(abrechnung.ResultTxt()) { NoBreak = true, Tab = true },
+                new PrintRun(Euro(Math.Abs(abrechnung.Result))) { Bold = true, Underlined = true },
+                new PrintRun(abrechnung.RefundDemand()));
 
-            p.Paragraph(new PrintRun(b.GenerischerText()));
+            p.Paragraph(new PrintRun(abrechnung.GenerischerText()));
         }
 
-        public static T Print(IBetriebskostenabrechnung betriebskostenabrechnung, IPrint<T> printImpl)
+        public static T Print(Betriebskostenabrechnung abrechnung, IPrint<T> printImpl)
         {
-            Header(betriebskostenabrechnung, printImpl);
-            Introtext(betriebskostenabrechnung, printImpl);
+            Header(abrechnung, printImpl);
+            Introtext(abrechnung, printImpl);
             printImpl.PageBreak();
 
             printImpl.Heading("Abrechnung der Nebenkosten");
-            ExplainUmlageschluessel(betriebskostenabrechnung, printImpl);
+            ExplainUmlageschluessel(abrechnung, printImpl);
             printImpl.Break();
             printImpl.Text("Anmerkung:");
-            printImpl.Text(betriebskostenabrechnung.Anmerkung());
+            printImpl.Text(abrechnung.Anmerkung());
             printImpl.Heading("Erläuterungen zu einzelnen Betriebskostenarten");
-            ExplainKalteBetriebskosten(betriebskostenabrechnung, printImpl);
+            ExplainKalteBetriebskosten(abrechnung, printImpl);
 
             printImpl.PageBreak();
 
-            if (betriebskostenabrechnung.Abrechnungseinheiten.FirstOrDefault() is Abrechnungseinheit einheit)
+            if (abrechnung.Abrechnungseinheiten.FirstOrDefault() is Abrechnungseinheit einheit)
             {
-                AbrechnungWohnung(betriebskostenabrechnung, einheit, printImpl);
+                AbrechnungWohnung(abrechnung, einheit, printImpl);
             }
 
             printImpl.Break();
             printImpl.Heading("Abrechnung der Nebenkosten (kalte Betriebskosten)");
 
-            foreach (var abrechnungseinheit in betriebskostenabrechnung.Abrechnungseinheiten.Where(einheit => einheit.GesamtEinheiten == 1))
+            foreach (var abrechnungseinheit in abrechnung.Abrechnungseinheiten.Where(einheit => einheit.GesamtEinheiten == 1))
             {
-                AbrechnungEinheit(betriebskostenabrechnung, abrechnungseinheit, printImpl);
+                AbrechnungEinheit(abrechnung, abrechnungseinheit, printImpl);
                 printImpl.Break();
-                ErmittlungKalteEinheiten(betriebskostenabrechnung, abrechnungseinheit, printImpl);
+                ErmittlungKalteEinheiten(abrechnung, abrechnungseinheit, printImpl);
                 printImpl.Break();
 
-                ErmittlungKalteKosten(betriebskostenabrechnung, abrechnungseinheit, printImpl);
+                ErmittlungKalteKosten(abrechnung, abrechnungseinheit, printImpl);
             }
             printImpl.Break();
 
-            foreach (var abrechnungseinheit in betriebskostenabrechnung.Abrechnungseinheiten.Where(einheit => einheit.GesamtEinheiten > 1))
+            foreach (var abrechnungseinheit in abrechnung.Abrechnungseinheiten.Where(einheit => einheit.GesamtEinheiten > 1))
             {
-                AbrechnungEinheit(betriebskostenabrechnung, abrechnungseinheit, printImpl);
+                AbrechnungEinheit(abrechnung, abrechnungseinheit, printImpl);
                 printImpl.Break();
-                ErmittlungKalteEinheiten(betriebskostenabrechnung, abrechnungseinheit, printImpl);
+                ErmittlungKalteEinheiten(abrechnung, abrechnungseinheit, printImpl);
                 printImpl.Break();
 
-                ErmittlungKalteKosten(betriebskostenabrechnung, abrechnungseinheit, printImpl);
+                ErmittlungKalteKosten(abrechnung, abrechnungseinheit, printImpl);
             }
 
             printImpl.PageBreak();
             printImpl.Heading("Abrechnung der Nebenkosten (warme Betriebskosten)");
 
-            foreach (var abrechnungseinheit in betriebskostenabrechnung.Abrechnungseinheiten)
+            foreach (var abrechnungseinheit in abrechnung.Abrechnungseinheiten)
             {
-                if (abrechnungseinheit.GesamtBetragWarmeNebenkosten > 0)
+                if (abrechnung.GesamtBetragWarmeNebenkosten(abrechnungseinheit) > 0)
                 {
                     if (abrechnungseinheit.GesamtEinheiten == 1)
                     {
                         printImpl.SubHeading("Direkt zugeordnet:");
-                        ErmittlungWarmeKosten(betriebskostenabrechnung, abrechnungseinheit, printImpl);
+                        ErmittlungWarmeKosten(abrechnung, abrechnungseinheit, printImpl);
                     }
                     else
                     {
-                        AbrechnungEinheit(betriebskostenabrechnung, abrechnungseinheit, printImpl);
+                        AbrechnungEinheit(abrechnung, abrechnungseinheit, printImpl);
                         printImpl.Break();
-                        ErmittlungWarmeKosten(betriebskostenabrechnung, abrechnungseinheit, printImpl);
-                        printImpl.EqHeizkostenV9_2(abrechnungseinheit);
-                        ErmittlungWarmeEinheiten(betriebskostenabrechnung, abrechnungseinheit, printImpl);
+                        ErmittlungWarmeKosten(abrechnung, abrechnungseinheit, printImpl);
+                        printImpl.EqHeizkostenV9_2(abrechnung, abrechnungseinheit);
+                        ErmittlungWarmeEinheiten(abrechnung, abrechnungseinheit, printImpl);
                         printImpl.Break();
                         printImpl.SubHeading("Ermittlung der warmen Betriebskosten");
-                        ErmittlungWarmanteil(abrechnungseinheit, printImpl);
+                        ErmittlungWarmanteil(abrechnung, abrechnungseinheit, printImpl);
                     }
                 }
             }
 
             printImpl.Heading("Gesamtergebnis der Abrechnung");
-            GesamtErgebnis(betriebskostenabrechnung, printImpl);
+            GesamtErgebnis(abrechnung, printImpl);
 
             return printImpl.body;
         }

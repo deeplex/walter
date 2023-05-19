@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+using Deeplex.Saverwalter.Model;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
 
@@ -9,11 +10,11 @@ namespace Deeplex.Saverwalter.PrintService
     {
         private static double leftMargin = 25;
         private static double rightMargin = 10;
-        private static double topMargin = 16.9;
-        private static double bottomMargin = 16.9;
+        //private static double topMargin = 16.9;
+        //private static double bottomMargin = 16.9;
 
         private static double pageWidth = 210;
-        private static double pageHeight = 297;
+        //private static double pageHeight = 297;
 
         private static Document DinA4()
         {
@@ -122,11 +123,11 @@ namespace Deeplex.Saverwalter.PrintService
             var section = body.AddSection();
             section.AddPageBreak();
         }
-        public void EqHeizkostenV9_2(IAbrechnungseinheit gruppe)
+        public void EqHeizkostenV9_2(Betriebskostenabrechnung abrechnung, Abrechnungseinheit abrechnungseinheit)
         {
             Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):");
 
-            foreach (var hk in gruppe.Heizkosten)
+            foreach (var hk in abrechnung.Heizkosten(abrechnungseinheit))
             {
                 // TODO implement...
                 Text(Utils.Prozent(hk.Para9_2));

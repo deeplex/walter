@@ -33,25 +33,25 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double BetragWarmeNebenkosten { get; }
             public double GesamtBetragWarmeNebenkosten { get; }
 
-            public AbrechnungseinheitEntry(IAbrechnungseinheit g, SaverwalterContext ctx)
+            public AbrechnungseinheitEntry(Betriebskostenabrechnung abrechnung, Abrechnungseinheit einheit, SaverwalterContext ctx)
             {
-                Bezeichnung = g.Bezeichnung;
-                PersonenIntervall = g.PersonenIntervall;
-                GesamtPersonenIntervall = g.GesamtPersonenIntervall;
-                GesamtWohnflaeche = g.GesamtWohnflaeche;
-                GesamtNutzflaeche = g.GesamtNutzflaeche;
-                GesamtEinheiten = g.GesamtEinheiten;
-                WFZeitanteil = g.WFZeitanteil;
-                NFZeitanteil = g.NFZeitanteil;
-                NEZeitanteil = g.NEZeitanteil;
-                Umlagen = g.Umlagen.Select(e => new UmlageEntry(e, ctx)).ToList();
-                PersonenZeitanteil = g.PersonenZeitanteil;
-                Verbrauch = g.Verbrauch;
-                VerbrauchAnteil = g.VerbrauchAnteil;
-                BetragKalteNebenkosten = g.BetragKalteNebenkosten;
-                GesamtBetragKalteNebenkosten = g.GesamtBetragKalteNebenkosten;
-                BetragWarmeNebenkosten = g.BetragWarmeNebenkosten;
-                GesamtBetragWarmeNebenkosten = g.GesamtBetragWarmeNebenkosten;
+                Bezeichnung = einheit.Bezeichnung;
+                PersonenIntervall = abrechnung.PersonenIntervall();
+                GesamtPersonenIntervall = abrechnung.GesamtPersonenIntervall(einheit);
+                GesamtWohnflaeche = einheit.GesamtWohnflaeche;
+                GesamtNutzflaeche = einheit.GesamtNutzflaeche;
+                GesamtEinheiten = einheit.GesamtEinheiten;
+                WFZeitanteil = abrechnung.WFZeitanteil(einheit);
+                NFZeitanteil = abrechnung.NFZeitanteil(einheit);
+                NEZeitanteil = abrechnung.NEZeitanteil(einheit);
+                Umlagen = einheit.Umlagen.Select(e => new UmlageEntry(e, ctx)).ToList();
+                PersonenZeitanteil = abrechnung.PersonenZeitanteil(einheit);
+                Verbrauch = abrechnung.Verbrauch(einheit);
+                VerbrauchAnteil = abrechnung.VerbrauchAnteil(einheit);
+                BetragKalteNebenkosten = abrechnung.BetragKalteNebenkosten(einheit);
+                GesamtBetragKalteNebenkosten = abrechnung.GesamtBetragKalteNebenkosten(einheit);
+                BetragWarmeNebenkosten = abrechnung.BetragWarmeNebenkosten(einheit);
+                GesamtBetragWarmeNebenkosten = abrechnung.GesamtBetragWarmeNebenkosten(einheit);
             }
         }
 
@@ -84,36 +84,36 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double Result { get; }
             public double AllgStromFaktor { get; set; }
 
-            public BetriebskostenabrechnungEntry(IBetriebskostenabrechnung b, SaverwalterContext ctx)
+            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung abrechnung, SaverwalterContext ctx)
             {
-                notes = b.Notes;
-                Jahr = b.Zeitraum.Jahr;
-                Abrechnungsbeginn = b.Zeitraum.Abrechnungsbeginn;
-                Abrechnungsende = b.Zeitraum.Abrechnungsende;
+                notes = abrechnung.Notes;
+                Jahr = abrechnung.Zeitraum.Jahr;
+                Abrechnungsbeginn = abrechnung.Zeitraum.Abrechnungsbeginn;
+                Abrechnungsende = abrechnung.Zeitraum.Abrechnungsende;
                 //Versionen = b.Versionen;
-                Vermieter = new SelectionEntry(b.Vermieter.PersonId, b.Vermieter.Bezeichnung);
-                Ansprechpartner = new SelectionEntry(b.Ansprechpartner.PersonId, b.Ansprechpartner.Bezeichnung);
-                Mieter = b.Mieter.Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung)).ToList();
-                Vertrag = new SelectionEntry(b.Vertrag.VertragId, "Vertrag");
-                Wohnung = new SelectionEntry(b.Wohnung.WohnungId, b.Wohnung.Bezeichnung);
-                Adresse = new AdresseEntryBase(b.Adresse);
-                Gezahlt = b.GezahlteMiete;
-                KaltMiete = b.KaltMiete;
-                Minderung = b.Mietminderung;
-                NebenkostenMinderung = b.NebenkostenMietminderung;
-                KaltMinderung = b.KaltMietminderung;
-                Nutzungsbeginn = b.Zeitraum.Nutzungsbeginn;
-                Nutzungsende = b.Zeitraum.Nutzungsende;
-                Zaehler = b.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer)).ToList();
-                Abrechnungszeitspanne = b.Zeitraum.Abrechnungszeitraum;
-                Nutzungszeitspanne = b.Zeitraum.Nutzungszeitraum;
-                Zeitanteil = b.Zeitraum.Zeitanteil;
+                Vermieter = new SelectionEntry(abrechnung.Vermieter.PersonId, abrechnung.Vermieter.Bezeichnung);
+                Ansprechpartner = new SelectionEntry(abrechnung.Ansprechpartner.PersonId, abrechnung.Ansprechpartner.Bezeichnung);
+                Mieter = abrechnung.Mieter.Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung)).ToList();
+                Vertrag = new SelectionEntry(abrechnung.Vertrag.VertragId, "Vertrag");
+                Wohnung = new SelectionEntry(abrechnung.Wohnung.WohnungId, abrechnung.Wohnung.Bezeichnung);
+                Adresse = new AdresseEntryBase(abrechnung.Adresse);
+                Gezahlt = abrechnung.GezahlteMiete;
+                KaltMiete = abrechnung.KaltMiete;
+                Minderung = abrechnung.Mietminderung;
+                NebenkostenMinderung = abrechnung.NebenkostenMietminderung;
+                KaltMinderung = abrechnung.KaltMietminderung;
+                Nutzungsbeginn = abrechnung.Zeitraum.Nutzungsbeginn;
+                Nutzungsende = abrechnung.Zeitraum.Nutzungsende;
+                Zaehler = abrechnung.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer)).ToList();
+                Abrechnungszeitspanne = abrechnung.Zeitraum.Abrechnungszeitraum;
+                Nutzungszeitspanne = abrechnung.Zeitraum.Nutzungszeitraum;
+                Zeitanteil = abrechnung.Zeitraum.Zeitanteil;
 
 
-                Result = b.Result;
-                AllgStromFaktor = b.AllgStromFaktor;
+                Result = abrechnung.Result;
+                AllgStromFaktor = abrechnung.AllgStromFaktor;
 
-                Abrechnungseinheiten = b.Abrechnungseinheiten.Select(e => new AbrechnungseinheitEntry(e, ctx)).ToList();
+                Abrechnungseinheiten = abrechnung.Abrechnungseinheiten.Select(e => new AbrechnungseinheitEntry(abrechnung, e, ctx)).ToList();
             }
         }
 
