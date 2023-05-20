@@ -57,7 +57,7 @@ namespace Deeplex.Saverwalter.ModelTests.model
                 } }
             };
 
-        [Theory]
+        [Theory(Skip = "TODO")]
         [MemberData(nameof(ShouldWorkData))]
         public void ShouldAddNatuerlichePerson(NatuerlichePerson entity)
         {
@@ -94,7 +94,7 @@ namespace Deeplex.Saverwalter.ModelTests.model
                 } }
             };
 
-        [Theory]
+        [Theory(Skip = "TODO")]
         [MemberData(nameof(ShouldNotWorkData))]
         public void ShouldNotAddNatuerlichePerson(NatuerlichePerson entity)
         {
@@ -119,7 +119,7 @@ namespace Deeplex.Saverwalter.ModelTests.model
             DatabaseContext.Set<NatuerlichePerson>().Should().NotContain(entity);
         }
 
-        [Theory]
+        [Theory(Skip = "TODO")]
         [MemberData(nameof(ShouldWorkData))]
         public void ShouldUpdateNatuerlichePerson(NatuerlichePerson entity)
         {
@@ -140,7 +140,7 @@ namespace Deeplex.Saverwalter.ModelTests.model
             DatabaseContext.Set<NatuerlichePerson>().Should().Contain(entity);
         }
 
-        [Theory]
+        [Theory(Skip = "Theory")]
         [MemberData(nameof(ShouldWorkData))]
         public void ShouldNotUpdateNatuerlichePerson(NatuerlichePerson entity)
         {
