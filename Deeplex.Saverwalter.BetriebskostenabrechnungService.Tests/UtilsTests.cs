@@ -32,15 +32,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
             mock.GetBriefAnrede().Should().Be(s);
         }
 
-        [Fact(Skip = "TODO")]
-        public void TitleTest()
-        {
-            // Arrange
-            // Act
-            // Assert
-        }
-
-        [Theory(Skip = "TODO")]
+        [Theory(Skip = "How to set Mieterliste to fake?")]
         [InlineData("Mieter: Erika Mustermann, Max Mustermann")]
         public void MieterlisteTest(string s)
         {
