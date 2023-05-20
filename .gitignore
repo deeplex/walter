@@ -5,6 +5,7 @@
 
 wwwroot
 coverage.json
+TestResults
 
 # User-specific files
 *.db
