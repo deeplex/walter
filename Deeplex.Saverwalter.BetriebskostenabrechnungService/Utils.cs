@@ -30,13 +30,13 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         }
 
         public static string Title(this Betriebskostenabrechnung abrechnung)
-            => "abrechnung " + abrechnung.Zeitraum.Jahr.ToString();
+            => "Betriebskostenabrechnung " + abrechnung.Zeitraum.Jahr.ToString();
 
         public static string Mieterliste(this Betriebskostenabrechnung abrechnung)
             => "Mieter: " + string.Join(", ", abrechnung.Mieter.Select(person => person.Bezeichnung));
 
         public static string Mietobjekt(this Betriebskostenabrechnung abrechnung)
-            => "Mietobjekt: " + abrechnung.Wohnung.Adresse!.Strasse + " " + abrechnung.Adresse.Hausnummer + ", " + abrechnung.Wohnung.Bezeichnung;
+            => "Mietobjekt: " + abrechnung.Vertrag.Wohnung.Adresse!.Strasse + " " + abrechnung.Vertrag.Wohnung.Adresse.Hausnummer + ", " + abrechnung.Vertrag.Wohnung.Bezeichnung;
 
         public static string Abrechnungszeitraum(this Betriebskostenabrechnung abrechnung)
             => abrechnung.Zeitraum.Abrechnungsbeginn.ToString("dd.MM.yyyy") + " - " + abrechnung.Zeitraum.Abrechnungsende.ToString("dd.MM.yyyy");
@@ -111,7 +111,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         public static string Anmerkung(this Betriebskostenabrechnung _)
             => "Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger) Kostenanteil";
-
 
         public static List<VertragVersion> getAllVertragVersionen(List<Wohnung> wohnungen, Zeitraum zeitraum)
         {
@@ -390,10 +389,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .ToList();
         }
 
-        public static double Mietzahlungen(Vertrag vertrag, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
+        public static double Mietzahlungen(Vertrag vertrag, Zeitraum zeitraum)
         {
             return vertrag.Mieten
-                .Where(m => m.BetreffenderMonat >= abrechnungsbeginn && m.BetreffenderMonat < abrechnungsende)
+                .Where(m => m.BetreffenderMonat >= zeitraum.Abrechnungsbeginn &&
+                            m.BetreffenderMonat < zeitraum.Abrechnungsende)
                 .ToList()
                 .Sum(z => z.Betrag);
         }
@@ -439,25 +439,25 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 }) / (abrechnungsende.DayNumber - abrechnungsbeginn.DayNumber + 1);
         }
 
-        public static double GetKaltMiete(Vertrag vertrag, List<VertragVersion> versionen, int jahr, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
+        public static double GetKaltMiete(Vertrag vertrag, Zeitraum zeitraum)
         {
-            if (jahr < vertrag.Beginn().Year ||
-               (vertrag.Ende is DateOnly d && d.Year < jahr))
+            if (zeitraum.Jahr < vertrag.Beginn().Year ||
+               (vertrag.Ende is DateOnly d && d.Year < zeitraum.Jahr))
             {
                 return 0;
             }
-            return versionen
+            return vertrag.Versionen
                 .Sum(version =>
                 {
                     var versionEnde = version.Ende();
-                    if (versionEnde is DateOnly d && d < abrechnungsbeginn)
+                    if (versionEnde is DateOnly d && d < zeitraum.Abrechnungsbeginn)
                     {
                         return 0;
                     }
                     else
                     {
-                        var last = Min(versionEnde ?? abrechnungsende, abrechnungsende).Month;
-                        var first = Max(version.Beginn, abrechnungsbeginn).Month - 1;
+                        var last = Min(versionEnde ?? zeitraum.Abrechnungsende, zeitraum.Abrechnungsende).Month;
+                        var first = Max(version.Beginn, zeitraum.Abrechnungsbeginn).Month - 1;
                         return (last - first) * version.Grundmiete;
                     }
                 });

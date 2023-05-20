@@ -95,8 +95,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 Ansprechpartner = new SelectionEntry(abrechnung.Ansprechpartner.PersonId, abrechnung.Ansprechpartner.Bezeichnung);
                 Mieter = abrechnung.Mieter.Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung)).ToList();
                 Vertrag = new SelectionEntry(abrechnung.Vertrag.VertragId, "Vertrag");
-                Wohnung = new SelectionEntry(abrechnung.Wohnung.WohnungId, abrechnung.Wohnung.Bezeichnung);
-                Adresse = new AdresseEntryBase(abrechnung.Adresse);
+                Wohnung = new SelectionEntry(abrechnung.Vertrag.Wohnung.WohnungId, abrechnung.Vertrag.Wohnung.Bezeichnung);
+                Adresse = new AdresseEntryBase(abrechnung.Vertrag.Wohnung.Adresse!);
                 Gezahlt = abrechnung.GezahlteMiete;
                 KaltMiete = abrechnung.KaltMiete;
                 Minderung = abrechnung.Mietminderung;
@@ -104,7 +104,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 KaltMinderung = abrechnung.KaltMietminderung;
                 Nutzungsbeginn = abrechnung.Zeitraum.Nutzungsbeginn;
                 Nutzungsende = abrechnung.Zeitraum.Nutzungsende;
-                Zaehler = abrechnung.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer)).ToList();
+                Zaehler = abrechnung.Vertrag.Wohnung.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer)).ToList();
                 Abrechnungszeitspanne = abrechnung.Zeitraum.Abrechnungszeitraum;
                 Nutzungszeitspanne = abrechnung.Zeitraum.Nutzungszeitraum;
                 Zeitanteil = abrechnung.Zeitraum.Zeitanteil;

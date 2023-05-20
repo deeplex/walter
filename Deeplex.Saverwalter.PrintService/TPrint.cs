@@ -143,7 +143,7 @@ namespace Deeplex.Saverwalter.PrintService
         }
         private static void ExplainKalteBetriebskosten(Betriebskostenabrechnung abrechnung, IPrint<T> printImpl)
         {
-            var runs = abrechnung.Wohnung.Umlagen
+            var runs = abrechnung.Vertrag.Wohnung.Umlagen
                 .Where(r => r.Beschreibung != null && r.Beschreibung.Trim() != "")
                 .SelectMany(t => new List<PrintRun>()
                 {
@@ -174,8 +174,8 @@ namespace Deeplex.Saverwalter.PrintService
                 var firstLine = personenZeitIntervall.Beginn == abrechnung.Zeitraum.Nutzungsbeginn;
 
                 col1.Add(firstLine ? 1.ToString() : "");
-                col2.Add(firstLine ? Quadrat(abrechnung.Wohnung.Wohnflaeche) : "");
-                col3.Add(firstLine ? Quadrat(abrechnung.Wohnung.Nutzflaeche) : "");
+                col2.Add(firstLine ? Quadrat(abrechnung.Vertrag.Wohnung.Wohnflaeche) : "");
+                col3.Add(firstLine ? Quadrat(abrechnung.Vertrag.Wohnung.Nutzflaeche) : "");
                 col4.Add(personenZeitIntervall.Personenzahl.ToString());
                 col5.Add(Datum(personenZeitIntervall.Beginn) + " - " + Datum(personenZeitIntervall.Ende));
                 col6.Add(abrechnung.Zeitraum.Nutzungszeitraum + "/" + abrechnung.Zeitraum.Abrechnungszeitraum);
@@ -259,7 +259,7 @@ namespace Deeplex.Saverwalter.PrintService
                     bold.Add(true);
                     underlined.Add(false);
 
-                    col1.Add(Quadrat(abrechnung.Wohnung.Wohnflaeche) + " / " + Quadrat(abrechnungseinheit.GesamtWohnflaeche));
+                    col1.Add(Quadrat(abrechnung.Vertrag.Wohnung.Wohnflaeche) + " / " + Quadrat(abrechnungseinheit.GesamtWohnflaeche));
                     col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
                     col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
                     col4.Add(Prozent(abrechnung.WFZeitanteil(abrechnungseinheit)));
@@ -276,7 +276,7 @@ namespace Deeplex.Saverwalter.PrintService
                     bold.Add(true);
                     underlined.Add(false);
 
-                    col1.Add(Quadrat(abrechnung.Wohnung.Nutzflaeche) + " / " + Quadrat(abrechnungseinheit.GesamtNutzflaeche));
+                    col1.Add(Quadrat(abrechnung.Vertrag.Wohnung.Nutzflaeche) + " / " + Quadrat(abrechnungseinheit.GesamtNutzflaeche));
                     col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
                     col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
                     col4.Add(Prozent(abrechnung.NFZeitanteil(abrechnungseinheit)));
@@ -293,7 +293,7 @@ namespace Deeplex.Saverwalter.PrintService
                     bold.Add(true);
                     underlined.Add(false);
 
-                    col1.Add(Quadrat(abrechnung.Wohnung.Nutzeinheit) + " / " + abrechnungseinheit.GesamtEinheiten);
+                    col1.Add(Quadrat(abrechnung.Vertrag.Wohnung.Nutzeinheit) + " / " + abrechnungseinheit.GesamtEinheiten);
                     col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
                     col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
                     col4.Add(Prozent(abrechnung.NEZeitanteil(abrechnungseinheit)));
@@ -505,7 +505,7 @@ namespace Deeplex.Saverwalter.PrintService
                 p.Table(widths, justification, bold, underlined, cols);
             }
         }
-        private static void ErmittlungWarmeEinheiten(Betriebskostenabrechnung b, Abrechnungseinheit abrechnungseinheit, IPrint<T> p)
+        private static void ErmittlungWarmeEinheiten(Betriebskostenabrechnung abrechnung, Abrechnungseinheit abrechnungseinheit, IPrint<T> p)
         {
             var widths = new int[] { 41, 25, 17, 17 };
             var col1 = new List<string> { "Ermittlung Ihrer Einheiten" };
@@ -518,10 +518,10 @@ namespace Deeplex.Saverwalter.PrintService
             col3.Add("");
             col4.Add("");
 
-            col1.Add(Quadrat(b.Wohnung.Nutzflaeche) + " / " + Quadrat(abrechnungseinheit.GesamtNutzflaeche));
-            col2.Add(Datum(b.Zeitraum.Nutzungsbeginn) + " - " + Datum(b.Zeitraum.Nutzungsende));
-            col3.Add(b.Zeitraum.Nutzungszeitraum.ToString() + " / " + b.Zeitraum.Abrechnungszeitraum.ToString());
-            col4.Add(Prozent(b.NFZeitanteil(abrechnungseinheit)));
+            col1.Add(Quadrat(abrechnung.Vertrag.Wohnung.Nutzflaeche) + " / " + Quadrat(abrechnungseinheit.GesamtNutzflaeche));
+            col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
+            col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
+            col4.Add(Prozent(abrechnung.NFZeitanteil(abrechnungseinheit)));
 
             var bold = new List<bool> { true, true, false };
             var underlined = new List<bool> { false, false, true };
@@ -539,14 +539,14 @@ namespace Deeplex.Saverwalter.PrintService
                 bold.Add(false);
 
                 static string SingularOrPluralPerson(int i) => i.ToString() + (i > 1 ? " Personen" : " Person");
-                var personenzeitanteile = b.PersonenZeitanteil(abrechnungseinheit);
+                var personenzeitanteile = abrechnung.PersonenZeitanteil(abrechnungseinheit);
                 foreach (var personenzeitanteil in personenzeitanteile)
                 {
                     var Beginn = personenzeitanteil.Beginn;
                     var Ende = personenzeitanteil.Ende;
-                    var GesamtPersonenzahl = b.GesamtPersonenIntervall(abrechnungseinheit)
+                    var GesamtPersonenzahl = abrechnung.GesamtPersonenIntervall(abrechnungseinheit)
                         .Last(gs => gs.Beginn <= personenzeitanteil.Beginn).Personenzahl;
-                    var Personenzahl = b.PersonenIntervall()
+                    var Personenzahl = abrechnung.PersonenIntervall()
                         .Last(p => p.Beginn <= personenzeitanteil.Beginn).Personenzahl;
                     var timespan = (Ende.DayNumber - Beginn.DayNumber + 1).ToString();
 
@@ -555,14 +555,14 @@ namespace Deeplex.Saverwalter.PrintService
 
                         col1.Add(SingularOrPluralPerson(Personenzahl) + " / " + SingularOrPluralPerson(GesamtPersonenzahl));
                         col2.Add(Datum(Beginn) + " - " + Datum(Ende));
-                        col3.Add(timespan + " / " + b.Zeitraum.Abrechnungszeitraum.ToString());
+                        col3.Add(timespan + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
                         col4.Add(Prozent(personenzeitanteil.Anteil));
                     }
                     else
                     {
                         col1.Add(SingularOrPluralPerson(Personenzahl) + " / " + SingularOrPluralPerson(GesamtPersonenzahl));
                         col2.Add(Datum(Beginn) + " - " + Datum(Ende));
-                        col3.Add(timespan + " / " + b.Zeitraum.Abrechnungszeitraum.ToString());
+                        col3.Add(timespan + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
                         col4.Add(Prozent(personenzeitanteil.Anteil));
                     }
                     bold.Add(false);
@@ -579,14 +579,14 @@ namespace Deeplex.Saverwalter.PrintService
                 bold.Add(true);
                 underlined.Add(false);
 
-                foreach (var Verbrauch in b.Verbrauch(abrechnungseinheit)
+                foreach (var Verbrauch in abrechnung.Verbrauch(abrechnungseinheit)
                     .Where(v => (int)v.Key % 2 == 1)) // Kalte Betriebskosten are equal / warme are odd
                 {
                     foreach (var Value in Verbrauch.Value)
                     {
                         var unit = Value.Typ.ToUnitString();
                         col1.Add(Unit(Value.Delta, unit) + " / " + Unit(Value.Delta / Value.Anteil, unit) + "\t(" + Value.Typ + ")");
-                        col2.Add(Datum(b.Zeitraum.Nutzungsbeginn) + " - " + Datum(b.Zeitraum.Nutzungsende));
+                        col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
                         col3.Add(Value.Kennnummer);
                         col4.Add(Prozent(Value.Anteil));
                         bold.Add(false);

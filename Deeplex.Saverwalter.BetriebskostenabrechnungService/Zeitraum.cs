@@ -1,4 +1,6 @@
-﻿namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
+﻿using Deeplex.Saverwalter.Model;
+
+namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
     public class Zeitraum
     {
@@ -11,22 +13,17 @@
         public double Zeitanteil { get; }
         public int Jahr { get; }
 
-        public Zeitraum(
-            int jahr,
-            DateOnly nutzungsbeginn,
-            DateOnly nutzungsende,
-            DateOnly abrechnungsbeginn,
-            DateOnly abrechnungsende)
+        public Zeitraum(int jahr, Vertrag vertrag)
         {
             Jahr = jahr;
+            Abrechnungsbeginn = new DateOnly(jahr, 1, 1);
+            Abrechnungsende = new DateOnly(jahr, 12, 31);
+            var beginn = vertrag.Beginn();
+            Nutzungsbeginn = Utils.Max(vertrag.Beginn(), Abrechnungsbeginn);
+            Nutzungsende = Utils.Min(vertrag.Ende ?? Abrechnungsende, Abrechnungsende);
 
-            Nutzungsbeginn = nutzungsbeginn;
-            Nutzungsende = nutzungsende;
-            Abrechnungsbeginn = abrechnungsbeginn;
-            Abrechnungsende = abrechnungsende;
-
-            Nutzungszeitraum = nutzungsende.DayNumber - nutzungsbeginn.DayNumber;
-            Abrechnungszeitraum = abrechnungsende.DayNumber - abrechnungsbeginn.DayNumber;
+            Nutzungszeitraum = Nutzungsende.DayNumber - Nutzungsbeginn.DayNumber;
+            Abrechnungszeitraum = Abrechnungsende.DayNumber - Abrechnungsbeginn.DayNumber;
             Zeitanteil = (double)Nutzungszeitraum / Abrechnungszeitraum;
         }
     }
