@@ -2,7 +2,7 @@
 
 namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
-    public sealed class Abrechnungseinheit
+    public class Abrechnungseinheit
     {
         public List<Umlage> Umlagen { get; }
         public List<Wohnung> Wohnungen { get; }
