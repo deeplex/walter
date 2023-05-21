@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.Erhaltu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.InitiateTestDbs", "Deeplex.Saverwalter.InitiateTestDbs\Deeplex.Saverwalter.InitiateTestDbs.csproj", "{D94B4983-7DF1-469E-9B29-B078D73E296F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deeplex.Saverwalter.PrintService.Tests", "Deeplex.Saverwalter.PrintService.Tests\Deeplex.Saverwalter.PrintService.Tests.csproj", "{943A29B9-B814-4319-A63F-66911EBFC991}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -215,6 +217,26 @@ Global
 		{D94B4983-7DF1-469E-9B29-B078D73E296F}.Release|x64.Build.0 = Release|Any CPU
 		{D94B4983-7DF1-469E-9B29-B078D73E296F}.Release|x86.ActiveCfg = Release|Any CPU
 		{D94B4983-7DF1-469E-9B29-B078D73E296F}.Release|x86.Build.0 = Release|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Debug|ARM.Build.0 = Debug|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Debug|x64.Build.0 = Debug|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Debug|x86.Build.0 = Debug|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Release|Any CPU.Build.0 = Release|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Release|ARM.ActiveCfg = Release|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Release|ARM.Build.0 = Release|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Release|ARM64.Build.0 = Release|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Release|x64.ActiveCfg = Release|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Release|x64.Build.0 = Release|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Release|x86.ActiveCfg = Release|Any CPU
+		{943A29B9-B814-4319-A63F-66911EBFC991}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
