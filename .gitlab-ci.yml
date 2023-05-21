@@ -63,7 +63,17 @@ build-docker:
     - fi
   only:
     - tags
-  release:
-    name: 'release-$CI_COMMIT_TAG'
+
+release_job:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:v0.15.0                 
+  script:
+    - echo "running release_job"
+  needs:
+    - build-docker
+  only:
+    - tags
+  release:                              
     tag_name: '$CI_COMMIT_TAG'
-    description: "New release"
+    description: '$CI_COMMIT_TAG'
+
