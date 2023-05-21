@@ -38,12 +38,15 @@ test-dotnet:
   image: mcr.microsoft.com/devcontainers/dotnet:0-6.0
   script:
     - dotnet restore
-    - dotnet test --collect:"XPlat Code Coverage" --results-directory "TestResults"
+    - dotnet test *.sln --collect:"XPlat Code Coverage" --results-directory "TestResults"
+  coverage: '/TOTAL_COVERAGE=(\d+.\d+)/'
   artifacts:
+    paths:
+      - ./**/TestResults.xml
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: TestResults/**/coverage.cobertura.xml
+        path: ./**/TestResults/*/coverage.cobertura.xml
 
 build-docker:
   stage: release
