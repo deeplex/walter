@@ -1,15 +1,15 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import type { UserConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
-const config: UserConfig = {
-  plugins: [
-    sveltekit()
-  ],
+export default defineConfig({
+  plugins: [sveltekit()],
   server: {
     proxy: {
       '/api': 'http://localhost:5254'
     }
+  },
+  test: {
+    environment: 'jsdom',
+    include: ['src/**/*.{test,spec}.ts'],
   }
-};
-
-export default config;
+});
