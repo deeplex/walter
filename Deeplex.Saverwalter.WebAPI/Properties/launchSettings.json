@@ -8,8 +8,8 @@
         "DATABASE_HOST": "localhost",
         "DATABASE_PORT": "5432",
         "DATABASE_NAME": "walter_dev_full_generic_db",
-        "DATABASE_USER": "root",
-        "DATABASE_PASS": "securepw",
+        "DATABASE_USER": "postgres",
+        "DATABASE_PASS": "postgres",
         "S3_PROVIDER": "http://localhost:9000/saverwalter"
       },
       "dotnetRunMessages": true,
