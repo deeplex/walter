@@ -69,14 +69,14 @@ namespace Deeplex.Saverwalter.WebAPI
 
         private static void AddServices(WebApplicationBuilder builder, Container container)
         {
-            if (Environment.GetEnvironmentVariable("APM_SERVER") is string apm_server)
+            if (Environment.GetEnvironmentVariable("OTEL_ENDPOINT") is string otel_endpoint)
             {
                 builder.Services.AddOpenTelemetry()
                     .WithTracing(tracerProviderBuilder => tracerProviderBuilder
                     .AddSource(AppName)
                     .AddOtlpExporter(opt =>
                     {
-                        opt.Endpoint = new Uri(apm_server);
+                        opt.Endpoint = new Uri(otel_endpoint);
                         opt.Protocol = OtlpExportProtocol.Grpc;
                     })
                     .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName: AppName))

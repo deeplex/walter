@@ -2,7 +2,7 @@
 Environment variables with default examples:
 ```
 WALTER_VERSION=v0.0.0
-APM_SERVER=apm-server:9200
+OTEL_ENDPOINT=otelcol:4317
 DATABASE_HOST=db
 DATABASE_PORT=5432
 DATABASE_NAME=saverdb
