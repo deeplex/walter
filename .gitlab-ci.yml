@@ -22,6 +22,15 @@ build-svelte:
     paths:
       - $CI_PROJECT_DIR/Deeplex.Saverwalter.WebAPI/wwwroot
 
+test-svelte:
+  stage: test
+  image: node:18-alpine3.17
+  script:
+    - cd Deeplex.Saverwalter.WebAPI/svelte
+    - yarn install
+    - yarn vitest --coverage
+  coverage: '/Lines\s+:\s+(\d+(?:\.\d+)?)%/' 
+
 build-dotnet:
   stage: build
   image: mcr.microsoft.com/devcontainers/dotnet:0-6.0
