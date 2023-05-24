@@ -11,7 +11,6 @@
     "lint": "prettier --plugin-search-dir . --check . && eslint .",
     "format": "prettier --plugin-search-dir . --write .",
     "vitest": "vitest",
-    "vitest:coverage": "vitest --coverage",
     "vitest:ui": "vitest --coverage --ui"
   },
   "devDependencies": {
