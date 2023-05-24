@@ -11,7 +11,6 @@
   import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
   import {
-    convertDate,
     convertEuro,
     convertPercent,
     convertTime

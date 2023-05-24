@@ -1,8 +1,25 @@
-export function convertDate(date: Date | undefined): string | undefined {
+// Canadian format allegedly is yyyy-mm-dd
+export function convertDateCanadian(date: Date | undefined): string | undefined {
   if (date) {
-    // en-CA is yyyy-MM-dd, which is requested by C# DateOnly
-    return date.toLocaleDateString('en-CA');
-  } else {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  else {
+    return undefined;
+  }
+}
+
+export function convertDateGerman(date: Date | undefined): string | undefined {
+  if (date) {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+
+    return `${day}.${month}.${year}`;
+  }
+  else {
     return undefined;
   }
 }

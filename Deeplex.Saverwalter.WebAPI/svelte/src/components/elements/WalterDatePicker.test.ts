@@ -24,4 +24,14 @@ describe("WalterDatePicker tests", () => {
         expect(input).toHaveProperty("value");
         expect(input!.value).toBe("24.05.2023");
     });
+
+    it("should show correct date at startup (21.09.2020)", async () => {
+        render(WalterDatePicker, { props: { value: "2020-09-21", labelText: "Datum" } });
+
+        const input = document.getElementsByTagName("input").item(0);
+
+        expect(input).toBeDefined();
+        expect(input).toHaveProperty("value");
+        expect(input!.value).toBe("21.09.2020");
+    });
 });

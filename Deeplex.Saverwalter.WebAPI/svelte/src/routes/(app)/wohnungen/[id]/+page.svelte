@@ -12,7 +12,7 @@
     WalterWohnung,
     WalterLinks
   } from '$WalterComponents';
-  import { convertDate } from '$WalterServices/utils';
+  import { convertDateCanadian } from '$WalterServices/utils';
   import type {
     WalterErhaltungsaufwendungEntry,
     WalterUmlageEntry,
@@ -41,7 +41,7 @@
       id: '' + data.a.id,
       text: data.a.adresse?.anschrift + ' - ' + data.a.bezeichnung
     },
-    datum: convertDate(new Date())
+    datum: convertDateCanadian(new Date())
   };
 </script>
 

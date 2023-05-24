@@ -4,7 +4,7 @@
     WalterGrid,
     WalterZaehlerstand
   } from '$WalterComponents';
-  import { convertDate } from '$WalterServices/utils';
+  import { convertDateGerman } from '$WalterServices/utils';
   import { Button, ButtonSkeleton } from 'carbon-components-svelte';
   import type { PageData } from './$types';
 
@@ -16,7 +16,9 @@
   files={data.anhaenge}
   a={data.a}
   apiURL={data.apiURL}
-  title={data.a.zaehler.text + ' - ' + convertDate(new Date(data.a.datum))}
+  title={data.a.zaehler.text +
+    ' - ' +
+    convertDateGerman(new Date(data.a.datum))}
   f={data.fetch}
 />
 

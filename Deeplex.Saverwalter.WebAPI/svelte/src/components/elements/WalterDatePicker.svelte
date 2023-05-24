@@ -5,19 +5,26 @@
     DatePickerSkeleton
   } from 'carbon-components-svelte';
 
-  import { convertDate } from '$WalterServices/utils';
+  import {
+    convertDateCanadian,
+    convertDateGerman
+  } from '$WalterServices/utils';
 
   export let labelText: string;
   export let value: string | undefined = undefined;
   export let placeholder: string | undefined = undefined;
   export let disabled: boolean | undefined = false;
 
+  console.log('Beginning: ', value);
+
   function change(e: any) {
-    value = convertDate(new Date(e.detail?.selectedDates[0]));
+    value = convertDateCanadian(new Date(e.detail?.selectedDates[0]));
   }
 
   function getDateForDatePicker(date: string | undefined) {
-    return date ? new Date(date).toLocaleDateString() : undefined;
+    const retval = date ? convertDateGerman(new Date(date)) : undefined;
+
+    return retval;
   }
 </script>
 

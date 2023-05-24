@@ -6,13 +6,13 @@
     WalterBetriebskostenrechnung
   } from '$WalterComponents';
   import type { WalterBetriebskostenrechnungEntry } from '$WalterLib';
-  import { convertDate } from '$WalterServices/utils';
+  import { convertDateCanadian } from '$WalterServices/utils';
   import type { PageData } from './$types';
 
   export let data: PageData;
 
   const entry: Partial<WalterBetriebskostenrechnungEntry> = {
-    datum: convertDate(new Date())
+    datum: convertDateCanadian(new Date())
   };
   let searchParams: URLSearchParams = new URL($page.url).searchParams;
 

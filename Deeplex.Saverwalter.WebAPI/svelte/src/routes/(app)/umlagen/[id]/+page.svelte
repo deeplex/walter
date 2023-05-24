@@ -9,7 +9,7 @@
     WalterZaehlerList,
     WalterLinks
   } from '$WalterComponents';
-  import { convertDate } from '$WalterServices/utils';
+  import { convertDateCanadian } from '$WalterServices/utils';
   import type {
     WalterBetriebskostenrechnungEntry,
     WalterSelectionEntry
@@ -35,7 +35,7 @@
       betreffendesJahr:
         lastBetriebskostenrechnung?.betreffendesJahr + 1 ||
         new Date().getFullYear(),
-      datum: convertDate(new Date())
+      datum: convertDateCanadian(new Date())
     };
 </script>
 

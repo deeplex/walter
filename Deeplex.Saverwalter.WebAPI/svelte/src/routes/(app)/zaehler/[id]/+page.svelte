@@ -8,7 +8,7 @@
     WalterUmlagen,
     WalterLinks
   } from '$WalterComponents';
-  import { convertDate } from '$WalterServices/utils';
+  import { convertDateCanadian } from '$WalterServices/utils';
   import type { WalterZaehlerstandEntry } from '$WalterLib';
 
   export let data: PageData;
@@ -20,7 +20,7 @@
     : undefined;
   const zaehlerstandEntry: Partial<WalterZaehlerstandEntry> = {
     zaehler: { id: '' + data.a.id, text: data.a.kennnummer },
-    datum: convertDate(new Date()),
+    datum: convertDateCanadian(new Date()),
     stand: lastZaehlerstand?.stand || 0,
     einheit: lastZaehlerstand?.einheit
   };
