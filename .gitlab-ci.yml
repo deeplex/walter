@@ -28,7 +28,7 @@ test-svelte:
   script:
     - cd Deeplex.Saverwalter.WebAPI/svelte
     - yarn install
-    - yarn vitest --coverage
+    - yarn run vitest --coverage
   coverage: '/Lines\s+:\s+(\d+(?:\.\d+)?)%/' 
 
 build-dotnet:
