@@ -58,22 +58,21 @@
   <WalterPreview bind:files bind:file={selectedFile} bind:open={previewOpen} />
 {/if}
 
-<HeaderAction text="({files.length})">
+<HeaderPanelLinks>
+  <FileUploader
+    status={fileUploadComplete ? 'complete' : 'uploading'}
+    bind:files={newFiles}
+    on:add={upload}
+    multiple
+    buttonLabel="Datei hochladen"
+  />
+  <HeaderPanelDivider>Dateien ({files.length})</HeaderPanelDivider>
   <HeaderPanelLinks>
-    <FileUploader
-      status={fileUploadComplete ? 'complete' : 'uploading'}
-      bind:files={newFiles}
-      on:add={upload}
-      multiple
-      buttonLabel="Datei hochladen"
-    />
-    <HeaderPanelDivider>Dateien ({files.length})</HeaderPanelDivider>
-    <HeaderPanelLinks>
-      {#each files as file}
-        <HeaderPanelLink on:click={showModal}>
-          <!-- Copy the style from the original element. -->
-          <Truncate
-            style="font-size: 0.875rem;
+    {#each files as file}
+      <HeaderPanelLink on:click={showModal}>
+        <!-- Copy the style from the original element. -->
+        <Truncate
+          style="font-size: 0.875rem;
 							   margin-left: 0;
 							   font-weight: 600;
 							   line-height: 1.28572;
@@ -82,11 +81,10 @@
 							   height: 2rem;
 							   color: #c6c6c6;
 							   text-decoration: none;"
-          >
-            {file.FileName}
-          </Truncate>
-        </HeaderPanelLink>
-      {/each}
-    </HeaderPanelLinks>
+        >
+          {file.FileName}
+        </Truncate>
+      </HeaderPanelLink>
+    {/each}
   </HeaderPanelLinks>
-</HeaderAction>
+</HeaderPanelLinks>

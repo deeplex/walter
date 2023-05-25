@@ -6,7 +6,6 @@
     Modal,
     Tile
   } from 'carbon-components-svelte';
-  import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
   import { WalterDataTable } from '$WalterComponents';
   import { Add } from 'carbon-icons-svelte';
