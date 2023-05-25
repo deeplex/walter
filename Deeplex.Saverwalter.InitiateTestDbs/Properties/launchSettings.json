@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Deeplex.Saverwalter.InitiateTestDbs": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DATABASE_HOST": "localhost",
+        "DATABASE_PORT": "5432",
+        "DATABASE_USER": "postgres",
+        "DATABASE_PASS": "postgres"
+      }
+    }
+  }
+}

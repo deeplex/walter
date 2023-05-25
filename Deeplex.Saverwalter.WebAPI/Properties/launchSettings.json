@@ -7,7 +7,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DATABASE_HOST": "localhost",
         "DATABASE_PORT": "5432",
-        "DATABASE_NAME": "walter_dev_full_generic_db",
+        "DATABASE_NAME": "walter_dev_generic_db",
         "DATABASE_USER": "postgres",
         "DATABASE_PASS": "postgres",
         "S3_PROVIDER": "http://localhost:9000/saverwalter"

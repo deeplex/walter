@@ -1,41 +1,50 @@
 ﻿using Deeplex.Saverwalter.InitiateTestDbs.Templates;
-using Deeplex.Saverwalter.Model;
-using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.InitiateTestDbs
 {
     internal class Program
     {
-        private static string databaseUser = "postgres";
-        private static string databasePass = "postgres";
-        private static string databaseHost = "db";
-        private static string databasePort = "5432";
-        private static string databaseName = "walter_dev_full_generic_db";
-
         static async Task Main(string[] args)
         {
-            var options = CreateDbContextOptions();
-            var ctx = new SaverwalterContext(options);
-            await ctx.Database.EnsureDeletedAsync();
-            await ctx.Database.EnsureCreatedAsync();
+            var databaseUser = Environment.GetEnvironmentVariable("DATABASE_USER");
+            if (databaseUser == null)
+            {
+                Console.WriteLine("Can't find environment variable DATABASE_USER");
+            }
+            
+            var databasePass = Environment.GetEnvironmentVariable("DATABASE_PASS");
+            if (databaseUser == null)
+            {
+                Console.WriteLine("Can't find environment variable DATABASE_PASS");
+            }
 
-            // TODO is this necessary?
-            await ctx.SaveChangesAsync();
+            var databaseHost = Environment.GetEnvironmentVariable("DATABASE_HOST");
+            if (databaseUser == null)
+            {
+                Console.WriteLine("Can't find environment variable DATABASE_HOST");
+            }
 
-            await FullGenericDatabase.PopulateDatabase(ctx, databaseUser, databasePass);
-        }
+            var databasePort = Environment.GetEnvironmentVariable("DATABASE_PORT");
+            if (databaseUser == null)
+            {
+                Console.WriteLine("Can't find environment variable DATABASE_PORT");
+            }
 
-        private static DbContextOptions<SaverwalterContext> CreateDbContextOptions()
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
-            optionsBuilder.UseNpgsql(
-                 $@"Server={databaseHost}
-                ;Port={databasePort}
-                ;Database={databaseName}
-                ;Username={databaseUser}
-                ;Password={databasePass}");
+            await GenericDatabase.ConnectAndPopulate(
+                databaseHost!,
+                databasePort!,
+                "walter_dev_generic_db",
+                databaseUser!,
+                databasePass!,
+                10);
 
-            return optionsBuilder.Options;
+            await GenericDatabase.ConnectAndPopulate(
+                databaseHost!,
+                databasePort!,
+                "walter_dev_full_generic_db",
+                databaseUser!,
+                databasePass!,
+                100);
         }
     }
 }
