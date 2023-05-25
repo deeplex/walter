@@ -22,7 +22,9 @@
         value: string;
     }[];
     export let search = false;
-    export let navigate: (e: any) => Promise<void> | void = (_e: any) => {};
+    export let navigate: (e: unknown) => Promise<void> | void = (
+        _e: unknown
+    ) => {};
 
     let addModalOpen = false;
     let open = false;
@@ -31,10 +33,10 @@
         'Speichern erfolgreich',
         'Speichern fehlgeschlagen',
         () => `${title} erfolgreich gespeichert.`,
-        (a: any) => `Konnte ${a} nicht speichern.`
+        (a: unknown) => `Konnte ${a} nicht speichern.`
     );
 
-    async function click_post(url: string | undefined, body: any) {
+    async function click_post(url: string | undefined, body: unknown) {
         if (!url) {
             return;
         }

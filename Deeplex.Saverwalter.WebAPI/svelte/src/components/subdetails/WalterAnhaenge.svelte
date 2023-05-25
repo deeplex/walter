@@ -1,7 +1,6 @@
 <script lang="ts">
     import {
         FileUploader,
-        HeaderAction,
         HeaderPanelDivider,
         HeaderPanelLink,
         HeaderPanelLinks,

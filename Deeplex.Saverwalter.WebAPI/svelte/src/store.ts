@@ -4,7 +4,7 @@ import type { WalterToastContent } from './lib/WalterToastContent';
 
 export const toasts: Writable<Partial<WalterToast>[]> = writable([]);
 
-export let isWalterSideNavOpen: Writable<boolean> = writable(true);
+export const isWalterSideNavOpen: Writable<boolean> = writable(true);
 
 export function removeToast(index: number) {
     toasts.update((e) => {
@@ -14,7 +14,11 @@ export function removeToast(index: number) {
     return toasts;
 }
 
-export function addToast(toast: WalterToastContent, ok: boolean, ...args: any) {
+export function addToast(
+    toast: WalterToastContent,
+    ok: boolean,
+    ...args: unknown[]
+) {
     const title = ok ? toast.successTitle : toast.failureTitle;
     const subtitle = ok
         ? toast.subtitleSuccess(...args)

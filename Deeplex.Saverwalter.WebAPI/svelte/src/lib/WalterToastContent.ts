@@ -2,7 +2,7 @@ export class WalterToastContent {
     constructor(
         public successTitle: string,
         public failureTitle: string = '',
-        public subtitleSuccess: (...args: any) => string = () => '',
-        public subtitleFailure: (...args: any) => string = () => ''
+        public subtitleSuccess: (...args: unknown[]) => string = () => '',
+        public subtitleFailure: (...args: unknown[]) => string = () => ''
     ) {}
 }

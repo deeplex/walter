@@ -56,14 +56,17 @@ export async function walter_fetch(
 
 // =================================== GET ====================================
 
-export const walter_get = (url: string, f: typeof fetch): Promise<any> =>
-    walter_fetch(f, url, { method: 'GET' }).then((e) => e.json());
+export const walter_get = (
+    url: string,
+    fetchImpl: typeof fetch
+): Promise<any> =>
+    walter_fetch(fetchImpl, url, { method: 'GET' }).then((e) => e.json());
 
 // =================================== PUT ===================================
 
 export const walter_put = (
     url: string,
-    body: any,
+    body: unknown,
     toast?: WalterToastContent
 ) =>
     walter_fetch(fetch, url, {

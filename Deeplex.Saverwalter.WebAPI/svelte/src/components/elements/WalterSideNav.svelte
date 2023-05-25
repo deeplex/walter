@@ -38,7 +38,7 @@
     }
 
     function closeSideNav() {
-        isWalterSideNavOpen.update((e: any) => false);
+        isWalterSideNavOpen.update((_e: unknown) => false);
     }
 
     function logout() {

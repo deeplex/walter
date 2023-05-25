@@ -13,7 +13,7 @@
 
     export let title = 'Neu...';
     export let apiURL: string;
-    export let entry: any;
+    export let entry: unknown;
 
     const SaveToast = new WalterToastContent(
         'Speichern erfolgreich',

@@ -14,7 +14,7 @@
     import type { WalterS3File } from '$WalterTypes';
     import { WalterToastContent } from '$WalterLib';
 
-    export let title: string = 'Saverwalter';
+    export let title = 'Saverwalter';
     export let a: any;
     export let apiURL: string;
     export let S3URL: string;

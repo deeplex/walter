@@ -14,7 +14,7 @@ describe('WalterDatePicker tests', () => {
 
         expect(input).toBeDefined();
         expect(input).toHaveProperty('value');
-        expect(input!.value).toBe('15.05.1970');
+        input && expect(input.value).toBe('15.05.1970');
     });
 
     it('should show correct date at startup (24.05.2023)', async () => {
@@ -26,7 +26,7 @@ describe('WalterDatePicker tests', () => {
 
         expect(input).toBeDefined();
         expect(input).toHaveProperty('value');
-        expect(input!.value).toBe('24.05.2023');
+        input && expect(input.value).toBe('24.05.2023');
     });
 
     it('should show correct date at startup (21.09.2020)', async () => {
@@ -38,6 +38,6 @@ describe('WalterDatePicker tests', () => {
 
         expect(input).toBeDefined();
         expect(input).toHaveProperty('value');
-        expect(input!.value).toBe('21.09.2020');
+        input && expect(input.value).toBe('21.09.2020');
     });
 });

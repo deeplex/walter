@@ -10,7 +10,7 @@
     import { WalterHeader } from '$WalterComponents';
     import { page } from '$app/stores';
 
-    export let title: string = 'Saverwalter';
+    export let title = 'Saverwalter';
 
     function click_new() {
         goto(`${$page.url.pathname}/new`);
