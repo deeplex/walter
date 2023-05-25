@@ -1,8 +1,8 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import { WalterDataWrapper, WalterZaehlerstand } from '$WalterComponents';
+    import { WalterDataWrapper, WalterZaehlerstand } from '$walter/components';
 
-    import type { WalterZaehlerstandEntry } from '$WalterLib';
+    import type { WalterZaehlerstandEntry } from '$walter/lib';
 
     const headers = [
         { key: 'datum', value: 'Datum' },

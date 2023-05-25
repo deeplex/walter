@@ -4,9 +4,9 @@
         WalterAbrechnungGruppe,
         WalterAbrechnungResultat,
         WalterDatePicker
-    } from '$WalterComponents';
-    import { convertEuro } from '$WalterServices/utils';
-    import type { WalterBetriebskostenabrechnungKostengruppenEntry } from '$WalterTypes';
+    } from '$walter/components';
+    import { convertEuro } from '$walter/services/utils';
+    import type { WalterBetriebskostenabrechnungKostengruppenEntry } from '$walter/types';
     import { Row, Tile } from 'carbon-components-svelte';
 
     export let abrechnung: WalterBetriebskostenabrechnungKostengruppenEntry;

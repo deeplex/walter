@@ -1,7 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
-    import { isWalterSideNavOpen } from '$WalterStore';
+    import { isWalterSideNavOpen } from '$walter/store';
 
     import {
         SideNav,
@@ -23,8 +23,8 @@
         User,
         UserMultiple
     } from 'carbon-icons-svelte';
-    import { WalterToastContent } from '$WalterLib';
-    import { walter_sign_out } from '$WalterServices/auth';
+    import { WalterToastContent } from '$walter/lib';
+    import { walter_sign_out } from '$walter/services/auth';
 
     let winWidth = 0;
     let isOpen: boolean;

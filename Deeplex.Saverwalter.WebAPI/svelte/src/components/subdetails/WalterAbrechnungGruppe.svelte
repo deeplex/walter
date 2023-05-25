@@ -1,7 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import { WalterDataTable } from '$WalterComponents';
-    import type { WalterBetriebskostenabrechnungKostenpunkt } from '$WalterTypes';
+    import { WalterDataTable } from '$walter/components';
+    import type { WalterBetriebskostenabrechnungKostenpunkt } from '$walter/types';
 
     export let rows: WalterBetriebskostenabrechnungKostenpunkt[];
     export let year: number;

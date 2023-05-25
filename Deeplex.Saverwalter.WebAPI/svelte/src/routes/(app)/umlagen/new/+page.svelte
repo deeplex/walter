@@ -3,8 +3,8 @@
         WalterGrid,
         WalterUmlage,
         WalterHeaderNew
-    } from '$WalterComponents';
-    import type { WalterUmlageEntry } from '$WalterLib';
+    } from '$walter/components';
+    import type { WalterUmlageEntry } from '$walter/lib';
     import type { PageData } from './$types';
 
     const entry: Partial<WalterUmlageEntry> = {};

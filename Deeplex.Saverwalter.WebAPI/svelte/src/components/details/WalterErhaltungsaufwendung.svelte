@@ -5,12 +5,12 @@
         WalterNumberInput,
         WalterTextArea,
         WalterTextInput
-    } from '$WalterComponents';
+    } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
     import type {
         WalterErhaltungsaufwendungEntry,
         WalterSelectionEntry
-    } from '$WalterLib';
+    } from '$walter/lib';
 
     export let kontakte: WalterSelectionEntry[];
     export let wohnungen: WalterSelectionEntry[];

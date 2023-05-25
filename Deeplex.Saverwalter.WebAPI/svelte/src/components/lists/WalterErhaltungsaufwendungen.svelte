@@ -5,11 +5,11 @@
     import {
         WalterDataWrapper,
         WalterErhaltungsaufwendung
-    } from '$WalterComponents';
+    } from '$walter/components';
     import type {
         WalterErhaltungsaufwendungEntry,
         WalterSelectionEntry
-    } from '$WalterLib';
+    } from '$walter/lib';
 
     const headers = [
         { key: 'bezeichnung', value: 'Bezeichnung' },

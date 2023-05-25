@@ -2,11 +2,11 @@
     // import 'carbon-components-svelte/css/white.css';
     import 'carbon-components-svelte/css/all.css';
 
-    import { WalterSideNav } from '$WalterComponents';
+    import { WalterSideNav } from '$walter/components';
     import { Modal } from 'carbon-components-svelte';
-    import type { WalterModalControl } from '$WalterTypes';
-    import { walterModalControl } from '$WalterStore';
-    import { getAccessToken } from '$WalterServices/auth';
+    import type { WalterModalControl } from '$walter/types';
+    import { walterModalControl } from '$walter/store';
+    import { getAccessToken } from '$walter/services/auth';
     import { goto } from '$app/navigation';
     if (getAccessToken() == null) {
         goto('/login');

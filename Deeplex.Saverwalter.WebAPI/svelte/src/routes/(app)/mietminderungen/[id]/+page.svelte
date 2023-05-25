@@ -3,7 +3,7 @@
         WalterHeaderDetail,
         WalterGrid,
         WalterMietminderung
-    } from '$WalterComponents';
+    } from '$walter/components';
     import { Button, ButtonSkeleton } from 'carbon-components-svelte';
     import type { PageData } from './$types';
 

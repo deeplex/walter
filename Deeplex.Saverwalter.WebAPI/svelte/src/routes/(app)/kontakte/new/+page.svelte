@@ -6,12 +6,12 @@
         WalterHeaderNew,
         WalterJuristischePerson,
         WalterNatuerlichePerson
-    } from '$WalterComponents';
+    } from '$walter/components';
     import type { PageData } from './$types';
     import type {
         WalterJuristischePersonEntry,
         WalterNatuerlichePersonEntry
-    } from '$WalterLib';
+    } from '$walter/lib';
 
     export let data: PageData;
 

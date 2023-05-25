@@ -1,5 +1,5 @@
-import type { WalterSelectionEntry, WalterToastContent } from '$WalterLib';
-import { addToast } from '$WalterStore';
+import type { WalterSelectionEntry, WalterToastContent } from '$walter/lib';
+import { addToast } from '$walter/store';
 import { goto } from '$app/navigation';
 import { getAccessToken } from './auth';
 

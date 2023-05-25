@@ -4,9 +4,9 @@
         WalterGrid,
         WalterHeaderNew,
         WalterBetriebskostenrechnung
-    } from '$WalterComponents';
-    import type { WalterBetriebskostenrechnungEntry } from '$WalterLib';
-    import { convertDateCanadian } from '$WalterServices/utils';
+    } from '$walter/components';
+    import type { WalterBetriebskostenrechnungEntry } from '$walter/lib';
+    import { convertDateCanadian } from '$walter/services/utils';
     import type { PageData } from './$types';
 
     export let data: PageData;

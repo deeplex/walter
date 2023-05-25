@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
-import type { WalterToastContent } from '$WalterLib';
-import { addToast } from '$WalterStore';
+import type { WalterToastContent } from '$walter/lib';
+import { addToast } from '$walter/store';
 import { writable, type Writable } from 'svelte/store';
 
 type SignInRequest = {
@@ -119,7 +119,7 @@ function isTokenStillValid(token: string): boolean {
             expiryDateIso8601Basic.substring(start, start + length);
         // prettier-ignore
         const expiryDateIso8601Extended
-      = `${basicPart(0, 4)}-${basicPart(4, 2)}-${basicPart(6, 5)}:${basicPart(11, 2)}:${basicPart(13, 3)}`;
+            = `${basicPart(0, 4)}-${basicPart(4, 2)}-${basicPart(6, 5)}:${basicPart(11, 2)}:${basicPart(13, 3)}`;
 
         const expiry = new Date(expiryDateIso8601Extended);
         // _obviously_ a default constructed a Date object is initialized from

@@ -3,8 +3,8 @@
         WalterGrid,
         WalterHeaderNew,
         WalterMiete
-    } from '$WalterComponents';
-    import type { WalterMieteEntry } from '$WalterLib';
+    } from '$walter/components';
+    import type { WalterMieteEntry } from '$walter/lib';
 
     const apiURL = `/api/miete`;
     const title = 'Neue Miete';

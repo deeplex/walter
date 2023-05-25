@@ -2,8 +2,8 @@
     import { goto } from '$app/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import { WalterDataWrapper, WalterUmlage } from '$WalterComponents';
-    import type { WalterSelectionEntry, WalterUmlageEntry } from '$WalterLib';
+    import { WalterDataWrapper, WalterUmlage } from '$walter/components';
+    import type { WalterSelectionEntry, WalterUmlageEntry } from '$walter/lib';
 
     const headers = [
         { key: 'typ.text', value: 'Typ' },

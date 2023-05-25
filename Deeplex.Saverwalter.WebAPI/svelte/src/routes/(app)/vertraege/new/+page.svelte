@@ -4,11 +4,11 @@
         WalterVertrag,
         WalterHeaderNew,
         WalterVertragVersion
-    } from '$WalterComponents';
+    } from '$walter/components';
     import type {
         WalterVertragEntry,
         WalterVertragVersionEntry
-    } from '$WalterLib';
+    } from '$walter/lib';
     import { Tile } from 'carbon-components-svelte';
     import type { PageData } from './$types';
 

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { ComboBox, TextInputSkeleton } from 'carbon-components-svelte';
 
-    import type { WalterSelectionEntry } from '$WalterLib';
+    import type { WalterSelectionEntry } from '$walter/lib';
 
     export let value: WalterSelectionEntry | undefined;
     export let titleText: string;

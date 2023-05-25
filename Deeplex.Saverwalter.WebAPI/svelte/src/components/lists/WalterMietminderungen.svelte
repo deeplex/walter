@@ -1,7 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import { WalterDataWrapper, WalterMietminderung } from '$WalterComponents';
-    import type { WalterMietminderungEntry } from '$WalterLib';
+    import { WalterDataWrapper, WalterMietminderung } from '$walter/components';
+    import type { WalterMietminderungEntry } from '$walter/lib';
 
     const headers = [
         { key: 'beginn', value: 'Beginn' },

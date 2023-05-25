@@ -6,12 +6,12 @@
         WalterDataWrapper,
         WalterPerson,
         WalterTextInput
-    } from '$WalterComponents';
+    } from '$walter/components';
     import type {
         WalterJuristischePersonEntry,
         WalterNatuerlichePersonEntry,
         WalterPersonEntry
-    } from '$WalterLib';
+    } from '$walter/lib';
     import { ContentSwitcher, Row, Switch } from 'carbon-components-svelte';
 
     const headers = [

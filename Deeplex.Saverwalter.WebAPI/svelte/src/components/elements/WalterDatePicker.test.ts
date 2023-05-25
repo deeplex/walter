@@ -1,6 +1,6 @@
 import { expect, describe, it, afterEach } from 'vitest';
 import { render, cleanup } from '@testing-library/svelte';
-import { WalterDatePicker } from '$WalterComponents';
+import { WalterDatePicker } from '$walter/components';
 
 describe('WalterDatePicker tests', () => {
     afterEach(cleanup);

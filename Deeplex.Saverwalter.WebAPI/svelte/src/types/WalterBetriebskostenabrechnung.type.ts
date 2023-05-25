@@ -2,7 +2,7 @@ import type {
     WalterAdresseEntry,
     WalterSelectionEntry,
     WalterUmlageEntry
-} from '$WalterLib';
+} from '$walter/lib';
 
 export type WalterBetriebskostenabrechnungKostengruppenEntry = {
     kostengruppen: WalterBetriebskostenabrechnungsRechnungsgruppeEntry[];

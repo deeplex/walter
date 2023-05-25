@@ -5,11 +5,11 @@
     } from 'carbon-components-svelte';
     import { Save } from 'carbon-icons-svelte';
 
-    import { WalterHeader } from '$WalterComponents';
-    import { walter_post } from '$WalterServices/requests';
+    import { WalterHeader } from '$walter/components';
+    import { walter_post } from '$walter/services/requests';
     import { goto } from '$app/navigation';
-    import { WalterToastContent } from '$WalterLib';
-    import { addToast } from '$WalterStore';
+    import { WalterToastContent } from '$walter/lib';
+    import { addToast } from '$walter/store';
 
     export let title = 'Neu...';
     export let apiURL: string;

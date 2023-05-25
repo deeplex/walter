@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { convertEuro } from '$WalterServices/utils';
-    import type { WalterBetriebskostenabrechnungEntry } from '$WalterTypes';
+    import { convertEuro } from '$walter/services/utils';
+    import type { WalterBetriebskostenabrechnungEntry } from '$walter/types';
     import {
         Row,
         StructuredList,

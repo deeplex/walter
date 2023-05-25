@@ -4,8 +4,8 @@
         WalterDatePicker,
         WalterMultiSelect,
         WalterTextArea
-    } from '$WalterComponents';
-    import type { WalterSelectionEntry, WalterVertragEntry } from '$WalterLib';
+    } from '$walter/components';
+    import type { WalterSelectionEntry, WalterVertragEntry } from '$walter/lib';
     import { Row, TextInput } from 'carbon-components-svelte';
 
     export let a: Partial<WalterVertragEntry> = {};

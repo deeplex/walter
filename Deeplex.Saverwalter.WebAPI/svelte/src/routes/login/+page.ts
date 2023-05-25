@@ -9,7 +9,9 @@ export const load: PageLoad = async ({ fetch }) => {
         };
     }
 
-    const accessToken = (await import('$WalterServices/auth')).getAccessToken();
+    const accessToken = (
+        await import('$walter/services/auth')
+    ).getAccessToken();
     if (accessToken == null) {
         return {
             fetch

@@ -4,11 +4,11 @@
         WalterPerson,
         WalterTextArea,
         WalterTextInput
-    } from '$WalterComponents';
+    } from '$walter/components';
     import type {
         WalterNatuerlichePersonEntry,
         WalterSelectionEntry
-    } from '$WalterLib';
+    } from '$walter/lib';
     import { Row } from 'carbon-components-svelte';
 
     export let a: Partial<WalterNatuerlichePersonEntry>;

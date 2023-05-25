@@ -2,7 +2,7 @@
     import {
         WalterErhaltungsaufwendungen,
         WalterHeaderList
-    } from '$WalterComponents';
+    } from '$walter/components';
     import type { PageData } from './$types';
 
     export let data: PageData;

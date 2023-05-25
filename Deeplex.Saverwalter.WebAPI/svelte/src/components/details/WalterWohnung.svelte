@@ -5,9 +5,9 @@
         WalterNumberInput,
         WalterTextArea,
         WalterTextInput
-    } from '$WalterComponents';
+    } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
-    import type { WalterSelectionEntry, WalterWohnungEntry } from '$WalterLib';
+    import type { WalterSelectionEntry, WalterWohnungEntry } from '$walter/lib';
 
     export let a: Partial<WalterWohnungEntry> = {};
     export let kontakte: WalterSelectionEntry[];

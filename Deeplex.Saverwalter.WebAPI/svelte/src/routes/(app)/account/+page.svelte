@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { WalterHeader } from '$WalterComponents';
-    import { WalterToastContent } from '$WalterLib';
-    import { walter_post } from '$WalterServices/requests';
-    import { addToast } from '$WalterStore';
+    import { WalterHeader } from '$walter/components';
+    import { WalterToastContent } from '$walter/lib';
+    import { walter_post } from '$walter/services/requests';
+    import { addToast } from '$walter/store';
     import {
         Content,
         PasswordInput,

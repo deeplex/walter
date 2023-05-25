@@ -1,5 +1,5 @@
-import { walter_selection } from '$WalterServices/requests';
-import { WalterBetriebskostenrechnungEntry } from '$WalterLib';
+import { walter_selection } from '$walter/services/requests';
+import { WalterBetriebskostenrechnungEntry } from '$walter/lib';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch }) => {

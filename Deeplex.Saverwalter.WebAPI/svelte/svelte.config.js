@@ -15,11 +15,7 @@ const config = {
             assets: '../wwwroot'
         }),
         alias: {
-            $WalterComponents: resolve('./src/components/index'),
-            $WalterStore: resolve('./src/store'),
-            $WalterServices: resolve('./src/services'),
-            $WalterTypes: resolve('./src/types/index'),
-            $WalterLib: resolve('./src/lib/index')
+            $walter: resolve('./src')
         }
     }
 };

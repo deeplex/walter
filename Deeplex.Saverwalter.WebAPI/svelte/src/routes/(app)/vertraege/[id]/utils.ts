@@ -1,5 +1,5 @@
-import type { WalterVertragVersionEntry } from '$WalterLib';
-import { convertDateCanadian } from '$WalterServices/utils';
+import type { WalterVertragVersionEntry } from '$walter/lib';
+import { convertDateCanadian } from '$walter/services/utils';
 
 export function getMietminderungEntry(vertragId: string) {
     const today = new Date();

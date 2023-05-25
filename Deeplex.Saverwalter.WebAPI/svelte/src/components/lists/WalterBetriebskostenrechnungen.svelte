@@ -5,11 +5,11 @@
     import {
         WalterBetriebskostenrechnung,
         WalterDataWrapper
-    } from '$WalterComponents';
+    } from '$walter/components';
     import type {
         WalterBetriebskostenrechnungEntry,
         WalterSelectionEntry
-    } from '$WalterLib';
+    } from '$walter/lib';
 
     export let rows: WalterBetriebskostenrechnungEntry[];
     export let search = false;

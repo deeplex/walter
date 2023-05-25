@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { WalterHeaderList, WalterWohnungen } from '$WalterComponents';
+    import { WalterHeaderList, WalterWohnungen } from '$walter/components';
     import type { PageData } from './$types';
 
     export let data: PageData;

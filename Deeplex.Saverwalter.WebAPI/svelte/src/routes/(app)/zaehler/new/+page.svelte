@@ -3,8 +3,8 @@
         WalterGrid,
         WalterZaehler,
         WalterHeaderNew
-    } from '$WalterComponents';
-    import type { WalterZaehlerEntry } from '$WalterLib';
+    } from '$walter/components';
+    import type { WalterZaehlerEntry } from '$walter/lib';
     import type { PageData } from './$types';
 
     export let data: PageData;

@@ -3,12 +3,12 @@
         WalterDatePicker,
         WalterNumberInput,
         WalterTextArea
-    } from '$WalterComponents';
+    } from '$walter/components';
     import { ComboBox, Row, TextInputSkeleton } from 'carbon-components-svelte';
     import type {
         WalterBetriebskostenrechnungEntry,
         WalterSelectionEntry
-    } from '$WalterLib';
+    } from '$walter/lib';
 
     export let a: Partial<WalterBetriebskostenrechnungEntry> = {};
     export let betriebskostentypen: WalterSelectionEntry[];

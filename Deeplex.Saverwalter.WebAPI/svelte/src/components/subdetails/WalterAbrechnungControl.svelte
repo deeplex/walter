@@ -1,19 +1,19 @@
 <script lang="ts">
-    import { WalterNumberInput } from '$WalterComponents';
-    import { WalterToastContent } from '$WalterLib';
+    import { WalterNumberInput } from '$walter/components';
+    import { WalterToastContent } from '$walter/lib';
     import {
         create_abrechnung_pdf,
         create_abrechnung_word,
         loadAbrechnung
-    } from '$WalterServices/abrechnung';
+    } from '$walter/services/abrechnung';
     import {
         create_walter_s3_file_from_file,
         walter_s3_post
-    } from '$WalterServices/s3';
+    } from '$walter/services/s3';
     import type {
         WalterBetriebskostenabrechnungKostengruppenEntry,
         WalterS3File
-    } from '$WalterTypes';
+    } from '$walter/types';
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
 

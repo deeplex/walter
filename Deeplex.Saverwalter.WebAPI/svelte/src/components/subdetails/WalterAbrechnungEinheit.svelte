@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { convertM2 } from '$WalterServices/utils';
-    import type { WalterBetriebskostenabrechnungsRechnungsgruppeEntry } from '$WalterTypes';
+    import { convertM2 } from '$walter/services/utils';
+    import type { WalterBetriebskostenabrechnungsRechnungsgruppeEntry } from '$walter/types';
     import {
         Row,
         StructuredList,

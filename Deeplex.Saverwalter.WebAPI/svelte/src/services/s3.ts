@@ -1,5 +1,5 @@
-import { addToast } from '$WalterStore';
-import type { WalterS3File } from '$WalterTypes';
+import { addToast } from '$walter/store';
+import type { WalterS3File } from '$walter/types';
 import * as parser from 'fast-xml-parser';
 import { walter_delete, walter_fetch } from './requests';
 import type { WalterToastContent } from '../lib/WalterToastContent';

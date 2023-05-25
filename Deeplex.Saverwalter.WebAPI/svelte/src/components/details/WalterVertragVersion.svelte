@@ -3,9 +3,9 @@
         WalterDatePicker,
         WalterNumberInput,
         WalterTextArea
-    } from '$WalterComponents';
+    } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
-    import type { WalterVertragVersionEntry } from '$WalterLib';
+    import type { WalterVertragVersionEntry } from '$walter/lib';
 
     export let a: Partial<WalterVertragVersionEntry> = {};
 </script>

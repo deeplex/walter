@@ -7,7 +7,7 @@
 
     import { goto } from '$app/navigation';
 
-    import { WalterHeader } from '$WalterComponents';
+    import { WalterHeader } from '$walter/components';
     import { page } from '$app/stores';
 
     export let title = 'Saverwalter';

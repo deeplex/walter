@@ -8,7 +8,7 @@
     import {
         convertDateCanadian,
         convertDateGerman
-    } from '$WalterServices/utils';
+    } from '$walter/services/utils';
 
     export let labelText: string;
     export let value: string | undefined = undefined;

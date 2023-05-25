@@ -3,8 +3,8 @@
         WalterGrid,
         WalterHeaderNew,
         WalterZaehlerstand
-    } from '$WalterComponents';
-    import type { WalterZaehlerstandEntry } from '$WalterLib';
+    } from '$walter/components';
+    import type { WalterZaehlerstandEntry } from '$walter/lib';
 
     const apiURL = `/api/zaehlerstaende`;
     const title = 'Neuer Zählerstand';

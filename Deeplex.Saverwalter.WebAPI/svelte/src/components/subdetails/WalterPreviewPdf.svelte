@@ -1,8 +1,8 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
     import PDFObject from 'pdfobject';
-    import type { WalterS3File } from '$WalterTypes';
-    import { WalterPreviewError } from '$WalterComponents';
+    import type { WalterS3File } from '$walter/types';
+    import { WalterPreviewError } from '$walter/components';
 
     export let file: WalterS3File;
 

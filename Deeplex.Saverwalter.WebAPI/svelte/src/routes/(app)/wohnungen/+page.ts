@@ -1,5 +1,5 @@
-import { walter_selection } from '$WalterServices/requests';
-import { WalterWohnungEntry } from '$WalterLib';
+import { walter_selection } from '$walter/services/requests';
+import { WalterWohnungEntry } from '$walter/lib';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch }) => {

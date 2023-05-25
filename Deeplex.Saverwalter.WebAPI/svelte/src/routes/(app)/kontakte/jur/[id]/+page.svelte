@@ -8,11 +8,11 @@
         WalterHeaderDetail,
         WalterJuristischePerson,
         WalterLinks
-    } from '$WalterComponents';
+    } from '$walter/components';
     import type {
         WalterJuristischePersonEntry,
         WalterNatuerlichePersonEntry
-    } from '$WalterLib';
+    } from '$walter/lib';
 
     export let data: PageData;
 

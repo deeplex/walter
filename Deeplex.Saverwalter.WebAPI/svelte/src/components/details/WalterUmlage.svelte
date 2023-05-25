@@ -3,9 +3,9 @@
         WalterComboBox,
         WalterMultiSelect,
         WalterTextArea
-    } from '$WalterComponents';
+    } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
-    import type { WalterSelectionEntry, WalterUmlageEntry } from '$WalterLib';
+    import type { WalterSelectionEntry, WalterUmlageEntry } from '$walter/lib';
 
     export let betriebskostentypen: WalterSelectionEntry[];
     export let umlageschluessel: WalterSelectionEntry[];

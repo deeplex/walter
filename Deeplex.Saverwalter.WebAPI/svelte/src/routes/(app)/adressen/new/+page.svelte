@@ -3,8 +3,8 @@
         WalterAdresse,
         WalterGrid,
         WalterHeaderNew
-    } from '$WalterComponents';
-    import type { WalterAdresseEntry } from '$WalterLib';
+    } from '$walter/components';
+    import type { WalterAdresseEntry } from '$walter/lib';
 
     const apiURL = `/api/adressen`;
     const title = 'Neue Adresse';

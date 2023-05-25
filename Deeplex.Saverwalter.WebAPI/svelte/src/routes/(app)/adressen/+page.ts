@@ -1,4 +1,4 @@
-import { WalterAdresseEntry } from '$WalterLib';
+import { WalterAdresseEntry } from '$walter/lib';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch }) => {

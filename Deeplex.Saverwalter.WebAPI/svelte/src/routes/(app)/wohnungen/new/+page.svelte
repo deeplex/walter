@@ -3,8 +3,8 @@
         WalterGrid,
         WalterHeaderNew,
         WalterWohnung
-    } from '$WalterComponents';
-    import type { WalterWohnungEntry } from '$WalterLib';
+    } from '$walter/components';
+    import type { WalterWohnungEntry } from '$walter/lib';
     import type { PageData } from './$types';
 
     export let data: PageData;

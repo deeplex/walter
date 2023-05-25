@@ -7,9 +7,9 @@
         WalterZaehlerstaende,
         WalterUmlagen,
         WalterLinks
-    } from '$WalterComponents';
-    import { convertDateCanadian } from '$WalterServices/utils';
-    import type { WalterZaehlerstandEntry } from '$WalterLib';
+    } from '$walter/components';
+    import { convertDateCanadian } from '$walter/services/utils';
+    import type { WalterZaehlerstandEntry } from '$walter/lib';
 
     export let data: PageData;
 

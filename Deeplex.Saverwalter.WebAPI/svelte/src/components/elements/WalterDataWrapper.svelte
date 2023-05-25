@@ -7,11 +7,11 @@
         Tile
     } from 'carbon-components-svelte';
 
-    import { WalterDataTable } from '$WalterComponents';
+    import { WalterDataTable } from '$walter/components';
     import { Add } from 'carbon-icons-svelte';
-    import { walter_post } from '$WalterServices/requests';
+    import { walter_post } from '$walter/services/requests';
     import { WalterToastContent } from '../../lib/WalterToastContent';
-    import { addToast } from '$WalterStore';
+    import { addToast } from '$walter/store';
 
     export let addUrl: string | undefined = undefined;
     export let addEntry: any | undefined = undefined;
@@ -22,7 +22,7 @@
         value: string;
     }[];
     export let search = false;
-    export let navigate: (e: unknown) => Promise<void> | void = (
+    export let navigate: (e: CustomEvent) => Promise<void> | void = (
         _e: unknown
     ) => {};
 

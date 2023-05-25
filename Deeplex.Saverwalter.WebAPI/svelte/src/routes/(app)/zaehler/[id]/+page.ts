@@ -1,7 +1,7 @@
-import { WalterZaehlerEntry } from '$WalterLib';
-import { walter_selection } from '$WalterServices/requests';
-import { walter_s3_get_files } from '$WalterServices/s3';
-import type { WalterS3File } from '$WalterTypes';
+import { WalterZaehlerEntry } from '$walter/lib';
+import { walter_selection } from '$walter/services/requests';
+import { walter_s3_get_files } from '$walter/services/s3';
+import type { WalterS3File } from '$walter/types';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch }) => {

@@ -1,4 +1,4 @@
-import { walter_get } from '$WalterServices/requests';
+import { walter_get } from '$walter/services/requests';
 
 export abstract class WalterApiHandler {
     protected static ApiURL: string;

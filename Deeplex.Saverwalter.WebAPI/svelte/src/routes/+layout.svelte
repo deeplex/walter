@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { WalterToasts } from '$WalterComponents';
+    import { WalterToasts } from '$walter/components';
     import { Theme } from 'carbon-components-svelte';
     import 'carbon-components-svelte/css/all.css';
 </script>

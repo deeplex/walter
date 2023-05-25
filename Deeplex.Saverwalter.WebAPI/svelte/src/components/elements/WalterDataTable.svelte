@@ -14,7 +14,7 @@
         convertEuro,
         convertPercent,
         convertTime
-    } from '$WalterServices/utils';
+    } from '$walter/services/utils';
 
     export let headers: {
         key: string;

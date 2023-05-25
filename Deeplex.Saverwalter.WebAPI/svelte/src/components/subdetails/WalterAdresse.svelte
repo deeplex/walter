@@ -1,8 +1,8 @@
 <script lang="ts">
     import { Row } from 'carbon-components-svelte';
 
-    import type { WalterAdresseEntry } from '$WalterLib';
-    import { WalterTextInput } from '$WalterComponents';
+    import type { WalterAdresseEntry } from '$walter/lib';
+    import { WalterTextInput } from '$walter/components';
 
     export let value: Partial<WalterAdresseEntry> | undefined = {};
 

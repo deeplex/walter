@@ -12,11 +12,7 @@
         "sourceMap": true,
         "strict": true,
         "paths": {
-            "$WalterComponents": ["./src/components/index.ts"],
-            "$WalterStore": ["./src/store.ts"],
-            "$WalterServices/*": ["./src/services/*"],
-            "$WalterTypes": ["./src/types/index.ts"],
-            "$WalterLib": ["./src/lib/index.ts"],
+            "$walter/*": ["./src/*"],
             "$lib": ["./src/lib"], // vite dev output wants this
             "$lib/*": ["./src/lib/*"] // vite dev output wants this
         }

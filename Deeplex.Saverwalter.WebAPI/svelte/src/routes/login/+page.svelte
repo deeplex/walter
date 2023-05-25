@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { WalterHeader } from '$WalterComponents';
+    import { WalterHeader } from '$walter/components';
 
     import {
         Button,
@@ -10,8 +10,8 @@
     } from 'carbon-components-svelte';
     import { Login } from 'carbon-icons-svelte';
     import { goto } from '$app/navigation';
-    import { WalterToastContent } from '$WalterLib';
-    import { walter_sign_in } from '$WalterServices/auth';
+    import { WalterToastContent } from '$walter/lib';
+    import { walter_sign_in } from '$walter/services/auth';
     import type { PageData } from './$types';
     import { page } from '$app/stores';
 

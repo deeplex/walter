@@ -11,9 +11,9 @@
         create_walter_s3_file_from_file,
         walter_s3_get,
         walter_s3_post
-    } from '$WalterServices/s3';
-    import { WalterPreview } from '$WalterComponents';
-    import type { WalterS3File } from '$WalterTypes';
+    } from '$walter/services/s3';
+    import { WalterPreview } from '$walter/components';
+    import type { WalterS3File } from '$walter/types';
 
     export let f: typeof fetch;
     export let S3URL: string;

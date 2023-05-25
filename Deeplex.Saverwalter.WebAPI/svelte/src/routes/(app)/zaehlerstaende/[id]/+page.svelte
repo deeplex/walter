@@ -3,8 +3,8 @@
         WalterHeaderDetail,
         WalterGrid,
         WalterZaehlerstand
-    } from '$WalterComponents';
-    import { convertDateGerman } from '$WalterServices/utils';
+    } from '$walter/components';
+    import { convertDateGerman } from '$walter/services/utils';
     import { Button, ButtonSkeleton } from 'carbon-components-svelte';
     import type { PageData } from './$types';
 

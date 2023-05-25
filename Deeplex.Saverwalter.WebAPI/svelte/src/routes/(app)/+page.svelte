@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Content } from 'carbon-components-svelte';
 
-    import { WalterHeader } from '$WalterComponents';
+    import { WalterHeader } from '$walter/components';
 </script>
 
 <WalterHeader title="SaverWalter" />

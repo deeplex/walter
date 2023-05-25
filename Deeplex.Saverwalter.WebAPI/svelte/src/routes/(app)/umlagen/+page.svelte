@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { WalterUmlagen, WalterHeaderList } from '$WalterComponents';
+    import { WalterUmlagen, WalterHeaderList } from '$walter/components';
     import type { PageData } from './$types';
 
     export let data: PageData;

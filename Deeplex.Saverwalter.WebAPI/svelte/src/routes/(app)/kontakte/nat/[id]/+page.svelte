@@ -8,7 +8,7 @@
         WalterHeaderDetail,
         WalterNatuerlichePerson,
         WalterLinks
-    } from '$WalterComponents';
+    } from '$walter/components';
 
     export let data: PageData;
 </script>

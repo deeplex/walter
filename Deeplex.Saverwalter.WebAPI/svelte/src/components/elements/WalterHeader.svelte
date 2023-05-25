@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { isWalterSideNavOpen } from '$WalterStore';
+    import { isWalterSideNavOpen } from '$walter/store';
     import { Button, Header } from 'carbon-components-svelte';
     import { Close, Menu } from 'carbon-icons-svelte';
 

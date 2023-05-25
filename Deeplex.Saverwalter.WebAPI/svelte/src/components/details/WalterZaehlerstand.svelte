@@ -3,9 +3,9 @@
         WalterDatePicker,
         WalterNumberInput,
         WalterTextArea
-    } from '$WalterComponents';
+    } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
-    import type { WalterZaehlerstandEntry } from '$WalterLib';
+    import type { WalterZaehlerstandEntry } from '$walter/lib';
     import WalterTextInput from '../elements/WalterTextInput.svelte';
 
     export let a: Partial<WalterZaehlerstandEntry> = {};

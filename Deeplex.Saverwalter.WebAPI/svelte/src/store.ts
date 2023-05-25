@@ -1,4 +1,4 @@
-import type { WalterModalControl, WalterToast } from '$WalterTypes';
+import type { WalterModalControl, WalterToast } from '$walter/types';
 import { get, writable, type Writable } from 'svelte/store';
 import type { WalterToastContent } from './lib/WalterToastContent';
 

@@ -11,13 +11,13 @@
         WalterHeaderDetail,
         WalterWohnung,
         WalterLinks
-    } from '$WalterComponents';
-    import { convertDateCanadian } from '$WalterServices/utils';
+    } from '$walter/components';
+    import { convertDateCanadian } from '$walter/services/utils';
     import type {
         WalterErhaltungsaufwendungEntry,
         WalterUmlageEntry,
         WalterZaehlerEntry
-    } from '$WalterLib';
+    } from '$walter/lib';
 
     export let data: PageData;
 

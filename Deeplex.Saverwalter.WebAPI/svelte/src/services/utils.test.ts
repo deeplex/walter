@@ -1,5 +1,5 @@
 import { expect, describe, it } from 'vitest';
-import { convertDateCanadian, convertDateGerman } from '$WalterServices/utils';
+import { convertDateCanadian, convertDateGerman } from '$walter/services/utils';
 
 describe('convertDateCanadian tests', () => {
     it('should be 2023-05-24', () => {

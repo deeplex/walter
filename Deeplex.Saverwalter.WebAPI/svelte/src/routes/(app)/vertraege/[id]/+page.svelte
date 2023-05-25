@@ -12,8 +12,8 @@
         WalterVertragVersionen,
         WalterAbrechnung,
         WalterAbrechnungControl
-    } from '$WalterComponents';
-    import type { WalterBetriebskostenabrechnungKostengruppenEntry } from '$WalterTypes';
+    } from '$walter/components';
+    import type { WalterBetriebskostenabrechnungKostengruppenEntry } from '$walter/types';
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
     import {
@@ -26,8 +26,8 @@
         WalterMietminderungEntry,
         WalterPersonEntry,
         WalterVertragVersionEntry
-    } from '$WalterLib';
-    import { loadAbrechnung } from '$WalterServices/abrechnung';
+    } from '$walter/lib';
+    import { loadAbrechnung } from '$walter/services/abrechnung';
     import WalterLinks from '../../../../components/subdetails/WalterLinks.svelte';
     export let data: PageData;
 

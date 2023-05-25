@@ -1,10 +1,10 @@
-import type { WalterUmlageEntry } from '$WalterLib';
+import type { WalterUmlageEntry } from '$walter/lib';
 import type {
     WalterBetriebskostenabrechnungEntry,
     WalterBetriebskostenabrechnungKostengruppenEntry,
     WalterBetriebskostenabrechnungKostenpunkt,
     WalterBetriebskostenabrechnungsRechnungsgruppe
-} from '$WalterTypes';
+} from '$walter/types';
 import { walter_fetch, walter_get } from './requests';
 import { finish_s3_post } from './s3';
 

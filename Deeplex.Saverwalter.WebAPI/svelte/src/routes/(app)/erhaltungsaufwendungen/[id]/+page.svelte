@@ -4,7 +4,7 @@
         WalterHeaderDetail,
         WalterGrid,
         WalterErhaltungsaufwendung
-    } from '$WalterComponents';
+    } from '$walter/components';
 
     export let data: PageData;
 </script>

@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { WalterNumberInput } from '$WalterComponents';
-    import { walter_s3_post } from '$WalterServices/s3';
+    import { WalterNumberInput } from '$walter/components';
+    import { walter_s3_post } from '$walter/services/s3';
     import { Button, Row } from 'carbon-components-svelte';
 
     export let f: typeof fetch;

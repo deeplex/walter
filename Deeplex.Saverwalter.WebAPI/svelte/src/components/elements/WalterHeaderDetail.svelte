@@ -8,11 +8,11 @@
     } from 'carbon-components-svelte';
     import { Save, TrashCan } from 'carbon-icons-svelte';
 
-    import { WalterAnhaenge, WalterHeader } from '$WalterComponents';
-    import { walter_delete, walter_put } from '$WalterServices/requests';
-    import { openModal } from '$WalterStore';
-    import type { WalterS3File } from '$WalterTypes';
-    import { WalterToastContent } from '$WalterLib';
+    import { WalterAnhaenge, WalterHeader } from '$walter/components';
+    import { walter_delete, walter_put } from '$walter/services/requests';
+    import { openModal } from '$walter/store';
+    import type { WalterS3File } from '$walter/types';
+    import { WalterToastContent } from '$walter/lib';
 
     export let title = 'Saverwalter';
     export let a: any;

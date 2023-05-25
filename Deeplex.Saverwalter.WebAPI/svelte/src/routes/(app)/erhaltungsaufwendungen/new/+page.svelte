@@ -3,8 +3,8 @@
         WalterGrid,
         WalterErhaltungsaufwendung,
         WalterHeaderNew
-    } from '$WalterComponents';
-    import type { WalterErhaltungsaufwendungEntry } from '$WalterLib';
+    } from '$walter/components';
+    import type { WalterErhaltungsaufwendungEntry } from '$walter/lib';
     import type { PageData } from './$types';
 
     export let data: PageData;
