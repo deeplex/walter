@@ -19,6 +19,7 @@
     export let open = false;
     export let file: WalterS3File;
     export let files: WalterS3File[];
+    // export let fullscreen: boolean = false;
 
     function close() {
         open = false;
@@ -48,7 +49,7 @@
     }
 </script>
 
-<ComposedModal bind:open on:submit>
+<ComposedModal size="lg" bind:open on:submit>
     <ModalHeader bind:title={file.FileName} />
     <ModalBody>
         {#if file.Type?.includes('image/')}

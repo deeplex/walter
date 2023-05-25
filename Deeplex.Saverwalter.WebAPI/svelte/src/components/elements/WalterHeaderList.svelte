@@ -10,7 +10,7 @@
     import { WalterHeader } from '$WalterComponents';
     import { page } from '$app/stores';
 
-    export let title: Promise<string> | string = 'Saverwalter';
+    export let title: string = 'Saverwalter';
 
     function click_new() {
         goto(`${$page.url.pathname}/new`);
@@ -18,9 +18,7 @@
 </script>
 
 <WalterHeader {title}>
-    {#await title then}
-        <HeaderUtilities>
-            <HeaderGlobalAction on:click={click_new} icon={Add} />
-        </HeaderUtilities>
-    {/await}
+    <HeaderUtilities>
+        <HeaderGlobalAction on:click={click_new} icon={Add} />
+    </HeaderUtilities>
 </WalterHeader>

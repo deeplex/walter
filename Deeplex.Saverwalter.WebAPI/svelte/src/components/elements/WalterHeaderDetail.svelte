@@ -1,6 +1,9 @@
 <script lang="ts">
     import {
+        HeaderAction,
         HeaderGlobalAction,
+        HeaderPanelLink,
+        HeaderPanelLinks,
         HeaderUtilities
     } from 'carbon-components-svelte';
     import { Save, TrashCan } from 'carbon-icons-svelte';
@@ -11,12 +14,14 @@
     import type { WalterS3File } from '$WalterTypes';
     import { WalterToastContent } from '$WalterLib';
 
-    export let title: Promise<string> | string = 'Saverwalter';
+    export let title: string = 'Saverwalter';
     export let a: any;
     export let apiURL: string;
     export let S3URL: string;
     export let files: WalterS3File[] | undefined = undefined;
-    export let f: typeof fetch;
+    export let fetchImpl: typeof fetch;
+
+    let winWidth = 0;
 
     const PutToast = new WalterToastContent(
         'Speichern erfolgreich',
@@ -55,17 +60,38 @@
     }
 </script>
 
-<WalterHeader {title}>
-    {#await title then x}
-        <HeaderUtilities>
+<svelte:window bind:innerWidth={winWidth} />
+
+<WalterHeader bind:title>
+    <HeaderUtilities>
+        {#if winWidth < 1056}
+            <HeaderAction>
+                <HeaderPanelLinks>
+                    <HeaderPanelLink on:click={click_save}
+                        >Speichern</HeaderPanelLink
+                    >
+                    <HeaderPanelLink on:click={() => click_delete(title)}
+                        >Löschen</HeaderPanelLink
+                    >
+                </HeaderPanelLinks>
+                {#if files}
+                    <div style="height: 1em" />
+                    <WalterAnhaenge {S3URL} bind:files f={fetchImpl} />
+                {/if}
+            </HeaderAction>
+        {:else}
+            <p>{winWidth}</p>
             <HeaderGlobalAction on:click={click_save} icon={Save} />
             <HeaderGlobalAction
-                on:click={() => click_delete(x)}
+                on:click={() => click_delete(title)}
                 icon={TrashCan}
             />
-        </HeaderUtilities>
-        {#if files}
-            <WalterAnhaenge {S3URL} bind:files {f} />
+
+            {#if files}
+                <HeaderAction text="({files.length})">
+                    <WalterAnhaenge {S3URL} bind:files f={fetchImpl} />
+                </HeaderAction>
+            {/if}
         {/if}
-    {/await}
+    </HeaderUtilities>
 </WalterHeader>
