@@ -1,15 +1,15 @@
 import { WalterApiHandler } from './WalterApiHandler';
 
 export class WalterSelectionEntry extends WalterApiHandler {
-  constructor(
-    public id: number | string,
-    public text: string,
-    public filter?: string
-  ) {
-    super();
-  }
+    constructor(
+        public id: number | string,
+        public text: string,
+        public filter?: string
+    ) {
+        super();
+    }
 
-  static fromJson(json: any) {
-    return new WalterSelectionEntry(json.id, json.text, json.filter);
-  }
+    static fromJson(json: any) {
+        return new WalterSelectionEntry(json.id, json.text, json.filter);
+    }
 }

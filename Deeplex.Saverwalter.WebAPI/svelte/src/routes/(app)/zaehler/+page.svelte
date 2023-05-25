@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { WalterHeaderList, WalterZaehlerList } from '$WalterComponents';
-  import type { PageData } from './$types';
+    import { WalterHeaderList, WalterZaehlerList } from '$WalterComponents';
+    import type { PageData } from './$types';
 
-  export let data: PageData;
+    export let data: PageData;
 </script>
 
 <WalterHeaderList title="Zähler" />
 <WalterZaehlerList
-  zaehlertypen={data.zaehlertypen}
-  wohnungen={data.wohnungen}
-  umlagen={data.umlagen}
-  search
-  rows={data.rows}
+    zaehlertypen={data.zaehlertypen}
+    wohnungen={data.wohnungen}
+    umlagen={data.umlagen}
+    search
+    rows={data.rows}
 />

@@ -1,35 +1,35 @@
 <script lang="ts">
-  import {
-    WalterAdresse,
-    WalterComboBox,
-    WalterMultiSelect,
-    WalterTextArea,
-    WalterTextInput
-  } from '$WalterComponents';
-  import type { WalterSelectionEntry, WalterZaehlerEntry } from '$WalterLib';
-  import { Row } from 'carbon-components-svelte';
+    import {
+        WalterAdresse,
+        WalterComboBox,
+        WalterMultiSelect,
+        WalterTextArea,
+        WalterTextInput
+    } from '$WalterComponents';
+    import type { WalterSelectionEntry, WalterZaehlerEntry } from '$WalterLib';
+    import { Row } from 'carbon-components-svelte';
 
-  export let a: Partial<WalterZaehlerEntry> = {};
-  export let zaehlertypen: WalterSelectionEntry[];
-  export let wohnungen: WalterSelectionEntry[];
-  export let umlagen: WalterSelectionEntry[];
+    export let a: Partial<WalterZaehlerEntry> = {};
+    export let zaehlertypen: WalterSelectionEntry[];
+    export let wohnungen: WalterSelectionEntry[];
+    export let umlagen: WalterSelectionEntry[];
 </script>
 
 <Row>
-  <WalterTextInput bind:value={a.kennnummer} labelText="Kennnummer" />
-  <WalterComboBox bind:value={a.typ} titleText="Typ" a={zaehlertypen} />
+    <WalterTextInput bind:value={a.kennnummer} labelText="Kennnummer" />
+    <WalterComboBox bind:value={a.typ} titleText="Typ" a={zaehlertypen} />
 </Row>
 <WalterAdresse bind:value={a.adresse} />
 <Row>
-  <WalterComboBox bind:value={a.wohnung} titleText="Wohnung" a={wohnungen} />
+    <WalterComboBox bind:value={a.wohnung} titleText="Wohnung" a={wohnungen} />
 </Row>
 <Row>
-  <WalterMultiSelect
-    bind:value={a.selectedUmlagen}
-    a={umlagen}
-    titleText="Umlagen"
-  />
+    <WalterMultiSelect
+        bind:value={a.selectedUmlagen}
+        a={umlagen}
+        titleText="Umlagen"
+    />
 </Row>
 <Row>
-  <WalterTextArea bind:value={a.notiz} labelText="Notiz" />
+    <WalterTextArea bind:value={a.notiz} labelText="Notiz" />
 </Row>

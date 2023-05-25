@@ -1,17 +1,17 @@
 <script lang="ts">
-  import {
-    WalterBetriebskostenrechnungen,
-    WalterHeaderList
-  } from '$WalterComponents';
-  import type { PageData } from './$types';
+    import {
+        WalterBetriebskostenrechnungen,
+        WalterHeaderList
+    } from '$WalterComponents';
+    import type { PageData } from './$types';
 
-  export let data: PageData;
+    export let data: PageData;
 </script>
 
 <WalterHeaderList title="Betriebskostenrechnung" />
 <WalterBetriebskostenrechnungen
-  umlagen={data.umlagen}
-  betriebskostentypen={data.betriebskostentypen}
-  search
-  rows={data.rows}
+    umlagen={data.umlagen}
+    betriebskostentypen={data.betriebskostentypen}
+    search
+    rows={data.rows}
 />

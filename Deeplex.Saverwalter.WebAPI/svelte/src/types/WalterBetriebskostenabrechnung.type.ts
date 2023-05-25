@@ -1,115 +1,115 @@
 import type {
-  WalterAdresseEntry,
-  WalterSelectionEntry,
-  WalterUmlageEntry
+    WalterAdresseEntry,
+    WalterSelectionEntry,
+    WalterUmlageEntry
 } from '$WalterLib';
 
 export type WalterBetriebskostenabrechnungKostengruppenEntry = {
-  kostengruppen: WalterBetriebskostenabrechnungsRechnungsgruppeEntry[];
+    kostengruppen: WalterBetriebskostenabrechnungsRechnungsgruppeEntry[];
 } & WalterBetriebskostenabrechnungEntry;
 
 export type WalterBetriebskostenabrechnungEntry = {
-  notes: WalterBetriebskostenabrechnungNote[];
-  jahr: number;
-  abrechnungsbeginn: Date;
-  abrechnungsende: Date;
-  vermieter: WalterSelectionEntry;
-  ansprechpartner: WalterSelectionEntry;
-  mieter: WalterSelectionEntry[];
-  vertrag: WalterSelectionEntry;
-  wohnung: WalterSelectionEntry;
-  adresse: WalterAdresseEntry;
-  gezahlt: number;
-  kaltMiete: number;
-  betragNebenkosten: number;
-  bezahltNebenkosten: number;
-  minderung: number;
-  nebenkostenMinderung: number;
-  kaltMinderung: number;
-  nutzungsbeginn: Date;
-  nutzungsende: Date;
-  zaehler: WalterSelectionEntry[];
-  abrechnungszeitspanne: number;
-  nutzungszeitspanne: number;
-  zeitanteil: number;
-  abrechnungseinheiten: WalterBetriebskostenabrechnungsRechnungsgruppe[];
-  result: number;
-  allgStromFaktor: number;
+    notes: WalterBetriebskostenabrechnungNote[];
+    jahr: number;
+    abrechnungsbeginn: Date;
+    abrechnungsende: Date;
+    vermieter: WalterSelectionEntry;
+    ansprechpartner: WalterSelectionEntry;
+    mieter: WalterSelectionEntry[];
+    vertrag: WalterSelectionEntry;
+    wohnung: WalterSelectionEntry;
+    adresse: WalterAdresseEntry;
+    gezahlt: number;
+    kaltMiete: number;
+    betragNebenkosten: number;
+    bezahltNebenkosten: number;
+    minderung: number;
+    nebenkostenMinderung: number;
+    kaltMinderung: number;
+    nutzungsbeginn: Date;
+    nutzungsende: Date;
+    zaehler: WalterSelectionEntry[];
+    abrechnungszeitspanne: number;
+    nutzungszeitspanne: number;
+    zeitanteil: number;
+    abrechnungseinheiten: WalterBetriebskostenabrechnungsRechnungsgruppe[];
+    result: number;
+    allgStromFaktor: number;
 };
 
 export type WalterBetriebskostenabrechnungNote = {
-  message: string;
-  severity: string;
+    message: string;
+    severity: string;
 };
 
 export type WalterBetriebskostenabrechnungPersonenZeitIntervall = {
-  beginn: Date;
-  ende: Date;
-  tage: number;
-  gesamtTage: number;
-  personenzahl: number;
+    beginn: Date;
+    ende: Date;
+    tage: number;
+    gesamtTage: number;
+    personenzahl: number;
 };
 
 export type WalterBetriebskostenabrechnungPersonenZeitanteil = {
-  beginn: Date;
-  ende: Date;
-  anteil: number;
-  personenzahl: number;
-}
+    beginn: Date;
+    ende: Date;
+    anteil: number;
+    personenzahl: number;
+};
 
 export type WalterBetriebskostenabrechnungsRechnungsgruppe = {
-  bezeichnung: string;
-  personenIntervall: WalterBetriebskostenabrechnungPersonenZeitIntervall[];
-  gesamtPersonenIntervall: WalterBetriebskostenabrechnungPersonenZeitIntervall[];
-  gesamtWohnflaeche: number;
-  gesamtNutzflaeche: number;
-  gesamtEinheiten: number;
-  wfZeitanteil: number;
-  nfZeitanteil: number;
-  neZeitanteil: number;
-  umlagen: WalterUmlageEntry[];
-  personenZeitanteil: WalterBetriebskostenabrechnungPersonenZeitanteil[];
-  verbrauch: any;
-  verbrauchAnteil: any;
-  // heizkosten: WalterBetriebskostenabrechnungHeizkostenberechnungEntry[]; // ?
-  gesamtBetragKalteNebenkosten: number;
-  betragKalteNebenkosten: number;
-  gesamtBetragWarmeNebenkosten: number;
-  betragWarmeNebenkosten: number;
+    bezeichnung: string;
+    personenIntervall: WalterBetriebskostenabrechnungPersonenZeitIntervall[];
+    gesamtPersonenIntervall: WalterBetriebskostenabrechnungPersonenZeitIntervall[];
+    gesamtWohnflaeche: number;
+    gesamtNutzflaeche: number;
+    gesamtEinheiten: number;
+    wfZeitanteil: number;
+    nfZeitanteil: number;
+    neZeitanteil: number;
+    umlagen: WalterUmlageEntry[];
+    personenZeitanteil: WalterBetriebskostenabrechnungPersonenZeitanteil[];
+    verbrauch: any;
+    verbrauchAnteil: any;
+    // heizkosten: WalterBetriebskostenabrechnungHeizkostenberechnungEntry[]; // ?
+    gesamtBetragKalteNebenkosten: number;
+    betragKalteNebenkosten: number;
+    gesamtBetragWarmeNebenkosten: number;
+    betragWarmeNebenkosten: number;
 };
 
 export type WalterBetriebskostenabrechnungsRechnungsgruppeEntry = {
-  kostenpunkte: WalterBetriebskostenabrechnungKostenpunkt[];
+    kostenpunkte: WalterBetriebskostenabrechnungKostenpunkt[];
 } & WalterBetriebskostenabrechnungsRechnungsgruppe;
 
 export type WalterBetriebskostenabrechnungHeizkostenberechnungEntry = {
-  betrag: number;
-  pauschalBetrag: number;
-  tw: number;
-  v: number;
-  q: number;
-  para7: number;
-  para8: number;
-  gesamtNutzflaeche: number;
-  nfZeitanteil: number;
-  heizkostenVerbrauchAnteil: number;
-  warmwasserVerbrauchAnteil: number;
-  para9_2: number;
-  waermeAnteilNF: number;
-  waermeAnteilVerb: number;
-  warmwasserAnteilNF: number;
-  warmwasserAnteilVerb: number;
-  kosten: number;
+    betrag: number;
+    pauschalBetrag: number;
+    tw: number;
+    v: number;
+    q: number;
+    para7: number;
+    para8: number;
+    gesamtNutzflaeche: number;
+    nfZeitanteil: number;
+    heizkostenVerbrauchAnteil: number;
+    warmwasserVerbrauchAnteil: number;
+    para9_2: number;
+    waermeAnteilNF: number;
+    waermeAnteilVerb: number;
+    warmwasserAnteilNF: number;
+    warmwasserAnteilVerb: number;
+    kosten: number;
 };
 
 export type WalterBetriebskostenabrechnungKostenpunkt = {
-  umlageId: number;
-  betriebskostenrechnungId: number;
-  id: number; // just for rows
-  typ: WalterSelectionEntry;
-  schluessel: WalterSelectionEntry;
-  nutzungsintervall: string;
-  betrag: number;
-  anteil: number;
-  kosten: number;
+    umlageId: number;
+    betriebskostenrechnungId: number;
+    id: number; // just for rows
+    typ: WalterSelectionEntry;
+    schluessel: WalterSelectionEntry;
+    nutzungsintervall: string;
+    betrag: number;
+    anteil: number;
+    kosten: number;
 };

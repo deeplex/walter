@@ -1,82 +1,82 @@
 <script lang="ts">
-  import { WalterHeader } from '$WalterComponents';
+    import { WalterHeader } from '$WalterComponents';
 
-  import {
-    Button,
-    Content,
-    FluidForm,
-    PasswordInput,
-    TextInput
-  } from 'carbon-components-svelte';
-  import { Login } from 'carbon-icons-svelte';
-  import { goto } from '$app/navigation';
-  import { WalterToastContent } from '$WalterLib';
-  import { walter_sign_in } from '$WalterServices/auth';
-  import type { PageData } from './$types';
-  import { page } from '$app/stores';
+    import {
+        Button,
+        Content,
+        FluidForm,
+        PasswordInput,
+        TextInput
+    } from 'carbon-components-svelte';
+    import { Login } from 'carbon-icons-svelte';
+    import { goto } from '$app/navigation';
+    import { WalterToastContent } from '$WalterLib';
+    import { walter_sign_in } from '$WalterServices/auth';
+    import type { PageData } from './$types';
+    import { page } from '$app/stores';
 
-  export let data: PageData;
+    export let data: PageData;
 
-  const login = {
-    username: '',
-    password: ''
-  };
+    const login = {
+        username: '',
+        password: ''
+    };
 
-  let invalid = false;
+    let invalid = false;
 
-  const LoginToast = new WalterToastContent(
-    'Anmeldung erfolgreich',
-    'Anmeldung fehlgeschlagen',
-    () => `Anmeldung für Nutzer ${login.username} erfolgreich.`,
-    () => 'Nutzername oder Passwort falsch.'
-  );
-
-  async function submit() {
-    const response = await walter_sign_in(
-      data.fetch,
-      login.username,
-      login.password,
-      LoginToast
+    const LoginToast = new WalterToastContent(
+        'Anmeldung erfolgreich',
+        'Anmeldung fehlgeschlagen',
+        () => `Anmeldung für Nutzer ${login.username} erfolgreich.`,
+        () => 'Nutzername oder Passwort falsch.'
     );
-    if (response == null) {
-      invalid = true;
-    } else {
-      if (document.referrer.includes($page.url.host)) {
-        history.back();
-      } else {
-        goto('/');
-      }
-    }
-  }
 
-  function handleEnterKey(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      submit();
+    async function submit() {
+        const response = await walter_sign_in(
+            data.fetch,
+            login.username,
+            login.password,
+            LoginToast
+        );
+        if (response == null) {
+            invalid = true;
+        } else {
+            if (document.referrer.includes($page.url.host)) {
+                history.back();
+            } else {
+                goto('/');
+            }
+        }
     }
-  }
+
+    function handleEnterKey(event: KeyboardEvent) {
+        if (event.key === 'Enter') {
+            submit();
+        }
+    }
 </script>
 
 <Content>
-  <WalterHeader title="Anmeldeseite" />
-  <FluidForm style="text-align: center; margin-top: 40vh">
-    <TextInput
-      bind:value={login.username}
-      labelText="Nutzername"
-      bind:invalid
-      invalidText="Nutzername oder Passwort falsch"
-      placeholder="Nutzername eintragen..."
-      required
-    />
-    <PasswordInput
-      bind:value={login.password}
-      bind:invalid
-      invalidText="Nutzername oder Passwort falsch"
-      required
-      type="password"
-      labelText="Passwort"
-      placeholder="Passwort eintragen..."
-      on:keydown={handleEnterKey}
-    />
-    <Button on:click={submit} icon={Login}>Anmelden</Button>
-  </FluidForm>
+    <WalterHeader title="Anmeldeseite" />
+    <FluidForm style="text-align: center; margin-top: 40vh">
+        <TextInput
+            bind:value={login.username}
+            labelText="Nutzername"
+            bind:invalid
+            invalidText="Nutzername oder Passwort falsch"
+            placeholder="Nutzername eintragen..."
+            required
+        />
+        <PasswordInput
+            bind:value={login.password}
+            bind:invalid
+            invalidText="Nutzername oder Passwort falsch"
+            required
+            type="password"
+            labelText="Passwort"
+            placeholder="Passwort eintragen..."
+            on:keydown={handleEnterKey}
+        />
+        <Button on:click={submit} icon={Login}>Anmelden</Button>
+    </FluidForm>
 </Content>
