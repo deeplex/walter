@@ -1,15 +1,31 @@
 <script lang="ts">
-  import { Header, Loading, SkipToContent } from 'carbon-components-svelte';
+  import { isWalterSideNavOpen } from '$WalterStore';
+  import { Button, Header } from 'carbon-components-svelte';
+  import { Close, Menu } from 'carbon-icons-svelte';
 
-  export let title: Promise<string> | string = 'Saverwalter';
+  export let title: string = 'Saverwalter';
+
+  let isSideNavOpen = true;
+
+  isWalterSideNavOpen.subscribe((value) => {
+    isSideNavOpen = value;
+  });
+
+  function sideNavClick() {
+    isWalterSideNavOpen.update((value) => !value);
+  }
 </script>
 
-{#await title}
-  <Header href="/" platformName="Lade...">
-    <Loading withOverlay={false} small />
-  </Header>
-{:then x}
-  <Header href="/" platformName={x}>
-    <slot />
-  </Header>
-{/await}
+<Header platformName={title}>
+  <svelte:fragment slot="skip-to-content">
+    <Button
+      style="background-color: #161616"
+      iconDescription="Navigation"
+      tooltipPosition="right"
+      kind="secondary"
+      icon={isSideNavOpen ? Close : Menu}
+      on:click={sideNavClick}
+    />
+  </svelte:fragment>
+  <slot />
+</Header>
