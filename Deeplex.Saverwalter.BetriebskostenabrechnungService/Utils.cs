@@ -112,15 +112,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public static string Anmerkung(this Betriebskostenabrechnung _)
             => "Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger) Kostenanteil";
 
-        public static List<VertragVersion> getAllVertragVersionen(List<Wohnung> wohnungen, Zeitraum zeitraum)
-        {
-            return wohnungen
-                .SelectMany(w => w.Vertraege.SelectMany(e => e.Versionen))
-                .ToList()
-                .Where(v => v.Beginn <= zeitraum.Abrechnungsende && (v.Ende() is null || v.Ende() >= zeitraum.Abrechnungsbeginn))
-                .ToList();
-        }
-
         public static double checkVerbrauch(Dictionary<Betriebskostentyp, double> verbrauchAnteil, Betriebskostentyp typ, List<Note> notes)
         {
             if (verbrauchAnteil.ContainsKey(typ))
@@ -245,7 +236,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             List<VertragVersion> vertraege,
             Zeitraum zeitraum)
         {
-            var merged = vertraege
+            var temp = vertraege
                 .Where(vertragVersion =>
                     vertragVersion.Beginn <= zeitraum.Abrechnungsende
                     && (vertragVersion.Ende() is null || vertragVersion.Ende() >= zeitraum.Abrechnungsbeginn))
@@ -257,11 +248,12 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 })
                 .ToList()
                 .GroupBy(t => t.Item1)
-                .ToList()
-                .Select(g => new PersonenZeitIntervall(g.Key, zeitraum.Abrechnungsende, g.Sum(t => t.Item2)))
-                .ToList()
-                .OrderBy(t => t.Beginn)
                 .ToList();
+
+            var merged = temp.Select(g => new PersonenZeitIntervall(g.Key, zeitraum.Abrechnungsende, g.Sum(t => t.Item2)))
+               .ToList()
+               .OrderBy(t => t.Beginn)
+               .ToList();
 
             for (int i = 0; i < merged.Count; ++i)
             {

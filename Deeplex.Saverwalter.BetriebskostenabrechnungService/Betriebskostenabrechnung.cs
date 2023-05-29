@@ -64,7 +64,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         public List<PersonenZeitIntervall> GesamtPersonenIntervall(Abrechnungseinheit einheit)
             => VertraegeIntervallPersonenzahl(
-                getAllVertragVersionen(einheit.Wohnungen, Zeitraum),
+                einheit.Wohnungen.SelectMany(e => e.Vertraege.SelectMany(e => e.Versionen)).ToList(),
                 Zeitraum);
 
         public Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch(Abrechnungseinheit einheit)
