@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+using static Deeplex.Saverwalter.BetriebskostenabrechnungService.Utils;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
 
@@ -160,7 +161,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             var p = new Paragraph(Font(), new Run(Font(), new Break(), new Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):"), new Break(), new Break()));
 
-            foreach (var hk in abrechnung.Heizkosten(abrechnungseinheit))
+            foreach (var hk in CalculateHeizkosten(abrechnungseinheit.Umlagen, abrechnung.Vertrag.Wohnung, abrechnung.Zeitraum, abrechnung.Notes))
             {
                 p.Append(new DocumentFormat.OpenXml.Math.Paragraph(justifyLeft(),
                     new DocumentFormat.OpenXml.Math.OfficeMath(

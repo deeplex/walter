@@ -51,7 +51,7 @@
                             : ''}</StructuredListCell
                     >
                     <StructuredListCell
-                        >{intervall.personenzahl}</StructuredListCell
+                        >{intervall.gesamtPersonenzahl}</StructuredListCell
                     >
                     <StructuredListCell
                         >{new Date(intervall.beginn).toLocaleDateString(

@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+using static Deeplex.Saverwalter.BetriebskostenabrechnungService.Utils;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
 
@@ -126,7 +127,7 @@ namespace Deeplex.Saverwalter.PrintService
         {
             Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):");
 
-            foreach (var hk in abrechnung.Heizkosten(abrechnungseinheit))
+            foreach (var hk in CalculateHeizkosten(abrechnungseinheit.Umlagen, abrechnung.Vertrag.Wohnung, abrechnung.Zeitraum, abrechnung.Notes))
             {
                 // TODO implement...
                 Text(Utils.Prozent(hk.Para9_2));
