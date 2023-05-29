@@ -14,107 +14,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             => Min(l, r, Comparer<T>.Default);
         public static T Min<T>(T l, T r, IComparer<T> c)
             => c.Compare(l, r) > 0 ? r : l;
-
-        public static string GetBriefAnrede(this IPerson person)
-        {
-            var text = "";
-            if (person is NatuerlichePerson natuerlichePerson)
-            {
-                text += natuerlichePerson.Anrede == Anrede.Herr ? "Herrn " :
-                    natuerlichePerson.Anrede == Anrede.Frau ? "Frau " :
-                    "";
-            }
-            text += person.Bezeichnung;
-
-            return text;
-        }
-
-        public static string Title(this Betriebskostenabrechnung abrechnung)
-            => "Betriebskostenabrechnung " + abrechnung.Zeitraum.Jahr.ToString();
-
-        public static string Mieterliste(this Betriebskostenabrechnung abrechnung)
-            => "Mieter: " + string.Join(", ", abrechnung.Mieter.Select(person => person.Bezeichnung));
-
-        public static string Mietobjekt(this Betriebskostenabrechnung abrechnung)
-            => "Mietobjekt: " + abrechnung.Vertrag.Wohnung.Adresse!.Strasse + " " + abrechnung.Vertrag.Wohnung.Adresse.Hausnummer + ", " + abrechnung.Vertrag.Wohnung.Bezeichnung;
-
-        public static string Abrechnungszeitraum(this Betriebskostenabrechnung abrechnung)
-            => abrechnung.Zeitraum.Abrechnungsbeginn.ToString("dd.MM.yyyy") + " - " + abrechnung.Zeitraum.Abrechnungsende.ToString("dd.MM.yyyy");
-
-        public static string Nutzungszeitraum(this Betriebskostenabrechnung abrechnung)
-            => abrechnung.Zeitraum.Nutzungsbeginn.ToString("dd.MM.yyyy") + " - " + abrechnung.Zeitraum.Nutzungsende.ToString("dd.MM.yyyy");
-
-        public static string Gruss(this Betriebskostenabrechnung abrechnung)
-        {
-            var gruss = abrechnung.Mieter.Aggregate("", (text, mieter) =>
-            {
-                if (mieter is NatuerlichePerson natuerlichePerson)
-                {
-                    return text + (natuerlichePerson.Anrede == Anrede.Herr ? "sehr geehrter Herr " :
-                        natuerlichePerson.Anrede == Anrede.Frau ? "sehr geehrte Frau " :
-                        natuerlichePerson.Vorname) + natuerlichePerson.Nachname + ", ";
-                }
-                else
-                {
-                    return "Sehr geehrte Damen und Herren, ";
-                }
-            });
-
-            return gruss.Remove(1).ToUpper() + gruss[1..];
-        }
-
-        public static string ResultTxt(this Betriebskostenabrechnung abrechnung)
-            => "wir haben die Kosten, die im Abrechnungszeitraum angefallen sind, berechnet. Die Abrechnung schließt mit " + (abrechnung.Result > 0 ? "einem Guthaben" : "einer Nachforderung") + " in Höhe von: ";
-
-        public static string RefundDemand(this Betriebskostenabrechnung abrechnung)
-            => abrechnung.Result > 0 ?
-            "Dieser Betrag wird über die von Ihnen angegebene Bankverbindung erstattet." :
-            "Bitte überweisen Sie diesen Betrag auf das Ihnen bekannte Konto.";
-
-        public static string GenerischerText(this Betriebskostenabrechnung abrechnung)
-        {
-            // TODO Text auf Anwesenheit von Heizung oder so testen und anpassen.
-
-            var text = "Die Abrechnung betrifft zunächst die mietvertraglich vereinbarten Nebenkosten (die kalten Betriebskosten). ";
-
-            var wohnung = abrechnung.Vertrag.Wohnung;
-            var zeitraum = abrechnung.Zeitraum;
-
-            if (abrechnung.Abrechnungseinheiten.Any(abrechnungseinheit =>
-                    GesamtBetragWarmeNebenkosten(wohnung, abrechnungseinheit, zeitraum, abrechnung.Notes) != 0 &&
-                BetragWarmeNebenkosten(wohnung, abrechnungseinheit, zeitraum, abrechnung.Notes) != 0))
-            {
-                text += "Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses (warme Betriebskosten) werden gesondert berechnet, nach Verbrauch und Wohn -/ Nutzfläche auf die einzelnen Wohnungen umgelegt („Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der von Ihnen geleisteten Vorauszahlungen verrechnet.";
-            }
-
-            text += "Bei bestehenden Mietrückständen ist das Ergebnis der Abrechnung zusätzlich mit den Mietrückständen verrechnet. Gegebenenfalls bestehende Mietminderungen / Ratenzahlungsvereinbarungen sind hier nicht berücksichtigt, haben aber weiterhin für den vereinbarten Zeitraum Bestand. Aufgelöste oder gekündigte Mietverhältnisse werden durch dieses Schreiben nicht neu begründet. Die Aufstellung, Verteilung und Erläuterung der Gesamtkosten, die Berechnung der Kostenanteile, die Verrechnung der geleisteten Vorauszahlungen und gegebenenfalls die Neuberechnung der monatlichen Vorauszahlungen entnehmen Sie bitte den folgenden Seiten.";
-
-            return text;
-        }
-
-        public static bool DirekteZuordnung(this Betriebskostenabrechnung abrechnung)
-            => abrechnung.Abrechnungseinheiten.Any(rechnungsgruppe => rechnungsgruppe.Umlagen.Any(umlage => umlage.Wohnungen.Count == 1));
-
-        private static bool UmlageSchluesselExistsInabrechnung(this Betriebskostenabrechnung betriebskostenrechnung, Umlageschluessel umlageSchluessel) =>
-            betriebskostenrechnung.Abrechnungseinheiten
-                .Any(rechnungsgruppe => rechnungsgruppe.Umlagen
-                    .Where(umlage => umlage.Wohnungen.Count > 1)
-                    .Any(umlage => umlage.Schluessel == umlageSchluessel));
-
-        public static bool NachWohnflaeche(this Betriebskostenabrechnung abrechnung)
-            => abrechnung.UmlageSchluesselExistsInabrechnung(Umlageschluessel.NachWohnflaeche);
-        public static bool NachNutzflaeche(this Betriebskostenabrechnung abrechnung)
-            => abrechnung.UmlageSchluesselExistsInabrechnung(Umlageschluessel.NachNutzflaeche);
-        public static bool NachNutzeinheiten(this Betriebskostenabrechnung abrechnung)
-            => abrechnung.UmlageSchluesselExistsInabrechnung(Umlageschluessel.NachNutzeinheit);
-        public static bool NachPersonenzahl(this Betriebskostenabrechnung abrechnung)
-            => abrechnung.UmlageSchluesselExistsInabrechnung(Umlageschluessel.NachPersonenzahl);
-        public static bool NachVerbrauch(this Betriebskostenabrechnung abrechnung)
-            => abrechnung.UmlageSchluesselExistsInabrechnung(Umlageschluessel.NachVerbrauch);
-
-        public static string Anmerkung(this Betriebskostenabrechnung _)
-            => "Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger) Kostenanteil";
-
+       
         public static double checkVerbrauch(Dictionary<Betriebskostentyp, double> verbrauchAnteil, Betriebskostentyp typ, List<Note> notes)
         {
             if (verbrauchAnteil.ContainsKey(typ))
@@ -409,7 +309,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             });
         }
 
-        public static List<Abrechnungseinheit> DetermineAbrechnungseinheiten(Vertrag vertrag)
+        public static List<Abrechnungseinheit> GetAbrechnungseinheiten(Vertrag vertrag)
         {
             // Group up all Wohnungen sharing the same Umlage
             var einheiten = vertrag.Wohnung.Umlagen
@@ -527,9 +427,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     zeitraum,
                     CalculateAbrechnungseinheitVerbrauch(einheit.Umlagen, zeitraum, notes),
                     notes));
-
-        public static double GesamtBetragKalteNebenkosten(Abrechnungseinheit einheit, Zeitraum zeitraum)
-            => GetKalteNebenkosten(einheit, zeitraum).Sum(r => r.Betrag);
 
         public static Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch(
             Wohnung wohnung,

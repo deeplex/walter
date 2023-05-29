@@ -3,8 +3,6 @@ using static Deeplex.Saverwalter.BetriebskostenabrechnungService.Utils;
 using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml;
 using static Deeplex.Saverwalter.PrintService.Utils;
-using DocumentFormat.OpenXml.ExtendedProperties;
-using DocumentFormat.OpenXml.EMMA;
 
 namespace Deeplex.Saverwalter.PrintService
 {
@@ -35,7 +33,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             foreach (var m in abrechnung.Mieter)
             {
-                left.Add(m.GetBriefAnrede());
+                left.Add(GetBriefAnrede(m));
                 rows++;
             }
             var ad = abrechnung.Mieter.First().Adresse;
@@ -84,7 +82,7 @@ namespace Deeplex.Saverwalter.PrintService
             var left2 = new List<string> { "Umlageweg" };
             var right2 = new List<string> { "Beschreibung" };
 
-            if (abrechnung.DirekteZuordnung())
+            if (DirekteZuordnung(abrechnung.Abrechnungseinheiten))
             {
                 left1.Add("Direkt");
                 left2.Add("Direkt");
@@ -92,7 +90,7 @@ namespace Deeplex.Saverwalter.PrintService
                 right2.Add("Kostenanteil = Kosten werden Einheit direkt zugeordnet.");
             }
 
-            if (abrechnung.NachWohnflaeche())
+            if (NachWohnflaeche(abrechnung.Abrechnungseinheiten))
             {
                 left1.Add("n. WF.");
                 left2.Add("n. WF.");
@@ -101,7 +99,7 @@ namespace Deeplex.Saverwalter.PrintService
             }
 
             // There is a Umlage nach Nutzfläche in the Heizkostenberechnung:
-            if (abrechnung.NachNutzflaeche() || abrechnung.Abrechnungseinheiten.Any(g => g.Umlagen.Where(r => r.Wohnungen.Count > 1).Any(r => (int)r.Typ % 2 == 1)))
+            if (NachNutzflaeche(abrechnung.Abrechnungseinheiten) || abrechnung.Abrechnungseinheiten.Any(g => g.Umlagen.Where(r => r.Wohnungen.Count > 1).Any(r => (int)r.Typ % 2 == 1)))
             {
                 left1.Add("n. NF");
                 left2.Add("n. NF");
@@ -109,7 +107,7 @@ namespace Deeplex.Saverwalter.PrintService
                 right2.Add("Kostenanteil = Kosten je Quadratmeter Nutzfläche mal Anteil Fläche je Wohnung.");
             }
 
-            if (abrechnung.NachNutzeinheiten())
+            if (NachNutzeinheiten(abrechnung.Abrechnungseinheiten))
             {
                 left1.Add("n. NE");
                 left2.Add("n. NE");
@@ -117,7 +115,7 @@ namespace Deeplex.Saverwalter.PrintService
                 right2.Add("Kostenanteil = Kosten je Wohn-/Nutzeinheit.");
             }
 
-            if (abrechnung.NachPersonenzahl())
+            if (NachPersonenzahl(abrechnung.Abrechnungseinheiten))
             {
                 left1.Add("n. Pers.");
                 left2.Add("n. Pers.");
@@ -125,7 +123,7 @@ namespace Deeplex.Saverwalter.PrintService
                 right2.Add("Kostenanteil = Kosten je Hausbewohner mal Anzahl Bewohner je Wohnung.");
             }
 
-            if (abrechnung.NachVerbrauch())
+            if (NachVerbrauch(abrechnung.Abrechnungseinheiten))
             {
                 left1.Add("n. Verb");
                 left2.Add("n. Verb");
@@ -774,21 +772,21 @@ namespace Deeplex.Saverwalter.PrintService
         private static void Introtext(Betriebskostenabrechnung abrechnung, IPrint<T> p)
         {
             p.Paragraph(
-                new PrintRun(abrechnung.Title()) { Bold = true },
-                new PrintRun(abrechnung.Mieterliste()),
-                new PrintRun(abrechnung.Mietobjekt()),
+                new PrintRun(Title(abrechnung.Zeitraum.Jahr)) { Bold = true },
+                new PrintRun(Mieterliste(abrechnung.Mieter)),
+                new PrintRun(Mietobjekt(abrechnung.Vertrag.Wohnung)),
                 new PrintRun("Abrechnungszeitraum: ") { NoBreak = true, Tab = true },
-                new PrintRun(abrechnung.Abrechnungszeitraum()),
+                new PrintRun(Abrechnungszeitraum(abrechnung.Zeitraum)),
                 new PrintRun("Nutzungszeitraum: ") { NoBreak = true, Tab = true },
-                new PrintRun(abrechnung.Nutzungszeitraum()));
+                new PrintRun(Nutzungszeitraum(abrechnung.Zeitraum)));
 
             p.Paragraph(
-                new PrintRun(abrechnung.Gruss()),
-                new PrintRun(abrechnung.ResultTxt()) { NoBreak = true, Tab = true },
+                new PrintRun(Gruss(abrechnung.Mieter)),
+                new PrintRun(ResultTxt(abrechnung.Result)) { NoBreak = true, Tab = true },
                 new PrintRun(Euro(Math.Abs(abrechnung.Result))) { Bold = true, Underlined = true },
-                new PrintRun(abrechnung.RefundDemand()));
+                new PrintRun(RefundDemand(abrechnung.Result)));
 
-            p.Paragraph(new PrintRun(abrechnung.GenerischerText()));
+            p.Paragraph(new PrintRun(GenerischerText(abrechnung.Vertrag.Wohnung, abrechnung.Abrechnungseinheiten, abrechnung.Zeitraum, abrechnung.Notes)));
         }
 
         public static T Print(Betriebskostenabrechnung abrechnung, IPrint<T> printImpl)
@@ -801,7 +799,7 @@ namespace Deeplex.Saverwalter.PrintService
             ExplainUmlageschluessel(abrechnung, printImpl);
             printImpl.Break();
             printImpl.Text("Anmerkung:");
-            printImpl.Text(abrechnung.Anmerkung());
+            printImpl.Text(Anmerkung());
             printImpl.Heading("Erläuterungen zu einzelnen Betriebskostenarten");
             ExplainKalteBetriebskosten(abrechnung, printImpl);
 
