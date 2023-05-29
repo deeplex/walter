@@ -161,7 +161,10 @@ namespace Deeplex.Saverwalter.PrintService
 
             var p = new Paragraph(Font(), new Run(Font(), new Break(), new Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):"), new Break(), new Break()));
 
-            foreach (var hk in CalculateHeizkosten(abrechnungseinheit.Umlagen, abrechnung.Vertrag.Wohnung, abrechnung.Zeitraum, abrechnung.Notes))
+            var wohnung = abrechnung.Vertrag.Wohnung;
+            var zeitraum = abrechnung.Zeitraum;
+
+            foreach (var hk in CalculateHeizkosten(wohnung, abrechnungseinheit, zeitraum, abrechnung.Notes))
             {
                 p.Append(new DocumentFormat.OpenXml.Math.Paragraph(justifyLeft(),
                     new DocumentFormat.OpenXml.Math.OfficeMath(

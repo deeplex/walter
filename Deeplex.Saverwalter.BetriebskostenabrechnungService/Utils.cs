@@ -77,9 +77,12 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             var text = "Die Abrechnung betrifft zunächst die mietvertraglich vereinbarten Nebenkosten (die kalten Betriebskosten). ";
 
+            var wohnung = abrechnung.Vertrag.Wohnung;
+            var zeitraum = abrechnung.Zeitraum;
+
             if (abrechnung.Abrechnungseinheiten.Any(abrechnungseinheit =>
-                    GesamtBetragWarmeNebenkosten(abrechnung.Vertrag.Wohnung, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes) != 0 &&
-                BetragWarmeNebenkosten(abrechnung.Vertrag, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes) != 0))
+                    GesamtBetragWarmeNebenkosten(wohnung, abrechnungseinheit, zeitraum, abrechnung.Notes) != 0 &&
+                BetragWarmeNebenkosten(wohnung, abrechnungseinheit, zeitraum, abrechnung.Notes) != 0))
             {
                 text += "Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses (warme Betriebskosten) werden gesondert berechnet, nach Verbrauch und Wohn -/ Nutzfläche auf die einzelnen Wohnungen umgelegt („Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der von Ihnen geleisteten Vorauszahlungen verrechnet.";
             }
@@ -360,12 +363,12 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         }
 
         public static List<Heizkostenberechnung> CalculateHeizkosten(
-            List<Umlage> umlagen,
             Wohnung wohnung,
+            Abrechnungseinheit einheit,
             Zeitraum zeitraum,
             List<Note> notes)
         {
-            return umlagen
+            return einheit.Umlagen
                 .Where(r => (int)r.Typ % 2 == 1)
                 .ToList()
                 .SelectMany(umlage => umlage.Betriebskostenrechnungen)
@@ -541,11 +544,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 notes);
 
         public static double GesamtBetragWarmeNebenkosten(Wohnung wohnung, Abrechnungseinheit einheit, Zeitraum zeitraum, List<Note> notes)
-            => CalculateHeizkosten(einheit.Umlagen, wohnung, zeitraum, notes)
+            => CalculateHeizkosten(wohnung, einheit, zeitraum, notes)
                 .Sum(heizkostenberechnung => heizkostenberechnung.PauschalBetrag);
 
-        public static double BetragWarmeNebenkosten(Vertrag vertrag, Abrechnungseinheit einheit, Zeitraum zeitraum, List<Note> notes)
-            => CalculateHeizkosten(einheit.Umlagen, vertrag.Wohnung, zeitraum, notes)
+        public static double BetragWarmeNebenkosten(Wohnung wohnung, Abrechnungseinheit einheit, Zeitraum zeitraum, List<Note> notes)
+            => CalculateHeizkosten(wohnung, einheit, zeitraum, notes)
                 .Sum(heizkostenberechnung => heizkostenberechnung.Kosten);
     }
 }

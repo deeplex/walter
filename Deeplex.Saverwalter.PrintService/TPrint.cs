@@ -654,7 +654,9 @@ namespace Deeplex.Saverwalter.PrintService
             var bold = new List<bool> { true };
             var underlined = new List<bool> { true };
 
-            foreach (var heizkostenberechnung in CalculateHeizkosten(abrechnungseinheit.Umlagen, abrechnung.Vertrag.Wohnung, abrechnung.Zeitraum, abrechnung.Notes))
+            var wohnung = abrechnung.Vertrag.Wohnung;
+
+            foreach (var heizkostenberechnung in CalculateHeizkosten(wohnung, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes))
             {
                 col1.Add("Heizung");
                 col2.Add(Umlageschluessel.NachNutzflaeche.ToDescriptionString());
@@ -702,7 +704,7 @@ namespace Deeplex.Saverwalter.PrintService
                 col4.Add("");
                 col5.Add("");
                 col6.Add("Summe: ");
-                col7.Add(Euro(BetragWarmeNebenkosten(abrechnung.Vertrag, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes)));
+                col7.Add(Euro(BetragWarmeNebenkosten(wohnung, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes)));
                 bold.Add(true);
                 underlined.Add(false);
             }
@@ -740,7 +742,8 @@ namespace Deeplex.Saverwalter.PrintService
 
             foreach (var abrechnungseinheit in abrechnung.Abrechnungseinheiten)
             {
-                var warmeNebenkosten = BetragWarmeNebenkosten(abrechnung.Vertrag, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes);
+                var wohnung = abrechnung.Vertrag.Wohnung;
+                var warmeNebenkosten = BetragWarmeNebenkosten(wohnung, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes);
                 if (warmeNebenkosten > 0)
                 {
                     col1.Add(f ? "Abzüglich Ihrer Nebenkostenanteile: " : "");

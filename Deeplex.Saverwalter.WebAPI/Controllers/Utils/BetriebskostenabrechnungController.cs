@@ -34,21 +34,26 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 
             public AbrechnungseinheitEntry(Betriebskostenabrechnung abrechnung, Abrechnungseinheit einheit, SaverwalterContext ctx)
             {
+                var vertrag = abrechnung.Vertrag;
+                var wohnung = abrechnung.Vertrag.Wohnung;
+                var zeitraum = abrechnung.Zeitraum;
+                var notes = abrechnung.Notes;
+
                 Bezeichnung = einheit.Bezeichnung;
                 GesamtWohnflaeche = einheit.GesamtWohnflaeche;
                 GesamtNutzflaeche = einheit.GesamtNutzflaeche;
                 GesamtEinheiten = einheit.GesamtEinheiten;
-                WFZeitanteil = WFZeitanteil(abrechnung.Vertrag.Wohnung, einheit, abrechnung.Zeitraum);
-                NFZeitanteil = NFZeitanteil(abrechnung.Vertrag.Wohnung, einheit, abrechnung.Zeitraum);
-                NEZeitanteil = NEZeitanteil(abrechnung.Vertrag.Wohnung, einheit, abrechnung.Zeitraum);
+                WFZeitanteil = WFZeitanteil(wohnung, einheit, zeitraum);
+                NFZeitanteil = NFZeitanteil(wohnung, einheit, zeitraum);
+                NEZeitanteil = NEZeitanteil(wohnung, einheit, zeitraum);
                 Umlagen = einheit.Umlagen.Select(e => new UmlageEntry(e, ctx)).ToList();
-                PersonenZeitanteil = GetPersonenZeitanteil(abrechnung.Vertrag, einheit, abrechnung.Zeitraum);
-                Verbrauch = Verbrauch(abrechnung.Vertrag.Wohnung, einheit, abrechnung.Zeitraum, abrechnung.Notes);
-                VerbrauchAnteil = VerbrauchAnteil(abrechnung.Vertrag.Wohnung, einheit, abrechnung.Zeitraum, abrechnung.Notes);
-                BetragKalteNebenkosten = BetragKalteNebenkosten(abrechnung.Vertrag, einheit, abrechnung.Zeitraum, abrechnung.Notes);
-                GesamtBetragKalteNebenkosten = GetKalteNebenkosten(einheit, abrechnung.Zeitraum).Sum(r => r.Betrag);
-                BetragWarmeNebenkosten = BetragWarmeNebenkosten(abrechnung.Vertrag, einheit, abrechnung.Zeitraum, abrechnung.Notes);
-                GesamtBetragWarmeNebenkosten = GesamtBetragWarmeNebenkosten(abrechnung.Vertrag.Wohnung, einheit, abrechnung.Zeitraum, abrechnung.Notes);
+                PersonenZeitanteil = GetPersonenZeitanteil(vertrag, einheit, zeitraum);
+                Verbrauch = Verbrauch(wohnung, einheit, zeitraum, notes);
+                VerbrauchAnteil = VerbrauchAnteil(wohnung, einheit, zeitraum, abrechnung.Notes);
+                BetragKalteNebenkosten = BetragKalteNebenkosten(vertrag, einheit, zeitraum, notes);
+                GesamtBetragKalteNebenkosten = GetKalteNebenkosten(einheit, zeitraum).Sum(r => r.Betrag);
+                BetragWarmeNebenkosten = BetragWarmeNebenkosten(wohnung, einheit, zeitraum, notes);
+                GesamtBetragWarmeNebenkosten = GesamtBetragWarmeNebenkosten(wohnung, einheit, zeitraum, notes);
             }
         }
 

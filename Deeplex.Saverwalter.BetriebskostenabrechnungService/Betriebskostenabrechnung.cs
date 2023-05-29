@@ -27,12 +27,12 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public Betriebskostenabrechnung(SaverwalterContext ctx, Vertrag vertrag, int jahr, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
         {
             Vertrag = vertrag;
-
             Zeitraum = new Zeitraum(jahr, vertrag);
 
+            var wohnung = Vertrag.Wohnung;
             var versionen = vertrag.Versionen.OrderBy(v => v.Beginn).ToList();
 
-            Vermieter = ctx.FindPerson(vertrag.Wohnung.BesitzerId);
+            Vermieter = ctx.FindPerson(wohnung.BesitzerId);
             Ansprechpartner = ctx.FindPerson(vertrag.AnsprechpartnerId!.Value) ?? Vermieter;
             GezahlteMiete = Mietzahlungen(vertrag, Zeitraum);
             KaltMiete = GetKaltMiete(vertrag, Zeitraum);
@@ -40,8 +40,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             AllgStromFaktor = CalcAllgStromFactor(vertrag, jahr);
             Abrechnungseinheiten = DetermineAbrechnungseinheiten(vertrag);
             BetragNebenkosten = Abrechnungseinheiten.Sum((einheit) => {
-                var kalteNebenkosten = BetragKalteNebenkosten(Vertrag, einheit, Zeitraum, Notes);
-                var warmeNebenkosten = BetragWarmeNebenkosten(Vertrag, einheit, Zeitraum, Notes);
+                var kalteNebenkosten = BetragKalteNebenkosten(vertrag, einheit, Zeitraum, Notes);
+                var warmeNebenkosten = BetragWarmeNebenkosten(wohnung, einheit, Zeitraum, Notes);
 
                 return kalteNebenkosten + warmeNebenkosten;
             });
