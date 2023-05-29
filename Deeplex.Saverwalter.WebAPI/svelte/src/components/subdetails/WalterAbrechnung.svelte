@@ -7,12 +7,16 @@
     } from '$walter/components';
     import { convertEuro } from '$walter/services/utils';
     import type { WalterBetriebskostenabrechnungKostengruppenEntry } from '$walter/types';
-    import { Row, Tile } from 'carbon-components-svelte';
+    import { Loading, Row, Tile } from 'carbon-components-svelte';
 
     export let abrechnung: WalterBetriebskostenabrechnungKostengruppenEntry;
 </script>
 
-{#await abrechnung then}
+{#await abrechnung}
+    <div style="width:100%; display: flex; justify-content: center">
+        <Loading withOverlay={false} />
+    </div>
+{:then}
     <Row>
         <WalterDatePicker
             placeholder="Nutzungsbeginn"
