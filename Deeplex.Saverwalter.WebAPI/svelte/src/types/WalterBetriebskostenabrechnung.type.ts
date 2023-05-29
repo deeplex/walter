@@ -42,25 +42,17 @@ export type WalterBetriebskostenabrechnungNote = {
     severity: string;
 };
 
-export type WalterBetriebskostenabrechnungPersonenZeitIntervall = {
-    beginn: Date;
-    ende: Date;
-    tage: number;
-    gesamtTage: number;
-    personenzahl: number;
-};
-
 export type WalterBetriebskostenabrechnungPersonenZeitanteil = {
     beginn: Date;
     ende: Date;
-    anteil: number;
+    tage: number;
     personenzahl: number;
+    gesamtPersonenzahl: number;
+    anteil: number;
 };
 
 export type WalterBetriebskostenabrechnungsRechnungsgruppe = {
     bezeichnung: string;
-    personenIntervall: WalterBetriebskostenabrechnungPersonenZeitIntervall[];
-    gesamtPersonenIntervall: WalterBetriebskostenabrechnungPersonenZeitIntervall[];
     gesamtWohnflaeche: number;
     gesamtNutzflaeche: number;
     gesamtEinheiten: number;

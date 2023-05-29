@@ -7,9 +7,9 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DATABASE_HOST": "localhost",
         "DATABASE_PORT": "5432",
-        "DATABASE_NAME": "walter_dev_generic_db",
+        "DATABASE_NAME": "saverdb",
         "DATABASE_USER": "postgres",
-        "DATABASE_PASS": "postgres",
+        "DATABASE_PASS": "admin",
         "S3_PROVIDER": "http://localhost:9000/saverwalter"
       },
       "dotnetRunMessages": true,

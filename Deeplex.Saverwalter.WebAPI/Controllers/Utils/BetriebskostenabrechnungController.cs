@@ -15,8 +15,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         public class AbrechnungseinheitEntry
         {
             public string? Bezeichnung { get; }
-            public List<PersonenZeitIntervall>? PersonenIntervall { get; }
-            public List<PersonenZeitIntervall>? GesamtPersonenIntervall { get; }
             public double GesamtWohnflaeche { get; }
             public double GesamtNutzflaeche { get; }
             public int GesamtEinheiten { get; }
@@ -36,8 +34,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public AbrechnungseinheitEntry(Betriebskostenabrechnung abrechnung, Abrechnungseinheit einheit, SaverwalterContext ctx)
             {
                 Bezeichnung = einheit.Bezeichnung;
-                PersonenIntervall = abrechnung.PersonenIntervall();
-                GesamtPersonenIntervall = abrechnung.GesamtPersonenIntervall(einheit);
                 GesamtWohnflaeche = einheit.GesamtWohnflaeche;
                 GesamtNutzflaeche = einheit.GesamtNutzflaeche;
                 GesamtEinheiten = einheit.GesamtEinheiten;

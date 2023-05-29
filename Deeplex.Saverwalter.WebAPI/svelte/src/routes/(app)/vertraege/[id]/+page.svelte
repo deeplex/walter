@@ -63,7 +63,7 @@
     bind:a={data.a}
     apiURL={data.apiURL}
     {title}
-    f={data.fetch}
+    fetchImpl={data.fetch}
 />
 
 <WalterGrid>
@@ -89,7 +89,7 @@
     </WalterLinks>
 
     <hr style="margin: 2em" />
-    <Truncate>Betriebskostenabrechnung :</Truncate>
+    <Truncate>Betriebskostenabrechnung:</Truncate>
 
     <WalterAbrechnungControl
         {title}

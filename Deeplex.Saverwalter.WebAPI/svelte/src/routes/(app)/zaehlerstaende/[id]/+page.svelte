@@ -19,7 +19,7 @@
     title={data.a.zaehler.text +
         ' - ' +
         convertDateGerman(new Date(data.a.datum))}
-    f={data.fetch}
+    fetchImpl={data.fetch}
 />
 
 <WalterGrid>

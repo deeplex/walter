@@ -4,30 +4,27 @@
     {
         public DateOnly Beginn { get; }
         public DateOnly Ende { get; }
-        public double Anteil { get; }
+        public double Tage { get; }
         public int Personenzahl { get; }
+        public int GesamtPersonenzahl { get; }
+        public double Anteil { get; }
 
         public PersonenZeitanteil(
-            PersonenZeitIntervall interval,
-            List<PersonenZeitIntervall> gesamtPersonenZeitIntervallList,
-            Zeitraum zeitraum)
+            DateOnly beginn, DateOnly ende, int personenzahl, int gesamtPersonenzahl, Zeitraum zeitraum)
         {
-            Beginn = interval.Beginn;
-            Ende = interval.Ende;
-            Personenzahl = interval.Personenzahl;
+            Beginn = beginn;
+            Ende = ende;
+            Tage = ende.DayNumber - beginn.DayNumber + 1;
+            Personenzahl = personenzahl;
+            GesamtPersonenzahl = gesamtPersonenzahl;
 
-            if (Personenzahl == 0)
-            {
-                Anteil = 0;
-            }
-            else
-            {
-                var gesamtPersonenZahl = gesamtPersonenZeitIntervallList
-                    .FirstOrDefault(pzi => Beginn <= pzi.Beginn)?.Personenzahl ?? 0;
-                var personenAnteil = (double)Personenzahl / gesamtPersonenZahl;
+            var personenAnteil = gesamtPersonenzahl == 0
+                ? 0
+                : (double)personenzahl / gesamtPersonenzahl;
 
-                Anteil = personenAnteil * zeitraum.Zeitanteil;
-            }
+            var zeitanteil = (double)Tage / zeitraum.Abrechnungszeitraum;
+
+            Anteil = personenAnteil * zeitanteil;
         }
     }
 }

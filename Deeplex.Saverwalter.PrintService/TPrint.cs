@@ -169,16 +169,17 @@ namespace Deeplex.Saverwalter.PrintService
             var col5 = new List<string> { "Nutzungsintervall" };
             var col6 = new List<string> { "Tage" };
 
-            foreach (var personenZeitIntervall in abrechnung.PersonenIntervall())
+            var anteile = abrechnung.PersonenZeitanteil(abrechnungseinheit).Where(e => e.Personenzahl > 0);
+            foreach (var anteil in anteile)
             {
-                var firstLine = personenZeitIntervall.Beginn == abrechnung.Zeitraum.Nutzungsbeginn;
+                var firstLine = anteil.Beginn == abrechnung.Zeitraum.Nutzungsbeginn;
 
                 col1.Add(firstLine ? 1.ToString() : "");
                 col2.Add(firstLine ? Quadrat(abrechnung.Vertrag.Wohnung.Wohnflaeche) : "");
                 col3.Add(firstLine ? Quadrat(abrechnung.Vertrag.Wohnung.Nutzflaeche) : "");
-                col4.Add(personenZeitIntervall.Personenzahl.ToString());
-                col5.Add(Datum(personenZeitIntervall.Beginn) + " - " + Datum(personenZeitIntervall.Ende));
-                col6.Add(abrechnung.Zeitraum.Nutzungszeitraum + "/" + abrechnung.Zeitraum.Abrechnungszeitraum);
+                col4.Add(anteil.Personenzahl.ToString());
+                col5.Add(Datum(anteil.Beginn) + " - " + Datum(anteil.Ende));
+                col6.Add(anteil.Tage + "/" + abrechnung.Zeitraum.Abrechnungszeitraum);
             }
 
             var cols = new List<List<string>> { col1, col2, col3, col4, col5, col6 }.Select(w => w.ToArray()).ToArray();
@@ -202,17 +203,19 @@ namespace Deeplex.Saverwalter.PrintService
             var col5 = new List<string> { "Nutzungsintervall" };
             var col6 = new List<string> { "Tage" };
 
-            foreach (var personenZeitIntervall in abrechnung.GesamtPersonenIntervall(abrechnungseinheit))
+            var anteile = abrechnung.PersonenZeitanteil(abrechnungseinheit);
+            for (var i = 0; i < anteile.Count; ++i)
             {
-                var firstLine = personenZeitIntervall.Beginn == abrechnung.Zeitraum.Nutzungsbeginn;
+                var firstLine = i == 0;
+                var anteil = anteile[i];
 
-                var timespan = (personenZeitIntervall.Ende.DayNumber - personenZeitIntervall.Beginn.DayNumber + 1).ToString();
+                var timespan = anteil.Tage.ToString();
 
                 col1.Add(firstLine ? abrechnungseinheit.GesamtEinheiten.ToString() : "");
                 col2.Add(firstLine ? Quadrat(abrechnungseinheit.GesamtWohnflaeche) : "");
                 col3.Add(firstLine ? Quadrat(abrechnungseinheit.GesamtNutzflaeche) : "");
-                col4.Add(personenZeitIntervall.Personenzahl.ToString());
-                col5.Add(Datum(personenZeitIntervall.Beginn) + " - " + Datum(personenZeitIntervall.Ende));
+                col4.Add(anteil.GesamtPersonenzahl.ToString());
+                col5.Add(Datum(anteil.Beginn) + " - " + Datum(anteil.Ende));
                 col6.Add(timespan + "/" + abrechnung.Zeitraum.Abrechnungszeitraum);
             }
 
@@ -314,13 +317,17 @@ namespace Deeplex.Saverwalter.PrintService
                     var personenzeitanteile = abrechnung.PersonenZeitanteil(abrechnungseinheit);
                     foreach (var personenzeitanteil in personenzeitanteile)
                     {
+                        var Personenzahl = personenzeitanteil.Personenzahl;
+
+                        if (Personenzahl == 0)
+                        {
+                            continue;
+                        }
+
                         var Beginn = personenzeitanteil.Beginn;
                         var Ende = personenzeitanteil.Ende;
-                        var GesamtPersonenzahl = abrechnung.GesamtPersonenIntervall(abrechnungseinheit)
-                            .Last(gs => gs.Beginn <= personenzeitanteil.Beginn).Personenzahl;
-                        var Personenzahl = abrechnung.PersonenIntervall()
-                            .LastOrDefault(p => p.Beginn <= personenzeitanteil.Beginn)?.Personenzahl ?? 0;
-                        var timespan = (Ende.DayNumber - Beginn.DayNumber + 1).ToString();
+                        var GesamtPersonenzahl = personenzeitanteil.GesamtPersonenzahl;
+                        var timespan = personenzeitanteil.Tage.ToString();
 
                         col1.Add(SingularOrPluralPerson(Personenzahl) + " / " + SingularOrPluralPerson(GesamtPersonenzahl));
                         col2.Add(Datum(Beginn) + " - " + Datum(Ende));
@@ -411,6 +418,8 @@ namespace Deeplex.Saverwalter.PrintService
                 underlined.Add(true);
             }
 
+            var personenzeitanteile = abrechnung.PersonenZeitanteil(abrechnungseinheit);
+
             foreach (var umlage in abrechnungseinheit.Umlagen.Where(umlage => (int)umlage.Typ % 2 == 0)) // Kalte Betriebskosten
             {
                 switch (umlage.Schluessel)
@@ -431,15 +440,31 @@ namespace Deeplex.Saverwalter.PrintService
                         break;
                     case Umlageschluessel.NachPersonenzahl:
                         var first = true;
-                        foreach (var a in abrechnung.PersonenZeitanteil(abrechnungseinheit))
+                        if (personenzeitanteile.All(e => e.Personenzahl == 0))
                         {
                             kostenPunkt(
                                 umlage,
-                                Datum(a.Beginn) + " - " + Datum(a.Ende),
+                                Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende),
                                 abrechnung.Zeitraum.Jahr,
-                                a.Anteil,
+                                0,
                                 first);
-                            first = false;
+                        }
+                        else
+                        {
+                            foreach (var a in personenzeitanteile)
+                            {
+                                if (a.Personenzahl == 0)
+                                {
+                                    continue;
+                                }
+                                kostenPunkt(
+                                    umlage,
+                                    Datum(a.Beginn) + " - " + Datum(a.Ende),
+                                    abrechnung.Zeitraum.Jahr,
+                                    a.Anteil,
+                                    first);
+                                first = false;
+                            }
                         }
                         break;
                     case Umlageschluessel.NachVerbrauch:
@@ -542,12 +567,17 @@ namespace Deeplex.Saverwalter.PrintService
                 var personenzeitanteile = abrechnung.PersonenZeitanteil(abrechnungseinheit);
                 foreach (var personenzeitanteil in personenzeitanteile)
                 {
+                    var Personenzahl = personenzeitanteil.Personenzahl;
+                    
+                    if (Personenzahl == 0)
+                    {
+                        continue;
+                    }
+
                     var Beginn = personenzeitanteil.Beginn;
                     var Ende = personenzeitanteil.Ende;
-                    var GesamtPersonenzahl = abrechnung.GesamtPersonenIntervall(abrechnungseinheit)
-                        .Last(gs => gs.Beginn <= personenzeitanteil.Beginn).Personenzahl;
-                    var Personenzahl = abrechnung.PersonenIntervall()
-                        .Last(p => p.Beginn <= personenzeitanteil.Beginn).Personenzahl;
+                    var GesamtPersonenzahl = personenzeitanteil.GesamtPersonenzahl;
+
                     var timespan = (Ende.DayNumber - Beginn.DayNumber + 1).ToString();
 
                     if (personenzeitanteil == personenzeitanteile.Last())
@@ -673,7 +703,7 @@ namespace Deeplex.Saverwalter.PrintService
         }
         private static void GesamtErgebnis(Betriebskostenabrechnung abrechnung, IPrint<T> p)
         {
-            var widths = new int[] { 40, 10 };
+            var widths = new int[] { 40, 20 };
 
             var col1 = new List<string>
             {
@@ -688,20 +718,22 @@ namespace Deeplex.Saverwalter.PrintService
             var f = true;
             foreach (var abrechnungseinheit in abrechnung.Abrechnungseinheiten)
             {
-                if (abrechnung.BetragKalteNebenkosten(abrechnungseinheit) > 0)
+                var kalteNebenkosten = abrechnung.BetragKalteNebenkosten(abrechnungseinheit);
+                if (kalteNebenkosten > 0)
                 {
                     col1.Add(f ? "Abzüglich Ihrer Nebenkostenanteile: " : "");
-                    col2.Add("-" + Euro(abrechnung.BetragKalteNebenkosten(abrechnungseinheit)));
+                    col2.Add("-" + Euro(kalteNebenkosten));
                     f = false;
                 }
             }
 
             foreach (var abrechnungseinheit in abrechnung.Abrechnungseinheiten)
             {
-                if (abrechnung.BetragWarmeNebenkosten(abrechnungseinheit) > 0)
+                var warmeNebenkosten = abrechnung.BetragWarmeNebenkosten(abrechnungseinheit);
+                if (warmeNebenkosten > 0)
                 {
                     col1.Add(f ? "Abzüglich Ihrer Nebenkostenanteile: " : "");
-                    col2.Add("-" + Euro(abrechnung.BetragWarmeNebenkosten(abrechnungseinheit)));
+                    col2.Add("-" + Euro(warmeNebenkosten));
                     f = false;
                 }
             }

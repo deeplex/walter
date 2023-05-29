@@ -12,6 +12,7 @@
     } from 'carbon-components-svelte';
 
     export let entry: WalterBetriebskostenabrechnungsRechnungsgruppeEntry;
+    export let abrechnungstage: number;
 </script>
 
 <Row>
@@ -32,7 +33,7 @@
             </StructuredListRow>
         </StructuredListHead>
         <StructuredListBody>
-            {#each entry.gesamtPersonenIntervall as intervall, index}
+            {#each entry.personenZeitanteil as intervall, index}
                 <StructuredListRow>
                     <StructuredListCell
                         >{!index
@@ -60,7 +61,7 @@
                         )}</StructuredListCell
                     >
                     <StructuredListCell
-                        >{intervall.tage} / {intervall.gesamtTage}</StructuredListCell
+                        >{intervall.tage} / {abrechnungstage}</StructuredListCell
                     >
                 </StructuredListRow>
             {/each}

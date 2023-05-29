@@ -232,61 +232,98 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .ToList());
         }
 
-        public static List<PersonenZeitIntervall> VertraegeIntervallPersonenzahl(
-            List<VertragVersion> vertraege,
-            Zeitraum zeitraum)
+        private static List<DateOnly> getTimestampsOfPersonenAnzahlChanges(List<Vertrag> vertraege, Zeitraum zeitraum)
         {
-            var temp = vertraege
-                .Where(vertragVersion =>
-                    vertragVersion.Beginn <= zeitraum.Abrechnungsende
-                    && (vertragVersion.Ende() is null || vertragVersion.Ende() >= zeitraum.Abrechnungsbeginn))
-                .ToList()
-                .SelectMany(v => new[]
+            var begins = vertraege
+                .SelectMany(e => e.Versionen)
+                .Select(e => e.Beginn)
+                .ToList();
+            var ends = vertraege
+                .Where(e => e.Ende != null)
+                .Select(e => e.Ende is DateOnly d ? d.AddDays(1) : new DateOnly())
+                .ToList();
+
+            var breakpoints = begins
+                .Concat(ends)
+                .Where(e => e <= zeitraum.Abrechnungsende && e >= zeitraum.Abrechnungsbeginn)
+                .Distinct()
+                .OrderBy(e => e)
+                .ToList();
+
+            if (breakpoints.FirstOrDefault() != zeitraum.Abrechnungsbeginn)
+            {
+                breakpoints.Insert(0, zeitraum.Abrechnungsbeginn);
+            }
+
+            return breakpoints;
+        }
+
+        public static VertragVersion? getVersion(Vertrag vertrag, DateOnly timestamp)
+        {
+            return vertrag.Versionen.SingleOrDefault(
+                version => version.Beginn <= timestamp &&
+                (version.Ende() == null || version.Ende() > timestamp));
+        }
+
+        public static int SumPersonenzahlen(List<Vertrag> vertraege, DateOnly timestamp)
+        {
+            var Personenzahl = 0;
+
+            foreach (var vertrag in vertraege)
+            {
+                var version = getVersion(vertrag, timestamp);
+                if (version is VertragVersion v)
                 {
-                    (Max(v.Beginn, zeitraum.Abrechnungsbeginn), v.Personenzahl),
-                    (Min(v.Ende() ?? zeitraum.Abrechnungsende, zeitraum.Abrechnungsende).AddDays(1), -v.Personenzahl)
-                })
-                .ToList()
-                .GroupBy(t => t.Item1)
-                .ToList();
-
-            var merged = temp.Select(g => new PersonenZeitIntervall(g.Key, zeitraum.Abrechnungsende, g.Sum(t => t.Item2)))
-               .ToList()
-               .OrderBy(t => t.Beginn)
-               .ToList();
-
-            for (int i = 0; i < merged.Count; ++i)
-            {
-                merged[i] = new PersonenZeitIntervall(
-                    merged[i].Beginn,
-                    i + 1 < merged.Count ? merged[i + 1].Beginn.AddDays(-1) : zeitraum.Abrechnungsende,
-                    i - 1 >= 0 ? merged[i - 1].Personenzahl + merged[i].Personenzahl : merged[i].Personenzahl);
-            }
-            if (merged.Count > 0)
-            {
-                merged.RemoveAt(merged.Count - 1);
+                    Personenzahl += v.Personenzahl;
+                }
             }
 
-            // TODO refactor function to switch from tuple to class - or replace this function by constructor
-            var ret = merged.Select(personenZeitIntervall => new PersonenZeitIntervall(
-                personenZeitIntervall.Beginn,
-                personenZeitIntervall.Ende,
-                personenZeitIntervall.Personenzahl))
-                .ToList();
-
-            return ret;
+            return Personenzahl;
         }
 
         public static List<PersonenZeitanteil> GetPersonenZeitanteil(
-            List<PersonenZeitIntervall> intervalle,
-            List<PersonenZeitIntervall> gesamtIntervalle,
+            Vertrag vertrag,
+            List<Vertrag> vertraege,
             Zeitraum zeitraum)
         {
-            return intervalle
-                .Where(g => g.Beginn < zeitraum.Nutzungsende && g.Ende >= zeitraum.Nutzungsbeginn)
-                .ToList()
-                .Select((w, i) => new PersonenZeitanteil(w, gesamtIntervalle, zeitraum))
-                .ToList();
+            if (!vertraege.Contains(vertrag))
+            {
+                throw new ArgumentException("Vertrag not in Einheit!");
+            }
+
+            var breakPoints = getTimestampsOfPersonenAnzahlChanges(vertraege, zeitraum);
+
+            List<(DateOnly beginn, int personenzahl)> einheitAnteile = new();
+
+            foreach (var change in breakPoints)
+            {
+                var sum = SumPersonenzahlen(vertraege, change);
+                einheitAnteile.Add((change, sum));
+            }
+
+            List<PersonenZeitanteil> personenzeitanteile = new();
+
+            // Skip the last
+            for (var i = 0; i < einheitAnteile.Count; ++i)
+            {
+                var current = einheitAnteile[i];
+                var ende = i == einheitAnteile.Count - 1
+                    ? zeitraum.Abrechnungsende
+                    : einheitAnteile[i + 1].beginn.AddDays(-1);
+
+                var personenzahl = getVersion(vertrag, current.beginn)?.Personenzahl ?? 0;
+
+                var personenZeitanteil = new PersonenZeitanteil(
+                    current.beginn,
+                    ende,
+                    personenzahl,
+                    current.personenzahl,
+                    zeitraum);
+
+                personenzeitanteile.Add(personenZeitanteil);
+            }
+
+            return personenzeitanteile;
         }
 
         public static Dictionary<Betriebskostentyp, List<(Zaehlertyp, double)>> CalculateAbrechnungseinheitVerbrauch(

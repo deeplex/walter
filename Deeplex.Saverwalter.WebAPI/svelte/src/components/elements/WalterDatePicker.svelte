@@ -15,8 +15,6 @@
     export let placeholder: string | undefined = undefined;
     export let disabled: boolean | undefined = false;
 
-    console.log('Beginning: ', value);
-
     function change(e: CustomEvent) {
         value = convertDateCanadian(new Date(e.detail?.selectedDates[0]));
     }

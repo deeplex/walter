@@ -23,7 +23,7 @@
         data.a.betreffendesJahr +
         ' - ' +
         data.a.umlage?.text}
-    f={data.fetch}
+    fetchImpl={data.fetch}
 />
 
 <WalterGrid>

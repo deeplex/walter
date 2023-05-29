@@ -31,7 +31,10 @@
     <WalterAbrechnungResultat entry={abrechnung} />
     {#each abrechnung.kostengruppen as gruppe}
         <hr />
-        <WalterAbrechnungEinheit entry={gruppe} />
+        <WalterAbrechnungEinheit
+            entry={gruppe}
+            abrechnungstage={abrechnung.abrechnungszeitspanne}
+        />
         <WalterAbrechnungGruppe
             rows={gruppe.kostenpunkte}
             year={abrechnung.jahr}

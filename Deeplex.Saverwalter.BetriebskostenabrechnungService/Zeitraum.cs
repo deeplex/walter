@@ -18,12 +18,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Jahr = jahr;
             Abrechnungsbeginn = new DateOnly(jahr, 1, 1);
             Abrechnungsende = new DateOnly(jahr, 12, 31);
-            var beginn = vertrag.Beginn();
             Nutzungsbeginn = Utils.Max(vertrag.Beginn(), Abrechnungsbeginn);
             Nutzungsende = Utils.Min(vertrag.Ende ?? Abrechnungsende, Abrechnungsende);
 
-            Nutzungszeitraum = Nutzungsende.DayNumber - Nutzungsbeginn.DayNumber;
-            Abrechnungszeitraum = Abrechnungsende.DayNumber - Abrechnungsbeginn.DayNumber;
+            Nutzungszeitraum = Nutzungsende.DayNumber - Nutzungsbeginn.DayNumber + 1;
+            Abrechnungszeitraum = Abrechnungsende.DayNumber - Abrechnungsbeginn.DayNumber + 1;
             Zeitanteil = (double)Nutzungszeitraum / Abrechnungszeitraum;
         }
     }

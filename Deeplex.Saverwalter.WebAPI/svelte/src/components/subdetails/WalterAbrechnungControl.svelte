@@ -84,7 +84,7 @@
         S3files = [...S3files, file];
     }
 
-    async function abrechnung_click() {
+    async function vorschau_erstellen_click() {
         searchParams = new URLSearchParams({ abrechnung: `${selectedYear}` });
         goto(`?${searchParams.toString()}`, { noScroll: true });
         abrechnung = await loadAbrechnung(
@@ -103,7 +103,7 @@
         hideSteppers={false}
     />
     <ButtonSet style="margin: auto">
-        <Button on:click={abrechnung_click}>Vorschau anzeigen</Button>
+        <Button on:click={vorschau_erstellen_click}>Vorschau anzeigen</Button>
         <Button on:click={word_dokument_erstellen_click}
             >Word-Dokument erstellen</Button
         >

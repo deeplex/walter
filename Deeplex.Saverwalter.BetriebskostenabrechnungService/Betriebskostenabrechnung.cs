@@ -51,27 +51,18 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         public List<PersonenZeitanteil> PersonenZeitanteil(Abrechnungseinheit einheit)
             => GetPersonenZeitanteil(
-                PersonenIntervall(),
-                GesamtPersonenIntervall(einheit),
+                Vertrag,
+                einheit.Wohnungen.SelectMany(e => e.Vertraege).ToList(),
                 Zeitraum);
 
         public Dictionary<Betriebskostentyp, double> VerbrauchAnteil(Abrechnungseinheit einheit)
             => CalculateVerbrauchAnteil(Verbrauch(einheit));
 
-
         public double GesamtBetragKalteNebenkosten(Abrechnungseinheit einheit)
             => GetKalteNebenkosten(einheit, Zeitraum).Sum(r => r.Betrag);
 
-        public List<PersonenZeitIntervall> GesamtPersonenIntervall(Abrechnungseinheit einheit)
-            => VertraegeIntervallPersonenzahl(
-                einheit.Wohnungen.SelectMany(e => e.Vertraege.SelectMany(e => e.Versionen)).ToList(),
-                Zeitraum);
-
         public Dictionary<Betriebskostentyp, List<(Zaehlertyp Typ, double Delta)>> GesamtVerbrauch(Abrechnungseinheit einheit)
              => CalculateAbrechnungseinheitVerbrauch(einheit.Umlagen, Zeitraum, Notes);
-
-        public List<PersonenZeitIntervall> PersonenIntervall()
-            => VertraegeIntervallPersonenzahl(Vertrag.Versionen, Zeitraum);
 
         public Dictionary<Betriebskostentyp, List<VerbrauchAnteil>> Verbrauch(Abrechnungseinheit einheit)
             => CalculateWohnungVerbrauch(

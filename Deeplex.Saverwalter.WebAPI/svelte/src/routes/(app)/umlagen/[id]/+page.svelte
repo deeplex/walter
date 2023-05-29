@@ -45,7 +45,7 @@
     a={data.a}
     apiURL={data.apiURL}
     title={`${data.a.typ.text} - ${data.a.wohnungenBezeichnung}`}
-    f={data.fetch}
+    fetchImpl={data.fetch}
 />
 
 <WalterGrid>
