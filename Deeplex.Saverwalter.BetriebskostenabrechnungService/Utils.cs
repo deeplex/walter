@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using System.Collections.Immutable;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
@@ -28,23 +29,12 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             }
         }
 
-        public static List<Verbrauch> GetVerbrauchAbrechnungseinheit(Umlage umlage, Zeitraum zeitraum, List<Note> notes)
+        public static List<Verbrauch> GetVerbrauch(List<Zaehler> zaehler, Betriebskostentyp betriebskostentyp, Zeitraum zeitraum, List<Note> notes)
         {
-            var Zaehler = umlage.Zaehler.Where(z => z.Wohnung != null).ToList();
             // TODO check that all Zaehler have the Same typ
-            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(Zaehler, zeitraum.Nutzungsende);
-            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(Zaehler, zeitraum.Nutzungsbeginn);
-            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerAnfangsStaende, ZaehlerEndStaende, notes);
-
-            return Deltas;
-        }
-
-        private static List<Verbrauch> GetVerbrauchWohnung(Umlage umlage, Wohnung wohnung, Zeitraum zeitraum, List<Note> notes)
-        {
-            var Zaehler = umlage.Zaehler.Where(z => z.Wohnung == wohnung).ToList();
-            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(Zaehler, zeitraum.Nutzungsende);
-            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(Zaehler, zeitraum.Nutzungsbeginn);
-            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(umlage, ZaehlerAnfangsStaende, ZaehlerEndStaende, notes);
+            var ZaehlerEndStaende = GetZaehlerEndStaendeFuerBerechnung(zaehler, zeitraum.Nutzungsende);
+            var ZaehlerAnfangsStaende = GetZaehlerAnfangsStaendeFuerBerechnung(zaehler, zeitraum.Nutzungsbeginn);
+            List<Verbrauch> Deltas = GetVerbrauchForZaehlerStaende(betriebskostentyp, ZaehlerAnfangsStaende, ZaehlerEndStaende, notes);
 
             return Deltas;
         }
@@ -74,7 +64,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .ToImmutableList();
         }
 
-        public static List<Verbrauch> GetVerbrauchForZaehlerStaende(Umlage umlage, ImmutableList<Zaehlerstand> beginne, ImmutableList<Zaehlerstand> enden, List<Note> notes)
+        public static List<Verbrauch> GetVerbrauchForZaehlerStaende(Betriebskostentyp betriebskostentyp, ImmutableList<Zaehlerstand> beginne, ImmutableList<Zaehlerstand> enden, List<Note> notes)
         {
             List<Verbrauch> Deltas = new();
 
@@ -94,7 +84,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             {
                 for (var i = 0; i < enden.Count; ++i)
                 {
-                    Deltas.Add(new Verbrauch(umlage.Typ, enden[i].Zaehler.Kennnummer, enden[i].Zaehler.Typ, enden[i].Stand - beginne[i].Stand));
+                    Deltas.Add(new Verbrauch(betriebskostentyp, enden[i].Zaehler.Kennnummer, enden[i].Zaehler.Typ, enden[i].Stand - beginne[i].Stand));
                 }
             }
 
@@ -111,7 +101,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var VerbrauchList = Umlagen
                     .Where(g => g.Schluessel == Umlageschluessel.NachVerbrauch)
                     .ToList()
-                    .Select(umlage => GetVerbrauchWohnung(umlage, wohnung, zeitraum, notes))
+                    .Select(umlage =>
+                    {
+                        var zaehler = umlage.Zaehler.Where(z => z.Wohnung == wohnung).ToList();
+                        return GetVerbrauch(zaehler, umlage.Typ, zeitraum, notes);
+                    })
                     .ToList();
 
             if (VerbrauchList.Any(w => w.Count == 0))
@@ -239,7 +233,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             return umlagen
                 .Where(umlage => umlage.Schluessel == Umlageschluessel.NachVerbrauch)
                 .ToList()
-                .Select(umlage => GetVerbrauchAbrechnungseinheit(umlage, zeitraum, notes))
+                .Select(umlage =>
+                {
+                    var zaehler = umlage.Zaehler.Where(z => z.Wohnung != null).ToList();
+                    return GetVerbrauch(zaehler, umlage.Typ, zeitraum, notes);
+                })
                 .ToList()
                 .Where(verbrauchList => verbrauchList.Count > 0)
                 .ToList()
