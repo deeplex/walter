@@ -57,14 +57,15 @@ namespace Deeplex.Saverwalter.ModelTests.model
                 } }
             };
 
-        [Theory(Skip = "TODO")]
-        [MemberData(nameof(ShouldWorkData))]
-        public void ShouldAddNatuerlichePerson(NatuerlichePerson entity)
+        [Theory(Skip = "InMemoryDatabaseNotRunning")]
+        [InlineData("Mustername")]
+        public void ShouldAddNatuerlichePerson(string nachname)
         {
             // Arrange
+            var entity = new NatuerlichePerson(nachname);
 
             // Act
-            var result = DatabaseContext.Add(entity);
+            var result = DatabaseContext.NatuerlichePersonen.Add(entity);
             DatabaseContext.SaveChanges();
 
             // Assert
@@ -94,11 +95,12 @@ namespace Deeplex.Saverwalter.ModelTests.model
                 } }
             };
 
-        [Theory(Skip = "TODO")]
-        [MemberData(nameof(ShouldNotWorkData))]
-        public void ShouldNotAddNatuerlichePerson(NatuerlichePerson entity)
+        [Theory(Skip = "InMemoryDatabaseNotRunning")]
+        [InlineData("Mustername")]
+        public void ShouldNotAddNatuerlichePerson(string nachname)
         {
             // Arrange
+            var entity = new NatuerlichePerson(nachname);
 
             // Act
             DatabaseContext.Add(entity);
@@ -119,17 +121,18 @@ namespace Deeplex.Saverwalter.ModelTests.model
             DatabaseContext.Set<NatuerlichePerson>().Should().NotContain(entity);
         }
 
-        [Theory(Skip = "TODO")]
-        [MemberData(nameof(ShouldWorkData))]
-        public void ShouldUpdateNatuerlichePerson(NatuerlichePerson entity)
+        [Theory(Skip = "InMemoryDatabaseNotRunning")]
+        [InlineData("Mustername")]
+        public void ShouldUpdateNatuerlichePerson(string nachname)
         {
             // Arrange
+            var entity = new NatuerlichePerson(nachname);
             DatabaseContext.Add(entity);
             DatabaseContext.SaveChanges();
             var testEntity = DatabaseContext.Set<NatuerlichePerson>().FirstOrDefault(e => e.NatuerlichePersonId == entity.NatuerlichePersonId)!;
             testEntity.Email = "Updated Test Email";
 
-            // Assert
+            // Act
             var result = DatabaseContext.Update(entity);
             DatabaseContext.SaveChanges();
 
@@ -140,11 +143,12 @@ namespace Deeplex.Saverwalter.ModelTests.model
             DatabaseContext.Set<NatuerlichePerson>().Should().Contain(entity);
         }
 
-        [Theory(Skip = "Theory")]
-        [MemberData(nameof(ShouldWorkData))]
-        public void ShouldNotUpdateNatuerlichePerson(NatuerlichePerson entity)
+        [Theory(Skip = "InMemoryDatabaseNotRunning")]
+        [InlineData("Mustername")]
+        public void ShouldNotUpdateNatuerlichePerson(string nachname)
         {
             // Arrange
+            var entity = new NatuerlichePerson(nachname);
             DatabaseContext.Add(entity);
             DatabaseContext.SaveChanges();
             var testEntity = DatabaseContext.Set<NatuerlichePerson>().FirstOrDefault(e => e.NatuerlichePersonId == entity.NatuerlichePersonId)!;
