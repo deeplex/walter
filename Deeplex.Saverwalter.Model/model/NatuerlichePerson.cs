@@ -4,7 +4,7 @@ namespace Deeplex.Saverwalter.Model
 {
     public class NatuerlichePerson : IPerson
     {
-        public string Bezeichnung => string.Join(" ", Vorname ?? "", Nachname);
+        public string Bezeichnung => string.IsNullOrEmpty(Vorname) ? Nachname : $"{Vorname} {Nachname}";
 
         public int NatuerlichePersonId { get; set; }
         public Guid PersonId { get; set; }

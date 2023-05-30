@@ -799,7 +799,7 @@ namespace Deeplex.Saverwalter.PrintService
             ExplainUmlageschluessel(abrechnung, printImpl);
             printImpl.Break();
             printImpl.Text("Anmerkung:");
-            printImpl.Text(Anmerkung());
+            printImpl.Text(Anmerkung);
             printImpl.Heading("Erläuterungen zu einzelnen Betriebskostenarten");
             ExplainKalteBetriebskosten(abrechnung, printImpl);
 

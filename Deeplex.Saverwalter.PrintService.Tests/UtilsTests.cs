@@ -1,14 +1,29 @@
-﻿using FluentAssertions;
+﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+using Deeplex.Saverwalter.Model;
+using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Wordprocessing;
+using FluentAssertions;
 using Xunit;
 
 namespace Deeplex.Saverwalter.PrintService.Tests
 {
     public class UtilsTests
     {
-        [Fact(Skip = "TODO = Replace with toDescription String")]
-        public void AnschriftTest()
+        [Theory]
+        [InlineData("test", "test", "test", "test", "test test, test test")]
+        [InlineData("Musterstraße", "7", "12345", "Musterstadt", "Musterstraße 7, 12345 Musterstadt")]
+        public void AnschriftTest(
+            string strasse,
+            string hausnummer,
+            string postleitzahl,
+            string stadt,
+            string output)
         {
-            Assert.True(false, "This test needs an implementation");
+            var adresse = new Adresse(strasse, hausnummer, postleitzahl, stadt);
+
+            var anschrift = Utils.Anschrift(adresse);
+
+            anschrift.Should().Be(output);
         }
 
         [Theory]
@@ -79,12 +94,103 @@ namespace Deeplex.Saverwalter.PrintService.Tests
             stub.Should().Be(s);
         }
 
-        [Fact]
-        public void DatumTest()
+        [Theory]
+        [InlineData(1516, 3, 14, "14.03.1516")]
+        public void DatumTest(int year, int month, int day, string result)
         {
-            var mock = new DateOnly(1516, 3, 14);
+            var mock = new DateOnly(year, month, day);
             var stub = Utils.Datum(mock);
-            stub.Should().Be("14.03.1516");
+            stub.Should().Be(result);
+        }
+
+        [Theory]
+        [InlineData("Test", null, Anrede.Herr, "Herrn Test")]
+        [InlineData("Test", "Mustername", Anrede.Herr, "Herrn Mustername Test")]
+        [InlineData("Test", null, Anrede.Frau, "Frau Test")]
+        [InlineData("Test", "Mustername", Anrede.Frau, "Frau Mustername Test")]
+        [InlineData("Test", null, Anrede.Keine, "Test")]
+        [InlineData("Test", "Mustername", Anrede.Keine, "Mustername Test")]
+        public void GetBriefAnredeTestNatuerlichePerson(string nachname, string vorname, Anrede anrede, string result)
+        {
+            var person = new NatuerlichePerson(nachname)
+            {
+                Anrede = anrede,
+                Vorname = vorname
+            };
+
+            var output = Utils.GetBriefAnrede(person);
+
+            output.Should().Be(result);
+        }
+
+        [Theory]
+        [InlineData("Test GmbH", "Test GmbH")]
+        public void GetBriefAnredeTestJuristischePerson(string bezeichnung, string result)
+        {
+            var person = new JuristischePerson(bezeichnung) { };
+
+            var output = Utils.GetBriefAnrede(person);
+
+            output.Should().Be(result);
+        }
+
+        [Theory]
+        [InlineData(2023, "Betriebskostenabrechnung 2023")]
+        public void TitleTest(int jahr, string title)
+        {
+            var output = Utils.Title(jahr);
+
+            output.Should().Be(title);
+        }
+
+        [Theory]
+        [InlineData("test", "test", "test", "Mietobjekt: test test, test")]
+        [InlineData("Musterstraße", "89", "Obergeschoss", "Mietobjekt: Musterstraße 89, Obergeschoss")]
+        public void MietobjektTest(string strasse, string hausnummer, string bezeichnung, string result)
+        {
+            var adresse = new Adresse(strasse, hausnummer, "irrelevant", "irrelevant");
+            var wohnung = new Wohnung(bezeichnung, 100, 100, 1)
+            {
+                Adresse = adresse
+            };
+
+            var mietobjekt = Utils.Mietobjekt(wohnung);
+
+            mietobjekt.Should().Be(result);
+        }
+
+        [Theory]
+        [InlineData(2023, "01.01.2023 - 31.12.2023")]
+        public void Abrechnungszeitraum(int jahr, string result)
+        {
+            var vertrag = new Vertrag();
+            var zeitraum = new Zeitraum(jahr, vertrag);
+
+            var abrechnungszeitraum = Utils.Abrechnungszeitraum(zeitraum);
+
+            abrechnungszeitraum.Should().Be(result);
+        }
+
+        private const string resultTxtPositive
+            = "wir haben die Kosten, die im Abrechnungszeitraum angefallen sind, berechnet. Die Abrechnung schließt mit einem Guthaben in Höhe von: ";
+        private const string resultTxtNegative
+            = "wir haben die Kosten, die im Abrechnungszeitraum angefallen sind, berechnet. Die Abrechnung schließt mit einer Nachforderung in Höhe von: ";
+        [Theory]
+        [InlineData(123.45, resultTxtPositive)]
+        [InlineData(-123.45, resultTxtNegative)]
+        public void ResultTxtTest(double input, string output)
+        {
+            var resultTxt = Utils.ResultTxt(input);
+            resultTxt.Should().Be(output);
+        }
+
+        [Theory]
+        [InlineData(20, Utils.RefundPositive)]
+        [InlineData(-2, Utils.RefundNegative)]
+        public void RefundDemandTest(double input, string output)
+        {
+            var refundDemand = Utils.RefundDemand(input);
+            refundDemand.Should().Be(output);
         }
     }
 }

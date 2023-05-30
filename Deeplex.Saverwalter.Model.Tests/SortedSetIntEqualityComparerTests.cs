@@ -47,11 +47,5 @@ namespace Deeplex.Saverwalter.ModelTests
 
             stub.Equals(mock1, mock2).Should().BeTrue();
         }
-
-        [Fact(Skip = "How? Has no reference anyway...")]
-        public void GetHashCodeTest()
-        {
-            // TODO
-        }
     }
 }

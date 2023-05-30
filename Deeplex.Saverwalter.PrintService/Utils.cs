@@ -65,27 +65,37 @@ namespace Deeplex.Saverwalter.PrintService
         }
 
         public static string ResultTxt(double result)
-           => "wir haben die Kosten, die im Abrechnungszeitraum angefallen sind, berechnet. Die Abrechnung schließt mit " + (result > 0 ? "einem Guthaben" : "einer Nachforderung") + " in Höhe von: ";
+           => $"wir haben die Kosten, die im Abrechnungszeitraum angefallen sind, berechnet. Die Abrechnung schließt mit {(result > 0 ? "einem Guthaben" : "einer Nachforderung")} in Höhe von: ";
 
+
+        public const string RefundPositive
+            = "Dieser Betrag wird über die von Ihnen angegebene Bankverbindung erstattet.";
+        public const string RefundNegative
+            = "Bitte überweisen Sie diesen Betrag auf das Ihnen bekannte Konto.";
         public static string RefundDemand(double result)
-            => result > 0 ?
-            "Dieser Betrag wird über die von Ihnen angegebene Bankverbindung erstattet." :
-            "Bitte überweisen Sie diesen Betrag auf das Ihnen bekannte Konto.";
+            => result > 0 ? RefundPositive : RefundNegative;
+
+        public const string GenerischerTextFirstPart
+            = "Die Abrechnung betrifft zunächst die mietvertraglich vereinbarten Nebenkosten (die kalten Betriebskosten). ";
+        public const string GenerischerTextHeizungPart
+            = "Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses (warme Betriebskosten) werden gesondert berechnet, nach Verbrauch und Wohn -/ Nutzfläche auf die einzelnen Wohnungen umgelegt („Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der von Ihnen geleisteten Vorauszahlungen verrechnet.";
+        public const string GenerischerTextFinalPart
+            = "Bei bestehenden Mietrückständen ist das Ergebnis der Abrechnung zusätzlich mit den Mietrückständen verrechnet. Gegebenenfalls bestehende Mietminderungen / Ratenzahlungsvereinbarungen sind hier nicht berücksichtigt, haben aber weiterhin für den vereinbarten Zeitraum Bestand. Aufgelöste oder gekündigte Mietverhältnisse werden durch dieses Schreiben nicht neu begründet. Die Aufstellung, Verteilung und Erläuterung der Gesamtkosten, die Berechnung der Kostenanteile, die Verrechnung der geleisteten Vorauszahlungen und gegebenenfalls die Neuberechnung der monatlichen Vorauszahlungen entnehmen Sie bitte den folgenden Seiten.";
 
         public static string GenerischerText(Wohnung wohnung, List<Abrechnungseinheit> einheiten, Zeitraum zeitraum, List<Note> notes)
         {
             // TODO Text auf Anwesenheit von Heizung oder so testen und anpassen.
 
-            var text = "Die Abrechnung betrifft zunächst die mietvertraglich vereinbarten Nebenkosten (die kalten Betriebskosten). ";
+            var text = GenerischerTextFirstPart; ;
 
             if (einheiten.Any(abrechnungseinheit =>
                     GesamtBetragWarmeNebenkosten(wohnung, abrechnungseinheit, zeitraum, notes) != 0 &&
                 BetragWarmeNebenkosten(wohnung, abrechnungseinheit, zeitraum, notes) != 0))
             {
-                text += "Die Kosten für die Heizung und für die Erwärmung von Wasser über die Heizanlage Ihres Wohnhauses (warme Betriebskosten) werden gesondert berechnet, nach Verbrauch und Wohn -/ Nutzfläche auf die einzelnen Wohnungen umgelegt („Ihre Heizungsrechnung“) und mit dem Ergebnis aus der Aufrechnung Ihrer Nebenkosten und der Summe der von Ihnen geleisteten Vorauszahlungen verrechnet.";
+                text += GenerischerTextHeizungPart;
             }
 
-            text += "Bei bestehenden Mietrückständen ist das Ergebnis der Abrechnung zusätzlich mit den Mietrückständen verrechnet. Gegebenenfalls bestehende Mietminderungen / Ratenzahlungsvereinbarungen sind hier nicht berücksichtigt, haben aber weiterhin für den vereinbarten Zeitraum Bestand. Aufgelöste oder gekündigte Mietverhältnisse werden durch dieses Schreiben nicht neu begründet. Die Aufstellung, Verteilung und Erläuterung der Gesamtkosten, die Berechnung der Kostenanteile, die Verrechnung der geleisteten Vorauszahlungen und gegebenenfalls die Neuberechnung der monatlichen Vorauszahlungen entnehmen Sie bitte den folgenden Seiten.";
+            text += GenerischerTextFinalPart;
 
             return text;
         }
@@ -109,8 +119,8 @@ namespace Deeplex.Saverwalter.PrintService
         public static bool NachVerbrauch(List<Abrechnungseinheit> einheiten)
             => UmlageSchluesselExistsInabrechnung(einheiten, Umlageschluessel.NachVerbrauch);
 
-        public static string Anmerkung()
-           => "Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger) Kostenanteil";
+        public const string Anmerkung
+           = "Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger) Kostenanteil";
 
     }
 }
