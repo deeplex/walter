@@ -49,7 +49,7 @@ export function download_file_blob(blob: Blob, fileName: string) {
     URL.revokeObjectURL(url);
 }
 
-export function walter_s3_get_files(S3prefixURL: string, f: typeof fetch) {
+export function walter_s3_get_files(S3prefixURL: string, f: typeof fetch): Promise<WalterS3File[]> {
     const url = `${baseURL}?prefix=${S3prefixURL}`;
     const requestInit = { method: 'GET' };
 

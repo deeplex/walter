@@ -10,6 +10,7 @@ export const load: PageLoad = async ({ fetch }) => {
 
         umlageschluessel: walter_selection.umlageschluessel(fetch),
         betriebskostentypen: walter_selection.betriebskostentypen(fetch),
-        wohnungen: walter_selection.wohnungen(fetch)
+        wohnungen: walter_selection.wohnungen(fetch),
+        zaehler: walter_selection.zaehler(fetch),
     };
 };

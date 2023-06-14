@@ -21,7 +21,7 @@
         <Button
             style="background-color: #161616"
             iconDescription="Navigation"
-            tooltipPosition="right"
+            tooltipPosition="top"
             kind="secondary"
             icon={isSideNavOpen ? Close : Menu}
             on:click={sideNavClick}

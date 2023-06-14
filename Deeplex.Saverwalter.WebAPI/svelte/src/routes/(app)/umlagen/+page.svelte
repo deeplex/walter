@@ -7,6 +7,7 @@
 
 <WalterHeaderList title="Umlagen" />
 <WalterUmlagen
+    zaehler={data.zaehler}
     wohnungen={data.wohnungen}
     umlageschluessel={data.umlageschluessel}
     betriebskostentypen={data.betriebskostentypen}
