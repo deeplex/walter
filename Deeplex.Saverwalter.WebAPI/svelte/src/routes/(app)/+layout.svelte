@@ -8,6 +8,10 @@
     import { walterModalControl } from '$walter/store';
     import { getAccessToken } from '$walter/services/auth';
     import { goto } from '$app/navigation';
+    import type { PageData } from './$types';
+
+    export let data: PageData;
+
     if (getAccessToken() == null) {
         goto('/login');
     }
@@ -18,7 +22,7 @@
     });
 </script>
 
-<WalterSideNav />
+<WalterSideNav fetchImpl={data.fetch} />
 <Modal
     {...modalControl}
     bind:open={modalControl.open}

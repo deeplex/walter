@@ -10,6 +10,7 @@
     tokens={{
         'interactive-01': '#2E7D32', // darker green primary color
         'interactive-01-selected': '#2E7D32', // darker green selected color
+        'interactive-03': '#2E7D32',
         'active-primary': '#1D5F27',
         'link-01': '#2E7D32', // darker green link color
         focus: '#388E3C', // slightly lighter green focus color
@@ -26,6 +27,24 @@
             a.bx--side-nav__link--current::before
         ) {
         background-color: #2e7d32 !important;
+    }
+
+    :global(.bx--file) {
+        padding-top: 2em;
+        display: flex;
+        justify-content: center;
+    }
+
+    :global(.bx--file-browse-btn, .bx--file__drop-container) {
+        font-size: xx-large;
+        flex: 0 0 97%;
+        height: 85vh;
+        max-width: none;
+        align-items: center;
+    }
+
+    :global(.bx--file__drop-container) {
+        padding-left: 25%;
     }
 
     /* Override svelte Hamburger Menu -> Seems to be buggy with rail */

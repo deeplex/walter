@@ -41,6 +41,16 @@
         }
     }
 
+    function time(key: string) {
+        switch (key) {
+            case 'creationTime':
+            case 'LastModified':
+                return true;
+            default:
+                return false;
+        }
+    }
+
     function formatToTableDate(date: string) {
         return new Date(date).toLocaleDateString('de-DE', {
             day: '2-digit',
@@ -86,7 +96,7 @@
                     ---
                 {:else if dates(cell.key)}
                     {formatToTableDate(cell.value)}
-                {:else if cell.key === 'creationTime'}
+                {:else if time(cell.key)}
                     {convertTime(cell.value)}
                 {:else if cell.key === 'betrag' || cell.key === 'grundmiete' || cell.key === 'kosten'}
                     {convertEuro(cell.value)}

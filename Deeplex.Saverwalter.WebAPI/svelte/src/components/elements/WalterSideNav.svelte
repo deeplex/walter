@@ -4,6 +4,7 @@
     import { isWalterSideNavOpen } from '$walter/store';
 
     import {
+        Loading,
         SideNav,
         SideNavDivider,
         SideNavItems,
@@ -25,6 +26,9 @@
     } from 'carbon-icons-svelte';
     import { WalterToastContent } from '$walter/lib';
     import { walter_sign_out } from '$walter/services/auth';
+    import { checkStackTodo } from './WalterSideNav';
+
+    export let fetchImpl: typeof fetch;
 
     let winWidth = 0;
     let isOpen: boolean;
@@ -67,6 +71,7 @@
             text="Wohnungen"
             href="/wohnungen"
         />
+
         <SideNavLink
             on:click={closeSideNavIfWinWidthSmall}
             isSelected={$page.route.id?.includes('/vertraege')}
@@ -74,6 +79,7 @@
             text="Verträge"
             href="/vertraege"
         />
+
         <SideNavLink
             on:click={closeSideNavIfWinWidthSmall}
             isSelected={$page.route.id?.includes('/betriebskostenrechnungen')}
@@ -81,6 +87,7 @@
             text="Betriebskostenrechnungen"
             href="/betriebskostenrechnungen"
         />
+
         <SideNavLink
             on:click={closeSideNavIfWinWidthSmall}
             isSelected={$page.route.id?.includes('/erhaltungsaufwendungen')}
@@ -88,6 +95,7 @@
             text="Erhaltungsaufwendungen"
             href="/erhaltungsaufwendungen"
         />
+
         <SideNavLink
             on:click={closeSideNavIfWinWidthSmall}
             isSelected={$page.route.id?.includes('/umlagen')}
@@ -95,6 +103,7 @@
             text="Umlagen"
             href="/umlagen"
         />
+
         <SideNavLink
             on:click={closeSideNavIfWinWidthSmall}
             isSelected={$page.route.id?.includes('/zaehler')}
@@ -110,6 +119,26 @@
             text="Adressen"
             href="/adressen"
         />
+
+        <SideNavDivider />
+
+        {#await checkStackTodo(fetchImpl)}
+            <SideNavLink
+                on:click={closeSideNavIfWinWidthSmall}
+                isSelected={$page.route.id?.includes('/stack')}
+                icon={Loading}
+                text="Ablagestapel"
+                href="/stack"
+            />
+        {:then x}
+            <SideNavLink
+                on:click={closeSideNavIfWinWidthSmall}
+                isSelected={$page.route.id?.includes('/stack')}
+                icon={x}
+                text="Ablagestapel"
+                href="/stack"
+            />
+        {/await}
 
         <SideNavDivider />
 
