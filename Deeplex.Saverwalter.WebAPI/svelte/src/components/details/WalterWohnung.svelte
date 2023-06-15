@@ -9,24 +9,28 @@
     import { Row } from 'carbon-components-svelte';
     import type { WalterSelectionEntry, WalterWohnungEntry } from '$walter/lib';
 
-    export let a: Partial<WalterWohnungEntry> = {};
+    export let entry: Partial<WalterWohnungEntry> = {};
     export let kontakte: WalterSelectionEntry[];
 </script>
 
 <Row>
-    <WalterComboBox bind:value={a.besitzer} titleText="Besitzer" a={kontakte} />
+    <WalterComboBox
+        bind:value={entry.besitzer}
+        titleText="Besitzer"
+        entry={kontakte}
+    />
 </Row>
-<WalterAdresse bind:value={a.adresse} />
+<WalterAdresse bind:value={entry.adresse} />
 <Row>
-    <WalterTextInput bind:value={a.bezeichnung} labelText="Bezeichnung" />
-    <WalterNumberInput bind:value={a.wohnflaeche} label="Wohnfläche" />
-    <WalterNumberInput bind:value={a.nutzflaeche} label="Nutzfläche" />
+    <WalterTextInput bind:value={entry.bezeichnung} labelText="Bezeichnung" />
+    <WalterNumberInput bind:value={entry.wohnflaeche} label="Wohnfläche" />
+    <WalterNumberInput bind:value={entry.nutzflaeche} label="Nutzfläche" />
     <WalterNumberInput
         hideSteppers={false}
-        bind:value={a.einheiten}
+        bind:value={entry.einheiten}
         label="Einheiten"
     />
 </Row>
 <Row>
-    <WalterTextArea bind:value={a.notiz} labelText="Notiz" />
+    <WalterTextArea bind:value={entry.notiz} labelText="Notiz" />
 </Row>

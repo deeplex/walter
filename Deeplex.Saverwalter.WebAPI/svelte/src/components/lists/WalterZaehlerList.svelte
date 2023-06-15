@@ -22,14 +22,14 @@
     export let wohnungen: WalterSelectionEntry[];
     export let umlagen: WalterSelectionEntry[];
     export let zaehlertypen: WalterSelectionEntry[];
-    export let a: Partial<WalterZaehlerEntry> | undefined = undefined;
+    export let entry: Partial<WalterZaehlerEntry> | undefined = undefined;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
         goto(`/zaehler/${e.detail.id}`);
 </script>
 
 <WalterDataWrapper
-    addEntry={a}
+    addEntry={entry}
     {addUrl}
     {title}
     {search}
@@ -37,7 +37,7 @@
     {rows}
     {headers}
 >
-    {#if a}
-        <WalterZaehler {wohnungen} {umlagen} {zaehlertypen} {a} />
+    {#if entry}
+        <WalterZaehler {wohnungen} {umlagen} {zaehlertypen} {entry} />
     {/if}
 </WalterDataWrapper>

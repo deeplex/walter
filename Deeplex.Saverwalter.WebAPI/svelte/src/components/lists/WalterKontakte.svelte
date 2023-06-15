@@ -37,21 +37,21 @@
 
     let personType = 0;
 
-    export let a:
+    export let entry:
         | Partial<WalterNatuerlichePersonEntry & WalterJuristischePersonEntry>
         | undefined = undefined;
 </script>
 
 <WalterDataWrapper
     {addUrl}
-    addEntry={a}
+    addEntry={entry}
     {title}
     {search}
     {navigate}
     {rows}
     {headers}
 >
-    {#if a}
+    {#if entry}
         <Row>
             <ContentSwitcher bind:selectedIndex={personType}>
                 <Switch text="Natürliche Person" />
@@ -60,12 +60,21 @@
         </Row>
         <Row>
             {#if personType === 0}
-                <WalterTextInput bind:value={a.vorname} labelText="Vorname" />
-                <WalterTextInput bind:value={a.nachname} labelText="Nachname" />
+                <WalterTextInput
+                    bind:value={entry.vorname}
+                    labelText="Vorname"
+                />
+                <WalterTextInput
+                    bind:value={entry.nachname}
+                    labelText="Nachname"
+                />
             {:else}
-                <WalterTextInput bind:value={a.name} labelText="Bezeichnung" />
+                <WalterTextInput
+                    bind:value={entry.name}
+                    labelText="Bezeichnung"
+                />
             {/if}
         </Row>
-        <WalterPerson value={a} />
+        <WalterPerson value={entry} />
     {/if}
 </WalterDataWrapper>

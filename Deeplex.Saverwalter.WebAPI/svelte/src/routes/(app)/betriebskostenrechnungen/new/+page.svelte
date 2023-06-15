@@ -24,7 +24,7 @@
     }
     const umlageId = searchParams.get('umlage');
     if (umlageId) {
-        entry.umlage = data.umlagen.find((e) => +e.id === +umlageId);
+        entry.umlage = data.umlagen_wohnungen.find((e) => +e.id === +umlageId);
     }
 
     const jahr = searchParams.get('jahr');
@@ -45,7 +45,7 @@
 <WalterGrid>
     <WalterBetriebskostenrechnung
         betriebskostentypen={data.betriebskostentypen}
-        umlagen={data.umlagen}
-        a={entry}
+        umlagen_wohnungen={data.umlagen_wohnungen}
+        {entry}
     />
 </WalterGrid>

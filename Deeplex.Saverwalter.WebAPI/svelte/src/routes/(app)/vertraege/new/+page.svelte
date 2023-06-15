@@ -26,8 +26,8 @@
     <WalterVertrag
         kontakte={data.kontakte}
         wohnungen={data.wohnungen}
-        a={entry}
+        {entry}
     />
     <Tile light>Vertragsversion:</Tile>
-    <WalterVertragVersion a={entryVersion} />
+    <WalterVertragVersion entry={entryVersion} />
 </WalterGrid>

@@ -19,6 +19,6 @@
         wohnungen={data.wohnungen}
         umlagen={data.umlagen}
         zaehlertypen={data.zaehlertypen}
-        a={entry}
+        {entry}
     />
 </WalterGrid>

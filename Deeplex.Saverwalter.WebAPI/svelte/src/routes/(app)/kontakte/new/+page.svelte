@@ -45,12 +45,12 @@
 <WalterGrid>
     {#if personType === 0}
         <WalterNatuerlichePerson
-            a={entry}
+            {entry}
             juristischePersonen={data.juristischePersonen}
         />
     {:else}
         <WalterJuristischePerson
-            a={entry}
+            {entry}
             kontakte={data.kontakte}
             juristischePersonen={data.juristischePersonen}
         />

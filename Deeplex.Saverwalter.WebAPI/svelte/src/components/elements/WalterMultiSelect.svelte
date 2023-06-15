@@ -4,14 +4,14 @@
 
     export let value: WalterSelectionEntry[] | undefined;
     export let titleText: string;
-    export let a: WalterSelectionEntry[];
+    export let entry: WalterSelectionEntry[];
 
     function select(e: CustomEvent) {
         value = e.detail.selected;
     }
 </script>
 
-{#await a}
+{#await entry}
     <TextInputSkeleton />
 {:then items}
     {#await value}

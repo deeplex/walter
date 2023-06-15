@@ -30,20 +30,20 @@
     export let kontakte: WalterSelectionEntry[];
     export let wohnungen: WalterSelectionEntry[];
 
-    export let a: Partial<WalterErhaltungsaufwendungEntry> | undefined =
+    export let entry: Partial<WalterErhaltungsaufwendungEntry> | undefined =
         undefined;
 </script>
 
 <WalterDataWrapper
     {addUrl}
-    addEntry={a}
+    addEntry={entry}
     {title}
     {search}
     {navigate}
     {rows}
     {headers}
 >
-    {#if a}
-        <WalterErhaltungsaufwendung {kontakte} {wohnungen} {a} />
+    {#if entry}
+        <WalterErhaltungsaufwendung {kontakte} {wohnungen} {entry} />
     {/if}
 </WalterDataWrapper>

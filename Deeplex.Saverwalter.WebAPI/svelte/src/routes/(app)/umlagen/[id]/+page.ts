@@ -13,7 +13,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         id: params.id,
         apiURL: apiURL,
         S3URL: S3URL,
-        a: WalterUmlageEntry.GetOne<WalterUmlageEntry>(params.id, fetch),
+        entry: WalterUmlageEntry.GetOne<WalterUmlageEntry>(params.id, fetch),
         betriebskostentypen: walter_selection.betriebskostentypen(fetch),
         umlagen: walter_selection.umlagen(fetch),
         umlagen_wohnungen: walter_selection.umlagen_wohnungen(fetch),

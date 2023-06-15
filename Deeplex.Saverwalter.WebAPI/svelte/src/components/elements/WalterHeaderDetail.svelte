@@ -15,7 +15,7 @@
     import { WalterToastContent } from '$walter/lib';
 
     export let title = 'Saverwalter';
-    export let a: any;
+    export let entry: any;
     export let apiURL: string;
     export let S3URL: string;
     export let files: WalterS3File[] | undefined = undefined;
@@ -35,7 +35,7 @@
     );
 
     function click_save() {
-        walter_put(apiURL, a, PutToast);
+        walter_put(apiURL, entry, PutToast);
     }
 
     const DeleteToast = new WalterToastContent(

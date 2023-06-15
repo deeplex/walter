@@ -10,12 +10,12 @@
         WalterSelectionEntry
     } from '$walter/lib';
 
-    export let a: Partial<WalterBetriebskostenrechnungEntry> = {};
+    export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
     export let betriebskostentypen: WalterSelectionEntry[];
     export let umlagen_wohnungen: WalterSelectionEntry[];
 
     let umlageEntries: WalterSelectionEntry[];
-    updateUmlageEntries(a.typ?.id);
+    updateUmlageEntries(entry.typ?.id);
 
     function updateUmlageEntries(id: string | number | undefined) {
         umlageEntries = umlagen_wohnungen.filter((u) => u.filter === id);
@@ -28,12 +28,12 @@
 
     function selectTyp(e: CustomEvent) {
         updateUmlageEntries(e.detail.selectedItem.id);
-        a.typ = e.detail.selectedItem;
-        a.umlage = undefined;
+        entry.typ = e.detail.selectedItem;
+        entry.umlage = undefined;
     }
 
     function selectUmlage(e: CustomEvent) {
-        a.umlage = e.detail.selectedItem;
+        entry.umlage = e.detail.selectedItem;
         // entry.typ = entry.umlage.filter;
     }
 </script>
@@ -43,11 +43,11 @@
         <TextInputSkeleton />
     {:then items}
         <ComboBox
-            selectedId={a?.typ?.id}
+            selectedId={entry?.typ?.id}
             on:select={selectTyp}
             style="padding-right: 1rem"
             {items}
-            value={a?.typ?.text}
+            value={entry?.typ?.text}
             titleText="Betriebskostentyp der Umlage"
             {shouldFilterItem}
         />
@@ -57,8 +57,8 @@
         <TextInputSkeleton />
     {:then}
         <ComboBox
-            disabled={!a.typ}
-            selectedId={a.umlage?.id}
+            disabled={!entry.typ}
+            selectedId={entry.umlage?.id}
             on:select={selectUmlage}
             style="padding-right: 1rem"
             bind:items={umlageEntries}
@@ -70,13 +70,13 @@
 
 <Row>
     <WalterNumberInput
-        bind:value={a.betreffendesJahr}
+        bind:value={entry.betreffendesJahr}
         hideSteppers={false}
         label="Betreffendes Jahr"
     />
-    <WalterNumberInput bind:value={a.betrag} label="Betrag" />
-    <WalterDatePicker bind:value={a.datum} labelText="Datum" />
+    <WalterNumberInput bind:value={entry.betrag} label="Betrag" />
+    <WalterDatePicker bind:value={entry.datum} labelText="Datum" />
 </Row>
 <Row>
-    <WalterTextArea bind:value={a.notiz} labelText="Notiz" />
+    <WalterTextArea bind:value={entry.notiz} labelText="Notiz" />
 </Row>

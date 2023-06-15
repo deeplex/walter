@@ -7,16 +7,24 @@ export const walter_selection = {
     adressen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/adressen', fetchImpl);
     },
-    betriebskostenrechnungen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
+    betriebskostenrechnungen(
+        fetchImpl: typeof fetch
+    ): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/betriebskostenrechnungen', fetchImpl);
     },
-    erhaltungsaufwendungen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
+    erhaltungsaufwendungen(
+        fetchImpl: typeof fetch
+    ): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/erhaltungsaufwendungen', fetchImpl);
     },
-    natuerlichePersonen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
+    natuerlichePersonen(
+        fetchImpl: typeof fetch
+    ): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/natuerlichepersonen', fetchImpl);
     },
-    juristischePersonen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
+    juristischePersonen(
+        fetchImpl: typeof fetch
+    ): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/juristischepersonen', fetchImpl);
     },
     mieten(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
@@ -43,7 +51,9 @@ export const walter_selection = {
     wohnungen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/wohnungen', fetchImpl);
     },
-    betriebskostentypen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
+    betriebskostentypen(
+        fetchImpl: typeof fetch
+    ): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/betriebskostentypen', fetchImpl);
     },
     kontakte(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
@@ -52,10 +62,14 @@ export const walter_selection = {
     umlageschluessel(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/umlageschluessel', fetchImpl);
     },
-    umlagen_verbrauch(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
+    umlagen_verbrauch(
+        fetchImpl: typeof fetch
+    ): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/umlagen_verbrauch', fetchImpl);
     },
-    umlagen_wohnungen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
+    umlagen_wohnungen(
+        fetchImpl: typeof fetch
+    ): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/umlagen_wohnungen', fetchImpl);
     },
     zaehlertypen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {

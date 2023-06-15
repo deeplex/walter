@@ -13,13 +13,13 @@
 
     export let data: PageData;
 
-    const staende = data.a.staende;
+    const staende = data.entry.staende;
 
     const lastZaehlerstand = staende.length
         ? staende[staende.length - 1]
         : undefined;
     const zaehlerstandEntry: Partial<WalterZaehlerstandEntry> = {
-        zaehler: { id: '' + data.a.id, text: data.a.kennnummer },
+        zaehler: { id: '' + data.entry.id, text: data.entry.kennnummer },
         datum: convertDateCanadian(new Date()),
         stand: lastZaehlerstand?.stand || 0,
         einheit: lastZaehlerstand?.einheit
@@ -29,9 +29,9 @@
 <WalterHeaderDetail
     S3URL={data.S3URL}
     files={data.anhaenge}
-    a={data.a}
+    entry={data.entry}
     apiURL={data.apiURL}
-    title={data.a.kennnummer}
+    title={data.entry.kennnummer}
     fetchImpl={data.fetch}
 />
 
@@ -40,14 +40,14 @@
         umlagen={data.umlagen}
         zaehlertypen={data.zaehlertypen}
         wohnungen={data.wohnungen}
-        a={data.a}
+        entry={data.entry}
     />
 
     <WalterLinks>
         <WalterZaehlerstaende
-            a={zaehlerstandEntry}
+            entry={zaehlerstandEntry}
             title="Zählerstände"
-            rows={data.a.staende}
+            rows={data.entry.staende}
         />
         <WalterUmlagen
             title="Umlagen"
@@ -55,7 +55,7 @@
             umlageschluessel={data.umlageschluessel}
             wohnungen={data.wohnungen}
             betriebskostentypen={data.betriebskostentypen}
-            rows={data.a.umlagen}
+            rows={data.entry.umlagen}
         />
     </WalterLinks>
 </WalterGrid>

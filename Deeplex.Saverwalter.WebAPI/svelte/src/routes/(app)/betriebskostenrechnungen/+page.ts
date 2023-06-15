@@ -11,6 +11,6 @@ export const load: PageLoad = async ({ fetch }) => {
         ),
 
         betriebskostentypen: walter_selection.betriebskostentypen(fetch),
-        umlagen: walter_selection.umlagen(fetch)
+        umlagen_wohnungen: walter_selection.umlagen_wohnungen(fetch)
     };
 };

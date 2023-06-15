@@ -13,35 +13,35 @@
 
     export let data: PageData;
     const wohnungEntry: Partial<WalterWohnungEntry> = {
-        adresse: { ...data.a }
+        adresse: { ...data.entry }
     };
 </script>
 
 <WalterHeaderDetail
     S3URL={data.S3URL}
-    a={data.a}
+    entry={data.entry}
     apiURL={data.apiURL}
-    title={data.a.anschrift}
+    title={data.entry.anschrift}
     fetchImpl={data.fetch}
 />
 
 <WalterGrid>
-    <WalterAdresse bind:value={data.a} />
+    <WalterAdresse bind:value={data.entry} />
 
     <WalterLinks>
         <WalterWohnungen
             kontakte={data.kontakte}
-            a={wohnungEntry}
+            entry={wohnungEntry}
             title="Wohnungen"
-            rows={data.a.wohnungen}
+            rows={data.entry.wohnungen}
         />
-        <WalterKontakte title="Personen" rows={data.a.kontakte} />
+        <WalterKontakte title="Personen" rows={data.entry.kontakte} />
         <WalterZaehlerList
             umlagen={data.umlagen}
             zaehlertypen={data.zaehlertypen}
             wohnungen={data.wohnungen}
             title="Zähler"
-            rows={data.a.zaehler}
+            rows={data.entry.zaehler}
         />
     </WalterLinks>
 </WalterGrid>

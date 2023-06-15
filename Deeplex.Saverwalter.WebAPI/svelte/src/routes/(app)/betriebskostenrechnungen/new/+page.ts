@@ -6,6 +6,6 @@ export const load: PageLoad = async ({ fetch }) => {
         apiURL: `/api/betriebskostenrechnungen`,
         title: 'Neue Betriebskostenrechnung',
         betriebskostentypen: walter_selection.betriebskostentypen(fetch),
-        umlagen: walter_selection.umlagen(fetch)
+        umlagen_wohnungen: walter_selection.umlagen_wohnungen(fetch)
     };
 };

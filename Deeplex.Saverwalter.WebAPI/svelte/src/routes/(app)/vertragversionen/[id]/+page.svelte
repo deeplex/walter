@@ -11,19 +11,20 @@
 </script>
 
 <WalterHeaderDetail
-    S3URL={data.apiURL}
+    S3URL={data.S3URL}
     files={data.anhaenge}
-    a={data.a}
+    entry={data.entry}
     apiURL={data.apiURL}
-    title={data.a.vertrag.text}
+    title={data.entry.vertrag.text}
     fetchImpl={data.fetch}
 />
 
 <WalterGrid>
-    <WalterVertragVersion a={data.a} />
-    {#await data.a}
+    <WalterVertragVersion entry={data.entry} />
+    {#await data.entry}
         <ButtonSkeleton />
     {:then x}
-        <Button href={`/vertraege/${data.a.vertrag.id}`}>Zum Vertrag</Button>
+        <Button href={`/vertraege/${data.entry.vertrag.id}`}>Zum Vertrag</Button
+        >
     {/await}
 </WalterGrid>

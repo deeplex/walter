@@ -9,27 +9,35 @@
     import type { WalterSelectionEntry, WalterZaehlerEntry } from '$walter/lib';
     import { Row } from 'carbon-components-svelte';
 
-    export let a: Partial<WalterZaehlerEntry> = {};
+    export let entry: Partial<WalterZaehlerEntry> = {};
     export let zaehlertypen: WalterSelectionEntry[];
     export let wohnungen: WalterSelectionEntry[];
     export let umlagen: WalterSelectionEntry[];
 </script>
 
 <Row>
-    <WalterTextInput bind:value={a.kennnummer} labelText="Kennnummer" />
-    <WalterComboBox bind:value={a.typ} titleText="Typ" a={zaehlertypen} />
+    <WalterTextInput bind:value={entry.kennnummer} labelText="Kennnummer" />
+    <WalterComboBox
+        bind:value={entry.typ}
+        titleText="Typ"
+        entry={zaehlertypen}
+    />
 </Row>
-<WalterAdresse bind:value={a.adresse} />
+<WalterAdresse bind:value={entry.adresse} />
 <Row>
-    <WalterComboBox bind:value={a.wohnung} titleText="Wohnung" a={wohnungen} />
+    <WalterComboBox
+        bind:value={entry.wohnung}
+        titleText="Wohnung"
+        entry={wohnungen}
+    />
 </Row>
 <Row>
     <WalterMultiSelect
-        bind:value={a.selectedUmlagen}
+        bind:value={entry.selectedUmlagen}
         a={umlagen}
         titleText="Umlagen"
     />
 </Row>
 <Row>
-    <WalterTextArea bind:value={a.notiz} labelText="Notiz" />
+    <WalterTextArea bind:value={entry.notiz} labelText="Notiz" />
 </Row>

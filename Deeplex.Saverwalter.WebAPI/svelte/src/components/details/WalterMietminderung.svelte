@@ -7,18 +7,18 @@
     import { Row } from 'carbon-components-svelte';
     import type { WalterMietminderungEntry } from '$walter/lib';
 
-    export let a: Partial<WalterMietminderungEntry> = {};
+    export let entry: Partial<WalterMietminderungEntry> = {};
 </script>
 
 <Row>
-    <WalterNumberInput bind:value={a.minderung} label="Minderung" />
-    <WalterDatePicker bind:value={a.beginn} labelText="Beginn" />
+    <WalterNumberInput bind:value={entry.minderung} label="Minderung" />
+    <WalterDatePicker bind:value={entry.beginn} labelText="Beginn" />
     <WalterDatePicker
         placeholder="Offen"
-        bind:value={a.ende}
+        bind:value={entry.ende}
         labelText="Ende"
     />
 </Row>
 <Row>
-    <WalterTextArea labelText="Notiz" bind:value={a.notiz} />
+    <WalterTextArea labelText="Notiz" bind:value={entry.notiz} />
 </Row>

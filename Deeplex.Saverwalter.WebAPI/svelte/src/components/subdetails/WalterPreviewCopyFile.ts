@@ -1,4 +1,4 @@
-import { walter_selection } from "$walter/services/requests";
+import { walter_selection } from '$walter/services/requests';
 
 export const tables = [
     {
@@ -11,49 +11,49 @@ export const tables = [
         value: 'Betriebskostenrechnungen',
         key: 'betriebskostenrechnungen',
         fetch: walter_selection.betriebskostenrechnungen,
-        S3URL: 'betriebskostenrechnungen',
+        S3URL: 'betriebskostenrechnungen'
     },
     {
         value: 'Erhaltungsaufwendungen',
         key: 'erhaltungsaufwendungen',
         fetch: walter_selection.erhaltungsaufwendungen,
-        S3URL: 'erhaltungsaufwendungen',
+        S3URL: 'erhaltungsaufwendungen'
     },
     {
         value: 'Natürliche Personen',
         key: 'natuerlichepersonen',
         fetch: walter_selection.natuerlichePersonen,
-        S3URL: 'kontakte/nat',
+        S3URL: 'kontakte/nat'
     },
     {
         value: 'Juristische Personen',
         key: 'juristischepersonen',
         fetch: walter_selection.juristischePersonen,
-        S3URL: 'kontakte/jur',
+        S3URL: 'kontakte/jur'
     },
     {
         value: 'Mieten',
         key: 'mieten',
         fetch: walter_selection.mieten,
-        S3URL: 'mieten',
+        S3URL: 'mieten'
     },
     {
         value: 'Mietminderungen',
         key: 'mietminderungen',
         fetch: walter_selection.mietminderungen,
-        S3URL: 'mietminderungen',
+        S3URL: 'mietminderungen'
     },
     {
         value: 'Umlagen',
         key: 'umlagen',
         fetch: walter_selection.umlagen,
-        S3URL: 'umlagen',
+        S3URL: 'umlagen'
     },
     {
         value: 'Verträge',
         key: 'vertraege',
         fetch: walter_selection.vertraege,
-        S3URL: 'vertraege',
+        S3URL: 'vertraege'
     },
     // {
     //     value: 'Vertragversionen',
@@ -65,18 +65,18 @@ export const tables = [
         value: 'Wohnungen',
         key: 'wohnungen',
         fetch: walter_selection.wohnungen,
-        S3URL: 'wohnungen',
+        S3URL: 'wohnungen'
     },
     {
         value: 'Zähler',
         key: 'zaehler',
         fetch: walter_selection.zaehler,
-        S3URL: 'zaehler',
+        S3URL: 'zaehler'
     },
     {
         value: 'Zählerstände',
         key: 'zaehlerstaende',
         fetch: walter_selection.zaehlerstaende,
-        S3URL: 'zaehlerstaende',
+        S3URL: 'zaehlerstaende'
     }
 ];

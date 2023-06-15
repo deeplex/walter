@@ -18,18 +18,18 @@
     export let data: PageData;
 
     const lastBetriebskostenrechnung =
-        data.a.betriebskostenrechnungen[
-            data.a.betriebskostenrechnungen.length - 1
+        data.entry.betriebskostenrechnungen[
+            data.entry.betriebskostenrechnungen.length - 1
         ] || undefined;
 
     const umlage: WalterSelectionEntry = {
-        id: '' + data.a.id,
-        text: data.a.wohnungenBezeichnung,
-        filter: '' + data.a.typ
+        id: '' + data.entry.id,
+        text: data.entry.wohnungenBezeichnung,
+        filter: '' + data.entry.typ
     };
     const betriebskostenrechungEntry: Partial<WalterBetriebskostenrechnungEntry> =
         {
-            typ: data.a.typ,
+            typ: data.entry.typ,
             umlage: umlage,
             betrag: lastBetriebskostenrechnung?.betrag || 0,
             betreffendesJahr:
@@ -42,9 +42,9 @@
 <WalterHeaderDetail
     S3URL={data.S3URL}
     files={data.anhaenge}
-    a={data.a}
+    entry={data.entry}
     apiURL={data.apiURL}
-    title={`${data.a.typ.text} - ${data.a.wohnungenBezeichnung}`}
+    title={`${data.entry.typ.text} - ${data.entry.wohnungenBezeichnung}`}
     fetchImpl={data.fetch}
 />
 
@@ -54,30 +54,30 @@
         betriebskostentypen={data.betriebskostentypen}
         wohnungen={data.wohnungen}
         umlageschluessel={data.umlageschluessel}
-        bind:a={data.a}
+        bind:entry={data.entry}
     />
 
     <WalterLinks>
         <WalterWohnungen
             kontakte={data.kontakte}
             title="Wohnungen"
-            rows={data.a.wohnungen}
+            rows={data.entry.wohnungen}
         />
         <WalterBetriebskostenrechnungen
             betriebskostentypen={data.betriebskostentypen}
             umlagen_wohnungen={data.umlagen_wohnungen}
-            a={betriebskostenrechungEntry}
+            entry={betriebskostenrechungEntry}
             title="Betriebskostenrechnungen"
-            rows={data.a.betriebskostenrechnungen}
+            rows={data.entry.betriebskostenrechnungen}
         />
         <!-- Only show if Schlüssel is "nach Verbrauch" -->
-        {#if data.a?.schluessel?.id === '3'}
+        {#if data.entry?.schluessel?.id === '3'}
             <WalterZaehlerList
                 title="Zähler"
                 wohnungen={data.wohnungen}
                 umlagen={data.umlagen}
                 zaehlertypen={data.zaehlertypen}
-                rows={data.a.zaehler}
+                rows={data.entry.zaehler}
             />
         {/if}
     </WalterLinks>

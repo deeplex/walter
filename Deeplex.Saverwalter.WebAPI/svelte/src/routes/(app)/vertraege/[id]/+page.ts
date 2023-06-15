@@ -13,7 +13,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         id: params.id,
         apiURL: apiURL,
         S3URL: S3URL,
-        a: WalterVertragEntry.GetOne<WalterVertragEntry>(params.id, fetch),
+        entry: WalterVertragEntry.GetOne<WalterVertragEntry>(params.id, fetch),
         kontakte: walter_selection.kontakte(fetch),
         wohnungen: walter_selection.wohnungen(fetch),
 

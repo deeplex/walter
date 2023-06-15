@@ -12,7 +12,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         id: params.id,
         apiURL: apiURL,
         S3URL: S3URL,
-        a: WalterBetriebskostenrechnungEntry.GetOne<WalterBetriebskostenrechnungEntry>(
+        entry: WalterBetriebskostenrechnungEntry.GetOne<WalterBetriebskostenrechnungEntry>(
             params.id,
             fetch
         ),

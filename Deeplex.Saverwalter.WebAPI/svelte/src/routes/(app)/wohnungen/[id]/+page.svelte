@@ -23,24 +23,30 @@
 
     const zaehlerEntry: Partial<WalterZaehlerEntry> = {
         wohnung: {
-            id: `${data.a.id}`,
-            text: `${data.a.adresse?.anschrift} - ${data.a.bezeichnung}`
+            id: `${data.entry.id}`,
+            text: `${data.entry.adresse?.anschrift} - ${data.entry.bezeichnung}`
         },
-        adresse: data.a.adresse ? { ...data.a.adresse } : undefined
+        adresse: data.entry.adresse ? { ...data.entry.adresse } : undefined
     };
     const umlageEntry: Partial<WalterUmlageEntry> = {
         selectedWohnungen: [
             {
-                id: '' + data.a.id,
-                text: data.a.adresse?.anschrift + ' - ' + data.a.bezeichnung
+                id: '' + data.entry.id,
+                text:
+                    data.entry.adresse?.anschrift +
+                    ' - ' +
+                    data.entry.bezeichnung
             }
         ]
     };
     const erhaltungsaufwendungEntry: Partial<WalterErhaltungsaufwendungEntry> =
         {
             wohnung: {
-                id: '' + data.a.id,
-                text: data.a.adresse?.anschrift + ' - ' + data.a.bezeichnung
+                id: '' + data.entry.id,
+                text:
+                    data.entry.adresse?.anschrift +
+                    ' - ' +
+                    data.entry.bezeichnung
             },
             datum: convertDateCanadian(new Date())
         };
@@ -49,56 +55,56 @@
 <WalterHeaderDetail
     S3URL={data.S3URL}
     files={data.anhaenge}
-    a={data.a}
+    entry={data.entry}
     apiURL={data.apiURL}
-    title={data.a.adresse?.anschrift + ' - ' + data.a.bezeichnung}
+    title={data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung}
     fetchImpl={data.fetch}
 />
 
 <WalterGrid>
-    <WalterWohnung kontakte={data.kontakte} a={data.a} />
+    <WalterWohnung kontakte={data.kontakte} entry={data.entry} />
 
     <WalterLinks>
         <WalterWohnungen
             kontakte={data.kontakte}
             title="Wohnungen an der selben Adresse"
-            rows={data.a.haus || []}
+            rows={data.entry.haus || []}
         />
         <WalterZaehlerList
             zaehlertypen={data.zaehlertypen}
             umlagen={data.umlagen}
             wohnungen={data.wohnungen}
-            a={zaehlerEntry}
+            entry={zaehlerEntry}
             title="Zähler"
-            rows={data.a.zaehler}
+            rows={data.entry.zaehler}
         />
         <WalterVertraege
             wohnungen={data.wohnungen}
             kontakte={data.kontakte}
             title="Verträge"
-            rows={data.a.vertraege}
+            rows={data.entry.vertraege}
         />
         <WalterUmlagen
             zaehler={data.zaehler}
             wohnungen={data.wohnungen}
             umlageschluessel={data.umlageschluessel}
             betriebskostentypen={data.betriebskostentypen}
-            a={umlageEntry}
+            entry={umlageEntry}
             title="Umlagen"
-            rows={data.a.umlagen}
+            rows={data.entry.umlagen}
         />
         <WalterBetriebskostenrechnungen
             betriebskostentypen={data.betriebskostentypen}
-            umlagen={data.umlagen}
+            umlagen_wohnungen={data.umlagen_wohnungen}
             title="Betriebskostenrechnungen"
-            rows={data.a.betriebskostenrechnungen}
+            rows={data.entry.betriebskostenrechnungen}
         />
         <WalterErhaltungsaufwendungen
             wohnungen={data.wohnungen}
             kontakte={data.kontakte}
-            a={erhaltungsaufwendungEntry}
+            entry={erhaltungsaufwendungEntry}
             title="Erhaltungsaufwendungen"
-            rows={data.a.erhaltungsaufwendungen}
+            rows={data.entry.erhaltungsaufwendungen}
         />
     </WalterLinks>
 </WalterGrid>

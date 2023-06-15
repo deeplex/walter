@@ -20,6 +20,6 @@
         wohnungen={data.wohnungen}
         betriebskostentypen={data.betriebskostentypen}
         umlageschluessel={data.umlageschluessel}
-        a={entry}
+        {entry}
     />
 </WalterGrid>
