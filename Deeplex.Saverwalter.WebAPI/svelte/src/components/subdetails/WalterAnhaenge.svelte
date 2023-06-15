@@ -57,6 +57,7 @@
 
 {#if selectedFile}
     <WalterPreview
+        fetchImpl={f}
         bind:files
         bind:file={selectedFile}
         bind:open={previewOpen}

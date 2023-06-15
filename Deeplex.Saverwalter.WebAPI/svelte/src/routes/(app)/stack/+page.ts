@@ -5,6 +5,7 @@ export const load: PageLoad = async ({ fetch }) => {
     const S3URL = 'stack'
 
     return {
+        fetch,
         S3URL,
         files: walter_s3_get_files('stack', fetch),
     };

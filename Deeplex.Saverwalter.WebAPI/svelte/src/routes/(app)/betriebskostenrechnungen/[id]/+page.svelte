@@ -29,7 +29,7 @@
 <WalterGrid>
     <WalterBetriebskostenrechnung
         betriebskostentypen={data.betriebskostentypen}
-        umlagen={data.umlagen}
+        umlagen_wohnungen={data.umlagen_wohnungen}
         a={data.a}
     />
 

@@ -16,6 +16,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         a: WalterUmlageEntry.GetOne<WalterUmlageEntry>(params.id, fetch),
         betriebskostentypen: walter_selection.betriebskostentypen(fetch),
         umlagen: walter_selection.umlagen(fetch),
+        umlagen_wohnungen: walter_selection.umlagen_wohnungen(fetch),
         umlageschluessel: walter_selection.umlageschluessel(fetch),
         wohnungen: walter_selection.wohnungen(fetch),
         kontakte: walter_selection.kontakte(fetch),

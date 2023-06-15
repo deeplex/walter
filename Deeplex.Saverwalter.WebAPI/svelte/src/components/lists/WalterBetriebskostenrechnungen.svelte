@@ -15,7 +15,7 @@
     export let search = false;
     export let title: string | undefined = undefined;
     export let betriebskostentypen: WalterSelectionEntry[];
-    export let umlagen: WalterSelectionEntry[];
+    export let umlagen_wohnungen: WalterSelectionEntry[];
 
     const headers = [
         { key: 'typ.text', value: 'Typ' },
@@ -44,6 +44,10 @@
     {headers}
 >
     {#if a}
-        <WalterBetriebskostenrechnung {umlagen} {betriebskostentypen} {a} />
+        <WalterBetriebskostenrechnung
+            {umlagen_wohnungen}
+            {betriebskostentypen}
+            {a}
+        />
     {/if}
 </WalterDataWrapper>

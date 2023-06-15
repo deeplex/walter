@@ -12,13 +12,13 @@
 
     export let a: Partial<WalterBetriebskostenrechnungEntry> = {};
     export let betriebskostentypen: WalterSelectionEntry[];
-    export let umlagen: WalterSelectionEntry[];
+    export let umlagen_wohnungen: WalterSelectionEntry[];
 
     let umlageEntries: WalterSelectionEntry[];
     updateUmlageEntries(a.typ?.id);
 
     function updateUmlageEntries(id: string | number | undefined) {
-        umlageEntries = umlagen.filter((u) => u.filter === id);
+        umlageEntries = umlagen_wohnungen.filter((u) => u.filter === id);
     }
 
     function shouldFilterItem(item: WalterSelectionEntry, value: string) {
@@ -53,7 +53,7 @@
         />
     {/await}
 
-    {#await umlagen}
+    {#await umlagen_wohnungen}
         <TextInputSkeleton />
     {:then}
         <ComboBox

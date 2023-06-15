@@ -65,7 +65,7 @@
         />
         <WalterBetriebskostenrechnungen
             betriebskostentypen={data.betriebskostentypen}
-            umlagen={data.umlagen}
+            umlagen_wohnungen={data.umlagen_wohnungen}
             a={betriebskostenrechungEntry}
             title="Betriebskostenrechnungen"
             rows={data.a.betriebskostenrechnungen}
