@@ -29,6 +29,22 @@
         background-color: #2e7d32 !important;
     }
 
+    :global(.bx--toast-notification) {
+        animation-name: fly;
+        animation-duration: 200ms;
+    }
+
+    @keyframes fly {
+        from {
+            transform: translateX(200px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
     :global(.bx--file) {
         padding-top: 2em;
         display: flex;

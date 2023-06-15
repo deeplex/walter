@@ -62,12 +62,16 @@
                 } kopiert werden.`
         );
 
-        walter_s3_post(
+        const success = walter_s3_post(
             new File([file.Blob], file.FileName),
             S3URL,
             fetchImpl,
             copyToast
         );
+
+        if ((await success).ok) {
+            open = false;
+        }
     }
 </script>
 
