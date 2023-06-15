@@ -97,7 +97,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public PersonEntry(IPerson entity, SaverwalterContext ctx) : base(entity)
             {
                 Ctx = ctx;
-                SelectedJuristischePersonen = Entity!.JuristischePersonen.Select(e => new SelectionEntry(e.PersonId, ctx.FindPerson(e.PersonId).Bezeichnung));
+                SelectedJuristischePersonen = Entity!.JuristischePersonen.Select(e => new SelectionEntry(e.JuristischePersonId, ctx.FindPerson(e.PersonId).Bezeichnung));
             }
         }
 

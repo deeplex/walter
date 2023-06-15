@@ -13,7 +13,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         id: params.id,
         S3URL: S3URL,
         apiURL: apiURL,
-        a: WalterJuristischePersonEntry.GetOne<WalterJuristischePersonEntry>(
+        entry: WalterJuristischePersonEntry.GetOne<WalterJuristischePersonEntry>(
             `jur/${params.id}`,
             fetch
         ),

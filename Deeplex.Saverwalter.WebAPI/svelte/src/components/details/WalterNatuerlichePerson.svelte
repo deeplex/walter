@@ -11,22 +11,22 @@
     } from '$walter/lib';
     import { Row } from 'carbon-components-svelte';
 
-    export let a: Partial<WalterNatuerlichePersonEntry>;
+    export let entry: Partial<WalterNatuerlichePersonEntry>;
     export let juristischePersonen: WalterSelectionEntry[];
 </script>
 
 <Row>
-    <WalterTextInput bind:value={a.vorname} labelText="Vorname" />
-    <WalterTextInput bind:value={a.nachname} labelText="Nachname" />
+    <WalterTextInput bind:value={entry.vorname} labelText="Vorname" />
+    <WalterTextInput bind:value={entry.nachname} labelText="Nachname" />
 </Row>
-<WalterPerson value={a} />
+<WalterPerson value={entry} />
 <Row>
     <WalterMultiSelect
-        bind:a={juristischePersonen}
+        bind:entry={juristischePersonen}
         titleText="Juristische Personen"
-        bind:value={a.selectedJuristischePersonen}
+        bind:value={entry.selectedJuristischePersonen}
     />
 </Row>
 <Row>
-    <WalterTextArea bind:value={a.notiz} labelText="Notiz" />
+    <WalterTextArea bind:value={entry.notiz} labelText="Notiz" />
 </Row>

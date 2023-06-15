@@ -15,22 +15,26 @@
     export let kontakte: WalterSelectionEntry[];
     export let wohnungen: WalterSelectionEntry[];
 
-    export let a: Partial<WalterErhaltungsaufwendungEntry> = {};
+    export let entry: Partial<WalterErhaltungsaufwendungEntry> = {};
 </script>
 
 <Row>
-    <WalterTextInput bind:value={a.bezeichnung} labelText="Bezeichnung" />
+    <WalterTextInput bind:value={entry.bezeichnung} labelText="Bezeichnung" />
     <WalterComboBox
-        bind:value={a.aussteller}
+        bind:value={entry.aussteller}
         titleText="Aussteller"
-        a={kontakte}
+        entry={kontakte}
     />
-    <WalterDatePicker bind:value={a.datum} labelText="Datum" />
+    <WalterDatePicker bind:value={entry.datum} labelText="Datum" />
 </Row>
 <Row>
-    <WalterComboBox bind:value={a.wohnung} titleText="Wohnung" a={wohnungen} />
-    <WalterNumberInput bind:value={a.betrag} label="Betrag" />
+    <WalterComboBox
+        bind:value={entry.wohnung}
+        titleText="Wohnung"
+        entry={wohnungen}
+    />
+    <WalterNumberInput bind:value={entry.betrag} label="Betrag" />
 </Row>
 <Row>
-    <WalterTextArea bind:value={a.notiz} labelText="Notiz" />
+    <WalterTextArea bind:value={entry.notiz} labelText="Notiz" />
 </Row>

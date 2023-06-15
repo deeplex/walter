@@ -15,7 +15,7 @@
     export let rows: WalterZaehlerstandEntry[];
     export let search = false;
     export let title: string | undefined = undefined;
-    export let a: Partial<WalterZaehlerstandEntry> | undefined = undefined;
+    export let entry: Partial<WalterZaehlerstandEntry> | undefined = undefined;
 
     const navigate = (e: CustomEvent) => goto(`/zaehlerstaende/${e.detail.id}`);
 </script>
@@ -23,13 +23,13 @@
 <WalterDataWrapper
     {navigate}
     {addUrl}
-    addEntry={a}
+    addEntry={entry}
     {title}
     {search}
     {rows}
     {headers}
 >
-    {#if a}
-        <WalterZaehlerstand {a} />
+    {#if entry}
+        <WalterZaehlerstand {entry} />
     {/if}
 </WalterDataWrapper>

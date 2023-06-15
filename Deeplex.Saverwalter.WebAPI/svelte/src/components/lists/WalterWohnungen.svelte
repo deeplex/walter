@@ -21,19 +21,19 @@
     export let search = false;
     export let title: string | undefined = undefined;
     export let kontakte: WalterSelectionEntry[];
-    export let a: Partial<WalterWohnungEntry> | undefined = undefined;
+    export let entry: Partial<WalterWohnungEntry> | undefined = undefined;
 </script>
 
 <WalterDataWrapper
     {addUrl}
-    addEntry={a}
+    addEntry={entry}
     {title}
     {search}
     {navigate}
     {rows}
     {headers}
 >
-    {#if a}
-        <WalterWohnung {kontakte} {a} />
+    {#if entry}
+        <WalterWohnung {kontakte} {entry} />
     {/if}
 </WalterDataWrapper>

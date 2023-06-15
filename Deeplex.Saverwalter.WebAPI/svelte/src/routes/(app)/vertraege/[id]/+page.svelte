@@ -31,14 +31,14 @@
     import WalterLinks from '../../../../components/subdetails/WalterLinks.svelte';
     export let data: PageData;
 
-    const ver = data.a.versionen;
+    const versionen = data.entry.versionen;
     const mietminderungEntry: Partial<WalterMietminderungEntry> =
         getMietminderungEntry(`${data.id}`);
     const vertragversionEntry: Partial<WalterVertragVersionEntry> =
-        getVertragversionEntry(`${data.id}`, ver[ver.length - 1]);
+        getVertragversionEntry(`${data.id}`, versionen[versionen.length - 1]);
     const mieteEntry: Partial<WalterMieteEntry> = getMieteEntry(
         `${data.id}`,
-        ver[ver.length - 1]
+        versionen[versionen.length - 1]
     );
     const mieterEntry: Partial<WalterPersonEntry> = {};
 
@@ -52,7 +52,7 @@
         }
     });
 
-    let title = `${data.a.wohnung?.text} - ${data.a.mieter
+    let title = `${data.entry.wohnung?.text} - ${data.entry.mieter
         ?.map((mieter) => mieter.name)
         .join(', ')}`;
 </script>
@@ -60,7 +60,7 @@
 <WalterHeaderDetail
     S3URL={data.S3URL}
     bind:files={data.anhaenge}
-    bind:a={data.a}
+    bind:entry={data.entry}
     apiURL={data.apiURL}
     {title}
     fetchImpl={data.fetch}
@@ -70,21 +70,29 @@
     <WalterVertrag
         kontakte={data.kontakte}
         wohnungen={data.wohnungen}
-        bind:a={data.a}
+        bind:entry={data.entry}
     />
 
     <WalterLinks>
-        <WalterKontakte a={mieterEntry} title="Mieter" rows={data.a.mieter} />
-        <WalterVertragVersionen
-            a={vertragversionEntry}
-            title="Versionen:"
-            rows={data.a.versionen}
+        <WalterKontakte
+            entry={mieterEntry}
+            title="Mieter"
+            rows={data.entry.mieter}
         />
-        <WalterMieten a={mieteEntry} title="Mieten" rows={data.a.mieten} />
+        <WalterVertragVersionen
+            entry={vertragversionEntry}
+            title="Versionen:"
+            rows={data.entry.versionen}
+        />
+        <WalterMieten
+            entry={mieteEntry}
+            title="Mieten"
+            rows={data.entry.mieten}
+        />
         <WalterMietminderungen
-            a={mietminderungEntry}
+            entry={mietminderungEntry}
             title="Mietminderungen"
-            rows={data.a.mietminderungen}
+            rows={data.entry.mietminderungen}
         />
     </WalterLinks>
 
@@ -96,7 +104,7 @@
         vertragId={data.id}
         fetchImpl={data.fetch}
         S3URL={data.S3URL}
-        firstYear={new Date(data.a.beginn).getFullYear()}
+        firstYear={new Date(data.entry.beginn).getFullYear()}
         bind:S3files={data.anhaenge}
         bind:abrechnung
     />

@@ -8,14 +8,14 @@
     import type { WalterZaehlerstandEntry } from '$walter/lib';
     import WalterTextInput from '../elements/WalterTextInput.svelte';
 
-    export let a: Partial<WalterZaehlerstandEntry> = {};
+    export let entry: Partial<WalterZaehlerstandEntry> = {};
 </script>
 
 <Row>
-    <WalterNumberInput bind:value={a.stand} label="Zählerstand" />
-    <WalterDatePicker bind:value={a.datum} labelText="Ablesedatum" />
-    <WalterTextInput readonly bind:value={a.einheit} labelText="Einheit" />
+    <WalterNumberInput bind:value={entry.stand} label="Zählerstand" />
+    <WalterDatePicker bind:value={entry.datum} labelText="Ablesedatum" />
+    <WalterTextInput readonly bind:value={entry.einheit} labelText="Einheit" />
 </Row>
 <Row>
-    <WalterTextArea labelText="Notiz" bind:value={a.notiz} />
+    <WalterTextArea labelText="Notiz" bind:value={entry.notiz} />
 </Row>

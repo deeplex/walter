@@ -15,7 +15,7 @@
     export let search = false;
     export let title: string | undefined = undefined;
     export let betriebskostentypen: WalterSelectionEntry[];
-    export let umlagen: WalterSelectionEntry[];
+    export let umlagen_wohnungen: WalterSelectionEntry[];
 
     const headers = [
         { key: 'typ.text', value: 'Typ' },
@@ -30,20 +30,24 @@
     const navigate = (e: CustomEvent<DataTableRow>) =>
         goto(`/betriebskostenrechnungen/${e.detail.id}`);
 
-    export let a: Partial<WalterBetriebskostenrechnungEntry> | undefined =
+    export let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined =
         undefined;
 </script>
 
 <WalterDataWrapper
     {addUrl}
-    addEntry={a}
+    addEntry={entry}
     {title}
     {search}
     {navigate}
     {rows}
     {headers}
 >
-    {#if a}
-        <WalterBetriebskostenrechnung {umlagen} {betriebskostentypen} {a} />
+    {#if entry}
+        <WalterBetriebskostenrechnung
+            {umlagen_wohnungen}
+            {betriebskostentypen}
+            {entry}
+        />
     {/if}
 </WalterDataWrapper>

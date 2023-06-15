@@ -5,7 +5,7 @@
 
     export let value: WalterSelectionEntry | undefined;
     export let titleText: string;
-    export let a: WalterSelectionEntry[];
+    export let entry: WalterSelectionEntry[];
 
     function shouldFilterItem(item: WalterSelectionEntry, value: string) {
         if (!value) return true;
@@ -17,7 +17,7 @@
     }
 </script>
 
-{#await a}
+{#await entry}
     <TextInputSkeleton />
 {:then items}
     {#await value}

@@ -15,11 +15,12 @@
         ModalFooter,
         ModalHeader
     } from 'carbon-components-svelte';
+    import WalterPreviewCopyFile from './WalterPreviewCopyFile.svelte';
 
     export let open = false;
     export let file: WalterS3File;
     export let files: WalterS3File[];
-    // export let fullscreen: boolean = false;
+    export let fetchImpl: typeof fetch;
 
     function close() {
         open = false;
@@ -47,6 +48,11 @@
                 })
         });
     }
+
+    let copying = false;
+    function copy() {
+        copying = true;
+    }
 </script>
 
 <ComposedModal size="lg" bind:open on:submit>
@@ -64,7 +70,10 @@
     </ModalBody>
     <ModalFooter>
         <Button kind="secondary" on:click={close}>Abbrechen</Button>
+        <Button kind="tertiary" on:click={copy}>Kopieren</Button>
         <Button kind="danger" on:click={remove}>Löschen</Button>
         <Button kind="primary" on:click={download}>Herunterladen</Button>
     </ModalFooter>
 </ComposedModal>
+
+<WalterPreviewCopyFile {fetchImpl} bind:open={copying} {file} />

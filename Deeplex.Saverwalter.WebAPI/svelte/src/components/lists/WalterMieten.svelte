@@ -17,19 +17,19 @@
 
     const navigate = (e: CustomEvent) => goto(`/mieten/${e.detail.id}`);
 
-    export let a: Partial<WalterMieteEntry> | undefined = undefined;
+    export let entry: Partial<WalterMieteEntry> | undefined = undefined;
 </script>
 
 <WalterDataWrapper
     {navigate}
     {addUrl}
-    addEntry={a}
+    addEntry={entry}
     {title}
     {search}
     {rows}
     {headers}
 >
-    {#if a}
-        <WalterMiete {a} />
+    {#if entry}
+        <WalterMiete {entry} />
     {/if}
 </WalterDataWrapper>

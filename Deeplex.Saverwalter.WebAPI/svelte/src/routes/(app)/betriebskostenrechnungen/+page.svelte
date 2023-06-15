@@ -10,7 +10,7 @@
 
 <WalterHeaderList title="Betriebskostenrechnung" />
 <WalterBetriebskostenrechnungen
-    umlagen={data.umlagen}
+    umlagen_wohnungen={data.umlagen_wohnungen}
     betriebskostentypen={data.betriebskostentypen}
     search
     rows={data.rows}

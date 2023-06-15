@@ -17,6 +17,6 @@
     <WalterErhaltungsaufwendung
         kontakte={data.kontakte}
         wohnungen={data.wohnungen}
-        a={entry}
+        {entry}
     />
 </WalterGrid>

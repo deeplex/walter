@@ -16,30 +16,30 @@
 <WalterHeaderDetail
     S3URL={data.S3URL}
     files={data.anhaenge}
-    a={data.a}
+    entry={data.entry}
     apiURL={data.apiURL}
-    title={data.a.typ?.text +
+    title={data.entry.typ?.text +
         ' - ' +
-        data.a.betreffendesJahr +
+        data.entry.betreffendesJahr +
         ' - ' +
-        data.a.umlage?.text}
+        data.entry.umlage?.text}
     fetchImpl={data.fetch}
 />
 
 <WalterGrid>
     <WalterBetriebskostenrechnung
         betriebskostentypen={data.betriebskostentypen}
-        umlagen={data.umlagen}
-        a={data.a}
+        umlagen_wohnungen={data.umlagen_wohnungen}
+        entry={data.entry}
     />
 
     <WalterLinks>
         <WalterWohnungen
             kontakte={data.kontakte}
             title="Wohnungen"
-            rows={data.a.wohnungen}
+            rows={data.entry.wohnungen}
         />
     </WalterLinks>
 
-    <Button href={`/umlagen/${data.a.umlage?.id}`}>Zur Umlage</Button>
+    <Button href={`/umlagen/${data.entry.umlage?.id}`}>Zur Umlage</Button>
 </WalterGrid>

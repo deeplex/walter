@@ -12,37 +12,37 @@
     export let wohnungen: WalterSelectionEntry[];
     export let zaehler: WalterSelectionEntry[];
 
-    export let a: Partial<WalterUmlageEntry> = {};
+    export let entry: Partial<WalterUmlageEntry> = {};
 </script>
 
 <Row>
     <WalterComboBox
-        a={betriebskostentypen}
-        bind:value={a.typ}
+        entry={betriebskostentypen}
+        bind:value={entry.typ}
         titleText="Typ"
     />
     <WalterComboBox
-        a={umlageschluessel}
-        bind:value={a.schluessel}
+        entry={umlageschluessel}
+        bind:value={entry.schluessel}
         titleText="Umlageschlüssel"
     />
 </Row>
 <Row>
     <WalterMultiSelect
-        bind:value={a.selectedWohnungen}
+        bind:value={entry.selectedWohnungen}
         a={wohnungen}
         titleText="Wohnungen"
     />
 </Row>
-{#if a.schluessel?.id === '3'}
+{#if entry.schluessel?.id === '3'}
     <Row>
         <WalterMultiSelect
-            bind:value={a.selectedZaehler}
+            bind:value={entry.selectedZaehler}
             a={zaehler}
             titleText="Zähler"
         />
     </Row>
 {/if}
 <Row>
-    <WalterTextArea labelText="Notiz" bind:value={a.notiz} />
+    <WalterTextArea labelText="Notiz" bind:value={entry.notiz} />
 </Row>

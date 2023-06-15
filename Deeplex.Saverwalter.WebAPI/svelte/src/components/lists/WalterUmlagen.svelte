@@ -22,11 +22,11 @@
     export let umlageschluessel: WalterSelectionEntry[];
     export let wohnungen: WalterSelectionEntry[];
     export let zaehler: WalterSelectionEntry[];
-    export let a: Partial<WalterUmlageEntry> | undefined = undefined;
+    export let entry: Partial<WalterUmlageEntry> | undefined = undefined;
 </script>
 
 <WalterDataWrapper
-    addEntry={a}
+    addEntry={entry}
     {addUrl}
     {title}
     {search}
@@ -34,13 +34,13 @@
     {rows}
     {headers}
 >
-    {#if a}
+    {#if entry}
         <WalterUmlage
             {zaehler}
             {betriebskostentypen}
             {umlageschluessel}
             {wohnungen}
-            {a}
+            {entry}
         />
     {/if}
 </WalterDataWrapper>

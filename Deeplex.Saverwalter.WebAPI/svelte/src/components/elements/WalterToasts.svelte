@@ -17,18 +17,23 @@
     });
 </script>
 
-<div
-    style="; overflow: hidden; position: absolute; top: 48px; right: 0; z-index: 99"
->
-    {#each toaster as toast, i}
-        <div transition:fly={{ x: 200, duration: 200 }}>
-            <ToastNotification
-                on:close={(e) => close(e, i)}
-                title={toast.title}
-                kind={toast.kind}
-                subtitle={toast.subtitle}
-                caption={new Date().toLocaleString('de-DE')}
-            />
-        </div>
+<div class="toast-container">
+    {#each toaster as toast, i (toast)}
+        <ToastNotification
+            on:close={(e) => close(e, i)}
+            title={toast.title}
+            kind={toast.kind}
+            subtitle={toast.subtitle}
+            caption={new Date().toLocaleString('de-DE')}
+        />
     {/each}
 </div>
+
+<style>
+    .toast-container {
+        z-index: 9000;
+        position: fixed;
+        right: 0px;
+        top: 48px;
+    }
+</style>

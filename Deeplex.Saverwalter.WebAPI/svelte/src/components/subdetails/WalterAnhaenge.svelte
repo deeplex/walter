@@ -15,7 +15,7 @@
     import { WalterPreview } from '$walter/components';
     import type { WalterS3File } from '$walter/types';
 
-    export let f: typeof fetch;
+    export let fetchImpl: typeof fetch;
     export let S3URL: string;
     export let files: WalterS3File[];
 
@@ -35,7 +35,7 @@
         fileUploadComplete = false;
         for (const file of newFiles) {
             {
-                walter_s3_post(file, S3URL, f).then(() =>
+                walter_s3_post(file, S3URL, fetchImpl).then(() =>
                     upload_finished(file)
                 );
             }
@@ -57,6 +57,7 @@
 
 {#if selectedFile}
     <WalterPreview
+        {fetchImpl}
         bind:files
         bind:file={selectedFile}
         bind:open={previewOpen}

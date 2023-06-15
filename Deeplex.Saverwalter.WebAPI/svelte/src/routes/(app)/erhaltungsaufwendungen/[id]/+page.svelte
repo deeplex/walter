@@ -12,9 +12,9 @@
 <WalterHeaderDetail
     S3URL={data.S3URL}
     files={data.anhaenge}
-    a={data.a}
+    entry={data.entry}
     apiURL={data.apiURL}
-    title={data.a.aussteller?.text + ' - ' + data.a.bezeichnung}
+    title={data.éntry.aussteller?.text + ' - ' + data.entry.bezeichnung}
     fetchImpl={data.fetch}
 />
 
@@ -22,6 +22,6 @@
     <WalterErhaltungsaufwendung
         kontakte={data.kontakte}
         wohnungen={data.wohnungen}
-        a={data.a}
+        entry={data.entry}
     />
 </WalterGrid>

@@ -23,19 +23,20 @@
     const navigate = (e: CustomEvent<DataTableRow>) =>
         goto(`/vertragversionen/${e.detail.id}`);
 
-    export let a: Partial<WalterVertragVersionEntry> | undefined = undefined;
+    export let entry: Partial<WalterVertragVersionEntry> | undefined =
+        undefined;
 </script>
 
 <WalterDataWrapper
     {navigate}
     {addUrl}
-    addEntry={a}
+    addEntry={entry}
     {title}
     {search}
     {rows}
     {headers}
 >
-    {#if a}
-        <WalterVertragVersion {a} />
+    {#if entry}
+        <WalterVertragVersion {entry} />
     {/if}
 </WalterDataWrapper>

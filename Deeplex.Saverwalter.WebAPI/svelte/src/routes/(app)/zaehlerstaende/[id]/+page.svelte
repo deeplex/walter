@@ -14,17 +14,17 @@
 <WalterHeaderDetail
     S3URL={data.S3URL}
     files={data.anhaenge}
-    a={data.a}
+    entry={data.entry}
     apiURL={data.apiURL}
-    title={data.a.zaehler.text +
+    title={data.entry.zaehler.text +
         ' - ' +
-        convertDateGerman(new Date(data.a.datum))}
+        convertDateGerman(new Date(data.entry.datum))}
     fetchImpl={data.fetch}
 />
 
 <WalterGrid>
-    <WalterZaehlerstand a={data.a} />
-    {#await data.a}
+    <WalterZaehlerstand entry={data.entry} />
+    {#await data.entry}
         <ButtonSkeleton />
     {:then x}
         <Button href={`/zaehler/${x.zaehler.id}`}>Zum Zähler</Button>

@@ -13,15 +13,15 @@
 <WalterHeaderDetail
     S3URL={data.S3URL}
     files={data.anhaenge}
-    a={data.a}
+    entry={data.entry}
     apiURL={data.apiURL}
-    title={data.a.vertrag.text}
+    title={data.entry.vertrag.text}
     fetchImpl={data.fetch}
 />
 
 <WalterGrid>
-    <WalterMiete a={data.a} />
-    {#await data.a}
+    <WalterMiete entry={data.entry} />
+    {#await data.entry}
         <ButtonSkeleton />
     {:then x}
         <Button href={`/vertraege/${x.vertrag.id}`}>Zum Vertrag</Button>
