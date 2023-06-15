@@ -12,7 +12,10 @@
         ModalHeader,
         RadioButton,
         RadioButtonGroup,
-        Row
+        Row,
+        Toolbar,
+        ToolbarContent,
+        ToolbarSearch
     } from 'carbon-components-svelte';
     import { tables } from './WalterPreviewCopyFile';
     import { walter_s3_post } from '$walter/services/s3';
@@ -78,7 +81,7 @@
 <ComposedModal size="lg" bind:open on:submit>
     <ModalHeader title={`${file.FileName} kopieren`} />
     <ModalBody>
-        <Grid fullWidth condensed>
+        <Grid condensed fullWidth>
             <Row>
                 <Column>
                     <RadioButtonGroup
@@ -96,13 +99,25 @@
                 </Column>
                 <Column>
                     <DataTable
+                        style="max-height: 30em; cursor: pointer"
+                        stickyHeader
+                        sortable
                         zebra
-                        style="max-height: 1em"
                         radio
                         bind:selectedRowIds
                         {headers}
                         {rows}
-                    />
+                    >
+                        <Toolbar>
+                            <ToolbarContent>
+                                <ToolbarSearch
+                                    placeholder="Suche..."
+                                    persistent
+                                    shouldFilterRows
+                                />
+                            </ToolbarContent>
+                        </Toolbar>
+                    </DataTable>
                 </Column>
             </Row>
         </Grid>
