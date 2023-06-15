@@ -76,7 +76,7 @@
                 </HeaderPanelLinks>
                 {#if files}
                     <div style="height: 1em" />
-                    <WalterAnhaenge {S3URL} bind:files f={fetchImpl} />
+                    <WalterAnhaenge {S3URL} bind:files {fetchImpl} />
                 {/if}
             </HeaderAction>
         {:else}
@@ -89,7 +89,7 @@
 
             {#if files}
                 <HeaderAction text="({files.length})">
-                    <WalterAnhaenge {S3URL} bind:files f={fetchImpl} />
+                    <WalterAnhaenge {S3URL} bind:files {fetchImpl} />
                 </HeaderAction>
             {/if}
         {/if}

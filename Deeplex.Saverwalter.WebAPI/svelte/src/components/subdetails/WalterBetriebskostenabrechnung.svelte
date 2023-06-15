@@ -3,7 +3,7 @@
     import { walter_s3_post } from '$walter/services/s3';
     import { Button, Row } from 'carbon-components-svelte';
 
-    export let f: typeof fetch;
+    export let fetchImpl: typeof fetch;
     export let id: number;
     let jahr: number = new Date().getFullYear() - 1;
 
@@ -22,7 +22,7 @@
                 walter_s3_post(
                     new File([e], `Abrechnung ${jahr}.docx`),
                     `vertraege/${id}`,
-                    f
+                    fetchImpl
                 )
             );
     }

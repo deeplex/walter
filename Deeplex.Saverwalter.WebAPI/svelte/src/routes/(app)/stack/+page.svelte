@@ -41,7 +41,7 @@
     <HeaderUtilities>
         <HeaderAction text="({data.files.length})">
             <WalterAnhaenge
-                f={data.fetch}
+                fetchImpl={data.fetch}
                 files={data.files}
                 S3URL={data.S3URL}
             />

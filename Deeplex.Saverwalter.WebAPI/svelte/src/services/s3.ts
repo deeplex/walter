@@ -12,10 +12,10 @@ type XMLResult = {
 export const walter_s3_post = (
     file: File,
     path: string,
-    f: typeof fetch,
+    fetchImpl: typeof fetch,
     toast?: WalterToastContent
 ) =>
-    walter_fetch(f, `${baseURL}/${path}/${file.name}`, {
+    walter_fetch(fetchImpl, `${baseURL}/${path}/${file.name}`, {
         method: 'PUT',
         headers: {
             // Ignored, due to header being replaced in walter_fetch
