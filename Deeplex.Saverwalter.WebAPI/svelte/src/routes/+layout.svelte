@@ -54,13 +54,14 @@
     :global(.bx--file-browse-btn, .bx--file__drop-container) {
         font-size: xx-large;
         flex: 0 0 97%;
-        height: 85vh;
-        max-width: none;
+        height: 85vh !important;
+        max-width: none !important;
         align-items: center;
     }
 
     :global(.bx--file__drop-container) {
-        padding-left: 25%;
+        padding-top: 40vh !important;
+        padding-left: 20% !important;
     }
 
     /* Override svelte Hamburger Menu -> Seems to be buggy with rail */
