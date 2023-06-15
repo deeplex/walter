@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { WalterSelectionEntry } from '$walter/lib';
+    import { WalterToastContent, type WalterSelectionEntry } from '$walter/lib';
     import type { WalterS3File } from '$walter/types';
     import {
         Button,
@@ -35,7 +35,6 @@
     async function radio_change() {
         const selection = tables.find((e) => e.key === selectedTable);
         rows = (await selection!.fetch(fetchImpl)) || [];
-        console.log(rows);
     }
 
     async function copy() {
@@ -49,12 +48,25 @@
             return;
         }
         const S3URL = `${selectedTableObject.S3URL}/${selectedRowIds[0]}`;
-        console.log(
-            walter_s3_post(
-                new File([file.Blob], file.FileName),
-                S3URL,
-                fetchImpl
-            )
+
+        const copyToast = new WalterToastContent(
+            'Kopieren erfolgreich',
+            'Kopieren fehlgeschlagen',
+            () =>
+                `Die Datei ${file.FileName} wurde erfolgreich zu ${
+                    rows.find((row) => row.id === selectedRowIds[0])?.text
+                } kopiert.`,
+            () =>
+                `Die Datei ${file.FileName} konnte nicht zu ${
+                    rows.find((row) => row.id === selectedRowIds[0])?.text
+                } kopiert werden.`
+        );
+
+        walter_s3_post(
+            new File([file.Blob], file.FileName),
+            S3URL,
+            fetchImpl,
+            copyToast
         );
     }
 </script>
