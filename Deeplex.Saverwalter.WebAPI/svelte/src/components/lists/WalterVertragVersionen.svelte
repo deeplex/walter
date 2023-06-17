@@ -18,6 +18,7 @@
 
     export let rows: WalterVertragVersionEntry[];
     export let search = false;
+    export let fullHeight = false;
     export let title: string | undefined = undefined;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
@@ -35,6 +36,7 @@
     {search}
     {rows}
     {headers}
+    {fullHeight}
 >
     {#if entry}
         <WalterVertragVersion {entry} />

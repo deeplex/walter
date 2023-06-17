@@ -14,4 +14,5 @@
     betriebskostentypen={data.betriebskostentypen}
     search
     rows={data.rows}
+    fullHeight
 />

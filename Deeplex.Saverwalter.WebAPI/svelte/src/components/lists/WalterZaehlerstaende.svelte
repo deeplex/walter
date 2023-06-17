@@ -14,6 +14,7 @@
 
     export let rows: WalterZaehlerstandEntry[];
     export let search = false;
+    export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let entry: Partial<WalterZaehlerstandEntry> | undefined = undefined;
 
@@ -28,6 +29,7 @@
     {search}
     {rows}
     {headers}
+    {fullHeight}
 >
     {#if entry}
         <WalterZaehlerstand {entry} />

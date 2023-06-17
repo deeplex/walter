@@ -12,6 +12,7 @@
     const addUrl = `/api/mieten/`;
 
     export let rows: WalterMieteEntry[];
+    export let fullHeight = false;
     export let search = false;
     export let title: string | undefined = undefined;
 
@@ -28,6 +29,7 @@
     {search}
     {rows}
     {headers}
+    {fullHeight}
 >
     {#if entry}
         <WalterMiete {entry} />

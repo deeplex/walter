@@ -12,6 +12,7 @@
     const addUrl = `/api/mietminderungen/`;
 
     export let rows: WalterMietminderungEntry[];
+    export let fullHeight = false;
     export let search = false;
     export let title: string | undefined = undefined;
 
@@ -29,6 +30,7 @@
     {search}
     {rows}
     {headers}
+    {fullHeight}
 >
     {#if entry}
         <WalterMietminderung {entry} />

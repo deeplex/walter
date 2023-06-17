@@ -17,6 +17,7 @@
     } from '$walter/services/utils';
     import { dates, formatToTableDate, time } from './WalterDataTable';
 
+    export let fullHeight = false;
     export let headers: {
         key: string;
         value: string;
@@ -43,7 +44,8 @@
             stickyHeader
             {headers}
             rows={x}
-            style="cursor: pointer"
+            class={fullHeight ? 'proper-list' : ''}
+            style="cursor: pointer; max-height: none !important"
         >
             {#if search}
                 <Toolbar>
@@ -76,5 +78,13 @@
                 {/if}
             </span>
         </DataTable>
+
+        <style>
+            .proper-list
+                > .bx--data-table_inner-container
+                > .bx--data-table--sticky-header {
+                max-height: none !important;
+            }
+        </style>
     {/await}
 </Content>

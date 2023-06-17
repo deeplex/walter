@@ -17,6 +17,7 @@
     const navigate = (e: CustomEvent<DataTableRow>) =>
         goto(`/adressen/${e.detail.id}`);
 
+    export let fullHeight = false;
     export let rows: WalterAdresseEntry[];
     export let search = false;
     export let title: string | undefined = undefined;
@@ -31,6 +32,7 @@
     {navigate}
     {rows}
     {headers}
+    {fullHeight}
 >
     {#if entry}
         <WalterAdresse value={entry} />

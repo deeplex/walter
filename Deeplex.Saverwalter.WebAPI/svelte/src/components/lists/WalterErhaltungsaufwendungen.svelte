@@ -24,6 +24,7 @@
     const navigate = (e: CustomEvent<DataTableRow>) =>
         goto(`/erhaltungsaufwendungen/${e.detail.id}`);
 
+    export let fullHeight = false;
     export let rows: WalterErhaltungsaufwendungEntry[];
     export let search = false;
     export let title: string | undefined = undefined;
@@ -42,6 +43,7 @@
     {navigate}
     {rows}
     {headers}
+    {fullHeight}
 >
     {#if entry}
         <WalterErhaltungsaufwendung {kontakte} {wohnungen} {entry} />

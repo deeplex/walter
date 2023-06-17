@@ -12,4 +12,5 @@
     umlagen={data.umlagen}
     search
     rows={data.rows}
+    fullHeight
 />

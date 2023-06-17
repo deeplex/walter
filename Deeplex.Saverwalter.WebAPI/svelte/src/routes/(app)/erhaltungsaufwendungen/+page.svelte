@@ -14,4 +14,5 @@
     wohnungen={data.wohnungen}
     search
     rows={data.rows}
+    fullHeight
 />

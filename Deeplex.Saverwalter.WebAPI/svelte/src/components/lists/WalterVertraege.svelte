@@ -19,6 +19,7 @@
 
     export let rows: WalterVertragEntry[];
     export let search = false;
+    export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let kontakte: WalterSelectionEntry[];
     export let wohnungen: WalterSelectionEntry[];
@@ -33,6 +34,7 @@
     {navigate}
     {rows}
     {headers}
+    {fullHeight}
 >
     {#if entry}
         <WalterVertrag {kontakte} {wohnungen} {entry} />

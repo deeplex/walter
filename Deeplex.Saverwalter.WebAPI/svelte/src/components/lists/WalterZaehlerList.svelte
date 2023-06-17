@@ -18,6 +18,7 @@
 
     export let rows: WalterZaehlerEntry[];
     export let search = false;
+    export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let wohnungen: WalterSelectionEntry[];
     export let umlagen: WalterSelectionEntry[];
@@ -36,6 +37,7 @@
     {navigate}
     {rows}
     {headers}
+    {fullHeight}
 >
     {#if entry}
         <WalterZaehler {wohnungen} {umlagen} {zaehlertypen} {entry} />

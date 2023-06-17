@@ -13,6 +13,7 @@
     import { WalterToastContent } from '../../lib/WalterToastContent';
     import { addToast } from '$walter/store';
 
+    export let fullHeight = false;
     export let addUrl: string | undefined = undefined;
     export let addEntry: any | undefined = undefined;
     export let title: string | undefined = undefined;
@@ -97,5 +98,5 @@
         </AccordionItem>
     {/await}
 {:else}
-    <WalterDataTable {search} {navigate} {rows} {headers} />
+    <WalterDataTable {fullHeight} {search} {navigate} {rows} {headers} />
 {/if}

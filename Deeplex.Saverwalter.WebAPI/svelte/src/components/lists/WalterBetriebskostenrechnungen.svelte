@@ -11,6 +11,7 @@
         WalterSelectionEntry
     } from '$walter/lib';
 
+    export let fullHeight = false;
     export let rows: WalterBetriebskostenrechnungEntry[];
     export let search = false;
     export let title: string | undefined = undefined;
@@ -42,6 +43,7 @@
     {navigate}
     {rows}
     {headers}
+    {fullHeight}
 >
     {#if entry}
         <WalterBetriebskostenrechnung

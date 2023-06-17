@@ -11,4 +11,5 @@
     kontakte={data.kontakte}
     search
     rows={data.rows}
+    fullHeight
 />

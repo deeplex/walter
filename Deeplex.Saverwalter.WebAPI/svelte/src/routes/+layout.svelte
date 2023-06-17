@@ -77,11 +77,6 @@
         position: relative !important;
     }
 
-    /* Make Lists use complete screen */
-    :global(.bx--data-table--sticky-header) {
-        max-height: calc(100vh - 96px);
-    }
-
     /* Adjust accordion for detail views */
     :global(.bx--content, .bx--accordion__content) {
         padding: 0 !important;

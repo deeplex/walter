@@ -32,6 +32,7 @@
         );
 
     export let rows: WalterPersonEntry[];
+    export let fullHeight = false;
     export let search = false;
     export let title: string | undefined = undefined;
 
@@ -50,6 +51,7 @@
     {navigate}
     {rows}
     {headers}
+    {fullHeight}
 >
     {#if entry}
         <Row>
