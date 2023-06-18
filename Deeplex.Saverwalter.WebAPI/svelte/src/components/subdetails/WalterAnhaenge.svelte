@@ -2,29 +2,31 @@
     import {
         FileUploaderDropContainer,
         HeaderPanelDivider,
-        HeaderPanelLink,
-        HeaderPanelLinks,
-        Truncate
+        HeaderPanelLinks
     } from 'carbon-components-svelte';
 
     import {
         create_walter_s3_file_from_file,
-        walter_s3_get,
         walter_s3_get_files,
         walter_s3_post
     } from '$walter/services/s3';
-    import { WalterPreview } from '$walter/components';
     import type { WalterS3File } from '$walter/types';
     import { openModal } from '$walter/store';
+    import WalterAnhaengeEntry from './WalterAnhaengeEntry.svelte';
+    import { onMount } from 'svelte';
 
     export let fetchImpl: typeof fetch;
     export let S3URL: string;
     export let files: WalterS3File[];
+    export let refFiles: WalterS3File[] | undefined = undefined;
     export let hideStackFiles = false;
 
-    let stackFilesPromise: Promise<WalterS3File[]> | undefined = undefined;
+    let stackFiles: WalterS3File[] | undefined = undefined;
+
     if (!hideStackFiles) {
-        stackFilesPromise = walter_s3_get_files('stack', fetchImpl);
+        onMount(async () => {
+            stackFiles = await walter_s3_get_files('stack', fetchImpl);
+        });
     }
 
     let fileUploadComplete = false;
@@ -62,28 +64,7 @@
             }
         }
     }
-
-    async function showModal(e: MouseEvent) {
-        const fileName = (e!.target as any).textContent;
-        walter_s3_get(`${S3URL}/${fileName}`).then((e: Blob) => {
-            const file = new File([e], fileName, { type: e.type });
-            selectedFile = create_walter_s3_file_from_file(file, S3URL);
-            previewOpen = true;
-        });
-    }
-
-    let selectedFile: WalterS3File;
-    let previewOpen = false;
 </script>
-
-{#if selectedFile}
-    <WalterPreview
-        {fetchImpl}
-        bind:files
-        bind:file={selectedFile}
-        bind:open={previewOpen}
-    />
-{/if}
 
 <HeaderPanelLinks>
     <FileUploaderDropContainer
@@ -101,50 +82,30 @@
     <HeaderPanelDivider>Dateien ({files.length})</HeaderPanelDivider>
     <HeaderPanelLinks>
         {#each files as file}
-            <HeaderPanelLink on:click={showModal}>
-                <!-- Copy the style from the original element. -->
-                <Truncate
-                    style="font-size: 0.875rem;
-							   margin-left: 0;
-							   font-weight: 600;
-							   line-height: 1.28572;
-							   letter-spacing: 0.16px;
-							   display: block;
-							   height: 2rem;
-							   color: #c6c6c6;
-							   text-decoration: none;"
-                >
-                    {file.FileName}
-                </Truncate>
-            </HeaderPanelLink>
+            <WalterAnhaengeEntry {file} bind:files {fetchImpl} {S3URL} />
         {/each}
-        {#if stackFilesPromise}
-            {#await stackFilesPromise}
-                <HeaderPanelDivider>Ablagestapel</HeaderPanelDivider>
-                <div>Loading</div>
-            {:then stackFiles}
-                <HeaderPanelDivider
-                    >Ablagestapel ({stackFiles.length})</HeaderPanelDivider
-                >
-                {#each stackFiles as file}
-                    <HeaderPanelLink on:click={showModal}>
-                        <!-- Copy the style from the original element. -->
-                        <Truncate
-                            style="font-size: 0.875rem;
-                       margin-left: 0;
-                       font-weight: 600;
-                       line-height: 1.28572;
-                       letter-spacing: 0.16px;
-                       display: block;
-                       height: 2rem;
-                       color: #c6c6c6;
-                       text-decoration: none;"
-                        >
-                            {file.FileName}
-                        </Truncate>
-                    </HeaderPanelLink>
-                {/each}
-            {/await}
+        {#if refFiles}
+            {#each refFiles as file}
+                <WalterAnhaengeEntry
+                    {file}
+                    bind:files={refFiles}
+                    {fetchImpl}
+                    {S3URL}
+                />
+            {/each}
+        {/if}
+        {#if !hideStackFiles && stackFiles}
+            <HeaderPanelDivider
+                >Ablagestapel ({stackFiles.length})</HeaderPanelDivider
+            >
+            {#each stackFiles as file}
+                <WalterAnhaengeEntry
+                    {file}
+                    bind:files={stackFiles}
+                    {fetchImpl}
+                    {S3URL}
+                />
+            {/each}
         {/if}
     </HeaderPanelLinks>
 </HeaderPanelLinks>
