@@ -49,26 +49,52 @@ export function download_file_blob(blob: Blob, fileName: string) {
     URL.revokeObjectURL(url);
 }
 
-export function walter_s3_get_files(
+export async function walter_s3_get_files(
     S3prefixURL: string,
     fetchImpl: typeof fetch
 ): Promise<WalterS3File[]> {
     const url = `${baseURL}?prefix=${S3prefixURL}`;
     const requestInit = { method: 'GET' };
 
-    return walter_fetch(fetchImpl, url, requestInit)
-        .then((e) => e.body?.getReader().read())
-        .then(parse_stream_into_walter_s3_files);
+    const fetched = await walter_fetch(fetchImpl, url, requestInit);
+    const reader = fetched.body?.getReader();
+
+    if (!reader) {
+        return []; // throw?
+    }
+
+    let done = false;
+    let result: Uint8Array | undefined = undefined;
+
+    while (!done) {
+        const { done: isDone, value } = await reader.read();
+        done = isDone;
+
+        if (value && value.length > 0) {
+            if (!result) {
+                result = value;
+            } else {
+                const concatenatedResult: Uint8Array = new Uint8Array(result.length + value.length);
+                concatenatedResult.set(result, 0);
+                concatenatedResult.set(value, result.length);
+                result = concatenatedResult;
+            }
+        }
+    }
+
+    const parsed = parse_stream_into_walter_s3_files(result);
+
+    return parsed
 }
 
 function parse_stream_into_walter_s3_files(
-    e: ReadableStreamReadResult<Uint8Array> | undefined
+    uint8array: Uint8Array | undefined
 ) {
-    if (!e) {
+    if (!uint8array) {
         return [];
     }
     const result: XMLResult = new parser.XMLParser().parse(
-        new TextDecoder().decode(e.value)
+        new TextDecoder().decode(uint8array)
     );
 
     const Contents = result?.ListBucketResult?.Contents;
