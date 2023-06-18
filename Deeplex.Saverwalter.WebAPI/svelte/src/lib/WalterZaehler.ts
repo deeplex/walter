@@ -17,7 +17,7 @@ export class WalterZaehlerEntry extends WalterApiHandler {
         public selectedUmlagen: WalterSelectionEntry[],
         public notiz: string,
         public staende: WalterZaehlerstandEntry[],
-        public lastZaehlerstand: WalterZaehlerEntry
+        public lastZaehlerstand: WalterZaehlerstandEntry
     ) {
         super();
     }

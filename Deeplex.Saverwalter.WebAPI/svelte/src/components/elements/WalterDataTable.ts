@@ -5,6 +5,7 @@ export function dates(key: string) {
         case 'datum':
         case 'betreffenderMonat':
         case 'zahlungsdatum':
+        case 'lastZaehlerstand.datum':
             return true;
         default:
             return false;
