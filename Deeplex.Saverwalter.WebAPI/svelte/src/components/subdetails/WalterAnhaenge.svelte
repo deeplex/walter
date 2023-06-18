@@ -1,6 +1,6 @@
 <script lang="ts">
     import {
-        FileUploader,
+        FileUploaderDropContainer,
         HeaderPanelDivider,
         HeaderPanelLink,
         HeaderPanelLinks,
@@ -79,13 +79,18 @@
 {/if}
 
 <HeaderPanelLinks>
-    <FileUploader
-        status={fileUploadComplete ? 'complete' : 'uploading'}
+    <FileUploaderDropContainer
+        style="scale: 0.9; margin-top: -2em"
         bind:files={newFiles}
         on:add={upload}
         multiple
-        buttonLabel="Datei hochladen"
-    />
+    >
+        <svelte:fragment slot="labelText"
+            ><div style="font-size: medium">
+                Hier klicken oder Dateien ablegen um sie hochzuladen.
+            </div></svelte:fragment
+        >
+    </FileUploaderDropContainer>
     <HeaderPanelDivider>Dateien ({files.length})</HeaderPanelDivider>
     <HeaderPanelLinks>
         {#each files as file}

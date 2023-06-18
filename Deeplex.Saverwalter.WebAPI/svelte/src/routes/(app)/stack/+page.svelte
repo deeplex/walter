@@ -66,10 +66,29 @@
 </WalterHeader>
 
 <Content>
-    <FileUploaderDropContainer
-        multiple
-        labelText="Hier klicken oder Dateien ablegen um sie hochzuladen."
-        bind:files={newFiles}
-        on:add={upload}
-    />
+    <div class="FileUploaderDropContainerWrapper">
+        <FileUploaderDropContainer
+            multiple
+            labelText="Hier klicken oder Dateien ablegen um sie hochzuladen."
+            bind:files={newFiles}
+            on:add={upload}
+        />
+    </div>
 </Content>
+
+<style>
+    :global(
+            .FileUploaderDropContainerWrapper .bx--file-browse-btn,
+            .FileUploaderDropContainerWrapper .bx--file__drop-container
+        ) {
+        font-size: xx-large;
+        flex: 0 0 97%;
+        height: 85vh !important;
+        max-width: none !important;
+        align-items: center;
+    }
+
+    :global(.FileUploaderDropContainerWrapper .bx--file__drop-container) {
+        padding-left: 20% !important;
+    }
+</style>
