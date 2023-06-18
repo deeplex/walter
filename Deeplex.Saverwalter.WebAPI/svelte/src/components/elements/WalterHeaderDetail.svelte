@@ -19,6 +19,7 @@
     export let apiURL: string;
     export let S3URL: string;
     export let files: WalterS3File[] | undefined = undefined;
+    export let refFiles: WalterS3File[] | undefined = undefined;
     export let fetchImpl: typeof fetch;
 
     let winWidth = 0;
@@ -76,7 +77,7 @@
                 </HeaderPanelLinks>
                 {#if files}
                     <div style="height: 1em" />
-                    <WalterAnhaenge {S3URL} bind:files {fetchImpl} />
+                    <WalterAnhaenge {refFiles} {S3URL} bind:files {fetchImpl} />
                 {/if}
             </HeaderAction>
         {:else}
@@ -89,7 +90,7 @@
 
             {#if files}
                 <HeaderAction text="({files.length})">
-                    <WalterAnhaenge {S3URL} bind:files {fetchImpl} />
+                    <WalterAnhaenge {refFiles} {S3URL} bind:files {fetchImpl} />
                 </HeaderAction>
             {/if}
         {/if}

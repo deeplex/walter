@@ -5,6 +5,10 @@ import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch }) => {
     const apiURL = `/api/zaehlerstaende/${params.id}`;
+    const entry = WalterZaehlerstandEntry.GetOne<WalterZaehlerstandEntry>(
+        params.id,
+        fetch
+    );
     const S3URL = `zaehlerstaende/${params.id}`;
 
     return {
@@ -12,10 +16,8 @@ export const load: PageLoad = async ({ params, fetch }) => {
         id: params.id,
         apiURL: apiURL,
         S3URL: S3URL,
-        entry: WalterZaehlerstandEntry.GetOne<WalterZaehlerstandEntry>(
-            params.id,
-            fetch
-        ),
-        files: walter_s3_get_files(S3URL, fetch) as Promise<WalterS3File[]>
+        entry,
+        files: walter_s3_get_files(S3URL, fetch) as Promise<WalterS3File[]>,
+        refFiles: walter_s3_get_files(`zaehler/${(await entry).zaehler.id}`, fetch)
     };
 };

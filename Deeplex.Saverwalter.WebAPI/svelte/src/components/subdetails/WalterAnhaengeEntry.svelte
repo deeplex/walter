@@ -5,7 +5,6 @@
     } from '$walter/services/s3';
     import type { WalterS3File } from '$walter/types';
 
-    export let S3URL: string;
     export let fetchImpl: typeof fetch;
     export let file: WalterS3File;
     export let files: WalterS3File[];
@@ -15,9 +14,9 @@
 
     async function showModal(e: MouseEvent) {
         const fileName = (e!.target as any).textContent;
-        walter_s3_get(`${S3URL}/${fileName}`).then((e: Blob) => {
-            const file = new File([e], fileName, { type: e.type });
-            selectedFile = create_walter_s3_file_from_file(file, S3URL);
+        walter_s3_get(file.Key).then((e: Blob) => {
+            const new_file = new File([e], fileName, { type: e.type });
+            selectedFile = create_walter_s3_file_from_file(new_file, file.Key);
             previewOpen = true;
         });
     }

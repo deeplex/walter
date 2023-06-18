@@ -14,6 +14,7 @@
 <WalterHeaderDetail
     S3URL={data.S3URL}
     files={data.files}
+    refFiles={data.refFiles}
     entry={data.entry}
     apiURL={data.apiURL}
     title={data.entry.zaehler.text +

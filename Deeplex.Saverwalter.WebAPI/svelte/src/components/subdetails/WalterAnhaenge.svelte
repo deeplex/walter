@@ -82,15 +82,17 @@
     <HeaderPanelDivider>Dateien ({files.length})</HeaderPanelDivider>
     <HeaderPanelLinks>
         {#each files as file}
-            <WalterAnhaengeEntry {file} bind:files {fetchImpl} {S3URL} />
+            <WalterAnhaengeEntry {file} bind:files {fetchImpl} />
         {/each}
         {#if refFiles}
-            {#each refFiles as file}
+            <HeaderPanelDivider
+                >Bezugsdateien ({refFiles.length})</HeaderPanelDivider
+            >
+            {#each refFiles as refFile}
                 <WalterAnhaengeEntry
-                    {file}
+                    file={refFile}
                     bind:files={refFiles}
                     {fetchImpl}
-                    {S3URL}
                 />
             {/each}
         {/if}
@@ -98,12 +100,11 @@
             <HeaderPanelDivider
                 >Ablagestapel ({stackFiles.length})</HeaderPanelDivider
             >
-            {#each stackFiles as file}
+            {#each stackFiles as stackFile}
                 <WalterAnhaengeEntry
-                    {file}
+                    file={stackFile}
                     bind:files={stackFiles}
                     {fetchImpl}
-                    {S3URL}
                 />
             {/each}
         {/if}
