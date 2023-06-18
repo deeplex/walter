@@ -30,7 +30,7 @@
 <Row>
     <WalterMultiSelect
         bind:value={entry.selectedWohnungen}
-        a={wohnungen}
+        entry={wohnungen}
         titleText="Wohnungen"
     />
 </Row>
@@ -38,7 +38,7 @@
     <Row>
         <WalterMultiSelect
             bind:value={entry.selectedZaehler}
-            a={zaehler}
+            entry={zaehler}
             titleText="Zähler"
         />
     </Row>
