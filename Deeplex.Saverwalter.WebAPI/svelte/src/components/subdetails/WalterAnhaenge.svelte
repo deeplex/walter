@@ -10,6 +10,7 @@
     import {
         create_walter_s3_file_from_file,
         walter_s3_get,
+        walter_s3_get_files,
         walter_s3_post
     } from '$walter/services/s3';
     import { WalterPreview } from '$walter/components';
@@ -19,6 +20,12 @@
     export let fetchImpl: typeof fetch;
     export let S3URL: string;
     export let files: WalterS3File[];
+    export let hideStackFiles = false;
+
+    let stackFilesPromise: Promise<WalterS3File[]> | undefined = undefined;
+    if (!hideStackFiles) {
+        stackFilesPromise = walter_s3_get_files('stack', fetchImpl);
+    }
 
     let fileUploadComplete = false;
     let newFiles: File[] = [];
@@ -111,5 +118,33 @@
                 </Truncate>
             </HeaderPanelLink>
         {/each}
+        {#if stackFilesPromise}
+            {#await stackFilesPromise}
+                <HeaderPanelDivider>Ablagestapel</HeaderPanelDivider>
+                <div>Loading</div>
+            {:then stackFiles}
+                <HeaderPanelDivider
+                    >Ablagestapel ({stackFiles.length})</HeaderPanelDivider
+                >
+                {#each stackFiles as file}
+                    <HeaderPanelLink on:click={showModal}>
+                        <!-- Copy the style from the original element. -->
+                        <Truncate
+                            style="font-size: 0.875rem;
+                       margin-left: 0;
+                       font-weight: 600;
+                       line-height: 1.28572;
+                       letter-spacing: 0.16px;
+                       display: block;
+                       height: 2rem;
+                       color: #c6c6c6;
+                       text-decoration: none;"
+                        >
+                            {file.FileName}
+                        </Truncate>
+                    </HeaderPanelLink>
+                {/each}
+            {/await}
+        {/if}
     </HeaderPanelLinks>
 </HeaderPanelLinks>

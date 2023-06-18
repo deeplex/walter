@@ -12,7 +12,6 @@
         walter_s3_post
     } from '$walter/services/s3';
     import { openModal } from '$walter/store';
-    import type { WalterS3File } from '$walter/types';
 
     export let data: PageData;
 
@@ -57,6 +56,7 @@
     <HeaderUtilities>
         <HeaderAction text="({data.files.length})">
             <WalterAnhaenge
+                hideStackFiles
                 fetchImpl={data.fetch}
                 files={data.files}
                 S3URL={data.S3URL}
