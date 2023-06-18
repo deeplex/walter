@@ -19,7 +19,7 @@
 
 <WalterHeaderDetail
     S3URL={data.S3URL}
-    files={data.anhaenge}
+    files={data.files}
     entry={data.entry}
     apiURL={data.apiURL}
     title={data.entry.anschrift}

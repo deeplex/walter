@@ -59,7 +59,7 @@
 
 <WalterHeaderDetail
     S3URL={data.S3URL}
-    bind:files={data.anhaenge}
+    bind:files={data.files}
     bind:entry={data.entry}
     apiURL={data.apiURL}
     {title}
@@ -105,7 +105,7 @@
         fetchImpl={data.fetch}
         S3URL={data.S3URL}
         firstYear={new Date(data.entry.beginn).getFullYear()}
-        bind:S3files={data.anhaenge}
+        bind:S3files={data.files}
         bind:abrechnung
     />
 

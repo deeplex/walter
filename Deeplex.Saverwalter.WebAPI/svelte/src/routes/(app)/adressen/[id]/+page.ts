@@ -18,6 +18,6 @@ export const load: PageLoad = async ({ params, fetch }) => {
         umlagen: walter_selection.umlagen(fetch),
         entry: WalterAdresseEntry.GetOne<WalterAdresseEntry>(params.id, fetch),
 
-        anhaenge: walter_s3_get_files(S3URL, fetch) as Promise<WalterS3File[]>
+        files: walter_s3_get_files(S3URL, fetch) as Promise<WalterS3File[]>
     };
 };

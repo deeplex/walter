@@ -24,6 +24,6 @@ export const load: PageLoad = async ({ params, fetch }) => {
         zaehlertypen: walter_selection.zaehlertypen(fetch),
         umlageschluessel: walter_selection.umlageschluessel(fetch),
 
-        anhaenge: walter_s3_get_files(S3URL, fetch) as Promise<WalterS3File[]>
+        files: walter_s3_get_files(S3URL, fetch) as Promise<WalterS3File[]>
     };
 };

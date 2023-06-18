@@ -20,6 +20,6 @@ export const load: PageLoad = async ({ params, fetch }) => {
         umlagen_wohnungen: walter_selection.umlagen_wohnungen(fetch),
         kontakte: walter_selection.kontakte(fetch),
 
-        anhaenge: walter_s3_get_files(S3URL, fetch) as Promise<WalterS3File[]>
+        files: walter_s3_get_files(S3URL, fetch) as Promise<WalterS3File[]>
     };
 };
