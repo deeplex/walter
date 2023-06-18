@@ -14,6 +14,7 @@
     } from '$walter/services/s3';
     import { WalterPreview } from '$walter/components';
     import type { WalterS3File } from '$walter/types';
+    import { openModal } from '$walter/store';
 
     export let fetchImpl: typeof fetch;
     export let S3URL: string;
@@ -31,13 +32,26 @@
         files = [...files, create_walter_s3_file_from_file(file, S3URL)];
     }
 
+    function post_s3_file(file: File) {
+        walter_s3_post(file, S3URL, fetchImpl).then(() =>
+            upload_finished(file)
+        );
+    }
+
     async function upload() {
-        fileUploadComplete = false;
         for (const file of newFiles) {
             {
-                walter_s3_post(file, S3URL, fetchImpl).then(() =>
-                    upload_finished(file)
-                );
+                if (files.map((e) => e.FileName).includes(file.name)) {
+                    const content = `Eine Datei mit dem Namen ${file.name} existiert bereits in dieser Ablage. Bist du sicher, dass diese Datei hochgeladen werden soll?`;
+                    openModal({
+                        modalHeading: `Datei existiert bereits`,
+                        content,
+                        primaryButtonText: 'Überschreiben',
+                        submit: () => post_s3_file(file)
+                    });
+                } else {
+                    post_s3_file(file);
+                }
             }
         }
     }
