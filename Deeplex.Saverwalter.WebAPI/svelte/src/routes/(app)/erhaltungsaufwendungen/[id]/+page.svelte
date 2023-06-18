@@ -14,7 +14,7 @@
     files={data.anhaenge}
     entry={data.entry}
     apiURL={data.apiURL}
-    title={data.éntry.aussteller?.text + ' - ' + data.entry.bezeichnung}
+    title={data.entry.aussteller?.text + ' - ' + data.entry.bezeichnung}
     fetchImpl={data.fetch}
 />
 
