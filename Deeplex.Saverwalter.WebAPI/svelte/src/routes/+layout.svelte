@@ -21,6 +21,11 @@
 <slot />
 
 <style>
+    :global(.bx--header-panel--expanded, .bx--side-nav--expanded) {
+        overflow: scroll !important;
+        max-height: none !important;
+    }
+
     /* Sidenav theming doesn't seem to have a token */
     :global(
             a.bx--side-nav__link[aria-current='page']::before,

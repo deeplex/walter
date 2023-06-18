@@ -160,4 +160,6 @@
             />
         </SideNavMenu>
     </SideNavItems>
+    <!-- To get the sidenav scrollable when window height is very small -->
+    <div style="height: 4em" />
 </SideNav>
