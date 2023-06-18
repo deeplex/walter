@@ -97,10 +97,23 @@ export function create_walter_s3_file_from_file(
 }
 
 function create_walter_s3_file_from_xml_parse(e: WalterS3File): WalterS3File {
-    return {
-        FileName: e.Key.split('/').pop() || 'Unbekannt',
-        Key: e.Key,
-        LastModified: e.LastModified,
-        Size: e.Size
-    };
+    const FileName = e.Key.split('/').pop();
+    const Key = e.Key;
+
+    if (FileName && Key) {
+        return {
+            FileName: e.Key.split('/').pop()!,
+            Key: e.Key,
+            LastModified: e.LastModified,
+            Size: e.Size
+        };
+    }
+    else {
+        return {
+            FileName: `Fehler (${FileName})`,
+            Key: e.Key || `Fehler (${Key}) - ${Math.floor(100000 + Math.random() * 900000)}`,
+            LastModified: e.LastModified || new Date().getTime(),
+            Size: e.Size || 0,
+        }
+    }
 }
