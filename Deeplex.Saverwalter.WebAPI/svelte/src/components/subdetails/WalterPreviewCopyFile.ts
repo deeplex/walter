@@ -1,6 +1,18 @@
 import { walter_selection } from '$walter/services/requests';
 
-export const tables = [
+export type WalterPreviewCopyTable = {
+    value: string;
+    key: string;
+    fetch: (
+        fetchImpl: (
+            input: RequestInfo | URL,
+            init?: RequestInit | undefined
+        ) => Promise<Response>
+    ) => Promise<any>;
+    S3URL: string;
+};
+
+export const tables: WalterPreviewCopyTable[] = [
     {
         value: 'Adressen',
         key: 'adressen',

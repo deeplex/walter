@@ -3,65 +3,70 @@
     import type { WalterS3File } from '$walter/types';
     import {
         Button,
-        Column,
         ComposedModal,
-        DataTable,
+        DataTableSkeleton,
         Grid,
+        Link,
         ModalBody,
         ModalFooter,
         ModalHeader,
+        ProgressIndicator,
+        ProgressStep,
         RadioButton,
         RadioButtonGroup,
-        Row,
-        Toolbar,
-        ToolbarContent,
-        ToolbarSearch
+        SkeletonText,
+        Tile
     } from 'carbon-components-svelte';
-    import { tables } from './WalterPreviewCopyFile';
+    import {
+        tables,
+        type WalterPreviewCopyTable
+    } from './WalterPreviewCopyFile';
     import { walter_s3_post } from '$walter/services/s3';
+    import { WalterDataTable } from '..';
+    import { page } from '$app/stores';
 
     export let file: WalterS3File;
     export let fetchImpl: typeof fetch;
 
     export let open = false;
-    let rows: WalterSelectionEntry[] = [];
+    let rows: WalterSelectionEntry[] | undefined = undefined;
 
     function close() {
         open = false;
     }
 
-    let selectedTable: string | undefined = undefined;
-    let selectedRowIds: number[] = [];
+    let selectedTable: WalterPreviewCopyTable | undefined = undefined;
+    let selectedEntry: WalterSelectionEntry | undefined = undefined;
 
     const headers = [{ key: 'text', value: 'Bezeichnung' }];
 
-    async function radio_change() {
-        const selection = tables.find((e) => e.key === selectedTable);
-        rows = (await selection!.fetch(fetchImpl)) || [];
+    async function selectedTable_change(e: any) {
+        selectedTable = tables.find((t) => t.key === e.target.value);
+        rows = undefined;
+        step = 1;
+        rows = (await selectedTable!.fetch(fetchImpl)) || [];
     }
 
     async function copy() {
         if (!file.Blob) {
             return;
         }
-        const selectedTableObject = tables.find(
-            (e) => e.key === selectedTable
-        ) as any;
-        if (!selectedTableObject) {
+
+        if (!selectedTable) {
             return;
         }
-        const S3URL = `${selectedTableObject.S3URL}/${selectedRowIds[0]}`;
+        const S3URL = `${selectedTable.S3URL}/${selectedEntry?.id}`;
 
         const copyToast = new WalterToastContent(
             'Kopieren erfolgreich',
             'Kopieren fehlgeschlagen',
             () =>
                 `Die Datei ${file.FileName} wurde erfolgreich zu ${
-                    rows.find((row) => row.id === selectedRowIds[0])?.text
+                    rows!.find((row) => row.id === selectedEntry!.id)?.text
                 } kopiert.`,
             () =>
                 `Die Datei ${file.FileName} konnte nicht zu ${
-                    rows.find((row) => row.id === selectedRowIds[0])?.text
+                    rows!.find((row) => row.id === selectedEntry!.id)?.text
                 } kopiert werden.`
         );
 
@@ -76,54 +81,100 @@
             open = false;
         }
     }
+
+    function selectedEntry_change(e: CustomEvent<any>) {
+        // e.stopImmediatePropagation();
+        // e.preventDefault();
+        // e.stopPropagation();
+        // Is this the best way of stopping the modal to stop? ...
+        selectedEntry = rows?.find((row) => row.id === e.detail.id);
+        setTimeout(() => (step = 2), 0);
+        // step = 2;
+    }
+
+    console.log(`${$page.url.origin}`);
+
+    let step = 0;
 </script>
 
-<ComposedModal size="lg" bind:open on:submit>
+<ComposedModal size="lg" bind:open>
     <ModalHeader title={`${file.FileName} kopieren`} />
     <ModalBody>
         <Grid condensed fullWidth>
-            <Row>
-                <Column>
-                    <RadioButtonGroup
-                        bind:selected={selectedTable}
-                        orientation="vertical"
-                        on:change={radio_change}
-                    >
-                        {#each tables as radio}
-                            <RadioButton
-                                labelText={radio.value}
-                                value={radio.key}
-                            />
-                        {/each}
-                    </RadioButtonGroup>
-                </Column>
-                <Column>
-                    <DataTable
-                        style="max-height: 30em; cursor: pointer"
-                        stickyHeader
-                        sortable
-                        zebra
-                        radio
-                        bind:selectedRowIds
+            <ProgressIndicator
+                style="margin: 1em"
+                spaceEqually
+                currentIndex={step}
+            >
+                <ProgressStep
+                    on:click={() => (step = 0)}
+                    label="Tabelle auswählen"
+                    complete={!!selectedTable}
+                />
+                <ProgressStep
+                    on:click={() => {
+                        if (!!selectedTable) step = 1;
+                    }}
+                    label="Eintrag auswählen"
+                    complete={step > 1}
+                />
+                <ProgressStep
+                    on:click={() => {
+                        if (selectedEntry) step = 2;
+                    }}
+                    label="Bestätigen"
+                    complete={step > 2}
+                />
+            </ProgressIndicator>
+            <style>
+                .bx--progress-label {
+                    padding-right: 0px !important;
+                }
+            </style>
+            {#if step === 0}
+                <RadioButtonGroup orientation="vertical">
+                    {#each tables as radio}
+                        <RadioButton
+                            checked={selectedTable?.key == radio.key}
+                            on:change={selectedTable_change}
+                            labelText={radio.value}
+                            value={radio.key}
+                        />
+                    {/each}
+                </RadioButtonGroup>
+            {:else if step === 1}
+                {#if rows}
+                    <WalterDataTable
+                        fullHeight
+                        navigate={selectedEntry_change}
                         {headers}
                         {rows}
+                        search
+                    />
+                {:else}
+                    <SkeletonText style="margin: 0; height: 48px" />
+                    <DataTableSkeleton
+                        {headers}
+                        showHeader={false}
+                        showToolbar={false}
+                    />
+                {/if}
+            {:else if step === 2}
+                <Tile light>
+                    Ausgewählter Eintrag von {selectedTable?.value}: <Link
+                        href="{$page.url
+                            .origin}/{selectedTable?.key}/{selectedEntry?.id}"
+                        >{selectedEntry?.text}</Link
                     >
-                        <Toolbar>
-                            <ToolbarContent>
-                                <ToolbarSearch
-                                    placeholder="Suche..."
-                                    persistent
-                                    shouldFilterRows
-                                />
-                            </ToolbarContent>
-                        </Toolbar>
-                    </DataTable>
-                </Column>
-            </Row>
+                </Tile>
+                <Tile light>Datei kann jetzt kopiert werden.</Tile>
+            {/if}
         </Grid>
     </ModalBody>
     <ModalFooter>
         <Button kind="secondary" on:click={close}>Abbrechen</Button>
-        <Button kind="primary" on:click={copy}>Kopieren</Button>
+        <Button disabled={!selectedEntry} kind="tertiary" on:click={copy}
+            >Kopieren</Button
+        >
     </ModalFooter>
 </ComposedModal>
