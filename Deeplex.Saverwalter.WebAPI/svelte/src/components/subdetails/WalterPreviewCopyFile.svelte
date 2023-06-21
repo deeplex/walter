@@ -21,11 +21,12 @@
         tables,
         type WalterPreviewCopyTable
     } from './WalterPreviewCopyFile';
-    import { walter_s3_post } from '$walter/services/s3';
+    import { walter_s3_delete, walter_s3_post } from '$walter/services/s3';
     import { WalterDataTable } from '..';
     import { page } from '$app/stores';
 
     export let file: WalterS3File;
+    export let files: WalterS3File[];
     export let fetchImpl: typeof fetch;
 
     export let open = false;
@@ -47,16 +48,27 @@
         rows = (await selectedTable!.fetch(fetchImpl)) || [];
     }
 
-    async function copy() {
+    async function copyFile(toast: WalterToastContent | undefined) {
         if (!file.Blob) {
-            return;
+            return false;
         }
 
         if (!selectedTable) {
-            return;
+            return false;
         }
         const S3URL = `${selectedTable.S3URL}/${selectedEntry?.id}`;
 
+        const success = walter_s3_post(
+            new File([file.Blob], file.FileName),
+            S3URL,
+            fetchImpl,
+            toast
+        );
+
+        return (await success).status === 200;
+    }
+
+    async function copy() {
         const copyToast = new WalterToastContent(
             'Kopieren erfolgreich',
             'Kopieren fehlgeschlagen',
@@ -70,15 +82,46 @@
                 } kopiert werden.`
         );
 
-        const success = walter_s3_post(
-            new File([file.Blob], file.FileName),
-            S3URL,
-            fetchImpl,
-            copyToast
+        const copied = copyFile(copyToast);
+
+        if (await copied) {
+            open = false;
+        }
+    }
+
+    async function move() {
+        function failureSubtitle() {
+            return `Die Datei ${file.FileName} konnte nicht zu ${
+                rows!.find((row) => row.id === selectedEntry!.id)?.text
+            } verschoben werden.`;
+        }
+        const failureTitle = 'Verschieben fehlgeschlagen';
+        const copyToast = new WalterToastContent(
+            undefined,
+            failureTitle,
+            undefined,
+            failureSubtitle
+        );
+        const moveToast = new WalterToastContent(
+            'Verschieben erfolgreich',
+            failureTitle,
+            () =>
+                `Die Datei ${file.FileName} wurde erfolgreich zu ${
+                    rows!.find((row) => row.id === selectedEntry!.id)?.text
+                } verschoben.`,
+            failureSubtitle
         );
 
-        if ((await success).ok) {
-            open = false;
+        const copied = copyFile(copyToast);
+
+        if (await copied) {
+            const deleted = walter_s3_delete(file, moveToast);
+            if ((await deleted).status === 200) {
+                files = files.filter(
+                    (e: WalterS3File) => e.FileName !== file.FileName
+                );
+                open = false;
+            }
         }
     }
 
@@ -91,8 +134,6 @@
         setTimeout(() => (step = 2), 0);
         // step = 2;
     }
-
-    console.log(`${$page.url.origin}`);
 
     let step = 0;
 </script>
@@ -173,6 +214,9 @@
     </ModalBody>
     <ModalFooter>
         <Button kind="secondary" on:click={close}>Abbrechen</Button>
+        <Button disabled={!selectedEntry} kind="tertiary" on:click={move}
+            >Verschieben</Button
+        >
         <Button disabled={!selectedEntry} kind="tertiary" on:click={copy}
             >Kopieren</Button
         >

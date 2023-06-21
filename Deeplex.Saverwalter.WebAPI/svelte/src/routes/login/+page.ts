@@ -23,7 +23,7 @@ export const load: PageLoad = async ({ fetch }) => {
             Authorization: `X-WalterToken ${accessToken}`
         }
     });
-    if (response.ok) {
+    if (response.status === 200) {
         await goto('/');
     }
 

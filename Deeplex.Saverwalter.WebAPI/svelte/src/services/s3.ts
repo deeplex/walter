@@ -34,8 +34,11 @@ export const walter_s3_get = (S3URL: string): Promise<any> =>
         e.blob()
     );
 
-export function walter_s3_delete(file: WalterS3File) {
-    return walter_delete(`${baseURL}/${file.Key}`);
+export function walter_s3_delete(
+    file: WalterS3File,
+    toast?: WalterToastContent
+) {
+    return walter_delete(`${baseURL}/${file.Key}`, toast);
 }
 
 export function download_file_blob(blob: Blob, fileName: string) {
@@ -74,7 +77,9 @@ export async function walter_s3_get_files(
             if (!result) {
                 result = value;
             } else {
-                const concatenatedResult: Uint8Array = new Uint8Array(result.length + value.length);
+                const concatenatedResult: Uint8Array = new Uint8Array(
+                    result.length + value.length
+                );
                 concatenatedResult.set(result, 0);
                 concatenatedResult.set(value, result.length);
                 result = concatenatedResult;
@@ -84,12 +89,10 @@ export async function walter_s3_get_files(
 
     const parsed = parse_stream_into_walter_s3_files(result);
 
-    return parsed
+    return parsed;
 }
 
-function parse_stream_into_walter_s3_files(
-    uint8array: Uint8Array | undefined
-) {
+function parse_stream_into_walter_s3_files(uint8array: Uint8Array | undefined) {
     if (!uint8array) {
         return [];
     }
@@ -114,7 +117,7 @@ export function create_walter_s3_file_from_file(
 ): WalterS3File {
     return {
         FileName: file.name,
-        Key: `${S3URL}/${file.name}`,
+        Key: `${S3URL}`,
         LastModified: file.lastModified,
         Type: file.type,
         Size: file.size,
@@ -133,13 +136,16 @@ function create_walter_s3_file_from_xml_parse(e: WalterS3File): WalterS3File {
             LastModified: e.LastModified,
             Size: e.Size
         };
-    }
-    else {
+    } else {
         return {
             FileName: `Fehler (${FileName})`,
-            Key: e.Key || `Fehler (${Key}) - ${Math.floor(100000 + Math.random() * 900000)}`,
+            Key:
+                e.Key ||
+                `Fehler (${Key}) - ${Math.floor(
+                    100000 + Math.random() * 900000
+                )}`,
             LastModified: e.LastModified || new Date().getTime(),
-            Size: e.Size || 0,
-        }
+            Size: e.Size || 0
+        };
     }
 }

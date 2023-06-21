@@ -19,15 +19,25 @@ export function addToast(
     ok: boolean,
     ...args: unknown[]
 ) {
-    const title = ok ? toast.successTitle : toast.failureTitle;
-    const subtitle = ok
-        ? toast.subtitleSuccess(...args)
-        : toast.subtitleFailure(...args);
-
-    toasts.update((e) => [
-        { title, subtitle, kind: ok ? 'success' : 'error' },
-        ...e
-    ]);
+    if (ok && toast.successTitle) {
+        toasts.update((e) => [
+            {
+                title: toast.successTitle,
+                subtitle: toast.subtitleSuccess(...args),
+                kind: 'success'
+            },
+            ...e
+        ]);
+    } else if (!ok && toast.failureTitle) {
+        toasts.update((e) => [
+            {
+                title: toast.failureTitle,
+                subtitle: toast.subtitleFailure(...args),
+                kind: 'error'
+            },
+            ...e
+        ]);
+    }
     return toasts;
 }
 

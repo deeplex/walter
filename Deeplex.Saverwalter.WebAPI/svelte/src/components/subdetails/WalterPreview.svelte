@@ -16,6 +16,7 @@
         ModalHeader
     } from 'carbon-components-svelte';
     import WalterPreviewCopyFile from './WalterPreviewCopyFile.svelte';
+    import { WalterToastContent } from '$walter/lib';
 
     export let open = false;
     export let file: WalterS3File;
@@ -36,15 +37,26 @@
         const content = `Bist du sicher, dass du ${file.FileName} löschen möchtest?
     	Dieser Vorgang kann nicht rückgängig gemacht werden.`;
 
+        const deleteToast = new WalterToastContent(
+            'Löschen erfolgreich',
+            'Löschen fehlgeschlagen',
+            (_a: unknown) => `${file.FileName} erfolgreich gelöscht.`,
+            (_a: unknown) => ''
+        );
+
         openModal({
             modalHeading: 'Löschen',
             content,
             danger: true,
             primaryButtonText: 'Löschen',
             submit: () =>
-                walter_s3_delete(file).then(() => {
-                    open = false;
-                    files = files.filter((e) => e.FileName !== file.FileName);
+                walter_s3_delete(file, deleteToast).then((e) => {
+                    if (e.status === 200) {
+                        open = false;
+                        files = files.filter(
+                            (e) => e.FileName !== file.FileName
+                        );
+                    }
                 })
         });
     }
@@ -70,10 +82,10 @@
     </ModalBody>
     <ModalFooter>
         <Button kind="secondary" on:click={close}>Abbrechen</Button>
-        <Button kind="tertiary" on:click={copy}>Kopieren</Button>
+        <Button kind="tertiary" on:click={copy}>Kopieren / Verschieben</Button>
         <Button kind="danger" on:click={remove}>Löschen</Button>
         <Button kind="primary" on:click={download}>Herunterladen</Button>
     </ModalFooter>
 </ComposedModal>
 
-<WalterPreviewCopyFile {fetchImpl} bind:open={copying} {file} />
+<WalterPreviewCopyFile {files} {fetchImpl} bind:open={copying} {file} />
