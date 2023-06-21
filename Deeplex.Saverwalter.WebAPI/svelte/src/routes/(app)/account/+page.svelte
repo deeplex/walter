@@ -34,11 +34,11 @@
             NewPassword: new_password_1
         });
 
-        addToast(ChangeToast, response.ok);
+        addToast(ChangeToast, response.status === 200);
 
         if (response.status === 400) {
             old_password_invalid = true;
-        } else if (response.ok) {
+        } else if (response.status === 200) {
             old_password = '';
             new_password_1 = '';
             new_password_2 = '';

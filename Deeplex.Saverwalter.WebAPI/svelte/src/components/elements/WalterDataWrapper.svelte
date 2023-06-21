@@ -43,7 +43,7 @@
         }
         const response = await walter_post(url, body);
         const parsed = await response.json();
-        addToast(PostToast, response.ok, parsed);
+        addToast(PostToast, response.status === 200, parsed);
 
         rows = [...rows, parsed];
         open = true;

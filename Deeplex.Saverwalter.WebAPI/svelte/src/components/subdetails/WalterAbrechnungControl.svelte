@@ -72,7 +72,7 @@
             toast
         );
 
-        if (response.ok) {
+        if (response.status === 200) {
             addToAnhang(file);
         }
     }

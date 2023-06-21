@@ -59,7 +59,7 @@ export async function walter_sign_in(
         body: JSON.stringify({ username, password } as SignInRequest),
         headers: { 'Content-Type': 'application/json' }
     });
-    if (!response.ok) {
+    if (!(response.status === 200)) {
         toast && addToast(toast, false);
         return null;
     }
