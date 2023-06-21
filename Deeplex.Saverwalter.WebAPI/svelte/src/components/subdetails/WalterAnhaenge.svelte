@@ -2,7 +2,9 @@
     import {
         FileUploaderDropContainer,
         HeaderPanelDivider,
-        HeaderPanelLinks
+        HeaderPanelLinks,
+        InlineLoading,
+        Loading
     } from 'carbon-components-svelte';
 
     import {
@@ -96,17 +98,25 @@
                 />
             {/each}
         {/if}
-        {#if !hideStackFiles && stackFiles}
+        {#if !hideStackFiles}
             <HeaderPanelDivider
-                >Ablagestapel ({stackFiles.length})</HeaderPanelDivider
+                >Ablagestapel ({stackFiles?.length ||
+                    '...'})</HeaderPanelDivider
             >
-            {#each stackFiles as stackFile}
-                <WalterAnhaengeEntry
-                    file={stackFile}
-                    bind:files={stackFiles}
-                    {fetchImpl}
+            {#if stackFiles}
+                {#each stackFiles as stackFile}
+                    <WalterAnhaengeEntry
+                        file={stackFile}
+                        bind:files={stackFiles}
+                        {fetchImpl}
+                    />
+                {/each}
+            {:else}
+                <InlineLoading
+                    style="margin-left: 2em"
+                    description="Lade Dateien"
                 />
-            {/each}
+            {/if}
         {/if}
     </HeaderPanelLinks>
 </HeaderPanelLinks>
