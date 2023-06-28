@@ -11,7 +11,8 @@
         WalterVertrag,
         WalterVertragVersionen,
         WalterAbrechnung,
-        WalterAbrechnungControl
+        WalterAbrechnungControl,
+        WalterLink
     } from '$walter/components';
     import type { WalterBetriebskostenabrechnungKostengruppenEntry } from '$walter/types';
     import { page } from '$app/stores';
@@ -94,6 +95,19 @@
             entry={mietminderungEntry}
             title="Mietminderungen"
             rows={data.entry.mietminderungen}
+        />
+
+        <!-- TODO id is GUID -->
+        <!-- 
+        <WalterLink
+            {fileWrapper}
+            name={`Ansprechpartner: ${data.entry.ansprechpartner?.text}`}
+            href={`/nat/${data.entry.ansprechpartner?.id}`}
+        /> -->
+        <WalterLink
+            {fileWrapper}
+            name={`Wohnung: ${data.entry.wohnung.text}`}
+            href={`/wohnungen/${data.entry.wohnung.id}`}
         />
     </WalterLinks>
 

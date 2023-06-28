@@ -6,7 +6,8 @@
         WalterZaehler,
         WalterZaehlerstaende,
         WalterUmlagen,
-        WalterLinks
+        WalterLinks,
+        WalterLink
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
@@ -61,6 +62,17 @@
             wohnungen={data.wohnungen}
             betriebskostentypen={data.betriebskostentypen}
             rows={data.entry.umlagen}
+        />
+
+        <WalterLink
+            {fileWrapper}
+            name={`Adresse: ${data.entry.adresse.anschrift}`}
+            href={`/adressen/${data.entry.adresse.id}`}
+        />
+        <WalterLink
+            {fileWrapper}
+            name={`Wohnung: ${data.entry.wohnung?.text}`}
+            href={`/wohnungen/${data.entry.wohnung?.id}`}
         />
     </WalterLinks>
 </WalterGrid>

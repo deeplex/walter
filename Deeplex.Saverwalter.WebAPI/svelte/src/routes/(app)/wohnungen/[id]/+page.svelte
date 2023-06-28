@@ -10,7 +10,8 @@
         WalterUmlagen,
         WalterHeaderDetail,
         WalterWohnung,
-        WalterLinks
+        WalterLinks,
+        WalterLink
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
@@ -110,5 +111,13 @@
             title="Erhaltungsaufwendungen"
             rows={data.entry.erhaltungsaufwendungen}
         />
+
+        <WalterLink
+            {fileWrapper}
+            name={`Adresse: ${data.entry.adresse.anschrift}`}
+            href={`/adressen/${data.entry.adresse.id}`}
+        />
+
+        <!-- TODO besitzer id is guid -->
     </WalterLinks>
 </WalterGrid>

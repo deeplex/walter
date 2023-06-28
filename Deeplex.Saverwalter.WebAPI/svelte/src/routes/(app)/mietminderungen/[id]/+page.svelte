@@ -2,7 +2,8 @@
     import {
         WalterHeaderDetail,
         WalterGrid,
-        WalterMietminderung
+        WalterMietminderung,
+        WalterLink
     } from '$walter/components';
     import { Button, ButtonSkeleton } from 'carbon-components-svelte';
     import type { PageData } from './$types';
@@ -24,9 +25,10 @@
 
 <WalterGrid>
     <WalterMietminderung entry={data.entry} />
-    {#await data.entry}
-        <ButtonSkeleton />
-    {:then x}
-        <Button href={`/vertraege/${x.vertrag.id}`}>Zum Vertrag</Button>
-    {/await}
+
+    <WalterLink
+        {fileWrapper}
+        name={`Adresse: ${data.entry.vertrag.id}`}
+        href={`/adresse/${data.entry.vertrag.text}`}
+    />
 </WalterGrid>

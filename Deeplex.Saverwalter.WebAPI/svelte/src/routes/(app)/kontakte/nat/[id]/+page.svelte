@@ -7,7 +7,8 @@
         WalterVertraege,
         WalterHeaderDetail,
         WalterNatuerlichePerson,
-        WalterLinks
+        WalterLinks,
+        WalterLink
     } from '$walter/components';
     import { WalterS3FileWrapper } from '$walter/lib';
 
@@ -46,6 +47,12 @@
             kontakte={data.kontakte}
             title="Verträge"
             rows={data.entry.vertraege}
+        />
+
+        <WalterLink
+            {fileWrapper}
+            name={`Adresse: ${data.entry.adresse.anschrift}`}
+            href={`/adressen/${data.entry.adresse.id}`}
         />
     </WalterLinks>
 </WalterGrid>

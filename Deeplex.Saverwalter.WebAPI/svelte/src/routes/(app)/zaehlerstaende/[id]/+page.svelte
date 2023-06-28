@@ -2,7 +2,8 @@
     import {
         WalterHeaderDetail,
         WalterGrid,
-        WalterZaehlerstand
+        WalterZaehlerstand,
+        WalterLink
     } from '$walter/components';
     import { convertDateGerman } from '$walter/services/utils';
     import { Button, ButtonSkeleton } from 'carbon-components-svelte';
@@ -28,9 +29,9 @@
 
 <WalterGrid>
     <WalterZaehlerstand entry={data.entry} />
-    {#await data.entry}
-        <ButtonSkeleton />
-    {:then x}
-        <Button href={`/zaehler/${x.zaehler.id}`}>Zum Zähler</Button>
-    {/await}
+    <WalterLink
+        {fileWrapper}
+        name={`Zähler: ${data.entry.zaehler.text}`}
+        href={`/zaehler/${data.entry.zaehler.id}`}
+    />
 </WalterGrid>

@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { Button } from 'carbon-components-svelte';
     import type { PageData } from './$types';
 
     import {
@@ -7,7 +6,8 @@
         WalterWohnungen,
         WalterHeaderDetail,
         WalterBetriebskostenrechnung,
-        WalterLinks
+        WalterLinks,
+        WalterLink
     } from '$walter/components';
     import { WalterS3FileWrapper } from '$walter/lib';
 
@@ -44,7 +44,11 @@
             title="Wohnungen"
             rows={data.entry.wohnungen}
         />
-    </WalterLinks>
 
-    <Button href={`/umlagen/${data.entry.umlage?.id}`}>Zur Umlage</Button>
+        <WalterLink
+            {fileWrapper}
+            name={`Umlage: ${data.entry.umlage.text}`}
+            href={`/umlagen/${data.entry.umlage?.id}`}
+        />
+    </WalterLinks>
 </WalterGrid>

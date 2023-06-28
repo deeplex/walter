@@ -2,6 +2,7 @@
     import {
         FileUploaderDropContainer,
         HeaderPanelDivider,
+        HeaderPanelLink,
         HeaderPanelLinks,
         InlineLoading
     } from 'carbon-components-svelte';
@@ -87,15 +88,17 @@
     {#each fileWrapper.handles as handle}
         {#await handle.files}
             <HeaderPanelDivider>{handle.name} (-)</HeaderPanelDivider>
+            <InlineLoading
+                style="margin-left: 2em"
+                description="Lade Dateien"
+            />
         {:then loadedFiles}
             <HeaderPanelDivider
                 >{handle.name} ({loadedFiles.length})</HeaderPanelDivider
             >
-            <HeaderPanelLinks>
-                {#each loadedFiles as file}
-                    <WalterAnhaengeEntry {file} {fileWrapper} />
-                {/each}
-            </HeaderPanelLinks>
+            {#each loadedFiles as file}
+                <WalterAnhaengeEntry {file} {fileWrapper} />
+            {/each}
         {/await}
     {/each}
     {#if !hideStackFiles}
