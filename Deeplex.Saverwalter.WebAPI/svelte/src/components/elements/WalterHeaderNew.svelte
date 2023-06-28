@@ -6,35 +6,14 @@
     import { Save } from 'carbon-icons-svelte';
 
     import { WalterHeader } from '$walter/components';
-    import { walter_post } from '$walter/services/requests';
-    import { goto } from '$app/navigation';
-    import { WalterToastContent } from '$walter/lib';
-    import { addToast } from '$walter/store';
+    import { handle_save } from './WalterHeaderNew';
 
     export let title = 'Neu...';
     export let apiURL: string;
     export let entry: unknown;
 
-    const SaveToast = new WalterToastContent(
-        'Speichern erfolgreich',
-        'Speichern fehlgeschlagen',
-        (a: any) => a,
-        (a: any) =>
-            `Speichern fehlgeschlagen.
-			Folgende Einträge sind erforderlich:
-			${Object.keys(a.errors)
-                .map((e) => e.split('.').pop())
-                .join(', \n')}`
-    );
-
-    async function click_post() {
-        const response = await walter_post(apiURL, entry);
-        const parsed = await response.json();
-        addToast(SaveToast, response.status === 200, parsed);
-
-        if (parsed.id) {
-            goto(`${apiURL}/${parsed.id}`.replace('api/', ''));
-        }
+    function click_post(e: MouseEvent): void {
+        handle_save(apiURL, entry);
     }
 </script>
 

@@ -16,7 +16,8 @@
         ModalHeader
     } from 'carbon-components-svelte';
     import WalterPreviewCopyFile from './WalterPreviewCopyFile.svelte';
-    import { WalterS3FileWrapper, WalterToastContent } from '$walter/lib';
+    import { download, remove } from './WalterPreview';
+    import type { WalterS3FileWrapper } from '$walter/lib';
 
     export let open = false;
     export let file: WalterS3File;
@@ -26,41 +27,17 @@
         open = false;
     }
 
-    function download() {
-        if (file.Blob) {
-            download_file_blob(file.Blob, file.FileName);
-        }
-    }
-
-    function remove() {
-        const content = `Bist du sicher, dass du ${file.FileName} löschen möchtest?
-    	Dieser Vorgang kann nicht rückgängig gemacht werden.`;
-
-        const deleteToast = new WalterToastContent(
-            'Löschen erfolgreich',
-            'Löschen fehlgeschlagen',
-            (_a: unknown) => `${file.FileName} erfolgreich gelöscht.`,
-            (_a: unknown) => ''
-        );
-
-        openModal({
-            modalHeading: 'Löschen',
-            content,
-            danger: true,
-            primaryButtonText: 'Löschen',
-            submit: () =>
-                walter_s3_delete(file, deleteToast).then((e) => {
-                    if (e.status === 200) {
-                        open = false;
-                        fileWrapper.removeFile(file);
-                    }
-                })
-        });
-    }
-
     let copying = false;
     function copy() {
         copying = true;
+    }
+
+    function click_remove(e: MouseEvent): void {
+        remove(file, fileWrapper);
+    }
+
+    function click_download(e: MouseEvent): void {
+        download(file);
     }
 </script>
 
@@ -80,8 +57,8 @@
     <ModalFooter>
         <Button kind="secondary" on:click={close}>Abbrechen</Button>
         <Button kind="tertiary" on:click={copy}>Kopieren / Verschieben</Button>
-        <Button kind="danger" on:click={remove}>Löschen</Button>
-        <Button kind="primary" on:click={download}>Herunterladen</Button>
+        <Button kind="danger" on:click={click_remove}>Löschen</Button>
+        <Button kind="primary" on:click={click_download}>Herunterladen</Button>
     </ModalFooter>
 </ComposedModal>
 

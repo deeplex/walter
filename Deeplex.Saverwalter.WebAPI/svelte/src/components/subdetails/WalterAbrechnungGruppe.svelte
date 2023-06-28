@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
     import { WalterDataTable } from '$walter/components';
     import type { WalterBetriebskostenabrechnungKostenpunkt } from '$walter/types';
+    import { goto_or_create_rechnung } from './WalterAbrechnungGruppe';
 
     export let rows: WalterBetriebskostenabrechnungKostenpunkt[];
     export let year: number;
@@ -16,19 +16,10 @@
     ];
 
     const navigate = (e: any) => {
-        const punkt = e.detail as WalterBetriebskostenabrechnungKostenpunkt;
-
-        if (punkt.betriebskostenrechnungId) {
-            goto(`/betriebskostenrechnungen/${punkt.betriebskostenrechnungId}`);
-        } else {
-            const searchParams = new URLSearchParams();
-            searchParams.set('typ', `${punkt.typ.id}`);
-            searchParams.set('umlage', `${punkt.umlageId}`);
-            searchParams.set('jahr', `${year}`);
-            // TODO betrag
-
-            goto(`/betriebskostenrechnungen/new?${searchParams.toString()}`);
-        }
+        goto_or_create_rechnung(
+            e.detail as WalterBetriebskostenabrechnungKostenpunkt,
+            year
+        );
     };
 </script>
 

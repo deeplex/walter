@@ -24,9 +24,7 @@
         User,
         UserMultiple
     } from 'carbon-icons-svelte';
-    import { WalterToastContent } from '$walter/lib';
-    import { walter_sign_out } from '$walter/services/auth';
-    import { checkStackTodo } from './WalterSideNav';
+    import { checkStackTodo, logout } from './WalterSideNav';
 
     export let fetchImpl: typeof fetch;
 
@@ -41,14 +39,8 @@
         }
     }
 
-    function closeSideNav() {
+    export function closeSideNav() {
         isWalterSideNavOpen.update((_e: unknown) => false);
-    }
-
-    function logout() {
-        const LogoutToast = new WalterToastContent('Abmeldung erfolgreich');
-        walter_sign_out(LogoutToast);
-        goto('/login');
     }
 </script>
 
@@ -80,21 +72,21 @@
             href="/vertraege"
         />
 
-        <SideNavLink
+        <!-- <SideNavLink
             on:click={closeSideNavIfWinWidthSmall}
             isSelected={$page.route.id?.includes('/betriebskostenrechnungen')}
             icon={Money}
             text="Betriebskostenrechnungen"
             href="/betriebskostenrechnungen"
-        />
+        /> -->
 
-        <SideNavLink
+        <!-- <SideNavLink
             on:click={closeSideNavIfWinWidthSmall}
             isSelected={$page.route.id?.includes('/erhaltungsaufwendungen')}
             icon={Tools}
             text="Erhaltungsaufwendungen"
             href="/erhaltungsaufwendungen"
-        />
+        /> -->
 
         <SideNavLink
             on:click={closeSideNavIfWinWidthSmall}
@@ -104,21 +96,21 @@
             href="/umlagen"
         />
 
-        <SideNavLink
+        <!-- <SideNavLink
             on:click={closeSideNavIfWinWidthSmall}
             isSelected={$page.route.id?.includes('/zaehler')}
             icon={Meter}
             text="Zähler"
             href="/zaehler"
-        />
+        /> -->
 
-        <SideNavLink
+        <!-- <SideNavLink
             on:click={closeSideNavIfWinWidthSmall}
             isSelected={$page.route.id?.includes('/adressen')}
             icon={Location}
             text="Adressen"
             href="/adressen"
-        />
+        /> -->
 
         <SideNavDivider />
 

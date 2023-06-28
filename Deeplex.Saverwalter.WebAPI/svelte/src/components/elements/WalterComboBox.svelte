@@ -2,15 +2,11 @@
     import { ComboBox, TextInputSkeleton } from 'carbon-components-svelte';
 
     import type { WalterSelectionEntry } from '$walter/lib';
+    import { shouldFilterItem } from './WalterComboBox';
 
     export let value: WalterSelectionEntry | undefined;
     export let titleText: string;
     export let entry: WalterSelectionEntry[];
-
-    function shouldFilterItem(item: WalterSelectionEntry, value: string) {
-        if (!value) return true;
-        return item.text.toLowerCase().includes(value.toLowerCase());
-    }
 
     function select(e: CustomEvent) {
         value = e.detail.selectedItem;
