@@ -25,11 +25,13 @@
     import { WalterDataTable } from '..';
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
-    import type { WalterSelectionEntry } from '$walter/lib';
+    import type {
+        WalterS3FileWrapper,
+        WalterSelectionEntry
+    } from '$walter/lib';
 
     export let file: WalterS3File;
-    export let files: WalterS3File[];
-    export let fetchImpl: typeof fetch;
+    export let fileWrapper: WalterS3FileWrapper;
 
     export let open = false;
     let rows: WalterSelectionEntry[] | undefined = undefined;
@@ -59,7 +61,7 @@
             return;
         }
 
-        rows = (await selectedTable!.fetch(fetchImpl)) || [];
+        rows = (await selectedTable!.fetch(fileWrapper.fetchImpl)) || [];
         selectedEntry = rows?.find((row) => row.id === id);
         if (selectedEntry) {
             step = 2;
@@ -70,38 +72,50 @@
         selectedTable = tables.find((t) => t.key === e.target.value);
         rows = undefined;
         step = 1;
-        rows = (await selectedTable!.fetch(fetchImpl)) || [];
+        rows = (await selectedTable!.fetch(fileWrapper.fetchImpl)) || [];
     }
 
     async function copy() {
+        if (!selectedTable || !selectedEntry) {
+            return;
+        }
+
         const copied = await copyImpl(
             file,
-            selectedTable!,
-            selectedEntry!,
-            fetchImpl
+            selectedTable,
+            selectedEntry,
+            fileWrapper.fetchImpl
         );
 
         if (copied) {
             open = false;
-            files = files.filter(
-                (e: WalterS3File) => e.FileName !== file.FileName
+
+            fileWrapper.addFile(
+                file,
+                `${selectedTable.key}/${selectedEntry.id}`
             );
         }
     }
 
     async function move() {
+        if (!selectedTable || !selectedEntry) {
+            return;
+        }
+
         const moved = await moveImpl(
             file,
-            selectedTable!,
-            selectedEntry!,
-            fetchImpl
+            selectedTable,
+            selectedEntry,
+            fileWrapper.fetchImpl
         );
 
         if (moved) {
             open = false;
-            files = files.filter(
-                (e: WalterS3File) => e.FileName !== file.FileName
+            fileWrapper.addFile(
+                file,
+                `${selectedTable.key}/${selectedEntry.id}`
             );
+            fileWrapper.removeFile(file);
         }
     }
 

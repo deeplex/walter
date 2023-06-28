@@ -11,7 +11,8 @@
         WalterVertrag,
         WalterVertragVersionen,
         WalterAbrechnung,
-        WalterAbrechnungControl
+        WalterAbrechnungControl,
+        WalterLink
     } from '$walter/components';
     import type { WalterBetriebskostenabrechnungKostengruppenEntry } from '$walter/types';
     import { page } from '$app/stores';
@@ -21,11 +22,12 @@
         getMietminderungEntry,
         getVertragversionEntry
     } from './utils';
-    import type {
-        WalterMieteEntry,
-        WalterMietminderungEntry,
-        WalterPersonEntry,
-        WalterVertragVersionEntry
+    import {
+        WalterS3FileWrapper,
+        type WalterMieteEntry,
+        type WalterMietminderungEntry,
+        type WalterPersonEntry,
+        type WalterVertragVersionEntry
     } from '$walter/lib';
     import { loadAbrechnung } from '$walter/services/abrechnung';
     import WalterLinks from '../../../../components/subdetails/WalterLinks.svelte';
@@ -52,18 +54,18 @@
         }
     });
 
-    let title = `${data.entry.wohnung?.text} - ${data.entry.mieter
+    const title = `${data.entry.wohnung?.text} - ${data.entry.mieter
         ?.map((mieter) => mieter.name)
         .join(', ')}`;
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
-    S3URL={data.S3URL}
-    bind:files={data.files}
     bind:entry={data.entry}
     apiURL={data.apiURL}
     {title}
-    fetchImpl={data.fetch}
+    bind:fileWrapper
 />
 
 <WalterGrid>
@@ -93,6 +95,19 @@
             entry={mietminderungEntry}
             title="Mietminderungen"
             rows={data.entry.mietminderungen}
+        />
+
+        <!-- TODO id is GUID -->
+        <!-- 
+        <WalterLink
+            bind:fileWrapper
+            name={`Ansprechpartner: ${data.entry.ansprechpartner?.text}`}
+            href={`/nat/${data.entry.ansprechpartner?.id}`}
+        /> -->
+        <WalterLink
+            bind:fileWrapper
+            name={`Wohnung: ${data.entry.wohnung.text}`}
+            href={`/wohnungen/${data.entry.wohnung.id}`}
         />
     </WalterLinks>
 

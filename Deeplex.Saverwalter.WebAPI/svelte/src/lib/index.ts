@@ -7,6 +7,7 @@ export { WalterJuristischePersonEntry } from './WalterJuristischePerson';
 export { WalterMieteEntry } from './WalterMiete';
 export { WalterMietminderungEntry } from './WalterMietminderung';
 export { WalterNatuerlichePersonEntry } from './WalterNatuerlichePerson';
+export { WalterS3FileWrapper } from './WalterS3FileWrapper';
 export { WalterSelectionEntry } from './WalterSelection';
 export { WalterUmlageEntry } from './WalterUmlage';
 export { WalterVertragEntry } from './WalterVertrag';

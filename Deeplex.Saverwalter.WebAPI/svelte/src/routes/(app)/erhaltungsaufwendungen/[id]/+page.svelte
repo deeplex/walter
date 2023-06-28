@@ -3,19 +3,25 @@
     import {
         WalterHeaderDetail,
         WalterGrid,
-        WalterErhaltungsaufwendung
+        WalterErhaltungsaufwendung,
+        WalterLink,
+        WalterLinks
     } from '$walter/components';
+    import { WalterS3FileWrapper } from '$walter/lib';
 
     export let data: PageData;
+
+    const title = data.entry.aussteller?.text + ' - ' + data.entry.bezeichnung;
+
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
-    S3URL={data.S3URL}
-    files={data.files}
     entry={data.entry}
     apiURL={data.apiURL}
-    title={data.entry.aussteller?.text + ' - ' + data.entry.bezeichnung}
-    fetchImpl={data.fetch}
+    {title}
+    bind:fileWrapper
 />
 
 <WalterGrid>
@@ -25,3 +31,16 @@
         entry={data.entry}
     />
 </WalterGrid>
+
+<WalterLinks>
+    <WalterLink
+        bind:fileWrapper
+        name={`Wohnung: ${data.entry.wohnung.text}`}
+        href={`/wohnungen/${data.entry.wohnung.id}`}
+    />
+    <WalterLink
+        bind:fileWrapper
+        name={`Aussteller: ${data.entry.aussteller.text}`}
+        href={`/kontakte/jur/${data.entry.aussteller.id}`}
+    />
+</WalterLinks>

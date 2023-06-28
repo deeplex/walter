@@ -12,6 +12,7 @@
     import { walter_post } from '$walter/services/requests';
     import { WalterToastContent } from '../../lib/WalterToastContent';
     import { addToast } from '$walter/store';
+    import { handle_save } from './WalterDataWrapper';
 
     export let fullHeight = false;
     export let addUrl: string | undefined = undefined;
@@ -30,20 +31,10 @@
     let addModalOpen = false;
     let open = false;
 
-    const PostToast = new WalterToastContent(
-        'Speichern erfolgreich',
-        'Speichern fehlgeschlagen',
-        () => `${title} erfolgreich gespeichert.`,
-        (a: unknown) => `Konnte ${a} nicht speichern.`
-    );
+    function submit() {
+        if (!addUrl) return;
 
-    async function click_post(url: string | undefined, body: unknown) {
-        if (!url) {
-            return;
-        }
-        const response = await walter_post(url, body);
-        const parsed = await response.json();
-        addToast(PostToast, response.status === 200, parsed);
+        const parsed = handle_save(addUrl, addEntry, title!);
 
         rows = [...rows, parsed];
         open = true;
@@ -84,7 +75,7 @@
                 <Modal
                     secondaryButtonText="Abbrechen"
                     primaryButtonText="Bestätigen"
-                    on:submit={() => click_post(addUrl, addEntry)}
+                    on:submit={submit}
                     on:click:button--secondary={() => (addModalOpen = false)}
                     on:click:button--primary={() => (addModalOpen = false)}
                     modalHeading="Eintrag zu {title} hinzufügen"

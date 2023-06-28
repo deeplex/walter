@@ -5,10 +5,8 @@
         DatePickerSkeleton
     } from 'carbon-components-svelte';
 
-    import {
-        convertDateCanadian,
-        convertDateGerman
-    } from '$walter/services/utils';
+    import { convertDateCanadian } from '$walter/services/utils';
+    import { getDateForDatePicker } from './WalterDatePicker';
 
     export let labelText: string;
     export let value: string | undefined = undefined;
@@ -17,12 +15,6 @@
 
     function change(e: CustomEvent) {
         value = convertDateCanadian(new Date(e.detail?.selectedDates[0]));
-    }
-
-    function getDateForDatePicker(date: string | undefined) {
-        const retval = date ? convertDateGerman(new Date(date)) : undefined;
-
-        return retval;
     }
 </script>
 

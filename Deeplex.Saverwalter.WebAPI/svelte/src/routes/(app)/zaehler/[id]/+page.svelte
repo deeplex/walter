@@ -6,10 +6,14 @@
         WalterZaehler,
         WalterZaehlerstaende,
         WalterUmlagen,
-        WalterLinks
+        WalterLinks,
+        WalterLink
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
-    import type { WalterZaehlerstandEntry } from '$walter/lib';
+    import {
+        WalterS3FileWrapper,
+        type WalterZaehlerstandEntry
+    } from '$walter/lib';
 
     export let data: PageData;
 
@@ -24,15 +28,17 @@
         stand: lastZaehlerstand?.stand || 0,
         einheit: lastZaehlerstand?.einheit
     };
+
+    const title = data.entry.kennnummer;
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
-    S3URL={data.S3URL}
-    files={data.files}
     entry={data.entry}
     apiURL={data.apiURL}
-    title={data.entry.kennnummer}
-    fetchImpl={data.fetch}
+    {title}
+    bind:fileWrapper
 />
 
 <WalterGrid>
@@ -56,6 +62,17 @@
             wohnungen={data.wohnungen}
             betriebskostentypen={data.betriebskostentypen}
             rows={data.entry.umlagen}
+        />
+
+        <WalterLink
+            bind:fileWrapper
+            name={`Adresse: ${data.entry.adresse.anschrift}`}
+            href={`/adressen/${data.entry.adresse.id}`}
+        />
+        <WalterLink
+            bind:fileWrapper
+            name={`Wohnung: ${data.entry.wohnung?.text}`}
+            href={`/wohnungen/${data.entry.wohnung?.id}`}
         />
     </WalterLinks>
 </WalterGrid>

@@ -8,22 +8,25 @@
         WalterWohnungen,
         WalterZaehlerList
     } from '$walter/components';
-    import type { WalterWohnungEntry } from '$walter/lib';
+    import { WalterS3FileWrapper, type WalterWohnungEntry } from '$walter/lib';
     import type { PageData } from './$types';
 
     export let data: PageData;
     const wohnungEntry: Partial<WalterWohnungEntry> = {
         adresse: { ...data.entry }
     };
+
+    const title = data.entry.anschrift;
+
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
-    S3URL={data.S3URL}
-    files={data.files}
+    bind:fileWrapper
     entry={data.entry}
     apiURL={data.apiURL}
-    title={data.entry.anschrift}
-    fetchImpl={data.fetch}
+    {title}
 />
 
 <WalterGrid>

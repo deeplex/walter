@@ -1,24 +1,19 @@
 <script lang="ts">
-    import {
-        create_walter_s3_file_from_file,
-        walter_s3_get
-    } from '$walter/services/s3';
     import type { WalterS3File } from '$walter/types';
 
-    export let fetchImpl: typeof fetch;
     export let file: WalterS3File;
-    export let files: WalterS3File[];
+    export let fileWrapper: WalterS3FileWrapper;
 
     import { HeaderPanelLink, Truncate } from 'carbon-components-svelte';
     import WalterPreview from './WalterPreview.svelte';
+    import type { WalterS3FileWrapper } from '$walter/lib';
+    import { get_file } from './WalterAnhaengeEntry';
 
     async function showModal(e: MouseEvent) {
-        const fileName = (e!.target as any).textContent;
-        walter_s3_get(file.Key).then((e: Blob) => {
-            const new_file = new File([e], fileName, { type: e.type });
-            selectedFile = create_walter_s3_file_from_file(new_file, file.Key);
-            previewOpen = true;
-        });
+        // const fileName = (e!.target as any).textContent;
+
+        selectedFile = await get_file(file);
+        previewOpen = true;
     }
 
     let selectedFile: WalterS3File;
@@ -27,8 +22,7 @@
 
 {#if selectedFile}
     <WalterPreview
-        {fetchImpl}
-        bind:files
+        bind:fileWrapper
         bind:file={selectedFile}
         bind:open={previewOpen}
     />

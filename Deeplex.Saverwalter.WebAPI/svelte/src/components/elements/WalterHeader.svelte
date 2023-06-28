@@ -11,7 +11,7 @@
         isSideNavOpen = value;
     });
 
-    function sideNavClick() {
+    function toggleWalterSideNav() {
         isWalterSideNavOpen.update((value) => !value);
     }
 </script>
@@ -24,7 +24,7 @@
             tooltipPosition="top"
             kind="secondary"
             icon={isSideNavOpen ? Close : Menu}
-            on:click={sideNavClick}
+            on:click={toggleWalterSideNav}
         />
     </svelte:fragment>
     <slot />

@@ -9,6 +9,7 @@
         WalterBetriebskostenrechnungEntry,
         WalterSelectionEntry
     } from '$walter/lib';
+    import { shouldFilterItem } from './WalterBetriebskostenrechnung';
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
     export let betriebskostentypen: WalterSelectionEntry[];
@@ -16,15 +17,6 @@
 
     let umlageEntries: WalterSelectionEntry[];
     updateUmlageEntries(entry.typ?.id);
-
-    function updateUmlageEntries(id: string | number | undefined) {
-        umlageEntries = umlagen_wohnungen.filter((u) => u.filter === id);
-    }
-
-    function shouldFilterItem(item: WalterSelectionEntry, value: string) {
-        if (!value) return true;
-        return item.text.toLowerCase().includes(value.toLowerCase());
-    }
 
     function selectTyp(e: CustomEvent) {
         updateUmlageEntries(e.detail.selectedItem.id);
@@ -35,6 +27,10 @@
     function selectUmlage(e: CustomEvent) {
         entry.umlage = e.detail.selectedItem;
         // entry.typ = entry.umlage.filter;
+    }
+
+    function updateUmlageEntries(id: string | number | undefined) {
+        umlageEntries = umlagen_wohnungen.filter((u) => u.filter === id);
     }
 </script>
 

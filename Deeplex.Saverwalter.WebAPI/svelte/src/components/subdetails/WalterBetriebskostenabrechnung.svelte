@@ -1,30 +1,14 @@
 <script lang="ts">
     import { WalterNumberInput } from '$walter/components';
-    import { walter_s3_post } from '$walter/services/s3';
     import { Button, Row } from 'carbon-components-svelte';
+    import { post_files } from './WalterBetriebskostenabrechnung';
 
     export let fetchImpl: typeof fetch;
     export let id: number;
     let jahr: number = new Date().getFullYear() - 1;
 
-    const headers = {
-        'Content-Type': 'application/octet-stream'
-    };
-
     function click() {
-        const apiURL = `/api/betriebskostenabrechnung/${id}/${jahr}`;
-        fetch(apiURL, {
-            method: 'GET',
-            headers
-        })
-            .then((e) => e.blob())
-            .then((e) =>
-                walter_s3_post(
-                    new File([e], `Abrechnung ${jahr}.docx`),
-                    `vertraege/${id}`,
-                    fetchImpl
-                )
-            );
+        post_files(id, jahr, fetchImpl);
     }
 </script>
 

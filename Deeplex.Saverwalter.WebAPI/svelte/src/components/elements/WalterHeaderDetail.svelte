@@ -9,55 +9,23 @@
     import { Save, TrashCan } from 'carbon-icons-svelte';
 
     import { WalterAnhaenge, WalterHeader } from '$walter/components';
-    import { walter_delete, walter_put } from '$walter/services/requests';
-    import { openModal } from '$walter/store';
-    import type { WalterS3File } from '$walter/types';
-    import { WalterToastContent } from '$walter/lib';
+    import { handle_save } from './WalterDataWrapper';
+    import { handle_delete } from './WalterHeaderDetail';
+    import type { WalterS3FileWrapper } from '$walter/lib';
 
     export let title = 'Saverwalter';
     export let entry: any;
     export let apiURL: string;
-    export let S3URL: string;
-    export let files: WalterS3File[] | undefined = undefined;
-    export let refFiles: WalterS3File[] | undefined = undefined;
-    export let fetchImpl: typeof fetch;
+    export let fileWrapper: WalterS3FileWrapper | undefined = undefined;
 
     let winWidth = 0;
 
-    const PutToast = new WalterToastContent(
-        'Speichern erfolgreich',
-        'Speichern fehlgeschlagen',
-        (_a: unknown) => `${title} erfolgreich gespeichert.`,
-        (a: any) =>
-            `Folgende Einträge sind erforderlich:
-			${Object.keys(a.errors)
-                .map((e) => e.split('.').pop())
-                .join(', \n')}`
-    );
-
-    function click_save() {
-        walter_put(apiURL, entry, PutToast);
+    function click_save(e: MouseEvent): void {
+        handle_save(apiURL, entry, title);
     }
 
-    const DeleteToast = new WalterToastContent(
-        'Löschen erfolgreich',
-        'Löschen fehlgeschlagen',
-        (_a: unknown) => `${title} erfolgreich gelöscht.`,
-        (_a: unknown) => ''
-    );
-
-    function click_delete(title: string) {
-        const content = `Bist du sicher, dass du ${title} löschen möchtest?
-    	Dieser Vorgang kann nicht rückgängig gemacht werden.`;
-
-        openModal({
-            modalHeading: 'Löschen',
-            content,
-            danger: true,
-            primaryButtonText: 'Löschen',
-            submit: () =>
-                walter_delete(apiURL, DeleteToast).then(() => history.back())
-        });
+    function click_delete(e: MouseEvent): void {
+        handle_delete(title, apiURL);
     }
 </script>
 
@@ -71,27 +39,30 @@
                     <HeaderPanelLink on:click={click_save}
                         >Speichern</HeaderPanelLink
                     >
-                    <HeaderPanelLink on:click={() => click_delete(title)}
+                    <HeaderPanelLink on:click={click_delete}
                         >Löschen</HeaderPanelLink
                     >
                 </HeaderPanelLinks>
-                {#if files}
+                {#if fileWrapper}
                     <div style="height: 1em" />
-                    <WalterAnhaenge {refFiles} {S3URL} bind:files {fetchImpl} />
+                    <WalterAnhaenge bind:fileWrapper />
                 {/if}
             </HeaderAction>
         {:else}
             <p>{winWidth}</p>
             <HeaderGlobalAction on:click={click_save} icon={Save} />
-            <HeaderGlobalAction
-                on:click={() => click_delete(title)}
-                icon={TrashCan}
-            />
+            <HeaderGlobalAction on:click={click_delete} icon={TrashCan} />
 
-            {#if files}
-                <HeaderAction text="({files.length})">
-                    <WalterAnhaenge {refFiles} {S3URL} bind:files {fetchImpl} />
-                </HeaderAction>
+            {#if fileWrapper}
+                {#await fileWrapper.handles[0].files}
+                    <HeaderAction text="(...)">
+                        <WalterAnhaenge bind:fileWrapper />
+                    </HeaderAction>
+                {:then files}
+                    <HeaderAction text="({files.length})">
+                        <WalterAnhaenge bind:fileWrapper />
+                    </HeaderAction>
+                {/await}
             {/if}
         {/if}
     </HeaderUtilities>

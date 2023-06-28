@@ -7,11 +7,13 @@
         WalterVertraege,
         WalterHeaderDetail,
         WalterJuristischePerson,
-        WalterLinks
+        WalterLinks,
+        WalterLink
     } from '$walter/components';
-    import type {
-        WalterJuristischePersonEntry,
-        WalterNatuerlichePersonEntry
+    import {
+        WalterS3FileWrapper,
+        type WalterJuristischePersonEntry,
+        type WalterNatuerlichePersonEntry
     } from '$walter/lib';
 
     export let data: PageData;
@@ -25,15 +27,17 @@
     let juristischePerson: Partial<WalterJuristischePersonEntry> = {
         selectedMitglieder: [{ id: +data.id, text: data.entry.name }]
     };
+
+    const title = data.entry.name;
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
-    S3URL={data.S3URL}
-    files={data.files}
     entry={data.entry}
     apiURL={data.apiURL}
-    title={data.entry.name}
-    fetchImpl={data.fetch}
+    {title}
+    bind:fileWrapper
 />
 
 <WalterGrid>
@@ -64,6 +68,12 @@
             kontakte={data.kontakte}
             title="Verträge"
             rows={data.entry.vertraege}
+        />
+
+        <WalterLink
+            bind:fileWrapper
+            name={`Adresse: ${data.entry.adresse.anschrift}`}
+            href={`/adressen/${data.entry.adresse.id}`}
         />
     </WalterLinks>
 </WalterGrid>

@@ -3,68 +3,21 @@
         FileUploaderDropContainer,
         HeaderPanelDivider,
         HeaderPanelLinks,
-        InlineLoading,
-        Loading
+        InlineLoading
     } from 'carbon-components-svelte';
 
-    import {
-        create_walter_s3_file_from_file,
-        walter_s3_get_files,
-        walter_s3_post
-    } from '$walter/services/s3';
-    import type { WalterS3File } from '$walter/types';
-    import { openModal } from '$walter/store';
     import WalterAnhaengeEntry from './WalterAnhaengeEntry.svelte';
-    import { onMount } from 'svelte';
+    import type { WalterS3FileWrapper } from '$walter/lib';
+    import { upload_new_files } from './WalterAnhaenge';
 
-    export let fetchImpl: typeof fetch;
-    export let S3URL: string;
-    export let files: WalterS3File[];
-    export let refFiles: WalterS3File[] | undefined = undefined;
-    export let hideStackFiles = false;
-
-    let stackFiles: WalterS3File[] | undefined = undefined;
-
-    if (!hideStackFiles) {
-        onMount(async () => {
-            stackFiles = await walter_s3_get_files('stack', fetchImpl);
-        });
-    }
+    export let fileWrapper: WalterS3FileWrapper;
 
     let fileUploadComplete = false;
     let newFiles: File[] = [];
 
-    function upload_finished(file: File) {
+    function upload(e: CustomEvent<readonly File[]>): void {
+        upload_new_files(fileWrapper, newFiles);
         fileUploadComplete = true;
-        // Don't update if file already exists (file overwrite)
-        if (files.some((e) => e.FileName == file.name)) {
-            return;
-        }
-        files = [...files, create_walter_s3_file_from_file(file, S3URL)];
-    }
-
-    function post_s3_file(file: File) {
-        walter_s3_post(file, S3URL, fetchImpl).then(() =>
-            upload_finished(file)
-        );
-    }
-
-    async function upload() {
-        for (const file of newFiles) {
-            {
-                if (files.map((e) => e.FileName).includes(file.name)) {
-                    const content = `Eine Datei mit dem Namen ${file.name} existiert bereits in dieser Ablage. Bist du sicher, dass diese Datei hochgeladen werden soll?`;
-                    openModal({
-                        modalHeading: `Datei existiert bereits`,
-                        content,
-                        primaryButtonText: 'Überschreiben',
-                        submit: () => post_s3_file(file)
-                    });
-                } else {
-                    post_s3_file(file);
-                }
-            }
-        }
     }
 </script>
 
@@ -81,42 +34,20 @@
             </div></svelte:fragment
         >
     </FileUploaderDropContainer>
-    <HeaderPanelDivider>Dateien ({files.length})</HeaderPanelDivider>
-    <HeaderPanelLinks>
-        {#each files as file}
-            <WalterAnhaengeEntry {file} bind:files {fetchImpl} />
-        {/each}
-        {#if refFiles}
+    {#each fileWrapper.handles as handle}
+        {#await handle.files}
+            <HeaderPanelDivider>{handle.name} (-)</HeaderPanelDivider>
+            <InlineLoading
+                style="margin-left: 2em"
+                description="Lade Dateien"
+            />
+        {:then loadedFiles}
             <HeaderPanelDivider
-                >Bezugsdateien ({refFiles.length})</HeaderPanelDivider
+                >{handle.name} ({loadedFiles.length})</HeaderPanelDivider
             >
-            {#each refFiles as refFile}
-                <WalterAnhaengeEntry
-                    file={refFile}
-                    bind:files={refFiles}
-                    {fetchImpl}
-                />
+            {#each loadedFiles as file}
+                <WalterAnhaengeEntry {file} bind:fileWrapper />
             {/each}
-        {/if}
-        {#if !hideStackFiles}
-            <HeaderPanelDivider
-                >Ablagestapel ({stackFiles?.length ||
-                    '...'})</HeaderPanelDivider
-            >
-            {#if stackFiles}
-                {#each stackFiles as stackFile}
-                    <WalterAnhaengeEntry
-                        file={stackFile}
-                        bind:files={stackFiles}
-                        {fetchImpl}
-                    />
-                {/each}
-            {:else}
-                <InlineLoading
-                    style="margin-left: 2em"
-                    description="Lade Dateien"
-                />
-            {/if}
-        {/if}
-    </HeaderPanelLinks>
+        {/await}
+    {/each}
 </HeaderPanelLinks>

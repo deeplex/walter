@@ -10,13 +10,15 @@
         WalterUmlagen,
         WalterHeaderDetail,
         WalterWohnung,
-        WalterLinks
+        WalterLinks,
+        WalterLink
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
-    import type {
-        WalterErhaltungsaufwendungEntry,
-        WalterUmlageEntry,
-        WalterZaehlerEntry
+    import {
+        WalterS3FileWrapper,
+        type WalterErhaltungsaufwendungEntry,
+        type WalterUmlageEntry,
+        type WalterZaehlerEntry
     } from '$walter/lib';
 
     export let data: PageData;
@@ -50,15 +52,18 @@
             },
             datum: convertDateCanadian(new Date())
         };
+
+    const title =
+        data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung;
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
-    S3URL={data.S3URL}
-    files={data.files}
     entry={data.entry}
     apiURL={data.apiURL}
-    title={data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung}
-    fetchImpl={data.fetch}
+    {title}
+    bind:fileWrapper
 />
 
 <WalterGrid>
@@ -106,5 +111,13 @@
             title="Erhaltungsaufwendungen"
             rows={data.entry.erhaltungsaufwendungen}
         />
+
+        <WalterLink
+            bind:fileWrapper
+            name={`Adresse: ${data.entry.adresse.anschrift}`}
+            href={`/adressen/${data.entry.adresse.id}`}
+        />
+
+        <!-- TODO besitzer id is guid -->
     </WalterLinks>
 </WalterGrid>

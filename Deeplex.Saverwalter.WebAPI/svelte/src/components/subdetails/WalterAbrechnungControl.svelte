@@ -6,10 +6,6 @@
         create_abrechnung_word,
         loadAbrechnung
     } from '$walter/services/abrechnung';
-    import {
-        create_walter_s3_file_from_file,
-        walter_s3_post
-    } from '$walter/services/s3';
     import type {
         WalterBetriebskostenabrechnungKostengruppenEntry,
         WalterS3File
@@ -18,6 +14,7 @@
     import { page } from '$app/stores';
 
     import { Button, ButtonSet, Row } from 'carbon-components-svelte';
+    import { create_pdf_doc, create_word_doc } from './WalterAbrechnungControl';
 
     export let firstYear: number;
 
@@ -33,50 +30,7 @@
         +(searchParams.get('abrechnung') || 0) ||
         Math.max(new Date().getFullYear() - 1, firstYear);
 
-    async function word_dokument_erstellen_click() {
-        const abrechnung = await create_abrechnung_word(
-            vertragId,
-            selectedYear,
-            title
-        );
-        if (abrechnung instanceof File) {
-            create_abrechnung(abrechnung);
-        }
-    }
-
-    async function pdf_dokument_erstellen_click() {
-        const abrechnung = await create_abrechnung_pdf(
-            vertragId,
-            selectedYear,
-            title
-        );
-        if (abrechnung instanceof File) {
-            create_abrechnung(abrechnung);
-        }
-    }
-
-    async function create_abrechnung(abrechnung: File) {
-        const file = create_walter_s3_file_from_file(abrechnung, S3URL);
-
-        const toast = new WalterToastContent(
-            'Hochladen erfolgreich',
-            'Hochladen fehlgeschlagen',
-            () => `Die Datei: ${file.FileName} wurde erfolgreich hochgeladen`,
-            () => `Die Datei: ${file.FileName} konnte nicht hochgeladen werden.`
-        );
-
-        var response = await walter_s3_post(
-            new File([abrechnung], file.FileName),
-            S3URL,
-            fetchImpl,
-            toast
-        );
-
-        if (response.status === 200) {
-            addToAnhang(file);
-        }
-    }
-
+    // TODO rework -> inject fileWrapper instead
     function addToAnhang(file: WalterS3File) {
         if (S3files.some((e) => e.FileName == file.FileName)) {
             return;
@@ -84,7 +38,7 @@
         S3files = [...S3files, file];
     }
 
-    async function vorschau_erstellen_click() {
+    async function vorschau_erstellen_click(): Promise<void> {
         searchParams = new URLSearchParams({ abrechnung: `${selectedYear}` });
         goto(`?${searchParams.toString()}`, { noScroll: true });
         abrechnung = await loadAbrechnung(
@@ -92,6 +46,34 @@
             `${selectedYear}`,
             fetchImpl
         );
+    }
+
+    async function click_word(e: MouseEvent): Promise<void> {
+        const file = await create_word_doc(
+            vertragId,
+            selectedYear,
+            title,
+            S3URL,
+            fetchImpl
+        );
+
+        if (file) {
+            addToAnhang(file);
+        }
+    }
+
+    async function click_pdf(e: MouseEvent): Promise<void> {
+        const file = await create_pdf_doc(
+            vertragId,
+            selectedYear,
+            title,
+            S3URL,
+            fetchImpl
+        );
+
+        if (file) {
+            addToAnhang(file);
+        }
     }
 </script>
 
@@ -104,11 +86,7 @@
     />
     <ButtonSet style="margin: auto">
         <Button on:click={vorschau_erstellen_click}>Vorschau anzeigen</Button>
-        <Button on:click={word_dokument_erstellen_click}
-            >Word-Dokument erstellen</Button
-        >
-        <Button on:click={pdf_dokument_erstellen_click}
-            >PDF-Dokument erstellen</Button
-        >
+        <Button on:click={click_word}>Word-Dokument erstellen</Button>
+        <Button on:click={click_pdf}>PDF-Dokument erstellen</Button>
     </ButtonSet>
 </Row>

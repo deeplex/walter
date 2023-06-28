@@ -2,28 +2,33 @@
     import {
         WalterHeaderDetail,
         WalterGrid,
-        WalterMietminderung
+        WalterMietminderung,
+        WalterLink
     } from '$walter/components';
     import { Button, ButtonSkeleton } from 'carbon-components-svelte';
     import type { PageData } from './$types';
+    import { WalterS3FileWrapper } from '$walter/lib';
 
     export let data: PageData;
+
+    const title = data.entry.vertrag.text;
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
-    S3URL={data.S3URL}
-    files={data.files}
     entry={data.entry}
     apiURL={data.apiURL}
-    title={data.entry.vertrag.text}
-    fetchImpl={data.fetch}
+    {title}
+    bind:fileWrapper
 />
 
 <WalterGrid>
     <WalterMietminderung entry={data.entry} />
-    {#await data.entry}
-        <ButtonSkeleton />
-    {:then x}
-        <Button href={`/vertraege/${x.vertrag.id}`}>Zum Vertrag</Button>
-    {/await}
+
+    <WalterLink
+        bind:fileWrapper
+        name={`Adresse: ${data.entry.vertrag.id}`}
+        href={`/adresse/${data.entry.vertrag.text}`}
+    />
 </WalterGrid>
