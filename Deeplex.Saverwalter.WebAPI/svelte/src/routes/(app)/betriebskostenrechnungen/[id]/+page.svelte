@@ -9,22 +9,26 @@
         WalterBetriebskostenrechnung,
         WalterLinks
     } from '$walter/components';
+    import { WalterS3FileWrapper } from '$walter/lib';
 
     export let data: PageData;
-</script>
 
-<WalterHeaderDetail
-    S3URL={data.S3URL}
-    files={data.files}
-    refFiles={data.refFiles}
-    entry={data.entry}
-    apiURL={data.apiURL}
-    title={data.entry.typ?.text +
+    const title =
+        data.entry.typ?.text +
         ' - ' +
         data.entry.betreffendesJahr +
         ' - ' +
-        data.entry.umlage?.text}
-    fetchImpl={data.fetch}
+        data.entry.umlage?.text;
+
+    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    fileWrapper.register(title, data.S3URL);
+</script>
+
+<WalterHeaderDetail
+    entry={data.entry}
+    apiURL={data.apiURL}
+    {title}
+    {fileWrapper}
 />
 
 <WalterGrid>

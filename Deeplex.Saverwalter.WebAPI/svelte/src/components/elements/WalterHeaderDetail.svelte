@@ -11,16 +11,12 @@
     import { WalterAnhaenge, WalterHeader } from '$walter/components';
     import { walter_delete, walter_put } from '$walter/services/requests';
     import { openModal } from '$walter/store';
-    import type { WalterS3File } from '$walter/types';
-    import { WalterToastContent } from '$walter/lib';
+    import { WalterS3FileWrapper, WalterToastContent } from '$walter/lib';
 
     export let title = 'Saverwalter';
     export let entry: any;
     export let apiURL: string;
-    export let S3URL: string;
-    export let files: WalterS3File[] | undefined = undefined;
-    export let refFiles: WalterS3File[] | undefined = undefined;
-    export let fetchImpl: typeof fetch;
+    export let fileWrapper: WalterS3FileWrapper | undefined = undefined;
 
     let winWidth = 0;
 
@@ -75,9 +71,9 @@
                         >Löschen</HeaderPanelLink
                     >
                 </HeaderPanelLinks>
-                {#if files}
+                {#if fileWrapper}
                     <div style="height: 1em" />
-                    <WalterAnhaenge {refFiles} {S3URL} bind:files {fetchImpl} />
+                    <WalterAnhaenge {fileWrapper} />
                 {/if}
             </HeaderAction>
         {:else}
@@ -88,9 +84,10 @@
                 icon={TrashCan}
             />
 
-            {#if files}
-                <HeaderAction text="({files.length})">
-                    <WalterAnhaenge {refFiles} {S3URL} bind:files {fetchImpl} />
+            {#if fileWrapper}
+                <!-- TODO replace ... check the text remove in the line below. -->
+                <HeaderAction>
+                    <WalterAnhaenge {fileWrapper} />
                 </HeaderAction>
             {/if}
         {/if}

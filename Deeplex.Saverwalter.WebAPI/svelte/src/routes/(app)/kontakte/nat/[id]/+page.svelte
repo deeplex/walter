@@ -9,17 +9,20 @@
         WalterNatuerlichePerson,
         WalterLinks
     } from '$walter/components';
+    import { WalterS3FileWrapper } from '$walter/lib';
 
     export let data: PageData;
+
+    const title = data.entry.name;
+    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
-    S3URL={data.S3URL}
-    files={data.files}
     entry={data.entry}
     apiURL={data.apiURL}
-    title={data.entry.name}
-    fetchImpl={data.fetch}
+    {title}
+    {fileWrapper}
 />
 
 <WalterGrid>

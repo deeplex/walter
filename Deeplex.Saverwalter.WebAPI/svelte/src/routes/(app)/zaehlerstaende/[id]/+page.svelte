@@ -7,20 +7,23 @@
     import { convertDateGerman } from '$walter/services/utils';
     import { Button, ButtonSkeleton } from 'carbon-components-svelte';
     import type { PageData } from './$types';
+    import { WalterS3FileWrapper } from '$walter/lib';
 
     export let data: PageData;
+
+    const title =
+        data.entry.zaehler.text +
+        ' - ' +
+        convertDateGerman(new Date(data.entry.datum));
+    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
-    S3URL={data.S3URL}
-    files={data.files}
-    refFiles={data.refFiles}
     entry={data.entry}
     apiURL={data.apiURL}
-    title={data.entry.zaehler.text +
-        ' - ' +
-        convertDateGerman(new Date(data.entry.datum))}
-    fetchImpl={data.fetch}
+    {title}
+    {fileWrapper}
 />
 
 <WalterGrid>

@@ -21,11 +21,12 @@
         getMietminderungEntry,
         getVertragversionEntry
     } from './utils';
-    import type {
-        WalterMieteEntry,
-        WalterMietminderungEntry,
-        WalterPersonEntry,
-        WalterVertragVersionEntry
+    import {
+        WalterS3FileWrapper,
+        type WalterMieteEntry,
+        type WalterMietminderungEntry,
+        type WalterPersonEntry,
+        type WalterVertragVersionEntry
     } from '$walter/lib';
     import { loadAbrechnung } from '$walter/services/abrechnung';
     import WalterLinks from '../../../../components/subdetails/WalterLinks.svelte';
@@ -52,18 +53,18 @@
         }
     });
 
-    let title = `${data.entry.wohnung?.text} - ${data.entry.mieter
+    const title = `${data.entry.wohnung?.text} - ${data.entry.mieter
         ?.map((mieter) => mieter.name)
         .join(', ')}`;
+    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
-    S3URL={data.S3URL}
-    bind:files={data.files}
     bind:entry={data.entry}
     apiURL={data.apiURL}
     {title}
-    fetchImpl={data.fetch}
+    {fileWrapper}
 />
 
 <WalterGrid>

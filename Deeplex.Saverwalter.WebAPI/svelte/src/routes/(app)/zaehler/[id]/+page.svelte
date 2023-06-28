@@ -9,7 +9,10 @@
         WalterLinks
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
-    import type { WalterZaehlerstandEntry } from '$walter/lib';
+    import {
+        WalterS3FileWrapper,
+        type WalterZaehlerstandEntry
+    } from '$walter/lib';
 
     export let data: PageData;
 
@@ -24,15 +27,17 @@
         stand: lastZaehlerstand?.stand || 0,
         einheit: lastZaehlerstand?.einheit
     };
+
+    const title = data.entry.kennnummer;
+    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
-    S3URL={data.S3URL}
-    files={data.files}
     entry={data.entry}
     apiURL={data.apiURL}
-    title={data.entry.kennnummer}
-    fetchImpl={data.fetch}
+    {title}
+    {fileWrapper}
 />
 
 <WalterGrid>

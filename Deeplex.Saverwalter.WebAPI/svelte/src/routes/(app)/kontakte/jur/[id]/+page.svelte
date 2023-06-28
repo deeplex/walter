@@ -9,9 +9,10 @@
         WalterJuristischePerson,
         WalterLinks
     } from '$walter/components';
-    import type {
-        WalterJuristischePersonEntry,
-        WalterNatuerlichePersonEntry
+    import {
+        WalterS3FileWrapper,
+        type WalterJuristischePersonEntry,
+        type WalterNatuerlichePersonEntry
     } from '$walter/lib';
 
     export let data: PageData;
@@ -25,15 +26,17 @@
     let juristischePerson: Partial<WalterJuristischePersonEntry> = {
         selectedMitglieder: [{ id: +data.id, text: data.entry.name }]
     };
+
+    const title = data.entry.name;
+    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
-    S3URL={data.S3URL}
-    files={data.files}
     entry={data.entry}
     apiURL={data.apiURL}
-    title={data.entry.name}
-    fetchImpl={data.fetch}
+    {title}
+    {fileWrapper}
 />
 
 <WalterGrid>

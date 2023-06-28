@@ -13,10 +13,11 @@
         WalterLinks
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
-    import type {
-        WalterErhaltungsaufwendungEntry,
-        WalterUmlageEntry,
-        WalterZaehlerEntry
+    import {
+        WalterS3FileWrapper,
+        type WalterErhaltungsaufwendungEntry,
+        type WalterUmlageEntry,
+        type WalterZaehlerEntry
     } from '$walter/lib';
 
     export let data: PageData;
@@ -50,15 +51,18 @@
             },
             datum: convertDateCanadian(new Date())
         };
+
+    const title =
+        data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung;
+    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
-    S3URL={data.S3URL}
-    files={data.files}
     entry={data.entry}
     apiURL={data.apiURL}
-    title={data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung}
-    fetchImpl={data.fetch}
+    {title}
+    {fileWrapper}
 />
 
 <WalterGrid>

@@ -16,12 +16,11 @@
         ModalHeader
     } from 'carbon-components-svelte';
     import WalterPreviewCopyFile from './WalterPreviewCopyFile.svelte';
-    import { WalterToastContent } from '$walter/lib';
+    import { WalterS3FileWrapper, WalterToastContent } from '$walter/lib';
 
     export let open = false;
     export let file: WalterS3File;
-    export let files: WalterS3File[];
-    export let fetchImpl: typeof fetch;
+    export let fileWrapper: WalterS3FileWrapper;
 
     function close() {
         open = false;
@@ -53,9 +52,10 @@
                 walter_s3_delete(file, deleteToast).then((e) => {
                     if (e.status === 200) {
                         open = false;
-                        files = files.filter(
-                            (e) => e.FileName !== file.FileName
-                        );
+                        // TODO replace
+                        // files = files.filter(
+                        //     (e) => e.FileName !== file.FileName
+                        // );
                     }
                 })
         });
@@ -88,4 +88,4 @@
     </ModalFooter>
 </ComposedModal>
 
-<WalterPreviewCopyFile {files} {fetchImpl} bind:open={copying} {file} />
+<WalterPreviewCopyFile {fileWrapper} bind:open={copying} {file} />

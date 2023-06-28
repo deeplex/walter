@@ -5,12 +5,12 @@
     } from '$walter/services/s3';
     import type { WalterS3File } from '$walter/types';
 
-    export let fetchImpl: typeof fetch;
     export let file: WalterS3File;
-    export let files: WalterS3File[];
+    export let fileWrapper: WalterS3FileWrapper;
 
     import { HeaderPanelLink, Truncate } from 'carbon-components-svelte';
     import WalterPreview from './WalterPreview.svelte';
+    import type { WalterS3FileWrapper } from '$walter/lib';
 
     async function showModal(e: MouseEvent) {
         const fileName = (e!.target as any).textContent;
@@ -27,8 +27,7 @@
 
 {#if selectedFile}
     <WalterPreview
-        {fetchImpl}
-        bind:files
+        bind:fileWrapper
         bind:file={selectedFile}
         bind:open={previewOpen}
     />
