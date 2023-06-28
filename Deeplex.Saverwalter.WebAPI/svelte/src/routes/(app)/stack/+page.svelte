@@ -58,7 +58,7 @@
 <WalterHeader title="Ablagestapel">
     <HeaderUtilities>
         <HeaderAction text="({data.files.length})">
-            <WalterAnhaenge hideStackFiles {fileWrapper} />
+            <WalterAnhaenge {fileWrapper} />
         </HeaderAction>
     </HeaderUtilities>
 </WalterHeader>

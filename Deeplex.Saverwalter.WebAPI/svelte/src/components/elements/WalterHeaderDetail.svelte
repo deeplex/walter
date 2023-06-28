@@ -85,10 +85,15 @@
             />
 
             {#if fileWrapper}
-                <!-- TODO replace ... check the text remove in the line below. -->
-                <HeaderAction>
-                    <WalterAnhaenge {fileWrapper} />
-                </HeaderAction>
+                {#await fileWrapper.handles[0].files}
+                    <HeaderAction text="(...)">
+                        <WalterAnhaenge {fileWrapper} />
+                    </HeaderAction>
+                {:then files}
+                    <HeaderAction text="({files.length})">
+                        <WalterAnhaenge {fileWrapper} />
+                    </HeaderAction>
+                {/await}
             {/if}
         {/if}
     </HeaderUtilities>

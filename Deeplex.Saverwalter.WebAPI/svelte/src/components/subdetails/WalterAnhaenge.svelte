@@ -19,18 +19,6 @@
     import type { WalterS3FileWrapper } from '$walter/lib';
 
     export let fileWrapper: WalterS3FileWrapper;
-    export let hideStackFiles = false;
-
-    let stackFiles: WalterS3File[] | undefined = undefined;
-
-    if (!hideStackFiles) {
-        onMount(async () => {
-            stackFiles = await walter_s3_get_files(
-                'stack',
-                fileWrapper.fetchImpl
-            );
-        });
-    }
 
     let fileUploadComplete = false;
     let newFiles: File[] = [];
@@ -101,19 +89,4 @@
             {/each}
         {/await}
     {/each}
-    {#if !hideStackFiles}
-        <HeaderPanelDivider
-            >Ablagestapel ({stackFiles?.length || '...'})</HeaderPanelDivider
-        >
-        {#if stackFiles}
-            {#each stackFiles as stackFile}
-                <WalterAnhaengeEntry file={stackFile} {fileWrapper} />
-            {/each}
-        {:else}
-            <InlineLoading
-                style="margin-left: 2em"
-                description="Lade Dateien"
-            />
-        {/if}
-    {/if}
 </HeaderPanelLinks>
