@@ -52,10 +52,7 @@
                 walter_s3_delete(file, deleteToast).then((e) => {
                     if (e.status === 200) {
                         open = false;
-                        // TODO replace
-                        // files = files.filter(
-                        //     (e) => e.FileName !== file.FileName
-                        // );
+                        fileWrapper.removeFile(file);
                     }
                 })
         });
@@ -88,4 +85,4 @@
     </ModalFooter>
 </ComposedModal>
 
-<WalterPreviewCopyFile {fileWrapper} bind:open={copying} {file} />
+<WalterPreviewCopyFile bind:fileWrapper bind:open={copying} {file} />

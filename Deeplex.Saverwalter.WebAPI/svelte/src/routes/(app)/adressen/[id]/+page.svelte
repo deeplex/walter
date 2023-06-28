@@ -18,12 +18,12 @@
 
     const title = data.entry.anschrift;
 
-    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
     fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
-    {fileWrapper}
+    bind:fileWrapper
     entry={data.entry}
     apiURL={data.apiURL}
     {title}

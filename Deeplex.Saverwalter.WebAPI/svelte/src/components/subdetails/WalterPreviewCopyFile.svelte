@@ -76,36 +76,46 @@
     }
 
     async function copy() {
+        if (!selectedTable || !selectedEntry) {
+            return;
+        }
+
         const copied = await copyImpl(
             file,
-            selectedTable!,
-            selectedEntry!,
+            selectedTable,
+            selectedEntry,
             fileWrapper.fetchImpl
         );
 
         if (copied) {
             open = false;
-            // TODO replace
-            // files = files.filter(
-            //     (e: WalterS3File) => e.FileName !== file.FileName
-            // );
+
+            fileWrapper.addFile(
+                file,
+                `${selectedTable.key}/${selectedEntry.id}`
+            );
         }
     }
 
     async function move() {
+        if (!selectedTable || !selectedEntry) {
+            return;
+        }
+
         const moved = await moveImpl(
             file,
-            selectedTable!,
-            selectedEntry!,
+            selectedTable,
+            selectedEntry,
             fileWrapper.fetchImpl
         );
 
         if (moved) {
             open = false;
-            // TODO replace
-            // files = files.filter(
-            //     (e: WalterS3File) => e.FileName !== file.FileName
-            // );
+            fileWrapper.addFile(
+                file,
+                `${selectedTable.key}/${selectedEntry.id}`
+            );
+            fileWrapper.removeFile(file);
         }
     }
 

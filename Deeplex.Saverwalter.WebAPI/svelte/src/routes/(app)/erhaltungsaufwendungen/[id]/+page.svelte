@@ -13,7 +13,7 @@
 
     const title = data.entry.aussteller?.text + ' - ' + data.entry.bezeichnung;
 
-    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
     fileWrapper.register(title, data.S3URL);
 </script>
 
@@ -21,7 +21,7 @@
     entry={data.entry}
     apiURL={data.apiURL}
     {title}
-    {fileWrapper}
+    bind:fileWrapper
 />
 
 <WalterGrid>
@@ -34,12 +34,12 @@
 
 <WalterLinks>
     <WalterLink
-        {fileWrapper}
+        bind:fileWrapper
         name={`Wohnung: ${data.entry.wohnung.text}`}
         href={`/wohnungen/${data.entry.wohnung.id}`}
     />
     <WalterLink
-        {fileWrapper}
+        bind:fileWrapper
         name={`Aussteller: ${data.entry.aussteller.text}`}
         href={`/kontakte/jur/${data.entry.aussteller.id}`}
     />

@@ -52,13 +52,13 @@
         }
     }
 
-    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
 </script>
 
 <WalterHeader title="Ablagestapel">
     <HeaderUtilities>
         <HeaderAction text="({data.files.length})">
-            <WalterAnhaenge {fileWrapper} />
+            <WalterAnhaenge bind:fileWrapper />
         </HeaderAction>
     </HeaderUtilities>
 </WalterHeader>

@@ -73,7 +73,7 @@
                 </HeaderPanelLinks>
                 {#if fileWrapper}
                     <div style="height: 1em" />
-                    <WalterAnhaenge {fileWrapper} />
+                    <WalterAnhaenge bind:fileWrapper />
                 {/if}
             </HeaderAction>
         {:else}
@@ -87,11 +87,11 @@
             {#if fileWrapper}
                 {#await fileWrapper.handles[0].files}
                     <HeaderAction text="(...)">
-                        <WalterAnhaenge {fileWrapper} />
+                        <WalterAnhaenge bind:fileWrapper />
                     </HeaderAction>
                 {:then files}
                     <HeaderAction text="({files.length})">
-                        <WalterAnhaenge {fileWrapper} />
+                        <WalterAnhaenge bind:fileWrapper />
                     </HeaderAction>
                 {/await}
             {/if}

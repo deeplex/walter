@@ -16,7 +16,7 @@
         data.entry.zaehler.text +
         ' - ' +
         convertDateGerman(new Date(data.entry.datum));
-    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
     fileWrapper.register(title, data.S3URL);
 </script>
 
@@ -24,13 +24,13 @@
     entry={data.entry}
     apiURL={data.apiURL}
     {title}
-    {fileWrapper}
+    bind:fileWrapper
 />
 
 <WalterGrid>
     <WalterZaehlerstand entry={data.entry} />
     <WalterLink
-        {fileWrapper}
+        bind:fileWrapper
         name={`Zähler: ${data.entry.zaehler.text}`}
         href={`/zaehler/${data.entry.zaehler.id}`}
     />

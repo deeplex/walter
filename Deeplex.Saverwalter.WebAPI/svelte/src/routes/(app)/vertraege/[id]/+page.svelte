@@ -57,7 +57,7 @@
     const title = `${data.entry.wohnung?.text} - ${data.entry.mieter
         ?.map((mieter) => mieter.name)
         .join(', ')}`;
-    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
     fileWrapper.register(title, data.S3URL);
 </script>
 
@@ -65,7 +65,7 @@
     bind:entry={data.entry}
     apiURL={data.apiURL}
     {title}
-    {fileWrapper}
+    bind:fileWrapper
 />
 
 <WalterGrid>
@@ -100,12 +100,12 @@
         <!-- TODO id is GUID -->
         <!-- 
         <WalterLink
-            {fileWrapper}
+            bind:fileWrapper
             name={`Ansprechpartner: ${data.entry.ansprechpartner?.text}`}
             href={`/nat/${data.entry.ansprechpartner?.id}`}
         /> -->
         <WalterLink
-            {fileWrapper}
+            bind:fileWrapper
             name={`Wohnung: ${data.entry.wohnung.text}`}
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />

@@ -40,7 +40,7 @@
         };
 
     const title = `${data.entry.typ.text} - ${data.entry.wohnungenBezeichnung}`;
-    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
     fileWrapper.register(title, data.S3URL);
 </script>
 
@@ -48,7 +48,7 @@
     entry={data.entry}
     apiURL={data.apiURL}
     {title}
-    {fileWrapper}
+    bind:fileWrapper
 />
 
 <WalterGrid>

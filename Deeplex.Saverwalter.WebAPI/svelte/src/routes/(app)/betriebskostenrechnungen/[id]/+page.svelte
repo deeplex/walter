@@ -20,7 +20,7 @@
         ' - ' +
         data.entry.umlage?.text;
 
-    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
     fileWrapper.register(title, data.S3URL);
 </script>
 
@@ -28,7 +28,7 @@
     entry={data.entry}
     apiURL={data.apiURL}
     {title}
-    {fileWrapper}
+    bind:fileWrapper
 />
 
 <WalterGrid>
@@ -46,7 +46,7 @@
         />
 
         <WalterLink
-            {fileWrapper}
+            bind:fileWrapper
             name={`Umlage: ${data.entry.umlage.text}`}
             href={`/umlagen/${data.entry.umlage?.id}`}
         />

@@ -14,22 +14,33 @@ export class WalterS3FileWrapper {
         this.handles.splice(this.handles.length - 1, 0, handle);
     }
 
-    addFile(file: WalterS3File, target: string) {
-        for (const handle of this.handles) {
-            console.log('Check for add:', handle.S3URL, target);
-            if (handle.S3URL == target) {
-                console.log('Match for add.');
-                handle.files.then((e) => e.push(file));
-            }
+    // target might be either an index of a S3URL that has to match the handles S3URL
+    async addFile(file: WalterS3File, target: string | number) {
+        const index =
+            typeof target === 'number'
+                ? target
+                : this.handles.findIndex((e) => e.S3URL === target);
+
+        const files = await this.handles[index].files;
+
+        if (!files) {
+            return;
         }
+        // Do not overwrite if the file already exists
+        if (files.some((e) => e.FileName === file.FileName)) {
+            return;
+        }
+
+        this.handles[index].files = Promise.resolve([...files, file]);
     }
 
-    removeFile(file: WalterS3File) {
+    async removeFile(file: WalterS3File) {
         for (const handle of this.handles) {
-            console.log('Check for remove: ', file.Key, handle.S3URL);
             if (file.Key.includes(handle.S3URL)) {
-                console.log('Match for remove.');
-                handle.files.then((e) => e.splice(e.indexOf(file), 1));
+                const files = await handle.files;
+                handle.files = Promise.resolve(
+                    files.filter((e) => e.FileName !== file.FileName)
+                );
             }
         }
     }
@@ -41,8 +52,8 @@ class WalterS3FileHandle {
     constructor(
         public name: string,
         public S3URL: string,
-        fetchImpl: typeof fetch
+        public fetchImpl: typeof fetch
     ) {
-        this.files = walter_s3_get_files(this.S3URL, fetchImpl);
+        this.files = walter_s3_get_files(this.S3URL, this.fetchImpl);
     }
 }

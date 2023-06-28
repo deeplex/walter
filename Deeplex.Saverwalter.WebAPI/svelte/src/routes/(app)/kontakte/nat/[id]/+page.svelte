@@ -15,7 +15,7 @@
     export let data: PageData;
 
     const title = data.entry.name;
-    const fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetch);
     fileWrapper.register(title, data.S3URL);
 </script>
 
@@ -23,7 +23,7 @@
     entry={data.entry}
     apiURL={data.apiURL}
     {title}
-    {fileWrapper}
+    bind:fileWrapper
 />
 
 <WalterGrid>
@@ -50,7 +50,7 @@
         />
 
         <WalterLink
-            {fileWrapper}
+            bind:fileWrapper
             name={`Adresse: ${data.entry.adresse.anschrift}`}
             href={`/adressen/${data.entry.adresse.id}`}
         />
