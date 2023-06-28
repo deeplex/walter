@@ -4,12 +4,14 @@
     import { isWalterSideNavOpen } from '$walter/store';
 
     import {
+        Checkbox,
         Loading,
         SideNav,
         SideNavDivider,
         SideNavItems,
         SideNavLink,
-        SideNavMenu
+        SideNavMenu,
+        SideNavMenuItem
     } from 'carbon-components-svelte';
     import {
         Building,
@@ -31,6 +33,8 @@
     let winWidth = 0;
     let isOpen: boolean;
     isWalterSideNavOpen.subscribe((value) => (isOpen = value));
+
+    let extendedNavigation = false;
 
     function closeSideNavIfWinWidthSmall() {
         // https://github.com/carbon-design-system/carbon-components-svelte/blob/master/src/UIShell/Header.svelte#L44
@@ -72,45 +76,51 @@
             href="/vertraege"
         />
 
-        <!-- <SideNavLink
-            on:click={closeSideNavIfWinWidthSmall}
-            isSelected={$page.route.id?.includes('/betriebskostenrechnungen')}
-            icon={Money}
-            text="Betriebskostenrechnungen"
-            href="/betriebskostenrechnungen"
-        /> -->
+        {#if extendedNavigation}
+            <SideNavDivider />
 
-        <!-- <SideNavLink
-            on:click={closeSideNavIfWinWidthSmall}
-            isSelected={$page.route.id?.includes('/erhaltungsaufwendungen')}
-            icon={Tools}
-            text="Erhaltungsaufwendungen"
-            href="/erhaltungsaufwendungen"
-        /> -->
+            <SideNavLink
+                on:click={closeSideNavIfWinWidthSmall}
+                isSelected={$page.route.id?.includes(
+                    '/betriebskostenrechnungen'
+                )}
+                icon={Money}
+                text="Betriebskostenrechnungen"
+                href="/betriebskostenrechnungen"
+            />
 
-        <SideNavLink
-            on:click={closeSideNavIfWinWidthSmall}
-            isSelected={$page.route.id?.includes('/umlagen')}
-            icon={ChartRelationship}
-            text="Umlagen"
-            href="/umlagen"
-        />
+            <SideNavLink
+                on:click={closeSideNavIfWinWidthSmall}
+                isSelected={$page.route.id?.includes('/erhaltungsaufwendungen')}
+                icon={Tools}
+                text="Erhaltungsaufwendungen"
+                href="/erhaltungsaufwendungen"
+            />
 
-        <!-- <SideNavLink
-            on:click={closeSideNavIfWinWidthSmall}
-            isSelected={$page.route.id?.includes('/zaehler')}
-            icon={Meter}
-            text="Zähler"
-            href="/zaehler"
-        /> -->
+            <SideNavLink
+                on:click={closeSideNavIfWinWidthSmall}
+                isSelected={$page.route.id?.includes('/umlagen')}
+                icon={ChartRelationship}
+                text="Umlagen"
+                href="/umlagen"
+            />
 
-        <!-- <SideNavLink
-            on:click={closeSideNavIfWinWidthSmall}
-            isSelected={$page.route.id?.includes('/adressen')}
-            icon={Location}
-            text="Adressen"
-            href="/adressen"
-        /> -->
+            <SideNavLink
+                on:click={closeSideNavIfWinWidthSmall}
+                isSelected={$page.route.id?.includes('/zaehler')}
+                icon={Meter}
+                text="Zähler"
+                href="/zaehler"
+            />
+
+            <SideNavLink
+                on:click={closeSideNavIfWinWidthSmall}
+                isSelected={$page.route.id?.includes('/adressen')}
+                icon={Location}
+                text="Adressen"
+                href="/adressen"
+            />
+        {/if}
 
         <SideNavDivider />
 
@@ -135,6 +145,13 @@
         <SideNavDivider />
 
         <SideNavMenu text="Einstellungen" icon={Settings}>
+            <SideNavMenuItem style="padding-left: 1.2em">
+                <Checkbox
+                    bind:checked={extendedNavigation}
+                    labelText="Erweiterte Navigation"
+                />
+            </SideNavMenuItem>
+
             <SideNavLink
                 on:click={closeSideNavIfWinWidthSmall}
                 isSelected={$page.route.id?.includes('/account')}
