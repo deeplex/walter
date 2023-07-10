@@ -3,18 +3,10 @@
     import {
         Button,
         ComposedModal,
-        DataTableSkeleton,
         Grid,
-        Link,
         ModalBody,
         ModalFooter,
-        ModalHeader,
-        ProgressIndicator,
-        ProgressStep,
-        RadioButton,
-        RadioButtonGroup,
-        SkeletonText,
-        Tile
+        ModalHeader
     } from 'carbon-components-svelte';
     import {
         copyImpl,
@@ -22,13 +14,16 @@
         tables,
         type WalterPreviewCopyTable
     } from './WalterPreviewCopyFile';
-    import { WalterDataTable } from '..';
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
     import type {
         WalterS3FileWrapper,
         WalterSelectionEntry
     } from '$walter/lib';
+    import WalterPreviewCopyFileStep0 from './WalterPreviewCopyFileStep0.svelte';
+    import WalterPreviewCopyFileStep1 from './WalterPreviewCopyFileStep1.svelte';
+    import WalterPreviewCopyFileStep2 from './WalterPreviewCopyFileStep2.svelte';
+    import WalterPreviewCopyFileStepper from './WalterPreviewCopyFileStepper.svelte';
 
     export let file: WalterS3File;
     export let fileWrapper: WalterS3FileWrapper;
@@ -36,7 +31,6 @@
     export let open = false;
     let rows: WalterSelectionEntry[] | undefined = undefined;
 
-    const headers = [{ key: 'text', value: 'Bezeichnung' }];
     let step = 0;
     let selectedTable: WalterPreviewCopyTable | undefined = undefined;
     let selectedEntry: WalterSelectionEntry | undefined = undefined;
@@ -134,74 +128,32 @@
     <ModalHeader title={`${file.FileName} kopieren`} />
     <ModalBody>
         <Grid condensed fullWidth>
-            <ProgressIndicator
-                style="margin: 1em"
-                spaceEqually
-                currentIndex={step}
-            >
-                <ProgressStep
-                    on:click={() => (step = 0)}
-                    label="Tabelle auswählen"
-                    complete={!!selectedTable}
-                />
-                <ProgressStep
-                    on:click={() => {
-                        if (!!selectedTable) step = 1;
-                    }}
-                    label="Eintrag auswählen"
-                    complete={step > 1}
-                />
-                <ProgressStep
-                    on:click={() => {
-                        if (selectedEntry) step = 2;
-                    }}
-                    label="Bestätigen"
-                    complete={step > 2}
-                />
-            </ProgressIndicator>
+            <WalterPreviewCopyFileStepper
+                bind:step
+                bind:selectedEntry
+                bind:selectedTable
+            />
             <style>
                 .bx--progress-label {
                     padding-right: 0px !important;
                 }
             </style>
-            {#if step === 0}
-                <RadioButtonGroup orientation="vertical">
-                    {#each tables as radio}
-                        <RadioButton
-                            checked={selectedTable?.key == radio.key}
-                            on:change={selectedTable_change}
-                            labelText={radio.value}
-                            value={radio.key}
-                        />
-                    {/each}
-                </RadioButtonGroup>
-            {:else if step === 1}
-                {#if rows}
-                    <WalterDataTable
-                        fullHeight
-                        navigate={selectedEntry_change}
-                        {headers}
-                        {rows}
-                        search
-                    />
-                {:else}
-                    <SkeletonText style="margin: 0; height: 48px" />
-                    <DataTableSkeleton
-                        {headers}
-                        showHeader={false}
-                        showToolbar={false}
-                    />
-                {/if}
-            {:else if step === 2}
-                <Tile light>
-                    Ausgewählter Eintrag von {selectedTable?.value}: <Link
-                        href="{$page.url
-                            .origin}/{selectedTable?.key}/{selectedEntry?.id}"
-                        >{selectedEntry?.text}</Link
-                    >
-                </Tile>
-                <Tile light>Datei kann jetzt kopiert werden.</Tile>
-            {/if}
+            <WalterPreviewCopyFileStep0
+                bind:selectedTable
+                bind:step
+                {selectedTable_change}
+                {tables}
+            />
+            <WalterPreviewCopyFileStep1
+                bind:step
+                {rows}
+                {selectedEntry_change}
+            />
+            <WalterPreviewCopyFileStep2
+                bind:selectedTable
+                bind:selectedEntry
+                bind:step
+            />
         </Grid>
     </ModalBody>
     <ModalFooter>
