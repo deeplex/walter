@@ -15,8 +15,8 @@
         ModalFooter,
         ModalHeader
     } from 'carbon-components-svelte';
-    import WalterPreviewCopyFile from './WalterPreviewCopyFile.svelte';
-    import { download, remove } from './WalterPreview';
+    import WalterPreviewCopyFile from '../preview/WalterPreviewCopyFile.svelte';
+    import { download, remove } from '../preview/WalterPreview';
     import type { WalterS3FileWrapper } from '$walter/lib';
 
     export let open = false;

@@ -1,12 +1,6 @@
 export { default as WalterAdresse } from './subdetails/WalterAdresse.svelte';
 export { default as WalterAnhaenge } from './subdetails/WalterAnhaenge.svelte';
 export { default as WalterPerson } from './subdetails/WalterPerson.svelte';
-export { default as WalterPreviewImage } from './subdetails/WalterPreviewImage.svelte';
-export { default as WalterPreviewText } from './subdetails/WalterPreviewText.svelte';
-export { default as WalterPreviewPdf } from './subdetails/WalterPreviewPdf.svelte';
-export { default as WalterPreview } from './subdetails/WalterPreview.svelte';
-export { default as WalterPreviewUnknown } from './subdetails/WalterPreviewUnknown.svelte';
-export { default as WalterPreviewError } from './subdetails/WalterPreviewError.svelte';
 export { default as WalterAbrechnung } from './subdetails/WalterAbrechnung.svelte';
 export { default as WalterAbrechnungControl } from './subdetails/WalterAbrechnungControl.svelte';
 export { default as WalterAbrechnungGruppe } from './subdetails/WalterAbrechnungGruppe.svelte';
@@ -14,6 +8,13 @@ export { default as WalterAbrechnungEinheit } from './subdetails/WalterAbrechnun
 export { default as WalterAbrechnungResultat } from './subdetails/WalterAbrechnungResultat.svelte';
 export { default as WalterLinks } from './subdetails/WalterLinks.svelte';
 export { default as WalterLink } from './subdetails/WalterLink.svelte';
+
+export { default as WalterPreviewImage } from './preview/WalterPreviewImage.svelte';
+export { default as WalterPreviewText } from './preview/WalterPreviewText.svelte';
+export { default as WalterPreviewPdf } from './preview/WalterPreviewPdf.svelte';
+export { default as WalterPreview } from './preview/WalterPreview.svelte';
+export { default as WalterPreviewUnknown } from './preview/WalterPreviewUnknown.svelte';
+export { default as WalterPreviewError } from './preview/WalterPreviewError.svelte';
 
 export { default as WalterNatuerlichePerson } from './details/WalterNatuerlichePerson.svelte';
 export { default as WalterJuristischePerson } from './details/WalterJuristischePerson.svelte';
