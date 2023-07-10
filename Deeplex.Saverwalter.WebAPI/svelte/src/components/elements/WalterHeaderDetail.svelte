@@ -49,7 +49,6 @@
                 {/if}
             </HeaderAction>
         {:else}
-            <p>{winWidth}</p>
             <HeaderGlobalAction on:click={click_save} icon={Save} />
             <HeaderGlobalAction on:click={click_delete} icon={TrashCan} />
 

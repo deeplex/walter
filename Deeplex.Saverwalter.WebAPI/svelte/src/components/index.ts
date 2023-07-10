@@ -1,4 +1,3 @@
-export { default as WalterAdresse } from './subdetails/WalterAdresse.svelte';
 export { default as WalterAnhaenge } from './subdetails/WalterAnhaenge.svelte';
 export { default as WalterPerson } from './subdetails/WalterPerson.svelte';
 export { default as WalterAbrechnung } from './subdetails/WalterAbrechnung.svelte';
@@ -16,6 +15,7 @@ export { default as WalterPreview } from './preview/WalterPreview.svelte';
 export { default as WalterPreviewUnknown } from './preview/WalterPreviewUnknown.svelte';
 export { default as WalterPreviewError } from './preview/WalterPreviewError.svelte';
 
+export { default as WalterAdresse } from './details/WalterAdresse.svelte';
 export { default as WalterNatuerlichePerson } from './details/WalterNatuerlichePerson.svelte';
 export { default as WalterJuristischePerson } from './details/WalterJuristischePerson.svelte';
 export { default as WalterMiete } from './details/WalterMiete.svelte';
