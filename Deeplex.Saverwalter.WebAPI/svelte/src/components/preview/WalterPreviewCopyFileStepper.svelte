@@ -10,22 +10,29 @@
 
 <ProgressIndicator style="margin: 1em" spaceEqually currentIndex={step}>
     <ProgressStep
-        on:click={() => (step = 0)}
         label="Tabelle auswählen"
+        on:click={() => (step = 0)}
         complete={!!selectedTable}
     />
     <ProgressStep
+        label="Eintrag auswählen"
         on:click={() => {
             if (!!selectedTable) step = 1;
         }}
-        label="Eintrag auswählen"
         complete={step > 1}
     />
     <ProgressStep
+        label="Vorschau"
         on:click={() => {
-            if (selectedEntry) step = 2;
+            step = 2;
         }}
-        label="Bestätigen"
         complete={step > 2}
+    />
+    <ProgressStep
+        label="Bestätigen"
+        on:click={() => {
+            if (selectedEntry) step = 3;
+        }}
+        complete={step > 3}
     />
 </ProgressIndicator>

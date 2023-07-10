@@ -44,7 +44,7 @@
                     >
                 </HeaderPanelLinks>
                 {#if fileWrapper}
-                    <div style="height: 1em" />
+                    <div style="height: 1em; margin-top: 4em" />
                     <WalterAnhaenge bind:fileWrapper />
                 {/if}
             </HeaderAction>

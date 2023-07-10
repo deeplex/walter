@@ -5,8 +5,6 @@
         WalterPreviewText,
         WalterPreviewUnknown
     } from '$walter/components';
-    import { download_file_blob, walter_s3_delete } from '$walter/services/s3';
-    import { openModal } from '$walter/store';
     import type { WalterS3File } from '$walter/types';
     import {
         Button,

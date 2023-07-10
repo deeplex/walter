@@ -23,7 +23,9 @@
     import WalterPreviewCopyFileStep0 from './WalterPreviewCopyFileStep0.svelte';
     import WalterPreviewCopyFileStep1 from './WalterPreviewCopyFileStep1.svelte';
     import WalterPreviewCopyFileStep2 from './WalterPreviewCopyFileStep2.svelte';
+    import WalterPreviewCopyFileStep3 from './WalterPreviewCopyFileStep3.svelte';
     import WalterPreviewCopyFileStepper from './WalterPreviewCopyFileStepper.svelte';
+    import { walter_get } from '$walter/services/requests';
 
     export let file: WalterS3File;
     export let fileWrapper: WalterS3FileWrapper;
@@ -62,26 +64,26 @@
         }
     });
 
+    async function updateRows() {
+        rows = (await selectedTable!.fetch(fileWrapper.fetchImpl)) || [];
+    }
+
     async function selectedTable_change(e: any) {
         selectedTable = tables.find((t) => t.key === e.target.value);
         rows = undefined;
         step = 1;
-        rows = (await selectedTable!.fetch(fileWrapper.fetchImpl)) || [];
+        updateRows();
     }
 
     async function copy() {
-        if (!selectedTable || !selectedEntry) {
-            return;
-        }
-
         const copied = await copyImpl(
             file,
+            fileWrapper.fetchImpl,
             selectedTable,
-            selectedEntry,
-            fileWrapper.fetchImpl
+            selectedEntry
         );
 
-        if (copied) {
+        if (copied && selectedTable && selectedEntry) {
             open = false;
 
             fileWrapper.addFile(
@@ -92,18 +94,14 @@
     }
 
     async function move() {
-        if (!selectedTable || !selectedEntry) {
-            return;
-        }
-
         const moved = await moveImpl(
             file,
+            fileWrapper.fetchImpl,
             selectedTable,
-            selectedEntry,
-            fileWrapper.fetchImpl
+            selectedEntry
         );
 
-        if (moved) {
+        if (moved && selectedTable && selectedEntry) {
             open = false;
             fileWrapper.addFile(
                 file,
@@ -113,13 +111,23 @@
         }
     }
 
-    function selectedEntry_change(e: CustomEvent<any>) {
+    let value = {};
+
+    function selectEntryFromId(id: string) {
+        selectedEntry = rows?.find((row) => row.id === id);
+    }
+
+    async function selectedEntry_change(e: CustomEvent<any>) {
         // e.stopImmediatePropagation();
         // e.preventDefault();
         // e.stopPropagation();
         // Is this the best way of stopping the modal to stop? ...
-        selectedEntry = rows?.find((row) => row.id === e.detail.id);
-        setTimeout(() => (step = 2), 0);
+        selectEntryFromId(e.detail.id);
+        setTimeout(() => (step = 3), 0);
+        value = await walter_get(
+            `/api/${selectedTable?.key}/${selectedEntry?.id}`,
+            fileWrapper.fetchImpl
+        );
         // step = 2;
     }
 </script>
@@ -146,10 +154,19 @@
             />
             <WalterPreviewCopyFileStep1
                 bind:step
+                bind:selectedEntry
                 {rows}
                 {selectedEntry_change}
             />
             <WalterPreviewCopyFileStep2
+                bind:step
+                bind:selectedEntry
+                bind:selectedTable
+                bind:value
+                {updateRows}
+                {selectEntryFromId}
+            />
+            <WalterPreviewCopyFileStep3
                 bind:selectedTable
                 bind:selectedEntry
                 bind:step

@@ -1,20 +1,28 @@
 <script lang="ts">
-    import { Link, Tile } from 'carbon-components-svelte';
+    import { Button } from 'carbon-components-svelte';
     import type { WalterPreviewCopyTable } from './WalterPreviewCopyFile';
-    import { page } from '$app/stores';
+    import { handle_save } from './WalterPreviewCopyFileStep2';
     import type { WalterSelectionEntry } from '$walter/lib';
 
     export let step: number;
-    export let selectedEntry: WalterSelectionEntry | undefined = undefined;
+    export let value: any;
     export let selectedTable: WalterPreviewCopyTable | undefined;
+    export let selectedEntry: WalterSelectionEntry | undefined;
+    export let updateRows: () => void;
+    export let selectEntryFromId: (id: string) => void;
+
+    async function click() {
+        const apiURL = `/api/${selectedTable?.key}`;
+        var saved_entry = await handle_save(apiURL, value);
+        await updateRows();
+        await selectEntryFromId(`${saved_entry.id}`);
+        setTimeout(() => (step = 3), 0);
+    }
 </script>
 
-{#if step === 2}
-    <Tile light>
-        Ausgewählter Eintrag von {selectedTable?.value}: <Link
-            href="{$page.url.origin}/{selectedTable?.key}/{selectedEntry?.id}"
-            >{selectedEntry?.text}</Link
-        >
-    </Tile>
-    <Tile light>Datei kann jetzt kopiert werden.</Tile>
+{#if step === 2 && selectedTable}
+    <svelte:component this={selectedTable.newPage()} bind:value />
+    {#if !selectedEntry}
+        <Button on:click={click}>Eintrag speichern</Button>
+    {/if}
 {/if}
