@@ -54,15 +54,11 @@
     />
 </Row>
 <Row>
-    {#await kontakte}
-        <TextInputSkeleton />
-    {:then entries}
-        <WalterMultiSelect
-            bind:value={entry.selectedMieter}
-            entry={entries}
-            titleText="Mieter"
-        />
-    {/await}
+    <WalterMultiSelect
+        bind:value={entry.selectedMieter}
+        entries={kontakte}
+        titleText="Mieter"
+    />
 </Row>
 <Row>
     <WalterTextArea labelText="Notiz" bind:value={entry.notiz} />

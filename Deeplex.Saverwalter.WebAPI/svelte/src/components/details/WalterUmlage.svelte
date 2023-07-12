@@ -30,27 +30,19 @@
     />
 </Row>
 <Row>
-    {#await wohnungen}
-        <TextInputSkeleton />
-    {:then entries}
-        <WalterMultiSelect
-            bind:value={entry.selectedWohnungen}
-            entry={entries}
-            titleText="Wohnungen"
-        />
-    {/await}
+    <WalterMultiSelect
+        bind:value={entry.selectedWohnungen}
+        entries={wohnungen}
+        titleText="Wohnungen"
+    />
 </Row>
 {#if entry.schluessel?.id === '3'}
     <Row>
-        {#await zaehler}
-            <TextInputSkeleton />
-        {:then entries}
-            <WalterMultiSelect
-                bind:value={entry.selectedZaehler}
-                entry={entries}
-                titleText="Zähler"
-            />
-        {/await}
+        <WalterMultiSelect
+            bind:value={entry.selectedZaehler}
+            entries={zaehler}
+            titleText="Zähler"
+        />
     </Row>
 {/if}
 <Row>

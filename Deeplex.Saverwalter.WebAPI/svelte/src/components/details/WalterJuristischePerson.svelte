@@ -29,24 +29,16 @@
 </Row>
 <WalterPerson value={entry} />
 <Row>
-    {#await juristischePersonen}
-        <TextInputSkeleton />
-    {:then entries}
-        <WalterMultiSelect
-            entry={entries}
-            titleText="Juristische Personen"
-            bind:value={entry.selectedJuristischePersonen}
-        />
-    {/await}
-    {#await kontakte}
-        <TextInputSkeleton />
-    {:then entries}
-        <WalterMultiSelect
-            titleText="Mitglieder"
-            entry={entries}
-            bind:value={entry.selectedMitglieder}
-        />
-    {/await}
+    <WalterMultiSelect
+        entries={juristischePersonen}
+        titleText="Juristische Personen"
+        bind:value={entry.selectedJuristischePersonen}
+    />
+    <WalterMultiSelect
+        titleText="Mitglieder"
+        entries={kontakte}
+        bind:value={entry.selectedMitglieder}
+    />
 </Row>
 <Row>
     <WalterTextArea bind:value={entry.notiz} labelText="Notiz" />
