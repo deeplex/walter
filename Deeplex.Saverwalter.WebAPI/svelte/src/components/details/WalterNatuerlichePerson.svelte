@@ -5,14 +5,14 @@
         WalterTextArea,
         WalterTextInput
     } from '$walter/components';
-    import type {
-        WalterNatuerlichePersonEntry,
-        WalterSelectionEntry
-    } from '$walter/lib';
-    import { Row } from 'carbon-components-svelte';
+    import type { WalterNatuerlichePersonEntry } from '$walter/lib';
+    import { walter_selection } from '$walter/services/requests';
+    import { Row, TextInputSkeleton } from 'carbon-components-svelte';
 
     export let entry: Partial<WalterNatuerlichePersonEntry>;
-    export let juristischePersonen: WalterSelectionEntry[];
+    export let fetchImpl: typeof fetch;
+
+    const juristischePersonen = walter_selection.juristischePersonen(fetchImpl);
 </script>
 
 <Row>
@@ -22,7 +22,7 @@
 <WalterPerson value={entry} />
 <Row>
     <WalterMultiSelect
-        bind:entry={juristischePersonen}
+        entries={juristischePersonen}
         titleText="Juristische Personen"
         bind:value={entry.selectedJuristischePersonen}
     />

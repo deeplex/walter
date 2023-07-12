@@ -15,11 +15,5 @@
 <WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} />
 
 <WalterGrid>
-    <WalterUmlage
-        zaehler={data.zaehler}
-        wohnungen={data.wohnungen}
-        betriebskostentypen={data.betriebskostentypen}
-        umlageschluessel={data.umlageschluessel}
-        {entry}
-    />
+    <WalterUmlage fetchImpl={data.fetchImpl} {entry} />
 </WalterGrid>

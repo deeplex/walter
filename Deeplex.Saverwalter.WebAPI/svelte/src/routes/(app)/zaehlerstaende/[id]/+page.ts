@@ -12,12 +12,11 @@ export const load: PageLoad = async ({ params, fetch }) => {
     const S3URL = `zaehlerstaende/${params.id}`;
 
     return {
-        fetch,
+        fetchImpl: fetch,
         id: params.id,
         apiURL: apiURL,
         S3URL: S3URL,
         entry,
-        files: walter_s3_get_files(S3URL, fetch) as Promise<WalterS3File[]>,
-        refFiles: walter_s3_get_files(`zaehler/${(await entry).zaehler.id}`, fetch)
+        files: walter_s3_get_files(S3URL, fetch) as Promise<WalterS3File[]>
     };
 };

@@ -5,7 +5,7 @@
     export let fileWrapper: WalterS3FileWrapper;
 
     import { HeaderPanelLink, Truncate } from 'carbon-components-svelte';
-    import WalterPreview from './WalterPreview.svelte';
+    import WalterPreview from '../preview/WalterPreview.svelte';
     import type { WalterS3FileWrapper } from '$walter/lib';
     import { get_file } from './WalterAnhaengeEntry';
 

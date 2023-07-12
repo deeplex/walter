@@ -30,11 +30,12 @@
     };
 
     const title = data.entry.kennnummer;
-    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
+    fetchImpl={data.fetchImpl}
     entry={data.entry}
     apiURL={data.apiURL}
     {title}
@@ -42,12 +43,7 @@
 />
 
 <WalterGrid>
-    <WalterZaehler
-        umlagen={data.umlagen}
-        zaehlertypen={data.zaehlertypen}
-        wohnungen={data.wohnungen}
-        entry={data.entry}
-    />
+    <WalterZaehler fetchImpl={data.fetchImpl} entry={data.entry} />
 
     <WalterLinks>
         <WalterZaehlerstaende
@@ -57,10 +53,7 @@
         />
         <WalterUmlagen
             title="Umlagen"
-            zaehler={data.zaehler}
-            umlageschluessel={data.umlageschluessel}
-            wohnungen={data.wohnungen}
-            betriebskostentypen={data.betriebskostentypen}
+            fetchImpl={data.fetchImpl}
             rows={data.entry.umlagen}
         />
 

@@ -7,7 +7,7 @@
     export let value: Partial<WalterPersonEntry>;
 </script>
 
-<WalterAdresse bind:value={value.adresse} />
+<WalterAdresse bind:entry={value.adresse} />
 <Row>
     <WalterTextInput bind:value={value.email} labelText="E-Mail" />
     <WalterTextInput bind:value={value.fax} labelText="Fax" />

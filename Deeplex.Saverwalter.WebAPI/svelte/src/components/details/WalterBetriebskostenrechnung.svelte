@@ -10,12 +10,17 @@
         WalterSelectionEntry
     } from '$walter/lib';
     import { shouldFilterItem } from './WalterBetriebskostenrechnung';
+    import { walter_selection } from '$walter/services/requests';
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
-    export let betriebskostentypen: WalterSelectionEntry[];
-    export let umlagen_wohnungen: WalterSelectionEntry[];
+    export let fetchImpl: typeof fetch;
 
-    let umlageEntries: WalterSelectionEntry[];
+    const betriebskostentypen = walter_selection.betriebskostentypen(fetchImpl);
+    const umlagen_wohnungen = walter_selection.umlagen_wohnungen(fetchImpl);
+
+    let selectedUmlageId: string | number | undefined = entry.umlage?.id;
+
+    let umlageEntries: WalterSelectionEntry[] = [];
     updateUmlageEntries(entry.typ?.id);
 
     function selectTyp(e: CustomEvent) {
@@ -26,11 +31,15 @@
 
     function selectUmlage(e: CustomEvent) {
         entry.umlage = e.detail.selectedItem;
+        selectedUmlageId = entry.umlage?.id;
         // entry.typ = entry.umlage.filter;
     }
 
-    function updateUmlageEntries(id: string | number | undefined) {
-        umlageEntries = umlagen_wohnungen.filter((u) => u.filter === id);
+    async function updateUmlageEntries(id: string | number | undefined) {
+        umlageEntries = await umlagen_wohnungen.then((fulfilled) =>
+            fulfilled.filter((u) => u.filter === id)
+        );
+        selectedUmlageId = entry.umlage?.id;
     }
 </script>
 
@@ -48,20 +57,16 @@
             {shouldFilterItem}
         />
     {/await}
-
-    {#await umlagen_wohnungen}
-        <TextInputSkeleton />
-    {:then}
-        <ComboBox
-            disabled={!entry.typ}
-            selectedId={entry.umlage?.id}
-            on:select={selectUmlage}
-            style="padding-right: 1rem"
-            bind:items={umlageEntries}
-            titleText="Wohnungen der Umlage"
-            {shouldFilterItem}
-        />
-    {/await}
+    <ComboBox
+        disabled={!entry.typ}
+        bind:selectedId={selectedUmlageId}
+        on:select={selectUmlage}
+        style="padding-right: 1rem"
+        bind:items={umlageEntries}
+        placeholder="{umlageEntries.length} Umlagen für diesen Kostentypen gefunden"
+        titleText="Wohnungen der Umlage"
+        {shouldFilterItem}
+    />
 </Row>
 
 <Row>

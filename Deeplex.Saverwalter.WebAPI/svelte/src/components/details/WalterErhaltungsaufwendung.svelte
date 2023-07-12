@@ -6,16 +6,15 @@
         WalterTextArea,
         WalterTextInput
     } from '$walter/components';
-    import { Row } from 'carbon-components-svelte';
-    import type {
-        WalterErhaltungsaufwendungEntry,
-        WalterSelectionEntry
-    } from '$walter/lib';
-
-    export let kontakte: WalterSelectionEntry[];
-    export let wohnungen: WalterSelectionEntry[];
+    import { Row, TextInputSkeleton } from 'carbon-components-svelte';
+    import type { WalterErhaltungsaufwendungEntry } from '$walter/lib';
+    import { walter_selection } from '$walter/services/requests';
 
     export let entry: Partial<WalterErhaltungsaufwendungEntry> = {};
+    export let fetchImpl: typeof fetch;
+
+    const kontakte = walter_selection.kontakte(fetchImpl);
+    const wohnungen = walter_selection.wohnungen(fetchImpl);
 </script>
 
 <Row>
@@ -23,7 +22,7 @@
     <WalterComboBox
         bind:value={entry.aussteller}
         titleText="Aussteller"
-        entry={kontakte}
+        entries={kontakte}
     />
     <WalterDatePicker bind:value={entry.datum} labelText="Datum" />
 </Row>
@@ -31,7 +30,7 @@
     <WalterComboBox
         bind:value={entry.wohnung}
         titleText="Wohnung"
-        entry={wohnungen}
+        entries={wohnungen}
     />
     <WalterNumberInput bind:value={entry.betrag} label="Betrag" />
 </Row>

@@ -8,13 +8,17 @@
 <Theme
     theme="g10"
     tokens={{
+        interactive: '#2E7D32',
         'interactive-01': '#2E7D32', // darker green primary color
         'interactive-01-selected': '#2E7D32', // darker green selected color
         'interactive-03': '#2E7D32',
+        'interactive-04': '#2E7D32',
         'active-primary': '#1D5F27',
+        'active-tertiary': '#1D5F27',
         'link-01': '#2E7D32', // darker green link color
         focus: '#388E3C', // slightly lighter green focus color
-        'hover-primary': '#388E3C' // slightly lighter green hover color
+        'hover-primary': '#388E3C', // slightly lighter green hover color
+        'hover-tertiary': '#388E3C' // slightly lighter green hover color
     }}
 />
 <WalterToasts />
@@ -27,7 +31,11 @@
     }
 
     /* Sidenav theming doesn't seem to have a token */
+    :global(a) {
+        color: #2e7d32;
+    }
     :global(
+            a.bx--side-nav__icon--small,
             a.bx--side-nav__link[aria-current='page']::before,
             a.bx--side-nav__link--current::before
         ) {
@@ -74,9 +82,13 @@
         padding: 0 !important;
     }
 
+    :global(.bx--list-box__menu-item) {
+        margin: 0px !important;
+    }
+
     /* Adjust size of content in detail view */
     :global(.bx--text-input-wrapper, .bx--form-item, .bx--list-box__wrapper) {
-        margin: 10px !important;
+        margin: 10px;
         flex: 1 1 auto !important;
         display: flex !important;
         flex-direction: column !important;

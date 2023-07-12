@@ -4,25 +4,27 @@
         WalterMultiSelect,
         WalterTextArea
     } from '$walter/components';
-    import { Row } from 'carbon-components-svelte';
-    import type { WalterSelectionEntry, WalterUmlageEntry } from '$walter/lib';
-
-    export let betriebskostentypen: WalterSelectionEntry[];
-    export let umlageschluessel: WalterSelectionEntry[];
-    export let wohnungen: WalterSelectionEntry[];
-    export let zaehler: WalterSelectionEntry[];
+    import { Row, TextInputSkeleton } from 'carbon-components-svelte';
+    import type { WalterUmlageEntry } from '$walter/lib';
+    import { walter_selection } from '$walter/services/requests';
 
     export let entry: Partial<WalterUmlageEntry> = {};
+    export let fetchImpl: typeof fetch;
+
+    const betriebskostentypen = walter_selection.betriebskostentypen(fetchImpl);
+    const umlageschluessel = walter_selection.umlageschluessel(fetchImpl);
+    const wohnungen = walter_selection.wohnungen(fetchImpl);
+    const zaehler = walter_selection.zaehler(fetchImpl);
 </script>
 
 <Row>
     <WalterComboBox
-        entry={betriebskostentypen}
+        entries={betriebskostentypen}
         bind:value={entry.typ}
         titleText="Typ"
     />
     <WalterComboBox
-        entry={umlageschluessel}
+        entries={umlageschluessel}
         bind:value={entry.schluessel}
         titleText="Umlageschlüssel"
     />
@@ -30,7 +32,7 @@
 <Row>
     <WalterMultiSelect
         bind:value={entry.selectedWohnungen}
-        entry={wohnungen}
+        entries={wohnungen}
         titleText="Wohnungen"
     />
 </Row>
@@ -38,7 +40,7 @@
     <Row>
         <WalterMultiSelect
             bind:value={entry.selectedZaehler}
-            entry={zaehler}
+            entries={zaehler}
             titleText="Zähler"
         />
     </Row>

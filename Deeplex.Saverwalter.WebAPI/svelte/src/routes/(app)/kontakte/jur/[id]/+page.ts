@@ -9,7 +9,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
     const S3URL = `kontakte/jur/${params.id}`;
 
     return {
-        fetch,
+        fetchImpl: fetch,
         id: params.id,
         S3URL: S3URL,
         apiURL: apiURL,
@@ -17,10 +17,6 @@ export const load: PageLoad = async ({ params, fetch }) => {
             `jur/${params.id}`,
             fetch
         ),
-
-        kontakte: walter_selection.kontakte(fetch),
-        wohnungen: walter_selection.wohnungen(fetch),
-        juristischePersonen: walter_selection.juristischePersonen(fetch),
 
         files: walter_s3_get_files(S3URL, fetch) as Promise<WalterS3File[]>
     };

@@ -44,15 +44,8 @@
 
 <WalterGrid>
     {#if personType === 0}
-        <WalterNatuerlichePerson
-            {entry}
-            juristischePersonen={data.juristischePersonen}
-        />
+        <WalterNatuerlichePerson {entry} fetchImpl={data.fetchImpl} />
     {:else}
-        <WalterJuristischePerson
-            {entry}
-            kontakte={data.kontakte}
-            juristischePersonen={data.juristischePersonen}
-        />
+        <WalterJuristischePerson {entry} fetchImpl={data.fetchImpl} />
     {/if}
 </WalterGrid>

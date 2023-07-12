@@ -50,18 +50,19 @@
     onMount(async () => {
         const year = searchParams.get('abrechnung');
         if (year) {
-            abrechnung = await loadAbrechnung(data.id, year, data.fetch);
+            abrechnung = await loadAbrechnung(data.id, year, data.fetchImpl);
         }
     });
 
     const title = `${data.entry.wohnung?.text} - ${data.entry.mieter
         ?.map((mieter) => mieter.name)
         .join(', ')}`;
-    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
+    fetchImpl={data.fetchImpl}
     bind:entry={data.entry}
     apiURL={data.apiURL}
     {title}
@@ -69,11 +70,7 @@
 />
 
 <WalterGrid>
-    <WalterVertrag
-        kontakte={data.kontakte}
-        wohnungen={data.wohnungen}
-        bind:entry={data.entry}
-    />
+    <WalterVertrag fetchImpl={data.fetchImpl} bind:entry={data.entry} />
 
     <WalterLinks>
         <WalterKontakte
@@ -117,7 +114,7 @@
     <WalterAbrechnungControl
         {title}
         vertragId={data.id}
-        fetchImpl={data.fetch}
+        fetchImpl={data.fetchImpl}
         S3URL={data.S3URL}
         firstYear={new Date(data.entry.beginn).getFullYear()}
         bind:S3files={data.files}

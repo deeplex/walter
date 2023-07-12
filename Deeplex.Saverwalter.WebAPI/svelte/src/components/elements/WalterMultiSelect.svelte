@@ -4,16 +4,16 @@
 
     export let value: WalterSelectionEntry[] | undefined;
     export let titleText: string;
-    export let entry: WalterSelectionEntry[];
+    export let entries: Promise<WalterSelectionEntry[]>;
 
     function select(e: CustomEvent) {
         value = e.detail.selected;
     }
 </script>
 
-{#await entry}
+{#await entries}
     <TextInputSkeleton />
-{:then items}
+{:then resolvedEntries}
     {#await value}
         <TextInputSkeleton />
     {:then x}
@@ -21,7 +21,7 @@
             placeholder={value?.map((e) => e.text).join(', ')}
             selectedIds={x?.map((e) => e.id)}
             style="padding-right: 1rem"
-            {items}
+            items={resolvedEntries}
             on:select={select}
             {titleText}
             filterable

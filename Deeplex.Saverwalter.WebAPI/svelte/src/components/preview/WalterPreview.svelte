@@ -5,8 +5,6 @@
         WalterPreviewText,
         WalterPreviewUnknown
     } from '$walter/components';
-    import { download_file_blob, walter_s3_delete } from '$walter/services/s3';
-    import { openModal } from '$walter/store';
     import type { WalterS3File } from '$walter/types';
     import {
         Button,
@@ -15,8 +13,8 @@
         ModalFooter,
         ModalHeader
     } from 'carbon-components-svelte';
-    import WalterPreviewCopyFile from './WalterPreviewCopyFile.svelte';
-    import { download, remove } from './WalterPreview';
+    import WalterPreviewCopyFile from '../preview/WalterPreviewCopyFile.svelte';
+    import { download, remove } from '../preview/WalterPreview';
     import type { WalterS3FileWrapper } from '$walter/lib';
 
     export let open = false;

@@ -15,10 +15,5 @@
 <WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} />
 
 <WalterGrid>
-    <WalterZaehler
-        wohnungen={data.wohnungen}
-        umlagen={data.umlagen}
-        zaehlertypen={data.zaehlertypen}
-        {entry}
-    />
+    <WalterZaehler fetchImpl={data.fetchImpl} {entry} />
 </WalterGrid>
