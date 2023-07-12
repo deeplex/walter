@@ -8,6 +8,7 @@
     import type { WalterVertragVersionEntry } from '$walter/lib';
 
     export let entry: Partial<WalterVertragVersionEntry> = {};
+    export let fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
 </script>
 
 <Row>

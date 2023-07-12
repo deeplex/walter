@@ -8,6 +8,7 @@
     import type { WalterMieteEntry } from '$walter/lib';
 
     export let entry: Partial<WalterMieteEntry> = {};
+    export let fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
 </script>
 
 <Row>
