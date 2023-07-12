@@ -82,9 +82,13 @@
         padding: 0 !important;
     }
 
+    :global(.bx--list-box__menu-item) {
+        margin: 0px !important;
+    }
+
     /* Adjust size of content in detail view */
     :global(.bx--text-input-wrapper, .bx--form-item, .bx--list-box__wrapper) {
-        margin: 10px !important;
+        margin: 10px;
         flex: 1 1 auto !important;
         display: flex !important;
         flex-direction: column !important;
