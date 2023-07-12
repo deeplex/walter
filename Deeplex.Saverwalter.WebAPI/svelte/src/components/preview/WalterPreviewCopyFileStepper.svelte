@@ -6,26 +6,37 @@
     export let step: number;
     export let selectedEntry: WalterSelectionEntry | undefined = undefined;
     export let selectedTable: WalterPreviewCopyTable | undefined;
+
+    function tableClick() {
+        selectedTable = undefined;
+        selectedEntry = undefined;
+        step = 0;
+    }
+
+    function entryClick() {
+        selectedEntry = undefined;
+        if (!!selectedTable) {
+            step = 1;
+        }
+    }
 </script>
 
 <ProgressIndicator style="margin: 1em" spaceEqually currentIndex={step}>
     <ProgressStep
         label="Tabelle auswählen"
-        on:click={() => (step = 0)}
-        complete={!!selectedTable}
+        on:click={tableClick}
+        complete={step > 0}
     />
     <ProgressStep
         label="Eintrag auswählen"
-        on:click={() => {
-            if (!!selectedTable) step = 1;
-        }}
+        on:click={entryClick}
         complete={step > 1}
+        disabled={!selectedTable}
     />
     <ProgressStep
         label="Vorschau"
-        on:click={() => {
-            step = 2;
-        }}
+        on:click={() => (step = 2)}
+        disabled={!selectedEntry}
         complete={step > 2}
     />
     <ProgressStep
@@ -33,6 +44,7 @@
         on:click={() => {
             if (selectedEntry) step = 3;
         }}
+        disabled={!selectedEntry}
         complete={step > 3}
     />
 </ProgressIndicator>

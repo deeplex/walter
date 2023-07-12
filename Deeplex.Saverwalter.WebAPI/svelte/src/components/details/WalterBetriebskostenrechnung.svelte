@@ -18,7 +18,7 @@
     const betriebskostentypen = walter_selection.betriebskostentypen(fetchImpl);
     const umlagen_wohnungen = walter_selection.umlagen_wohnungen(fetchImpl);
 
-    let selectedUmlageId: string | number | undefined = undefined;
+    let selectedUmlageId: string | number | undefined = entry.umlage?.id;
 
     let umlageEntries: WalterSelectionEntry[] = [];
     updateUmlageEntries(entry.typ?.id);

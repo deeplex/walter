@@ -12,11 +12,15 @@
     export let updateRows: () => void;
     export let selectEntryFromId: (id: string) => void;
 
-    async function click() {
+    async function save() {
         const apiURL = `/api/${selectedTable?.key}`;
         var saved_entry = await handle_save(apiURL, entry);
         await updateRows();
         await selectEntryFromId(`${saved_entry.id}`);
+        setTimeout(() => (step = 3), 0);
+    }
+
+    function proceed() {
         setTimeout(() => (step = 3), 0);
     }
 </script>
@@ -28,6 +32,8 @@
         bind:fetchImpl
     />
     {#if !selectedEntry}
-        <Button on:click={click}>Eintrag speichern</Button>
+        <Button on:click={save}>Eintrag speichern</Button>
+    {:else}
+        <Button on:click={proceed}>Weiter</Button>
     {/if}
 {/if}
