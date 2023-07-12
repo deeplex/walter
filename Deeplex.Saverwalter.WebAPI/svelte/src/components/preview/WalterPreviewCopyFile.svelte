@@ -27,6 +27,7 @@
     import WalterPreviewCopyFileStepper from './WalterPreviewCopyFileStepper.svelte';
     import { walter_get } from '$walter/services/requests';
 
+    export let fetchImpl: typeof fetch;
     export let file: WalterS3File;
     export let fileWrapper: WalterS3FileWrapper;
 
@@ -111,7 +112,7 @@
         }
     }
 
-    let value = {};
+    let entry = {};
 
     function selectEntryFromId(id: string) {
         selectedEntry = rows?.find((row) => row.id === id);
@@ -124,7 +125,7 @@
         // Is this the best way of stopping the modal to stop? ...
         selectEntryFromId(e.detail.id);
         setTimeout(() => (step = 3), 0);
-        value = await walter_get(
+        entry = await walter_get(
             `/api/${selectedTable?.key}/${selectedEntry?.id}`,
             fileWrapper.fetchImpl
         );
@@ -162,7 +163,8 @@
                 bind:step
                 bind:selectedEntry
                 bind:selectedTable
-                bind:value
+                bind:entry
+                {fetchImpl}
                 {updateRows}
                 {selectEntryFromId}
             />

@@ -14,5 +14,5 @@
 <WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} />
 
 <WalterGrid>
-    <WalterWohnung kontakte={data.kontakte} {entry} />
+    <WalterWohnung fetchImpl={data.fetchImpl} {entry} />
 </WalterGrid>

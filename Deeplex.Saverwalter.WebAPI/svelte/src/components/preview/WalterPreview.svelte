@@ -17,6 +17,7 @@
     import { download, remove } from '../preview/WalterPreview';
     import type { WalterS3FileWrapper } from '$walter/lib';
 
+    export let fetchImpl: typeof fetch;
     export let open = false;
     export let file: WalterS3File;
     export let fileWrapper: WalterS3FileWrapper;
@@ -60,4 +61,9 @@
     </ModalFooter>
 </ComposedModal>
 
-<WalterPreviewCopyFile bind:fileWrapper bind:open={copying} {file} />
+<WalterPreviewCopyFile
+    {fetchImpl}
+    bind:fileWrapper
+    bind:open={copying}
+    {file}
+/>

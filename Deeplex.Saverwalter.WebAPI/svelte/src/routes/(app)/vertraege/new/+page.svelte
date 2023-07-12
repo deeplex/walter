@@ -23,11 +23,7 @@
 <WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} />
 
 <WalterGrid>
-    <WalterVertrag
-        kontakte={data.kontakte}
-        wohnungen={data.wohnungen}
-        {entry}
-    />
+    <WalterVertrag fetchImpl={data.fetchImpl} {entry} />
     <Tile light>Vertragsversion:</Tile>
     <WalterVertragVersion entry={entryVersion} />
 </WalterGrid>

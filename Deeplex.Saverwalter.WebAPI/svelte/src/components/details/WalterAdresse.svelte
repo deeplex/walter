@@ -4,24 +4,24 @@
     import type { WalterAdresseEntry } from '$walter/lib';
     import { WalterTextInput } from '$walter/components';
 
-    export let value: Partial<WalterAdresseEntry> | undefined = {};
+    export let entry: Partial<WalterAdresseEntry> | undefined = {};
 
-    let fallback: Partial<WalterAdresseEntry> = value || {};
+    let fallback: Partial<WalterAdresseEntry> = entry || {};
 
     const change = () => {
-        value = fallback;
+        entry = fallback;
     };
 </script>
 
 <Row>
-    {#if value}
-        <WalterTextInput labelText="Straße" bind:value={value.strasse} />
-        <WalterTextInput labelText="Hausnr." bind:value={value.hausnummer} />
+    {#if entry}
+        <WalterTextInput labelText="Straße" bind:value={entry.strasse} />
+        <WalterTextInput labelText="Hausnr." bind:value={entry.hausnummer} />
         <WalterTextInput
             labelText="Postleitzahl"
-            bind:value={value.postleitzahl}
+            bind:value={entry.postleitzahl}
         />
-        <WalterTextInput labelText="Stadt" bind:value={value.stadt} />
+        <WalterTextInput labelText="Stadt" bind:value={entry.stadt} />
     {:else}
         <WalterTextInput
             {change}

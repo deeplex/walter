@@ -18,11 +18,12 @@
 
     const title = data.entry.anschrift;
 
-    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
+    fetchImpl={data.fetchImpl}
     bind:fileWrapper
     entry={data.entry}
     apiURL={data.apiURL}
@@ -30,20 +31,18 @@
 />
 
 <WalterGrid>
-    <WalterAdresse bind:value={data.entry} />
+    <WalterAdresse bind:entry={data.entry} />
 
     <WalterLinks>
         <WalterWohnungen
-            kontakte={data.kontakte}
+            fetchImpl={data.fetchImpl}
             entry={wohnungEntry}
             title="Wohnungen"
             rows={data.entry.wohnungen}
         />
         <WalterKontakte title="Personen" rows={data.entry.kontakte} />
         <WalterZaehlerList
-            umlagen={data.umlagen}
-            zaehlertypen={data.zaehlertypen}
-            wohnungen={data.wohnungen}
+            fetchImpl={data.fetchImpl}
             title="Zähler"
             rows={data.entry.zaehler}
         />

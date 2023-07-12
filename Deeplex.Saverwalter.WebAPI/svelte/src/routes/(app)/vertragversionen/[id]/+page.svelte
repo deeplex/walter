@@ -11,11 +11,12 @@
     export let data: PageData;
 
     const title = data.entry.vertrag.text;
-    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
+    fetchImpl={data.fetchImpl}
     entry={data.entry}
     apiURL={data.apiURL}
     {title}

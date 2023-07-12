@@ -6,12 +6,4 @@
 </script>
 
 <WalterHeaderList title="Umlagen" />
-<WalterUmlagen
-    zaehler={data.zaehler}
-    wohnungen={data.wohnungen}
-    umlageschluessel={data.umlageschluessel}
-    betriebskostentypen={data.betriebskostentypen}
-    search
-    rows={data.rows}
-    fullHeight
-/>
+<WalterUmlagen fetchImpl={data.fetchImpl} search rows={data.rows} fullHeight />

@@ -40,11 +40,12 @@
         };
 
     const title = `${data.entry.typ.text} - ${data.entry.wohnungenBezeichnung}`;
-    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
+    fetchImpl={data.fetchImpl}
     entry={data.entry}
     apiURL={data.apiURL}
     {title}
@@ -52,23 +53,16 @@
 />
 
 <WalterGrid>
-    <WalterUmlage
-        zaehler={data.zaehler}
-        betriebskostentypen={data.betriebskostentypen}
-        wohnungen={data.wohnungen}
-        umlageschluessel={data.umlageschluessel}
-        bind:entry={data.entry}
-    />
+    <WalterUmlage fetchImpl={data.fetchImpl} bind:entry={data.entry} />
 
     <WalterLinks>
         <WalterWohnungen
-            kontakte={data.kontakte}
+            fetchImpl={data.fetchImpl}
             title="Wohnungen"
             rows={data.entry.wohnungen}
         />
         <WalterBetriebskostenrechnungen
-            betriebskostentypen={data.betriebskostentypen}
-            umlagen_wohnungen={data.umlagen_wohnungen}
+            fetchImpl={data.fetchImpl}
             entry={betriebskostenrechungEntry}
             title="Betriebskostenrechnungen"
             rows={data.entry.betriebskostenrechnungen}
@@ -76,10 +70,8 @@
         <!-- Only show if Schlüssel is "nach Verbrauch" -->
         {#if data.entry?.schluessel?.id === '3'}
             <WalterZaehlerList
+                fetchImpl={data.fetchImpl}
                 title="Zähler"
-                wohnungen={data.wohnungen}
-                umlagen={data.umlagen}
-                zaehlertypen={data.zaehlertypen}
                 rows={data.entry.zaehler}
             />
         {/if}

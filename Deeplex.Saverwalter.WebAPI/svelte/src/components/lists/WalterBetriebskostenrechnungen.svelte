@@ -15,8 +15,7 @@
     export let rows: WalterBetriebskostenrechnungEntry[];
     export let search = false;
     export let title: string | undefined = undefined;
-    export let betriebskostentypen: WalterSelectionEntry[];
-    export let umlagen_wohnungen: WalterSelectionEntry[];
+    export let fetchImpl: typeof fetch;
 
     const headers = [
         { key: 'typ.text', value: 'Typ' },
@@ -46,10 +45,6 @@
     {fullHeight}
 >
     {#if entry}
-        <WalterBetriebskostenrechnung
-            {umlagen_wohnungen}
-            {betriebskostentypen}
-            {entry}
-        />
+        <WalterBetriebskostenrechnung {fetchImpl} {entry} />
     {/if}
 </WalterDataWrapper>

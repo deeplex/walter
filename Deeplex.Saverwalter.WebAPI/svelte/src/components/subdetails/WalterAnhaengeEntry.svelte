@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { WalterS3File } from '$walter/types';
 
+    export let fetchImpl: typeof fetch;
     export let file: WalterS3File;
     export let fileWrapper: WalterS3FileWrapper;
 
@@ -22,6 +23,7 @@
 
 {#if selectedFile}
     <WalterPreview
+        {fetchImpl}
         bind:fileWrapper
         bind:file={selectedFile}
         bind:open={previewOpen}

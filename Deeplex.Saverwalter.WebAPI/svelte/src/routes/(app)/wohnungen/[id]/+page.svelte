@@ -55,11 +55,12 @@
 
     const title =
         data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung;
-    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
+    fetchImpl={data.fetchImpl}
     entry={data.entry}
     apiURL={data.apiURL}
     {title}
@@ -67,46 +68,38 @@
 />
 
 <WalterGrid>
-    <WalterWohnung kontakte={data.kontakte} entry={data.entry} />
+    <WalterWohnung fetchImpl={data.fetchImpl} entry={data.entry} />
 
     <WalterLinks>
         <WalterWohnungen
-            kontakte={data.kontakte}
+            fetchImpl={data.fetchImpl}
             title="Wohnungen an der selben Adresse"
             rows={data.entry.haus || []}
         />
         <WalterZaehlerList
-            zaehlertypen={data.zaehlertypen}
-            umlagen={data.umlagen}
-            wohnungen={data.wohnungen}
+            fetchImpl={data.fetchImpl}
             entry={zaehlerEntry}
             title="Zähler"
             rows={data.entry.zaehler}
         />
         <WalterVertraege
-            wohnungen={data.wohnungen}
-            kontakte={data.kontakte}
+            fetchImpl={data.fetchImpl}
             title="Verträge"
             rows={data.entry.vertraege}
         />
         <WalterUmlagen
-            zaehler={data.zaehler}
-            wohnungen={data.wohnungen}
-            umlageschluessel={data.umlageschluessel}
-            betriebskostentypen={data.betriebskostentypen}
+            fetchImpl={data.fetchImpl}
             entry={umlageEntry}
             title="Umlagen"
             rows={data.entry.umlagen}
         />
         <WalterBetriebskostenrechnungen
-            betriebskostentypen={data.betriebskostentypen}
-            umlagen_wohnungen={data.umlagen_wohnungen}
+            fetchImpl={data.fetchImpl}
             title="Betriebskostenrechnungen"
             rows={data.entry.betriebskostenrechnungen}
         />
         <WalterErhaltungsaufwendungen
-            wohnungen={data.wohnungen}
-            kontakte={data.kontakte}
+            fetchImpl={data.fetchImpl}
             entry={erhaltungsaufwendungEntry}
             title="Erhaltungsaufwendungen"
             rows={data.entry.erhaltungsaufwendungen}

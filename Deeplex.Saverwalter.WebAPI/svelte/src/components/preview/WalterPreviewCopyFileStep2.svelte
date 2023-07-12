@@ -5,7 +5,8 @@
     import type { WalterSelectionEntry } from '$walter/lib';
 
     export let step: number;
-    export let value: any;
+    export let fetchImpl: typeof fetch;
+    export let entry: any;
     export let selectedTable: WalterPreviewCopyTable | undefined;
     export let selectedEntry: WalterSelectionEntry | undefined;
     export let updateRows: () => void;
@@ -13,7 +14,7 @@
 
     async function click() {
         const apiURL = `/api/${selectedTable?.key}`;
-        var saved_entry = await handle_save(apiURL, value);
+        var saved_entry = await handle_save(apiURL, entry);
         await updateRows();
         await selectEntryFromId(`${saved_entry.id}`);
         setTimeout(() => (step = 3), 0);
@@ -21,7 +22,11 @@
 </script>
 
 {#if step === 2 && selectedTable}
-    <svelte:component this={selectedTable.newPage()} bind:value />
+    <svelte:component
+        this={selectedTable.newPage()}
+        bind:entry
+        bind:fetchImpl
+    />
     {#if !selectedEntry}
         <Button on:click={click}>Eintrag speichern</Button>
     {/if}

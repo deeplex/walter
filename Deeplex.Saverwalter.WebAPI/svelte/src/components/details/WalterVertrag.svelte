@@ -6,11 +6,18 @@
         WalterTextArea
     } from '$walter/components';
     import type { WalterSelectionEntry, WalterVertragEntry } from '$walter/lib';
-    import { Row, TextInput } from 'carbon-components-svelte';
+    import { walter_selection } from '$walter/services/requests';
+    import {
+        Row,
+        TextInput,
+        TextInputSkeleton
+    } from 'carbon-components-svelte';
 
     export let entry: Partial<WalterVertragEntry> = {};
-    export let wohnungen: WalterSelectionEntry[];
-    export let kontakte: WalterSelectionEntry[];
+    export let fetchImpl: typeof fetch;
+
+    const wohnungen = walter_selection.wohnungen(fetchImpl);
+    const kontakte = walter_selection.kontakte(fetchImpl);
 </script>
 
 <Row>
@@ -26,28 +33,44 @@
     />
 </Row>
 <Row>
-    <WalterComboBox
-        bind:value={entry.wohnung}
-        entry={wohnungen}
-        titleText="Wohnung"
-    />
-    <TextInput
-        labelText="Vermieter"
-        readonly
-        value={kontakte.find((e) => e.id === entry.wohnung?.filter)?.text}
-    />
-    <WalterComboBox
-        bind:value={entry.ansprechpartner}
-        entry={kontakte}
-        titleText="Ansprechpartner"
-    />
+    {#await wohnungen}
+        <TextInputSkeleton />
+    {:then entries}
+        <WalterComboBox
+            bind:value={entry.wohnung}
+            entry={entries}
+            titleText="Wohnung"
+        />
+    {/await}
+    {#await kontakte}
+        <TextInputSkeleton />
+    {:then entries}
+        <TextInput
+            labelText="Vermieter"
+            readonly
+            value={entries.find((e) => e.id === entry.wohnung?.filter)?.text}
+        />
+    {/await}
+    {#await kontakte}
+        <TextInputSkeleton />
+    {:then entries}
+        <WalterComboBox
+            bind:value={entry.ansprechpartner}
+            entry={entries}
+            titleText="Ansprechpartner"
+        />
+    {/await}
 </Row>
 <Row>
-    <WalterMultiSelect
-        bind:value={entry.selectedMieter}
-        entry={kontakte}
-        titleText="Mieter"
-    />
+    {#await kontakte}
+        <TextInputSkeleton />
+    {:then entries}
+        <WalterMultiSelect
+            bind:value={entry.selectedMieter}
+            entry={entries}
+            titleText="Mieter"
+        />
+    {/await}
 </Row>
 <Row>
     <WalterTextArea labelText="Notiz" bind:value={entry.notiz} />

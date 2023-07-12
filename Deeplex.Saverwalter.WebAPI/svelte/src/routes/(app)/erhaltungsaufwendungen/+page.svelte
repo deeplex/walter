@@ -10,8 +10,7 @@
 
 <WalterHeaderList title="Erhaltungsaufwendungen" />
 <WalterErhaltungsaufwendungen
-    kontakte={data.kontakte}
-    wohnungen={data.wohnungen}
+    fetchImpl={data.fetch}
     search
     rows={data.rows}
     fullHeight

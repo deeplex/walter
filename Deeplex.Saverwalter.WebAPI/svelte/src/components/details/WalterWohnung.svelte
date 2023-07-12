@@ -6,21 +6,28 @@
         WalterTextArea,
         WalterTextInput
     } from '$walter/components';
-    import { Row } from 'carbon-components-svelte';
-    import type { WalterSelectionEntry, WalterWohnungEntry } from '$walter/lib';
+    import { Row, TextInputSkeleton } from 'carbon-components-svelte';
+    import type { WalterWohnungEntry } from '$walter/lib';
+    import { walter_selection } from '$walter/services/requests';
 
     export let entry: Partial<WalterWohnungEntry> = {};
-    export let kontakte: WalterSelectionEntry[];
+    export let fetchImpl: typeof fetch;
+
+    const kontakte = walter_selection.kontakte(fetchImpl);
 </script>
 
 <Row>
-    <WalterComboBox
-        bind:value={entry.besitzer}
-        titleText="Besitzer"
-        entry={kontakte}
-    />
+    {#await kontakte}
+        <TextInputSkeleton />
+    {:then entries}
+        <WalterComboBox
+            bind:value={entry.besitzer}
+            titleText="Besitzer"
+            entry={entries}
+        />
+    {/await}
 </Row>
-<WalterAdresse bind:value={entry.adresse} />
+<WalterAdresse bind:entry={entry.adresse} />
 <Row>
     <WalterTextInput bind:value={entry.bezeichnung} labelText="Bezeichnung" />
     <WalterNumberInput bind:value={entry.wohnflaeche} label="Wohnfläche" />

@@ -6,4 +6,9 @@
 </script>
 
 <WalterHeaderList title="Wohnungen" />
-<WalterWohnungen kontakte={data.kontakte} search rows={data.rows} fullHeight />
+<WalterWohnungen
+    fetchImpl={data.fetchImpl}
+    search
+    rows={data.rows}
+    fullHeight
+/>

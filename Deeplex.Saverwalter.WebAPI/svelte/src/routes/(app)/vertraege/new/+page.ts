@@ -3,10 +3,8 @@ import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch }) => {
     return {
+        fetchImpl: fetch,
         apiURL: `/api/vertraege`,
-        title: 'Neuer Vertrag',
-
-        kontakte: walter_selection.kontakte(fetch),
-        wohnungen: walter_selection.wohnungen(fetch)
+        title: 'Neuer Vertrag'
     };
 };

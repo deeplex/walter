@@ -19,11 +19,8 @@
     export let rows: WalterUmlageEntry[];
     export let search = false;
     export let title: string | undefined = undefined;
-    export let betriebskostentypen: WalterSelectionEntry[];
-    export let umlageschluessel: WalterSelectionEntry[];
-    export let wohnungen: WalterSelectionEntry[];
-    export let zaehler: WalterSelectionEntry[];
     export let entry: Partial<WalterUmlageEntry> | undefined = undefined;
+    export let fetchImpl: typeof fetch;
 </script>
 
 <WalterDataWrapper
@@ -37,12 +34,6 @@
     {fullHeight}
 >
     {#if entry}
-        <WalterUmlage
-            {zaehler}
-            {betriebskostentypen}
-            {umlageschluessel}
-            {wohnungen}
-            {entry}
-        />
+        <WalterUmlage {fetchImpl} {entry} />
     {/if}
 </WalterDataWrapper>

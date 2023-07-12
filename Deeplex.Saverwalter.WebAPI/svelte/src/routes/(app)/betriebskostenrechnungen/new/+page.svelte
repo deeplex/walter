@@ -43,9 +43,5 @@
 <WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} />
 
 <WalterGrid>
-    <WalterBetriebskostenrechnung
-        betriebskostentypen={data.betriebskostentypen}
-        umlagen_wohnungen={data.umlagen_wohnungen}
-        {entry}
-    />
+    <WalterBetriebskostenrechnung fetchImpl={data.fetchImpl} {entry} />
 </WalterGrid>

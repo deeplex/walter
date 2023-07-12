@@ -28,8 +28,7 @@
     export let rows: WalterErhaltungsaufwendungEntry[];
     export let search = false;
     export let title: string | undefined = undefined;
-    export let kontakte: WalterSelectionEntry[];
-    export let wohnungen: WalterSelectionEntry[];
+    export let fetchImpl: typeof fetch;
 
     export let entry: Partial<WalterErhaltungsaufwendungEntry> | undefined =
         undefined;
@@ -46,6 +45,6 @@
     {fullHeight}
 >
     {#if entry}
-        <WalterErhaltungsaufwendung {kontakte} {wohnungen} {entry} />
+        <WalterErhaltungsaufwendung {fetchImpl} {entry} />
     {/if}
 </WalterDataWrapper>

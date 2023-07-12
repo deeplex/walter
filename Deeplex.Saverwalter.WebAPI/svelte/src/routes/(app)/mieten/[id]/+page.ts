@@ -8,7 +8,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
     const S3URL = `mieten/${params.id}`;
 
     return {
-        fetch,
+        fetchImpl: fetch,
         id: params.id,
         apiURL: apiURL,
         S3URL: S3URL,

@@ -20,10 +20,8 @@
     export let search = false;
     export let fullHeight = false;
     export let title: string | undefined = undefined;
-    export let wohnungen: WalterSelectionEntry[];
-    export let umlagen: WalterSelectionEntry[];
-    export let zaehlertypen: WalterSelectionEntry[];
     export let entry: Partial<WalterZaehlerEntry> | undefined = undefined;
+    export let fetchImpl: typeof fetch;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
         goto(`/zaehler/${e.detail.id}`);
@@ -40,6 +38,6 @@
     {fullHeight}
 >
     {#if entry}
-        <WalterZaehler {wohnungen} {umlagen} {zaehlertypen} {entry} />
+        <WalterZaehler {fetchImpl} {entry} />
     {/if}
 </WalterDataWrapper>

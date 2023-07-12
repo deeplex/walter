@@ -15,11 +15,12 @@
     export let data: PageData;
 
     const title = data.entry.name;
-    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.register(title, data.S3URL);
 </script>
 
 <WalterHeaderDetail
+    fetchImpl={data.fetchImpl}
     entry={data.entry}
     apiURL={data.apiURL}
     {title}
@@ -29,7 +30,7 @@
 <WalterGrid>
     <WalterNatuerlichePerson
         bind:entry={data.entry}
-        juristischePersonen={data.juristischePersonen}
+        fetchImpl={data.fetchImpl}
     />
 
     <WalterLinks>
@@ -38,13 +39,12 @@
             rows={data.entry.juristischePersonen}
         />
         <WalterWohnungen
-            kontakte={data.kontakte}
+            fetchImpl={data.fetchImpl}
             title="Wohnungen"
             rows={data.entry.wohnungen}
         />
         <WalterVertraege
-            wohnungen={data.wohnungen}
-            kontakte={data.kontakte}
+            fetchImpl={data.fetchImpl}
             title="Verträge"
             rows={data.entry.vertraege}
         />

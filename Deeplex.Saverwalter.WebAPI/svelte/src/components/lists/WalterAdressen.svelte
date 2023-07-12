@@ -35,6 +35,6 @@
     {fullHeight}
 >
     {#if entry}
-        <WalterAdresse value={entry} />
+        <WalterAdresse {entry} />
     {/if}
 </WalterDataWrapper>

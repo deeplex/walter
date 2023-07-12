@@ -10,6 +10,7 @@
     import type { WalterS3FileWrapper } from '$walter/lib';
     import { upload_new_files } from './WalterAnhaenge';
 
+    export let fetchImpl: typeof fetch;
     export let fileWrapper: WalterS3FileWrapper;
 
     let fileUploadComplete = false;
@@ -46,7 +47,7 @@
                 >{handle.name} ({loadedFiles.length})</HeaderPanelDivider
             >
             {#each loadedFiles as file}
-                <WalterAnhaengeEntry {file} bind:fileWrapper />
+                <WalterAnhaengeEntry {fetchImpl} {file} bind:fileWrapper />
             {/each}
         {/await}
     {/each}

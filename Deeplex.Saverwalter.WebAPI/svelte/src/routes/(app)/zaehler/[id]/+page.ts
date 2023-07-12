@@ -9,18 +9,11 @@ export const load: PageLoad = async ({ params, fetch }) => {
     const S3URL = `zaehler/${params.id}`;
 
     return {
-        fetch,
+        fetchImpl: fetch,
         id: params.id,
         apiURL: apiURL,
         S3URL: S3URL,
         entry: WalterZaehlerEntry.GetOne<WalterZaehlerEntry>(params.id, fetch),
-
-        betriebskostentypen: walter_selection.betriebskostentypen(fetch),
-        umlagen: walter_selection.umlagen_verbrauch(fetch),
-        umlageschluessel: walter_selection.umlageschluessel(fetch),
-        wohnungen: walter_selection.wohnungen(fetch),
-        zaehler: walter_selection.zaehler(fetch),
-        zaehlertypen: walter_selection.zaehlertypen(fetch),
 
         files: walter_s3_get_files(S3URL, fetch) as Promise<WalterS3File[]>
     };

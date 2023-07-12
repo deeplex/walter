@@ -10,10 +10,13 @@
         WalterSelectionEntry
     } from '$walter/lib';
     import { shouldFilterItem } from './WalterBetriebskostenrechnung';
+    import { walter_selection } from '$walter/services/requests';
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
-    export let betriebskostentypen: WalterSelectionEntry[];
-    export let umlagen_wohnungen: WalterSelectionEntry[];
+    export let fetchImpl: typeof fetch;
+
+    const betriebskostentypen = walter_selection.betriebskostentypen(fetchImpl);
+    const umlagen_wohnungen = walter_selection.umlagen_wohnungen(fetchImpl);
 
     let umlageEntries: WalterSelectionEntry[];
     updateUmlageEntries(entry.typ?.id);
@@ -29,8 +32,10 @@
         // entry.typ = entry.umlage.filter;
     }
 
-    function updateUmlageEntries(id: string | number | undefined) {
-        umlageEntries = umlagen_wohnungen.filter((u) => u.filter === id);
+    async function updateUmlageEntries(id: string | number | undefined) {
+        umlageEntries = await umlagen_wohnungen.then((fulfilled) =>
+            fulfilled.filter((u) => u.filter === id)
+        );
     }
 </script>
 

@@ -21,7 +21,7 @@
     export let search = false;
     export let fullHeight = false;
     export let title: string | undefined = undefined;
-    export let kontakte: WalterSelectionEntry[];
+    export let fetchImpl: typeof fetch;
     export let entry: Partial<WalterWohnungEntry> | undefined = undefined;
 </script>
 
@@ -36,6 +36,6 @@
     {fullHeight}
 >
     {#if entry}
-        <WalterWohnung {kontakte} {entry} />
+        <WalterWohnung {fetchImpl} {entry} />
     {/if}
 </WalterDataWrapper>

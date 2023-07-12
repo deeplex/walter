@@ -29,7 +29,7 @@
     }
 
     function post_s3_file(file: File) {
-        walter_s3_post(file, data.S3URL, data.fetch).then(() =>
+        walter_s3_post(file, data.S3URL, data.fetchImpl).then(() =>
             upload_finished(file)
         );
     }
@@ -52,13 +52,13 @@
         }
     }
 
-    let fileWrapper = new WalterS3FileWrapper(data.fetch);
+    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
 </script>
 
 <WalterHeader title="Ablagestapel">
     <HeaderUtilities>
         <HeaderAction text="({data.files.length})">
-            <WalterAnhaenge bind:fileWrapper />
+            <WalterAnhaenge fetchImpl={data.fetchImpl} bind:fileWrapper />
         </HeaderAction>
     </HeaderUtilities>
 </WalterHeader>

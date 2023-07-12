@@ -14,9 +14,5 @@
 <WalterHeaderNew apiURL={data.apiURL} {entry} title={data.title} />
 
 <WalterGrid>
-    <WalterErhaltungsaufwendung
-        kontakte={data.kontakte}
-        wohnungen={data.wohnungen}
-        {entry}
-    />
+    <WalterErhaltungsaufwendung fetchImpl={data.fetchImpl} {entry} />
 </WalterGrid>

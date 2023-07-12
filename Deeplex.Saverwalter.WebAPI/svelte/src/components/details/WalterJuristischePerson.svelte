@@ -9,11 +9,19 @@
         WalterJuristischePersonEntry,
         WalterSelectionEntry
     } from '$walter/lib';
-    import { Row } from 'carbon-components-svelte';
+    import { walter_selection } from '$walter/services/requests';
+    import { Row, TextInputSkeleton } from 'carbon-components-svelte';
+    import { removeSelf } from './WalterBetriebskostenrechnung';
 
     export let entry: Partial<WalterJuristischePersonEntry>;
-    export let juristischePersonen: WalterSelectionEntry[];
-    export let kontakte: WalterSelectionEntry[];
+    export let fetchImpl: typeof fetch;
+
+    const juristischePersonen = walter_selection
+        .juristischePersonen(fetchImpl)
+        .then((entries) => removeSelf(entries, entry));
+    const kontakte = walter_selection
+        .kontakte(fetchImpl)
+        .then((entries) => removeSelf(entries, entry));
 </script>
 
 <Row>
@@ -21,16 +29,24 @@
 </Row>
 <WalterPerson value={entry} />
 <Row>
-    <WalterMultiSelect
-        bind:entry={juristischePersonen}
-        titleText="Juristische Personen"
-        bind:value={entry.selectedJuristischePersonen}
-    />
-    <WalterMultiSelect
-        titleText="Mitglieder"
-        entry={kontakte}
-        bind:value={entry.selectedMitglieder}
-    />
+    {#await juristischePersonen}
+        <TextInputSkeleton />
+    {:then entries}
+        <WalterMultiSelect
+            entry={entries}
+            titleText="Juristische Personen"
+            bind:value={entry.selectedJuristischePersonen}
+        />
+    {/await}
+    {#await kontakte}
+        <TextInputSkeleton />
+    {:then entries}
+        <WalterMultiSelect
+            titleText="Mitglieder"
+            entry={entries}
+            bind:value={entry.selectedMitglieder}
+        />
+    {/await}
 </Row>
 <Row>
     <WalterTextArea bind:value={entry.notiz} labelText="Notiz" />

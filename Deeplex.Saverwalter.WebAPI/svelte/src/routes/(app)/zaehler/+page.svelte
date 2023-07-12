@@ -7,9 +7,7 @@
 
 <WalterHeaderList title="Zähler" />
 <WalterZaehlerList
-    zaehlertypen={data.zaehlertypen}
-    wohnungen={data.wohnungen}
-    umlagen={data.umlagen}
+    fetchImpl={data.fetchImpl}
     search
     rows={data.rows}
     fullHeight
