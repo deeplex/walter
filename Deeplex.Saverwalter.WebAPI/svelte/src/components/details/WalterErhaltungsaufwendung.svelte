@@ -19,27 +19,19 @@
 
 <Row>
     <WalterTextInput bind:value={entry.bezeichnung} labelText="Bezeichnung" />
-    {#await kontakte}
-        <TextInputSkeleton />
-    {:then entries}
-        <WalterComboBox
-            bind:value={entry.aussteller}
-            titleText="Aussteller"
-            entry={entries}
-        />
-        <WalterDatePicker bind:value={entry.datum} labelText="Datum" />
-    {/await}
+    <WalterComboBox
+        bind:value={entry.aussteller}
+        titleText="Aussteller"
+        entries={kontakte}
+    />
+    <WalterDatePicker bind:value={entry.datum} labelText="Datum" />
 </Row>
 <Row>
-    {#await wohnungen}
-        <TextInputSkeleton />
-    {:then entries}
-        <WalterComboBox
-            bind:value={entry.wohnung}
-            titleText="Wohnung"
-            entry={entries}
-        />
-    {/await}
+    <WalterComboBox
+        bind:value={entry.wohnung}
+        titleText="Wohnung"
+        entries={wohnungen}
+    />
     <WalterNumberInput bind:value={entry.betrag} label="Betrag" />
 </Row>
 <Row>

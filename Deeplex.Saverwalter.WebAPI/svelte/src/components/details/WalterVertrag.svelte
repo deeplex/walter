@@ -33,15 +33,11 @@
     />
 </Row>
 <Row>
-    {#await wohnungen}
-        <TextInputSkeleton />
-    {:then entries}
-        <WalterComboBox
-            bind:value={entry.wohnung}
-            entry={entries}
-            titleText="Wohnung"
-        />
-    {/await}
+    <WalterComboBox
+        bind:value={entry.wohnung}
+        entries={wohnungen}
+        titleText="Wohnung"
+    />
     {#await kontakte}
         <TextInputSkeleton />
     {:then entries}
@@ -51,15 +47,11 @@
             value={entries.find((e) => e.id === entry.wohnung?.filter)?.text}
         />
     {/await}
-    {#await kontakte}
-        <TextInputSkeleton />
-    {:then entries}
-        <WalterComboBox
-            bind:value={entry.ansprechpartner}
-            entry={entries}
-            titleText="Ansprechpartner"
-        />
-    {/await}
+    <WalterComboBox
+        bind:value={entry.ansprechpartner}
+        entries={kontakte}
+        titleText="Ansprechpartner"
+    />
 </Row>
 <Row>
     {#await kontakte}

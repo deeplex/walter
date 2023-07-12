@@ -17,15 +17,11 @@
 </script>
 
 <Row>
-    {#await kontakte}
-        <TextInputSkeleton />
-    {:then entries}
-        <WalterComboBox
-            bind:value={entry.besitzer}
-            titleText="Besitzer"
-            entry={entries}
-        />
-    {/await}
+    <WalterComboBox
+        bind:value={entry.besitzer}
+        titleText="Besitzer"
+        entries={kontakte}
+    />
 </Row>
 <WalterAdresse bind:entry={entry.adresse} />
 <Row>

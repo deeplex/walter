@@ -20,27 +20,19 @@
 
 <Row>
     <WalterTextInput bind:value={entry.kennnummer} labelText="Kennnummer" />
-    {#await zaehlertypen}
-        <TextInputSkeleton />
-    {:then entries}
-        <WalterComboBox
-            bind:value={entry.typ}
-            titleText="Typ"
-            entry={entries}
-        />
-    {/await}
+    <WalterComboBox
+        bind:value={entry.typ}
+        titleText="Typ"
+        entries={zaehlertypen}
+    />
 </Row>
 <WalterAdresse bind:entry={entry.adresse} />
 <Row>
-    {#await wohnungen}
-        <TextInputSkeleton />
-    {:then entries}
-        <WalterComboBox
-            bind:value={entry.wohnung}
-            titleText="Wohnung"
-            entry={entries}
-        />
-    {/await}
+    <WalterComboBox
+        bind:value={entry.wohnung}
+        titleText="Wohnung"
+        entries={wohnungen}
+    />
 </Row>
 <Row>
     {#await umlagen}

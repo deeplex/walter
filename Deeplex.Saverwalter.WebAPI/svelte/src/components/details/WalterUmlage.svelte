@@ -18,24 +18,16 @@
 </script>
 
 <Row>
-    {#await betriebskostentypen}
-        <TextInputSkeleton />
-    {:then entries}
-        <WalterComboBox
-            entry={entries}
-            bind:value={entry.typ}
-            titleText="Typ"
-        />
-    {/await}
-    {#await umlageschluessel}
-        <TextInputSkeleton />
-    {:then entries}
-        <WalterComboBox
-            entry={entries}
-            bind:value={entry.schluessel}
-            titleText="Umlageschlüssel"
-        />
-    {/await}
+    <WalterComboBox
+        entries={betriebskostentypen}
+        bind:value={entry.typ}
+        titleText="Typ"
+    />
+    <WalterComboBox
+        entries={umlageschluessel}
+        bind:value={entry.schluessel}
+        titleText="Umlageschlüssel"
+    />
 </Row>
 <Row>
     {#await wohnungen}
