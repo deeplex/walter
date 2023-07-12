@@ -27,7 +27,6 @@
     import WalterPreviewCopyFileStepper from './WalterPreviewCopyFileStepper.svelte';
     import { walter_get } from '$walter/services/requests';
 
-    export let fetchImpl: typeof fetch;
     export let file: WalterS3File;
     export let fileWrapper: WalterS3FileWrapper;
 
@@ -164,7 +163,7 @@
                 bind:selectedEntry
                 bind:selectedTable
                 bind:entry
-                {fetchImpl}
+                fetchImpl={fileWrapper.fetchImpl}
                 {updateRows}
                 {selectEntryFromId}
             />

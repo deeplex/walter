@@ -58,7 +58,7 @@
 <WalterHeader title="Ablagestapel">
     <HeaderUtilities>
         <HeaderAction text="({data.files.length})">
-            <WalterAnhaenge fetchImpl={data.fetchImpl} bind:fileWrapper />
+            <WalterAnhaenge bind:fileWrapper />
         </HeaderAction>
     </HeaderUtilities>
 </WalterHeader>
