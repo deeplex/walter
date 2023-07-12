@@ -41,6 +41,7 @@
         open = false;
     }
 
+    let entry = {};
     onMount(async () => {
         const entryList = $page.url.pathname.split('/').filter((e) => e);
         if (entryList.length !== 2) {
@@ -58,7 +59,7 @@
         }
 
         rows = (await selectedTable!.fetch(fileWrapper.fetchImpl)) || [];
-        selectedEntry = rows?.find((row) => row.id === id);
+        selectEntryFromId(id);
         if (selectedEntry) {
             step = 2;
         }
@@ -111,10 +112,12 @@
         }
     }
 
-    let entry = {};
-
-    function selectEntryFromId(id: string) {
+    async function selectEntryFromId(id: string) {
         selectedEntry = rows?.find((row) => row.id === id);
+        entry = await walter_get(
+            `/api/${selectedTable?.key}/${selectedEntry?.id}`,
+            fileWrapper.fetchImpl
+        );
     }
 
     async function selectedEntry_change(e: CustomEvent<any>) {
@@ -122,12 +125,8 @@
         // e.preventDefault();
         // e.stopPropagation();
         // Is this the best way of stopping the modal to stop? ...
-        selectEntryFromId(e.detail.id);
-        setTimeout(() => (step = 3), 0);
-        entry = await walter_get(
-            `/api/${selectedTable?.key}/${selectedEntry?.id}`,
-            fileWrapper.fetchImpl
-        );
+        setTimeout(() => (step = 2), 0);
+        await selectEntryFromId(e.detail.id);
         // step = 2;
     }
 </script>
@@ -176,10 +175,10 @@
     </ModalBody>
     <ModalFooter>
         <Button kind="secondary" on:click={close}>Abbrechen</Button>
-        <Button disabled={!selectedEntry} kind="tertiary" on:click={move}
+        <Button disabled={step < 3} kind="tertiary" on:click={move}
             >Verschieben</Button
         >
-        <Button disabled={!selectedEntry} kind="tertiary" on:click={copy}
+        <Button disabled={step < 3} kind="tertiary" on:click={copy}
             >Kopieren</Button
         >
     </ModalFooter>
