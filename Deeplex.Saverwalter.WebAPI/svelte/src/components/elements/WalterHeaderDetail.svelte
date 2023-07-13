@@ -13,7 +13,6 @@
     import { handle_delete } from './WalterHeaderDetail';
     import type { WalterS3FileWrapper } from '$walter/lib';
 
-    export let fetchImpl: typeof fetch;
     export let title = 'Saverwalter';
     export let entry: any;
     export let apiURL: string;
@@ -35,7 +34,7 @@
 <WalterHeader bind:title>
     <HeaderUtilities>
         {#if winWidth < 1056}
-            <HeaderAction>
+            <HeaderAction preventCloseOnClickOutside>
                 <HeaderPanelLinks>
                     <HeaderPanelLink on:click={click_save}
                         >Speichern</HeaderPanelLink
@@ -55,11 +54,11 @@
 
             {#if fileWrapper}
                 {#await fileWrapper.handles[0].files}
-                    <HeaderAction text="(...)">
+                    <HeaderAction preventCloseOnClickOutside text="(...)">
                         <WalterAnhaenge bind:fileWrapper />
                     </HeaderAction>
                 {:then files}
-                    <HeaderAction text="({files.length})">
+                    <HeaderAction preventCloseOnClickOutside text="({files.length})">
                         <WalterAnhaenge bind:fileWrapper />
                     </HeaderAction>
                 {/await}

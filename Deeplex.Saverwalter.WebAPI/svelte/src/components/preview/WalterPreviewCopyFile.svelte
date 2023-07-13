@@ -1,13 +1,6 @@
 <script lang="ts">
     import type { WalterS3File } from '$walter/types';
-    import {
-        Button,
-        ComposedModal,
-        Grid,
-        ModalBody,
-        ModalFooter,
-        ModalHeader
-    } from 'carbon-components-svelte';
+    import { Grid } from 'carbon-components-svelte';
     import {
         copyImpl,
         moveImpl,
@@ -27,19 +20,12 @@
     import WalterPreviewCopyFileStepper from './WalterPreviewCopyFileStepper.svelte';
     import { walter_get } from '$walter/services/requests';
 
-    export let file: WalterS3File;
     export let fileWrapper: WalterS3FileWrapper;
+    export let step: number;
+    export let selectedTable: WalterPreviewCopyTable | undefined = undefined;
+    export let selectedEntry: WalterSelectionEntry | undefined = undefined;
 
-    export let open = false;
     let rows: WalterSelectionEntry[] | undefined = undefined;
-
-    let step = 0;
-    let selectedTable: WalterPreviewCopyTable | undefined = undefined;
-    let selectedEntry: WalterSelectionEntry | undefined = undefined;
-
-    function close() {
-        open = false;
-    }
 
     let entry = {};
     onMount(async () => {
@@ -76,42 +62,6 @@
         updateRows();
     }
 
-    async function copy() {
-        const copied = await copyImpl(
-            file,
-            fileWrapper.fetchImpl,
-            selectedTable,
-            selectedEntry
-        );
-
-        if (copied && selectedTable && selectedEntry) {
-            open = false;
-
-            fileWrapper.addFile(
-                file,
-                `${selectedTable.key}/${selectedEntry.id}`
-            );
-        }
-    }
-
-    async function move() {
-        const moved = await moveImpl(
-            file,
-            fileWrapper.fetchImpl,
-            selectedTable,
-            selectedEntry
-        );
-
-        if (moved && selectedTable && selectedEntry) {
-            open = false;
-            fileWrapper.addFile(
-                file,
-                `${selectedTable.key}/${selectedEntry.id}`
-            );
-            fileWrapper.removeFile(file);
-        }
-    }
-
     async function selectEntryFromId(id: string) {
         selectedEntry = rows?.find((row) => row.id === id);
         entry = await walter_get(
@@ -121,65 +71,46 @@
     }
 
     async function selectedEntry_change(e: CustomEvent<any>) {
-        // e.stopImmediatePropagation();
-        // e.preventDefault();
-        // e.stopPropagation();
-        // Is this the best way of stopping the modal to stop? ...
         setTimeout(() => (step = 2), 0);
         await selectEntryFromId(e.detail.id);
-        // step = 2;
     }
 </script>
 
-<ComposedModal size="lg" bind:open>
-    <ModalHeader title={`${file.FileName} kopieren`} />
-    <ModalBody>
-        <Grid condensed fullWidth>
-            <WalterPreviewCopyFileStepper
-                bind:step
-                bind:selectedEntry
-                bind:selectedTable
-            />
-            <style>
-                .bx--progress-label {
-                    padding-right: 0px !important;
-                }
-            </style>
-            <WalterPreviewCopyFileStep0
-                bind:selectedTable
-                bind:step
-                {selectedTable_change}
-                {tables}
-            />
-            <WalterPreviewCopyFileStep1
-                bind:step
-                bind:selectedEntry
-                {rows}
-                {selectedEntry_change}
-            />
-            <WalterPreviewCopyFileStep2
-                bind:step
-                bind:selectedEntry
-                bind:selectedTable
-                bind:entry
-                fetchImpl={fileWrapper.fetchImpl}
-                {updateRows}
-                {selectEntryFromId}
-            />
-            <WalterPreviewCopyFileStep3
-                bind:selectedTable
-                bind:selectedEntry
-                bind:step
-            />
-        </Grid>
-    </ModalBody>
-    <ModalFooter>
-        <Button kind="secondary" on:click={close}>Abbrechen</Button>
-        <Button disabled={step < 3} kind="tertiary" on:click={move}
-            >Verschieben</Button
-        >
-        <Button disabled={step < 3} kind="tertiary" on:click={copy}
-            >Kopieren</Button
-        >
-    </ModalFooter>
-</ComposedModal>
+<Grid condensed fullWidth>
+    <WalterPreviewCopyFileStepper
+        bind:step
+        bind:selectedEntry
+        bind:selectedTable
+    />
+    <style>
+        .bx--progress-label {
+            padding-right: 0px !important;
+        }
+    </style>
+    <WalterPreviewCopyFileStep0
+        bind:selectedTable
+        bind:step
+        {selectedTable_change}
+        {tables}
+    />
+    <WalterPreviewCopyFileStep1
+        bind:step
+        bind:selectedEntry
+        {rows}
+        {selectedEntry_change}
+    />
+    <WalterPreviewCopyFileStep2
+        bind:step
+        bind:selectedEntry
+        bind:selectedTable
+        bind:entry
+        fetchImpl={fileWrapper.fetchImpl}
+        {updateRows}
+        {selectEntryFromId}
+    />
+    <WalterPreviewCopyFileStep3
+        bind:selectedTable
+        bind:selectedEntry
+        bind:step
+    />
+</Grid>

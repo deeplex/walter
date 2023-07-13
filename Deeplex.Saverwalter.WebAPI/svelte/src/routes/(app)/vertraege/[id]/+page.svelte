@@ -62,7 +62,6 @@
 </script>
 
 <WalterHeaderDetail
-    fetchImpl={data.fetchImpl}
     bind:entry={data.entry}
     apiURL={data.apiURL}
     {title}

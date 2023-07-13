@@ -26,6 +26,13 @@
 </script>
 
 {#if step === 2 && selectedTable}
+    {#if !selectedEntry}
+        <p>
+            Neuen Eintrag zu <b style="font-weight: bold"
+                >{selectedTable.value}</b
+            > hinzufügen
+        </p>
+    {/if}
     <svelte:component
         this={selectedTable.newPage()}
         bind:entry
