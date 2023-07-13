@@ -16,7 +16,6 @@
 </script>
 
 <WalterHeaderDetail
-    fetchImpl={data.fetchImpl}
     entry={data.entry}
     apiURL={data.apiURL}
     {title}

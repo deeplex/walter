@@ -13,7 +13,6 @@
     import { handle_delete } from './WalterHeaderDetail';
     import type { WalterS3FileWrapper } from '$walter/lib';
 
-    export let fetchImpl: typeof fetch;
     export let title = 'Saverwalter';
     export let entry: any;
     export let apiURL: string;

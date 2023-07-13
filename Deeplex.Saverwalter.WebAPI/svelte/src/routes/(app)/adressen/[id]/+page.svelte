@@ -23,7 +23,6 @@
 </script>
 
 <WalterHeaderDetail
-    fetchImpl={data.fetchImpl}
     bind:fileWrapper
     entry={data.entry}
     apiURL={data.apiURL}
