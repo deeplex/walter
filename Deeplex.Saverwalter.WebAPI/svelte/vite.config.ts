@@ -13,7 +13,8 @@ export default defineConfig({
         include: ['src/**/*.{test,spec}.ts'],
         coverage: {
             reporter: ['text-summary', 'html'],
-            reportsDirectory: './coverage'
+            reportsDirectory: './coverage',
+            provider: 'v8'
         }
     }
 });
