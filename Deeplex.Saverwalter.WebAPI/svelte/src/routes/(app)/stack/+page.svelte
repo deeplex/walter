@@ -57,7 +57,7 @@
 
 <WalterHeader title="Ablagestapel">
     <HeaderUtilities>
-        <HeaderAction text="({data.files.length})">
+        <HeaderAction preventCloseOnClickOutside text="({data.files.length})">
             <WalterAnhaenge bind:fileWrapper />
         </HeaderAction>
     </HeaderUtilities>
