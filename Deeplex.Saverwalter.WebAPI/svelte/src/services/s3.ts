@@ -34,11 +34,35 @@ export const walter_s3_get = (S3URL: string): Promise<any> =>
         e.blob()
     );
 
-export function walter_s3_delete(
+export async function walter_s3_delete(
     file: WalterS3File,
-    toast?: WalterToastContent
+    fetchImpl: typeof fetch,
+    toast?: WalterToastContent,
 ) {
-    return walter_delete(`${baseURL}/${file.Key}`, toast);
+    const file_path = `${baseURL}/${file.Key}`;
+
+    if (file.Blob)
+    {
+        const response = walter_s3_post(
+            new File([file.Blob], file.FileName),
+            "trash",
+            fetchImpl,
+        );
+
+        if ((await response).ok)
+        {
+            return walter_delete(file_path, toast)
+        }
+        else
+        {
+            return response;
+        }
+    }
+    else
+    {
+        return walter_delete(file_path, toast);
+    }
+
 }
 
 export function download_file_blob(blob: Blob, fileName: string) {

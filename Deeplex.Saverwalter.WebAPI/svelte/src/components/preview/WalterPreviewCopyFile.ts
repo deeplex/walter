@@ -80,7 +80,7 @@ export async function moveImpl(
     );
 
     if (await copied) {
-        const deleted = walter_s3_delete(file, moveToast);
+        const deleted = walter_s3_delete(file, fetchImpl, moveToast);
         if ((await deleted).status === 200) {
             return true;
         }

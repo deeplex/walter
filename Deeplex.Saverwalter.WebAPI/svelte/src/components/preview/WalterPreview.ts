@@ -10,8 +10,7 @@ export function download(file: WalterS3File) {
 }
 
 export function remove(file: WalterS3File, fileWrapper: WalterS3FileWrapper) {
-    const content = `Bist du sicher, dass du ${file.FileName} löschen möchtest?
-    Dieser Vorgang kann nicht rückgängig gemacht werden.`;
+    const content = `Bist du sicher, dass du ${file.FileName} löschen möchtest?`;
 
     const deleteToast = new WalterToastContent(
         'Löschen erfolgreich',
@@ -26,7 +25,7 @@ export function remove(file: WalterS3File, fileWrapper: WalterS3FileWrapper) {
         danger: true,
         primaryButtonText: 'Löschen',
         submit: () =>
-            walter_s3_delete(file, deleteToast).then((e) => {
+            walter_s3_delete(file, fileWrapper.fetchImpl, deleteToast).then((e) => {
                 if (e.status === 200) {
                     fileWrapper.removeFile(file);
                 }
