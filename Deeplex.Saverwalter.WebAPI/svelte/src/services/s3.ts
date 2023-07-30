@@ -1,4 +1,4 @@
-import { addToast } from '$walter/store';
+import { addToast, openModal } from '$walter/store';
 import type { WalterS3File } from '$walter/types';
 import * as parser from 'fast-xml-parser';
 import { walter_delete, walter_fetch } from './requests';
@@ -33,6 +33,49 @@ export const walter_s3_get = (S3URL: string): Promise<any> =>
     walter_fetch(fetch, `${baseURL}/${S3URL}`, { method: 'GET' }).then((e) =>
         e.blob()
     );
+
+async function walter_s3_remove_folder_content_impl(
+    files: WalterS3File[], toast?: WalterToastContent)
+{
+    let everything_okay = true;
+
+    for (const file of files)
+    {
+        const file_path = `${baseURL}/${file.Key}`
+        const result = await walter_delete(file_path);
+        if (!result.ok)
+        {
+            everything_okay = false;
+        }
+    }
+
+    toast && addToast(toast, everything_okay);
+
+    if (everything_okay)
+    {
+        files = [];
+    }
+
+    return everything_okay;
+
+}
+
+export async function walter_s3_remove_folder_content(
+    files: WalterS3File[],
+    toast?:WalterToastContent)
+{
+    const file_s = files.length === 1 ? "eine Datei" : `${files.length} Dateien`;
+    const content = `Bist du sicher, dass du ${file_s} endgültig löschen willst? Diese Änderung kann nicht rückgängig gemacht werden.`
+
+    openModal({
+        modalHeading: 'Löschen',
+        content,
+        danger: true,
+        primaryButtonText: 'Löschen',
+        submit: () =>
+            walter_s3_remove_folder_content_impl(files, toast)
+    });
+}
 
 export async function walter_s3_delete(
     file: WalterS3File,
