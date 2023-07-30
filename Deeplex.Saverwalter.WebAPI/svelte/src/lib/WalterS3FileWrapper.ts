@@ -4,14 +4,16 @@ import type { WalterS3File } from '$walter/types';
 export class WalterS3FileWrapper {
     handles: WalterS3FileHandle[] = [];
 
-    constructor(public fetchImpl: typeof fetch) {
-        this.register('Ablagestapel', 'stack');
-    }
+    constructor(public fetchImpl: typeof fetch) {}
 
     // Always register for the next to last position; the last is always the stack.
     register(name: string, S3URL: string) {
         const handle = new WalterS3FileHandle(name, S3URL, this.fetchImpl);
         this.handles.splice(this.handles.length - 1, 0, handle);
+    }
+
+    registerStack() {
+        this.register('Ablagestapel', 'stack');
     }
 
     // target might be either an index of a S3URL that has to match the handles S3URL

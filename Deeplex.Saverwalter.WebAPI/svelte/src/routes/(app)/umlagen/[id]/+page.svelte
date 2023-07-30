@@ -41,6 +41,7 @@
 
     const title = `${data.entry.typ.text} - ${data.entry.wohnungenBezeichnung}`;
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
+    fileWrapper.registerStack()
     fileWrapper.register(title, data.S3URL);
 </script>
 

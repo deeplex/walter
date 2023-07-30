@@ -31,6 +31,7 @@
 
     const title = data.entry.kennnummer;
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
+    fileWrapper.registerStack()
     fileWrapper.register(title, data.S3URL);
 </script>
 

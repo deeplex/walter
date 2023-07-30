@@ -53,6 +53,7 @@
     }
 
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
+    fileWrapper.registerStack()
 </script>
 
 <WalterHeader title="Ablagestapel">
