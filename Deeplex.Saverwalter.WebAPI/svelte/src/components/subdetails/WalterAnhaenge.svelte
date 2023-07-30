@@ -12,12 +12,10 @@
 
     export let fileWrapper: WalterS3FileWrapper;
 
-    let fileUploadComplete = false;
     let newFiles: File[] = [];
 
     function upload(e: CustomEvent<readonly File[]>): void {
         upload_new_files(fileWrapper, newFiles);
-        fileUploadComplete = true;
     }
 </script>
 

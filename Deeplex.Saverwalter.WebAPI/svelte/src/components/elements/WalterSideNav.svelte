@@ -23,6 +23,7 @@
         Money,
         Settings,
         Tools,
+        TrashCan,
         User,
         UserMultiple
     } from 'carbon-icons-svelte';
@@ -141,7 +142,13 @@
                 href="/stack"
             />
         {/await}
-
+        <SideNavLink
+            on:click={closeSideNavIfWinWidthSmall}
+            isSelected={$page.route.id?.includes('/trash')}
+            icon={TrashCan}
+            text="Papierkorb"
+            href="/trash" />
+  
         <SideNavDivider />
 
         <SideNavMenu text="Einstellungen" icon={Settings}>
