@@ -9,8 +9,7 @@
     import { Save, TrashCan } from 'carbon-icons-svelte';
 
     import { WalterAnhaenge, WalterHeader } from '$walter/components';
-    import { handle_save } from './WalterDataWrapper';
-    import { handle_delete } from './WalterHeaderDetail';
+    import { handle_save, handle_delete } from './WalterHeaderDetail';
     import type { WalterS3FileWrapper } from '$walter/lib';
 
     export let title = 'Saverwalter';
