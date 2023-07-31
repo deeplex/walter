@@ -24,17 +24,25 @@
     export let step: number;
     export let selectedTable: WalterPreviewCopyTable | undefined = undefined;
     export let selectedEntry: WalterSelectionEntry | undefined = undefined;
+    export let entry: any;
+    export let rows: WalterSelectionEntry[] | undefined = undefined;
 
-    let rows: WalterSelectionEntry[] | undefined = undefined;
-
-    let entry = {};
     onMount(async () => {
         const entryList = $page.url.pathname.split('/').filter((e) => e);
+        if (!entryList.length) {
+            return;
+        }
+
+        const tableName = entryList[0];
+
+        if (tableName === 'stack' || tableName === 'trash') {
+            return;
+        }
+        
         if (entryList.length !== 2) {
             step = 0;
         }
 
-        const tableName = entryList[0];
         const id = entryList[1];
         selectedTable = tables.find((t) => t.key === tableName);
 

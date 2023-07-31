@@ -27,6 +27,10 @@
     export let file: WalterS3File;
     export let fileWrapper: WalterS3FileWrapper;
 
+    // Created here to keep them when the selection changes
+    let entry = {};
+    let rows: WalterSelectionEntry[] | undefined = undefined;
+
     function close() {
         open = false;
     }
@@ -123,6 +127,8 @@
             <WalterPreviewType {file} />
         {:else if selectedTab === TabSelector.Copy || selectedTab === TabSelector.Move}
             <WalterPreviewCopyFile
+                bind:rows
+                bind:entry
                 bind:selectedTable
                 bind:selectedEntry
                 bind:step
