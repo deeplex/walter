@@ -53,7 +53,6 @@
         );
 
         if (copied && selectedTable && selectedEntry) {
-            open = false;
 
             fileWrapper.addFile(
                 file,
