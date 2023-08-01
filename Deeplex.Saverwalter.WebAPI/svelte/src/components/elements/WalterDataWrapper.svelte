@@ -31,10 +31,10 @@
     let addModalOpen = false;
     let open = false;
 
-    function submit() {
+    async function submit() {
         if (!addUrl) return;
 
-        const parsed = handle_save(addUrl, addEntry, title!);
+        const parsed = await handle_save(addUrl, addEntry, title!);
 
         rows = [...rows, parsed];
         open = true;
