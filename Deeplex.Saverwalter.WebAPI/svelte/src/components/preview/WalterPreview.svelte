@@ -53,11 +53,13 @@
         );
 
         if (copied && selectedTable && selectedEntry) {
-
             fileWrapper.addFile(
                 file,
                 `${selectedTable.key}/${selectedEntry.id}`
             );
+            selectedTable = undefined;
+            selectedEntry = undefined;
+            step = 0;
         }
     }
 

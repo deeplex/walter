@@ -18,6 +18,7 @@
         await updateRows();
         await selectEntryFromId(`${saved_entry.id}`);
         setTimeout(() => (step = 3), 0);
+        entry = undefined;
     }
 
     function proceed() {
