@@ -14,9 +14,21 @@
 </script>
 
 <Row>
-    <WalterNumberInput {readonly} bind:value={entry.stand} label="Zählerstand" />
-    <WalterDatePicker disabled={readonly} bind:value={entry.datum} labelText="Ablesedatum" />
-    <WalterTextInput {readonly} bind:value={entry.einheit} labelText="Einheit" />
+    <WalterNumberInput
+        required
+        {readonly}
+        bind:value={entry.stand}
+        label="Zählerstand" />
+    <WalterDatePicker
+        required
+        disabled={readonly}
+        bind:value={entry.datum}
+        labelText="Ablesedatum" />
+    <WalterTextInput
+        required
+        {readonly}
+        bind:value={entry.einheit}
+        labelText="Einheit" />
 </Row>
 <Row>
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />

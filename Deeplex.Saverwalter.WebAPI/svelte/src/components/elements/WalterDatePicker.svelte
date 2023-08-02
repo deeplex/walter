@@ -12,6 +12,7 @@
     export let value: string | undefined = undefined;
     export let placeholder: string | undefined = undefined;
     export let disabled: boolean | undefined = false;
+    export let required = false;
 
     function change(e: CustomEvent) {
         value = convertDateCanadian(new Date(e.detail?.selectedDates[0]));
@@ -28,6 +29,8 @@
         on:change={change}
     >
         <DatePickerInput
+            invalid={required && !value}
+            invalidText={`${labelText} ist ein notwendiges Feld.`}
             {disabled}
             style="width: 100%"
             type="text"

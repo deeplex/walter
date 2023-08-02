@@ -8,6 +8,7 @@
     export let titleText: string;
     export let entries: Promise<WalterSelectionEntry[]>;
     export let readonly = false;
+    export let required = false;
 
     function select(e: CustomEvent) {
         value = e.detail.selectedItem;
@@ -21,6 +22,8 @@
         <TextInputSkeleton />
     {:then x}
         <ComboBox
+            invalid={required && !value}
+            invalidText={`${titleText} ist ein notwendiges Feld.`}
             disabled={readonly}
             selectedId={x?.id}
             on:select={select}

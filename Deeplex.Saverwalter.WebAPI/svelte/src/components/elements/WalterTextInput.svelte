@@ -4,6 +4,7 @@
     export let value: string | undefined = undefined;
     export let labelText: string | undefined;
     export let readonly = false;
+    export let required = false;
 
     export let change = (e: CustomEvent<string | number | null>) => {
         value = '' + e.detail || undefined;
@@ -13,5 +14,11 @@
 {#await value}
     <TextInputSkeleton />
 {:then x}
-    <TextInput {readonly} on:change={change} {labelText} value={x} />
+    <TextInput
+        invalid={required && !value}
+        invalidText={`${labelText} ist ein notwendiges Feld.`}
+        {readonly}
+        on:change={change}
+        {labelText}
+        value={x} />
 {/await}

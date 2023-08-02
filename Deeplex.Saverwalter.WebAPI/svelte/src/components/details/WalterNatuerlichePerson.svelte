@@ -18,7 +18,7 @@
 
 <Row>
     <WalterTextInput {readonly} bind:value={entry.vorname} labelText="Vorname" />
-    <WalterTextInput {readonly} bind:value={entry.nachname} labelText="Nachname" />
+    <WalterTextInput required {readonly} bind:value={entry.nachname} labelText="Nachname" />
 </Row>
 <WalterPerson {readonly} value={entry} />
 <Row>

@@ -57,6 +57,8 @@
         <TextInputSkeleton />
     {:then items}
         <ComboBox
+            invalid={!entry?.typ?.id}
+            invalidText={"Betriebskostentyp der Umlage ist ein notwendiges Feld"}
             disabled={readonly}
             selectedId={entry?.typ?.id}
             on:select={selectTyp}
@@ -68,6 +70,8 @@
         />
     {/await}
     <ComboBox
+        invalid={!selectedUmlageId}
+        invalidText={"Wohnungen der Umlage ist ein notwendiges Feld"}
         disabled={readonly || !entry.typ}
         bind:selectedId={selectedUmlageId}
         on:select={selectUmlage}
@@ -81,13 +85,22 @@
 
 <Row>
     <WalterNumberInput
+        required
         {readonly}
         bind:value={entry.betreffendesJahr}
         hideSteppers={false}
         label="Betreffendes Jahr"
     />
-    <WalterNumberInput {readonly} bind:value={entry.betrag} label="Betrag" />
-    <WalterDatePicker disabled={readonly} bind:value={entry.datum} labelText="Datum" />
+    <WalterNumberInput
+        required
+        {readonly}
+        bind:value={entry.betrag}
+        label="Betrag" />
+    <WalterDatePicker
+        required
+        disabled={readonly}
+        bind:value={entry.datum}
+        labelText="Datum" />
 </Row>
 <Row>
     <WalterTextArea {readonly} bind:value={entry.notiz} labelText="Notiz" />

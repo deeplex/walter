@@ -20,12 +20,14 @@
 
 <Row>
     <WalterComboBox
+        required
         {readonly}
         entries={betriebskostentypen}
         bind:value={entry.typ}
         titleText="Typ"
     />
     <WalterComboBox
+        required
         {readonly}
         entries={umlageschluessel}
         bind:value={entry.schluessel}

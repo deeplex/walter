@@ -20,8 +20,13 @@
 </script>
 
 <Row>
-    <WalterTextInput {readonly} bind:value={entry.kennnummer} labelText="Kennnummer" />
+    <WalterTextInput
+        required
+        {readonly}
+        bind:value={entry.kennnummer}
+        labelText="Kennnummer" />
     <WalterComboBox
+        required
         {readonly}
         bind:value={entry.typ}
         titleText="Typ"

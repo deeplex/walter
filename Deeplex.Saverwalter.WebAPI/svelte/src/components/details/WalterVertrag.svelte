@@ -23,6 +23,7 @@
 
 <Row>
     <WalterDatePicker
+        required
         disabled
         bind:value={entry.beginn}
         labelText="Beginn (aus Vertragsversion)"
@@ -36,6 +37,7 @@
 </Row>
 <Row>
     <WalterComboBox
+        required
         {readonly}
         bind:value={entry.wohnung}
         entries={wohnungen}

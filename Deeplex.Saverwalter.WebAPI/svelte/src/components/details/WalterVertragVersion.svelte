@@ -13,14 +13,23 @@
 </script>
 
 <Row>
-    <WalterDatePicker disabled={readonly} bind:value={entry.beginn} labelText="Beginn" />
+    <WalterDatePicker
+        required
+        disabled={readonly}
+        bind:value={entry.beginn}
+        labelText="Beginn" />
     <WalterNumberInput
+        required
         {readonly}
         hideSteppers
         bind:value={entry.grundmiete}
         label="Grundmiete"
     />
-    <WalterNumberInput {readonly} bind:value={entry.personenzahl} label="Personenzahl" />
+    <WalterNumberInput
+        required
+        {readonly}
+        bind:value={entry.personenzahl}
+        label="Personenzahl" />
 </Row>
 <Row>
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />

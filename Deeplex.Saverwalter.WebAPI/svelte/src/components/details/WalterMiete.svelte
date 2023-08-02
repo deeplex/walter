@@ -13,13 +13,19 @@
 </script>
 
 <Row>
-    <WalterNumberInput {readonly} bind:value={entry.betrag} label="Betrag" />
+    <WalterNumberInput
+        required
+        {readonly}
+        bind:value={entry.betrag}
+        label="Betrag" />
     <WalterDatePicker
+        required
         disabled={readonly}
         bind:value={entry.betreffenderMonat}
         labelText="Betreffender Monat"
     />
     <WalterDatePicker
+        required
         disabled={readonly}
         bind:value={entry.zahlungsdatum}
         labelText="Zahlungsdatum"

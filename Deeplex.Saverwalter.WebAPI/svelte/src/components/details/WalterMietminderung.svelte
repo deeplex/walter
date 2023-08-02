@@ -13,8 +13,16 @@
 </script>
 
 <Row>
-    <WalterNumberInput {readonly} bind:value={entry.minderung} label="Minderung" />
-    <WalterDatePicker disabled={readonly} bind:value={entry.beginn} labelText="Beginn" />
+    <WalterNumberInput
+        required
+        {readonly}
+        bind:value={entry.minderung}
+        label="Minderung" />
+    <WalterDatePicker
+        required
+        disabled={readonly}
+        bind:value={entry.beginn}
+        labelText="Beginn" />
     <WalterDatePicker
         disabled={readonly}
         placeholder="Offen"

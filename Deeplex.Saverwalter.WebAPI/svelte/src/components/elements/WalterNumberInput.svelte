@@ -8,16 +8,26 @@
     export let hideSteppers = true;
     export let digits = 2;
     export let readonly = false;
+    export let required = false;
 
     export let change = (e: CustomEvent<number | null>) => {
-        value = e.detail || undefined;
+        if (e.detail === 0) {
+            value = 0;
+        }
+        else
+        {
+            value = e.detail || undefined;
+        }
     };
+
 </script>
 
 {#await value}
     <NumberInputSkeleton />
 {:then x}
     <NumberInput
+        invalid={required && value !== 0 && value === undefined}
+        invalidText={`${label} ist ein notwendiges Feld.`}
         {readonly}
         {min}
         {max}

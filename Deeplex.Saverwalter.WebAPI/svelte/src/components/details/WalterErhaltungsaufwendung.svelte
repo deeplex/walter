@@ -19,23 +19,37 @@
 </script>
 
 <Row>
-    <WalterTextInput {readonly} bind:value={entry.bezeichnung} labelText="Bezeichnung" />
+    <WalterTextInput
+        required
+        {readonly}
+        bind:value={entry.bezeichnung}
+        labelText="Bezeichnung" />
     <WalterComboBox
+        required
         {readonly}
         bind:value={entry.aussteller}
         titleText="Aussteller"
         entries={kontakte}
     />
-    <WalterDatePicker disabled={readonly} bind:value={entry.datum} labelText="Datum" />
+    <WalterDatePicker
+        required
+        disabled={readonly}
+        bind:value={entry.datum}
+        labelText="Datum" />
 </Row>
 <Row>
     <WalterComboBox
+        required
         {readonly}
         bind:value={entry.wohnung}
         titleText="Wohnung"
         entries={wohnungen}
     />
-    <WalterNumberInput {readonly} bind:value={entry.betrag} label="Betrag" />
+    <WalterNumberInput
+        required
+        {readonly}
+        bind:value={entry.betrag}
+        label="Betrag" />
 </Row>
 <Row>
     <WalterTextArea {readonly} bind:value={entry.notiz} labelText="Notiz" />
