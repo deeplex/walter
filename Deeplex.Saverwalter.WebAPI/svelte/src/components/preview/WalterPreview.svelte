@@ -22,7 +22,7 @@
         moveImpl,
         type WalterPreviewCopyTable
     } from './WalterPreviewCopyFile';
-    import { get_file } from '../subdetails/WalterAnhaengeEntry';
+    import { get_file_and_update_url } from '../subdetails/WalterAnhaengeEntry';
 
     export let open = false;
     export let file: WalterS3File;
@@ -53,8 +53,9 @@
         }
 
         const nextFile: WalterS3File = files[targetIndex];
+        // First to update the fileName etc, then to load the blob
         file = nextFile;
-        file = await get_file(nextFile);
+        file = await get_file_and_update_url(nextFile);
     }
 
     async function fileBefore() {
@@ -143,21 +144,21 @@
             </Tabs>
             <Button
                 on:click={fileBefore}
-                style="top: -3em"
+                style="top: -3.15em"
                 kind="tertiary"
                 iconDescription="Vorherige Datei"
                 icon={ArrowLeft}
             />
             <Button
                 on:click={fileAfter}
-                style="top: -3em"
+                style="top: -3.15em"
                 kind="tertiary"
                 iconDescription="Nachfolgende Datei"
                 icon={ArrowRight}
             />
             <Button
                 on:click={click_download}
-                style="top: -3em"
+                style="top: -3.15em"
                 kind="tertiary"
                 iconDescription="Herunterladen"
                 icon={Download}
