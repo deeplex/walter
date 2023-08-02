@@ -11,6 +11,7 @@
     } from '$walter/lib';
     import { shouldFilterItem } from './WalterBetriebskostenrechnung';
     import { walter_selection } from '$walter/services/requests';
+    import { convertDateCanadian } from '$walter/services/utils';
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
     export let fetchImpl: typeof fetch;
@@ -41,6 +42,13 @@
             fulfilled.filter((u) => u.filter === id)
         );
         selectedUmlageId = entry.umlage?.id;
+    }
+
+    if (!entry.betreffendesJahr) {
+        entry.betreffendesJahr = new Date().getFullYear() - 1;
+    }
+    if (!entry.datum) {
+        entry.datum = convertDateCanadian(new Date());
     }
 </script>
 

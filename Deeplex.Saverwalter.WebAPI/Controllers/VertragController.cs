@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MietminderungController;
@@ -55,6 +56,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             private SaverwalterContext Ctx { get; } = null!;
             private Vertrag Entity { get; } = null!;
 
+            public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen => Entity?.Wohnung.Umlagen
+                .SelectMany(e => e.Betriebskostenrechnungen)
+                .Where(e => e.BetreffendesJahr >= Entity.Beginn().Year && (Entity.Ende == null || Entity.Ende.Value.Year >= e.BetreffendesJahr))
+                .Select(e => new BetriebskostenrechnungEntryBase(e));
             public IEnumerable<MieteEntryBase>? Mieten => Entity?.Mieten.ToList().Select(e => new MieteEntryBase(e));
             public IEnumerable<MietminderungEntryBase>? Mietminderungen => Entity?.Mietminderungen.ToList().Select(e => new MietminderungEntryBase(e));
             public IEnumerable<PersonEntryBase>? Mieter => Ctx?.MieterSet
