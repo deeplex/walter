@@ -27,6 +27,24 @@
     export let navigate: (
         e: CustomEvent<DataTableRow>
     ) => Promise<void> | void = () => {};
+
+    function shouldFilterRows(row: any, value: any) {
+        const filteredValues = headers.map(headerObj => {
+            const keys = headerObj.key.split('.');
+            let value = row;
+            keys.forEach(key => {
+                if (value?.hasOwnProperty(key)) {
+                    value = value[key];
+                } else {
+                    value = null;
+                }
+            });
+            return value;
+        });
+
+        const values = `${value}`.toLowerCase().split(";").map(e => e.trim());
+        return values.every(val => filteredValues.some(e => `${e}`.toLowerCase().includes(val)));
+    }
 </script>
 
 <Content>
@@ -47,9 +65,9 @@
             <Toolbar>
                 <ToolbarContent>
                     <ToolbarSearch
-                        placeholder="Suche..."
+                        placeholder="Suche mit ; separierter Liste..."
                         persistent
-                        shouldFilterRows
+                        {shouldFilterRows}
                     />
                 </ToolbarContent>
             </Toolbar>
