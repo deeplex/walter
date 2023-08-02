@@ -27,7 +27,6 @@
 {/if}
 
 <HeaderPanelLink on:click={showModal}>
-    <!-- Copy the style from the original element. -->
     <TooltipDefinition tooltipText={file.FileName} align="start" direction="top">
         <Truncate
             style="font-size: 0.875rem;
