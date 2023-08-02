@@ -13,6 +13,8 @@
     import { WalterToastContent } from '../../lib/WalterToastContent';
     import { addToast } from '$walter/store';
     import { handle_save } from './WalterDataWrapper';
+    import { goto } from '$app/navigation';
+    import { page } from '$app/stores';
 
     export let fullHeight = false;
     export let addUrl: string | undefined = undefined;
@@ -38,6 +40,14 @@
         rows = [...rows, parsed];
         open = true;
     }
+
+    let quick_add = () => {
+        addModalOpen = true;
+    }
+
+    function normal_add() {
+        goto(`${$page.url.pathname}/new`);
+    }
 </script>
 
 {#if title !== undefined}
@@ -60,17 +70,10 @@
         </AccordionItem>
     {:then x}
         <AccordionItem title={`${title} (${x.length})`} bind:open>
-            {#if x.length}
-                <WalterDataTable {navigate} bind:rows {headers} />
-            {/if}
+             <Tile light>
+                <WalterDataTable add={addUrl && addEntry && quick_add} {navigate} bind:rows {headers} />
+            </Tile>
             {#if addUrl && addEntry}
-                <div style="float: right">
-                    <Button
-                        on:click={() => (addModalOpen = true)}
-                        iconDescription="Eintrag hinzufügen"
-                        icon={Add}>Eintrag hinzufügen</Button
-                    >
-                </div>
                 <Modal
                     secondaryButtonText="Abbrechen"
                     primaryButtonText="Bestätigen"
@@ -88,5 +91,5 @@
         </AccordionItem>
     {/await}
 {:else}
-    <WalterDataTable {fullHeight} {navigate} {rows} {headers} />
-{/if}
+    <WalterDataTable add={normal_add} {fullHeight} {navigate} {rows} {headers} />
+    {/if}

@@ -1,5 +1,6 @@
 <script lang="ts">
     import {
+    Button,
         Content,
         DataTable,
         DataTableSkeleton,
@@ -16,6 +17,7 @@
         convertTime
     } from '$walter/services/utils';
     import { dates, formatToTableDate, time } from './WalterDataTable';
+    import { Add } from 'carbon-icons-svelte';
 
     export let fullHeight = false;
     export let headers: {
@@ -23,6 +25,7 @@
         value: string;
     }[];
     export let rows: any[];
+    export let add: (() => void) | undefined = undefined;
 
     export let navigate: (
         e: CustomEvent<DataTableRow>
@@ -69,6 +72,13 @@
                         persistent
                         {shouldFilterRows}
                     />
+                    {#if !!add}
+                        <Button
+                            on:click={add}
+                            iconDescription="Eintrag hinzufügen"
+                            icon={Add}>Eintrag hinzufügen</Button
+                            >
+                    {/if}
                 </ToolbarContent>
             </Toolbar>
             <span

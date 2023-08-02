@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Truncate } from 'carbon-components-svelte';
+    import { SideNavDivider, Truncate } from 'carbon-components-svelte';
     import type { PageData } from './$types';
 
     import {
