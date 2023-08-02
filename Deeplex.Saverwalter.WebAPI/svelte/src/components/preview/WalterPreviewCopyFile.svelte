@@ -60,8 +60,15 @@
     async function selectedTable_change(e: any) {
         selectedTable = tables.find((t) => t.key === e.target.value);
         rows = undefined;
-        step = 1;
-        updateRows();
+        if (selectedTable?.key === 'stack')
+        {
+            step = 3;
+        }
+        else
+        {
+            step = 1;
+            updateRows();
+        }
     }
 
     async function selectEntryFromId(id: string) {

@@ -11,9 +11,16 @@
 
 {#if step === 3}
     <Tile light>
-        Ausgewählter Eintrag von {selectedTable?.value}: <Link
-            href="{$page.url.origin}/{selectedTable?.key}/{selectedEntry?.id}"
-            >{selectedEntry?.text}</Link
-        >
+        {#if selectedTable?.key === 'stack'}
+            <Link href="{$page.url.origin}/{selectedTable?.key}">
+                {selectedTable?.value}
+            </Link>
+            ausgewählt.
+        {:else}
+            Ausgewählter Eintrag von {selectedTable?.value}:
+            <Link href="{$page.url.origin}/{selectedTable?.key}/{selectedEntry?.id}">
+                {selectedEntry?.text}
+            </Link>
+        {/if}
     </Tile>
 {/if}

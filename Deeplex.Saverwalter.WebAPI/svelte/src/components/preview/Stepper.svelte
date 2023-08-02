@@ -36,7 +36,7 @@
             label="Eintrag auswählen"
             on:click={entryClick}
             complete={step > 1}
-            disabled={!selectedTable}
+            disabled={!selectedTable || selectedTable.key === "stack"}
         />
         <ProgressStep
             label="Vorschau"

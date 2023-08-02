@@ -23,17 +23,22 @@ export async function copyImpl(
     selectedTable?: WalterPreviewCopyTable,
     selectedEntry?: WalterSelectionEntry
 ) {
-    if (!selectedTable || !selectedEntry) {
+    if (!selectedTable || (selectedTable.key !== 'stack' && !selectedEntry)) {
         return;
     }
+
+    const target =
+        selectedTable.key === 'stack'
+            ? 'auf den Ablagestapel'
+            : `zu ${selectedEntry?.text}`;
+    const success = `Die Datei ${file.FileName} wurde erfolgreich ${target} kopiert.`;
+    const failure = `Die Datei ${file.FileName} konnte nicht zu ${selectedEntry?.text} kopiert werden.`;
 
     const copyToast = new WalterToastContent(
         'Kopieren erfolgreich',
         'Kopieren fehlgeschlagen',
-        () =>
-            `Die Datei ${file.FileName} wurde erfolgreich zu ${selectedEntry?.text} kopiert.`,
-        () =>
-            `Die Datei ${file.FileName} konnte nicht zu ${selectedEntry?.text} kopiert werden.`
+        () => success,
+        () => failure
     );
 
     const copied = copyFile(
@@ -53,6 +58,11 @@ export async function moveImpl(
     selectedTable?: WalterPreviewCopyTable,
     selectedEntry?: WalterSelectionEntry
 ) {
+    if (!selectedTable || (selectedTable.key !== 'stack' && !selectedEntry)) {
+        return;
+    }
+
+    const success = `Die Datei ${file.FileName} wurde erfolgreich zu ${selectedEntry?.text} verschoben.`;
     function failureSubtitle() {
         return `Die Datei ${file.FileName} konnte nicht zu ${selectedEntry?.text} verschoben werden.`;
     }
@@ -66,8 +76,7 @@ export async function moveImpl(
     const moveToast = new WalterToastContent(
         'Verschieben erfolgreich',
         failureTitle,
-        () =>
-            `Die Datei ${file.FileName} wurde erfolgreich zu ${selectedEntry?.text} verschoben.`,
+        () => success,
         failureSubtitle
     );
 
@@ -103,7 +112,10 @@ async function copyFile(
     if (!selectedTable) {
         return false;
     }
-    const S3URL = `${selectedTable.S3URL}/${selectedEntry?.id}`;
+    const S3URL =
+        selectedTable.key === 'stack'
+            ? `${selectedTable.S3URL}`
+            : `${selectedTable.S3URL}/${selectedEntry?.id}`;
 
     const success = walter_s3_post(
         new File([file.Blob], file.FileName),
@@ -218,5 +230,12 @@ export const tables: WalterPreviewCopyTable[] = [
         fetch: walter_selection.zaehlerstaende,
         S3URL: 'zaehlerstaende',
         newPage: () => WalterZaehlerstand
+    },
+    {
+        value: 'Ablagestapel',
+        key: 'stack',
+        fetch: () => undefined as any,
+        S3URL: 'stack',
+        newPage: () => undefined
     }
 ];
