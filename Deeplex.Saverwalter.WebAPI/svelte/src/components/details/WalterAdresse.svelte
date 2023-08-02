@@ -5,7 +5,7 @@
     import { WalterTextInput } from '$walter/components';
 
     export let entry: Partial<WalterAdresseEntry> | undefined = {};
-    export let fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
+    export const fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
     export let readonly = false;
     export let required = false;
 

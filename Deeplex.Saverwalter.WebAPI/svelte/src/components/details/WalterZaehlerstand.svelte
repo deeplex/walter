@@ -9,7 +9,7 @@
     import WalterTextInput from '../elements/WalterTextInput.svelte';
 
     export let entry: Partial<WalterZaehlerstandEntry> = {};
-    export let fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
+    export const fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
     export let readonly = false;
 </script>
 

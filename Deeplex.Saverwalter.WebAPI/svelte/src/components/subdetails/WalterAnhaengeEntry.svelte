@@ -10,8 +10,6 @@
     import { get_file } from './WalterAnhaengeEntry';
 
     async function showModal(e: MouseEvent) {
-        // const fileName = (e!.target as any).textContent;
-
         selectedFile = await get_file(file);
         previewOpen = true;
     }
@@ -33,14 +31,14 @@
     <TooltipDefinition tooltipText={file.FileName} align="start" direction="top">
         <Truncate
             style="font-size: 0.875rem;
-                       margin-left: 0;
-                       font-weight: 600;
-                       line-height: 1.28572;
-                       letter-spacing: 0.16px;
-                       display: block;
-                       height: 2rem;
-                       color: #c6c6c6;
-                       text-decoration: none;"
+                margin-left: 0;
+                font-weight: 600;
+                line-height: 1.28572;
+                letter-spacing: 0.16px;
+                display: block;
+                height: 2rem;
+                color: #c6c6c6;
+                text-decoration: none;"
         >
             {file.FileName}
         </Truncate>
