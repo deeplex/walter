@@ -1,23 +1,17 @@
 <script lang="ts">
-    import type { WalterS3File } from '$walter/types';
     import { Grid } from 'carbon-components-svelte';
-    import {
-        copyImpl,
-        moveImpl,
-        tables,
-        type WalterPreviewCopyTable
-    } from './WalterPreviewCopyFile';
+    import { tables, type WalterPreviewCopyTable } from './WalterPreviewCopyFile';
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
     import type {
         WalterS3FileWrapper,
         WalterSelectionEntry
     } from '$walter/lib';
-    import WalterPreviewCopyFileStep0 from './WalterPreviewCopyFileStep0.svelte';
-    import WalterPreviewCopyFileStep1 from './WalterPreviewCopyFileStep1.svelte';
-    import WalterPreviewCopyFileStep2 from './WalterPreviewCopyFileStep2.svelte';
-    import WalterPreviewCopyFileStep3 from './WalterPreviewCopyFileStep3.svelte';
-    import WalterPreviewCopyFileStepper from './WalterPreviewCopyFileStepper.svelte';
+    import Step0SelectTable from './Step0SelectTable.svelte';
+    import Step1SelectEntry from './Step1SelectEntry.svelte';
+    import Step2ViewOrCreateEntry from './Step2ViewOrCreateEntry.svelte';
+    import Step3CheckAndSubmit from './Step3CheckAndSubmit.svelte';
+    import WalterPreviewCopyFileStepper from './Stepper.svelte';
     import { walter_get } from '$walter/services/requests';
 
     export let fileWrapper: WalterS3FileWrapper;
@@ -73,7 +67,7 @@
     async function selectEntryFromId(id: string) {
         selectedEntry = rows?.find((row) => row.id === id);
         entry = await walter_get(
-            `/api/${selectedTable?.key}/${selectedEntry?.id}`,
+            `/api/${selectedTable?.S3URL}/${selectedEntry?.id}`,
             fileWrapper.fetchImpl
         );
     }
@@ -95,19 +89,20 @@
             padding-right: 0px !important;
         }
     </style>
-    <WalterPreviewCopyFileStep0
+    <Step0SelectTable
         bind:selectedTable
         bind:step
         {selectedTable_change}
         {tables}
     />
-    <WalterPreviewCopyFileStep1
+    <Step1SelectEntry
+        bind:entry
         bind:step
         bind:selectedEntry
         {rows}
         {selectedEntry_change}
     />
-    <WalterPreviewCopyFileStep2
+    <Step2ViewOrCreateEntry
         bind:step
         bind:selectedEntry
         bind:selectedTable
@@ -116,7 +111,7 @@
         {updateRows}
         {selectEntryFromId}
     />
-    <WalterPreviewCopyFileStep3
+    <Step3CheckAndSubmit
         bind:selectedTable
         bind:selectedEntry
         bind:step

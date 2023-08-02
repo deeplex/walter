@@ -25,7 +25,7 @@
 </script>
 
 <Row>
-    <WalterTextInput labelText="Bezeichnung" value={entry.name} />
+    <WalterTextInput {readonly} labelText="Bezeichnung" value={entry.name} />
 </Row>
 <WalterPerson {readonly} value={entry} />
 <Row>

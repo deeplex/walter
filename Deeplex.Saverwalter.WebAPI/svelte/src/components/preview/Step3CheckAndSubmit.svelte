@@ -16,5 +16,4 @@
             >{selectedEntry?.text}</Link
         >
     </Tile>
-    <Tile light>Datei kann jetzt kopiert werden.</Tile>
 {/if}

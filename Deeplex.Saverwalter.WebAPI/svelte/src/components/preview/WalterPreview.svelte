@@ -177,7 +177,7 @@
                 {fileWrapper}
             />
         {:else if selectedTab === TabSelector.Delete}
-            <p>Datei {file.FileName} unwiderruflich löschen</p>
+            <p>Datei {file.FileName} löschen</p>
         {/if}
     </ModalBody>
     {#if selectedTab !== TabSelector.Preview}

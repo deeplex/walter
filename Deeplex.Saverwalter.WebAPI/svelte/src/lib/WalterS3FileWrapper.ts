@@ -23,7 +23,7 @@ export class WalterS3FileWrapper {
                 ? target
                 : this.handles.findIndex((e) => e.S3URL === target);
 
-        const files = await this.handles[index].files;
+        const files = await this.handles[index]?.files;
 
         if (!files) {
             return;
