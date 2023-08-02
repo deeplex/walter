@@ -3,7 +3,8 @@
         FileUploaderDropContainer,
         HeaderPanelDivider,
         HeaderPanelLinks,
-        InlineLoading
+        InlineLoading,
+        TextInput
     } from 'carbon-components-svelte';
 
     import WalterAnhaengeEntry from './WalterAnhaengeEntry.svelte';
@@ -17,6 +18,8 @@
     function upload(e: CustomEvent<readonly File[]>): void {
         upload_new_files(fileWrapper, newFiles);
     }
+
+    let filter = "";
 </script>
 
 <HeaderPanelLinks>
@@ -32,7 +35,14 @@
             </div></svelte:fragment
         >
     </FileUploaderDropContainer>
-    {#each fileWrapper.handles as handle}
+    <TextInput
+        bind:value={filter}
+        placeholder="Suche..."
+        on:input={() => console.log(filter)}
+        size="sm"
+        style="background-color: transparent; color: white">
+    </TextInput>
+        {#each fileWrapper.handles as handle}
         {#await handle.files}
             <HeaderPanelDivider>{handle.name} (-)</HeaderPanelDivider>
             <InlineLoading
@@ -44,7 +54,9 @@
                 >{handle.name} ({loadedFiles.length})</HeaderPanelDivider
             >
             {#each loadedFiles as file}
-                <WalterAnhaengeEntry {file} bind:fileWrapper />
+                {#if file.FileName.toLowerCase().includes(filter.toLowerCase())}
+                    <WalterAnhaengeEntry {file} bind:fileWrapper />
+                {/if}
             {/each}
         {/await}
     {/each}

@@ -1,17 +1,12 @@
 <script lang="ts">
     import {
         AccordionItem,
-        Button,
         Loading,
         Modal,
         Tile
     } from 'carbon-components-svelte';
 
     import { WalterDataTable } from '$walter/components';
-    import { Add } from 'carbon-icons-svelte';
-    import { walter_post } from '$walter/services/requests';
-    import { WalterToastContent } from '../../lib/WalterToastContent';
-    import { addToast } from '$walter/store';
     import { handle_save } from './WalterDataWrapper';
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
