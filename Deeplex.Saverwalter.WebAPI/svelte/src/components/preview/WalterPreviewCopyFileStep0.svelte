@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { RadioButton, RadioButtonGroup } from 'carbon-components-svelte';
+    import { RadioButton, RadioButtonGroup, RadioTile, TileGroup } from 'carbon-components-svelte';
     import type { WalterPreviewCopyTable } from './WalterPreviewCopyFile';
 
     export let step: number;
@@ -9,14 +9,14 @@
 </script>
 
 {#if step === 0}
-    <RadioButtonGroup orientation="vertical">
+    <TileGroup>
         {#each tables as radio}
-            <RadioButton
+            <RadioTile
                 checked={selectedTable?.key == radio.key}
                 on:change={selectedTable_change}
-                labelText={radio.value}
                 value={radio.key}
-            />
+                >{radio.value}
+            </RadioTile>
         {/each}
-    </RadioButtonGroup>
+    </TileGroup>
 {/if}
