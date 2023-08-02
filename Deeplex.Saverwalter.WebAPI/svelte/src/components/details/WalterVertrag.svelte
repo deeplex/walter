@@ -5,13 +5,14 @@
         WalterMultiSelect,
         WalterTextArea
     } from '$walter/components';
-    import type { WalterSelectionEntry, WalterVertragEntry } from '$walter/lib';
+    import type { WalterVertragEntry } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
     import {
         Row,
         TextInput,
         TextInputSkeleton
     } from 'carbon-components-svelte';
+    import { convertDateGerman } from '$walter/services/utils';
 
     export let entry: Partial<WalterVertragEntry> = {};
     export let fetchImpl: typeof fetch;
@@ -22,10 +23,11 @@
 </script>
 
 <Row>
-    <WalterDatePicker
+    <TextInput
+        placeholder="Wird aus Vertragsversion genommen"
         required
-        disabled
-        bind:value={entry.beginn}
+        readonly
+        value={entry.beginn && convertDateGerman(new Date(entry.beginn))}
         labelText="Beginn (aus Vertragsversion)"
     />
     <WalterDatePicker

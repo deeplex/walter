@@ -14,8 +14,17 @@
     export let disabled: boolean | undefined = false;
     export let required = false;
 
-    function change(e: CustomEvent) {
-        value = convertDateCanadian(new Date(e.detail?.selectedDates[0]));
+    function change(e: any) {
+        const germanDate = e.target.value;
+        if (!germanDate) {
+            value = undefined;
+        }
+        else
+        {
+            const [day, month, year] = germanDate.split(".");
+            // month starts at 0. So 1 has to be substracted
+            value = convertDateCanadian(new Date(year, month - 1, day));
+        }
     }
 </script>
 
@@ -26,9 +35,9 @@
         value={getDateForDatePicker(x)}
         dateFormat="d.m.Y"
         datePickerType="single"
-        on:change={change}
     >
         <DatePickerInput
+            on:input={change}
             invalid={required && !value}
             invalidText={`${labelText} ist ein notwendiges Feld.`}
             {disabled}
