@@ -12,24 +12,26 @@
 
     export let entry: Partial<WalterWohnungEntry> = {};
     export let fetchImpl: typeof fetch;
+    export let readonly = false;
 
     const kontakte = walter_selection.kontakte(fetchImpl);
 </script>
 
 <Row>
     <WalterComboBox
+        {readonly}
         bind:value={entry.besitzer}
         titleText="Besitzer"
         entries={kontakte}
     />
 </Row>
-<WalterAdresse bind:entry={entry.adresse} />
+<WalterAdresse {readonly} bind:entry={entry.adresse} />
 <Row>
-    <WalterTextInput bind:value={entry.bezeichnung} labelText="Bezeichnung" />
-    <WalterNumberInput bind:value={entry.wohnflaeche} label="Wohnfläche" />
-    <WalterNumberInput bind:value={entry.nutzflaeche} label="Nutzfläche" />
-    <WalterNumberInput bind:value={entry.einheiten} label="Einheiten" />
+    <WalterTextInput {readonly} bind:value={entry.bezeichnung} labelText="Bezeichnung" />
+    <WalterNumberInput {readonly} bind:value={entry.wohnflaeche} label="Wohnfläche" />
+    <WalterNumberInput {readonly} bind:value={entry.nutzflaeche} label="Nutzfläche" />
+    <WalterNumberInput {readonly} bind:value={entry.einheiten} label="Einheiten" />
 </Row>
 <Row>
-    <WalterTextArea bind:value={entry.notiz} labelText="Notiz" />
+    <WalterTextArea {readonly} bind:value={entry.notiz} labelText="Notiz" />
 </Row>

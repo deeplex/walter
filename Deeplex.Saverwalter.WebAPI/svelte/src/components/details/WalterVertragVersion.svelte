@@ -9,17 +9,19 @@
 
     export let entry: Partial<WalterVertragVersionEntry> = {};
     export let fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
+    export let readonly = false;
 </script>
 
 <Row>
-    <WalterDatePicker bind:value={entry.beginn} labelText="Beginn" />
+    <WalterDatePicker disabled={readonly} bind:value={entry.beginn} labelText="Beginn" />
     <WalterNumberInput
+        {readonly}
         hideSteppers
         bind:value={entry.grundmiete}
         label="Grundmiete"
     />
-    <WalterNumberInput bind:value={entry.personenzahl} label="Personenzahl" />
+    <WalterNumberInput {readonly} bind:value={entry.personenzahl} label="Personenzahl" />
 </Row>
 <Row>
-    <WalterTextArea labelText="Notiz" bind:value={entry.notiz} />
+    <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />
 </Row>

@@ -7,6 +7,7 @@
     export let max: number | undefined = undefined;
     export let hideSteppers = true;
     export let digits = 2;
+    export let readonly = false;
 
     export let change = (e: CustomEvent<number | null>) => {
         value = e.detail || undefined;
@@ -17,6 +18,7 @@
     <NumberInputSkeleton />
 {:then x}
     <NumberInput
+        {readonly}
         {min}
         {max}
         {hideSteppers}

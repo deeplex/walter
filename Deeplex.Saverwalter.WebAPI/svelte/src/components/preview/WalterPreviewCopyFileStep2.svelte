@@ -36,6 +36,7 @@
     {/if}
     <svelte:component
         this={selectedTable.newPage()}
+        readonly={!!selectedEntry}
         bind:entry
         bind:fetchImpl
     />

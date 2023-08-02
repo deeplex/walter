@@ -7,6 +7,7 @@
     export let value: WalterSelectionEntry | undefined;
     export let titleText: string;
     export let entries: Promise<WalterSelectionEntry[]>;
+    export let readonly = false;
 
     function select(e: CustomEvent) {
         value = e.detail.selectedItem;
@@ -20,6 +21,7 @@
         <TextInputSkeleton />
     {:then x}
         <ComboBox
+            disabled={readonly}
             selectedId={x?.id}
             on:select={select}
             style="padding-right: 1rem"

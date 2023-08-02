@@ -15,6 +15,7 @@
 
     export let entry: Partial<WalterVertragEntry> = {};
     export let fetchImpl: typeof fetch;
+    export let readonly = false;
 
     const wohnungen = walter_selection.wohnungen(fetchImpl);
     const kontakte = walter_selection.kontakte(fetchImpl);
@@ -27,6 +28,7 @@
         labelText="Beginn (aus Vertragsversion)"
     />
     <WalterDatePicker
+        disabled={readonly}
         bind:value={entry.ende}
         labelText="Ende"
         placeholder="Offen"
@@ -34,6 +36,7 @@
 </Row>
 <Row>
     <WalterComboBox
+        {readonly}
         bind:value={entry.wohnung}
         entries={wohnungen}
         titleText="Wohnung"
@@ -48,6 +51,7 @@
         />
     {/await}
     <WalterComboBox
+        {readonly}
         bind:value={entry.ansprechpartner}
         entries={kontakte}
         titleText="Ansprechpartner"
@@ -55,11 +59,12 @@
 </Row>
 <Row>
     <WalterMultiSelect
+        disabled={readonly}
         bind:value={entry.selectedMieter}
         entries={kontakte}
         titleText="Mieter"
     />
 </Row>
 <Row>
-    <WalterTextArea labelText="Notiz" bind:value={entry.notiz} />
+    <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />
 </Row>

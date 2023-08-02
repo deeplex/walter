@@ -10,13 +10,14 @@
 
     export let entry: Partial<WalterZaehlerstandEntry> = {};
     export let fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
+    export let readonly = false;
 </script>
 
 <Row>
-    <WalterNumberInput bind:value={entry.stand} label="Zählerstand" />
-    <WalterDatePicker bind:value={entry.datum} labelText="Ablesedatum" />
-    <WalterTextInput readonly bind:value={entry.einheit} labelText="Einheit" />
+    <WalterNumberInput {readonly} bind:value={entry.stand} label="Zählerstand" />
+    <WalterDatePicker disabled={readonly} bind:value={entry.datum} labelText="Ablesedatum" />
+    <WalterTextInput {readonly} bind:value={entry.einheit} labelText="Einheit" />
 </Row>
 <Row>
-    <WalterTextArea labelText="Notiz" bind:value={entry.notiz} />
+    <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />
 </Row>

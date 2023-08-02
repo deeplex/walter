@@ -5,6 +5,7 @@
     export let value: WalterSelectionEntry[] | undefined;
     export let titleText: string;
     export let entries: Promise<WalterSelectionEntry[]>;
+    export let disabled = false;
 
     function select(e: CustomEvent) {
         value = e.detail.selected;
@@ -18,6 +19,7 @@
         <TextInputSkeleton />
     {:then x}
         <MultiSelect
+            {disabled}
             placeholder={value?.map((e) => e.text).join(', ')}
             selectedIds={x?.map((e) => e.id)}
             style="padding-right: 1rem"

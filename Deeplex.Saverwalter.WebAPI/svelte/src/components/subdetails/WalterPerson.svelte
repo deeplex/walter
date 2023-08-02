@@ -5,14 +5,15 @@
     import { WalterAdresse, WalterTextInput } from '$walter/components';
 
     export let value: Partial<WalterPersonEntry>;
+    export let readonly = false;
 </script>
 
-<WalterAdresse bind:entry={value.adresse} />
+<WalterAdresse {readonly} bind:entry={value.adresse} />
 <Row>
-    <WalterTextInput bind:value={value.email} labelText="E-Mail" />
-    <WalterTextInput bind:value={value.fax} labelText="Fax" />
+    <WalterTextInput {readonly} bind:value={value.email} labelText="E-Mail" />
+    <WalterTextInput {readonly} bind:value={value.fax} labelText="Fax" />
 </Row>
 <Row>
-    <WalterTextInput bind:value={value.telefon} labelText="Telefon" />
-    <WalterTextInput bind:value={value.mobil} labelText="Mobil" />
+    <WalterTextInput {readonly} bind:value={value.telefon} labelText="Telefon" />
+    <WalterTextInput {readonly} bind:value={value.mobil} labelText="Mobil" />
 </Row>
