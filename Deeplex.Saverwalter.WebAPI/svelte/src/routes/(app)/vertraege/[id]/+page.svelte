@@ -132,6 +132,6 @@
     />
 
     {#if abrechnung}
-        <WalterAbrechnung {abrechnung} />
+        <WalterAbrechnung fetchImpl={data.fetchImpl} {abrechnung} />
     {/if}
 </WalterGrid>
