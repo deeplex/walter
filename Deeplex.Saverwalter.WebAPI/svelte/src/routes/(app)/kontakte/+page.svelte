@@ -6,4 +6,4 @@
 </script>
 
 <WalterHeaderList title="Kontakte" />
-<WalterKontakte search rows={data.rows} fullHeight />
+<WalterKontakte rows={data.rows} fullHeight />

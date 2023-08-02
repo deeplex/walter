@@ -8,7 +8,6 @@
 <WalterHeaderList title="Verträge" />
 <WalterVertraege
     fetchImpl={data.fetchImpl}
-    search
     rows={data.rows}
     fullHeight
 />

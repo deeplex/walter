@@ -19,7 +19,6 @@
 
     export let fullHeight = false;
     export let rows: WalterAdresseEntry[];
-    export let search = false;
     export let title: string | undefined = undefined;
     export let entry: Partial<WalterAdresseEntry> | undefined = undefined;
 </script>
@@ -28,7 +27,6 @@
     {addUrl}
     addEntry={entry}
     {title}
-    {search}
     {navigate}
     {rows}
     {headers}

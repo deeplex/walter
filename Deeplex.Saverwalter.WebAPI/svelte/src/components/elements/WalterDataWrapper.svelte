@@ -23,7 +23,6 @@
         key: string;
         value: string;
     }[];
-    export let search = false;
     export let navigate: (e: CustomEvent) => Promise<void> | void = (
         _e: unknown
     ) => {};
@@ -62,7 +61,7 @@
     {:then x}
         <AccordionItem title={`${title} (${x.length})`} bind:open>
             {#if x.length}
-                <WalterDataTable {search} {navigate} bind:rows {headers} />
+                <WalterDataTable {navigate} bind:rows {headers} />
             {/if}
             {#if addUrl && addEntry}
                 <div style="float: right">
@@ -89,5 +88,5 @@
         </AccordionItem>
     {/await}
 {:else}
-    <WalterDataTable {fullHeight} {search} {navigate} {rows} {headers} />
+    <WalterDataTable {fullHeight} {navigate} {rows} {headers} />
 {/if}

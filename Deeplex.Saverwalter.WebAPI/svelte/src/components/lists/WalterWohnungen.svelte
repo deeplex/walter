@@ -18,7 +18,6 @@
         goto(`/wohnungen/${e.detail.id}`);
 
     export let rows: WalterWohnungEntry[];
-    export let search = false;
     export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch;
@@ -29,7 +28,6 @@
     {addUrl}
     addEntry={entry}
     {title}
-    {search}
     {navigate}
     {rows}
     {headers}

@@ -8,7 +8,6 @@
 <WalterHeaderList title="Zähler" />
 <WalterZaehlerList
     fetchImpl={data.fetchImpl}
-    search
     rows={data.rows}
     fullHeight
 />

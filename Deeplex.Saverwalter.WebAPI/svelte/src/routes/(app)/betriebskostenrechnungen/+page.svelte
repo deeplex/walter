@@ -11,7 +11,6 @@
 <WalterHeaderList title="Betriebskostenrechnung" />
 <WalterBetriebskostenrechnungen
     fetchImpl={data.fetchImpl}
-    search
     rows={data.rows}
     fullHeight
 />

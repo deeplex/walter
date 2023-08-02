@@ -28,7 +28,6 @@
             navigate={selectedEntry_change}
             {headers}
             {rows}
-            search
         />
     {:else}
         <SkeletonText style="margin: 0; height: 48px" />

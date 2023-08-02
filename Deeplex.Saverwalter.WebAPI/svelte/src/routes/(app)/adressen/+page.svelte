@@ -6,4 +6,4 @@
 </script>
 
 <WalterHeaderList title="Adressen" />
-<WalterAdressen search rows={data.rows} fullHeight />
+<WalterAdressen rows={data.rows} fullHeight />

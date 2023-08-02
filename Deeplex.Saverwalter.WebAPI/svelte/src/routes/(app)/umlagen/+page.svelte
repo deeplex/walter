@@ -6,4 +6,4 @@
 </script>
 
 <WalterHeaderList title="Umlagen" />
-<WalterUmlagen fetchImpl={data.fetchImpl} search rows={data.rows} fullHeight />
+<WalterUmlagen fetchImpl={data.fetchImpl} rows={data.rows} fullHeight />

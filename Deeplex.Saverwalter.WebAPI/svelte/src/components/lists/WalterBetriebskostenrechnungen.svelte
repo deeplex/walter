@@ -8,12 +8,10 @@
     } from '$walter/components';
     import type {
         WalterBetriebskostenrechnungEntry,
-        WalterSelectionEntry
     } from '$walter/lib';
 
     export let fullHeight = false;
     export let rows: WalterBetriebskostenrechnungEntry[];
-    export let search = false;
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch;
 
@@ -38,7 +36,6 @@
     {addUrl}
     addEntry={entry}
     {title}
-    {search}
     {navigate}
     {rows}
     {headers}

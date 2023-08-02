@@ -33,7 +33,6 @@
 
     export let rows: WalterPersonEntry[];
     export let fullHeight = false;
-    export let search = false;
     export let title: string | undefined = undefined;
 
     let personType = 0;
@@ -47,7 +46,6 @@
     {addUrl}
     addEntry={entry}
     {title}
-    {search}
     {navigate}
     {rows}
     {headers}

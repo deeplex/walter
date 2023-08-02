@@ -11,7 +11,6 @@
 <WalterHeaderList title="Erhaltungsaufwendungen" />
 <WalterErhaltungsaufwendungen
     fetchImpl={data.fetch}
-    search
     rows={data.rows}
     fullHeight
 />

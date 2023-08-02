@@ -27,14 +27,11 @@
     export let navigate: (
         e: CustomEvent<DataTableRow>
     ) => Promise<void> | void = () => {};
-    export let search = false;
 </script>
 
 <Content>
     {#await rows}
-        {#if search}
-            <SkeletonPlaceholder style="margin:0; width: 100%; height:3rem" />
-        {/if}
+        <SkeletonPlaceholder style="margin:0; width: 100%; height:3rem" />
         <DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
     {:then x}
         <DataTable
@@ -47,17 +44,15 @@
             class={fullHeight ? 'proper-list' : ''}
             style="cursor: pointer; max-height: none !important"
         >
-            {#if search}
-                <Toolbar>
-                    <ToolbarContent>
-                        <ToolbarSearch
-                            placeholder="Suche..."
-                            persistent
-                            shouldFilterRows
-                        />
-                    </ToolbarContent>
-                </Toolbar>
-            {/if}
+            <Toolbar>
+                <ToolbarContent>
+                    <ToolbarSearch
+                        placeholder="Suche..."
+                        persistent
+                        shouldFilterRows
+                    />
+                </ToolbarContent>
+            </Toolbar>
             <span
                 style="text-overflow: ellipsis; white-space: nowrap; overflow:hidden;"
                 slot="cell"
