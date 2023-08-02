@@ -44,6 +44,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             private SaverwalterContext? Ctx { get; }
 
+            public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen
+                => Entity?.Umlage?.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e));
             public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Umlage.Wohnungen.Select(e => new WohnungEntryBase(e, Ctx!));
 
             public BetriebskostenrechnungEntry() : base() { }
