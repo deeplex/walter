@@ -53,11 +53,11 @@
 
             {#if fileWrapper}
                 {#await fileWrapper.handles[0].files}
-                    <HeaderAction preventCloseOnClickOutside text="(...)">
+                    <HeaderAction isOpen preventCloseOnClickOutside text="(...)">
                         <WalterAnhaenge bind:fileWrapper />
                     </HeaderAction>
                 {:then files}
-                    <HeaderAction preventCloseOnClickOutside text="({files.length})">
+                    <HeaderAction isOpen preventCloseOnClickOutside text="({files.length})">
                         <WalterAnhaenge bind:fileWrapper />
                     </HeaderAction>
                 {/await}

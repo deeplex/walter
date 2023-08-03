@@ -17,7 +17,6 @@
     const addUrl = `/api/vertragversionen/`;
 
     export let rows: WalterVertragVersionEntry[];
-    export let search = false;
     export let fullHeight = false;
     export let title: string | undefined = undefined;
 
@@ -33,7 +32,6 @@
     {addUrl}
     addEntry={entry}
     {title}
-    {search}
     {rows}
     {headers}
     {fullHeight}

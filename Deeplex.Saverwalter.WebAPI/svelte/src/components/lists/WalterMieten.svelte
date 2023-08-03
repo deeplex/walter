@@ -13,7 +13,6 @@
 
     export let rows: WalterMieteEntry[];
     export let fullHeight = false;
-    export let search = false;
     export let title: string | undefined = undefined;
 
     const navigate = (e: CustomEvent) => goto(`/mieten/${e.detail.id}`);
@@ -26,7 +25,6 @@
     {addUrl}
     addEntry={entry}
     {title}
-    {search}
     {rows}
     {headers}
     {fullHeight}

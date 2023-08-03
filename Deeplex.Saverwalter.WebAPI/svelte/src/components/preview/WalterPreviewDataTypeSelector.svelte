@@ -9,11 +9,11 @@
 </script>
 
 {#if file.Type?.includes('image/')}
-    <WalterPreviewImage {file} />
+    <WalterPreviewImage bind:file />
 {:else if file.Type === 'text/plain' || file.Type === 'application/json'}
-    <WalterPreviewText {file} />
+    <WalterPreviewText bind:file />
 {:else if file.Type === 'application/pdf'}
-    <WalterPreviewPdf {file} />
+    <WalterPreviewPdf bind:file />
 {:else}
-    <WalterPreviewUnknown {file} />
+    <WalterPreviewUnknown bind:file />
 {/if}

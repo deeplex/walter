@@ -3,32 +3,35 @@
         WalterAbrechnungEinheit,
         WalterAbrechnungGruppe,
         WalterAbrechnungResultat,
-        WalterDatePicker
+        WalterDatePicker,
+        WalterZaehlerList
     } from '$walter/components';
-    import { convertEuro } from '$walter/services/utils';
+    import { convertDateGerman, convertEuro } from '$walter/services/utils';
     import type { WalterBetriebskostenabrechnungKostengruppenEntry } from '$walter/types';
-    import { Loading, Row, Tile } from 'carbon-components-svelte';
+    import { Column, Loading, Row, TextInput, Tile, Truncate } from 'carbon-components-svelte';
 
     export let abrechnung: WalterBetriebskostenabrechnungKostengruppenEntry;
+    export let fetchImpl: typeof fetch;
 </script>
 
+<Tile style="margin-top: 2rem">
 {#await abrechnung}
     <div style="width:100%; display: flex; justify-content: center">
         <Loading withOverlay={false} />
     </div>
 {:then}
     <Row>
-        <WalterDatePicker
+        <TextInput
             placeholder="Nutzungsbeginn"
             labelText="Nutzungsbeginn"
-            disabled
-            value={abrechnung.nutzungsbeginn.toLocaleString('de-DE')}
+            readonly
+            value={convertDateGerman(new Date(abrechnung.nutzungsbeginn))}
         />
-        <WalterDatePicker
+        <TextInput
             placeholder="Nutzungsende"
             labelText="Nutzungsende"
-            disabled
-            value={abrechnung.nutzungsende.toLocaleString('de-DE')}
+            readonly
+            value={convertDateGerman(new Date(abrechnung.nutzungsende))}
         />
     </Row>
 
@@ -43,10 +46,19 @@
             rows={gruppe.kostenpunkte}
             year={abrechnung.jahr}
         />
-        <Tile light>
+        <Tile>
             <h5 style="display: flex; justify-content: center">
                 Zwischensumme: {convertEuro(gruppe.betragKalteNebenkosten)}
             </h5>
         </Tile>
-    {/each}
+        {/each}
+        {#if abrechnung.zaehler.length}
+            <hr />
+            <Tile>
+                <h4>Zähler</h4>
+            </Tile>
+            <WalterZaehlerList {fetchImpl} rows={abrechnung.zaehler} />
+        {/if}
+        <div style="margin: 3em"/>
 {/await}
+</Tile>

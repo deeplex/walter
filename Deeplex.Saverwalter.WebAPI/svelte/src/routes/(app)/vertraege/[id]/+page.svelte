@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Truncate } from 'carbon-components-svelte';
+    import { SideNavDivider, Truncate } from 'carbon-components-svelte';
     import type { PageData } from './$types';
 
     import {
@@ -27,10 +27,14 @@
         type WalterMieteEntry,
         type WalterMietminderungEntry,
         type WalterPersonEntry,
-        type WalterVertragVersionEntry
+        type WalterVertragVersionEntry,
+
+        WalterBetriebskostenrechnungEntry
+
     } from '$walter/lib';
     import { loadAbrechnung } from '$walter/services/abrechnung';
     import WalterLinks from '../../../../components/subdetails/WalterLinks.svelte';
+    import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
     export let data: PageData;
 
     const versionen = data.entry.versionen;
@@ -43,6 +47,7 @@
         versionen[versionen.length - 1]
     );
     const mieterEntry: Partial<WalterPersonEntry> = {};
+    const betriebskostenrechnungEntry: Partial<WalterBetriebskostenrechnungEntry> = {};
 
     let abrechnung: WalterBetriebskostenabrechnungKostengruppenEntry;
     let searchParams: URLSearchParams = new URL($page.url).searchParams;
@@ -93,6 +98,11 @@
             title="Mietminderungen"
             rows={data.entry.mietminderungen}
         />
+        <WalterBetriebskostenrechnungen
+            entry={betriebskostenrechnungEntry}
+            fetchImpl={data.fetchImpl}
+            title="Betriebskostenrechnungen"
+            rows={data.entry.betriebskostenrechnungen} />
 
         <!-- TODO id is GUID -->
         <!-- 
@@ -122,6 +132,6 @@
     />
 
     {#if abrechnung}
-        <WalterAbrechnung {abrechnung} />
+        <WalterAbrechnung fetchImpl={data.fetchImpl} {abrechnung} />
     {/if}
 </WalterGrid>

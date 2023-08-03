@@ -1,7 +1,7 @@
 <script lang="ts">
     import { WalterPreviewError } from '$walter/components';
     import type { WalterS3File } from '$walter/types';
-    import { ImageLoader } from 'carbon-components-svelte';
+    import { ImageLoader, InlineLoading, Loading } from 'carbon-components-svelte';
     import { onDestroy, onMount } from 'svelte';
 
     export let file: WalterS3File;

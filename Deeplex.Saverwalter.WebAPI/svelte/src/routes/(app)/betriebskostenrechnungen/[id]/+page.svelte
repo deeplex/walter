@@ -6,6 +6,7 @@
         WalterWohnungen,
         WalterHeaderDetail,
         WalterBetriebskostenrechnung,
+        WalterBetriebskostenrechnungen,
         WalterLinks,
         WalterLink
     } from '$walter/components';
@@ -43,6 +44,12 @@
             fetchImpl={data.fetchImpl}
             title="Wohnungen"
             rows={data.entry.wohnungen}
+        />
+
+        <WalterBetriebskostenrechnungen
+            fetchImpl={data.fetchImpl}
+            title="Rechnungen der Umlage"
+            rows={data.entry.betriebskostenrechnungen}
         />
 
         <WalterLink

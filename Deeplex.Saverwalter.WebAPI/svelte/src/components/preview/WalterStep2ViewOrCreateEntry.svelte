@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Button } from 'carbon-components-svelte';
     import type { WalterPreviewCopyTable } from './WalterPreviewCopyFile';
-    import { handle_save } from './WalterPreviewCopyFileStep2';
+    import { handle_save } from './WalterStep2ViewOrCreateEntry';
     import type { WalterSelectionEntry } from '$walter/lib';
 
     export let step: number;
@@ -13,7 +13,7 @@
     export let selectEntryFromId: (id: string) => void;
 
     async function save() {
-        const apiURL = `/api/${selectedTable?.key}`;
+        const apiURL = `/api/${selectedTable?.S3URL}`;
         var saved_entry = await handle_save(apiURL, entry);
         await updateRows();
         await selectEntryFromId(`${saved_entry.id}`);
@@ -35,6 +35,7 @@
     {/if}
     <svelte:component
         this={selectedTable.newPage()}
+        readonly={!!selectedEntry}
         bind:entry
         bind:fetchImpl
     />

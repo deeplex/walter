@@ -1,7 +1,8 @@
 import type {
     WalterAdresseEntry,
     WalterSelectionEntry,
-    WalterUmlageEntry
+    WalterUmlageEntry,
+    WalterZaehlerEntry
 } from '$walter/lib';
 
 export type WalterBetriebskostenabrechnungKostengruppenEntry = {
@@ -28,7 +29,7 @@ export type WalterBetriebskostenabrechnungEntry = {
     kaltMinderung: number;
     nutzungsbeginn: Date;
     nutzungsende: Date;
-    zaehler: WalterSelectionEntry[];
+    zaehler: WalterZaehlerEntry[];
     abrechnungszeitspanne: number;
     nutzungszeitspanne: number;
     zeitanteil: number;

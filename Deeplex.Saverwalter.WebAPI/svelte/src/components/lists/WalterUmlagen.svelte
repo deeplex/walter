@@ -17,7 +17,6 @@
 
     export let fullHeight = false;
     export let rows: WalterUmlageEntry[];
-    export let search = false;
     export let title: string | undefined = undefined;
     export let entry: Partial<WalterUmlageEntry> | undefined = undefined;
     export let fetchImpl: typeof fetch;
@@ -27,7 +26,6 @@
     addEntry={entry}
     {addUrl}
     {title}
-    {search}
     {navigate}
     {rows}
     {headers}

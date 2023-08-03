@@ -4,12 +4,13 @@
         WalterMultiSelect,
         WalterTextArea
     } from '$walter/components';
-    import { Row, TextInputSkeleton } from 'carbon-components-svelte';
+    import { Row } from 'carbon-components-svelte';
     import type { WalterUmlageEntry } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
 
     export let entry: Partial<WalterUmlageEntry> = {};
     export let fetchImpl: typeof fetch;
+    export let readonly = false;
 
     const betriebskostentypen = walter_selection.betriebskostentypen(fetchImpl);
     const umlageschluessel = walter_selection.umlageschluessel(fetchImpl);
@@ -19,11 +20,15 @@
 
 <Row>
     <WalterComboBox
+        required
+        {readonly}
         entries={betriebskostentypen}
         bind:value={entry.typ}
         titleText="Typ"
     />
     <WalterComboBox
+        required
+        {readonly}
         entries={umlageschluessel}
         bind:value={entry.schluessel}
         titleText="Umlageschlüssel"
@@ -31,6 +36,7 @@
 </Row>
 <Row>
     <WalterMultiSelect
+        disabled={readonly}
         bind:value={entry.selectedWohnungen}
         entries={wohnungen}
         titleText="Wohnungen"
@@ -39,6 +45,7 @@
 {#if entry.schluessel?.id === '3'}
     <Row>
         <WalterMultiSelect
+            disabled={readonly}
             bind:value={entry.selectedZaehler}
             entries={zaehler}
             titleText="Zähler"
@@ -46,5 +53,5 @@
     </Row>
 {/if}
 <Row>
-    <WalterTextArea labelText="Notiz" bind:value={entry.notiz} />
+    <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />
 </Row>

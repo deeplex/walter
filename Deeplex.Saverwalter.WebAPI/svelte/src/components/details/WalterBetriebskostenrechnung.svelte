@@ -11,9 +11,11 @@
     } from '$walter/lib';
     import { shouldFilterItem } from './WalterBetriebskostenrechnung';
     import { walter_selection } from '$walter/services/requests';
+    import { convertDateCanadian } from '$walter/services/utils';
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
     export let fetchImpl: typeof fetch;
+    export let readonly = false;
 
     const betriebskostentypen = walter_selection.betriebskostentypen(fetchImpl);
     const umlagen_wohnungen = walter_selection.umlagen_wohnungen(fetchImpl);
@@ -41,6 +43,13 @@
         );
         selectedUmlageId = entry.umlage?.id;
     }
+
+    if (!entry.betreffendesJahr) {
+        entry.betreffendesJahr = new Date().getFullYear() - 1;
+    }
+    if (!entry.datum) {
+        entry.datum = convertDateCanadian(new Date());
+    }
 </script>
 
 <Row>
@@ -48,6 +57,9 @@
         <TextInputSkeleton />
     {:then items}
         <ComboBox
+            invalid={!entry?.typ?.id}
+            invalidText={"Betriebskostentyp der Umlage ist ein notwendiges Feld"}
+            disabled={readonly}
             selectedId={entry?.typ?.id}
             on:select={selectTyp}
             style="padding-right: 1rem"
@@ -58,7 +70,9 @@
         />
     {/await}
     <ComboBox
-        disabled={!entry.typ}
+        invalid={!selectedUmlageId}
+        invalidText={"Wohnungen der Umlage ist ein notwendiges Feld"}
+        disabled={readonly || !entry.typ}
         bind:selectedId={selectedUmlageId}
         on:select={selectUmlage}
         style="padding-right: 1rem"
@@ -71,13 +85,23 @@
 
 <Row>
     <WalterNumberInput
+        required
+        {readonly}
         bind:value={entry.betreffendesJahr}
         hideSteppers={false}
         label="Betreffendes Jahr"
     />
-    <WalterNumberInput bind:value={entry.betrag} label="Betrag" />
-    <WalterDatePicker bind:value={entry.datum} labelText="Datum" />
+    <WalterNumberInput
+        required
+        {readonly}
+        bind:value={entry.betrag}
+        label="Betrag" />
+    <WalterDatePicker
+        required
+        disabled={readonly}
+        bind:value={entry.datum}
+        labelText="Datum" />
 </Row>
 <Row>
-    <WalterTextArea bind:value={entry.notiz} labelText="Notiz" />
+    <WalterTextArea {readonly} bind:value={entry.notiz} labelText="Notiz" />
 </Row>

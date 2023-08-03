@@ -8,18 +8,28 @@
     import type { WalterMietminderungEntry } from '$walter/lib';
 
     export let entry: Partial<WalterMietminderungEntry> = {};
-    export let fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
+    export const fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
+    export let readonly = false;
 </script>
 
 <Row>
-    <WalterNumberInput bind:value={entry.minderung} label="Minderung" />
-    <WalterDatePicker bind:value={entry.beginn} labelText="Beginn" />
+    <WalterNumberInput
+        required
+        {readonly}
+        bind:value={entry.minderung}
+        label="Minderung" />
     <WalterDatePicker
+        required
+        disabled={readonly}
+        bind:value={entry.beginn}
+        labelText="Beginn" />
+    <WalterDatePicker
+        disabled={readonly}
         placeholder="Offen"
         bind:value={entry.ende}
         labelText="Ende"
     />
 </Row>
 <Row>
-    <WalterTextArea labelText="Notiz" bind:value={entry.notiz} />
+    <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />
 </Row>

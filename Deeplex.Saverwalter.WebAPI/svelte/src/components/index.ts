@@ -38,7 +38,6 @@ export { default as WalterDataWrapper } from './elements/WalterDataWrapper.svelt
 export { default as WalterDatePicker } from './elements/WalterDatePicker.svelte';
 export { default as WalterHeader } from './elements/WalterHeader.svelte';
 export { default as WalterHeaderDetail } from './elements/WalterHeaderDetail.svelte';
-export { default as WalterHeaderList } from './elements/WalterHeaderList.svelte';
 export { default as WalterHeaderNew } from './elements/WalterHeaderNew.svelte';
 export { default as WalterGrid } from './elements/WalterGrid.svelte';
 export { default as WalterSideNav } from './elements/WalterSideNav.svelte';

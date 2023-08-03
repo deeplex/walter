@@ -157,9 +157,13 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         public static VertragVersion? getVersion(Vertrag vertrag, DateOnly timestamp)
         {
-            return vertrag.Versionen.SingleOrDefault(
-                version => version.Beginn <= timestamp &&
-                (version.Ende() == null || version.Ende() > timestamp));
+            return vertrag.Versionen.SingleOrDefault(version =>
+            {
+                var startedBefore = version.Beginn <= timestamp;
+                var end = version.Ende();
+                var endsAfter = end == null || end > timestamp;
+                return startedBefore && endsAfter;
+            });
         }
 
         public static int SumPersonenzahlen(List<Vertrag> vertraege, DateOnly timestamp)

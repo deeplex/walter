@@ -26,7 +26,6 @@
 
     export let fullHeight = false;
     export let rows: WalterErhaltungsaufwendungEntry[];
-    export let search = false;
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch;
 
@@ -38,7 +37,6 @@
     {addUrl}
     addEntry={entry}
     {title}
-    {search}
     {navigate}
     {rows}
     {headers}

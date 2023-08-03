@@ -1,5 +1,6 @@
 <script lang="ts">
     import {
+    Button,
         Content,
         DataTable,
         DataTableSkeleton,
@@ -16,6 +17,7 @@
         convertTime
     } from '$walter/services/utils';
     import { dates, formatToTableDate, time } from './WalterDataTable';
+    import { Add } from 'carbon-icons-svelte';
 
     export let fullHeight = false;
     export let headers: {
@@ -23,18 +25,34 @@
         value: string;
     }[];
     export let rows: any[];
+    export let add: (() => void) | undefined = undefined;
 
     export let navigate: (
         e: CustomEvent<DataTableRow>
     ) => Promise<void> | void = () => {};
-    export let search = false;
+
+    function shouldFilterRows(row: any, value: any) {
+        const filteredValues = headers.map(headerObj => {
+            const keys = headerObj.key.split('.');
+            let value = row;
+            keys.forEach(key => {
+                if (value?.hasOwnProperty(key)) {
+                    value = value[key];
+                } else {
+                    value = null;
+                }
+            });
+            return value;
+        });
+
+        const values = `${value}`.toLowerCase().split(";").map(e => e.trim());
+        return values.every(val => filteredValues.some(e => `${e}`.toLowerCase().includes(val)));
+    }
 </script>
 
 <Content>
     {#await rows}
-        {#if search}
-            <SkeletonPlaceholder style="margin:0; width: 100%; height:3rem" />
-        {/if}
+        <SkeletonPlaceholder style="margin:0; width: 100%; height:3rem" />
         <DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
     {:then x}
         <DataTable
@@ -47,17 +65,22 @@
             class={fullHeight ? 'proper-list' : ''}
             style="cursor: pointer; max-height: none !important"
         >
-            {#if search}
-                <Toolbar>
-                    <ToolbarContent>
-                        <ToolbarSearch
-                            placeholder="Suche..."
-                            persistent
-                            shouldFilterRows
-                        />
-                    </ToolbarContent>
-                </Toolbar>
-            {/if}
+            <Toolbar>
+                <ToolbarContent>
+                    <ToolbarSearch
+                        placeholder="Suche mit ; separierter Liste..."
+                        persistent
+                        {shouldFilterRows}
+                    />
+                    {#if !!add}
+                        <Button
+                            on:click={add}
+                            iconDescription="Eintrag hinzufügen"
+                            icon={Add}>Eintrag hinzufügen</Button
+                            >
+                    {/if}
+                </ToolbarContent>
+            </Toolbar>
             <span
                 style="text-overflow: ellipsis; white-space: nowrap; overflow:hidden;"
                 slot="cell"

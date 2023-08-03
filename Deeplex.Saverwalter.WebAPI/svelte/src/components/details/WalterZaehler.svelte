@@ -12,6 +12,7 @@
 
     export let entry: Partial<WalterZaehlerEntry> = {};
     export let fetchImpl: typeof fetch;
+    export let readonly = false;
 
     const zaehlertypen = walter_selection.zaehlertypen(fetchImpl);
     const wohnungen = walter_selection.wohnungen(fetchImpl);
@@ -19,16 +20,23 @@
 </script>
 
 <Row>
-    <WalterTextInput bind:value={entry.kennnummer} labelText="Kennnummer" />
+    <WalterTextInput
+        required
+        {readonly}
+        bind:value={entry.kennnummer}
+        labelText="Kennnummer" />
     <WalterComboBox
+        required
+        {readonly}
         bind:value={entry.typ}
         titleText="Typ"
         entries={zaehlertypen}
     />
 </Row>
-<WalterAdresse bind:entry={entry.adresse} />
+<WalterAdresse {readonly} bind:entry={entry.adresse} />
 <Row>
     <WalterComboBox
+        {readonly}
         bind:value={entry.wohnung}
         titleText="Wohnung"
         entries={wohnungen}
@@ -36,11 +44,12 @@
 </Row>
 <Row>
     <WalterMultiSelect
+        disabled={readonly}
         bind:value={entry.selectedUmlagen}
         entries={umlagen}
         titleText="Umlagen"
     />
 </Row>
 <Row>
-    <WalterTextArea bind:value={entry.notiz} labelText="Notiz" />
+    <WalterTextArea {readonly} bind:value={entry.notiz} labelText="Notiz" />
 </Row>

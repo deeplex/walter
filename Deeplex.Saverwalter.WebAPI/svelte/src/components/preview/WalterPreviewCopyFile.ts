@@ -23,17 +23,22 @@ export async function copyImpl(
     selectedTable?: WalterPreviewCopyTable,
     selectedEntry?: WalterSelectionEntry
 ) {
-    if (!selectedTable || !selectedEntry) {
+    if (!selectedTable || (selectedTable.key !== 'stack' && !selectedEntry)) {
         return;
     }
+
+    const target =
+        selectedTable.key === 'stack'
+            ? 'auf den Ablagestapel'
+            : `zu ${selectedEntry?.text}`;
+    const success = `Die Datei ${file.FileName} wurde erfolgreich ${target} kopiert.`;
+    const failure = `Die Datei ${file.FileName} konnte nicht zu ${selectedEntry?.text} kopiert werden.`;
 
     const copyToast = new WalterToastContent(
         'Kopieren erfolgreich',
         'Kopieren fehlgeschlagen',
-        () =>
-            `Die Datei ${file.FileName} wurde erfolgreich zu ${selectedEntry?.text} kopiert.`,
-        () =>
-            `Die Datei ${file.FileName} konnte nicht zu ${selectedEntry?.text} kopiert werden.`
+        () => success,
+        () => failure
     );
 
     const copied = copyFile(
@@ -47,12 +52,55 @@ export async function copyImpl(
     return await copied;
 }
 
+export async function renameImpl(
+    file: WalterS3File,
+    fetchImpl: typeof fetch,
+    newFileName: string
+) {
+    function successSubtitle() {
+        return `Die Datei ${file.FileName} wurde zu ${newFileName} umbenannt.`;
+    }
+    function failureSubtitle() {
+        return `Konnte ${file.FileName} nicht umbenennen. Ist die Dateiendung vielleicht nicht korrekt?`;
+    }
+
+    const failureTitle = 'Umbenennen fehlgeschlagen.';
+
+    const copyToast = new WalterToastContent(
+        undefined,
+        failureTitle,
+        undefined,
+        failureSubtitle
+    );
+    const renameToast = new WalterToastContent(
+        'Umbenennen erfolgreich',
+        failureTitle,
+        successSubtitle,
+        failureSubtitle
+    );
+
+    const newFile = new File([file.Blob!], newFileName);
+    const S3URL = file.Key.slice(0, file.Key.length - file.FileName.length - 1);
+    const result = await walter_s3_post(newFile, S3URL, fetchImpl, copyToast);
+    if (result.ok) {
+        const result2 = await walter_s3_delete(file, fetchImpl, renameToast);
+        return result2.ok;
+    }
+
+    return false;
+}
+
 export async function moveImpl(
     file: WalterS3File,
     fetchImpl: typeof fetch,
     selectedTable?: WalterPreviewCopyTable,
     selectedEntry?: WalterSelectionEntry
 ) {
+    if (!selectedTable || (selectedTable.key !== 'stack' && !selectedEntry)) {
+        return;
+    }
+
+    const success = `Die Datei ${file.FileName} wurde erfolgreich zu ${selectedEntry?.text} verschoben.`;
     function failureSubtitle() {
         return `Die Datei ${file.FileName} konnte nicht zu ${selectedEntry?.text} verschoben werden.`;
     }
@@ -66,8 +114,7 @@ export async function moveImpl(
     const moveToast = new WalterToastContent(
         'Verschieben erfolgreich',
         failureTitle,
-        () =>
-            `Die Datei ${file.FileName} wurde erfolgreich zu ${selectedEntry?.text} verschoben.`,
+        () => success,
         failureSubtitle
     );
 
@@ -103,7 +150,10 @@ async function copyFile(
     if (!selectedTable) {
         return false;
     }
-    const S3URL = `${selectedTable.S3URL}/${selectedEntry?.id}`;
+    const S3URL =
+        selectedTable.key === 'stack'
+            ? `${selectedTable.S3URL}`
+            : `${selectedTable.S3URL}/${selectedEntry?.id}`;
 
     const success = walter_s3_post(
         new File([file.Blob], file.FileName),
@@ -218,5 +268,12 @@ export const tables: WalterPreviewCopyTable[] = [
         fetch: walter_selection.zaehlerstaende,
         S3URL: 'zaehlerstaende',
         newPage: () => WalterZaehlerstand
+    },
+    {
+        value: 'Ablagestapel',
+        key: 'stack',
+        fetch: () => undefined as any,
+        S3URL: 'stack',
+        newPage: () => undefined
     }
 ];

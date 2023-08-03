@@ -16,12 +16,15 @@
         WalterSelectionEntry
     } from '$walter/lib';
     import WalterPreviewType from './WalterPreviewDataTypeSelector.svelte';
-    import { Download } from 'carbon-icons-svelte';
+    import { ArrowLeft, ArrowRight, Download } from 'carbon-icons-svelte';
     import {
         copyImpl,
         moveImpl,
+        renameImpl,
         type WalterPreviewCopyTable
     } from './WalterPreviewCopyFile';
+    import { get_file_and_update_url } from '../subdetails/WalterAnhaengeEntry';
+    import WalterRenameFile from './WalterRenameFile.svelte';
 
     export let open = false;
     export let file: WalterS3File;
@@ -38,11 +41,40 @@
     function click_download(e: MouseEvent): void {
         download(file);
     }
+
+    async function selectFileNextToSelectedFile(step: number) {
+        const handleIndex = fileWrapper.handles.findIndex(e => e.S3URL === file?.Key.slice(0, e.S3URL.length));
+        const handle = fileWrapper.handles[handleIndex];
+        const files = await handle.files;
+        const fileIndex = files.findIndex(e => e.Key === file.Key);
+
+        const targetIndex = fileIndex + step
+
+        if (targetIndex < 0 || targetIndex >= files.length) {
+            return;
+        }
+
+        const nextFile: WalterS3File = files[targetIndex];
+        // First to update the fileName etc, then to load the blob
+        file = nextFile;
+        file = await get_file_and_update_url(nextFile);
+    }
+
+    async function fileBefore() {
+        selectFileNextToSelectedFile(-1);
+    }
+
+    function fileAfter() {
+        selectFileNextToSelectedFile(1);
+    }
+
     let selectedTab = 0;
 
     let step = 0;
     let selectedTable: WalterPreviewCopyTable | undefined = undefined;
     let selectedEntry: WalterSelectionEntry | undefined = undefined;
+
+    let newFileName = file.FileName;
 
     async function copy() {
         const copied = await copyImpl(
@@ -53,12 +85,13 @@
         );
 
         if (copied && selectedTable && selectedEntry) {
-            open = false;
-
             fileWrapper.addFile(
                 file,
                 `${selectedTable.key}/${selectedEntry.id}`
             );
+            selectedTable = undefined;
+            selectedEntry = undefined;
+            step = 0;
         }
     }
 
@@ -80,6 +113,20 @@
         }
     }
 
+    async function rename() {
+        const renamed = await renameImpl(
+            file,
+            fileWrapper.fetchImpl,
+            newFileName
+        );
+
+        if (renamed)
+        {
+            file.FileName = newFileName;
+            // TODO update sidenav
+        }
+    }
+
     function submit() {
         switch (selectedTab) {
             case TabSelector.Copy:
@@ -87,6 +134,9 @@
                 break;
             case TabSelector.Move:
                 move();
+                break;
+            case TabSelector.Rename:
+                rename();
                 break;
             case TabSelector.Delete:
                 remove(file, fileWrapper);
@@ -100,6 +150,7 @@
         Preview,
         Copy,
         Move,
+        Rename,
         Delete
     }
 </script>
@@ -111,20 +162,35 @@
                 <Tab label="Vorschau" />
                 <Tab label="Kopieren" />
                 <Tab label="Verschieben" />
+                <Tab label="Umbenennen" />
                 <Tab label="Löschen" />
             </Tabs>
             <Button
+                on:click={fileBefore}
+                style="top: -3.15em"
+                kind="tertiary"
+                iconDescription="Vorherige Datei"
+                icon={ArrowLeft}
+            />
+            <Button
+                on:click={fileAfter}
+                style="top: -3.15em"
+                kind="tertiary"
+                iconDescription="Nachfolgende Datei"
+                icon={ArrowRight}
+            />
+            <Button
                 on:click={click_download}
-                style="top: -3em"
+                style="top: -3.15em"
                 kind="tertiary"
                 iconDescription="Herunterladen"
                 icon={Download}
             />
         </div>
     </ModalHeader>
-    <ModalBody>
+    <ModalBody style="min-height: 40em;">
         {#if selectedTab === TabSelector.Preview}
-            <WalterPreviewType {file} />
+            <WalterPreviewType bind:file />
         {:else if selectedTab === TabSelector.Copy || selectedTab === TabSelector.Move}
             <WalterPreviewCopyFile
                 bind:rows
@@ -134,8 +200,10 @@
                 bind:step
                 {fileWrapper}
             />
+        {:else if selectedTab === TabSelector.Rename}
+            <WalterRenameFile bind:value={newFileName} bind:file />
         {:else if selectedTab === TabSelector.Delete}
-            <p>Datei {file.FileName} unwiderruflich löschen</p>
+            <p>Datei {file.FileName} löschen</p>
         {/if}
     </ModalBody>
     {#if selectedTab !== TabSelector.Preview}

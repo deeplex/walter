@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 {
@@ -78,7 +79,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double KaltMinderung { get; }
             public DateOnly Nutzungsbeginn { get; }
             public DateOnly Nutzungsende { get; }
-            public List<SelectionEntry>? Zaehler { get; }
+            public List<ZaehlerEntryBase>? Zaehler { get; }
             public int Abrechnungszeitspanne { get; }
             public int Nutzungszeitspanne { get; }
             public double Zeitanteil { get; }
@@ -106,7 +107,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 KaltMinderung = abrechnung.KaltMietminderung;
                 Nutzungsbeginn = abrechnung.Zeitraum.Nutzungsbeginn;
                 Nutzungsende = abrechnung.Zeitraum.Nutzungsende;
-                Zaehler = abrechnung.Vertrag.Wohnung.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer)).ToList();
+                Zaehler = abrechnung.Vertrag.Wohnung.Zaehler.Select(e => new ZaehlerEntryBase(e)).ToList();
                 Abrechnungszeitspanne = abrechnung.Zeitraum.Abrechnungszeitraum;
                 Nutzungszeitspanne = abrechnung.Zeitraum.Nutzungszeitraum;
                 Zeitanteil = abrechnung.Zeitraum.Zeitanteil;

@@ -35,7 +35,7 @@
     let isOpen: boolean;
     isWalterSideNavOpen.subscribe((value) => (isOpen = value));
 
-    let extendedNavigation = false;
+    let extendedNavigation = true;
 
     function closeSideNavIfWinWidthSmall() {
         // https://github.com/carbon-design-system/carbon-components-svelte/blob/master/src/UIShell/Header.svelte#L44
@@ -142,12 +142,15 @@
                 href="/stack"
             />
         {/await}
+
+        {#if extendedNavigation}
         <SideNavLink
             on:click={closeSideNavIfWinWidthSmall}
             isSelected={$page.route.id?.includes('/trash')}
             icon={TrashCan}
             text="Papierkorb"
             href="/trash" />
+        {/if}
   
         <SideNavDivider />
 

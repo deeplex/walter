@@ -13,7 +13,6 @@
     const addUrl = `/api/zaehlerstaende/`;
 
     export let rows: WalterZaehlerstandEntry[];
-    export let search = false;
     export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let entry: Partial<WalterZaehlerstandEntry> | undefined = undefined;
@@ -26,7 +25,6 @@
     {addUrl}
     addEntry={entry}
     {title}
-    {search}
     {rows}
     {headers}
     {fullHeight}
