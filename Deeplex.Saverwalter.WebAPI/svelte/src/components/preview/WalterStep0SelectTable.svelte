@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { RadioButton, RadioButtonGroup, RadioTile, TileGroup } from 'carbon-components-svelte';
+    import { RadioTile, TileGroup } from 'carbon-components-svelte';
     import type { WalterPreviewCopyTable } from './WalterPreviewCopyFile';
 
     export let step: number;

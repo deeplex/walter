@@ -7,11 +7,11 @@
         WalterS3FileWrapper,
         WalterSelectionEntry
     } from '$walter/lib';
-    import Step0SelectTable from './Step0SelectTable.svelte';
-    import Step1SelectEntry from './Step1SelectEntry.svelte';
-    import Step2ViewOrCreateEntry from './Step2ViewOrCreateEntry.svelte';
-    import Step3CheckAndSubmit from './Step3CheckAndSubmit.svelte';
-    import WalterPreviewCopyFileStepper from './Stepper.svelte';
+    import Step0SelectTable from './WalterStep0SelectTable.svelte';
+    import Step1SelectEntry from './WalterStep1SelectEntry.svelte';
+    import Step2ViewOrCreateEntry from './WalterStep2ViewOrCreateEntry.svelte';
+    import Step3CheckAndSubmit from './WalterStep3CheckAndSubmit.svelte';
+    import WalterPreviewCopyFileStepper from './WalterStepper.svelte';
     import { walter_get } from '$walter/services/requests';
 
     export let fileWrapper: WalterS3FileWrapper;

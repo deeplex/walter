@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Button } from 'carbon-components-svelte';
     import type { WalterPreviewCopyTable } from './WalterPreviewCopyFile';
-    import { handle_save } from './Step2ViewOrCreateEntry';
+    import { handle_save } from './WalterStep2ViewOrCreateEntry';
     import type { WalterSelectionEntry } from '$walter/lib';
 
     export let step: number;
