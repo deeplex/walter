@@ -52,6 +52,44 @@ export async function copyImpl(
     return await copied;
 }
 
+export async function renameImpl(
+    file: WalterS3File,
+    fetchImpl: typeof fetch,
+    newFileName: string
+) {
+    function successSubtitle() {
+        return `Die Datei ${file.FileName} wurde zu ${newFileName} umbenannt.`;
+    }
+    function failureSubtitle() {
+        return `Konnte ${file.FileName} nicht umbenennen. Ist die Dateiendung vielleicht nicht korrekt?`;
+    }
+
+    const failureTitle = 'Umbenennen fehlgeschlagen.';
+
+    const copyToast = new WalterToastContent(
+        undefined,
+        failureTitle,
+        undefined,
+        failureSubtitle
+    );
+    const renameToast = new WalterToastContent(
+        'Umbenennen erfolgreich',
+        failureTitle,
+        successSubtitle,
+        failureSubtitle
+    );
+
+    const newFile = new File([file.Blob!], newFileName);
+    const S3URL = file.Key.slice(0, file.Key.length - file.FileName.length - 1);
+    const result = await walter_s3_post(newFile, S3URL, fetchImpl, copyToast);
+    if (result.ok) {
+        const result2 = await walter_s3_delete(file, fetchImpl, renameToast);
+        return result2.ok;
+    }
+
+    return false;
+}
+
 export async function moveImpl(
     file: WalterS3File,
     fetchImpl: typeof fetch,

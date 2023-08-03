@@ -20,9 +20,11 @@
     import {
         copyImpl,
         moveImpl,
+        renameImpl,
         type WalterPreviewCopyTable
     } from './WalterPreviewCopyFile';
     import { get_file_and_update_url } from '../subdetails/WalterAnhaengeEntry';
+    import WalterRenameFile from './WalterRenameFile.svelte';
 
     export let open = false;
     export let file: WalterS3File;
@@ -72,6 +74,8 @@
     let selectedTable: WalterPreviewCopyTable | undefined = undefined;
     let selectedEntry: WalterSelectionEntry | undefined = undefined;
 
+    let newFileName = file.FileName;
+
     async function copy() {
         const copied = await copyImpl(
             file,
@@ -109,6 +113,20 @@
         }
     }
 
+    async function rename() {
+        const renamed = await renameImpl(
+            file,
+            fileWrapper.fetchImpl,
+            newFileName
+        );
+
+        if (renamed)
+        {
+            file.FileName = newFileName;
+            // TODO update sidenav
+        }
+    }
+
     function submit() {
         switch (selectedTab) {
             case TabSelector.Copy:
@@ -116,6 +134,9 @@
                 break;
             case TabSelector.Move:
                 move();
+                break;
+            case TabSelector.Rename:
+                rename();
                 break;
             case TabSelector.Delete:
                 remove(file, fileWrapper);
@@ -129,6 +150,7 @@
         Preview,
         Copy,
         Move,
+        Rename,
         Delete
     }
 </script>
@@ -140,6 +162,7 @@
                 <Tab label="Vorschau" />
                 <Tab label="Kopieren" />
                 <Tab label="Verschieben" />
+                <Tab label="Umbenennen" />
                 <Tab label="Löschen" />
             </Tabs>
             <Button
@@ -177,6 +200,8 @@
                 bind:step
                 {fileWrapper}
             />
+        {:else if selectedTab === TabSelector.Rename}
+            <WalterRenameFile bind:value={newFileName} bind:file />
         {:else if selectedTab === TabSelector.Delete}
             <p>Datei {file.FileName} löschen</p>
         {/if}
