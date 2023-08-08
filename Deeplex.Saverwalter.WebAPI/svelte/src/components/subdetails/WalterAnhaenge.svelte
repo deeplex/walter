@@ -38,7 +38,6 @@
     <TextInput
         bind:value={filter}
         placeholder="Suche..."
-        on:input={() => console.log(filter)}
         size="sm"
         style="background-color: transparent; color: white">
     </TextInput>

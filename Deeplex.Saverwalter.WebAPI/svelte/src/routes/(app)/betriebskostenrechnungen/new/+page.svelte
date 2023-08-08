@@ -45,11 +45,6 @@
         } else {
             entry.betreffendesJahr = new Date().getFullYear() - 1;
         }
-
-        const betrag = searchParams.get('betrag');
-        if (betrag) {
-            entry.betrag = +betrag;
-        }
     });
 </script>
 

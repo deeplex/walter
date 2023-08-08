@@ -1,25 +1,21 @@
 <script lang="ts">
     import { WalterDataTable } from '$walter/components';
-    import type { WalterBetriebskostenabrechnungKostenpunkt } from '$walter/types';
+    import type { WalterRechnungEntry } from '$walter/types/WalterBetriebskostenabrechnung.type';
     import { goto_or_create_rechnung } from './WalterAbrechnungGruppe';
 
-    export let rows: WalterBetriebskostenabrechnungKostenpunkt[];
+    export let rows: WalterRechnungEntry[];
     export let year: number;
 
     const headers = [
-        { key: 'typ.text', value: 'Kostenanteil' },
-        { key: 'schluessel.text', value: 'Schlüssel' },
-        { key: 'nutzungsintervall', value: 'Nutzungsintervall' },
-        { key: 'betrag', value: 'Betrag' },
-        { key: 'anteil', value: 'Ihr Anteil' },
-        { key: 'kosten', value: 'Ihre Kosten' }
+        { key: 'typ', value: 'Kostenanteil' },
+        { key: 'schluessel', value: 'Schlüssel' },
+        { key: 'gesamtBetrag', value: 'Betrag' },
+        { key: 'anteil', value: 'Anteil' },
+        { key: 'betrag', value: 'Kosten' }
     ];
 
     const navigate = (e: any) => {
-        goto_or_create_rechnung(
-            e.detail as WalterBetriebskostenabrechnungKostenpunkt,
-            year
-        );
+        goto_or_create_rechnung(e.detail, year);
     };
 </script>
 

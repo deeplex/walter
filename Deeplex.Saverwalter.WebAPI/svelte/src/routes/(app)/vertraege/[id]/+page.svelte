@@ -14,7 +14,7 @@
         WalterAbrechnungControl,
         WalterLink
     } from '$walter/components';
-    import type { WalterBetriebskostenabrechnungKostengruppenEntry } from '$walter/types';
+    import type { WalterBetriebskostenabrechnungEntry } from '$walter/types';
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
     import {
@@ -35,6 +35,7 @@
     import { loadAbrechnung } from '$walter/services/abrechnung';
     import WalterLinks from '../../../../components/subdetails/WalterLinks.svelte';
     import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
+    import WalterBetriebskostenabrechnung from '$walter/components/subdetails/WalterBetriebskostenabrechnung.svelte';
     export let data: PageData;
 
     const versionen = data.entry.versionen;
@@ -49,7 +50,7 @@
     const mieterEntry: Partial<WalterPersonEntry> = {};
     const betriebskostenrechnungEntry: Partial<WalterBetriebskostenrechnungEntry> = {};
 
-    let abrechnung: WalterBetriebskostenabrechnungKostengruppenEntry;
+    let abrechnung: WalterBetriebskostenabrechnungEntry;
     let searchParams: URLSearchParams = new URL($page.url).searchParams;
 
     onMount(async () => {

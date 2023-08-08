@@ -1,5 +1,4 @@
 import { WalterVertragEntry } from '$walter/lib';
-import { walter_selection } from '$walter/services/requests';
 import { walter_s3_get_files } from '$walter/services/s3';
 import type { WalterS3File } from '$walter/types';
 import type { PageLoad } from './$types';

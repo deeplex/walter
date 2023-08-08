@@ -28,7 +28,10 @@
     function selectTyp(e: CustomEvent) {
         updateUmlageEntries(e.detail.selectedItem.id);
         entry.typ = e.detail.selectedItem;
-        entry.umlage = undefined;
+        if ((e as any).explicitOriginalTarget)
+        {
+            entry.umlage = undefined;
+        }
     }
 
     function selectUmlage(e: CustomEvent) {
@@ -55,6 +58,7 @@
 <Row>
     {#await betriebskostentypen}
         <TextInputSkeleton />
+        <TextInputSkeleton />
     {:then items}
         <ComboBox
             invalid={!entry?.typ?.id}
@@ -68,19 +72,19 @@
             titleText="Betriebskostentyp der Umlage"
             {shouldFilterItem}
         />
+        <ComboBox
+            invalid={!selectedUmlageId}
+            invalidText={"Wohnungen der Umlage ist ein notwendiges Feld"}
+            disabled={readonly || !entry.typ}
+            bind:selectedId={selectedUmlageId}
+            on:select={selectUmlage}
+            style="padding-right: 1rem"
+            bind:items={umlageEntries}
+            placeholder="{umlageEntries.length} Umlagen für diesen Kostentypen gefunden"
+            titleText="Wohnungen der Umlage"
+            {shouldFilterItem}
+        />
     {/await}
-    <ComboBox
-        invalid={!selectedUmlageId}
-        invalidText={"Wohnungen der Umlage ist ein notwendiges Feld"}
-        disabled={readonly || !entry.typ}
-        bind:selectedId={selectedUmlageId}
-        on:select={selectUmlage}
-        style="padding-right: 1rem"
-        bind:items={umlageEntries}
-        placeholder="{umlageEntries.length} Umlagen für diesen Kostentypen gefunden"
-        titleText="Wohnungen der Umlage"
-        {shouldFilterItem}
-    />
 </Row>
 
 <Row>

@@ -10,9 +10,7 @@ namespace Deeplex.Saverwalter.PrintService
     {
         private static void Header(Betriebskostenabrechnung abrechnung, IPrint<T> printImpl)
         {
-            var AnsprechpartnerBezeichnung = abrechnung.Ansprechpartner is IPerson a ? a.Bezeichnung : "";
-
-            var ap = abrechnung.Ansprechpartner;
+            var ansprechpartner = abrechnung.Ansprechpartner;
 
             var left = new List<string> { };
             var right = new List<string> { };
@@ -20,14 +18,19 @@ namespace Deeplex.Saverwalter.PrintService
             var rows = 3; // 3 Are guaranteed
 
             left.Add(abrechnung.Vermieter.Bezeichnung);
-            if (abrechnung.Vermieter.Bezeichnung != AnsprechpartnerBezeichnung)
+            if (abrechnung.Vermieter.Bezeichnung != ansprechpartner.Bezeichnung)
             {
-                left.Add("℅ " + AnsprechpartnerBezeichnung);
+                left.Add("℅ " + ansprechpartner.Bezeichnung);
                 rows++;
             }
 
-            left.Add(abrechnung.Ansprechpartner.Adresse!.Strasse + " " + abrechnung.Ansprechpartner.Adresse.Hausnummer);
-            left.Add(abrechnung.Ansprechpartner.Adresse!.Postleitzahl + " " + abrechnung.Ansprechpartner.Adresse.Stadt);
+            if (ansprechpartner.Adresse == null)
+            {
+                abrechnung.Notes.Add(new Note("Ansprechpartner hat keine Adresse. Dies ist notwendig.", Severity.Error));
+            }
+
+            left.Add(ansprechpartner.Adresse!.Strasse + " " + ansprechpartner.Adresse.Hausnummer);
+            left.Add(ansprechpartner.Adresse.Postleitzahl + " " + ansprechpartner.Adresse.Stadt);
 
             for (; rows < 7; rows++) { left.Add(""); }
 
@@ -49,19 +52,19 @@ namespace Deeplex.Saverwalter.PrintService
             rows = 1;
 
             right.Add("");
-            if (ap.Telefon != null && ap.Telefon != "")
+            if (ansprechpartner.Telefon != null && ansprechpartner.Telefon != "")
             {
-                right.Add("Tel.: " + ap.Telefon);
+                right.Add("Tel.: " + ansprechpartner.Telefon);
                 rows++;
             }
-            if (ap.Fax != null && ap.Fax != "")
+            if (ansprechpartner.Fax != null && ansprechpartner.Fax != "")
             {
-                right.Add("Fax: " + ap.Fax);
+                right.Add("Fax: " + ansprechpartner.Fax);
                 rows++;
             }
-            if (ap.Email != null && ap.Email != "")
+            if (ansprechpartner.Email != null && ansprechpartner.Email != "")
             {
-                right.Add("E-Mail: " + ap.Email);
+                right.Add("E-Mail: " + ansprechpartner.Email);
                 rows++;
             }
 
@@ -99,7 +102,7 @@ namespace Deeplex.Saverwalter.PrintService
             }
 
             // There is a Umlage nach Nutzfläche in the Heizkostenberechnung:
-            if (NachNutzflaeche(abrechnung.Abrechnungseinheiten) || abrechnung.Abrechnungseinheiten.Any(g => g.Umlagen.Where(r => r.Wohnungen.Count > 1).Any(r => (int)r.Typ % 2 == 1)))
+            if (NachNutzflaeche(abrechnung.Abrechnungseinheiten))
             {
                 left1.Add("n. NF");
                 left2.Add("n. NF");
@@ -170,7 +173,7 @@ namespace Deeplex.Saverwalter.PrintService
             var col5 = new List<string> { "Nutzungsintervall" };
             var col6 = new List<string> { "Tage" };
 
-            var anteile = GetPersonenZeitanteil(abrechnung.Vertrag, abrechnungseinheit, abrechnung.Zeitraum).Where(e => e.Personenzahl > 0);
+            var anteile = abrechnungseinheit.PersonenZeitanteile.Where(anteile => anteile.Personenzahl > 0);
             foreach (var anteil in anteile)
             {
                 var firstLine = anteil.Beginn == abrechnung.Zeitraum.Nutzungsbeginn;
@@ -204,7 +207,7 @@ namespace Deeplex.Saverwalter.PrintService
             var col5 = new List<string> { "Nutzungsintervall" };
             var col6 = new List<string> { "Tage" };
 
-            var anteile = GetPersonenZeitanteil(abrechnung.Vertrag, abrechnungseinheit, abrechnung.Zeitraum);
+            var anteile = abrechnungseinheit.PersonenZeitanteile;
             for (var i = 0; i < anteile.Count; ++i)
             {
                 var firstLine = i == 0;
@@ -248,13 +251,14 @@ namespace Deeplex.Saverwalter.PrintService
                 col1.Add("Direkte Zuordnung");
                 col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
                 col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
-                col4.Add(Prozent(WFZeitanteil(abrechnung.Vertrag.Wohnung, abrechnungseinheit, abrechnung.Zeitraum)));
+                col4.Add(Prozent(abrechnungseinheit.WFZeitanteil));
                 bold.Add(false);
                 underlined.Add(true);
             }
             else
             {
-                if (abrechnungseinheit.Umlagen.Exists(umlage => umlage.Schluessel == Umlageschluessel.NachWohnflaeche))
+                if (abrechnungseinheit.Rechnungen
+                    .Any(rechnung => rechnung.Key.Schluessel == Umlageschluessel.NachWohnflaeche))
                 {
                     col1.Add("bei Umlage nach Wohnfläche (n. WF)");
                     col2.Add("");
@@ -266,12 +270,13 @@ namespace Deeplex.Saverwalter.PrintService
                     col1.Add(Quadrat(abrechnung.Vertrag.Wohnung.Wohnflaeche) + " / " + Quadrat(abrechnungseinheit.GesamtWohnflaeche));
                     col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
                     col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
-                    col4.Add(Prozent(WFZeitanteil(abrechnung.Vertrag.Wohnung, abrechnungseinheit, abrechnung.Zeitraum)));
+                    col4.Add(Prozent(abrechnungseinheit.WFZeitanteil));
                     bold.Add(false);
                     underlined.Add(true);
                 }
 
-                if (abrechnungseinheit.Umlagen.Exists(umlage => umlage.Schluessel == Umlageschluessel.NachNutzflaeche))
+                if (abrechnungseinheit.Rechnungen
+                    .Any(rechnung => rechnung.Key.Schluessel == Umlageschluessel.NachNutzflaeche))
                 {
                     col1.Add("bei Umlage nach Nutzfläche (n. NF)");
                     col2.Add("");
@@ -283,12 +288,13 @@ namespace Deeplex.Saverwalter.PrintService
                     col1.Add(Quadrat(abrechnung.Vertrag.Wohnung.Nutzflaeche) + " / " + Quadrat(abrechnungseinheit.GesamtNutzflaeche));
                     col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
                     col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
-                    col4.Add(Prozent(NFZeitanteil(abrechnung.Vertrag.Wohnung, abrechnungseinheit, abrechnung.Zeitraum)));
+                    col4.Add(Prozent(abrechnungseinheit.NFZeitanteil));
                     bold.Add(false);
                     underlined.Add(true);
                 }
 
-                if (abrechnungseinheit.Umlagen.Exists(umlage => umlage.Schluessel == Umlageschluessel.NachNutzeinheit))
+                if (abrechnungseinheit.Rechnungen
+                    .Any(rechnung => rechnung.Key.Schluessel == Umlageschluessel.NachNutzeinheit))
                 {
                     col1.Add("bei Umlage nach Nutzeinheiten (n. NE)");
                     col2.Add("");
@@ -300,12 +306,13 @@ namespace Deeplex.Saverwalter.PrintService
                     col1.Add(Quadrat(abrechnung.Vertrag.Wohnung.Nutzeinheit) + " / " + abrechnungseinheit.GesamtEinheiten);
                     col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
                     col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
-                    col4.Add(Prozent(NEZeitanteil(abrechnung.Vertrag.Wohnung, abrechnungseinheit, abrechnung.Zeitraum)));
+                    col4.Add(Prozent(abrechnungseinheit.NEZeitanteil));
                     bold.Add(false);
                     underlined.Add(true);
                 }
 
-                if (abrechnungseinheit.Umlagen.Exists(umlage => umlage.Schluessel == Umlageschluessel.NachPersonenzahl))
+                if (abrechnungseinheit.Rechnungen
+                    .Any(rechnung => rechnung.Key.Schluessel == Umlageschluessel.NachPersonenzahl))
                 {
                     col1.Add("bei Umlage nach Personenzahl (n. Pers.)");
                     col2.Add("");
@@ -315,7 +322,7 @@ namespace Deeplex.Saverwalter.PrintService
                     underlined.Add(false);
 
                     static string SingularOrPluralPerson(int i) => i.ToString() + (i > 1 ? " Personen" : " Person");
-                    var personenzeitanteile = GetPersonenZeitanteil(abrechnung.Vertrag, abrechnungseinheit, abrechnung.Zeitraum);
+                    var personenzeitanteile = abrechnungseinheit.PersonenZeitanteile;
                     foreach (var personenzeitanteil in personenzeitanteile)
                     {
                         var Personenzahl = personenzeitanteil.Personenzahl;
@@ -339,7 +346,8 @@ namespace Deeplex.Saverwalter.PrintService
                     }
                 }
 
-                if (abrechnungseinheit.Umlagen.Any(e => e.Schluessel == Umlageschluessel.NachVerbrauch))
+                if (abrechnungseinheit.Rechnungen
+                    .Any(rechnung => rechnung.Key.Schluessel == Umlageschluessel.NachVerbrauch))
                 {
                     col1.Add("bei Umlage nach Verbrauch (n. Verb.)");
                     col2.Add("");
@@ -348,35 +356,28 @@ namespace Deeplex.Saverwalter.PrintService
                     bold.Add(true);
                     underlined.Add(false);
 
-                    var verbraeuche = CalculateWohnungVerbrauch(
-                        abrechnungseinheit.Umlagen,
-                        abrechnung.Vertrag.Wohnung,
-                        abrechnung.Zeitraum,
-                        CalculateAbrechnungseinheitVerbrauch(abrechnungseinheit.Umlagen, abrechnung.Zeitraum, abrechnung.Notes),
-                        abrechnung.Notes);
-
-                    foreach (var verbrauch in verbraeuche.Where(v => (int)v.Key % 2 == 0)) // Kalte Betriebskosten are equal / warme are odd
+                    var verbrauchAnteile = abrechnungseinheit.VerbrauchAnteile;
+                    // Kalte Betriebskosten are equal / warme are odd
+                    var kalteAnteile = verbrauchAnteile.Where(verbrauch => (int)verbrauch.Umlage.Typ % 2 == 0);
+                    foreach (var verbrauchAnteil in kalteAnteile)
                     {
-                        for (var i = 0; i < verbrauch.Value.Count; ++i)
+                        foreach (var zaehlerTyp in verbrauchAnteil.DieseZaehler)
                         {
-                            var Value = verbrauch.Value[i];
-                            var unit = Value.Typ.ToUnitString();
-                            col1.Add(Unit(Value.Delta, unit) + " / " + Unit(Value.Delta / Value.Anteil, unit) + "\t(" + Value.Typ + ")");
-                            col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
-                            col3.Add(Value.Kennnummer);
-                            col4.Add(verbrauch.Value.Count > 1 ? "" : Prozent(Value.Anteil));
-                            bold.Add(false);
-                            underlined.Add(i == verbrauch.Value.Count - 1);
-                        }
-                        if (verbrauch.Value.Count > 1)
-                        {
-                            var unit = verbrauch.Value[0].Typ.ToUnitString();
-                            col1.Add(Unit(verbrauch.Value.Sum(v => v.Delta), unit) + " / " + Unit(verbrauch.Value.Sum(v => v.Delta / v.Anteil), unit));
-                            col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
-                            col3.Add(verbrauch.Key.ToDescriptionString());
-                            col4.Add(Prozent(VerbrauchAnteil(abrechnung.Vertrag.Wohnung, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes)[verbrauch.Key])); // TODO inefficient...
-                            bold.Add(false);
-                            underlined.Add(true);
+                            var typ = zaehlerTyp.Key;
+                            var unit = typ.ToUnitString();
+                            var deltaAll = verbrauchAnteil.AlleZaehler[typ].Sum(e => e.Delta);
+                            var value = zaehlerTyp.Value;
+
+                            for (var i = 0; i < value.Count; ++i)
+                            {
+                                var delta = value[i].Delta;
+                                col1.Add(Unit(delta, unit) + " / " + Unit(deltaAll, unit) + "\t(" + verbrauchAnteil.Umlage.Typ + ")");
+                                col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
+                                col3.Add(value[i].Zaehler.Kennnummer);
+                                col4.Add(Prozent(verbrauchAnteil.Anteil[typ]));
+                                bold.Add(false);
+                                underlined.Add(i == verbrauchAnteil.DieseZaehler.Count - 1);
+                            }
                         }
                     }
                 }
@@ -412,10 +413,6 @@ namespace Deeplex.Saverwalter.PrintService
                 var betrag = umlage.Betriebskostenrechnungen
                     .Where(rechnung => rechnung.BetreffendesJahr == abrechnung.Zeitraum.Jahr)
                     .Sum(b => b.Betrag);
-                if (umlage.Typ == Betriebskostentyp.AllgemeinstromHausbeleuchtung)
-                {
-                    betrag -= abrechnung.AllgStromFaktor;
-                }
                 col1.Add(firstLine ? umlage.Typ.ToDescriptionString() : "");
                 col2.Add(abrechnungseinheit.GesamtEinheiten == 1 ? "Direkt" : (firstLine ? umlage.Schluessel.ToDescriptionString() : ""));
                 col3.Add(zeitraum);
@@ -426,9 +423,13 @@ namespace Deeplex.Saverwalter.PrintService
                 underlined.Add(true);
             }
 
-            var personenzeitanteile = GetPersonenZeitanteil(abrechnung.Vertrag, abrechnungseinheit, abrechnung.Zeitraum);
+            var personenzeitanteile = abrechnungseinheit.PersonenZeitanteile;
 
-            foreach (var umlage in abrechnungseinheit.Umlagen.Where(umlage => (int)umlage.Typ % 2 == 0)) // Kalte Betriebskosten
+            // TODO use rechnungen directly instead of going back and forth.
+            var umlagen = abrechnungseinheit.Rechnungen
+                .Select(rechnung => rechnung.Key)
+                .Where(umlage => (int)umlage.Typ % 2 == 0);
+            foreach (var umlage in umlagen)
             {
                 switch (umlage.Schluessel)
                 {
@@ -437,14 +438,14 @@ namespace Deeplex.Saverwalter.PrintService
                             umlage,
                             Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende),
                             abrechnung.Zeitraum.Jahr,
-                            WFZeitanteil(abrechnung.Vertrag.Wohnung, abrechnungseinheit, abrechnung.Zeitraum));
+                            abrechnungseinheit.WFZeitanteil);
                         break;
                     case Umlageschluessel.NachNutzeinheit:
                         kostenPunkt(
                             umlage,
                             Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende),
                             abrechnung.Zeitraum.Jahr,
-                            NEZeitanteil(abrechnung.Vertrag.Wohnung, abrechnungseinheit, abrechnung.Zeitraum));
+                            abrechnungseinheit.NEZeitanteil);
                         break;
                     case Umlageschluessel.NachPersonenzahl:
                         var first = true;
@@ -476,13 +477,14 @@ namespace Deeplex.Saverwalter.PrintService
                         }
                         break;
                     case Umlageschluessel.NachVerbrauch:
-                        var anteil = VerbrauchAnteil(abrechnung.Vertrag.Wohnung, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes);
+                        var anteil = abrechnungseinheit.VerbrauchAnteile.Single(e => e.Umlage == umlage);
+                        // TODO anteil can only have one ZaehlerTyp. Catch that?
 
                         kostenPunkt(
                             umlage,
                             Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende),
                             abrechnung.Zeitraum.Jahr,
-                            anteil.ContainsKey(umlage.Typ) ? anteil[umlage.Typ] : 0);
+                            anteil.Anteil.First().Value);
                         break;
                     default:
                         break; // TODO or throw something...
@@ -494,7 +496,7 @@ namespace Deeplex.Saverwalter.PrintService
             col3.Add("");
             col4.Add("");
             col5.Add("Summe: ");
-            col6.Add(Euro(BetragKalteNebenkosten(abrechnung.Vertrag, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes)));
+            col6.Add(Euro(abrechnungseinheit.GesamtBetragKalt));
             bold.Add(true);
             underlined.Add(false);
 
@@ -510,12 +512,15 @@ namespace Deeplex.Saverwalter.PrintService
         {
             var widths = new int[] { 50, 10 };
 
-            foreach (var umlage in abrechnungseinheit.Umlagen.Where(umlage => (int)umlage.Typ % 2 == 1)) // Warme Betriebskosten
+            // TODO use rechnungen directly instead of going back and forth.
+            var umlagen = abrechnungseinheit.Rechnungen
+                .Select(rechnung => rechnung.Key)
+                .Where(umlage => (int)umlage.Typ % 2 == 1);
+            foreach (var umlage in umlagen)
             {
                 var betrag = umlage.Betriebskostenrechnungen
-                    .Where(r => r.BetreffendesJahr == abrechnung.Zeitraum.Jahr)
-                    .Sum(rechnung => rechnung.Betrag);
-
+                    .Where(rechnung => rechnung.BetreffendesJahr == abrechnung.Zeitraum.Jahr)
+                    .Sum(b => b.Betrag);
                 var col1 = new List<string>
                 {
                     umlage.Typ.ToDescriptionString(),
@@ -527,8 +532,8 @@ namespace Deeplex.Saverwalter.PrintService
                 {
                     "Betrag",
                     Euro(betrag),
-                    Euro(abrechnung.AllgStromFaktor),
-                    Euro(betrag + abrechnung.AllgStromFaktor),
+                    Euro(abrechnungseinheit.AllgStromFaktor),
+                    Euro(betrag + abrechnungseinheit.AllgStromFaktor),
                 };
                 var cols = new List<List<string>> { col1, col2 }.Select(w => w.ToArray()).ToArray();
 
@@ -555,12 +560,14 @@ namespace Deeplex.Saverwalter.PrintService
             col1.Add(Quadrat(abrechnung.Vertrag.Wohnung.Nutzflaeche) + " / " + Quadrat(abrechnungseinheit.GesamtNutzflaeche));
             col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
             col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
-            col4.Add(Prozent(NFZeitanteil(abrechnung.Vertrag.Wohnung, abrechnungseinheit, abrechnung.Zeitraum)));
+            col4.Add(Prozent(abrechnungseinheit.NFZeitanteil));
 
             var bold = new List<bool> { true, true, false };
             var underlined = new List<bool> { false, false, true };
 
-            var warmeRechnungen = abrechnungseinheit.Umlagen.Where(umlage => (int)umlage.Typ % 2 == 1).ToList();
+            var warmeRechnungen = abrechnungseinheit.Rechnungen
+                .Select(rechnung => rechnung.Key)
+                .Where(umlage => (int)umlage.Typ % 2 == 1).ToList();
 
             if (warmeRechnungen.Exists(umlage => umlage.Schluessel == Umlageschluessel.NachPersonenzahl))
             {
@@ -573,11 +580,11 @@ namespace Deeplex.Saverwalter.PrintService
                 bold.Add(false);
 
                 static string SingularOrPluralPerson(int i) => i.ToString() + (i > 1 ? " Personen" : " Person");
-                var personenzeitanteile = GetPersonenZeitanteil(abrechnung.Vertrag, abrechnungseinheit, abrechnung.Zeitraum);
+                var personenzeitanteile = abrechnungseinheit.PersonenZeitanteile;
                 foreach (var personenzeitanteil in personenzeitanteile)
                 {
                     var Personenzahl = personenzeitanteil.Personenzahl;
-                    
+
                     if (Personenzahl == 0)
                     {
                         continue;
@@ -618,18 +625,28 @@ namespace Deeplex.Saverwalter.PrintService
                 bold.Add(true);
                 underlined.Add(false);
 
-                foreach (var Verbrauch in Verbrauch(abrechnung.Vertrag.Wohnung, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes)
-                    .Where(v => (int)v.Key % 2 == 1)) // Kalte Betriebskosten are equal / warme are odd
+                var verbrauchAnteile = abrechnungseinheit.VerbrauchAnteile;
+                // Kalte Betriebskosten are equal / warme are odd
+                var warmeAnteile = verbrauchAnteile.Where(verbrauch => (int)verbrauch.Umlage.Typ % 2 == 1);
+                foreach (var verbrauchAnteil in warmeAnteile)
                 {
-                    foreach (var Value in Verbrauch.Value)
+                    foreach (var zaehlerTyp in verbrauchAnteil.DieseZaehler)
                     {
-                        var unit = Value.Typ.ToUnitString();
-                        col1.Add(Unit(Value.Delta, unit) + " / " + Unit(Value.Delta / Value.Anteil, unit) + "\t(" + Value.Typ + ")");
-                        col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
-                        col3.Add(Value.Kennnummer);
-                        col4.Add(Prozent(Value.Anteil));
-                        bold.Add(false);
-                        underlined.Add(false);
+                        var typ = zaehlerTyp.Key;
+                        var unit = typ.ToUnitString();
+                        var deltaAll = verbrauchAnteil.AlleZaehler[typ].Sum(e => e.Delta);
+                        var value = zaehlerTyp.Value;
+
+                        for (var i = 0; i < value.Count; ++i)
+                        {
+                            var delta = value[i].Delta;
+                            col1.Add(Unit(delta, unit) + " / " + Unit(deltaAll, unit) + "\t(" + verbrauchAnteil.Umlage.Typ + ")");
+                            col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
+                            col3.Add(value[i].Zaehler.Kennnummer);
+                            col4.Add(Prozent(verbrauchAnteil.Anteil[typ]));
+                            bold.Add(false);
+                            underlined.Add(i == verbrauchAnteil.DieseZaehler.Count - 1);
+                        }
                     }
                 }
             }
@@ -654,7 +671,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             var wohnung = abrechnung.Vertrag.Wohnung;
 
-            foreach (var heizkostenberechnung in CalculateHeizkosten(wohnung, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes))
+            foreach (var heizkostenberechnung in abrechnungseinheit.Heizkostenberechnungen)
             {
                 col1.Add("Heizung");
                 col2.Add(Umlageschluessel.NachNutzflaeche.ToDescriptionString());
@@ -702,7 +719,7 @@ namespace Deeplex.Saverwalter.PrintService
                 col4.Add("");
                 col5.Add("");
                 col6.Add("Summe: ");
-                col7.Add(Euro(BetragWarmeNebenkosten(wohnung, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes)));
+                col7.Add(Euro(abrechnungseinheit.BetragWarm));
                 bold.Add(true);
                 underlined.Add(false);
             }
@@ -729,11 +746,10 @@ namespace Deeplex.Saverwalter.PrintService
             var f = true;
             foreach (var abrechnungseinheit in abrechnung.Abrechnungseinheiten)
             {
-                var kalteNebenkosten = BetragKalteNebenkosten(abrechnung.Vertrag, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes);
-                if (kalteNebenkosten > 0)
+                if (abrechnungseinheit.BetragKalt > 0)
                 {
                     col1.Add(f ? "Abzüglich Ihrer Nebenkostenanteile: " : "");
-                    col2.Add("-" + Euro(kalteNebenkosten));
+                    col2.Add("-" + Euro(abrechnungseinheit.BetragKalt));
                     f = false;
                 }
             }
@@ -741,11 +757,10 @@ namespace Deeplex.Saverwalter.PrintService
             foreach (var abrechnungseinheit in abrechnung.Abrechnungseinheiten)
             {
                 var wohnung = abrechnung.Vertrag.Wohnung;
-                var warmeNebenkosten = BetragWarmeNebenkosten(wohnung, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes);
-                if (warmeNebenkosten > 0)
+                if (abrechnungseinheit.BetragWarm > 0)
                 {
                     col1.Add(f ? "Abzüglich Ihrer Nebenkostenanteile: " : "");
-                    col2.Add("-" + Euro(warmeNebenkosten));
+                    col2.Add("-" + Euro(abrechnungseinheit.BetragWarm));
                     f = false;
                 }
             }
@@ -839,7 +854,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             foreach (var abrechnungseinheit in abrechnung.Abrechnungseinheiten)
             {
-                if (GesamtBetragWarmeNebenkosten(abrechnung.Vertrag.Wohnung, abrechnungseinheit, abrechnung.Zeitraum, abrechnung.Notes) > 0)
+                if (abrechnungseinheit.GesamtBetragWarm > 0)
                 {
                     if (abrechnungseinheit.GesamtEinheiten == 1)
                     {

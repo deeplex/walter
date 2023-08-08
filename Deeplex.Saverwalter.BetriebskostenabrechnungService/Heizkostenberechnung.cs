@@ -4,7 +4,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
     public sealed class Heizkostenberechnung
     {
-        public double Betrag;
+        public double GesamtBetrag;
         public double PauschalBetrag;
 
         public double tw;
@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public double WarmwasserAnteilNF;
         public double WarmwasserAnteilVerb;
 
-        public double Kosten;
+        public double Betrag;
 
         public Heizkostenberechnung(
             Betriebskostenrechnung rechnung,
@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Zeitraum zeitraum,
             List<Note> notes)
         {
-            Betrag = rechnung.Betrag;
+            GesamtBetrag = rechnung.Betrag;
             PauschalBetrag = rechnung.Betrag * 1.05;
 
             tw = 60;
@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var allgemeinZaehler = rechnung.Umlage.Zaehler.Where(e => e.Wohnung is null).ToList();
             if (allgemeinZaehler.Count == 0)
             {
-                new Note("Notwendiger Zähler für Umlage ist nicht definiert.", Severity.Error);
+                notes.Add(new Note("Notwendiger Zähler für Umlage ist nicht definiert.", Severity.Error));
                 return;
             }
 
@@ -92,7 +92,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             WarmwasserAnteilNF = PauschalBetrag * Para9_2 * Para8 * NFZeitanteil;
             WarmwasserAnteilVerb = PauschalBetrag * Para9_2 * Para8 * WarmwasserVerbrauchAnteil;
 
-            Kosten = WaermeAnteilNF + WaermeAnteilVerb + WarmwasserAnteilNF + WarmwasserAnteilVerb;
+            Betrag = WaermeAnteilNF + WaermeAnteilVerb + WarmwasserAnteilNF + WarmwasserAnteilVerb;
         }
 
         private static double Delta(IEnumerable<Zaehler> zaehlerList, DateOnly beginn, DateOnly ende)

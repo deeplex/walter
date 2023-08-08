@@ -1,41 +1,27 @@
 import type {
-    WalterAdresseEntry,
     WalterSelectionEntry,
     WalterUmlageEntry,
-    WalterZaehlerEntry
+    WalterZaehlerEntry,
+    WalterZaehlerstandEntry
 } from '$walter/lib';
-
-export type WalterBetriebskostenabrechnungKostengruppenEntry = {
-    kostengruppen: WalterBetriebskostenabrechnungsRechnungsgruppeEntry[];
-} & WalterBetriebskostenabrechnungEntry;
 
 export type WalterBetriebskostenabrechnungEntry = {
     notes: WalterBetriebskostenabrechnungNote[];
-    jahr: number;
-    abrechnungsbeginn: Date;
-    abrechnungsende: Date;
     vermieter: WalterSelectionEntry;
     ansprechpartner: WalterSelectionEntry;
     mieter: WalterSelectionEntry[];
     vertrag: WalterSelectionEntry;
-    wohnung: WalterSelectionEntry;
-    adresse: WalterAdresseEntry;
-    gezahlt: number;
+    gezahltMiete: number;
     kaltMiete: number;
     betragNebenkosten: number;
     bezahltNebenkosten: number;
-    minderung: number;
-    nebenkostenMinderung: number;
-    kaltMinderung: number;
-    nutzungsbeginn: Date;
-    nutzungsende: Date;
+    mietMinderung: number;
+    nebenkostenMietminderung: number;
+    kaltMietminderung: number;
     zaehler: WalterZaehlerEntry[];
-    abrechnungszeitspanne: number;
-    nutzungszeitspanne: number;
-    zeitanteil: number;
-    abrechnungseinheiten: WalterBetriebskostenabrechnungsRechnungsgruppe[];
+    abrechnungseinheiten: WalterAbrechnungseinheit[];
     result: number;
-    allgStromFaktor: number;
+    zeitraum: WalterZeitraum;
 };
 
 export type WalterBetriebskostenabrechnungNote = {
@@ -43,7 +29,55 @@ export type WalterBetriebskostenabrechnungNote = {
     severity: string;
 };
 
-export type WalterBetriebskostenabrechnungPersonenZeitanteil = {
+export type WalterAbrechnungseinheit = {
+    rechnungen: WalterRechnungEntry[],
+    betragKalt: number;
+    betragWarm: number;
+    gesamtBetragKalt: number;
+    gesamtBetragWarm: number;
+    bezeichnung: string;
+    gesamtWohnflaeche: number;
+    gesamtNutzflaeche: number;
+    gesamtEinheiten: number;
+    wFZeitanteil: number;
+    nFZeitanteil: number;
+    nEZeitanteil: number;
+    verbrauchAnteil: WalterVerbrauchAnteil[];
+    personenZeitanteil: WalterPersonenZeitanteil[];
+    heizkostenberechnungen: WalterHeizkostenberechnungEntry[];
+    allgStromFaktor: number;
+}
+
+// TODO used where?
+export type WalterVerbrauchAnteil = {
+    umlage: WalterUmlageEntry;
+    alleZaehler: {key: string, value: WalterVerbrauch[]},
+    alleVerbrauch: {key: string, value: number},
+    dieseZaehler: {key: string, value: WalterVerbrauch[]},
+    dieseVerbrauch: {key: string, value: number},
+    anteil: {key: string, value: number}
+}
+
+// TODO not active
+export type WalterVerbrauch = {
+    zaehler: WalterZaehlerEntry,
+    endstand: WalterZaehlerstandEntry,
+    anfangsstand: WalterZaehlerstandEntry,
+    delta: number
+}
+
+export type WalterZeitraum = {
+    nutzungsbeginn: Date;
+    nutzungsende: Date;
+    abrechnungsbeginn: Date;
+    abrechnungsende: Date;
+    abrechnungszeitraum: number;
+    nutzungszeitraum: number;
+    zeitanteil: number;
+    jahr: number;
+}
+
+export type WalterPersonenZeitanteil = {
     beginn: Date;
     ende: Date;
     tage: number;
@@ -52,31 +86,19 @@ export type WalterBetriebskostenabrechnungPersonenZeitanteil = {
     anteil: number;
 };
 
-export type WalterBetriebskostenabrechnungsRechnungsgruppe = {
-    bezeichnung: string;
-    gesamtWohnflaeche: number;
-    gesamtNutzflaeche: number;
-    gesamtEinheiten: number;
-    wfZeitanteil: number;
-    nfZeitanteil: number;
-    neZeitanteil: number;
-    umlagen: WalterUmlageEntry[];
-    personenZeitanteil: WalterBetriebskostenabrechnungPersonenZeitanteil[];
-    verbrauch: any;
-    verbrauchAnteil: any;
-    // heizkosten: WalterBetriebskostenabrechnungHeizkostenberechnungEntry[]; // ?
-    gesamtBetragKalteNebenkosten: number;
-    betragKalteNebenkosten: number;
-    gesamtBetragWarmeNebenkosten: number;
-    betragWarmeNebenkosten: number;
+export type WalterRechnungEntry = {
+    id: number,
+    rechnungId: number,
+    typ: string,
+    typId: number,
+    schluessel: string,
+    gesamtBetrag: number,
+    anteil: number,
+    betrag: number
 };
 
-export type WalterBetriebskostenabrechnungsRechnungsgruppeEntry = {
-    kostenpunkte: WalterBetriebskostenabrechnungKostenpunkt[];
-} & WalterBetriebskostenabrechnungsRechnungsgruppe;
-
-export type WalterBetriebskostenabrechnungHeizkostenberechnungEntry = {
-    betrag: number;
+export type WalterHeizkostenberechnungEntry = {
+    gesamtBetrag: number;
     pauschalBetrag: number;
     tw: number;
     v: number;
@@ -92,17 +114,5 @@ export type WalterBetriebskostenabrechnungHeizkostenberechnungEntry = {
     waermeAnteilVerb: number;
     warmwasserAnteilNF: number;
     warmwasserAnteilVerb: number;
-    kosten: number;
-};
-
-export type WalterBetriebskostenabrechnungKostenpunkt = {
-    umlageId: number;
-    betriebskostenrechnungId: number;
-    id: number; // just for rows
-    typ: WalterSelectionEntry;
-    schluessel: WalterSelectionEntry;
-    nutzungsintervall: string;
     betrag: number;
-    anteil: number;
-    kosten: number;
 };

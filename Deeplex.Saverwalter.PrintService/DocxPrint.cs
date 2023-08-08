@@ -164,7 +164,7 @@ namespace Deeplex.Saverwalter.PrintService
             var wohnung = abrechnung.Vertrag.Wohnung;
             var zeitraum = abrechnung.Zeitraum;
 
-            foreach (var hk in CalculateHeizkosten(wohnung, abrechnungseinheit, zeitraum, abrechnung.Notes))
+            foreach (var hk in abrechnungseinheit.Heizkostenberechnungen)
             {
                 p.Append(new DocumentFormat.OpenXml.Math.Paragraph(justifyLeft(),
                     new DocumentFormat.OpenXml.Math.OfficeMath(

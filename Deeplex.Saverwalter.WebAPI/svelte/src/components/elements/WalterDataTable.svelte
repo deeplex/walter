@@ -92,7 +92,11 @@
                     {formatToTableDate(cell.value)}
                 {:else if time(cell.key)}
                     {convertTime(cell.value)}
-                {:else if cell.key === 'betrag' || cell.key === 'grundmiete' || cell.key === 'kosten'}
+                {:else if
+                    cell.key === 'betrag' ||
+                    cell.key === 'grundmiete' ||
+                    cell.key === 'kosten' ||
+                    cell.key === 'gesamtBetrag'}
                     {convertEuro(cell.value)}
                 {:else if cell.key === 'anteil'}
                     {convertPercent(cell.value)}

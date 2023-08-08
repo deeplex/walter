@@ -7,7 +7,7 @@
         loadAbrechnung
     } from '$walter/services/abrechnung';
     import type {
-        WalterBetriebskostenabrechnungKostengruppenEntry,
+        WalterBetriebskostenabrechnungEntry,
         WalterS3File
     } from '$walter/types';
     import { goto } from '$app/navigation';
@@ -23,7 +23,7 @@
     export let S3URL: string;
     export let title: string;
     export let S3files: WalterS3File[];
-    export let abrechnung: WalterBetriebskostenabrechnungKostengruppenEntry;
+    export let abrechnung: WalterBetriebskostenabrechnungEntry;
 
     let searchParams: URLSearchParams = new URL($page.url).searchParams;
     let selectedYear =
@@ -41,6 +41,7 @@
     async function vorschau_erstellen_click(): Promise<void> {
         searchParams = new URLSearchParams({ abrechnung: `${selectedYear}` });
         goto(`?${searchParams.toString()}`, { noScroll: true });
+        
         abrechnung = await loadAbrechnung(
             vertragId,
             `${selectedYear}`,

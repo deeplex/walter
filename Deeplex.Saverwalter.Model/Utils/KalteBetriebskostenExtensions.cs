@@ -36,7 +36,40 @@ namespace Deeplex.Saverwalter.Model
             }
 
             UnitAttribute[] attributes = (UnitAttribute[])field.GetCustomAttributes(typeof(UnitAttribute), false);
-            return attributes.Length > 0 ? attributes[0].Unit : string.Empty;
+            return attributes.Length > 0 ? attributes[0].UnitString : "";
+        }
+
+        public static Zaehlereinheit ToUnit(this Zaehlertyp typ)
+        {
+            var field = typ
+                .GetType()
+                .GetField(typ.ToString());
+
+            if (field == null)
+            {
+                throw new ArgumentException("Zählertyp has no Unit");
+            }
+
+
+            UnitAttribute[] attributes = (UnitAttribute[])field.GetCustomAttributes(typeof(UnitAttribute), false);
+            return attributes.Length > 0 ? attributes[0].Unit : Zaehlereinheit.Dimensionslos;
+
+        }
+
+
+        public static string ToUnitString(this Zaehlereinheit unit)
+        {
+            var field = unit
+                .GetType()
+                .GetField(unit.ToString());
+
+            if (field == null)
+            {
+                throw new ArgumentException("Zählertyp has no UnitString");
+            }
+
+            UnitStringAttribute[] attributes = (UnitStringAttribute[])field.GetCustomAttributes(typeof(UnitStringAttribute), false);
+            return attributes.Length > 0 ? attributes[0].UnitString : string.Empty;
         }
     }
 }

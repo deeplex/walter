@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.WebAPI
 {
     public sealed class BetriebskostenabrechnungHandler
     {
-        private Betriebskostenabrechnung createAbrechnung(int vertragId, int Jahr, SaverwalterContext ctx)
+        private static Betriebskostenabrechnung CreateAbrechnung(int vertragId, int Jahr, SaverwalterContext ctx)
         {
             var vertrag = ctx.Vertraege.Find(vertragId)!;
             var beginn = new DateOnly(Jahr, 1, 1);
@@ -21,8 +21,8 @@ namespace Deeplex.Saverwalter.WebAPI
         {
             try
             {
-                var abrechnung = createAbrechnung(id, Jahr, ctx);
-                var controller = new BetriebskostenabrechnungEntry(abrechnung, ctx);
+                var abrechnung = CreateAbrechnung(id, Jahr, ctx);
+                var controller = new BetriebskostenabrechnungEntry(abrechnung);
 
                 return new OkObjectResult(controller);
             }
@@ -38,8 +38,8 @@ namespace Deeplex.Saverwalter.WebAPI
             try
             {
                 var stream = new MemoryStream();
-                StreamWriter writer = new StreamWriter(stream);
-                var abrechnung = createAbrechnung(id, Jahr, ctx);
+                var writer = new StreamWriter(stream);
+                var abrechnung = CreateAbrechnung(id, Jahr, ctx);
                 abrechnung.SaveAsDocx(stream);
                 stream.Position = 0;
 
@@ -56,8 +56,8 @@ namespace Deeplex.Saverwalter.WebAPI
             try
             {
                 var stream = new MemoryStream();
-                StreamWriter writer = new StreamWriter(stream);
-                var abrechnung = createAbrechnung(id, Jahr, ctx);
+                var writer = new StreamWriter(stream);
+                var abrechnung = CreateAbrechnung(id, Jahr, ctx);
                 abrechnung.SaveAsPdf(stream);
                 stream.Position = 0;
 

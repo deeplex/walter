@@ -1,16 +1,16 @@
 import { goto } from '$app/navigation';
-import type { WalterBetriebskostenabrechnungKostenpunkt } from '$walter/types';
+import type { WalterRechnungEntry } from '$walter/types/WalterBetriebskostenabrechnung.type';
 
 export function goto_or_create_rechnung(
-    punkt: WalterBetriebskostenabrechnungKostenpunkt,
+    punkt: WalterRechnungEntry,
     year: number
 ) {
-    if (punkt.betriebskostenrechnungId) {
-        goto(`/betriebskostenrechnungen/${punkt.betriebskostenrechnungId}`);
+    if (punkt.rechnungId) {
+        goto(`/betriebskostenrechnungen/${punkt.rechnungId}`);
     } else {
         const searchParams = new URLSearchParams();
-        searchParams.set('typ', `${punkt.typ.id}`);
-        searchParams.set('umlage', `${punkt.umlageId}`);
+        searchParams.set('typ', `${punkt.typId}`)
+        searchParams.set('umlage', `${punkt.id}`);
         searchParams.set('jahr', `${year}`);
         // TODO betrag
 

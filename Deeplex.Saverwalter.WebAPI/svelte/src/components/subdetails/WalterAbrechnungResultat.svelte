@@ -25,28 +25,28 @@
         </StructuredListHead>
         <StructuredListBody>
             {#each entry.abrechnungseinheiten as abrechnungseinheit}
-                {#if abrechnungseinheit.betragKalteNebenkosten}
+                {#if abrechnungseinheit.betragKalt}
                     <StructuredListRow>
                         <StructuredListCell
                             >Abrechnungseinheit: {abrechnungseinheit.bezeichnung}
-                            (kalte Nebenkosten) :</StructuredListCell
+                            (kalte Nebenkosten):</StructuredListCell
                         >
                         <StructuredListCell style="text-align: right"
                             >{convertEuro(
-                                abrechnungseinheit.betragKalteNebenkosten || 0
+                                abrechnungseinheit.betragKalt || 0
                             )}</StructuredListCell
                         >
                     </StructuredListRow>
                 {/if}
-                {#if abrechnungseinheit.betragWarmeNebenkosten}
+                {#if abrechnungseinheit.betragWarm}
                     <StructuredListRow>
                         <StructuredListCell
                             >Abrechnungseinheit: {abrechnungseinheit.bezeichnung}
-                            (warme Nebenkosten) :</StructuredListCell
+                            (warme Nebenkosten):</StructuredListCell
                         >
                         <StructuredListCell style="text-align: right"
                             >{convertEuro(
-                                abrechnungseinheit.betragWarmeNebenkosten
+                                abrechnungseinheit.betragWarm
                             )}</StructuredListCell
                         >
                     </StructuredListRow>
@@ -59,14 +59,14 @@
                 >
             </StructuredListRow>
             <StructuredListRow>
-                <StructuredListCell>Gezahlt :</StructuredListCell>
+                <StructuredListCell>Gezahlt:</StructuredListCell>
                 <StructuredListCell style="text-align: right"
-                    >{convertEuro(entry.gezahlt)}</StructuredListCell
+                    >{convertEuro(entry.gezahltMiete)}</StructuredListCell
                 >
             </StructuredListRow>
             <StructuredListRow>
                 <StructuredListCell head
-                    >Ergebnis der Abrechnung :</StructuredListCell
+                    >Ergebnis der Abrechnung:</StructuredListCell
                 >
                 <StructuredListCell head style="text-align: right">
                     {convertEuro(entry.result)}

@@ -25,13 +25,23 @@ namespace Deeplex.Saverwalter.Model
 
     public enum Zaehlertyp
     {
-        [Unit("m³")]
+        [Unit(Zaehlereinheit.Kubikmeter)]
         Warmwasser,
-        [Unit("m³")]
+        [Unit(Zaehlereinheit.Kubikmeter)]
         Kaltwasser,
-        [Unit("kWh")]
+        [Unit(Zaehlereinheit.Kilowattstunden)]
         Strom,
-        [Unit("kWh")]
+        [Unit(Zaehlereinheit.Kilowattstunden)]
         Gas,
+    }
+
+    public enum Zaehlereinheit
+    {
+        [UnitString("")]
+        Dimensionslos,
+        [UnitString("m³")]
+        Kubikmeter,
+        [UnitString("kWh")]
+        Kilowattstunden
     }
 }

@@ -130,7 +130,7 @@ namespace Deeplex.Saverwalter.PrintService
             var wohnung = abrechnung.Vertrag.Wohnung;
             var zeitraum = abrechnung.Zeitraum;
 
-            foreach (var hk in CalculateHeizkosten(wohnung, abrechnungseinheit, zeitraum, abrechnung.Notes))
+            foreach (var hk in abrechnungseinheit.Heizkostenberechnungen)
             {
                 // TODO implement...
                 Text(Utils.Prozent(hk.Para9_2));

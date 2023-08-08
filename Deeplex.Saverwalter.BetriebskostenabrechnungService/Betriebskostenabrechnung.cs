@@ -22,29 +22,23 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         public double Result { get; }
 
-        public double AllgStromFaktor { get; set; }
-
-        public Betriebskostenabrechnung(SaverwalterContext ctx, Vertrag vertrag, int jahr, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
+        public Betriebskostenabrechnung(
+            SaverwalterContext ctx,
+            Vertrag vertrag,
+            int jahr,
+            DateOnly abrechnungsbeginn,
+            DateOnly abrechnungsende)
         {
             Vertrag = vertrag;
             Zeitraum = new Zeitraum(jahr, vertrag);
 
-            var wohnung = Vertrag.Wohnung;
-            var versionen = vertrag.Versionen.OrderBy(v => v.Beginn).ToList();
-
-            Vermieter = ctx.FindPerson(wohnung.BesitzerId);
+            Vermieter = ctx.FindPerson(Vertrag.Wohnung.BesitzerId);
             Ansprechpartner = ctx.FindPerson(vertrag.AnsprechpartnerId!.Value) ?? Vermieter;
             GezahlteMiete = Mietzahlungen(vertrag, Zeitraum);
             KaltMiete = GetKaltMiete(vertrag, Zeitraum);
             Mieter = GetMieter(ctx, vertrag);
-            AllgStromFaktor = CalcAllgStromFactor(vertrag, jahr);
-            Abrechnungseinheiten = GetAbrechnungseinheiten(vertrag);
-            BetragNebenkosten = Abrechnungseinheiten.Sum((einheit) => {
-                var kalteNebenkosten = BetragKalteNebenkosten(vertrag, einheit, Zeitraum, Notes);
-                var warmeNebenkosten = BetragWarmeNebenkosten(wohnung, einheit, Zeitraum, Notes);
-
-                return kalteNebenkosten + warmeNebenkosten;
-            });
+            Abrechnungseinheiten = Abrechnungseinheit.GetAbrechnungseinheiten(vertrag, Zeitraum, Notes);
+            BetragNebenkosten = Abrechnungseinheiten.Sum(einheit => einheit.BetragKalt + einheit.BetragWarm);
 
             Mietminderung = GetMietminderung(vertrag, abrechnungsbeginn, abrechnungsende);
             NebenkostenMietminderung = BetragNebenkosten * Mietminderung;

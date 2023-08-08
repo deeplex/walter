@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.PrintService
 
         public static string Mieterliste(List<IPerson> mieter)
             => "Mieter: " + string.Join(", ", mieter.Select(person => person.Bezeichnung));
-        
+
         public static string Mietobjekt(Wohnung wohnung)
             => "Mietobjekt: " + wohnung.Adresse!.Strasse + " " + wohnung.Adresse.Hausnummer + ", " + wohnung.Bezeichnung;
 
@@ -89,8 +89,8 @@ namespace Deeplex.Saverwalter.PrintService
             var text = GenerischerTextFirstPart; ;
 
             if (einheiten.Any(abrechnungseinheit =>
-                    GesamtBetragWarmeNebenkosten(wohnung, abrechnungseinheit, zeitraum, notes) != 0 &&
-                BetragWarmeNebenkosten(wohnung, abrechnungseinheit, zeitraum, notes) != 0))
+                abrechnungseinheit.GesamtBetragWarm != 0 &&
+                abrechnungseinheit.BetragWarm != 0))
             {
                 text += GenerischerTextHeizungPart;
             }
@@ -101,12 +101,12 @@ namespace Deeplex.Saverwalter.PrintService
         }
 
         public static bool DirekteZuordnung(List<Abrechnungseinheit> einheiten)
-            => einheiten.Any(einheit => einheit.Umlagen.Any(umlage => umlage.Wohnungen.Count == 1));
+            => einheiten.Any(einheit => einheit.Rechnungen.Any(rechnung => rechnung.Key.Wohnungen.Count == 1));
 
         private static bool UmlageSchluesselExistsInabrechnung(List<Abrechnungseinheit> einheiten, Umlageschluessel umlageSchluessel) =>
-            einheiten.Any(rechnungsgruppe => rechnungsgruppe.Umlagen
-                .Where(umlage => umlage.Wohnungen.Count > 1)
-                .Any(umlage => umlage.Schluessel == umlageSchluessel));
+            einheiten.Any(einheit => einheit.Rechnungen
+                .Where(rechnung => rechnung.Key.Wohnungen.Count > 1)
+                .Any(rechnung => rechnung.Key.Schluessel == umlageSchluessel));
 
         public static bool NachWohnflaeche(List<Abrechnungseinheit> einheiten)
             => UmlageSchluesselExistsInabrechnung(einheiten, Umlageschluessel.NachWohnflaeche);
