@@ -1,32 +1,39 @@
 <script lang="ts">
     import type { WalterBetriebskostenabrechnungEntry } from "$walter/types";
-    import {
-        Row,
-        StructuredList,
-        StructuredListBody,
-        StructuredListCell,
-        StructuredListHead,
-        StructuredListRow
-    } from "carbon-components-svelte";
+    import type { WalterBetriebskostenabrechnungNote } from "$walter/types/WalterBetriebskostenabrechnung.type";
+    import { InlineNotification, Row, Tile } from "carbon-components-svelte";
 
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
+
+    function getNotificationKind(note: WalterBetriebskostenabrechnungNote) {
+        switch (`${note.severity}`) {
+            case "0":
+                return "info"
+            case "1":
+                return "warning";
+            case "2":
+                return "error";
+            default:
+                return "success";
+        }
+    }
 </script>
 
+{#if abrechnung.notes.length > 0}
 <Row>
-    <StructuredList style="margin-right: 2em">
-        <StructuredListHead>
-            <StructuredListRow head>
-                <StructuredListCell head>Notizen</StructuredListCell>
-            </StructuredListRow>
-        </StructuredListHead>
-        <StructuredListBody>
-            {#each abrechnung.notes as note}
-                <StructuredListRow>
-                    <StructuredListCell>
-                        {note.message}
-                    </StructuredListCell>
-                </StructuredListRow>
-            {/each}
-        </StructuredListBody>
-    </StructuredList>
+    <Tile>
+        <h4>Hinweise:</h4>
+    </Tile>
 </Row>
+<Row>
+    {#each abrechnung.notes as note}
+        <InlineNotification
+            style="margin-left: 2em; margin-top: 0.5em;"
+            hideCloseButton
+            lowContrast
+            kind={getNotificationKind(note)}
+            title="Fehler"
+            subtitle={note.message} />
+    {/each}
+</Row>
+{/if}

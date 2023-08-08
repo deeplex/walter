@@ -72,7 +72,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 }
                 else if (allgStrom.Betrag < AllgStromFaktor)
                 {
-                    notes.Add(new Note($"Allgemeinstromrechnung ist niedriger als 5% der Heizungskosten. Rechnung wäre damit {allgStrom.Betrag - AllgStromFaktor}€", Severity.Error));
+                    notes.Add(new Note($"Allgemeinstromrechnung ist niedriger als 5% der Heizungskosten. Rechnung wäre damit {allgStrom.Betrag - AllgStromFaktor}€", Severity.Warning));
                 }
                 else
                 {
