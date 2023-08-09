@@ -7,6 +7,7 @@ export { default as WalterAbrechnungGruppe } from './subdetails/WalterAbrechnung
 export { default as WalterAbrechnungEinheit } from './subdetails/WalterAbrechnungEinheit.svelte';
 export { default as WalterAbrechnungResultat } from './subdetails/WalterAbrechnungResultat.svelte';
 export { default as WalterAbrechnungNotes } from './subdetails/WalterAbrechnungNotes.svelte';
+export { default as WalterAbrechnungHeizkosten } from './subdetails/WalterAbrechnungHeizkosten.svelte';
 export { default as WalterLinks } from './subdetails/WalterLinks.svelte';
 export { default as WalterLink } from './subdetails/WalterLink.svelte';
 

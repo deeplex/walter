@@ -14,7 +14,7 @@
 </script>
 
 <Row>
-    <StructuredList style="margin-right: 2em">
+    <StructuredList condensed style="margin-right: 2em; width: 75%">
         <StructuredListHead>
             <StructuredListRow head>
                 <StructuredListCell head>Teil</StructuredListCell>

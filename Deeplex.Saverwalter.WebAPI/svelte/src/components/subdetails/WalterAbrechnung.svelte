@@ -2,13 +2,14 @@
     import {
         WalterAbrechnungEinheit,
         WalterAbrechnungGruppe,
+        WalterAbrechnungHeizkosten,
         WalterAbrechnungNotes,
         WalterAbrechnungResultat,
         WalterZaehlerList
     } from '$walter/components';
     import { convertDateGerman, convertEuro } from '$walter/services/utils';
     import type { WalterBetriebskostenabrechnungEntry } from '$walter/types';
-    import { Loading, Row, TextInput, Tile } from 'carbon-components-svelte';
+    import { Column, Loading, Row, TextInput, Tile } from 'carbon-components-svelte';
 
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
     export let fetchImpl: typeof fetch;
@@ -20,9 +21,19 @@
         <Loading withOverlay={false} />
     </div>
 {:then}
-    {#if abrechnung.notes.length > 0}
-        <WalterAbrechnungNotes {abrechnung}/>
-    {/if}
+    <Row>
+        <Column>
+            {#if abrechnung.notes.length > 0}
+                <WalterAbrechnungNotes {abrechnung}/>
+            {/if}
+        </Column>
+        <Column sm={1}>
+            <Tile>
+                <h4>Resultat: {convertEuro(Math.abs(abrechnung.result))}</h4>
+                <p>{abrechnung.result > 0 ? "bekommt der Mieter" : "bekommt der Vermieter"}</p>
+            </Tile>
+        </Column>
+    </Row>
 
     <Row>
         <TextInput
@@ -39,7 +50,9 @@
         />
     </Row>
 
-    <WalterAbrechnungResultat entry={abrechnung} />
+    <Tile>
+        <h4>Kalte Nebenkosten</h4>
+    </Tile>
     {#each abrechnung.abrechnungseinheiten as einheit}
         <hr />
         <WalterAbrechnungEinheit
@@ -55,14 +68,30 @@
                 Zwischensumme: {convertEuro(einheit.betragKalt)}
             </h5>
         </Tile>
-        {/each}
-        {#if abrechnung.zaehler.length}
-            <hr />
-            <Tile>
-                <h4>Zähler</h4>
-            </Tile>
-            <WalterZaehlerList {fetchImpl} rows={abrechnung.zaehler} />
+    {/each}
+    <Tile><h4>Warme Nebenkosten</h4></Tile>
+    {#each abrechnung.abrechnungseinheiten as einheit}
+        {#if einheit.heizkostenberechnungen.length}
+            <WalterAbrechnungEinheit
+                entry={einheit}
+                abrechnungstage={abrechnung.zeitraum.abrechnungszeitraum}
+            />
+            {#each einheit.heizkostenberechnungen as heizkosten}
+                <WalterAbrechnungHeizkosten {heizkosten}/>
+            {/each}
         {/if}
-        <div style="margin: 3em"/>
+    {/each}
+
+    <Tile><h4>Gesamtergebnis der Abrechnung:</h4></Tile>
+    <WalterAbrechnungResultat entry={abrechnung} />
+
+    {#if abrechnung.zaehler.length}
+        <hr />
+        <Tile>
+            <h4>Zähler</h4>
+        </Tile>
+        <WalterZaehlerList {fetchImpl} rows={abrechnung.zaehler} />
+    {/if}
+    <div style="margin: 3em"/>
 {/await}
 </Tile>

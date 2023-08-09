@@ -70,8 +70,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double NEZeitanteil { get; }
             public List<VerbrauchAnteilEntry>? VerbrauchAnteil { get; }
             public List<PersonenZeitanteil>? PersonenZeitanteil { get; }
-            // TODO not in use yet...
-            // public List<Heizkostenberechnung>? Heizkostenberechnungen { get; }
+            public List<Heizkostenberechnung>? Heizkostenberechnungen { get; }
             public double AllgStromFaktor { get; }
 
             public AbrechnungseinheitEntry(Abrechnungseinheit einheit)
@@ -83,11 +82,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 WFZeitanteil = einheit.WFZeitanteil;
                 NFZeitanteil = einheit.NFZeitanteil;
                 NEZeitanteil = einheit.NEZeitanteil;
+                PersonenZeitanteil = einheit.PersonenZeitanteile;
+                Heizkostenberechnungen = einheit.Heizkostenberechnungen;
                 Rechnungen = einheit.Rechnungen
                     .Where(rechnung => (int)rechnung.Key.Typ % 2 == 0)
                     .Select(rechnung => new RechnungEntry(rechnung, einheit))
                     .ToList();
-                PersonenZeitanteil = einheit.PersonenZeitanteile;
                 VerbrauchAnteil = einheit.VerbrauchAnteile
                     .Select(anteil => new VerbrauchAnteilEntry(anteil))
                     .ToList();

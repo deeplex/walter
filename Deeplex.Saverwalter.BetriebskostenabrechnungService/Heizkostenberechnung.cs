@@ -4,29 +4,29 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
     public sealed class Heizkostenberechnung
     {
-        public double GesamtBetrag;
-        public double PauschalBetrag;
+        public double GesamtBetrag { get; }
+        public double PauschalBetrag { get; }
 
-        public double tw;
-        public double V;
-        public double Q;
+        public double tw { get; }
+        public double V { get; }
+        public double Q { get; }
 
-        public double Para7;
-        public double Para8;
+        public double Para7 { get; }
+        public double Para8 { get; }
 
-        public double GesamtNutzflaeche;
-        public double NFZeitanteil;
-        public double HeizkostenVerbrauchAnteil;
-        public double WarmwasserVerbrauchAnteil;
+        public double GesamtNutzflaeche { get; }
+        public double NFZeitanteil { get; }
+        public double HeizkostenVerbrauchAnteil { get; }
+        public double WarmwasserVerbrauchAnteil { get; }
 
-        public double Para9_2;
+        public double Para9_2 { get; }
 
-        public double WaermeAnteilNF;
-        public double WaermeAnteilVerb;
-        public double WarmwasserAnteilNF;
-        public double WarmwasserAnteilVerb;
+        public double WaermeAnteilNF { get; }
+        public double WaermeAnteilVerb { get; }
+        public double WarmwasserAnteilNF { get; }
+        public double WarmwasserAnteilVerb { get; }
 
-        public double Betrag;
+        public double Betrag { get; }
 
         public Heizkostenberechnung(
             Betriebskostenrechnung rechnung,
