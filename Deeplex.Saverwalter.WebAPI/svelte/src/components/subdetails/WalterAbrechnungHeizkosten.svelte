@@ -20,15 +20,21 @@
         <StructuredListBody>
             <StructuredListRow>
                 <StructuredListCell>Kosten für Brennstoffe</StructuredListCell>
-                <StructuredListCell style="text-align: right">{heizkosten.gesamtBetrag}</StructuredListCell>
+                <StructuredListCell style="text-align: right">
+                    {convertEuro(heizkosten.gesamtBetrag)}
+                </StructuredListCell>
             </StructuredListRow>
             <StructuredListRow>
                 <StructuredListCell>Betriebskosten der Anlage (5% pauschal)</StructuredListCell>
-                <StructuredListCell style="text-align: right">{heizkosten.gesamtBetrag * 0.05}</StructuredListCell>
+                <StructuredListCell style="text-align: right">
+                    {convertEuro(heizkosten.gesamtBetrag * 0.05)}
+                </StructuredListCell>
             </StructuredListRow>
             <StructuredListRow>
                 <StructuredListCell head>Gesamt</StructuredListCell>
-                <StructuredListCell head style="text-align: right">{heizkosten.pauschalBetrag}</StructuredListCell>
+                <StructuredListCell head style="text-align: right">
+                    {convertEuro(heizkosten.pauschalBetrag)}
+                </StructuredListCell>
             </StructuredListRow>
         </StructuredListBody>
     </StructuredList>
