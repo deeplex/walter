@@ -69,7 +69,9 @@
             </h5>
         </Tile>
     {/each}
+    {#if abrechnung.abrechnungseinheiten.some(e => e.heizkostenberechnungen.length)}
     <Tile><h4>Warme Nebenkosten</h4></Tile>
+    {/if}
     {#each abrechnung.abrechnungseinheiten as einheit}
         {#if einheit.heizkostenberechnungen.length}
             <WalterAbrechnungEinheit

@@ -17,6 +17,19 @@
                 return "success";
         }
     }
+
+    function getNotificationTitle(note: WalterBetriebskostenabrechnungNote) {
+        switch (`${note.severity}`) {
+            case "0":
+                return "Info"
+            case "1":
+                return "Warnung";
+            case "2":
+                return "Fehler";
+            default:
+                return "Erfolg";
+        }
+    }
 </script>
 
 {#if abrechnung.notes.length > 0}
@@ -32,7 +45,7 @@
             hideCloseButton
             lowContrast
             kind={getNotificationKind(note)}
-            title="Fehler"
+            title={getNotificationTitle(note)}
             subtitle={note.message} />
     {/each}
 </Row>

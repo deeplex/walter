@@ -20,6 +20,7 @@
     import { Add } from 'carbon-icons-svelte';
 
     export let fullHeight = false;
+    export let size: "compact" | "short" | "medium" | "tall" | undefined = undefined;
     export let headers: {
         key: string;
         value: string;
@@ -56,6 +57,7 @@
         <DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
     {:then x}
         <DataTable
+            {size}
             on:click:row={navigate}
             sortable
             zebra

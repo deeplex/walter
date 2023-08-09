@@ -18,7 +18,7 @@
     <h4>Abrechnungseinheit: {entry.bezeichnung}</h4>
 </Tile>
 <!-- StructuredList has margin-bottom 5rem per default -->
-<StructuredList style="margin-bottom: 2rem">
+<StructuredList condensed>
     <StructuredListHead>
         <StructuredListRow head>
             <StructuredListCell head>Nutzeinheiten</StructuredListCell>

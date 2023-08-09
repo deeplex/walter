@@ -19,4 +19,4 @@
     };
 </script>
 
-<WalterDataTable fullHeight {navigate} {headers} {rows} />
+<WalterDataTable size="short" fullHeight {navigate} {headers} {rows} />

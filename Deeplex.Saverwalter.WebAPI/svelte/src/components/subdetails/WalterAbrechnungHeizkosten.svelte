@@ -8,7 +8,7 @@
 </script>
 
 <Row>
-    <StructuredList condensed style="margin-right: 2em; width: 50%">
+    <StructuredList condensed style="margin: 2em; width: 50%">
         <StructuredListHead>
             <StructuredListRow head>
                 <StructuredListCell head>Heizkosten</StructuredListCell>
@@ -57,7 +57,7 @@
 <!-- TODO: Einheitenermittlung -->
 
 <Row>
-    <StructuredList condensed style="margin-right: 2em;">
+    <StructuredList condensed style="margin: 2em;">
         <StructuredListHead>
             <StructuredListRow head>
                 <StructuredListCell head>Kostenanteil</StructuredListCell>
