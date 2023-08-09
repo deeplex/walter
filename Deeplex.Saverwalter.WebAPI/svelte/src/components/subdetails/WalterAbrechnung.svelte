@@ -1,6 +1,7 @@
 <script lang="ts">
     import {
-        WalterAbrechnungEinheit,
+        WalterAbrechnungEinheitKalt,
+        WalterAbrechnungEinheitWarm,
         WalterAbrechnungGruppe,
         WalterAbrechnungHeizkosten,
         WalterAbrechnungNotes,
@@ -55,9 +56,9 @@
     </Tile>
     {#each abrechnung.abrechnungseinheiten as einheit}
         <hr />
-        <WalterAbrechnungEinheit
-            entry={einheit}
-            abrechnungstage={abrechnung.zeitraum.abrechnungszeitraum}
+        <WalterAbrechnungEinheitKalt
+            einheit={einheit}
+            zeitraum={abrechnung.zeitraum}
         />
         <WalterAbrechnungGruppe
             rows={einheit.rechnungen}
@@ -74,9 +75,9 @@
     {/if}
     {#each abrechnung.abrechnungseinheiten as einheit}
         {#if einheit.heizkostenberechnungen.length}
-            <WalterAbrechnungEinheit
-                entry={einheit}
-                abrechnungstage={abrechnung.zeitraum.abrechnungszeitraum}
+            <WalterAbrechnungEinheitWarm
+                {einheit}
+                zeitraum={abrechnung.zeitraum}
             />
             {#each einheit.heizkostenberechnungen as heizkosten}
                 <WalterAbrechnungHeizkosten {heizkosten}/>

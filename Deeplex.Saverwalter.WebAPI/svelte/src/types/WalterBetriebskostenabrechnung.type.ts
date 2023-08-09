@@ -39,9 +39,9 @@ export type WalterAbrechnungseinheit = {
     gesamtWohnflaeche: number;
     gesamtNutzflaeche: number;
     gesamtEinheiten: number;
-    wFZeitanteil: number;
-    nFZeitanteil: number;
-    nEZeitanteil: number;
+    wfZeitanteil: number;
+    nfZeitanteil: number;
+    neZeitanteil: number;
     verbrauchAnteil: WalterVerbrauchAnteil[];
     personenZeitanteil: WalterPersonenZeitanteil[];
     heizkostenberechnungen: WalterHeizkostenberechnungEntry[];
@@ -50,19 +50,17 @@ export type WalterAbrechnungseinheit = {
 
 // TODO used where?
 export type WalterVerbrauchAnteil = {
-    umlage: WalterUmlageEntry;
-    alleZaehler: {key: string, value: WalterVerbrauch[]},
-    alleVerbrauch: {key: string, value: number},
-    dieseZaehler: {key: string, value: WalterVerbrauch[]},
-    dieseVerbrauch: {key: string, value: number},
-    anteil: {key: string, value: number}
+    umlage: WalterSelectionEntry;
+    alleZaehler: {[key: string]: WalterVerbrauch[]},
+    alleVerbrauch: {[key: string]: number},
+    dieseZaehler: {[key: string]: WalterVerbrauch[]},
+    dieseVerbrauch: {[key: string]: number},
+    anteil: {[key: string]: number}
 }
 
 // TODO not active
 export type WalterVerbrauch = {
-    zaehler: WalterZaehlerEntry,
-    endstand: WalterZaehlerstandEntry,
-    anfangsstand: WalterZaehlerstandEntry,
+    zaehler: WalterSelectionEntry,
     delta: number
 }
 

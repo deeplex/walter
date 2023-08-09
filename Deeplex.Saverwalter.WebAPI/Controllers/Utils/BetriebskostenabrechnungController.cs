@@ -13,11 +13,28 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         private readonly ILogger<BetriebskostenabrechnungController> _logger;
         private BetriebskostenabrechnungHandler Service { get; }
 
+        public class VerbrauchEntry
+        {
+            public SelectionEntry Zaehler { get; }
+            public double Delta { get; }
+
+            public VerbrauchEntry(Verbrauch verbrauch)
+            {
+                Zaehler = new SelectionEntry(
+                    verbrauch.Zaehler.ZaehlerId,
+                    verbrauch.Zaehler.Kennnummer,
+                    verbrauch.Zaehler.Typ.ToUnitString());
+                Delta = verbrauch.Delta;
+            }
+        }
+
         public class VerbrauchAnteilEntry
         {
             public SelectionEntry Umlage { get; }
             public Dictionary<Zaehlereinheit, double> AlleVerbrauch { get; }
+            public Dictionary<Zaehlereinheit, List<VerbrauchEntry>> AlleZaehler { get; } = new();
             public Dictionary<Zaehlereinheit, double> DieseVerbrauch { get; }
+            public Dictionary<Zaehlereinheit, List<VerbrauchEntry>> DieseZaehler { get; } = new();
             public Dictionary<Zaehlereinheit, double> Anteil { get; }
 
             public VerbrauchAnteilEntry(VerbrauchAnteil anteil)
@@ -26,6 +43,27 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 AlleVerbrauch = anteil.AlleVerbrauch;
                 DieseVerbrauch = anteil.DieseVerbrauch;
                 Anteil = anteil.Anteil;
+                foreach (var zaehler in anteil.AlleZaehler)
+                {
+                    if (!AlleZaehler.ContainsKey(zaehler.Key))
+                    {
+                        AlleZaehler[zaehler.Key] = new();
+                    }
+
+                    AlleZaehler[zaehler.Key].AddRange(zaehler.Value
+                        .Select(verbrauch => new VerbrauchEntry(verbrauch)));
+                }
+
+                foreach (var zaehler in anteil.DieseZaehler)
+                {
+                    if (!DieseZaehler.ContainsKey(zaehler.Key))
+                    {
+                        DieseZaehler[zaehler.Key] = new();
+                    }
+
+                    DieseZaehler[zaehler.Key].AddRange(zaehler.Value
+                        .Select(verbrauch => new VerbrauchEntry(verbrauch)));
+                }
             }
         }
 
