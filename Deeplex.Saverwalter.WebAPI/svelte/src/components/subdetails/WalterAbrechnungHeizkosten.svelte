@@ -1,7 +1,9 @@
 <script lang="ts">
     import { convertEuro, convertPercent } from "$walter/services/utils";
+    import "./katex.min.css";
     import type { WalterHeizkostenberechnungEntry } from "$walter/types/WalterBetriebskostenabrechnung.type";
     import { Row, StructuredList, StructuredListBody, StructuredListCell, StructuredListHead, StructuredListRow, Tile, Truncate } from "carbon-components-svelte";
+    import Katex from "svelte-katex";
 
     export let heizkosten: WalterHeizkostenberechnungEntry;
     const betrag = heizkosten.gesamtBetrag + heizkosten.pauschalBetrag;
@@ -47,12 +49,11 @@
         </Truncate>
     </Tile>
 </Row>
-<Row>
-    <Tile>
-        <h5>TODO</h5>
-        <h5>2,5 × V/Q × (-10°C) kWh/m³ x K ⟹ 2,5 × 73.00m³/41,476kWh × (60.00°C - 10°C) kWh/(m³ x K) = 22.00%</h5>
-    </Tile>
-</Row>
+<Tile>
+    <Katex displayMode>
+        2,5 \times \frac{'{V}'}{'{Q}'} \times (60°C-10°C) \frac{'{kWh}'}{'{m³ K}'}\rightarrow 2,5 \times \frac{`{${heizkosten.v} m³}`}{`{${heizkosten.q / 1000} kWh}`} \times (60°C - 10°C) \frac{'{kWh}'}{'{m³ K}'} = {(heizkosten.heizkostenVerbrauchAnteil * 100).toFixed(2)} \%
+    </Katex>
+</Tile>
 
 <!-- TODO: Einheitenermittlung -->
 
