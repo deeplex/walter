@@ -55,6 +55,16 @@
     <SideNavItems>
         <SideNavLink
             on:click={closeSideNavIfWinWidthSmall}
+            isSelected={$page.route.id?.includes('/abrechnung')}
+            icon={Document}
+            text="Abrechnung"
+            href="/abrechnung"
+        />
+
+        <SideNavDivider />
+
+        <SideNavLink
+            on:click={closeSideNavIfWinWidthSmall}
             isSelected={$page.route.id?.includes('/kontakte')}
             icon={UserMultiple}
             text="Kontakte"
