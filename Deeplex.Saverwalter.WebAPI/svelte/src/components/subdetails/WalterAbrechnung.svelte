@@ -13,6 +13,7 @@
     import { Column, Loading, Row, TextInput, Tile } from 'carbon-components-svelte';
 
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
+    export let title: string | undefined;
     export let fetchImpl: typeof fetch;
 </script>
 
@@ -22,10 +23,13 @@
         <Loading withOverlay={false} />
     </div>
 {:then}
+    
     <Row>
         <Column>
-            {#if abrechnung.notes.length > 0}
-                <WalterAbrechnungNotes {abrechnung}/>
+            {#if title}
+                <Tile>
+                    <h4>{title} - {abrechnung.zeitraum.jahr}</h4>
+                </Tile>
             {/if}
         </Column>
         <Column sm={1}>
@@ -34,6 +38,12 @@
                 <p>{abrechnung.result > 0 ? "bekommt der Mieter" : "bekommt der Vermieter"}</p>
             </Tile>
         </Column>
+    </Row>
+
+    <Row>
+        {#if abrechnung.notes.length > 0}
+            <WalterAbrechnungNotes {abrechnung}/>
+        {/if}
     </Row>
 
     <Row>
@@ -54,6 +64,7 @@
     <Tile>
         <h4>Kalte Nebenkosten</h4>
     </Tile>
+    
     {#each abrechnung.abrechnungseinheiten as einheit}
         <hr />
         <WalterAbrechnungEinheitKalt

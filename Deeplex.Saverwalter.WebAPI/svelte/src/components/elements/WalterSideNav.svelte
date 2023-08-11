@@ -80,7 +80,7 @@
             <SideNavMenuItem style="padding-left: 1.2em">
                 <Checkbox bind:checked={extendedNavigation} labelText="Erweiterte Navigation" />
             </SideNavMenuItem>
-            <WalterSideNavLink text="Nutzereinstellungen" icon={User} href="/account" style="padding-left: 1em" />
+            <WalterSideNavLink text="Nutzereinstellungen" icon={User} href="/account" />
             <SideNavLink icon={Logout} on:click={logout} text="Abmelden" style="padding-left: 1em"/>
         </SideNavMenu>
     </SideNavItems>

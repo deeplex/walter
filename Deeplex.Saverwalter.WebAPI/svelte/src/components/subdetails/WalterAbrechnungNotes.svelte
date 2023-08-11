@@ -38,11 +38,9 @@
 </script>
 
 {#if length > 0}
-<Row>
     <Tile>
         <h4>Hinweise:</h4>
     </Tile>
-</Row>
 <Row>
     {#each abrechnung.notes as note}
         <InlineNotification
