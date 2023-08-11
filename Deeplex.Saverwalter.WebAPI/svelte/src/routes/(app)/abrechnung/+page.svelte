@@ -32,6 +32,9 @@
         if (selectedYear && vertragId) {
             abrechnung = loadAbrechnung(vertragId, selectedYear, data.fetchImpl);
         }
+
+        searchParams.set("jahr", `${selectedYear}`);
+        goto(`?${searchParams.toString()}`, { noScroll: true });
     });
 
     let title: string;

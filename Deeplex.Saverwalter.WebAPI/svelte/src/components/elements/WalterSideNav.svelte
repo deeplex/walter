@@ -1,6 +1,4 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
-    import { page } from '$app/stores';
     import { isWalterSideNavOpen } from '$walter/store';
 
     import {
@@ -28,6 +26,7 @@
         UserMultiple
     } from 'carbon-icons-svelte';
     import { checkStackTodo, logout } from './WalterSideNav';
+    import WalterSideNavLink from './WalterSideNavLink.svelte';
 
     export let fetchImpl: typeof fetch;
 
@@ -37,156 +36,52 @@
 
     let extendedNavigation = true;
 
-    function closeSideNavIfWinWidthSmall() {
-        // https://github.com/carbon-design-system/carbon-components-svelte/blob/master/src/UIShell/Header.svelte#L44
-        if (winWidth < 1056) {
-            closeSideNav();
-        }
+    function closeSideNav() {
+        closeSideNav();
     }
 
-    export function closeSideNav() {
-        isWalterSideNavOpen.update((_e: unknown) => false);
-    }
 </script>
 
 <svelte:window bind:innerWidth={winWidth} />
 
 <SideNav bind:isOpen on:close={closeSideNav}>
     <SideNavItems>
-        <SideNavLink
-            on:click={closeSideNavIfWinWidthSmall}
-            isSelected={$page.route.id?.includes('/abrechnung')}
-            icon={Document}
-            text="Abrechnung"
-            href="/abrechnung"
-        />
-
+        <WalterSideNavLink icon={Document} text="Abrechnung" href="/abrechnung" />
         <SideNavDivider />
-
-        <SideNavLink
-            on:click={closeSideNavIfWinWidthSmall}
-            isSelected={$page.route.id?.includes('/kontakte')}
-            icon={UserMultiple}
-            text="Kontakte"
-            href="/kontakte"
-        />
-
-        <SideNavLink
-            on:click={closeSideNavIfWinWidthSmall}
-            isSelected={$page.route.id?.includes('/wohnungen')}
-            icon={Building}
-            text="Wohnungen"
-            href="/wohnungen"
-        />
-
-        <SideNavLink
-            on:click={closeSideNavIfWinWidthSmall}
-            isSelected={$page.route.id?.includes('/vertraege')}
-            icon={Document}
-            text="Verträge"
-            href="/vertraege"
-        />
+        <WalterSideNavLink icon={UserMultiple} text="Kontakte" href="/kontakte" />
+        <WalterSideNavLink icon={Building} text="Wohnungen" href="/wohnungen" />
+        <WalterSideNavLink icon={Document} text="Verträge" href="/vertraege" />
 
         {#if extendedNavigation}
             <SideNavDivider />
-
-            <SideNavLink
-                on:click={closeSideNavIfWinWidthSmall}
-                isSelected={$page.route.id?.includes(
-                    '/betriebskostenrechnungen'
-                )}
-                icon={Money}
-                text="Betriebskostenrechnungen"
-                href="/betriebskostenrechnungen"
-            />
-
-            <SideNavLink
-                on:click={closeSideNavIfWinWidthSmall}
-                isSelected={$page.route.id?.includes('/erhaltungsaufwendungen')}
-                icon={Tools}
-                text="Erhaltungsaufwendungen"
-                href="/erhaltungsaufwendungen"
-            />
-
-            <SideNavLink
-                on:click={closeSideNavIfWinWidthSmall}
-                isSelected={$page.route.id?.includes('/umlagen')}
-                icon={ChartRelationship}
-                text="Umlagen"
-                href="/umlagen"
-            />
-
-            <SideNavLink
-                on:click={closeSideNavIfWinWidthSmall}
-                isSelected={$page.route.id?.includes('/zaehler')}
-                icon={Meter}
-                text="Zähler"
-                href="/zaehler"
-            />
-
-            <SideNavLink
-                on:click={closeSideNavIfWinWidthSmall}
-                isSelected={$page.route.id?.includes('/adressen')}
-                icon={Location}
-                text="Adressen"
-                href="/adressen"
-            />
+            <WalterSideNavLink icon={Money} text="Betriebskostenrechnungen" href="/betriebskostenrechnungen" />
+            <WalterSideNavLink icon={Tools} text="Erhaltungsaufwendungen" href="/erhaltungsaufwendungen" />
+            <WalterSideNavLink icon={ChartRelationship} text="Umlagen" href="/umlagen" />
+            <WalterSideNavLink icon={Meter} text="Zähler" href="/zaehler" />
+            <WalterSideNavLink icon={Location} text="Adressen" href="/adressen" />
         {/if}
 
         <SideNavDivider />
 
         {#await checkStackTodo(fetchImpl)}
-            <SideNavLink
-                on:click={closeSideNavIfWinWidthSmall}
-                isSelected={$page.route.id?.includes('/stack')}
-                icon={Loading}
-                text="Ablagestapel"
-                href="/stack"
-            />
+            <WalterSideNavLink icon={Loading} text="Ablagestapel" href="/stack" />
         {:then x}
-            <SideNavLink
-                on:click={closeSideNavIfWinWidthSmall}
-                isSelected={$page.route.id?.includes('/stack')}
-                icon={x}
-                text="Ablagestapel"
-                href="/stack"
+            <WalterSideNavLink icon={x} text="Ablagestapel" href="/stack"
             />
         {/await}
 
         {#if extendedNavigation}
-        <SideNavLink
-            on:click={closeSideNavIfWinWidthSmall}
-            isSelected={$page.route.id?.includes('/trash')}
-            icon={TrashCan}
-            text="Papierkorb"
-            href="/trash" />
+        <WalterSideNavLink icon={TrashCan} text="Papierkorb" href="/trash" />
         {/if}
   
         <SideNavDivider />
 
         <SideNavMenu text="Einstellungen" icon={Settings}>
             <SideNavMenuItem style="padding-left: 1.2em">
-                <Checkbox
-                    bind:checked={extendedNavigation}
-                    labelText="Erweiterte Navigation"
-                />
+                <Checkbox bind:checked={extendedNavigation} labelText="Erweiterte Navigation" />
             </SideNavMenuItem>
-
-            <SideNavLink
-                on:click={closeSideNavIfWinWidthSmall}
-                isSelected={$page.route.id?.includes('/account')}
-                text="Nutzereinstellungen"
-                icon={User}
-                href="/account"
-                style="padding-left: 1em"
-            />
-            <SideNavLink
-                on:click={closeSideNavIfWinWidthSmall}
-                icon={Logout}
-                on:click={logout}
-                text="Abmelden"
-                style="padding-left: 1em"
-            />
+            <WalterSideNavLink text="Nutzereinstellungen" icon={User} href="/account" style="padding-left: 1em" />
+            <SideNavLink icon={Logout} on:click={logout} text="Abmelden" style="padding-left: 1em"/>
         </SideNavMenu>
     </SideNavItems>
     <!-- To get the sidenav scrollable when window height is very small -->
