@@ -79,11 +79,7 @@ export async function updatePreview(
     let abrechnung;
 
     if (vertragId && selectedYear) {
-        abrechnung = loadAbrechnung(
-            vertragId,
-            selectedYear,
-            fetchImpl
-        );
+        abrechnung = loadAbrechnung(vertragId, selectedYear, fetchImpl);
     }
     else
     {

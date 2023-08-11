@@ -46,6 +46,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             foreach (var zaehlerTyp in DieseVerbrauch)
             {
                 Anteil[zaehlerTyp.Key] = zaehlerTyp.Value / AlleVerbrauch[zaehlerTyp.Key];
+
+                if (double.IsNaN(Anteil[zaehlerTyp.Key]))
+                {
+                    Anteil[zaehlerTyp.Key] = 0;
+                }
             }
         }
 

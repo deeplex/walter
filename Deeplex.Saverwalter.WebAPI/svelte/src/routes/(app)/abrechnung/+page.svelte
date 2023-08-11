@@ -45,8 +45,9 @@
             searchParams.set("vertrag", `${vertragId}`);
             goto(`?${searchParams.toString()}`, { noScroll: true });
             
-            abrechnung = updatePreview(vertragId, selectedYear, data.fetchImpl);
         }
+
+        abrechnung = updatePreview(vertragId, selectedYear, data.fetchImpl);
     }
 
     async function change(e: CustomEvent<number | null>)

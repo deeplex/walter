@@ -38,9 +38,11 @@
 </script>
 
 {#if length > 0}
+<Row style="margin-left: 0em">
     <Tile>
         <h4>Hinweise:</h4>
     </Tile>
+</Row>
 <Row>
     {#each abrechnung.notes as note}
         <InlineNotification
