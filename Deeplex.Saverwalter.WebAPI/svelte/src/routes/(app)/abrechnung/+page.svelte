@@ -30,7 +30,7 @@
         value = data.vertraege.find(vertrag => vertrag.id == vertragId);
 
         if (selectedYear && vertragId) {
-            abrechnung = loadAbrechnung(vertragId, selectedYear, data.fetchImpl);
+            abrechnung = updatePreview(vertragId, selectedYear, data.fetchImpl);
         }
 
         searchParams.set("jahr", `${selectedYear}`);
@@ -42,7 +42,7 @@
     async function select(e: CustomEvent) {
         const selectedItem = e.detail.selectedItem;
         title = selectedItem?.text || "Wähle einen Vertrag aus";
-        vertragId = selectedItem.id;
+        vertragId = selectedItem?.id;
         if (vertragId)
         {
             searchParams.set("vertrag", `${vertragId}`);
@@ -117,8 +117,10 @@
     {#await abrechnung}
         <Loading />
     {:then resolved}
-        {#if resolved}
-            <WalterAbrechnung fetchImpl={data.fetchImpl} abrechnung={resolved} />
+        {#if resolved && resolved.abrechnungseinheiten && resolved.zeitraum}
+            <WalterAbrechnung fetchImpl={data.fetchImpl} abrechnung={resolved} title={value?.text}/>
+        {:else}
+            <p>Fehler...</p>
         {/if}
     {/await}
 </WalterGrid>
