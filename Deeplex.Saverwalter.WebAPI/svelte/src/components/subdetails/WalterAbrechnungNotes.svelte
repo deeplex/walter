@@ -30,9 +30,14 @@
                 return "Erfolg";
         }
     }
+
+    let length = abrechnung.notes.length;
+    function close() {
+        length -= 1;
+    }
 </script>
 
-{#if abrechnung.notes.length > 0}
+{#if length > 0}
 <Row>
     <Tile>
         <h4>Hinweise:</h4>
@@ -42,7 +47,7 @@
     {#each abrechnung.notes as note}
         <InlineNotification
             style="margin-left: 2em; margin-top: 0.5em;"
-            hideCloseButton
+            on:close={close}
             lowContrast
             kind={getNotificationKind(note)}
             title={getNotificationTitle(note)}
