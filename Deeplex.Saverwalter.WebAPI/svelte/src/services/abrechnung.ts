@@ -9,7 +9,7 @@ const headers = {
 };
 
 export function create_abrechnung_word(
-    vertrag_id: string,
+    vertrag_id: number,
     jahr: number,
     fileNameBase: string
 ) {
@@ -19,7 +19,7 @@ export function create_abrechnung_word(
 }
 
 export function create_abrechnung_pdf(
-    vertrag_id: string,
+    vertrag_id: number,
     jahr: number,
     fileNameBase: string
 ) {
@@ -43,8 +43,8 @@ async function create_abrechnung_file(apiURL: string, fileName: string) {
 }
 
 export function loadAbrechnung(
-    vertragId: string,
-    year: string,
+    vertragId: number,
+    year: number,
     fetchImpl: typeof fetch
 ) {
     const abrechnungURL = `/api/betriebskostenabrechnung/${vertragId}/${year}`;

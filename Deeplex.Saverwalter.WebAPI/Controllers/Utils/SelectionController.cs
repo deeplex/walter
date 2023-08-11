@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -184,7 +185,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         [Route("api/selection/juristischepersonen")]
         public IActionResult GetJuristischePersonen()
         {
-            var list =  Ctx.JuristischePersonen
+            var list = Ctx.JuristischePersonen
                 .Select(e => new SelectionEntry(e.JuristischePersonId, e.Bezeichnung, null))
                 .ToList();
 
@@ -214,17 +215,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         {
             var list = Ctx.Vertraege
                 .ToList()
-                .Select(vertrag => new SelectionEntry(vertrag.VertragId, getVertragName(vertrag), null))
+                .Select(vertrag => new SelectionEntry(vertrag.VertragId, GetVertragName(vertrag, Ctx), null))
                 .ToList();
 
             return new OkObjectResult(list);
         }
 
-        private static string getVertragName(Vertrag vertrag)
+        private static string GetVertragName(Vertrag vertrag, SaverwalterContext ctx)
         {
             var wohnung = $"{vertrag.Wohnung.Adresse!.Anschrift ?? "Unbekannte Anschrift"} - {vertrag.Wohnung.Bezeichnung}";
-            var vertragname = $"{wohnung} - {vertrag.Beginn().ToString("MM.yyyy")}"; // TODO get MieterListe
-            
+            var mieterList = BetriebskostenabrechnungService.Utils
+                .GetMieter(ctx, vertrag)
+                .Select(person => person.Bezeichnung);
+            var mieterText = string.Join(", ", mieterList);
+            var vertragname = $"{wohnung} - {vertrag.Beginn():MM.yyyy} - {mieterText}";
+
             return vertragname;
         }
 

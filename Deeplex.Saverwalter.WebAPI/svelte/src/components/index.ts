@@ -2,7 +2,6 @@ export { default as WalterAnhaenge } from './subdetails/WalterAnhaenge.svelte';
 export { default as WalterAnhaengeEntry } from './subdetails/WalterAnhaengeEntry.svelte';
 export { default as WalterPerson } from './subdetails/WalterPerson.svelte';
 export { default as WalterAbrechnung } from './subdetails/WalterAbrechnung.svelte';
-export { default as WalterAbrechnungControl } from './subdetails/WalterAbrechnungControl.svelte';
 export { default as WalterAbrechnungGruppe } from './subdetails/WalterAbrechnungGruppe.svelte';
 export { default as WalterAbrechnungEinheitKalt } from './subdetails/WalterAbrechnungEinheitKalt.svelte';
 export { default as WalterAbrechnungEinheitWarm } from './subdetails/WalterAbrechnungEinheitWarm.svelte';

@@ -1,7 +1,5 @@
 <script lang="ts">
-    import { SideNavDivider, Truncate } from 'carbon-components-svelte';
     import type { PageData } from './$types';
-
     import {
         WalterKontakte,
         WalterMieten,
@@ -10,13 +8,9 @@
         WalterGrid,
         WalterVertrag,
         WalterVertragVersionen,
-        WalterAbrechnung,
-        WalterAbrechnungControl,
-        WalterLink
+        WalterLink,
+        WalterLinks
     } from '$walter/components';
-    import type { WalterBetriebskostenabrechnungEntry } from '$walter/types';
-    import { page } from '$app/stores';
-    import { onMount } from 'svelte';
     import {
         getMieteEntry,
         getMietminderungEntry,
@@ -28,14 +22,9 @@
         type WalterMietminderungEntry,
         type WalterPersonEntry,
         type WalterVertragVersionEntry,
-
         WalterBetriebskostenrechnungEntry
-
     } from '$walter/lib';
-    import { loadAbrechnung } from '$walter/services/abrechnung';
-    import WalterLinks from '../../../../components/subdetails/WalterLinks.svelte';
     import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
-    import WalterBetriebskostenabrechnung from '$walter/components/subdetails/WalterBetriebskostenabrechnung.svelte';
     export let data: PageData;
 
     const versionen = data.entry.versionen;
@@ -49,16 +38,6 @@
     );
     const mieterEntry: Partial<WalterPersonEntry> = {};
     const betriebskostenrechnungEntry: Partial<WalterBetriebskostenrechnungEntry> = {};
-
-    let abrechnung: WalterBetriebskostenabrechnungEntry;
-    let searchParams: URLSearchParams = new URL($page.url).searchParams;
-
-    onMount(async () => {
-        const year = searchParams.get('abrechnung');
-        if (year) {
-            abrechnung = await loadAbrechnung(data.id, year, data.fetchImpl);
-        }
-    });
 
     const title = `${data.entry.wohnung?.text} - ${data.entry.mieter
         ?.map((mieter) => mieter.name)
@@ -118,21 +97,4 @@
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />
     </WalterLinks>
-
-    <hr style="margin: 2em" />
-    <Truncate>Betriebskostenabrechnung:</Truncate>
-
-    <WalterAbrechnungControl
-        {title}
-        vertragId={data.id}
-        fetchImpl={data.fetchImpl}
-        S3URL={data.S3URL}
-        firstYear={new Date(data.entry.beginn).getFullYear()}
-        bind:S3files={data.files}
-        bind:abrechnung
-    />
-
-    {#if abrechnung}
-        <WalterAbrechnung fetchImpl={data.fetchImpl} {abrechnung} />
-    {/if}
 </WalterGrid>
