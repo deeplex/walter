@@ -37,11 +37,8 @@
         goto(`?${searchParams.toString()}`, { noScroll: true });
     });
 
-    let title: string;
-
     async function select(e: CustomEvent) {
         const selectedItem = e.detail.selectedItem;
-        title = selectedItem?.text || "Wähle einen Vertrag aus";
         vertragId = selectedItem?.id;
         if (vertragId)
         {
@@ -67,7 +64,7 @@
         const file = await create_word_doc(
             vertragId,
             selectedYear,
-            title,
+            value?.text!,
             data.fetchImpl
         );
     }
@@ -78,13 +75,13 @@
         const file = await create_pdf_doc(
             vertragId,
             selectedYear,
-            title,
+            value?.text!,
             data.fetchImpl
         );
     }
 </script>
 
-<WalterHeader {title} />
+<WalterHeader title={value?.text || "Wähle einen Vertrag aus"} />
 
 <WalterGrid>
     <Row>
@@ -94,7 +91,7 @@
             on:select={select}
             items={data.vertraege}
             value={value?.text}
-            titleText={title || "Vertrag auswählen"}
+            titleText={value?.text || "Wähle einen Vertrag aus"}
             {shouldFilterItem}
         />
 
@@ -118,7 +115,10 @@
         <Loading />
     {:then resolved}
         {#if resolved && resolved.abrechnungseinheiten && resolved.zeitraum}
-            <WalterAbrechnung fetchImpl={data.fetchImpl} abrechnung={resolved} title={value?.text}/>
+            <WalterAbrechnung
+                fetchImpl={data.fetchImpl}
+                abrechnung={resolved}
+                title={value?.text || "Wähle einen Vertrag aus"}/>
         {:else}
             <p>Fehler...</p>
         {/if}

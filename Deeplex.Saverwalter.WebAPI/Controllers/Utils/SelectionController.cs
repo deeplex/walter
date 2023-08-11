@@ -228,7 +228,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .GetMieter(ctx, vertrag)
                 .Select(person => person.Bezeichnung);
             var mieterText = string.Join(", ", mieterList);
-            var vertragname = $"{wohnung} - {vertrag.Beginn():MM.yyyy} - {mieterText}";
+            var vertragname = $"{wohnung} - {mieterText}";
 
             return vertragname;
         }

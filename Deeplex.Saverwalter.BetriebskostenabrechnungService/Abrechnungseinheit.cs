@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 }
                 else if (allgStrom.Betrag < AllgStromFaktor)
                 {
-                    notes.Add(new Note($"Allgemeinstromrechnung ist niedriger als 5% der Heizungskosten. Rechnung wäre damit {allgStrom.Betrag - AllgStromFaktor}€", Severity.Warning));
+                    notes.Add(new Note($"Allgemeinstromrechnung ist niedriger als 5% der Heizungskosten. Rechnung wäre damit {allgStrom.Betrag - AllgStromFaktor:N2}€", Severity.Warning));
                 }
                 else
                 {
@@ -97,7 +97,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 Umlageschluessel.NachWohnflaeche => WFZeitanteil,
                 Umlageschluessel.NachNutzflaeche => NFZeitanteil,
                 Umlageschluessel.NachPersonenzahl => PersonenZeitanteile.Sum(anteil => anteil.Anteil),
-                Umlageschluessel.NachVerbrauch => VerbrauchAnteile.Single(anteil => anteil.Umlage == umlage).Anteil.Sum(a => a.Value),
+                Umlageschluessel.NachVerbrauch => VerbrauchAnteile
+                    .SingleOrDefault(anteil => anteil.Umlage == umlage)?.Anteil?.Sum(a => a.Value) ?? 0,
                 _ => 0,
             };
         }
@@ -118,7 +119,23 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         private double GetVerbrauchAnteil(Betriebskostenrechnung rechnung, List<Note> notes)
         {
-            var verbrauchAnteil = VerbrauchAnteile.Single(anteil => anteil.Umlage == rechnung.Umlage);
+            var verbrauchAnteile = VerbrauchAnteile.Where(anteil => anteil.Umlage == rechnung.Umlage).ToList();
+            if (verbrauchAnteile.Count == 0)
+            {
+                notes.Add(new Note($"Keinen Anteil für {rechnung.Umlage.Typ.ToDescriptionString()} gefunden", Severity.Error));
+
+                return 0;
+            }
+            else if (verbrauchAnteile.Count > 1)
+            {
+                notes.Add(new Note($"Mehr als einen Anteil für {rechnung.Umlage.Typ.ToDescriptionString()} gefunden", Severity.Error));
+
+                return 0;
+            }
+
+            var verbrauchAnteil = verbrauchAnteile.First();
+
+
             if (verbrauchAnteil.Anteil.Count > 1)
             {
                 notes.Add(new Note($"Verbrauch von Rechnung {rechnung.Umlage.Typ} enthält mehr als einen Zählertypen", Severity.Error));
