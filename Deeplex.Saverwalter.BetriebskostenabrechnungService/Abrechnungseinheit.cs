@@ -39,6 +39,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             {
                 Rechnungen[umlage] = umlage.Betriebskostenrechnungen
                     .SingleOrDefault(rechnung => rechnung.BetreffendesJahr == zeitraum.Jahr);
+
+                if (Rechnungen[umlage] == null)
+                {
+                    notes.Add(new Note($"Keine Rechnung für {umlage.Typ.ToDescriptionString()} gefunden.", Severity.Warning));
+                }
             }
 
             var rechnungenKalt = Rechnungen
