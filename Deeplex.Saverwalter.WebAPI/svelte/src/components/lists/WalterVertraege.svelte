@@ -55,7 +55,7 @@
 <WalterDataWrapperQuickAdd
     title={quickAddEntry.vertrag?.text || "Vertrag"}
     addEntry={quickAddEntry}
-    addUrl="/api/zaehlerstand/"
+    addUrl="/api/vertraege/"
     bind:addModalOpen={open}>
     <WalterMiete entry={quickAddEntry}/>
 </WalterDataWrapperQuickAdd>

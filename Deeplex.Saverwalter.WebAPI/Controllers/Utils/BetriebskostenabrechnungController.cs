@@ -80,8 +80,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double GesamtBetrag { get; }
             public double Anteil { get; }
             public double Betrag { get; }
+            public double BetragLetztesJahr { get; }
 
-            public RechnungEntry(KeyValuePair<Umlage, Betriebskostenrechnung?> rechnung, Abrechnungseinheit einheit)
+            public RechnungEntry(KeyValuePair<Umlage, Betriebskostenrechnung?> rechnung, Abrechnungseinheit einheit, int year)
             {
                 Id = rechnung.Key.UmlageId;
                 RechnungId = rechnung.Value?.BetriebskostenrechnungId ?? 0;
@@ -92,6 +93,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 GesamtBetrag = rechnung.Value?.Betrag ?? 0;
                 Anteil = einheit.GetAnteil(rechnung.Key);
                 Betrag = GesamtBetrag * Anteil;
+                BetragLetztesJahr = rechnung.Key.Betriebskostenrechnungen
+                    .Where(bkr => (bkr.BetreffendesJahr + 1) == year)
+                    .Sum(bkr => bkr.Betrag);
             }
         }
 
@@ -114,7 +118,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public List<Heizkostenberechnung>? Heizkostenberechnungen { get; }
             public double AllgStromFaktor { get; }
 
-            public AbrechnungseinheitEntry(Abrechnungseinheit einheit)
+            public AbrechnungseinheitEntry(Abrechnungseinheit einheit, int year)
             {
                 Bezeichnung = einheit.Bezeichnung;
                 GesamtWohnflaeche = einheit.GesamtWohnflaeche;
@@ -127,7 +131,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 Heizkostenberechnungen = einheit.Heizkostenberechnungen;
                 Rechnungen = einheit.Rechnungen
                     .Where(rechnung => (int)rechnung.Key.Typ % 2 == 0)
-                    .Select(rechnung => new RechnungEntry(rechnung, einheit))
+                    .Select(rechnung => new RechnungEntry(rechnung, einheit, year))
                     .ToList();
                 VerbrauchAnteil = einheit.VerbrauchAnteile
                     .Select(anteil => new VerbrauchAnteilEntry(anteil))
@@ -177,7 +181,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 Zeitraum = abrechnung.Zeitraum;
                 Result = abrechnung.Result;
                 Abrechnungseinheiten = abrechnung.Abrechnungseinheiten
-                    .Select(einheit => new AbrechnungseinheitEntry(einheit))
+                    .Select(einheit => new AbrechnungseinheitEntry(einheit, Zeitraum.Jahr))
                     .ToList();
 
 

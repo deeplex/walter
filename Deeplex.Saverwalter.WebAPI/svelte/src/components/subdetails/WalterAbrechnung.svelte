@@ -18,8 +18,8 @@
     export let title: string | undefined;
     export let fetchImpl: typeof fetch;
 
-    const lastMiete = abrechnung.mieten[abrechnung.mieten.length - 1];
-    const dateMiete = new Date(lastMiete.betreffenderMonat);
+    const lastMiete = abrechnung.mieten.length ? abrechnung.mieten[abrechnung.mieten.length - 1] : undefined;
+    const dateMiete = lastMiete ? new Date(lastMiete.betreffenderMonat) : new Date();
     dateMiete.setDate(dateMiete.getDate() + new Date(dateMiete.getFullYear(), dateMiete.getMonth(), 0).getDate());
     if (dateMiete < abrechnung.zeitraum.abrechnungsbeginn)
     {
@@ -28,7 +28,7 @@
     const mietEntry: Partial<WalterMieteEntry> = {
         vertrag: abrechnung.vertrag,
         zahlungsdatum: convertDateCanadian(new Date()),
-        betrag: lastMiete.betrag,
+        betrag: lastMiete?.betrag,
         betreffenderMonat: convertDateCanadian(dateMiete)
     }
 </script>
@@ -99,6 +99,7 @@
             zeitraum={abrechnung.zeitraum}
         />
         <WalterAbrechnungGruppe
+            {fetchImpl}
             rows={einheit.rechnungen}
             year={abrechnung.zeitraum.jahr}
         />

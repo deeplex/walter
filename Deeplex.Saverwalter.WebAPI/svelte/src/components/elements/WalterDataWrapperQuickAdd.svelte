@@ -9,7 +9,10 @@
     export let rows: any[] | undefined = undefined;
 
     async function submit() {
-        if (!addUrl) return;
+        if (!addUrl)
+        {
+            return;
+        }
 
         const parsed = await handle_save(addUrl, addEntry, title!);
 
@@ -27,6 +30,7 @@
     on:click:button--primary={() => (addModalOpen = false)}
     modalHeading="Eintrag zu {title} hinzufügen"
     bind:open={addModalOpen}
+    primaryButtonDisabled={!addUrl}
     >
     <slot />
     <!-- Spacer for DatePickers. Otherwise the modal is too narrow -->

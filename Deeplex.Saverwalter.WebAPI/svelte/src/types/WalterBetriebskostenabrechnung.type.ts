@@ -95,6 +95,7 @@ export type WalterRechnungEntry = {
     typId: number;
     schluessel: string;
     gesamtBetrag: number;
+    betragLetztesJahr: number;
     anteil: number;
     betrag: number;
 };

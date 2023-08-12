@@ -40,7 +40,7 @@
 
         open = true;
     }
-    const rowsAdd = rows.map(row => ({...row, button: (e: CustomEvent) => add(e, row) }));
+    const rowsAdd = rows.map(row => ({...row, button: row.lastZaehlerstand.datum === convertDateCanadian(ablesedatum) ? "disabled" : (e: CustomEvent) => add(e, row) }));
 
     let open = false;
 

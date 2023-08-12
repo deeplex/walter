@@ -26,7 +26,7 @@
     updateUmlageEntries(entry.typ?.id);
 
     function selectTyp(e: CustomEvent) {
-        updateUmlageEntries(e.detail.selectedItem.id);
+        updateUmlageEntries(e.detail.selectedItem?.id);
         entry.typ = e.detail.selectedItem;
         if ((e as any).explicitOriginalTarget)
         {
