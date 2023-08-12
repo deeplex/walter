@@ -22,7 +22,7 @@ namespace Deeplex.Saverwalter.WebAPI
             try
             {
                 var abrechnung = CreateAbrechnung(id, Jahr, ctx);
-                var controller = new BetriebskostenabrechnungEntry(abrechnung);
+                var controller = new BetriebskostenabrechnungEntry(abrechnung, ctx);
 
                 return new OkObjectResult(controller);
             }

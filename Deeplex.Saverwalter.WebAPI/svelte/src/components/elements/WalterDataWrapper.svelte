@@ -1,7 +1,6 @@
 <script lang="ts">
     import {
         AccordionItem,
-        Loading,
         Modal,
         Tile
     } from 'carbon-components-svelte';
@@ -46,45 +45,26 @@
 </script>
 
 {#if title !== undefined}
-    {#await rows}
-        <AccordionItem>
-            <svelte:fragment slot="title">
-                <div
-                    style="display: flex; flex-direction: row; margin-left: -1em"
-                >
-                    <p class="bx--accordion__title" style="width: auto;">
-                        {title}
-                    </p>
-                    <Loading
-                        withOverlay={false}
-                        small
-                        style="margin-left: 1em"
-                    />
-                </div>
-            </svelte:fragment>
-        </AccordionItem>
-    {:then x}
-        <AccordionItem title={`${title} (${x.length})`} bind:open>
-             <Tile light>
-                <WalterDataTable add={addUrl && addEntry && quick_add} {navigate} bind:rows {headers} />
-            </Tile>
-            {#if addUrl && addEntry}
-                <Modal
-                    secondaryButtonText="Abbrechen"
-                    primaryButtonText="Bestätigen"
-                    on:submit={submit}
-                    on:click:button--secondary={() => (addModalOpen = false)}
-                    on:click:button--primary={() => (addModalOpen = false)}
-                    modalHeading="Eintrag zu {title} hinzufügen"
-                    bind:open={addModalOpen}
-                >
-                    <slot />
-                    <!-- Spacer for DatePickers. Otherwise the modal is too narrow -->
-                    <Tile style="height: 13em" />
-                </Modal>
-            {/if}
-        </AccordionItem>
-    {/await}
+    <AccordionItem title={`${title} (${rows.length})`} bind:open>
+        <Tile>
+            <WalterDataTable add={addUrl && addEntry && quick_add} {navigate} bind:rows {headers} />
+        </Tile>
+        {#if addUrl && addEntry}
+            <Modal
+                secondaryButtonText="Abbrechen"
+                primaryButtonText="Bestätigen"
+                on:submit={submit}
+                on:click:button--secondary={() => (addModalOpen = false)}
+                on:click:button--primary={() => (addModalOpen = false)}
+                modalHeading="Eintrag zu {title} hinzufügen"
+                bind:open={addModalOpen}
+            >
+                <slot />
+                <!-- Spacer for DatePickers. Otherwise the modal is too narrow -->
+                <Tile style="height: 13em" />
+            </Modal>
+        {/if}
+    </AccordionItem>
 {:else}
     <WalterDataTable add={normal_add} {fullHeight} {navigate} {rows} {headers} />
-    {/if}
+{/if}

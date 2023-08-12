@@ -6,11 +6,11 @@
         WalterAbrechnungHeizkosten,
         WalterAbrechnungNotes,
         WalterAbrechnungResultat,
-        WalterZaehlerList
     } from '$walter/components';
     import { convertDateGerman, convertEuro } from '$walter/services/utils';
     import type { WalterBetriebskostenabrechnungEntry } from '$walter/types';
     import { Column, Loading, Row, TextInput, Tile } from 'carbon-components-svelte';
+    import WalterAbrechnungNebenkosten from './WalterAbrechnungNebenkosten.svelte';
 
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
     export let title: string | undefined;
@@ -61,6 +61,8 @@
         />
     </Row>
 
+    <WalterAbrechnungNebenkosten {fetchImpl} {abrechnung} />
+
     <Tile>
         <h4>Kalte Nebenkosten</h4>
     </Tile>
@@ -98,14 +100,5 @@
 
     <Tile><h4>Gesamtergebnis der Abrechnung:</h4></Tile>
     <WalterAbrechnungResultat entry={abrechnung} />
-
-    {#if abrechnung.zaehler.length}
-        <hr />
-        <Tile>
-            <h4>Zähler</h4>
-        </Tile>
-        <WalterZaehlerList {fetchImpl} rows={abrechnung.zaehler} />
-    {/if}
-    <div style="margin: 3em"/>
 {/await}
 </Tile>

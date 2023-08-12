@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
@@ -151,12 +153,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double NebenkostenMietminderung { get; }
             public double KaltMietminderung { get; }
             public double Mietminderung { get; }
-            public List<ZaehlerEntryBase>? Zaehler { get; }
             public List<AbrechnungseinheitEntry>? Abrechnungseinheiten { get; }
             public double Result { get; }
             public Zeitraum? Zeitraum { get; set; }
+            public List<WohnungEntryBase> Wohnungen { get; }
+            public List<VertragEntryBase> Vertraege { get; }
+            public List<ZaehlerEntryBase> Zaehler { get; }
 
-            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung abrechnung)
+            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung abrechnung, SaverwalterContext ctx)
             {
                 Notes = abrechnung.Notes;
                 Vermieter = new SelectionEntry(abrechnung.Vermieter.PersonId, abrechnung.Vermieter.Bezeichnung);
@@ -173,7 +177,25 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 Abrechnungseinheiten = abrechnung.Abrechnungseinheiten
                     .Select(einheit => new AbrechnungseinheitEntry(einheit))
                     .ToList();
-                Zaehler = abrechnung.Vertrag.Wohnung.Zaehler.Select(e => new ZaehlerEntryBase(e)).ToList();
+
+
+                var wohnungen = abrechnung.Abrechnungseinheiten
+                    .SelectMany(einheit => einheit.Rechnungen.Select(rechnung => rechnung.Key))
+                    .SelectMany(umlage => umlage.Wohnungen)
+                    .Distinct();
+                Wohnungen = wohnungen
+                    .Select(wohnung => new WohnungEntryBase(wohnung, ctx))
+                    .ToList();
+                Vertraege = wohnungen
+                    .SelectMany(wohnung => wohnung.Vertraege)
+                    .Where(vertrag => vertrag.Beginn() <= abrechnung.Zeitraum.Abrechnungsende &&
+                        (vertrag.Ende == null || vertrag.Ende >= abrechnung.Zeitraum.Abrechnungsbeginn))
+                    .Select(vertrag => new VertragEntryBase(vertrag, ctx))
+                    .ToList();
+                Zaehler = wohnungen
+                    .SelectMany(wohnung => wohnung.Zaehler)
+                    .Select(e => new ZaehlerEntryBase(e))
+                    .ToList();
             }
         }
 
