@@ -102,6 +102,14 @@
                     {convertEuro(cell.value)}
                 {:else if cell.key === 'anteil'}
                     {convertPercent(cell.value)}
+                {:else if cell.key === 'button'}
+                    <Button
+                        on:click={cell.value}
+                        tooltipPosition="left"
+                        style="position: absolute; margin-top: -1em;"
+                        kind="tertiary"
+                        icon="{Add}"
+                        iconDescription={"Hinzufügen"} />
                 {:else}
                     {cell.value}
                 {/if}

@@ -26,7 +26,7 @@
         labelText="Ablesedatum" />
     <WalterTextInput
         required
-        {readonly}
+        readonly
         bind:value={entry.einheit}
         labelText="Einheit" />
 </Row>
