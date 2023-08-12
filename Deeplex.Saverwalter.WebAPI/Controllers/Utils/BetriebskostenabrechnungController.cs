@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
@@ -159,6 +160,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public List<WohnungEntryBase> Wohnungen { get; }
             public List<VertragEntryBase> Vertraege { get; }
             public List<ZaehlerEntryBase> Zaehler { get; }
+            public List<MieteEntryBase> Mieten { get; }
 
             public BetriebskostenabrechnungEntry(Betriebskostenabrechnung abrechnung, SaverwalterContext ctx)
             {
@@ -195,6 +197,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 Zaehler = wohnungen
                     .SelectMany(wohnung => wohnung.Zaehler)
                     .Select(e => new ZaehlerEntryBase(e))
+                    .ToList();
+                Mieten = abrechnung.Vertrag.Mieten
+                    .Where(miete =>
+                        miete.BetreffenderMonat >= abrechnung.Zeitraum.Abrechnungsbeginn &&
+                        miete.BetreffenderMonat <= abrechnung.Zeitraum.Abrechnungsende)
+                    .Select(miete => new MieteEntryBase(miete))
                     .ToList();
             }
         }

@@ -6,23 +6,39 @@
         WalterAbrechnungHeizkosten,
         WalterAbrechnungNotes,
         WalterAbrechnungResultat,
+        WalterMieten,
     } from '$walter/components';
-    import { convertDateGerman, convertEuro } from '$walter/services/utils';
+    import { convertDateCanadian, convertDateGerman, convertEuro } from '$walter/services/utils';
     import type { WalterBetriebskostenabrechnungEntry } from '$walter/types';
-    import { Column, Loading, Row, TextInput, Tile } from 'carbon-components-svelte';
+    import { Accordion, Column, Loading, Row, TextInput, Tile } from 'carbon-components-svelte';
     import WalterAbrechnungNebenkosten from './WalterAbrechnungNebenkosten.svelte';
+    import type { WalterMieteEntry } from '$walter/lib';
 
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
     export let title: string | undefined;
     export let fetchImpl: typeof fetch;
+
+    const lastMiete = abrechnung.mieten[abrechnung.mieten.length - 1];
+    const dateMiete = new Date(lastMiete.betreffenderMonat);
+    dateMiete.setDate(dateMiete.getDate() + new Date(dateMiete.getFullYear(), dateMiete.getMonth(), 0).getDate());
+    if (dateMiete < abrechnung.zeitraum.abrechnungsbeginn)
+    {
+        dateMiete.setDate(abrechnung.zeitraum.abrechnungsbeginn.getDate());
+    }
+    const mietEntry: Partial<WalterMieteEntry> = {
+        vertrag: abrechnung.vertrag,
+        zahlungsdatum: convertDateCanadian(new Date()),
+        betrag: lastMiete.betrag,
+        betreffenderMonat: convertDateCanadian(dateMiete)
+    }
 </script>
 
 <Tile style="margin-top: 2rem">
-{#await abrechnung}
-    <div style="width:100%; display: flex; justify-content: center">
-        <Loading withOverlay={false} />
-    </div>
-{:then}
+    {#await abrechnung}
+        <div style="width:100%; display: flex; justify-content: center">
+            <Loading withOverlay={false} />
+        </div>
+    {:then}
     
     <Row>
         <Column>
@@ -44,6 +60,15 @@
         {#if abrechnung.notes.length > 0}
             <WalterAbrechnungNotes {abrechnung}/>
         {/if}
+    </Row>
+
+    <Row>
+        <Accordion>
+            <WalterMieten
+                entry={mietEntry}
+                title="Gezahlte Mieten ({abrechnung.gezahltMiete}€)"
+                rows={abrechnung.mieten} />
+        </Accordion>
     </Row>
 
     <Row>

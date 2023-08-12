@@ -1,6 +1,4 @@
 <script lang="ts">
-
-    import { Accordion, Tile } from "carbon-components-svelte";
     import type { WalterBetriebskostenabrechnungEntry } from "$walter/types";
     import { WalterLinks, WalterVertraege, WalterWohnungen, WalterZaehlerList } from "..";
 

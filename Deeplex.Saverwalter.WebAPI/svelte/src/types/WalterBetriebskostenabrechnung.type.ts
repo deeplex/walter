@@ -1,4 +1,5 @@
 import type {
+    WalterMieteEntry,
     WalterSelectionEntry,
     WalterUmlageEntry,
     WalterVertragEntry,
@@ -26,6 +27,7 @@ export type WalterBetriebskostenabrechnungEntry = {
     zaehler: WalterZaehlerEntry[];
     wohnungen: WalterWohnungEntry[];
     vertraege: WalterVertragEntry[];
+    mieten: WalterMieteEntry[];
 };
 
 export type WalterBetriebskostenabrechnungNote = {

@@ -29,7 +29,7 @@
 
     <WalterLink
         bind:fileWrapper
-        name={`Adresse: ${data.entry.vertrag.id}`}
-        href={`/adresse/${data.entry.vertrag.text}`}
+        name={`Vertrag: ${data.entry.vertrag.text}`}
+        href={`/vertraege/${data.entry.vertrag.id}`}
     />
 </WalterGrid>
