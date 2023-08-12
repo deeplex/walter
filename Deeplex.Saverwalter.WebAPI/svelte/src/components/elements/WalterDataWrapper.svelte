@@ -1,12 +1,10 @@
 <script lang="ts">
     import {
         AccordionItem,
-        Modal,
         Tile
     } from 'carbon-components-svelte';
 
     import { WalterDataTable } from '$walter/components';
-    import { handle_save } from './WalterDataWrapper';
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
     import WalterDataWrapperQuickAdd from './WalterDataWrapperQuickAdd.svelte';

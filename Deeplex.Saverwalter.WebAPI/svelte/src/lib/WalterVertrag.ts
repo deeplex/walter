@@ -22,7 +22,8 @@ export class WalterVertragEntry extends WalterApiHandler {
         public mieter: WalterPersonEntry[],
         public mieten: WalterMieteEntry[],
         public mietminderungen: WalterMietminderungEntry[],
-        public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[]
+        public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
+        public lastMiete: WalterMieteEntry
     ) {
         super();
     }
@@ -47,6 +48,8 @@ export class WalterVertragEntry extends WalterApiHandler {
         const betriebskostenrechnungen = json.betriebskostenrechnungen?.map(
             WalterBetriebskostenrechnungEntry.fromJson
         );
+        const lastMiete =
+            json.lastMiete && WalterMieteEntry.fromJson(json.lastMiete);
 
         return new WalterVertragEntry(
             json.id,
@@ -61,7 +64,8 @@ export class WalterVertragEntry extends WalterApiHandler {
             mieter,
             mieten,
             mietminderungen,
-            betriebskostenrechnungen
+            betriebskostenrechnungen,
+            lastMiete
         );
     }
 }

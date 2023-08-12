@@ -106,7 +106,7 @@
                     <Button
                         on:click={cell.value}
                         tooltipPosition="left"
-                        style="position: absolute; margin-top: -1em;"
+                        style="position: absolute; margin-top: -15px; margin-left: 1em; scale: 0.9"
                         kind="tertiary"
                         icon="{Add}"
                         iconDescription={"Hinzufügen"} />
