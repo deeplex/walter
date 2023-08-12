@@ -71,7 +71,7 @@ async function create_abrechnung(
 }
 
 
-export async function updatePreview(
+export function updatePreview(
     vertragId: number | null,
     selectedYear: number | null,
     fetchImpl: typeof fetch)
@@ -83,7 +83,7 @@ export async function updatePreview(
     }
     else
     {
-        abrechnung = undefined;
+        abrechnung = Promise.resolve(undefined);
     }
 
     return abrechnung;

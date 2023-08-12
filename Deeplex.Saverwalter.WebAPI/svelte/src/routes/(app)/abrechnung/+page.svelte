@@ -4,7 +4,6 @@
     import type { PageData } from "./$types";
     import type { WalterBetriebskostenabrechnungEntry } from "$walter/types";
     import { page } from "$app/stores";
-    import { loadAbrechnung } from "$walter/services/abrechnung";
     import { ComboBox, Loading, NumberInput, OverflowMenu, OverflowMenuItem, Row } from "carbon-components-svelte";
     import { shouldFilterItem } from "$walter/components/elements/WalterComboBox";
     import { create_pdf_doc, create_word_doc, updatePreview } from "./utils";
@@ -24,39 +23,32 @@
 
     let value: WalterSelectionEntry | undefined;
 
+    function update() {
+        goto(`?${searchParams.toString()}`, { noScroll: true });
+        abrechnung = updatePreview(vertragId, selectedYear, data.fetchImpl);
+    }
+
     onMount(async () => {
         vertragId = +(searchParams.get('vertrag') || 0) || null;
         selectedYear = +(searchParams.get('jahr') || 0) || likelyYear;
         value = data.vertraege.find(vertrag => vertrag.id == vertragId);
 
-        if (selectedYear && vertragId) {
-            abrechnung = updatePreview(vertragId, selectedYear, data.fetchImpl);
-        }
-
         searchParams.set("jahr", `${selectedYear}`);
-        goto(`?${searchParams.toString()}`, { noScroll: true });
+
+        update();
     });
 
-    async function select(e: CustomEvent) {
-        const selectedItem = e.detail.selectedItem;
-        vertragId = selectedItem?.id;
-        if (vertragId)
-        {
-            searchParams.set("vertrag", `${vertragId}`);
-            goto(`?${searchParams.toString()}`, { noScroll: true });
-            
-        }
-
-        abrechnung = updatePreview(vertragId, selectedYear, data.fetchImpl);
+    function select(e: CustomEvent) {
+        vertragId = e.detail.selectedItem?.id || vertragId;
+        searchParams.set("vertrag", `${vertragId}`);
+        update();
     }
 
-    async function change(e: CustomEvent<number | null>)
+    function change(e: CustomEvent<number | null>)
     {
         selectedYear = e.detail || likelyYear;
         searchParams.set("jahr", `${selectedYear}`);
-        goto(`?${searchParams.toString()}`, { noScroll: true });
-
-        abrechnung = updatePreview(vertragId, selectedYear, data.fetchImpl);
+        update();
     }
 
     async function click_word(e: MouseEvent): Promise<void> {
@@ -115,7 +107,7 @@
     {#await abrechnung}
         <Loading />
     {:then resolved}
-        {#if resolved && resolved.abrechnungseinheiten && resolved.zeitraum}
+        {#if resolved}
             <WalterAbrechnung
                 fetchImpl={data.fetchImpl}
                 abrechnung={resolved}

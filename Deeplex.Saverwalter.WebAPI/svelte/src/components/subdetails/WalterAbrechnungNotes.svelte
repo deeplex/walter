@@ -38,6 +38,7 @@
 </script>
 
 {#if length > 0}
+<div>
 <Row style="margin-left: 0em">
     <Tile>
         <h4>Hinweise:</h4>
@@ -54,4 +55,5 @@
             subtitle={note.message} />
     {/each}
 </Row>
+</div>
 {/if}
