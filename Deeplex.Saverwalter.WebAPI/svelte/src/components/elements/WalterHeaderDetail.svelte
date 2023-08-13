@@ -26,6 +26,8 @@
     function click_delete(e: MouseEvent): void {
         handle_delete(title, apiURL);
     }
+
+    let isOpen=false;
 </script>
 
 <svelte:window bind:innerWidth={winWidth} />
@@ -53,11 +55,11 @@
 
             {#if fileWrapper}
                 {#await fileWrapper.handles[0].files}
-                    <HeaderAction isOpen preventCloseOnClickOutside text="(...)">
+                    <HeaderAction {isOpen} preventCloseOnClickOutside text="(...)">
                         <WalterAnhaenge bind:fileWrapper />
                     </HeaderAction>
                 {:then files}
-                    <HeaderAction isOpen preventCloseOnClickOutside text="({files.length})">
+                    <HeaderAction {isOpen} preventCloseOnClickOutside text="({files.length})">
                         <WalterAnhaenge bind:fileWrapper />
                     </HeaderAction>
                 {/await}

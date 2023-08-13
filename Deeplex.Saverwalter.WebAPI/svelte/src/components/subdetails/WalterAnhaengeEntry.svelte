@@ -19,15 +19,14 @@
     let previewOpen = false;
 
     const style = `
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 14em;
-    height: 2rem;
-    color: #c6c6c6;
-    text-align: left;
-    padding-top: 7px
-    `;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 14em;
+        height: 2rem;
+        color: #c6c6c6;
+        text-align: left;
+        padding-top: 7px`;
 </script>
 
 {#if selectedFile}

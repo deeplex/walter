@@ -98,6 +98,7 @@ export type WalterRechnungEntry = {
     betragLetztesJahr: number;
     anteil: number;
     betrag: number;
+    beschreibung: string;
 };
 
 export type WalterHeizkostenberechnungEntry = {

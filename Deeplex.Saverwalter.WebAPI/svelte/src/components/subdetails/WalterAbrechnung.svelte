@@ -63,15 +63,6 @@
     </Row>
 
     <Row>
-        <Accordion>
-            <WalterMieten
-                entry={mietEntry}
-                title="Gezahlte Mieten ({abrechnung.gezahltMiete}€)"
-                rows={abrechnung.mieten} />
-        </Accordion>
-    </Row>
-
-    <Row>
         <TextInput
             placeholder="Nutzungsbeginn"
             labelText="Nutzungsbeginn"
@@ -85,6 +76,13 @@
             value={convertDateGerman(new Date(abrechnung.zeitraum.nutzungsende))}
         />
     </Row>
+
+    <Accordion>
+        <WalterMieten
+            entry={mietEntry}
+            title="Gezahlte Mieten ({abrechnung.gezahltMiete}€)"
+            rows={abrechnung.mieten} />
+    </Accordion>
 
     <WalterAbrechnungNebenkosten {fetchImpl} {abrechnung} />
 

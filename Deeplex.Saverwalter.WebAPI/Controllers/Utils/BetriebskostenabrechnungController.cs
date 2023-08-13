@@ -81,6 +81,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double Anteil { get; }
             public double Betrag { get; }
             public double BetragLetztesJahr { get; }
+            public string Beschreibung { get; }
 
             public RechnungEntry(KeyValuePair<Umlage, Betriebskostenrechnung?> rechnung, Abrechnungseinheit einheit, int year)
             {
@@ -96,6 +97,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 BetragLetztesJahr = rechnung.Key.Betriebskostenrechnungen
                     .Where(bkr => (bkr.BetreffendesJahr + 1) == year)
                     .Sum(bkr => bkr.Betrag);
+                Beschreibung = rechnung.Key.Beschreibung ?? "";
             }
         }
 

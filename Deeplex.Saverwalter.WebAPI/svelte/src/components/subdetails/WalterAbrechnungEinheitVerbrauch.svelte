@@ -1,7 +1,7 @@
 <script lang="ts">
     import { convertDateGerman, convertPercent } from "$walter/services/utils";
     import type { WalterVerbrauchAnteil } from "$walter/types/WalterBetriebskostenabrechnung.type";
-    import { StructuredListCell, StructuredListRow } from "carbon-components-svelte";
+    import { Link, StructuredListCell, StructuredListRow } from "carbon-components-svelte";
 
     export let verbrauch: WalterVerbrauchAnteil;
     export let beginn: Date;
@@ -16,7 +16,11 @@
                 {v.delta}{v.zaehler.filter} / {verbrauch.alleVerbrauch[unit]}{v.zaehler.filter}
             </StructuredListCell>
             <StructuredListCell></StructuredListCell>
-            <StructuredListCell>{v.zaehler.text}</StructuredListCell>
+            <StructuredListCell>
+                <Link href={`zaehler/${v.zaehler.id}`}>
+                    {v.zaehler.text}
+                </Link>
+            </StructuredListCell>
     </StructuredListRow>
     {/each}
     <StructuredListRow>
@@ -26,7 +30,11 @@
         <StructuredListCell>
             {convertDateGerman(new Date(beginn))} - {convertDateGerman(new Date(ende))}
         </StructuredListCell>
-        <StructuredListCell head>{verbrauch.umlage.text}</StructuredListCell>
+        <StructuredListCell head>
+            <Link href={`umlagen/${verbrauch.umlage.id}`}>
+                {verbrauch.umlage.text}
+            </Link>
+        </StructuredListCell>
         <StructuredListCell>{convertPercent(verbrauch.anteil[unit])}</StructuredListCell>
     </StructuredListRow>
 {/each}

@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { WalterBetriebskostenabrechnungEntry } from "$walter/types";
-    import { StructuredList, StructuredListCell, StructuredListRow, Tile } from "carbon-components-svelte";
+    import { Accordion, AccordionItem, Link, StructuredList, StructuredListCell, StructuredListRow, Tile } from "carbon-components-svelte";
     import { WalterLinks, WalterVertraege, WalterWohnungen, WalterZaehlerList } from "..";
 
     export let fetchImpl: typeof fetch;
@@ -21,51 +21,72 @@
     const wohnungText = wohnungSchluessel.join(", ");
 </script>
 
-<Tile>
-    <h4>Genutzte Umlageschlüssel in dieser Abrechnung: </h4>
-</Tile>
-<StructuredList condensed style="margin-bottom: 0em">
-    <StructuredListRow>
-        <StructuredListCell head>Umlageschlüssel</StructuredListCell>
-        <StructuredListCell head>Bedeutung</StructuredListCell>
-    </StructuredListRow>
-    {#if dir}
-    <StructuredListRow>
-        <StructuredListCell>Direkt</StructuredListCell>
-        <StructuredListCell>Direkte Zuordnung</StructuredListCell>
-    </StructuredListRow>
-    {/if}
-    {#if nWF}
-    <StructuredListRow>
-        <StructuredListCell>n. WF</StructuredListCell>
-        <StructuredListCell>nach Wohnfläche in m²</StructuredListCell>
-    </StructuredListRow>
-    {/if}
-    {#if nNF}
-    <StructuredListRow>
-        <StructuredListCell>n. NF</StructuredListCell>
-        <StructuredListCell>nach Nutzfläche in m²</StructuredListCell>
-    </StructuredListRow>
-    {/if}
-    {#if nNE}
-    <StructuredListRow>
-        <StructuredListCell>n. NE</StructuredListCell>
-        <StructuredListCell>nach Anzahl der Wohn-/Nutzeinheiten</StructuredListCell>
-    </StructuredListRow>
-    {/if}
-    {#if nPs}
-    <StructuredListRow>
-        <StructuredListCell>n. Pers.</StructuredListCell>
-        <StructuredListCell>nach Personenzahl/Anzahl der Bewohner</StructuredListCell>
-    </StructuredListRow>
-    {/if}
-    {#if nVb}
-    <StructuredListRow>
-        <StructuredListCell>n. Verb.</StructuredListCell>
-        <StructuredListCell>nach Verbrauch</StructuredListCell>
-    </StructuredListRow>
-    {/if}
-</StructuredList>
+<Accordion>
+    <AccordionItem title="Genutzte Umlageschlüssel in dieser Abrechnung" style="border-top: 0px">
+        <StructuredList condensed>
+            <StructuredListRow>
+                <StructuredListCell head>Umlageschlüssel</StructuredListCell>
+                <StructuredListCell head>Bedeutung</StructuredListCell>
+            </StructuredListRow>
+            {#if dir}
+            <StructuredListRow>
+                <StructuredListCell>Direkt</StructuredListCell>
+                <StructuredListCell>Direkte Zuordnung</StructuredListCell>
+            </StructuredListRow>
+            {/if}
+            {#if nWF}
+            <StructuredListRow>
+                <StructuredListCell>n. WF</StructuredListCell>
+                <StructuredListCell>nach Wohnfläche in m²</StructuredListCell>
+            </StructuredListRow>
+            {/if}
+            {#if nNF}
+            <StructuredListRow>
+                <StructuredListCell>n. NF</StructuredListCell>
+                <StructuredListCell>nach Nutzfläche in m²</StructuredListCell>
+            </StructuredListRow>
+            {/if}
+            {#if nNE}
+            <StructuredListRow>
+                <StructuredListCell>n. NE</StructuredListCell>
+                <StructuredListCell>nach Anzahl der Wohn-/Nutzeinheiten</StructuredListCell>
+            </StructuredListRow>
+            {/if}
+            {#if nPs}
+            <StructuredListRow>
+                <StructuredListCell>n. Pers.</StructuredListCell>
+                <StructuredListCell>nach Personenzahl/Anzahl der Bewohner</StructuredListCell>
+            </StructuredListRow>
+            {/if}
+            {#if nVb}
+            <StructuredListRow>
+                <StructuredListCell>n. Verb.</StructuredListCell>
+                <StructuredListCell>nach Verbrauch</StructuredListCell>
+            </StructuredListRow>
+            {/if}
+        </StructuredList>
+    </AccordionItem>
+    <AccordionItem title="Erläuterungen zu einzelnen Betriebskostenarten">
+        <StructuredList condensed>
+            <StructuredListRow>
+                <StructuredListCell head>Betriebskotentyp</StructuredListCell>
+                <StructuredListCell head>Beschreibung</StructuredListCell>
+            </StructuredListRow>
+            {#each rechnungen as rechnung}
+            <StructuredListRow>
+                <StructuredListCell>
+                    <Link href={`umlagen/${rechnung.id}`}>
+                        {rechnung.typ}
+                    </Link>
+                </StructuredListCell>
+                <StructuredListCell>{rechnung.beschreibung}</StructuredListCell>
+            </StructuredListRow>
+            {/each}
+        </StructuredList>
+    </AccordionItem>
+</Accordion>
+
+<br/>
 
 <WalterLinks>
     {#if nWF || nNF || nNE}
