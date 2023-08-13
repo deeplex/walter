@@ -25,6 +25,7 @@
         WalterBetriebskostenrechnungEntry
     } from '$walter/lib';
     import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
+    import { ClickableTile } from 'carbon-components-svelte';
     export let data: PageData;
 
     const versionen = data.entry.versionen;
@@ -58,6 +59,8 @@
     <WalterVertrag fetchImpl={data.fetchImpl} bind:entry={data.entry} />
 
     <WalterLinks>
+        <ClickableTile href="/abrechnung?vertrag={data.id}">Betriebskostenabrechnung erstellen</ClickableTile>
+
         <WalterKontakte
             entry={mieterEntry}
             title="Mieter"
