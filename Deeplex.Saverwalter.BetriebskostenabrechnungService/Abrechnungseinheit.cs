@@ -94,6 +94,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         {
             return umlage.Schluessel switch
             {
+                Umlageschluessel.NachNutzeinheit => NEZeitanteil,
                 Umlageschluessel.NachWohnflaeche => WFZeitanteil,
                 Umlageschluessel.NachNutzflaeche => NFZeitanteil,
                 Umlageschluessel.NachPersonenzahl => PersonenZeitanteile.Sum(anteil => anteil.Anteil),
@@ -109,8 +110,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             return rechnungen.Sum(rechnung => rechnung.Umlage.Schluessel switch
             {
-                Umlageschluessel.NachWohnflaeche => rechnung.Betrag * WFZeitanteil,
                 Umlageschluessel.NachNutzeinheit => rechnung.Betrag * NEZeitanteil,
+                Umlageschluessel.NachWohnflaeche => rechnung.Betrag * WFZeitanteil,
+                Umlageschluessel.NachNutzflaeche => rechnung.Betrag * NFZeitanteil,
                 Umlageschluessel.NachPersonenzahl => rechnung.Betrag * PersZeitanteil,
                 Umlageschluessel.NachVerbrauch => rechnung.Betrag * GetVerbrauchAnteil(rechnung, notes),
                 _ => 0

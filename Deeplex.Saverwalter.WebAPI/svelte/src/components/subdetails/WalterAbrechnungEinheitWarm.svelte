@@ -38,34 +38,25 @@
     <StructuredListBody>
         {#each einheit.personenZeitanteil as intervall, index}
             <StructuredListRow>
-                <StructuredListCell
-                    >{!index
-                        ? einheit.gesamtEinheiten
-                        : ''}</StructuredListCell
-                >
-                <StructuredListCell
-                    >{!index
-                        ? convertM2(einheit.gesamtWohnflaeche)
-                        : ''}</StructuredListCell
-                >
-                <StructuredListCell
-                    >{!index
-                        ? convertM2(einheit.gesamtNutzflaeche)
-                        : ''}</StructuredListCell
-                >
-                <StructuredListCell
-                    >{intervall.gesamtPersonenzahl}</StructuredListCell
-                >
-                <StructuredListCell
-                    >{new Date(intervall.beginn).toLocaleDateString(
-                        'de-DE'
-                    )} - {new Date(intervall.ende).toLocaleDateString(
-                        'de-DE'
-                    )}</StructuredListCell
-                >
-                <StructuredListCell
-                    >{intervall.tage} / {zeitraum.nutzungszeitraum}</StructuredListCell
-                >
+                <StructuredListCell>
+                    {!index ? einheit.gesamtEinheiten : ''}
+                </StructuredListCell>
+                <StructuredListCell>
+                    {!index ? convertM2(einheit.gesamtWohnflaeche) : ''}
+                </StructuredListCell>
+                <StructuredListCell>
+                    {!index ? convertM2(einheit.gesamtNutzflaeche) : ''}
+                </StructuredListCell>
+                <StructuredListCell>
+                    {intervall.gesamtPersonenzahl}
+                </StructuredListCell>
+                <StructuredListCell>
+                    {new Date(intervall.beginn).toLocaleDateString('de-DE')} -
+                    {new Date(intervall.ende).toLocaleDateString('de-DE')}
+                </StructuredListCell>
+                <StructuredListCell>
+                    {intervall.tage} / {zeitraum.nutzungszeitraum}
+                </StructuredListCell>
             </StructuredListRow>
         {/each}
     </StructuredListBody>
@@ -82,9 +73,9 @@
             <WalterAbrechnungEinheitPart
                 beginn={zeitraum.nutzungsbeginn}
                 ende={zeitraum.nutzungsende}
-                value={-1000}
-                gesamt={einheit.gesamtNutzflaeche}
-                anteil={einheit.nFZeitanteil}
+                value={convertM2(einheit.gesamtNutzflaeche * einheit.nfZeitanteil / zeitraum.zeitanteil)}
+                gesamt={convertM2(einheit.gesamtNutzflaeche)}
+                anteil={einheit.nfZeitanteil}
                 tage={zeitraum.nutzungszeitraum}
                 />
            
