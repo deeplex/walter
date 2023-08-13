@@ -22,6 +22,19 @@ export function time(key: string) {
     }
 }
 
+export function euro(key: string) {
+    switch (key) {
+        case 'betrag':
+        case 'grundmiete':
+        case 'kosten':
+        case 'gesamtBetrag':
+        case 'betragLetztesJahr':
+            return true;
+        default:
+            return false;
+    }
+}
+
 export function formatToTableDate(date: string) {
     return new Date(date).toLocaleDateString('de-DE', {
         day: '2-digit',

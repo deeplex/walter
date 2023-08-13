@@ -16,7 +16,7 @@
         convertPercent,
         convertTime
     } from '$walter/services/utils';
-    import { dates, formatToTableDate, time } from './WalterDataTable';
+    import { dates, euro, formatToTableDate, time } from './WalterDataTable';
     import { Add } from 'carbon-icons-svelte';
 
     export let fullHeight = false;
@@ -94,12 +94,7 @@
                     {formatToTableDate(cell.value)}
                 {:else if time(cell.key)}
                     {convertTime(cell.value)}
-                {:else if
-                    cell.key === 'betrag' ||
-                    cell.key === 'grundmiete' ||
-                    cell.key === 'kosten' ||
-                    cell.key === 'gesamtBetrag' ||
-                    cell.key === 'betragLetztesJahr' }
+                {:else if euro(cell.key) }
                     {convertEuro(cell.value)}
                 {:else if cell.key === 'anteil'}
                     {convertPercent(cell.value)}
