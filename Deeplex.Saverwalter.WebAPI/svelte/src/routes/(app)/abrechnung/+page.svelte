@@ -10,6 +10,7 @@
     import { Download } from "carbon-icons-svelte";
     import type { WalterSelectionEntry } from "$walter/lib";
     import { goto } from "$app/navigation";
+    import { download } from "$walter/components/preview/WalterPreview";
 
     export let vertragId: number | null;
     export let selectedYear: number;
@@ -63,6 +64,11 @@
             value?.text!,
             data.fetchImpl
         );
+
+        if (file)
+        {
+            download(file)
+        }
     }
 
     async function click_pdf(e: MouseEvent): Promise<void> {
@@ -74,6 +80,11 @@
             value?.text!,
             data.fetchImpl
         );
+
+        if (file)
+        {
+            download(file)
+        }
     }
 </script>
 
