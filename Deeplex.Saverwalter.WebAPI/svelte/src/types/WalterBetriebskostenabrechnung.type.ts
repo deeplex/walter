@@ -1,6 +1,9 @@
 import type {
+    WalterMieteEntry,
     WalterSelectionEntry,
     WalterUmlageEntry,
+    WalterVertragEntry,
+    WalterWohnungEntry,
     WalterZaehlerEntry,
     WalterZaehlerstandEntry
 } from '$walter/lib';
@@ -18,10 +21,13 @@ export type WalterBetriebskostenabrechnungEntry = {
     mietMinderung: number;
     nebenkostenMietminderung: number;
     kaltMietminderung: number;
-    zaehler: WalterZaehlerEntry[];
     abrechnungseinheiten: WalterAbrechnungseinheit[];
     result: number;
     zeitraum: WalterZeitraum;
+    zaehler: WalterZaehlerEntry[];
+    wohnungen: WalterWohnungEntry[];
+    vertraege: WalterVertragEntry[];
+    mieten: WalterMieteEntry[];
 };
 
 export type WalterBetriebskostenabrechnungNote = {
@@ -30,7 +36,7 @@ export type WalterBetriebskostenabrechnungNote = {
 };
 
 export type WalterAbrechnungseinheit = {
-    rechnungen: WalterRechnungEntry[],
+    rechnungen: WalterRechnungEntry[];
     betragKalt: number;
     betragWarm: number;
     gesamtBetragKalt: number;
@@ -46,23 +52,21 @@ export type WalterAbrechnungseinheit = {
     personenZeitanteil: WalterPersonenZeitanteil[];
     heizkostenberechnungen: WalterHeizkostenberechnungEntry[];
     allgStromFaktor: number;
-}
+};
 
-// TODO used where?
 export type WalterVerbrauchAnteil = {
     umlage: WalterSelectionEntry;
-    alleZaehler: {[key: string]: WalterVerbrauch[]},
-    alleVerbrauch: {[key: string]: number},
-    dieseZaehler: {[key: string]: WalterVerbrauch[]},
-    dieseVerbrauch: {[key: string]: number},
-    anteil: {[key: string]: number}
-}
+    alleZaehler: { [key: string]: WalterVerbrauch[] };
+    alleVerbrauch: { [key: string]: number };
+    dieseZaehler: { [key: string]: WalterVerbrauch[] };
+    dieseVerbrauch: { [key: string]: number };
+    anteil: { [key: string]: number };
+};
 
-// TODO not active
 export type WalterVerbrauch = {
-    zaehler: WalterSelectionEntry,
-    delta: number
-}
+    zaehler: WalterSelectionEntry;
+    delta: number;
+};
 
 export type WalterZeitraum = {
     nutzungsbeginn: Date;
@@ -73,7 +77,7 @@ export type WalterZeitraum = {
     nutzungszeitraum: number;
     zeitanteil: number;
     jahr: number;
-}
+};
 
 export type WalterPersonenZeitanteil = {
     beginn: Date;
@@ -85,14 +89,15 @@ export type WalterPersonenZeitanteil = {
 };
 
 export type WalterRechnungEntry = {
-    id: number,
-    rechnungId: number,
-    typ: string,
-    typId: number,
-    schluessel: string,
-    gesamtBetrag: number,
-    anteil: number,
-    betrag: number
+    id: number;
+    rechnungId: number;
+    typ: string;
+    typId: number;
+    schluessel: string;
+    gesamtBetrag: number;
+    betragLetztesJahr: number;
+    anteil: number;
+    betrag: number;
 };
 
 export type WalterHeizkostenberechnungEntry = {

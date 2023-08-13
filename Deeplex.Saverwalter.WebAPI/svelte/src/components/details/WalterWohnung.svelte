@@ -6,7 +6,7 @@
         WalterTextArea,
         WalterTextInput
     } from '$walter/components';
-    import { Row, TextInputSkeleton } from 'carbon-components-svelte';
+    import { Row } from 'carbon-components-svelte';
     import type { WalterWohnungEntry } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
 

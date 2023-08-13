@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Adresse = Entity.Adresse is Adresse a ? new AdresseEntryBase(a) : null;
                 Wohnung = Entity.Wohnung is Wohnung w ? new(w.WohnungId, $"{w.Adresse?.Anschrift ?? "Unbekannte Anschrift"}, {w.Bezeichnung}") : null;
                 Notiz = Entity.Notiz;
-                var letzterStand = Entity?.Staende?.OrderBy(s => s.Stand).ToList().LastOrDefault();
+                var letzterStand = Entity?.Staende?.OrderBy(s => s.Datum).ToList().LastOrDefault();
                 if (letzterStand is Zaehlerstand stand)
                 {
                     LastZaehlerstand = new ZaehlerstandEntryBase(letzterStand);

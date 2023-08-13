@@ -16,14 +16,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     {
         public class VertragEntryBase
         {
-            public int Id { get; set; }
-            public DateOnly Beginn { get; set; }
-            public DateOnly? Ende { get; set; }
-            public SelectionEntry Wohnung { get; set; } = null!;
-            public SelectionEntry? Ansprechpartner { get; set; }
+            public int Id { get; }
+            public DateOnly Beginn { get; }
+            public DateOnly? Ende { get; }
+            public SelectionEntry Wohnung { get; } = null!;
+            public SelectionEntry? Ansprechpartner { get; }
             public string? Notiz { get; set; }
-            public string? MieterAuflistung { get; set; }
-            public IEnumerable<SelectionEntry>? SelectedMieter { get; set; }
+            public string? MieterAuflistung { get; }
+            public IEnumerable<SelectionEntry>? SelectedMieter { get; }
+            public MieteEntryBase? LastMiete { get; }
 
             public VertragEntryBase() { }
             public VertragEntryBase(Vertrag entity, SaverwalterContext ctx)
@@ -48,6 +49,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     .Select(a => ctx.FindPerson(a.PersonId).Bezeichnung));
                 SelectedMieter = Mieter.Select(e
                     => new SelectionEntry(e.PersonId, ctx.FindPerson(e.PersonId).Bezeichnung));
+
+                var lastMiete = entity.Mieten.OrderBy(miete => miete.BetreffenderMonat).LastOrDefault();
+                if (lastMiete != null)
+                {
+                    LastMiete = new MieteEntryBase(lastMiete);
+                }
             }
         }
 

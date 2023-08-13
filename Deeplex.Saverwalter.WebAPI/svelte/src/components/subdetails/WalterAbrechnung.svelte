@@ -6,23 +6,39 @@
         WalterAbrechnungHeizkosten,
         WalterAbrechnungNotes,
         WalterAbrechnungResultat,
-        WalterZaehlerList
+        WalterMieten,
     } from '$walter/components';
-    import { convertDateGerman, convertEuro } from '$walter/services/utils';
+    import { convertDateCanadian, convertDateGerman, convertEuro } from '$walter/services/utils';
     import type { WalterBetriebskostenabrechnungEntry } from '$walter/types';
-    import { Column, Loading, Row, TextInput, Tile } from 'carbon-components-svelte';
+    import { Accordion, Column, Loading, Row, TextInput, Tile } from 'carbon-components-svelte';
+    import WalterAbrechnungNebenkosten from './WalterAbrechnungNebenkosten.svelte';
+    import type { WalterMieteEntry } from '$walter/lib';
 
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
     export let title: string | undefined;
     export let fetchImpl: typeof fetch;
+
+    const lastMiete = abrechnung.mieten.length ? abrechnung.mieten[abrechnung.mieten.length - 1] : undefined;
+    const dateMiete = lastMiete ? new Date(lastMiete.betreffenderMonat) : new Date();
+    dateMiete.setDate(dateMiete.getDate() + new Date(dateMiete.getFullYear(), dateMiete.getMonth(), 0).getDate());
+    if (dateMiete < abrechnung.zeitraum.abrechnungsbeginn)
+    {
+        dateMiete.setDate(abrechnung.zeitraum.abrechnungsbeginn.getDate());
+    }
+    const mietEntry: Partial<WalterMieteEntry> = {
+        vertrag: abrechnung.vertrag,
+        zahlungsdatum: convertDateCanadian(new Date()),
+        betrag: lastMiete?.betrag,
+        betreffenderMonat: convertDateCanadian(dateMiete)
+    }
 </script>
 
 <Tile style="margin-top: 2rem">
-{#await abrechnung}
-    <div style="width:100%; display: flex; justify-content: center">
-        <Loading withOverlay={false} />
-    </div>
-{:then}
+    {#await abrechnung}
+        <div style="width:100%; display: flex; justify-content: center">
+            <Loading withOverlay={false} />
+        </div>
+    {:then}
     
     <Row>
         <Column>
@@ -47,6 +63,15 @@
     </Row>
 
     <Row>
+        <Accordion>
+            <WalterMieten
+                entry={mietEntry}
+                title="Gezahlte Mieten ({abrechnung.gezahltMiete}€)"
+                rows={abrechnung.mieten} />
+        </Accordion>
+    </Row>
+
+    <Row>
         <TextInput
             placeholder="Nutzungsbeginn"
             labelText="Nutzungsbeginn"
@@ -61,6 +86,8 @@
         />
     </Row>
 
+    <WalterAbrechnungNebenkosten {fetchImpl} {abrechnung} />
+
     <Tile>
         <h4>Kalte Nebenkosten</h4>
     </Tile>
@@ -72,6 +99,7 @@
             zeitraum={abrechnung.zeitraum}
         />
         <WalterAbrechnungGruppe
+            {fetchImpl}
             rows={einheit.rechnungen}
             year={abrechnung.zeitraum.jahr}
         />
@@ -98,14 +126,5 @@
 
     <Tile><h4>Gesamtergebnis der Abrechnung:</h4></Tile>
     <WalterAbrechnungResultat entry={abrechnung} />
-
-    {#if abrechnung.zaehler.length}
-        <hr />
-        <Tile>
-            <h4>Zähler</h4>
-        </Tile>
-        <WalterZaehlerList {fetchImpl} rows={abrechnung.zaehler} />
-    {/if}
-    <div style="margin: 3em"/>
 {/await}
 </Tile>

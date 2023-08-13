@@ -37,7 +37,7 @@
     let extendedNavigation = true;
 
     function closeSideNav() {
-        closeSideNav();
+        isOpen = false;
     }
 
 </script>

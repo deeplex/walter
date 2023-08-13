@@ -136,13 +136,13 @@
                 <StructuredListCell></StructuredListCell>
                 <StructuredListCell head>Zählernummer / Typ</StructuredListCell>
             </StructuredListRow>
-                {#each einheit.verbrauchAnteil.filter(e => e.umlage.text !== "Heizkosten") as verbrauch}
-                    <WalterAbrechnungEinheitVerbrauch 
-                        {verbrauch}
-                        beginn={zeitraum.nutzungsbeginn}
-                        ende={zeitraum.nutzungsende} />
-                {/each}
-            {/if}
+            {#each einheit.verbrauchAnteil.filter(e => e.umlage.text !== "Heizkosten") as verbrauch}
+                <WalterAbrechnungEinheitVerbrauch
+                    {verbrauch}
+                    beginn={zeitraum.nutzungsbeginn}
+                    ende={zeitraum.nutzungsende} />
+            {/each}
+        {/if}
         </StructuredListBody>
     </StructuredList>
 </Row>

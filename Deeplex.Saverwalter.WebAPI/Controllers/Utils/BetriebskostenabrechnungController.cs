@@ -2,8 +2,11 @@
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
@@ -77,8 +80,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double GesamtBetrag { get; }
             public double Anteil { get; }
             public double Betrag { get; }
+            public double BetragLetztesJahr { get; }
 
-            public RechnungEntry(KeyValuePair<Umlage, Betriebskostenrechnung?> rechnung, Abrechnungseinheit einheit)
+            public RechnungEntry(KeyValuePair<Umlage, Betriebskostenrechnung?> rechnung, Abrechnungseinheit einheit, int year)
             {
                 Id = rechnung.Key.UmlageId;
                 RechnungId = rechnung.Value?.BetriebskostenrechnungId ?? 0;
@@ -89,6 +93,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 GesamtBetrag = rechnung.Value?.Betrag ?? 0;
                 Anteil = einheit.GetAnteil(rechnung.Key);
                 Betrag = GesamtBetrag * Anteil;
+                BetragLetztesJahr = rechnung.Key.Betriebskostenrechnungen
+                    .Where(bkr => (bkr.BetreffendesJahr + 1) == year)
+                    .Sum(bkr => bkr.Betrag);
             }
         }
 
@@ -111,7 +118,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public List<Heizkostenberechnung>? Heizkostenberechnungen { get; }
             public double AllgStromFaktor { get; }
 
-            public AbrechnungseinheitEntry(Abrechnungseinheit einheit)
+            public AbrechnungseinheitEntry(Abrechnungseinheit einheit, int year)
             {
                 Bezeichnung = einheit.Bezeichnung;
                 GesamtWohnflaeche = einheit.GesamtWohnflaeche;
@@ -124,7 +131,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 Heizkostenberechnungen = einheit.Heizkostenberechnungen;
                 Rechnungen = einheit.Rechnungen
                     .Where(rechnung => (int)rechnung.Key.Typ % 2 == 0)
-                    .Select(rechnung => new RechnungEntry(rechnung, einheit))
+                    .Select(rechnung => new RechnungEntry(rechnung, einheit, year))
                     .ToList();
                 VerbrauchAnteil = einheit.VerbrauchAnteile
                     .Select(anteil => new VerbrauchAnteilEntry(anteil))
@@ -151,12 +158,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double NebenkostenMietminderung { get; }
             public double KaltMietminderung { get; }
             public double Mietminderung { get; }
-            public List<ZaehlerEntryBase>? Zaehler { get; }
             public List<AbrechnungseinheitEntry>? Abrechnungseinheiten { get; }
             public double Result { get; }
             public Zeitraum? Zeitraum { get; set; }
+            public List<WohnungEntryBase> Wohnungen { get; }
+            public List<VertragEntryBase> Vertraege { get; }
+            public List<ZaehlerEntryBase> Zaehler { get; }
+            public List<MieteEntryBase> Mieten { get; }
 
-            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung abrechnung)
+            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung abrechnung, SaverwalterContext ctx)
             {
                 Notes = abrechnung.Notes;
                 Vermieter = new SelectionEntry(abrechnung.Vermieter.PersonId, abrechnung.Vermieter.Bezeichnung);
@@ -171,9 +181,33 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 Zeitraum = abrechnung.Zeitraum;
                 Result = abrechnung.Result;
                 Abrechnungseinheiten = abrechnung.Abrechnungseinheiten
-                    .Select(einheit => new AbrechnungseinheitEntry(einheit))
+                    .Select(einheit => new AbrechnungseinheitEntry(einheit, Zeitraum.Jahr))
                     .ToList();
-                Zaehler = abrechnung.Vertrag.Wohnung.Zaehler.Select(e => new ZaehlerEntryBase(e)).ToList();
+
+
+                var wohnungen = abrechnung.Abrechnungseinheiten
+                    .SelectMany(einheit => einheit.Rechnungen.Select(rechnung => rechnung.Key))
+                    .SelectMany(umlage => umlage.Wohnungen)
+                    .Distinct();
+                Wohnungen = wohnungen
+                    .Select(wohnung => new WohnungEntryBase(wohnung, ctx))
+                    .ToList();
+                Vertraege = wohnungen
+                    .SelectMany(wohnung => wohnung.Vertraege)
+                    .Where(vertrag => vertrag.Beginn() <= abrechnung.Zeitraum.Abrechnungsende &&
+                        (vertrag.Ende == null || vertrag.Ende >= abrechnung.Zeitraum.Abrechnungsbeginn))
+                    .Select(vertrag => new VertragEntryBase(vertrag, ctx))
+                    .ToList();
+                Zaehler = wohnungen
+                    .SelectMany(wohnung => wohnung.Zaehler)
+                    .Select(e => new ZaehlerEntryBase(e))
+                    .ToList();
+                Mieten = abrechnung.Vertrag.Mieten
+                    .Where(miete =>
+                        miete.BetreffenderMonat >= abrechnung.Zeitraum.Abrechnungsbeginn &&
+                        miete.BetreffenderMonat <= abrechnung.Zeitraum.Abrechnungsende)
+                    .Select(miete => new MieteEntryBase(miete))
+                    .ToList();
             }
         }
 

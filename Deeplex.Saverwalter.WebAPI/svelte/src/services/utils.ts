@@ -2,7 +2,7 @@
 export function convertDateCanadian(
     date: Date | undefined
 ): string | undefined {
-    if (date) {
+    if (date && date.getFullYear) {
         const year = date.getFullYear();
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const day = date.getDate().toString().padStart(2, '0');

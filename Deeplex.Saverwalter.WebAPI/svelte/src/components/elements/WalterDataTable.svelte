@@ -98,10 +98,20 @@
                     cell.key === 'betrag' ||
                     cell.key === 'grundmiete' ||
                     cell.key === 'kosten' ||
-                    cell.key === 'gesamtBetrag'}
+                    cell.key === 'gesamtBetrag' ||
+                    cell.key === 'betragLetztesJahr' }
                     {convertEuro(cell.value)}
                 {:else if cell.key === 'anteil'}
                     {convertPercent(cell.value)}
+                {:else if cell.key === 'button'}
+                    <Button
+                        disabled={cell.value === "disabled"}
+                        on:click={cell.value}
+                        tooltipPosition="left"
+                        style="position: absolute; margin-top: -15px; margin-left: 1em; scale: 0.65"
+                        kind="tertiary"
+                        icon="{Add}"
+                        iconDescription={"Hinzufügen"} />
                 {:else}
                     {cell.value}
                 {/if}
