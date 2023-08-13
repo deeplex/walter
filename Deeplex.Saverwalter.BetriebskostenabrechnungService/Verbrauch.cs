@@ -12,7 +12,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Zaehler = zaehler;
             var endstand = GetZaehlerEndStand(zaehler, zeitraum.Nutzungsende);
             var anfangsstand = GetZaehlerAnfangsStand(zaehler, zeitraum.Nutzungsbeginn);
-            if (anfangsstand == null && (endstand == null || endstand.Stand > 0))
+            if (anfangsstand == null)
             {
                 notes.Add(new Note($"Keinen Anfangsstand für Zähler {zaehler.Kennnummer} gefunden.", Severity.Error));
             }

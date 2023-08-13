@@ -4,7 +4,7 @@
     import type { PageData } from "./$types";
     import type { WalterBetriebskostenabrechnungEntry } from "$walter/types";
     import { page } from "$app/stores";
-    import { ComboBox, Loading, NumberInput, OverflowMenu, OverflowMenuItem, Row } from "carbon-components-svelte";
+    import { ComboBox, InlineNotification, Link, Loading, NumberInput, OverflowMenu, OverflowMenuItem, Row } from "carbon-components-svelte";
     import { shouldFilterItem } from "$walter/components/elements/WalterComboBox";
     import { create_pdf_doc, create_word_doc, updatePreview } from "./utils";
     import { Download } from "carbon-icons-svelte";
@@ -16,6 +16,7 @@
     export let selectedYear: number;
 
     let abrechnung: Promise<WalterBetriebskostenabrechnungEntry | undefined>;
+    let title: string;
     const searchParams: URLSearchParams = new URL($page.url).searchParams;
 
     export let data: PageData;
@@ -24,9 +25,12 @@
 
     let value: WalterSelectionEntry | undefined;
 
-    function update() {
+    async function update() {
         goto(`?${searchParams.toString()}`, { noScroll: true });
         abrechnung = updatePreview(vertragId, selectedYear, data.fetchImpl);
+
+        const value = data.vertraege.find(vertrag => vertrag.id == vertragId);
+        title = value?.text || "Wähle einen Vertrag aus";
     }
 
     onMount(async () => {
@@ -88,7 +92,7 @@
     }
 </script>
 
-<WalterHeader title={value?.text || "Wähle einen Vertrag aus"} />
+<WalterHeader {title} />
 
 <WalterGrid>
     <Row>
@@ -98,7 +102,7 @@
             on:select={select}
             items={data.vertraege}
             value={value?.text}
-            titleText={value?.text || "Wähle einen Vertrag aus"}
+            titleText={title}
             {shouldFilterItem}
         />
 
@@ -122,12 +126,20 @@
         <Loading />
     {:then resolved}
         {#if resolved}
-            <WalterAbrechnung
-                fetchImpl={data.fetchImpl}
-                abrechnung={resolved}
-                title={value?.text || "Wähle einen Vertrag aus"}/>
+            {#if resolved.zeitraum.nutzungszeitraum > 0}
+                <WalterAbrechnung
+                    fetchImpl={data.fetchImpl}
+                    abrechnung={resolved}
+                    title={title}/>
+            {:else}
+                <InlineNotification lowContrast kind="error" hideCloseButton title="Abrechnungsjahr liegt außerhalb der Vertragslaufzeit.">
+                    <Link href={`vertraege/${vertragId}`}>Klicke hier um zum Vertrag zu gelangen.</Link>
+                </InlineNotification>
+            {/if}
         {:else if vertragId}
-            <p>Fehler...</p>
+            <InlineNotification lowContrast kind="error" hideCloseButton>
+                Ups, da ist wohl irgendwas schiefgelaufen. Versuche die Seite neu zu laden...
+            </InlineNotification>
         {/if}
     {/await}
 </WalterGrid>

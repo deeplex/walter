@@ -20,7 +20,7 @@
         { key: 'betragLetztesJahr', value: 'Betrag (letztes Jahr)'},
         { key: 'anteil', value: 'Anteil' },
         { key: 'betrag', value: 'Kosten' },
-        { key: 'button', value: 'Vorschau'}
+        { key: 'button', value: 'Hinzufügen'}
     ];
 
     function add(e: CustomEvent, rechnung: WalterRechnungEntry)
