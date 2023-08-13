@@ -40,7 +40,10 @@
 
     function select(e: CustomEvent) {
         vertragId = e.detail.selectedItem?.id || vertragId;
-        searchParams.set("vertrag", `${vertragId}`);
+        if (vertragId)
+        {
+            searchParams.set("vertrag", `${vertragId}`);
+        }
         update();
     }
 
@@ -112,7 +115,7 @@
                 fetchImpl={data.fetchImpl}
                 abrechnung={resolved}
                 title={value?.text || "Wähle einen Vertrag aus"}/>
-        {:else}
+        {:else if vertragId}
             <p>Fehler...</p>
         {/if}
     {/await}
