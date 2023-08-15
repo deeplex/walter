@@ -27,17 +27,17 @@
 
 <WalterGrid>
     <WalterErhaltungsaufwendung fetchImpl={data.fetchImpl} entry={data.entry} />
-</WalterGrid>
 
-<WalterLinks>
-    <WalterLink
-        bind:fileWrapper
-        name={`Wohnung: ${data.entry.wohnung.text}`}
-        href={`/wohnungen/${data.entry.wohnung.id}`}
-    />
-    <WalterLink
-        bind:fileWrapper
-        name={`Aussteller: ${data.entry.aussteller.text}`}
-        href={`/kontakte/jur/${data.entry.aussteller.id}`}
-    />
-</WalterLinks>
+    <WalterLinks>
+        <WalterLink
+            bind:fileWrapper
+            name={`Wohnung: ${data.entry.wohnung.text}`}
+            href={`/wohnungen/${data.entry.wohnung.id}`}
+        />
+        <WalterLink
+            bind:fileWrapper
+            name={`Aussteller: ${data.entry.aussteller.text}`}
+            href={`/kontakte/jur/${data.entry.aussteller.id}`}
+        />
+    </WalterLinks>
+</WalterGrid>
