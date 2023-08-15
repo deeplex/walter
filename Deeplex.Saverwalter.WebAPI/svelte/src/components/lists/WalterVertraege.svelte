@@ -39,7 +39,7 @@
             dateMiete.setDate(earliest.getDate());
         }
         quickAddEntry = {
-            vertrag: vertrag.lastMiete?.vertrag || {id: vertrag.id, text: vertrag.wohnung.text},
+            vertrag: vertrag.lastMiete?.vertrag || {id: `${vertrag.id}`, text: vertrag.wohnung.text},
             zahlungsdatum: convertDateCanadian(new Date()),
             betrag: vertrag.lastMiete?.betrag,
             betreffenderMonat: convertDateCanadian(dateMiete)

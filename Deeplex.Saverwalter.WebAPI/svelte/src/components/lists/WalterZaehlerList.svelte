@@ -35,7 +35,7 @@
             datum: convertDateCanadian(ablesedatum),
             stand: zaehler.lastZaehlerstand?.stand,
             einheit: zaehler.lastZaehlerstand?.einheit,
-            zaehler: {id: zaehler.id, text: zaehler.kennnummer}
+            zaehler: {id: `${zaehler.id}`, text: zaehler.kennnummer}
         }
 
         open = true;
@@ -51,7 +51,7 @@
 <WalterDataWrapperQuickAdd
     title={quickAddEntry.zaehler?.text || "Zähler"}
     addEntry={quickAddEntry}
-    addUrl="/api/zaehlerstand/"
+    addUrl="/api/zaehlerstaende/"
     bind:addModalOpen={open}>
     <WalterZaehlerstand entry={quickAddEntry}/>
 </WalterDataWrapperQuickAdd>
