@@ -65,7 +65,7 @@
         const file = await create_word_doc(
             vertragId,
             selectedYear,
-            value?.text!,
+            title,
             data.fetchImpl
         );
 
@@ -81,7 +81,7 @@
         const file = await create_pdf_doc(
             vertragId,
             selectedYear,
-            value?.text!,
+            title,
             data.fetchImpl
         );
 
