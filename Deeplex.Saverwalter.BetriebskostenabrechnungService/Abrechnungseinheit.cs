@@ -87,7 +87,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             BetragKalt = GetSum(rechnungenKalt, notes);
             GesamtBetragKalt = rechnungenKalt.Sum(rechnung => rechnung.Betrag);
-
         }
 
         public double GetAnteil(Umlage umlage)

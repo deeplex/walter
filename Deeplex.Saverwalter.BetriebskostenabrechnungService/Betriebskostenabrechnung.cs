@@ -45,6 +45,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             KaltMietminderung = KaltMiete * Mietminderung;
             BezahltNebenkosten = GezahlteMiete - KaltMiete + KaltMietminderung;
             Result = BezahltNebenkosten - BetragNebenkosten + NebenkostenMietminderung;
+
+            Notes = Notes.Distinct().ToList();
         }
     }
 }
