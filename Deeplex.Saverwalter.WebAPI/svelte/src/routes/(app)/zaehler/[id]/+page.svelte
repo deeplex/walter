@@ -57,15 +57,19 @@
             rows={data.entry.umlagen}
         />
 
-        <WalterLink
-            bind:fileWrapper
-            name={`Adresse: ${data.entry.adresse.anschrift}`}
-            href={`/adressen/${data.entry.adresse.id}`}
-        />
-        <WalterLink
-            bind:fileWrapper
-            name={`Wohnung: ${data.entry.wohnung?.text}`}
-            href={`/wohnungen/${data.entry.wohnung?.id}`}
-        />
+        {#if data.entry.adresse !== null}
+            <WalterLink
+                bind:fileWrapper
+                name={`Adresse: ${data.entry.adresse?.anschrift}`}
+                href={`/adressen/${data.entry.adresse?.id}`}
+            />
+        {/if}
+        {#if data.entry.wohnung !== null}
+            <WalterLink
+                bind:fileWrapper
+                name={`Wohnung: ${data.entry.wohnung?.text}`}
+                href={`/wohnungen/${data.entry.wohnung?.id}`}
+            />
+        {/if}
     </WalterLinks>
 </WalterGrid>

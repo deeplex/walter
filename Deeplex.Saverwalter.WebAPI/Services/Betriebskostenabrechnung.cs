@@ -34,7 +34,6 @@ namespace Deeplex.Saverwalter.WebAPI
 
         public IActionResult GetWordDocument(int id, int Jahr, SaverwalterContext ctx)
         {
-
             try
             {
                 var stream = new MemoryStream();
