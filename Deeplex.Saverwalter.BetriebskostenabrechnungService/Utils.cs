@@ -4,6 +4,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
     public static class Utils
     {
+        public static void Add(this List<Note> notes, string message, Severity severity)
+        {
+            notes.Add(new Note(message, severity));
+        }
+
         public static T Max<T>(T l, T r) where T : IComparable<T>
             => Max(l, r, Comparer<T>.Default);
         public static T Max<T>(T l, T r, IComparer<T> c)
@@ -22,7 +27,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             }
             else
             {
-                notes.Add(new Note("Konnte keinen Anteil für " + typ.ToDescriptionString() + " feststellen.", Severity.Error));
+                notes.Add("Konnte keinen Anteil für " + typ.ToDescriptionString() + " feststellen.", Severity.Error);
                 return 0;
             }
         }

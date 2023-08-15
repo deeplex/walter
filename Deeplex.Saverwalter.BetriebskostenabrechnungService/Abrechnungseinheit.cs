@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
                 if (Rechnungen[umlage] == null)
                 {
-                    notes.Add(new Note($"Keine Rechnung für {umlage.Typ.ToDescriptionString()} gefunden.", Severity.Warning));
+                    notes.Add($"Keine Rechnung für {umlage.Typ.ToDescriptionString()} gefunden.", Severity.Warning);
                 }
             }
 
@@ -73,11 +73,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
                 if (allgStrom == null)
                 {
-                    notes.Add(new Note("Keine Allgemeinstromrechnung für Heizung gefunden", Severity.Error));
+                    notes.Add("Keine Allgemeinstromrechnung für Heizung gefunden", Severity.Error);
                 }
                 else if (allgStrom.Betrag < AllgStromFaktor)
                 {
-                    notes.Add(new Note($"Allgemeinstromrechnung ist niedriger als 5% der Heizungskosten. Rechnung wäre damit {allgStrom.Betrag - AllgStromFaktor:N2}€", Severity.Warning));
+                    notes.Add($"Allgemeinstromrechnung ist niedriger als 5% der Heizungskosten. Rechnung wäre damit {allgStrom.Betrag - AllgStromFaktor:N2}€", Severity.Warning);
                 }
                 else
                 {
@@ -123,13 +123,15 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var verbrauchAnteile = VerbrauchAnteile.Where(anteil => anteil.Umlage == rechnung.Umlage).ToList();
             if (verbrauchAnteile.Count == 0)
             {
-                notes.Add(new Note($"Keinen Anteil für {rechnung.Umlage.Typ.ToDescriptionString()} gefunden", Severity.Error));
+                notes.Add($"Keinen Anteil für {rechnung.Umlage.Typ.ToDescriptionString()} gefunden",
+                    Severity.Error);
 
                 return 0;
             }
             else if (verbrauchAnteile.Count > 1)
             {
-                notes.Add(new Note($"Mehr als einen Anteil für {rechnung.Umlage.Typ.ToDescriptionString()} gefunden", Severity.Error));
+                notes.Add($"Mehr als einen Anteil für {rechnung.Umlage.Typ.ToDescriptionString()} gefunden",
+                    Severity.Error);
 
                 return 0;
             }
@@ -139,7 +141,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             if (verbrauchAnteil.Anteil.Count > 1)
             {
-                notes.Add(new Note($"Verbrauch von Rechnung {rechnung.Umlage.Typ} enthält mehr als einen Zählertypen", Severity.Error));
+                notes.Add($"Verbrauch von Rechnung {rechnung.Umlage.Typ} enthält mehr als einen Zählertypen",
+                    Severity.Error);
+
                 return 0;
             }
             return verbrauchAnteil.Anteil.First().Value;

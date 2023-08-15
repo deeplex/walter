@@ -80,15 +80,16 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                         verbrauch.Zaehler.Wohnung == other_verbrauch.Zaehler.Wohnung);
                     if (ersatz != null)
                     {
-                        notes.Add(new Note($"Zählerwechsel erkannt am {verbrauch.Enddatum} von Zähler " +
+                        notes.Add($"Zählerwechsel erkannt am {verbrauch.Enddatum} von Zähler " +
                             $"{verbrauch.Zaehler.Kennnummer} auf {ersatz.Zaehler.Kennnummer} ({ersatz.Zaehler.Typ})",
-                            Severity.Info));
+                            Severity.Info);
                     }
                     else
                     {
-                        notes.Add(new Note($"Kein Endstand für Zähler {verbrauch.Zaehler.Kennnummer} ({verbrauch.Zaehler.Typ}) gefunden. " +
+                        notes.Add(
+                            $"Kein Endstand für Zähler {verbrauch.Zaehler.Kennnummer} ({verbrauch.Zaehler.Typ}) gefunden. " +
                             $"Letzter gültiger Zählerstand ist vom {verbrauch.Enddatum}, was nicht innerhalb von 14 Tagen vor Nutzungsende ist.",
-                            Severity.Error));
+                            Severity.Error);
                     }
                 }
 
@@ -103,9 +104,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     }
                     else
                     {
-                        notes.Add(new Note($"Kein Anfangsstand für Zähler {verbrauch.Zaehler.Kennnummer} ({verbrauch.Zaehler.Typ}) gefunden. " +
+                        notes.Add(
+                            $"Kein Anfangsstand für Zähler {verbrauch.Zaehler.Kennnummer} ({verbrauch.Zaehler.Typ}) gefunden. " +
                             $"Erster gültiger Zählerstand ist vom {verbrauch.Anfangsdatum}, was nach Nutzungsbeginn ist.",
-                            Severity.Error));
+                            Severity.Error);
                     }
                 }
             }

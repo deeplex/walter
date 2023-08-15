@@ -44,13 +44,13 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var warmwasserZaehlerAbrechnungseinheit = rechnung.Umlage.Zaehler.Where(e => e.Typ == Zaehlertyp.Warmwasser).ToList();
             if (warmwasserZaehlerAbrechnungseinheit.Count == 0)
             {
-                notes.Add(new Note("Keine Warmwasserzähler in Abrechnungseinheit gefunden.", Severity.Error));
+                notes.Add("Keine Warmwasserzähler in Abrechnungseinheit gefunden.", Severity.Error);
             }
 
             var warmwasserZaehlerWohnung = warmwasserZaehlerAbrechnungseinheit.Where(z => z.Wohnung == wohnung).ToList();
             if (warmwasserZaehlerWohnung.Count == 0)
             {
-                notes.Add(new Note("Keine Warmwasserzähler für Wohnung.", Severity.Error));
+                notes.Add("Keine Warmwasserzähler für Wohnung.", Severity.Error);
             }
 
             var gasZaehlerAbrechnungseinheit = rechnung.Umlage.Zaehler.Where(e => e.Typ == Zaehlertyp.Gas && e.Wohnung != null).ToList();
@@ -60,7 +60,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             if (gasAllgemeinZaehler.Count == 0)
             {
-                notes.Add(new Note($"Notwendiger Allgemeinzähler Gas für Heizkosten ist nicht definiert.", Severity.Error));
+                notes.Add($"Notwendiger Allgemeinzähler Gas für Heizkosten ist nicht definiert.", Severity.Error);
                 return;
             }
 
@@ -70,14 +70,14 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             if (Q == 0)
             {
-                notes.Add(new Note("Gesamtzähler steht auf 0.", Severity.Error));
+                notes.Add("Gesamtzähler steht auf 0.", Severity.Error);
             }
 
             Para9_2 = 2.5 * (V / Q) * (tw - 10); // TODO HeizkostenV §9
 
             if (Para9_2 > 1)
             {
-                notes.Add(new Note("Heizkostenverteilung nach §9 ist über 100%.", Severity.Error));
+                notes.Add("Heizkostenverteilung nach §9 ist über 100%.", Severity.Error);
             }
 
             GesamtNutzflaeche = rechnung.Umlage.Wohnungen.Sum(w => w.Nutzflaeche);

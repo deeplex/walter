@@ -16,9 +16,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var anfangsstand = GetZaehlerAnfangsStand(zaehler, beginn);
             if (anfangsstand == null)
             {
-                notes.Add(new Note($"Keinen gültigen Anfangsstand für Zähler {zaehler.Kennnummer} ({zaehler.Typ}) " +
+                notes.Add($"Keinen gültigen Anfangsstand für Zähler {zaehler.Kennnummer} ({zaehler.Typ}) " +
                     $"innerhalb des Zeitraums ({beginn.ToString("dd.MM.yyyy")} - {ende.ToString("dd.MM.yyyy")}) gefunden.",
-                    Severity.Error));
+                    Severity.Error);
             }
             else
             {
@@ -27,9 +27,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             if (endstand == null)
             {
-                notes.Add(new Note($"Keinen gültigen Endstand für Zähler {zaehler.Kennnummer} ({zaehler.Typ})" +
+                notes.Add($"Keinen gültigen Endstand für Zähler {zaehler.Kennnummer} ({zaehler.Typ})" +
                     $"innerhalb des Zeitraums ({beginn.ToString("dd.MM.yyyy")} - {ende.ToString("dd.MM.yyyy")}) gefunden.",
-                    Severity.Error));
+                    Severity.Error);
             }
             else
             {

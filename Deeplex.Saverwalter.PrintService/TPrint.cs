@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             if (ansprechpartner.Adresse == null)
             {
-                abrechnung.Notes.Add(new Note("Ansprechpartner hat keine Adresse. Dies ist notwendig.", Severity.Error));
+                abrechnung.Notes.Add("Ansprechpartner hat keine Adresse. Dies ist notwendig.", Severity.Error);
             }
 
             left.Add(ansprechpartner.Adresse!.Strasse + " " + ansprechpartner.Adresse.Hausnummer);
