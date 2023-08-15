@@ -53,17 +53,17 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 notes.Add(new Note("Keine Warmwasserzähler für Wohnung.", Severity.Error));
             }
 
-            var allgemeinZaehler = rechnung.Umlage.Zaehler.Where(e => e.Wohnung is null).ToList();
-            if (allgemeinZaehler.Count == 0)
-            {
-                notes.Add(new Note("Notwendiger Zähler für Umlage ist nicht definiert.", Severity.Error));
-                return;
-            }
-
             var gasZaehlerAbrechnungseinheit = rechnung.Umlage.Zaehler.Where(e => e.Typ == Zaehlertyp.Gas && e.Wohnung != null).ToList();
             var gasZaehlerWohnung = gasZaehlerAbrechnungseinheit.Where(e => e.Wohnung == wohnung).ToList();
             var gasZaehlerVerbrauchWohnung = Delta(gasZaehlerWohnung, zeitraum.Nutzungsbeginn, zeitraum.Nutzungsende);
             var gasAllgemeinZaehler = rechnung.Umlage.Zaehler.Where(z => z.Wohnung == null && z.Typ == Zaehlertyp.Gas).ToList();
+
+            if (gasAllgemeinZaehler.Count == 0)
+            {
+                notes.Add(new Note($"Notwendiger Allgemeinzähler Gas für Heizkosten ist nicht definiert.", Severity.Error));
+                return;
+            }
+
 
             V = Delta(warmwasserZaehlerAbrechnungseinheit, zeitraum.Abrechnungsbeginn, zeitraum.Abrechnungsende);
             Q = Delta(gasAllgemeinZaehler, zeitraum.Abrechnungsbeginn, zeitraum.Abrechnungsende);
