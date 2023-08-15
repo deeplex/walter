@@ -102,7 +102,7 @@
             on:select={select}
             items={data.vertraege}
             value={value?.text}
-            titleText={title}
+            titleText="Vertrag"
             {shouldFilterItem}
         />
 
