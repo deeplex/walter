@@ -73,7 +73,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var checkQ = alleAnteile.Where(w => w.Zaehler.Typ == Zaehlertyp.Gas).Sum(verbrauch => verbrauch.Delta);
             if (Q < checkQ)
             {
-                notes.Add($"Gesamtzähler für Heizung zählt {Q} kWh, während die Summer der einzelnen Wärmemengenzähler {checkQ} ist. " +
+                notes.Add($"Gesamtzähler für Heizung zählt {Q} kWh, während die Summer der einzelnen Wärmemengenzähler {checkQ} kWh ist. " +
                     $"Der Allgemeinzähler muss mehr zählen als die Summe der einzelnen.", Severity.Error);
             }
 

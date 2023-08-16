@@ -98,7 +98,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
                     if (ersatz != null)
                     {
-                        notes.Add($"Zählerwechsel erkannt am {verbrauch.Enddatum} von Zähler " +
+                        notes.Add($"Zählerwechsel erkannt am {verbrauch.Enddatum.ToString("dd.MM.yyyy")} von Zähler " +
                             $"{verbrauch.Zaehler.Kennnummer} auf {ersatz.Zaehler.Kennnummer} ({ersatz.Zaehler.Typ})",
                             Severity.Info);
                     }
