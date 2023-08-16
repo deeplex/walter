@@ -7,7 +7,6 @@
     export let beginn: Date;
     export let ende: Date;
 
-    const reference = Object.values(verbrauch.alleZaehler)[0][0].zaehler.filter;
 </script>
 {#each Object.entries(verbrauch.dieseZaehler) as [unit, verbrauchUnit]}
     {#each verbrauchUnit as v}
@@ -25,7 +24,7 @@
     {/each}
     <StructuredListRow>
         <StructuredListCell head>
-            {convertFixed2(verbrauch.dieseVerbrauch[unit])} {reference} / {convertFixed2(verbrauch.alleVerbrauch[unit])} {reference}
+            {convertFixed2(verbrauch.dieseVerbrauch[unit])} {verbrauchUnit[0].zaehler.filter} / {convertFixed2(verbrauch.alleVerbrauch[unit])} {verbrauchUnit[0].zaehler.filter}
         </StructuredListCell>
         <StructuredListCell>
             {convertDateGerman(new Date(beginn))} - {convertDateGerman(new Date(ende))}
