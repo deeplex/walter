@@ -70,9 +70,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             DateOnly ende,
             List<Note> notes)
         {
+            var thresholdOfDaysBeforeNotOkay = 14;
+
             foreach (var verbrauch in verbraeuche)
             {
-                if (verbrauch.Enddatum.DayNumber < ende.DayNumber - 14)
+                if (verbrauch.Enddatum.DayNumber < ende.DayNumber - thresholdOfDaysBeforeNotOkay)
                 {
                     var ersatz = verbraeuche.SingleOrDefault(other_verbrauch =>
                         other_verbrauch.Anfangsdatum == verbrauch.Enddatum &&
@@ -88,7 +90,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     {
                         notes.Add(
                             $"Kein Endstand für Zähler {verbrauch.Zaehler.Kennnummer} ({verbrauch.Zaehler.Typ}) gefunden. " +
-                            $"Letzter gültiger Zählerstand ist vom {verbrauch.Enddatum}, was nicht innerhalb von 14 Tagen vor Nutzungsende ist.",
+                            $"Letzter gültiger Zählerstand ist vom {verbrauch.Enddatum.ToString("dd.MM.yyyy")}, was {ende.DayNumber - verbrauch.Enddatum.DayNumber}" +
+                            $" Tage vor Nutzungsende ist.",
                             Severity.Error);
                     }
                 }
