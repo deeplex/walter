@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { convertEuro, convertPercent } from "$walter/services/utils";
+    import { convertEuro, convertFixed2, convertPercent } from "$walter/services/utils";
     import "./katex.min.css";
     import type { WalterHeizkostenberechnungEntry } from "$walter/types/WalterBetriebskostenabrechnung.type";
     import { Row, StructuredList, StructuredListBody, StructuredListCell, StructuredListHead, StructuredListRow, Tile, Truncate } from "carbon-components-svelte";
@@ -51,7 +51,7 @@
 </Row>
 <Tile>
     <Katex displayMode>
-        2,5 \times \frac{'{V}'}{'{Q}'} \times (60°C-10°C) \frac{'{kWh}'}{'{m³ K}'}\rightarrow 2,5 \times \frac{`{${heizkosten.v} m³}`}{`{${heizkosten.q / 1000} kWh}`} \times (60°C - 10°C) \frac{'{kWh}'}{'{m³ K}'} = {(heizkosten.heizkostenVerbrauchAnteil * 100).toFixed(2)} \%
+        2,5 \times \frac{'{V}'}{'{Q}'} \times (60°C-10°C) \frac{'{kWh}'}{'{m³ K}'}\rightarrow 2,5 \times \frac{`{${convertFixed2(heizkosten.v)} m³}`}{`{${heizkosten.q / 1000} kWh}`} \times (60°C - 10°C) \frac{'{kWh}'}{'{m³ K}'} = {(heizkosten.para9_2 * 100).toFixed(2)} \%
     </Katex>
 </Tile>
 
@@ -104,7 +104,7 @@
                 <StructuredListCell>{convertEuro(heizkosten.pauschalBetrag)}</StructuredListCell>
                 <StructuredListCell>{convertPercent(heizkosten.para9_2)}</StructuredListCell>
                 <StructuredListCell>{convertPercent(1 - heizkosten.para8)}</StructuredListCell>
-                <StructuredListCell>{convertPercent(heizkosten.heizkostenVerbrauchAnteil)}</StructuredListCell>
+                <StructuredListCell>{convertPercent(heizkosten.warmwasserVerbrauchAnteil)}</StructuredListCell>
                 <StructuredListCell>{convertEuro(heizkosten.warmwasserAnteilVerb)}</StructuredListCell>
             </StructuredListRow>
             <StructuredListRow>

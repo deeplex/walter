@@ -371,7 +371,7 @@ namespace Deeplex.Saverwalter.PrintService
                             for (var i = 0; i < value.Count; ++i)
                             {
                                 var delta = value[i].Delta;
-                                col1.Add(Unit(delta, unit) + " / " + Unit(deltaAll, unit) + "\t(" + verbrauchAnteil.Umlage.Typ + ")");
+                                col1.Add(Unit(delta, unit) + " / " + Unit(deltaAll, unit));
                                 col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
                                 col3.Add(value[i].Zaehler.Kennnummer);
                                 col4.Add(Prozent(verbrauchAnteil.Anteil[typ]));
@@ -496,7 +496,7 @@ namespace Deeplex.Saverwalter.PrintService
             col3.Add("");
             col4.Add("");
             col5.Add("Summe: ");
-            col6.Add(Euro(abrechnungseinheit.GesamtBetragKalt));
+            col6.Add(Euro(abrechnungseinheit.BetragKalt));
             bold.Add(true);
             underlined.Add(false);
 
@@ -640,7 +640,7 @@ namespace Deeplex.Saverwalter.PrintService
                         for (var i = 0; i < value.Count; ++i)
                         {
                             var delta = value[i].Delta;
-                            col1.Add(Unit(delta, unit) + " / " + Unit(deltaAll, unit) + "\t(" + verbrauchAnteil.Umlage.Typ + ")");
+                            col1.Add(Unit(delta, unit) + " / " + Unit(deltaAll, unit));
                             col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
                             col3.Add(value[i].Zaehler.Kennnummer);
                             col4.Add(Prozent(verbrauchAnteil.Anteil[typ]));

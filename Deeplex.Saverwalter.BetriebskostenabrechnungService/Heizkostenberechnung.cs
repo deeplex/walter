@@ -31,6 +31,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public Heizkostenberechnung(
             Betriebskostenrechnung rechnung,
             Wohnung wohnung,
+            List<VerbrauchAnteil> verbrauchAnteile,
             Zeitraum zeitraum,
             List<Note> notes)
         {
@@ -53,9 +54,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 notes.Add("Keine Warmwasserzähler für Wohnung.", Severity.Error);
             }
 
-            var gasZaehlerAbrechnungseinheit = rechnung.Umlage.Zaehler.Where(e => e.Typ == Zaehlertyp.Gas && e.Wohnung != null).ToList();
-            var gasZaehlerWohnung = gasZaehlerAbrechnungseinheit.Where(e => e.Wohnung == wohnung).ToList();
-            var gasZaehlerVerbrauchWohnung = Delta(gasZaehlerWohnung, zeitraum.Nutzungsbeginn, zeitraum.Nutzungsende);
             var gasAllgemeinZaehler = rechnung.Umlage.Zaehler.Where(z => z.Wohnung == null && z.Typ == Zaehlertyp.Gas).ToList();
 
             if (gasAllgemeinZaehler.Count == 0)
@@ -65,8 +63,19 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             }
 
 
-            V = Delta(warmwasserZaehlerAbrechnungseinheit, zeitraum.Abrechnungsbeginn, zeitraum.Abrechnungsende);
+            var anteile = verbrauchAnteile.Where(anteil => anteil.Umlage == rechnung.Umlage);
+            var dieseAnteile = anteile.SelectMany(anteil => anteil.DieseZaehler.Values.SelectMany(value => value));
+            var alleAnteile = anteile.SelectMany(anteil => anteil.AlleZaehler.Values.SelectMany(value => value));
+
+            V = alleAnteile.Where(w => w.Zaehler.Typ == Zaehlertyp.Warmwasser).Sum(verbrauch => verbrauch.Delta);
             Q = Delta(gasAllgemeinZaehler, zeitraum.Abrechnungsbeginn, zeitraum.Abrechnungsende);
+
+            var checkQ = alleAnteile.Where(w => w.Zaehler.Typ == Zaehlertyp.Gas).Sum(verbrauch => verbrauch.Delta);
+            if (Q < checkQ)
+            {
+                notes.Add($"Gesamtzähler für Heizung zählt {Q} kWh, während die Summer der einzelnen Wärmemengenzähler {checkQ} ist. " +
+                    $"Der Allgemeinzähler muss mehr zählen als die Summe der einzelnen.", Severity.Error);
+            }
 
             if (Q == 0)
             {
@@ -77,15 +86,21 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             if (Para9_2 > 1)
             {
-                notes.Add("Heizkostenverteilung nach §9 ist über 100%.", Severity.Error);
+                notes.Add("Heizkostenverteilung nach §9(2) ist über 100%.", Severity.Error);
+            }
+
+            if (Para9_2 <= 0)
+            {
+                notes.Add("Heizkostenverteilung nach $9(2) ist kleiner als 0%", Severity.Error);
             }
 
             GesamtNutzflaeche = rechnung.Umlage.Wohnungen.Sum(w => w.Nutzflaeche);
             NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitraum.Zeitanteil;
-
-            HeizkostenVerbrauchAnteil = Delta(gasZaehlerWohnung, zeitraum.Nutzungsbeginn, zeitraum.Nutzungsende) /
-                Delta(gasZaehlerAbrechnungseinheit, zeitraum.Nutzungsbeginn, zeitraum.Nutzungsende);
-            WarmwasserVerbrauchAnteil = Delta(warmwasserZaehlerWohnung, zeitraum.Nutzungsbeginn, zeitraum.Nutzungsende) / V;
+            
+            var q = dieseAnteile.Where(w => w.Zaehler.Typ == Zaehlertyp.Gas).Sum(verbrauch => verbrauch.Delta);
+            HeizkostenVerbrauchAnteil = q / checkQ;
+            var v = dieseAnteile.Where(w => w.Zaehler.Typ == Zaehlertyp.Warmwasser).Sum(verbrauch => verbrauch.Delta);
+            WarmwasserVerbrauchAnteil = v / V;
 
             WaermeAnteilNF = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * NFZeitanteil;
             WaermeAnteilVerb = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * HeizkostenVerbrauchAnteil;

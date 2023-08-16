@@ -58,7 +58,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             PersonenZeitanteile = PersonenZeitanteil.GetPersonenZeitanteile(vertrag, wohnungen, zeitraum);
             VerbrauchAnteile = VerbrauchAnteil.GetVerbrauchAnteile(umlagen, vertrag, zeitraum, notes);
 
-            Heizkostenberechnungen = CalculateHeizkosten(rechnungenWarm, wohnung, zeitraum, notes);
+            Heizkostenberechnungen = CalculateHeizkosten(rechnungenWarm, wohnung, VerbrauchAnteile, zeitraum, notes);
             BetragWarm = Heizkostenberechnungen.Sum(heizkosten => heizkosten.Betrag);
             GesamtBetragWarm = rechnungenWarm.Sum(e => e.Betrag);
 
@@ -169,11 +169,12 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         private static List<Heizkostenberechnung> CalculateHeizkosten(
             List<Betriebskostenrechnung> rechnungen,
             Wohnung wohnung,
+            List<VerbrauchAnteil> verbrauchAnteile,
             Zeitraum zeitraum,
             List<Note> notes)
         {
             return rechnungen
-                .Select(rechnung => new Heizkostenberechnung(rechnung, wohnung, zeitraum, notes))
+                .Select(rechnung => new Heizkostenberechnung(rechnung, wohnung, verbrauchAnteile, zeitraum, notes))
                 .ToList();
         }
 
