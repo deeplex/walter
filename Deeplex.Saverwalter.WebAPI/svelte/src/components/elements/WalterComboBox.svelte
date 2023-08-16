@@ -13,6 +13,7 @@
     function select(e: CustomEvent) {
         value = e.detail.selectedItem;
     }
+
 </script>
 
 {#await entries}
