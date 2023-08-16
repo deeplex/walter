@@ -74,12 +74,28 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             foreach (var verbrauch in verbraeuche)
             {
-                if (verbrauch.Enddatum.DayNumber < ende.DayNumber - thresholdOfDaysBeforeNotOkay)
+                if (verbrauch.Enddatum <= verbrauch.Anfangsdatum)
                 {
-                    var ersatz = verbraeuche.SingleOrDefault(other_verbrauch =>
+                    notes.Add($"Enddatum von {verbrauch.Zaehler.Kennnummer} ist kleiner oder gleich dem Anfang der Zählung " +
+                        $"({verbrauch.Anfangsdatum.ToString("dd.MM.yyyy")} - {verbrauch.Enddatum.ToString("dd.MM.yyyy")})", Severity.Error);
+                }
+                else if(verbrauch.Enddatum.DayNumber < (ende.DayNumber - thresholdOfDaysBeforeNotOkay))
+                {
+                    var candidates = verbraeuche.Where(other_verbrauch =>
+                        other_verbrauch.Zaehler != verbrauch.Zaehler &&
                         other_verbrauch.Anfangsdatum == verbrauch.Enddatum &&
-                        other_verbrauch.Zaehler.Staende.OrderBy(stand => stand.Datum).First().Datum == other_verbrauch.Anfangsdatum &&
+                        other_verbrauch.Zaehler.Typ == verbrauch.Zaehler.Typ &&
+                        other_verbrauch.Zaehler.Staende?.OrderBy(stand => stand.Datum).FirstOrDefault()?.Datum == other_verbrauch.Anfangsdatum &&
                         verbrauch.Zaehler.Wohnung == other_verbrauch.Zaehler.Wohnung);
+                    
+                    if (candidates.Count() > 1)
+                    {
+                        var ersatz_string = string.Join(", ", candidates.Select(verbrauch => verbrauch.Zaehler.Kennnummer));
+                        notes.Add($"Mehr als einen Ersatz für {verbrauch.Zaehler.Kennnummer} gefunden: {ersatz_string}", Severity.Error);
+                    }
+                    
+                    var ersatz = candidates.FirstOrDefault();
+
                     if (ersatz != null)
                     {
                         notes.Add($"Zählerwechsel erkannt am {verbrauch.Enddatum} von Zähler " +
@@ -96,11 +112,23 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     }
                 }
 
-                if (verbrauch.Anfangsdatum > beginn)
+                if (verbrauch.Anfangsdatum > beginn && verbrauch.Anfangsdatum != verbrauch.Enddatum)
                 {
-                    var vorgaenger = verbraeuche.SingleOrDefault(other_verbrauch =>
+                    var candidates = verbraeuche.Where(other_verbrauch =>
+                        other_verbrauch.Anfangsdatum != other_verbrauch.Enddatum &&
+                        other_verbrauch.Zaehler != verbrauch.Zaehler &&
                         other_verbrauch.Enddatum == verbrauch.Anfangsdatum &&
+                        other_verbrauch.Zaehler.Typ == verbrauch.Zaehler.Typ &&
                         verbrauch.Zaehler.Wohnung == other_verbrauch.Zaehler.Wohnung);
+
+                    if (candidates.Count() > 1)
+                    {
+                        var ersatz_string = string.Join(", ", candidates.Select(verbrauch => verbrauch.Zaehler.Kennnummer));
+                        notes.Add($"Mehr als einen Ersatz für {verbrauch.Zaehler.Kennnummer} gefunden: {ersatz_string}", Severity.Error);
+                    }
+
+                    var vorgaenger = candidates.FirstOrDefault();
+
                     if (vorgaenger != null)
                     {
                         // Wurde bereits beim abgelösten Teil klar gemacht.
