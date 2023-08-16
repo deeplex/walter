@@ -6,9 +6,9 @@
         WalterTextArea,
         WalterTextInput
     } from '$walter/components';
-    import type { WalterSelectionEntry, WalterZaehlerEntry } from '$walter/lib';
+    import type { WalterZaehlerEntry } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
-    import { Row, TextInputSkeleton } from 'carbon-components-svelte';
+    import { Row } from 'carbon-components-svelte';
 
     export let entry: Partial<WalterZaehlerEntry> = {};
     export let fetchImpl: typeof fetch;

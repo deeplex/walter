@@ -43,3 +43,7 @@ export function convertPercent(value: number | undefined): string | undefined {
 export function convertM2(value: number | undefined): string | undefined {
     return `${(value || 0).toFixed(2)} m²`;
 }
+
+export function convertFixed2(value: number | undefined): string | undefined {
+    return `${(value || 0).toFixed(2)}`;
+}
