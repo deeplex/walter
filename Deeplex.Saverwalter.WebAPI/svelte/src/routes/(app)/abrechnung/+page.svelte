@@ -125,7 +125,7 @@
     {#await abrechnung}
         <Loading />
     {:then resolved}
-        {#if resolved}
+        {#if resolved && resolved.zeitraum}
             {#if resolved.zeitraum.nutzungszeitraum > 0}
                 <WalterAbrechnung
                     fetchImpl={data.fetchImpl}
