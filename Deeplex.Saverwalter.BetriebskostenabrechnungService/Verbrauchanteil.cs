@@ -31,6 +31,21 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
                 foreach (var zaehler in zaehlergroup)
                 {
+                    if (zaehler.Staende.Count == 0)
+                    {
+                        continue;
+                    }
+                    // Done because the first entry should not be in the last month.
+                    var daysToFirstZaehler = zaehler.Staende
+                        .OrderBy(stand => stand.Stand)
+                        .FirstOrDefault()?
+                        .Datum
+                        .DayNumber - zeitraum.Abrechnungsende.DayNumber;
+                    // First Zählerstand should be at least in next to last month of Abrechnung
+                    if (daysToFirstZaehler > -31)
+                    {
+                        continue;
+                    }
                     var verbrauch = new Verbrauch(zaehler, zeitraum.Abrechnungsbeginn, zeitraum.Abrechnungsende, notes);
                     AlleZaehler[unit].Add(verbrauch);
                     AlleVerbrauch[unit] += verbrauch.Delta;
