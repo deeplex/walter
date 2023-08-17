@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -13,7 +14,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             protected new NatuerlichePerson? Entity { get; }
 
-            public Anrede? Anrede { get; set; }
+            public SelectionEntry? Anrede { get; set; }
             public string? Vorname { get; set; }
             public string Nachname { get; set; } = null!;
 
@@ -22,8 +23,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 Entity = entity;
                 Id = entity.NatuerlichePersonId;
-
-                Anrede = Entity.Anrede;
+                Anrede = new SelectionEntry((int)Entity.Anrede, Entity.Anrede.ToString());
                 Vorname = Entity.Vorname;
                 Nachname = Entity.Nachname;
             }

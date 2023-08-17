@@ -28,7 +28,8 @@ export class WalterNatuerlichePersonEntry
         public wohnungen: WalterWohnungEntry[],
         public vertraege: WalterVertragEntry[],
         public vorname: string,
-        public nachname: string
+        public nachname: string,
+        public anrede: WalterSelectionEntry
     ) {
         super();
     }
@@ -62,7 +63,8 @@ export class WalterNatuerlichePersonEntry
             wohnungen,
             vertraege,
             json.vorname,
-            json.nachname
+            json.nachname,
+            json.anrede
         );
     }
 }

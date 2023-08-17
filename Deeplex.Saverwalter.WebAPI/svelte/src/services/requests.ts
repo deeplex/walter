@@ -7,6 +7,9 @@ export const walter_selection = {
     adressen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/adressen', fetchImpl);
     },
+    anreden(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
+        return walter_get('/api/selection/anreden', fetchImpl);
+    },
     betriebskostenrechnungen(
         fetchImpl: typeof fetch
     ): Promise<WalterSelectionEntry[]> {

@@ -119,6 +119,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Notiz = entry.Notiz;
             entity.Telefon = entry.Telefon;
             entity.Mobil = entry.Mobil;
+
+            if (entry.Anrede is SelectionEntry anrede)
+            {
+                entity.Anrede = (Anrede)int.Parse(anrede.Id);
+            }
             if (entry.Adresse is AdresseEntryBase a)
             {
                 entity.Adresse = GetAdresse(a, Ctx);

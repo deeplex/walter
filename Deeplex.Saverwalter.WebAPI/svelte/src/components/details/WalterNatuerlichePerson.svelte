@@ -1,5 +1,6 @@
 <script lang="ts">
     import {
+        WalterComboBox,
         WalterMultiSelect,
         WalterPerson,
         WalterTextArea,
@@ -14,9 +15,11 @@
     export let readonly = false;
 
     const juristischePersonen = walter_selection.juristischePersonen(fetchImpl);
+    const anreden = walter_selection.anreden(fetchImpl);
 </script>
 
 <Row>
+    <WalterComboBox entries={anreden} bind:value={entry.anrede} titleText="Anrede"/>
     <WalterTextInput {readonly} bind:value={entry.vorname} labelText="Vorname" />
     <WalterTextInput required {readonly} bind:value={entry.nachname} labelText="Nachname" />
 </Row>
