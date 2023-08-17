@@ -372,12 +372,19 @@ namespace Deeplex.Saverwalter.PrintService
                             {
                                 var delta = value[i].Delta;
                                 col1.Add(Unit(delta, unit) + " / " + Unit(deltaAll, unit));
-                                col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
+                                col2.Add("");
                                 col3.Add(value[i].Zaehler.Kennnummer);
-                                col4.Add(Prozent(verbrauchAnteil.Anteil[typ]));
+                                col4.Add(Prozent(delta / deltaAll));
                                 bold.Add(false);
-                                underlined.Add(i == verbrauchAnteil.DieseZaehler.Count - 1);
+                                underlined.Add(false);
                             }
+                            var deltaHere = verbrauchAnteil.DieseZaehler[typ].Sum(e => e.Delta);
+                            col1.Add(Unit(deltaHere, unit) + " / " + Unit(deltaAll, unit));
+                            col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
+                            col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
+                            col4.Add(Prozent(verbrauchAnteil.Anteil[typ]));
+                            bold.Add(true);
+                            underlined.Add(true);
                         }
                     }
                 }
@@ -641,12 +648,19 @@ namespace Deeplex.Saverwalter.PrintService
                         {
                             var delta = value[i].Delta;
                             col1.Add(Unit(delta, unit) + " / " + Unit(deltaAll, unit));
-                            col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
+                            col2.Add("");
                             col3.Add(value[i].Zaehler.Kennnummer);
-                            col4.Add(Prozent(verbrauchAnteil.Anteil[typ]));
+                            col4.Add(Prozent(delta / deltaAll));
                             bold.Add(false);
-                            underlined.Add(i == verbrauchAnteil.DieseZaehler.Count - 1);
+                            underlined.Add(false);
                         }
+                        var deltaHere = verbrauchAnteil.DieseZaehler[typ].Sum(e => e.Delta);
+                        col1.Add(Unit(deltaHere, unit) + " / " + Unit(deltaAll, unit));
+                        col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
+                        col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
+                        col4.Add(Prozent(verbrauchAnteil.Anteil[typ]));
+                        bold.Add(true);
+                        underlined.Add(true);
                     }
                 }
             }
