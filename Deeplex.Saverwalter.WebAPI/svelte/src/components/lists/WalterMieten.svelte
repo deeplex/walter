@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
     import { WalterDataWrapper, WalterMiete } from '$walter/components';
     import type { WalterMieteEntry } from '$walter/lib';
+    import { walter_goto } from '$walter/services/utils';
 
     const headers = [
         { key: 'betreffenderMonat', value: 'Betreffender Monat' },
@@ -15,7 +15,7 @@
     export let fullHeight = false;
     export let title: string | undefined = undefined;
 
-    const navigate = (e: CustomEvent) => goto(`/mieten/${e.detail.id}`);
+    const navigate = (e: CustomEvent) => walter_goto(`/mieten/${e.detail.id}`);
 
     export let entry: Partial<WalterMieteEntry> | undefined = undefined;
 </script>

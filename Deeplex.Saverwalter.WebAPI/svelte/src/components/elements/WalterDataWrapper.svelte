@@ -5,9 +5,9 @@
     } from 'carbon-components-svelte';
 
     import { WalterDataTable } from '$walter/components';
-    import { goto } from '$app/navigation';
     import { page } from '$app/stores';
     import WalterDataWrapperQuickAdd from './WalterDataWrapperQuickAdd.svelte';
+    import { walter_goto } from '$walter/services/utils';
 
     export let fullHeight = false;
     export let addUrl: string | undefined = undefined;
@@ -29,7 +29,7 @@
     }
 
     function normal_add() {
-        goto(`${$page.url.pathname}/new`);
+        walter_goto(`${$page.url.pathname}/new`);
     }
 </script>
 

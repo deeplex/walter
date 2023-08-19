@@ -1,11 +1,10 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import { WalterDataWrapper, WalterMiete, WalterVertrag } from '$walter/components';
     import type { WalterMieteEntry, WalterVertragEntry } from '$walter/lib';
-    import { convertDateCanadian } from '$walter/services/utils';
+    import { convertDateCanadian, walter_goto } from '$walter/services/utils';
 
     const headers = [
         { key: 'wohnung.text', value: 'Wohnung' },
@@ -18,7 +17,7 @@
     const addUrl = `/api/vertraege/`;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
-        goto(`/vertraege/${e.detail.id}`);
+        walter_goto(`/vertraege/${e.detail.id}`);
 
     export let rows: WalterVertragEntry[];
     export let fullHeight = false;

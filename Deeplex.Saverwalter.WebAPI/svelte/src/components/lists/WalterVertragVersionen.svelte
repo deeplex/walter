@@ -1,10 +1,7 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
-    import {
-        WalterDataWrapper,
-        WalterVertragVersion
-    } from '$walter/components';
+    import { WalterDataWrapper, WalterVertragVersion } from '$walter/components';
     import type { WalterVertragVersionEntry } from '$walter/lib';
+    import { walter_goto } from '$walter/services/utils';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     const headers = [
@@ -21,7 +18,7 @@
     export let title: string | undefined = undefined;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
-        goto(`/vertragversionen/${e.detail.id}`);
+        walter_goto(`/vertragversionen/${e.detail.id}`);
 
     export let entry: Partial<WalterVertragVersionEntry> | undefined =
         undefined;

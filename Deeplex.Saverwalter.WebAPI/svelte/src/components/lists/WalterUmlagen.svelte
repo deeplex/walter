@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import { WalterDataWrapper, WalterUmlage } from '$walter/components';
     import type { WalterSelectionEntry, WalterUmlageEntry } from '$walter/lib';
+    import { walter_goto } from '$walter/services/utils';
 
     const headers = [
         { key: 'typ.text', value: 'Typ' },
@@ -13,7 +13,7 @@
     const addUrl = `/api/umlagen/`;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
-        goto(`/umlagen/${e.detail.id}`);
+        walter_goto(`/umlagen/${e.detail.id}`);
 
     export let fullHeight = false;
     export let rows: WalterUmlageEntry[];

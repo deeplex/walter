@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import {
@@ -9,6 +8,7 @@
     import type {
         WalterBetriebskostenrechnungEntry,
     } from '$walter/lib';
+    import { walter_goto } from '$walter/services/utils';
 
     export let fullHeight = false;
     export let rows: WalterBetriebskostenrechnungEntry[];
@@ -26,7 +26,7 @@
     const addUrl = `/api/betriebskostenrechnungen/`;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
-        goto(`/betriebskostenrechnungen/${e.detail.id}`);
+        walter_goto(`/betriebskostenrechnungen/${e.detail.id}`);
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined =
         undefined;

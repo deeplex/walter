@@ -1,3 +1,5 @@
+import { goto } from "$app/navigation";
+
 // Canadian format allegedly is yyyy-mm-dd
 export function convertDateCanadian(
     date: Date | undefined
@@ -46,4 +48,10 @@ export function convertM2(value: number | undefined): string | undefined {
 
 export function convertFixed2(value: number | undefined): string | undefined {
     return `${(value || 0).toFixed(2)}`;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function walter_goto(url: string, opts: any = undefined)
+{
+    return goto(url, opts);
 }

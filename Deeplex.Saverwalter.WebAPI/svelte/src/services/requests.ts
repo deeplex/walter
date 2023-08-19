@@ -1,7 +1,7 @@
 import type { WalterSelectionEntry, WalterToastContent } from '$walter/lib';
 import { addToast } from '$walter/store';
-import { goto } from '$app/navigation';
 import { getAccessToken } from './auth';
+import { walter_goto } from './utils';
 
 export const walter_selection = {
     adressen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
@@ -92,7 +92,7 @@ export async function walter_fetch(
     init.headers = headers;
     const response = await fetchImpl(url, init);
     if (response.status === 401) {
-        await goto('/login');
+        await walter_goto('/login');
         throw new Error('Unauthorized access. Redirecting to login page.');
     }
     return response;

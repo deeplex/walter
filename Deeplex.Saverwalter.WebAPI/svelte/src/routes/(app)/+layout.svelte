@@ -7,13 +7,13 @@
     import type { WalterModalControl } from '$walter/types';
     import { walterModalControl } from '$walter/store';
     import { getAccessToken } from '$walter/services/auth';
-    import { goto } from '$app/navigation';
     import type { PageData } from './$types';
+    import { walter_goto } from '$walter/services/utils';
 
     export let data: PageData;
 
     if (getAccessToken() == null) {
-        goto('/login');
+        walter_goto('/login');
     }
 
     let modalControl: WalterModalControl;
