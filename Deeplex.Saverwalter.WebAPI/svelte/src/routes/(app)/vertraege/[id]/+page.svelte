@@ -8,7 +8,7 @@
         WalterGrid,
         WalterVertrag,
         WalterVertragVersionen,
-        WalterLink,
+        WalterLinkTile,
         WalterLinks
     } from '$walter/components';
     import {
@@ -89,12 +89,12 @@
 
         <!-- TODO id is GUID -->
         <!-- 
-        <WalterLink
+        <WalterLinkTile
             bind:fileWrapper
             name={`Ansprechpartner: ${data.entry.ansprechpartner?.text}`}
             href={`/nat/${data.entry.ansprechpartner?.id}`}
         /> -->
-        <WalterLink
+        <WalterLinkTile
             bind:fileWrapper
             name={`Wohnung: ${data.entry.wohnung.text}`}
             href={`/wohnungen/${data.entry.wohnung.id}`}

@@ -7,7 +7,7 @@
         WalterZaehlerstaende,
         WalterUmlagen,
         WalterLinks,
-        WalterLink
+        WalterLinkTile
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
@@ -58,14 +58,14 @@
         />
 
         {#if data.entry.adresse !== null}
-            <WalterLink
+            <WalterLinkTile
                 bind:fileWrapper
                 name={`Adresse: ${data.entry.adresse?.anschrift}`}
                 href={`/adressen/${data.entry.adresse?.id}`}
             />
         {/if}
         {#if data.entry.wohnung !== null}
-            <WalterLink
+            <WalterLinkTile
                 bind:fileWrapper
                 name={`Wohnung: ${data.entry.wohnung?.text}`}
                 href={`/wohnungen/${data.entry.wohnung?.id}`}

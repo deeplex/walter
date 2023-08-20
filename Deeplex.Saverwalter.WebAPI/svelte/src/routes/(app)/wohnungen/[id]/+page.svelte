@@ -11,7 +11,7 @@
         WalterHeaderDetail,
         WalterWohnung,
         WalterLinks,
-        WalterLink
+        WalterLinkTile
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
@@ -105,7 +105,7 @@
             rows={data.entry.erhaltungsaufwendungen}
         />
 
-        <WalterLink
+        <WalterLinkTile
             bind:fileWrapper
             name={`Adresse: ${data.entry.adresse.anschrift}`}
             href={`/adressen/${data.entry.adresse.id}`}
