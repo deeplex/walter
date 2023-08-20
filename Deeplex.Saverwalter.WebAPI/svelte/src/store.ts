@@ -4,6 +4,8 @@ import type { WalterToastContent } from './lib/WalterToastContent';
 
 export const toasts: Writable<Partial<WalterToast>[]> = writable([]);
 
+export const changeTracker: Writable<number> = writable(0);
+
 export const isWalterSideNavOpen: Writable<boolean> = writable(true);
 
 export function removeToast(index: number) {

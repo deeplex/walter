@@ -5,8 +5,9 @@
         DatePickerSkeleton
     } from 'carbon-components-svelte';
 
-    import { convertDateCanadian } from '$walter/services/utils';
+    import { convertDateCanadian, walter_subscribe_reset_changeTracker, walter_update_value } from '$walter/services/utils';
     import { getDateForDatePicker } from './WalterDatePicker';
+    import { onMount } from 'svelte';
 
     export let labelText: string;
     export let value: string | undefined = undefined;
@@ -14,16 +15,27 @@
     export let disabled: boolean | undefined = false;
     export let required = false;
 
+    let lastSavedValue: string | undefined;
+    function updateLastSavedValue() {
+        lastSavedValue = value;
+    }
+
+    onMount(() => {
+        walter_subscribe_reset_changeTracker(updateLastSavedValue);
+        updateLastSavedValue();
+    });
+
     function change(e: any) {
         const germanDate = e.target.value;
         if (!germanDate) {
-            value = undefined;
+            value = walter_update_value(lastSavedValue, value, undefined);
         }
         else
         {
             const [day, month, year] = germanDate.split(".");
             // month starts at 0. So 1 has to be substracted
-            value = convertDateCanadian(new Date(year, month - 1, day));
+            const new_value = convertDateCanadian(new Date(year, month - 1, day));
+            value = walter_update_value(lastSavedValue, value, new_value);
         }
     }
 </script>

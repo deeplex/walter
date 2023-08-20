@@ -42,7 +42,7 @@
             invalid = true;
         } else {
             if (document.referrer.includes($page.url.host)) {
-                history.back();
+                history.back(); // TODO should be walter_history_back
             } else {
                 walter_goto('/');
             }

@@ -38,6 +38,6 @@ export function handle_delete(title: string, apiURL: string) {
         danger: true,
         primaryButtonText: 'Löschen',
         submit: () =>
-            walter_delete(apiURL, DeleteToast).then(() => history.back())
+            walter_delete(apiURL, DeleteToast).then(() => history.back()) // TODO should be walter_history_back
     });
 }
