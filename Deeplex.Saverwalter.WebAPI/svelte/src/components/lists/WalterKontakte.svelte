@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import {
@@ -13,6 +12,7 @@
         WalterPersonEntry
     } from '$walter/lib';
     import { ContentSwitcher, Row, Switch } from 'carbon-components-svelte';
+    import { walter_goto } from '$walter/services/utils';
 
     const headers = [
         { key: 'name', value: 'Name', default: '' },
@@ -25,7 +25,7 @@
     const addUrl = `/api/kontakte/`;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
-        goto(
+        walter_goto(
             `/kontakte/${e.detail.id > 0 ? 'nat' : 'jur'}/${Math.abs(
                 e.detail.id
             )}`

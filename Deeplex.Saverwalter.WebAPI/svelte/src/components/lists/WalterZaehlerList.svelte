@@ -1,11 +1,10 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import { WalterDataWrapper, WalterZaehler } from '$walter/components';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import WalterZaehlerstand from '../details/WalterZaehlerstand.svelte';
-    import { convertDateCanadian } from '$walter/services/utils';
+    import { convertDateCanadian, walter_goto } from '$walter/services/utils';
     import type { WalterZaehlerEntry, WalterZaehlerstandEntry } from '$walter/lib';
 
     const headers = [
@@ -45,7 +44,7 @@
     let open = false;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
-        goto(`/zaehler/${e.detail.id}`);
+        walter_goto(`/zaehler/${e.detail.id}`);
 </script>
 
 <WalterDataWrapperQuickAdd

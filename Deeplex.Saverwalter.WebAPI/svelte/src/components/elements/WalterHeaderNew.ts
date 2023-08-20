@@ -1,7 +1,7 @@
-import { goto } from '$app/navigation';
 import { WalterToastContent } from '$walter/lib';
 import { walter_post } from '$walter/services/requests';
-import { addToast } from '$walter/store';
+import { walter_goto } from '$walter/services/utils';
+import { addToast, changeTracker } from '$walter/store';
 
 export async function handle_save(apiURL: string, entry: unknown) {
     const SaveToast = new WalterToastContent(
@@ -21,6 +21,7 @@ export async function handle_save(apiURL: string, entry: unknown) {
     addToast(SaveToast, response.status === 200, parsed);
 
     if (parsed.id) {
-        goto(`${apiURL}/${parsed.id}`.replace('api/', ''));
+        changeTracker.set(0);
+        walter_goto(`${apiURL}/${parsed.id}`.replace('api/', ''));
     }
 }

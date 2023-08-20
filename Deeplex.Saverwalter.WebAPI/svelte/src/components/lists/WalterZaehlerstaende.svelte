@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
     import { WalterDataWrapper, WalterZaehlerstand } from '$walter/components';
 
     import type { WalterZaehlerstandEntry } from '$walter/lib';
+    import { walter_goto } from '$walter/services/utils';
 
     const headers = [
         { key: 'datum', value: 'Datum' },
@@ -17,7 +17,7 @@
     export let title: string | undefined = undefined;
     export let entry: Partial<WalterZaehlerstandEntry> | undefined = undefined;
 
-    const navigate = (e: CustomEvent) => goto(`/zaehlerstaende/${e.detail.id}`);
+    const navigate = (e: CustomEvent) => walter_goto(`/zaehlerstaende/${e.detail.id}`);
 </script>
 
 <WalterDataWrapper

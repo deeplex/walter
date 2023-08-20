@@ -9,11 +9,11 @@
         TextInput
     } from 'carbon-components-svelte';
     import { Login } from 'carbon-icons-svelte';
-    import { goto } from '$app/navigation';
     import { WalterToastContent } from '$walter/lib';
     import { walter_sign_in } from '$walter/services/auth';
     import type { PageData } from './$types';
     import { page } from '$app/stores';
+    import { walter_goto } from '$walter/services/utils';
 
     export let data: PageData;
 
@@ -42,9 +42,9 @@
             invalid = true;
         } else {
             if (document.referrer.includes($page.url.host)) {
-                history.back();
+                history.back(); // TODO should be walter_history_back
             } else {
-                goto('/');
+                walter_goto('/');
             }
         }
     }

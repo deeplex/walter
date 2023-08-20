@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { WalterAbrechnung, WalterGrid, WalterHeader, WalterNumberInput } from "$walter/components";
+    import { WalterAbrechnung, WalterGrid, WalterHeader, WalterLink, WalterNumberInput } from "$walter/components";
     import { onMount } from "svelte";
     import type { PageData } from "./$types";
     import type { WalterBetriebskostenabrechnungEntry } from "$walter/types";
@@ -9,8 +9,8 @@
     import { create_pdf_doc, create_word_doc, updatePreview } from "./utils";
     import { Download } from "carbon-icons-svelte";
     import type { WalterSelectionEntry } from "$walter/lib";
-    import { goto } from "$app/navigation";
     import { download } from "$walter/components/preview/WalterPreview";
+    import { walter_goto } from "$walter/services/utils";
 
     export let vertragId: number | null;
     export let selectedYear: number;
@@ -26,7 +26,7 @@
     let value: WalterSelectionEntry | undefined;
 
     async function update() {
-        goto(`?${searchParams.toString()}`, { noScroll: true });
+        walter_goto(`?${searchParams.toString()}`, { noScroll: true });
         abrechnung = updatePreview(vertragId, selectedYear, data.fetchImpl);
 
         const value = data.vertraege.find(vertrag => vertrag.id == vertragId);
@@ -133,7 +133,7 @@
                     title={title}/>
             {:else}
                 <InlineNotification lowContrast kind="error" hideCloseButton title="Abrechnungsjahr liegt außerhalb der Vertragslaufzeit.">
-                    <Link href={`vertraege/${vertragId}`}>Klicke hier um zum Vertrag zu gelangen.</Link>
+                    <WalterLink href={`vertraege/${vertragId}`}>Klicke hier um zum Vertrag zu gelangen.</WalterLink>
                 </InlineNotification>
             {/if}
         {:else if vertragId}

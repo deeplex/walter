@@ -2,6 +2,7 @@
     import { convertDateGerman, convertFixed2, convertPercent } from "$walter/services/utils";
     import type { WalterVerbrauchAnteil } from "$walter/types/WalterBetriebskostenabrechnung.type";
     import { Link, StructuredListCell, StructuredListRow } from "carbon-components-svelte";
+    import { WalterLink } from "..";
 
     export let verbrauch: WalterVerbrauchAnteil;
     export let beginn: Date;
@@ -16,9 +17,9 @@
             </StructuredListCell>
             <StructuredListCell></StructuredListCell>
             <StructuredListCell>
-                <Link href={`zaehler/${v.zaehler.id}`}>
+                <WalterLink href={`zaehler/${v.zaehler.id}`}>
                     {v.zaehler.text}
-                </Link>
+                </WalterLink>
             </StructuredListCell>
     </StructuredListRow>
     {/each}
@@ -30,9 +31,9 @@
             {convertDateGerman(new Date(beginn))} - {convertDateGerman(new Date(ende))}
         </StructuredListCell>
         <StructuredListCell head>
-            <Link href={`umlagen/${verbrauch.umlage.id}`}>
+            <WalterLink href={`umlagen/${verbrauch.umlage.id}`}>
                 {verbrauch.umlage.text}
-            </Link>
+            </WalterLink>
         </StructuredListCell>
         <StructuredListCell>{convertPercent(verbrauch.anteil[unit])}</StructuredListCell>
     </StructuredListRow>

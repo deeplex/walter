@@ -3,7 +3,8 @@
         WalterHeaderDetail,
         WalterGrid,
         WalterVertragVersion,
-        WalterLink
+        WalterLinkTile
+
     } from '$walter/components';
     import type { PageData } from './$types';
     import { WalterS3FileWrapper } from '$walter/lib';
@@ -25,7 +26,7 @@
 
 <WalterGrid>
     <WalterVertragVersion entry={data.entry} />
-    <WalterLink
+    <WalterLinkTile
         bind:fileWrapper
         name={`Vertrag: ${data.entry.vertrag.text}`}
         href={`/vertraege/${data.entry.vertrag.id}`}

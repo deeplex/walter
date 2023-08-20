@@ -8,7 +8,7 @@
         WalterBetriebskostenrechnung,
         WalterBetriebskostenrechnungen,
         WalterLinks,
-        WalterLink
+        WalterLinkTile
     } from '$walter/components';
     import { WalterS3FileWrapper } from '$walter/lib';
 
@@ -52,7 +52,7 @@
             rows={data.entry.betriebskostenrechnungen}
         />
 
-        <WalterLink
+        <WalterLinkTile
             bind:fileWrapper
             name={`Umlage: ${data.entry.umlage.text}`}
             href={`/umlagen/${data.entry.umlage?.id}`}

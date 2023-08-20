@@ -1,5 +1,7 @@
 <script lang="ts">
+    import { walter_subscribe_reset_changeTracker, walter_update_value } from '$walter/services/utils';
     import { NumberInput, NumberInputSkeleton } from 'carbon-components-svelte';
+    import { onMount } from 'svelte';
 
     export let value: number | undefined = undefined;
     export let label: string | undefined;
@@ -10,13 +12,24 @@
     export let readonly = false;
     export let required = false;
 
+
+    let lastSavedValue: number | undefined;
+    function updateLastSavedValue() {
+        lastSavedValue = value;
+    }
+
+    onMount(() => {
+        walter_subscribe_reset_changeTracker(updateLastSavedValue);
+        updateLastSavedValue();
+    });
+
     export let change = (e: CustomEvent<number | null>) => {
         if (e.detail === 0) {
-            value = 0;
+            value = walter_update_value(lastSavedValue, value, 0);
         }
         else
         {
-            value = e.detail || undefined;
+            value = walter_update_value(lastSavedValue, value, e.detail || undefined);
         }
     };
 

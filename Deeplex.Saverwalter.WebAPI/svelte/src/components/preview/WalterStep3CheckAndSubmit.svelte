@@ -3,6 +3,7 @@
     import type { WalterPreviewCopyTable } from './WalterPreviewCopyFile';
     import { page } from '$app/stores';
     import type { WalterSelectionEntry } from '$walter/lib';
+    import { WalterLink } from '..';
 
     export let step: number;
     export let selectedEntry: WalterSelectionEntry | undefined = undefined;
@@ -12,15 +13,15 @@
 {#if step === 3}
     <Tile light>
         {#if selectedTable?.key === 'stack'}
-            <Link href="{$page.url.origin}/{selectedTable?.key}">
+            <WalterLink href="{$page.url.origin}/{selectedTable?.key}">
                 {selectedTable?.value}
-            </Link>
+            </WalterLink>
             ausgewählt.
         {:else}
             Ausgewählter Eintrag von {selectedTable?.value}:
-            <Link href="{$page.url.origin}/{selectedTable?.key}/{selectedEntry?.id}">
+            <WalterLink href="{$page.url.origin}/{selectedTable?.key}/{selectedEntry?.id}">
                 {selectedEntry?.text}
-            </Link>
+            </WalterLink>
         {/if}
     </Tile>
 {/if}

@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import {
@@ -10,6 +9,7 @@
         WalterErhaltungsaufwendungEntry,
         WalterSelectionEntry
     } from '$walter/lib';
+    import { walter_goto } from '$walter/services/utils';
 
     const headers = [
         { key: 'bezeichnung', value: 'Bezeichnung' },
@@ -22,7 +22,7 @@
     const addUrl = `/api/erhaltungsaufwendungen/`;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
-        goto(`/erhaltungsaufwendungen/${e.detail.id}`);
+        walter_goto(`/erhaltungsaufwendungen/${e.detail.id}`);
 
     export let fullHeight = false;
     export let rows: WalterErhaltungsaufwendungEntry[];

@@ -1,12 +1,15 @@
 <script lang="ts">
-    import type { WalterS3FileWrapper } from '$walter/lib';
-    import { ClickableTile } from 'carbon-components-svelte';
+    import { walter_goto } from "$walter/services/utils";
+    import { Link } from "carbon-components-svelte";
+
+    let winWidth = 0;
 
     export let href: string;
-    export let name: string;
-    export let fileWrapper: WalterS3FileWrapper;
 
-    fileWrapper.register(name, href);
+    function click(e: Event) {
+        e.preventDefault();
+        walter_goto(href);
+    }
 </script>
 
-<ClickableTile {href}>{name}</ClickableTile>
+<Link on:click={click} {href}><slot /></Link>

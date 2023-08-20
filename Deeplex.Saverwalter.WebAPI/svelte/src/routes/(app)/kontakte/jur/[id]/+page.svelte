@@ -8,7 +8,7 @@
         WalterHeaderDetail,
         WalterJuristischePerson,
         WalterLinks,
-        WalterLink
+        WalterLinkTile
     } from '$walter/components';
     import {
         WalterS3FileWrapper,
@@ -66,7 +66,7 @@
             rows={data.entry.vertraege}
         />
 
-        <WalterLink
+        <WalterLinkTile
             bind:fileWrapper
             name={`Adresse: ${data.entry.adresse.anschrift}`}
             href={`/adressen/${data.entry.adresse.id}`}

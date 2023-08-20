@@ -1,7 +1,17 @@
 <script lang="ts">
+    import { beforeNavigate } from '$app/navigation';
     import { WalterToasts } from '$walter/components';
+    import { walter_goto } from '$walter/services/utils';
     import { Theme } from 'carbon-components-svelte';
     import 'carbon-components-svelte/css/all.css';
+
+    beforeNavigate((e) => {
+        if (e.to && e.type !== 'goto')
+        {
+            e.cancel();
+            walter_goto(e.to.url.href);
+        }
+    });
 </script>
 
 <!-- Theming as suggested. Sidenav bg color is set in <style> -->

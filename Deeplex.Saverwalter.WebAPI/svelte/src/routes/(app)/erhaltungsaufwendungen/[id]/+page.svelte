@@ -4,7 +4,7 @@
         WalterHeaderDetail,
         WalterGrid,
         WalterErhaltungsaufwendung,
-        WalterLink,
+        WalterLinkTile,
         WalterLinks
     } from '$walter/components';
     import { WalterS3FileWrapper } from '$walter/lib';
@@ -29,12 +29,12 @@
     <WalterErhaltungsaufwendung fetchImpl={data.fetchImpl} entry={data.entry} />
 
     <WalterLinks>
-        <WalterLink
+        <WalterLinkTile
             bind:fileWrapper
             name={`Wohnung: ${data.entry.wohnung.text}`}
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />
-        <WalterLink
+        <WalterLinkTile
             bind:fileWrapper
             name={`Aussteller: ${data.entry.aussteller.text}`}
             href={`/kontakte/jur/${data.entry.aussteller.id}`}

@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import { WalterDataWrapper, WalterWohnung } from '$walter/components';
     import type { WalterSelectionEntry, WalterWohnungEntry } from '$walter/lib';
+    import { walter_goto } from '$walter/services/utils';
 
     const headers = [
         { key: 'adresse.anschrift', value: 'Anschrift' },
@@ -15,7 +15,7 @@
     const addUrl = `/api/wohnungen/`;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
-        goto(`/wohnungen/${e.detail.id}`);
+        walter_goto(`/wohnungen/${e.detail.id}`);
 
     export let rows: WalterWohnungEntry[];
     export let fullHeight = false;

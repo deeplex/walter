@@ -1,6 +1,6 @@
-import { goto } from '$app/navigation';
 import type { PageLoad } from './$types';
 import { browser } from '$app/environment';
+import { walter_goto } from '$walter/services/utils';
 
 export const load: PageLoad = async ({ fetch }) => {
     if (!browser) {
@@ -24,7 +24,7 @@ export const load: PageLoad = async ({ fetch }) => {
         }
     });
     if (response.status === 200) {
-        await goto('/');
+        await walter_goto('/');
     }
 
     return {
