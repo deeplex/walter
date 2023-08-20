@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.WebAPI
 
             container.Verify();
 
-            CreateRootIfNoUserExists();
+            await CreateRootIfNoUserExists(container);
 
             app.Run();
         }
@@ -156,27 +156,30 @@ namespace Deeplex.Saverwalter.WebAPI
 
         private static async Task CreateRootIfNoUserExists(Container container)
         {
-            var dbContext = container.GetInstance<SaverwalterContext>();
-
-            if (await dbContext.UserAccounts.CountAsync() > 0)
+            await using (AsyncScopedLifestyle.BeginScope(container))
             {
-                return;
+                var dbContext = container.GetInstance<SaverwalterContext>();
+
+                if (await dbContext.UserAccounts.CountAsync() > 0)
+                {
+                    return;
+                }
+
+                var rootPassword = Environment.GetEnvironmentVariable("WALTER_PASSWORD");
+                if (string.IsNullOrEmpty(rootPassword))
+                {
+                    return;
+                }
+
+                // either create the account _and_ associate a password or do nothing
+                using var tx = await dbContext.Database.BeginTransactionAsync();
+
+                var userService = container.GetInstance<UserService>();
+                var rootAccount = await userService.CreateUserAccount("root");
+                await userService.UpdateUserPassword(rootAccount, Encoding.UTF8.GetBytes(rootPassword));
+
+                await tx.CommitAsync();
             }
-
-            var rootPassword = Environment.GetEnvironmentVariable("WALTER_PASSWORD");
-            if (string.IsNullOrEmpty(rootPassword))
-            {
-                return;
-            }
-
-            // either create the account _and_ associate a password or do nothing
-            using var tx = await dbContext.Database.BeginTransactionAsync();
-
-            var userService = container.GetInstance<UserService>();
-            var rootAccount = await userService.CreateUserAccount("root");
-            await userService.UpdateUserPassword(rootAccount, Encoding.UTF8.GetBytes(rootPassword));
-
-            await tx.CommitAsync();
         }
     }
 }
