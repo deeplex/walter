@@ -49,10 +49,12 @@
             rows={data.entry.vertraege}
         />
 
-        <WalterLinkTile
-            bind:fileWrapper
-            name={`Adresse: ${data.entry.adresse.anschrift}`}
-            href={`/adressen/${data.entry.adresse.id}`}
-        />
+        {#if data.entry.adresse}
+            <WalterLinkTile
+                bind:fileWrapper
+                name={`Adresse: ${data.entry.adresse.anschrift}`}
+                href={`/adressen/${data.entry.adresse.id}`}
+            />
+        {/if}
     </WalterLinks>
 </WalterGrid>

@@ -123,7 +123,7 @@ async function finishPut(e: Response, toast?: WalterToastContent) {
 
     toast && addToast(toast, e.status === 200, j);
 
-    return j;
+    return e;
 }
 
 // =================================== POST ====================================

@@ -9,7 +9,7 @@
 
     let lastSavedValue: string | undefined;
     function updateLastSavedValue() {
-        lastSavedValue = value;
+        lastSavedValue = value || undefined;
     }
 
     onMount(() => {
@@ -20,7 +20,7 @@
     export let change = (e: Event) => {
         value = walter_update_value(    
             lastSavedValue,
-            value,
+            value || undefined,
             '' + (e.target as any)?.value || undefined);
     };
 </script>

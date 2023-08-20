@@ -1,8 +1,8 @@
 import { WalterToastContent } from '$walter/lib';
 import { walter_delete, walter_put } from '$walter/services/requests';
-import { openModal } from '$walter/store';
+import { changeTracker, openModal } from '$walter/store';
 
-export function handle_save(
+export async function handle_save(
     apiURL: string,
     entry: unknown,
     toastTitle: string
@@ -18,7 +18,13 @@ export function handle_save(
                 .join(', \n')}`
     );
 
-    walter_put(apiURL, entry, PutToast);
+    const result = await walter_put(apiURL, entry, PutToast);
+    console.log(result.ok);
+    if (result.ok)
+    {
+        changeTracker.set(-1);
+        changeTracker.set(0);
+    }
 }
 
 export function handle_delete(title: string, apiURL: string) {
@@ -37,7 +43,14 @@ export function handle_delete(title: string, apiURL: string) {
         content,
         danger: true,
         primaryButtonText: 'Löschen',
-        submit: () =>
-            walter_delete(apiURL, DeleteToast).then(() => history.back()) // TODO should be walter_history_back
+        submit: async () => {
+            const result = await walter_delete(apiURL, DeleteToast);
+            if (result.ok) 
+            {
+                changeTracker.set(-1);
+                changeTracker.set(0);
+                history.back();
+            }
+        }
     });
 }
