@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { WalterBetriebskostenabrechnungEntry } from "$walter/types";
     import { Accordion, AccordionItem, Link, StructuredList, StructuredListCell, StructuredListRow, Tile } from "carbon-components-svelte";
-    import { WalterLinks, WalterVertraege, WalterWohnungen, WalterZaehlerList } from "..";
+    import { WalterLink, WalterLinks, WalterVertraege, WalterWohnungen, WalterZaehlerList } from "..";
 
     export let fetchImpl: typeof fetch;
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
@@ -75,9 +75,9 @@
             {#each rechnungen as rechnung}
             <StructuredListRow>
                 <StructuredListCell>
-                    <Link href={`umlagen/${rechnung.id}`}>
+                    <WalterLink href={`umlagen/${rechnung.id}`}>
                         {rechnung.typ}
-                    </Link>
+                    </WalterLink>
                 </StructuredListCell>
                 <StructuredListCell>{rechnung.beschreibung}</StructuredListCell>
             </StructuredListRow>

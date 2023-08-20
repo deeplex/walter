@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { WalterAbrechnung, WalterGrid, WalterHeader, WalterNumberInput } from "$walter/components";
+    import { WalterAbrechnung, WalterGrid, WalterHeader, WalterLink, WalterNumberInput } from "$walter/components";
     import { onMount } from "svelte";
     import type { PageData } from "./$types";
     import type { WalterBetriebskostenabrechnungEntry } from "$walter/types";
@@ -133,7 +133,7 @@
                     title={title}/>
             {:else}
                 <InlineNotification lowContrast kind="error" hideCloseButton title="Abrechnungsjahr liegt außerhalb der Vertragslaufzeit.">
-                    <Link href={`vertraege/${vertragId}`}>Klicke hier um zum Vertrag zu gelangen.</Link>
+                    <WalterLink href={`vertraege/${vertragId}`}>Klicke hier um zum Vertrag zu gelangen.</WalterLink>
                 </InlineNotification>
             {/if}
         {:else if vertragId}

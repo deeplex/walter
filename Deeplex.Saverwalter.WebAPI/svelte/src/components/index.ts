@@ -10,6 +10,7 @@ export { default as WalterAbrechnungNotes } from './subdetails/WalterAbrechnungN
 export { default as WalterAbrechnungHeizkosten } from './subdetails/WalterAbrechnungHeizkosten.svelte';
 export { default as WalterLinks } from './subdetails/WalterLinks.svelte';
 export { default as WalterLinkTile } from './subdetails/WalterLinkTile.svelte';
+export { default as WalterLink } from './subdetails/WalterLink.svelte';
 
 export { default as WalterPreviewImage } from './preview/WalterPreviewImage.svelte';
 export { default as WalterPreviewText } from './preview/WalterPreviewText.svelte';
