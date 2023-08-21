@@ -7,11 +7,11 @@
         WalterAbrechnungNotes,
         WalterAbrechnungResultat,
         WalterMieten,
+        WalterAbrechnungNebenkosten,
     } from '$walter/components';
     import { convertDateCanadian, convertDateGerman, convertEuro } from '$walter/services/utils';
     import type { WalterBetriebskostenabrechnungEntry } from '$walter/types';
     import { Accordion, Column, Loading, Row, TextInput, Tile } from 'carbon-components-svelte';
-    import WalterAbrechnungNebenkosten from './WalterAbrechnungNebenkosten.svelte';
     import type { WalterMieteEntry } from '$walter/lib';
 
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
