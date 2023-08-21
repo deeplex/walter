@@ -14,6 +14,8 @@
         "vitest:ui": "vitest --coverage --ui"
     },
     "devDependencies": {
+        "@carbon/charts-svelte": "^1.11.21",
+        "@carbon/styles": "^1.36.0",
         "@sveltejs/adapter-auto": "^2.1.0",
         "@sveltejs/adapter-static": "^2.0.2",
         "@sveltejs/kit": "^1.0.0-next.587",
@@ -26,6 +28,9 @@
         "@vitest/ui": "^0.33.0",
         "carbon-components-svelte": "^0.77.0",
         "carbon-icons-svelte": "^12.0.0",
+        "d3": "^7.8.5",
+        "d3-cloud": "^1.2.7",
+        "d3-sankey": "^0.12.3",
         "eslint": "^8.28.0",
         "eslint-config-prettier": "^8.5.0",
         "eslint-plugin-svelte3": "^4.0.0",
