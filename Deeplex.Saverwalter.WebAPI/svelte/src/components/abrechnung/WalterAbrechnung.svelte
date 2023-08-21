@@ -13,6 +13,7 @@
     import type { WalterBetriebskostenabrechnungEntry } from '$walter/types';
     import { Accordion, Column, Loading, Row, TextInput, Tile } from 'carbon-components-svelte';
     import type { WalterMieteEntry } from '$walter/lib';
+    import WalterData from '../data/WalterData.svelte';
 
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
     export let title: string | undefined;
@@ -55,6 +56,8 @@
             </Tile>
         </Column>
     </Row>
+
+    <WalterData {abrechnung}/>
 
     <Row>
         {#if abrechnung.notes.length > 0}
