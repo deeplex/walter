@@ -36,6 +36,7 @@
 <WalterGrid>
     <WalterAdresse bind:entry={data.entry} />
 
+    {#if data.entry.wohnungen.length > 1}
     <Row>
         <Column>
             <WalterDataPieChart data={convertToWFGruppe(data.entry.wohnungen)} title="Wohnfläche" /> 
@@ -47,6 +48,7 @@
             <WalterDataPieChart data={convertToNEGruppe(data.entry.wohnungen)} title="Nutzeinheiten" /> 
         </Column>
     </Row>
+    {/if}
 
     <WalterLinks>
         <WalterWohnungen
