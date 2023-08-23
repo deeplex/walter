@@ -57,14 +57,12 @@
         </Column>
     </Row>
 
-    <WalterData {abrechnung}/>
-
     <Row>
         {#if abrechnung.notes.length > 0}
             <WalterAbrechnungNotes {abrechnung}/>
         {/if}
     </Row>
-
+    
     <Row>
         <TextInput
             placeholder="Nutzungsbeginn"
@@ -81,6 +79,7 @@
     </Row>
 
     <Accordion>
+        <WalterData {abrechnung} />
         <WalterMieten
             entry={mietEntry}
             title="Gezahlte Mieten ({abrechnung.gezahltMiete}€)"
