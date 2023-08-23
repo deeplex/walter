@@ -3,6 +3,11 @@
     import type { WalterAbrechnungseinheit } from '$walter/types';
     import type {  WalterZeitraum } from '$walter/types/WalterBetriebskostenabrechnung.type';
     import {
+        WalterAbrechnungEinheitHead,
+        WalterAbrechnungEinheitPart,
+        WalterAbrechnungEinheitVerbrauch
+    } from '$walter/components'
+    import {
         Row,
         StructuredList,
         StructuredListBody,
@@ -11,9 +16,6 @@
         StructuredListRow,
         Tile
     } from 'carbon-components-svelte';
-    import WalterAbrechnungEinheitPart from './WalterAbrechnungEinheitPart.svelte';
-    import WalterAbrechnungEinheitHead from './WalterAbrechnungEinheitHead.svelte';
-    import WalterAbrechnungEinheitVerbrauch from './WalterAbrechnungEinheitVerbrauch.svelte';
 
     export let einheit: WalterAbrechnungseinheit;
     export let zeitraum: WalterZeitraum;

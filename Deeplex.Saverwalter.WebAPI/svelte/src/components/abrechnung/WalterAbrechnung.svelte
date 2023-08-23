@@ -7,12 +7,13 @@
         WalterAbrechnungNotes,
         WalterAbrechnungResultat,
         WalterMieten,
+        WalterAbrechnungNebenkosten,
     } from '$walter/components';
     import { convertDateCanadian, convertDateGerman, convertEuro } from '$walter/services/utils';
     import type { WalterBetriebskostenabrechnungEntry } from '$walter/types';
     import { Accordion, Column, Loading, Row, TextInput, Tile } from 'carbon-components-svelte';
-    import WalterAbrechnungNebenkosten from './WalterAbrechnungNebenkosten.svelte';
     import type { WalterMieteEntry } from '$walter/lib';
+    import WalterData from '../data/WalterData.svelte';
 
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
     export let title: string | undefined;
@@ -61,7 +62,7 @@
             <WalterAbrechnungNotes {abrechnung}/>
         {/if}
     </Row>
-
+    
     <Row>
         <TextInput
             placeholder="Nutzungsbeginn"
@@ -78,6 +79,7 @@
     </Row>
 
     <Accordion>
+        <WalterData {abrechnung} />
         <WalterMieten
             entry={mietEntry}
             title="Gezahlte Mieten ({abrechnung.gezahltMiete}€)"
