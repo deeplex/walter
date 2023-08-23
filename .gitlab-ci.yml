@@ -51,6 +51,19 @@ test-dotnet:
     - dotnet test /p:CollectCoverage=true | grep '%' | awk '{print $0}{sum += substr($4,1,length($4)-1)} END {if (NR>0) print "Total coverage:" sum / NR "%" }'
   coverage: '/Total coverage:\s*(\d+(?:\.\d+)?)/'
 
+build-docker-latest:
+  stage: release
+  image: docker:23.0
+  needs:
+    - build-svelte
+    - build-dotnet
+  dependencies:
+    - build-svelte
+    - build-dotnet
+  script:
+    - cd Deeplex.Saverwalter.WebAPI
+    - docker build -t "$IMAGE_NAME:latest" .
+
 build-docker:
   stage: release
   image: docker:23.0
