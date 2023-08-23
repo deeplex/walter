@@ -52,6 +52,11 @@
         />
     </Row>
 {/if}
+
+<Row>
+    <WalterTextArea {readonly} labelText="Beschreibung" bind:value={entry.beschreibung} />
+</Row>
+
 <Row>
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />
 </Row>
