@@ -9,7 +9,10 @@
         WalterZaehlerList
     } from '$walter/components';
     import { WalterS3FileWrapper, type WalterWohnungEntry } from '$walter/lib';
+    import { Column, Row } from 'carbon-components-svelte';
     import type { PageData } from './$types';
+    import WalterDataPieChart from '$walter/components/data/WalterDataPieChart.svelte';
+    import { convertToNEGruppe, convertToNFGruppe, convertToWFGruppe } from '$walter/components/data/WalterData';
 
     export let data: PageData;
     const wohnungEntry: Partial<WalterWohnungEntry> = {
@@ -32,6 +35,18 @@
 
 <WalterGrid>
     <WalterAdresse bind:entry={data.entry} />
+
+    <Row>
+        <Column>
+            <WalterDataPieChart data={convertToWFGruppe(data.entry.wohnungen)} title="Wohnfläche" /> 
+        </Column>
+        <Column>
+            <WalterDataPieChart data={convertToNFGruppe(data.entry.wohnungen)} title="Nutzfläche" /> 
+        </Column>
+        <Column>
+            <WalterDataPieChart data={convertToNEGruppe(data.entry.wohnungen)} title="Nutzeinheiten" /> 
+        </Column>
+    </Row>
 
     <WalterLinks>
         <WalterWohnungen
