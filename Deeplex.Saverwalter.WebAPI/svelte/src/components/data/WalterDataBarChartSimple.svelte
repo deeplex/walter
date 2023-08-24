@@ -4,18 +4,7 @@
 	import { BarChartSimple } from '@carbon/charts-svelte'
     import type { WalterDataType } from './WalterData';
 
-	export let title: string;
-	export let data: WalterDataType;
-
-	const options = {
-		legend: { enabled: false },
-		title: title,
-		height: '400px',
-		axes: {
-			bottom: { mapsTo: 'value'  },
-			left: { mapsTo: 'group', scaleType: 'labels' }
-		}
-	} as any; // TODO scaleType is not correct
+	export let config: {data: WalterDataType, options: any};
 </script>
 
-<BarChartSimple {data} {options} />
+<BarChartSimple data={config.data} options={config.options} />

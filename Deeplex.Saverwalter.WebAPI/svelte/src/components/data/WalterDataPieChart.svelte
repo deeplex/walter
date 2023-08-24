@@ -2,16 +2,9 @@
 	import '@carbon/styles/css/styles.css'
 	import '@carbon/charts-svelte/styles.css'
 	import { PieChart } from '@carbon/charts-svelte'
-    import type { WalterDataType } from './WalterData';
+    import type { WalterDataConfigType, WalterDataType } from './WalterData';
 
-	export let title: string;
-	export let data: WalterDataType;
-
-	const options = {
-		legend: { enabled: false },
-		title: title,
-		height: '400px',
-	};
+	export let config: WalterDataConfigType;
 </script>
 
-<PieChart {data} {options} />
+<PieChart data={config.data} options={config.options} />

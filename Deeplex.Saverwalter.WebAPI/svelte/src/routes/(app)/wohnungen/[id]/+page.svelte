@@ -20,6 +20,9 @@
         type WalterUmlageEntry,
         type WalterZaehlerEntry
     } from '$walter/lib';
+    import { Row } from 'carbon-components-svelte';
+    import { walter_data_aufwendungen } from '$walter/components/data/WalterData';
+    import WalterDataScatterChart from '$walter/components/data/WalterDataScatterChart.svelte';
 
     export let data: PageData;
 
@@ -113,4 +116,13 @@
 
         <!-- TODO besitzer id is guid -->
     </WalterLinks>
+    
+    {#if data.entry.erhaltungsaufwendungen.length > 1}
+    <Row>
+        <WalterDataScatterChart
+            config={walter_data_aufwendungen(
+                "Erhaltungsaufwendungen",
+                data.entry.erhaltungsaufwendungen)} />
+    </Row>
+    {/if}
 </WalterGrid>

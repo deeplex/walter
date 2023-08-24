@@ -12,7 +12,7 @@
     import { Column, Row } from 'carbon-components-svelte';
     import type { PageData } from './$types';
     import WalterDataPieChart from '$walter/components/data/WalterDataPieChart.svelte';
-    import { convertToNEGruppe, convertToNFGruppe, convertToWFGruppe } from '$walter/components/data/WalterData';
+    import { walter_data_ne, walter_data_nf, walter_data_wf } from '$walter/components/data/WalterData';
 
     export let data: PageData;
     const wohnungEntry: Partial<WalterWohnungEntry> = {
@@ -54,13 +54,13 @@
     {#if data.entry.wohnungen.length > 1}
     <Row>
         <Column>
-            <WalterDataPieChart data={convertToWFGruppe(data.entry.wohnungen)} title="Wohnfläche" /> 
+            <WalterDataPieChart data={walter_data_wf(data.entry.wohnungen)} title="Wohnfläche" /> 
         </Column>
         <Column>
-            <WalterDataPieChart data={convertToNFGruppe(data.entry.wohnungen)} title="Nutzfläche" /> 
+            <WalterDataPieChart data={walter_data_nf(data.entry.wohnungen)} title="Nutzfläche" /> 
         </Column>
         <Column>
-            <WalterDataPieChart data={convertToNEGruppe(data.entry.wohnungen)} title="Nutzeinheiten" /> 
+            <WalterDataPieChart data={walter_data_ne(data.entry.wohnungen)} title="Nutzeinheiten" /> 
         </Column>
     </Row>
     {/if}
