@@ -1,6 +1,6 @@
 <script lang="ts">
 
-    import { Modal, Tile } from "carbon-components-svelte";
+    import { Modal } from "carbon-components-svelte";
     import { handle_save } from "./WalterDataWrapper";
     export let addModalOpen = false;
     export let addUrl: string;
@@ -34,5 +34,5 @@
     >
     <slot />
     <!-- Spacer for DatePickers. Otherwise the modal is too narrow -->
-    <Tile style="height: 13em" />
+    <div style="height: 13em" />
 </Modal>

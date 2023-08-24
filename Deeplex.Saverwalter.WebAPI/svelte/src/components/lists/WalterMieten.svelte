@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { WalterDataWrapper, WalterMiete } from '$walter/components';
+    import { WalterDataWrapper, WalterMiete, WalterNumberInput } from '$walter/components';
     import type { WalterMieteEntry } from '$walter/lib';
     import { walter_goto } from '$walter/services/utils';
 
@@ -31,5 +31,11 @@
 >
     {#if entry}
         <WalterMiete {entry} />
+        <WalterNumberInput
+            label="Auch anwenden auf die nächsten Monate:"
+            min={0}
+            max={11}
+            hideSteppers={false}
+            bind:value={entry.repeat} />
     {/if}
 </WalterDataWrapper>

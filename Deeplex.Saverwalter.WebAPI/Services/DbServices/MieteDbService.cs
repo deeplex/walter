@@ -65,18 +65,27 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private MieteEntryBase Add(MieteEntryBase entry)
         {
-
-            var vertrag = Ctx.Vertraege.Find(int.Parse(entry.Vertrag.Id));
-            var entity = new Miete(entry.Zahlungsdatum, entry.BetreffenderMonat, entry.Betrag)
+            var mieten = new List<Miete>(); 
+            
+            // Be able to create multiple Mieten at once
+            for (int i = 0; i <= entry.Repeat; ++i)
             {
-                Vertrag = vertrag!
-            };
+                var vertrag = Ctx.Vertraege.Find(int.Parse(entry.Vertrag.Id));
+                var monat = entry.BetreffenderMonat.AddMonths(i);
+                var entity = new Miete(entry.Zahlungsdatum, monat, entry.Betrag)
+                {
+                    Vertrag = vertrag!
+                };
 
-            SetOptionalValues(entity, entry);
-            Ctx.Mieten.Add(entity);
+                SetOptionalValues(entity, entry);
+                Ctx.Mieten.Add(entity);
+                mieten.Add(entity);
+            }
+
             Ctx.SaveChanges();
 
-            return new MieteEntryBase(entity);
+            return new MieteEntryBase(mieten.First(), entry.Repeat);
+
         }
 
 

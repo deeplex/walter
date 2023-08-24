@@ -10,7 +10,8 @@ export class WalterMieteEntry extends WalterApiHandler {
         public zahlungsdatum: string,
         public betrag: number,
         public vertrag: WalterSelectionEntry,
-        public notiz: string
+        public notiz: string,
+        public repeat: number
     ) {
         super();
     }
@@ -25,7 +26,8 @@ export class WalterMieteEntry extends WalterApiHandler {
             json.zahlungsdatum,
             json.betrag,
             vertrag,
-            json.notiz
+            json.notiz,
+            json.repeat
         );
     }
 }

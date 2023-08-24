@@ -2,7 +2,7 @@
     import {
         WalterGrid,
         WalterHeaderNew,
-        WalterMiete
+        WalterMietminderung
     } from '$walter/components';
     import type { WalterMieteEntry } from '$walter/lib';
 
@@ -15,5 +15,5 @@
 <WalterHeaderNew {apiURL} {entry} {title} />
 
 <WalterGrid>
-    <WalterMiete {entry} />
+    <WalterMietminderung {entry} />
 </WalterGrid>

@@ -10,7 +10,9 @@
         .sort((a, b) => new Date(a.betreffenderMonat).getTime() - new Date(b.betreffenderMonat).getTime());
     
     const years: number[] = [];
-    for (let i = new Date(mieten[0].betreffenderMonat).getFullYear(); i < new Date().getFullYear() + 1; ++i)
+    for(let i = new Date(mieten[0].betreffenderMonat).getFullYear();
+        i < new Date(mieten[mieten.length - 1].betreffenderMonat).getFullYear() + 1;
+        ++i)
     {
         years.push(i);
     }
