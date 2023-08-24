@@ -17,7 +17,7 @@
     } from '$walter/lib';
     import { Row } from 'carbon-components-svelte';
     import WalterDataLineChart from '$walter/components/data/WalterDataLineChart.svelte';
-    import { convertToRechnungenFromUmlage } from '$walter/components/data/WalterData';
+    import { walter_data_rechnungen_year } from '$walter/components/data/WalterData';
 
     export let data: PageData;
 
@@ -83,8 +83,9 @@
     {#if data.entry.betriebskostenrechnungen.length > 1}
         <Row>
             <WalterDataLineChart
-                data={convertToRechnungenFromUmlage(data.entry.betriebskostenrechnungen)}
-                title="Rechnungen"/> 
+                config={walter_data_rechnungen_year(
+                    "Rechnungen",
+                    data.entry.betriebskostenrechnungen)} />
         </Row>
     {/if}
 </WalterGrid>
