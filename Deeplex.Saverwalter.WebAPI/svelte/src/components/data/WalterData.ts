@@ -1,6 +1,7 @@
 import type {
     WalterBetriebskostenrechnungEntry,
     WalterErhaltungsaufwendungEntry,
+    WalterVertragEntry,
     WalterWohnungEntry
 } from '$walter/lib';
 import type { WalterRechnungEntry } from '$walter/types';
@@ -121,6 +122,77 @@ export function walter_data_wf(
     return { data, options };
 }
 
+const months = [
+    'Januar',
+    'Februar',
+    'März',
+    'April',
+    'Mai',
+    'Juni',
+    'Juli',
+    'August',
+    'September',
+    'Oktober',
+    'November',
+    'Dezember'
+];
+
+export function walter_data_miettabelle(
+    vertraege: WalterVertragEntry[],
+    year: number
+): WalterDataConfigType {
+    const options = {
+        ...baseOptions,
+        legend: {
+            enabled: true
+        },
+        axes: {
+            bottom: {
+                mapsTo: 'key',
+                scaleType: 'labels'
+            },
+            left: {
+                truncation: {
+                    threshold: 999
+                },
+                mapsTo: 'group',
+                scaleType: 'labels'
+            }
+        },
+        heatmap: {
+            colorLegend: {
+                type: 'quantize'
+            }
+        }
+    };
+
+    const prefilled = vertraege.flatMap((vertrag) => {
+        return months.map((month) => ({
+            key: month,
+            value: 0,
+            group: vertrag.wohnung.text
+        }));
+    });
+
+    const data = [
+        ...prefilled,
+        ...vertraege.flatMap((vertrag) => {
+            return vertrag.mieten
+                .filter(
+                    (miete) =>
+                        new Date(miete.betreffenderMonat).getFullYear() === year
+                )
+                .map((miete) => ({
+                    key: months[new Date(miete.betreffenderMonat).getMonth()],
+                    value: miete.betrag,
+                    group: vertrag.wohnung.text
+                }));
+        })
+    ];
+
+    return { options, data };
+}
+
 export function walter_data_nf(
     title: string,
     wohnungen: WalterWohnungEntry[]
@@ -156,6 +228,7 @@ export type WalterDataConfigType = {
 
 export type WalterDataOptionsType = {
     legend: { enabled: boolean };
+    heatmap: any;
     height: string;
     curve?: string;
     axes?: {

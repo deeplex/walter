@@ -31,16 +31,19 @@
     function add(e: CustomEvent, vertrag: WalterVertragEntry) {
         e.stopPropagation();
 
-        const dateMiete = vertrag.lastMiete ? new Date(vertrag.lastMiete?.betreffenderMonat) : new Date();
+        const mieten = vertrag.mieten
+            .map(miete => new Date(miete.betreffenderMonat))
+            .sort((a, b) => b.getTime() - a.getTime());
+        const dateMiete = mieten[0] || new Date();
         dateMiete.setDate(dateMiete.getDate() + new Date(dateMiete.getFullYear(), dateMiete.getMonth(), 0).getDate());
         if (dateMiete < earliest)
         {
             dateMiete.setDate(earliest.getDate());
         }
         quickAddEntry = {
-            vertrag: vertrag.lastMiete?.vertrag || {id: `${vertrag.id}`, text: vertrag.wohnung.text},
+            vertrag: vertrag.mieten[0]?.vertrag || {id: `${vertrag.id}`, text: vertrag.wohnung.text},
             zahlungsdatum: convertDateCanadian(new Date()),
-            betrag: vertrag.lastMiete?.betrag,
+            betrag: vertrag.mieten[0]?.betrag,
             betreffenderMonat: convertDateCanadian(dateMiete)
         }
 

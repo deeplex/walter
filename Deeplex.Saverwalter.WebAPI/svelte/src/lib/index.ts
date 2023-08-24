@@ -6,6 +6,7 @@ export { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
 export { WalterJuristischePersonEntry } from './WalterJuristischePerson';
 export { WalterMieteEntry } from './WalterMiete';
 export { WalterMietminderungEntry } from './WalterMietminderung';
+export { WalterMiettabelleEntry } from './WalterMiettabelle';
 export { WalterNatuerlichePersonEntry } from './WalterNatuerlichePerson';
 export { WalterS3FileWrapper } from './WalterS3FileWrapper';
 export { WalterSelectionEntry } from './WalterSelection';

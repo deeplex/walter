@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Notiz { get; set; }
             public string? MieterAuflistung { get; }
             public IEnumerable<SelectionEntry>? SelectedMieter { get; }
-            public MieteEntryBase? LastMiete { get; }
+            public IEnumerable<MieteEntryBase>? Mieten { get; }
 
             public VertragEntryBase() { }
             public VertragEntryBase(Vertrag entity, SaverwalterContext ctx)
@@ -50,11 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 SelectedMieter = Mieter.Select(e
                     => new SelectionEntry(e.PersonId, ctx.FindPerson(e.PersonId).Bezeichnung));
 
-                var lastMiete = entity.Mieten.OrderBy(miete => miete.BetreffenderMonat).LastOrDefault();
-                if (lastMiete != null)
-                {
-                    LastMiete = new MieteEntryBase(lastMiete);
-                }
+                Mieten = entity.Mieten.ToList().Select(e => new MieteEntryBase(e));
             }
         }
 
@@ -67,7 +63,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .SelectMany(e => e.Betriebskostenrechnungen)
                 .Where(e => e.BetreffendesJahr >= Entity.Beginn().Year && (Entity.Ende == null || Entity.Ende.Value.Year >= e.BetreffendesJahr))
                 .Select(e => new BetriebskostenrechnungEntryBase(e));
-            public IEnumerable<MieteEntryBase>? Mieten => Entity?.Mieten.ToList().Select(e => new MieteEntryBase(e));
             public IEnumerable<MietminderungEntryBase>? Mietminderungen => Entity?.Mietminderungen.ToList().Select(e => new MietminderungEntryBase(e));
             public IEnumerable<PersonEntryBase>? Mieter => Ctx?.MieterSet
                 .ToList()
