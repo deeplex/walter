@@ -1,4 +1,7 @@
-import type { WalterWohnungEntry } from '$walter/lib';
+import type {
+    WalterBetriebskostenrechnungEntry,
+    WalterWohnungEntry
+} from '$walter/lib';
 import type { WalterRechnungEntry } from '$walter/types';
 
 export function convertToDataFromRechnungen(
@@ -13,18 +16,28 @@ export function convertToDataFromRechnungen(
 export function convertToBeforeAfterDataFromRechnungen(
     rechnungen: WalterRechnungEntry[]
 ): WalterDataType {
-    return rechnungen.map((e) => ({
-        group: e.typ,
-        value: [e.betragLetztesJahr, e.gesamtBetrag]
+    return rechnungen.map((rechnung) => ({
+        group: rechnung.typ,
+        value: [rechnung.betragLetztesJahr, rechnung.gesamtBetrag]
     }));
 }
 
 export function convertToDiffDataFromRechnungen(
     rechnungen: WalterRechnungEntry[]
-) {
-    return rechnungen.map((e) => ({
-        group: e.typ,
-        value: e.gesamtBetrag - e.betragLetztesJahr
+): WalterDataType {
+    return rechnungen.map((rechnung) => ({
+        group: rechnung.typ,
+        value: rechnung.gesamtBetrag - rechnung.betragLetztesJahr
+    }));
+}
+
+export function convertToRechnungenFromUmlage(
+    rechnungen: WalterBetriebskostenrechnungEntry[]
+): WalterDataType {
+    return rechnungen.map((rechnung) => ({
+        group: `${rechnung.umlage.text}`,
+        key: `${rechnung.betreffendesJahr}`,
+        value: rechnung.betrag
     }));
 }
 
@@ -52,4 +65,6 @@ export function convertToNEGruppe(wohnungen: WalterWohnungEntry[]) {
 export type WalterDataType = {
     group: string;
     value: number | number[];
+    key?: string;
+    date?: string; // Date in Canadian Format
 }[];

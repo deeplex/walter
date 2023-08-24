@@ -36,20 +36,6 @@
 <WalterGrid>
     <WalterAdresse bind:entry={data.entry} />
 
-    {#if data.entry.wohnungen.length > 1}
-    <Row>
-        <Column>
-            <WalterDataPieChart data={convertToWFGruppe(data.entry.wohnungen)} title="Wohnfläche" /> 
-        </Column>
-        <Column>
-            <WalterDataPieChart data={convertToNFGruppe(data.entry.wohnungen)} title="Nutzfläche" /> 
-        </Column>
-        <Column>
-            <WalterDataPieChart data={convertToNEGruppe(data.entry.wohnungen)} title="Nutzeinheiten" /> 
-        </Column>
-    </Row>
-    {/if}
-
     <WalterLinks>
         <WalterWohnungen
             fetchImpl={data.fetchImpl}
@@ -64,4 +50,18 @@
             rows={data.entry.zaehler}
         />
     </WalterLinks>
+
+    {#if data.entry.wohnungen.length > 1}
+    <Row>
+        <Column>
+            <WalterDataPieChart data={convertToWFGruppe(data.entry.wohnungen)} title="Wohnfläche" /> 
+        </Column>
+        <Column>
+            <WalterDataPieChart data={convertToNFGruppe(data.entry.wohnungen)} title="Nutzfläche" /> 
+        </Column>
+        <Column>
+            <WalterDataPieChart data={convertToNEGruppe(data.entry.wohnungen)} title="Nutzeinheiten" /> 
+        </Column>
+    </Row>
+    {/if}
 </WalterGrid>

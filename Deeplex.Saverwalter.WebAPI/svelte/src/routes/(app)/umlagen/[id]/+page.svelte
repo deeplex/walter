@@ -15,6 +15,9 @@
         type WalterBetriebskostenrechnungEntry,
         type WalterSelectionEntry
     } from '$walter/lib';
+    import { Row } from 'carbon-components-svelte';
+    import WalterDataLineChart from '$walter/components/data/WalterDataLineChart.svelte';
+    import { convertToRechnungenFromUmlage } from '$walter/components/data/WalterData';
 
     export let data: PageData;
 
@@ -64,7 +67,7 @@
         <WalterBetriebskostenrechnungen
             fetchImpl={data.fetchImpl}
             entry={betriebskostenrechungEntry}
-            title="Betriebskostenrechnungen"
+            title="Rechnungen"
             rows={data.entry.betriebskostenrechnungen}
         />
         <!-- Only show if Schlüssel is "nach Verbrauch" -->
@@ -76,4 +79,12 @@
             />
         {/if}
     </WalterLinks>
+
+    {#if data.entry.betriebskostenrechnungen.length > 1}
+        <Row>
+            <WalterDataLineChart
+                data={convertToRechnungenFromUmlage(data.entry.betriebskostenrechnungen)}
+                title="Rechnungen"/> 
+        </Row>
+    {/if}
 </WalterGrid>
