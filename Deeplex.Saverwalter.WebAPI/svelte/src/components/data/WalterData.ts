@@ -205,7 +205,7 @@ export function walter_data_miettabelle(
         return began && !ended;
     }
 
-    const prefilled: WalterDataType = [];
+    const data: WalterDataType = [];
     for (const vertrag of vertraege) {
         const begin = new Date(
             new Date(vertrag.beginn).getFullYear(),
@@ -221,16 +221,25 @@ export function walter_data_miettabelle(
             : undefined;
 
         for (let monthIndex = 0; monthIndex < months.length; ++monthIndex) {
+            const eigentum = vertrag.versionen.every(
+                (version) => version.grundmiete === 0
+            );
+
+            if (
+                eigentum ||
+                begin.getFullYear() > year ||
+                (end && end.getFullYear() < year)
+            ) {
+                continue;
+            }
+
             const monthDate = new Date(year, monthIndex, 1);
 
             const group = vertrag.wohnung.text;
             const key = months[monthIndex];
 
-            const eigentum = vertrag.versionen.every(
-                (version) => version.grundmiete === 0
-            );
             const inactive = !vertragActive(begin, end, monthDate);
-            const occupied = prefilled.some(
+            const occupied = !!data.find(
                 (entry) =>
                     entry.group === group &&
                     entry.key === key &&
@@ -239,32 +248,33 @@ export function walter_data_miettabelle(
                     entry.value >= 0
             );
 
-            const doesNotHaveToPay =
-                (!inactive && eigentum) || (inactive && !occupied);
+            const doesNotHaveToPay = inactive && !occupied;
 
-            prefilled.push({
+            data.push({
                 value: doesNotHaveToPay ? null : 0,
                 key,
                 group
             });
         }
-    }
 
-    const data = [
-        ...prefilled,
-        ...vertraege.flatMap((vertrag) => {
-            return vertrag.mieten
-                .filter(
-                    (miete) =>
-                        new Date(miete.betreffenderMonat).getFullYear() === year
-                )
-                .map((miete) => ({
-                    key: months[new Date(miete.betreffenderMonat).getMonth()],
-                    value: miete.betrag,
-                    group: vertrag.wohnung.text
-                }));
-        })
-    ];
+        const relevantMieten = vertrag.mieten.filter(
+            (miete) => new Date(miete.betreffenderMonat).getFullYear() === year
+        );
+
+        for (const miete of relevantMieten) {
+            const group = vertrag.wohnung.text;
+            const key = months[new Date(miete.betreffenderMonat).getMonth()];
+
+            const previous = data.find(
+                (entry) => entry.group === group && entry.key === key
+            );
+
+            if (previous) {
+                previous.value =
+                    ((previous.value as number) || 0) + miete.betrag;
+            }
+        }
+    }
 
     return { options, data };
 }
