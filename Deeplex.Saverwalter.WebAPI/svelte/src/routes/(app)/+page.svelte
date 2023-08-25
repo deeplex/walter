@@ -17,6 +17,7 @@
         years.push(i);
     }
     
+    const selected = years.findIndex(year => year === new Date().getFullYear()) || years.length - 1;
 </script>
 
 <WalterHeader title="SaverWalter" />
@@ -25,7 +26,7 @@
         <Grid>
             <Tile>
                 <h4>Miettabelle</h4>
-                <Tabs selected={years.length - 1}>
+                <Tabs {selected}>
                     {#each years as year}
                     <Tab label={`${year}`}/>
                     {/each}
