@@ -15,6 +15,7 @@
         Building,
         ChartRelationship,
         Document,
+        Home,
         Location,
         Logout,
         Meter,
@@ -46,6 +47,7 @@
 
 <SideNav bind:isOpen on:close={closeSideNav}>
     <SideNavItems>
+        <WalterSideNavLink icon={Home} text="Startseite" href="/" />
         <WalterSideNavLink icon={Document} text="Abrechnung" href="/abrechnung" />
         <SideNavDivider />
         <WalterSideNavLink icon={UserMultiple} text="Kontakte" href="/kontakte" />

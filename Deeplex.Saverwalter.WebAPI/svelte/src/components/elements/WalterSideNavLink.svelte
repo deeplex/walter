@@ -25,7 +25,7 @@
 
 <SideNavLink
     on:click={closeSideNavIfWinWidthSmall}
-    isSelected={$page.route.id?.includes(href)}
+    isSelected={href === `/${$page.url.pathname.split("/")[1]}`}
     {icon}
     {text}
     {href}
