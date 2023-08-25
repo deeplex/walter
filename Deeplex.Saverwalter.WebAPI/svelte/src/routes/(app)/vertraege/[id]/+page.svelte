@@ -25,7 +25,9 @@
         WalterBetriebskostenrechnungEntry
     } from '$walter/lib';
     import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
-    import { ClickableTile } from 'carbon-components-svelte';
+    import { ClickableTile, Row } from 'carbon-components-svelte';
+    import WalterDataLineChart from '$walter/components/data/WalterDataLineChart.svelte';
+    import { walter_data_mieten } from '$walter/components/data/WalterData';
     export let data: PageData;
 
     const versionen = data.entry.versionen;
@@ -100,4 +102,13 @@
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />
     </WalterLinks>
+
+    {#if data.entry.mieten.length > 1}
+    <Row>
+        <WalterDataLineChart
+            config={walter_data_mieten(
+                "Mieten",
+                data.entry.mieten)} />
+    </Row>
+    {/if}
 </WalterGrid>

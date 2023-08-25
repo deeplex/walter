@@ -1,6 +1,7 @@
 import type {
     WalterBetriebskostenrechnungEntry,
     WalterErhaltungsaufwendungEntry,
+    WalterMieteEntry,
     WalterVertragEntry,
     WalterWohnungEntry
 } from '$walter/lib';
@@ -122,7 +123,7 @@ export function walter_data_wf(
     return { data, options };
 }
 
-const months = [
+export const months = [
     'Januar',
     'Februar',
     'März',
@@ -136,6 +137,24 @@ const months = [
     'November',
     'Dezember'
 ];
+
+export function walter_data_mieten(title: string, mieten: WalterMieteEntry[]) {
+    const options = {
+        ...baseOptions,
+        title,
+        axes: {
+            left: { mapsTo: 'value', scaleType: 'linear' },
+            bottom: { mapsTo: 'date', scaleType: 'time' }
+        }
+    };
+
+    const data = mieten.map((miete) => ({
+        value: miete.betrag,
+        date: miete.betreffenderMonat
+    }));
+
+    return { options, data };
+}
 
 export function walter_data_miettabelle(
     vertraege: WalterVertragEntry[],
@@ -218,7 +237,7 @@ export function walter_data_miettabelle(
                 value: doesNotHaveToPay ? null : 0,
                 key,
                 group
-    });
+            });
         }
     }
 
@@ -286,8 +305,8 @@ export type WalterDataOptionsType = {
 };
 
 export type WalterDataType = {
-    group: string;
     value: number | number[] | null;
+    group?: string;
     id?: string;
     key?: string;
     date?: string; // Date in Canadian Format
