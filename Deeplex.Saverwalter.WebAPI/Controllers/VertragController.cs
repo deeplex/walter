@@ -25,6 +25,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? MieterAuflistung { get; }
             public IEnumerable<SelectionEntry>? SelectedMieter { get; }
             public IEnumerable<MieteEntryBase>? Mieten { get; }
+            public IEnumerable<VertragVersionEntryBase>? Versionen { get; set; }
 
             public VertragEntryBase() { }
             public VertragEntryBase(Vertrag entity, SaverwalterContext ctx)
@@ -51,6 +52,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     => new SelectionEntry(e.PersonId, ctx.FindPerson(e.PersonId).Bezeichnung));
 
                 Mieten = entity.Mieten.ToList().Select(e => new MieteEntryBase(e));
+                Versionen = entity?.Versionen.Select(e => new VertragVersionEntryBase(e));
             }
         }
 
@@ -69,7 +71,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Where(m => Entity != null && m.Vertrag.VertragId == Entity.VertragId)
                 .ToList()
                 .Select(e => new PersonEntryBase(Ctx.FindPerson(e.PersonId)));
-            public IEnumerable<VertragVersionEntryBase>? Versionen { get; set; }
             // TODO Garagen
 
             public VertragEntry() : base() { }
@@ -77,7 +78,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 Entity = entity;
                 Ctx = ctx;
-                Versionen = Entity?.Versionen.Select(e => new VertragVersionEntryBase(e));
             }
         }
 

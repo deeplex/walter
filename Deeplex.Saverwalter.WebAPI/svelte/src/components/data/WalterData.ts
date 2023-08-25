@@ -143,15 +143,18 @@ export function walter_data_miettabelle(
 ): WalterDataConfigType {
     const options = {
         ...baseOptions,
+        height: `${vertraege.length * 2}em`,
         legend: {
             enabled: true
         },
         axes: {
             bottom: {
+                title: 'Monat',
                 mapsTo: 'key',
                 scaleType: 'labels'
             },
             left: {
+                title: 'Wohnung',
                 truncation: {
                     threshold: 999
                 },
@@ -166,13 +169,58 @@ export function walter_data_miettabelle(
         }
     };
 
-    const prefilled = vertraege.flatMap((vertrag) => {
-        return months.map((month) => ({
-            key: month,
-            value: 0,
-            group: vertrag.wohnung.text
-        }));
+    function vertragActive(begin: Date, end: Date | undefined, month: Date) {
+        const began = begin <= month;
+        const monthAfter = new Date(month.setMonth(month.getMonth()));
+        const ended = end && end < monthAfter;
+
+        return began && !ended;
+    }
+
+    const prefilled: WalterDataType = [];
+    for (const vertrag of vertraege) {
+        const begin = new Date(
+            new Date(vertrag.beginn).getFullYear(),
+            new Date(vertrag.beginn).getMonth(),
+            1
+        );
+        const end = vertrag.ende
+            ? new Date(
+                  new Date(vertrag.ende).getFullYear(),
+                  new Date(vertrag.ende).getMonth(),
+                  1
+              )
+            : undefined;
+
+        for (let monthIndex = 0; monthIndex < months.length; ++monthIndex) {
+            const monthDate = new Date(year, monthIndex, 1);
+
+            const group = vertrag.wohnung.text;
+            const key = months[monthIndex];
+
+            const eigentum = vertrag.versionen.every(
+                (version) => version.grundmiete === 0
+            );
+            const inactive = !vertragActive(begin, end, monthDate);
+            const occupied = prefilled.some(
+                (entry) =>
+                    entry.group === group &&
+                    entry.key === key &&
+                    entry.value !== null &&
+                    !Array.isArray(entry.value) &&
+                    entry.value >= 0
+            );
+
+            const doesNotHaveToPay =
+                (!inactive && eigentum) || (inactive && !occupied);
+
+            prefilled.push({
+                value: doesNotHaveToPay ? null : 0,
+                key,
+                group
     });
+        }
+    }
 
     const data = [
         ...prefilled,
@@ -239,7 +287,8 @@ export type WalterDataOptionsType = {
 
 export type WalterDataType = {
     group: string;
-    value: number | number[];
+    value: number | number[] | null;
+    id?: string;
     key?: string;
     date?: string; // Date in Canadian Format
 }[];
