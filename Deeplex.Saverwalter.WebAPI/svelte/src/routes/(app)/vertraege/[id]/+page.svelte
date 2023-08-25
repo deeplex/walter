@@ -26,8 +26,8 @@
     } from '$walter/lib';
     import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
     import { ClickableTile, Row } from 'carbon-components-svelte';
-    import WalterDataLineChart from '$walter/components/data/WalterDataLineChart.svelte';
     import { walter_data_mieten } from '$walter/components/data/WalterData';
+    import WalterDataScatterChart from '$walter/components/data/WalterDataScatterChart.svelte';
     export let data: PageData;
 
     const versionen = data.entry.versionen;
@@ -105,7 +105,7 @@
 
     {#if data.entry.mieten.length > 1}
     <Row>
-        <WalterDataLineChart
+        <WalterDataScatterChart
             config={walter_data_mieten(
                 "Mieten",
                 data.entry.mieten)} />

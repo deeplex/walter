@@ -139,11 +139,20 @@ export const months = [
 ];
 
 export function walter_data_mieten(title: string, mieten: WalterMieteEntry[]) {
+    const sortedMieten = mieten.sort((a, b) => a.betrag - b.betrag);
+
     const options = {
         ...baseOptions,
         title,
         axes: {
-            left: { mapsTo: 'value', scaleType: 'linear' },
+            left: {
+                domain: [
+                    sortedMieten[0].betrag,
+                    sortedMieten[sortedMieten.length - 1].betrag
+                ],
+                mapsTo: 'value',
+                scaleType: 'linear'
+            },
             bottom: { mapsTo: 'date', scaleType: 'time' }
         }
     };
