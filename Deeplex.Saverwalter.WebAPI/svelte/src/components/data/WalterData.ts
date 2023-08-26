@@ -175,6 +175,21 @@ export function walter_data_miettabelle(
     vertraege: WalterVertragEntry[],
     year: number
 ): WalterDataConfigType {
+    const colorGradient = [
+        '#ffffff',
+        '#f4f4f4',
+        '#e4ebdf',
+        '#d4e2c9',
+        '#c4d9b3',
+        '#b4d0a0',
+        '#a3c68d',
+        '#93bd7a',
+        '#83b368',
+        '#73aa56',
+        '#63a143',
+        '#2e7d32'
+    ];
+
     const options = {
         ...baseOptions,
         height: `${vertraege.length * 2}em`,
@@ -194,6 +209,11 @@ export function walter_data_miettabelle(
                 },
                 mapsTo: 'group',
                 scaleType: 'labels'
+            }
+        },
+        color: {
+            gradient: {
+                colors: colorGradient
             }
         },
         heatmap: {
