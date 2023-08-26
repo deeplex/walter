@@ -51,7 +51,7 @@
 </script>
 
 <WalterHeaderDetail
-    bind:entry={data.entry}
+    entry={data.entry}
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper

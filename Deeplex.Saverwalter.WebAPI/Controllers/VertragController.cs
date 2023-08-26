@@ -16,15 +16,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     {
         public class VertragEntryBase
         {
-            public int Id { get; }
-            public DateOnly Beginn { get; }
-            public DateOnly? Ende { get; }
-            public SelectionEntry Wohnung { get; } = null!;
-            public SelectionEntry? Ansprechpartner { get; }
+            public int Id { get; set; }
+            public DateOnly Beginn { get; set; }
+            public DateOnly? Ende { get; set; }
+            public SelectionEntry? Wohnung { get; set; }
+            public SelectionEntry? Ansprechpartner { get; set; }
             public string? Notiz { get; set; }
-            public string? MieterAuflistung { get; }
-            public IEnumerable<SelectionEntry>? SelectedMieter { get; }
-            public IEnumerable<MieteEntryBase>? Mieten { get; }
+            public string? MieterAuflistung { get; set; }
+            public IEnumerable<SelectionEntry>? SelectedMieter { get; set; }
+            public IEnumerable<MieteEntryBase>? Mieten { get; set; }
             public IEnumerable<VertragVersionEntryBase>? Versionen { get; set; }
 
             public VertragEntryBase() { }
