@@ -41,7 +41,7 @@
     }
 
     :global(.cds--cc--heatmap rect.heat) {
-        fill: #ffebeb;
+        fill: #d5d5d5;
     }
 
     /* Sidenav theming doesn't seem to have a token */
