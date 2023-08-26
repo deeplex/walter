@@ -7,15 +7,14 @@
     import { onMount } from 'svelte';
 
 	export let config: WalterDataConfigType;
-	export let year: number;
-	export let click: ((e: CustomEvent<any>, config: WalterDataConfigType, year: number) => void) | undefined = undefined;
+	export let click: ((e: CustomEvent<any>, config: WalterDataConfigType) => void) | undefined = undefined;
 
 	let heatMap : HeatmapChart;
 
 	onMount(() => {
 		if (click)
 		{
-			heatMap.$$.root.addEventListener('click', (e: CustomEvent<any>) => click!(e, config, year));
+			heatMap.$$.root.addEventListener('click', (e: CustomEvent<any>) => click!(e, config));
 		}
 	});
 
