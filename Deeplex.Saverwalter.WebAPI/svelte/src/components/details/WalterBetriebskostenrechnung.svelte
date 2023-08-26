@@ -1,6 +1,8 @@
 <script lang="ts">
     import {
         WalterDatePicker,
+        WalterLinkTile,
+        WalterLinks,
         WalterNumberInput,
         WalterTextArea
     } from '$walter/components';
@@ -13,6 +15,7 @@
     import { walter_selection } from '$walter/services/requests';
     import { convertDateCanadian } from '$walter/services/utils';
     import { onMount } from 'svelte';
+    import { page } from '$app/stores';
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
     export let fetchImpl: typeof fetch;
@@ -113,3 +116,9 @@
 <Row>
     <WalterTextArea {readonly} bind:value={entry.notiz} labelText="Notiz" />
 </Row>
+
+{#if $page.url.pathname !== `/umlagen/${entry.umlage?.id}`}
+<WalterLinks>
+    <WalterLinkTile name={"Umlage ansehen"} href={`/umlagen/${entry.umlage?.id}`} />
+</WalterLinks>
+{/if}
