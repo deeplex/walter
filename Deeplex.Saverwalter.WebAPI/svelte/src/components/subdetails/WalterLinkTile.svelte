@@ -4,9 +4,12 @@
 
     export let href: string;
     export let name: string;
-    export let fileWrapper: WalterS3FileWrapper;
+    export let fileWrapper: WalterS3FileWrapper | undefined = undefined;
 
-    fileWrapper.register(name, href);
+    if (fileWrapper)
+    {
+        fileWrapper.register(name, href);
+    }
 </script>
 
 <ClickableTile {href}>{name}</ClickableTile>
