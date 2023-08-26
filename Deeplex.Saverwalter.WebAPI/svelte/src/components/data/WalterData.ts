@@ -5,11 +5,17 @@ import type {
     WalterVertragEntry,
     WalterWohnungEntry
 } from '$walter/lib';
+import { convertDateCanadian } from '$walter/services/utils';
 import type { WalterRechnungEntry } from '$walter/types';
 
 const baseOptions = {
     legend: { enabled: false },
-    height: '400px'
+    height: '400px',
+    tooltip: {
+        truncation: {
+            threshold: 999
+        }
+    }
 } as WalterDataOptionsType;
 
 const lineAxes = {
@@ -250,11 +256,17 @@ export function walter_data_miettabelle(
 
             const doesNotHaveToPay = inactive && !occupied;
 
-            data.push({
-                value: doesNotHaveToPay ? null : 0,
+            if (doesNotHaveToPay) continue;
+
+            const entry = {
+                id: `${vertrag.id}`,
+                year,
+                value: 0,
                 key,
                 group
-            });
+            };
+
+            data.push(entry);
         }
 
         const relevantMieten = vertrag.mieten.filter(
@@ -272,6 +284,11 @@ export function walter_data_miettabelle(
             if (previous) {
                 previous.value =
                     ((previous.value as number) || 0) + miete.betrag;
+            } else {
+                // Should never happen...
+                console.warn(
+                    `Could not find value for ${key} ${year} for ${group}`
+                );
             }
         }
     }
@@ -321,10 +338,16 @@ export type WalterDataOptionsType = {
         bottom: any;
         left: any;
     };
+    tooltip: {
+        truncation: {
+            threshold: number;
+        };
+    };
 };
 
 export type WalterDataType = {
     value: number | number[] | null;
+    year?: number;
     group?: string;
     id?: string;
     key?: string;

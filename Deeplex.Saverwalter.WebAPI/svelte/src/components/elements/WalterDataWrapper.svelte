@@ -38,7 +38,7 @@
         <WalterDataWrapperQuickAdd
             bind:addEntry
             {addUrl}
-            {addModalOpen}
+            bind:addModalOpen
             bind:rows
             {title}>
             <slot />

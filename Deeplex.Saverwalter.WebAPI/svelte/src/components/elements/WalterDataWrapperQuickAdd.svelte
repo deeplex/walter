@@ -9,10 +9,7 @@
     export let rows: any[] | undefined = undefined;
 
     async function submit() {
-        if (!addUrl)
-        {
-            return;
-        }
+        if (!addUrl) return;
 
         const parsed = await handle_save(addUrl, addEntry, title!);
 
@@ -25,6 +22,7 @@
 <Modal
     secondaryButtonText="Abbrechen"
     primaryButtonText="Bestätigen"
+    on:close={() => addModalOpen = false}
     on:submit={submit}
     on:click:button--secondary={() => (addModalOpen = false)}
     on:click:button--primary={() => (addModalOpen = false)}
