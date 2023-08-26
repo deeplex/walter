@@ -40,6 +40,10 @@
         max-height: none !important;
     }
 
+    :global(.cds--cc--heatmap rect.heat) {
+        fill: #ffebeb;
+    }
+
     /* Sidenav theming doesn't seem to have a token */
     :global(a) {
         color: #2e7d32;
