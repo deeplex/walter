@@ -51,16 +51,16 @@
         />
     </WalterLinks>
 
-    {#if data.entry.wohnungen.length > 1}
+    {#if data.entry.wohnungen?.length > 1}
     <Row>
         <Column>
-            <WalterDataPieChart data={walter_data_wf(data.entry.wohnungen)} title="Wohnfläche" /> 
+            <WalterDataPieChart config={walter_data_wf("Wohnfläche", data.entry.wohnungen)} /> 
         </Column>
         <Column>
-            <WalterDataPieChart data={walter_data_nf(data.entry.wohnungen)} title="Nutzfläche" /> 
+            <WalterDataPieChart config={walter_data_nf("Nutzfläche", data.entry.wohnungen)} /> 
         </Column>
         <Column>
-            <WalterDataPieChart data={walter_data_ne(data.entry.wohnungen)} title="Nutzeinheiten" /> 
+            <WalterDataPieChart config={walter_data_ne("Nutzeinheiten", data.entry.wohnungen)} /> 
         </Column>
     </Row>
     {/if}
