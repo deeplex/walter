@@ -8,22 +8,23 @@
     import { Grid } from "carbon-components-svelte";
 
     export let umlagen: WalterUmlageEntry[];
-    export let selectedYear: number;
     export let fetchImpl: typeof fetch;
     export let year: number;
 
     function updateEntry(umlageId: string, umlageTyp: string, rechnungTyp: string)
     {
-        addEntry.betreffendesJahr = selectedYear;
-        addEntry.typ = {
-            id: rechnungTyp,
-            text: umlageTyp,
-        }
-        addEntry.umlage = {
-            id: umlageId,
-            text: umlageTyp
-        }
-        console.log(addEntry);
+        addEntry = {
+            datum: convertDateCanadian(new Date()),
+            betreffendesJahr : year,
+            typ: {
+                id: rechnungTyp,
+                text: umlageTyp,
+            },
+            umlage: {
+                id: umlageId,
+                text: umlageTyp
+            }
+        };
     }
 
     function click(e: CustomEvent, config: WalterDataConfigType)
@@ -32,7 +33,7 @@
 
         // NOTE: Blame the tab implementation for all the tables being triggered at once.
         // Because of that all the configs with different years are filtered here.
-		if (!data || !selectedYear || year !== selectedYear) return;
+		if (!data) return;
 
         const group = config.data.filter(entry => entry.group === data.group);
 
@@ -54,7 +55,6 @@
 	}
 
     let addEntry: Partial<WalterBetriebskostenrechnungEntry> = {
-        datum: convertDateCanadian(new Date()),
     };
     let addModalOpen = false;
     let addUrl = `/api/betriebskostenrechnungen`;
@@ -66,7 +66,7 @@
     {addUrl}
     bind:addModalOpen
     {title}>
-    <WalterBetriebskostenrechnung {fetchImpl} entry={addEntry} />
+    <WalterBetriebskostenrechnung {fetchImpl} bind:entry={addEntry} />
 </WalterDataWrapperQuickAdd>
 
 

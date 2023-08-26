@@ -19,9 +19,7 @@ export async function handle_save(
     );
 
     const result = await walter_put(apiURL, entry, PutToast);
-    console.log(result.ok);
-    if (result.ok)
-    {
+    if (result.ok) {
         changeTracker.set(-1);
         changeTracker.set(0);
     }
@@ -45,8 +43,7 @@ export function handle_delete(title: string, apiURL: string) {
         primaryButtonText: 'Löschen',
         submit: async () => {
             const result = await walter_delete(apiURL, DeleteToast);
-            if (result.ok) 
-            {
+            if (result.ok) {
                 changeTracker.set(-1);
                 changeTracker.set(0);
                 history.back();

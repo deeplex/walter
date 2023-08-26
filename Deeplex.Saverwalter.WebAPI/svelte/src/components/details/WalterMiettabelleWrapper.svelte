@@ -27,22 +27,16 @@
             <h2>Übersicht</h2>
             <Tabs bind:selected>
                 {#each years as year}
-                <Tab label={`${year}`}/>
+                    <Tab label={`${year}`}/>
                 {/each}
                 <svelte:fragment slot="content">
-                    {#each years as year}
-                    <TabContent>
-                        <WalterMiettabelle
-                            {year}
-                            selectedYear={years[selected]}
-                            {vertraege} />
-                        <WalterRechnungenTabelle
-                            {year}
-                            selectedYear={years[selected]}
-                            {fetchImpl}
-                            {umlagen} />
-                    </TabContent>
-                    {/each}
+                    <WalterMiettabelle
+                        year={years[selected]}
+                        {vertraege} />
+                    <WalterRechnungenTabelle
+                        year={years[selected]}
+                        {fetchImpl}
+                        {umlagen} />
                 </svelte:fragment>
             </Tabs>
         </Tile>

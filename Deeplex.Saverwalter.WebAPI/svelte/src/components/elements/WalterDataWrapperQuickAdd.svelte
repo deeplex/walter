@@ -18,11 +18,16 @@
             rows = [...rows, parsed];
         }
     }
+
+    function close() {
+        addModalOpen = false;
+        addEntry = {};
+    }
 </script>
 <Modal
     secondaryButtonText="Abbrechen"
     primaryButtonText="Bestätigen"
-    on:close={() => addModalOpen = false}
+    on:close={close}
     on:submit={submit}
     on:click:button--secondary={() => (addModalOpen = false)}
     on:click:button--primary={() => (addModalOpen = false)}

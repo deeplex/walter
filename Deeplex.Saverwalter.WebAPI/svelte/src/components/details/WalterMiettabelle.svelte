@@ -8,17 +8,19 @@
     import { Grid } from "carbon-components-svelte";
 
     export let vertraege: WalterVertragEntry[];
-    export let selectedYear: number;
     export let year: number;
 
-    function updateEntry(vertradId: string, monthIndex: number, year: number, wohnung: string, betrag: number)
+    function updateEntry(vertradId: string, monthIndex: number, wohnung: string, betrag: number)
     {
-        addEntry.betreffenderMonat = convertDateCanadian(new Date(year, monthIndex, 1));
-        addEntry.vertrag = {
-            id: vertradId,
-            text: "UNKNOWN"
-        };
-        addEntry.betrag = betrag;
+        addEntry = {
+            zahlungsdatum: convertDateCanadian(new Date()),
+            betreffenderMonat: convertDateCanadian(new Date(year, monthIndex, 1)),
+            vertrag: {
+                id: vertradId,
+                text: "UNKNOWN"
+            },
+            betrag: betrag
+        }
 
         title = `${wohnung}`;
     }
@@ -29,7 +31,7 @@
 
         // NOTE: Blame the tab implementation for all the tables being triggered at once.
         // Because of that all the configs with different years are filtered here.
-		if (!data || !selectedYear || year !== selectedYear) return;
+		if (!data) return;
 
         let monthIndex = months.findIndex(month => month === data.key);
 
@@ -41,11 +43,11 @@
 
         const lastEntry = group.find(entry =>
             entry.key === months[lastMonthIndex] &&
-            entry.year === (monthIndex === 0 ? selectedYear - 1 : selectedYear));
+            entry.year === (monthIndex === 0 ? year - 1 : year));
 
         const thisEntry = group.find(entry =>
             entry.key === data.key &&
-            entry.year === selectedYear);
+            entry.year === year);
 
         const vertragId = thisEntry?.id!;
         if (vertragId)
@@ -53,14 +55,12 @@
             const wohnung = data.group;
             const lastValue = (lastEntry?.value as number) || 0;
 
-            updateEntry(vertragId, monthIndex, selectedYear, wohnung, lastValue);
+            updateEntry(vertragId, monthIndex, wohnung, lastValue);
             addModalOpen = true;
         }
 	}
 
-    let addEntry: Partial<WalterMieteEntry> = {
-        zahlungsdatum: convertDateCanadian(new Date())
-    };
+    let addEntry: Partial<WalterMieteEntry> = {};
     let addModalOpen = false;
     let addUrl = `/api/mieten`;
     let title = "Unbekannter Vertrag";
