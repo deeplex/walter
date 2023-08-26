@@ -1,4 +1,8 @@
-import { WalterVertragEntry } from '$walter/lib';
+import {
+    WalterBetriebskostenrechnungEntry,
+    WalterUmlageEntry,
+    WalterVertragEntry
+} from '$walter/lib';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch }) => {
@@ -6,6 +10,7 @@ export const load: PageLoad = async ({ fetch }) => {
     return {
         fetchImpl: fetch,
         apiURL: apiURL,
-        rows: WalterVertragEntry.GetAll<WalterVertragEntry>(fetch)
+        vertraege: WalterVertragEntry.GetAll<WalterVertragEntry>(fetch),
+        umlagen: WalterUmlageEntry.GetAll<WalterUmlageEntry>(fetch)
     };
 };

@@ -1,12 +1,12 @@
 <script lang="ts">
-    import type { WalterMieteEntry, WalterVertragEntry } from "$walter/lib";
+    import type { WalterUmlageEntry, WalterVertragEntry } from "$walter/lib";
     import { Grid, Tab, TabContent, Tabs, Tile } from "carbon-components-svelte";
-    import { convertDateCanadian } from "$walter/services/utils";
-    import WalterDataWrapperQuickAdd from "../elements/WalterDataWrapperQuickAdd.svelte";
-    import WalterMiete from "./WalterMiete.svelte";
     import WalterMiettabelle from "./WalterMiettabelle.svelte";
+    import WalterRechnungenTabelle from "./WalterRechnungenTabelle.svelte";
 
     export let vertraege: WalterVertragEntry[];
+    export let umlagen: WalterUmlageEntry[];
+    export let fetchImpl: typeof fetch;
 
     const mieten = vertraege.flatMap(vertrag => vertrag.mieten)
         .sort((a, b) => new Date(a.betreffenderMonat).getTime() - new Date(b.betreffenderMonat).getTime());
@@ -24,7 +24,7 @@
 <div  style="margin-top: 5em">
     <Grid>
         <Tile>
-            <h2>Miettabelle</h2>
+            <h2>Übersicht</h2>
             <Tabs bind:selected>
                 {#each years as year}
                 <Tab label={`${year}`}/>
@@ -33,9 +33,14 @@
                     {#each years as year}
                     <TabContent>
                         <WalterMiettabelle
+                            {year}
                             selectedYear={years[selected]}
-                            {vertraege}
-                            {year}/>
+                            {vertraege} />
+                        <WalterRechnungenTabelle
+                            {year}
+                            selectedYear={years[selected]}
+                            {fetchImpl}
+                            {umlagen} />
                     </TabContent>
                     {/each}
                 </svelte:fragment>

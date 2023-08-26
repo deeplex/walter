@@ -10,5 +10,8 @@
 
 <WalterHeader title="SaverWalter" />
 <Content>
-    <WalterMiettabelleWrapper vertraege={data.rows}/>
+    <WalterMiettabelleWrapper
+        fetchImpl={data.fetchImpl}
+        umlagen={data.umlagen}
+        vertraege={data.vertraege}/>
 </Content>

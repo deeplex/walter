@@ -28,7 +28,9 @@
     function selectTyp(e: CustomEvent) {
         updateUmlageEntries(e.detail.selectedItem?.id);
         entry.typ = e.detail.selectedItem;
-        if ((e as any).explicitOriginalTarget)
+        console.log(e);
+        // This should be only the case when manually changing the type.
+        if ((e as any).explicitOriginalTarget.tagName === "DIV")
         {
             entry.umlage = undefined;
         }

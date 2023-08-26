@@ -5,6 +5,7 @@
     import { convertDateCanadian } from "$walter/services/utils";
     import WalterDataWrapperQuickAdd from "../elements/WalterDataWrapperQuickAdd.svelte";
     import { WalterMiete } from "..";
+    import { Grid } from "carbon-components-svelte";
 
     export let vertraege: WalterVertragEntry[];
     export let selectedYear: number;
@@ -73,4 +74,7 @@
     <WalterMiete entry={addEntry} />
 </WalterDataWrapperQuickAdd>
 
-<WalterDataHeatmapChart {click} config={walter_data_miettabelle(vertraege, year)} />
+<Grid>
+    <h3>Miettabelle</h3>
+    <WalterDataHeatmapChart {click} config={walter_data_miettabelle(vertraege, year)} />
+</Grid>

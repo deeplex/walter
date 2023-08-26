@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
             public string? WohnungenBezeichnung { get; set; }
             public IEnumerable<SelectionEntry>? SelectedZaehler { get; set; }
-
+            public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen { get; set; }
             protected UmlageEntryBase() { }
             public UmlageEntryBase(Umlage entity)
             {
@@ -43,6 +43,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                         $"{e.Adresse?.Anschrift ?? "Unbekannte Anschrift"} - {e.Bezeichnung}"));
 
                 SelectedZaehler = Entity.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer));
+
+                Betriebskostenrechnungen = entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e));
             }
         }
 
@@ -50,8 +52,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             private SaverwalterContext? Ctx { get; }
 
-            public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen => Entity?.Betriebskostenrechnungen
-                .Select(e => new BetriebskostenrechnungEntryBase(e));
             public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, Ctx!));
             public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
             // TODO HKVO
