@@ -12,6 +12,7 @@
     import { shouldFilterItem } from './WalterBetriebskostenrechnung';
     import { walter_selection } from '$walter/services/requests';
     import { convertDateCanadian } from '$walter/services/utils';
+    import { onMount } from 'svelte';
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
     export let fetchImpl: typeof fetch;
@@ -20,32 +21,34 @@
     const betriebskostentypen = walter_selection.betriebskostentypen(fetchImpl);
     const umlagen_wohnungen = walter_selection.umlagen_wohnungen(fetchImpl);
 
-    let selectedUmlageId: string | number | undefined = entry.umlage?.id;
-
     let umlageEntries: WalterSelectionEntry[] = [];
-    updateUmlageEntries(entry.typ?.id);
 
-    function selectTyp(e: CustomEvent) {
-        updateUmlageEntries(e.detail.selectedItem?.id);
-        entry.typ = e.detail.selectedItem;
-        // This should be only the case when manually changing the type.
-        if ((e as any).explicitOriginalTarget.tagName === "DIV")
+    onMount(async () => {
+        await updateUmlageEntries(entry.typ?.id);
+        entry.umlage = umlageEntries.find(umlage => umlage.id === entry.umlage?.id);
+    });
+
+    async function selectTyp(e: CustomEvent) {
+        const id = `${e.detail.selectedItem.id}`;
+        await updateUmlageEntries(id);
+        if (entry.typ?.id !== `${id}`)
         {
             entry.umlage = undefined;
         }
+        entry.typ = e.detail.selectedItem;
     }
 
     function selectUmlage(e: CustomEvent) {
-        entry.umlage = e.detail.selectedItem;
-        selectedUmlageId = entry.umlage?.id;
-        // entry.typ = entry.umlage.filter;
+        if (e.detail.selectedItem)
+        {
+            entry.umlage = e.detail.selectedItem;
+        }
     }
 
     async function updateUmlageEntries(id: string | number | undefined) {
         umlageEntries = await umlagen_wohnungen.then((fulfilled) =>
             fulfilled.filter((u) => u.filter === id)
         );
-        selectedUmlageId = entry.umlage?.id;
     }
 
     if (!entry.betreffendesJahr) {
@@ -62,10 +65,10 @@
         <TextInputSkeleton />
     {:then items}
         <ComboBox
-            invalid={!entry?.typ?.id}
+            invalid={!entry.typ?.id}
             invalidText={"Betriebskostentyp der Umlage ist ein notwendiges Feld"}
             disabled={readonly}
-            selectedId={entry?.typ?.id}
+            selectedId={entry.typ?.id}
             on:select={selectTyp}
             style="padding-right: 1rem"
             {items}
@@ -74,10 +77,10 @@
             {shouldFilterItem}
         />
         <ComboBox
-            invalid={!selectedUmlageId}
+            invalid={!entry.umlage?.id}
             invalidText={"Wohnungen der Umlage ist ein notwendiges Feld"}
             disabled={readonly || !entry.typ}
-            bind:selectedId={selectedUmlageId}
+            selectedId={entry.umlage?.id}
             on:select={selectUmlage}
             style="padding-right: 1rem"
             bind:items={umlageEntries}
