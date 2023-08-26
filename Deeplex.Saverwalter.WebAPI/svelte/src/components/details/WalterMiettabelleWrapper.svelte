@@ -21,24 +21,23 @@
     let selected = years.findIndex(year => year === new Date().getFullYear()) || years.length - 1;
 </script>
 
-<div  style="margin-top: 5em">
-    <Grid>
+<Tabs bind:selected type="container">
+    {#each years as year}
+        <Tab label={`${year}`}/>
+    {/each}
+    <svelte:fragment slot="content">
         <Tile>
-            <h2>Übersicht</h2>
-            <Tabs bind:selected>
-                {#each years as year}
-                    <Tab label={`${year}`}/>
-                {/each}
-                <svelte:fragment slot="content">
-                    <WalterMiettabelle
-                        year={years[selected]}
-                        {vertraege} />
-                    <WalterRechnungenTabelle
-                        year={years[selected]}
-                        {fetchImpl}
-                        {umlagen} />
-                </svelte:fragment>
-            </Tabs>
+        <div style="margin: 1em">
+            <WalterMiettabelle
+                year={years[selected]}
+                {vertraege} />
+        </div>
+        <div style="margin: 1em">
+            <WalterRechnungenTabelle
+                year={years[selected]}
+                {fetchImpl}
+                {umlagen} />
+        </div>
         </Tile>
-    </Grid>
-</div>
+    </svelte:fragment>
+</Tabs>
