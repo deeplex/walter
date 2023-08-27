@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
-using static Deeplex.Saverwalter.BetriebskostenabrechnungService.Utils;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
 
@@ -160,9 +159,6 @@ namespace Deeplex.Saverwalter.PrintService
             DocumentFormat.OpenXml.Math.Fraction units() => frac("kWh", "m³ x K");
 
             var p = new Paragraph(Font(), new Run(Font(), new Break(), new Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):"), new Break(), new Break()));
-
-            var wohnung = abrechnung.Vertrag.Wohnung;
-            var zeitraum = abrechnung.Zeitraum;
 
             foreach (var hk in abrechnungseinheit.Heizkostenberechnungen)
             {
