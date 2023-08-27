@@ -20,8 +20,8 @@ const baseOptions = {
 
 const lineAxes = {
     axes: {
-        bottom: { mapsTo: 'value' },
-        left: { mapsTo: 'group', scaleType: 'labels' }
+        bottom: { mapsTo: 'value', includeZero: false },
+        left: { mapsTo: 'group', scaleType: 'labels', includeZero: false }
     }
 };
 
@@ -81,7 +81,18 @@ export function walter_data_rechnungen_year(
     title: string,
     rechnungen: WalterBetriebskostenrechnungEntry[]
 ): WalterDataConfigType {
-    const options = { ...baseOptions, title };
+    const options = {
+        ...baseOptions,
+        title,
+        axes: {
+            bottom: { mapsTo: 'key', scaleType: 'labels' },
+            left: {
+                mapsTo: 'value',
+                scaleType: 'linear',
+                includeZero: false
+            }
+        }
+    };
 
     const data = rechnungen.map((rechnung) => ({
         group: `${rechnung.umlage.text}`,
