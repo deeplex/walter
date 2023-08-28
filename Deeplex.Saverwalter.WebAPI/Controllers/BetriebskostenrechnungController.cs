@@ -12,27 +12,24 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     {
         public class BetriebskostenrechnungEntryBase
         {
-            protected Betriebskostenrechnung? Entity { get; }
-
             public int Id { get; set; }
             public double Betrag { get; set; }
             public int BetreffendesJahr { get; set; }
             public DateOnly Datum { get; set; }
             public string? Notiz { get; set; }
-            public SelectionEntry Typ { get; set; } = null!;
-            public SelectionEntry Umlage { get; set; } = null!;
+            public SelectionEntry? Typ { get; set; }
+            public SelectionEntry? Umlage { get; set; }
 
-            protected BetriebskostenrechnungEntryBase() { }
+            public BetriebskostenrechnungEntryBase() { }
             public BetriebskostenrechnungEntryBase(Betriebskostenrechnung entity)
             {
-                Entity = entity;
-                Id = Entity.BetriebskostenrechnungId;
+                Id = entity.BetriebskostenrechnungId;
 
-                Betrag = Entity.Betrag;
-                BetreffendesJahr = Entity.BetreffendesJahr;
-                Datum = Entity.Datum;
-                Notiz = Entity.Notiz;
-                Typ = new SelectionEntry((int)Entity.Umlage.Typ, Entity.Umlage.Typ.ToDescriptionString());
+                Betrag = entity.Betrag;
+                BetreffendesJahr = entity.BetreffendesJahr;
+                Datum = entity.Datum;
+                Notiz = entity.Notiz;
+                Typ = new SelectionEntry((int)entity.Umlage.Typ, entity.Umlage.Typ.ToDescriptionString());
                 Umlage = new SelectionEntry(
                     entity.Umlage.UmlageId,
                     entity.Umlage.GetWohnungenBezeichnung(),
@@ -43,6 +40,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class BetriebskostenrechnungEntry : BetriebskostenrechnungEntryBase
         {
             private SaverwalterContext? Ctx { get; }
+            private Betriebskostenrechnung? Entity { get; }
 
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen
                 => Entity?.Umlage?.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e));
@@ -52,6 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public BetriebskostenrechnungEntry(Betriebskostenrechnung entity, SaverwalterContext ctx) : base(entity)
             {
                 Ctx = ctx;
+                Entity = entity;
             }
         }
 

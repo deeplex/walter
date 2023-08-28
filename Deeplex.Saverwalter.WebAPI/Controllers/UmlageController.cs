@@ -14,35 +14,33 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     {
         public class UmlageEntryBase
         {
-            protected Umlage? Entity { get; }
-
             public int Id { get; set; }
             public string? Notiz { get; set; }
             public string? Beschreibung { get; set; }
-            public SelectionEntry Schluessel { get; set; } = null!;
-            public SelectionEntry Typ { get; set; } = null!;
+            public SelectionEntry? Schluessel { get; set; }
+            public SelectionEntry? Typ { get; set; }
             public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
             public string? WohnungenBezeichnung { get; set; }
             public IEnumerable<SelectionEntry>? SelectedZaehler { get; set; }
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen { get; set; }
+
             protected UmlageEntryBase() { }
             public UmlageEntryBase(Umlage entity)
             {
-                Entity = entity;
-                Id = Entity.UmlageId;
+                Id = entity.UmlageId;
 
-                Notiz = Entity.Notiz;
-                Beschreibung = Entity.Beschreibung;
-                Schluessel = new SelectionEntry((int)Entity.Schluessel, Entity.Schluessel.ToDescriptionString());
-                Typ = new SelectionEntry((int)Entity.Typ, Entity.Typ.ToDescriptionString());
-                WohnungenBezeichnung = Entity.GetWohnungenBezeichnung() ?? "";
+                Notiz = entity.Notiz;
+                Beschreibung = entity.Beschreibung;
+                Schluessel = new SelectionEntry((int)entity.Schluessel, entity.Schluessel.ToDescriptionString());
+                Typ = new SelectionEntry((int)entity.Typ, entity.Typ.ToDescriptionString());
+                WohnungenBezeichnung = entity.GetWohnungenBezeichnung() ?? "";
 
-                SelectedWohnungen = Entity.Wohnungen.Select(e =>
+                SelectedWohnungen = entity.Wohnungen.Select(e =>
                     new SelectionEntry(
                         e.WohnungId,
                         $"{e.Adresse?.Anschrift ?? "Unbekannte Anschrift"} - {e.Bezeichnung}"));
 
-                SelectedZaehler = Entity.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer));
+                SelectedZaehler = entity.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer));
 
                 Betriebskostenrechnungen = entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e));
             }
@@ -50,7 +48,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class UmlageEntry : UmlageEntryBase
         {
-            private SaverwalterContext? Ctx { get; }
+            private SaverwalterContext? Ctx { get; } = null!;
+            private Umlage Entity { get; } = null!;
 
             public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, Ctx!));
             public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
@@ -59,6 +58,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public UmlageEntry() : base() { }
             public UmlageEntry(Umlage entity, SaverwalterContext ctx) : base(entity)
             {
+                Entity = entity;
                 Ctx = ctx;
             }
         }
