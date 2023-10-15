@@ -9,6 +9,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
     {
         public class SelectionEntry
         {
+            // string because UUID stuff
             public string Id { get; set; } = null!;
             public string Text { get; set; } = null!;
             public string? Filter { get; set; }

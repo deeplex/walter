@@ -66,7 +66,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private VertragEntry Add(VertragEntry entry)
         {
-            var wohnung = Ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id!));
+            if (entry.Wohnung == null)
+            {
+                throw new ArgumentException("entry has no Wohnung");
+            }
+            var wohnung = Ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id));
             var entity = new Vertrag() { Wohnung = wohnung! };
 
             SetOptionalValues(entity, entry);
@@ -96,6 +100,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private VertragEntry Update(VertragEntry entry, Vertrag entity)
         {
+            if (entry.Wohnung == null)
+            {
+                throw new ArgumentException("entry has no Wohnung.");
+            }
             entity.Wohnung = Ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id))!;
 
             SetOptionalValues(entity, entry);

@@ -128,8 +128,8 @@ namespace Deeplex.Saverwalter.PrintService
 
             if (NachVerbrauch(abrechnung.Abrechnungseinheiten))
             {
-                left1.Add("n. Verb");
-                left2.Add("n. Verb");
+                left1.Add("n. Verb.");
+                left2.Add("n. Verb.");
                 right1.Add("nach Verbrauch (in m³ oder in kWh");
                 right2.Add("Kostenanteil = Kosten je Verbrauchseinheit mal individuelle Verbrauchsmenge in Kubikmetern oder Kilowattstunden.");
             }
@@ -239,7 +239,7 @@ namespace Deeplex.Saverwalter.PrintService
             IPrint<T> printImpl)
         {
             var widths = new int[] { 41, 25, 17, 17 };
-            var col1 = new List<string> { "Ermittlung Ihrer Einheiten" };
+            var col1 = new List<string> { "Ermittlung Ihrer Anteile" };
             var col2 = new List<string> { "Nutzungsintervall" };
             var col3 = new List<string> { "Tage" };
             var col4 = new List<string> { "Ihr Anteil" };
@@ -303,7 +303,7 @@ namespace Deeplex.Saverwalter.PrintService
                     bold.Add(true);
                     underlined.Add(false);
 
-                    col1.Add(Quadrat(abrechnung.Vertrag.Wohnung.Nutzeinheit) + " / " + abrechnungseinheit.GesamtEinheiten);
+                    col1.Add(abrechnung.Vertrag.Wohnung.Nutzeinheit + " / " + abrechnungseinheit.GesamtEinheiten);
                     col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
                     col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
                     col4.Add(Prozent(abrechnungseinheit.NEZeitanteil));
@@ -371,7 +371,7 @@ namespace Deeplex.Saverwalter.PrintService
                             for (var i = 0; i < value.Count; ++i)
                             {
                                 var delta = value[i].Delta;
-                                col1.Add(Unit(delta, unit) + " / " + Unit(deltaAll, unit));
+                                col1.Add(Unit(delta, unit) + " / " + Unit(deltaAll, unit) + " (" + verbrauchAnteil.Umlage.Typ.ToDescriptionString() + ")");
                                 col2.Add("");
                                 col3.Add(value[i].Zaehler.Kennnummer);
                                 col4.Add(Prozent(delta / deltaAll));

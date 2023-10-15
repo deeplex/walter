@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.PrintService
         {
             var document = TPrint<Document>.Print(abrechnung, new PdfPrint());
 
-            var renderer = new PdfDocumentRenderer(true);
+            var renderer = new PdfDocumentRenderer();
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             renderer.Document = document;
             renderer.DocumentRenderer = new DocumentRenderer(document);

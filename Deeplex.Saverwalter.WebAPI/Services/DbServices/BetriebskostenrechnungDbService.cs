@@ -65,7 +65,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private BetriebskostenrechnungEntry Add(BetriebskostenrechnungEntry entry)
         {
-            var umlage = Ctx.Umlagen.Find(int.Parse(entry.Umlage.Id!));
+            if (entry.Umlage == null)
+            {
+                throw new ArgumentException("entry.Umlage can't be null.");
+            }
+            var umlage = Ctx.Umlagen.Find(int.Parse(entry.Umlage.Id));
+            if (umlage == null)
+            {
+                throw new ArgumentException($"Did not find Umlage with Id {entry.Umlage.Id}");
+            }
             var entity = new Betriebskostenrechnung(entry.Betrag, entry.Datum, entry.BetreffendesJahr)
             {
                 Umlage = umlage!
@@ -101,7 +109,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Betrag = entry.Betrag;
             entity.Datum = entry.Datum;
             entity.BetreffendesJahr = entry.BetreffendesJahr;
-            entity.Umlage = Ctx.Umlagen.Find(int.Parse(entry.Umlage.Id))!;
+            if (entry.Umlage == null)
+            {
+                throw new ArgumentException("entry has no Umlage");
+            }
+            var umlage = Ctx.Umlagen.Find(int.Parse(entry.Umlage.Id));
+            if (umlage == null)
+            {
+                throw new ArgumentException($"entry has no Umlage with Id {entry.Umlage.Id}");
+            }
+
+            entity.Umlage = umlage;
 
             SetOptionalValues(entity, entry);
             Ctx.Betriebskostenrechnungen.Update(entity);
