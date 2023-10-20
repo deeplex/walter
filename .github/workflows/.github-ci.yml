@@ -1,0 +1,76 @@
+name: walter
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  merge_group:
+
+jobs:
+  build-svelte:
+    runs-on: self-hosted
+    container:
+      image: node:18-alpine3.17
+    steps:
+      - run: |
+          cd Deeplex.Saverwalter.WebAPI/svelte
+          yarn install
+          yarn build
+      - name: svelte app
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./Deeplex.Saverwalter.WebAPI/wwwroot
+
+  test-svelte:
+    runs-on: self-hosted
+    container:
+      image: node:18-alpine3.17
+    steps:
+      - run: |
+          cd Deeplex-Saverwalter.WebAPI/svelte
+          yarn install
+          yarn run vitest --coverage
+
+  build-dotnet:
+    runs-on: self-hosted
+    container:
+      image: mcr.microsoft.com/devcontainers/dotnet:0-6.0
+    steps:
+      - run: |
+          cd Deeplex:Saverwalter.WebAPI
+          dotnet restore
+          dotnet publish -c release
+      - name: dotnet app
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./Deeplex.Saverwalter.WebAPI/bin
+
+  test-dotnet:
+    runs-on: self-hosted
+    container:
+      image: mcr.microsoft.com/devcontainers/dotnet:0-6.0
+    steps:
+      - run: |
+          export LC_ALL=de_DE.UTF-8
+          dotnet restore
+          dotnet test /p:CollectCoverage=true | grep '%' | awk '{print $0}{sum += substr($4,1,length($4)-1)} END {if (NR>0) print "Total coverage:" sum / NR "%" }'
+
+  build-docker:
+    runs-on: self-hosted
+    container:
+      image: docker:23.0
+    needs:
+      - build-svelte
+      - build-dotnet
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: svelte app
+          path: ./Deeplex.Saverwalter.WebAPI/wwwroot
+      - uses: actions/download-artifact@v3
+        with:
+          name: dotnet app
+          path: ./Deeplex.Saverwalter.WebAPI/bin
+      - run: |
+          cd Deeplex.Saverwalter.WebAPI
+          docker build -t "walter:latest" .
