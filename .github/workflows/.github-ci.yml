@@ -27,7 +27,7 @@ jobs:
       image: node:18-alpine3.17
     steps:
       - run: |
-          cd Deeplex-Saverwalter.WebAPI/svelte
+          cd Deeplex.Saverwalter.WebAPI/svelte
           yarn install
           yarn run vitest --coverage
 
@@ -37,7 +37,7 @@ jobs:
       image: mcr.microsoft.com/devcontainers/dotnet:0-6.0
     steps:
       - run: |
-          cd Deeplex:Saverwalter.WebAPI
+          cd Deeplex.Saverwalter.WebAPI
           dotnet restore
           dotnet publish -c release
       - name: dotnet app
