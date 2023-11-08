@@ -385,7 +385,7 @@ public class BetriebskostenabrechnungTests
         vertrag.Ende = new DateOnly(2021, 6, 30);
         var vertrag2 = TestUtils.FillVertragWithSomeData(ctx, 0);
 
-        ctx.Umlagen.AddRange(Add6Umlagen(new List<Wohnung>() { vertrag.Wohnung, vertrag2.Wohnung }));
+        ctx.Umlagen.AddRange(TestUtils.Add6Umlagen(new List<Wohnung>() { vertrag.Wohnung, vertrag2.Wohnung }));
         ctx.SaveChanges();
 
         // Act
