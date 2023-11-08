@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.PrintService
                     wordDocument.Dispose();
                     throw;
                 }
-                wordDocument.MainDocumentPart.Document.AppendChild(body);
+                wordDocument.MainDocumentPart?.Document.AppendChild(body);
             }
         }
 
