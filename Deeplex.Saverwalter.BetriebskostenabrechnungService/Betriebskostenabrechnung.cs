@@ -33,10 +33,29 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Zeitraum = new Zeitraum(jahr, vertrag);
 
             Vermieter = ctx.FindPerson(Vertrag.Wohnung.BesitzerId);
+
             Ansprechpartner = ctx.FindPerson(vertrag.AnsprechpartnerId!.Value) ?? Vermieter;
+
+            if (Ansprechpartner.Adresse == null)
+            {
+                Notes.Add(new Note(
+                    $"Die Adresse des Ansprechpartners {Ansprechpartner.Bezeichnung} ist notwendig für die Betriebskostenabrechnung.",
+                    Severity.Error
+                ));
+            }
+
             GezahlteMiete = Mietzahlungen(vertrag, Zeitraum);
             KaltMiete = GetKaltMiete(vertrag, Zeitraum);
             Mieter = GetMieter(ctx, vertrag);
+
+            if (Mieter.First(mieter => mieter.Adresse != null) != null)
+            {
+                Notes.Add(new Note(
+                    $"Die Adresse mindestens eines Mieters ist notwendig für die Betriebskostenabrechnung.",
+                    Severity.Error
+                ));
+            }
+
             Abrechnungseinheiten = Abrechnungseinheit.GetAbrechnungseinheiten(vertrag, Zeitraum, Notes);
             BetragNebenkosten = Abrechnungseinheiten.Sum(einheit => einheit.BetragKalt + einheit.BetragWarm);
 
