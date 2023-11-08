@@ -53,7 +53,7 @@ jobs:
       - run: |
           export LC_ALL=de_DE.UTF-8
           dotnet restore
-          dotnet test /p:CollectCoverage=true | grep '%' | awk '{print $0}{sum += substr($4,1,length($4)-1)} END {if (NR>0) print "Total coverage:" sum / NR "%" }'
+          dotnet test /p:CollectCoverage=true /p:ExcludeByFile="**/Migrations/Npgsql/*.cs" | grep '%' | awk '{print $0}{sum += substr($4,1,length($4)-1)} END {if (NR>0) print "Total coverage:" sum / NR "%" }'
 
   build-docker:
     runs-on: self-hosted

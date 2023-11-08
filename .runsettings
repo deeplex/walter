@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>teamcity,json,cobertura,lcov,opencover</Format>
+          <Exclude></Exclude> <!-- [Assembly-Filter]Type-Filter -->
+          <Include></Include> <!-- [Assembly-Filter]Type-Filter -->
+          <ExcludeByAttribute></ExcludeByAttribute>
+          <ExcludeByFile>**/Migrations/Npgsql/*.cs,**/*Tests.cs,**/TestUtils.cs</ExcludeByFile> <!--
+          Globbing filter -->
+          <IncludeDirectory></IncludeDirectory>
+          <SingleHit>false</SingleHit>
+          <UseSourceLink>true</UseSourceLink>
+          <IncludeTestAssembly>true</IncludeTestAssembly>
+          <SkipAutoProps>true</SkipAutoProps>
+          <DeterministicReport>false</DeterministicReport>
+          <ExcludeAssembliesWithoutSources>MissingAll,MissingAny,None</ExcludeAssembliesWithoutSources>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
