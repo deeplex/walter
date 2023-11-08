@@ -39,11 +39,11 @@ namespace Deeplex.Saverwalter.PrintService
                 left.Add(GetBriefAnrede(m));
                 rows++;
             }
-            var ad = abrechnung.Mieter.First().Adresse;
-            if (ad != null)
+            var mieterAdresse = abrechnung.Mieter.First(mieter => mieter.Adresse != null).Adresse;
+            if (mieterAdresse != null)
             {
-                left.Add(ad.Strasse + " " + ad.Hausnummer);
-                left.Add(ad.Postleitzahl + " " + ad.Stadt);
+                left.Add(mieterAdresse.Strasse + " " + mieterAdresse.Hausnummer);
+                left.Add(mieterAdresse.Postleitzahl + " " + mieterAdresse.Stadt);
                 rows += 2;
             }
 
