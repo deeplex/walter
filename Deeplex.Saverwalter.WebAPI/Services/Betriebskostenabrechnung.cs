@@ -37,7 +37,6 @@ namespace Deeplex.Saverwalter.WebAPI
             try
             {
                 var stream = new MemoryStream();
-                var writer = new StreamWriter(stream);
                 var abrechnung = CreateAbrechnung(id, Jahr, ctx);
                 abrechnung.SaveAsDocx(stream);
                 stream.Position = 0;
@@ -55,7 +54,6 @@ namespace Deeplex.Saverwalter.WebAPI
             try
             {
                 var stream = new MemoryStream();
-                var writer = new StreamWriter(stream);
                 var abrechnung = CreateAbrechnung(id, Jahr, ctx);
                 abrechnung.SaveAsPdf(stream);
                 stream.Position = 0;
