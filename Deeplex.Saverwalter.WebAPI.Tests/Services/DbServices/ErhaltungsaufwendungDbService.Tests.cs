@@ -16,15 +16,15 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var service = new ErhaltungsaufwendungDbService(ctx);
-            var aufwendung = new Erhaltungsaufwendung(
+            var entity = new Erhaltungsaufwendung(
                 1000, "TestAufwendung", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1))
             {
                 Wohnung = vertrag.Wohnung
             };
-            ctx.Erhaltungsaufwendungen.Add(aufwendung);
+            ctx.Erhaltungsaufwendungen.Add(entity);
             ctx.SaveChanges();
 
-            var result = service.Get(aufwendung.ErhaltungsaufwendungId);
+            var result = service.Get(entity.ErhaltungsaufwendungId);
 
             result.Should().BeOfType<OkObjectResult>();
             var okResult = (OkObjectResult)result;
@@ -37,15 +37,15 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var service = new ErhaltungsaufwendungDbService(ctx);
-            var aufwendung = new Erhaltungsaufwendung(
+            var entity = new Erhaltungsaufwendung(
                 1000, "TestAufwendung", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1));
-            ctx.Erhaltungsaufwendungen.Add(aufwendung);
+            ctx.Erhaltungsaufwendungen.Add(entity);
             ctx.SaveChanges();
 
-            var result = service.Delete(aufwendung.ErhaltungsaufwendungId);
+            var result = service.Delete(entity.ErhaltungsaufwendungId);
 
             result.Should().BeOfType<OkResult>();
-            ctx.Erhaltungsaufwendungen.Find(aufwendung.ErhaltungsaufwendungId).Should().BeNull();
+            ctx.Erhaltungsaufwendungen.Find(entity.ErhaltungsaufwendungId).Should().BeNull();
         }
 
         [Fact]
@@ -54,14 +54,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var service = new ErhaltungsaufwendungDbService(ctx);
-            var aufwendung = new Erhaltungsaufwendung(
+            var entity = new Erhaltungsaufwendung(
                 1000, "TestAufwendung", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1))
             {
                 Wohnung = vertrag.Wohnung
             };
-            var aufwendungEntry = new ErhaltungsaufwendungEntry(aufwendung, ctx);
+            var entry = new ErhaltungsaufwendungEntry(entity, ctx);
 
-            var result = service.Post(aufwendungEntry);
+            var result = service.Post(entry);
 
             result.Should().BeOfType<OkObjectResult>();
         }
@@ -72,16 +72,16 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var service = new ErhaltungsaufwendungDbService(ctx);
-            var aufwendung = new Erhaltungsaufwendung(
+            var entity = new Erhaltungsaufwendung(
                 1000, "TestAufwendung", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1))
             {
                 Wohnung = vertrag.Wohnung
             };
-            ctx.Erhaltungsaufwendungen.Add(aufwendung);
+            ctx.Erhaltungsaufwendungen.Add(entity);
             ctx.SaveChanges();
-            var aufwendungEntry = new ErhaltungsaufwendungEntry(aufwendung, ctx);
+            var entry = new ErhaltungsaufwendungEntry(entity, ctx);
 
-            var result = service.Post(aufwendungEntry);
+            var result = service.Post(entry);
 
             result.Should().BeOfType<BadRequestResult>();
         }
@@ -92,27 +92,27 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var service = new ErhaltungsaufwendungDbService(ctx);
-            var aufwendung = new Erhaltungsaufwendung(
+            var entity = new Erhaltungsaufwendung(
                 1000, "TestAufwendung", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1))
             {
                 Wohnung = vertrag.Wohnung
             };
 
-            ctx.Erhaltungsaufwendungen.Add(aufwendung);
+            ctx.Erhaltungsaufwendungen.Add(entity);
             ctx.SaveChanges();
 
-            var aufwendungEntry = new ErhaltungsaufwendungEntry(aufwendung, ctx);
-            aufwendungEntry.Betrag = 2000;
+            var entry = new ErhaltungsaufwendungEntry(entity, ctx);
+            entry.Betrag = 2000;
 
-            var result = service.Put(aufwendung.ErhaltungsaufwendungId, aufwendungEntry);
+            var result = service.Put(entity.ErhaltungsaufwendungId, entry);
 
             result.Should().BeOfType<OkObjectResult>();
-            var updatedAufwendung = ctx.Erhaltungsaufwendungen.Find(aufwendung.ErhaltungsaufwendungId);
-            if (updatedAufwendung == null)
+            var updatedEntity = ctx.Erhaltungsaufwendungen.Find(entity.ErhaltungsaufwendungId);
+            if (updatedEntity == null)
             {
                 throw new Exception("Erhaltungsaufwendung not found");
             }
-            updatedAufwendung.Betrag.Should().Be(2000);
+            updatedEntity.Betrag.Should().Be(2000);
         }
 
         [Fact]
@@ -121,18 +121,18 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var service = new ErhaltungsaufwendungDbService(ctx);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var aufwendung = new Erhaltungsaufwendung(
+            var entity = new Erhaltungsaufwendung(
                 1000, "TestAufwendung", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1))
             {
                 Wohnung = vertrag.Wohnung
             };
-            var aufwendungEntry = new ErhaltungsaufwendungEntry(aufwendung, ctx);
-            aufwendungEntry.Betrag = 2000;
+            var entry = new ErhaltungsaufwendungEntry(entity, ctx);
+            entry.Betrag = 2000;
 
-            ctx.Erhaltungsaufwendungen.Add(aufwendung);
+            ctx.Erhaltungsaufwendungen.Add(entity);
             ctx.SaveChanges();
 
-            var result = service.Put(aufwendung.ErhaltungsaufwendungId + 1, aufwendungEntry);
+            var result = service.Put(entity.ErhaltungsaufwendungId + 1, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }

@@ -51,13 +51,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new AdresseDbService(ctx);
-            var adresse = new Adresse("Teststraße", "1", "12345", "Teststadt");
-            var adresseEntry = new AdresseEntry(adresse, ctx);
+            var entity = new Adresse("Teststraße", "1", "12345", "Teststadt");
+            var entry = new AdresseEntry(entity, ctx);
 
-            var result = service.Post(adresseEntry);
+            var result = service.Post(entry);
 
             result.Should().BeOfType<OkObjectResult>();
-            var postedAdresse = Helper.Utils.GetAdresse(adresseEntry, ctx);
+            var postedAdresse = Helper.Utils.GetAdresse(entry, ctx);
             postedAdresse.Should().NotBeNull();
         }
 
@@ -66,12 +66,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new AdresseDbService(ctx);
-            var adresse = new Adresse("Teststraße", "1", "12345", "Teststadt");
+            var entity = new Adresse("Teststraße", "1", "12345", "Teststadt");
 
-            ctx.Adressen.Add(adresse);
+            ctx.Adressen.Add(entity);
             ctx.SaveChanges();
 
-            var adresseEntry = new AdresseEntry(adresse, ctx);
+            var adresseEntry = new AdresseEntry(entity, ctx);
 
             var result = service.Post(adresseEntry);
 
@@ -83,23 +83,23 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new AdresseDbService(ctx);
-            var adresse = new Adresse("Teststraße", "1", "12345", "Teststadt");
+            var entity = new Adresse("Teststraße", "1", "12345", "Teststadt");
 
-            ctx.Adressen.Add(adresse);
+            ctx.Adressen.Add(entity);
             ctx.SaveChanges();
 
-            var adresseEntry = new AdresseEntry(adresse, ctx);
-            adresseEntry.Hausnummer = "2";
+            var entry = new AdresseEntry(entity, ctx);
+            entry.Hausnummer = "2";
 
-            var result = service.Put(adresse.AdresseId, adresseEntry);
+            var result = service.Put(entity.AdresseId, entry);
 
             result.Should().BeOfType<OkObjectResult>();
-            var updatedAdresse = ctx.Adressen.Find(adresse.AdresseId);
-            if (updatedAdresse == null)
+            var updatedEntity = ctx.Adressen.Find(entity.AdresseId);
+            if (updatedEntity == null)
             {
                 throw new Exception("Adresse not found");
             }
-            updatedAdresse.Hausnummer.Should().Be("2");
+            updatedEntity.Hausnummer.Should().Be("2");
         }
 
         [Fact]
@@ -107,14 +107,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new AdresseDbService(ctx);
-            var adresse = new Adresse("Teststraße", "1", "12345", "Teststadt");
-            var adresseEntry = new AdresseEntry(adresse, ctx);
-            adresseEntry.Hausnummer = "2";
+            var entity = new Adresse("Teststraße", "1", "12345", "Teststadt");
+            var entry = new AdresseEntry(entity, ctx);
+            entry.Hausnummer = "2";
 
-            ctx.Adressen.Add(adresse);
+            ctx.Adressen.Add(entity);
             ctx.SaveChanges();
 
-            var result = service.Put(adresse.AdresseId + 1, adresseEntry);
+            var result = service.Put(entity.AdresseId + 1, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }

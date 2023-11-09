@@ -55,13 +55,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var umlage = new Umlage(Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachWohnflaeche);
             ctx.Umlagen.Add(umlage);
             ctx.SaveChanges();
-            var rechnung = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
+            var entity = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
             {
                 Umlage = umlage
             };
-            var rechnungEntry = new BetriebskostenrechnungEntry(rechnung, ctx);
+            var entry = new BetriebskostenrechnungEntry(entity, ctx);
 
-            var result = service.Post(rechnungEntry);
+            var result = service.Post(entry);
 
             result.Should().BeOfType<OkObjectResult>();
         }
@@ -72,17 +72,17 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var service = new BetriebskostenrechnungDbService(ctx);
             var umlage = new Umlage(Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachWohnflaeche);
-            var rechnung = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
+            var entity = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
             {
                 Umlage = umlage
             };
 
-            ctx.Betriebskostenrechnungen.Add(rechnung);
+            ctx.Betriebskostenrechnungen.Add(entity);
             ctx.SaveChanges();
 
-            var rechnungEntry = new BetriebskostenrechnungEntry(rechnung, ctx);
+            var entry = new BetriebskostenrechnungEntry(entity, ctx);
 
-            var result = service.Post(rechnungEntry);
+            var result = service.Post(entry);
 
             result.Should().BeOfType<BadRequestResult>();
         }
@@ -93,24 +93,24 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var service = new BetriebskostenrechnungDbService(ctx);
             var umlage = new Umlage(Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachWohnflaeche);
-            var rechnung = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
+            var entity = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
             {
                 Umlage = umlage
             };
-            ctx.Betriebskostenrechnungen.Add(rechnung);
+            ctx.Betriebskostenrechnungen.Add(entity);
             ctx.SaveChanges();
-            var rechnungEntry = new BetriebskostenrechnungEntry(rechnung, ctx);
-            rechnungEntry.Betrag = 2000;
+            var entry = new BetriebskostenrechnungEntry(entity, ctx);
+            entry.Betrag = 2000;
 
-            var result = service.Put(rechnung.BetriebskostenrechnungId, rechnungEntry);
+            var result = service.Put(entity.BetriebskostenrechnungId, entry);
 
             result.Should().BeOfType<OkObjectResult>();
-            var updatedRechnung = ctx.Betriebskostenrechnungen.Find(rechnung.BetriebskostenrechnungId);
-            if (updatedRechnung == null)
+            var updatedEntity = ctx.Betriebskostenrechnungen.Find(entity.BetriebskostenrechnungId);
+            if (updatedEntity == null)
             {
                 throw new Exception("Betriebskostenrechnung not found");
             }
-            updatedRechnung.Betrag.Should().Be(2000);
+            updatedEntity.Betrag.Should().Be(2000);
         }
 
         [Fact]
@@ -119,15 +119,15 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var service = new BetriebskostenrechnungDbService(ctx);
             var umlage = new Umlage(Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachWohnflaeche);
-            var rechnung = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
+            var entity = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
             {
                 Umlage = umlage
             };
-            var rechnungEntry = new BetriebskostenrechnungEntry(rechnung, ctx);
-            ctx.Betriebskostenrechnungen.Add(rechnung);
+            var entry = new BetriebskostenrechnungEntry(entity, ctx);
+            ctx.Betriebskostenrechnungen.Add(entity);
             ctx.SaveChanges();
 
-            var result = service.Put(rechnung.BetriebskostenrechnungId + 1, rechnungEntry);
+            var result = service.Put(entity.BetriebskostenrechnungId + 1, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }
