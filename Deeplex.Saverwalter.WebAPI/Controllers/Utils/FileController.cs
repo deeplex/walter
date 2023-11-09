@@ -16,16 +16,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             httpClient = _httpClient;
         }
 
-        private string GetMimeTypeFromExtension(string extension)
-        {
-            var provider = new FileExtensionContentTypeProvider();
-            if (!provider.TryGetContentType(extension, out string? contentType))
-            {
-                contentType = "application/octet-stream";
-            }
-            return contentType;
-        }
-
         private async Task<IActionResult> RedirectToFileServer(string path)
         {
             if (baseUrl is null)
