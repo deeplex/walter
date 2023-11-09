@@ -127,7 +127,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Betriebskostenrechnungen.Add(entity);
             ctx.SaveChanges();
 
-            var result = service.Put(entity.BetriebskostenrechnungId + 1, entry);
+            var result = service.Put(entity.BetriebskostenrechnungId + 312, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }

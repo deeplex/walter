@@ -106,7 +106,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.JuristischePersonen.Add(entity);
             ctx.SaveChanges();
 
-            var result = service.Put(entity.JuristischePersonId + 1, entry);
+            var result = service.Put(entity.JuristischePersonId + 1132, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }
