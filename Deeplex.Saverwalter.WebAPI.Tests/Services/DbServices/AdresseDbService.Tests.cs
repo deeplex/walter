@@ -114,7 +114,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Adressen.Add(entity);
             ctx.SaveChanges();
 
-            var result = service.Put(entity.AdresseId + 1, entry);
+            var result = service.Put(entity.AdresseId + 20, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }
