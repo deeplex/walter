@@ -9,10 +9,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
     {
         private readonly ILogger<FileController> _logger;
         private static string? baseUrl = Environment.GetEnvironmentVariable("S3_PROVIDER");
-
-        public FileController(ILogger<FileController> logger)
+        private HttpClient httpClient;
+        public FileController(ILogger<FileController> logger, HttpClient _httpClient)
         {
             _logger = logger;
+            httpClient = _httpClient;
         }
 
         private string GetMimeTypeFromExtension(string extension)
@@ -32,36 +33,33 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 return StatusCode(StatusCodes.Status503ServiceUnavailable);
             }
 
-            using (var httpClient = new HttpClient())
+            var resourceUrl = baseUrl + path;
+            var requestMethod = HttpContext.Request.Method;
+
+            HttpContent content = null!;
+            var request = new HttpRequestMessage(new HttpMethod(requestMethod), resourceUrl) { Content = content };
+
+            if (requestMethod == HttpMethod.Put.Method)
             {
-                var resourceUrl = baseUrl + path;
-                var requestMethod = HttpContext.Request.Method;
+                content = new StreamContent(Request.Body);
 
-                HttpContent content = null!;
-                var request = new HttpRequestMessage(new HttpMethod(requestMethod), resourceUrl) { Content = content };
-
-                if (requestMethod == HttpMethod.Put.Method)
+                var contentLength = Request.ContentLength ?? -1;
+                if (contentLength >= 0)
                 {
-                    content = new StreamContent(Request.Body);
-
-                    var contentLength = Request.ContentLength ?? -1;
-                    if (contentLength >= 0)
-                    {
-                        content.Headers.ContentLength = contentLength;
-                    }
-
-                    request.Content = content;
-                    new FileExtensionContentTypeProvider()
-                        .TryGetContentType(Path.GetExtension(path), out string? contentType);
-                    content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+                    content.Headers.ContentLength = contentLength;
                 }
 
-                var response = await httpClient.SendAsync(request);
-                var responseContent = await response.Content.ReadAsByteArrayAsync();
-                var responseType = response.Content.Headers.ContentType?.MediaType ?? "plain/text";
-
-                return File(responseContent, responseType);
+                request.Content = content;
+                new FileExtensionContentTypeProvider()
+                    .TryGetContentType(Path.GetExtension(path), out string? contentType);
+                content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
             }
+
+            var response = await httpClient.SendAsync(request);
+            var responseContent = await response.Content.ReadAsByteArrayAsync();
+            var responseType = response.Content.Headers.ContentType?.MediaType ?? "plain/text";
+
+            return File(responseContent, responseType);
         }
 
         [HttpGet]
