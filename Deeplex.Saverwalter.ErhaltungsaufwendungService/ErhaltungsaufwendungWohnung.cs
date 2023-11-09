@@ -7,13 +7,14 @@ namespace Deeplex.Saverwalter.Model
     {
         ImmutableList<ErhaltungsaufwendungListeEntry> Liste { get; set; }
         Wohnung Wohnung { get; }
-        double Summe => Liste.Sum(e => e.Betrag);
+        double Summe { get; }
     }
 
     public sealed class ErhaltungsaufwendungWohnung : IErhaltungsaufwendungWohnung
     {
         public ImmutableList<ErhaltungsaufwendungListeEntry> Liste { get; set; }
         public Wohnung Wohnung { get; }
+        public double Summe => Liste.Sum(e => e.Betrag);
 
         public ErhaltungsaufwendungWohnung(SaverwalterContext ctx, int WohnungId, int Jahr)
         {
