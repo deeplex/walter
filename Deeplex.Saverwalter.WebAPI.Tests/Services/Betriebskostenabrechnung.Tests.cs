@@ -1,7 +1,6 @@
 using Xunit;
 using Deeplex.Saverwalter.ModelTests;
 using FluentAssertions;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Utils.BetriebskostenabrechnungController;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
