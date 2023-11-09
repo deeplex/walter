@@ -89,7 +89,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var updatedEntity = ctx.NatuerlichePersonen.Find(entity.NatuerlichePersonId);
             if (updatedEntity == null)
             {
-                throw new Exception("Erhaltungsaufwendung not found");
+                throw new Exception("NatuerlichePerson not found");
             }
             updatedEntity.Email.Should().Be("TestPerson@saverwalter.de");
         }
