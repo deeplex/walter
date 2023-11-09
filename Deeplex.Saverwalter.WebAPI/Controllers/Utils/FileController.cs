@@ -55,7 +55,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
             }
 
-            var response = await httpClient.SendAsync(request);
+            var response = await httpClient.SendAsync(request, CancellationToken.None);
             var responseContent = await response.Content.ReadAsByteArrayAsync();
             var responseType = response.Content.Headers.ContentType?.MediaType ?? "plain/text";
 
