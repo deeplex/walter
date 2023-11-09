@@ -17,7 +17,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public void Post()
         {
             var ctx = TestUtils.GetContext();
-            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<NatuerlichePersonController>>();
             var dbService = new NatuerlichePersonDbService(ctx);
             var controller = new NatuerlichePersonController(logger, dbService);
@@ -34,7 +33,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public void GetId()
         {
             var ctx = TestUtils.GetContext();
-            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<NatuerlichePersonController>>();
             var dbService = new NatuerlichePersonDbService(ctx);
             var controller = new NatuerlichePersonController(logger, dbService);
@@ -52,7 +50,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public void Put()
         {
             var ctx = TestUtils.GetContext();
-            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<NatuerlichePersonController>>();
             var dbService = new NatuerlichePersonDbService(ctx);
             var controller = new NatuerlichePersonController(logger, dbService);
@@ -74,7 +71,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public void Delete()
         {
             var ctx = TestUtils.GetContext();
-            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<NatuerlichePersonController>>();
             var dbService = new NatuerlichePersonDbService(ctx);
             var controller = new NatuerlichePersonController(logger, dbService);
