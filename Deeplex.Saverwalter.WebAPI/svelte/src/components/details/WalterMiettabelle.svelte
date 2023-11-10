@@ -75,6 +75,7 @@
             console.warn("Vertrag not found: ", new_value.vertrag?.id);
             return;
         }
+        mieten.push(new_value);
         vertrag!.mieten.push(new_value);
         config = walter_data_miettabelle(vertraege, year);
     }
