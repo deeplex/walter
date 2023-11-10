@@ -15,7 +15,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
         [InlineData(
             1, 1, 2020,
             1, 7, 2020,
-            1, 1, 2019, 
+            1, 1, 2019,
             1, 4, 2020, 0.125)]
         [InlineData(
             1, 1, 2020,

@@ -1,10 +1,7 @@
 using Deeplex.Saverwalter.Model;
-
+using Deeplex.Saverwalter.ModelTests;
 using FluentAssertions;
 using Xunit;
-using Deeplex.Saverwalter.BetriebskostenabrechnungService;
-using Microsoft.EntityFrameworkCore;
-using Deeplex.Saverwalter.ModelTests;
 
 namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
 {

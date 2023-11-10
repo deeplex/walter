@@ -1,10 +1,9 @@
-using Xunit;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
+using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
-using Deeplex.Saverwalter.Model;
-using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
+using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests

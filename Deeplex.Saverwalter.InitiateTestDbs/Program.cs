@@ -11,7 +11,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
             {
                 Console.WriteLine("Can't find environment variable DATABASE_USER");
             }
-            
+
             var databasePass = Environment.GetEnvironmentVariable("DATABASE_PASS");
             if (databaseUser == null)
             {

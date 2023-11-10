@@ -1,7 +1,7 @@
-using Xunit;
 using Deeplex.Saverwalter.ModelTests;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Xunit;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {

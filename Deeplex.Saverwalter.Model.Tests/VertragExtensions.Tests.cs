@@ -1,6 +1,6 @@
-﻿using FluentAssertions;
+﻿using FakeItEasy;
+using FluentAssertions;
 using Xunit;
-using FakeItEasy;
 
 namespace Deeplex.Saverwalter.Model.Tests
 {

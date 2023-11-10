@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
 
 namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
@@ -94,7 +93,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     notes.Add($"Enddatum von {verbrauch.Zaehler.Kennnummer} ist kleiner oder gleich dem Anfang der Zählung " +
                         $"({verbrauch.Anfangsdatum.ToString("dd.MM.yyyy")} - {verbrauch.Enddatum.ToString("dd.MM.yyyy")})", Severity.Error);
                 }
-                else if(verbrauch.Enddatum.DayNumber < (ende.DayNumber - thresholdOfDaysBeforeNotOkay))
+                else if (verbrauch.Enddatum.DayNumber < (ende.DayNumber - thresholdOfDaysBeforeNotOkay))
                 {
                     var candidates = verbraeuche.Where(other_verbrauch =>
                         other_verbrauch.Zaehler != verbrauch.Zaehler &&
@@ -102,13 +101,13 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                         other_verbrauch.Zaehler.Typ == verbrauch.Zaehler.Typ &&
                         other_verbrauch.Zaehler.Staende?.OrderBy(stand => stand.Datum).FirstOrDefault()?.Datum == other_verbrauch.Anfangsdatum &&
                         verbrauch.Zaehler.Wohnung == other_verbrauch.Zaehler.Wohnung);
-                    
+
                     if (candidates.Count() > 1)
                     {
                         var ersatz_string = string.Join(", ", candidates.Select(verbrauch => verbrauch.Zaehler.Kennnummer));
                         notes.Add($"Mehr als einen Ersatz für {verbrauch.Zaehler.Kennnummer} gefunden: {ersatz_string}", Severity.Error);
                     }
-                    
+
                     var ersatz = candidates.FirstOrDefault();
 
                     if (ersatz != null)

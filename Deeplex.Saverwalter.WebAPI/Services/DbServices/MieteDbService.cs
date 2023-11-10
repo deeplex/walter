@@ -65,8 +65,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private MieteEntryBase Add(MieteEntryBase entry)
         {
-            var mieten = new List<Miete>(); 
-            
+            var mieten = new List<Miete>();
+
             // Be able to create multiple Mieten at once
             for (int i = 0; i <= entry.Repeat; ++i)
             {

@@ -1,10 +1,10 @@
-using Xunit;
 using Deeplex.Saverwalter.ModelTests;
-using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
-using FakeItEasy;
 using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services;
+using FakeItEasy;
+using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
+using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Utils.AccountController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests

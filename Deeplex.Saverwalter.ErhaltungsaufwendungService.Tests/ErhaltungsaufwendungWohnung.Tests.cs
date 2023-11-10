@@ -1,7 +1,7 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
-using Xunit;
 using FluentAssertions;
+using Xunit;
 
 namespace Deeplex.Saverwalter.ErhaltungsaufwendungService.Tests
 {

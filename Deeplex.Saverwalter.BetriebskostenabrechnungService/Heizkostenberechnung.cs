@@ -96,7 +96,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             GesamtNutzflaeche = rechnung.Umlage.Wohnungen.Sum(w => w.Nutzflaeche);
             NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitraum.Zeitanteil;
-            
+
             var q = dieseAnteile.Where(w => w.Zaehler.Typ == Zaehlertyp.Gas).Sum(verbrauch => verbrauch.Delta);
             HeizkostenVerbrauchAnteil = q / checkQ;
             var v = dieseAnteile.Where(w => w.Zaehler.Typ == Zaehlertyp.Warmwasser).Sum(verbrauch => verbrauch.Delta);

@@ -1,13 +1,11 @@
-using Xunit;
 using Deeplex.Saverwalter.ModelTests;
-using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Deeplex.Saverwalter.WebAPI.Controllers.Services;
-using FakeItEasy;
 using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
-using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
+using FakeItEasy;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {

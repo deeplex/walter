@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using FakeItEasy;
 using FluentAssertions;
 using Xunit;
 
