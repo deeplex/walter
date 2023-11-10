@@ -51,7 +51,7 @@
     }
 </script>
 
-<Content>
+<Content style="overflow: scroll">
     {#await rows}
         <SkeletonPlaceholder style="margin:0; width: 100%; height:3rem" />
         <DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
