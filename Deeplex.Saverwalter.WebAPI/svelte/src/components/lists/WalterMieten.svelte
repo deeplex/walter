@@ -12,6 +12,7 @@
     const addUrl = `/api/mieten/`;
 
     export let rows: WalterMieteEntry[];
+    const sortedRows = rows.sort((a, b) => b.betreffenderMonat.localeCompare(a.betreffenderMonat));
     export let fullHeight = false;
     export let title: string | undefined = undefined;
 
@@ -25,7 +26,7 @@
     {addUrl}
     addEntry={entry}
     {title}
-    {rows}
+    rows={sortedRows}
     {headers}
     {fullHeight}
 >
