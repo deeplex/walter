@@ -60,6 +60,7 @@
     let addModalOpen = false;
     let addUrl = `/api/betriebskostenrechnungen`;
     let title = "Umlage";
+    let rechnungen = umlagen.flatMap(e => e.betriebskostenrechnungen);
 
     function onSubmit(new_value: any)
     {
@@ -70,6 +71,7 @@
             return;
         }
         umlage!.betriebskostenrechnungen.push(new_value);
+        rechnungen.push(new_value);
         config = walter_data_rechnungentabelle(umlagen, year);
     }
 </script>
@@ -80,7 +82,10 @@
     {addUrl}
     bind:addModalOpen
     {title}>
-    <WalterBetriebskostenrechnung {fetchImpl} bind:entry={addEntry} />
+    <WalterBetriebskostenrechnung
+        {fetchImpl}
+        bind:entry={addEntry}
+        rechnungen={rechnungen} />
 </WalterDataWrapperQuickAdd>
 
 

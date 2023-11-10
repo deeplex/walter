@@ -16,8 +16,10 @@
     import { convertDateCanadian } from '$walter/services/utils';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
+    import WalterBetriebskostenrechnungen from '../lists/WalterBetriebskostenrechnungen.svelte';
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
+    export let rechnungen: WalterBetriebskostenrechnungEntry[] = [];
     export let fetchImpl: typeof fetch;
     export let readonly = false;
 
@@ -120,5 +122,11 @@
 {#if $page.url.pathname !== `/umlagen/${entry.umlage?.id}`}
 <WalterLinks>
     <WalterLinkTile name={"Umlage ansehen"} href={`/umlagen/${entry.umlage?.id}`} />
+    {#if entry.umlage?.id}
+        <WalterBetriebskostenrechnungen
+            {fetchImpl}
+            title="Rechnungen"
+            rows={rechnungen.filter(e => +e.umlage.id === +(entry.umlage?.id || 0))} />
+    {/if}
 </WalterLinks>
 {/if}
