@@ -265,117 +265,127 @@ export function walter_data_rechnungentabelle(
     return { data, options };
 }
 
+const walter_data_miettabelle_options = {
+    ...heatMapOptions,
+    axes: {
+        bottom: {
+            title: 'Monat',
+            mapsTo: 'key',
+            scaleType: 'labels'
+        },
+        left: {
+            title: 'Wohnung',
+            truncation: {
+                threshold: 999
+            },
+            mapsTo: 'group',
+            scaleType: 'labels'
+        }
+    }
+};
+
+function vertragActiveMonth(begin: Date, end: Date | undefined, month: Date) {
+    const began = begin <= month;
+    const monthAfter = new Date(month.setMonth(month.getMonth()));
+    const ended = end && end < monthAfter;
+
+    return began && !ended;
+}
+
+function vertragActiveYear(begin: Date, end: Date | undefined, year: number) {
+    const began = begin.getFullYear() <= year;
+    const ended = end && end.getFullYear() < year;
+
+    return began && !ended;
+}
+
+function getVertragBeginn(vertrag: WalterVertragEntry): Date {
+    return new Date(
+        new Date(vertrag.beginn).getFullYear(),
+        new Date(vertrag.beginn).getMonth(),
+        1
+    );
+}
+
+function getVertragEnde(vertrag: WalterVertragEntry): Date | undefined {
+    return vertrag.ende
+        ? new Date(
+              new Date(vertrag.ende).getFullYear(),
+              new Date(vertrag.ende).getMonth(),
+              1
+          )
+        : undefined;
+}
+
+function fillDataWithMieten(
+    vertrag: WalterVertragEntry,
+    data: WalterDataType,
+    year: number
+) {
+    const mietenInThisYear = vertrag.mieten.filter(
+        (miete) => new Date(miete.betreffenderMonat).getFullYear() === year
+    );
+
+    for (const miete of mietenInThisYear) {
+        const group = vertrag.wohnung.text;
+        const key = months[new Date(miete.betreffenderMonat).getMonth()];
+
+        const previous = data.find(
+            (entry) => entry.group === group && entry.key === key
+        );
+
+        if (!previous) {
+            console.warn(
+                `Could not find value for ${key} ${year} for ${group}`
+            );
+            return;
+        }
+
+        previous.value = ((previous.value as number) || 0) + miete.betrag;
+    }
+}
+
 export function walter_data_miettabelle(
     vertraege: WalterVertragEntry[],
     year: number
 ): WalterDataConfigType {
-    const options = {
-        ...heatMapOptions,
-        axes: {
-            bottom: {
-                title: 'Monat',
-                mapsTo: 'key',
-                scaleType: 'labels'
-            },
-            left: {
-                title: 'Wohnung',
-                truncation: {
-                    threshold: 999
-                },
-                mapsTo: 'group',
-                scaleType: 'labels'
-            }
-        }
-    };
-
-    function vertragActive(begin: Date, end: Date | undefined, month: Date) {
-        const began = begin <= month;
-        const monthAfter = new Date(month.setMonth(month.getMonth()));
-        const ended = end && end < monthAfter;
-
-        return began && !ended;
-    }
-
     const data: WalterDataType = [];
+
+    // go through each vertrag and check if it should get miete for the specific month
     for (const vertrag of vertraege) {
-        const begin = new Date(
-            new Date(vertrag.beginn).getFullYear(),
-            new Date(vertrag.beginn).getMonth(),
-            1
-        );
-        const end = vertrag.ende
-            ? new Date(
-                  new Date(vertrag.ende).getFullYear(),
-                  new Date(vertrag.ende).getMonth(),
-                  1
-              )
-            : undefined;
+        const begin = getVertragBeginn(vertrag);
+        const end = getVertragEnde(vertrag);
 
+        // Skip vertrag if it is not active in the given year
+        if (!vertragActiveYear(begin, end, year)) {
+            continue;
+        }
+        // Skip vertrag if it has no grundmiete
+        if (vertrag.versionen.every((version) => version.grundmiete === 0)) {
+            continue;
+        }
+
+        // Iterate through each month of the year
         for (let monthIndex = 0; monthIndex < months.length; ++monthIndex) {
-            const eigentum = vertrag.versionen.every(
-                (version) => version.grundmiete === 0
-            );
-
-            if (
-                eigentum ||
-                begin.getFullYear() > year ||
-                (end && end.getFullYear() < year)
-            ) {
+            const monthDate = new Date(year, monthIndex, 1);
+            // Skip vertrag if it is not active in the given month
+            if (!vertragActiveMonth(begin, end, monthDate)) {
                 continue;
             }
 
-            const monthDate = new Date(year, monthIndex, 1);
-
-            const group = vertrag.wohnung.text;
-            const key = months[monthIndex];
-
-            const inactive = !vertragActive(begin, end, monthDate);
-            const occupied = !!data.find(
-                (entry) =>
-                    entry.group === group &&
-                    entry.key === key &&
-                    entry.value !== null &&
-                    !Array.isArray(entry.value) &&
-                    entry.value! >= 0
-            );
-
-            const doesNotHaveToPay = inactive && !occupied;
-
-            if (doesNotHaveToPay) continue;
-
+            // Every entry that is eligible for miete gets an entry in the data array (value = 0)
             const entry = {
                 id: `${vertrag.id}`,
                 year,
                 value: 0,
-                key,
-                group
+                key: months[monthIndex],
+                group: vertrag.wohnung.text
             };
 
             data.push(entry);
         }
 
-        const relevantMieten = vertrag.mieten.filter(
-            (miete) => new Date(miete.betreffenderMonat).getFullYear() === year
-        );
-
-        for (const miete of relevantMieten) {
-            const group = vertrag.wohnung.text;
-            const key = months[new Date(miete.betreffenderMonat).getMonth()];
-
-            const previous = data.find(
-                (entry) => entry.group === group && entry.key === key
-            );
-
-            if (previous) {
-                previous.value =
-                    ((previous.value as number) || 0) + miete.betrag;
-            } else {
-                // Should never happen...
-                console.warn(
-                    `Could not find value for ${key} ${year} for ${group}`
-                );
-            }
-        }
+        fillDataWithMieten(vertrag, data, year);
     }
 
     data.forEach((entry) => {
@@ -385,12 +395,15 @@ export function walter_data_miettabelle(
                 : undefined;
     });
 
+    // Get number of unique Wohnungen to scale table
     const wohnungen = new Set();
     data.forEach((entry) => wohnungen.add(entry.group));
+    const height = `${wohnungen.size * 3}em`;
 
-    options.height = `${wohnungen.size * 3}em`;
-
-    return { options, data };
+    return {
+        data,
+        options: { ...walter_data_miettabelle_options, height }
+    };
 }
 
 export function walter_data_nf(
