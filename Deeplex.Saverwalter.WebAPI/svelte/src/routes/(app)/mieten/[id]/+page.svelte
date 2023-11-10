@@ -25,11 +25,5 @@
 />
 
 <WalterGrid>
-    <WalterMiete entry={data.entry} />
-
-    <WalterLinkTile
-        bind:fileWrapper
-        name={`Vertrag: ${data.entry.vertrag.text}`}
-        href={`/vertraege/${data.entry.vertrag.id}`}
-    />
+    <WalterMiete entry={data.entry} mieten={data.vertrag.mieten} />
 </WalterGrid>

@@ -30,6 +30,7 @@
         <div style="margin: 1em">
             <WalterMiettabelle
                 year={years[selected]}
+                {mieten}
                 {vertraege} />
         </div>
         <div style="margin: 1em">

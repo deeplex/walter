@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { WalterMieteEntry, WalterVertragEntry } from "$walter/lib";
+    import type { WalterVertragEntry, WalterMieteEntry } from "$walter/lib";
     import { months, walter_data_miettabelle, type WalterDataConfigType } from "../data/WalterData";
     import WalterDataHeatmapChart from "../data/WalterDataHeatmapChart.svelte";
     import { convertDateCanadian } from "$walter/services/utils";
@@ -9,15 +9,16 @@
 
     export let vertraege: WalterVertragEntry[];
     export let year: number;
+    export let mieten: WalterMieteEntry[];
 
-    function updateEntry(vertradId: string, monthIndex: number, wohnung: string, betrag: number)
+    function updateEntry(vertragId: string, monthIndex: number, wohnung: string, betrag: number)
     {
         addEntry = {
             zahlungsdatum: convertDateCanadian(new Date()),
             betreffenderMonat: convertDateCanadian(new Date(year, monthIndex, 1)),
             vertrag: {
-                id: vertradId,
-                text: "UNKNOWN"
+                id: vertragId,
+                text: wohnung
             },
             betrag: betrag
         }
@@ -71,7 +72,7 @@
     {addUrl}
     bind:addModalOpen
     {title}>
-    <WalterMiete entry={addEntry} />
+    <WalterMiete entry={addEntry} mieten={mieten}/>
 </WalterDataWrapperQuickAdd>
 
 <Grid>
