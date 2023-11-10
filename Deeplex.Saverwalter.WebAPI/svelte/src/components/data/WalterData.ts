@@ -458,9 +458,9 @@ export type WalterDataOptionsType = {
 export type WalterDataType = {
     value: number | number[] | null | undefined;
     year?: number;
-    group?: string;
-    id?: string;
+    group?: string; // row in heatmap
+    id?: string; // id of vertrag
     id2?: string;
-    key?: string;
+    key?: string; // column in heatmap
     date?: string; // Date in Canadian Format
 }[];
