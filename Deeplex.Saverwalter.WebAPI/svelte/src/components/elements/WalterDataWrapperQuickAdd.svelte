@@ -2,6 +2,8 @@
 
     import { Modal } from "carbon-components-svelte";
     import { handle_save } from "./WalterDataWrapper";
+    import { changeTracker } from "$walter/store";
+    import { get } from "svelte/store";
     export let addModalOpen = false;
     export let addUrl: string;
     export let addEntry: any;
@@ -19,14 +21,21 @@
         }
     }
 
+    let tracker : number;
+    function open() {
+        tracker = get(changeTracker);
+    }
+
     function close() {
         addModalOpen = false;
         addEntry = {};
+        changeTracker.set(tracker);
     }
 </script>
 <Modal
     secondaryButtonText="Abbrechen"
     primaryButtonText="Bestätigen"
+    on:open={open}
     on:close={close}
     on:submit={submit}
     on:click:button--secondary={() => (addModalOpen = false)}
