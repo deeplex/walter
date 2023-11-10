@@ -105,17 +105,19 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         [Fact]
         public void PutFailedTest()
         {
-            var ctx = TestUtils.GetContext();
-            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var service = new ZaehlerstandDbService(ctx);
-            var zaehler = vertrag.Wohnung.Zaehler.First();
-            var entity = zaehler.Staende.First();
-            var entry = new ZaehlerstandEntryBase(entity);
-            entry.Stand = 5000;
+            using (var ctx = TestUtils.GetContext())
+            {
+                var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
+                var service = new ZaehlerstandDbService(ctx);
+                var zaehler = vertrag.Wohnung.Zaehler.First();
+                var entity = zaehler.Staende.First();
+                var entry = new ZaehlerstandEntryBase(entity);
+                entry.Stand = 5000;
 
-            var result = service.Put(entity.ZaehlerstandId + 20, entry);
+                var result = service.Put(entity.ZaehlerstandId + 31902, entry);
 
-            result.Should().BeOfType<NotFoundResult>();
+                result.Should().BeOfType<NotFoundResult>();
+            }
         }
     }
 }

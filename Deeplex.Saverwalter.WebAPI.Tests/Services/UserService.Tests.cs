@@ -29,10 +29,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var tokenService = A.Fake<TokenService>();
             var userService = new UserService(ctx, tokenService);
-            var account = await userService.CreateUserAccount("test");
+            var account = await userService.CreateUserAccount("sign_in_async_user");
             await userService.UpdateUserPassword(account, Encoding.UTF8.GetBytes("test"));
 
-            var result = await userService.SignInAsync("test", "test");
+            var result = await userService.SignInAsync("sign_in_async_user", "test");
 
             result.Succeeded.Should().Be(true);
             result.Account.Should().Be(account);
@@ -50,9 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await userService.SignInAsync("test", "test2");
 
-            result.Succeeded.Should().Be(true);
-            result.Account.Should().Be(account);
-            result.SessionToken.Should().NotBeNullOrEmpty();
+            result.Succeeded.Should().Be(false);
         }
     }
 }

@@ -223,7 +223,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
 
         private static string GetVertragName(Vertrag vertrag, SaverwalterContext ctx)
         {
-            var wohnung = $"{vertrag.Wohnung.Adresse!.Anschrift ?? "Unbekannte Anschrift"} - {vertrag.Wohnung.Bezeichnung}";
+            var wohnung = $"{vertrag.Wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift"} - {vertrag.Wohnung.Bezeichnung}";
             var mieterList = BetriebskostenabrechnungService.Utils
                 .GetMieter(ctx, vertrag)
                 .Select(person => person.Bezeichnung);

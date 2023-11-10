@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
     public class FileController : ControllerBase
     {
         private readonly ILogger<FileController> _logger;
-        private static string? baseUrl = Environment.GetEnvironmentVariable("S3_PROVIDER");
+        private string? baseUrl = Environment.GetEnvironmentVariable("S3_PROVIDER");
         private HttpClient httpClient;
         public FileController(ILogger<FileController> logger, HttpClient _httpClient)
         {

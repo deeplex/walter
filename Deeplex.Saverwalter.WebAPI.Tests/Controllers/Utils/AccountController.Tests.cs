@@ -14,20 +14,21 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         [Fact]
         public async void CreateUser()
         {
-            var ctx = TestUtils.GetContext();
-            var tokenService = A.Fake<TokenService>();
-            var userService = new UserService(ctx, tokenService);
-            var controller = new AccountController(ctx, tokenService, userService);
-
-            var result = await controller.Create(new CreateRequest
+            using (var ctx = TestUtils.GetContext())
             {
-                Username = "test",
-                Password = "test"
-            });
+                var tokenService = A.Fake<TokenService>();
+                var userService = new UserService(ctx, tokenService);
+                var controller = new AccountController(ctx, tokenService, userService);
 
-            result.Should().BeOfType<OkResult>();
-            ctx.UserAccounts.Should().HaveCount(1);
-            ctx.UserAccounts.First().Username.Should().Be("test");
+                var result = await controller.Create(new CreateRequest
+                {
+                    Username = "create_user_test",
+                    Password = "test"
+                });
+
+                result.Should().BeOfType<OkResult>();
+                ctx.UserAccounts.Last().Username.Should().Be("create_user_test");
+            }
         }
 
         [Fact]

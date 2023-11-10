@@ -145,10 +145,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<FileController>>();
+            Environment.SetEnvironmentVariable("S3_PROVIDER", null);
             var controller = new FileController(logger, new HttpClient());
 
             var context = new DefaultHttpContext();
             context.Request.QueryString = new QueryString("?param=value");
+            context.Request.Method = HttpMethod.Get.Method;
             controller.ControllerContext.HttpContext = context;
 
             var result = await controller.GetFiles();
