@@ -6,16 +6,16 @@
     export let addUrl: string;
     export let addEntry: any;
     export let title: string;
-    export let rows: any[] | undefined = undefined;
+    export let onSubmit: undefined | ((e: any) => void) = undefined;
 
     async function submit() {
         if (!addUrl) return;
 
         const parsed = await handle_save(addUrl, addEntry, title!);
 
-        if (rows)
+        if (onSubmit)
         {
-            rows = [...rows, parsed];
+            onSubmit(parsed);
         }
     }
 

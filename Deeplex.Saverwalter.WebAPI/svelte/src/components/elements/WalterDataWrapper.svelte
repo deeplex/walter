@@ -31,6 +31,10 @@
     function normal_add() {
         walter_goto(`${$page.url.pathname}/new`);
     }
+
+    function onSubmit(new_value: any) {
+        rows = [...rows, new_value];
+    }
 </script>
 
 {#if title !== undefined}
@@ -39,7 +43,7 @@
             bind:addEntry
             {addUrl}
             bind:addModalOpen
-            bind:rows
+            {onSubmit}
             {title}>
             <slot />
         </WalterDataWrapperQuickAdd>

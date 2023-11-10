@@ -7,6 +7,7 @@
     import { WalterMiete } from "..";
     import { Grid } from "carbon-components-svelte";
 
+    export let config: WalterDataConfigType;
     export let vertraege: WalterVertragEntry[];
     export let year: number;
     export let mieten: WalterMieteEntry[];
@@ -65,9 +66,22 @@
     let addModalOpen = false;
     let addUrl = `/api/mieten`;
     let title = "Unbekannter Vertrag";
+
+    function onSubmit(new_value: any)
+    {
+        const vertrag = vertraege.find(e => e.id === +new_value.vertrag?.id);
+        if (!vertrag)
+        {
+            console.warn("Vertrag not found: ", new_value.vertrag?.id);
+            return;
+        }
+        vertrag!.mieten.push(new_value);
+        config = walter_data_miettabelle(vertraege, year);
+    }
 </script>
 
 <WalterDataWrapperQuickAdd
+    {onSubmit}
     bind:addEntry
     {addUrl}
     bind:addModalOpen
@@ -76,6 +90,6 @@
 </WalterDataWrapperQuickAdd>
 
 <Grid>
-    <h3>Miettabelle</h3>
-    <WalterDataHeatmapChart {click} config={walter_data_miettabelle(vertraege, year)} />
+    <h3>Miettabelle {year}</h3>
+    <WalterDataHeatmapChart {click} bind:config />
 </Grid>

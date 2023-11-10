@@ -1,8 +1,9 @@
 <script lang="ts">
     import type { WalterUmlageEntry, WalterVertragEntry } from "$walter/lib";
-    import { Grid, Tab, TabContent, Tabs, Tile } from "carbon-components-svelte";
+    import { Tab, Tabs, Tile } from "carbon-components-svelte";
     import WalterMiettabelle from "./WalterMiettabelle.svelte";
     import WalterRechnungenTabelle from "./WalterRechnungenTabelle.svelte";
+    import { walter_data_miettabelle } from "../data/WalterData";
 
     export let vertraege: WalterVertragEntry[];
     export let umlagen: WalterUmlageEntry[];
@@ -29,6 +30,7 @@
         <Tile>
         <div style="margin: 1em">
             <WalterMiettabelle
+                config={walter_data_miettabelle(vertraege, years[selected])}
                 year={years[selected]}
                 {mieten}
                 {vertraege} />

@@ -20,4 +20,7 @@
 
 </script>
 
-<HeatmapChart bind:this={heatMap} data={config.data} options={config.options} />
+<HeatmapChart
+	bind:this={heatMap}
+	bind:data={config.data}
+	bind:options={config.options} />
