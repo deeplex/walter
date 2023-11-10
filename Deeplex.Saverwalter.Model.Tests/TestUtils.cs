@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.Model;
 using FakeItEasy;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Deeplex.Saverwalter.ModelTests
 {
@@ -22,6 +23,7 @@ namespace Deeplex.Saverwalter.ModelTests
         {
             var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
             optionsBuilder.UseInMemoryDatabase("TestDb");
+            optionsBuilder.ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning));
             var ctx = new SaverwalterContext(optionsBuilder.Options);
 
             return ctx;
