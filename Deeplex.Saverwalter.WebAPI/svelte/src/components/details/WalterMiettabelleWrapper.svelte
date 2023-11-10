@@ -3,7 +3,7 @@
     import { Tab, Tabs, Tile } from "carbon-components-svelte";
     import WalterMiettabelle from "./WalterMiettabelle.svelte";
     import WalterRechnungenTabelle from "./WalterRechnungenTabelle.svelte";
-    import { walter_data_miettabelle } from "../data/WalterData";
+    import { walter_data_miettabelle, walter_data_rechnungentabelle } from "../data/WalterData";
 
     export let vertraege: WalterVertragEntry[];
     export let umlagen: WalterUmlageEntry[];
@@ -37,6 +37,7 @@
         </div>
         <div style="margin: 1em">
             <WalterRechnungenTabelle
+                config={walter_data_rechnungentabelle(umlagen, years[selected])}
                 year={years[selected]}
                 {fetchImpl}
                 {umlagen} />

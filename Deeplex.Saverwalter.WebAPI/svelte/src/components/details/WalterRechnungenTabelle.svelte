@@ -7,6 +7,7 @@
     import WalterBetriebskostenrechnung from "./WalterBetriebskostenrechnung.svelte";
     import { Grid } from "carbon-components-svelte";
 
+    export let config: WalterDataConfigType;
     export let umlagen: WalterUmlageEntry[];
     export let fetchImpl: typeof fetch;
     export let year: number;
@@ -59,9 +60,22 @@
     let addModalOpen = false;
     let addUrl = `/api/betriebskostenrechnungen`;
     let title = "Umlage";
+
+    function onSubmit(new_value: any)
+    {
+        const umlage = umlagen.find(e => e.id === +new_value.umlage?.id);
+        if (!umlage)
+        {
+            console.warn("Umlage not found: ", new_value.umlage.id);
+            return;
+        }
+        umlage!.betriebskostenrechnungen.push(new_value);
+        config = walter_data_rechnungentabelle(umlagen, year);
+    }
 </script>
 
 <WalterDataWrapperQuickAdd
+    {onSubmit}
     bind:addEntry
     {addUrl}
     bind:addModalOpen
@@ -72,5 +86,5 @@
 
 <Grid>
     <h3>Umlagentabelle</h3>
-    <WalterDataHeatmapChart {click} config={walter_data_rechnungentabelle(umlagen, year)} />
+    <WalterDataHeatmapChart {click} bind:config />
 </Grid>
