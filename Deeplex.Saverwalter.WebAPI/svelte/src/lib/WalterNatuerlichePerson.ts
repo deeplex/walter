@@ -21,15 +21,17 @@ export class WalterNatuerlichePersonEntry
         public mobil: string,
         public notiz: string,
         public name: string,
+        public vorname: string,
+        public nachname: string,
+        public createdAt: Date,
+        public lastModified: Date,
+        public anrede: WalterSelectionEntry,
         public selectedJuristischePersonen: WalterSelectionEntry[],
         public natuerlichePerson: boolean,
         public adresse: WalterAdresseEntry,
         public juristischePersonen: WalterPersonEntry[],
         public wohnungen: WalterWohnungEntry[],
-        public vertraege: WalterVertragEntry[],
-        public vorname: string,
-        public nachname: string,
-        public anrede: WalterSelectionEntry
+        public vertraege: WalterVertragEntry[]
     ) {
         super();
     }
@@ -56,15 +58,17 @@ export class WalterNatuerlichePersonEntry
             json.mobil,
             json.notiz,
             json.name,
+            json.vorname,
+            json.nachname,
+            json.createdAt,
+            json.lastModified,
+            json.anrede,
             selectedJuristischePersonen,
             json.natuerlichePerson,
             adresse,
             juristischePersonen,
             wohnungen,
-            vertraege,
-            json.vorname,
-            json.nachname,
-            json.anrede
+            vertraege
         );
     }
 }

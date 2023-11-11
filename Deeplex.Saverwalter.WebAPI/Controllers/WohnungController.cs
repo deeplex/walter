@@ -28,6 +28,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public AdresseEntryBase? Adresse { get; set; }
             public string? Bewohner { get; set; }
             public SelectionEntry? Besitzer { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
 
             public WohnungEntryBase() { }
             public WohnungEntryBase(Wohnung entity, SaverwalterContext ctx)
@@ -50,6 +52,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                         .ToList()
                         .Select(a => ctx.FindPerson(a.PersonId).Bezeichnung)) :
                     null;
+
+                CreatedAt = Entity.CreatedAt;
+                LastModified = Entity.LastModified;
             }
         }
 

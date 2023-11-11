@@ -35,8 +35,8 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public double Grundmiete { get; set; }
         public string? Notiz { get; set; }
-        public DateOnly CreatedAt { get; private set; }
-        public DateOnly LastModified { get; private set; }
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
         public VertragVersion(DateOnly beginn, double grundmiete, int personenzahl)
         {
             Beginn = beginn;

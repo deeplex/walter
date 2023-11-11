@@ -20,6 +20,7 @@ export async function handle_save(
 
     const result = await walter_put(apiURL, entry, PutToast);
     if (result.ok) {
+        (entry as any).lastModified = new Date();
         changeTracker.set(-1);
         changeTracker.set(0);
     }

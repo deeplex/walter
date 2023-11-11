@@ -10,12 +10,14 @@ export class WalterZaehlerEntry extends WalterApiHandler {
     constructor(
         public id: number,
         public kennnummer: string,
+        public notiz: string,
+        public createdAt: Date,
+        public lastModified: Date,
         public adresse: WalterAdresseEntry,
         public typ: WalterSelectionEntry | undefined,
         public wohnung: WalterSelectionEntry | undefined,
         public umlagen: WalterUmlageEntry[],
         public selectedUmlagen: WalterSelectionEntry[],
-        public notiz: string,
         public staende: WalterZaehlerstandEntry[],
         public lastZaehlerstand: WalterZaehlerstandEntry
     ) {
@@ -40,12 +42,14 @@ export class WalterZaehlerEntry extends WalterApiHandler {
         return new WalterZaehlerEntry(
             json.id,
             json.kennnummer,
+            json.notiz,
+            json.createdAt,
+            json.lastModified,
             adresse,
             typ,
             wohnung,
             umlagen,
             selectedUmlagen,
-            json.notiz,
             staende,
             lastZaehlerstand
         );

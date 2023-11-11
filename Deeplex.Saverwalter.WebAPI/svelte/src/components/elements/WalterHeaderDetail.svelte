@@ -4,13 +4,17 @@
         HeaderGlobalAction,
         HeaderPanelLink,
         HeaderPanelLinks,
-        HeaderUtilities
+        HeaderUtilities,
+
+        Tooltip
+
     } from 'carbon-components-svelte';
     import { Save, TrashCan } from 'carbon-icons-svelte';
 
     import { WalterAnhaenge, WalterHeader } from '$walter/components';
     import { handle_save, handle_delete } from './WalterHeaderDetail';
     import type { WalterS3FileWrapper } from '$walter/lib';
+    import { convertTime } from '$walter/services/utils';
 
     export let title = 'Saverwalter';
     export let entry: any;
@@ -50,7 +54,7 @@
                 {/if}
             </HeaderAction>
         {:else}
-            <HeaderGlobalAction on:click={click_save} icon={Save} />
+            <HeaderGlobalAction on:click={click_save} icon={Save}/>
             <HeaderGlobalAction on:click={click_delete} icon={TrashCan} />
 
             {#if fileWrapper}
@@ -66,4 +70,11 @@
             {/if}
         {/if}
     </HeaderUtilities>
+
+    <Tooltip direction="top" align="end" style="position: absolute; right: 0.75vw; bottom: -96.5vh; text-align: end;">
+        <p>Erstellt am:</p>
+        <p>{convertTime(entry.createdAt)}</p>
+        <p>Zuletzt geändert am:</p>
+        <p>{convertTime(entry.lastModified)}</p>
+    </Tooltip>
 </WalterHeader>

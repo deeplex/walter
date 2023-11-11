@@ -110,7 +110,7 @@ namespace Deeplex.Saverwalter.ModelTests.model
             try
             {
                 DatabaseContext.SaveChanges();
-                Assert.True(false, "Expected DbUpdateException was not thrown.");
+                Assert.Fail("Expected DbUpdateException was not thrown.");
             }
             catch (DbUpdateException ex)
             {
@@ -160,7 +160,7 @@ namespace Deeplex.Saverwalter.ModelTests.model
             try
             {
                 DatabaseContext.SaveChanges();
-                Assert.True(false, "Expected DbUpdateException was not thrown.");
+                Assert.Fail("Expected DbUpdateException was not thrown.");
             }
             catch (DbUpdateException ex)
             {

@@ -18,6 +18,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry Zaehler { get; set; } = null!;
             public string? Einheit { get; set; }
             public string? Notiz { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
 
             public ZaehlerstandEntryBase() { }
             public ZaehlerstandEntryBase(Zaehlerstand entity)
@@ -30,6 +32,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Zaehler = new(Entity.Zaehler.ZaehlerId, Entity.Zaehler.Kennnummer);
                 Einheit = Entity.Zaehler.Typ.ToUnitString();
                 Notiz = Entity.Notiz;
+
+                CreatedAt = Entity.CreatedAt;
+                LastModified = Entity.LastModified;
             }
         }
 

@@ -25,6 +25,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Telefon { get; set; }
             public string? Mobil { get; set; }
             public AdresseEntryBase? Adresse { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
 
             public bool NatuerlichePerson { get; set; }
 
@@ -59,6 +61,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 {
                     Adresse = new AdresseEntryBase(a);
                 }
+
+                CreatedAt = p.CreatedAt;
+                LastModified = p.LastModified;
             }
         }
 

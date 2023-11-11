@@ -23,6 +23,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? WohnungenBezeichnung { get; set; }
             public IEnumerable<SelectionEntry>? SelectedZaehler { get; set; }
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
 
             protected UmlageEntryBase() { }
             public UmlageEntryBase(Umlage entity)
@@ -43,6 +45,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 SelectedZaehler = entity.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer));
 
                 Betriebskostenrechnungen = entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e));
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 

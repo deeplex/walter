@@ -19,6 +19,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Notiz { get; set; }
             public SelectionEntry Vertrag { get; set; } = null!;
             public int Repeat { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
 
             public MieteEntryBase() { }
             public MieteEntryBase(Miete entity, int repeat = 0)
@@ -32,6 +34,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 var a = v.Wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift";
                 Vertrag = new(v.VertragId, a + " - " + v.Wohnung.Bezeichnung + " - " + Zahlungsdatum.Datum());
                 Repeat = repeat;
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 

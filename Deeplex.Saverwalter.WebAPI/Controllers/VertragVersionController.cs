@@ -19,6 +19,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateOnly Beginn { get; set; }
             public double Grundmiete { get; set; }
             public SelectionEntry? Vertrag { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
 
             public VertragVersionEntryBase() { }
             public VertragVersionEntryBase(VertragVersion entity)
@@ -31,6 +33,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Grundmiete = entity.Grundmiete;
 
                 Vertrag = new(Entity.Vertrag.VertragId, "Name not implemented");
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 

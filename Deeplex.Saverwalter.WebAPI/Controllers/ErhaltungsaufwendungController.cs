@@ -20,6 +20,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string Bezeichnung { get; set; } = null!;
             public SelectionEntry Aussteller { get; set; } = null!;
             public SelectionEntry Wohnung { get; set; } = null!;
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
 
             public ErhaltungsaufwendungEntryBase() { }
             public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity, SaverwalterContext ctx)
@@ -34,6 +36,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Aussteller = new(Entity.AusstellerId, ctx.FindPerson(Entity.AusstellerId).Bezeichnung);
                 var anschrift = Entity.Wohnung.Adresse is Adresse a ? a.Anschrift : "Unbekannte Anschrift";
                 Wohnung = new(Entity.Wohnung.WohnungId, $"{anschrift} - {Entity.Wohnung.Bezeichnung}");
+
+                CreatedAt = Entity.CreatedAt;
+                LastModified = Entity.LastModified;
             }
         }
 

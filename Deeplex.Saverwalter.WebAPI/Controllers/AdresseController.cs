@@ -22,6 +22,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string Stadt { get; set; } = string.Empty;
             public string? Anschrift { get; set; }
             public string? Notiz { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
 
             public AdresseEntryBase() { }
             public AdresseEntryBase(Adresse entity)
@@ -35,6 +37,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Stadt = Entity.Stadt;
                 Anschrift = Entity.Anschrift;
                 Notiz = Entity.Notiz;
+
+                CreatedAt = Entity.CreatedAt;
+                LastModified = Entity.LastModified;
             }
         }
 

@@ -18,6 +18,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public double Minderung { get; set; }
             public string? Notiz { get; set; }
             public SelectionEntry Vertrag { get; set; } = null!;
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
 
             public MietminderungEntryBase() { }
             public MietminderungEntryBase(Mietminderung entity)
@@ -30,6 +32,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 var anschrift = entity.Vertrag.Wohnung.Adresse is Adresse a ? a.Anschrift : "Unbekannte Anschrift";
                 var vertragTitle = $"{anschrift} - {entity.Vertrag.Wohnung.Bezeichnung} - {Beginn.Datum()}";
                 Vertrag = new(entity.Vertrag.VertragId, vertragTitle);
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 

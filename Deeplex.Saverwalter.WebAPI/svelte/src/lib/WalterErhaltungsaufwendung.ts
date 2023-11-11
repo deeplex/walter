@@ -10,6 +10,8 @@ export class WalterErhaltungsaufwendungEntry extends WalterApiHandler {
         public datum: string,
         public notiz: string,
         public bezeichnung: string,
+        public createdAt: Date,
+        public lastModified: Date,
         public wohnung: WalterSelectionEntry,
         public aussteller: WalterSelectionEntry
     ) {
@@ -28,6 +30,8 @@ export class WalterErhaltungsaufwendungEntry extends WalterApiHandler {
             json.datum,
             json.notiz,
             json.bezeichnung,
+            json.createdAt,
+            json.lastModified,
             wohnung,
             aussteller
         );

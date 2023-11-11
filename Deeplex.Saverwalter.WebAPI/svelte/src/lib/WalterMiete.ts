@@ -9,9 +9,11 @@ export class WalterMieteEntry extends WalterApiHandler {
         public betreffenderMonat: string,
         public zahlungsdatum: string,
         public betrag: number,
-        public vertrag: WalterSelectionEntry,
         public notiz: string,
-        public repeat: number
+        public repeat: number,
+        public createdAt: Date,
+        public lastModified: Date,
+        public vertrag: WalterSelectionEntry
     ) {
         super();
     }
@@ -25,9 +27,11 @@ export class WalterMieteEntry extends WalterApiHandler {
             json.betreffenderMonat,
             json.zahlungsdatum,
             json.betrag,
-            vertrag,
             json.notiz,
-            json.repeat
+            json.repeat,
+            json.createdAt,
+            json.lastModified,
+            vertrag
         );
     }
 }

@@ -14,6 +14,8 @@ export class WalterAdresseEntry extends WalterApiHandler {
         public stadt: string,
         public anschrift: string,
         public notiz: string,
+        public createdAt: Date,
+        public lastModified: Date,
         public wohnungen: WalterWohnungEntry[],
         public kontakte: WalterPersonEntry[],
         public zaehler: WalterZaehlerEntry[]
@@ -34,6 +36,8 @@ export class WalterAdresseEntry extends WalterApiHandler {
             json.stadt,
             json.anschrift,
             json.notiz,
+            json.createdAt,
+            json.lastModified,
             wohnungen,
             kontakte,
             zaehler

@@ -19,6 +19,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Notiz { get; set; }
             public SelectionEntry? Typ { get; set; }
             public SelectionEntry? Umlage { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
 
             public BetriebskostenrechnungEntryBase() { }
             public BetriebskostenrechnungEntryBase(Betriebskostenrechnung entity)
@@ -34,6 +36,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     entity.Umlage.UmlageId,
                     entity.Umlage.GetWohnungenBezeichnung(),
                     ((int)entity.Umlage.Typ).ToString());
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 

@@ -10,6 +10,8 @@ export class WalterVertragVersionEntry extends WalterApiHandler {
         public personenzahl: number,
         public notiz: string,
         public grundmiete: number,
+        public createdAt: Date,
+        public lastModified: Date,
         public vertrag: WalterSelectionEntry
     ) {
         super();
@@ -25,6 +27,8 @@ export class WalterVertragVersionEntry extends WalterApiHandler {
             json.personenzahl,
             json.notiz,
             json.grundmiete,
+            json.createdAt,
+            json.lastModified,
             vertrag
         );
     }

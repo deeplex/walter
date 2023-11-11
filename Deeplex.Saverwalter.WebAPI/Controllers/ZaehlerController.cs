@@ -24,6 +24,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry? Wohnung { get; set; }
             public ZaehlerstandEntryBase? LastZaehlerstand { get; set; }
             public IEnumerable<SelectionEntry>? SelectedUmlagen { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
 
             public ZaehlerEntryBase() { }
             public ZaehlerEntryBase(Zaehler entity)
@@ -36,7 +38,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Adresse = Entity.Adresse is Adresse a ? new AdresseEntryBase(a) : null;
                 Wohnung = Entity.Wohnung is Wohnung w ? new(w.WohnungId, $"{w.Adresse?.Anschrift ?? "Unbekannte Anschrift"}, {w.Bezeichnung}") : null;
                 Notiz = Entity.Notiz;
-                var letzterStand = Entity?.Staende?.OrderBy(s => s.Datum).ToList().LastOrDefault();
+                var letzterStand = Entity.Staende?.OrderBy(s => s.Datum).ToList().LastOrDefault();
                 if (letzterStand is Zaehlerstand stand)
                 {
                     LastZaehlerstand = new ZaehlerstandEntryBase(letzterStand);
@@ -44,6 +46,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 SelectedUmlagen = entity.Umlagen.ToList()
                    .Select(e => new SelectionEntry(e.UmlageId, e.Typ.ToDescriptionString() + " - " + e.GetWohnungenBezeichnung()));
+
+                CreatedAt = Entity.CreatedAt;
+                LastModified = Entity.LastModified;
             }
         }
 

@@ -11,6 +11,9 @@
         public string? Notiz { get; set; }
         public Adresse? Adresse { get; set; }
 
+        public DateTime CreatedAt { get; }
+        public DateTime LastModified { get; set; }
+
         public List<JuristischePerson> JuristischePersonen { get; set; }
     }
 
