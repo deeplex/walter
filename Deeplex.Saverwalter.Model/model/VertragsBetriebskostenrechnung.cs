@@ -12,7 +12,8 @@ namespace Deeplex.Saverwalter.Model
         public virtual Vertrag Vertrag { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
         [Required]
         public virtual Betriebskostenrechnung Rechnung { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
-
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
         public VertragsBetriebskostenrechnung()
         {
         }

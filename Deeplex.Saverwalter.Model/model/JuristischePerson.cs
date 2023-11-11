@@ -24,6 +24,8 @@ namespace Deeplex.Saverwalter.Model
         public List<IPerson> Mitglieder => JuristischeMitglieder.Select(w => (IPerson)w)
             .Concat(NatuerlicheMitglieder.Select(w => (IPerson)w)).ToList();
 
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
         public JuristischePerson(string bezeichnung)
         {
             Bezeichnung = bezeichnung;

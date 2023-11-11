@@ -12,7 +12,8 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public double Stand { get; set; }
         public string? Notiz { get; set; }
-
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
         public Zaehlerstand(DateOnly datum, double stand)
         {
             Datum = datum;

@@ -15,7 +15,9 @@ namespace Deeplex.Saverwalter.Model
         public virtual List<Miete> Mieten { get; private set; } = new List<Miete>();
         public virtual List<Mietminderung> Mietminderungen { get; private set; } = new List<Mietminderung>();
         public virtual List<Garage> Garagen { get; private set; } = new List<Garage>();
-
+        public virtual List<Mieter> Mieter { get; private set; } = new List<Mieter>();
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
         public Vertrag()
         {
         }
@@ -33,7 +35,8 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public double Grundmiete { get; set; }
         public string? Notiz { get; set; }
-
+        public DateOnly CreatedAt { get; private set; }
+        public DateOnly LastModified { get; private set; }
         public VertragVersion(DateOnly beginn, double grundmiete, int personenzahl)
         {
             Beginn = beginn;

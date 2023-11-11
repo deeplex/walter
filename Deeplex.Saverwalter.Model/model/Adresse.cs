@@ -25,6 +25,9 @@ namespace Deeplex.Saverwalter.Model
         public virtual List<NatuerlichePerson> NatuerlichePersonen { get; private set; } = new List<NatuerlichePerson>();
         public virtual List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
 
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
+
         public Adresse(string strasse, string hausnummer, string postleitzahl, string stadt)
         {
             Strasse = strasse;

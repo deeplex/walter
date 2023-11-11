@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model.Auth;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -24,6 +25,20 @@ namespace Deeplex.Saverwalter.Model
 
         public DbSet<UserAccount> UserAccounts { get; set; } = null!;
         public DbSet<Pbkdf2PasswordCredential> Pbkdf2PasswordCredentials { get; set; } = null!;
+
+        public override int SaveChanges()
+        {
+            var entries = ChangeTracker.Entries().Where(e => e.State == EntityState.Modified).ToList();
+            foreach (var entry in entries)
+            {
+                if (entry.Metadata.FindProperty("LastModified") != null)
+                {
+                    entry.Property("LastModified").CurrentValue = DateTime.Now.ToUniversalTime();
+                }
+            }
+
+            return base.SaveChanges();
+        }
 
         public SaverwalterContext(DbContextOptions<SaverwalterContext> options)
             : base(options)
@@ -54,10 +69,46 @@ namespace Deeplex.Saverwalter.Model
             }
         }
 
+        // Careful postgres only:
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<JuristischePerson>().HasAlternateKey(person => person.PersonId);
             modelBuilder.Entity<NatuerlichePerson>().HasAlternateKey(person => person.PersonId);
+
+            modelBuilder.Entity<Adresse>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Adresse>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Betriebskostenrechnung>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Betriebskostenrechnung>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Erhaltungsaufwendung>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Erhaltungsaufwendung>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Garage>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Garage>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<JuristischePerson>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<JuristischePerson>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Konto>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Konto>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Miete>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Miete>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Mieter>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Mieter>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Mietminderung>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Mietminderung>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<NatuerlichePerson>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<NatuerlichePerson>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Umlage>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Umlage>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Vertrag>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Vertrag>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<VertragsBetriebskostenrechnung>()
+                .Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<VertragsBetriebskostenrechnung>()
+                .Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Wohnung>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Wohnung>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Zaehler>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Zaehler>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Zaehlerstand>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Zaehlerstand>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
 
             base.OnModelCreating(modelBuilder);
             modelBuilder.HasPostgresExtension("uuid-ossp");

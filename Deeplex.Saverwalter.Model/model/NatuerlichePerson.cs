@@ -21,7 +21,8 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
 
         public virtual List<JuristischePerson> JuristischePersonen { get; set; } = new List<JuristischePerson>();
-
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
         public NatuerlichePerson(string nachname)
         {
             Nachname = nachname;

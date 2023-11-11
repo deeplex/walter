@@ -10,7 +10,8 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public string Iban { get; set; }
         public string? Notiz { get; set; }
-
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
         public Konto(string bank, string iban)
         {
             Bank = bank;

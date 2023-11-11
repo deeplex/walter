@@ -14,7 +14,8 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public double Betrag { get; set; }
         public string? Notiz { get; set; }
-
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
         public Miete(DateOnly zahlungsdatum, DateOnly betreffenderMonat, double betrag)
         {
             Zahlungsdatum = zahlungsdatum;

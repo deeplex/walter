@@ -21,7 +21,8 @@ namespace Deeplex.Saverwalter.Model
         public virtual List<Zaehler> Zaehler { get; private set; } = new List<Zaehler>();
         public virtual List<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; private set; } = new List<Erhaltungsaufwendung>();
         public virtual List<Umlage> Umlagen { get; private set; } = new List<Umlage>();
-
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
         public Wohnung(string bezeichnung, double wohnflaeche, double nutzflaeche, int nutzeinheit)
         {
             Bezeichnung = bezeichnung;

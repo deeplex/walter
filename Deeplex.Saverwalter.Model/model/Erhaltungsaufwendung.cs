@@ -18,6 +18,9 @@ namespace Deeplex.Saverwalter.Model
 
         public string? Notiz { get; set; }
 
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
+
         public Erhaltungsaufwendung(double betrag, string bezeichnung, Guid ausstellerId, DateOnly datum)
         {
             Betrag = betrag;

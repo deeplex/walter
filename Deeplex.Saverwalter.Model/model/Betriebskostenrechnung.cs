@@ -16,6 +16,9 @@ namespace Deeplex.Saverwalter.Model
         public virtual Umlage Umlage { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
         public string? Notiz { get; set; }
 
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
+
         public Betriebskostenrechnung(double betrag, DateOnly datum, int betreffendesJahr)
         {
             Betrag = betrag;

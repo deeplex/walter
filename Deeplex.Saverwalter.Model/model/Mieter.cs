@@ -10,7 +10,8 @@ namespace Deeplex.Saverwalter.Model
         public Guid PersonId { get; set; }
         [Required]
         public virtual Vertrag Vertrag { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
-
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
         public Mieter(Guid personId)
         {
             PersonId = personId;

@@ -15,7 +15,8 @@ namespace Deeplex.Saverwalter.Model
 
         public virtual List<Zaehlerstand> Staende { get; private set; } = new List<Zaehlerstand>();
         public virtual List<Umlage> Umlagen { get; private set; } = new List<Umlage>();
-
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
         public Zaehler(string kennnummer, Zaehlertyp typ)
         {
             Kennnummer = kennnummer;
