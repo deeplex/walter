@@ -37,7 +37,7 @@
         <WalterLinkTile
             bind:fileWrapper
             name={`Aussteller: ${data.entry.aussteller.text}`}
-            href={`/kontakte/jur/${data.entry.aussteller.id}`}
+            href={`/kontakte/jur/${data.entry.aussteller.filter}`}
         />
     </WalterLinks>
 </WalterGrid>

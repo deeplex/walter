@@ -24,7 +24,11 @@
         {readonly}
         bind:value={entry.bezeichnung}
         labelText="Bezeichnung" />
-    <WalterComboBoxPerson {fetchImpl} required {readonly} bind:value={entry.aussteller} title="Aussteller" />
+    <WalterComboBoxPerson
+        {fetchImpl}
+        required {readonly}
+        bind:value={entry.aussteller}
+        title="Aussteller" />
     <WalterDatePicker
         required
         disabled={readonly}
@@ -32,7 +36,11 @@
         labelText="Datum" />
 </Row>
 <Row>
-    <WalterComboBoxWohnung required {readonly} {fetchImpl} bind:value={entry.wohnung}/>
+    <WalterComboBoxWohnung
+        required
+        {readonly}
+        {fetchImpl}
+        bind:value={entry.wohnung}/>
     <WalterNumberInput
         required
         {readonly}

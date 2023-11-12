@@ -33,7 +33,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Datum = Entity.Datum;
                 Notiz = Entity.Notiz;
                 Bezeichnung = Entity.Bezeichnung;
-                Aussteller = new(Entity.AusstellerId, ctx.FindPerson(Entity.AusstellerId).Bezeichnung);
+                Aussteller = new(
+                    Entity.AusstellerId,
+                    ctx.FindPerson(Entity.AusstellerId).Bezeichnung,
+                    ((JuristischePerson)ctx.FindPerson(Entity.AusstellerId))?.JuristischePersonId.ToString() ?? null);
                 var anschrift = Entity.Wohnung.Adresse is Adresse a ? a.Anschrift : "Unbekannte Anschrift";
                 Wohnung = new(Entity.Wohnung.WohnungId, $"{anschrift} - {Entity.Wohnung.Bezeichnung}");
 
