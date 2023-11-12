@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { WalterSelectionEntry } from "$walter/lib";
     import { walter_selection } from "$walter/services/requests";
-    import { ContentSwitcher, Switch } from "carbon-components-svelte";
+    import { Column, ContentSwitcher, Grid, Row, Switch } from "carbon-components-svelte";
     import WalterQuickAddButton from "./WalterQuickAddButton.svelte";
     import WalterMultiSelect from "./WalterMultiSelect.svelte";
     import { WalterJuristischePerson, WalterNatuerlichePerson } from "..";
@@ -22,6 +22,10 @@
     let personType = 0;
 </script>
 
+<div style="
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important">
 <WalterMultiSelect
     disabled={readonly}
     bind:value
@@ -43,3 +47,4 @@
         <WalterJuristischePerson entry={addEntry} {fetchImpl} />
     {/if}
 </WalterQuickAddButton>
+</div>

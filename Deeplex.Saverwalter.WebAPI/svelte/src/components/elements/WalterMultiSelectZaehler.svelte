@@ -19,6 +19,10 @@
     let addEntry = {};
 </script>
 
+<div style="
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important">
 <WalterMultiSelect
     disabled={readonly}
     bind:value
@@ -31,3 +35,4 @@
     {onSubmit}>
     <WalterZaehler entry={addEntry} {fetchImpl} />
 </WalterQuickAddButton>
+</div>

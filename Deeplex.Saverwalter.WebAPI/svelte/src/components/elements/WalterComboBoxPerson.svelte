@@ -22,6 +22,10 @@
     let personType = 0;
 </script>
 
+<div style="
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important">
 <WalterComboBox
     {required}
     {readonly}
@@ -44,3 +48,4 @@
         <WalterJuristischePerson entry={addEntry} {fetchImpl} />
     {/if}
 </WalterQuickAddButton>
+</div>
