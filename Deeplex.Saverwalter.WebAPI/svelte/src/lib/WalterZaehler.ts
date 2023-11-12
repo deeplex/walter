@@ -10,6 +10,7 @@ export class WalterZaehlerEntry extends WalterApiHandler {
     constructor(
         public id: number,
         public kennnummer: string,
+        public ende: string,
         public notiz: string,
         public createdAt: Date,
         public lastModified: Date,
@@ -42,6 +43,7 @@ export class WalterZaehlerEntry extends WalterApiHandler {
         return new WalterZaehlerEntry(
             json.id,
             json.kennnummer,
+            json.ende,
             json.notiz,
             json.createdAt,
             json.lastModified,

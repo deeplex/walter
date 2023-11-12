@@ -116,6 +116,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             entity.Adresse = entry.Adresse is AdresseEntryBase a ? GetAdresse(a, Ctx) : null;
             entity.Notiz = entry.Notiz;
+            entity.Ende = entry.Ende;
 
             if (entry.SelectedUmlagen is IEnumerable<SelectionEntry> umlagen)
             {

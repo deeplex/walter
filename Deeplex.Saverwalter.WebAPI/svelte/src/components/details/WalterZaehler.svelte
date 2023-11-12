@@ -10,6 +10,7 @@
     import type { WalterZaehlerEntry } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
     import { Row } from 'carbon-components-svelte';
+    import WalterDatePicker from '../elements/WalterDatePicker.svelte';
 
     export let entry: Partial<WalterZaehlerEntry> = {};
     export let fetchImpl: typeof fetch;
@@ -33,6 +34,10 @@
         titleText="Typ"
         entries={zaehlertypen}
     />
+    <WalterDatePicker
+        disabled={readonly}
+        bind:value={entry.ende}
+        labelText="Ende"/>
 </Row>
 <WalterAdresse {readonly} bind:entry={entry.adresse} />
 <Row>

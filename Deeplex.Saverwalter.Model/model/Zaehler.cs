@@ -11,6 +11,7 @@ namespace Deeplex.Saverwalter.Model
         public Zaehlertyp Typ { get; set; }
         public virtual Wohnung? Wohnung { get; set; }
         public virtual Adresse? Adresse { get; set; }
+        public virtual DateOnly? Ende { get; set; }
         public string? Notiz { get; set; }
 
         public virtual List<Zaehlerstand> Staende { get; private set; } = new List<Zaehlerstand>();
