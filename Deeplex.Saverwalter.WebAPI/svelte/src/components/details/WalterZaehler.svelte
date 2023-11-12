@@ -2,6 +2,7 @@
     import {
         WalterAdresse,
         WalterComboBox,
+        WalterComboBoxWohnung,
         WalterMultiSelect,
         WalterTextArea,
         WalterTextInput
@@ -35,12 +36,7 @@
 </Row>
 <WalterAdresse {readonly} bind:entry={entry.adresse} />
 <Row>
-    <WalterComboBox
-        {readonly}
-        bind:value={entry.wohnung}
-        titleText="Wohnung"
-        entries={wohnungen}
-    />
+    <WalterComboBoxWohnung {fetchImpl} {readonly} bind:value={entry.wohnung} />
 </Row>
 <Row>
     <WalterMultiSelect

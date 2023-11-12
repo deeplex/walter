@@ -1,13 +1,14 @@
 <script lang="ts">
     import {
-        WalterComboBox,
         WalterDatePicker,
         WalterNumberInput,
         WalterTextArea,
-        WalterTextInput
+        WalterTextInput,
+        WalterComboBoxPerson,
+        WalterComboBoxWohnung
     } from '$walter/components';
-    import { Row, TextInputSkeleton } from 'carbon-components-svelte';
-    import type { WalterErhaltungsaufwendungEntry } from '$walter/lib';
+    import { Row } from 'carbon-components-svelte';
+    import type { WalterErhaltungsaufwendungEntry, WalterWohnungEntry } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
 
     export let entry: Partial<WalterErhaltungsaufwendungEntry> = {};
@@ -15,7 +16,6 @@
     export let readonly = false;
 
     const kontakte = walter_selection.kontakte(fetchImpl);
-    const wohnungen = walter_selection.wohnungen(fetchImpl);
 </script>
 
 <Row>
@@ -24,13 +24,7 @@
         {readonly}
         bind:value={entry.bezeichnung}
         labelText="Bezeichnung" />
-    <WalterComboBox
-        required
-        {readonly}
-        bind:value={entry.aussteller}
-        titleText="Aussteller"
-        entries={kontakte}
-    />
+    <WalterComboBoxPerson {fetchImpl} required {readonly} bind:value={entry.aussteller} title="Aussteller" />
     <WalterDatePicker
         required
         disabled={readonly}
@@ -38,13 +32,7 @@
         labelText="Datum" />
 </Row>
 <Row>
-    <WalterComboBox
-        required
-        {readonly}
-        bind:value={entry.wohnung}
-        titleText="Wohnung"
-        entries={wohnungen}
-    />
+    <WalterComboBoxWohnung required {readonly} {fetchImpl} bind:value={entry.wohnung}/>
     <WalterNumberInput
         required
         {readonly}

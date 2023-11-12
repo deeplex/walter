@@ -43,6 +43,8 @@ export { default as WalterMiettabelleWrapper } from './details/WalterMiettabelle
 export { default as WalterError } from './elements/WalterError.svelte';
 export { default as WalterMultiSelect } from './elements/WalterMultiSelect.svelte';
 export { default as WalterComboBox } from './elements/WalterComboBox.svelte';
+export { default as WalterComboBoxPerson } from './elements/WalterComboBoxPerson.svelte';
+export { default as WalterComboBoxWohnung } from './elements/WalterComboBoxWohnung.svelte';
 export { default as WalterDataTable } from './elements/WalterDataTable.svelte';
 export { default as WalterDataWrapper } from './elements/WalterDataWrapper.svelte';
 export { default as WalterDatePicker } from './elements/WalterDatePicker.svelte';

@@ -1,7 +1,7 @@
 <script lang="ts">
     import {
         WalterAdresse,
-        WalterComboBox,
+        WalterComboBoxPerson,
         WalterNumberInput,
         WalterTextArea,
         WalterTextInput
@@ -18,12 +18,12 @@
 </script>
 
 <Row>
-    <WalterComboBox
+    <WalterComboBoxPerson
+        {fetchImpl}
         required
         {readonly}
         bind:value={entry.besitzer}
-        titleText="Besitzer"
-        entries={kontakte}
+        title="Besitzer"
     />
 </Row>
 <WalterAdresse required {readonly} bind:entry={entry.adresse} />

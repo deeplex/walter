@@ -1,9 +1,10 @@
 <script lang="ts">
     import {
-        WalterComboBox,
         WalterDatePicker,
         WalterMultiSelect,
-        WalterTextArea
+        WalterTextArea,
+        WalterComboBoxPerson,
+        WalterComboBoxWohnung
     } from '$walter/components';
     import type { WalterVertragEntry } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
@@ -38,13 +39,7 @@
     />
 </Row>
 <Row>
-    <WalterComboBox
-        required
-        {readonly}
-        bind:value={entry.wohnung}
-        entries={wohnungen}
-        titleText="Wohnung"
-    />
+    <WalterComboBoxWohnung {fetchImpl} required {readonly} bind:value={entry.wohnung} />
     {#await kontakte}
         <TextInputSkeleton />
     {:then entries}
@@ -54,12 +49,7 @@
             value={entries.find((e) => e.id === entry.wohnung?.filter)?.text}
         />
     {/await}
-    <WalterComboBox
-        {readonly}
-        bind:value={entry.ansprechpartner}
-        entries={kontakte}
-        titleText="Ansprechpartner"
-    />
+    <WalterComboBoxPerson {fetchImpl} {readonly} bind:value={entry.ansprechpartner} title="Ansprechpartner" />
 </Row>
 <Row>
     <WalterMultiSelect
