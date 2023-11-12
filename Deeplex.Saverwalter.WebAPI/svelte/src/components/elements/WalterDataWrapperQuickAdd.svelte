@@ -32,6 +32,7 @@
         changeTracker.set(tracker);
     }
 </script>
+
 <Modal
     secondaryButtonText="Abbrechen"
     primaryButtonText="Bestätigen"
@@ -40,7 +41,7 @@
     on:submit={submit}
     on:click:button--secondary={() => (addModalOpen = false)}
     on:click:button--primary={() => (addModalOpen = false)}
-    modalHeading="{title ? `Eintrag zu ${title} hinzufügen}` : `Eintrag hinzufügen`}"
+    modalHeading="{title ? `Eintrag zu ${title} hinzufügen` : `Eintrag hinzufügen`}"
     bind:open={addModalOpen}
     primaryButtonDisabled={!addUrl}
     >

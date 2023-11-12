@@ -35,6 +35,10 @@
 <slot />
 
 <style>
+    :global(.bx--modal) {
+        transition: none !important;
+    }
+
     :global(.bx--header-panel--expanded, .bx--side-nav--expanded) {
         overflow: scroll !important;
         max-height: none !important;

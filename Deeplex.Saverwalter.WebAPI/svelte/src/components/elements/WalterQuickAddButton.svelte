@@ -7,6 +7,7 @@
     export let addUrl: string;
     export let addEntry: any = {};
     export let onSubmit: undefined | ((e: any) => void) = undefined;
+    export let title: string | undefined = undefined;
 
     let addModalOpen = false;
 
@@ -21,6 +22,7 @@
     kind="tertiary"/>
 </div>
 <WalterDataWrapperQuickAdd
+    {title}
     bind:addModalOpen
     {addUrl}
     bind:addEntry

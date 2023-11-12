@@ -34,6 +34,7 @@
     {entries}/>
 
 <WalterQuickAddButton
+    title="Personen"
     bind:addEntry
     addUrl="/api/kontakte/{personType ? "jur" : "nat"}"
     {onSubmit}>

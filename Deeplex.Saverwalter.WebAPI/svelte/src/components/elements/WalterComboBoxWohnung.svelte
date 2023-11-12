@@ -29,7 +29,7 @@
     titleText="Wohnung"
     {entries}/>
 
-<WalterQuickAddButton {addEntry} addUrl={"/api/wohnungen"} {onSubmit}>
+<WalterQuickAddButton title="Wohnungen" {addEntry} addUrl={"/api/wohnungen"} {onSubmit}>
     <WalterWohnung {fetchImpl} entry={addEntry} />
 </WalterQuickAddButton>
 </div>

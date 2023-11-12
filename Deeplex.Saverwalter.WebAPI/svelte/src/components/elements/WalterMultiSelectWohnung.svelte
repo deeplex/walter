@@ -30,6 +30,7 @@
     {entries}/>
 
 <WalterQuickAddButton
+    title="Wohnungen"
     bind:addEntry
     addUrl="/api/wohnungen"
     {onSubmit}>

@@ -30,6 +30,7 @@
     {entries}/>
 
 <WalterQuickAddButton
+    title="Juristische Personen"
     bind:addEntry
     addUrl="/api/kontakte/jur"
     {onSubmit}>

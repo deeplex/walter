@@ -30,6 +30,7 @@
     {entries}/>
 
 <WalterQuickAddButton
+    title="Zähler"
     bind:addEntry
     addUrl="/api/zaehler"
     {onSubmit}>
