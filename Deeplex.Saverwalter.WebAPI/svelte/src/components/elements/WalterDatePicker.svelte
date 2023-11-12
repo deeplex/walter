@@ -14,6 +14,7 @@
     export let placeholder: string | undefined = undefined;
     export let disabled: boolean | undefined = false;
     export let required = false;
+    export let maxDate: string | undefined = undefined;
 
     let lastSavedValue: string | undefined;
     function updateLastSavedValue() {
@@ -44,6 +45,7 @@
     <DatePickerSkeleton />
 {:then x}
     <DatePicker
+        {maxDate}
         value={getDateForDatePicker(x)}
         dateFormat="d.m.Y"
         datePickerType="single"

@@ -51,7 +51,7 @@
     }
 </script>
 
-<Content style="overflow: scroll">
+<Content>
     {#await rows}
         <SkeletonPlaceholder style="margin:0; width: 100%; height:3rem" />
         <DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
@@ -65,7 +65,7 @@
             {headers}
             rows={x}
             class={fullHeight ? 'proper-list' : ''}
-            style="cursor: pointer; max-height: none !important"
+            style="cursor: pointer; max-height: none !important;"
         >
             <Toolbar>
                 <ToolbarContent>

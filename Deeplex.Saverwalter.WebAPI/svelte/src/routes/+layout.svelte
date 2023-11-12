@@ -35,6 +35,10 @@
 <slot />
 
 <style>
+    :global(.bx--data-table) {
+        overflow: auto;
+    }
+
     :global(.bx--modal) {
         transition: none !important;
     }
