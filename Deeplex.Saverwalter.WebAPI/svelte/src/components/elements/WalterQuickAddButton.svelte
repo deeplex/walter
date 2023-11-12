@@ -10,7 +10,6 @@
     export let title: string | undefined = undefined;
 
     let addModalOpen = false;
-
 </script>
 
 <div style="margin-top: 34px; margin-left: -0.75em">

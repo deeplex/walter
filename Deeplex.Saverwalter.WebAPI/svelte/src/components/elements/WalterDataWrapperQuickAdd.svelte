@@ -34,6 +34,8 @@
 </script>
 
 <Modal
+    style="width: 100%; height: 100%;"
+    size="lg"
     secondaryButtonText="Abbrechen"
     primaryButtonText="Bestätigen"
     on:open={open}
@@ -44,6 +46,7 @@
     modalHeading="{title ? `Eintrag zu ${title} hinzufügen` : `Eintrag hinzufügen`}"
     bind:open={addModalOpen}
     primaryButtonDisabled={!addUrl}
+    hasScrollingContent
     >
     <slot />
     <!-- Spacer for DatePickers. Otherwise the modal is too narrow -->
