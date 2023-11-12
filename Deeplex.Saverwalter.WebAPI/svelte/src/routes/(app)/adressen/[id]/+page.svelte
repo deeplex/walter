@@ -5,6 +5,7 @@
         WalterHeaderDetail,
         WalterKontakte,
         WalterLinks,
+        WalterTextArea,
         WalterWohnungen,
         WalterZaehlerList
     } from '$walter/components';
@@ -35,6 +36,9 @@
 
 <WalterGrid>
     <WalterAdresse bind:entry={data.entry} />
+    <Row>
+        <WalterTextArea bind:value={data.entry.notiz} labelText="Notiz" />
+    </Row>
 
     <WalterLinks>
         <WalterWohnungen

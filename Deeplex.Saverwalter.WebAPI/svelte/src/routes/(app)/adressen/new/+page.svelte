@@ -2,9 +2,13 @@
     import {
         WalterAdresse,
         WalterGrid,
-        WalterHeaderNew
+        WalterHeaderNew,
+
+        WalterTextArea
+
     } from '$walter/components';
     import type { WalterAdresseEntry } from '$walter/lib';
+    import { Row } from 'carbon-components-svelte';
 
     const apiURL = `/api/adressen`;
     const title = 'Neue Adresse';
@@ -16,4 +20,7 @@
 
 <WalterGrid>
     <WalterAdresse {entry} />
+    <Row>
+        <WalterTextArea bind:value={entry.notiz} labelText="Notiz" />
+    </Row>
 </WalterGrid>
