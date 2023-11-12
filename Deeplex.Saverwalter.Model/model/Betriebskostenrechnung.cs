@@ -26,14 +26,6 @@ namespace Deeplex.Saverwalter.Model
             BetreffendesJahr = betreffendesJahr;
         }
     }
-
-    public enum HKVO_P9A2
-    {
-        Satz_1 = 1,
-        Satz_2 = 2,
-        Satz_4 = 4,
-    }
-
     // Even is Kalte Betriebskosten
     // Odd is Warme Betriebskosten
     public enum Betriebskostentyp
@@ -78,20 +70,5 @@ namespace Deeplex.Saverwalter.Model
         WeitereSonstigeNebenkosten = 32,
         [Description("Heizkosten")]
         Heizkosten = 35,
-    }
-
-
-    public enum Umlageschluessel
-    {
-        [Description("n. WF")]
-        NachWohnflaeche,
-        [Description("n. NE")]
-        NachNutzeinheit,
-        [Description("n. Pers.")]
-        NachPersonenzahl,
-        [Description("n. Verb.")]
-        NachVerbrauch,
-        [Description("n. NF")]
-        NachNutzflaeche,
     }
 }

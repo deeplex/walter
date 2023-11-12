@@ -1,3 +1,4 @@
+﻿using System.ComponentModel;
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
@@ -25,14 +26,17 @@ namespace Deeplex.Saverwalter.Model
         }
     }
 
-    public class HKVO
+    public enum Umlageschluessel
     {
-        public int HKVOId { get; set; }
-
-        public double? HKVO_P7 { get; set; }
-        public double? HKVO_P8 { get; set; }
-        public HKVO_P9A2? HKVO_P9 { get; set; }
-
-        public string? Notiz { get; set; }
+        [Description("n. WF")]
+        NachWohnflaeche,
+        [Description("n. NE")]
+        NachNutzeinheit,
+        [Description("n. Pers.")]
+        NachPersonenzahl,
+        [Description("n. Verb.")]
+        NachVerbrauch,
+        [Description("n. NF")]
+        NachNutzflaeche,
     }
 }

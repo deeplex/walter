@@ -14,6 +14,7 @@
         { key: 'lastZaehlerstand.datum', value: 'Letztes Ablesedatum' },
         { key: 'lastZaehlerstand.stand', value: 'Letzter Stand' },
         { key: 'lastZaehlerstand.einheit', value: 'Einheit' },
+        { key: 'ende', value: 'Ende'},
         { key: 'button', value: 'Stand hinzufügen' }
     ];
 
@@ -52,7 +53,7 @@
     addEntry={quickAddEntry}
     addUrl="/api/zaehlerstaende/"
     bind:addModalOpen={open}>
-    <WalterZaehlerstand entry={quickAddEntry}/>
+    <WalterZaehlerstand {fetchImpl} entry={quickAddEntry}/>
 </WalterDataWrapperQuickAdd>
 
 <WalterDataWrapper

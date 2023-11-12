@@ -47,6 +47,7 @@
 
     <WalterLinks>
         <WalterZaehlerstaende
+            fetchImpl={data.fetchImpl}
             entry={zaehlerstandEntry}
             title="Zählerstände"
             rows={data.entry.staende}

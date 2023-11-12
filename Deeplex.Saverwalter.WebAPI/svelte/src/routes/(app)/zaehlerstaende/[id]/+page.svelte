@@ -28,7 +28,7 @@
 />
 
 <WalterGrid>
-    <WalterZaehlerstand entry={data.entry} />
+    <WalterZaehlerstand fetchImpl={data.fetchImpl} entry={data.entry} />
     <WalterLinkTile
         bind:fileWrapper
         name={`Zähler: ${data.entry.zaehler.text}`}
