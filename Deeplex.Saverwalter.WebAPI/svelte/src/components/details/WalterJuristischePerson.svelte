@@ -1,6 +1,7 @@
 <script lang="ts">
     import {
-        WalterMultiSelect,
+        WalterMultiSelectPerson,
+        WalterMultiSelectJuristischePerson,
         WalterPerson,
         WalterTextArea,
         WalterTextInput
@@ -8,20 +9,11 @@
     import type {
         WalterJuristischePersonEntry,
     } from '$walter/lib';
-    import { walter_selection } from '$walter/services/requests';
     import { Row } from 'carbon-components-svelte';
-    import { removeSelf } from './WalterBetriebskostenrechnung';
 
     export let entry: Partial<WalterJuristischePersonEntry>;
     export let fetchImpl: typeof fetch;
     export let readonly = false;
-
-    const juristischePersonen = walter_selection
-        .juristischePersonen(fetchImpl)
-        .then((entries) => removeSelf(entries, entry));
-    const kontakte = walter_selection
-        .kontakte(fetchImpl)
-        .then((entries) => removeSelf(entries, entry));
 </script>
 
 <Row>
@@ -29,16 +21,16 @@
 </Row>
 <WalterPerson {readonly} value={entry} />
 <Row>
-    <WalterMultiSelect
-        disabled={readonly}
-        entries={juristischePersonen}
+    <WalterMultiSelectJuristischePerson
+        {readonly}
+        {fetchImpl}
         titleText="Juristische Personen"
         bind:value={entry.selectedJuristischePersonen}
     />
-    <WalterMultiSelect
-        disabled={readonly}
+    <WalterMultiSelectPerson
+        {readonly}
+        {fetchImpl}
         titleText="Mitglieder"
-        entries={kontakte}
         bind:value={entry.selectedMitglieder}
     />
 </Row>

@@ -25,5 +25,7 @@
     {addUrl}
     bind:addEntry
     {onSubmit}>
-    <slot />
+    {#if addModalOpen}
+        <slot/>
+    {/if}
 </WalterDataWrapperQuickAdd>

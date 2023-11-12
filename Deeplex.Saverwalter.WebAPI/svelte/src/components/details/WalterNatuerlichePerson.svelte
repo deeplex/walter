@@ -2,6 +2,7 @@
     import {
         WalterComboBox,
         WalterMultiSelect,
+        WalterMultiSelectJuristischePerson,
         WalterPerson,
         WalterTextArea,
         WalterTextInput
@@ -14,7 +15,6 @@
     export let fetchImpl: typeof fetch;
     export let readonly = false;
 
-    const juristischePersonen = walter_selection.juristischePersonen(fetchImpl);
     const anreden = walter_selection.anreden(fetchImpl);
 </script>
 
@@ -25,9 +25,9 @@
 </Row>
 <WalterPerson {readonly} value={entry} />
 <Row>
-    <WalterMultiSelect
-        disabled={readonly}
-        entries={juristischePersonen}
+    <WalterMultiSelectJuristischePerson
+        {readonly}
+        {fetchImpl}
         titleText="Juristische Personen"
         bind:value={entry.selectedJuristischePersonen}
     />

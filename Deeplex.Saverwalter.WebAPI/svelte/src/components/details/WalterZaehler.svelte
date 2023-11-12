@@ -3,7 +3,7 @@
         WalterAdresse,
         WalterComboBox,
         WalterComboBoxWohnung,
-        WalterMultiSelect,
+        WalterMultiSelectUmlage,
         WalterTextArea,
         WalterTextInput
     } from '$walter/components';
@@ -39,10 +39,10 @@
     <WalterComboBoxWohnung {fetchImpl} {readonly} bind:value={entry.wohnung} />
 </Row>
 <Row>
-    <WalterMultiSelect
-        disabled={readonly}
+    <WalterMultiSelectUmlage
+        {fetchImpl}
+        {readonly}
         bind:value={entry.selectedUmlagen}
-        entries={umlagen}
         titleText="Umlagen"
     />
 </Row>

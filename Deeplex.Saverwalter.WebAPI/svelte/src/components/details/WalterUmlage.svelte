@@ -1,8 +1,12 @@
 <script lang="ts">
     import {
         WalterComboBox,
+        WalterMultiSelectWohnung,
         WalterMultiSelect,
-        WalterTextArea
+        WalterTextArea,
+
+        WalterMultiSelectZaehler
+
     } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
     import type { WalterUmlageEntry } from '$walter/lib';
@@ -35,19 +39,20 @@
     />
 </Row>
 <Row>
-    <WalterMultiSelect
-        disabled={readonly}
+    <WalterMultiSelectWohnung
+        {fetchImpl}
+        {readonly}
         bind:value={entry.selectedWohnungen}
-        entries={wohnungen}
         titleText="Wohnungen"
     />
 </Row>
+<!-- If entry.schluessel is nach Verbrauch -->
 {#if entry.schluessel?.id === '3'}
     <Row>
-        <WalterMultiSelect
-            disabled={readonly}
+        <WalterMultiSelectZaehler
+            {fetchImpl}
+            {readonly}
             bind:value={entry.selectedZaehler}
-            entries={zaehler}
             titleText="Zähler"
         />
     </Row>

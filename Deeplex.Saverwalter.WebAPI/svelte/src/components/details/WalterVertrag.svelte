@@ -4,7 +4,10 @@
         WalterMultiSelect,
         WalterTextArea,
         WalterComboBoxPerson,
-        WalterComboBoxWohnung
+        WalterComboBoxWohnung,
+
+        WalterMultiSelectPerson
+
     } from '$walter/components';
     import type { WalterVertragEntry } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
@@ -52,12 +55,7 @@
     <WalterComboBoxPerson {fetchImpl} {readonly} bind:value={entry.ansprechpartner} title="Ansprechpartner" />
 </Row>
 <Row>
-    <WalterMultiSelect
-        disabled={readonly}
-        bind:value={entry.selectedMieter}
-        entries={kontakte}
-        titleText="Mieter"
-    />
+    <WalterMultiSelectPerson {fetchImpl} {readonly} bind:value={entry.selectedMieter} titleText="Mieter" />
 </Row>
 <Row>
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />
