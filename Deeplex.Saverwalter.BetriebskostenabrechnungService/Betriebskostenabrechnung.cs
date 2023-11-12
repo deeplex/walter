@@ -48,7 +48,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             KaltMiete = GetKaltMiete(vertrag, Zeitraum);
             Mieter = GetMieter(ctx, vertrag);
 
-            if (Mieter.First(mieter => mieter.Adresse != null) != null)
+            if (!Mieter.Any(mieter => mieter.Adresse != null))
             {
                 Notes.Add(new Note(
                     $"Die Adresse mindestens eines Mieters ist notwendig für die Betriebskostenabrechnung.",
