@@ -8,11 +8,12 @@
         WalterAbrechnungResultat,
         WalterMieten,
         WalterAbrechnungNebenkosten,
+        WalterKontakte,
     } from '$walter/components';
     import { convertDateCanadian, convertDateGerman, convertEuro } from '$walter/services/utils';
     import type { WalterBetriebskostenabrechnungEntry } from '$walter/types';
     import { Accordion, Column, Loading, Row, TextInput, Tile } from 'carbon-components-svelte';
-    import type { WalterMieteEntry } from '$walter/lib';
+    import { WalterPersonEntry, type WalterMieteEntry } from '$walter/lib';
     import WalterData from '../data/WalterData.svelte';
 
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
@@ -32,6 +33,9 @@
         betrag: lastMiete?.betrag,
         betreffenderMonat: convertDateCanadian(dateMiete)
     }
+
+    const mieter = WalterPersonEntry.GetAll<WalterPersonEntry>(fetchImpl)
+        .then(res => res.filter(kontakt => abrechnung.mieter.some(m => m.id === kontakt.guid)));
 </script>
 
 <Tile style="margin-top: 2rem">
@@ -80,6 +84,11 @@
 
     <Accordion>
         <WalterData {abrechnung} />
+        {#await mieter then mieter}
+            <WalterKontakte
+                title="Mieter"
+                rows={mieter}/>
+        {/await}
         <WalterMieten
             entry={mietEntry}
             title="Gezahlte Mieten ({abrechnung.gezahltMiete}€)"
