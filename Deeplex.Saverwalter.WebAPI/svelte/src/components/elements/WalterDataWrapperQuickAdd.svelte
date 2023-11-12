@@ -7,7 +7,7 @@
     export let addModalOpen = false;
     export let addUrl: string;
     export let addEntry: any;
-    export let title: string;
+    export let title: string | undefined = undefined;
     export let onSubmit: undefined | ((e: any) => void) = undefined;
 
     async function submit() {
@@ -40,7 +40,7 @@
     on:submit={submit}
     on:click:button--secondary={() => (addModalOpen = false)}
     on:click:button--primary={() => (addModalOpen = false)}
-    modalHeading="Eintrag zu {title} hinzufügen"
+    modalHeading="{title ? `Eintrag zu ${title} hinzufügen}` : `Eintrag hinzufügen`}"
     bind:open={addModalOpen}
     primaryButtonDisabled={!addUrl}
     >
