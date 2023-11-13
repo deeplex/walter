@@ -71,13 +71,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new ArgumentException("entry has no Typ.");
             }
 
-            var typ = (Betriebskostentyp)int.Parse(entry.Typ.Id);
             if (entry.Schluessel == null)
             {
                 throw new ArgumentException("entry has no Schluessel.");
             }
             var schluessel = (Umlageschluessel)int.Parse(entry.Schluessel.Id);
-            var entity = new Umlage(typ, schluessel);
+            var typ = Ctx.Umlagetypen.First(typ => typ.UmlagetypId == int.Parse(entry.Typ.Id));
+            var entity = new Umlage(schluessel)
+            {
+                Typ = typ
+            };
 
             SetOptionalValues(entity, entry);
             Ctx.Umlagen.Add(entity);
@@ -115,7 +118,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new ArgumentException("entry has no Schluessel.");
             }
 
-            entity.Typ = (Betriebskostentyp)int.Parse(entry.Typ.Id);
+            entity.Typ = Ctx.Umlagetypen.First(typ => typ.UmlagetypId == int.Parse(entry.Typ.Id));
             entity.Schluessel = (Umlageschluessel)int.Parse(entry.Schluessel.Id);
 
             SetOptionalValues(entity, entry);

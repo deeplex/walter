@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 }
 
                 SelectedUmlagen = entity.Umlagen.ToList()
-                   .Select(e => new SelectionEntry(e.UmlageId, e.Typ.ToDescriptionString() + " - " + e.GetWohnungenBezeichnung()));
+                   .Select(e => new SelectionEntry(e.UmlageId, e.Typ.Bezeichnung + " - " + e.GetWohnungenBezeichnung()));
 
                 CreatedAt = Entity.CreatedAt;
                 LastModified = Entity.LastModified;

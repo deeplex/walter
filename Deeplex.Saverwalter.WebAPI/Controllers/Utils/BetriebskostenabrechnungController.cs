@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 
             public VerbrauchAnteilEntry(VerbrauchAnteil anteil)
             {
-                Umlage = new SelectionEntry(anteil.Umlage.UmlageId, anteil.Umlage.Typ.ToDescriptionString());
+                Umlage = new SelectionEntry(anteil.Umlage.UmlageId, anteil.Umlage.Typ.Bezeichnung);
                 AlleVerbrauch = anteil.AlleVerbrauch;
                 DieseVerbrauch = anteil.DieseVerbrauch;
                 Anteil = anteil.Anteil;
@@ -85,8 +85,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             {
                 Id = rechnung.Key.UmlageId;
                 RechnungId = rechnung.Value?.BetriebskostenrechnungId ?? 0;
-                Typ = rechnung.Key.Typ.ToDescriptionString();
-                TypId = (int)rechnung.Key.Typ;
+                Typ = rechnung.Key.Typ.Bezeichnung;
+                TypId = rechnung.Key.Typ.UmlagetypId;
                 var key = rechnung.Key.Schluessel;
                 Schluessel = key.ToDescriptionString();
                 GesamtBetrag = rechnung.Value?.Betrag ?? 0;
@@ -130,7 +130,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 PersonenZeitanteil = einheit.PersonenZeitanteile;
                 Heizkostenberechnungen = einheit.Heizkostenberechnungen;
                 Rechnungen = einheit.Rechnungen
-                    .Where(rechnung => (int)rechnung.Key.Typ % 2 == 0)
+                    .Where(rechnung => rechnung.Key.HKVO == null)
                     .Select(rechnung => new RechnungEntry(rechnung, einheit, year))
                     .ToList();
                 VerbrauchAnteil = einheit.VerbrauchAnteile

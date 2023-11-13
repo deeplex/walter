@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Notiz = entity.Notiz;
                 Beschreibung = entity.Beschreibung;
                 Schluessel = new SelectionEntry((int)entity.Schluessel, entity.Schluessel.ToDescriptionString());
-                Typ = new SelectionEntry((int)entity.Typ, entity.Typ.ToDescriptionString());
+                Typ = new SelectionEntry(entity.Typ.UmlagetypId, entity.Typ.Bezeichnung);
                 WohnungenBezeichnung = entity.GetWohnungenBezeichnung() ?? "";
 
                 SelectedWohnungen = entity.Wohnungen.Select(e =>
