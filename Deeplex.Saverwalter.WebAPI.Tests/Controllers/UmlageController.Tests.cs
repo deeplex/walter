@@ -34,7 +34,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var dbService = new UmlageDbService(ctx);
             var controller = new UmlageController(logger, dbService);
 
-            var entity = new Umlage(Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachWohnflaeche);
+            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Dachrinnenreinigung")
+            };
             var entry = new UmlageEntry(entity, ctx);
 
             var result = controller.Post(entry);

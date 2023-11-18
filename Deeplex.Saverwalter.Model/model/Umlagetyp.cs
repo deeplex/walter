@@ -9,7 +9,6 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public string Bezeichnung { get; set; }
 
-        [Required]
         public string? Notiz { get; set; }
 
         public virtual List<Umlage> Umlagen { get; private set; } = new List<Umlage>();

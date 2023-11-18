@@ -14,6 +14,8 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
            string databaseUser,
            string databasePass)
         {
+            GenericData.FillUmlagetypen(ctx);
+
             CreateUserAccount(ctx, databaseUser, databasePass);
             var adressen = FillAdressen(ctx);
             var wohnungen = FillWohnungen(ctx, adressen);
@@ -413,19 +415,19 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 var beginn = getEarliestDate(umlage.Wohnungen.ToList());
                 for (var date = beginn; date < globalToday; date = date.AddYears(1))
                 {
-                    double betrag = 100 + beginn.DayOfYear + (int)umlage.Typ * 13;
-                    if (umlage.Typ == Betriebskostentyp.Heizkosten)
+                    double betrag = 100 + beginn.DayOfYear;
+                    if (umlage.Typ == GetTyp(ctx, "Heizkosten"))
                     {
-                        betrag = umlage.Wohnungen.Sum(e => e.Wohnflaeche) * 12 + beginn.DayOfYear + (int)umlage.Typ;
+                        betrag = umlage.Wohnungen.Sum(e => e.Wohnflaeche) * 12 + beginn.DayOfYear;
                     }
-                    else if (umlage.Typ == Betriebskostentyp.Grundsteuer)
+                    else if (umlage.Typ == GetTyp(ctx, "Grundsteuer"))
                     {
                         betrag = umlage.Wohnungen.Sum(e => e.Wohnflaeche) * 5;
                     }
-                    else if (umlage.Typ == Betriebskostentyp.EntwaesserungSchmutzwasser
-                        || umlage.Typ == Betriebskostentyp.WasserversorgungKalt)
+                    else if (umlage.Typ == GetTyp(ctx, "Entwässerung/Schmutzwasser")
+                        || umlage.Typ == GetTyp(ctx, "Wasserversorgung"))
                     {
-                        betrag = umlage.Wohnungen.Sum(e => e.Wohnflaeche) * 5 + beginn.DayOfYear + (int)umlage.Typ * 13;
+                        betrag = umlage.Wohnungen.Sum(e => e.Wohnflaeche) * 5 + beginn.DayOfYear;
                     }
                     betriebskostenrechnungen.Add(new Betriebskostenrechnung(betrag, date, date.Year)
                     {
@@ -469,16 +471,22 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
         private static Umlage addUmlage(
             Adresse adresse,
-            Betriebskostentyp typ,
+            Umlagetyp typ,
             Umlageschluessel schluessel)
         {
-            var umlage = new Umlage(typ, schluessel)
+            var umlage = new Umlage(schluessel)
             {
-                Beschreibung = $"{typ.ToDescriptionString()} wird über die Stadt {adresse.Stadt} abgerechnet.",
+                Typ = typ,
+                Beschreibung = $"{typ.Bezeichnung} wird über die Stadt {adresse.Stadt} abgerechnet.",
                 Wohnungen = adresse.Wohnungen,
             };
 
             return umlage;
+        }
+
+        private static Umlagetyp GetTyp(SaverwalterContext ctx, string bezeichnung)
+        {
+            return ctx.Umlagetypen.First(typ => typ.Bezeichnung == bezeichnung);
         }
 
         private static List<Umlage> FillUmlagen(SaverwalterContext ctx, List<Adresse> adressen)
@@ -491,49 +499,49 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             {
                 var adresse = adressen[i];
 
-                umlagen.Add(addUmlage(adresse, Betriebskostentyp.AllgemeinstromHausbeleuchtung, Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Allgemeinstrom/Hausbeleuchtung"), Umlageschluessel.NachWohnflaeche));
 
                 if (i % 10 == 0)
                 {
-                    umlagen.Add(addUmlage(adresse, Betriebskostentyp.Breitbandkabelanschluss, Umlageschluessel.NachNutzeinheit));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Breitbandkabelanschluss"), Umlageschluessel.NachNutzeinheit));
                 }
 
-                umlagen.Add(addUmlage(adresse, Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Dachrinnenreinigung"), Umlageschluessel.NachWohnflaeche));
 
-                umlagen.Add(addUmlage(adresse, Betriebskostentyp.EntwaesserungNiederschlagswasser, Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Müllbeseitigung"), Umlageschluessel.NachWohnflaeche));
 
                 // Can also use Personen
-                umlagen.Add(addUmlage(adresse, Betriebskostentyp.EntwaesserungSchmutzwasser, Umlageschluessel.NachVerbrauch));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Entwässerung/Niederschlagswasser"), Umlageschluessel.NachVerbrauch));
 
                 if (i % 2 == 0)
                 {
-                    umlagen.Add(addUmlage(adresse, Betriebskostentyp.Gartenpflege, Umlageschluessel.NachWohnflaeche));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Entwässerung/Schmutzwasser"), Umlageschluessel.NachWohnflaeche));
                 }
 
                 // Can also be made direct
-                umlagen.Add(addUmlage(adresse, Betriebskostentyp.Grundsteuer, Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Gartenpflege"), Umlageschluessel.NachWohnflaeche));
 
-                umlagen.Add(addUmlage(adresse, Betriebskostentyp.Haftpflichtversicherung, Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Grundsteuer"), Umlageschluessel.NachWohnflaeche));
 
                 if (i % 3 == 0)
                 {
-                    umlagen.Add(addUmlage(adresse, Betriebskostentyp.Hauswartarbeiten, Umlageschluessel.NachWohnflaeche));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Haftpflichtversicherung"), Umlageschluessel.NachWohnflaeche));
                 }
 
                 if (i % 3 == 0 || i % 7 == 0 || i % 11 == 0)
                 {
-                    umlagen.Add(addUmlage(adresse, Betriebskostentyp.Heizkosten, Umlageschluessel.NachVerbrauch));
-                    umlagen.Add(addUmlage(adresse, Betriebskostentyp.WartungThermenSpeicher, Umlageschluessel.NachWohnflaeche));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Heizkosten"), Umlageschluessel.NachVerbrauch));
+                    umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Wartung Therme/Speicher"), Umlageschluessel.NachWohnflaeche));
                 }
 
-                umlagen.Add(addUmlage(adresse, Betriebskostentyp.Muellbeseitigung, Umlageschluessel.NachPersonenzahl));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Müllbeseitigung"), Umlageschluessel.NachPersonenzahl));
 
-                umlagen.Add(addUmlage(adresse, Betriebskostentyp.Sachversicherung, Umlageschluessel.NachWohnflaeche));
-                umlagen.Add(addUmlage(adresse, Betriebskostentyp.SchornsteinfegerarbeitenKalt, Umlageschluessel.NachNutzeinheit));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Sachversicherung"), Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Schornsteinfegerarbeiten"), Umlageschluessel.NachNutzeinheit));
 
-                umlagen.Add(addUmlage(adresse, Betriebskostentyp.Strassenreinigung, Umlageschluessel.NachWohnflaeche));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Strassenreinigung"), Umlageschluessel.NachWohnflaeche));
 
-                umlagen.Add(addUmlage(adresse, Betriebskostentyp.WasserversorgungKalt, Umlageschluessel.NachVerbrauch));
+                umlagen.Add(addUmlage(adresse, GetTyp(ctx, "Wasserversorgung"), Umlageschluessel.NachVerbrauch));
                 // umlagen.Add(addUmlage(adresse, Betriebskostentyp.WasserversorgungWarm, Umlageschluessel.NachVerbrauch))
             }
 
@@ -551,7 +559,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
             foreach (var umlage in umlagen)
             {
-                if (umlage.Typ == Betriebskostentyp.WasserversorgungKalt)
+                if (umlage.Typ == GetTyp(ctx, "Wasserversorgung"))
                 {
                     foreach (var wohnung in umlage.Wohnungen)
                     {
@@ -568,7 +576,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     }
                 }
                 // Vielleicht brauchen die Zähler?
-                if (umlage.Typ == Betriebskostentyp.Heizkosten)
+                if (umlage.Typ == GetTyp(ctx, "Heizkosten"))
                 {
                     var kennung = "Allgemein Heizung" + umlage.GetWohnungenBezeichnung();
                     zaehler.Add(new Zaehler(kennung, Zaehlertyp.Gas)

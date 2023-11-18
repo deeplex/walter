@@ -14,6 +14,8 @@ namespace Deeplex.Saverwalter.Model
         public HKVO_P9A2 HKVO_P9 { get; set; }
         [Required]
         public double Strompauschale { get; set; }
+
+        public int BetriebsstromId { get; set; }
         public virtual Umlage Betriebsstrom { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
 
         public string? Notiz { get; set; }
@@ -21,13 +23,13 @@ namespace Deeplex.Saverwalter.Model
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
 
-        public HKVO(double p7, double p8, HKVO_P9A2 p9, double strompauschale)
+        public HKVO(double hKVO_P7, double hKVO_P8, HKVO_P9A2 hKVO_P9, double strompauschale)
         {
-            HKVO_P7 = p7;
-            HKVO_P8 = p8;
-            HKVO_P9 = p9;
+            HKVO_P7 = hKVO_P7;
+            HKVO_P8 = hKVO_P8;
+            HKVO_P9 = hKVO_P9;
 
-            // TODO this could be calculated by a zaehler, too... Therefore it would be different for each year...
+            // TODO this could be calculated by a zaehler, too... Then it would be different for each year...
             Strompauschale = strompauschale;
         }
     }
