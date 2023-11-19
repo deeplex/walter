@@ -3,7 +3,7 @@
 
     import { WalterAdresse, WalterDataWrapper } from '$walter/components';
     import { WalterAdresseEntry } from '$walter/lib';
-    import { walter_goto } from '$walter/services/utils';
+    import { navigation } from '$walter/services/navigation';
 
     const headers = [
         { key: 'strasse', value: 'Straße' },
@@ -12,8 +12,8 @@
         { key: 'stadt', value: 'Stadt' }
     ];
 
-    const navigate = (e: CustomEvent<DataTableRow>) =>
-        walter_goto(`/adressen/${e.detail.id}`);
+    const on_click_row = (e: CustomEvent<DataTableRow>) =>
+        navigation.adresse(e.detail.id);
 
     export let fullHeight = false;
     export let rows: WalterAdresseEntry[];
@@ -25,7 +25,7 @@
     addUrl={WalterAdresseEntry.ApiURL}
     addEntry={entry}
     {title}
-    {navigate}
+    {on_click_row}
     {rows}
     {headers}
     {fullHeight}

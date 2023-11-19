@@ -1,7 +1,7 @@
 <script lang="ts">
     import { WalterDataWrapper, WalterMietminderung } from '$walter/components';
     import { WalterMietminderungEntry } from '$walter/lib';
-    import { walter_goto } from '$walter/services/utils';
+    import { navigation } from '$walter/services/navigation';
 
     const headers = [
         { key: 'beginn', value: 'Beginn' },
@@ -13,15 +13,15 @@
     export let fullHeight = false;
     export let title: string | undefined = undefined;
 
-    const navigate = (e: CustomEvent) =>
-        walter_goto(`/mietminderungen/${e.detail.id}`);
+    const on_click_row = (e: CustomEvent) =>
+        navigation.mietminderung(e.detail.id);
 
     export let entry: Partial<WalterMietminderungEntry> | undefined = undefined;
 </script>
 
 <WalterDataWrapper
     addUrl={WalterMietminderungEntry.ApiURL}
-    {navigate}
+    {on_click_row}
     addEntry={entry}
     {title}
     {rows}

@@ -6,7 +6,7 @@
         WalterErhaltungsaufwendung
     } from '$walter/components';
     import { WalterErhaltungsaufwendungEntry } from '$walter/lib';
-    import { walter_goto } from '$walter/services/utils';
+    import { navigation } from '$walter/services/navigation';
 
     const headers = [
         { key: 'bezeichnung', value: 'Bezeichnung' },
@@ -16,8 +16,8 @@
         { key: 'datum', value: 'Datum' }
     ];
 
-    const navigate = (e: CustomEvent<DataTableRow>) =>
-        walter_goto(`/erhaltungsaufwendungen/${e.detail.id}`);
+    const on_click_row = (e: CustomEvent<DataTableRow>) =>
+        navigation.erhaltungsaufwendung(e.detail.id);
 
     export let fullHeight = false;
     export let rows: WalterErhaltungsaufwendungEntry[];
@@ -32,7 +32,7 @@
     addUrl={WalterErhaltungsaufwendungEntry.ApiURL}
     addEntry={entry}
     {title}
-    {navigate}
+    {on_click_row}
     {rows}
     {headers}
     {fullHeight}

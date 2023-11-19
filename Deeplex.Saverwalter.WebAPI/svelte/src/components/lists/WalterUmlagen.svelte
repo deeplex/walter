@@ -3,15 +3,15 @@
 
     import { WalterDataWrapper, WalterUmlage } from '$walter/components';
     import { WalterUmlageEntry } from '$walter/lib';
-    import { walter_goto } from '$walter/services/utils';
+    import { navigation } from '$walter/services/navigation';
 
     const headers = [
         { key: 'typ.text', value: 'Typ' },
         { key: 'wohnungenBezeichnung', value: 'Wohnungen' }
     ];
 
-    const navigate = (e: CustomEvent<DataTableRow>) =>
-        walter_goto(`/umlagen/${e.detail.id}`);
+    const on_click_row = (e: CustomEvent<DataTableRow>) =>
+        navigation.umlage(e.detail.id);
 
     export let fullHeight = false;
     export let rows: WalterUmlageEntry[];
@@ -24,7 +24,7 @@
     addUrl={WalterUmlageEntry.ApiURL}
     addEntry={entry}
     {title}
-    {navigate}
+    {on_click_row}
     {rows}
     {headers}
     {fullHeight}

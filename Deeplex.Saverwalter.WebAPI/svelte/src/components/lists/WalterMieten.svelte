@@ -5,7 +5,7 @@
         WalterNumberInput
     } from '$walter/components';
     import { WalterMieteEntry } from '$walter/lib';
-    import { walter_goto } from '$walter/services/utils';
+    import { navigation } from '$walter/services/navigation';
 
     const headers = [
         { key: 'betreffenderMonat', value: 'Betreffender Monat' },
@@ -20,14 +20,14 @@
     export let fullHeight = false;
     export let title: string | undefined = undefined;
 
-    const navigate = (e: CustomEvent) => walter_goto(`/mieten/${e.detail.id}`);
+    const on_click_row = (e: CustomEvent) => navigation.miete(e.detail.id);
 
     export let entry: Partial<WalterMieteEntry> | undefined = undefined;
 </script>
 
 <WalterDataWrapper
     addUrl={WalterMieteEntry.ApiURL}
-    {navigate}
+    {on_click_row}
     addEntry={entry}
     {title}
     rows={sortedRows}

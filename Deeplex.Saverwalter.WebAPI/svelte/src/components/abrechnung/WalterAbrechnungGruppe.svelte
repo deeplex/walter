@@ -44,7 +44,7 @@
         button: row.rechnungId ? 'disabled' : (e: CustomEvent) => add(e, row)
     }));
 
-    const navigate = (e: CustomEvent<DataTableRow>) => {
+    const on_click_row = (e: CustomEvent<DataTableRow>) => {
         goto_or_create_rechnung(e.detail as WalterRechnungEntry, year);
     };
 
@@ -64,4 +64,10 @@
     />
 </WalterDataWrapperQuickAdd>
 
-<WalterDataTable size="short" fullHeight {navigate} {headers} rows={rowsAdd} />
+<WalterDataTable
+    size="short"
+    fullHeight
+    {on_click_row}
+    {headers}
+    rows={rowsAdd}
+/>

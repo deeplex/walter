@@ -8,7 +8,8 @@
         WalterVertrag
     } from '$walter/components';
     import { WalterVertragEntry, type WalterMieteEntry } from '$walter/lib';
-    import { convertDateCanadian, walter_goto } from '$walter/services/utils';
+    import { convertDateCanadian } from '$walter/services/utils';
+    import { navigation } from '$walter/services/navigation';
 
     const headers = [
         { key: 'wohnung.text', value: 'Wohnung' },
@@ -18,8 +19,8 @@
         { key: 'button', value: 'Miete hinzufügen' }
     ];
 
-    const navigate = (e: CustomEvent<DataTableRow>) =>
-        walter_goto(`/vertraege/${e.detail.id}`);
+    const on_click_row = (e: CustomEvent<DataTableRow>) =>
+        navigation.vertrag(e.detail.id);
 
     export let rows: WalterVertragEntry[];
     export let fullHeight = false;
@@ -81,7 +82,7 @@
     addUrl={WalterVertragEntry.ApiURL}
     addEntry={entry}
     {title}
-    {navigate}
+    {on_click_row}
     rows={rowsAdd}
     {headers}
     {fullHeight}

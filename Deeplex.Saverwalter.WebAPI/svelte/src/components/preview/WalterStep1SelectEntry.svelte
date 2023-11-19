@@ -23,7 +23,7 @@
         <WalterDataTable
             add={click}
             fullHeight
-            navigate={selectedEntry_change}
+            on_click_row={selectedEntry_change}
             {headers}
             {rows}
         />

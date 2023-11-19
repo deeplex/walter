@@ -4,7 +4,7 @@
         WalterVertragVersion
     } from '$walter/components';
     import { WalterVertragVersionEntry } from '$walter/lib';
-    import { walter_goto } from '$walter/services/utils';
+    import { navigation } from '$walter/services/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     const headers = [
@@ -18,8 +18,8 @@
     export let fullHeight = false;
     export let title: string | undefined = undefined;
 
-    const navigate = (e: CustomEvent<DataTableRow>) =>
-        walter_goto(`/vertragversionen/${e.detail.id}`);
+    const on_click_row = (e: CustomEvent<DataTableRow>) =>
+        navigation.vertragversion(e.detail.id);
 
     export let entry: Partial<WalterVertragVersionEntry> | undefined =
         undefined;
@@ -27,7 +27,7 @@
 
 <WalterDataWrapper
     addUrl={WalterVertragVersionEntry.ApiURL}
-    {navigate}
+    {on_click_row}
     addEntry={entry}
     {title}
     {rows}

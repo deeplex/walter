@@ -2,7 +2,7 @@
     import { WalterDataWrapper, WalterZaehlerstand } from '$walter/components';
 
     import { WalterZaehlerstandEntry } from '$walter/lib';
-    import { walter_goto } from '$walter/services/utils';
+    import { navigation } from '$walter/services/navigation';
     export let fetchImpl: typeof fetch;
 
     const headers = [
@@ -16,13 +16,13 @@
     export let title: string | undefined = undefined;
     export let entry: Partial<WalterZaehlerstandEntry> | undefined = undefined;
 
-    const navigate = (e: CustomEvent) =>
-        walter_goto(`/zaehlerstaende/${e.detail.id}`);
+    const on_click_row = (e: CustomEvent) =>
+        navigation.zaehlerstand(e.detail.id);
 </script>
 
 <WalterDataWrapper
     addUrl={WalterZaehlerstandEntry.ApiURL}
-    {navigate}
+    {on_click_row}
     addEntry={entry}
     {title}
     {rows}

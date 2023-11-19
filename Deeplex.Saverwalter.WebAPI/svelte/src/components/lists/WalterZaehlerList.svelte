@@ -4,8 +4,9 @@
     import { WalterDataWrapper, WalterZaehler } from '$walter/components';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import WalterZaehlerstand from '../details/WalterZaehlerstand.svelte';
-    import { convertDateCanadian, walter_goto } from '$walter/services/utils';
+    import { convertDateCanadian } from '$walter/services/utils';
     import { WalterZaehlerEntry, WalterZaehlerstandEntry } from '$walter/lib';
+    import { navigation } from '$walter/services/navigation';
 
     const headers = [
         { key: 'kennnummer', value: 'Kennnummer' },
@@ -48,8 +49,8 @@
 
     let open = false;
 
-    const navigate = (e: CustomEvent<DataTableRow>) =>
-        walter_goto(`/zaehler/${e.detail.id}`);
+    const on_click_row = (e: CustomEvent<DataTableRow>) =>
+        navigation.zaehler(e.detail.id);
 </script>
 
 <WalterDataWrapperQuickAdd
@@ -65,7 +66,7 @@
     addUrl={WalterZaehlerEntry.ApiURL}
     addEntry={entry}
     {title}
-    {navigate}
+    {on_click_row}
     rows={rowsAdd}
     {headers}
     {fullHeight}

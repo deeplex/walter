@@ -15,7 +15,9 @@
         key: string;
         value: string;
     }[];
-    export let navigate: (e: CustomEvent) => Promise<void> | void = () => {};
+    export let on_click_row: (
+        e: CustomEvent
+    ) => Promise<void> | void = () => {};
 
     let open = false;
     let addModalOpen = false;
@@ -49,7 +51,7 @@
         <Tile>
             <WalterDataTable
                 add={addUrl && addEntry && quick_add}
-                {navigate}
+                {on_click_row}
                 bind:rows
                 {headers}
             />
@@ -59,7 +61,7 @@
     <WalterDataTable
         add={normal_add}
         {fullHeight}
-        {navigate}
+        {on_click_row}
         {rows}
         {headers}
     />

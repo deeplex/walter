@@ -3,7 +3,7 @@
 
     import { WalterDataWrapper, WalterWohnung } from '$walter/components';
     import { WalterWohnungEntry } from '$walter/lib';
-    import { walter_goto } from '$walter/services/utils';
+    import { navigation } from '$walter/services/navigation';
 
     const headers = [
         { key: 'adresse.anschrift', value: 'Anschrift' },
@@ -12,8 +12,8 @@
         { key: 'bewohner', value: 'Bewohner' }
     ];
 
-    const navigate = (e: CustomEvent<DataTableRow>) =>
-        walter_goto(`/wohnungen/${e.detail.id}`);
+    const on_click_row = (e: CustomEvent<DataTableRow>) =>
+        navigation.wohnung(e.detail.id);
 
     export let rows: WalterWohnungEntry[];
     export let fullHeight = false;
@@ -26,7 +26,7 @@
     addUrl={WalterWohnungEntry.ApiURL}
     addEntry={entry}
     {title}
-    {navigate}
+    {on_click_row}
     {rows}
     {headers}
     {fullHeight}

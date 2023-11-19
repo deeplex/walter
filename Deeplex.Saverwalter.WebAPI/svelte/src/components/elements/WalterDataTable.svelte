@@ -29,7 +29,7 @@
     export let rows: unknown[];
     export let add: (() => void) | undefined = undefined;
 
-    export let navigate: (
+    export let on_click_row: (
         e: CustomEvent<DataTableRow>
     ) => Promise<void> | void = () => {};
 
@@ -68,7 +68,7 @@
     {:then x}
         <DataTable
             {size}
-            on:click:row={navigate}
+            on:click:row={on_click_row}
             sortable
             zebra
             stickyHeader

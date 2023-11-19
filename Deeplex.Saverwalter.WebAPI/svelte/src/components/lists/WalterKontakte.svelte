@@ -12,7 +12,7 @@
         type WalterNatuerlichePersonEntry
     } from '$walter/lib';
     import { ContentSwitcher, Row, Switch } from 'carbon-components-svelte';
-    import { walter_goto } from '$walter/services/utils';
+    import { navigation } from '$walter/services/navigation';
 
     const headers = [
         { key: 'name', value: 'Name', default: '' },
@@ -22,12 +22,10 @@
         { key: 'email', value: 'E-Mail' }
     ];
 
-    const navigate = (e: CustomEvent<DataTableRow>) =>
-        walter_goto(
-            `/kontakte/${e.detail.id > 0 ? 'nat' : 'jur'}/${Math.abs(
-                e.detail.id
-            )}`
-        );
+    const on_click_row = (e: CustomEvent<DataTableRow>) =>
+        e.detail.id > 0
+            ? navigation.natuerlicheperson(e.detail.id)
+            : navigation.juristischeperson(Math.abs(e.detail.id));
 
     export let rows: WalterPersonEntry[];
     export let fullHeight = false;
@@ -44,7 +42,7 @@
     addUrl={WalterPersonEntry.ApiURL}
     addEntry={entry}
     {title}
-    {navigate}
+    {on_click_row}
     {rows}
     {headers}
     {fullHeight}
