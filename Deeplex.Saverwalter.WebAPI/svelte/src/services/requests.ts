@@ -1,5 +1,5 @@
 import type { WalterSelectionEntry, WalterToastContent } from '$walter/lib';
-import { addToast } from '$walter/store';
+import { addToast, changeTracker } from '$walter/store';
 import { getAccessToken } from './auth';
 import { walter_goto } from './utils';
 
@@ -20,6 +20,9 @@ export const walter_selection = {
     ): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/erhaltungsaufwendungen', fetchImpl);
     },
+    hkvo_p9a2(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
+        return walter_get('/api/selection/hkvo_p9a2', fetchImpl);
+    },
     natuerlichePersonen(
         fetchImpl: typeof fetch
     ): Promise<WalterSelectionEntry[]> {
@@ -39,6 +42,9 @@ export const walter_selection = {
     umlagen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/umlagen', fetchImpl);
     },
+    umlagetypen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
+        return walter_get('/api/selection/umlagetypen', fetchImpl);
+    },
     vertraege(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/vertraege', fetchImpl);
     },
@@ -53,11 +59,6 @@ export const walter_selection = {
     },
     wohnungen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/wohnungen', fetchImpl);
-    },
-    betriebskostentypen(
-        fetchImpl: typeof fetch
-    ): Promise<WalterSelectionEntry[]> {
-        return walter_get('/api/selection/betriebskostentypen', fetchImpl);
     },
     kontakte(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/kontakte', fetchImpl);
@@ -95,6 +96,7 @@ export async function walter_fetch(
     init.headers = headers;
     const response = await fetchImpl(url, init);
     if (response.status === 401) {
+        changeTracker.set(0);
         await walter_goto('/login');
         throw new Error('Unauthorized access. Redirecting to login page.');
     }

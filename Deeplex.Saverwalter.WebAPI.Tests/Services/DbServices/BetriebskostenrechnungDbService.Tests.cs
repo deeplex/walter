@@ -52,7 +52,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new BetriebskostenrechnungDbService(ctx);
-            var umlage = new Umlage(Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachWohnflaeche);
+            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Dachrinnenreinigung")
+            };
             ctx.Umlagen.Add(umlage);
             ctx.SaveChanges();
             var entity = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
@@ -71,7 +74,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new BetriebskostenrechnungDbService(ctx);
-            var umlage = new Umlage(Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachWohnflaeche);
+            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Dachrinnenreinigung")
+            };
             var entity = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
             {
                 Umlage = umlage
@@ -92,7 +98,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new BetriebskostenrechnungDbService(ctx);
-            var umlage = new Umlage(Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachWohnflaeche);
+            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Dachrinnenreinigung")
+            };
             var entity = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
             {
                 Umlage = umlage
@@ -118,7 +127,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new BetriebskostenrechnungDbService(ctx);
-            var umlage = new Umlage(Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachWohnflaeche);
+            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Dachrinnenreinigung")
+            };
             var entity = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)
             {
                 Umlage = umlage

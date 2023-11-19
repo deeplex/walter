@@ -11,6 +11,7 @@ import {
     WalterMietminderung,
     WalterNatuerlichePerson,
     WalterUmlage,
+    WalterUmlagetyp,
     WalterVertrag,
     WalterWohnung,
     WalterZaehler,
@@ -234,6 +235,13 @@ export const tables: WalterPreviewCopyTable[] = [
         fetch: walter_selection.umlagen,
         S3URL: 'umlagen',
         newPage: () => WalterUmlage
+    },
+    {
+        value: 'Umlagetypen',
+        key: 'umlagetypen',
+        fetch: walter_selection.umlagetypen,
+        S3URL: 'umlagetypen',
+        newPage: () => WalterUmlagetyp
     },
     {
         value: 'Verträge',

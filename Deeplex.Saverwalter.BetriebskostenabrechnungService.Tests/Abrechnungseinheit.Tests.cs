@@ -13,8 +13,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
             var adresse = new Adresse("Teststraße", "Testhausnummer", "Testpostleitzahl", "Teststadt");
             var wohnung = new Wohnung("Testwohnung", 100, 200, 1) { Adresse = adresse };
             var wohnungen = new List<Wohnung> { wohnung };
-            var umlage = new Umlage(Betriebskostentyp.AllgemeinstromHausbeleuchtung, Umlageschluessel.NachNutzeinheit)
+            var umlage = new Umlage(Umlageschluessel.NachNutzeinheit)
             {
+                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung"),
                 Wohnungen = wohnungen
             };
             var umlagen = new List<Umlage> { umlage };
@@ -48,8 +49,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
                 wohnung,
                 new("Testwohnung2", 150, 300, 2) { Adresse = adresse },
             };
-            var umlage = new Umlage(Betriebskostentyp.AllgemeinstromHausbeleuchtung, Umlageschluessel.NachNutzeinheit)
+            var umlage = new Umlage(Umlageschluessel.NachNutzeinheit)
             {
+                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung"),
                 Wohnungen = wohnungen
             };
             var umlagen = new List<Umlage> { umlage };
@@ -87,9 +89,15 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
                 wohnung,
                 new("Testwohnung2", 150, 300, 2) { Adresse = adresse },
             };
-            var umlage1 = new Umlage(Betriebskostentyp.AllgemeinstromHausbeleuchtung, Umlageschluessel.NachNutzeinheit);
+            var umlage1 = new Umlage(Umlageschluessel.NachNutzeinheit)
+            {
+                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung"),
+            };
             umlage1.Wohnungen = wohnungen1;
-            var umlage2 = new Umlage(Betriebskostentyp.Breitbandkabelanschluss, Umlageschluessel.NachPersonenzahl);
+            var umlage2 = new Umlage(Umlageschluessel.NachPersonenzahl)
+            {
+                Typ = new Umlagetyp("Breitbandkabelanschluss")
+            };
             umlage2.Wohnungen = wohnungen2;
             var umlagen = new List<Umlage> { umlage1, umlage2 };
 

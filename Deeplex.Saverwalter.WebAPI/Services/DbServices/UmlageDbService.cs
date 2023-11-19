@@ -71,13 +71,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new ArgumentException("entry has no Typ.");
             }
 
-            var typ = (Betriebskostentyp)int.Parse(entry.Typ.Id);
             if (entry.Schluessel == null)
             {
                 throw new ArgumentException("entry has no Schluessel.");
             }
             var schluessel = (Umlageschluessel)int.Parse(entry.Schluessel.Id);
-            var entity = new Umlage(typ, schluessel);
+            var typ = Ctx.Umlagetypen.First(typ => typ.UmlagetypId == int.Parse(entry.Typ.Id));
+            var entity = new Umlage(schluessel)
+            {
+                Typ = typ
+            };
 
             SetOptionalValues(entity, entry);
             Ctx.Umlagen.Add(entity);
@@ -115,7 +118,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new ArgumentException("entry has no Schluessel.");
             }
 
-            entity.Typ = (Betriebskostentyp)int.Parse(entry.Typ.Id);
+            entity.Typ = Ctx.Umlagetypen.First(typ => typ.UmlagetypId == int.Parse(entry.Typ.Id));
             entity.Schluessel = (Umlageschluessel)int.Parse(entry.Schluessel.Id);
 
             SetOptionalValues(entity, entry);
@@ -153,6 +156,35 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     .Select(w => Ctx.ZaehlerSet.Find(int.Parse(w.Id))!));
                 // Remove old zaehler
                 entity.Zaehler.RemoveAll(w => !zaehler.ToList().Exists(e => e.Id == w.ZaehlerId.ToString()));
+            }
+
+            if (entry.Schluessel != null &&
+                (Umlageschluessel)int.Parse(entry.Schluessel.Id) == Umlageschluessel.NachVerbrauch &&
+                entry.HKVO is HKVOEntryBase hkvo)
+            {
+                if (hkvo.Id == 0)
+                {
+                    var newHKVO = new HKVO(hkvo.HKVO_P7 / 100, hkvo.HKVO_P8 / 100, (HKVO_P9A2)int.Parse(hkvo.HKVO_P9.Id), hkvo.Strompauschale / 100)
+                    {
+                        Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == int.Parse(hkvo.Stromrechnung.Id))
+                    };
+                    entity.HKVO = newHKVO;
+                    Ctx.HKVO.Add(newHKVO);
+                }
+                else
+                {
+                    var oldHKVO = Ctx.HKVO.Single(e => e.HKVOId == hkvo.Id);
+                    oldHKVO.HKVO_P7 = (double)hkvo.HKVO_P7 / 100;
+                    oldHKVO.HKVO_P8 = (double)hkvo.HKVO_P8 / 100;
+                    oldHKVO.HKVO_P9 = (HKVO_P9A2)int.Parse(hkvo.HKVO_P9.Id);
+                    oldHKVO.Strompauschale = (double)hkvo.Strompauschale / 100;
+                    oldHKVO.Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == int.Parse(hkvo.Stromrechnung.Id));
+                    Ctx.HKVO.Update(oldHKVO);
+                }
+            }
+            else
+            {
+                entity.HKVO = null;
             }
 
             entity.Notiz = entry.Notiz;

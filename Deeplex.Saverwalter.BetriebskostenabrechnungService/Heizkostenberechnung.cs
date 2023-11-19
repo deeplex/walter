@@ -36,7 +36,14 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             List<Note> notes)
         {
             GesamtBetrag = rechnung.Betrag;
-            PauschalBetrag = rechnung.Betrag * 1.05;
+            if (rechnung.Umlage.HKVO is HKVO hkvo)
+            {
+                PauschalBetrag = rechnung.Betrag + rechnung.Betrag * hkvo.Strompauschale;
+            }
+            else
+            {
+                notes.Add("Warme Rechnung hat keine HKVO.", Severity.Error);
+            }
 
             tw = 60;
             Para7 = rechnung.Umlage.HKVO?.HKVO_P7 ?? 0.5; // HeizkostenV §7

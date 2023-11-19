@@ -15,7 +15,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new UmlageDbService(ctx);
-            var entity = new Umlage(Betriebskostentyp.AllgemeinstromHausbeleuchtung, Umlageschluessel.NachWohnflaeche);
+            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung")
+            };
             ctx.Umlagen.Add(entity);
             ctx.SaveChanges();
 
@@ -31,7 +34,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new UmlageDbService(ctx);
-            var entity = new Umlage(Betriebskostentyp.AllgemeinstromHausbeleuchtung, Umlageschluessel.NachWohnflaeche);
+            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung")
+            };
             ctx.Umlagen.Add(entity);
             ctx.SaveChanges();
 
@@ -46,7 +52,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new UmlageDbService(ctx);
-            var entity = new Umlage(Betriebskostentyp.AllgemeinstromHausbeleuchtung, Umlageschluessel.NachWohnflaeche);
+            var typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung");
+            ctx.Umlagetypen.Add(typ);
+            ctx.SaveChanges();
+            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = typ
+            };
             var entry = new UmlageEntry(entity, ctx);
 
             var result = service.Post(entry);
@@ -59,7 +71,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new UmlageDbService(ctx);
-            var entity = new Umlage(Betriebskostentyp.AllgemeinstromHausbeleuchtung, Umlageschluessel.NachWohnflaeche);
+            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung")
+            };
+
             ctx.Umlagen.Add(entity);
             ctx.SaveChanges();
             var entry = new UmlageEntry(entity, ctx);
@@ -74,7 +90,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new UmlageDbService(ctx);
-            var entity = new Umlage(Betriebskostentyp.AllgemeinstromHausbeleuchtung, Umlageschluessel.NachWohnflaeche);
+            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung")
+            };
 
             ctx.Umlagen.Add(entity);
             ctx.SaveChanges();
@@ -98,7 +117,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new UmlageDbService(ctx);
-            var entity = new Umlage(Betriebskostentyp.AllgemeinstromHausbeleuchtung, Umlageschluessel.NachWohnflaeche);
+            var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung")
+            };
             var entry = new UmlageEntry(entity, ctx);
             entry.Beschreibung = "Test";
 

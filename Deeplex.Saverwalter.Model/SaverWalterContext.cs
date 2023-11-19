@@ -10,6 +10,7 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
         public DbSet<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; set; } = null!;
         public DbSet<Garage> Garagen { get; set; } = null!;
+        public DbSet<HKVO> HKVO { get; set; } = null!;
         public DbSet<JuristischePerson> JuristischePersonen { get; set; } = null!;
         public DbSet<Konto> Kontos { get; set; } = null!;
         public DbSet<Miete> Mieten { get; set; } = null!;
@@ -17,6 +18,7 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Mietminderung> Mietminderungen { get; set; } = null!;
         public DbSet<NatuerlichePerson> NatuerlichePersonen { get; set; } = null!;
         public DbSet<Umlage> Umlagen { get; set; } = null!;
+        public DbSet<Umlagetyp> Umlagetypen { get; set; } = null!;
         public DbSet<Vertrag> Vertraege { get; set; } = null!;
         public DbSet<VertragVersion> VertragVersionen { get; set; } = null!;
         public DbSet<Wohnung> Wohnungen { get; set; } = null!;
@@ -75,6 +77,9 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<JuristischePerson>().HasAlternateKey(person => person.PersonId);
             modelBuilder.Entity<NatuerlichePerson>().HasAlternateKey(person => person.PersonId);
 
+            modelBuilder.Entity<HKVO>().HasOne(u => u.Heizkosten).WithOne(u => u.HKVO);
+            modelBuilder.Entity<HKVO>().HasOne(u => u.Betriebsstrom).WithMany(u => u.HKVOs);
+
             modelBuilder.Entity<Adresse>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Adresse>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Betriebskostenrechnung>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
@@ -83,6 +88,8 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<Erhaltungsaufwendung>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Garage>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Garage>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<HKVO>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<HKVO>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<JuristischePerson>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<JuristischePerson>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Konto>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
@@ -97,6 +104,8 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<NatuerlichePerson>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Umlage>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Umlage>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Umlagetyp>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Umlagetyp>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Vertrag>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Vertrag>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<VertragsBetriebskostenrechnung>()

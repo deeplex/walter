@@ -23,7 +23,7 @@
     export let fetchImpl: typeof fetch;
     export let readonly = false;
 
-    const betriebskostentypen = walter_selection.betriebskostentypen(fetchImpl);
+    const umlagetypen = walter_selection.umlagetypen(fetchImpl);
     const umlagen_wohnungen = walter_selection.umlagen_wohnungen(fetchImpl);
 
     let umlageEntries: WalterSelectionEntry[] = [];
@@ -65,7 +65,7 @@
 </script>
 
 <Row>
-    {#await betriebskostentypen}
+    {#await umlagetypen}
         <TextInputSkeleton />
         <TextInputSkeleton />
     {:then items}

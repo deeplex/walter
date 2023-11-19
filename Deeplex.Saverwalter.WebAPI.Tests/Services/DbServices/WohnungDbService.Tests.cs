@@ -95,7 +95,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new WohnungDbService(ctx);
-            var umlage = new Umlage(Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachWohnflaeche);
+            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Dachrinnenreinigung")
+            };
             var entity = new Wohnung("Test", 100, 100, 1);
             var entry = new WohnungEntry(entity, ctx);
             ctx.Wohnungen.Add(entity);

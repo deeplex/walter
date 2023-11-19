@@ -95,7 +95,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new ZaehlerDbService(ctx);
-            var umlage = new Umlage(Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachWohnflaeche);
+            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Dachrinnenreinigung")
+            };
             var entity = new Zaehler("Test", Zaehlertyp.Strom);
             var entry = new ZaehlerEntry(entity);
             entry.Kennnummer = "Neue Kennnummer";

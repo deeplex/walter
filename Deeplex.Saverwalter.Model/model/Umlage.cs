@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -6,7 +7,7 @@ namespace Deeplex.Saverwalter.Model
     {
         public int UmlageId { get; set; }
         [Required]
-        public Betriebskostentyp Typ { get; set; }
+        public virtual Umlagetyp Typ { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
         [Required]
         public Umlageschluessel Schluessel { get; set; }
         public string? Beschreibung { get; set; }
@@ -16,23 +17,27 @@ namespace Deeplex.Saverwalter.Model
         public virtual List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
         public virtual List<Betriebskostenrechnung> Betriebskostenrechnungen { get; private set; } = new List<Betriebskostenrechnung>();
         public virtual List<Zaehler> Zaehler { get; set; } = new List<Zaehler>();
+        // Stromrechnungen keep track of the HKVOs that point to them
+        public virtual List<HKVO> HKVOs { get; set; } = new List<HKVO>();
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
-        public Umlage(Betriebskostentyp typ, Umlageschluessel schluessel)
+        public Umlage(Umlageschluessel schluessel)
         {
-            Typ = typ;
             Schluessel = schluessel;
         }
     }
 
-    public class HKVO
+    public enum Umlageschluessel
     {
-        public int HKVOId { get; set; }
-
-        public double? HKVO_P7 { get; set; }
-        public double? HKVO_P8 { get; set; }
-        public HKVO_P9A2? HKVO_P9 { get; set; }
-
-        public string? Notiz { get; set; }
+        [Description("n. WF")]
+        NachWohnflaeche,
+        [Description("n. NE")]
+        NachNutzeinheit,
+        [Description("n. Pers.")]
+        NachPersonenzahl,
+        [Description("n. Verb.")]
+        NachVerbrauch,
+        [Description("n. NF")]
+        NachNutzflaeche,
     }
 }

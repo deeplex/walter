@@ -34,7 +34,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var dbService = new BetriebskostenrechnungDbService(ctx);
             var controller = new BetriebskostenrechnungController(logger, dbService);
 
-            var umlage = new Umlage(Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachWohnflaeche);
+            var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
+            {
+                Typ = new Umlagetyp("Dachrinnenreinigung")
+            };
             ctx.Umlagen.Add(umlage);
             ctx.SaveChanges();
             var entity = new Betriebskostenrechnung(1000, new DateOnly(2021, 1, 1), 2021)

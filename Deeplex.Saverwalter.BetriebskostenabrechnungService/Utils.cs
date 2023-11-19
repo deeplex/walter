@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public static T Min<T>(T l, T r, IComparer<T> c)
             => c.Compare(l, r) > 0 ? r : l;
 
-        public static double checkVerbrauch(Dictionary<Betriebskostentyp, double> verbrauchAnteil, Betriebskostentyp typ, List<Note> notes)
+        public static double checkVerbrauch(Dictionary<Umlagetyp, double> verbrauchAnteil, Umlagetyp typ, List<Note> notes)
         {
             if (verbrauchAnteil.ContainsKey(typ))
             {
@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             }
             else
             {
-                notes.Add("Konnte keinen Anteil für " + typ.ToDescriptionString() + " feststellen.", Severity.Error);
+                notes.Add("Konnte keinen Anteil für " + typ.Bezeichnung + " feststellen.", Severity.Error);
                 return 0;
             }
         }

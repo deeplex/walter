@@ -21,7 +21,7 @@
     onMount(async () => {
         const betriebskostenTypId = searchParams.get('typ');
 
-        const betriebskostentypen = await walter_selection.betriebskostentypen(
+        const umlagetypen = await walter_selection.umlagetypen(
             data.fetchImpl
         );
         const umlagen_wohnungen = await walter_selection.umlagen_wohnungen(
@@ -29,7 +29,7 @@
         );
 
         if (betriebskostenTypId) {
-            entry.typ = betriebskostentypen.find(
+            entry.typ = umlagetypen.find(
                 (e: any) => +e.id === +betriebskostenTypId
             );
         }

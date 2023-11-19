@@ -35,7 +35,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var dbService = new ErhaltungsaufwendungDbService(ctx);
             var controller = new ErhaltungsaufwendungController(logger, dbService);
 
-            var entity = new Erhaltungsaufwendung(1000, "Test", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1))
+            var aussteller = new JuristischePerson("TestPerson");
+            ctx.JuristischePersonen.Add(aussteller);
+            ctx.SaveChanges();
+
+            var entity = new Erhaltungsaufwendung(1000, "Test", aussteller.PersonId, new DateOnly(2021, 1, 1))
             {
                 Wohnung = vertrag.Wohnung
             };
@@ -55,7 +59,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var dbService = new ErhaltungsaufwendungDbService(ctx);
             var controller = new ErhaltungsaufwendungController(logger, dbService);
 
-            var entity = new Erhaltungsaufwendung(1000, "Test", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1))
+            var aussteller = new JuristischePerson("TestPerson");
+            ctx.JuristischePersonen.Add(aussteller);
+            ctx.SaveChanges();
+
+            var entity = new Erhaltungsaufwendung(1000, "Test", aussteller.PersonId, new DateOnly(2021, 1, 1))
             {
                 Wohnung = vertrag.Wohnung
             };
@@ -76,7 +84,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var dbService = new ErhaltungsaufwendungDbService(ctx);
             var controller = new ErhaltungsaufwendungController(logger, dbService);
 
-            var entity = new Erhaltungsaufwendung(1000, "Test", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1))
+            var aussteller = new JuristischePerson("TestPerson");
+            ctx.JuristischePersonen.Add(aussteller);
+            ctx.SaveChanges();
+
+            var entity = new Erhaltungsaufwendung(1000, "Test", aussteller.PersonId, new DateOnly(2021, 1, 1))
             {
                 Wohnung = vertrag.Wohnung
             };
@@ -101,7 +113,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var dbService = new ErhaltungsaufwendungDbService(ctx);
             var controller = new ErhaltungsaufwendungController(logger, dbService);
 
-            var entity = new Erhaltungsaufwendung(1000, "Test", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1))
+            var aussteller = new JuristischePerson("TestPerson");
+            ctx.JuristischePersonen.Add(aussteller);
+            ctx.SaveChanges();
+
+            var entity = new Erhaltungsaufwendung(1000, "Test", aussteller.PersonId, new DateOnly(2021, 1, 1))
             {
                 Wohnung = vertrag.Wohnung
             };

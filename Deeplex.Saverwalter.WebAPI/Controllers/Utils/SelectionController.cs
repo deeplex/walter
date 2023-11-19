@@ -60,7 +60,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .Select(e =>
                     new SelectionEntry(
                         e.BetriebskostenrechnungId,
-                        $"{e.BetreffendesJahr} - {e.Umlage.Typ.ToDescriptionString()} - {e.Umlage.GetWohnungenBezeichnung()}",
+                        $"{e.BetreffendesJahr} - {e.Umlage.Typ.Bezeichnung} - {e.Umlage.GetWohnungenBezeichnung()}",
                         null))
                 .ToList();
 
@@ -120,8 +120,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .Select(e =>
                     new SelectionEntry(
                         e.UmlageId,
-                        $"{e.Typ.ToDescriptionString()} - {e.Wohnungen.ToList().GetWohnungenBezeichnung()}",
-                        ((int)e.Typ).ToString()))
+                        $"{e.Typ.Bezeichnung} - {e.Wohnungen.ToList().GetWohnungenBezeichnung()}",
+                        e.Typ.UmlagetypId.ToString()))
                 .ToList();
 
             return new OkObjectResult(list);
@@ -136,7 +136,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                     new SelectionEntry(
                         e.UmlageId,
                         e.Wohnungen.ToList().GetWohnungenBezeichnung(),
-                        ((int)e.Typ).ToString()))
+                        e.Typ.UmlagetypId.ToString()))
                 .ToList();
 
             return new OkObjectResult(list);
@@ -150,7 +150,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .Where(e => e.Schluessel == Umlageschluessel.NachVerbrauch)
                 .Select(e => new SelectionEntry(
                     e.UmlageId,
-                    e.Typ.ToDescriptionString() + " - " + e.Wohnungen.ToList().GetWohnungenBezeichnung(),
+                    e.Typ.Bezeichnung + " - " + e.Wohnungen.ToList().GetWohnungenBezeichnung(),
                     null))
                 .ToList();
 
@@ -276,13 +276,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         [HttpGet]
-        [Route("api/selection/betriebskostentypen")]
-        public IActionResult GetBetriebskostentypen()
+        [Route("api/selection/umlagetypen")]
+        public IActionResult GetUmlagetypen()
         {
-            var list = Enum.GetValues(typeof(Betriebskostentyp))
-                .Cast<Betriebskostentyp>()
+            var list = Ctx.Umlagetypen
                 .ToList()
-                .Select(e => new SelectionEntry((int)e, e.ToDescriptionString()))
+                .Select(typ => new SelectionEntry(typ.UmlagetypId, typ.Bezeichnung, null))
                 .ToList();
 
             return new OkObjectResult(list);
@@ -308,7 +307,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
             var list = Enum.GetValues(typeof(HKVO_P9A2))
                 .Cast<HKVO_P9A2>()
                 .ToList()
-                .Select(e => new SelectionEntry((int)e, e.ToString()))
+                .Select(e => new SelectionEntry((int)e, e.ToDescriptionString()))
                 .ToList();
 
             return new OkObjectResult(list);

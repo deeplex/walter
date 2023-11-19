@@ -151,7 +151,7 @@ namespace Deeplex.Saverwalter.PrintService
                 .Where(r => r.Beschreibung != null && r.Beschreibung.Trim() != "")
                 .SelectMany(t => new List<PrintRun>()
                 {
-                    new PrintRun(t.Typ.ToDescriptionString() + ": ") { Bold = true, NoBreak = true },
+                    new PrintRun(t.Typ.Bezeichnung + ": ") { Bold = true, NoBreak = true },
                     new PrintRun(t.Beschreibung ?? "")
                 })
                 .ToArray();
@@ -358,7 +358,7 @@ namespace Deeplex.Saverwalter.PrintService
 
                     var verbrauchAnteile = abrechnungseinheit.VerbrauchAnteile;
                     // Kalte Betriebskosten are equal / warme are odd
-                    var kalteAnteile = verbrauchAnteile.Where(verbrauch => (int)verbrauch.Umlage.Typ % 2 == 0);
+                    var kalteAnteile = verbrauchAnteile.Where(verbrauch => verbrauch.Umlage.HKVO == null);
                     foreach (var verbrauchAnteil in kalteAnteile)
                     {
                         foreach (var zaehlerTyp in verbrauchAnteil.DieseZaehler)
@@ -371,7 +371,7 @@ namespace Deeplex.Saverwalter.PrintService
                             for (var i = 0; i < value.Count; ++i)
                             {
                                 var delta = value[i].Delta;
-                                col1.Add(Unit(delta, unit) + " / " + Unit(deltaAll, unit) + " (" + verbrauchAnteil.Umlage.Typ.ToDescriptionString() + ")");
+                                col1.Add(Unit(delta, unit) + " / " + Unit(deltaAll, unit) + " (" + verbrauchAnteil.Umlage.Typ.Bezeichnung + ")");
                                 col2.Add("");
                                 col3.Add(value[i].Zaehler.Kennnummer);
                                 col4.Add(Prozent(delta / deltaAll));
@@ -420,7 +420,7 @@ namespace Deeplex.Saverwalter.PrintService
                 var betrag = umlage.Betriebskostenrechnungen
                     .Where(rechnung => rechnung.BetreffendesJahr == abrechnung.Zeitraum.Jahr)
                     .Sum(b => b.Betrag);
-                col1.Add(firstLine ? umlage.Typ.ToDescriptionString() : "");
+                col1.Add(firstLine ? umlage.Typ.Bezeichnung : "");
                 col2.Add(abrechnungseinheit.GesamtEinheiten == 1 ? "Direkt" : (firstLine ? umlage.Schluessel.ToDescriptionString() : ""));
                 col3.Add(zeitraum);
                 col4.Add(Euro(betrag));
@@ -435,7 +435,7 @@ namespace Deeplex.Saverwalter.PrintService
             // TODO use rechnungen directly instead of going back and forth.
             var umlagen = abrechnungseinheit.Rechnungen
                 .Select(rechnung => rechnung.Key)
-                .Where(umlage => (int)umlage.Typ % 2 == 0);
+                .Where(umlage => umlage.HKVO == null);
             foreach (var umlage in umlagen)
             {
                 switch (umlage.Schluessel)
@@ -522,7 +522,7 @@ namespace Deeplex.Saverwalter.PrintService
             // TODO use rechnungen directly instead of going back and forth.
             var umlagen = abrechnungseinheit.Rechnungen
                 .Select(rechnung => rechnung.Key)
-                .Where(umlage => (int)umlage.Typ % 2 == 1);
+                .Where(umlage => umlage.HKVO != null);
             foreach (var umlage in umlagen)
             {
                 var betrag = umlage.Betriebskostenrechnungen
@@ -530,7 +530,7 @@ namespace Deeplex.Saverwalter.PrintService
                     .Sum(b => b.Betrag);
                 var col1 = new List<string>
                 {
-                    umlage.Typ.ToDescriptionString(),
+                    umlage.Typ.Bezeichnung,
                     "Kosten für Brennstoffe",
                     "Betriebskosten der Anlage (5% pauschal)",
                     "Gesamt",
@@ -574,7 +574,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             var warmeRechnungen = abrechnungseinheit.Rechnungen
                 .Select(rechnung => rechnung.Key)
-                .Where(umlage => (int)umlage.Typ % 2 == 1).ToList();
+                .Where(umlage => umlage.HKVO != null).ToList();
 
             if (warmeRechnungen.Exists(umlage => umlage.Schluessel == Umlageschluessel.NachPersonenzahl))
             {
@@ -634,7 +634,7 @@ namespace Deeplex.Saverwalter.PrintService
 
                 var verbrauchAnteile = abrechnungseinheit.VerbrauchAnteile;
                 // Kalte Betriebskosten are equal / warme are odd
-                var warmeAnteile = verbrauchAnteile.Where(verbrauch => (int)verbrauch.Umlage.Typ % 2 == 1);
+                var warmeAnteile = verbrauchAnteile.Where(verbrauch => verbrauch.Umlage.HKVO != null);
                 foreach (var verbrauchAnteil in warmeAnteile)
                 {
                     foreach (var zaehlerTyp in verbrauchAnteil.DieseZaehler)

@@ -42,16 +42,16 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
                 if (Rechnungen[umlage] == null)
                 {
-                    notes.Add($"Keine Rechnung für {umlage.Typ.ToDescriptionString()} gefunden.", Severity.Warning);
+                    notes.Add($"Keine Rechnung für {umlage.Typ.Bezeichnung} gefunden.", Severity.Warning);
                 }
             }
 
             var rechnungenKalt = Rechnungen
-                .Where(e => (int)e.Key.Typ % 2 == 0 && e.Value != null)
+                .Where(e => e.Key.HKVO == null && e.Value != null)
                 .Select(e => e.Value!)
                 .ToList();
             var rechnungenWarm = Rechnungen
-                .Where(e => (int)e.Key.Typ % 2 == 1 && e.Value != null)
+                .Where(e => e.Key.HKVO != null && e.Value != null)
                 .Select(e => e.Value!)
                 .ToList();
 
@@ -60,31 +60,34 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             Heizkostenberechnungen = CalculateHeizkosten(rechnungenWarm, wohnung, VerbrauchAnteile, zeitraum, notes);
             BetragWarm = Heizkostenberechnungen.Sum(heizkosten => heizkosten.Betrag);
-            GesamtBetragWarm = rechnungenWarm.Sum(e => e.Betrag);
 
-            AllgStromFaktor = GesamtBetragWarm * 0.05;
-
-            if (AllgStromFaktor > 0)
+            rechnungenWarm.ForEach(warmeRechnung =>
             {
-                var allgStrom = rechnungenKalt
-                    .SingleOrDefault(rechnung =>
-                        rechnung.Umlage.Typ ==
-                        Betriebskostentyp.AllgemeinstromHausbeleuchtung);
+                if (warmeRechnung.Umlage.HKVO is HKVO hkvo)
+                {
+                    var stromRechnung = rechnungenKalt.FirstOrDefault(kalteRechnung =>
+                        kalteRechnung.Umlage.UmlageId == hkvo.Betriebsstrom.UmlageId);
 
-                if (allgStrom == null)
-                {
-                    notes.Add("Keine Allgemeinstromrechnung für Heizung gefunden", Severity.Error);
-                }
-                else if (allgStrom.Betrag < AllgStromFaktor)
-                {
-                    notes.Add($"Allgemeinstromrechnung ist niedriger als 5% der Heizungskosten. Rechnung wäre damit {allgStrom.Betrag - AllgStromFaktor:N2}€", Severity.Warning);
-                }
-                else
-                {
-                    allgStrom.Betrag -= AllgStromFaktor;
-                }
-            }
+                    if (stromRechnung == null)
+                    {
+                        notes.Add("Keine Stromrechnung für Heizung gefunden", Severity.Error);
+                        return;
+                    }
 
+                    var delta = warmeRechnung.Betrag * hkvo.Strompauschale;
+                    // Das wird bereits in der Heizkostenberechnung gemacht und als Pauschalbetrag verbucht.
+                    // Für die Stromrechnung allerdings muss der Teil noch abgezogen werden.
+                    //warmeRechnung.Betrag += delta;
+                    stromRechnung.Betrag -= delta;
+
+                    if (stromRechnung.Betrag < 0)
+                    {
+                        notes.Add($"Pauschale der Heizkosten ({hkvo.Strompauschale:N2}%) ist mehr als Allgemeinstromrechnung {stromRechnung.Betrag:N2}€", Severity.Warning);
+                    }
+                }
+            });
+
+            GesamtBetragWarm = rechnungenWarm.Sum(e => e.Betrag);
             BetragKalt = GetSum(rechnungenKalt, notes);
             GesamtBetragKalt = rechnungenKalt.Sum(rechnung => rechnung.Betrag);
         }
@@ -123,14 +126,14 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             var verbrauchAnteile = VerbrauchAnteile.Where(anteil => anteil.Umlage == rechnung.Umlage).ToList();
             if (verbrauchAnteile.Count == 0)
             {
-                notes.Add($"Keinen Anteil für {rechnung.Umlage.Typ.ToDescriptionString()} gefunden",
+                notes.Add($"Keinen Anteil für {rechnung.Umlage.Typ.Bezeichnung} gefunden",
                     Severity.Error);
 
                 return 0;
             }
             else if (verbrauchAnteile.Count > 1)
             {
-                notes.Add($"Mehr als einen Anteil für {rechnung.Umlage.Typ.ToDescriptionString()} gefunden",
+                notes.Add($"Mehr als einen Anteil für {rechnung.Umlage.Typ.Bezeichnung} gefunden",
                     Severity.Error);
 
                 return 0;

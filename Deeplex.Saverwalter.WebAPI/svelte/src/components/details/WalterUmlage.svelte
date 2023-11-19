@@ -2,12 +2,13 @@
     import {
         WalterComboBox,
         WalterMultiSelectWohnung,
-        WalterMultiSelect,
         WalterTextArea,
-
-        WalterMultiSelectZaehler
-
+        WalterMultiSelectZaehler,
+        WalterComboBoxUmlagetyp
     } from '$walter/components';
+
+    import WalterUmlageHKVO from './WalterUmlageHKVO.svelte'
+
     import { Row } from 'carbon-components-svelte';
     import type { WalterUmlageEntry } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
@@ -16,19 +17,17 @@
     export let fetchImpl: typeof fetch;
     export let readonly = false;
 
-    const betriebskostentypen = walter_selection.betriebskostentypen(fetchImpl);
+    const umlagetypen = walter_selection.umlagetypen(fetchImpl);
     const umlageschluessel = walter_selection.umlageschluessel(fetchImpl);
-    const wohnungen = walter_selection.wohnungen(fetchImpl);
-    const zaehler = walter_selection.zaehler(fetchImpl);
 </script>
 
 <Row>
-    <WalterComboBox
-        required
+    <WalterComboBoxUmlagetyp
         {readonly}
-        entries={betriebskostentypen}
+        {fetchImpl}
+        required
         bind:value={entry.typ}
-        titleText="Typ"
+        title="Betriebskostentyp der Umlage"
     />
     <WalterComboBox
         required
@@ -61,6 +60,8 @@
 <Row>
     <WalterTextArea {readonly} labelText="Beschreibung" bind:value={entry.beschreibung} />
 </Row>
+
+<WalterUmlageHKVO bind:entry {fetchImpl} bind:selectedWohnungen={entry.selectedWohnungen}/>
 
 <Row>
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />

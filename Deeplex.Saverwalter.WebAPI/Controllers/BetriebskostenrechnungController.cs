@@ -31,11 +31,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 BetreffendesJahr = entity.BetreffendesJahr;
                 Datum = entity.Datum;
                 Notiz = entity.Notiz;
-                Typ = new SelectionEntry((int)entity.Umlage.Typ, entity.Umlage.Typ.ToDescriptionString());
+                Typ = new SelectionEntry(entity.Umlage.Typ.UmlagetypId, entity.Umlage.Typ.Bezeichnung);
                 Umlage = new SelectionEntry(
                     entity.Umlage.UmlageId,
                     entity.Umlage.GetWohnungenBezeichnung(),
-                    ((int)entity.Umlage.Typ).ToString());
+                    entity.Umlage.Typ.UmlagetypId.ToString());
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;

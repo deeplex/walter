@@ -306,24 +306,55 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("HKVOId"));
 
-                    b.Property<double?>("HKVO_P7")
+                    b.Property<int>("BetriebsstromUmlageId")
+                        .HasColumnType("integer")
+                        .HasColumnName("betriebsstrom_umlage_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<double>("HKVO_P7")
                         .HasColumnType("double precision")
                         .HasColumnName("hkvo_p7");
 
-                    b.Property<double?>("HKVO_P8")
+                    b.Property<double>("HKVO_P8")
                         .HasColumnType("double precision")
                         .HasColumnName("hkvo_p8");
 
-                    b.Property<int?>("HKVO_P9")
+                    b.Property<int>("HKVO_P9")
                         .HasColumnType("integer")
                         .HasColumnName("hkvo_p9");
+
+                    b.Property<int>("HeizkostenId")
+                        .HasColumnType("integer")
+                        .HasColumnName("heizkosten_id");
+
+                    b.Property<DateTime>("LastModified")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_modified")
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("Notiz")
                         .HasColumnType("text")
                         .HasColumnName("notiz");
 
+                    b.Property<double>("Strompauschale")
+                        .HasColumnType("double precision")
+                        .HasColumnName("strompauschale");
+
                     b.HasKey("HKVOId")
                         .HasName("pk_hkvo");
+
+                    b.HasIndex("BetriebsstromUmlageId")
+                        .HasDatabaseName("ix_hkvo_betriebsstrom_umlage_id");
+
+                    b.HasIndex("HeizkostenId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_hkvo_heizkosten_id");
 
                     b.ToTable("hkvo", (string)null);
                 });
@@ -670,10 +701,6 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<int?>("HKVOId")
-                        .HasColumnType("integer")
-                        .HasColumnName("hkvo_id");
-
                     b.Property<DateTime>("LastModified")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -688,17 +715,53 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasColumnType("integer")
                         .HasColumnName("schluessel");
 
-                    b.Property<int>("Typ")
+                    b.Property<int>("TypUmlagetypId")
                         .HasColumnType("integer")
-                        .HasColumnName("typ");
+                        .HasColumnName("typ_umlagetyp_id");
 
                     b.HasKey("UmlageId")
                         .HasName("pk_umlagen");
 
-                    b.HasIndex("HKVOId")
-                        .HasDatabaseName("ix_umlagen_hkvo_id");
+                    b.HasIndex("TypUmlagetypId")
+                        .HasDatabaseName("ix_umlagen_typ_umlagetyp_id");
 
                     b.ToTable("umlagen", (string)null);
+                });
+
+            modelBuilder.Entity("Deeplex.Saverwalter.Model.Umlagetyp", b =>
+                {
+                    b.Property<int>("UmlagetypId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("umlagetyp_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UmlagetypId"));
+
+                    b.Property<string>("Bezeichnung")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("bezeichnung");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<DateTime>("LastModified")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_modified")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("Notiz")
+                        .HasColumnType("text")
+                        .HasColumnName("notiz");
+
+                    b.HasKey("UmlagetypId")
+                        .HasName("pk_umlagetypen");
+
+                    b.ToTable("umlagetypen", (string)null);
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Vertrag", b =>
@@ -1150,6 +1213,27 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                     b.Navigation("Adresse");
                 });
 
+            modelBuilder.Entity("Deeplex.Saverwalter.Model.HKVO", b =>
+                {
+                    b.HasOne("Deeplex.Saverwalter.Model.Umlage", "Betriebsstrom")
+                        .WithMany("HKVOs")
+                        .HasForeignKey("BetriebsstromUmlageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_hkvo_umlagen_betriebsstrom_umlage_id");
+
+                    b.HasOne("Deeplex.Saverwalter.Model.Umlage", "Heizkosten")
+                        .WithOne("HKVO")
+                        .HasForeignKey("Deeplex.Saverwalter.Model.HKVO", "HeizkostenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_hkvo_umlagen_heizkosten_id");
+
+                    b.Navigation("Betriebsstrom");
+
+                    b.Navigation("Heizkosten");
+                });
+
             modelBuilder.Entity("Deeplex.Saverwalter.Model.JuristischePerson", b =>
                 {
                     b.HasOne("Deeplex.Saverwalter.Model.Adresse", "Adresse")
@@ -1208,12 +1292,14 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Umlage", b =>
                 {
-                    b.HasOne("Deeplex.Saverwalter.Model.HKVO", "HKVO")
-                        .WithMany()
-                        .HasForeignKey("HKVOId")
-                        .HasConstraintName("fk_umlagen_hkvo_hkvo_id");
+                    b.HasOne("Deeplex.Saverwalter.Model.Umlagetyp", "Typ")
+                        .WithMany("Umlagen")
+                        .HasForeignKey("TypUmlagetypId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_umlagen_umlagetypen_typ_umlagetyp_id");
 
-                    b.Navigation("HKVO");
+                    b.Navigation("Typ");
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Vertrag", b =>
@@ -1418,6 +1504,15 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Umlage", b =>
                 {
                     b.Navigation("Betriebskostenrechnungen");
+
+                    b.Navigation("HKVO");
+
+                    b.Navigation("HKVOs");
+                });
+
+            modelBuilder.Entity("Deeplex.Saverwalter.Model.Umlagetyp", b =>
+                {
+                    b.Navigation("Umlagen");
                 });
 
             modelBuilder.Entity("Deeplex.Saverwalter.Model.Vertrag", b =>

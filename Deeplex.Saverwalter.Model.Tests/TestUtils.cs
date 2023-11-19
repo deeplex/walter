@@ -110,47 +110,57 @@ namespace Deeplex.Saverwalter.ModelTests
             var umlagen = new List<Umlage>();
             var date = new DateOnly(2021, 1, 1);
 
-            var grundsteuer = new Umlage(Betriebskostentyp.Grundsteuer, Umlageschluessel.NachWohnflaeche)
+            var grundsteuer = new Umlage(Umlageschluessel.NachWohnflaeche)
             {
+                Typ = new Umlagetyp("Grundsteuer"),
                 Wohnungen = wohnungen
             };
             var grundsteuer_rechnung = new Betriebskostenrechnung(1000, date, 2021) { Umlage = grundsteuer };
             grundsteuer.Betriebskostenrechnungen.Add(grundsteuer_rechnung);
             umlagen.Add(grundsteuer);
 
-            var dachrinnenreinigung = new Umlage(Betriebskostentyp.Dachrinnenreinigung, Umlageschluessel.NachNutzeinheit)
+            var dachrinnenreinigung = new Umlage(Umlageschluessel.NachNutzeinheit)
             {
+                Typ = new Umlagetyp("Dachrinnenreinigung"),
                 Wohnungen = wohnungen
             };
             var dachrinnenreinigung_rechnung = new Betriebskostenrechnung(500, date, 2021) { Umlage = dachrinnenreinigung };
             dachrinnenreinigung.Betriebskostenrechnungen.Add(dachrinnenreinigung_rechnung);
             umlagen.Add(dachrinnenreinigung);
 
-            var gartenpflege = new Umlage(Betriebskostentyp.Gartenpflege, Umlageschluessel.NachNutzeinheit);
+            var gartenpflege = new Umlage(Umlageschluessel.NachNutzeinheit)
+            {
+                Typ = new Umlagetyp("Gartenpflege")
+            };
             gartenpflege.Wohnungen.Add(wohnungen.First());
             var gartenpflege_rechnung = new Betriebskostenrechnung(650, date, 2021) { Umlage = gartenpflege };
             gartenpflege.Betriebskostenrechnungen.Add(gartenpflege_rechnung);
             umlagen.Add(gartenpflege);
 
-            var allgemeinstrom = new Umlage(Betriebskostentyp.AllgemeinstromHausbeleuchtung, Umlageschluessel.NachWohnflaeche)
+            var allgemeinstrom = new Umlage(Umlageschluessel.NachWohnflaeche)
             {
+                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung"),
                 Wohnungen = wohnungen
             };
             var allgemeinstrom_rechnung = new Betriebskostenrechnung(200, date, 2021) { Umlage = allgemeinstrom };
             allgemeinstrom.Betriebskostenrechnungen.Add(allgemeinstrom_rechnung);
             umlagen.Add(allgemeinstrom);
 
-            var muellbeseitigung = new Umlage(Betriebskostentyp.Muellbeseitigung, Umlageschluessel.NachPersonenzahl)
+            var muellbeseitigung = new Umlage(Umlageschluessel.NachPersonenzahl)
             {
+                Typ = new Umlagetyp("Müllbeseitigung"),
                 Wohnungen = wohnungen
             };
             var muellbeseitigung_rechnung = new Betriebskostenrechnung(1000, date, 2021) { Umlage = muellbeseitigung };
             muellbeseitigung.Betriebskostenrechnungen.Add(muellbeseitigung_rechnung);
             umlagen.Add(muellbeseitigung);
 
-            var heizkosten = new Umlage(Betriebskostentyp.Heizkosten, Umlageschluessel.NachVerbrauch)
+            var hkvo = new HKVO(0.5, 0.5, HKVO_P9A2.Satz_2, 0.05) { Betriebsstrom = allgemeinstrom };
+            var heizkosten = new Umlage(Umlageschluessel.NachVerbrauch)
             {
-                Wohnungen = wohnungen
+                Typ = new Umlagetyp("Heizkosten"),
+                Wohnungen = wohnungen,
+                HKVO = hkvo
             };
             var heizkosten_rechnung = new Betriebskostenrechnung(2000, date, 2021) { Umlage = heizkosten };
             heizkosten.Betriebskostenrechnungen.Add(heizkosten_rechnung);
