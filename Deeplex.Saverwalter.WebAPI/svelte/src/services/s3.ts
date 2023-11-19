@@ -29,7 +29,7 @@ export async function finish_s3_post(e: Response, toast?: WalterToastContent) {
     return e;
 }
 
-export const walter_s3_get = (S3URL: string): Promise<any> =>
+export const walter_s3_get = (S3URL: string): Promise<unknown> =>
     walter_fetch(fetch, `${baseURL}/${S3URL}`, { method: 'GET' }).then((e) =>
         e.blob()
     );

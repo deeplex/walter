@@ -1,7 +1,7 @@
 <script lang="ts">
     import { WalterDataWrapper, WalterZaehlerstand } from '$walter/components';
 
-    import type { WalterZaehlerstandEntry } from '$walter/lib';
+    import { WalterZaehlerstandEntry } from '$walter/lib';
     import { walter_goto } from '$walter/services/utils';
     export let fetchImpl: typeof fetch;
 
@@ -10,8 +10,6 @@
         { key: 'stand', value: 'Stand' },
         { key: 'einheit', value: 'Einheit' }
     ];
-
-    const addUrl = `/api/zaehlerstaende/`;
 
     export let rows: WalterZaehlerstandEntry[];
     export let fullHeight = false;
@@ -23,8 +21,8 @@
 </script>
 
 <WalterDataWrapper
+    addUrl={WalterZaehlerstandEntry.ApiURL}
     {navigate}
-    {addUrl}
     addEntry={entry}
     {title}
     {rows}

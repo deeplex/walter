@@ -1,5 +1,8 @@
 <script lang="ts">
-    import type { WalterSelectionEntry } from '$walter/lib';
+    import {
+        WalterJuristischePersonEntry,
+        type WalterSelectionEntry
+    } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
     import WalterQuickAddButton from './WalterQuickAddButton.svelte';
     import WalterMultiSelect from './WalterMultiSelect.svelte';
@@ -29,7 +32,7 @@
     <WalterQuickAddButton
         title="Juristische Personen"
         bind:addEntry
-        addUrl="/api/kontakte/jur"
+        addUrl={WalterJuristischePersonEntry.ApiURL}
         {onSubmit}
     >
         <WalterJuristischePerson entry={addEntry} {fetchImpl} />

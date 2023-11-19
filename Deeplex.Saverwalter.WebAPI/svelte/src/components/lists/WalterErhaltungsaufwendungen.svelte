@@ -5,10 +5,7 @@
         WalterDataWrapper,
         WalterErhaltungsaufwendung
     } from '$walter/components';
-    import type {
-        WalterErhaltungsaufwendungEntry,
-        WalterSelectionEntry
-    } from '$walter/lib';
+    import { WalterErhaltungsaufwendungEntry } from '$walter/lib';
     import { walter_goto } from '$walter/services/utils';
 
     const headers = [
@@ -18,8 +15,6 @@
         { key: 'betrag', value: 'Betrag' },
         { key: 'datum', value: 'Datum' }
     ];
-
-    const addUrl = `/api/erhaltungsaufwendungen/`;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
         walter_goto(`/erhaltungsaufwendungen/${e.detail.id}`);
@@ -34,7 +29,7 @@
 </script>
 
 <WalterDataWrapper
-    {addUrl}
+    addUrl={WalterErhaltungsaufwendungEntry.ApiURL}
     addEntry={entry}
     {title}
     {navigate}

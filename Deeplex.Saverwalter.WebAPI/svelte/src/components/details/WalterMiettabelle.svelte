@@ -1,9 +1,10 @@
 <script lang="ts">
-    import type { WalterVertragEntry, WalterMieteEntry } from '$walter/lib';
+    import { type WalterVertragEntry, WalterMieteEntry } from '$walter/lib';
     import {
         months,
         walter_data_miettabelle,
-        type WalterDataConfigType
+        type WalterDataConfigType,
+        type WalterDataPoint
     } from '../data/WalterData';
     import WalterDataHeatmapChart from '../data/WalterDataHeatmapChart.svelte';
     import { convertDateCanadian } from '$walter/services/utils';
@@ -38,7 +39,8 @@
     }
 
     function click(e: CustomEvent, config: WalterDataConfigType) {
-        const data = (e as any).target.__data__;
+        const targetWithData = e.target as { __data__?: WalterDataPoint };
+        const data = targetWithData?.__data__;
 
         // NOTE: Blame the tab implementation for all the tables being triggered at once.
         // Because of that all the configs with different years are filtered here.
@@ -63,9 +65,9 @@
             (entry) => entry.key === data.key && entry.year === year
         );
 
-        const vertragId = thisEntry?.id!;
+        const vertragId = thisEntry?.id;
         if (vertragId) {
-            const wohnung = data.group;
+            const wohnung = data.group!;
             const lastValue = (lastEntry?.value as number) || 0;
 
             updateEntry(vertragId, monthIndex, wohnung, lastValue);
@@ -75,17 +77,17 @@
 
     let addEntry: Partial<WalterMieteEntry> = {};
     let addModalOpen = false;
-    let addUrl = `/api/mieten`;
     let title = 'Unbekannter Vertrag';
 
-    function onSubmit(new_value: any) {
-        const vertrag = vertraege.find((e) => e.id === +new_value.vertrag?.id);
+    function onSubmit(new_value: unknown) {
+        const value = new_value as WalterMieteEntry;
+        const vertrag = vertraege.find((e) => e.id === +value.vertrag?.id);
         if (!vertrag) {
-            console.warn('Vertrag not found: ', new_value.vertrag?.id);
+            console.warn('Vertrag not found: ', value.vertrag?.id);
             return;
         }
-        mieten.push(new_value);
-        vertrag!.mieten.push(new_value);
+        mieten.push(value);
+        vertrag!.mieten.push(value);
         config = walter_data_miettabelle(vertraege, year);
     }
 </script>
@@ -93,7 +95,7 @@
 <WalterDataWrapperQuickAdd
     {onSubmit}
     bind:addEntry
-    {addUrl}
+    addUrl={WalterMieteEntry.ApiURL}
     bind:addModalOpen
     {title}
 >

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { InlineLoading, Loading, Tile } from 'carbon-components-svelte';
+    import { Loading, Tile } from 'carbon-components-svelte';
     import type { WalterS3File } from '$walter/types';
 
     export let file: WalterS3File;

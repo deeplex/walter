@@ -3,11 +3,12 @@
     import { handle_save } from './WalterDataWrapper';
     import { changeTracker } from '$walter/store';
     import { get } from 'svelte/store';
+
     export let addModalOpen = false;
     export let addUrl: string;
-    export let addEntry: any;
+    export let addEntry: unknown;
     export let title: string | undefined = undefined;
-    export let onSubmit: undefined | ((e: any) => void) = undefined;
+    export let onSubmit: undefined | ((e: unknown) => void) = undefined;
 
     async function submit() {
         if (!addUrl) return;

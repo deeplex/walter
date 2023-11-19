@@ -24,7 +24,7 @@
         value = walter_update_value(
             lastSavedValue,
             value || undefined,
-            '' + (e.target as any)?.value || undefined
+            '' + (e.target as HTMLTextAreaElement)?.value || undefined
         );
     };
 </script>

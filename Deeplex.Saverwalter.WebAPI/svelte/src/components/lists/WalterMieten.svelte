@@ -4,7 +4,7 @@
         WalterMiete,
         WalterNumberInput
     } from '$walter/components';
-    import type { WalterMieteEntry } from '$walter/lib';
+    import { WalterMieteEntry } from '$walter/lib';
     import { walter_goto } from '$walter/services/utils';
 
     const headers = [
@@ -12,8 +12,6 @@
         { key: 'zahlungsdatum', value: 'Zahlungsdatum' },
         { key: 'betrag', value: 'Betrag' }
     ];
-
-    const addUrl = `/api/mieten/`;
 
     export let rows: WalterMieteEntry[];
     const sortedRows = rows.sort((a, b) =>
@@ -28,8 +26,8 @@
 </script>
 
 <WalterDataWrapper
+    addUrl={WalterMieteEntry.ApiURL}
     {navigate}
-    {addUrl}
     addEntry={entry}
     {title}
     rows={sortedRows}

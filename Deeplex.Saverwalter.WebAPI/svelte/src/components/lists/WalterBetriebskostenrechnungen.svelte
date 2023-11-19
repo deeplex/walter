@@ -5,7 +5,7 @@
         WalterBetriebskostenrechnung,
         WalterDataWrapper
     } from '$walter/components';
-    import type { WalterBetriebskostenrechnungEntry } from '$walter/lib';
+    import { WalterBetriebskostenrechnungEntry } from '$walter/lib';
     import { walter_goto } from '$walter/services/utils';
 
     export let fullHeight = false;
@@ -21,8 +21,6 @@
         { key: 'datum', value: 'Datum' }
     ];
 
-    const addUrl = `/api/betriebskostenrechnungen/`;
-
     const navigate = (e: CustomEvent<DataTableRow>) =>
         walter_goto(`/betriebskostenrechnungen/${e.detail.id}`);
 
@@ -31,7 +29,7 @@
 </script>
 
 <WalterDataWrapper
-    {addUrl}
+    addUrl={WalterBetriebskostenrechnungEntry.ApiURL}
     addEntry={entry}
     {title}
     {navigate}

@@ -6,7 +6,7 @@
 
     export let step: number;
     export let fetchImpl: typeof fetch;
-    export let entry: any;
+    export let entry: unknown;
     export let selectedTable: WalterPreviewCopyTable | undefined;
     export let selectedEntry: WalterSelectionEntry | undefined;
     export let updateRows: () => void;

@@ -17,8 +17,6 @@
     export let readonly = false;
 
     const zaehlertypen = walter_selection.zaehlertypen(fetchImpl);
-    const wohnungen = walter_selection.wohnungen(fetchImpl);
-    const umlagen = walter_selection.umlagen(fetchImpl);
 </script>
 
 <Row>

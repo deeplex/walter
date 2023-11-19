@@ -7,7 +7,7 @@
         WalterMiete,
         WalterVertrag
     } from '$walter/components';
-    import type { WalterMieteEntry, WalterVertragEntry } from '$walter/lib';
+    import { WalterVertragEntry, type WalterMieteEntry } from '$walter/lib';
     import { convertDateCanadian, walter_goto } from '$walter/services/utils';
 
     const headers = [
@@ -17,8 +17,6 @@
         { key: 'ende', value: 'Ende' },
         { key: 'button', value: 'Miete hinzufügen' }
     ];
-
-    const addUrl = `/api/vertraege/`;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
         walter_goto(`/vertraege/${e.detail.id}`);
@@ -73,14 +71,14 @@
 <WalterDataWrapperQuickAdd
     title={quickAddEntry.vertrag?.text || 'Vertrag'}
     addEntry={quickAddEntry}
-    addUrl="/api/vertraege/"
+    addUrl={WalterVertragEntry.ApiURL}
     bind:addModalOpen={open}
 >
     <WalterMiete entry={quickAddEntry} />
 </WalterDataWrapperQuickAdd>
 
 <WalterDataWrapper
-    {addUrl}
+    addUrl={WalterVertragEntry.ApiURL}
     addEntry={entry}
     {title}
     {navigate}

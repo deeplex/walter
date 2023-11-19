@@ -5,10 +5,7 @@
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import WalterZaehlerstand from '../details/WalterZaehlerstand.svelte';
     import { convertDateCanadian, walter_goto } from '$walter/services/utils';
-    import type {
-        WalterZaehlerEntry,
-        WalterZaehlerstandEntry
-    } from '$walter/lib';
+    import { WalterZaehlerEntry, WalterZaehlerstandEntry } from '$walter/lib';
 
     const headers = [
         { key: 'kennnummer', value: 'Kennnummer' },
@@ -20,8 +17,6 @@
         { key: 'ende', value: 'Ende' },
         { key: 'button', value: 'Stand hinzufügen' }
     ];
-
-    const addUrl = `/api/zaehler/`;
 
     export let rows: WalterZaehlerEntry[];
     export let fullHeight = false;
@@ -60,15 +55,15 @@
 <WalterDataWrapperQuickAdd
     title={quickAddEntry.zaehler?.text || 'Zähler'}
     addEntry={quickAddEntry}
-    addUrl="/api/zaehlerstaende/"
+    addUrl={WalterZaehlerstandEntry.ApiURL}
     bind:addModalOpen={open}
 >
     <WalterZaehlerstand {fetchImpl} entry={quickAddEntry} />
 </WalterDataWrapperQuickAdd>
 
 <WalterDataWrapper
+    addUrl={WalterZaehlerEntry.ApiURL}
     addEntry={entry}
-    {addUrl}
     {title}
     {navigate}
     rows={rowsAdd}

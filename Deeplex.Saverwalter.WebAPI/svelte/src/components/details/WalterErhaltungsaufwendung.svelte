@@ -8,17 +8,11 @@
         WalterComboBoxWohnung
     } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
-    import type {
-        WalterErhaltungsaufwendungEntry,
-        WalterWohnungEntry
-    } from '$walter/lib';
-    import { walter_selection } from '$walter/services/requests';
+    import type { WalterErhaltungsaufwendungEntry } from '$walter/lib';
 
     export let entry: Partial<WalterErhaltungsaufwendungEntry> = {};
     export let fetchImpl: typeof fetch;
     export let readonly = false;
-
-    const kontakte = walter_selection.kontakte(fetchImpl);
 </script>
 
 <Row>

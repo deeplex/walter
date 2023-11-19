@@ -30,15 +30,15 @@
         updateLastSavedValue();
     });
 
-    function change(e: any) {
-        const germanDate = e.target.value;
+    function change(e: Event) {
+        const germanDate = (e.target as HTMLSelectElement).value;
         if (!germanDate) {
             value = walter_update_value(lastSavedValue, value, undefined);
         } else {
             const [day, month, year] = germanDate.split('.');
             // month starts at 0. So 1 has to be substracted
             const new_value = convertDateCanadian(
-                new Date(year, month - 1, day)
+                new Date(+year, +month - 1, +day)
             );
             value = walter_update_value(lastSavedValue, value, new_value);
         }

@@ -26,20 +26,24 @@
         key: string;
         value: string;
     }[];
-    export let rows: any[];
+    export let rows: unknown[];
     export let add: (() => void) | undefined = undefined;
 
     export let navigate: (
         e: CustomEvent<DataTableRow>
     ) => Promise<void> | void = () => {};
 
-    function shouldFilterRows(row: any, value: any) {
+    function shouldFilterRows(row: { [key: string]: unknown }, value: unknown) {
         const filteredValues = headers.map((headerObj) => {
             const keys = headerObj.key.split('.');
-            let value = row;
+            let value: unknown | null = row;
             keys.forEach((key) => {
-                if (value?.hasOwnProperty(key)) {
-                    value = value[key];
+                if (
+                    typeof value === 'object' &&
+                    value !== null &&
+                    key in value
+                ) {
+                    value = (value as { [key: string]: unknown })[key];
                 } else {
                     value = null;
                 }

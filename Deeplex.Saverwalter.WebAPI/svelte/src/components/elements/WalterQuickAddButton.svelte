@@ -4,8 +4,8 @@
     import WalterDataWrapperQuickAdd from './WalterDataWrapperQuickAdd.svelte';
 
     export let addUrl: string;
-    export let addEntry: any = {};
-    export let onSubmit: undefined | ((e: any) => void) = undefined;
+    export let addEntry: unknown = {};
+    export let onSubmit: undefined | ((e: unknown) => void) = undefined;
     export let title: string | undefined = undefined;
 
     let addModalOpen = false;

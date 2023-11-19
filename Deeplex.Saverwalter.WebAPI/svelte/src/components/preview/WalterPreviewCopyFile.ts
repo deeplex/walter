@@ -174,9 +174,9 @@ export type WalterPreviewCopyTable = {
             input: RequestInfo | URL,
             init?: RequestInit | undefined
         ) => Promise<Response>
-    ) => Promise<any>;
+    ) => Promise<unknown>;
     S3URL: string;
-    newPage: any;
+    newPage: () => unknown;
 };
 
 export const tables: WalterPreviewCopyTable[] = [
@@ -280,7 +280,7 @@ export const tables: WalterPreviewCopyTable[] = [
     {
         value: 'Ablagestapel',
         key: 'stack',
-        fetch: () => undefined as any,
+        fetch: () => Promise.resolve(),
         S3URL: 'stack',
         newPage: () => undefined
     }

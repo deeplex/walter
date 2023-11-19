@@ -2,15 +2,13 @@
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import { WalterDataWrapper, WalterUmlage } from '$walter/components';
-    import type { WalterUmlageEntry } from '$walter/lib';
+    import { WalterUmlageEntry } from '$walter/lib';
     import { walter_goto } from '$walter/services/utils';
 
     const headers = [
         { key: 'typ.text', value: 'Typ' },
         { key: 'wohnungenBezeichnung', value: 'Wohnungen' }
     ];
-
-    const addUrl = `/api/umlagen/`;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
         walter_goto(`/umlagen/${e.detail.id}`);
@@ -23,8 +21,8 @@
 </script>
 
 <WalterDataWrapper
+    addUrl={WalterUmlageEntry.ApiURL}
     addEntry={entry}
-    {addUrl}
     {title}
     {navigate}
     {rows}

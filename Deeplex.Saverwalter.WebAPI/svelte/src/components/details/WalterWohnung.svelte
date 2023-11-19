@@ -8,13 +8,10 @@
     } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
     import type { WalterWohnungEntry } from '$walter/lib';
-    import { walter_selection } from '$walter/services/requests';
 
     export let entry: Partial<WalterWohnungEntry> = {};
     export let fetchImpl: typeof fetch;
     export let readonly = false;
-
-    const kontakte = walter_selection.kontakte(fetchImpl);
 </script>
 
 <Row>

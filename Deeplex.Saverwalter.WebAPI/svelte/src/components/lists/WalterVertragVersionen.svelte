@@ -3,7 +3,7 @@
         WalterDataWrapper,
         WalterVertragVersion
     } from '$walter/components';
-    import type { WalterVertragVersionEntry } from '$walter/lib';
+    import { WalterVertragVersionEntry } from '$walter/lib';
     import { walter_goto } from '$walter/services/utils';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
@@ -13,8 +13,6 @@
         { key: 'grundmiete', value: 'Grundmiete' },
         { key: 'notiz', value: 'Notiz' }
     ];
-
-    const addUrl = `/api/vertragversionen/`;
 
     export let rows: WalterVertragVersionEntry[];
     export let fullHeight = false;
@@ -28,8 +26,8 @@
 </script>
 
 <WalterDataWrapper
+    addUrl={WalterVertragVersionEntry.ApiURL}
     {navigate}
-    {addUrl}
     addEntry={entry}
     {title}
     {rows}

@@ -19,7 +19,7 @@
 
     function entryClick() {
         selectedEntry = undefined;
-        if (!!selectedTable) {
+        if (selectedTable) {
             step = 1;
         }
     }

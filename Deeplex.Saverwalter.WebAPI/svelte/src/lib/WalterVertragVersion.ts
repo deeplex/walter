@@ -17,7 +17,7 @@ export class WalterVertragVersionEntry extends WalterApiHandler {
         super();
     }
 
-    static fromJson(json: any) {
+    static fromJson(json: WalterVertragVersionEntry) {
         const vertrag =
             json.vertrag && WalterSelectionEntry.fromJson(json.vertrag);
 

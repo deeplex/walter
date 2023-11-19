@@ -2,8 +2,6 @@
     import { walter_goto } from '$walter/services/utils';
     import { Link } from 'carbon-components-svelte';
 
-    let winWidth = 0;
-
     export let href: string;
 
     function click(e: Event) {

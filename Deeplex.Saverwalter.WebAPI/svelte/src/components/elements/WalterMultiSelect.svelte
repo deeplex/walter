@@ -31,7 +31,7 @@
     }
 
     // svelte things item should be MultiSelectItem but importing is squiggly.
-    function filterItem(item: any, value: string) {
+    function filterItem(item: { text: string } & unknown, value: string) {
         if (!value) return true;
 
         const text = item.text.toLowerCase();
@@ -39,7 +39,7 @@
             .toLowerCase()
             .split(';')
             .map((e) => e.trim());
-        return values.every((val) => text.includes(val)) as any; // svelte things this should be string...
+        return values.every((val) => text.includes(val)); // svelte thinks this should be string...
     }
 </script>
 

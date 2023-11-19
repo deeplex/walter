@@ -19,8 +19,6 @@
     import { Row } from 'carbon-components-svelte';
     import WalterDataLineChart from '$walter/components/data/WalterDataLineChart.svelte';
     import { walter_data_rechnungen_year } from '$walter/components/data/WalterData';
-    import WalterUmlagen from '$walter/components/lists/WalterUmlagen.svelte';
-    import WalterUmlagetyp from '$walter/components/details/WalterUmlagetyp.svelte';
 
     export let data: PageData;
 

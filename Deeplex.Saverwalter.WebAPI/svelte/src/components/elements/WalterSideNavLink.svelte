@@ -16,7 +16,7 @@
         walter_goto(href);
         // https://github.com/carbon-design-system/carbon-components-svelte/blob/master/src/UIShell/Header.svelte#L44
         if (winWidth < 1056) {
-            isWalterSideNavOpen.update((_e: unknown) => false);
+            isWalterSideNavOpen.update(() => false);
         }
     }
 </script>

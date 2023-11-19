@@ -1,5 +1,8 @@
 <script lang="ts">
-    import type { WalterSelectionEntry } from '$walter/lib';
+    import {
+        WalterUmlagetypEntry,
+        type WalterSelectionEntry
+    } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
     import { WalterComboBox, WalterUmlagetyp } from '..';
     import WalterQuickAddButton from './WalterQuickAddButton.svelte';
@@ -35,7 +38,7 @@
     <WalterQuickAddButton
         title="Umlagetypen"
         bind:addEntry
-        addUrl="/api/umlagetypen"
+        addUrl={WalterUmlagetypEntry.ApiURL}
         {onSubmit}
     >
         <WalterUmlagetyp entry={addEntry} {fetchImpl} />

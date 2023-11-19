@@ -3,6 +3,7 @@
     import type { WalterBetriebskostenrechnungEntry } from '$walter/lib';
     import { convertDateCanadian } from '$walter/services/utils';
     import type { WalterRechnungEntry } from '$walter/types/WalterBetriebskostenabrechnung.type';
+    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
     import WalterBetriebskostenrechnung from '../details/WalterBetriebskostenrechnung.svelte';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import { goto_or_create_rechnung } from './WalterAbrechnungGruppe';
@@ -43,8 +44,8 @@
         button: row.rechnungId ? 'disabled' : (e: CustomEvent) => add(e, row)
     }));
 
-    const navigate = (e: any) => {
-        goto_or_create_rechnung(e.detail, year);
+    const navigate = (e: CustomEvent<DataTableRow>) => {
+        goto_or_create_rechnung(e.detail as WalterRechnungEntry, year);
     };
 
     let open = false;

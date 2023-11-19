@@ -9,7 +9,7 @@ export class WalterSelectionEntry extends WalterApiHandler {
         super();
     }
 
-    static fromJson(json: any) {
+    static fromJson(json: WalterSelectionEntry) {
         return new WalterSelectionEntry(json.id, json.text, json.filter);
     }
 }

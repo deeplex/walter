@@ -1,4 +1,3 @@
-import { walter_selection } from '$walter/services/requests';
 import { WalterBetriebskostenrechnungEntry } from '$walter/lib';
 import type { PageLoad } from './$types';
 

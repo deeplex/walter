@@ -5,7 +5,7 @@
     export let step: number;
     export let tables: WalterPreviewCopyTable[];
     export let selectedTable: WalterPreviewCopyTable | undefined;
-    export let selectedTable_change: (e: any) => Promise<void>;
+    export let selectedTable_change: (e: Event) => Promise<void>;
 </script>
 
 {#if step === 0}

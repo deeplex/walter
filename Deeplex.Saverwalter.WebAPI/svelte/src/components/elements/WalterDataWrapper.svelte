@@ -8,16 +8,14 @@
 
     export let fullHeight = false;
     export let addUrl: string | undefined = undefined;
-    export let addEntry: any | undefined = undefined;
+    export let addEntry: unknown | undefined = undefined;
     export let title: string | undefined = undefined;
-    export let rows: any[];
+    export let rows: unknown[];
     export let headers: {
         key: string;
         value: string;
     }[];
-    export let navigate: (e: CustomEvent) => Promise<void> | void = (
-        _e: unknown
-    ) => {};
+    export let navigate: (e: CustomEvent) => Promise<void> | void = () => {};
 
     let open = false;
     let addModalOpen = false;
@@ -29,7 +27,7 @@
         walter_goto(`${$page.url.pathname}/new`);
     }
 
-    function onSubmit(new_value: any) {
+    function onSubmit(new_value: unknown) {
         rows = [...rows, new_value];
     }
 </script>

@@ -2,15 +2,15 @@ import { WalterToastContent } from '$walter/lib';
 import { walter_post } from '$walter/services/requests';
 import { addToast } from '$walter/store';
 
-export async function handle_save(apiURL: string, entry: any) {
+export async function handle_save(apiURL: string, entry: unknown) {
     const SaveToast = new WalterToastContent(
         'Speichern erfolgreich',
         'Speichern fehlgeschlagen',
-        (a: any) => a,
-        (a: any) =>
+        (a: unknown) => a as string,
+        (a: unknown) =>
             `Speichern fehlgeschlagen.
         Folgende Einträge sind erforderlich:
-        ${Object.keys(a.errors)
+        ${Object.keys((a as { errors: string }).errors)
             .map((e) => e.split('.').pop())
             .join(', \n')}`
     );

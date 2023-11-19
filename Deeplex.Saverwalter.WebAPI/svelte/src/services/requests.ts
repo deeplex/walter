@@ -108,7 +108,7 @@ export async function walter_fetch(
 export const walter_get = (
     url: string,
     fetchImpl: typeof fetch
-): Promise<any> =>
+): Promise<unknown> =>
     walter_fetch(fetchImpl, url, { method: 'GET' }).then((e) => e.json());
 
 // =================================== PUT ===================================

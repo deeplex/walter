@@ -5,8 +5,7 @@
     import {
         WalterComboBox,
         WalterJuristischePerson,
-        WalterNatuerlichePerson,
-        WalterWohnung
+        WalterNatuerlichePerson
     } from '..';
     import WalterQuickAddButton from './WalterQuickAddButton.svelte';
 

@@ -1,12 +1,13 @@
 <script lang="ts">
-    import type {
+    import {
         WalterBetriebskostenrechnungEntry,
-        WalterUmlageEntry
+        type WalterUmlageEntry
     } from '$walter/lib';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
         walter_data_rechnungentabelle,
-        type WalterDataConfigType
+        type WalterDataConfigType,
+        type WalterDataPoint
     } from '../data/WalterData';
     import WalterDataHeatmapChart from '../data/WalterDataHeatmapChart.svelte';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
@@ -38,7 +39,8 @@
     }
 
     function click(e: CustomEvent, config: WalterDataConfigType) {
-        const data = (e as any).target.__data__;
+        const targetWithData = e.target as { __data__?: WalterDataPoint };
+        const data = targetWithData?.__data__;
 
         // NOTE: Blame the tab implementation for all the tables being triggered at once.
         // Because of that all the configs with different years are filtered here.
@@ -55,25 +57,25 @@
         const umlageId = thisEntry.id!;
 
         if (umlageId) {
-            updateEntry(umlageId, umlageTyp, rechnungTyp);
+            updateEntry(umlageId, umlageTyp!, rechnungTyp);
             addModalOpen = true;
         }
     }
 
     let addEntry: Partial<WalterBetriebskostenrechnungEntry> = {};
     let addModalOpen = false;
-    let addUrl = `/api/betriebskostenrechnungen`;
     let title = 'Umlage';
     let rechnungen = umlagen.flatMap((e) => e.betriebskostenrechnungen);
 
-    function onSubmit(new_value: any) {
-        const umlage = umlagen.find((e) => e.id === +new_value.umlage?.id);
+    function onSubmit(new_value: unknown) {
+        const value = new_value as WalterBetriebskostenrechnungEntry;
+        const umlage = umlagen.find((e) => e.id === +value.umlage?.id);
         if (!umlage) {
-            console.warn('Umlage not found: ', new_value.umlage.id);
+            console.warn('Umlage not found: ', value.umlage.id);
             return;
         }
-        umlage!.betriebskostenrechnungen.push(new_value);
-        rechnungen.push(new_value);
+        umlage!.betriebskostenrechnungen.push(value);
+        rechnungen.push(value);
         config = walter_data_rechnungentabelle(umlagen, year);
     }
 </script>
@@ -81,7 +83,7 @@
 <WalterDataWrapperQuickAdd
     {onSubmit}
     bind:addEntry
-    {addUrl}
+    addUrl={WalterBetriebskostenrechnungEntry.ApiURL}
     bind:addModalOpen
     {title}
 >

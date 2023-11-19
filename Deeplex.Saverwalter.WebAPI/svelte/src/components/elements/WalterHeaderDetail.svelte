@@ -15,17 +15,17 @@
     import { convertTime } from '$walter/services/utils';
 
     export let title = 'Saverwalter';
-    export let entry: any;
+    export let entry: { lastModified: Date } & unknown;
     export let apiURL: string;
     export let fileWrapper: WalterS3FileWrapper | undefined = undefined;
 
     let winWidth = 0;
 
-    function click_save(e: MouseEvent): void {
+    function click_save(): void {
         handle_save(apiURL, entry, title);
     }
 
-    function click_delete(e: MouseEvent): void {
+    function click_delete(): void {
         handle_delete(title, apiURL);
     }
 

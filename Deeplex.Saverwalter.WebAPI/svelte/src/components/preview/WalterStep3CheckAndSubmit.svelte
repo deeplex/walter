@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Link, Tile } from 'carbon-components-svelte';
+    import { Tile } from 'carbon-components-svelte';
     import type { WalterPreviewCopyTable } from './WalterPreviewCopyFile';
     import { page } from '$app/stores';
     import type { WalterSelectionEntry } from '$walter/lib';

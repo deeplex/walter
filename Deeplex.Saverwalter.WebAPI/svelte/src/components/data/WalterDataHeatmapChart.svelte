@@ -7,15 +7,16 @@
 
     export let config: WalterDataConfigType;
     export let click:
-        | ((e: CustomEvent<any>, config: WalterDataConfigType) => void)
+        | ((e: CustomEvent<unknown>, config: WalterDataConfigType) => void)
         | undefined = undefined;
 
     let heatMap: HeatmapChart;
 
     onMount(() => {
         if (click) {
-            heatMap.$$.root.addEventListener('click', (e: CustomEvent<any>) =>
-                click!(e, config)
+            heatMap.$$.root.addEventListener(
+                'click',
+                (e: CustomEvent<unknown>) => click!(e, config)
             );
         }
     });

@@ -38,7 +38,7 @@
         open = false;
     }
 
-    function click_download(e: MouseEvent): void {
+    function click_download(): void {
         download(file);
     }
 

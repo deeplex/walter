@@ -9,9 +9,8 @@
     import WalterComboBox from '../elements/WalterComboBox.svelte';
     import {
         WalterUmlageEntry,
-        type WalterHKVOEntry,
-        type WalterSelectionEntry,
-        type WalterWohnungEntry
+        WalterHKVOEntry,
+        type WalterSelectionEntry
     } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
     import { onMount } from 'svelte';
@@ -33,8 +32,10 @@
 
     const hkvo_p9a2 = walter_selection.hkvo_p9a2(fetchImpl).then((res) => {
         // TODO: Implement Satz 1 and Satz 4
-        (res[0] as any).disabled = true;
-        (res[2] as any).disabled = true;
+        (res[0] as WalterSelectionEntry & { disabled: boolean }).disabled =
+            true;
+        (res[2] as WalterSelectionEntry & { disabled: boolean }).disabled =
+            true;
 
         return res;
     });
@@ -97,8 +98,8 @@
         updateSelectableUmlagen();
     }
 
-    function change(e: any, p9a2: WalterSelectionEntry[]) {
-        if (e.target.checked) {
+    function change(e: Event, p9a2: WalterSelectionEntry[]) {
+        if ((e.target as HTMLInputElement).checked) {
             entry.hKVO = {
                 hkvO_P7: oldHKVO.hkvO_P7 || 50,
                 hkvO_P8: oldHKVO.hkvO_P8 || 50,

@@ -1,8 +1,5 @@
 import { WalterApiHandler } from './WalterApiHandler';
-import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
 import { WalterSelectionEntry } from './WalterSelection';
-import { WalterWohnungEntry } from './WalterWohnung';
-import { WalterZaehlerEntry } from './WalterZaehler';
 
 export class WalterHKVOEntry extends WalterApiHandler {
     // public static ApiURL = `/api/hkvo`;
@@ -21,7 +18,7 @@ export class WalterHKVOEntry extends WalterApiHandler {
         super();
     }
 
-    static fromJson(json: any) {
+    static fromJson(json: WalterHKVOEntry) {
         const hkvo_p9 =
             json.hkvO_P9 && WalterSelectionEntry.fromJson(json.hkvO_P9);
         const stromrechnung =

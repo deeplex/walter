@@ -12,7 +12,7 @@
     export let apiURL: string;
     export let entry: unknown;
 
-    function click_post(e: MouseEvent): void {
+    function click_post(): void {
         handle_save(apiURL, entry);
     }
 </script>

@@ -2,12 +2,10 @@
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import { WalterDataWrapper, WalterUmlagetyp } from '$walter/components';
-    import type { WalterUmlagetypEntry } from '$walter/lib';
+    import { WalterUmlagetypEntry } from '$walter/lib';
     import { walter_goto } from '$walter/services/utils';
 
     const headers = [{ key: 'bezeichnung', value: 'Bezeichnung' }];
-
-    const addUrl = `/api/umlagetypen/`;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
         walter_goto(`/umlagetypen/${e.detail.id}`);
@@ -20,8 +18,8 @@
 </script>
 
 <WalterDataWrapper
+    addUrl={WalterUmlagetypEntry.ApiURL}
     addEntry={entry}
-    {addUrl}
     {title}
     {navigate}
     {rows}

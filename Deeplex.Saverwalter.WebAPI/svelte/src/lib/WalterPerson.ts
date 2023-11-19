@@ -22,14 +22,14 @@ export class WalterPersonEntry extends WalterApiHandler {
         public selectedJuristischePersonen: WalterSelectionEntry[],
         public natuerlichePerson: boolean,
         public adresse: WalterAdresseEntry | undefined,
-        public juristischePersonen: WalterPersonEntry[],
+        public juristischePersonen: WalterJuristischePersonEntry[],
         public wohnungen: WalterWohnungEntry[],
         public vertraege: WalterVertragEntry[]
     ) {
         super();
     }
 
-    static fromJson(json: any) {
+    static fromJson(json: WalterPersonEntry): WalterPersonEntry {
         const adresse =
             json.adresse && WalterAdresseEntry.fromJson(json.adresse);
         const selectedJuristischePersonen =
@@ -39,8 +39,12 @@ export class WalterPersonEntry extends WalterApiHandler {
         const juristischePersonen = json.juristischePersonen?.map(
             WalterJuristischePersonEntry.fromJson
         );
-        const wohnungen = json.wohnungen?.map(WalterWohnungEntry.fromJson);
-        const vertraege = json.vertraege?.map(WalterVertragEntry.fromJson);
+        const wohnungen: WalterWohnungEntry[] = json.wohnungen?.map(
+            WalterWohnungEntry.fromJson
+        );
+        const vertraege: WalterVertragEntry[] = json.vertraege?.map(
+            WalterVertragEntry.fromJson
+        );
 
         return new WalterPersonEntry(
             json.id,

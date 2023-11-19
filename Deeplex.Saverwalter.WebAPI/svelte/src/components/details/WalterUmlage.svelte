@@ -17,7 +17,6 @@
     export let fetchImpl: typeof fetch;
     export let readonly = false;
 
-    const umlagetypen = walter_selection.umlagetypen(fetchImpl);
     const umlageschluessel = walter_selection.umlageschluessel(fetchImpl);
 </script>
 

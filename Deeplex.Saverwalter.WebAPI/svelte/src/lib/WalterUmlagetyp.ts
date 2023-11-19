@@ -15,7 +15,7 @@ export class WalterUmlagetypEntry extends WalterApiHandler {
         super();
     }
 
-    static fromJson(json: any) {
+    static fromJson(json: WalterUmlagetypEntry) {
         const umlagen = json.umlagen?.map(WalterUmlageEntry.fromJson);
 
         return new WalterUmlagetypEntry(

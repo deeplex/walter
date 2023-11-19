@@ -6,15 +6,14 @@
 
     import {
         HeaderPanelLink,
-        TooltipDefinition,
-        Truncate
+        TooltipDefinition
     } from 'carbon-components-svelte';
     import WalterPreview from '../preview/WalterPreview.svelte';
     import type { WalterS3FileWrapper } from '$walter/lib';
     import { get_file_and_update_url } from './WalterAnhaengeEntry';
     import { page } from '$app/stores';
 
-    async function showModal(e: MouseEvent) {
+    async function showModal() {
         selectedFile = await get_file_and_update_url(file);
         previewOpen = true;
     }

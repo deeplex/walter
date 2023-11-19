@@ -25,7 +25,7 @@ export class WalterZaehlerEntry extends WalterApiHandler {
         super();
     }
 
-    static fromJson(json: any) {
+    static fromJson(json: WalterZaehlerEntry) {
         const adresse =
             json.adresse && WalterAdresseEntry.fromJson(json.adresse);
         const typ = json.typ && WalterSelectionEntry.fromJson(json.typ);
@@ -33,7 +33,7 @@ export class WalterZaehlerEntry extends WalterApiHandler {
             json.wohnung && WalterSelectionEntry.fromJson(json.wohnung);
         const umlagen = json.umlagen?.map(WalterUmlageEntry.fromJson);
         const selectedUmlagen = json.selectedUmlagen?.map(
-            WalterUmlageEntry.fromJson
+            WalterSelectionEntry.fromJson
         );
         const staende = json.staende?.map(WalterZaehlerstandEntry.fromJson);
         const lastZaehlerstand =

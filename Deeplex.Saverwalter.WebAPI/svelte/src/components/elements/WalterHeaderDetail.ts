@@ -4,23 +4,23 @@ import { changeTracker, openModal } from '$walter/store';
 
 export async function handle_save(
     apiURL: string,
-    entry: unknown,
+    entry: { lastModified: Date } & unknown,
     toastTitle: string
 ) {
     const PutToast = new WalterToastContent(
         'Speichern erfolgreich',
         'Speichern fehlgeschlagen',
-        (_a: unknown) => `${toastTitle} erfolgreich gespeichert.`,
-        (a: any) =>
+        () => `${toastTitle} erfolgreich gespeichert.`,
+        (a: unknown) =>
             `Folgende Einträge sind erforderlich:
-            ${Object.keys(a.errors)
+            ${Object.keys((a as { errors: string }).errors)
                 .map((e) => e.split('.').pop())
                 .join(', \n')}`
     );
 
     const result = await walter_put(apiURL, entry, PutToast);
     if (result.ok) {
-        (entry as any).lastModified = new Date();
+        entry.lastModified = new Date();
         changeTracker.set(-1);
         changeTracker.set(0);
     }
@@ -33,8 +33,8 @@ export function handle_delete(title: string, apiURL: string) {
     const DeleteToast = new WalterToastContent(
         'Löschen erfolgreich',
         'Löschen fehlgeschlagen',
-        (_a: unknown) => `${title} erfolgreich gelöscht.`,
-        (_a: unknown) => ''
+        () => `${title} erfolgreich gelöscht.`,
+        () => ''
     );
 
     openModal({

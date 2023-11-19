@@ -1,11 +1,9 @@
 import type {
     WalterMieteEntry,
     WalterSelectionEntry,
-    WalterUmlageEntry,
     WalterVertragEntry,
     WalterWohnungEntry,
-    WalterZaehlerEntry,
-    WalterZaehlerstandEntry
+    WalterZaehlerEntry
 } from '$walter/lib';
 
 export type WalterBetriebskostenabrechnungEntry = {

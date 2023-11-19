@@ -1,10 +1,5 @@
 <script lang="ts">
-    import {
-        convertDateGerman,
-        convertM2,
-        convertPercent
-    } from '$walter/services/utils';
-    import type { WalterZeitraum } from '$walter/types/WalterBetriebskostenabrechnung.type';
+    import { convertDateGerman, convertPercent } from '$walter/services/utils';
     import {
         StructuredListCell,
         StructuredListRow

@@ -8,10 +8,7 @@
     import { WalterZaehlerEntry, WalterZaehlerstandEntry } from '$walter/lib';
     import WalterTextInput from '../elements/WalterTextInput.svelte';
     import { onMount } from 'svelte';
-    import {
-        convertDateCanadian,
-        convertDateGerman
-    } from '$walter/services/utils';
+    import { convertDateGerman } from '$walter/services/utils';
 
     export let entry: Partial<WalterZaehlerstandEntry> = {};
     export let fetchImpl: typeof fetch | undefined = undefined;

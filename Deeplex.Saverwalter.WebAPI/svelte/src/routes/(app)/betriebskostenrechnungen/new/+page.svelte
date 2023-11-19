@@ -27,9 +27,7 @@
         );
 
         if (betriebskostenTypId) {
-            entry.typ = umlagetypen.find(
-                (e: any) => +e.id === +betriebskostenTypId
-            );
+            entry.typ = umlagetypen.find((e) => +e.id === +betriebskostenTypId);
         }
 
         const umlageId = searchParams.get('umlage');

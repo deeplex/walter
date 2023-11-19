@@ -21,7 +21,9 @@ export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
         super();
     }
 
-    public static fromJson(json: any): WalterBetriebskostenrechnungEntry {
+    public static fromJson(
+        json: WalterBetriebskostenrechnungEntry
+    ): WalterBetriebskostenrechnungEntry {
         const typ = json.typ && WalterSelectionEntry.fromJson(json.typ);
         const umlage =
             json.umlage && WalterSelectionEntry.fromJson(json.umlage);

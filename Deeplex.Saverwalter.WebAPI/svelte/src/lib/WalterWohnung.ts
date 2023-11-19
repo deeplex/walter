@@ -32,12 +32,14 @@ export class WalterWohnungEntry extends WalterApiHandler {
         super();
     }
 
-    static fromJson(json: any) {
+    static fromJson(json: WalterWohnungEntry) {
         const adresse =
             json.adresse && WalterAdresseEntry.fromJson(json.adresse);
         const besitzer =
             json.besitzer && WalterSelectionEntry.fromJson(json.besitzer);
-        const haus = json.haus?.map(WalterWohnungEntry.fromJson);
+        const haus: WalterWohnungEntry[] = json.haus?.map(
+            WalterWohnungEntry.fromJson
+        );
         const zaehler = json.zaehler?.map(WalterZaehlerEntry.fromJson);
         const vertraege = json.vertraege?.map(WalterVertragEntry.fromJson);
         const betriebskostenrechnungen = json.betriebskostenrechnungen?.map(

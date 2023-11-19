@@ -1,11 +1,6 @@
 <script lang="ts">
     import { WalterAnhaengeEntry, WalterHeader } from '$walter/components';
-    import {
-        Button,
-        Content,
-        InlineLoading,
-        Loading
-    } from 'carbon-components-svelte';
+    import { Button, Content, Loading } from 'carbon-components-svelte';
     import type { PageData } from './$types';
     import { WalterS3FileWrapper, WalterToastContent } from '$walter/lib';
     import {

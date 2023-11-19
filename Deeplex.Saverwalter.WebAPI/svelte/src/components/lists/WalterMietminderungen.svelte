@@ -1,6 +1,6 @@
 <script lang="ts">
     import { WalterDataWrapper, WalterMietminderung } from '$walter/components';
-    import type { WalterMietminderungEntry } from '$walter/lib';
+    import { WalterMietminderungEntry } from '$walter/lib';
     import { walter_goto } from '$walter/services/utils';
 
     const headers = [
@@ -8,8 +8,6 @@
         { key: 'ende', value: 'Ende' },
         { key: 'minderung', value: 'Minderung' }
     ];
-
-    const addUrl = `/api/mietminderungen/`;
 
     export let rows: WalterMietminderungEntry[];
     export let fullHeight = false;
@@ -22,8 +20,8 @@
 </script>
 
 <WalterDataWrapper
+    addUrl={WalterMietminderungEntry.ApiURL}
     {navigate}
-    {addUrl}
     addEntry={entry}
     {title}
     {rows}

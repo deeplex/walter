@@ -6,7 +6,7 @@
     export let step: number;
     export let rows: WalterSelectionEntry[] | undefined;
     export let selectedEntry: WalterSelectionEntry | undefined;
-    export let selectedEntry_change: (e: CustomEvent<any>) => void;
+    export let selectedEntry_change: (e: CustomEvent<unknown>) => void;
     export let entry;
 
     const headers = [{ key: 'text', value: 'Bezeichnung' }];

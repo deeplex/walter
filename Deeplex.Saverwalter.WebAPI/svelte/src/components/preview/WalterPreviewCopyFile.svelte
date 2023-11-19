@@ -21,7 +21,7 @@
     export let step: number;
     export let selectedTable: WalterPreviewCopyTable | undefined = undefined;
     export let selectedEntry: WalterSelectionEntry | undefined = undefined;
-    export let entry: any;
+    export let entry: unknown;
     export let rows: WalterSelectionEntry[] | undefined = undefined;
 
     onMount(async () => {
@@ -60,8 +60,10 @@
         rows = (await selectedTable!.fetch(fileWrapper.fetchImpl)) || [];
     }
 
-    async function selectedTable_change(e: any) {
-        selectedTable = tables.find((t) => t.key === e.target.value);
+    async function selectedTable_change(e: Event) {
+        selectedTable = tables.find(
+            (t) => t.key === (e.target as HTMLSelectElement)?.value
+        );
         rows = undefined;
         if (selectedTable?.key === 'stack') {
             step = 3;
@@ -79,7 +81,7 @@
         );
     }
 
-    async function selectedEntry_change(e: CustomEvent<any>) {
+    async function selectedEntry_change(e: CustomEvent) {
         setTimeout(() => (step = 2), 0);
         await selectEntryFromId(e.detail.id);
     }

@@ -6,10 +6,10 @@
         WalterPerson,
         WalterTextInput
     } from '$walter/components';
-    import type {
-        WalterJuristischePersonEntry,
-        WalterNatuerlichePersonEntry,
-        WalterPersonEntry
+    import {
+        WalterPersonEntry,
+        type WalterJuristischePersonEntry,
+        type WalterNatuerlichePersonEntry
     } from '$walter/lib';
     import { ContentSwitcher, Row, Switch } from 'carbon-components-svelte';
     import { walter_goto } from '$walter/services/utils';
@@ -21,8 +21,6 @@
         { key: 'mobil', value: 'Mobil' },
         { key: 'email', value: 'E-Mail' }
     ];
-
-    const addUrl = `/api/kontakte/`;
 
     const navigate = (e: CustomEvent<DataTableRow>) =>
         walter_goto(
@@ -43,7 +41,7 @@
 </script>
 
 <WalterDataWrapper
-    {addUrl}
+    addUrl={WalterPersonEntry.ApiURL}
     addEntry={entry}
     {title}
     {navigate}

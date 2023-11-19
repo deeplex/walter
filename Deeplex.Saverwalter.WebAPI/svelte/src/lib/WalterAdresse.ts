@@ -23,7 +23,7 @@ export class WalterAdresseEntry extends WalterApiHandler {
         super();
     }
 
-    static fromJson(json: any) {
+    static fromJson(json: WalterAdresseEntry): WalterAdresseEntry {
         const wohnungen = json.wohnungen?.map(WalterWohnungEntry.fromJson);
         const kontakte = json.kontakte?.map(WalterPersonEntry.fromJson);
         const zaehler = json.zaehler?.map(WalterZaehlerEntry.fromJson);

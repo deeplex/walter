@@ -15,8 +15,8 @@ export function remove(file: WalterS3File, fileWrapper: WalterS3FileWrapper) {
     const deleteToast = new WalterToastContent(
         'Löschen erfolgreich',
         'Löschen fehlgeschlagen',
-        (_a: unknown) => `${file.FileName} erfolgreich gelöscht.`,
-        (_a: unknown) => ''
+        () => `${file.FileName} erfolgreich gelöscht.`,
+        () => ''
     );
 
     openModal({

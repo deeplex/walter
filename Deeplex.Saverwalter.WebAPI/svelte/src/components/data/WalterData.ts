@@ -441,12 +441,12 @@ export type WalterDataConfigType = {
 
 export type WalterDataOptionsType = {
     legend: { enabled: boolean };
-    heatmap: any;
+    heatmap: unknown;
     height: string;
     curve?: string;
     axes?: {
-        bottom: any;
-        left: any;
+        bottom: unknown;
+        left: unknown;
     };
     tooltip: {
         truncation: {
@@ -455,7 +455,9 @@ export type WalterDataOptionsType = {
     };
 };
 
-export type WalterDataType = {
+export type WalterDataType = WalterDataPoint[];
+
+export type WalterDataPoint = {
     value: number | number[] | null | undefined;
     year?: number;
     group?: string; // row in heatmap
@@ -463,4 +465,4 @@ export type WalterDataType = {
     id2?: string;
     key?: string; // column in heatmap
     date?: string; // Date in Canadian Format
-}[];
+};

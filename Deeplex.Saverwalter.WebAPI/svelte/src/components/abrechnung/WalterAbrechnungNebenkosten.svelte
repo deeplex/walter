@@ -3,11 +3,9 @@
     import {
         Accordion,
         AccordionItem,
-        Link,
         StructuredList,
         StructuredListCell,
-        StructuredListRow,
-        Tile
+        StructuredListRow
     } from 'carbon-components-svelte';
     import {
         WalterLink,

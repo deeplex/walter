@@ -6,7 +6,7 @@
 
     export let entry: Partial<WalterUmlagetypEntry> = {};
     export let readonly = false;
-    export let fetchImpl: typeof fetch;
+    export const fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
 </script>
 
 <Row>

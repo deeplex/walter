@@ -7,7 +7,7 @@
         WalterTextArea
     } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
-    import type { WalterMieteEntry, WalterS3FileWrapper } from '$walter/lib';
+    import type { WalterMieteEntry } from '$walter/lib';
     import WalterLinkTile from '../subdetails/WalterLinkTile.svelte';
 
     export let entry: Partial<WalterMieteEntry> = {};

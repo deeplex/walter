@@ -1,8 +1,4 @@
-import {
-    WalterBetriebskostenrechnungEntry,
-    WalterUmlageEntry,
-    WalterVertragEntry
-} from '$walter/lib';
+import { WalterUmlageEntry, WalterVertragEntry } from '$walter/lib';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch }) => {

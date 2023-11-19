@@ -1,7 +1,6 @@
 <script lang="ts">
     import {
         WalterDatePicker,
-        WalterMultiSelect,
         WalterTextArea,
         WalterComboBoxPerson,
         WalterComboBoxWohnung,
@@ -20,7 +19,6 @@
     export let fetchImpl: typeof fetch;
     export let readonly = false;
 
-    const wohnungen = walter_selection.wohnungen(fetchImpl);
     const kontakte = walter_selection.kontakte(fetchImpl);
 </script>
 

@@ -1,7 +1,6 @@
 <script lang="ts">
     import {
         WalterComboBox,
-        WalterMultiSelect,
         WalterMultiSelectJuristischePerson,
         WalterPerson,
         WalterTextArea,

@@ -2,7 +2,7 @@
     import '@carbon/styles/css/styles.css';
     import '@carbon/charts-svelte/styles.css';
     import { PieChart } from '@carbon/charts-svelte';
-    import type { WalterDataConfigType, WalterDataType } from './WalterData';
+    import type { WalterDataConfigType } from './WalterData';
 
     export let config: WalterDataConfigType;
 </script>

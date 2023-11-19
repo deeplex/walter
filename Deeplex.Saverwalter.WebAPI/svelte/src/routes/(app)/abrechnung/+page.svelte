@@ -3,8 +3,7 @@
         WalterAbrechnung,
         WalterGrid,
         WalterHeader,
-        WalterLink,
-        WalterNumberInput
+        WalterLink
     } from '$walter/components';
     import { onMount } from 'svelte';
     import type { PageData } from './$types';
@@ -13,7 +12,6 @@
     import {
         ComboBox,
         InlineNotification,
-        Link,
         Loading,
         NumberInput,
         OverflowMenu,
@@ -72,7 +70,7 @@
         update();
     }
 
-    async function click_word(e: MouseEvent): Promise<void> {
+    async function click_word(): Promise<void> {
         if (!vertragId || !selectedYear) return;
 
         const file = await create_word_doc(
@@ -87,7 +85,7 @@
         }
     }
 
-    async function click_pdf(e: MouseEvent): Promise<void> {
+    async function click_pdf(): Promise<void> {
         if (!vertragId || !selectedYear) return;
 
         const file = await create_pdf_doc(

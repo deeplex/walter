@@ -1,6 +1,6 @@
 import { WalterAdresseEntry } from './WalterAdresse';
 import { WalterApiHandler } from './WalterApiHandler';
-import type { WalterPersonEntry } from './WalterPerson';
+import { WalterPersonEntry } from './WalterPerson';
 import { WalterSelectionEntry } from './WalterSelection';
 import { WalterVertragEntry } from './WalterVertrag';
 import { WalterWohnungEntry } from './WalterWohnung';
@@ -9,7 +9,7 @@ export class WalterJuristischePersonEntry
     extends WalterApiHandler
     implements WalterPersonEntry
 {
-    public static ApiURL = `/api/kontakte`;
+    public static ApiURL = `/api/kontakte/jur`;
 
     constructor(
         public id: number,
@@ -25,7 +25,7 @@ export class WalterJuristischePersonEntry
         public natuerlichePerson: boolean,
         public selectedJuristischePersonen: WalterSelectionEntry[],
         public adresse: WalterAdresseEntry,
-        public juristischePersonen: WalterPersonEntry[],
+        public juristischePersonen: WalterJuristischePersonEntry[],
         public wohnungen: WalterWohnungEntry[],
         public vertraege: WalterVertragEntry[],
         public selectedMitglieder: WalterSelectionEntry[],
@@ -34,11 +34,13 @@ export class WalterJuristischePersonEntry
         super();
     }
 
-    static fromJson(json: any) {
+    static fromJson(
+        json: WalterJuristischePersonEntry
+    ): WalterJuristischePersonEntry {
         const selectedMitglieder = json.selectedMitglieder?.map(
             WalterSelectionEntry.fromJson
         );
-        const mitglieder = json.mitglieder?.map(WalterSelectionEntry.fromJson);
+        const mitglieder = json.mitglieder?.map(WalterPersonEntry.fromJson);
         const selectedJuristischePersonen =
             json.selectedJuristischePersonen?.map(
                 WalterSelectionEntry.fromJson

@@ -19,7 +19,6 @@
     import Katex from 'svelte-katex';
 
     export let heizkosten: WalterHeizkostenberechnungEntry;
-    const betrag = heizkosten.gesamtBetrag + heizkosten.pauschalBetrag;
 </script>
 
 <Row>

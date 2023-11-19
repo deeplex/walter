@@ -10,7 +10,7 @@ export class WalterNatuerlichePersonEntry
     extends WalterApiHandler
     implements WalterPersonEntry
 {
-    public static ApiURL = `/api/kontakte`;
+    public static ApiURL = `/api/kontakte/nat`;
 
     constructor(
         public id: number,
@@ -29,14 +29,14 @@ export class WalterNatuerlichePersonEntry
         public selectedJuristischePersonen: WalterSelectionEntry[],
         public natuerlichePerson: boolean,
         public adresse: WalterAdresseEntry,
-        public juristischePersonen: WalterPersonEntry[],
+        public juristischePersonen: WalterJuristischePersonEntry[],
         public wohnungen: WalterWohnungEntry[],
         public vertraege: WalterVertragEntry[]
     ) {
         super();
     }
 
-    static fromJson(json: any) {
+    static fromJson(json: WalterNatuerlichePersonEntry) {
         const selectedJuristischePersonen =
             json.selectedJuristischePersonen?.map(
                 WalterSelectionEntry.fromJson
