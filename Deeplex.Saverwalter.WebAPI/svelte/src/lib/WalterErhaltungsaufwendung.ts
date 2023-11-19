@@ -3,6 +3,9 @@ import { WalterSelectionEntry } from './WalterSelection';
 
 export class WalterErhaltungsaufwendungEntry extends WalterApiHandler {
     public static ApiURL = `/api/erhaltungsaufwendungen`;
+    public static ApiURLId(id: number) {
+        return `${WalterErhaltungsaufwendungEntry.ApiURL}/${id}`;
+    }
 
     constructor(
         public id: number,

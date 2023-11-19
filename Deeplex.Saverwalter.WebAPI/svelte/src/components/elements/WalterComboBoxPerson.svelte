@@ -1,5 +1,9 @@
 <script lang="ts">
-    import type { WalterSelectionEntry } from '$walter/lib';
+    import {
+        WalterJuristischePersonEntry,
+        WalterNatuerlichePersonEntry,
+        type WalterSelectionEntry
+    } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
     import { ContentSwitcher, Switch } from 'carbon-components-svelte';
     import {
@@ -8,6 +12,7 @@
         WalterNatuerlichePerson
     } from '..';
     import WalterQuickAddButton from './WalterQuickAddButton.svelte';
+    import { Api } from 'carbon-icons-svelte';
 
     export let readonly: boolean = false;
     export let required: boolean = false;
@@ -42,7 +47,9 @@
     <WalterQuickAddButton
         title="Personen"
         bind:addEntry
-        addUrl="/api/kontakte/{personType ? 'jur' : 'nat'}"
+        addUrl={personType
+            ? WalterJuristischePersonEntry.ApiURL
+            : WalterNatuerlichePersonEntry.ApiURL}
         {onSubmit}
     >
         <ContentSwitcher bind:selectedIndex={personType}>

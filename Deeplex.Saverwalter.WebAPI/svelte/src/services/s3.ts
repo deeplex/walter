@@ -4,6 +4,23 @@ import * as parser from 'fast-xml-parser';
 import { walter_delete, walter_fetch } from './requests';
 import type { WalterToastContent } from '../lib/WalterToastContent';
 
+export const S3URL = {
+    adresse: (id: string) => `adressen/${id}`,
+    betriebskostenrechnung: (id: string) => `betriebskostenrechnungen/${id}`,
+    erhaltungsaufwendung: (id: string) => `erhaltungsaufwendungen/${id}`,
+    juristischeperson: (id: string) => `kontakte/jur/${id}`,
+    miete: (id: string) => `mieten/${id}`,
+    mietminderung: (id: string) => `mietminderungen/${id}`,
+    natuerlicheperson: (id: string) => `kontakte/nat/${id}`,
+    umlage: (id: string) => `umlagen/${id}`,
+    umlagetyp: (id: string) => `umlagetypen/${id}`,
+    vertrag: (id: string) => `vertraege/${id}`,
+    vertragversion: (id: string) => `vertragversionen/${id}`,
+    wohnung: (id: string) => `wohnungen/${id}`,
+    zaehler: (id: string) => `zaehler/${id}`,
+    zaehlerstand: (id: string) => `zaehlerstaende/${id}`
+};
+
 const baseURL = '/api/files';
 type XMLResult = {
     ListBucketResult?: { Contents?: WalterS3File | WalterS3File[] };

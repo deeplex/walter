@@ -8,14 +8,13 @@
         WalterNatuerlichePerson
     } from '$walter/components';
     import type { PageData } from './$types';
-    import type {
+    import {
         WalterJuristischePersonEntry,
         WalterNatuerlichePersonEntry
     } from '$walter/lib';
 
     export let data: PageData;
 
-    const apiURL = `/api/kontakte`;
     const title = 'Neue Person';
 
     const entry: Partial<
@@ -26,7 +25,9 @@
 </script>
 
 <WalterHeaderNew
-    apiURL={apiURL + `/${personType ? 'jur' : 'nat'}`}
+    apiURL={personType
+        ? WalterJuristischePersonEntry.ApiURL
+        : WalterNatuerlichePersonEntry.ApiURL}
     {title}
     {entry}
 >
