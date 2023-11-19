@@ -52,9 +52,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new UmlageDbService(ctx);
+            var typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung");
+            ctx.Umlagetypen.Add(typ);
+            ctx.SaveChanges();
             var entity = new Umlage(Umlageschluessel.NachWohnflaeche)
             {
-                Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung")
+                Typ = typ
             };
             var entry = new UmlageEntry(entity, ctx);
 

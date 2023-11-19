@@ -77,6 +77,9 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<JuristischePerson>().HasAlternateKey(person => person.PersonId);
             modelBuilder.Entity<NatuerlichePerson>().HasAlternateKey(person => person.PersonId);
 
+            modelBuilder.Entity<HKVO>().HasOne(u => u.Heizkosten).WithOne(u => u.HKVO);
+            modelBuilder.Entity<HKVO>().HasOne(u => u.Betriebsstrom).WithMany(u => u.HKVOs);
+
             modelBuilder.Entity<Adresse>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Adresse>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Betriebskostenrechnung>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");

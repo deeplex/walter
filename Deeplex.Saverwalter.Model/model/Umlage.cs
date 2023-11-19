@@ -17,6 +17,8 @@ namespace Deeplex.Saverwalter.Model
         public virtual List<Wohnung> Wohnungen { get; set; } = new List<Wohnung>();
         public virtual List<Betriebskostenrechnung> Betriebskostenrechnungen { get; private set; } = new List<Betriebskostenrechnung>();
         public virtual List<Zaehler> Zaehler { get; set; } = new List<Zaehler>();
+        // Stromrechnungen keep track of the HKVOs that point to them
+        public virtual List<HKVO> HKVOs { get; set; } = new List<HKVO>();
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
         public Umlage(Umlageschluessel schluessel)

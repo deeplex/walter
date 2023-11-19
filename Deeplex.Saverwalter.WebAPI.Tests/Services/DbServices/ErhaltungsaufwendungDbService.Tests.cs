@@ -16,8 +16,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var service = new ErhaltungsaufwendungDbService(ctx);
+
+            var aussteller = new JuristischePerson("TestPerson");
+            ctx.JuristischePersonen.Add(aussteller);
+            ctx.SaveChanges();
+
             var entity = new Erhaltungsaufwendung(
-                1000, "TestAufwendung", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1))
+                1000, "TestAufwendung", aussteller.PersonId, new DateOnly(2021, 1, 1))
             {
                 Wohnung = vertrag.Wohnung
             };
@@ -37,8 +42,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var service = new ErhaltungsaufwendungDbService(ctx);
+
+            var aussteller = new JuristischePerson("TestPerson");
+            ctx.JuristischePersonen.Add(aussteller);
+            ctx.SaveChanges();
+
             var entity = new Erhaltungsaufwendung(
-                1000, "TestAufwendung", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1));
+                1000, "TestAufwendung", aussteller.PersonId, new DateOnly(2021, 1, 1));
             ctx.Erhaltungsaufwendungen.Add(entity);
             ctx.SaveChanges();
 
@@ -54,8 +64,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var service = new ErhaltungsaufwendungDbService(ctx);
+
+            var aussteller = new JuristischePerson("TestPerson");
+            ctx.JuristischePersonen.Add(aussteller);
+            ctx.SaveChanges();
+
             var entity = new Erhaltungsaufwendung(
-                1000, "TestAufwendung", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1))
+                1000, "TestAufwendung", aussteller.PersonId, new DateOnly(2021, 1, 1))
             {
                 Wohnung = vertrag.Wohnung
             };
@@ -72,8 +87,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var service = new ErhaltungsaufwendungDbService(ctx);
+
+            var aussteller = new JuristischePerson("TestPerson");
+            ctx.JuristischePersonen.Add(aussteller);
+            ctx.SaveChanges();
+
             var entity = new Erhaltungsaufwendung(
-                1000, "TestAufwendung", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1))
+                1000, "TestAufwendung", aussteller.PersonId, new DateOnly(2021, 1, 1))
             {
                 Wohnung = vertrag.Wohnung
             };
@@ -92,8 +112,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var service = new ErhaltungsaufwendungDbService(ctx);
+
+            var aussteller = new JuristischePerson("TestPerson");
+            ctx.JuristischePersonen.Add(aussteller);
+            ctx.SaveChanges();
+
             var entity = new Erhaltungsaufwendung(
-                1000, "TestAufwendung", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1))
+                1000, "TestAufwendung", aussteller.PersonId, new DateOnly(2021, 1, 1))
             {
                 Wohnung = vertrag.Wohnung
             };
@@ -121,8 +146,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var service = new ErhaltungsaufwendungDbService(ctx);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
+
+            var aussteller = new JuristischePerson("TestPerson");
+            ctx.JuristischePersonen.Add(aussteller);
+            ctx.SaveChanges();
+
             var entity = new Erhaltungsaufwendung(
-                1000, "TestAufwendung", vertrag.Wohnung.BesitzerId, new DateOnly(2021, 1, 1))
+                1000, "TestAufwendung", aussteller.PersonId, new DateOnly(2021, 1, 1))
             {
                 Wohnung = vertrag.Wohnung
             };

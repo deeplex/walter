@@ -38,7 +38,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             GesamtBetrag = rechnung.Betrag;
             if (rechnung.Umlage.HKVO is HKVO hkvo)
             {
-                PauschalBetrag = rechnung.Betrag * hkvo.Strompauschale;
+                PauschalBetrag = rechnung.Betrag + rechnung.Betrag * hkvo.Strompauschale;
             }
             else
             {

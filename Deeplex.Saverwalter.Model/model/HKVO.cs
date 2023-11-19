@@ -15,7 +15,10 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public double Strompauschale { get; set; }
 
-        public int BetriebsstromId { get; set; }
+        public int HeizkostenId { get; set; }
+        [Required]
+        public virtual Umlage Heizkosten { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
+        [Required]
         public virtual Umlage Betriebsstrom { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
 
         public string? Notiz { get; set; }

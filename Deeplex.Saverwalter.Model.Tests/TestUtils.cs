@@ -155,10 +155,12 @@ namespace Deeplex.Saverwalter.ModelTests
             muellbeseitigung.Betriebskostenrechnungen.Add(muellbeseitigung_rechnung);
             umlagen.Add(muellbeseitigung);
 
+            var hkvo = new HKVO(0.5, 0.5, HKVO_P9A2.Satz_2, 0.05) { Betriebsstrom = allgemeinstrom };
             var heizkosten = new Umlage(Umlageschluessel.NachVerbrauch)
             {
                 Typ = new Umlagetyp("Heizkosten"),
-                Wohnungen = wohnungen
+                Wohnungen = wohnungen,
+                HKVO = hkvo
             };
             var heizkosten_rechnung = new Betriebskostenrechnung(2000, date, 2021) { Umlage = heizkosten };
             heizkosten.Betriebskostenrechnungen.Add(heizkosten_rechnung);
