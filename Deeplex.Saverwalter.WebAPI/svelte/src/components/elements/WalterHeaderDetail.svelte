@@ -5,9 +5,7 @@
         HeaderPanelLink,
         HeaderPanelLinks,
         HeaderUtilities,
-
         Tooltip
-
     } from 'carbon-components-svelte';
     import { Save, TrashCan } from 'carbon-icons-svelte';
 
@@ -31,7 +29,7 @@
         handle_delete(title, apiURL);
     }
 
-    let isOpen=false;
+    let isOpen = false;
 </script>
 
 <svelte:window bind:innerWidth={winWidth} />
@@ -54,16 +52,24 @@
                 {/if}
             </HeaderAction>
         {:else}
-            <HeaderGlobalAction on:click={click_save} icon={Save}/>
+            <HeaderGlobalAction on:click={click_save} icon={Save} />
             <HeaderGlobalAction on:click={click_delete} icon={TrashCan} />
 
             {#if fileWrapper}
                 {#await fileWrapper.handles[0].files}
-                    <HeaderAction {isOpen} preventCloseOnClickOutside text="(...)">
+                    <HeaderAction
+                        {isOpen}
+                        preventCloseOnClickOutside
+                        text="(...)"
+                    >
                         <WalterAnhaenge bind:fileWrapper />
                     </HeaderAction>
                 {:then files}
-                    <HeaderAction {isOpen} preventCloseOnClickOutside text="({files.length})">
+                    <HeaderAction
+                        {isOpen}
+                        preventCloseOnClickOutside
+                        text="({files.length})"
+                    >
                         <WalterAnhaenge bind:fileWrapper />
                     </HeaderAction>
                 {/await}
@@ -71,7 +77,11 @@
         {/if}
     </HeaderUtilities>
 
-    <Tooltip direction="top" align="end" style="position: absolute; right: 0.75vw; bottom: -96.5vh; text-align: end;">
+    <Tooltip
+        direction="top"
+        align="end"
+        style="position: absolute; right: 0.75vw; bottom: -96.5vh; text-align: end;"
+    >
         <p>Erstellt am:</p>
         <p>{convertTime(entry.createdAt)}</p>
         <p>Zuletzt geändert am:</p>

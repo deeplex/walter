@@ -59,7 +59,7 @@
     const title =
         data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung;
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
-    fileWrapper.registerStack()
+    fileWrapper.registerStack();
     fileWrapper.register(title, data.S3URL);
 </script>
 
@@ -116,13 +116,15 @@
 
         <!-- TODO besitzer id is guid -->
     </WalterLinks>
-    
+
     {#if data.entry.erhaltungsaufwendungen.length > 1}
-    <Row>
-        <WalterDataScatterChart
-            config={walter_data_aufwendungen(
-                "Erhaltungsaufwendungen",
-                data.entry.erhaltungsaufwendungen)} />
-    </Row>
+        <Row>
+            <WalterDataScatterChart
+                config={walter_data_aufwendungen(
+                    'Erhaltungsaufwendungen',
+                    data.entry.erhaltungsaufwendungen
+                )}
+            />
+        </Row>
     {/if}
 </WalterGrid>

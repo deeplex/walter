@@ -6,8 +6,7 @@
     import 'carbon-components-svelte/css/all.css';
 
     beforeNavigate((e) => {
-        if (e.to && e.type !== 'goto')
-        {
+        if (e.to && e.type !== 'goto') {
             e.cancel();
             walter_goto(e.to.url.href);
         }

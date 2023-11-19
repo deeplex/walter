@@ -43,12 +43,14 @@
     }
 
     async function selectFileNextToSelectedFile(step: number) {
-        const handleIndex = fileWrapper.handles.findIndex(e => e.S3URL === file?.Key.slice(0, e.S3URL.length));
+        const handleIndex = fileWrapper.handles.findIndex(
+            (e) => e.S3URL === file?.Key.slice(0, e.S3URL.length)
+        );
         const handle = fileWrapper.handles[handleIndex];
         const files = await handle.files;
-        const fileIndex = files.findIndex(e => e.Key === file.Key);
+        const fileIndex = files.findIndex((e) => e.Key === file.Key);
 
-        const targetIndex = fileIndex + step
+        const targetIndex = fileIndex + step;
 
         if (targetIndex < 0 || targetIndex >= files.length) {
             return;
@@ -120,8 +122,7 @@
             newFileName
         );
 
-        if (renamed)
-        {
+        if (renamed) {
             file.FileName = newFileName;
             // TODO update sidenav
         }

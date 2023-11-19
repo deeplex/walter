@@ -1,5 +1,8 @@
 <script lang="ts">
-    import { walter_subscribe_reset_changeTracker, walter_update_value } from '$walter/services/utils';
+    import {
+        walter_subscribe_reset_changeTracker,
+        walter_update_value
+    } from '$walter/services/utils';
     import { TextArea, TextAreaSkeleton } from 'carbon-components-svelte';
     import { onMount } from 'svelte';
 
@@ -18,10 +21,11 @@
     });
 
     export let change = (e: Event) => {
-        value = walter_update_value(    
+        value = walter_update_value(
             lastSavedValue,
             value || undefined,
-            '' + (e.target as any)?.value || undefined);
+            '' + (e.target as any)?.value || undefined
+        );
     };
 </script>
 

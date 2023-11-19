@@ -17,12 +17,14 @@
         required
         {readonly}
         bind:value={entry.minderung}
-        label="Minderung" />
+        label="Minderung"
+    />
     <WalterDatePicker
         required
         disabled={readonly}
         bind:value={entry.beginn}
-        labelText="Beginn" />
+        labelText="Beginn"
+    />
     <WalterDatePicker
         disabled={readonly}
         placeholder="Offen"

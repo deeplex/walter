@@ -18,7 +18,8 @@
     export let title: string | undefined = undefined;
     export let entry: Partial<WalterZaehlerstandEntry> | undefined = undefined;
 
-    const navigate = (e: CustomEvent) => walter_goto(`/zaehlerstaende/${e.detail.id}`);
+    const navigate = (e: CustomEvent) =>
+        walter_goto(`/zaehlerstaende/${e.detail.id}`);
 </script>
 
 <WalterDataWrapper

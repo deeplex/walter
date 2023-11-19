@@ -22,12 +22,14 @@
             {required}
             {readonly}
             labelText="Straße"
-            bind:value={entry.strasse} />
+            bind:value={entry.strasse}
+        />
         <WalterTextInput
             {required}
             {readonly}
             labelText="Hausnr."
-            bind:value={entry.hausnummer} />
+            bind:value={entry.hausnummer}
+        />
         <WalterTextInput
             {required}
             {readonly}
@@ -38,7 +40,8 @@
             {required}
             {readonly}
             labelText="Stadt"
-            bind:value={entry.stadt} />
+            bind:value={entry.stadt}
+        />
     {:else}
         <WalterTextInput
             {required}

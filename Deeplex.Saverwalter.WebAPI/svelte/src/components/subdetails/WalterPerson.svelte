@@ -14,6 +14,10 @@
     <WalterTextInput {readonly} bind:value={value.fax} labelText="Fax" />
 </Row>
 <Row>
-    <WalterTextInput {readonly} bind:value={value.telefon} labelText="Telefon" />
+    <WalterTextInput
+        {readonly}
+        bind:value={value.telefon}
+        labelText="Telefon"
+    />
     <WalterTextInput {readonly} bind:value={value.mobil} labelText="Mobil" />
 </Row>

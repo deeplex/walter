@@ -5,6 +5,6 @@ export const load: PageLoad = async ({ fetch }) => {
 
     return {
         fetchImpl: fetch,
-        S3URL,
+        S3URL
     };
 };

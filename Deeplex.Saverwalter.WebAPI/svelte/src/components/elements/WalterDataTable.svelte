@@ -1,6 +1,6 @@
 <script lang="ts">
     import {
-    Button,
+        Button,
         Content,
         DataTable,
         DataTableSkeleton,
@@ -20,7 +20,8 @@
     import { Add } from 'carbon-icons-svelte';
 
     export let fullHeight = false;
-    export let size: "compact" | "short" | "medium" | "tall" | undefined = undefined;
+    export let size: 'compact' | 'short' | 'medium' | 'tall' | undefined =
+        undefined;
     export let headers: {
         key: string;
         value: string;
@@ -33,10 +34,10 @@
     ) => Promise<void> | void = () => {};
 
     function shouldFilterRows(row: any, value: any) {
-        const filteredValues = headers.map(headerObj => {
+        const filteredValues = headers.map((headerObj) => {
             const keys = headerObj.key.split('.');
             let value = row;
-            keys.forEach(key => {
+            keys.forEach((key) => {
                 if (value?.hasOwnProperty(key)) {
                     value = value[key];
                 } else {
@@ -46,8 +47,13 @@
             return value;
         });
 
-        const values = `${value}`.toLowerCase().split(";").map(e => e.trim());
-        return values.every(val => filteredValues.some(e => `${e}`.toLowerCase().includes(val)));
+        const values = `${value}`
+            .toLowerCase()
+            .split(';')
+            .map((e) => e.trim());
+        return values.every((val) =>
+            filteredValues.some((e) => `${e}`.toLowerCase().includes(val))
+        );
     }
 </script>
 
@@ -79,7 +85,7 @@
                             on:click={add}
                             iconDescription="Eintrag hinzufügen"
                             icon={Add}>Eintrag hinzufügen</Button
-                            >
+                        >
                     {/if}
                 </ToolbarContent>
             </Toolbar>
@@ -94,19 +100,20 @@
                     {formatToTableDate(cell.value)}
                 {:else if time(cell.key)}
                     {convertTime(cell.value)}
-                {:else if euro(cell.key) }
+                {:else if euro(cell.key)}
                     {convertEuro(cell.value)}
                 {:else if cell.key === 'anteil'}
                     {convertPercent(cell.value)}
                 {:else if cell.key === 'button'}
                     <Button
-                        disabled={cell.value === "disabled"}
+                        disabled={cell.value === 'disabled'}
                         on:click={cell.value}
                         tooltipPosition="left"
                         style="position: absolute; margin-top: -15px; margin-left: 1em; scale: 0.65"
                         kind="tertiary"
-                        icon="{Add}"
-                        iconDescription={"Hinzufügen"} />
+                        icon={Add}
+                        iconDescription={'Hinzufügen'}
+                    />
                 {:else}
                     {cell.value}
                 {/if}

@@ -6,8 +6,7 @@
     export let name: string;
     export let fileWrapper: WalterS3FileWrapper | undefined = undefined;
 
-    if (fileWrapper)
-    {
+    if (fileWrapper) {
         fileWrapper.register(name, href);
     }
 </script>

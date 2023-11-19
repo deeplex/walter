@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { page } from "$app/stores";
-    import { walter_goto } from "$walter/services/utils";
-    import { isWalterSideNavOpen } from "$walter/store";
-    import { SideNavLink } from "carbon-components-svelte";
-    import type { SvelteComponent } from "svelte";
+    import { page } from '$app/stores';
+    import { walter_goto } from '$walter/services/utils';
+    import { isWalterSideNavOpen } from '$walter/store';
+    import { SideNavLink } from 'carbon-components-svelte';
+    import type { SvelteComponent } from 'svelte';
 
     let winWidth = 0;
 
@@ -25,7 +25,7 @@
 
 <SideNavLink
     on:click={closeSideNavIfWinWidthSmall}
-    isSelected={href === `/${$page.url.pathname.split("/")[1]}`}
+    isSelected={href === `/${$page.url.pathname.split('/')[1]}`}
     {icon}
     {text}
     {href}

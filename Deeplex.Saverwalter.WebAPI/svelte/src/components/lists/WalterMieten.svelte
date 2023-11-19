@@ -1,5 +1,9 @@
 <script lang="ts">
-    import { WalterDataWrapper, WalterMiete, WalterNumberInput } from '$walter/components';
+    import {
+        WalterDataWrapper,
+        WalterMiete,
+        WalterNumberInput
+    } from '$walter/components';
     import type { WalterMieteEntry } from '$walter/lib';
     import { walter_goto } from '$walter/services/utils';
 
@@ -12,7 +16,9 @@
     const addUrl = `/api/mieten/`;
 
     export let rows: WalterMieteEntry[];
-    const sortedRows = rows.sort((a, b) => b.betreffenderMonat.localeCompare(a.betreffenderMonat));
+    const sortedRows = rows.sort((a, b) =>
+        b.betreffenderMonat.localeCompare(a.betreffenderMonat)
+    );
     export let fullHeight = false;
     export let title: string | undefined = undefined;
 
@@ -37,6 +43,7 @@
             min={0}
             max={11}
             hideSteppers={false}
-            bind:value={entry.repeat} />
+            bind:value={entry.repeat}
+        />
     {/if}
 </WalterDataWrapper>

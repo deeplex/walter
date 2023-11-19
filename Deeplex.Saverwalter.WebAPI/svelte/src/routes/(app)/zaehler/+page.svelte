@@ -6,8 +6,4 @@
 </script>
 
 <WalterHeader title="Zähler" />
-<WalterZaehlerList
-    fetchImpl={data.fetchImpl}
-    rows={data.rows}
-    fullHeight
-/>
+<WalterZaehlerList fetchImpl={data.fetchImpl} rows={data.rows} fullHeight />

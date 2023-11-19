@@ -4,8 +4,6 @@
     import type { PageData } from './$types';
 
     export let data: PageData;
-
-
 </script>
 
 <WalterHeader title="SaverWalter" />
@@ -13,5 +11,6 @@
     <WalterMiettabelleWrapper
         fetchImpl={data.fetchImpl}
         umlagen={data.umlagen}
-        vertraege={data.vertraege}/>
+        vertraege={data.vertraege}
+    />
 </Content>

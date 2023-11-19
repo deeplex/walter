@@ -6,8 +6,4 @@
 </script>
 
 <WalterHeader title="Verträge" />
-<WalterVertraege
-    fetchImpl={data.fetchImpl}
-    rows={data.rows}
-    fullHeight
-/>
+<WalterVertraege fetchImpl={data.fetchImpl} rows={data.rows} fullHeight />

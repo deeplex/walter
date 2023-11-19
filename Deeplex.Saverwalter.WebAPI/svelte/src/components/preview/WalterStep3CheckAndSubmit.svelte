@@ -19,7 +19,10 @@
             ausgewählt.
         {:else}
             Ausgewählter Eintrag von {selectedTable?.value}:
-            <WalterLink href="{$page.url.origin}/{selectedTable?.key}/{selectedEntry?.id}">
+            <WalterLink
+                href="{$page.url
+                    .origin}/{selectedTable?.key}/{selectedEntry?.id}"
+            >
                 {selectedEntry?.text}
             </WalterLink>
         {/if}

@@ -53,12 +53,16 @@
     }
 
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
-    fileWrapper.registerStack()
+    fileWrapper.registerStack();
 </script>
 
 <WalterHeader title="Ablagestapel">
     <HeaderUtilities>
-        <HeaderAction isOpen preventCloseOnClickOutside text="({data.files.length})">
+        <HeaderAction
+            isOpen
+            preventCloseOnClickOutside
+            text="({data.files.length})"
+        >
             <WalterAnhaenge bind:fileWrapper />
         </HeaderAction>
     </HeaderUtilities>

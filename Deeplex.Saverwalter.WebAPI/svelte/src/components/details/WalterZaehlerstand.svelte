@@ -8,7 +8,10 @@
     import { WalterZaehlerEntry, WalterZaehlerstandEntry } from '$walter/lib';
     import WalterTextInput from '../elements/WalterTextInput.svelte';
     import { onMount } from 'svelte';
-    import { convertDateCanadian, convertDateGerman } from '$walter/services/utils';
+    import {
+        convertDateCanadian,
+        convertDateGerman
+    } from '$walter/services/utils';
 
     export let entry: Partial<WalterZaehlerstandEntry> = {};
     export let fetchImpl: typeof fetch | undefined = undefined;
@@ -16,14 +19,14 @@
 
     let maxDate: string | undefined;
     onMount(async () => {
-        if (entry.zaehler?.id && fetchImpl)
-        {
-            const date = await WalterZaehlerEntry.GetOne<WalterZaehlerEntry>(`${entry.zaehler?.id}`, fetchImpl)
-                .then(zaehler => zaehler.ende);
+        if (entry.zaehler?.id && fetchImpl) {
+            const date = await WalterZaehlerEntry.GetOne<WalterZaehlerEntry>(
+                `${entry.zaehler?.id}`,
+                fetchImpl
+            ).then((zaehler) => zaehler.ende);
             maxDate = convertDateGerman(new Date(date));
         }
-    })
-    
+    });
 </script>
 
 <Row>
@@ -31,18 +34,21 @@
         required
         {readonly}
         bind:value={entry.stand}
-        label="Zählerstand" />
+        label="Zählerstand"
+    />
     <WalterDatePicker
         {maxDate}
         required
         disabled={readonly}
         bind:value={entry.datum}
-        labelText="Ablesedatum" />
+        labelText="Ablesedatum"
+    />
     <WalterTextInput
         required
         readonly
         bind:value={entry.einheit}
-        labelText="Einheit" />
+        labelText="Einheit"
+    />
 </Row>
 <Row>
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />

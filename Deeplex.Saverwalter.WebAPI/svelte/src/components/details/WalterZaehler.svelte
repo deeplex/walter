@@ -26,7 +26,8 @@
         required
         {readonly}
         bind:value={entry.kennnummer}
-        labelText="Kennnummer" />
+        labelText="Kennnummer"
+    />
     <WalterComboBox
         required
         {readonly}
@@ -37,7 +38,8 @@
     <WalterDatePicker
         disabled={readonly}
         bind:value={entry.ende}
-        labelText="Ende"/>
+        labelText="Ende"
+    />
 </Row>
 <WalterAdresse {readonly} bind:entry={entry.adresse} />
 <Row>

@@ -1,7 +1,7 @@
 <script lang="ts">
     import {
         WalterBetriebskostenrechnungen,
-        WalterHeader,
+        WalterHeader
     } from '$walter/components';
     import type { PageData } from './$types';
 

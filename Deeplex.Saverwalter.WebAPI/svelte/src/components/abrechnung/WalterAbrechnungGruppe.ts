@@ -9,7 +9,7 @@ export function goto_or_create_rechnung(
         walter_goto(`/betriebskostenrechnungen/${punkt.rechnungId}`);
     } else {
         const searchParams = new URLSearchParams();
-        searchParams.set('typ', `${punkt.typId}`)
+        searchParams.set('typ', `${punkt.typId}`);
         searchParams.set('umlage', `${punkt.id}`);
         searchParams.set('jahr', `${year}`);
         // TODO betrag

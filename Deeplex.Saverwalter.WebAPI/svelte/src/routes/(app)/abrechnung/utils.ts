@@ -9,7 +9,6 @@ import {
     walter_s3_post
 } from '$walter/services/s3';
 
-
 export async function create_word_doc(
     vertragId: number,
     selectedYear: number,
@@ -70,19 +69,16 @@ async function create_abrechnung(
     }
 }
 
-
 export function updatePreview(
     vertragId: number | null,
     selectedYear: number | null,
-    fetchImpl: typeof fetch)
-{
+    fetchImpl: typeof fetch
+) {
     let abrechnung;
 
     if (vertragId && selectedYear) {
         abrechnung = loadAbrechnung(vertragId, selectedYear, fetchImpl);
-    }
-    else
-    {
+    } else {
         abrechnung = Promise.resolve(undefined);
     }
 

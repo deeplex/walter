@@ -17,7 +17,8 @@
         required
         disabled={readonly}
         bind:value={entry.beginn}
-        labelText="Beginn" />
+        labelText="Beginn"
+    />
     <WalterNumberInput
         required
         {readonly}
@@ -29,7 +30,8 @@
         required
         {readonly}
         bind:value={entry.personenzahl}
-        label="Personenzahl" />
+        label="Personenzahl"
+    />
 </Row>
 <Row>
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />

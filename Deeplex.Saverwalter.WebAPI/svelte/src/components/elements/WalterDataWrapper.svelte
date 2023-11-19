@@ -1,8 +1,5 @@
 <script lang="ts">
-    import {
-        AccordionItem,
-        Tile
-    } from 'carbon-components-svelte';
+    import { AccordionItem, Tile } from 'carbon-components-svelte';
 
     import { WalterDataTable } from '$walter/components';
     import { page } from '$app/stores';
@@ -26,7 +23,7 @@
     let addModalOpen = false;
     let quick_add = () => {
         addModalOpen = true;
-    }
+    };
 
     function normal_add() {
         walter_goto(`${$page.url.pathname}/new`);
@@ -44,16 +41,28 @@
             {addUrl}
             bind:addModalOpen
             {onSubmit}
-            {title}>
+            {title}
+        >
             <slot />
         </WalterDataWrapperQuickAdd>
     {/if}
 
     <AccordionItem title={`${title} (${rows.length})`} bind:open>
         <Tile>
-            <WalterDataTable add={addUrl && addEntry && quick_add} {navigate} bind:rows {headers} />
+            <WalterDataTable
+                add={addUrl && addEntry && quick_add}
+                {navigate}
+                bind:rows
+                {headers}
+            />
         </Tile>
     </AccordionItem>
 {:else}
-    <WalterDataTable add={normal_add} {fullHeight} {navigate} {rows} {headers} />
+    <WalterDataTable
+        add={normal_add}
+        {fullHeight}
+        {navigate}
+        {rows}
+        {headers}
+    />
 {/if}

@@ -1,6 +1,4 @@
-import type {
-    WalterBetriebskostenabrechnungEntry,
-} from '$walter/types';
+import type { WalterBetriebskostenabrechnungEntry } from '$walter/types';
 import { walter_fetch, walter_get } from './requests';
 import { finish_s3_post } from './s3';
 

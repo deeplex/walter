@@ -13,7 +13,11 @@
     import { Column, Row } from 'carbon-components-svelte';
     import type { PageData } from './$types';
     import WalterDataPieChart from '$walter/components/data/WalterDataPieChart.svelte';
-    import { walter_data_ne, walter_data_nf, walter_data_wf } from '$walter/components/data/WalterData';
+    import {
+        walter_data_ne,
+        walter_data_nf,
+        walter_data_wf
+    } from '$walter/components/data/WalterData';
 
     export let data: PageData;
     const wohnungEntry: Partial<WalterWohnungEntry> = {
@@ -23,7 +27,7 @@
     const title = data.entry.anschrift;
 
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
-    fileWrapper.registerStack()
+    fileWrapper.registerStack();
     fileWrapper.register(title, data.S3URL);
 </script>
 
@@ -56,16 +60,25 @@
     </WalterLinks>
 
     {#if data.entry.wohnungen?.length > 1}
-    <Row>
-        <Column>
-            <WalterDataPieChart config={walter_data_wf("Wohnfläche", data.entry.wohnungen)} /> 
-        </Column>
-        <Column>
-            <WalterDataPieChart config={walter_data_nf("Nutzfläche", data.entry.wohnungen)} /> 
-        </Column>
-        <Column>
-            <WalterDataPieChart config={walter_data_ne("Nutzeinheiten", data.entry.wohnungen)} /> 
-        </Column>
-    </Row>
+        <Row>
+            <Column>
+                <WalterDataPieChart
+                    config={walter_data_wf('Wohnfläche', data.entry.wohnungen)}
+                />
+            </Column>
+            <Column>
+                <WalterDataPieChart
+                    config={walter_data_nf('Nutzfläche', data.entry.wohnungen)}
+                />
+            </Column>
+            <Column>
+                <WalterDataPieChart
+                    config={walter_data_ne(
+                        'Nutzeinheiten',
+                        data.entry.wohnungen
+                    )}
+                />
+            </Column>
+        </Row>
     {/if}
 </WalterGrid>

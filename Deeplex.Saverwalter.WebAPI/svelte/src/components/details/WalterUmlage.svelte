@@ -7,7 +7,7 @@
         WalterComboBoxUmlagetyp
     } from '$walter/components';
 
-    import WalterUmlageHKVO from './WalterUmlageHKVO.svelte'
+    import WalterUmlageHKVO from './WalterUmlageHKVO.svelte';
 
     import { Row } from 'carbon-components-svelte';
     import type { WalterUmlageEntry } from '$walter/lib';
@@ -58,10 +58,18 @@
 {/if}
 
 <Row>
-    <WalterTextArea {readonly} labelText="Beschreibung" bind:value={entry.beschreibung} />
+    <WalterTextArea
+        {readonly}
+        labelText="Beschreibung"
+        bind:value={entry.beschreibung}
+    />
 </Row>
 
-<WalterUmlageHKVO bind:entry {fetchImpl} bind:selectedWohnungen={entry.selectedWohnungen}/>
+<WalterUmlageHKVO
+    bind:entry
+    {fetchImpl}
+    bind:selectedWohnungen={entry.selectedWohnungen}
+/>
 
 <Row>
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />

@@ -19,9 +19,22 @@
 </script>
 
 <Row>
-    <WalterComboBox entries={anreden} bind:value={entry.anrede} titleText="Anrede"/>
-    <WalterTextInput {readonly} bind:value={entry.vorname} labelText="Vorname" />
-    <WalterTextInput required {readonly} bind:value={entry.nachname} labelText="Nachname" />
+    <WalterComboBox
+        entries={anreden}
+        bind:value={entry.anrede}
+        titleText="Anrede"
+    />
+    <WalterTextInput
+        {readonly}
+        bind:value={entry.vorname}
+        labelText="Vorname"
+    />
+    <WalterTextInput
+        required
+        {readonly}
+        bind:value={entry.nachname}
+        labelText="Nachname"
+    />
 </Row>
 <WalterPerson {readonly} value={entry} />
 <Row>

@@ -8,9 +8,7 @@
         WalterUmlage,
         WalterZaehlerList,
         WalterLinks,
-
         WalterLinkTile
-
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
@@ -49,7 +47,7 @@
 
     const title = `${data.entry.typ.text} - ${data.entry.wohnungenBezeichnung}`;
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
-    fileWrapper.registerStack()
+    fileWrapper.registerStack();
     fileWrapper.register(title, data.S3URL);
 </script>
 
@@ -84,7 +82,7 @@
             />
         {/if}
         <WalterLinkTile
-            fileWrapper={fileWrapper}
+            {fileWrapper}
             name={`Umlagetyp ansehen`}
             href={`/umlagetypen/${data.entry.typ.id}`}
         />
@@ -94,8 +92,10 @@
         <Row>
             <WalterDataLineChart
                 config={walter_data_rechnungen_year(
-                    "Rechnungen",
-                    data.entry.betriebskostenrechnungen)} />
+                    'Rechnungen',
+                    data.entry.betriebskostenrechnungen
+                )}
+            />
         </Row>
     {/if}
 </WalterGrid>

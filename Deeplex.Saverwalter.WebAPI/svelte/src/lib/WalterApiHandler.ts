@@ -13,12 +13,11 @@ export abstract class WalterApiHandler {
     ): Promise<T[]> {
         const response = await walter_get(this.ApiURL, fetchImpl);
 
-        if (!Array.isArray(response))
-        {
-            throw new Error("Expected response to be an array.");
+        if (!Array.isArray(response)) {
+            throw new Error('Expected response to be an array.');
         }
 
-        return response.map<T>(json => this.fromJson(json) as unknown as T);
+        return response.map<T>((json) => this.fromJson(json) as unknown as T);
     }
 
     public static async GetOne<T extends WalterApiHandler>(

@@ -6,9 +6,7 @@
         WalterTextArea,
         WalterTextInput
     } from '$walter/components';
-    import type {
-        WalterJuristischePersonEntry,
-    } from '$walter/lib';
+    import type { WalterJuristischePersonEntry } from '$walter/lib';
     import { Row } from 'carbon-components-svelte';
 
     export let entry: Partial<WalterJuristischePersonEntry>;
@@ -17,7 +15,12 @@
 </script>
 
 <Row>
-    <WalterTextInput required {readonly} labelText="Bezeichnung" bind:value={entry.name} />
+    <WalterTextInput
+        required
+        {readonly}
+        labelText="Bezeichnung"
+        bind:value={entry.name}
+    />
 </Row>
 <WalterPerson {readonly} value={entry} />
 <Row>

@@ -2,7 +2,11 @@
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
-    import { WalterDataWrapper, WalterMiete, WalterVertrag } from '$walter/components';
+    import {
+        WalterDataWrapper,
+        WalterMiete,
+        WalterVertrag
+    } from '$walter/components';
     import type { WalterMieteEntry, WalterVertragEntry } from '$walter/lib';
     import { convertDateCanadian, walter_goto } from '$walter/services/utils';
 
@@ -32,34 +36,47 @@
         e.stopPropagation();
 
         const mieten = vertrag.mieten
-            .map(miete => new Date(miete.betreffenderMonat))
+            .map((miete) => new Date(miete.betreffenderMonat))
             .sort((a, b) => b.getTime() - a.getTime());
         const dateMiete = mieten[0] || new Date();
-        dateMiete.setDate(dateMiete.getDate() + new Date(dateMiete.getFullYear(), dateMiete.getMonth(), 0).getDate());
-        if (dateMiete < earliest)
-        {
+        dateMiete.setDate(
+            dateMiete.getDate() +
+                new Date(
+                    dateMiete.getFullYear(),
+                    dateMiete.getMonth(),
+                    0
+                ).getDate()
+        );
+        if (dateMiete < earliest) {
             dateMiete.setDate(earliest.getDate());
         }
         quickAddEntry = {
-            vertrag: vertrag.mieten[0]?.vertrag || {id: `${vertrag.id}`, text: vertrag.wohnung.text},
+            vertrag: vertrag.mieten[0]?.vertrag || {
+                id: `${vertrag.id}`,
+                text: vertrag.wohnung.text
+            },
             zahlungsdatum: convertDateCanadian(new Date()),
             betrag: vertrag.mieten[0]?.betrag,
             betreffenderMonat: convertDateCanadian(dateMiete)
-        }
+        };
 
         open = true;
     }
-    const rowsAdd = rows.map(row => ({...row, button: (e: CustomEvent) => add(e, row) }));
+    const rowsAdd = rows.map((row) => ({
+        ...row,
+        button: (e: CustomEvent) => add(e, row)
+    }));
 
     let open = false;
 </script>
 
 <WalterDataWrapperQuickAdd
-    title={quickAddEntry.vertrag?.text || "Vertrag"}
+    title={quickAddEntry.vertrag?.text || 'Vertrag'}
     addEntry={quickAddEntry}
     addUrl="/api/vertraege/"
-    bind:addModalOpen={open}>
-    <WalterMiete entry={quickAddEntry}/>
+    bind:addModalOpen={open}
+>
+    <WalterMiete entry={quickAddEntry} />
 </WalterDataWrapperQuickAdd>
 
 <WalterDataWrapper

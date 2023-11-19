@@ -1,6 +1,9 @@
 <script lang="ts">
     import type { WalterSelectionEntry } from '$walter/lib';
-    import { walter_subscribe_reset_changeTracker, walter_update_value } from '$walter/services/utils';
+    import {
+        walter_subscribe_reset_changeTracker,
+        walter_update_value
+    } from '$walter/services/utils';
     import { MultiSelect, TextInputSkeleton } from 'carbon-components-svelte';
     import { onMount } from 'svelte';
     import { entriesToString } from './WalterMultiSelect';
@@ -38,7 +41,6 @@
             .map((e) => e.trim());
         return values.every((val) => text.includes(val)) as any; // svelte things this should be string...
     }
-
 </script>
 
 {#await entries}

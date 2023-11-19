@@ -1,9 +1,8 @@
 <script lang="ts">
-
-    import { Modal } from "carbon-components-svelte";
-    import { handle_save } from "./WalterDataWrapper";
-    import { changeTracker } from "$walter/store";
-    import { get } from "svelte/store";
+    import { Modal } from 'carbon-components-svelte';
+    import { handle_save } from './WalterDataWrapper';
+    import { changeTracker } from '$walter/store';
+    import { get } from 'svelte/store';
     export let addModalOpen = false;
     export let addUrl: string;
     export let addEntry: any;
@@ -15,13 +14,12 @@
 
         const parsed = await handle_save(addUrl, addEntry, title!);
 
-        if (onSubmit)
-        {
+        if (onSubmit) {
             onSubmit(parsed);
         }
     }
 
-    let tracker : number;
+    let tracker: number;
     function open() {
         tracker = get(changeTracker);
     }
@@ -43,11 +41,13 @@
     on:submit={submit}
     on:click:button--secondary={() => (addModalOpen = false)}
     on:click:button--primary={() => (addModalOpen = false)}
-    modalHeading="{title ? `Eintrag zu ${title} hinzufügen` : `Eintrag hinzufügen`}"
+    modalHeading={title
+        ? `Eintrag zu ${title} hinzufügen`
+        : `Eintrag hinzufügen`}
     bind:open={addModalOpen}
     primaryButtonDisabled={!addUrl}
     hasScrollingContent
-    >
+>
     <slot />
     <!-- Spacer for DatePickers. Otherwise the modal is too narrow -->
     <div style="height: 13em" />

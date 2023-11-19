@@ -3,9 +3,7 @@
         WalterAdresse,
         WalterGrid,
         WalterHeaderNew,
-
         WalterTextArea
-
     } from '$walter/components';
     import type { WalterAdresseEntry } from '$walter/lib';
     import { Row } from 'carbon-components-svelte';

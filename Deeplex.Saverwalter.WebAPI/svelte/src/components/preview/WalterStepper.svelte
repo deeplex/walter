@@ -28,7 +28,7 @@
 <Tile light style="padding-top: 1em; padding-bottom: 0.5em">
     <ProgressIndicator style="margin: 1em" spaceEqually currentIndex={step}>
         <ProgressStep
-            label={selectedTable?.value || "Tabelle auswählen"}
+            label={selectedTable?.value || 'Tabelle auswählen'}
             on:click={tableClick}
             complete={step > 0}
         />
@@ -36,7 +36,7 @@
             label="Eintrag auswählen"
             on:click={entryClick}
             complete={step > 1}
-            disabled={!selectedTable || selectedTable.key === "stack"}
+            disabled={!selectedTable || selectedTable.key === 'stack'}
         />
         <ProgressStep
             label="Vorschau"

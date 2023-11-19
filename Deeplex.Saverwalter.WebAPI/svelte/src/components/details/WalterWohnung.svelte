@@ -28,10 +28,30 @@
 </Row>
 <WalterAdresse required {readonly} bind:entry={entry.adresse} />
 <Row>
-    <WalterTextInput required {readonly} bind:value={entry.bezeichnung} labelText="Bezeichnung" />
-    <WalterNumberInput required {readonly} bind:value={entry.wohnflaeche} label="Wohnfläche" />
-    <WalterNumberInput required {readonly} bind:value={entry.nutzflaeche} label="Nutzfläche" />
-    <WalterNumberInput required {readonly} bind:value={entry.einheiten} label="Einheiten" />
+    <WalterTextInput
+        required
+        {readonly}
+        bind:value={entry.bezeichnung}
+        labelText="Bezeichnung"
+    />
+    <WalterNumberInput
+        required
+        {readonly}
+        bind:value={entry.wohnflaeche}
+        label="Wohnfläche"
+    />
+    <WalterNumberInput
+        required
+        {readonly}
+        bind:value={entry.nutzflaeche}
+        label="Nutzfläche"
+    />
+    <WalterNumberInput
+        required
+        {readonly}
+        bind:value={entry.einheiten}
+        label="Einheiten"
+    />
 </Row>
 <Row>
     <WalterTextArea {readonly} bind:value={entry.notiz} labelText="Notiz" />

@@ -13,7 +13,8 @@
     <WalterTextInput
         labelText="Bezeichnung"
         required
-        bind:value={entry.bezeichnung}/>
+        bind:value={entry.bezeichnung}
+    />
 </Row>
 
 <Row>

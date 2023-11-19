@@ -5,9 +5,7 @@
         WalterTextArea,
         WalterComboBoxPerson,
         WalterComboBoxWohnung,
-
         WalterMultiSelectPerson
-
     } from '$walter/components';
     import type { WalterVertragEntry } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
@@ -42,7 +40,12 @@
     />
 </Row>
 <Row>
-    <WalterComboBoxWohnung {fetchImpl} required {readonly} bind:value={entry.wohnung} />
+    <WalterComboBoxWohnung
+        {fetchImpl}
+        required
+        {readonly}
+        bind:value={entry.wohnung}
+    />
     {#await kontakte}
         <TextInputSkeleton />
     {:then entries}
@@ -52,10 +55,20 @@
             value={entries.find((e) => e.id === entry.wohnung?.filter)?.text}
         />
     {/await}
-    <WalterComboBoxPerson {fetchImpl} {readonly} bind:value={entry.ansprechpartner} title="Ansprechpartner" />
+    <WalterComboBoxPerson
+        {fetchImpl}
+        {readonly}
+        bind:value={entry.ansprechpartner}
+        title="Ansprechpartner"
+    />
 </Row>
 <Row>
-    <WalterMultiSelectPerson {fetchImpl} {readonly} bind:value={entry.selectedMieter} titleText="Mieter" />
+    <WalterMultiSelectPerson
+        {fetchImpl}
+        {readonly}
+        bind:value={entry.selectedMieter}
+        titleText="Mieter"
+    />
 </Row>
 <Row>
     <WalterTextArea {readonly} labelText="Notiz" bind:value={entry.notiz} />

@@ -4,7 +4,6 @@
         WalterGrid,
         WalterVertragVersion,
         WalterLinkTile
-
     } from '$walter/components';
     import type { PageData } from './$types';
     import { WalterS3FileWrapper } from '$walter/lib';
@@ -13,7 +12,7 @@
 
     const title = data.entry.vertrag.text;
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
-    fileWrapper.registerStack()
+    fileWrapper.registerStack();
     fileWrapper.register(title, data.S3URL);
 </script>
 

@@ -21,7 +21,8 @@
         required
         {readonly}
         bind:value={entry.betrag}
-        label="Betrag" />
+        label="Betrag"
+    />
     <WalterDatePicker
         required
         disabled={readonly}
@@ -41,10 +42,15 @@
 
 <WalterLinks>
     <WalterLinkTile
-        name={`Vertrag: ${mieten[0]?.vertrag?.text || "ansehen"}`}
+        name={`Vertrag: ${mieten[0]?.vertrag?.text || 'ansehen'}`}
         href={`/vertraege/${entry.vertrag?.id}`}
     />
     {#if entry.vertrag?.id}
-        <WalterMieten title="Mieten" rows={mieten.filter(e => +e.vertrag.id === +(entry.vertrag?.id || 0))} />
+        <WalterMieten
+            title="Mieten"
+            rows={mieten.filter(
+                (e) => +e.vertrag.id === +(entry.vertrag?.id || 0)
+            )}
+        />
     {/if}
 </WalterLinks>

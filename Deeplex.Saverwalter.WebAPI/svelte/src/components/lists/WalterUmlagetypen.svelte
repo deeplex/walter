@@ -5,9 +5,7 @@
     import type { WalterUmlagetypEntry } from '$walter/lib';
     import { walter_goto } from '$walter/services/utils';
 
-    const headers = [
-        { key: 'bezeichnung', value: 'Bezeichnung' },
-    ];
+    const headers = [{ key: 'bezeichnung', value: 'Bezeichnung' }];
 
     const addUrl = `/api/umlagetypen/`;
 

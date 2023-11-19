@@ -19,7 +19,7 @@
         upload_new_files(fileWrapper, newFiles);
     }
 
-    let filter = "";
+    let filter = '';
 </script>
 
 <HeaderPanelLinks>
@@ -39,9 +39,9 @@
         bind:value={filter}
         placeholder="Suche..."
         size="sm"
-        style="background-color: transparent; color: white">
-    </TextInput>
-        {#each fileWrapper.handles as handle}
+        style="background-color: transparent; color: white"
+    ></TextInput>
+    {#each fileWrapper.handles as handle}
         {#await handle.files}
             <HeaderPanelDivider>{handle.name} (-)</HeaderPanelDivider>
             <InlineLoading

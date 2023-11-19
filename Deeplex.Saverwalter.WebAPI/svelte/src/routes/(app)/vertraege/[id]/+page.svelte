@@ -40,13 +40,14 @@
         versionen[versionen.length - 1]
     );
     const mieterEntry: Partial<WalterPersonEntry> = {};
-    const betriebskostenrechnungEntry: Partial<WalterBetriebskostenrechnungEntry> = {};
+    const betriebskostenrechnungEntry: Partial<WalterBetriebskostenrechnungEntry> =
+        {};
 
     const title = `${data.entry.wohnung?.text} - ${data.entry.mieter
         ?.map((mieter) => mieter.name)
         .join(', ')}`;
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
-    fileWrapper.registerStack()
+    fileWrapper.registerStack();
     fileWrapper.register(title, data.S3URL);
 </script>
 
@@ -61,7 +62,9 @@
     <WalterVertrag fetchImpl={data.fetchImpl} bind:entry={data.entry} />
 
     <WalterLinks>
-        <ClickableTile href="/abrechnung?vertrag={data.id}">Betriebskostenabrechnung erstellen</ClickableTile>
+        <ClickableTile href="/abrechnung?vertrag={data.id}"
+            >Betriebskostenabrechnung erstellen</ClickableTile
+        >
 
         <WalterKontakte
             entry={mieterEntry}
@@ -87,7 +90,8 @@
             entry={betriebskostenrechnungEntry}
             fetchImpl={data.fetchImpl}
             title="Betriebskostenrechnungen"
-            rows={data.entry.betriebskostenrechnungen} />
+            rows={data.entry.betriebskostenrechnungen}
+        />
 
         <!-- TODO id is GUID -->
         <!-- 
@@ -104,11 +108,10 @@
     </WalterLinks>
 
     {#if data.entry.mieten.length > 1}
-    <Row>
-        <WalterDataScatterChart
-            config={walter_data_mieten(
-                "Mieten",
-                data.entry.mieten)} />
-    </Row>
+        <Row>
+            <WalterDataScatterChart
+                config={walter_data_mieten('Mieten', data.entry.mieten)}
+            />
+        </Row>
     {/if}
 </WalterGrid>

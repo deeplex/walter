@@ -5,9 +5,7 @@
         WalterBetriebskostenrechnung,
         WalterDataWrapper
     } from '$walter/components';
-    import type {
-        WalterBetriebskostenrechnungEntry,
-    } from '$walter/lib';
+    import type { WalterBetriebskostenrechnungEntry } from '$walter/lib';
     import { walter_goto } from '$walter/services/utils';
 
     export let fullHeight = false;

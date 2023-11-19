@@ -1,6 +1,9 @@
 <script lang="ts">
     import { Grid } from 'carbon-components-svelte';
-    import { tables, type WalterPreviewCopyTable } from './WalterPreviewCopyFile';
+    import {
+        tables,
+        type WalterPreviewCopyTable
+    } from './WalterPreviewCopyFile';
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
     import type {
@@ -32,7 +35,7 @@
         if (tableName === 'stack' || tableName === 'trash') {
             return;
         }
-        
+
         if (entryList.length !== 2) {
             step = 0;
         }
@@ -60,12 +63,9 @@
     async function selectedTable_change(e: any) {
         selectedTable = tables.find((t) => t.key === e.target.value);
         rows = undefined;
-        if (selectedTable?.key === 'stack')
-        {
+        if (selectedTable?.key === 'stack') {
             step = 3;
-        }
-        else
-        {
+        } else {
             step = 1;
             updateRows();
         }
@@ -118,9 +118,5 @@
         {updateRows}
         {selectEntryFromId}
     />
-    <Step3CheckAndSubmit
-        bind:selectedTable
-        bind:selectedEntry
-        bind:step
-    />
+    <Step3CheckAndSubmit bind:selectedTable bind:selectedEntry bind:step />
 </Grid>

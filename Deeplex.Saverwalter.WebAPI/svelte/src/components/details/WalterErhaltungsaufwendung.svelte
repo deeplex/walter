@@ -8,7 +8,10 @@
         WalterComboBoxWohnung
     } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
-    import type { WalterErhaltungsaufwendungEntry, WalterWohnungEntry } from '$walter/lib';
+    import type {
+        WalterErhaltungsaufwendungEntry,
+        WalterWohnungEntry
+    } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
 
     export let entry: Partial<WalterErhaltungsaufwendungEntry> = {};
@@ -23,29 +26,35 @@
         required
         {readonly}
         bind:value={entry.bezeichnung}
-        labelText="Bezeichnung" />
+        labelText="Bezeichnung"
+    />
     <WalterComboBoxPerson
         {fetchImpl}
-        required {readonly}
+        required
+        {readonly}
         bind:value={entry.aussteller}
-        title="Aussteller" />
+        title="Aussteller"
+    />
     <WalterDatePicker
         required
         disabled={readonly}
         bind:value={entry.datum}
-        labelText="Datum" />
+        labelText="Datum"
+    />
 </Row>
 <Row>
     <WalterComboBoxWohnung
         required
         {readonly}
         {fetchImpl}
-        bind:value={entry.wohnung}/>
+        bind:value={entry.wohnung}
+    />
     <WalterNumberInput
         required
         {readonly}
         bind:value={entry.betrag}
-        label="Betrag" />
+        label="Betrag"
+    />
 </Row>
 <Row>
     <WalterTextArea {readonly} bind:value={entry.notiz} labelText="Notiz" />

@@ -13,5 +13,5 @@
         <strong>{file.Type}</strong> ist keine Vorschau verfügbar.
     </Tile>
 {:else}
-    <Loading/>
+    <Loading />
 {/if}

@@ -5,7 +5,10 @@
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import WalterZaehlerstand from '../details/WalterZaehlerstand.svelte';
     import { convertDateCanadian, walter_goto } from '$walter/services/utils';
-    import type { WalterZaehlerEntry, WalterZaehlerstandEntry } from '$walter/lib';
+    import type {
+        WalterZaehlerEntry,
+        WalterZaehlerstandEntry
+    } from '$walter/lib';
 
     const headers = [
         { key: 'kennnummer', value: 'Kennnummer' },
@@ -14,7 +17,7 @@
         { key: 'lastZaehlerstand.datum', value: 'Letztes Ablesedatum' },
         { key: 'lastZaehlerstand.stand', value: 'Letzter Stand' },
         { key: 'lastZaehlerstand.einheit', value: 'Einheit' },
-        { key: 'ende', value: 'Ende'},
+        { key: 'ende', value: 'Ende' },
         { key: 'button', value: 'Stand hinzufügen' }
     ];
 
@@ -35,12 +38,18 @@
             datum: convertDateCanadian(ablesedatum),
             stand: zaehler.lastZaehlerstand?.stand,
             einheit: zaehler.lastZaehlerstand?.einheit,
-            zaehler: {id: `${zaehler.id}`, text: zaehler.kennnummer}
-        }
+            zaehler: { id: `${zaehler.id}`, text: zaehler.kennnummer }
+        };
 
         open = true;
     }
-    const rowsAdd = rows.map(row => ({...row, button: row.lastZaehlerstand?.datum === convertDateCanadian(ablesedatum) ? "disabled" : (e: CustomEvent) => add(e, row) }));
+    const rowsAdd = rows.map((row) => ({
+        ...row,
+        button:
+            row.lastZaehlerstand?.datum === convertDateCanadian(ablesedatum)
+                ? 'disabled'
+                : (e: CustomEvent) => add(e, row)
+    }));
 
     let open = false;
 
@@ -49,11 +58,12 @@
 </script>
 
 <WalterDataWrapperQuickAdd
-    title={quickAddEntry.zaehler?.text || "Zähler"}
+    title={quickAddEntry.zaehler?.text || 'Zähler'}
     addEntry={quickAddEntry}
     addUrl="/api/zaehlerstaende/"
-    bind:addModalOpen={open}>
-    <WalterZaehlerstand {fetchImpl} entry={quickAddEntry}/>
+    bind:addModalOpen={open}
+>
+    <WalterZaehlerstand {fetchImpl} entry={quickAddEntry} />
 </WalterDataWrapperQuickAdd>
 
 <WalterDataWrapper

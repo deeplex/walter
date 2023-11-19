@@ -1,5 +1,8 @@
 <script lang="ts">
-    import { WalterDataWrapper, WalterVertragVersion } from '$walter/components';
+    import {
+        WalterDataWrapper,
+        WalterVertragVersion
+    } from '$walter/components';
     import type { WalterVertragVersionEntry } from '$walter/lib';
     import { walter_goto } from '$walter/services/utils';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';

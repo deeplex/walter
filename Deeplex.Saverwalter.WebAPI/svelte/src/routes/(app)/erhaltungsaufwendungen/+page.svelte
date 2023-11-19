@@ -1,6 +1,7 @@
 <script lang="ts">
     import {
-        WalterErhaltungsaufwendungen, WalterHeader,
+        WalterErhaltungsaufwendungen,
+        WalterHeader
     } from '$walter/components';
     import type { PageData } from './$types';
 

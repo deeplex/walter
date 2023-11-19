@@ -3,7 +3,10 @@
 
     import type { WalterSelectionEntry } from '$walter/lib';
     import { shouldFilterItem } from './WalterComboBox';
-    import { walter_subscribe_reset_changeTracker, walter_update_value } from '$walter/services/utils';
+    import {
+        walter_subscribe_reset_changeTracker,
+        walter_update_value
+    } from '$walter/services/utils';
     import { onMount } from 'svelte';
 
     export let value: WalterSelectionEntry | undefined;

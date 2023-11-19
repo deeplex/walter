@@ -1,8 +1,11 @@
 <script lang="ts">
-
-    import { StructuredListCell, StructuredListHead, StructuredListRow } from "carbon-components-svelte";
-
+    import {
+        StructuredListCell,
+        StructuredListHead,
+        StructuredListRow
+    } from 'carbon-components-svelte';
 </script>
+
 <StructuredListHead>
     <StructuredListRow>
         <StructuredListCell head>Ermittlung der Einheit</StructuredListCell>
