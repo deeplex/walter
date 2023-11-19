@@ -281,9 +281,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         {
             var list = Ctx.Umlagetypen
                 .ToList()
-                .Select(typ => new SelectionEntry(
-                    typ.UmlagetypId,
-                    typ.Bezeichnung))
+                .Select(typ => new SelectionEntry(typ.UmlagetypId, typ.Bezeichnung, null))
                 .ToList();
 
             return new OkObjectResult(list);
