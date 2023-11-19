@@ -16,6 +16,7 @@
         ChartRelationship,
         Document,
         Home,
+        IbmDataReplication,
         Location,
         Logout,
         Meter,
@@ -57,8 +58,9 @@
         {#if extendedNavigation}
             <SideNavDivider />
             <WalterSideNavLink icon={Money} text="Betriebskostenrechnungen" href="/betriebskostenrechnungen" />
-            <WalterSideNavLink icon={Tools} text="Erhaltungsaufwendungen" href="/erhaltungsaufwendungen" />
             <WalterSideNavLink icon={ChartRelationship} text="Umlagen" href="/umlagen" />
+            <WalterSideNavLink icon={IbmDataReplication} text="Umlagetypen" href="/umlagetypen" />
+            <WalterSideNavLink icon={Tools} text="Erhaltungsaufwendungen" href="/erhaltungsaufwendungen" />
             <WalterSideNavLink icon={Meter} text="Zähler" href="/zaehler" />
             <WalterSideNavLink icon={Location} text="Adressen" href="/adressen" />
         {/if}

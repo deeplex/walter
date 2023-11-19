@@ -207,14 +207,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public void GetBetriebskostentypen()
+        public void GetUmlagetypen()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
 
-            var result = controller.GetBetriebskostentypen();
+            var result = controller.GetUmlagetypen();
 
             result.Should().BeOfType<OkObjectResult>();
         }

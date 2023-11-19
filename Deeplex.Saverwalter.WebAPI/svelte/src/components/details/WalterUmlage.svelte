@@ -2,10 +2,10 @@
     import {
         WalterComboBox,
         WalterMultiSelectWohnung,
-        WalterMultiSelect,
         WalterTextArea,
+        WalterMultiSelectZaehler,
 
-        WalterMultiSelectZaehler
+        WalterComboBoxUmlagetyp
 
     } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
@@ -18,17 +18,15 @@
 
     const umlagetypen = walter_selection.umlagetypen(fetchImpl);
     const umlageschluessel = walter_selection.umlageschluessel(fetchImpl);
-    const wohnungen = walter_selection.wohnungen(fetchImpl);
-    const zaehler = walter_selection.zaehler(fetchImpl);
 </script>
 
 <Row>
-    <WalterComboBox
-        required
+    <WalterComboBoxUmlagetyp
         {readonly}
-        entries={umlagetypen}
+        {fetchImpl}
+        required
         bind:value={entry.typ}
-        titleText="Typ"
+        title="Betriebskostentyp der Umlage"
     />
     <WalterComboBox
         required

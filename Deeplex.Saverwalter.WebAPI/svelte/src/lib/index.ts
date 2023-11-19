@@ -11,6 +11,7 @@ export { WalterNatuerlichePersonEntry } from './WalterNatuerlichePerson';
 export { WalterS3FileWrapper } from './WalterS3FileWrapper';
 export { WalterSelectionEntry } from './WalterSelection';
 export { WalterUmlageEntry } from './WalterUmlage';
+export { WalterUmlagetypEntry } from './WalterUmlagetyp';
 export { WalterVertragEntry } from './WalterVertrag';
 export { WalterVertragVersionEntry } from './WalterVertragVersion';
 export { WalterWohnungEntry } from './WalterWohnung';
