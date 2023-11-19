@@ -1,5 +1,7 @@
+import type WalterUmlageHkvo from '$walter/components/details/WalterUmlageHKVO.svelte';
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
+import { WalterHKVOEntry } from './WalterHKVO';
 import { WalterSelectionEntry } from './WalterSelection';
 import { WalterWohnungEntry } from './WalterWohnung';
 import { WalterZaehlerEntry } from './WalterZaehler';
@@ -12,6 +14,7 @@ export class WalterUmlageEntry extends WalterApiHandler {
         public notiz: string,
         public beschreibung: string,
         public wohnungenBezeichnung: string,
+        public hKVO: Partial<WalterHKVOEntry>,
         public createdAt: Date,
         public lastModified: Date,
         public zaehler: WalterZaehlerEntry[],
@@ -39,6 +42,7 @@ export class WalterUmlageEntry extends WalterApiHandler {
         const selectedZaehler = json.selectedZaehler?.map(
             WalterSelectionEntry.fromJson
         );
+        const hkvo = json.hkvo && WalterHKVOEntry.fromJson(json.hkvo);
         const zaehler = json.zaehler?.map(WalterZaehlerEntry.fromJson);
 
         return new WalterUmlageEntry(
@@ -46,6 +50,7 @@ export class WalterUmlageEntry extends WalterApiHandler {
             json.notiz,
             json.beschreibung,
             json.wohnungenBezeichnung,
+            hkvo,
             json.createdAt,
             json.lastModified,
             zaehler,

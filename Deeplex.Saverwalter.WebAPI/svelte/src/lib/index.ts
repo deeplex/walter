@@ -3,6 +3,7 @@ export { WalterPersonEntry } from './WalterPerson';
 export { WalterAdresseEntry } from './WalterAdresse';
 export { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
 export { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
+export { WalterHKVOEntry } from './WalterHKVO';
 export { WalterJuristischePersonEntry } from './WalterJuristischePerson';
 export { WalterMieteEntry } from './WalterMiete';
 export { WalterMietminderungEntry } from './WalterMietminderung';

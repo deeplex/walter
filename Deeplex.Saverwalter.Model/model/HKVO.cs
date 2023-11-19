@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -39,8 +40,11 @@ namespace Deeplex.Saverwalter.Model
 
     public enum HKVO_P9A2
     {
+        [Description("Satz 1")]
         Satz_1 = 1,
+        [Description("Satz 2")]
         Satz_2 = 2,
+        [Description("Satz 4")]
         Satz_4 = 4,
     }
 }

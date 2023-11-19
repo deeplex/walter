@@ -307,7 +307,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
             var list = Enum.GetValues(typeof(HKVO_P9A2))
                 .Cast<HKVO_P9A2>()
                 .ToList()
-                .Select(e => new SelectionEntry((int)e, e.ToString()))
+                .Select(e => new SelectionEntry((int)e, e.ToDescriptionString()))
                 .ToList();
 
             return new OkObjectResult(list);

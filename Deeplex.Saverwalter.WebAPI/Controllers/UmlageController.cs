@@ -12,6 +12,29 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     [Route("api/umlagen")]
     public class UmlageController : ControllerBase
     {
+        public class HKVOEntryBase
+        {
+            public int Id { get; set; }
+
+            public int HKVO_P7 { get; set; }
+            public int HKVO_P8 { get; set; }
+            public SelectionEntry HKVO_P9 { get; set; } = null!;
+            public int Strompauschale { get; set; }
+            public SelectionEntry Stromrechnung { get; set; } = null!;
+
+            public HKVOEntryBase() { }
+            public HKVOEntryBase(HKVO entity)
+            {
+                Id = entity.HKVOId;
+
+                HKVO_P7 = (int)(entity.HKVO_P7 * 100);
+                HKVO_P8 = (int)(entity.HKVO_P8 * 100);
+                HKVO_P9 = new((int)entity.HKVO_P9, entity.HKVO_P9.ToDescriptionString());
+                Strompauschale = (int)(entity.Strompauschale * 100);
+                Stromrechnung = new SelectionEntry(entity.Betriebsstrom.UmlageId, entity.Betriebsstrom.Typ.Bezeichnung);
+            }
+        }
+
         public class UmlageEntryBase
         {
             public int Id { get; set; }
@@ -19,6 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string? Beschreibung { get; set; }
             public SelectionEntry? Schluessel { get; set; }
             public SelectionEntry? Typ { get; set; }
+            public HKVOEntryBase? HKVO { get; set; }
             public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
             public string? WohnungenBezeichnung { get; set; }
             public IEnumerable<SelectionEntry>? SelectedZaehler { get; set; }
@@ -45,6 +69,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 SelectedZaehler = entity.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer));
 
                 Betriebskostenrechnungen = entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e));
+
+                if (entity.HKVO != null)
+                {
+                    HKVO = new HKVOEntryBase(entity.HKVO);
+                }
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;

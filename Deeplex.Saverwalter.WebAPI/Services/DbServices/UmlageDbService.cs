@@ -158,6 +158,35 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 entity.Zaehler.RemoveAll(w => !zaehler.ToList().Exists(e => e.Id == w.ZaehlerId.ToString()));
             }
 
+            if (entry.Schluessel != null &&
+                (Umlageschluessel)int.Parse(entry.Schluessel.Id) == Umlageschluessel.NachVerbrauch &&
+                entry.HKVO is HKVOEntryBase hkvo)
+            {
+                if (hkvo.Id == 0)
+                {
+                    var newHKVO = new HKVO(hkvo.HKVO_P7 / 100, hkvo.HKVO_P8 / 100, (HKVO_P9A2)int.Parse(hkvo.HKVO_P9.Id), hkvo.Strompauschale / 100)
+                    {
+                        Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == int.Parse(hkvo.Stromrechnung.Id))
+                    };
+                    entity.HKVO = newHKVO;
+                    Ctx.HKVO.Add(newHKVO);
+                }
+                else
+                {
+                    var oldHKVO = Ctx.HKVO.Single(e => e.HKVOId == hkvo.Id);
+                    oldHKVO.HKVO_P7 = (double)hkvo.HKVO_P7 / 100;
+                    oldHKVO.HKVO_P8 = (double)hkvo.HKVO_P8 / 100;
+                    oldHKVO.HKVO_P9 = (HKVO_P9A2)int.Parse(hkvo.HKVO_P9.Id);
+                    oldHKVO.Strompauschale = (double)hkvo.Strompauschale / 100;
+                    oldHKVO.Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == int.Parse(hkvo.Stromrechnung.Id));
+                    Ctx.HKVO.Update(oldHKVO);
+                }
+            }
+            else
+            {
+                entity.HKVO = null;
+            }
+
             entity.Notiz = entry.Notiz;
         }
     }
