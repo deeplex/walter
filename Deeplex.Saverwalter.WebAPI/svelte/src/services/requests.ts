@@ -39,6 +39,9 @@ export const walter_selection = {
     umlagen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/umlagen', fetchImpl);
     },
+    umlagetypen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
+        return walter_get('/api/selection/umlagetypen', fetchImpl);
+    },
     vertraege(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/vertraege', fetchImpl);
     },
@@ -53,11 +56,6 @@ export const walter_selection = {
     },
     wohnungen(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/wohnungen', fetchImpl);
-    },
-    betriebskostentypen(
-        fetchImpl: typeof fetch
-    ): Promise<WalterSelectionEntry[]> {
-        return walter_get('/api/selection/betriebskostentypen', fetchImpl);
     },
     kontakte(fetchImpl: typeof fetch): Promise<WalterSelectionEntry[]> {
         return walter_get('/api/selection/kontakte', fetchImpl);

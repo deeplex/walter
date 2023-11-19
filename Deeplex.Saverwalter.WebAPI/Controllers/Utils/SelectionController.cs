@@ -276,8 +276,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         [HttpGet]
-        [Route("api/selection/betriebskostentypen")]
-        public IActionResult GetBetriebskostentypen()
+        [Route("api/selection/umlagetypen")]
+        public IActionResult GetUmlagetypen()
         {
             var list = Ctx.Umlagetypen
                 .ToList()

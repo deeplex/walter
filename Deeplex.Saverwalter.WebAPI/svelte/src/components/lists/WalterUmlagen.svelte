@@ -2,7 +2,7 @@
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     import { WalterDataWrapper, WalterUmlage } from '$walter/components';
-    import type { WalterSelectionEntry, WalterUmlageEntry } from '$walter/lib';
+    import type { WalterUmlageEntry } from '$walter/lib';
     import { walter_goto } from '$walter/services/utils';
 
     const headers = [

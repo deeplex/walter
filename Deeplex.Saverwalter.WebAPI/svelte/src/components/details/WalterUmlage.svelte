@@ -16,7 +16,7 @@
     export let fetchImpl: typeof fetch;
     export let readonly = false;
 
-    const betriebskostentypen = walter_selection.betriebskostentypen(fetchImpl);
+    const umlagetypen = walter_selection.umlagetypen(fetchImpl);
     const umlageschluessel = walter_selection.umlageschluessel(fetchImpl);
     const wohnungen = walter_selection.wohnungen(fetchImpl);
     const zaehler = walter_selection.zaehler(fetchImpl);
@@ -26,7 +26,7 @@
     <WalterComboBox
         required
         {readonly}
-        entries={betriebskostentypen}
+        entries={umlagetypen}
         bind:value={entry.typ}
         titleText="Typ"
     />
