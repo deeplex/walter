@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -126,7 +125,7 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                     {29, "Wartung Therme/Speicher"},
                     {31, "Wasserversorgung"},
                     {33, "Sonstige Nebenkosten"},
-                    {36, "Heizkosten" } 
+                    {36, "Heizkosten" }
                 });
 
             migrationBuilder.CreateIndex(

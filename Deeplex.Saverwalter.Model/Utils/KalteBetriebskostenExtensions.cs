@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace Deeplex.Saverwalter.Model
+﻿namespace Deeplex.Saverwalter.Model
 {
     public static class KalteBetriebskostenExtensions
     {

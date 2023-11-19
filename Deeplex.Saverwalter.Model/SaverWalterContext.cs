@@ -1,6 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model.Auth;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Deeplex.Saverwalter.Model
 {
