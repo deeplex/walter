@@ -5,20 +5,37 @@ import { walter_delete, walter_fetch } from './requests';
 import type { WalterToastContent } from '../lib/WalterToastContent';
 
 export const S3URL = {
-    adresse: (id: string) => `adressen/${id}`,
-    betriebskostenrechnung: (id: string) => `betriebskostenrechnungen/${id}`,
-    erhaltungsaufwendung: (id: string) => `erhaltungsaufwendungen/${id}`,
-    juristischeperson: (id: string) => `kontakte/jur/${id}`,
-    miete: (id: string) => `mieten/${id}`,
-    mietminderung: (id: string) => `mietminderungen/${id}`,
-    natuerlicheperson: (id: string) => `kontakte/nat/${id}`,
-    umlage: (id: string) => `umlagen/${id}`,
-    umlagetyp: (id: string) => `umlagetypen/${id}`,
-    vertrag: (id: string) => `vertraege/${id}`,
-    vertragversion: (id: string) => `vertragversionen/${id}`,
-    wohnung: (id: string) => `wohnungen/${id}`,
-    zaehler: (id: string) => `zaehler/${id}`,
-    zaehlerstand: (id: string) => `zaehlerstaende/${id}`
+    adressen: `adressen`,
+    adresse: (id: string) => `${S3URL.adressen}/${id}`,
+    betriebskostenrechnungen: `betriebskostenrechnungen`,
+    betriebskostenrechnung: (id: string) =>
+        `${S3URL.betriebskostenrechnungen}/${id}`,
+    erhaltungsaufwendungen: `erhaltungsaufwendungen`,
+    erhaltungsaufwendung: (id: string) =>
+        `${S3URL.erhaltungsaufwendungen}/${id}`,
+    juristischepersonen: `kontakte/jur`,
+    juristischeperson: (id: string) => `${S3URL.juristischepersonen}/${id}`,
+    mieten: `mieten`,
+    miete: (id: string) => `${S3URL.mieten}/${id}`,
+    mietminderungen: `mietminderungen`,
+    mietminderung: (id: string) => `${S3URL.mietminderungen}/${id}`,
+    natuerlichepersonen: `kontakte/nat`,
+    natuerlicheperson: (id: string) => `${S3URL.natuerlichepersonen}/${id}`,
+    umlagen: `umlagen`,
+    umlage: (id: string) => `${S3URL.umlagen}/${id}`,
+    umlagetypen: `umlagetypen`,
+    umlagetyp: (id: string) => `${S3URL.umlagetypen}/${id}`,
+    vertraege: `vertraege`,
+    vertrag: (id: string) => `${S3URL.vertraege}/${id}`,
+    vertragversionen: `vertragversionen`,
+    vertragversion: (id: string) => `${S3URL.vertragversionen}/${id}`,
+    wohnungen: `wohnungen`,
+    wohnung: (id: string) => `${S3URL.wohnungen}/${id}`,
+    zaehlerSet: `zaehler`,
+    zaehler: (id: string) => `${S3URL.zaehlerSet}/${id}`,
+    zaehlerstaende: `zaehlerstaende`,
+    zaehlerstand: (id: string) => `${S3URL.zaehlerstaende}/${id}`,
+    stack: `stack`
 };
 
 const baseURL = '/api/files';

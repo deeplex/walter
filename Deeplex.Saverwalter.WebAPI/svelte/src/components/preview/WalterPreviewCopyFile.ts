@@ -1,6 +1,6 @@
 import { WalterToastContent, type WalterSelectionEntry } from '$walter/lib';
 import { walter_selection } from '$walter/services/requests';
-import { walter_s3_delete, walter_s3_post } from '$walter/services/s3';
+import { S3URL, walter_s3_delete, walter_s3_post } from '$walter/services/s3';
 import type { WalterS3File } from '$walter/types';
 import {
     WalterAdresse,
@@ -184,104 +184,104 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Adressen',
         key: 'adressen',
         fetch: walter_selection.adressen,
-        S3URL: 'adressen',
+        S3URL: S3URL.adressen,
         newPage: () => WalterAdresse
     },
     {
         value: 'Betriebskostenrechnungen',
         key: 'betriebskostenrechnungen',
         fetch: walter_selection.betriebskostenrechnungen,
-        S3URL: 'betriebskostenrechnungen',
+        S3URL: S3URL.betriebskostenrechnungen,
         newPage: () => WalterBetriebskostenrechnung
     },
     {
         value: 'Erhaltungsaufwendungen',
         key: 'erhaltungsaufwendungen',
         fetch: walter_selection.erhaltungsaufwendungen,
-        S3URL: 'erhaltungsaufwendungen',
+        S3URL: S3URL.erhaltungsaufwendungen,
         newPage: () => WalterErhaltungsaufwendung
     },
     {
         value: 'Natürliche Personen',
         key: 'natuerlichepersonen',
         fetch: walter_selection.natuerlichePersonen,
-        S3URL: 'kontakte/nat',
+        S3URL: S3URL.natuerlichepersonen,
         newPage: () => WalterNatuerlichePerson
     },
     {
         value: 'Juristische Personen',
         key: 'juristischepersonen',
         fetch: walter_selection.juristischePersonen,
-        S3URL: 'kontakte/jur',
+        S3URL: S3URL.juristischepersonen,
         newPage: () => WalterJuristischePerson
     },
     {
         value: 'Mieten',
         key: 'mieten',
         fetch: walter_selection.mieten,
-        S3URL: 'mieten',
+        S3URL: S3URL.mieten,
         newPage: () => WalterMiete
     },
     {
         value: 'Mietminderungen',
         key: 'mietminderungen',
         fetch: walter_selection.mietminderungen,
-        S3URL: 'mietminderungen',
+        S3URL: S3URL.mietminderungen,
         newPage: () => WalterMietminderung
     },
     {
         value: 'Umlagen',
         key: 'umlagen',
         fetch: walter_selection.umlagen,
-        S3URL: 'umlagen',
+        S3URL: S3URL.umlagen,
         newPage: () => WalterUmlage
     },
     {
         value: 'Umlagetypen',
         key: 'umlagetypen',
         fetch: walter_selection.umlagetypen,
-        S3URL: 'umlagetypen',
+        S3URL: S3URL.umlagetypen,
         newPage: () => WalterUmlagetyp
     },
     {
         value: 'Verträge',
         key: 'vertraege',
         fetch: walter_selection.vertraege,
-        S3URL: 'vertraege',
+        S3URL: S3URL.vertraege,
         newPage: () => WalterVertrag
     },
     // {
     //     value: 'Vertragversionen',
     //     key: 'vertragsversionen',
     //     fetch: walter_selection.vertragversionen,
-    //     S3URL: 'vertragsversionen',
+    //     S3URL: 'S3URL.vertragversionen,
     // },
     {
         value: 'Wohnungen',
         key: 'wohnungen',
         fetch: walter_selection.wohnungen,
-        S3URL: 'wohnungen',
+        S3URL: S3URL.wohnungen,
         newPage: () => WalterWohnung
     },
     {
         value: 'Zähler',
         key: 'zaehler',
         fetch: walter_selection.zaehler,
-        S3URL: 'zaehler',
+        S3URL: S3URL.zaehlerSet,
         newPage: () => WalterZaehler
     },
     {
         value: 'Zählerstände',
         key: 'zaehlerstaende',
         fetch: walter_selection.zaehlerstaende,
-        S3URL: 'zaehlerstaende',
+        S3URL: S3URL.zaehlerstaende,
         newPage: () => WalterZaehlerstand
     },
     {
         value: 'Ablagestapel',
         key: 'stack',
         fetch: () => Promise.resolve(),
-        S3URL: 'stack',
+        S3URL: S3URL.stack,
         newPage: () => undefined
     }
 ];
