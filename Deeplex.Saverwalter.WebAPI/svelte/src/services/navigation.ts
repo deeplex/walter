@@ -1,6 +1,7 @@
 import { walter_goto } from './utils';
 
 export const navigation = {
+    account: (id: number) => walter_goto(`/account/${id}`),
     adresse: (id: number) => walter_goto(`/adressen/${id}`),
     betriebskostenrechnung: (id: number) =>
         walter_goto(`/betriebskostenrechnungen/${id}`),

@@ -21,6 +21,7 @@
         Logout,
         Meter,
         Money,
+        NetworkAdminControl,
         Settings,
         Tools,
         TrashCan,
@@ -126,6 +127,13 @@
                 icon={User}
                 href="/account"
             />
+            {#if true}
+            <WalterSideNavLink
+                text="Adminbereich"
+                icon={NetworkAdminControl}
+                href="/admin"
+            />
+            {/if}
             <SideNavLink
                 icon={Logout}
                 on:click={logout}

@@ -23,6 +23,7 @@ export { default as WalterPreview } from './preview/WalterPreview.svelte';
 export { default as WalterPreviewUnknown } from './preview/WalterPreviewUnknown.svelte';
 export { default as WalterPreviewError } from './preview/WalterPreviewError.svelte';
 
+export { default as WalterAccount } from './details/WalterAccount.svelte';
 export { default as WalterAdresse } from './details/WalterAdresse.svelte';
 export { default as WalterKontakt } from './details/WalterKontakt.svelte';
 export { default as WalterMiete } from './details/WalterMiete.svelte';
