@@ -16,27 +16,27 @@ namespace Deeplex.Saverwalter.PrintService
 
         public void Table(int[] widths, int[] justification, bool[] bold, bool[] underlined, string[][] cols)
         {
-            TableCell ContentCell(string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
+            TableCell ContentCell(string str, JustificationValues value, BorderValues bordervalue)
                 => new TableCell(
                     new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
                     new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
                     new Run(Font(), new Text(str))));
 
-            TableCell ContentCellWidth(string pct, string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
+            TableCell ContentCellWidth(string pct, string str, JustificationValues value, BorderValues bordervalue)
                 => new TableCell(
                     new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
                     new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = pct },
                     new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
                     new Run(Font(), new Text(str))));
 
-            TableCell ContentHeadWidth(string pct, string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
+            TableCell ContentHeadWidth(string pct, string str, JustificationValues value, BorderValues bordervalue)
                 => new TableCell(
                     new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
                     new TableCellWidth() { Type = TableWidthUnitValues.Pct, Width = pct },
                     new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
                     new Run(Font(), Bold(), new Text(str))));
 
-            TableCell ContentHead(string str, JustificationValues value, BorderValues bordervalue = BorderValues.None)
+            TableCell ContentHead(string str, JustificationValues value, BorderValues bordervalue)
                 => new TableCell(
                     new TableCellProperties(new BottomBorder() { Val = bordervalue, Size = 4 }),
                     new Paragraph(Font(), NoSpace(), new ParagraphProperties(new Justification() { Val = value }),
