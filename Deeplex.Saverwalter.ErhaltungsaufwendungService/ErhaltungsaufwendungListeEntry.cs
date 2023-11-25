@@ -5,7 +5,7 @@
         public Erhaltungsaufwendung Entity { get; }
         public SaverwalterContext db { get; }
         public Wohnung Wohnung => Entity.Wohnung;
-        public IPerson Aussteller => db.FindPerson(Entity.AusstellerId);
+        public Kontakt Aussteller => Entity.Aussteller;
         public string Bezeichnung => Entity.Bezeichnung;
         public DateOnly Datum => Entity.Datum;
         public double Betrag => Entity.Betrag;

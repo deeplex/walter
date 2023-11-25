@@ -1,12 +1,9 @@
 <script lang="ts">
-    import {
-        WalterJuristischePersonEntry,
-        type WalterSelectionEntry
-    } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
     import WalterQuickAddButton from './WalterQuickAddButton.svelte';
     import WalterMultiSelect from './WalterMultiSelect.svelte';
-    import { WalterJuristischePerson } from '..';
+    import { WalterKontaktEntry, type WalterSelectionEntry } from '$walter/lib';
+    import WalterKontakt from '../details/WalterKontakt.svelte';
 
     export let value: WalterSelectionEntry[] | undefined;
     export let titleText: string;
@@ -18,6 +15,7 @@
         entries = walter_selection.juristischePersonen(fetchImpl);
     }
 
+    // TODO: Add Rechtsform
     let addEntry = {};
 </script>
 
@@ -32,9 +30,9 @@
     <WalterQuickAddButton
         title="Juristische Personen"
         bind:addEntry
-        addUrl={WalterJuristischePersonEntry.ApiURL}
+        addUrl={WalterKontaktEntry.ApiURL}
         {onSubmit}
     >
-        <WalterJuristischePerson entry={addEntry} {fetchImpl} />
+        <WalterKontakt juristisch entry={addEntry} {fetchImpl} />
     </WalterQuickAddButton>
 </div>

@@ -1,15 +1,11 @@
 import { WalterAdresseEntry } from './WalterAdresse';
 import { WalterApiHandler } from './WalterApiHandler';
-import { WalterPersonEntry } from './WalterPerson';
 import { WalterSelectionEntry } from './WalterSelection';
 import { WalterVertragEntry } from './WalterVertrag';
 import { WalterWohnungEntry } from './WalterWohnung';
 
-export class WalterJuristischePersonEntry
-    extends WalterApiHandler
-    implements WalterPersonEntry
-{
-    public static ApiURL = `/api/kontakte/jur`;
+export class WalterKontaktEntry extends WalterApiHandler {
+    public static ApiURL = `/api/kontakte`;
 
     constructor(
         public id: number,
@@ -19,28 +15,25 @@ export class WalterJuristischePersonEntry
         public fax: string,
         public mobil: string,
         public notiz: string,
+        public rechtsform: WalterSelectionEntry,
+        public bezeichnung: string,
         public name: string,
+        public vorname: string,
         public createdAt: Date,
         public lastModified: Date,
-        public natuerlichePerson: boolean,
+        public anrede: WalterSelectionEntry,
         public selectedJuristischePersonen: WalterSelectionEntry[],
         public adresse: WalterAdresseEntry,
-        public juristischePersonen: WalterJuristischePersonEntry[],
+        public juristischePersonen: WalterKontaktEntry[],
         public wohnungen: WalterWohnungEntry[],
         public vertraege: WalterVertragEntry[],
         public selectedMitglieder: WalterSelectionEntry[],
-        public mitglieder: WalterPersonEntry[]
+        public mitglieder: WalterKontaktEntry[]
     ) {
         super();
     }
 
-    static fromJson(
-        json: WalterJuristischePersonEntry
-    ): WalterJuristischePersonEntry {
-        const selectedMitglieder = json.selectedMitglieder?.map(
-            WalterSelectionEntry.fromJson
-        );
-        const mitglieder = json.mitglieder?.map(WalterPersonEntry.fromJson);
+    static fromJson(json: WalterKontaktEntry): WalterKontaktEntry {
         const selectedJuristischePersonen =
             json.selectedJuristischePersonen?.map(
                 WalterSelectionEntry.fromJson
@@ -48,12 +41,13 @@ export class WalterJuristischePersonEntry
         const adresse =
             json.adresse && WalterAdresseEntry.fromJson(json.adresse);
         const juristischePersonen = json.juristischePersonen?.map(
-            WalterJuristischePersonEntry.fromJson
+            WalterKontaktEntry.fromJson
         );
         const wohnungen = json.wohnungen?.map(WalterWohnungEntry.fromJson);
         const vertraege = json.vertraege?.map(WalterVertragEntry.fromJson);
+        const mitglieder = json.mitglieder?.map(WalterKontaktEntry.fromJson);
 
-        return new WalterJuristischePersonEntry(
+        return new WalterKontaktEntry(
             json.id,
             json.guid,
             json.email,
@@ -61,16 +55,19 @@ export class WalterJuristischePersonEntry
             json.fax,
             json.mobil,
             json.notiz,
+            json.rechtsform,
+            json.bezeichnung,
             json.name,
+            json.vorname,
             json.createdAt,
             json.lastModified,
-            json.natuerlichePerson,
+            json.anrede,
             selectedJuristischePersonen,
             adresse,
             juristischePersonen,
             wohnungen,
             vertraege,
-            selectedMitglieder,
+            json.selectedMitglieder,
             mitglieder
         );
     }

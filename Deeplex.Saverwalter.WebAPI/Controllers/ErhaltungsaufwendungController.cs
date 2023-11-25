@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime LastModified { get; set; }
 
             public ErhaltungsaufwendungEntryBase() { }
-            public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity, SaverwalterContext ctx)
+            public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity)
             {
                 Entity = entity;
 
@@ -33,10 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Datum = Entity.Datum;
                 Notiz = Entity.Notiz;
                 Bezeichnung = Entity.Bezeichnung;
-                Aussteller = new(
-                    Entity.AusstellerId,
-                    ctx.FindPerson(Entity.AusstellerId).Bezeichnung,
-                    ((JuristischePerson)ctx.FindPerson(Entity.AusstellerId))?.JuristischePersonId.ToString() ?? null);
+                Aussteller = new(Entity.Aussteller.KontaktId, Entity.Aussteller.Bezeichnung);
                 var anschrift = Entity.Wohnung.Adresse is Adresse a ? a.Anschrift : "Unbekannte Anschrift";
                 Wohnung = new(Entity.Wohnung.WohnungId, $"{anschrift} - {Entity.Wohnung.Bezeichnung}");
 
@@ -48,7 +45,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class ErhaltungsaufwendungEntry : ErhaltungsaufwendungEntryBase
         {
             public ErhaltungsaufwendungEntry() { }
-            public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity, SaverwalterContext ctx) : base(entity, ctx)
+            public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity) : base(entity)
             {
             }
         }
@@ -65,7 +62,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpGet]
         public IActionResult Get() => new OkObjectResult(DbService.Ctx.Erhaltungsaufwendungen
             .ToList()
-            .Select(e => new ErhaltungsaufwendungEntryBase(e, DbService.Ctx))
+            .Select(e => new ErhaltungsaufwendungEntryBase(e))
             .ToList());
         [HttpPost]
         public IActionResult Post([FromBody] ErhaltungsaufwendungEntry entry) => DbService.Post(entry);

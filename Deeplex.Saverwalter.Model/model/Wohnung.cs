@@ -13,8 +13,8 @@ namespace Deeplex.Saverwalter.Model
         public double Nutzflaeche { get; set; }
         [Required]
         public int Nutzeinheit { get; set; } // TODO Rename to Nutzeinheiten
+        public virtual Kontakt? Besitzer { get; set; }
         public virtual Adresse? Adresse { get; set; }
-        public Guid BesitzerId { get; set; }
         public string? Notiz { get; set; }
 
         public virtual List<Vertrag> Vertraege { get; private set; } = new List<Vertrag>();

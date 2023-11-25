@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime LastModified { get; set; }
 
             public WohnungEntryBase() { }
-            public WohnungEntryBase(Wohnung entity, SaverwalterContext ctx)
+            public WohnungEntryBase(Wohnung entity)
             {
                 Entity = entity;
 
@@ -43,14 +43,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Einheiten = Entity.Nutzeinheit;
                 Notiz = Entity.Notiz;
                 Adresse = Entity.Adresse is Adresse a ? new AdresseEntryBase(a) : null;
-                Besitzer = Entity.BesitzerId is Guid id && id != Guid.Empty ? new(id, ctx.FindPerson(id).Bezeichnung) : null;
+                if (Entity.Besitzer is Kontakt k)
+                {
+                    Besitzer = new(k.KontaktId, k.Bezeichnung);
+                }
 
                 var v = Entity.Vertraege.FirstOrDefault(e => e.Ende == null || e.Ende < DateOnly.FromDateTime(DateTime.Now));
                 Bewohner = v != null ?
-                    string.Join(", ", ctx.MieterSet
-                        .Where(m => m.Vertrag.VertragId == v.VertragId)
-                        .ToList()
-                        .Select(a => ctx.FindPerson(a.PersonId).Bezeichnung)) :
+                    string.Join(", ", v.Mieter.Select(m => m.Bezeichnung)) :
                     null;
 
                 CreatedAt = Entity.CreatedAt;
@@ -60,21 +60,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class WohnungEntry : WohnungEntryBase
         {
-            private SaverwalterContext? Ctx { get; }
-
-            public IEnumerable<WohnungEntryBase>? Haus => Entity?.Adresse?.Wohnungen.Select(e => new WohnungEntryBase(e, Ctx!));
+            public IEnumerable<WohnungEntryBase>? Haus => Entity?.Adresse?.Wohnungen.Select(e => new WohnungEntryBase(e));
             public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
-            public IEnumerable<VertragEntryBase>? Vertraege => Entity?.Vertraege.Select(e => new VertragEntryBase(e, Ctx!));
+            public IEnumerable<VertragEntryBase>? Vertraege => Entity?.Vertraege.Select(e => new VertragEntryBase(e));
             public IEnumerable<ErhaltungsaufwendungEntryBase>? Erhaltungsaufwendungen
-                => Entity?.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungEntryBase(e, Ctx!));
+                => Entity?.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungEntryBase(e));
             public IEnumerable<UmlageEntryBase>? Umlagen => Entity?.Umlagen.Select(e => new UmlageEntryBase(e));
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen
                 => Entity?.Umlagen.SelectMany(e => e.Betriebskostenrechnungen.Select(f => new BetriebskostenrechnungEntryBase(f)));
 
             public WohnungEntry() : base() { }
-            public WohnungEntry(Wohnung entity, SaverwalterContext ctx) : base(entity, ctx)
+            public WohnungEntry(Wohnung entity) : base(entity)
             {
-                Ctx = ctx;
             }
         }
 
@@ -89,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpGet]
         public IActionResult Get() => new OkObjectResult(DbService.Ctx.Wohnungen
             .ToList()
-            .Select(e => new WohnungEntryBase(e, DbService.Ctx))
+            .Select(e => new WohnungEntryBase(e))
             .ToList());
         [HttpPost]
         public IActionResult Post([FromBody] WohnungEntry entry) => DbService.Post(entry);

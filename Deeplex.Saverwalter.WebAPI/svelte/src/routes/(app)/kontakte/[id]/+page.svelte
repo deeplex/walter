@@ -6,9 +6,9 @@
         WalterWohnungen,
         WalterVertraege,
         WalterHeaderDetail,
-        WalterNatuerlichePerson,
         WalterLinks,
-        WalterLinkTile
+        WalterLinkTile,
+        WalterKontakt
     } from '$walter/components';
     import { WalterS3FileWrapper } from '$walter/lib';
 
@@ -28,16 +28,24 @@
 />
 
 <WalterGrid>
-    <WalterNatuerlichePerson
+    <WalterKontakt
         bind:entry={data.entry}
         fetchImpl={data.fetchImpl}
     />
 
     <WalterLinks>
         <WalterKontakte
+            fetchImpl={data.fetchImpl}
             title="Juristische Personen"
             rows={data.entry.juristischePersonen}
         />
+        {#if data.entry.rechtsform.id !== 0}
+            <WalterKontakte
+            fetchImpl={data.fetchImpl}
+            title="Mitglieder"
+            rows={data.entry.mitglieder}
+    />
+        {/if}
         <WalterWohnungen
             fetchImpl={data.fetchImpl}
             title="Wohnungen"

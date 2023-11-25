@@ -6,9 +6,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
     public sealed class Betriebskostenabrechnung
     {
         public List<Note> Notes { get; } = new List<Note>();
-        public IPerson Vermieter { get; }
-        public IPerson Ansprechpartner { get; }
-        public List<IPerson> Mieter { get; }
+        public Kontakt Vermieter { get; } = null!;
+        public Kontakt Ansprechpartner { get; }
+        public List<Kontakt> Mieter { get; }
         public Vertrag Vertrag { get; }
         public double GezahlteMiete { get; }
         public double KaltMiete { get; }
@@ -23,7 +23,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public double Result { get; }
 
         public Betriebskostenabrechnung(
-            SaverwalterContext ctx,
             Vertrag vertrag,
             int jahr,
             DateOnly abrechnungsbeginn,
@@ -32,9 +31,19 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Vertrag = vertrag;
             Zeitraum = new Zeitraum(jahr, vertrag);
 
-            Vermieter = ctx.FindPerson(Vertrag.Wohnung.BesitzerId);
+            Vermieter = Vertrag.Wohnung.Besitzer!;
 
-            Ansprechpartner = ctx.FindPerson(vertrag.AnsprechpartnerId!.Value) ?? Vermieter;
+            Ansprechpartner = vertrag.Ansprechpartner ?? Vermieter;
+
+            if (Vermieter == null)
+            {
+                Notes.Add(new Note(
+                    $"Die Wohnung benötigt für die Abrechnung einen Ansprechpartner (Besitzer)",
+                    Severity.Error));
+            }
+
+            Mieter = Vertrag.Mieter;
+
 
             if (Ansprechpartner.Adresse == null)
             {
@@ -46,9 +55,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             GezahlteMiete = Mietzahlungen(vertrag, Zeitraum);
             KaltMiete = GetKaltMiete(vertrag, Zeitraum);
-            Mieter = GetMieter(ctx, vertrag);
 
-            if (!Mieter.Any(mieter => mieter.Adresse != null))
+            if (!vertrag.Mieter.Any(mieter => mieter.Adresse != null))
             {
                 Notes.Add(new Note(
                     $"Die Adresse mindestens eines Mieters ist notwendig für die Betriebskostenabrechnung.",

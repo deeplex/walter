@@ -6,8 +6,7 @@ export const navigation = {
         walter_goto(`/betriebskostenrechnungen/${id}`),
     erhaltungsaufwendung: (id: number) =>
         walter_goto(`/erhaltungsaufwendungen/${id}`),
-    natuerlicheperson: (id: number) => walter_goto(`/kontakte/nat/${id}`),
-    juristischeperson: (id: number) => walter_goto(`/kontakte/jur/${id}`),
+    kontakt: (id: number) => walter_goto(`/kontakte/${id}`),
     miete: (id: number) => walter_goto(`/mieten/${id}`),
     mietminderung: (id: number) => walter_goto(`/mietminderungen/${id}`),
     umlage: (id: number) => walter_goto(`/umlagen/${id}`),

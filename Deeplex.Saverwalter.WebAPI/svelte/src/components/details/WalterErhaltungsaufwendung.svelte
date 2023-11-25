@@ -4,7 +4,7 @@
         WalterNumberInput,
         WalterTextArea,
         WalterTextInput,
-        WalterComboBoxPerson,
+        WalterComboBoxKontakt,
         WalterComboBoxWohnung
     } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
@@ -22,7 +22,7 @@
         bind:value={entry.bezeichnung}
         labelText="Bezeichnung"
     />
-    <WalterComboBoxPerson
+    <WalterComboBoxKontakt
         {fetchImpl}
         required
         {readonly}

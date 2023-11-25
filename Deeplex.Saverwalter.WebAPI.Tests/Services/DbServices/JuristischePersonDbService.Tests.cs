@@ -4,7 +4,7 @@ using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
-using static Deeplex.Saverwalter.WebAPI.Controllers.JuristischePersonController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {
@@ -14,40 +14,40 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public void GetTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new JuristischePersonDbService(ctx);
-            var entity = new JuristischePerson("TestFirma");
-            ctx.JuristischePersonen.Add(entity);
+            var service = new KontaktDbService(ctx);
+            var entity = new Kontakt("TestFirma", Rechtsform.ag);
+            ctx.Kontakte.Add(entity);
             ctx.SaveChanges();
 
-            var result = service.Get(entity.JuristischePersonId);
+            var result = service.Get(entity.KontaktId);
 
             result.Should().BeOfType<OkObjectResult>();
             var okResult = (OkObjectResult)result;
-            okResult.Value.Should().BeOfType<JuristischePersonEntry>();
+            okResult.Value.Should().BeOfType<KontaktEntry>();
         }
 
         [Fact]
         public void DeleteTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new JuristischePersonDbService(ctx);
-            var entity = new JuristischePerson("TestFirma");
-            ctx.JuristischePersonen.Add(entity);
+            var service = new KontaktDbService(ctx);
+            var entity = new Kontakt("TestFirma", Rechtsform.gbr);
+            ctx.Kontakte.Add(entity);
             ctx.SaveChanges();
 
-            var result = service.Delete(entity.JuristischePersonId);
+            var result = service.Delete(entity.KontaktId);
 
             result.Should().BeOfType<OkResult>();
-            ctx.JuristischePersonen.Find(entity.JuristischePersonId).Should().BeNull();
+            ctx.Kontakte.Find(entity.KontaktId).Should().BeNull();
         }
 
         [Fact]
         public void PostTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new JuristischePersonDbService(ctx);
-            var entity = new JuristischePerson("TestFirma");
-            var entry = new JuristischePersonEntry(entity, ctx);
+            var service = new KontaktDbService(ctx);
+            var entity = new Kontakt("TestFirma", Rechtsform.gmbh);
+            var entry = new KontaktEntry(entity);
 
             var result = service.Post(entry);
 
@@ -58,11 +58,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public void PostFailedTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new JuristischePersonDbService(ctx);
-            var entity = new JuristischePerson("TestFirma");
-            ctx.JuristischePersonen.Add(entity);
+            var service = new KontaktDbService(ctx);
+            var entity = new Kontakt("TestFirma", Rechtsform.ag);
+            ctx.Kontakte.Add(entity);
             ctx.SaveChanges();
-            var entry = new JuristischePersonEntry(entity, ctx);
+            var entry = new KontaktEntry(entity);
 
             var result = service.Post(entry);
 
@@ -73,19 +73,19 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public void PutTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new JuristischePersonDbService(ctx);
-            var entity = new JuristischePerson("TestFirma");
+            var service = new KontaktDbService(ctx);
+            var entity = new Kontakt("TestFirma", Rechtsform.gmbh);
 
-            ctx.JuristischePersonen.Add(entity);
+            ctx.Kontakte.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new JuristischePersonEntry(entity, ctx);
+            var entry = new KontaktEntry(entity);
             entry.Email = "testfirma@saverwalter.de";
 
-            var result = service.Put(entity.JuristischePersonId, entry);
+            var result = service.Put(entity.KontaktId, entry);
 
             result.Should().BeOfType<OkObjectResult>();
-            var updatedEntity = ctx.JuristischePersonen.Find(entity.JuristischePersonId);
+            var updatedEntity = ctx.Kontakte.Find(entity.KontaktId);
             if (updatedEntity == null)
             {
                 throw new Exception("JuristischePerson not found");
@@ -97,15 +97,15 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public void PutFailedTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new JuristischePersonDbService(ctx);
-            var entity = new JuristischePerson("TestFirma");
-            var entry = new JuristischePersonEntry(entity, ctx);
+            var service = new KontaktDbService(ctx);
+            var entity = new Kontakt("TestFirma", Rechtsform.ag);
+            var entry = new KontaktEntry(entity);
             entry.Email = "testfirma@saverwalter.de";
 
-            ctx.JuristischePersonen.Add(entity);
+            ctx.Kontakte.Add(entity);
             ctx.SaveChanges();
 
-            var result = service.Put(entity.JuristischePersonId + 1132, entry);
+            var result = service.Put(entity.KontaktId + 1132, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }

@@ -6,4 +6,4 @@
 </script>
 
 <WalterHeader title="Kontakte" />
-<WalterKontakte rows={data.rows} fullHeight />
+<WalterKontakte fetchImpl={data.fetchImpl} rows={data.rows} fullHeight />

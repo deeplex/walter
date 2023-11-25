@@ -82,18 +82,16 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class UmlageEntry : UmlageEntryBase
         {
-            private SaverwalterContext? Ctx { get; } = null!;
             private Umlage Entity { get; } = null!;
 
-            public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, Ctx!));
+            public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e));
             public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
             // TODO HKVO
 
             public UmlageEntry() : base() { }
-            public UmlageEntry(Umlage entity, SaverwalterContext ctx) : base(entity)
+            public UmlageEntry(Umlage entity) : base(entity)
             {
                 Entity = entity;
-                Ctx = ctx;
             }
         }
 

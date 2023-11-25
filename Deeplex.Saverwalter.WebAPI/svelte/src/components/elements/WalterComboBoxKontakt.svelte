@@ -1,18 +1,14 @@
 <script lang="ts">
     import {
-        WalterJuristischePersonEntry,
-        WalterNatuerlichePersonEntry,
+        WalterKontaktEntry,
         type WalterSelectionEntry
     } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
-    import { ContentSwitcher, Switch } from 'carbon-components-svelte';
     import {
         WalterComboBox,
-        WalterJuristischePerson,
-        WalterNatuerlichePerson
+        WalterKontakt
     } from '..';
     import WalterQuickAddButton from './WalterQuickAddButton.svelte';
-    import { Api } from 'carbon-icons-svelte';
 
     export let readonly: boolean = false;
     export let required: boolean = false;
@@ -25,9 +21,7 @@
         entries = walter_selection.kontakte(fetchImpl);
     }
 
-    let addEntry = {};
-
-    let personType = 0;
+    let addEntry: Partial<WalterKontaktEntry> = {};
 </script>
 
 <div
@@ -47,19 +41,9 @@
     <WalterQuickAddButton
         title="Personen"
         bind:addEntry
-        addUrl={personType
-            ? WalterJuristischePersonEntry.ApiURL
-            : WalterNatuerlichePersonEntry.ApiURL}
+        addUrl={WalterKontaktEntry.ApiURL}
         {onSubmit}
     >
-        <ContentSwitcher bind:selectedIndex={personType}>
-            <Switch text="Natürliche Person" />
-            <Switch text="Juristische Person" />
-        </ContentSwitcher>
-        {#if personType === 0}
-            <WalterNatuerlichePerson entry={addEntry} {fetchImpl} />
-        {:else}
-            <WalterJuristischePerson entry={addEntry} {fetchImpl} />
-        {/if}
+        <WalterKontakt entry={addEntry} {fetchImpl} />
     </WalterQuickAddButton>
 </div>

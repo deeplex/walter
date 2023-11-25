@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private ZaehlerEntry Add(ZaehlerEntry entry)
         {
-            var typ = (Zaehlertyp)int.Parse(entry.Typ.Id);
+            var typ = (Zaehlertyp)entry.Typ.Id;
             var entity = new Zaehler(entry.Kennnummer, typ);
 
             SetOptionalValues(entity, entry);
@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         private ZaehlerEntry Update(ZaehlerEntry entry, Zaehler entity)
         {
             entity.Kennnummer = entry.Kennnummer;
-            entity.Typ = (Zaehlertyp)int.Parse(entry.Typ.Id);
+            entity.Typ = (Zaehlertyp)entry.Typ.Id;
 
             SetOptionalValues(entity, entry);
             Ctx.ZaehlerSet.Update(entity);
@@ -112,7 +112,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private void SetOptionalValues(Zaehler entity, ZaehlerEntry entry)
         {
-            entity.Wohnung = entry.Wohnung is SelectionEntry w ? Ctx.Wohnungen.Find(int.Parse(w.Id!)) : null;
+            entity.Wohnung = entry.Wohnung is SelectionEntry w ? Ctx.Wohnungen.Find(w.Id) : null;
 
             entity.Adresse = entry.Adresse is AdresseEntryBase a ? GetAdresse(a, Ctx) : null;
             entity.Notiz = entry.Notiz;
@@ -122,10 +122,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 // Add missing umlagen
                 entity.Umlagen.AddRange(umlagen
-                    .Where(umlage => !entity.Umlagen.Exists(e => umlage.Id == e.UmlageId.ToString()))
-                    .Select(w => Ctx.Umlagen.Find(int.Parse(w.Id))!));
+                    .Where(umlage => !entity.Umlagen.Exists(e => umlage.Id == e.UmlageId))
+                    .Select(w => Ctx.Umlagen.Find(w.Id)!));
                 // Remove old umlagen
-                entity.Umlagen.RemoveAll(w => !umlagen.ToList().Exists(e => e.Id == w.UmlageId.ToString()));
+                entity.Umlagen.RemoveAll(w => !umlagen.ToList().Exists(e => e.Id == w.UmlageId));
             }
         }
     }

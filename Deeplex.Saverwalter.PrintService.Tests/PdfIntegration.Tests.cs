@@ -14,7 +14,6 @@ namespace Deeplex.Saverwalter.PrintService.Tests
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
 
             var abrechnung = new Betriebskostenabrechnung(
-                ctx,
                 vertrag,
                 2021,
                 new DateOnly(2021, 1, 1),

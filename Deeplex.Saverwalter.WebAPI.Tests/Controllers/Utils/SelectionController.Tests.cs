@@ -128,19 +128,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public void GetNatuerlichePersonen()
-        {
-            var ctx = TestUtils.GetContext();
-            TestUtils.GetVertragForAbrechnung(ctx);
-            var logger = A.Fake<ILogger<SelectionListController>>();
-            var controller = new SelectionListController(logger, ctx);
-
-            var result = controller.GetNatuerlichePersonen();
-
-            result.Should().BeOfType<OkObjectResult>();
-        }
-
-        [Fact]
         public void GetJuristischePersonen()
         {
             var ctx = TestUtils.GetContext();

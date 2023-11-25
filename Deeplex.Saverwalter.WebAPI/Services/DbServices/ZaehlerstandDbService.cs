@@ -65,7 +65,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private ZaehlerstandEntryBase Add(ZaehlerstandEntryBase entry)
         {
-            var zaehler = Ctx.ZaehlerSet.Find(int.Parse(entry.Zaehler!.Id!));
+            var zaehler = Ctx.ZaehlerSet.Find(entry.Zaehler!.Id!);
             var entity = new Zaehlerstand(entry.Datum, entry.Stand)
             {
                 Zaehler = zaehler!

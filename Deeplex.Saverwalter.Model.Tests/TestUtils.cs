@@ -29,34 +29,37 @@ namespace Deeplex.Saverwalter.ModelTests
         }
         public static Vertrag FillVertragWithSomeData(SaverwalterContext ctx, double grundmiete)
         {
-            var vermieter = new NatuerlichePerson("TestKopf")
+            var vermieter = new Kontakt("TestKopf", Rechtsform.natuerlich)
             {
                 Anrede = Anrede.Frau,
                 Vorname = "TestVorname",
                 Adresse = new Adresse("TestStraße", "TestHausnummer", "TestPLZ", "TestOrt")
             };
 
-            ctx.NatuerlichePersonen.Add(vermieter);
+            ctx.Kontakte.Add(vermieter);
+            ctx.SaveChanges();
 
             var wohnung = new Wohnung("TestWohnung", 100, 100, 1)
             {
                 Adresse = new Adresse("TestStraße", "TestHausnummer", "TestPLZ", "TestOrt"),
-                BesitzerId = vermieter.PersonId
+                Besitzer = vermieter
             };
 
             var vertrag = new Vertrag()
             {
-                AnsprechpartnerId = vermieter.PersonId,
+                Ansprechpartner = vermieter,
                 Wohnung = wohnung
             };
-            var mieter = new NatuerlichePerson("TestMieter")
+            var mieter = new Kontakt("TestMieter", Rechtsform.natuerlich)
             {
                 Anrede = Anrede.Herr,
                 Vorname = "TestVorname",
                 Adresse = new Adresse("TestStraße", "TestHausnummer", "TestPLZ", "TestOrt")
             };
-            ctx.NatuerlichePersonen.Add(mieter);
-            ctx.MieterSet.Add(new Mieter(mieter.PersonId) { Vertrag = vertrag });
+            ctx.Kontakte.Add(mieter);
+            mieter.Mietvertraege.Add(vertrag);
+
+            ctx.SaveChanges();
 
             var version = new VertragVersion(
                 new DateOnly(2020, 1, 1),

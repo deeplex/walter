@@ -1,52 +1,26 @@
 <script lang="ts">
-    import { ContentSwitcher, Switch } from 'carbon-components-svelte';
-
     import {
         WalterGrid,
         WalterHeaderNew,
-        WalterJuristischePerson,
-        WalterNatuerlichePerson
+        WalterKontakt,
     } from '$walter/components';
     import type { PageData } from './$types';
     import {
-        WalterJuristischePersonEntry,
-        WalterNatuerlichePersonEntry
+        WalterKontaktEntry
     } from '$walter/lib';
 
     export let data: PageData;
 
     const title = 'Neue Person';
 
-    const entry: Partial<
-        WalterNatuerlichePersonEntry & WalterJuristischePersonEntry
-    > = {};
-
-    let personType = 0;
+    const entry: Partial<WalterKontaktEntry> = {};
 </script>
 
 <WalterHeaderNew
-    apiURL={personType
-        ? WalterJuristischePersonEntry.ApiURL
-        : WalterNatuerlichePersonEntry.ApiURL}
+    apiURL={WalterKontaktEntry.ApiURL}
     {title}
-    {entry}
->
-    <div style="width: 100%;">
-        <ContentSwitcher
-            style="display: flex; width: 60em; margin: auto"
-            size="xl"
-            bind:selectedIndex={personType}
-        >
-            <Switch style="width: 30em" text="Natürliche Person" />
-            <Switch style="width: 30em" text="Juristische Person" />
-        </ContentSwitcher>
-    </div>
-</WalterHeaderNew>
+    {entry} />
 
 <WalterGrid>
-    {#if personType === 0}
-        <WalterNatuerlichePerson {entry} fetchImpl={data.fetchImpl} />
-    {:else}
-        <WalterJuristischePerson {entry} fetchImpl={data.fetchImpl} />
-    {/if}
+    <WalterKontakt {entry} fetchImpl={data.fetchImpl} />
 </WalterGrid>

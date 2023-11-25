@@ -1,14 +1,12 @@
 <script lang="ts">
     import {
-        WalterJuristischePersonEntry,
-        WalterNatuerlichePersonEntry,
+        WalterKontaktEntry,
         WalterSelectionEntry
     } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
-    import { ContentSwitcher, Switch } from 'carbon-components-svelte';
     import WalterQuickAddButton from './WalterQuickAddButton.svelte';
     import WalterMultiSelect from './WalterMultiSelect.svelte';
-    import { WalterJuristischePerson, WalterNatuerlichePerson } from '..';
+    import WalterKontakt from '../details/WalterKontakt.svelte';
 
     export let value: WalterSelectionEntry[] | undefined;
     export let titleText: string;
@@ -21,8 +19,6 @@
     }
 
     let addEntry = {};
-
-    let personType = 0;
 </script>
 
 <div
@@ -35,19 +31,9 @@
 
     <WalterQuickAddButton
         bind:addEntry
-        addUrl={personType
-            ? WalterJuristischePersonEntry.ApiURL
-            : WalterNatuerlichePersonEntry.ApiURL}
+        addUrl={WalterKontaktEntry.ApiURL}
         {onSubmit}
     >
-        <ContentSwitcher bind:selectedIndex={personType}>
-            <Switch text="Natürliche Person" />
-            <Switch text="Juristische Person" />
-        </ContentSwitcher>
-        {#if personType === 0}
-            <WalterNatuerlichePerson entry={addEntry} {fetchImpl} />
-        {:else}
-            <WalterJuristischePerson entry={addEntry} {fetchImpl} />
-        {/if}
+        <WalterKontakt entry={addEntry} {fetchImpl} />
     </WalterQuickAddButton>
 </div>

@@ -70,7 +70,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             // Be able to create multiple Mieten at once
             for (int i = 0; i <= entry.Repeat; ++i)
             {
-                var vertrag = Ctx.Vertraege.Find(int.Parse(entry.Vertrag.Id));
+                var vertrag = Ctx.Vertraege.Find(entry.Vertrag.Id);
                 var monat = entry.BetreffenderMonat.AddMonths(i);
                 var entity = new Miete(entry.Zahlungsdatum, monat, entry.Betrag)
                 {

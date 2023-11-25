@@ -31,7 +31,6 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
             // TODO
             var umlagen = FillUmlagen(ctx, adressen);
-            var mieterSet = FillMieterSet(ctx, vertraege);
             var zaehlerSet = FillZaehlerSet(ctx, umlagen);
             var zaehlerstaende = FillZaehlerstaende(ctx, vertraege);
             var betriebskostenrechnungen = FillBetriebskostenrechnungen(ctx, umlagen);
@@ -91,7 +90,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return list[seed * 37 % list.Count];
         }
 
-        private static NatuerlichePerson generateNatuerlichePerson(int seed)
+        private static Kontakt generateNatuerlichePerson(int seed)
         {
             var nachname = GetOne(GenericData.lastNames, seed * 13);
 
@@ -108,7 +107,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 vorname = GetOne(GenericData.FirstNamesFemale, seed * 19);
             }
 
-            var person = new NatuerlichePerson(nachname)
+            var person = new Kontakt(nachname, Rechtsform.natuerlich)
             {
                 Vorname = vorname,
                 Telefon = GetOne(GenericData.telefonnummerList, seed * 7),
@@ -120,11 +119,12 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return person;
         }
 
-        private static JuristischePerson generateJuristischePerson(int seed)
+        private static Kontakt generateJuristischePerson(int seed)
         {
             var name = GetOne(GenericData.companyNames, seed * 13);
 
-            var person = new JuristischePerson(name)
+            // TODO only gmbh
+            var person = new Kontakt(name, Rechtsform.gmbh)
             {
                 Email = name.Replace(" ", "_").ToLower() + (GenericData.emailProvider, seed * 7),
                 Telefon = GetOne(GenericData.telefonnummerList, seed * 7),
@@ -152,32 +152,12 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             Console.Write("Füge Wohnungen hinzu: ");
 
             var wohnungen = new List<Wohnung> { };
-            var besitzerIdList = new List<Guid> { };
+            // TODO: only one besitzer?
+            var besitzer = generateNatuerlichePerson(3);
+            ctx.Kontakte.Add(besitzer);
 
             for (var i = 0; i < 100; i++)
             {
-                Guid besitzerId;
-                if (i != 0 && (i % 2 == 0 || isPrime(i)))
-                {
-                    besitzerId = besitzerIdList.Last();
-                }
-                else
-                {
-                    if (isPrime(i))
-                    {
-                        var besitzer = generateJuristischePerson(i * 3);
-                        ctx.JuristischePersonen.Add(besitzer);
-                        besitzerIdList.Add(besitzer.PersonId);
-                        besitzerId = besitzer.PersonId;
-                    }
-                    else
-                    {
-                        var besitzer = generateNatuerlichePerson(i * 3);
-                        ctx.NatuerlichePersonen.Add(besitzer);
-                        besitzerIdList.Add(besitzer.PersonId);
-                        besitzerId = besitzer.PersonId;
-                    }
-                }
 
                 var adresse = adressen[i * 3 % adressen.Count];
                 // Should run 200 times
@@ -188,7 +168,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                     wohnungen.Add(new Wohnung(bezeichnung, i * 2, i * 2, 1)
                     {
                         Adresse = adresse,
-                        BesitzerId = besitzerId,
+                        Besitzer = besitzer,
                         Wohnflaeche = flaeche,
                         Nutzflaeche = flaeche,
                         Nutzeinheit = 1
@@ -197,8 +177,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             }
 
             ctx.Wohnungen.AddRange(wohnungen);
-            Console.WriteLine($"{ctx.JuristischePersonen.Count()} juristische Personen hinzugefügt,.");
-            Console.WriteLine($"{ctx.NatuerlichePersonen.Count()} natürliche Personen hinzugefügt,.");
+            Console.WriteLine($"{ctx.Kontakte.Count()} Kontakte hinzugefügt,.");
             Console.WriteLine($"{wohnungen.Count} Wohnungen hinzugefügt");
 
             return wohnungen;
@@ -209,23 +188,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             Console.Write("Füge Erhaltungsaufwendungen hinzu: ");
 
             var erhaltungsaufwendungen = new List<Erhaltungsaufwendung> { };
-
-            var ausstellerIdList = new List<Guid> { };
+            // TODO only one aussteller...
+            var aussteller = generateJuristischePerson(11);
 
             for (var i = 0; i < 3000; i++)
             {
-                Guid ausstellerId;
-                if (i < 100)
-                {
-                    var aussteller = generateJuristischePerson(11);
-                    ctx.JuristischePersonen.Add(aussteller);
-                    ausstellerIdList.Add(aussteller.PersonId);
-                    ausstellerId = aussteller.PersonId;
-                }
-                else
-                {
-                    ausstellerId = ausstellerIdList[i % ausstellerIdList.Count];
-                }
                 var betrag = 100;
                 var bezeichnung = $"Rechnungsnr. {i}";
                 var jahr = 2020 + i % 5;
@@ -234,14 +201,14 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 var datum = new DateOnly(jahr, monat, tag);
                 var wohnung = wohnungen[i % wohnungen.Count];
 
-                erhaltungsaufwendungen.Add(new Erhaltungsaufwendung(betrag, bezeichnung, ausstellerId, datum)
+                erhaltungsaufwendungen.Add(new Erhaltungsaufwendung(betrag, bezeichnung, datum)
                 {
+                    Aussteller = aussteller,
                     Wohnung = wohnung
                 });
             }
 
             ctx.Erhaltungsaufwendungen.AddRange(erhaltungsaufwendungen);
-            Console.WriteLine($"{ausstellerIdList.Count} juristische Personen hinzugefügt.");
             Console.WriteLine($"{erhaltungsaufwendungen.Count} Erhaltungsaufwendungen hinzugefügt");
 
             return erhaltungsaufwendungen;
@@ -269,7 +236,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
                 var vertrag = new Vertrag()
                 {
-                    AnsprechpartnerId = wohnung.BesitzerId, // TODO add some variation. Maybe a chance to add a new person
+                    Ansprechpartner = wohnung.Besitzer, // TODO add some variation. Maybe a chance to add a new person
                     Ende = ende,
                     Wohnung = wohnung
                 };
@@ -440,33 +407,6 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             Console.WriteLine($"{betriebskostenrechnungen.Count} Betriebskostenrechnungen hinzugefügt");
 
             return betriebskostenrechnungen;
-        }
-
-        private static List<Mieter> FillMieterSet(SaverwalterContext ctx, List<Vertrag> vertraege)
-        {
-            Console.Write("Füge Mieter hinzu: ");
-
-            var mieter = new List<Mieter> { };
-
-            for (var i = 0; i < vertraege.Count; ++i)
-            {
-                var anzahl = i % 5 + 1;
-
-                for (var j = 0; j < anzahl; ++j)
-                {
-                    var person = generateNatuerlichePerson((i + 1) * (j + 1));
-                    ctx.NatuerlichePersonen.Add(person);
-                    mieter.Add(new Mieter(person.PersonId)
-                    {
-                        Vertrag = vertraege[i]
-                    });
-                }
-            }
-
-            ctx.MieterSet.AddRange(mieter);
-            Console.WriteLine($"{mieter.Count} Mieter hinzugefügt");
-
-            return mieter;
         }
 
         private static Umlage addUmlage(

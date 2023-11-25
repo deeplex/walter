@@ -24,7 +24,7 @@
         TextInput,
         Tile
     } from 'carbon-components-svelte';
-    import { WalterPersonEntry, type WalterMieteEntry } from '$walter/lib';
+    import { WalterKontaktEntry, type WalterMieteEntry } from '$walter/lib';
     import WalterData from '../data/WalterData.svelte';
 
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
@@ -51,7 +51,7 @@
         betreffenderMonat: convertDateCanadian(dateMiete)
     };
 
-    const mieter = WalterPersonEntry.GetAll<WalterPersonEntry>(fetchImpl).then(
+    const mieter = WalterKontaktEntry.GetAll<WalterKontaktEntry>(fetchImpl).then(
         (res) =>
             res.filter((kontakt) =>
                 abrechnung.mieter.some((m) => m.id === kontakt.guid)
