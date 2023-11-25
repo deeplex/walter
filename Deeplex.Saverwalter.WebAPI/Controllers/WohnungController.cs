@@ -43,7 +43,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Einheiten = Entity.Nutzeinheit;
                 Notiz = Entity.Notiz;
                 Adresse = Entity.Adresse is Adresse a ? new AdresseEntryBase(a) : null;
-                Besitzer = new(Entity.Besitzer.KontaktId, Entity.Besitzer.Bezeichnung);
+                if (Entity.Besitzer is Kontakt k)
+                {
+                    Besitzer = new(k.KontaktId, k.Bezeichnung);
+                }
 
                 var v = Entity.Vertraege.FirstOrDefault(e => e.Ende == null || e.Ende < DateOnly.FromDateTime(DateTime.Now));
                 Bewohner = v != null ?

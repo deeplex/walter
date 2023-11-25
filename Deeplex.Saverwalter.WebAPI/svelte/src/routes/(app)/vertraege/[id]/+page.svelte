@@ -20,9 +20,11 @@
         WalterS3FileWrapper,
         type WalterMieteEntry,
         type WalterMietminderungEntry,
-        type WalterPersonEntry,
         type WalterVertragVersionEntry,
-        WalterBetriebskostenrechnungEntry
+        WalterBetriebskostenrechnungEntry,
+
+        WalterKontaktEntry
+
     } from '$walter/lib';
     import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
     import { ClickableTile, Row } from 'carbon-components-svelte';
@@ -39,7 +41,7 @@
         `${data.id}`,
         versionen[versionen.length - 1]
     );
-    const mieterEntry: Partial<WalterPersonEntry> = {};
+    const mieterEntry: Partial<WalterKontaktEntry> = {};
     const betriebskostenrechnungEntry: Partial<WalterBetriebskostenrechnungEntry> =
         {};
 

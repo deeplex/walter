@@ -12,7 +12,7 @@
     import WalterKontakt from '../details/WalterKontakt.svelte';
 
     const headers = [
-        { key: 'name', value: 'Name', default: '' },
+        { key: 'bezeichnung', value: 'Name', default: '' },
         { key: 'adresse.anschrift', value: 'Anschrift' },
         { key: 'telefon', value: 'Telefon' },
         { key: 'mobil', value: 'Mobil' },

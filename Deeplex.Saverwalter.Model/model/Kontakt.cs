@@ -13,7 +13,6 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public Rechtsform Rechtsform { get; set; }
         public string? Vorname { get; set; }
-        public Titel Titel { get; set; }
         public Anrede Anrede { get; set; }
         public string? Telefon { get; set; }
         public string? Mobil { get; set; }

@@ -6,7 +6,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
     public sealed class Betriebskostenabrechnung
     {
         public List<Note> Notes { get; } = new List<Note>();
-        public Kontakt Vermieter { get; }
+        public Kontakt Vermieter { get; } = null!;
         public Kontakt Ansprechpartner { get; }
         public List<Kontakt> Mieter { get; }
         public Vertrag Vertrag { get; }
@@ -31,10 +31,19 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Vertrag = vertrag;
             Zeitraum = new Zeitraum(jahr, vertrag);
 
-            Vermieter = Vertrag.Wohnung.Besitzer;
-            Mieter = Vertrag.Mieter;
+            Vermieter = Vertrag.Wohnung.Besitzer!;
 
             Ansprechpartner = vertrag.Ansprechpartner ?? Vermieter;
+
+            if (Vermieter == null)
+            {
+                Notes.Add(new Note(
+                    $"Die Wohnung benötigt für die Abrechnung einen Ansprechpartner (Besitzer)",
+                    Severity.Error));
+            }
+
+            Mieter = Vertrag.Mieter;
+
 
             if (Ansprechpartner.Adresse == null)
             {

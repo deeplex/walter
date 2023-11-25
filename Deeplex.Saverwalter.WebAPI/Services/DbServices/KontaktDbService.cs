@@ -162,7 +162,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             else
             {
                 entity.Anrede = Anrede.Keine;
-                entity.Titel = Titel.Kein;
             }
         }
     }

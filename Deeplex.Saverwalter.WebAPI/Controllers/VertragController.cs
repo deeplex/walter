@@ -39,7 +39,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Wohnung = new(
                     entity.Wohnung.WohnungId,
                     $"{anschrift} - {entity.Wohnung.Bezeichnung}",
-                    entity.Wohnung.Besitzer.Bezeichnung);
+                    entity.Wohnung.Besitzer?.Bezeichnung);
                 if (entity.Ansprechpartner is Kontakt a)
                 {
                     Ansprechpartner = new(a.KontaktId, a.Bezeichnung);

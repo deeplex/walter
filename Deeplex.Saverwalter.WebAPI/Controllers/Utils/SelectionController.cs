@@ -184,7 +184,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                     new SelectionEntry(
                             e.WohnungId,
                             $"{e.Adresse?.Anschrift ?? ""} - {e.Bezeichnung}",
-                            e.Besitzer.KontaktId.ToString()))
+                            e.Besitzer?.Bezeichnung))
                 .ToList();
 
             return new OkObjectResult(entries);
@@ -323,9 +323,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         public IActionResult GetRechtsformen()
         {
             var list = Enum.GetValues(typeof(Rechtsform))
-                .Cast<Anrede>()
+                .Cast<Rechtsform>()
                 .ToList()
-                .Select(e => new SelectionEntry((int)e, e.ToString()))
+                .Select(e => new SelectionEntry((int)e, e.ToDescriptionString()))
                 .ToList();
 
             return new OkObjectResult(list);

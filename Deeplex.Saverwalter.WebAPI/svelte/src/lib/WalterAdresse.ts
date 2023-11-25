@@ -1,5 +1,5 @@
 import { WalterApiHandler } from './WalterApiHandler';
-import { WalterPersonEntry } from './WalterPerson';
+import { WalterKontaktEntry } from './WalterKontakt';
 import { WalterWohnungEntry } from './WalterWohnung';
 import { WalterZaehlerEntry } from './WalterZaehler';
 
@@ -17,7 +17,7 @@ export class WalterAdresseEntry extends WalterApiHandler {
         public createdAt: Date,
         public lastModified: Date,
         public wohnungen: WalterWohnungEntry[],
-        public kontakte: WalterPersonEntry[],
+        public kontakte: WalterKontaktEntry[],
         public zaehler: WalterZaehlerEntry[]
     ) {
         super();
@@ -25,7 +25,7 @@ export class WalterAdresseEntry extends WalterApiHandler {
 
     static fromJson(json: WalterAdresseEntry): WalterAdresseEntry {
         const wohnungen = json.wohnungen?.map(WalterWohnungEntry.fromJson);
-        const kontakte = json.kontakte?.map(WalterPersonEntry.fromJson);
+        const kontakte = json.kontakte?.map(WalterKontaktEntry.fromJson);
         const zaehler = json.zaehler?.map(WalterZaehlerEntry.fromJson);
 
         return new WalterAdresseEntry(

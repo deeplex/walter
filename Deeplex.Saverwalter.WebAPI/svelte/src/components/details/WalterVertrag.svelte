@@ -18,8 +18,6 @@
     export let entry: Partial<WalterVertragEntry> = {};
     export let fetchImpl: typeof fetch;
     export let readonly = false;
-
-    const kontakte = walter_selection.kontakte(fetchImpl);
 </script>
 
 <Row>
@@ -44,15 +42,11 @@
         {readonly}
         bind:value={entry.wohnung}
     />
-    {#await kontakte}
-        <TextInputSkeleton />
-    {:then entries}
-        <TextInput
-            labelText="Vermieter"
-            readonly
-            value={entries.find((e) => e.id === entry.wohnung?.filter)?.text}
-        />
-    {/await}
+    <TextInput
+        labelText="Vermieter"
+        readonly
+        value={entry.wohnung?.filter}
+    />
     <WalterComboBoxKontakt
         {fetchImpl}
         {readonly}

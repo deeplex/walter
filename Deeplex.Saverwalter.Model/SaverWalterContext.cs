@@ -97,6 +97,7 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<Zaehlerstand>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
 
             base.OnModelCreating(modelBuilder);
+            modelBuilder.HasPostgresExtension("uuid-ossp");
         }
     }
 }

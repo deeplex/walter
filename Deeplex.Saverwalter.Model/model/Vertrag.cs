@@ -7,8 +7,7 @@ namespace Deeplex.Saverwalter.Model
         public int VertragId { get; set; }
         [Required]
         public virtual Wohnung Wohnung { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
-        [Required]
-        public virtual Kontakt Ansprechpartner { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
+        public virtual Kontakt? Ansprechpartner { get; set; }
         public string? Notiz { get; set; }
         public DateOnly? Ende { get; set; }
 
