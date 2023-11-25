@@ -1,24 +1,24 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.JuristischePersonController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class JuristischePersonDbService : IControllerService<JuristischePersonEntry>
+    public class KontaktDbService : IControllerService<KontaktEntry>
     {
         public SaverwalterContext Ctx { get; }
 
-        public JuristischePersonDbService(SaverwalterContext ctx)
+        public KontaktDbService(SaverwalterContext ctx)
         {
             Ctx = ctx;
         }
 
         public IActionResult Get(int id)
         {
-            var entity = Ctx.JuristischePersonen.Find(id);
+            var entity = Ctx.Kontakte.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new JuristischePersonEntry(entity, Ctx);
+                var entry = new KontaktEntry(entity);
                 return new OkObjectResult(entry);
             }
             catch
@@ -37,19 +37,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public IActionResult Delete(int id)
         {
-            var entity = Ctx.JuristischePersonen.Find(id);
+            var entity = Ctx.Kontakte.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            Ctx.JuristischePersonen.Remove(entity);
+            Ctx.Kontakte.Remove(entity);
             Ctx.SaveChanges();
 
             return new OkResult();
         }
 
-        public IActionResult Post(JuristischePersonEntry entry)
+        public IActionResult Post(KontaktEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -66,20 +66,20 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private JuristischePersonEntry Add(JuristischePersonEntry entry)
+        private KontaktEntry Add(KontaktEntry entry)
         {
-            var entity = new JuristischePerson(entry.Name!);
+            var entity = new Kontakt(entry.Name, (Rechtsform)entry.Rechtsform.Id);
 
             SetOptionalValues(entity, entry);
-            Ctx.JuristischePersonen.Add(entity);
+            Ctx.Kontakte.Add(entity);
             Ctx.SaveChanges();
 
-            return new JuristischePersonEntry(entity, Ctx);
+            return new KontaktEntry(entity);
         }
 
-        public IActionResult Put(int id, JuristischePersonEntry entry)
+        public IActionResult Put(int id, KontaktEntry entry)
         {
-            var entity = Ctx.JuristischePersonen.Find(id);
+            var entity = Ctx.Kontakte.Find(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -95,31 +95,33 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private JuristischePersonEntry Update(JuristischePersonEntry entry, JuristischePerson entity)
+        private KontaktEntry Update(KontaktEntry entry, Kontakt entity)
         {
-            entity.Bezeichnung = entry.Name!;
+            entity.Name = entry.Name;
+            entity.Rechtsform = (Rechtsform)entry.Rechtsform.Id;
 
             SetOptionalValues(entity, entry);
-            Ctx.JuristischePersonen.Update(entity);
+            Ctx.Kontakte.Update(entity);
             Ctx.SaveChanges();
 
-            return new JuristischePersonEntry(entity, Ctx);
+            return new KontaktEntry(entity);
         }
 
-        private void SetOptionalValues(JuristischePerson entity, JuristischePersonEntry entry)
+        private void SetOptionalValues(Kontakt entity, KontaktEntry entry)
         {
-            // NOTE: There is a minus before entry.Id.
-            // This is, because FrontEnd needs different Ids for List with Nat. Pers.
-            if (entity.JuristischePersonId != -entry.Id)
+            if (entity.KontaktId != entry.Id)
             {
                 throw new Exception();
             }
 
+            entity.Vorname = entry.Vorname;
             entity.Email = entry.Email;
             entity.Fax = entry.Fax;
             entity.Notiz = entry.Notiz;
             entity.Telefon = entry.Telefon;
             entity.Mobil = entry.Mobil;
+
+
             if (entry.Adresse is AdresseEntryBase a)
             {
                 entity.Adresse = GetAdresse(a, Ctx);
@@ -128,29 +130,39 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 // Add new
                 entity.JuristischePersonen
-                    .AddRange(l.Where(w => !entity.JuristischePersonen.Exists(e => w.Id == e.PersonId.ToString()))
-                    .Select(w => Ctx.FindPerson(new Guid(w.Id!)) as JuristischePerson)!);
+                    .AddRange(l.Where(w => !entity.JuristischePersonen.Exists(e => w.Id == e.KontaktId))
+                    .Select(w => Ctx.Kontakte.Find(w.Id)!));
                 // Remove old
-                entity.JuristischePersonen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.PersonId.ToString()));
+                entity.JuristischePersonen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.KontaktId));
             }
+
             if (entry.SelectedMitglieder is IEnumerable<SelectionEntry> m)
             {
                 // Add new
-                var missingPersons = m.Where(w =>
-                    !entity.Mitglieder.Exists(e => w.Id == e.PersonId.ToString())
-                    ).Select(w => Ctx.FindPerson(new Guid(w.Id!)!)!);
-
-                entity.JuristischeMitglieder.AddRange(missingPersons!
-                    .Where(e => e is JuristischePerson)
-                    .Select(e => (JuristischePerson)e));
-
-                entity.NatuerlicheMitglieder.AddRange(missingPersons!
-                    .Where(e => e is NatuerlichePerson)
-                    .Select(e => (NatuerlichePerson)e));
+                entity.Mitglieder
+                    .AddRange(m.Where(w => !entity.Mitglieder.Exists(e => w.Id == e.KontaktId))
+                    .Select(w => Ctx.Kontakte.Find(w.Id)!));
 
                 // Remove old
-                entity.NatuerlicheMitglieder.RemoveAll((w) => !m.ToList().Exists(e => e.Id == w.PersonId.ToString()));
-                entity.JuristischeMitglieder.RemoveAll((w) => !m.ToList().Exists(e => e.Id == w.PersonId.ToString()));
+                entity.Mitglieder.RemoveAll((w) => !m.ToList().Exists(e => e.Id == w.KontaktId));
+            }
+
+            if ((Rechtsform)entry.Rechtsform.Id == Rechtsform.natuerlich)
+            {
+                if (entry.Anrede is SelectionEntry anrede)
+                {
+                    entity.Anrede = (Anrede)anrede.Id;
+                }
+                else
+                {
+                    throw new ArgumentException("Anrede is required when Rechtsform is Natürlich");
+                }
+                //entity.Titel = (Titel)(entry.Titel?.Id ?? int.Parse(Titel.Kein));
+            }
+            else
+            {
+                entity.Anrede = Anrede.Keine;
+                entity.Titel = Titel.Kein;
             }
         }
     }

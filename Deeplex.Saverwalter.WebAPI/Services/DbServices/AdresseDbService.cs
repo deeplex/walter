@@ -23,7 +23,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new AdresseEntry(entity, Ctx);
+                var entry = new AdresseEntry(entity);
                 return new OkObjectResult(entry);
             }
             catch
@@ -70,7 +70,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Adressen.Add(entity);
             Ctx.SaveChanges();
 
-            return new AdresseEntry(entity, Ctx);
+            return new AdresseEntry(entity);
         }
 
         public IActionResult Put(int id, AdresseEntry entry)
@@ -102,7 +102,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Adressen.Update(entity);
             Ctx.SaveChanges();
 
-            return new AdresseEntry(entity, Ctx);
+            return new AdresseEntry(entity);
         }
 
         private void SetOptionalValues(Adresse entity, AdresseEntry entry)

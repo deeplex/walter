@@ -8,21 +8,22 @@ namespace Deeplex.Saverwalter.WebAPI
 {
     public sealed class BetriebskostenabrechnungHandler
     {
-        private static Betriebskostenabrechnung CreateAbrechnung(int vertragId, int Jahr, SaverwalterContext ctx)
+        private static Betriebskostenabrechnung CreateAbrechnung(Vertrag vertrag, int Jahr)
         {
-            var vertrag = ctx.Vertraege.Find(vertragId)!;
             var beginn = new DateOnly(Jahr, 1, 1);
             var ende = new DateOnly(Jahr, 12, 31);
 
-            return new Betriebskostenabrechnung(ctx, vertrag, Jahr, beginn, ende);
+            return new Betriebskostenabrechnung(vertrag, Jahr, beginn, ende);
         }
 
-        public IActionResult Get(int id, int Jahr, SaverwalterContext ctx)
+        public IActionResult Get(int vertrag_id, int Jahr)
         {
+
             try
             {
-                var abrechnung = CreateAbrechnung(id, Jahr, ctx);
-                var controller = new BetriebskostenabrechnungEntry(abrechnung, ctx);
+                var vertrag = Ctx.Vertraege.Find(vertrag_id)!;
+                var abrechnung = CreateAbrechnung(vertrag, Jahr);
+                var controller = new BetriebskostenabrechnungEntry(abrechnung);
 
                 return new OkObjectResult(controller);
             }
@@ -32,12 +33,13 @@ namespace Deeplex.Saverwalter.WebAPI
             }
         }
 
-        public IActionResult GetWordDocument(int id, int Jahr, SaverwalterContext ctx)
+        public IActionResult GetWordDocument(int vertrag_id, int Jahr)
         {
             try
             {
+                var vertrag = Ctx.Vertraege.Find(vertrag_id)!;
                 var stream = new MemoryStream();
-                var abrechnung = CreateAbrechnung(id, Jahr, ctx);
+                var abrechnung = CreateAbrechnung(vertrag, Jahr);
                 abrechnung.SaveAsDocx(stream);
                 stream.Position = 0;
 
@@ -49,12 +51,13 @@ namespace Deeplex.Saverwalter.WebAPI
             }
         }
 
-        public IActionResult GetPdfDocument(int id, int Jahr, SaverwalterContext ctx)
+        public IActionResult GetPdfDocument(int vertrag_id, int Jahr)
         {
             try
             {
+                var vertrag = Ctx.Vertraege.Find(vertrag_id)!;
                 var stream = new MemoryStream();
-                var abrechnung = CreateAbrechnung(id, Jahr, ctx);
+                var abrechnung = CreateAbrechnung(vertrag, Jahr);
                 abrechnung.SaveAsPdf(stream);
                 stream.Position = 0;
 

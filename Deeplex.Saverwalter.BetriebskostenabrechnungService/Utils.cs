@@ -41,15 +41,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 .Sum(z => z.Betrag);
         }
 
-        public static List<IPerson> GetMieter(SaverwalterContext ctx, Vertrag vertrag)
-        {
-            return ctx.MieterSet
-                .Where(m => m.Vertrag.VertragId == vertrag.VertragId)
-                .ToList()
-                .Select(m => ctx.FindPerson(m.PersonId))
-                .ToList();
-        }
-
         public static double GetMietminderung(Vertrag vertrag, DateOnly abrechnungsbeginn, DateOnly abrechnungsende)
         {
             var Minderungen = vertrag.Mietminderungen

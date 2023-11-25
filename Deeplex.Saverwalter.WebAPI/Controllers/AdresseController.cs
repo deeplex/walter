@@ -1,7 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
@@ -45,21 +45,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class AdresseEntry : AdresseEntryBase
         {
-            private SaverwalterContext? Ctx { get; }
-
             public IEnumerable<WohnungEntryBase>? Wohnungen
-                => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, Ctx!));
-            public IEnumerable<PersonEntryBase>? Kontakte
-                => Entity?.JuristischePersonen.Select(e => new PersonEntryBase(e))
-                    .Concat(Entity.NatuerlichePersonen.Select(e => new PersonEntryBase(e)));
+                => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e));
+            public IEnumerable<KontaktEntryBase>? Kontakte
+                => Entity?.Kontakte.Select(e => new KontaktEntryBase(e));
             public IEnumerable<ZaehlerEntryBase>? Zaehler
                 => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
 
 
             public AdresseEntry() : base() { }
-            public AdresseEntry(Adresse entity, SaverwalterContext ctx) : base(entity)
+            public AdresseEntry(Adresse entity) : base(entity)
             {
-                Ctx = ctx;
             }
         }
 

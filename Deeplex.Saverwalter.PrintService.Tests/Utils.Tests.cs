@@ -102,15 +102,15 @@ namespace Deeplex.Saverwalter.PrintService.Tests
         }
 
         [Theory]
-        [InlineData("Test", null, Anrede.Herr, "Herrn Test")]
-        [InlineData("Test", "Mustername", Anrede.Herr, "Herrn Mustername Test")]
-        [InlineData("Test", null, Anrede.Frau, "Frau Test")]
-        [InlineData("Test", "Mustername", Anrede.Frau, "Frau Mustername Test")]
-        [InlineData("Test", null, Anrede.Keine, "Test")]
-        [InlineData("Test", "Mustername", Anrede.Keine, "Mustername Test")]
-        public void GetBriefAnredeTestNatuerlichePerson(string nachname, string vorname, Anrede anrede, string result)
+        [InlineData("Test", null, Anrede.Herr, "Herrn Test", Rechtsform.natuerlich)]
+        [InlineData("Test", "Mustername", Anrede.Herr, "Herrn Mustername Test", Rechtsform.natuerlich)]
+        [InlineData("Test", null, Anrede.Frau, "Frau Test", Rechtsform.natuerlich)]
+        [InlineData("Test", "Mustername", Anrede.Frau, "Frau Mustername Test", Rechtsform.natuerlich)]
+        [InlineData("Test", null, Anrede.Keine, "Test", Rechtsform.natuerlich)]
+        [InlineData("Test", "Mustername", Anrede.Keine, "Mustername Test", Rechtsform.natuerlich)]
+        public void GetBriefAnredeTestNatuerlichePerson(string nachname, string vorname, Anrede anrede, string result, Rechtsform rechtsform)
         {
-            var person = new NatuerlichePerson(nachname)
+            var person = new Kontakt(nachname, rechtsform)
             {
                 Anrede = anrede,
                 Vorname = vorname
@@ -125,7 +125,7 @@ namespace Deeplex.Saverwalter.PrintService.Tests
         [InlineData("Test GmbH", "Test GmbH")]
         public void GetBriefAnredeTestJuristischePerson(string bezeichnung, string result)
         {
-            var person = new JuristischePerson(bezeichnung) { };
+            var person = new Kontakt(bezeichnung, Rechtsform.gmbh) { };
 
             var output = Utils.GetBriefAnrede(person);
 

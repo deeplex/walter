@@ -9,21 +9,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         public class SelectionEntry
         {
             // string because UUID stuff
-            public string Id { get; set; } = null!;
+            public int Id { get; set; }
             public string Text { get; set; } = null!;
             public string? Filter { get; set; }
 
             public SelectionEntry() { }
-            public SelectionEntry(Guid id, string text, string? filter = null)
-            {
-                Id = id.ToString();
-                Text = text;
-                Filter = filter;
-            }
 
             public SelectionEntry(int id, string text, string? filter = null)
             {
-                Id = id.ToString();
+                Id = id;
                 Text = text;
                 Filter = filter;
             }
@@ -75,7 +69,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .Select(e =>
                     new SelectionEntry(
                         e.ErhaltungsaufwendungId,
-                        $"{e.Bezeichnung} - {Ctx.FindPerson(e.AusstellerId).Bezeichnung}",
+                        $"{e.Bezeichnung} - {e.Aussteller.Bezeichnung}",
                         null))
                 .ToList();
 
@@ -161,21 +155,19 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         [Route("api/selection/kontakte")]
         public IActionResult GetKontakte()
         {
-            var nat = Ctx.NatuerlichePersonen
-                .Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung, null))
+            var list = Ctx.Kontakte
+                .Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung, null))
                 .ToList();
-            var jur = Ctx.JuristischePersonen
-                .Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung, null))
-                .ToList();
-            return new OkObjectResult(nat.Concat(jur));
+            return new OkObjectResult(list);
         }
 
         [HttpGet]
         [Route("api/selection/natuerlichepersonen")]
         public IActionResult GetNatuerlichePersonen()
         {
-            var list = Ctx.NatuerlichePersonen
-                .Select(e => new SelectionEntry(e.NatuerlichePersonId, e.Bezeichnung, null))
+            var list = Ctx.Kontakte
+                .Where(e => e.Rechtsform == Rechtsform.natuerlich)
+                .Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung, null))
                 .ToList();
 
             return new OkObjectResult(list);
@@ -185,8 +177,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         [Route("api/selection/juristischepersonen")]
         public IActionResult GetJuristischePersonen()
         {
-            var list = Ctx.JuristischePersonen
-                .Select(e => new SelectionEntry(e.JuristischePersonId, e.Bezeichnung, null))
+            var list = Ctx.Kontakte
+                .Where(e => e.Rechtsform != Rechtsform.natuerlich)
+                .Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung, null))
                 .ToList();
 
             return new OkObjectResult(list);
@@ -203,7 +196,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                     new SelectionEntry(
                             e.WohnungId,
                             $"{e.Adresse?.Anschrift ?? ""} - {e.Bezeichnung}",
-                            e.BesitzerId.ToString()))
+                            e.Besitzer.KontaktId.ToString()))
                 .ToList();
 
             return new OkObjectResult(entries);
@@ -224,9 +217,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         private static string GetVertragName(Vertrag vertrag, SaverwalterContext ctx)
         {
             var wohnung = $"{vertrag.Wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift"} - {vertrag.Wohnung.Bezeichnung}";
-            var mieterList = BetriebskostenabrechnungService.Utils
-                .GetMieter(ctx, vertrag)
-                .Select(person => person.Bezeichnung);
+            var mieterList = vertrag.Mieter.Select(person => person.Bezeichnung);
             var mieterText = string.Join(", ", mieterList);
             var vertragname = $"{wohnung} - {mieterText}";
 

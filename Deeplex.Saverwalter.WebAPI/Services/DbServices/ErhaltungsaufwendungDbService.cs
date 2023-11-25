@@ -23,7 +23,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new ErhaltungsaufwendungEntry(entity, Ctx);
+                var entry = new ErhaltungsaufwendungEntry(entity);
                 return new OkObjectResult(entry);
             }
             catch
@@ -65,18 +65,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private ErhaltungsaufwendungEntry Add(ErhaltungsaufwendungEntry entry)
         {
-            var ausstellerId = new Guid(entry.Aussteller.Id);
-            var wohnung = Ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id));
-            var entity = new Erhaltungsaufwendung(entry.Betrag, entry.Bezeichnung, ausstellerId, entry.Datum)
+            var aussteller = Ctx.Kontakte.Find(entry.Aussteller.Id)!;
+            var wohnung = Ctx.Wohnungen.Find(entry.Wohnung.Id)!;
+            var entity = new Erhaltungsaufwendung(entry.Betrag, entry.Bezeichnung, entry.Datum)
             {
-                Wohnung = wohnung!
+                Aussteller = aussteller,
+                Wohnung = wohnung,
             };
 
             SetOptionalValues(entity, entry);
             Ctx.Erhaltungsaufwendungen.Add(entity);
             Ctx.SaveChanges();
 
-            return new ErhaltungsaufwendungEntry(entity, Ctx);
+            return new ErhaltungsaufwendungEntry(entity);
         }
 
         public IActionResult Put(int id, ErhaltungsaufwendungEntry entry)
@@ -100,16 +101,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         private ErhaltungsaufwendungEntry Update(ErhaltungsaufwendungEntry entry, Erhaltungsaufwendung entity)
         {
             entity.Betrag = entry.Betrag;
-            entity.Wohnung = Ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id))!;
+            entity.Wohnung = Ctx.Wohnungen.Find(entry.Wohnung.Id)!;
             entity.Bezeichnung = entry.Bezeichnung;
-            entity.AusstellerId = new Guid(entry.Aussteller.Id);
+            entity.Aussteller = Ctx.Kontakte.Find(entry.Aussteller.Id)!;
             entity.Datum = entry.Datum;
 
             SetOptionalValues(entity, entry);
             Ctx.Erhaltungsaufwendungen.Update(entity);
             Ctx.SaveChanges();
 
-            return new ErhaltungsaufwendungEntry(entity, Ctx);
+            return new ErhaltungsaufwendungEntry(entity);
         }
 
         private void SetOptionalValues(Erhaltungsaufwendung entity, ErhaltungsaufwendungEntry entry)

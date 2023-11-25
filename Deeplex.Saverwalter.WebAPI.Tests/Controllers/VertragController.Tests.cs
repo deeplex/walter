@@ -34,15 +34,22 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var dbService = new VertragDbService(ctx);
             var controller = new VertragController(logger, dbService);
 
-            var wohnung = new Wohnung("Test", 100, 100, 1);
+            var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
+            ctx.Kontakte.Add(besitzer);
+
+            var wohnung = new Wohnung("Test", 100, 100, 1)
+            {
+                Besitzer = besitzer
+            };
             ctx.Wohnungen.Add(wohnung);
             ctx.SaveChanges();
 
             var entity = new Vertrag()
             {
+                Ansprechpartner = wohnung.Besitzer,
                 Wohnung = wohnung
             };
-            var entry = new VertragEntry(entity, ctx);
+            var entry = new VertragEntry(entity);
 
             var result = controller.Post(entry);
 
@@ -72,7 +79,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var dbService = new VertragDbService(ctx);
             var controller = new VertragController(logger, dbService);
 
-            var entry = new VertragEntry(entity, ctx);
+            var entry = new VertragEntry(entity);
             entry.Ende = new DateOnly(2021, 12, 31);
 
             var result = controller.Put(entity.VertragId, entry);

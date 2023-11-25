@@ -15,13 +15,13 @@ namespace Deeplex.Saverwalter.PrintService
         public static string Quadrat(double d) => string.Format(System.Globalization.CultureInfo.GetCultureInfo("de-DE"), "{0:N2}m²", d);
         public static string Datum(DateOnly d) => d.ToString("dd.MM.yyyy");
 
-        public static string GetBriefAnrede(IPerson person)
+        public static string GetBriefAnrede(Kontakt person)
         {
             var text = "";
-            if (person is NatuerlichePerson natuerlichePerson)
+            if (person.Rechtsform == Rechtsform.natuerlich)
             {
-                text += natuerlichePerson.Anrede == Anrede.Herr ? "Herrn " :
-                    natuerlichePerson.Anrede == Anrede.Frau ? "Frau " :
+                text += person.Anrede == Anrede.Herr ? "Herrn " :
+                    person.Anrede == Anrede.Frau ? "Frau " :
                     "";
             }
             text += person.Bezeichnung;
@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.PrintService
         public static string Title(int jahr)
             => "Betriebskostenabrechnung " + jahr.ToString();
 
-        public static string Mieterliste(List<IPerson> mieter)
+        public static string Mieterliste(List<Kontakt> mieter)
             => "Mieter: " + string.Join(", ", mieter.Select(person => person.Bezeichnung));
 
         public static string Mietobjekt(Wohnung wohnung)
@@ -44,15 +44,15 @@ namespace Deeplex.Saverwalter.PrintService
         public static string Nutzungszeitraum(Zeitraum zeitraum)
             => zeitraum.Nutzungsbeginn.ToString("dd.MM.yyyy") + " - " + zeitraum.Nutzungsende.ToString("dd.MM.yyyy");
 
-        public static string Gruss(List<IPerson> mieter)
+        public static string Gruss(List<Kontakt> mieter)
         {
             var gruss = mieter.Aggregate("", (text, mieter) =>
             {
-                if (mieter is NatuerlichePerson natuerlichePerson)
+                if (mieter.Rechtsform == Rechtsform.natuerlich)
                 {
-                    return text + (natuerlichePerson.Anrede == Anrede.Herr ? "sehr geehrter Herr " :
-                        natuerlichePerson.Anrede == Anrede.Frau ? "sehr geehrte Frau " :
-                        natuerlichePerson.Vorname) + natuerlichePerson.Nachname + ", ";
+                    return text + (mieter.Anrede == Anrede.Herr ? "sehr geehrter Herr " :
+                        mieter.Anrede == Anrede.Frau ? "sehr geehrte Frau " :
+                        mieter.Vorname) + mieter.Name + ", ";
                 }
                 else
                 {

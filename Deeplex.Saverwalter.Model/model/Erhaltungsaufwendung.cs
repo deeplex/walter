@@ -8,7 +8,7 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public DateOnly Datum { get; set; }
         [Required]
-        public Guid AusstellerId { get; set; }
+        public virtual Kontakt Aussteller { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
         [Required]
         public string Bezeichnung { get; set; }
         [Required]
@@ -21,11 +21,10 @@ namespace Deeplex.Saverwalter.Model
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
 
-        public Erhaltungsaufwendung(double betrag, string bezeichnung, Guid ausstellerId, DateOnly datum)
+        public Erhaltungsaufwendung(double betrag, string bezeichnung, DateOnly datum)
         {
             Betrag = betrag;
             Bezeichnung = bezeichnung;
-            AusstellerId = ausstellerId;
             Datum = datum;
         }
     }

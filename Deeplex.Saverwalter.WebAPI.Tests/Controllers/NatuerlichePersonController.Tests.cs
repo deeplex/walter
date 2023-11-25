@@ -7,7 +7,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Xunit;
-using static Deeplex.Saverwalter.WebAPI.Controllers.NatuerlichePersonController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {
@@ -17,12 +17,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public void Post()
         {
             var ctx = TestUtils.GetContext();
-            var logger = A.Fake<ILogger<NatuerlichePersonController>>();
-            var dbService = new NatuerlichePersonDbService(ctx);
-            var controller = new NatuerlichePersonController(logger, dbService);
+            var logger = A.Fake<ILogger<KontaktController>>();
+            var dbService = new KontaktDbService(ctx);
+            var controller = new KontaktController(logger, dbService);
 
-            var entity = new NatuerlichePerson("TestPerson");
-            var entry = new NatuerlichePersonEntry(entity, ctx);
+            var entity = new Kontakt("TestPerson", Rechtsform.natuerlich);
+            var entry = new KontaktEntry(entity);
 
             var result = controller.Post(entry);
 
@@ -33,15 +33,15 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public void GetId()
         {
             var ctx = TestUtils.GetContext();
-            var logger = A.Fake<ILogger<NatuerlichePersonController>>();
-            var dbService = new NatuerlichePersonDbService(ctx);
-            var controller = new NatuerlichePersonController(logger, dbService);
+            var logger = A.Fake<ILogger<KontaktController>>();
+            var dbService = new KontaktDbService(ctx);
+            var controller = new KontaktController(logger, dbService);
 
-            var entity = new NatuerlichePerson("TestPerson");
-            ctx.NatuerlichePersonen.Add(entity);
+            var entity = new Kontakt("TestPerson", Rechtsform.natuerlich);
+            ctx.Kontakte.Add(entity);
             ctx.SaveChanges();
 
-            var result = controller.Get(entity.NatuerlichePersonId);
+            var result = controller.Get(entity.KontaktId);
 
             result.Should().BeOfType<OkObjectResult>();
         }
@@ -50,18 +50,18 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public void Put()
         {
             var ctx = TestUtils.GetContext();
-            var logger = A.Fake<ILogger<NatuerlichePersonController>>();
-            var dbService = new NatuerlichePersonDbService(ctx);
-            var controller = new NatuerlichePersonController(logger, dbService);
+            var logger = A.Fake<ILogger<KontaktController>>();
+            var dbService = new KontaktDbService(ctx);
+            var controller = new KontaktController(logger, dbService);
 
-            var entity = new NatuerlichePerson("TestPerson");
-            ctx.NatuerlichePersonen.Add(entity);
+            var entity = new Kontakt("TestPerson", Rechtsform.natuerlich);
+            ctx.Kontakte.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new NatuerlichePersonEntry(entity, ctx);
+            var entry = new KontaktEntry(entity);
             entry.Email = "TestPerson@example.com";
 
-            var result = controller.Put(entity.NatuerlichePersonId, entry);
+            var result = controller.Put(entity.KontaktId, entry);
 
             result.Should().BeOfType<OkObjectResult>();
             entry.Email.Should().Be("TestPerson@example.com");
@@ -71,19 +71,19 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         public void Delete()
         {
             var ctx = TestUtils.GetContext();
-            var logger = A.Fake<ILogger<NatuerlichePersonController>>();
-            var dbService = new NatuerlichePersonDbService(ctx);
-            var controller = new NatuerlichePersonController(logger, dbService);
+            var logger = A.Fake<ILogger<KontaktController>>();
+            var dbService = new KontaktDbService(ctx);
+            var controller = new KontaktController(logger, dbService);
 
-            var entity = new NatuerlichePerson("TestPerson");
-            ctx.NatuerlichePersonen.Add(entity);
+            var entity = new Kontakt("TestPerson", Rechtsform.natuerlich);
+            ctx.Kontakte.Add(entity);
             ctx.SaveChanges();
-            var id = entity.NatuerlichePersonId;
+            var id = entity.KontaktId;
 
             var result = controller.Delete(id);
 
             result.Should().BeOfType<OkResult>();
-            ctx.NatuerlichePersonen.Find(id).Should().BeNull();
+            ctx.Kontakte.Find(id).Should().BeNull();
 
         }
     }

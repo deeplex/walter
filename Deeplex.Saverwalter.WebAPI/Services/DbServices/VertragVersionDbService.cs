@@ -65,7 +65,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private VertragVersionEntryBase Add(VertragVersionEntryBase entry)
         {
-            var vertrag = Ctx.Vertraege.Find(int.Parse(entry.Vertrag!.Id!));
+            var vertrag = Ctx.Vertraege.Find(entry.Vertrag!.Id);
             var entity = new VertragVersion(entry.Beginn, entry.Grundmiete, entry.Personenzahl)
             {
                 Vertrag = vertrag!

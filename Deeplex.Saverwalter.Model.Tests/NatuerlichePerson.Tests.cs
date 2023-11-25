@@ -21,9 +21,9 @@ namespace Deeplex.Saverwalter.ModelTests.model
         public static IEnumerable<object[]> ShouldWorkData =>
             new List<object[]>
             {
-                new object[] { new NatuerlichePerson("Test Nachname") },
-                new object[] { new NatuerlichePerson("Test Nachname") { Vorname = "Test Vorname" } },
-                new object[] { new NatuerlichePerson("Test Nachname")
+                new object[] { new Kontakt("Test Nachname", Rechtsform.natuerlich) },
+                new object[] { new Kontakt("Test Nachname", Rechtsform.natuerlich) { Vorname = "Test Vorname" } },
+                new object[] { new Kontakt("Test Nachname", Rechtsform.natuerlich)
                 {
                     Vorname = "Test Vorname",
                     Telefon = "Test Telefon",
@@ -32,26 +32,26 @@ namespace Deeplex.Saverwalter.ModelTests.model
                     Mobil = "Test Mobil",
                     Notiz = "Test Notiz",
                 } },
-                new object[] { new NatuerlichePerson("Test Nachname")
+                new object[] { new Kontakt("Test Nachname", Rechtsform.natuerlich)
                 {
                     Anrede = Anrede.Frau,
                 } },
-                new object[] { new NatuerlichePerson("Test Nachname")
+                new object[] { new Kontakt("Test Nachname", Rechtsform.natuerlich)
                 {
                     Anrede = Anrede.Herr,
                 } },
-                new object[] { new NatuerlichePerson("Test Nachname")
+                new object[] { new Kontakt("Test Nachname", Rechtsform.natuerlich)
                 {
                     Anrede = Anrede.Keine,
                 } },
-                new object[] { new NatuerlichePerson("Test Nachname")
+                new object[] { new Kontakt("Test Nachname", Rechtsform.natuerlich)
                 {
-                    Nachname = "Test Nachname",
-                    JuristischePersonen = new List<JuristischePerson>()
+                    Name = "Test Nachname",
+                    JuristischePersonen = new List<Kontakt>()
                     {
-                        new JuristischePerson("Test Nachname")
+                        new Kontakt("Test Nachname", Rechtsform.gmbh)
                         {
-                            Bezeichnung = "Test JuristischePerson"
+                            Name = "Test JuristischePerson"
                         }
                     }
                 } }
@@ -62,30 +62,29 @@ namespace Deeplex.Saverwalter.ModelTests.model
         public void ShouldAddNatuerlichePerson(string nachname)
         {
             // Arrange
-            var entity = new NatuerlichePerson(nachname);
+            var entity = new Kontakt(nachname, Rechtsform.natuerlich);
 
             // Act
-            var result = DatabaseContext.NatuerlichePersonen.Add(entity);
+            var result = DatabaseContext.Kontakte.Add(entity);
             DatabaseContext.SaveChanges();
 
             // Assert
             result.Should().BeEquivalentTo(entity, options => options.ExcludingMissingMembers());
-            result.Entity.NatuerlichePersonId.Should().BeGreaterThan(0);
-            result.Entity.PersonId.Should().NotBeEmpty();
-            result.Entity.Bezeichnung.Should().BeEquivalentTo(string.Join(" ", entity.Vorname ?? "", entity.Nachname));
-            DatabaseContext.Set<NatuerlichePerson>().Should().Contain(entity);
+            result.Entity.KontaktId.Should().BeGreaterThan(0);
+            result.Entity.Bezeichnung.Should().BeEquivalentTo(string.Join(" ", entity.Vorname ?? "", entity.Name));
+            DatabaseContext.Set<Kontakt>().Should().Contain(entity);
         }
 
         public static IEnumerable<object[]> ShouldNotWorkData
             => new List<object[]>
             {
-                new object[] { new NatuerlichePerson("Test Nachname")
+                new object[] { new Kontakt("Test Nachname", Rechtsform.natuerlich)
                 {
-                Nachname = null!
+                Name = null!
                 } },
-                new object[] { new NatuerlichePerson("Test Nachname")
+                new object[] { new Kontakt("Test Nachname", Rechtsform.natuerlich)
                 {
-                    Nachname = null!,
+                    Name = null!,
                     Vorname = "Test Vorname",
                     Telefon = "Test Telefon",
                     Email = "Test Email@testmail.test",
@@ -100,11 +99,11 @@ namespace Deeplex.Saverwalter.ModelTests.model
         public void ShouldNotAddNatuerlichePerson(string nachname)
         {
             // Arrange
-            var entity = new NatuerlichePerson(nachname);
+            var entity = new Kontakt(nachname, Rechtsform.natuerlich);
 
             // Act
             DatabaseContext.Add(entity);
-            var result = DatabaseContext.Set<NatuerlichePerson>().FirstOrDefault(e => e.NatuerlichePersonId == entity.NatuerlichePersonId);
+            var result = DatabaseContext.Set<Kontakt>().FirstOrDefault(e => e.KontaktId == entity.KontaktId);
 
             // Assert
             try
@@ -118,7 +117,7 @@ namespace Deeplex.Saverwalter.ModelTests.model
             }
 
             result.Should().BeNull();
-            DatabaseContext.Set<NatuerlichePerson>().Should().NotContain(entity);
+            DatabaseContext.Set<Kontakt>().Should().NotContain(entity);
         }
 
         [Theory(Skip = "InMemoryDatabaseNotRunning")]
@@ -126,10 +125,10 @@ namespace Deeplex.Saverwalter.ModelTests.model
         public void ShouldUpdateNatuerlichePerson(string nachname)
         {
             // Arrange
-            var entity = new NatuerlichePerson(nachname);
+            var entity = new Kontakt(nachname, Rechtsform.natuerlich);
             DatabaseContext.Add(entity);
             DatabaseContext.SaveChanges();
-            var testEntity = DatabaseContext.Set<NatuerlichePerson>().FirstOrDefault(e => e.NatuerlichePersonId == entity.NatuerlichePersonId)!;
+            var testEntity = DatabaseContext.Set<Kontakt>().FirstOrDefault(e => e.KontaktId == entity.KontaktId)!;
             testEntity.Email = "Updated Test Email";
 
             // Act
@@ -138,9 +137,9 @@ namespace Deeplex.Saverwalter.ModelTests.model
 
             // Assert
             result.Entity.Should().BeEquivalentTo(testEntity, options => options.ExcludingMissingMembers());
-            result.Entity.NatuerlichePersonId.Should().Be(entity.NatuerlichePersonId);
+            result.Entity.KontaktId.Should().Be(entity.KontaktId);
             result.Entity.Email.Should().Be(testEntity.Email);
-            DatabaseContext.Set<NatuerlichePerson>().Should().Contain(entity);
+            DatabaseContext.Set<Kontakt>().Should().Contain(entity);
         }
 
         [Theory(Skip = "InMemoryDatabaseNotRunning")]
@@ -148,13 +147,13 @@ namespace Deeplex.Saverwalter.ModelTests.model
         public void ShouldNotUpdateNatuerlichePerson(string nachname)
         {
             // Arrange
-            var entity = new NatuerlichePerson(nachname);
+            var entity = new Kontakt(nachname, Rechtsform.natuerlich);
             DatabaseContext.Add(entity);
             DatabaseContext.SaveChanges();
-            var testEntity = DatabaseContext.Set<NatuerlichePerson>().FirstOrDefault(e => e.NatuerlichePersonId == entity.NatuerlichePersonId)!;
+            var testEntity = DatabaseContext.Set<Kontakt>().FirstOrDefault(e => e.KontaktId == entity.KontaktId)!;
             testEntity.Email = "Updated Test Email";
-            testEntity.Nachname = null!;
-            DatabaseContext.NatuerlichePersonen.Update(testEntity);
+            testEntity.Name = null!;
+            DatabaseContext.Kontakte.Update(testEntity);
 
             // Act
             try
@@ -166,15 +165,15 @@ namespace Deeplex.Saverwalter.ModelTests.model
             {
                 ex.Should().NotBeNull();
             }
-            var result = DatabaseContext.Set<NatuerlichePerson>().FirstOrDefault(e => e.NatuerlichePersonId == entity.NatuerlichePersonId)!;
+            var result = DatabaseContext.Set<Kontakt>().FirstOrDefault(e => e.KontaktId == entity.KontaktId)!;
 
             // Assert
 
             result.Should().NotBeNull();
-            DatabaseContext.Set<NatuerlichePerson>().Should().Contain(result);
+            DatabaseContext.Set<Kontakt>().Should().Contain(result);
             result.Should().NotBeEquivalentTo(testEntity, options => options.ExcludingMissingMembers());
             result.Email.Should().NotBe(testEntity.Email);
-            DatabaseContext.Set<NatuerlichePerson>().Should().Contain(result);
+            DatabaseContext.Set<Kontakt>().Should().Contain(result);
         }
     }
 }

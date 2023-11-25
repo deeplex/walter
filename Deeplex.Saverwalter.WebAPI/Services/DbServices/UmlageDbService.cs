@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new UmlageEntry(entity, Ctx);
+                var entry = new UmlageEntry(entity);
                 return new OkObjectResult(entry);
             }
             catch
@@ -75,8 +75,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 throw new ArgumentException("entry has no Schluessel.");
             }
-            var schluessel = (Umlageschluessel)int.Parse(entry.Schluessel.Id);
-            var typ = Ctx.Umlagetypen.First(typ => typ.UmlagetypId == int.Parse(entry.Typ.Id));
+            var schluessel = (Umlageschluessel)entry.Schluessel.Id;
+            var typ = Ctx.Umlagetypen.First(typ => typ.UmlagetypId == entry.Typ.Id);
             var entity = new Umlage(schluessel)
             {
                 Typ = typ
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Umlagen.Add(entity);
             Ctx.SaveChanges();
 
-            return new UmlageEntry(entity, Ctx);
+            return new UmlageEntry(entity);
         }
 
         public IActionResult Put(int id, UmlageEntry entry)
@@ -118,14 +118,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new ArgumentException("entry has no Schluessel.");
             }
 
-            entity.Typ = Ctx.Umlagetypen.First(typ => typ.UmlagetypId == int.Parse(entry.Typ.Id));
-            entity.Schluessel = (Umlageschluessel)int.Parse(entry.Schluessel.Id);
+            entity.Typ = Ctx.Umlagetypen.First(typ => typ.UmlagetypId == entry.Typ.Id);
+            entity.Schluessel = (Umlageschluessel)entry.Schluessel.Id;
 
             SetOptionalValues(entity, entry);
             Ctx.Umlagen.Update(entity);
             Ctx.SaveChanges();
 
-            return new UmlageEntry(entity, Ctx);
+            return new UmlageEntry(entity);
         }
 
         private void SetOptionalValues(Umlage entity, UmlageEntry entry)
@@ -142,31 +142,31 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 // Add missing Wohnungen
                 entity.Wohnungen
                     .AddRange(l
-                    .Where(w => !entity.Wohnungen.Exists(e => w.Id == e.WohnungId.ToString()))
-                    .Select(w => Ctx.Wohnungen.Find(int.Parse(w.Id))!));
+                    .Where(w => !entity.Wohnungen.Exists(e => w.Id == e.WohnungId))
+                    .Select(w => Ctx.Wohnungen.Find(w.Id)!));
                 // Remove old Wohnungen
-                entity.Wohnungen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.WohnungId.ToString()));
+                entity.Wohnungen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.WohnungId));
             }
 
             if (entry.SelectedZaehler is IEnumerable<SelectionEntry> zaehler)
             {
                 // Add missing zaehler
                 entity.Zaehler.AddRange(zaehler
-                    .Where(z => !entity.Zaehler.Exists(e => z.Id == e.ZaehlerId.ToString()))
-                    .Select(w => Ctx.ZaehlerSet.Find(int.Parse(w.Id))!));
+                    .Where(z => !entity.Zaehler.Exists(e => z.Id == e.ZaehlerId))
+                    .Select(w => Ctx.ZaehlerSet.Find(w.Id)!));
                 // Remove old zaehler
-                entity.Zaehler.RemoveAll(w => !zaehler.ToList().Exists(e => e.Id == w.ZaehlerId.ToString()));
+                entity.Zaehler.RemoveAll(w => !zaehler.ToList().Exists(e => e.Id == w.ZaehlerId));
             }
 
             if (entry.Schluessel != null &&
-                (Umlageschluessel)int.Parse(entry.Schluessel.Id) == Umlageschluessel.NachVerbrauch &&
+                (Umlageschluessel)entry.Schluessel.Id == Umlageschluessel.NachVerbrauch &&
                 entry.HKVO is HKVOEntryBase hkvo)
             {
                 if (hkvo.Id == 0)
                 {
-                    var newHKVO = new HKVO(hkvo.HKVO_P7 / 100, hkvo.HKVO_P8 / 100, (HKVO_P9A2)int.Parse(hkvo.HKVO_P9.Id), hkvo.Strompauschale / 100)
+                    var newHKVO = new HKVO(hkvo.HKVO_P7 / 100, hkvo.HKVO_P8 / 100, (HKVO_P9A2)hkvo.HKVO_P9.Id, hkvo.Strompauschale / 100)
                     {
-                        Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == int.Parse(hkvo.Stromrechnung.Id))
+                        Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id)
                     };
                     entity.HKVO = newHKVO;
                     Ctx.HKVO.Add(newHKVO);
@@ -176,9 +176,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     var oldHKVO = Ctx.HKVO.Single(e => e.HKVOId == hkvo.Id);
                     oldHKVO.HKVO_P7 = (double)hkvo.HKVO_P7 / 100;
                     oldHKVO.HKVO_P8 = (double)hkvo.HKVO_P8 / 100;
-                    oldHKVO.HKVO_P9 = (HKVO_P9A2)int.Parse(hkvo.HKVO_P9.Id);
+                    oldHKVO.HKVO_P9 = (HKVO_P9A2)hkvo.HKVO_P9.Id;
                     oldHKVO.Strompauschale = (double)hkvo.Strompauschale / 100;
-                    oldHKVO.Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == int.Parse(hkvo.Stromrechnung.Id));
+                    oldHKVO.Betriebsstrom = Ctx.Umlagen.Single(e => e.UmlageId == hkvo.Stromrechnung.Id);
                     Ctx.HKVO.Update(oldHKVO);
                 }
             }

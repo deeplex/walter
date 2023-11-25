@@ -166,12 +166,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public List<ZaehlerEntryBase> Zaehler { get; }
             public List<MieteEntryBase> Mieten { get; }
 
-            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung abrechnung, SaverwalterContext ctx)
+            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung abrechnung)
             {
                 Notes = abrechnung.Notes;
-                Vermieter = new SelectionEntry(abrechnung.Vermieter.PersonId, abrechnung.Vermieter.Bezeichnung);
-                Ansprechpartner = new SelectionEntry(abrechnung.Ansprechpartner.PersonId, abrechnung.Ansprechpartner.Bezeichnung);
-                Mieter = abrechnung.Mieter.Select(e => new SelectionEntry(e.PersonId, e.Bezeichnung)).ToList();
+                Vermieter = new SelectionEntry(abrechnung.Vermieter.KontaktId, abrechnung.Vermieter.Bezeichnung);
+                Ansprechpartner = new SelectionEntry(abrechnung.Ansprechpartner.KontaktId, abrechnung.Ansprechpartner.Bezeichnung);
+                Mieter = abrechnung.Mieter.Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung)).ToList();
                 Vertrag = new SelectionEntry(abrechnung.Vertrag.VertragId, "Vertrag");
                 GezahltMiete = abrechnung.GezahlteMiete;
                 KaltMiete = abrechnung.KaltMiete;
@@ -190,13 +190,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                     .SelectMany(umlage => umlage.Wohnungen)
                     .Distinct();
                 Wohnungen = wohnungen
-                    .Select(wohnung => new WohnungEntryBase(wohnung, ctx))
+                    .Select(wohnung => new WohnungEntryBase(wohnung))
                     .ToList();
                 Vertraege = wohnungen
                     .SelectMany(wohnung => wohnung.Vertraege)
                     .Where(vertrag => vertrag.Beginn() <= abrechnung.Zeitraum.Abrechnungsende &&
                         (vertrag.Ende == null || vertrag.Ende >= abrechnung.Zeitraum.Abrechnungsbeginn))
-                    .Select(vertrag => new VertragEntryBase(vertrag, ctx))
+                    .Select(vertrag => new VertragEntryBase(vertrag))
                     .ToList();
                 Zaehler = wohnungen
                     .SelectMany(wohnung => wohnung.Zaehler)
@@ -221,21 +221,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}")]
         public IActionResult GetBetriebskostenabrechnung(int vertrag_id, int jahr)
         {
-            return Service.Get(vertrag_id, jahr, Service.Ctx);
+            return Service.Get(vertrag_id, jahr);
         }
 
         [HttpGet]
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}/word_document")]
         public IActionResult GetBetriebskostenabrechnungWordDocument(int vertrag_id, int jahr)
         {
-            return Service.GetWordDocument(vertrag_id, jahr, Service.Ctx);
+            return Service.GetWordDocument(vertrag_id, jahr);
         }
 
         [HttpGet]
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}/pdf_document")]
         public IActionResult GetBetriebskostenabrechnungPdfDocument(int vertrag_id, int jahr)
         {
-            return Service.GetPdfDocument(vertrag_id, jahr, Service.Ctx);
+            return Service.GetPdfDocument(vertrag_id, jahr);
         }
     }
 }

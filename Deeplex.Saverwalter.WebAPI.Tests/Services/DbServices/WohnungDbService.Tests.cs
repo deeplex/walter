@@ -43,8 +43,16 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new WohnungDbService(ctx);
-            var entity = new Wohnung("Test", 100, 100, 1);
-            var entry = new WohnungEntry(entity, ctx);
+
+            var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
+            ctx.Kontakte.Add(besitzer);
+            ctx.SaveChanges();
+
+            var entity = new Wohnung("Test", 100, 100, 1)
+            {
+                Besitzer = besitzer
+            };
+            var entry = new WohnungEntry(entity);
 
             var result = service.Post(entry);
 
@@ -56,12 +64,19 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new WohnungDbService(ctx);
-            var entity = new Wohnung("Test", 100, 100, 1);
+
+            var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
+            ctx.Kontakte.Add(besitzer);
+
+            var entity = new Wohnung("Test", 100, 100, 1)
+            {
+                Besitzer = besitzer
+            };
 
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new WohnungEntry(entity, ctx);
+            var entry = new WohnungEntry(entity);
 
             var result = service.Post(entry);
 
@@ -73,10 +88,18 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var ctx = TestUtils.GetContext();
             var service = new WohnungDbService(ctx);
-            var entity = new Wohnung("Test", 100, 100, 1);
+
+            var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
+            ctx.Kontakte.Add(besitzer);
+            ctx.SaveChanges();
+
+            var entity = new Wohnung("Test", 100, 100, 1)
+            {
+                Besitzer = besitzer
+            };
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
-            var entry = new WohnungEntry(entity, ctx);
+            var entry = new WohnungEntry(entity);
             entry.Wohnflaeche = 200;
 
             var result = service.Put(entity.WohnungId, entry);
@@ -99,8 +122,15 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Typ = new Umlagetyp("Dachrinnenreinigung")
             };
-            var entity = new Wohnung("Test", 100, 100, 1);
-            var entry = new WohnungEntry(entity, ctx);
+
+            var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
+            ctx.Kontakte.Add(besitzer);
+
+            var entity = new Wohnung("Test", 100, 100, 1)
+            {
+                Besitzer = besitzer
+            };
+            var entry = new WohnungEntry(entity);
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
 

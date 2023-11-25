@@ -23,7 +23,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new BetriebskostenrechnungEntry(entity, Ctx);
+                var entry = new BetriebskostenrechnungEntry(entity);
                 return new OkObjectResult(entry);
             }
             catch
@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 throw new ArgumentException("entry.Umlage can't be null.");
             }
-            var umlage = Ctx.Umlagen.Find(int.Parse(entry.Umlage.Id));
+            var umlage = Ctx.Umlagen.Find(entry.Umlage.Id);
             if (umlage == null)
             {
                 throw new ArgumentException($"Did not find Umlage with Id {entry.Umlage.Id}");
@@ -83,7 +83,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Betriebskostenrechnungen.Add(entity);
             Ctx.SaveChanges();
 
-            return new BetriebskostenrechnungEntry(entity, Ctx);
+            return new BetriebskostenrechnungEntry(entity);
         }
 
         public IActionResult Put(int id, BetriebskostenrechnungEntry entry)
@@ -113,7 +113,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 throw new ArgumentException("entry has no Umlage");
             }
-            var umlage = Ctx.Umlagen.Find(int.Parse(entry.Umlage.Id));
+            var umlage = Ctx.Umlagen.Find(entry.Umlage.Id);
             if (umlage == null)
             {
                 throw new ArgumentException($"entry has no Umlage with Id {entry.Umlage.Id}");
@@ -125,7 +125,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Betriebskostenrechnungen.Update(entity);
             Ctx.SaveChanges();
 
-            return new BetriebskostenrechnungEntry(entity, Ctx);
+            return new BetriebskostenrechnungEntry(entity);
         }
 
         private void SetOptionalValues(Betriebskostenrechnung entity, BetriebskostenrechnungEntry entry)

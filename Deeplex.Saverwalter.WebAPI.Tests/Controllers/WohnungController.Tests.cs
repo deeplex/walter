@@ -34,8 +34,15 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var dbService = new WohnungDbService(ctx);
             var controller = new WohnungController(logger, dbService);
 
-            var entity = new Wohnung("Test", 100, 100, 1);
-            var entry = new WohnungEntry(entity, ctx);
+            var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
+            ctx.Kontakte.Add(besitzer);
+            ctx.SaveChanges();
+
+            var entity = new Wohnung("Test", 100, 100, 1)
+            {
+                Besitzer = besitzer
+            };
+            var entry = new WohnungEntry(entity);
 
             var result = controller.Post(entry);
 
@@ -66,10 +73,16 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var dbService = new WohnungDbService(ctx);
             var controller = new WohnungController(logger, dbService);
 
-            var entity = new Wohnung("Test", 100, 100, 1);
+            var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
+            ctx.Kontakte.Add(besitzer);
+
+            var entity = new Wohnung("Test", 100, 100, 1)
+            {
+                Besitzer = besitzer
+            };
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
-            var entry = new WohnungEntry(entity, ctx);
+            var entry = new WohnungEntry(entity);
             entry.Wohnflaeche = 200;
 
             var result = controller.Put(entity.WohnungId, entry);

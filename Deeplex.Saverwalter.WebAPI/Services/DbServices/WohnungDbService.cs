@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new WohnungEntry(entity, Ctx);
+                var entry = new WohnungEntry(entity);
                 return new OkObjectResult(entry);
             }
             catch
@@ -68,13 +68,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         private WohnungEntry Add(WohnungEntry entry)
         {
-            var entity = new Wohnung(entry.Bezeichnung, entry.Wohnflaeche, entry.Nutzflaeche, entry.Einheiten);
+            var entity = new Wohnung(entry.Bezeichnung, entry.Wohnflaeche, entry.Nutzflaeche, entry.Einheiten)
+            {
+                Besitzer = Ctx.Kontakte.Find(entry.Besitzer!.Id)!
+            };
 
             SetOptionalValues(entity, entry);
             Ctx.Wohnungen.Add(entity);
             Ctx.SaveChanges();
 
-            return new WohnungEntry(entity, Ctx);
+            return new WohnungEntry(entity);
         }
 
         public IActionResult Put(int id, WohnungEntry entry)
@@ -101,19 +104,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Wohnflaeche = entry.Wohnflaeche;
             entity.Nutzflaeche = entry.Nutzflaeche;
             entity.Nutzeinheit = entry.Einheiten;
+            entity.Besitzer = Ctx.Kontakte.Find(entry.Besitzer!.Id)!;
 
             SetOptionalValues(entity, entry);
             Ctx.Wohnungen.Update(entity);
             Ctx.SaveChanges();
 
-            return new WohnungEntry(entity, Ctx);
+            return new WohnungEntry(entity);
         }
 
         private void SetOptionalValues(Wohnung entity, WohnungEntry entry)
         {
             entity.Adresse = entry.Adresse is AdresseEntryBase a ? GetAdresse(a, Ctx) : null;
             entity.Notiz = entry.Notiz;
-            entity.BesitzerId = entry.Besitzer is SelectionEntry b ? new Guid(b.Id) : Guid.Empty;
         }
     }
 }

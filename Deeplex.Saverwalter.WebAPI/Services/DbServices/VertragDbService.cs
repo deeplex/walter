@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new VertragEntry(entity, Ctx);
+                var entry = new VertragEntry(entity);
                 return new OkObjectResult(entry);
             }
             catch
@@ -70,14 +70,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 throw new ArgumentException("entry has no Wohnung");
             }
-            var wohnung = Ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id));
+            var wohnung = Ctx.Wohnungen.Find(entry.Wohnung.Id);
             var entity = new Vertrag() { Wohnung = wohnung! };
 
             SetOptionalValues(entity, entry);
             Ctx.Vertraege.Add(entity);
             Ctx.SaveChanges();
 
-            return new VertragEntry(entity, Ctx);
+            return new VertragEntry(entity);
         }
 
         public IActionResult Put(int id, VertragEntry entry)
@@ -104,13 +104,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 throw new ArgumentException("entry has no Wohnung.");
             }
-            entity.Wohnung = Ctx.Wohnungen.Find(int.Parse(entry.Wohnung.Id))!;
+            entity.Wohnung = Ctx.Wohnungen.Find(entry.Wohnung.Id)!;
 
             SetOptionalValues(entity, entry);
             Ctx.Vertraege.Update(entity);
             Ctx.SaveChanges();
 
-            return new VertragEntry(entity, Ctx);
+            return new VertragEntry(entity);
         }
 
         private void SetOptionalValues(Vertrag entity, VertragEntry entry)
@@ -136,31 +136,25 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
 
             entity.Ende = entry.Ende;
-            entity.AnsprechpartnerId = entry.Ansprechpartner is SelectionEntry s ? new Guid(s.Id!) : null;
+            entity.Ansprechpartner = Ctx.Kontakte.Find(entry.Ansprechpartner.Id)!;
             entity.Notiz = entry.Notiz;
 
             if (entry.SelectedMieter is IEnumerable<SelectionEntry> l)
             {
-                // Get a list of all mieter
-                var mieter = Ctx.MieterSet.Where(m => m.Vertrag.VertragId == entity.VertragId).ToList();
                 // Add missing mieter
                 foreach (var selectedMieter in l)
                 {
-                    if (!mieter.Any(m => m.PersonId.ToString() == selectedMieter.Id))
+                    if (!entity.Mieter.Any(m => m.KontaktId == selectedMieter.Id))
                     {
-                        var newMieter = new Mieter(new Guid(selectedMieter.Id!))
-                        {
-                            Vertrag = entity
-                        };
-                        Ctx.MieterSet.Add(newMieter); ;
+                        entity.Mieter.Add(Ctx.Kontakte.Find(selectedMieter.Id)!);
                     }
                 }
                 // Remove mieter
-                foreach (var m in mieter)
+                foreach (var m in entity.Mieter)
                 {
-                    if (!l.Any(e => m.PersonId.ToString() == e.Id))
+                    if (!l.Any(e => m.KontaktId == e.Id))
                     {
-                        Ctx.MieterSet.Remove(m);
+                        entity.Mieter.Remove(m);
                     }
                 }
             }
