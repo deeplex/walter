@@ -1,7 +1,7 @@
 <script lang="ts">
     import {
         WalterAdresse,
-        WalterComboBoxPerson,
+        WalterComboBoxKontakt,
         WalterNumberInput,
         WalterTextArea,
         WalterTextInput
@@ -15,7 +15,7 @@
 </script>
 
 <Row>
-    <WalterComboBoxPerson
+    <WalterComboBoxKontakt
         {fetchImpl}
         required
         {readonly}

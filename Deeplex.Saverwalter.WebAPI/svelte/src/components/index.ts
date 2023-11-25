@@ -12,7 +12,6 @@ export { default as WalterAbrechnungEinheitVerbrauch } from './abrechnung/Walter
 
 export { default as WalterAnhaenge } from './subdetails/WalterAnhaenge.svelte';
 export { default as WalterAnhaengeEntry } from './subdetails/WalterAnhaengeEntry.svelte';
-export { default as WalterPerson } from './subdetails/WalterPerson.svelte';
 export { default as WalterLinks } from './subdetails/WalterLinks.svelte';
 export { default as WalterLinkTile } from './subdetails/WalterLinkTile.svelte';
 export { default as WalterLink } from './subdetails/WalterLink.svelte';
@@ -25,8 +24,7 @@ export { default as WalterPreviewUnknown } from './preview/WalterPreviewUnknown.
 export { default as WalterPreviewError } from './preview/WalterPreviewError.svelte';
 
 export { default as WalterAdresse } from './details/WalterAdresse.svelte';
-export { default as WalterNatuerlichePerson } from './details/WalterNatuerlichePerson.svelte';
-export { default as WalterJuristischePerson } from './details/WalterJuristischePerson.svelte';
+export { default as WalterKontakt } from './details/WalterKontakt.svelte';
 export { default as WalterMiete } from './details/WalterMiete.svelte';
 export { default as WalterMietminderung } from './details/WalterMietminderung.svelte';
 export { default as WalterBetriebskostenrechnung } from './details/WalterBetriebskostenrechnung.svelte';
@@ -43,7 +41,7 @@ export { default as WalterMiettabelleWrapper } from './details/WalterMiettabelle
 
 export { default as WalterError } from './elements/WalterError.svelte';
 export { default as WalterComboBox } from './elements/WalterComboBox.svelte';
-export { default as WalterComboBoxPerson } from './elements/WalterComboBoxPerson.svelte';
+export { default as WalterComboBoxKontakt } from './elements/WalterComboBoxKontakt.svelte';
 export { default as WalterComboBoxWohnung } from './elements/WalterComboBoxWohnung.svelte';
 export { default as WalterComboBoxUmlagetyp } from './elements/WalterComboBoxUmlagetyp.svelte';
 export { default as WalterDataTable } from './elements/WalterDataTable.svelte';
@@ -54,8 +52,8 @@ export { default as WalterHeaderDetail } from './elements/WalterHeaderDetail.sve
 export { default as WalterHeaderNew } from './elements/WalterHeaderNew.svelte';
 export { default as WalterGrid } from './elements/WalterGrid.svelte';
 export { default as WalterMultiSelect } from './elements/WalterMultiSelect.svelte';
+export { default as WalterMultiSelectKontakt } from './elements/WalterMultiSelectKontakt.svelte';
 export { default as WalterMultiSelectJuristischePerson } from './elements/WalterMultiSelectJuristischePerson.svelte';
-export { default as WalterMultiSelectPerson } from './elements/WalterMultiSelectPerson.svelte';
 export { default as WalterMultiSelectUmlage } from './elements/WalterMultiSelectUmlage.svelte';
 export { default as WalterMultiSelectWohnung } from './elements/WalterMultiSelectWohnung.svelte';
 export { default as WalterMultiSelectZaehler } from './elements/WalterMultiSelectZaehler.svelte';

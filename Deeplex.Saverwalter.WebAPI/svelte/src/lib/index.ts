@@ -1,14 +1,12 @@
 export { WalterToastContent } from './WalterToastContent';
-export { WalterPersonEntry } from './WalterPerson';
 export { WalterAdresseEntry } from './WalterAdresse';
 export { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
 export { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
 export { WalterHKVOEntry } from './WalterHKVO';
-export { WalterJuristischePersonEntry } from './WalterJuristischePerson';
 export { WalterMieteEntry } from './WalterMiete';
 export { WalterMietminderungEntry } from './WalterMietminderung';
 export { WalterMiettabelleEntry } from './WalterMiettabelle';
-export { WalterNatuerlichePersonEntry } from './WalterNatuerlichePerson';
+export { WalterKontaktEntry } from './WalterKontakt';
 export { WalterS3FileWrapper } from './WalterS3FileWrapper';
 export { WalterSelectionEntry } from './WalterSelection';
 export { WalterUmlageEntry } from './WalterUmlage';

@@ -6,10 +6,9 @@ import {
     WalterAdresse,
     WalterBetriebskostenrechnung,
     WalterErhaltungsaufwendung,
-    WalterJuristischePerson,
+    WalterKontakt,
     WalterMiete,
     WalterMietminderung,
-    WalterNatuerlichePerson,
     WalterUmlage,
     WalterUmlagetyp,
     WalterVertrag,
@@ -202,18 +201,11 @@ export const tables: WalterPreviewCopyTable[] = [
         newPage: () => WalterErhaltungsaufwendung
     },
     {
-        value: 'Natürliche Personen',
-        key: 'natuerlichepersonen',
-        fetch: walter_selection.natuerlichePersonen,
-        S3URL: S3URL.natuerlichepersonen,
-        newPage: () => WalterNatuerlichePerson
-    },
-    {
-        value: 'Juristische Personen',
-        key: 'juristischepersonen',
-        fetch: walter_selection.juristischePersonen,
-        S3URL: S3URL.juristischepersonen,
-        newPage: () => WalterJuristischePerson
+        value: 'Kontakte',
+        key: 'kontakte',
+        fetch: walter_selection.kontakte,
+        S3URL: S3URL.kontakte,
+        newPage: () => WalterKontakt
     },
     {
         value: 'Mieten',

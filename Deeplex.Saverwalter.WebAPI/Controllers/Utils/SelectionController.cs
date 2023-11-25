@@ -162,18 +162,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         }
 
         [HttpGet]
-        [Route("api/selection/natuerlichepersonen")]
-        public IActionResult GetNatuerlichePersonen()
-        {
-            var list = Ctx.Kontakte
-                .Where(e => e.Rechtsform == Rechtsform.natuerlich)
-                .Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung, null))
-                .ToList();
-
-            return new OkObjectResult(list);
-        }
-
-        [HttpGet]
         [Route("api/selection/juristischepersonen")]
         public IActionResult GetJuristischePersonen()
         {
@@ -322,6 +310,19 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         public IActionResult GetAnreden()
         {
             var list = Enum.GetValues(typeof(Anrede))
+                .Cast<Anrede>()
+                .ToList()
+                .Select(e => new SelectionEntry((int)e, e.ToString()))
+                .ToList();
+
+            return new OkObjectResult(list);
+        }
+
+        [HttpGet]
+        [Route("api/selection/rechtsformen")]
+        public IActionResult GetRechtsformen()
+        {
+            var list = Enum.GetValues(typeof(Rechtsform))
                 .Cast<Anrede>()
                 .ToList()
                 .Select(e => new SelectionEntry((int)e, e.ToString()))

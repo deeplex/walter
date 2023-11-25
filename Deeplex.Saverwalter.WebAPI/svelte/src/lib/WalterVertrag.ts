@@ -18,7 +18,7 @@ export class WalterVertragEntry extends WalterApiHandler {
         public createdAt: Date,
         public lastModified: Date,
         public wohnung: WalterSelectionEntry,
-        public ansprechpartner: WalterSelectionEntry | undefined,
+        public ansprechpartner: WalterSelectionEntry,
         public selectedMieter: WalterSelectionEntry[],
         public versionen: WalterVertragVersionEntry[],
         public mieter: WalterPersonEntry[],

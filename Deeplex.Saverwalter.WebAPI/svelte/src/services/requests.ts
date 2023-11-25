@@ -31,12 +31,6 @@ export const walter_selection = {
             WalterSelectionEntry[]
         >;
     },
-    natuerlichePersonen(fetchImpl: typeof fetch) {
-        return walter_get(
-            '/api/selection/natuerlichepersonen',
-            fetchImpl
-        ) as Promise<WalterSelectionEntry[]>;
-    },
     juristischePersonen(fetchImpl: typeof fetch) {
         return walter_get(
             '/api/selection/juristischepersonen',
@@ -53,6 +47,11 @@ export const walter_selection = {
             '/api/selection/mietminderungen',
             fetchImpl
         ) as Promise<WalterSelectionEntry[]>;
+    },
+    rechtsformen(fetchImpl: typeof fetch) {
+        return walter_get('/api/selection/rechtsformen', fetchImpl) as Promise<
+            WalterSelectionEntry[]
+        >;
     },
     umlagen(fetchImpl: typeof fetch) {
         return walter_get('/api/selection/umlagen', fetchImpl) as Promise<

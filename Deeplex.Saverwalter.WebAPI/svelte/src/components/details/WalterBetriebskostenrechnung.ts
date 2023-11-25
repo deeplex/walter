@@ -1,7 +1,4 @@
-import type {
-    WalterJuristischePersonEntry,
-    WalterSelectionEntry
-} from '$walter/lib';
+import type { WalterKontaktEntry, WalterSelectionEntry } from '$walter/lib';
 
 export function shouldFilterItem(item: WalterSelectionEntry, value: string) {
     if (!value) return true;
@@ -10,7 +7,7 @@ export function shouldFilterItem(item: WalterSelectionEntry, value: string) {
 
 export function removeSelf(
     entries: WalterSelectionEntry[],
-    entry: Partial<WalterJuristischePersonEntry>
+    entry: Partial<WalterKontaktEntry>
 ) {
     return entries.filter((e) => e.id !== entry.id);
 }

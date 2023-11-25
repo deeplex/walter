@@ -93,13 +93,11 @@
             rows={data.entry.betriebskostenrechnungen}
         />
 
-        <!-- TODO id is GUID -->
-        <!-- 
         <WalterLinkTile
             bind:fileWrapper
-            name={`Ansprechpartner: ${data.entry.ansprechpartner?.text}`}
-            href={`/nat/${data.entry.ansprechpartner?.id}`}
-        /> -->
+            name={`Ansprechpartner: ${data.entry.ansprechpartner.text}`}
+            href={`/kontakte/${data.entry.ansprechpartner.id}`}
+        />
         <WalterLinkTile
             bind:fileWrapper
             name={`Wohnung: ${data.entry.wohnung.text}`}
