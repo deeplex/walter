@@ -113,34 +113,33 @@
             />
         {/if}
 
-        <SideNavDivider />
+        <li style="flex: 1" />
 
-        <SideNavMenu text="Einstellungen" icon={Settings}>
-            <SideNavMenuItem style="padding-left: 1.2em">
-                <Checkbox
-                    bind:checked={extendedNavigation}
-                    labelText="Erweiterte Navigation"
-                />
-            </SideNavMenuItem>
-            <WalterSideNavLink
-                text="Nutzereinstellungen"
-                icon={User}
-                href="/account"
+        <SideNavDivider />
+        <li>
+            <Checkbox
+                labelText="Erweiterte Navigation"
+                bind:checked={extendedNavigation}
             />
-            {#if true}
-            <WalterSideNavLink
-                text="Adminbereich"
-                icon={NetworkAdminControl}
-                href="/admin"
-            />
-            {/if}
-            <SideNavLink
-                icon={Logout}
-                on:click={logout}
-                text="Abmelden"
-                style="padding-left: 1em"
-            />
-        </SideNavMenu>
+        </li>
+        <WalterSideNavLink
+            text="Nutzereinstellungen"
+            icon={User}
+            href="/account"
+        />
+        {#if true}
+        <WalterSideNavLink
+            text="Adminbereich"
+            icon={NetworkAdminControl}
+            href="/admin"
+        />
+        {/if}
+        <SideNavLink
+            icon={Logout}
+            on:click={logout}
+            text="Abmelden"
+            style="padding-left: 1em"
+        />
     </SideNavItems>
     <!-- To get the sidenav scrollable when window height is very small -->
     <div style="height: 4em" />

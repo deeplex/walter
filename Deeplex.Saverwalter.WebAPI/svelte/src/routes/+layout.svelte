@@ -34,6 +34,19 @@
 <slot />
 
 <style>
+    :global(.bx--side-nav__items) {
+        display: flex;
+        flex-direction: column;
+    }
+
+    :global(.bx--side-nav__item) {
+        min-height: 32px;
+    }
+
+    :global(.bx--side-nav__divider) {
+        min-height: 1px;
+    }
+
     :global(.bx--data-table) {
         overflow: auto;
     }
