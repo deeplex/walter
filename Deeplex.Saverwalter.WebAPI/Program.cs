@@ -1,4 +1,5 @@
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authentication;
@@ -10,6 +11,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
+using System.Security.Claims;
 using System.Text;
 
 [assembly: ApiController]
@@ -100,6 +102,11 @@ namespace Deeplex.Saverwalter.WebAPI
                 {
                     policy.AddAuthenticationSchemes("TokenAuthentication");
                     policy.RequireAuthenticatedUser();
+                });
+
+                options.AddPolicy("RequireAdmin", policy =>
+                {
+                    policy.RequireClaim(ClaimTypes.Role, [UserRole.Admin.ToString()]);
                 });
             });
 

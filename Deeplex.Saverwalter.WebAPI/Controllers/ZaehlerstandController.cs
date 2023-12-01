@@ -41,20 +41,20 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly ILogger<ZaehlerstandController> _logger;
         private ZaehlerstandDbService DbService { get; }
 
-        public ZaehlerstandController(ILogger<ZaehlerstandController> logger, ZaehlerstandDbService dbService)
+        public ZaehlerstandController(ILogger<ZaehlerstandController> logger, ZaehlerstandDbService dbService, ZählerstandPermissionHandler permissionHandler)
         {
             _logger = logger;
             DbService = dbService;
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] ZaehlerstandEntryBase entry) => DbService.Post(entry);
+        public Task<IActionResult> Post([FromBody] ZaehlerstandEntryBase entry) => DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id) => DbService.Get(id);
+        public  Task<IActionResult> Get(int id) => DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public IActionResult Put(int id, ZaehlerstandEntryBase entry) => DbService.Put(id, entry);
+        public  Task<IActionResult> Put(int id, ZaehlerstandEntryBase entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id) => DbService.Delete(id);
+        public  Task<IActionResult> Delete(int id) => DbService.Delete(User!, id);
     }
 }

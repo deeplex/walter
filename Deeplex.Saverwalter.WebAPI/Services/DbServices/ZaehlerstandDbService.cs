@@ -1,21 +1,49 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class ZaehlerstandDbService : IControllerService<ZaehlerstandEntryBase>
+    public class ZählerstandPermissionHandler : WohnungPermissionHandlerBase<Zaehlerstand>
+    {
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context,
+            OperationAuthorizationRequirement requirement,
+            Zaehlerstand entity,
+            Guid userId)
+        {
+            var wohnung = entity.Zaehler.Wohnung!;
+            if (IsBesitzer(userId, wohnung))
+            {
+                context.Succeed(requirement);
+            }
+            else if (requirement.Name == Operations.Update.Name
+                && (IsVerwalter(userId, wohnung)
+                    || IsMieter(userId, wohnung)))
+            {
+                context.Succeed(requirement);
+            }
+            return Task.CompletedTask;
+        }
+    }
+
+    public class ZaehlerstandDbService : ICRUDService<ZaehlerstandEntryBase>
     {
         public SaverwalterContext Ctx { get; }
+        private readonly IAuthorizationService _authorizationService;
 
-        public ZaehlerstandDbService(SaverwalterContext ctx)
+        public ZaehlerstandDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
         {
             Ctx = ctx;
+            _authorizationService = authorizationService;
         }
 
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
         {
-            var entity = Ctx.Zaehlerstaende.Find(id);
+            var entity = await Ctx.Zaehlerstaende.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -32,9 +60,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = Ctx.Zaehlerstaende.Find(id);
+            var entity = await Ctx.Zaehlerstaende.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -46,7 +74,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public IActionResult Post(ZaehlerstandEntryBase entry)
+        public async Task<IActionResult> Post(ClaimsPrincipal user, ZaehlerstandEntryBase entry)
         {
             if (entry.Id != 0)
             {
@@ -77,12 +105,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new ZaehlerstandEntryBase(entity);
         }
 
-        public IActionResult Put(int id, ZaehlerstandEntryBase entry)
+        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, ZaehlerstandEntryBase entry)
         {
-            var entity = Ctx.Zaehlerstaende.Find(id);
+            var entity = await Ctx.Zaehlerstaende.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
+            }
+
+            var authRx = await _authorizationService.AuthorizeAsync(user, entity, "EditZählerstand");
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
             }
 
             try
