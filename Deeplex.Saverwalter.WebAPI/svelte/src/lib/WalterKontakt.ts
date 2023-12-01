@@ -9,7 +9,6 @@ export class WalterKontaktEntry extends WalterApiHandler {
 
     constructor(
         public id: number,
-        public guid: string,
         public email: string,
         public telefon: string,
         public fax: string,
@@ -23,7 +22,7 @@ export class WalterKontaktEntry extends WalterApiHandler {
         public lastModified: Date,
         public anrede: WalterSelectionEntry,
         public selectedJuristischePersonen: WalterSelectionEntry[],
-        public adresse: WalterAdresseEntry,
+        public adresse: WalterAdresseEntry | null,
         public juristischePersonen: WalterKontaktEntry[],
         public wohnungen: WalterWohnungEntry[],
         public vertraege: WalterVertragEntry[],
@@ -49,7 +48,6 @@ export class WalterKontaktEntry extends WalterApiHandler {
 
         return new WalterKontaktEntry(
             json.id,
-            json.guid,
             json.email,
             json.telefon,
             json.fax,
