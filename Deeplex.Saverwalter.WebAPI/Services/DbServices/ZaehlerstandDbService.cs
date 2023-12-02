@@ -21,8 +21,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 context.Succeed(requirement);
             }
             else if (requirement.Name == Operations.Update.Name
-                && (IsVerwalter(userId, wohnung)
-                    || IsMieter(userId, wohnung)))
+                && (IsAuthorized(userId, wohnung, VerwalterRolle.Vollmacht)
+                 || IsAuthorized(userId, wohnung, VerwalterRolle.Eigentuemer)))
             {
                 context.Succeed(requirement);
             }

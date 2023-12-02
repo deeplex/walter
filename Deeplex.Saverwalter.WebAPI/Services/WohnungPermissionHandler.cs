@@ -50,11 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             TEntity entity,
             Guid userId);
 
-        protected static bool IsBesitzer(Guid userId, Wohnung wohnung)
-            => wohnung.Besitzer!.Accounts.Any(account => account.Id == userId);
-        protected static bool IsVerwalter(Guid userId, Wohnung wohnung)
-            => wohnung.Verwalter.Any(verwalter => verwalter.Kontakt.Accounts.Any(account => account.Id == userId));
-        protected static bool IsMieter(Guid userId, Wohnung wohnung)
-            => wohnung.Vertraege.Any(vertrag => vertrag.Mieter.Any(mieter => mieter.Accounts.Any(account => account.Id == userId)));
+        protected static bool IsAuthorized(Guid userId, Wohnung wohnung, VerwalterRolle rolle)
+            => wohnung.Verwalter.Any(verwalter => verwalter.Rolle == rolle && verwalter.Account.Id == userId);
     }
 }
