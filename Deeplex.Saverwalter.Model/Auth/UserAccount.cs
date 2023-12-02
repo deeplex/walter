@@ -16,6 +16,7 @@ namespace Deeplex.Saverwalter.Model.Auth
         public string Name { get; set; } = default!;
         [Required]
         public UserRole Role { get; set; }
+        public virtual List<Verwalter> Verwalter { get; set; } = null!;
 
         public virtual List<Kontakt> Kontakte { get; set; } = null!;
 

@@ -31,7 +31,6 @@ namespace Deeplex.Saverwalter.Model
         public virtual List<Wohnung> Wohnungen { get; private set; } = [];
         public virtual List<Garage> Garagen { get; private set; } = [];
         public virtual List<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; private set; } = [];
-        public virtual List<Verwalter> Verwalter { get; private set; } = [];
         public virtual List<UserAccount> Accounts { get; private set; } = [];
 
         public DateTime CreatedAt { get; private set; }

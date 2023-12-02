@@ -6,7 +6,7 @@ namespace Deeplex.Saverwalter.Model
     {
         public int VerwalterId { get; set; }
         [Required]
-        public virtual Kontakt Kontakt { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
+        public virtual UserAccount UserAccount { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
         [Required]
         public virtual Wohnung Wohnung { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078
         [Required]
