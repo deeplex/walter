@@ -39,5 +39,6 @@ namespace Deeplex.Saverwalter.Model.Auth
         Guest,
         User,
         Admin,
+        Owner,
     }
 }

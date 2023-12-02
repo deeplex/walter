@@ -24,6 +24,7 @@ namespace Deeplex.Saverwalter.Model
     public enum VerwalterRolle
     {
         Keine,
-        Vollmacht
+        Vollmacht,
+        Eigentuemer
     }
 }
