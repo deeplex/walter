@@ -225,7 +225,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             for (var i = 0; i < wohnungen.Count; ++i)
             {
                 var wohnung = wohnungen[i];
-                DateOnly ende;
+                DateOnly ende = new DateOnly(2022, i % 12 + 1, 1);
                 if (i % 3 == 0)
                 {
                     var jahr = 2020 - (i % 5);

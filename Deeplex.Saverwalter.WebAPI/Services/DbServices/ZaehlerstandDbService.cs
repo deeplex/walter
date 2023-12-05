@@ -16,13 +16,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Guid userId)
         {
             var wohnung = entity.Zaehler.Wohnung!;
-            if (IsBesitzer(userId, wohnung))
-            {
-                context.Succeed(requirement);
-            }
-            else if (requirement.Name == Operations.Update.Name
-                && (IsAuthorized(userId, wohnung, VerwalterRolle.Vollmacht)
-                 || IsAuthorized(userId, wohnung, VerwalterRolle.Eigentuemer)))
+            if (requirement.Name == Operations.Update.Name
+                && MinAuthorized(userId, wohnung, VerwalterRolle.Vollmacht))
             {
                 context.Succeed(requirement);
             }

@@ -50,7 +50,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             TEntity entity,
             Guid userId);
 
+        protected static bool MinAuthorized(Guid userId, Wohnung wohnung, VerwalterRolle rolle)
+            => wohnung.Verwalter.Any(verwalter => verwalter.Rolle >= rolle && verwalter.UserAccount.Id == userId);
+
         protected static bool IsAuthorized(Guid userId, Wohnung wohnung, VerwalterRolle rolle)
-            => wohnung.Verwalter.Any(verwalter => verwalter.Rolle == rolle && verwalter.Account.Id == userId);
+            => wohnung.Verwalter.Any(verwalter => verwalter.Rolle == rolle && verwalter.UserAccount.Id == userId);
     }
 }

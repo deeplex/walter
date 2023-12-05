@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Deeplex.Saverwalter.Model.Auth;
+using System.ComponentModel.DataAnnotations;
 
 namespace Deeplex.Saverwalter.Model
 {

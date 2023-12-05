@@ -33,26 +33,5 @@ namespace Deeplex.Saverwalter.Model
             Nutzflaeche = nutzflaeche;
             Nutzeinheit = nutzeinheit;
         }
-
-        public List<Guid> AssembleReadUserGuids()
-        {
-            var accounts = new List<UserAccount>();
-            if (Besitzer != null)
-            {
-                accounts.AddRange(Besitzer.Accounts);
-            }
-            foreach (var verwalter in Verwalter)
-            {
-                accounts.AddRange(Verwalter.SelectMany(verwalter => verwalter.Kontakt.Accounts));
-            }
-
-            var guids = new List<Guid>();
-            foreach (var account in accounts)
-            {
-                guids.Add(account.Id);
-            }
-
-            return guids;
-        }
     }
 }
