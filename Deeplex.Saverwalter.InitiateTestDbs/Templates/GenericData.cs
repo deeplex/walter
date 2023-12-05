@@ -17,26 +17,27 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
         // 20 Numbers
         public static List<string> hausnummerList = new List<string> { "2", "3", "5", "7", "11", "13", "17", "19", "23", "29", "31", "37", "41", "43", "47", "53", "59", "61", "67", "71" };
 
-        public static List<Umlagetyp> FillUmlagetypen(SaverwalterContext ctx)
+        public static void FillUmlagetypen(SaverwalterContext ctx)
         {
-            var list = new List<Umlagetyp>();
-            list.Add(new Umlagetyp("Allgemeinstrom/Hausbeleuchtung"));
-            list.Add(new Umlagetyp("Breitbandkabelanschluss"));
-            list.Add(new Umlagetyp("Dachrinnenreinigung"));
-            list.Add(new Umlagetyp("Müllbeseitigung"));
-            list.Add(new Umlagetyp("Entwässerung/Niederschlagswasser"));
-            list.Add(new Umlagetyp("Entwässerung/Schmutzwasser"));
-            list.Add(new Umlagetyp("Gartenpflege"));
-            list.Add(new Umlagetyp("Grundsteuer"));
-            list.Add(new Umlagetyp("Haftpflichtversicherung"));
-            list.Add(new Umlagetyp("Hauswartarbeiten"));
-            list.Add(new Umlagetyp("Wartung Therme/Speicher"));
-            list.Add(new Umlagetyp("Sachversicherung"));
-
-            ctx.AddRange(list);
+            ctx.Umlagetypen.AddRange([
+                new Umlagetyp("Allgemeinstrom/Hausbeleuchtung"),
+                new Umlagetyp("Breitbandkabelanschluss"),
+                new Umlagetyp("Dachrinnenreinigung"),
+                new Umlagetyp("Heizkosten"),
+                new Umlagetyp("Müllbeseitigung"),
+                new Umlagetyp("Entwässerung/Niederschlagswasser"),
+                new Umlagetyp("Entwässerung/Schmutzwasser"),
+                new Umlagetyp("Gartenpflege"),
+                new Umlagetyp("Grundsteuer"),
+                new Umlagetyp("Haftpflichtversicherung"),
+                new Umlagetyp("Hauswartarbeiten"),
+                new Umlagetyp("Wartung Therme/Speicher"),
+                new Umlagetyp("Sachversicherung"),
+                new Umlagetyp("Schornsteinfegerarbeiten"),
+                new Umlagetyp("Strassenreinigung"),
+                new Umlagetyp("Wasserversorgung"),
+            ]);
             ctx.SaveChanges();
-
-            return list;
         }
 
         // 40 Numbers

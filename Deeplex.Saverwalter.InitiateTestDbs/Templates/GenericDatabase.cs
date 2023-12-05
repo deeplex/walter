@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
             await PopulateDatabase(ctx, databaseUser, databasePass, numberOfWohnungen);
 
-            ctx.Dispose();
+            await ctx.DisposeAsync();
         }
 
         public static async Task<SaverwalterContext> ConnectDatabase(
@@ -93,7 +93,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
         private static void CreateUserAccount(SaverwalterContext ctx, string databaseUser, string databasePass)
         {
             Console.WriteLine($"Erstelle Nutzer mit Nutzernamen {databaseUser} und Passwort {databasePass}");
-            var account = new UserAccount { Username = databaseUser };
+            var account = new UserAccount { Username = databaseUser, Name = "P. Laceholder" };
             ctx.UserAccounts.Add(account);
             var credential = new Pbkdf2PasswordCredential
             {
@@ -107,6 +107,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             credential.PasswordHash = Rfc2898DeriveBytes.Pbkdf2(utf8Password, credential.Salt, credential.Iterations, HashAlgorithmName.SHA512, 64);
             account.Pbkdf2PasswordCredential = credential;
             ctx.Pbkdf2PasswordCredentials.Add(credential);
+            ctx.SaveChanges();
         }
 
         static List<Adresse> FillAdressen(SaverwalterContext ctx)
@@ -223,8 +224,12 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                         Besitzer = besitzer,
                         Wohnflaeche = flaeche,
                         Nutzflaeche = flaeche,
-                        Nutzeinheit = 1
+                        Nutzeinheit = 1,
+                        Verwalter = {
+                            new Verwalter(VerwalterRolle.Keine) { UserAccount = ctx.UserAccounts.First() }
+                        },
                     });
+
                 }
             }
 
