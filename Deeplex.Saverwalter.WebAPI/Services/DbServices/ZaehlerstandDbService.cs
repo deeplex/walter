@@ -71,7 +71,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var wohnung = Ctx.ZaehlerSet.Find(entry.Zaehler.Id!)?.Wohnung;
+                var wohnung = (await Ctx.ZaehlerSet.FindAsync(entry.Zaehler.Id!))?.Wohnung;
                 var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate]);
                 if (!authRx.Succeeded)
                 {
@@ -86,9 +86,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private ZaehlerstandEntryBase Add(ZaehlerstandEntryBase entry)
+        private async Task<ZaehlerstandEntryBase> Add(ZaehlerstandEntryBase entry)
         {
-            var zaehler = Ctx.ZaehlerSet.Find(entry.Zaehler!.Id!);
+            var zaehler = await Ctx.ZaehlerSet.FindAsync(entry.Zaehler!.Id!);
             var entity = new Zaehlerstand(entry.Datum, entry.Stand)
             {
                 Zaehler = zaehler!
