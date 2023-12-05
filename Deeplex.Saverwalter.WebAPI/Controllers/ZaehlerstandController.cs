@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
@@ -41,7 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         private readonly ILogger<ZaehlerstandController> _logger;
         private ZaehlerstandDbService DbService { get; }
 
-        public ZaehlerstandController(ILogger<ZaehlerstandController> logger, ZaehlerstandDbService dbService, ZählerstandPermissionHandler permissionHandler)
+        public ZaehlerstandController(ILogger<ZaehlerstandController> logger, ZaehlerstandDbService dbService)
         {
             _logger = logger;
             DbService = dbService;
