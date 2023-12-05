@@ -1,25 +1,35 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class VertragDbService : IControllerService<VertragEntry>
+    public class VertragDbService : ICRUDService<VertragEntry>
     {
         public SaverwalterContext Ctx { get; }
+        private readonly IAuthorizationService Auth;
 
-        public VertragDbService(SaverwalterContext ctx)
+        public VertragDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
         {
             Ctx = ctx;
+            Auth = authorizationService;
         }
 
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
         {
-            var entity = Ctx.Vertraege.Find(id);
+            var entity = await Ctx.Vertraege.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
+            }
+
+            var authRx = await Auth.AuthorizeAsync(user, entity.Wohnung, [Operations.Read]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
             }
 
             try
@@ -33,12 +43,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = Ctx.Vertraege.Find(id);
+            var entity = await Ctx.Vertraege.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
+            }
+
+            var authRx = await Auth.AuthorizeAsync(user, entity.Wohnung, [Operations.Delete]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
             }
 
             Ctx.Vertraege.Remove(entity);
@@ -47,7 +63,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public IActionResult Post(VertragEntry entry)
+        public async Task<IActionResult> Post(ClaimsPrincipal user, VertragEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -56,6 +72,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
+                var wohnung = await Ctx.Wohnungen.FindAsync(entry.Wohnung!.Id);
+                var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate]);
+                if (!authRx.Succeeded)
+                {
+                    return new ForbidResult();
+                }
+
                 return new OkObjectResult(Add(entry));
             }
             catch
@@ -64,13 +87,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private VertragEntry Add(VertragEntry entry)
+        private async Task<VertragEntry> Add(VertragEntry entry)
         {
             if (entry.Wohnung == null)
             {
                 throw new ArgumentException("entry has no Wohnung");
             }
-            var wohnung = Ctx.Wohnungen.Find(entry.Wohnung.Id);
+            var wohnung = await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id);
             var entity = new Vertrag() { Wohnung = wohnung! };
 
             SetOptionalValues(entity, entry);
@@ -80,12 +103,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new VertragEntry(entity);
         }
 
-        public IActionResult Put(int id, VertragEntry entry)
+        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, VertragEntry entry)
         {
-            var entity = Ctx.Vertraege.Find(id);
+            var entity = await Ctx.Vertraege.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
+            }
+
+            var authRx = await Auth.AuthorizeAsync(user, entity.Wohnung, [Operations.Update]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
             }
 
             try
@@ -98,13 +127,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private VertragEntry Update(VertragEntry entry, Vertrag entity)
+        private async Task<VertragEntry> Update(VertragEntry entry, Vertrag entity)
         {
             if (entry.Wohnung == null)
             {
                 throw new ArgumentException("entry has no Wohnung.");
             }
-            entity.Wohnung = Ctx.Wohnungen.Find(entry.Wohnung.Id)!;
+            entity.Wohnung = (await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id))!;
 
             SetOptionalValues(entity, entry);
             Ctx.Vertraege.Update(entity);
@@ -113,7 +142,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new VertragEntry(entity);
         }
 
-        private void SetOptionalValues(Vertrag entity, VertragEntry entry)
+        private async Task SetOptionalValues(Vertrag entity, VertragEntry entry)
         {
             if (entity.VertragId != entry.Id)
             {
@@ -136,7 +165,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
 
             entity.Ende = entry.Ende;
-            entity.Ansprechpartner = Ctx.Kontakte.Find(entry.Ansprechpartner.Id)!;
+            entity.Ansprechpartner = await Ctx.Kontakte.FindAsync(entry.Ansprechpartner.Id)!;
             entity.Notiz = entry.Notiz;
 
             if (entry.SelectedMieter is IEnumerable<SelectionEntry> l)
@@ -146,7 +175,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 {
                     if (!entity.Mieter.Any(m => m.KontaktId == selectedMieter.Id))
                     {
-                        entity.Mieter.Add(Ctx.Kontakte.Find(selectedMieter.Id)!);
+                        entity.Mieter.Add((await Ctx.Kontakte.FindAsync(selectedMieter.Id))!);
                     }
                 }
                 // Remove mieter
