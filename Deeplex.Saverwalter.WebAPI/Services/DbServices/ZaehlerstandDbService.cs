@@ -108,7 +108,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await _authorizationService.AuthorizeAsync(user, entity, "EditZählerstand");
+            var authRx = await _authorizationService.AuthorizeAsync(user, entity, [Operations.Update]);
             if (!authRx.Succeeded)
             {
                 return new ForbidResult();

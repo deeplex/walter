@@ -3,6 +3,7 @@ using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -112,6 +113,7 @@ namespace Deeplex.Saverwalter.WebAPI
 
             builder.Services.AddTransient(c => container.GetInstance<TokenService>());
             builder.Services.AddTransient(c => container.GetInstance<SaverwalterContext>());
+            builder.Services.AddSingleton<IAuthorizationHandler, ZählerstandPermissionHandler>();
         }
 
         private static Container GetServiceContainer()
@@ -152,12 +154,12 @@ namespace Deeplex.Saverwalter.WebAPI
             var databasePass = Environment.GetEnvironmentVariable("DATABASE_PASS");
 
             var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
-            optionsBuilder.UseNpgsql(
-                 $@"Server={databaseHost}
+            var connection = $@"Server={databaseHost}
                 ;Port={databasePort}
                 ;Database={databaseName}
                 ;Username={databaseUser}
-                ;Password={databasePass}");
+                ;Password={databasePass}";
+            optionsBuilder.UseNpgsql(connection);
 
             return optionsBuilder.Options;
         }
