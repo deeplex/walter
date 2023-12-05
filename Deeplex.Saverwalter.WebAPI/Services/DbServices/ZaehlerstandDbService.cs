@@ -71,7 +71,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var wohnung = (await Ctx.ZaehlerSet.FindAsync(entry.Zaehler.Id!))?.Wohnung;
+                var wohnung = (await Ctx.ZaehlerSet.FindAsync(entry.Zaehler.Id))?.Wohnung;
                 var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate]);
                 if (!authRx.Succeeded)
                 {
