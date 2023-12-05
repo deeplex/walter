@@ -1,27 +1,36 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class WohnungDbService : IControllerService<WohnungEntry>
+    public class WohnungDbService : ICRUDService<WohnungEntry>
     {
         public SaverwalterContext Ctx { get; }
+        private readonly IAuthorizationService Auth;
 
-        public WohnungDbService(SaverwalterContext ctx)
+        public WohnungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
         {
             Ctx = ctx;
+            Auth = authorizationService;
         }
 
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
         {
-            var entity = Ctx.Wohnungen.Find(id);
+            var entity = await Ctx.Wohnungen.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
+            }
+
+            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Read]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
             }
 
             try
@@ -35,13 +44,20 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = Ctx.Wohnungen.Find(id);
+            var entity = await Ctx.Wohnungen.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
             }
+
+            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Delete]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
+            }
+
 
             Ctx.Wohnungen.Remove(entity);
             Ctx.SaveChanges();
@@ -49,7 +65,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public IActionResult Post(WohnungEntry entry)
+        public async Task<IActionResult> Post(ClaimsPrincipal user, WohnungEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -58,6 +74,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
+                var wohnung = await Ctx.ZaehlerSet.FindAsync(entry.Id);
+                var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate]);
+                if (!authRx.Succeeded)
+                {
+                    return new ForbidResult();
+                }
+
                 return new OkObjectResult(Add(entry));
             }
             catch
@@ -66,11 +89,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private WohnungEntry Add(WohnungEntry entry)
+        private async Task<WohnungEntry> Add(WohnungEntry entry)
         {
             var entity = new Wohnung(entry.Bezeichnung, entry.Wohnflaeche, entry.Nutzflaeche, entry.Einheiten)
             {
-                Besitzer = Ctx.Kontakte.Find(entry.Besitzer!.Id)!
+                Besitzer = await Ctx.Kontakte.FindAsync(entry.Besitzer!.Id)!
             };
 
             SetOptionalValues(entity, entry);
@@ -80,12 +103,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new WohnungEntry(entity);
         }
 
-        public IActionResult Put(int id, WohnungEntry entry)
+        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, WohnungEntry entry)
         {
-            var entity = Ctx.Wohnungen.Find(id);
+            var entity = await Ctx.Wohnungen.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
+            }
+
+            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Update]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
             }
 
             try
@@ -98,13 +127,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private WohnungEntry Update(WohnungEntry entry, Wohnung entity)
+        private async Task<WohnungEntry> Update(WohnungEntry entry, Wohnung entity)
         {
             entity.Bezeichnung = entry.Bezeichnung;
             entity.Wohnflaeche = entry.Wohnflaeche;
             entity.Nutzflaeche = entry.Nutzflaeche;
             entity.Nutzeinheit = entry.Einheiten;
-            entity.Besitzer = Ctx.Kontakte.Find(entry.Besitzer!.Id)!;
+            entity.Besitzer = await Ctx.Kontakte.FindAsync(entry.Besitzer!.Id)!;
 
             SetOptionalValues(entity, entry);
             Ctx.Wohnungen.Update(entity);
