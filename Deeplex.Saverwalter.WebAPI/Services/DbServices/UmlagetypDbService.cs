@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -122,7 +121,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             var allAuthorized = entity.Umlagen
                 .SelectMany(entity => entity.Wohnungen)
-                .Select(async wohnung => (await Auth.AuthorizeAsync(user, wohnung, [Operations.Delete])).Succeeded);
+                .Select(async wohnung => (await Auth.AuthorizeAsync(user, wohnung, [Operations.Update])).Succeeded);
             if (!(await Task.WhenAll(allAuthorized)).All(result => result))
             {
                 return new ForbidResult();

@@ -111,6 +111,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
+            var authRx = await Auth.AuthorizeAsync(user, entity.Wohnung, [Operations.Update]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
+            }
+
             try
             {
                 return new OkObjectResult(Update(entry, entity));

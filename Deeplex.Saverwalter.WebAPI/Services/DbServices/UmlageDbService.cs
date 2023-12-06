@@ -133,7 +133,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
 
             var allAuthorized = entity.Wohnungen
-                .Select(async wohnung => (await Auth.AuthorizeAsync(user, wohnung, [Operations.Delete])).Succeeded);
+                .Select(async wohnung => (await Auth.AuthorizeAsync(user, wohnung, [Operations.Update])).Succeeded);
             if (!(await Task.WhenAll(allAuthorized)).All(result => result))
             {
                 return new ForbidResult();

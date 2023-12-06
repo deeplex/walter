@@ -1,24 +1,44 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class BetriebskostenrechnungDbService : IControllerService<BetriebskostenrechnungEntry>
+    public class BetriebskostenrechnungDbService : ICRUDService<BetriebskostenrechnungEntry>
     {
         public SaverwalterContext Ctx { get; }
+        private readonly IAuthorizationService Auth;
 
-        public BetriebskostenrechnungDbService(SaverwalterContext ctx)
+        public BetriebskostenrechnungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
         {
             Ctx = ctx;
+            Auth = authorizationService;
         }
 
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
         {
-            var entity = Ctx.Betriebskostenrechnungen.Find(id);
+            var entity = await Ctx.Betriebskostenrechnungen.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
+            }
+
+            var wohnungen = entity.Umlage.Wohnungen;
+            var success = false;
+            foreach (var wohnung in wohnungen)
+            {
+                var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.Read]);
+                if (authRx.Succeeded)
+                {
+                    success = true;
+                    break;
+                }
+            }
+            if (!success)
+            {
+                return new ForbidResult();
             }
 
             try
@@ -32,12 +52,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = Ctx.Betriebskostenrechnungen.Find(id);
+            var entity = await Ctx.Betriebskostenrechnungen.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
+            }
+
+            var allAuthorized = entity.Umlage.Wohnungen
+                .Select(async wohnung => (await Auth.AuthorizeAsync(user, wohnung, [Operations.Delete])).Succeeded);
+            if (!(await Task.WhenAll(allAuthorized)).All(result => result))
+            {
+                return new ForbidResult();
             }
 
             Ctx.Betriebskostenrechnungen.Remove(entity);
@@ -46,7 +73,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public IActionResult Post(BetriebskostenrechnungEntry entry)
+        public async Task<IActionResult> Post(ClaimsPrincipal user, BetriebskostenrechnungEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -55,6 +82,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
+                var allAuthorized = (await Ctx.Umlagen.FindAsync(entry.Umlage!.Id))!
+                    .Wohnungen
+                    .Select(async wohnung => (await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate])).Succeeded);
+                if (allAuthorized == null ||
+                    !(await Task.WhenAll(allAuthorized)).All(result => result))
+                {
+                    return new ForbidResult();
+                }
+
                 return new OkObjectResult(Add(entry));
             }
             catch
@@ -63,13 +99,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private BetriebskostenrechnungEntry Add(BetriebskostenrechnungEntry entry)
+        private async Task<BetriebskostenrechnungEntry> Add(BetriebskostenrechnungEntry entry)
         {
             if (entry.Umlage == null)
             {
                 throw new ArgumentException("entry.Umlage can't be null.");
             }
-            var umlage = Ctx.Umlagen.Find(entry.Umlage.Id);
+            var umlage = await Ctx.Umlagen.FindAsync(entry.Umlage.Id);
             if (umlage == null)
             {
                 throw new ArgumentException($"Did not find Umlage with Id {entry.Umlage.Id}");
@@ -86,12 +122,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new BetriebskostenrechnungEntry(entity);
         }
 
-        public IActionResult Put(int id, BetriebskostenrechnungEntry entry)
+        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, BetriebskostenrechnungEntry entry)
         {
-            var entity = Ctx.Betriebskostenrechnungen.Find(id);
+            var entity = await Ctx.Betriebskostenrechnungen.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
+            }
+
+            var allAuthorized = entity.Umlage.Wohnungen
+                .Select(async wohnung => (await Auth.AuthorizeAsync(user, wohnung, [Operations.Update])).Succeeded);
+            if (!(await Task.WhenAll(allAuthorized)).All(result => result))
+            {
+                return new ForbidResult();
             }
 
             try
@@ -104,7 +147,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private BetriebskostenrechnungEntry Update(BetriebskostenrechnungEntry entry, Betriebskostenrechnung entity)
+        private async Task<BetriebskostenrechnungEntry> Update(BetriebskostenrechnungEntry entry, Betriebskostenrechnung entity)
         {
             entity.Betrag = entry.Betrag;
             entity.Datum = entry.Datum;
@@ -113,7 +156,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 throw new ArgumentException("entry has no Umlage");
             }
-            var umlage = Ctx.Umlagen.Find(entry.Umlage.Id);
+            var umlage = await Ctx.Umlagen.FindAsync(entry.Umlage.Id);
             if (umlage == null)
             {
                 throw new ArgumentException($"entry has no Umlage with Id {entry.Umlage.Id}");
