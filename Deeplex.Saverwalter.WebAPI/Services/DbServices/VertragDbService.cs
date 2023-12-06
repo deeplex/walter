@@ -96,7 +96,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             var wohnung = await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id);
             var entity = new Vertrag() { Wohnung = wohnung! };
 
-            SetOptionalValues(entity, entry);
+            await SetOptionalValues(entity, entry);
             Ctx.Vertraege.Add(entity);
             Ctx.SaveChanges();
 
