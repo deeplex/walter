@@ -58,7 +58,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new ForbidResult();
             }
 
-
             Ctx.Wohnungen.Remove(entity);
             Ctx.SaveChanges();
 
@@ -74,14 +73,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var wohnung = await Ctx.ZaehlerSet.FindAsync(entry.Id);
-                var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate]);
-                if (!authRx.Succeeded)
-                {
-                    return new ForbidResult();
-                }
-
-                return new OkObjectResult(Add(entry));
+                var newEntry = await Add(entry);
+                return new OkObjectResult(newEntry);
             }
             catch
             {

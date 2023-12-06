@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
@@ -84,18 +85,19 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             _logger = logger;
         }
         [HttpGet]
-        public IActionResult Get() => new OkObjectResult(DbService.Ctx.Wohnungen
+        public async Task<IActionResult> Get() => new OkObjectResult(DbService.Ctx.Wohnungen
             .ToList()
             .Select(e => new WohnungEntryBase(e))
             .ToList());
         [HttpPost]
-        public IActionResult Post([FromBody] WohnungEntry entry) => DbService.Post(entry);
+        [Authorize(Policy = "RequireOwner")]
+        public Task<IActionResult> Post([FromBody] WohnungEntry entry) => DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id) => DbService.Get(id);
+        public Task<IActionResult> Get(int id) => DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public IActionResult Put(int id, WohnungEntry entry) => DbService.Put(id, entry);
+        public Task<IActionResult> Put(int id, WohnungEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id) => DbService.Delete(id);
+        public Task<IActionResult> Delete(int id) => DbService.Delete(User!, id);
     }
 }

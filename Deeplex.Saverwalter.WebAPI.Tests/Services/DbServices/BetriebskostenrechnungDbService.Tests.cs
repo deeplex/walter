@@ -1,8 +1,11 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 
@@ -11,18 +14,19 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class BetriebskostenrechnungDbServiceTests
     {
         [Fact]
-        public void GetTest()
+        public async Task GetTest()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var service = new BetriebskostenrechnungDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new BetriebskostenrechnungDbService(ctx, auth);
 
-            var result = service.Get(
-                vertrag.
-                Wohnung.
-                Umlagen.First().
-                Betriebskostenrechnungen.First().
-                BetriebskostenrechnungId);
+            var result = await service.Get(
+                user,
+                vertrag.Wohnung.Umlagen.First().Betriebskostenrechnungen.First().BetriebskostenrechnungId);
 
             result.Should().BeOfType<OkObjectResult>();
             var okResult = (OkObjectResult)result;
@@ -30,28 +34,36 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public void DeleteTest()
+        public async Task DeleteTest()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var service = new BetriebskostenrechnungDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new BetriebskostenrechnungDbService(ctx, auth);
             var id = vertrag.
                 Wohnung.
                 Umlagen.First().
                 Betriebskostenrechnungen.First().
                 BetriebskostenrechnungId;
 
-            var result = service.Delete(id);
+            var result = await service.Delete(user, id);
 
             result.Should().BeOfType<OkResult>();
             ctx.Betriebskostenrechnungen.Find(id).Should().BeNull();
         }
 
         [Fact]
-        public void PostTest()
+        public async Task PostTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new BetriebskostenrechnungDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new BetriebskostenrechnungDbService(ctx, auth);
             var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
             {
                 Typ = new Umlagetyp("Dachrinnenreinigung")
@@ -64,16 +76,20 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             var entry = new BetriebskostenrechnungEntry(entity);
 
-            var result = service.Post(entry);
+            var result = await service.Post(user, entry);
 
             result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void PostFailedTest()
+        public async Task PostFailedTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new BetriebskostenrechnungDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new BetriebskostenrechnungDbService(ctx, auth);
             var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
             {
                 Typ = new Umlagetyp("Dachrinnenreinigung")
@@ -88,16 +104,20 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var entry = new BetriebskostenrechnungEntry(entity);
 
-            var result = service.Post(entry);
+            var result = await service.Post(user, entry);
 
             result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
-        public void PutTest()
+        public async Task PutTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new BetriebskostenrechnungDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new BetriebskostenrechnungDbService(ctx, auth);
             var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
             {
                 Typ = new Umlagetyp("Dachrinnenreinigung")
@@ -111,7 +131,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var entry = new BetriebskostenrechnungEntry(entity);
             entry.Betrag = 2000;
 
-            var result = service.Put(entity.BetriebskostenrechnungId, entry);
+            var result = await service.Put(user, entity.BetriebskostenrechnungId, entry);
 
             result.Should().BeOfType<OkObjectResult>();
             var updatedEntity = ctx.Betriebskostenrechnungen.Find(entity.BetriebskostenrechnungId);
@@ -123,10 +143,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public void PutFailedTest()
+        public async Task PutFailedTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new BetriebskostenrechnungDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new BetriebskostenrechnungDbService(ctx, auth);
             var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
             {
                 Typ = new Umlagetyp("Dachrinnenreinigung")
@@ -139,7 +163,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Betriebskostenrechnungen.Add(entity);
             ctx.SaveChanges();
 
-            var result = service.Put(entity.BetriebskostenrechnungId + 312, entry);
+            var result = await service.Put(user, entity.BetriebskostenrechnungId + 312, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }

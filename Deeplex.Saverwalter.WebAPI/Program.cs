@@ -109,6 +109,11 @@ namespace Deeplex.Saverwalter.WebAPI
                 {
                     policy.RequireClaim(ClaimTypes.Role, [UserRole.Admin.ToString()]);
                 });
+
+                options.AddPolicy("RequireOwner", policy =>
+                {
+                    policy.RequireClaim(ClaimTypes.Role, [UserRole.Owner.ToString()]);
+                });
             });
 
             builder.Services.AddTransient(c => container.GetInstance<TokenService>());
@@ -185,7 +190,7 @@ namespace Deeplex.Saverwalter.WebAPI
                 using var tx = await dbContext.Database.BeginTransactionAsync();
 
                 var userService = container.GetInstance<UserService>();
-                var rootAccount = await userService.CreateUserAccount("root");
+                var rootAccount = await userService.CreateUserAccount("root", "root");
                 await userService.UpdateUserPassword(rootAccount, Encoding.UTF8.GetBytes(rootPassword));
 
                 await tx.CommitAsync();

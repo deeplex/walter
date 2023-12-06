@@ -99,7 +99,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             int hour,
             int minute,
             int second,
-            string expected)
+            string? expected)
         {
             DateTime? date = year != 0 ? new DateTime(year, month, day, hour, minute, second) : null;
             var s = date.Zeit();

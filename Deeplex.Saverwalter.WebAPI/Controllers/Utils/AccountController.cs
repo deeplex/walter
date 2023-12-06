@@ -82,6 +82,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         public class CreateRequest
         {
             public string Username { get; set; } = null!;
+            public string Name { get; set; } = null!;
             public string? Password { get; set; }
         }
 
@@ -97,7 +98,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 
             try
             {
-                var account = await _userService.CreateUserAccount(createRequest.Username);
+                var account = await _userService.CreateUserAccount(createRequest.Username, createRequest.Name);
                 if (createRequest.Password is string)
                 {
                     await _userService.UpdateUserPassword(account, Encoding.UTF8.GetBytes(createRequest.Password));

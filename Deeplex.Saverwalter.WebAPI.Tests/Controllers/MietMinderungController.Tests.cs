@@ -4,8 +4,10 @@ using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MietminderungController;
 
@@ -14,24 +16,30 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class MietminderungControllerTests
     {
         [Fact]
-        public void Get()
+        public async Task Get()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<MietminderungController>>();
-            var dbService = new MietminderungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new MietminderungDbService(ctx, auth);
             var controller = new MietminderungController(logger, dbService);
 
-            var result = controller.Get();
+            var result = await controller.Get();
 
             result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void Post()
+        public async Task Post()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<MietminderungController>>();
-            var dbService = new MietminderungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new MietminderungDbService(ctx, auth);
             var controller = new MietminderungController(logger, dbService);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
 
@@ -41,18 +49,21 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             var entry = new MietminderungEntryBase(entity);
 
-            var result = controller.Post(entry);
+            var result = await controller.Post(entry);
 
             result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetId()
+        public async Task GetId()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<MietminderungController>>();
-            var dbService = new MietminderungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new MietminderungDbService(ctx, auth);
             var controller = new MietminderungController(logger, dbService);
             var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1)
             {
@@ -66,18 +77,21 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 throw new NullReferenceException("Mietminderung is null");
             }
 
-            var result = controller.Get(vertrag.Mietminderungen.First().MietminderungId);
+            var result = await controller.Get(vertrag.Mietminderungen.First().MietminderungId);
 
             result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void Put()
+        public async Task Put()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<MietminderungController>>();
-            var dbService = new MietminderungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new MietminderungDbService(ctx, auth);
             var controller = new MietminderungController(logger, dbService);
             var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1)
             {
@@ -89,19 +103,22 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var entry = new MietminderungEntryBase(entity);
             entry.Ende = new DateOnly(2021, 1, 31);
 
-            var result = controller.Put(entity.MietminderungId, entry);
+            var result = await controller.Put(entity.MietminderungId, entry);
 
             result.Should().BeOfType<OkObjectResult>();
             vertrag.Mietminderungen.First().Ende.Should().Be(new DateOnly(2021, 1, 31));
         }
 
         [Fact]
-        public void Delete()
+        public async Task Delete()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<MietminderungController>>();
-            var dbService = new MietminderungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new MietminderungDbService(ctx, auth);
             var controller = new MietminderungController(logger, dbService);
             var entity = new Mietminderung(new DateOnly(2021, 1, 1), 0.1)
             {
@@ -112,7 +129,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var id = entity.MietminderungId;
 
-            var result = controller.Delete(id);
+            var result = await controller.Delete(id);
 
             result.Should().BeOfType<OkResult>();
             ctx.Mietminderungen.Find(id).Should().BeNull();

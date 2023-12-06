@@ -4,8 +4,10 @@ using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 
@@ -14,24 +16,30 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class BetriebskostenrechnungControllerTests
     {
         [Fact]
-        public void Get()
+        public async Task Get()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<BetriebskostenrechnungController>>();
-            var dbService = new BetriebskostenrechnungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new BetriebskostenrechnungDbService(ctx, auth);
             var controller = new BetriebskostenrechnungController(logger, dbService);
 
-            var result = controller.Get();
+            var result = await controller.Get();
 
             result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void Post()
+        public async Task Post()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<BetriebskostenrechnungController>>();
-            var dbService = new BetriebskostenrechnungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new BetriebskostenrechnungDbService(ctx, auth);
             var controller = new BetriebskostenrechnungController(logger, dbService);
 
             var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
@@ -46,18 +54,21 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             var entry = new BetriebskostenrechnungEntry(entity);
 
-            var result = controller.Post(entry);
+            var result = await controller.Post(entry);
 
             result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetId()
+        public async Task GetId()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<BetriebskostenrechnungController>>();
-            var dbService = new BetriebskostenrechnungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new BetriebskostenrechnungDbService(ctx, auth);
             var controller = new BetriebskostenrechnungController(logger, dbService);
 
             var entity = vertrag.Wohnung.Umlagen.First().Betriebskostenrechnungen.First();
@@ -66,18 +77,21 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 throw new NullReferenceException("Betriebskostenrechnung is null");
             }
 
-            var result = controller.Get(entity.BetriebskostenrechnungId);
+            var result = await controller.Get(entity.BetriebskostenrechnungId);
 
             result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void Put()
+        public async Task Put()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<BetriebskostenrechnungController>>();
-            var dbService = new BetriebskostenrechnungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new BetriebskostenrechnungDbService(ctx, auth);
             var controller = new BetriebskostenrechnungController(logger, dbService);
 
             var entity = vertrag.Wohnung.Umlagen.First().Betriebskostenrechnungen.First();
@@ -88,19 +102,22 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var entry = new BetriebskostenrechnungEntry(entity);
             entry.Betrag = 2000;
 
-            var result = controller.Put(entity.BetriebskostenrechnungId, entry);
+            var result = await controller.Put(entity.BetriebskostenrechnungId, entry);
 
             result.Should().BeOfType<OkObjectResult>();
             entity.Betrag.Should().Be(2000);
         }
 
         [Fact]
-        public void Delete()
+        public async Task Delete()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<BetriebskostenrechnungController>>();
-            var dbService = new BetriebskostenrechnungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new BetriebskostenrechnungDbService(ctx, auth);
             var controller = new BetriebskostenrechnungController(logger, dbService);
 
             var entity = vertrag.Wohnung.Umlagen.First().Betriebskostenrechnungen.First();
@@ -110,7 +127,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             }
             var id = entity.BetriebskostenrechnungId;
 
-            var result = controller.Delete(id);
+            var result = await controller.Delete(id);
 
             result.Should().BeOfType<OkResult>();
             ctx.Betriebskostenrechnungen.Find(id).Should().BeNull();

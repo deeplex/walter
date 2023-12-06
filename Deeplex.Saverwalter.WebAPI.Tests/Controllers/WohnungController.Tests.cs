@@ -4,8 +4,10 @@ using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
@@ -14,24 +16,30 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class WohnungControllerTests
     {
         [Fact]
-        public void Get()
+        public async Task Get()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<WohnungController>>();
-            var dbService = new WohnungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new WohnungDbService(ctx, auth);
             var controller = new WohnungController(logger, dbService);
 
-            var result = controller.Get();
+            var result = await controller.Get();
 
             result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void Post()
+        public async Task Post()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<WohnungController>>();
-            var dbService = new WohnungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new WohnungDbService(ctx, auth);
             var controller = new WohnungController(logger, dbService);
 
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
@@ -44,33 +52,39 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             var entry = new WohnungEntry(entity);
 
-            var result = controller.Post(entry);
+            var result = await controller.Post(entry);
 
             result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetId()
+        public async Task GetId()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<WohnungController>>();
-            var dbService = new WohnungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new WohnungDbService(ctx, auth);
             var controller = new WohnungController(logger, dbService);
 
             var entity = vertrag.Wohnung;
 
-            var result = controller.Get(entity.WohnungId);
+            var result = await controller.Get(entity.WohnungId);
 
             result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void Put()
+        public async Task Put()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<WohnungController>>();
-            var dbService = new WohnungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new WohnungDbService(ctx, auth);
             var controller = new WohnungController(logger, dbService);
 
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
@@ -85,25 +99,28 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var entry = new WohnungEntry(entity);
             entry.Wohnflaeche = 200;
 
-            var result = controller.Put(entity.WohnungId, entry);
+            var result = await controller.Put(entity.WohnungId, entry);
 
             result.Should().BeOfType<OkObjectResult>();
             entity.Wohnflaeche.Should().Be(200);
         }
 
         [Fact]
-        public void Delete()
+        public async Task Delete()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<WohnungController>>();
-            var dbService = new WohnungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new WohnungDbService(ctx, auth);
             var controller = new WohnungController(logger, dbService);
 
             var entity = vertrag.Wohnung;
             var id = entity.WohnungId;
 
-            var result = controller.Delete(id);
+            var result = await controller.Delete(id);
 
             result.Should().BeOfType<OkResult>();
             ctx.Wohnungen.Find(id).Should().BeNull();

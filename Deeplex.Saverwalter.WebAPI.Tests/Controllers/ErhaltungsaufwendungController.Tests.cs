@@ -4,8 +4,10 @@ using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
 
@@ -14,25 +16,31 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class ErhaltungsaufwendungControllerTests
     {
         [Fact]
-        public void Get()
+        public async Task Get()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<ErhaltungsaufwendungController>>();
-            var dbService = new ErhaltungsaufwendungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new ErhaltungsaufwendungDbService(ctx, auth);
             var controller = new ErhaltungsaufwendungController(logger, dbService);
 
-            var result = controller.Get();
+            var result = await controller.Get();
 
             result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void Post()
+        public async Task Post()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<ErhaltungsaufwendungController>>();
-            var dbService = new ErhaltungsaufwendungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new ErhaltungsaufwendungDbService(ctx, auth);
             var controller = new ErhaltungsaufwendungController(logger, dbService);
 
             var aussteller = new Kontakt("TestPerson", Rechtsform.gmbh);
@@ -46,18 +54,21 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             var entry = new ErhaltungsaufwendungEntry(entity);
 
-            var result = controller.Post(entry);
+            var result = await controller.Post(entry);
 
             result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetId()
+        public async Task GetId()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<ErhaltungsaufwendungController>>();
-            var dbService = new ErhaltungsaufwendungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new ErhaltungsaufwendungDbService(ctx, auth);
             var controller = new ErhaltungsaufwendungController(logger, dbService);
 
             var aussteller = new Kontakt("TestPerson", Rechtsform.gmbh);
@@ -72,18 +83,21 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Erhaltungsaufwendungen.Add(entity);
             ctx.SaveChanges();
 
-            var result = controller.Get(entity.ErhaltungsaufwendungId);
+            var result = await controller.Get(entity.ErhaltungsaufwendungId);
 
             result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void Put()
+        public async Task Put()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<ErhaltungsaufwendungController>>();
-            var dbService = new ErhaltungsaufwendungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new ErhaltungsaufwendungDbService(ctx, auth);
             var controller = new ErhaltungsaufwendungController(logger, dbService);
 
             var aussteller = new Kontakt("TestPerson", Rechtsform.gmbh);
@@ -101,19 +115,22 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var entry = new ErhaltungsaufwendungEntry(entity);
             entry.Betrag = 2000;
 
-            var result = controller.Put(entity.ErhaltungsaufwendungId, entry);
+            var result = await controller.Put(entity.ErhaltungsaufwendungId, entry);
 
             result.Should().BeOfType<OkObjectResult>();
             entry.Betrag.Should().Be(2000);
         }
 
         [Fact]
-        public void Delete()
+        public async Task Delete()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<ErhaltungsaufwendungController>>();
-            var dbService = new ErhaltungsaufwendungDbService(ctx);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new ErhaltungsaufwendungDbService(ctx, auth);
             var controller = new ErhaltungsaufwendungController(logger, dbService);
 
             var aussteller = new Kontakt("TestPerson", Rechtsform.gmbh);
@@ -129,7 +146,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.SaveChanges();
             var id = entity.ErhaltungsaufwendungId;
 
-            var result = controller.Delete(id);
+            var result = await controller.Delete(id);
 
             result.Should().BeOfType<OkResult>();
             ctx.Erhaltungsaufwendungen.Find(id).Should().BeNull();

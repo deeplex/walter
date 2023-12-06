@@ -42,7 +42,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 request.Content = content;
                 new FileExtensionContentTypeProvider()
                     .TryGetContentType(Path.GetExtension(path), out string? contentType);
-                content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+                if (contentType != null)
+                {
+                    content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+                }
             }
 
             var response = await httpClient.SendAsync(request, CancellationToken.None);

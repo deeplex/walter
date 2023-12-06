@@ -1,8 +1,11 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragVersionController;
 
@@ -11,14 +14,18 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class VertragVersionDbServiceTests
     {
         [Fact]
-        public void GetTest()
+        public async Task GetTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new VertragVersionDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new VertragVersionDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity = vertrag.Versionen.First();
 
-            var result = service.Get(entity.VertragVersionId);
+            var result = await service.Get(user, entity.VertragVersionId);
 
             result.Should().BeOfType<OkObjectResult>();
             var okResult = (OkObjectResult)result;
@@ -26,24 +33,32 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public void DeleteTest()
+        public async Task DeleteTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new VertragVersionDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new VertragVersionDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity = vertrag.Versionen.First();
 
-            var result = service.Delete(entity.VertragVersionId);
+            var result = await service.Delete(user, entity.VertragVersionId);
 
             result.Should().BeOfType<OkResult>();
             ctx.VertragVersionen.Find(entity.VertragVersionId).Should().BeNull();
         }
 
         [Fact]
-        public void PostTest()
+        public async Task PostTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new VertragVersionDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new VertragVersionDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity = new VertragVersion(new DateOnly(2021, 6, 30), 1000, 2)
             {
@@ -51,37 +66,45 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             var entry = new VertragVersionEntryBase(entity);
 
-            var result = service.Post(entry);
+            var result = await service.Post(user, entry);
 
             result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void PostFailedTest()
+        public async Task PostFailedTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new VertragVersionDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new VertragVersionDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity = vertrag.Versionen.First();
             var entry = new VertragVersionEntryBase(entity);
 
-            var result = service.Post(entry);
+            var result = await service.Post(user, entry);
 
             result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
-        public void PutTest()
+        public async Task PutTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new VertragVersionDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new VertragVersionDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity = vertrag.Versionen.First();
 
             var entry = new VertragVersionEntryBase(entity);
             entry.Personenzahl = 2;
 
-            var result = service.Put(entity.VertragVersionId, entry);
+            var result = await service.Put(user, entity.VertragVersionId, entry);
 
             result.Should().BeOfType<OkObjectResult>();
             var updatedEntity = ctx.VertragVersionen.Find(entity.VertragVersionId);
@@ -93,16 +116,20 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public void PutFailedTest()
+        public async Task PutFailedTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new VertragVersionDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new VertragVersionDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity = vertrag.Versionen.First();
             var entry = new VertragVersionEntryBase(entity);
             entry.Personenzahl = 2;
 
-            var result = service.Put(entity.VertragVersionId + 20, entry);
+            var result = await service.Put(user, entity.VertragVersionId + 20, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }

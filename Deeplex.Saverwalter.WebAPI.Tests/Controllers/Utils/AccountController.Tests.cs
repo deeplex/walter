@@ -23,6 +23,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 var result = await controller.Create(new CreateRequest
                 {
                     Username = "create_user_test",
+                    Name = "Mister Test",
                     Password = "test"
                 });
 
@@ -41,13 +42,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var _ = await controller.Create(new CreateRequest
             {
-                Username = "test",
+                Username = "test1",
+                Name = "Miss Test",
                 Password = "test"
             });
 
             var result = await controller.SignIn(new SignInRequest
             {
-                Username = "test",
+                Username = "test1",
                 Password = "test"
             });
 
@@ -64,13 +66,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var _ = await controller.Create(new CreateRequest
             {
-                Username = "test",
+                Username = "test2",
                 Password = "test"
             });
 
             var result = await controller.SignIn(new SignInRequest
             {
-                Username = "test",
+                Username = "test2",
                 Password = "test2"
             });
 

@@ -69,19 +69,19 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
             => new OkObjectResult(DbService.Ctx.Adressen
             .ToList()
             .Select(e => new AdresseEntryBase(e))
             .ToList());
         [HttpPost]
-        public IActionResult Post([FromBody] AdresseEntry entry) => DbService.Post(entry);
+        public Task<IActionResult> Post([FromBody] AdresseEntry entry) => DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id) => DbService.Get(id);
+        public Task<IActionResult> Get(int id) => DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public IActionResult Put(int id, AdresseEntry entry) => DbService.Put(id, entry);
+        public Task<IActionResult> Put(int id, AdresseEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id) => DbService.Delete(id);
+        public Task<IActionResult> Delete(int id) => DbService.Delete(User!, id);
     }
 }

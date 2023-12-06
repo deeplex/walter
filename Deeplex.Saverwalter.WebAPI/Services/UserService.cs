@@ -56,9 +56,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             return new SignInResult { Succeeded = true, Account = account, SessionToken = token };
         }
 
-        public async Task<UserAccount> CreateUserAccount(string username)
+        public async Task<UserAccount> CreateUserAccount(string username, string name)
         {
-            var account = new UserAccount { Username = username };
+            var account = new UserAccount { Username = username, Name = name };
             walterContext.UserAccounts.Add(account);
             await walterContext.SaveChangesAsync();
             return account;
