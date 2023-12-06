@@ -1,24 +1,35 @@
 ﻿using Deeplex.Saverwalter.Model;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MietminderungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class MietminderungDbService : IControllerService<MietminderungEntryBase>
+    public class MietminderungDbService : ICRUDService<MietminderungEntryBase>
     {
         public SaverwalterContext Ctx { get; }
+        private readonly IAuthorizationService Auth;
 
-        public MietminderungDbService(SaverwalterContext ctx)
+        public MietminderungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
         {
             Ctx = ctx;
+            Auth = authorizationService;
         }
 
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
         {
-            var entity = Ctx.Mietminderungen.Find(id);
+            var entity = await Ctx.Mietminderungen.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
+            }
+
+            var authRx = await Auth.AuthorizeAsync(user, entity.Vertrag.Wohnung, [Operations.Read]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
             }
 
             try
@@ -32,12 +43,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = Ctx.Mietminderungen.Find(id);
+            var entity = await Ctx.Mietminderungen.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
+            }
+
+            var authRx = await Auth.AuthorizeAsync(user, entity.Vertrag.Wohnung, [Operations.Delete]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
             }
 
             Ctx.Mietminderungen.Remove(entity);
@@ -46,7 +63,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public IActionResult Post(MietminderungEntryBase entry)
+        public async Task<IActionResult> Post(ClaimsPrincipal user, MietminderungEntryBase entry)
         {
             if (entry.Id != 0)
             {
@@ -55,6 +72,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
+                var wohnung = (await Ctx.Vertraege.FindAsync(entry.Vertrag!.Id))?.Wohnung;
+                var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate]);
+                if (!authRx.Succeeded)
+                {
+                    return new ForbidResult();
+                }
+
                 return new OkObjectResult(Add(entry));
             }
             catch
@@ -63,9 +87,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private MietminderungEntryBase Add(MietminderungEntryBase entry)
+        private async Task<MietminderungEntryBase> Add(MietminderungEntryBase entry)
         {
-            var vertrag = Ctx.Vertraege.Find(entry.Vertrag.Id);
+            var vertrag = await Ctx.Vertraege.FindAsync(entry.Vertrag.Id);
             var entity = new Mietminderung(entry.Beginn, entry.Minderung)
             {
                 Vertrag = vertrag!
@@ -78,12 +102,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new MietminderungEntryBase(entity);
         }
 
-        public IActionResult Put(int id, MietminderungEntryBase entry)
+        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, MietminderungEntryBase entry)
         {
-            var entity = Ctx.Mietminderungen.Find(id);
+            var entity = await Ctx.Mietminderungen.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
+            }
+
+            var authRx = await Auth.AuthorizeAsync(user, entity.Vertrag.Wohnung, [Operations.Update]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
             }
 
             try
