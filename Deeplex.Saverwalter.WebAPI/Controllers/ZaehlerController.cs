@@ -75,9 +75,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
-            => new OkObjectResult(DbService.Ctx.ZaehlerSet.ToList().Select(e
-                => new ZaehlerEntryBase(e)).ToList());
+        public Task<IActionResult> Get() => DbService.GetList(User!);
+
         [HttpPost]
         public Task<IActionResult> Post([FromBody] ZaehlerEntry entry) => DbService.Post(User!, entry);
 

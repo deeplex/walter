@@ -1,6 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Model.Auth;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using System.Security.Claims;

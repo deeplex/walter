@@ -1,6 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
 {

@@ -84,11 +84,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             DbService = dbService;
             _logger = logger;
         }
+
         [HttpGet]
-        public async Task<IActionResult> Get() => new OkObjectResult(DbService.Ctx.Wohnungen
-            .ToList()
-            .Select(e => new WohnungEntryBase(e))
-            .ToList());
+        public Task<IActionResult> Get() => DbService.GetList(User!);
+
         [HttpPost]
         [Authorize(Policy = "RequireOwner")]
         public Task<IActionResult> Post([FromBody] WohnungEntry entry) => DbService.Post(User!, entry);

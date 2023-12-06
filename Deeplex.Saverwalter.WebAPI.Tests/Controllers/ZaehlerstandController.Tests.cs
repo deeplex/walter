@@ -7,7 +7,6 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Security.Claims;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
 
@@ -87,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<ZaehlerstandController>>();
-                        var auth = A.Fake<IAuthorizationService>();
+            var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ZaehlerstandDbService(ctx, auth);

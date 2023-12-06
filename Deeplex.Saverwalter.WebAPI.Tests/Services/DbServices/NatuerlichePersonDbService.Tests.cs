@@ -1,7 +1,6 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
-using DocumentFormat.OpenXml.Spreadsheet;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;

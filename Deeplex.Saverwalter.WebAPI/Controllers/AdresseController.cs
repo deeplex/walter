@@ -69,11 +69,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
-            => new OkObjectResult(DbService.Ctx.Adressen
-            .ToList()
-            .Select(e => new AdresseEntryBase(e))
-            .ToList());
+        public Task<IActionResult> Get() => DbService.GetList(User!);
+
         [HttpPost]
         public Task<IActionResult> Post([FromBody] AdresseEntry entry) => DbService.Post(User!, entry);
 

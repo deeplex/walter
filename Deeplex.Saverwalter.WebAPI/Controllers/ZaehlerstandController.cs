@@ -1,5 +1,4 @@
 ﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
@@ -52,10 +51,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public Task<IActionResult> Post([FromBody] ZaehlerstandEntryBase entry) => DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
-        public  Task<IActionResult> Get(int id) => DbService.Get(User!, id);
+        public Task<IActionResult> Get(int id) => DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public  Task<IActionResult> Put(int id, ZaehlerstandEntryBase entry) => DbService.Put(User!, id, entry);
+        public Task<IActionResult> Put(int id, ZaehlerstandEntryBase entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
-        public  Task<IActionResult> Delete(int id) => DbService.Delete(User!, id);
+        public Task<IActionResult> Delete(int id) => DbService.Delete(User!, id);
     }
 }

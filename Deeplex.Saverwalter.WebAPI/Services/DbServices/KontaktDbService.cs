@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
@@ -20,6 +21,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Auth = authorizationService;
         }
 
+        public async Task<IActionResult> GetList()
+        {
+            var list = await Ctx.Kontakte.ToListAsync();
+            return new OkObjectResult(list.Select(e => new KontaktEntryBase(e)).ToList());
+        }
+
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
         {
             var entity = await Ctx.Kontakte.FindAsync(id);
@@ -27,13 +34,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 return new NotFoundResult();
             }
-
-            // TODO: Who can see the contact?
-            //var authRx = await Auth.AuthorizeAsync(user, entity.Vertrag.Wohnung, [Operations.Read]);
-            //if (!authRx.Succeeded)
-            //{
-            //    return new ForbidResult();
-            //}
 
             try
             {

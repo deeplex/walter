@@ -67,11 +67,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
-            => new OkObjectResult(DbService.Ctx.Betriebskostenrechnungen
-            .ToList()
-            .Select(e => new BetriebskostenrechnungEntryBase(e))
-            .ToList());
+        public Task<IActionResult> Get() => DbService.GetList(User!);
+
         [HttpPost]
         public Task<IActionResult> Post([FromBody] BetriebskostenrechnungEntry entry) => DbService.Post(User!, entry);
 

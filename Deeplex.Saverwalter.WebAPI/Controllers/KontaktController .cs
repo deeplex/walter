@@ -1,7 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
@@ -99,7 +98,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get() => new OkObjectResult(DbService.Ctx.Kontakte.ToList().Select(e => new KontaktEntryBase(e)).ToList());
+        public Task<IActionResult> Get() => DbService.GetList();
         [HttpPost]
         public Task<IActionResult> Post([FromBody] KontaktEntry entry) => DbService.Post(User!, entry);
 

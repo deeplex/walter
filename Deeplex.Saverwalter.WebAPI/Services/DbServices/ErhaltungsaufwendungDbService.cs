@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
 
@@ -15,6 +16,23 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             Ctx = ctx;
             Auth = authorizationService;
+        }
+
+        private Task<List<Erhaltungsaufwendung>> GetListForUser(ClaimsPrincipal user)
+        {
+            Guid.TryParse(user.FindAll(ClaimTypes.NameIdentifier).SingleOrDefault()?.Value, out Guid guid);
+            return Ctx.Erhaltungsaufwendungen
+                .Where(e => e.Wohnung.Verwalter.Any(v => v.UserAccount.Id == guid))
+                .ToListAsync();
+        }
+
+        public async Task<IActionResult> GetList(ClaimsPrincipal user)
+        {
+            var list = await (user.IsInRole("Admin")
+                ? Ctx.Erhaltungsaufwendungen.ToListAsync()
+                : GetListForUser(user));
+
+            return new OkObjectResult(list.Select(e => new ErhaltungsaufwendungEntryBase(e)).ToList());
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)

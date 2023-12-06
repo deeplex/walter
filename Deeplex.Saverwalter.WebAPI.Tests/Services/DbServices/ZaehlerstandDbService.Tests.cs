@@ -1,14 +1,13 @@
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
-using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
-using Xunit;
 using FakeItEasy;
-using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
+using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Xunit;
+using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {

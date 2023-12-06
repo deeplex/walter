@@ -104,8 +104,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             DbService = dbService;
         }
 
+
         [HttpGet]
-        public async Task<IActionResult> Get() => new OkObjectResult(DbService.Ctx.Umlagen.ToList().Select(e => new UmlageEntryBase(e)).ToList());
+        public Task<IActionResult> Get() => DbService.GetList(User!);
+
         [HttpPost]
         public Task<IActionResult> Post([FromBody] UmlageEntry entry) => DbService.Post(User!, entry);
 

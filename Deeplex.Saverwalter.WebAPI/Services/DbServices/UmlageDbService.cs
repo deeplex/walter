@@ -1,6 +1,7 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
@@ -16,6 +17,23 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             Ctx = dbService;
             Auth = authorizationService;
+        }
+
+        private Task<List<Umlage>> GetListForUser(ClaimsPrincipal user)
+        {
+            Guid.TryParse(user.FindAll(ClaimTypes.NameIdentifier).SingleOrDefault()?.Value, out Guid guid);
+            return Ctx.Umlagen
+                    .Where(e => e.Wohnungen.Any(w => w.Verwalter.Any(v => v.UserAccount.Id == guid)))
+                    .ToListAsync();
+        }
+
+        public async Task<IActionResult> GetList(ClaimsPrincipal user)
+        {
+            List<Umlage> list = await (user.IsInRole("Admin")
+                ? Ctx.Umlagen.ToListAsync()
+                : GetListForUser(user));
+
+            return new OkObjectResult(list.Select(e => new UmlageEntryBase(e)).ToList());
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)

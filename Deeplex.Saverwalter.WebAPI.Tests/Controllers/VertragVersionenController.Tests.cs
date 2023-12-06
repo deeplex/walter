@@ -7,7 +7,6 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Security.Claims;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragVersionController;
 

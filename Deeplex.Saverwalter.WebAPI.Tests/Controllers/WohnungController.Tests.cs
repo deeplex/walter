@@ -5,6 +5,7 @@ using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
@@ -25,6 +26,9 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new WohnungDbService(ctx, auth);
             var controller = new WohnungController(logger, dbService);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
 
             var result = await controller.Get();
 
