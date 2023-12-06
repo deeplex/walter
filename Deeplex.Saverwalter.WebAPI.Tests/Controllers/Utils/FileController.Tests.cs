@@ -1,4 +1,4 @@
-using Deeplex.Saverwalter.ModelTests;
+﻿using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using FakeItEasy;
 using FluentAssertions;

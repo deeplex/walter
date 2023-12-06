@@ -1,8 +1,8 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 {

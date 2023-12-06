@@ -1,7 +1,7 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using System.Security.Claims;
+using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
-using System.Security.Claims;
 
 namespace Deeplex.Saverwalter.WebAPI.Services
 {

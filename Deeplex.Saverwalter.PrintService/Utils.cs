@@ -1,4 +1,8 @@
-﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 
 namespace Deeplex.Saverwalter.PrintService
@@ -81,7 +85,7 @@ namespace Deeplex.Saverwalter.PrintService
         public const string GenerischerTextFinalPart
             = "Bei bestehenden Mietrückständen ist das Ergebnis der Abrechnung zusätzlich mit den Mietrückständen verrechnet. Gegebenenfalls bestehende Mietminderungen / Ratenzahlungsvereinbarungen sind hier nicht berücksichtigt, haben aber weiterhin für den vereinbarten Zeitraum Bestand. Aufgelöste oder gekündigte Mietverhältnisse werden durch dieses Schreiben nicht neu begründet. Die Aufstellung, Verteilung und Erläuterung der Gesamtkosten, die Berechnung der Kostenanteile, die Verrechnung der geleisteten Vorauszahlungen und gegebenenfalls die Neuberechnung der monatlichen Vorauszahlungen entnehmen Sie bitte den folgenden Seiten.";
 
-        public static string GenerischerText(Wohnung wohnung, List<Abrechnungseinheit> einheiten, Zeitraum zeitraum, List<Note> notes)
+        public static string GenerischerText(List<Abrechnungseinheit> einheiten)
         {
             // TODO Text auf Anwesenheit von Heizung oder so testen und anpassen.
 

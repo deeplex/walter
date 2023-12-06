@@ -1,3 +1,5 @@
+﻿using System.Security.Claims;
+using System.Text;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.WebAPI.Services;
@@ -12,8 +14,6 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
-using System.Security.Claims;
-using System.Text;
 
 [assembly: ApiController]
 

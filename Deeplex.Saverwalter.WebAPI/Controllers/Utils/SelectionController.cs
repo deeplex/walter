@@ -1,4 +1,8 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
@@ -195,13 +199,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
         {
             var list = Ctx.Vertraege
                 .ToList()
-                .Select(vertrag => new SelectionEntry(vertrag.VertragId, GetVertragName(vertrag, Ctx), null))
+                .Select(vertrag => new SelectionEntry(vertrag.VertragId, GetVertragName(vertrag), null))
                 .ToList();
 
             return new OkObjectResult(list);
         }
 
-        private static string GetVertragName(Vertrag vertrag, SaverwalterContext ctx)
+        private static string GetVertragName(Vertrag vertrag)
         {
             var wohnung = $"{vertrag.Wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift"} - {vertrag.Wohnung.Bezeichnung}";
             var mieterList = vertrag.Mieter.Select(person => person.Bezeichnung);

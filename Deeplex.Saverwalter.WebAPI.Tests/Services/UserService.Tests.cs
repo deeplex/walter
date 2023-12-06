@@ -1,9 +1,9 @@
+﻿using System.Text;
 using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Services;
 using FakeItEasy;
 using FluentAssertions;
-using System.Text;
 using Xunit;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests

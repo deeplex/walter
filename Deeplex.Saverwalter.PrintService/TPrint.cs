@@ -1,4 +1,8 @@
-﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml;
 using static Deeplex.Saverwalter.BetriebskostenabrechnungService.Utils;
@@ -815,7 +819,7 @@ namespace Deeplex.Saverwalter.PrintService
                 new PrintRun(Euro(Math.Abs(abrechnung.Result))) { Bold = true, Underlined = true },
                 new PrintRun(RefundDemand(abrechnung.Result)));
 
-            p.Paragraph(new PrintRun(GenerischerText(abrechnung.Vertrag.Wohnung, abrechnung.Abrechnungseinheiten, abrechnung.Zeitraum, abrechnung.Notes)));
+            p.Paragraph(new PrintRun(GenerischerText(abrechnung.Abrechnungseinheiten)));
         }
 
         public static T Print(Betriebskostenabrechnung abrechnung, IPrint<T> printImpl)

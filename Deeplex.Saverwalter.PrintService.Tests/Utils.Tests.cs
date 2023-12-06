@@ -108,7 +108,7 @@ namespace Deeplex.Saverwalter.PrintService.Tests
         [InlineData("Test", "Mustername", Anrede.Frau, "Frau Mustername Test", Rechtsform.natuerlich)]
         [InlineData("Test", null, Anrede.Keine, "Test", Rechtsform.natuerlich)]
         [InlineData("Test", "Mustername", Anrede.Keine, "Mustername Test", Rechtsform.natuerlich)]
-        public void GetBriefAnredeTestNatuerlichePerson(string nachname, string vorname, Anrede anrede, string result, Rechtsform rechtsform)
+        public void GetBriefAnredeTestNatuerlichePerson(string nachname, string? vorname, Anrede anrede, string result, Rechtsform rechtsform)
         {
             var person = new Kontakt(nachname, rechtsform)
             {

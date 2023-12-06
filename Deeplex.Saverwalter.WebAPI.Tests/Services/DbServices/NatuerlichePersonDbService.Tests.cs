@@ -1,3 +1,4 @@
+﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
@@ -5,7 +6,6 @@ using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 

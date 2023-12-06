@@ -1,10 +1,14 @@
-﻿using Deeplex.Saverwalter.InitiateTestDbs.Templates;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Deeplex.Saverwalter.InitiateTestDbs.Templates;
 
 namespace Deeplex.Saverwalter.InitiateTestDbs
 {
     internal class Program
     {
-        static async Task Main(string[] args)
+        static async Task Main()
         {
             var databaseUser = Environment.GetEnvironmentVariable("DATABASE_USER");
             if (databaseUser == null)

@@ -1,8 +1,8 @@
-﻿using Deeplex.Saverwalter.Model.model;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Security.Claims;
+using Deeplex.Saverwalter.Model.model;
+using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.Model.Auth
 {

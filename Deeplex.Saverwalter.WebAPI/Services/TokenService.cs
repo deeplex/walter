@@ -1,7 +1,7 @@
-﻿using Deeplex.Saverwalter.Model.Auth;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using Deeplex.Saverwalter.Model.Auth;
 
 namespace Deeplex.Saverwalter.WebAPI.Services
 {

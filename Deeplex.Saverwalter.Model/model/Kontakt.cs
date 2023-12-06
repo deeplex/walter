@@ -1,6 +1,6 @@
-﻿using Deeplex.Saverwalter.Model.Auth;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Deeplex.Saverwalter.Model.Auth;
 
 namespace Deeplex.Saverwalter.Model
 {

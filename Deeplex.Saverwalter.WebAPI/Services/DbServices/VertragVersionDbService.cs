@@ -1,7 +1,7 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using System.Security.Claims;
+using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragVersionController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
