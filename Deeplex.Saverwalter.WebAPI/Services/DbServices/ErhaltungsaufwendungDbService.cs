@@ -1,24 +1,34 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class ErhaltungsaufwendungDbService : IControllerService<ErhaltungsaufwendungEntry>
+    public class ErhaltungsaufwendungDbService : ICRUDService<ErhaltungsaufwendungEntry>
     {
         public SaverwalterContext Ctx { get; }
+        private readonly IAuthorizationService Auth;
 
-        public ErhaltungsaufwendungDbService(SaverwalterContext ctx)
+        public ErhaltungsaufwendungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
         {
             Ctx = ctx;
+            Auth = authorizationService;
         }
 
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
         {
-            var entity = Ctx.Erhaltungsaufwendungen.Find(id);
+            var entity = await Ctx.Erhaltungsaufwendungen.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
+            }
+
+            var authRx = await Auth.AuthorizeAsync(user, entity.Wohnung, [Operations.Read]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
             }
 
             try
@@ -32,12 +42,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = Ctx.Erhaltungsaufwendungen.Find(id);
+            var entity = await Ctx.Erhaltungsaufwendungen.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
+            }
+
+            var authRx = await Auth.AuthorizeAsync(user, entity.Wohnung, [Operations.Delete]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
             }
 
             Ctx.Erhaltungsaufwendungen.Remove(entity);
@@ -46,7 +62,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public IActionResult Post(ErhaltungsaufwendungEntry entry)
+        public async Task<IActionResult> Post(ClaimsPrincipal user, ErhaltungsaufwendungEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -55,6 +71,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
+                var wohnung = (await Ctx.Vertraege.FindAsync(entry.Wohnung.Id));
+                var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate]);
+                if (!authRx.Succeeded)
+                {
+                    return new ForbidResult();
+                }
+
                 return new OkObjectResult(Add(entry));
             }
             catch
@@ -63,10 +86,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private ErhaltungsaufwendungEntry Add(ErhaltungsaufwendungEntry entry)
+        private async Task<ErhaltungsaufwendungEntry> Add(ErhaltungsaufwendungEntry entry)
         {
-            var aussteller = Ctx.Kontakte.Find(entry.Aussteller.Id)!;
-            var wohnung = Ctx.Wohnungen.Find(entry.Wohnung.Id)!;
+            var aussteller = (await Ctx.Kontakte.FindAsync(entry.Aussteller.Id))!;
+            var wohnung = (await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id))!;
             var entity = new Erhaltungsaufwendung(entry.Betrag, entry.Bezeichnung, entry.Datum)
             {
                 Aussteller = aussteller,
@@ -80,9 +103,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new ErhaltungsaufwendungEntry(entity);
         }
 
-        public IActionResult Put(int id, ErhaltungsaufwendungEntry entry)
+        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, ErhaltungsaufwendungEntry entry)
         {
-            var entity = Ctx.Erhaltungsaufwendungen.Find(id);
+            var entity = await Ctx.Erhaltungsaufwendungen.FindAsync(id);
             if (entity == null)
             {
                 return new NotFoundResult();
@@ -98,12 +121,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private ErhaltungsaufwendungEntry Update(ErhaltungsaufwendungEntry entry, Erhaltungsaufwendung entity)
+        private async Task<ErhaltungsaufwendungEntry> Update(ErhaltungsaufwendungEntry entry, Erhaltungsaufwendung entity)
         {
             entity.Betrag = entry.Betrag;
-            entity.Wohnung = Ctx.Wohnungen.Find(entry.Wohnung.Id)!;
+            entity.Wohnung = (await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id))!;
             entity.Bezeichnung = entry.Bezeichnung;
-            entity.Aussteller = Ctx.Kontakte.Find(entry.Aussteller.Id)!;
+            entity.Aussteller = (await Ctx.Kontakte.FindAsync(entry.Aussteller.Id))!;
             entity.Datum = entry.Datum;
 
             SetOptionalValues(entity, entry);
