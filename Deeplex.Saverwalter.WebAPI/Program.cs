@@ -52,10 +52,10 @@ namespace Deeplex.Saverwalter.WebAPI
             }
 
             app.UseAuthentication();
-            app.UseAuthorization();
 
             app.MapControllers();
             app.UseRouting();
+            app.UseAuthorization();
 
             app.UseStaticFiles();
             app.MapFallbackToFile("index.html");
@@ -145,6 +145,7 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<BetriebskostenabrechnungHandler>(Lifestyle.Scoped);
 
             container.Register<TokenService>(Lifestyle.Singleton);
+            container.Register<UserAccountDbService>(Lifestyle.Scoped);
             container.Register<UserService>(Lifestyle.Scoped);
 
             return container;
@@ -191,6 +192,7 @@ namespace Deeplex.Saverwalter.WebAPI
 
                 var userService = container.GetInstance<UserService>();
                 var rootAccount = await userService.CreateUserAccount("root", "root");
+                rootAccount.Role = UserRole.Admin;
                 await userService.UpdateUserPassword(rootAccount, Encoding.UTF8.GetBytes(rootPassword));
 
                 await tx.CommitAsync();

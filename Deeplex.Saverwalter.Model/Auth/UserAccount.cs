@@ -16,9 +16,9 @@ namespace Deeplex.Saverwalter.Model.Auth
         public string Name { get; set; } = default!;
         [Required]
         public UserRole Role { get; set; }
-        public virtual List<Verwalter> Verwalter { get; set; } = null!;
+        public virtual List<Verwalter> Verwalter { get; set; } = [];
 
-        public virtual List<Kontakt> Kontakte { get; set; } = null!;
+        public virtual List<Kontakt> Kontakte { get; set; } = [];
 
         public virtual Pbkdf2PasswordCredential? Pbkdf2PasswordCredential { get; set; }
         public virtual UserResetCredential? UserResetCredential { get; set; }

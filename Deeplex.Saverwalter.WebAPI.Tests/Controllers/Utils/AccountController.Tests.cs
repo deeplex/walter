@@ -1,4 +1,6 @@
-﻿using Deeplex.Saverwalter.ModelTests;
+﻿using System.Text;
+using Deeplex.Saverwalter.Model.Auth;
+using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services;
 using FakeItEasy;
@@ -12,27 +14,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class AccountControllerTests
     {
         [Fact]
-        public async void CreateUser()
-        {
-            using (var ctx = TestUtils.GetContext())
-            {
-                var tokenService = A.Fake<TokenService>();
-                var userService = new UserService(ctx, tokenService);
-                var controller = new AccountController(ctx, tokenService, userService);
-
-                var result = await controller.Create(new CreateRequest
-                {
-                    Username = "create_user_test",
-                    Name = "Mister Test",
-                    Password = "test"
-                });
-
-                result.Should().BeOfType<OkResult>();
-                ctx.UserAccounts.Last().Username.Should().Be("create_user_test");
-            }
-        }
-
-        [Fact]
         public async void SignInSuccess()
         {
             var ctx = TestUtils.GetContext();
@@ -40,12 +21,25 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var userService = new UserService(ctx, tokenService);
             var controller = new AccountController(ctx, tokenService, userService);
 
-            var _ = await controller.Create(new CreateRequest
+            var account = new UserAccount
             {
                 Username = "test1",
                 Name = "Miss Test",
-                Password = "test"
-            });
+                Role = UserRole.User
+            };
+
+            var account2 = new UserAccount
+            {
+                Username = "test2",
+                Name = "Miss Test",
+                Role = UserRole.User
+            };
+
+            ctx.UserAccounts.Add(account);
+            ctx.UserAccounts.Add(account2);
+            ctx.SaveChanges();
+            await userService.UpdateUserPassword(account, Encoding.UTF8.GetBytes("test"));
+            await userService.UpdateUserPassword(account2, Encoding.UTF8.GetBytes("test2"));
 
             var result = await controller.SignIn(new SignInRequest
             {
@@ -64,11 +58,15 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var userService = new UserService(ctx, tokenService);
             var controller = new AccountController(ctx, tokenService, userService);
 
-            var _ = await controller.Create(new CreateRequest
+            var account = new UserAccount
             {
-                Username = "test2",
-                Password = "test"
-            });
+                Username = "test3",
+                Name = "Miss Test",
+            };
+
+            ctx.UserAccounts.Add(account);
+            ctx.SaveChanges();
+            await userService.UpdateUserPassword(account, Encoding.UTF8.GetBytes("test"));
 
             var result = await controller.SignIn(new SignInRequest
             {

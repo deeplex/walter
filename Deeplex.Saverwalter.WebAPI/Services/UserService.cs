@@ -1,8 +1,11 @@
-﻿using System.Security.Cryptography;
+﻿using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.UserAccountController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services
 {
@@ -25,6 +28,71 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
         private readonly SaverwalterContext walterContext;
         private readonly TokenService tokenService;
+
+        public IActionResult Get(ClaimsPrincipal user)
+        {
+            var name = user.Identity?.Name;
+            var entity = walterContext.UserAccounts.Single(e => e.Username == name);
+            if (entity == null)
+            {
+                return new NotFoundResult();
+            }
+
+            try
+            {
+                var entry = new UserAccountEntry(entity);
+                return new OkObjectResult(entry);
+            }
+            catch
+            {
+                return new BadRequestResult();
+            }
+        }
+
+
+        public IActionResult Put(ClaimsPrincipal user, UserAccountEntry entry)
+        {
+            var name = user.Identity?.Name;
+            var entity = walterContext.UserAccounts.Single(e => e.Name == name);
+            if (entity == null)
+            {
+                return new NotFoundResult();
+            }
+
+            try
+            {
+                return new OkObjectResult(Update(entry, entity));
+            }
+            catch
+            {
+                return new BadRequestResult();
+            }
+        }
+
+        private UserAccountEntry Update(UserAccountEntry entry, UserAccount entity)
+        {
+            entity.Name = entry.Name;
+
+            walterContext.UserAccounts.Update(entity);
+            walterContext.SaveChanges();
+
+            return new UserAccountEntry(entity);
+        }
+
+        public IActionResult Delete(ClaimsPrincipal user)
+        {
+            var name = user.Identity?.Name;
+            var entity = walterContext.UserAccounts.Single(e => e.Name == name);
+            if (entity == null)
+            {
+                return new NotFoundResult();
+            }
+
+            walterContext.UserAccounts.Remove(entity);
+            walterContext.SaveChanges();
+
+            return new OkResult();
+        }
 
         public UserService(SaverwalterContext walterContext, TokenService tokenService)
         {

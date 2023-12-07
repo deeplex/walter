@@ -5,7 +5,7 @@ using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.UserAccountController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 {
@@ -39,6 +39,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 Token = token;
             }
         }
+
+        [HttpGet]
+        public IActionResult Get() => _userService.Get(User!);
+
+        [HttpPut]
+        public IActionResult Put(UserAccountEntry entry) => _userService.Put(User!, entry);
+
+        [HttpDelete]
+        public IActionResult Delete() => _userService.Delete(User!);
 
         [HttpPost("refresh-token")]
         [ProducesErrorResponseType(typeof(void))] // https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/1752#issue-663991077
@@ -77,40 +86,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 return new LoginResult(userId, token);
             }
             return Unauthorized();
-        }
-
-        public class CreateRequest
-        {
-            public string Username { get; set; } = null!;
-            public string Name { get; set; } = null!;
-            public string? Password { get; set; }
-        }
-
-        [HttpPost("create")]
-        [ProducesErrorResponseType(typeof(void))] // https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/1752#issue-663991077
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult> Create([FromBody] CreateRequest createRequest)
-        {
-            // either create the account _and_ associate a password or do nothing
-            using var tx = await _dbContext.Database.BeginTransactionAsync();
-
-            try
-            {
-                var account = await _userService.CreateUserAccount(createRequest.Username, createRequest.Name);
-                if (createRequest.Password is string)
-                {
-                    await _userService.UpdateUserPassword(account, Encoding.UTF8.GetBytes(createRequest.Password));
-                }
-
-                await tx.CommitAsync();
-                return Ok();
-            }
-            catch (DbUpdateException)
-            {
-                return Conflict();
-            }
         }
 
         public class UpdatePasswordRequest
