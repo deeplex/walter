@@ -5,7 +5,7 @@ using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using static Deeplex.Saverwalter.WebAPI.Controllers.UserAccountController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AccountController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services
 {

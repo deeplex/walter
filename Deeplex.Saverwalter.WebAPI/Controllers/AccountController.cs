@@ -9,7 +9,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     [ApiController]
     [Route("api/accounts")]
     [Authorize(Policy = "RequireAdmin")]
-    public class UserAccountController : ControllerBase
+    public class AccountController : ControllerBase
     {
         public class UserAccountEntryBase
         {
@@ -44,10 +44,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             }
         }
 
-        private readonly ILogger<UserAccountController> _logger;
+        private readonly ILogger<AccountController> _logger;
         UserAccountDbService DbService { get; }
 
-        public UserAccountController(ILogger<UserAccountController> logger, UserAccountDbService dbService)
+        public AccountController(ILogger<AccountController> logger, UserAccountDbService dbService)
         {
             _logger = logger;
             DbService = dbService;

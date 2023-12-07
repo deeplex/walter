@@ -54,7 +54,7 @@ export async function walter_sign_in(
     password: string,
     toast?: WalterToastContent
 ): Promise<AuthState | null> {
-    const response = await fetchImpl('/api/account/sign-in', {
+    const response = await fetchImpl('/api/user/sign-in', {
         method: 'POST',
         body: JSON.stringify({ username, password } as SignInRequest),
         headers: { 'Content-Type': 'application/json' }

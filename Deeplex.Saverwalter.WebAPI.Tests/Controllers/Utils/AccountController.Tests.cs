@@ -7,7 +7,7 @@ using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Utils.AccountController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Utils.UserController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {
@@ -19,7 +19,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var tokenService = A.Fake<TokenService>();
             var userService = new UserService(ctx, tokenService);
-            var controller = new AccountController(ctx, tokenService, userService);
+            var controller = new UserController(ctx, tokenService, userService);
 
             var account = new UserAccount
             {
@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var tokenService = A.Fake<TokenService>();
             var userService = new UserService(ctx, tokenService);
-            var controller = new AccountController(ctx, tokenService, userService);
+            var controller = new UserController(ctx, tokenService, userService);
 
             var account = new UserAccount
             {

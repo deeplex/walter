@@ -2,7 +2,8 @@ import { WalterApiHandler } from './WalterApiHandler';
 import { WalterSelectionEntry } from './WalterSelection';
 
 export class WalterAccountEntry extends WalterApiHandler {
-    public static ApiURL = `/api/account`;
+    public static ApiURL = `/api/accounts`;
+    public static ApiURLUser = `/api/user`;
 
     constructor(
         public id: number,

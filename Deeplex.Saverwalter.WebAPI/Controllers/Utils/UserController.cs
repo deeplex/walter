@@ -5,18 +5,18 @@ using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.UserAccountController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AccountController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 {
-    [Route("api/account")]
-    public class AccountController : ControllerBase
+    [Route("api/user")]
+    public class UserController : ControllerBase
     {
         private readonly SaverwalterContext _dbContext;
         private readonly TokenService _tokenService;
         private readonly UserService _userService;
 
-        public AccountController(SaverwalterContext dbContext, TokenService tokenService, UserService userService)
+        public UserController(SaverwalterContext dbContext, TokenService tokenService, UserService userService)
         {
             _dbContext = dbContext;
             _tokenService = tokenService;
