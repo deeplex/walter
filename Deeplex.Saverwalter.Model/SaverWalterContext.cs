@@ -24,6 +24,7 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Zaehlerstand> Zaehlerstaende { get; set; } = null!;
 
         public DbSet<UserAccount> UserAccounts { get; set; } = null!;
+        public DbSet<UserResetCredential> UserResetCredentials { get; set; } = null!;
         public DbSet<Pbkdf2PasswordCredential> Pbkdf2PasswordCredentials { get; set; } = null!;
 
         public override int SaveChanges()

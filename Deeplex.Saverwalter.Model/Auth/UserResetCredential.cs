@@ -1,6 +1,4 @@
-﻿using Deeplex.Saverwalter.Model.Auth;
-
-namespace Deeplex.Saverwalter.Model.model
+﻿namespace Deeplex.Saverwalter.Model.Auth
 {
     public class UserResetCredential
     {
