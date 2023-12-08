@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         {
             var tokenSalt = RandomNumberGenerator.GetBytes(tokenSaltSize);
             var keyNonce = HKDF.Extract(HashAlgorithmName.SHA384, authKey, tokenSalt);
-            using var key = new AesGcm(keyNonce.AsSpan(0, 32));
+            using var key = new AesGcm(keyNonce.AsSpan(0, 32), tagSize);
             var nonce = keyNonce.AsSpan(32, 12);
 
             var expiry = DateTime.UtcNow + maxTokenLifetime;
@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             var tokenSalt = token.AsSpan(0, tokenSaltSize);
             var keyNonce = new byte[384 / 8];
             HKDF.Extract(HashAlgorithmName.SHA384, authKey, tokenSalt, keyNonce);
-            using var key = new AesGcm(keyNonce.AsSpan(0, 32));
+            using var key = new AesGcm(keyNonce.AsSpan(0, 32), tagSize);
             var nonce = keyNonce.AsSpan(32, 12);
 
             var ciphertext = token.AsSpan(tokenInfoOffset, tokenInfoSize);
