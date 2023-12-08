@@ -102,8 +102,8 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<UserAccount>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<UserAccount>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
 
-            base.OnModelCreating(modelBuilder);
             modelBuilder.HasPostgresExtension("uuid-ossp");
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

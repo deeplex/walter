@@ -131,16 +131,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new Exception();
             }
 
-            if (entry.SelectedKontakte is IEnumerable<SelectionEntry> kontakte)
-            {
-                // Add missing Kontakte
-                entity.Kontakte.AddRange(kontakte
-                    .Where(kontakt => !entity.Kontakte.Exists(k => kontakt.Id == k.KontaktId))
-                    .SelectMany(w => Ctx.Kontakte.Where(k => k.KontaktId == w.Id)));
-                // Remove old Kontakte
-                entity.Kontakte.RemoveAll(k => !kontakte.ToList().Exists(kontakt => kontakt.Id == k.KontaktId));
-            }
-
             if (entry.SelectedWohnungen is IEnumerable<SelectionEntry> wohnungen)
             {
                 // Add missing Kontakte

@@ -20,7 +20,6 @@ namespace Deeplex.Saverwalter.Model.Auth
         public string? Email { get; set; }
 
         public virtual List<Verwalter> Verwalter { get; set; } = [];
-        public virtual List<Kontakt> Kontakte { get; set; } = [];
 
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }

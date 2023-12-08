@@ -1,4 +1,4 @@
-import { WalterAccountEntry, WalterAdresseEntry } from '$walter/lib';
+import { WalterAccountEntry } from '$walter/lib';
 import { walter_get } from '$walter/services/requests';
 import type { PageLoad } from './$types';
 

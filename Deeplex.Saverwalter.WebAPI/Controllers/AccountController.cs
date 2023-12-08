@@ -3,7 +3,6 @@ using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
@@ -41,7 +40,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string Name { get; set; } = null!;
             public UserRole Role { get; set; }
 
-            public IEnumerable<SelectionEntry>? SelectedKontakte { get; set; }
             public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
 
             public AccountEntryBase() { }
@@ -54,8 +52,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Name = Entity.Name;
                 Role = Entity.Role;
 
-                SelectedKontakte = Entity.Kontakte
-                    .Select(k => new SelectionEntry(k.KontaktId, k.Bezeichnung));
                 SelectedWohnungen = Entity.Verwalter
                     .Select(v => v.Wohnung)
                     .Select(w => new SelectionEntry(w.WohnungId, w.Bezeichnung));
@@ -64,8 +60,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class UserAccountEntry : AccountEntryBase
         {
-            public IEnumerable<KontaktEntryBase>? Kontakte
-                => Entity?.Kontakte.Select(e => new KontaktEntryBase(e));
             public IEnumerable<WohnungEntryBase>? Wohnungen
                 => Entity?.Verwalter.Select(v => v.Wohnung).Select(w => new WohnungEntry(w));
 
