@@ -1,6 +1,6 @@
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterSelectionEntry } from './WalterSelection';
-import { WalterWohnungEntry } from './WalterWohnung';
+import { WalterVerwalterEntry } from './WalterVerwalter';
 
 export class WalterAccountEntry extends WalterApiHandler {
     public static ApiURL = `/api/accounts`;
@@ -10,28 +10,30 @@ export class WalterAccountEntry extends WalterApiHandler {
         public id: number,
         public username: string,
         public name: string,
+        public role: WalterSelectionEntry,
         public createdAt: Date,
         public lastModified: Date,
-        public selectedWohnungen: WalterSelectionEntry[],
-        public wohnungen: WalterWohnungEntry[]
+        public resetToken: string,
+        public resetTokenExpires: Date,
+        public verwalter: WalterVerwalterEntry[]
     ) {
         super();
     }
 
     static fromJson(json: WalterAccountEntry): WalterAccountEntry {
-        const selectedWohnungen = json.selectedWohnungen?.map(
-            WalterSelectionEntry.fromJson
-        );
-        const wohnungen = json.wohnungen?.map(WalterWohnungEntry.fromJson);
+        const verwalter = json.verwalter?.map(WalterVerwalterEntry.fromJson);
+        const role = WalterSelectionEntry.fromJson(json.role);
 
         return new WalterAccountEntry(
             json.id,
             json.username,
             json.name,
+            role,
             json.createdAt,
             json.lastModified,
-            selectedWohnungen,
-            wohnungen
+            json.resetToken,
+            json.resetTokenExpires,
+            verwalter
         );
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Model.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
@@ -42,6 +44,33 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                         e.Anschrift,
                         null))
                 .ToList();
+            return new OkObjectResult(list);
+        }
+
+        [HttpGet]
+        [Route("api/selection/verwalterrollen")]
+        public IActionResult GetVerwalterrollen()
+        {
+            var list = Enum.GetValues(typeof(VerwalterRolle))
+                .Cast<VerwalterRolle>()
+                .ToList()
+                .Select(e => new SelectionEntry((int)e, e.ToString()))
+                .ToList();
+
+            return new OkObjectResult(list);
+        }
+
+        [HttpGet]
+        [Route("api/selection/userrole")]
+        [Authorize(Policy = "RequireAdmin")]
+        public IActionResult GetUserRole()
+        {
+            var list = Enum.GetValues(typeof(UserRole))
+                .Cast<UserRole>()
+                .ToList()
+                .Select(e => new SelectionEntry((int)e, e.ToString()))
+                .ToList();
+
             return new OkObjectResult(list);
         }
 

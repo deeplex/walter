@@ -21,5 +21,5 @@
 />
 
 <WalterGrid>
-    <WalterAccount entry={data.entry} fetchImpl={data.fetchImpl} />
+    <WalterAccount admin entry={data.entry} fetchImpl={data.fetchImpl} />
 </WalterGrid>

@@ -117,6 +117,17 @@ export const walter_selection = {
         return walter_get('/api/selection/zaehlertypen', fetchImpl) as Promise<
             WalterSelectionEntry[]
         >;
+    },
+    verwalterrollen(fetchImpl: typeof fetch) {
+        return walter_get(
+            '/api/selection/verwalterrollen',
+            fetchImpl
+        ) as Promise<WalterSelectionEntry[]>;
+    },
+    userrole(fetchImpl: typeof fetch) {
+        return walter_get('/api/selection/userrole', fetchImpl) as Promise<
+            WalterSelectionEntry[]
+        >;
     }
 };
 

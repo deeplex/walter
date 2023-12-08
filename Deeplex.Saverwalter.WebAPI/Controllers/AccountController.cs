@@ -1,9 +1,9 @@
-﻿using System.Security.Principal;
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
@@ -20,6 +20,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Id { get; set; }
             public SelectionEntry Rolle { get; set; } = null!;
             public SelectionEntry Wohnung { get; set; } = null!;
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+            public string? Notiz { get; set; } = null!;
 
             public VerwalterEntry() { }
             public VerwalterEntry(Verwalter entity)
@@ -28,6 +31,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Id = Entity.VerwalterId;
                 Rolle = new SelectionEntry((int)Entity.Rolle, Entity.Rolle.ToString());
                 Wohnung = new SelectionEntry(Entity.Wohnung.WohnungId, Entity.Wohnung.Bezeichnung);
+                Notiz = Entity.Notiz;
+
+                CreatedAt = Entity.CreatedAt;
+                LastModified = Entity.LastModified;
             }
         }
 
@@ -38,7 +45,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public Guid Id { get; set; }
             public string Username { get; set; } = null!;
             public string Name { get; set; } = null!;
-            public UserRole Role { get; set; }
+            public SelectionEntry Role { get; set; } = null!;
+
+            public string? ResetToken { get; set; } = null!;
+            public DateTime? ResetTokenExpires { get; set; } = null!;
 
             public IEnumerable<VerwalterEntry>? Verwalter { get; set; }
 
@@ -50,7 +60,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 Username = Entity.Username;
                 Name = Entity.Name;
-                Role = Entity.Role;
+                Role = new((int)Entity.Role, Entity.Role.ToString());
+
+                if (Entity.UserResetCredential is UserResetCredential cred)
+                {
+                    ResetToken = WebEncoders.Base64UrlEncode(cred.Token);
+                    ResetTokenExpires = cred.ExpiresAt;
+                }
 
                 Verwalter = Entity.Verwalter.Select(w => new VerwalterEntry(w));
             }

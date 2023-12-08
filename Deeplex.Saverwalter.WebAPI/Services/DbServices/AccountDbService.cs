@@ -1,15 +1,9 @@
 ﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Deeplex.Saverwalter.WebAPI.Helper;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AccountController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
-using System.Security.Cryptography;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Security.Principal;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -88,7 +82,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 Username = entry.Username,
                 Name = entry.Name,
-                Role = entry.Role
+                Role = (UserRole)entry.Role.Id
             };
             SetOptionalValues(entity, entry);
             Ctx.UserAccounts.Add(entity);
@@ -129,7 +123,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             entity.Username = entry.Username;
             entity.Name = entry.Name;
-            entity.Role = entry.Role;
+            entity.Role = (UserRole)entry.Role.Id;
 
             SetOptionalValues(entity, entry);
             Ctx.UserAccounts.Update(entity);
@@ -147,12 +141,28 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             if (entry.Verwalter is IEnumerable<VerwalterEntry> verwalter)
             {
+                // Update existing Verwalter
+                entity.Verwalter.ForEach(v =>
+                {
+                    var verwalterEntry = verwalter.SingleOrDefault(w => w.Wohnung.Id == v.Wohnung.WohnungId);
+                    if (verwalterEntry != null)
+                    {
+                        v.Rolle = (VerwalterRolle)verwalterEntry.Rolle.Id;
+                        v.Notiz = verwalterEntry.Notiz;
+                    }
+                });
                 // Add missing Verwalter
                 entity.Verwalter.AddRange(verwalter
-                    .Where(v => !entity.Verwalter.Exists(vv => v.Id == vv.VerwalterId))
-                    .SelectMany(w => Ctx.VerwalterSet.Where(v => v.VerwalterId == w.Id)));
-                // Remove old Verwalter
-                entity.Verwalter.RemoveAll(v => !verwalter.ToList().Exists(verwalter => verwalter.Id == v.VerwalterId));
+                    .Where(v => !entity.Verwalter.Exists(vv => v.Wohnung.Id == vv.Wohnung.WohnungId))
+                    .Select(w => new Verwalter((VerwalterRolle)w.Rolle.Id)
+                    {
+                        Notiz = w.Notiz,
+                        VerwalterId = w.Id,
+                        UserAccount = entity,
+                        Wohnung = Ctx.Wohnungen.Find(w.Wohnung.Id)!
+                    }));
+                // Remove removed Verwalter
+                entity.Verwalter.RemoveAll(v => !verwalter.ToList().Exists(verwalter => verwalter.Wohnung.Id == v.Wohnung.WohnungId));
             }
         }
     }

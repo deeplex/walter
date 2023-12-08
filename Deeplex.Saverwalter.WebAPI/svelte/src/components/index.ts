@@ -48,6 +48,7 @@ export { default as WalterComboBoxUmlagetyp } from './elements/WalterComboBoxUml
 export { default as WalterDataTable } from './elements/WalterDataTable.svelte';
 export { default as WalterDataWrapper } from './elements/WalterDataWrapper.svelte';
 export { default as WalterDatePicker } from './elements/WalterDatePicker.svelte';
+export { default as WalterDropdown } from './elements/WalterDropdown.svelte';
 export { default as WalterHeader } from './elements/WalterHeader.svelte';
 export { default as WalterHeaderDetail } from './elements/WalterHeaderDetail.svelte';
 export { default as WalterHeaderNew } from './elements/WalterHeaderNew.svelte';

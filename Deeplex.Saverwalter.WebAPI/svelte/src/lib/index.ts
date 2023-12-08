@@ -14,6 +14,7 @@ export { WalterUmlageEntry } from './WalterUmlage';
 export { WalterUmlagetypEntry } from './WalterUmlagetyp';
 export { WalterVertragEntry } from './WalterVertrag';
 export { WalterVertragVersionEntry } from './WalterVertragVersion';
+export { WalterVerwalterEntry } from './WalterVerwalter';
 export { WalterWohnungEntry } from './WalterWohnung';
 export { WalterZaehlerEntry } from './WalterZaehler';
 export { WalterZaehlerstandEntry } from './WalterZaehlerstand';
