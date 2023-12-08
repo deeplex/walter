@@ -145,7 +145,7 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<BetriebskostenabrechnungHandler>(Lifestyle.Scoped);
 
             container.Register<TokenService>(Lifestyle.Singleton);
-            container.Register<UserAccountDbService>(Lifestyle.Scoped);
+            container.Register<AccountDbService>(Lifestyle.Scoped);
             container.Register<UserService>(Lifestyle.Scoped);
 
             return container;

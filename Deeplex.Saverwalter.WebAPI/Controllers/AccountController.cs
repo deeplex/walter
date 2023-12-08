@@ -1,8 +1,11 @@
-﻿using Deeplex.Saverwalter.Model.Auth;
+﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -11,7 +14,25 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     [Authorize(Policy = "RequireAdmin")]
     public class AccountController : ControllerBase
     {
-        public class UserAccountEntryBase
+        public class VerwalterEntry
+        {
+            private Verwalter? Entity { get; }
+
+            public int Id { get; set; }
+            public SelectionEntry Rolle { get; set; } = null!;
+            public SelectionEntry Wohnung { get; set; } = null!;
+
+            public VerwalterEntry() { }
+            public VerwalterEntry(Verwalter entity)
+            {
+                Entity = entity;
+                Id = Entity.VerwalterId;
+                Rolle = new SelectionEntry((int)Entity.Rolle, Entity.Rolle.ToString());
+                Wohnung = new SelectionEntry(Entity.Wohnung.WohnungId, Entity.Wohnung.Bezeichnung);
+            }
+        }
+
+        public class AccountEntryBase
         {
             protected UserAccount? Entity { get; }
 
@@ -20,8 +41,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string Name { get; set; } = null!;
             public UserRole Role { get; set; }
 
-            public UserAccountEntryBase() { }
-            public UserAccountEntryBase(UserAccount entity)
+            public IEnumerable<SelectionEntry>? SelectedKontakte { get; set; }
+            public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
+
+            public AccountEntryBase() { }
+            public AccountEntryBase(UserAccount entity)
             {
                 Entity = entity;
                 Id = Entity.Id;
@@ -29,14 +53,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Username = Entity.Username;
                 Name = Entity.Name;
                 Role = Entity.Role;
+
+                SelectedKontakte = Entity.Kontakte
+                    .Select(k => new SelectionEntry(k.KontaktId, k.Bezeichnung));
+                SelectedWohnungen = Entity.Verwalter
+                    .Select(v => v.Wohnung)
+                    .Select(w => new SelectionEntry(w.WohnungId, w.Bezeichnung));
             }
         }
 
-        public class UserAccountEntry : UserAccountEntryBase
+        public class UserAccountEntry : AccountEntryBase
         {
             public IEnumerable<KontaktEntryBase>? Kontakte
                 => Entity?.Kontakte.Select(e => new KontaktEntryBase(e));
-
+            public IEnumerable<WohnungEntryBase>? Wohnungen
+                => Entity?.Verwalter.Select(v => v.Wohnung).Select(w => new WohnungEntry(w));
 
             public UserAccountEntry() : base() { }
             public UserAccountEntry(UserAccount entity) : base(entity)
@@ -45,9 +76,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<AccountController> _logger;
-        UserAccountDbService DbService { get; }
+        AccountDbService DbService { get; }
 
-        public AccountController(ILogger<AccountController> logger, UserAccountDbService dbService)
+        public AccountController(ILogger<AccountController> logger, AccountDbService dbService)
         {
             _logger = logger;
             DbService = dbService;

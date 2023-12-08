@@ -5,15 +5,16 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AccountController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class UserAccountDbService : ICRUDServiceGuid<UserAccountEntry>
+    public class AccountDbService : ICRUDServiceGuid<UserAccountEntry>
     {
         public SaverwalterContext Ctx { get; }
         private readonly IAuthorizationService Auth;
 
-        public UserAccountDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
+        public AccountDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
         {
             Ctx = ctx;
             Auth = authorizationService;
@@ -22,7 +23,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         public async Task<IActionResult> GetList()
         {
             var list = await Ctx.UserAccounts.ToListAsync();
-            return new OkObjectResult(list.Select(e => new UserAccountEntryBase(e)).ToList());
+            return new OkObjectResult(list.Select(e => new AccountEntryBase(e)).ToList());
         }
 
 
@@ -130,7 +131,25 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new Exception();
             }
 
-            // TODO: Define Verwalter and Kontakte
+            if (entry.SelectedKontakte is IEnumerable<SelectionEntry> kontakte)
+            {
+                // Add missing Kontakte
+                entity.Kontakte.AddRange(kontakte
+                    .Where(kontakt => !entity.Kontakte.Exists(k => kontakt.Id == k.KontaktId))
+                    .SelectMany(w => Ctx.Kontakte.Where(k => k.KontaktId == w.Id)));
+                // Remove old Kontakte
+                entity.Kontakte.RemoveAll(k => !kontakte.ToList().Exists(kontakt => kontakt.Id == k.KontaktId));
+            }
+
+            if (entry.SelectedWohnungen is IEnumerable<SelectionEntry> wohnungen)
+            {
+                // Add missing Kontakte
+                entity.Verwalter.AddRange(wohnungen
+                    .Where(wohnung => !entity.Verwalter.Exists(v => wohnung.Id == v.Wohnung.WohnungId))
+                    .SelectMany(w => Ctx.VerwalterSet.Where(v => v.VerwalterId == w.Id)));
+                // Remove old Kontakte
+                entity.Verwalter.RemoveAll(v => !wohnungen.ToList().Exists(verwalter => verwalter.Id == v.Wohnung.WohnungId));
+            }
         }
     }
 }

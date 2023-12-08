@@ -18,6 +18,7 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Umlagetyp> Umlagetypen { get; set; } = null!;
         public DbSet<Vertrag> Vertraege { get; set; } = null!;
         public DbSet<VertragVersion> VertragVersionen { get; set; } = null!;
+        public DbSet<Verwalter> VerwalterSet { get; set; } = null!;
         public DbSet<Wohnung> Wohnungen { get; set; } = null!;
         public DbSet<Zaehler> ZaehlerSet { get; set; } = null!;
         public DbSet<Zaehlerstand> Zaehlerstaende { get; set; } = null!;
@@ -85,6 +86,8 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<Umlagetyp>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Vertrag>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Vertrag>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Verwalter>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Verwalter>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<VertragsBetriebskostenrechnung>()
                 .Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<VertragsBetriebskostenrechnung>()
@@ -95,6 +98,9 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<Zaehler>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Zaehlerstand>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Zaehlerstand>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+
+            modelBuilder.Entity<UserAccount>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<UserAccount>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
 
             base.OnModelCreating(modelBuilder);
             modelBuilder.HasPostgresExtension("uuid-ossp");

@@ -1,8 +1,8 @@
-import { WalterAccountEntry, WalterAdresseEntry } from '$walter/lib';
+import { WalterAccountEntry } from '$walter/lib';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    const apiURL = `${WalterAdresseEntry.ApiURL}/${params.id}`;
+    const apiURL = `${WalterAccountEntry.ApiURL}/${params.id}`;
 
     return {
         apiURL,

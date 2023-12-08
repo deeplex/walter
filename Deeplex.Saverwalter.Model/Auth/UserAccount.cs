@@ -13,12 +13,17 @@ namespace Deeplex.Saverwalter.Model.Auth
         [Required]
         public string Username { get; set; } = null!; // See https://github.com/dotnet/efcore/issues/12078 
         [Required]
-        public string Name { get; set; } = default!;
+        public string Name { get; set; } = null!;
         [Required]
         public UserRole Role { get; set; }
-        public virtual List<Verwalter> Verwalter { get; set; } = [];
 
+        public string? Email { get; set; }
+
+        public virtual List<Verwalter> Verwalter { get; set; } = [];
         public virtual List<Kontakt> Kontakte { get; set; } = [];
+
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastModified { get; set; }
 
         public virtual Pbkdf2PasswordCredential? Pbkdf2PasswordCredential { get; set; }
         public virtual UserResetCredential? UserResetCredential { get; set; }
