@@ -5,11 +5,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AccountController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class AccountDbService : ICRUDServiceGuid<UserAccountEntry>
+    public class AccountDbService : ICRUDServiceGuid<AccountEntryBase>
     {
         public SaverwalterContext Ctx { get; }
         private readonly IAuthorizationService Auth;
@@ -37,7 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new UserAccountEntry(entity);
+                var entry = new AccountEntryBase(entity);
                 return new OkObjectResult(entry);
             }
             catch
@@ -60,7 +59,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public async Task<IActionResult> Post(ClaimsPrincipal user, UserAccountEntry entry)
+        public async Task<IActionResult> Post(ClaimsPrincipal user, AccountEntryBase entry)
         {
             if (entry.Id != Guid.Empty)
             {
@@ -77,7 +76,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private UserAccountEntry Add(UserAccountEntry entry)
+        private AccountEntryBase Add(AccountEntryBase entry)
         {
 
             var entity = new UserAccount()
@@ -90,10 +89,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.UserAccounts.Add(entity);
             Ctx.SaveChanges();
 
-            return new UserAccountEntry(entity);
+            return new AccountEntryBase(entity);
         }
 
-        public async Task<IActionResult> Put(ClaimsPrincipal user, Guid id, UserAccountEntry entry)
+        public async Task<IActionResult> Put(ClaimsPrincipal user, Guid id, AccountEntryBase entry)
         {
             var entity = await Ctx.UserAccounts.FindAsync(id);
             if (entity == null)
@@ -111,7 +110,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private UserAccountEntry Update(UserAccountEntry entry, UserAccount entity)
+        private AccountEntryBase Update(AccountEntryBase entry, UserAccount entity)
         {
             entity.Username = entry.Username;
             entity.Name = entry.Name;
@@ -121,24 +120,24 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.UserAccounts.Update(entity);
             Ctx.SaveChanges();
 
-            return new UserAccountEntry(entity);
+            return new AccountEntryBase(entity);
         }
 
-        private void SetOptionalValues(UserAccount entity, UserAccountEntry entry)
+        private void SetOptionalValues(UserAccount entity, AccountEntryBase entry)
         {
             if (entity.Id != entry.Id)
             {
                 throw new Exception();
             }
 
-            if (entry.SelectedWohnungen is IEnumerable<SelectionEntry> wohnungen)
+            if (entry.Verwalter is IEnumerable<VerwalterEntry> verwalter)
             {
-                // Add missing Kontakte
-                entity.Verwalter.AddRange(wohnungen
-                    .Where(wohnung => !entity.Verwalter.Exists(v => wohnung.Id == v.Wohnung.WohnungId))
+                // Add missing Verwalter
+                entity.Verwalter.AddRange(verwalter
+                    .Where(v => !entity.Verwalter.Exists(vv => v.Id == vv.VerwalterId))
                     .SelectMany(w => Ctx.VerwalterSet.Where(v => v.VerwalterId == w.Id)));
-                // Remove old Kontakte
-                entity.Verwalter.RemoveAll(v => !wohnungen.ToList().Exists(verwalter => verwalter.Id == v.Wohnung.WohnungId));
+                // Remove old Verwalter
+                entity.Verwalter.RemoveAll(v => !verwalter.ToList().Exists(verwalter => verwalter.Id == v.VerwalterId));
             }
         }
     }

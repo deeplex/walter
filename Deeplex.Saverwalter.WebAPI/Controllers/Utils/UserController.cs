@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         public IActionResult Get() => _userService.Get(User!);
 
         [HttpPut]
-        public IActionResult Put(UserAccountEntry entry) => _userService.Put(User!, entry);
+        public IActionResult Put(AccountEntryBase entry) => _userService.Put(User!, entry);
 
         [HttpDelete]
         public IActionResult Delete() => _userService.Delete(User!);

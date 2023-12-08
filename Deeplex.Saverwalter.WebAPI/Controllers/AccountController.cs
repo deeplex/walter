@@ -4,7 +4,6 @@ using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
-using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -40,7 +39,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public string Name { get; set; } = null!;
             public UserRole Role { get; set; }
 
-            public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
+            public IEnumerable<VerwalterEntry>? Verwalter { get; set; }
 
             public AccountEntryBase() { }
             public AccountEntryBase(UserAccount entity)
@@ -52,20 +51,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Name = Entity.Name;
                 Role = Entity.Role;
 
-                SelectedWohnungen = Entity.Verwalter
-                    .Select(v => v.Wohnung)
-                    .Select(w => new SelectionEntry(w.WohnungId, w.Bezeichnung));
-            }
-        }
-
-        public class UserAccountEntry : AccountEntryBase
-        {
-            public IEnumerable<WohnungEntryBase>? Wohnungen
-                => Entity?.Verwalter.Select(v => v.Wohnung).Select(w => new WohnungEntry(w));
-
-            public UserAccountEntry() : base() { }
-            public UserAccountEntry(UserAccount entity) : base(entity)
-            {
+                Verwalter = Entity.Verwalter.Select(w => new VerwalterEntry(w));
             }
         }
 
@@ -82,12 +68,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public Task<IActionResult> Get() => DbService.GetList();
 
         [HttpPost]
-        public Task<IActionResult> Post([FromBody] UserAccountEntry entry) => DbService.Post(User!, entry);
+        public Task<IActionResult> Post([FromBody] AccountEntryBase entry) => DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
         public Task<IActionResult> Get(Guid id) => DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public Task<IActionResult> Put(Guid id, UserAccountEntry entry) => DbService.Put(User!, id, entry);
+        public Task<IActionResult> Put(Guid id, AccountEntryBase entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<IActionResult> Delete(Guid id) => DbService.Delete(User!, id);
     }
