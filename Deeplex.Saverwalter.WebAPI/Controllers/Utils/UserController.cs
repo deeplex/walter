@@ -38,6 +38,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 UserId = userId;
                 Token = token;
             }
+            public LoginResult(WebAPI.Services.SignInResult rx)
+            {
+                UserId = rx.Account!.Id.ToString("D", CultureInfo.InvariantCulture);
+                Token = rx.SessionToken!;
+            }
         }
 
         [HttpGet]
@@ -78,14 +83,23 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         public async Task<ActionResult<LoginResult>> SignIn([FromBody] SignInRequest loginRequest)
         {
             var result = await _userService.SignInAsync(loginRequest.Username, loginRequest.Password);
-            if (result.Succeeded &&
-                result.SessionToken is string token &&
-                result.Account is Model.Auth.UserAccount account)
-            {
-                var userId = account.Id.ToString("D", CultureInfo.InvariantCulture);
-                return new LoginResult(userId, token);
-            }
-            return Unauthorized();
+            return result.Succeeded ? new LoginResult(result) : Unauthorized();
+        }
+
+        public class ResetCredentialsRequest
+        {
+            public string Token { get; set; } = null!;
+            public string NewPassword { get; set; } = null!;
+        }
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        [ProducesErrorResponseType(typeof(void))] // https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/1752#issue-663991077
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<LoginResult>> ResetPassword([FromBody] ResetCredentialsRequest resetRequest)
+        {
+            var rx = await _userService.TryRedeemResetToken(resetRequest.Token, resetRequest.NewPassword);
+            return rx.Succeeded ? new LoginResult(rx) : Unauthorized();
         }
 
         public class UpdatePasswordRequest

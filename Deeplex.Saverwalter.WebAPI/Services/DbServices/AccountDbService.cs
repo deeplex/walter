@@ -4,19 +4,24 @@ using Deeplex.Saverwalter.Model.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Deeplex.Saverwalter.WebAPI.Helper;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AccountController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Security.Principal;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
     public class AccountDbService : ICRUDServiceGuid<AccountEntryBase>
     {
         public SaverwalterContext Ctx { get; }
-        private readonly IAuthorizationService Auth;
+        private readonly UserService _userService;
 
-        public AccountDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
+        public AccountDbService(SaverwalterContext ctx, UserService userService)
         {
             Ctx = ctx;
-            Auth = authorizationService;
+            _userService = userService;
         }
 
         public async Task<IActionResult> GetList()
@@ -108,6 +113,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 return new BadRequestResult();
             }
+        }
+
+        public async Task<string> ResetCredentialsFor(Guid userId)
+        {
+            var user = await Ctx.UserAccounts
+                .Where(user => user.Id == userId)
+                .Include(user => user.UserResetCredential)
+                .SingleOrDefaultAsync() ?? throw new ArgumentException("User not found");
+
+            return await _userService.CreateResetToken(user);
         }
 
         private AccountEntryBase Update(AccountEntryBase entry, UserAccount entity)

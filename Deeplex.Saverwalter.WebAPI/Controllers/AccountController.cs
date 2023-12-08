@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using System.Security.Principal;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authorization;
@@ -76,5 +77,23 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public Task<IActionResult> Put(Guid id, AccountEntryBase entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<IActionResult> Delete(Guid id) => DbService.Delete(User!, id);
+
+        [HttpPost("{userId}/reset-credentials")]
+        [ProducesErrorResponseType(typeof(void))] // https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/1752#issue-663991077
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<string>> ResetCredentials(Guid userId)
+        {
+            try
+            {
+                return await DbService.ResetCredentialsFor(userId);
+            }
+            catch (ArgumentException)
+            {
+                return NotFound();
+            }
+        }
     }
 }
