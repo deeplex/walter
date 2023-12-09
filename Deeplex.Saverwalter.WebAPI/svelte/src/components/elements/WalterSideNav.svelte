@@ -2,14 +2,12 @@
     import { isWalterSideNavOpen } from '$walter/store';
 
     import {
-        Checkbox,
         Loading,
         SideNav,
         SideNavDivider,
         SideNavItems,
         SideNavLink,
-        SideNavMenu,
-        SideNavMenuItem
+        SideNavMenu
     } from 'carbon-components-svelte';
     import {
         Building,
@@ -17,12 +15,12 @@
         Document,
         Home,
         IbmDataReplication,
+        ListBoxes,
         Location,
         Logout,
         Meter,
         Money,
         NetworkAdminControl,
-        Settings,
         Tools,
         TrashCan,
         User,
@@ -36,8 +34,6 @@
     let winWidth = 0;
     let isOpen: boolean;
     isWalterSideNavOpen.subscribe((value) => (isOpen = value));
-
-    let extendedNavigation = true;
 
     function closeSideNav() {
         isOpen = false;
@@ -62,10 +58,12 @@
         />
         <WalterSideNavLink icon={Building} text="Wohnungen" href="/wohnungen" />
         <WalterSideNavLink icon={Document} text="Verträge" href="/vertraege" />
+        <SideNavDivider />
 
-        {#if extendedNavigation}
-            <SideNavDivider />
+        <SideNavMenu icon={ListBoxes} text="Erweitert">
+            <!-- <div style="margin-left: -3em"> -->
             <WalterSideNavLink
+                style="padding-left: 0"
                 icon={Money}
                 text="Betriebskostenrechnungen"
                 href="/betriebskostenrechnungen"
@@ -91,7 +89,10 @@
                 text="Adressen"
                 href="/adressen"
             />
-        {/if}
+            <!-- </div> -->
+        </SideNavMenu>
+
+        <li style="flex: 1" />
 
         <SideNavDivider />
 
@@ -105,23 +106,8 @@
             <WalterSideNavLink icon={x} text="Ablagestapel" href="/stack" />
         {/await}
 
-        {#if extendedNavigation}
-            <WalterSideNavLink
-                icon={TrashCan}
-                text="Papierkorb"
-                href="/trash"
-            />
-        {/if}
+        <WalterSideNavLink icon={TrashCan} text="Papierkorb" href="/trash" />
 
-        <li style="flex: 1" />
-
-        <SideNavDivider />
-        <li>
-            <Checkbox
-                labelText="Erweiterte Navigation"
-                bind:checked={extendedNavigation}
-            />
-        </li>
         <WalterSideNavLink
             text="Nutzereinstellungen"
             icon={User}

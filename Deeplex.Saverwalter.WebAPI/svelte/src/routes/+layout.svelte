@@ -34,6 +34,10 @@
 <slot />
 
 <style>
+    :global(.bx--side-nav__link) {
+        padding-left: 1rem !important;
+    }
+
     :global(.bx--side-nav__items) {
         display: flex;
         flex-direction: column;

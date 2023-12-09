@@ -32,7 +32,7 @@
     }
 </script>
 
-<WalterHeader title="Passwort zurücksetzen" />
+<WalterHeader title="Passwort setzen" />
 <WalterGrid>
     <PasswordInput
         labelText="Neues Passwort eingeben"
