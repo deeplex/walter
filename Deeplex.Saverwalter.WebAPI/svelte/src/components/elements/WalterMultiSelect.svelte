@@ -12,6 +12,7 @@
     export let titleText: string;
     export let entries: Promise<WalterSelectionEntry[]>;
     export let disabled = false;
+    export let hideLabel = false;
 
     let lastSavedValue: string | undefined;
     function updateLastSavedValue() {
@@ -50,6 +51,7 @@
         <TextInputSkeleton />
     {:then x}
         <MultiSelect
+            {hideLabel}
             {disabled}
             placeholder={value?.map((e) => e.text).join(', ')}
             selectedIds={x?.map((e) => e.id)}

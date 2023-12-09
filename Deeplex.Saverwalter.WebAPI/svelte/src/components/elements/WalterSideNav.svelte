@@ -125,14 +125,14 @@
         <WalterSideNavLink
             text="Nutzereinstellungen"
             icon={User}
-            href="/account"
+            href="/user"
         />
         {#if true}
-        <WalterSideNavLink
-            text="Adminbereich"
-            icon={NetworkAdminControl}
-            href="/admin"
-        />
+            <WalterSideNavLink
+                text="Adminbereich"
+                icon={NetworkAdminControl}
+                href="/admin"
+            />
         {/if}
         <SideNavLink
             icon={Logout}

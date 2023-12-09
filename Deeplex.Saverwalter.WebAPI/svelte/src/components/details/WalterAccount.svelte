@@ -1,5 +1,7 @@
 <script lang="ts">
     import {
+        Accordion,
+        AccordionItem,
         Row,
         StructuredList,
         StructuredListBody,
@@ -53,39 +55,46 @@
 </Row>
 
 <Row>
-    <WalterMultiSelect
-        disabled={!admin}
-        titleText="Verwaltete Wohnungen"
-        bind:value={selectedWohnungen}
-        entries={wohnungen}
-    />
-    <StructuredList condensed>
-        <StructuredListHead>
-            <StructuredListRow head>
-                <StructuredListCell head>Wohnung</StructuredListCell>
-                <StructuredListCell head>Berechtigung</StructuredListCell>
-            </StructuredListRow>
-        </StructuredListHead>
-        <StructuredListBody>
-            {#each entry.verwalter || [] as verwalter}
-                <StructuredListRow>
-                    <StructuredListCell
-                        >{verwalter.wohnung.text}</StructuredListCell
-                    >
-                    <StructuredListCell>
-                        <div style="width:14em">
-                            <WalterDropdown
-                                readonly={!admin}
-                                required
-                                hideLabel
-                                titleText="Berechtigung"
-                                entries={verwalterrollen}
-                                bind:value={verwalter.rolle}
-                            />
-                        </div>
-                    </StructuredListCell>
-                </StructuredListRow>
-            {/each}
-        </StructuredListBody>
-    </StructuredList>
+    <Accordion>
+        <AccordionItem title="Verwaltete Wohnungen" open>
+            <WalterMultiSelect
+                hideLabel
+                disabled={!admin}
+                titleText="Verwaltete Wohnungen"
+                bind:value={selectedWohnungen}
+                entries={wohnungen}
+            />
+            <StructuredList flush condensed>
+                <StructuredListHead>
+                    <StructuredListRow head>
+                        <StructuredListCell head>Wohnung</StructuredListCell>
+                        <StructuredListCell head
+                            >Berechtigung</StructuredListCell
+                        >
+                    </StructuredListRow>
+                </StructuredListHead>
+                <StructuredListBody>
+                    {#each entry.verwalter || [] as verwalter}
+                        <StructuredListRow>
+                            <StructuredListCell
+                                >{verwalter.wohnung.text}</StructuredListCell
+                            >
+                            <StructuredListCell>
+                                <div style="width:14em">
+                                    <WalterDropdown
+                                        readonly={!admin}
+                                        required
+                                        hideLabel
+                                        titleText="Berechtigung"
+                                        entries={verwalterrollen}
+                                        bind:value={verwalter.rolle}
+                                    />
+                                </div>
+                            </StructuredListCell>
+                        </StructuredListRow>
+                    {/each}
+                </StructuredListBody>
+            </StructuredList>
+        </AccordionItem>
+    </Accordion>
 </Row>

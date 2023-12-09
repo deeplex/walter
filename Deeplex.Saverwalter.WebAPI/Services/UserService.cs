@@ -166,7 +166,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             {
                 User = user,
                 Token = token,
-                ExpiresAt = DateTime.Now.AddDays(7), // TODO: Make this configurable
+                ExpiresAt = DateTime.Now.AddDays(7).AsUtcKind(), // TODO: Make this configurable
             };
             walterContext.UserResetCredentials.Add(user.UserResetCredential);
             await walterContext.SaveChangesAsync();
