@@ -14,12 +14,22 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungContro
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {
-    public class BetriebskostenrechnungControllerTests
+    public class BetriebskostenrechnungControllerTests : IDisposable
     {
+        public SaverwalterContext ctx;
+        public BetriebskostenrechnungControllerTests()
+        {
+            ctx = TestUtils.GetContext();
+        }
+
+        public void Dispose()
+        {
+            ctx.Dispose();
+        }
+
         [Fact]
         public async Task Get()
         {
-            var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<BetriebskostenrechnungController>>();
             var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
@@ -38,7 +48,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         [Fact]
         public async Task Post()
         {
-            var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<BetriebskostenrechnungController>>();
             var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
@@ -66,7 +75,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         [Fact]
         public async Task GetId()
         {
-            var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<BetriebskostenrechnungController>>();
             var auth = A.Fake<IAuthorizationService>();
@@ -89,7 +97,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         [Fact]
         public async Task Put()
         {
-            var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<BetriebskostenrechnungController>>();
             var auth = A.Fake<IAuthorizationService>();
@@ -115,7 +122,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         [Fact]
         public async Task Delete()
         {
-            var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<BetriebskostenrechnungController>>();
             var auth = A.Fake<IAuthorizationService>();
@@ -135,7 +141,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             result.Should().BeOfType<OkResult>();
             ctx.Betriebskostenrechnungen.Find(id).Should().BeNull();
-
         }
     }
 }

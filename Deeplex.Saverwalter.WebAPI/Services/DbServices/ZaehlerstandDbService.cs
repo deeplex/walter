@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity.Zaehler.Wohnung, [Operations.Delete]);
+            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Delete]);
             if (!authRx.Succeeded)
             {
                 return new ForbidResult();
@@ -71,8 +71,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var wohnung = (await Ctx.ZaehlerSet.FindAsync(entry.Zaehler.Id))?.Wohnung;
-                var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate]);
+                var zaehler = await Ctx.ZaehlerSet.FindAsync(entry.Zaehler.Id);
+                var authRx = await Auth.AuthorizeAsync(user, zaehler, [Operations.SubCreate]);
                 if (!authRx.Succeeded)
                 {
                     return new ForbidResult();
@@ -108,7 +108,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity.Zaehler.Wohnung, [Operations.Update]);
+            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Update]);
             if (!authRx.Succeeded)
             {
                 return new ForbidResult();

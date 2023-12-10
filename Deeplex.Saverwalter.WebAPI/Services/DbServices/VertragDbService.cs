@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity.Wohnung, [Operations.Read]);
+            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Read]);
             if (!authRx.Succeeded)
             {
                 return new ForbidResult();
@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity.Wohnung, [Operations.Delete]);
+            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Delete]);
             if (!authRx.Succeeded)
             {
                 return new ForbidResult();
@@ -129,7 +129,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity.Wohnung, [Operations.Update]);
+            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Update]);
             if (!authRx.Succeeded)
             {
                 return new ForbidResult();

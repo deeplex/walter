@@ -159,7 +159,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Umlagen.Add(entity);
             ctx.SaveChanges();
 
-            var result = await service.Put(user, entity.UmlageId + 1, entry);
+            var result = await service.Put(user, entity.UmlageId + 11, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }

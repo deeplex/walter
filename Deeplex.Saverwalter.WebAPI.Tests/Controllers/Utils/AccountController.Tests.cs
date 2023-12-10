@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
@@ -11,12 +12,22 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.Utils.UserController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {
-    public class AccountControllerTests
+    public class AccountControllerTests : IDisposable
     {
+        public SaverwalterContext ctx;
+        public AccountControllerTests()
+        {
+            ctx = TestUtils.GetContext();
+        }
+
+        public void Dispose()
+        {
+            ctx.Dispose();
+        }
+
         [Fact]
         public async void SignInSuccess()
         {
-            var ctx = TestUtils.GetContext();
             var tokenService = A.Fake<TokenService>();
             var userService = new UserService(ctx, tokenService);
             var controller = new UserController(ctx, tokenService, userService);
@@ -53,7 +64,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         [Fact]
         public async void SignInFailed()
         {
-            var ctx = TestUtils.GetContext();
             var tokenService = A.Fake<TokenService>();
             var userService = new UserService(ctx, tokenService);
             var controller = new UserController(ctx, tokenService, userService);
@@ -70,8 +80,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.SignIn(new SignInRequest
             {
-                Username = "test2",
-                Password = "test2"
+                Username = "test3",
+                Password = "test3"
             });
 
             result.Result.Should().BeOfType<UnauthorizedResult>();

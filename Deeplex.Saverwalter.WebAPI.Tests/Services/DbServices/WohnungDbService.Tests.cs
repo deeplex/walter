@@ -11,12 +11,22 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {
-    public class WohnungDbServiceTests
+    public class WohnungDbServiceTests : IDisposable
     {
+        public SaverwalterContext ctx;
+        public WohnungDbServiceTests()
+        {
+            ctx = TestUtils.GetContext();
+        }
+
+        public void Dispose()
+        {
+            ctx.Dispose();
+        }
+
         [Fact]
         public async Task GetTest()
         {
-            var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var user = A.Fake<ClaimsPrincipal>();
             var auth = A.Fake<IAuthorizationService>();
@@ -34,7 +44,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         [Fact]
         public async Task DeleteTest()
         {
-            var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var user = A.Fake<ClaimsPrincipal>();
             var auth = A.Fake<IAuthorizationService>();
@@ -52,7 +61,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         [Fact]
         public async Task PostTest()
         {
-            var ctx = TestUtils.GetContext();
             var user = A.Fake<ClaimsPrincipal>();
             var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
@@ -77,7 +85,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         [Fact]
         public async Task PostFailedTest()
         {
-            var ctx = TestUtils.GetContext();
             var user = A.Fake<ClaimsPrincipal>();
             var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
@@ -105,7 +112,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         [Fact]
         public async Task PutTest()
         {
-            var ctx = TestUtils.GetContext();
             var user = A.Fake<ClaimsPrincipal>();
             var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
@@ -139,7 +145,6 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         [Fact]
         public async Task PutFailedTest()
         {
-            var ctx = TestUtils.GetContext();
             var user = A.Fake<ClaimsPrincipal>();
             var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
@@ -161,7 +166,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
 
-            var result = await service.Put(user, entity.WohnungId + 1, entry);
+            var result = await service.Put(user, entity.WohnungId + 11, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }

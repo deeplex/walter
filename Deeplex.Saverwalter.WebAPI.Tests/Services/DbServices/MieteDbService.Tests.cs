@@ -156,7 +156,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Mieten.Add(entity);
             ctx.SaveChanges();
 
-            var result = await service.Put(user, entity.MieteId + 1, entry);
+            var result = await service.Put(user, entity.MieteId + 111, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }

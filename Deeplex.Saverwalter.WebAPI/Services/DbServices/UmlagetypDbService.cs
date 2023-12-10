@@ -44,17 +44,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
 
             var wohnungen = entity.Umlagen.SelectMany(entity => entity.Wohnungen);
-            var success = false;
-            foreach (var wohnung in wohnungen)
-            {
-                var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.Read]);
-                if (authRx.Succeeded)
-                {
-                    success = true;
-                    break;
-                }
-            }
-            if (!success)
+            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Read]);
+            if (!authRx.Succeeded)
             {
                 return new ForbidResult();
             }
@@ -78,10 +69,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var allAuthorized = entity.Umlagen
-                .SelectMany(entity => entity.Wohnungen)
-                .Select(async wohnung => (await Auth.AuthorizeAsync(user, wohnung, [Operations.Delete])).Succeeded);
-            if (!(await Task.WhenAll(allAuthorized)).All(result => result))
+            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Delete]);
+            if (!authRx.Succeeded)
             {
                 return new ForbidResult();
             }
@@ -99,12 +88,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new BadRequestResult();
             }
 
-            var allAuthorized = entry.Umlagen?
-                .SelectMany(entity => entity.SelectedWohnungen ?? [])
-                .SelectMany(w => Ctx.Wohnungen.Where(u => u.WohnungId == w.Id))
-                .Select(async wohnung => (await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate])).Succeeded);
-            if (allAuthorized == null ||
-                !(await Task.WhenAll(allAuthorized)).All(result => result))
+            var authRx = await Auth.AuthorizeAsync(
+                user,
+                entry.Umlagen!.Select(e => Ctx.Umlagen.Where(u => u.UmlageId == e.Id)),
+                [Operations.SubCreate]);
+            if (!authRx.Succeeded)
             {
                 return new ForbidResult();
             }
@@ -137,10 +125,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var allAuthorized = entity.Umlagen
-                .SelectMany(entity => entity.Wohnungen)
-                .Select(async wohnung => (await Auth.AuthorizeAsync(user, wohnung, [Operations.Update])).Succeeded);
-            if (!(await Task.WhenAll(allAuthorized)).All(result => result))
+            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.SubCreate]);
+            if (!authRx.Succeeded)
             {
                 return new ForbidResult();
             }

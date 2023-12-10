@@ -43,18 +43,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var wohnungen = entity.Umlage.Wohnungen;
-            var success = false;
-            foreach (var wohnung in wohnungen)
-            {
-                var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.Read]);
-                if (authRx.Succeeded)
-                {
-                    success = true;
-                    break;
-                }
-            }
-            if (!success)
+            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Read]);
+            if (!authRx.Succeeded)
             {
                 return new ForbidResult();
             }
@@ -78,9 +68,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var allAuthorized = entity.Umlage.Wohnungen
-                .Select(async wohnung => (await Auth.AuthorizeAsync(user, wohnung, [Operations.Delete])).Succeeded);
-            if (!(await Task.WhenAll(allAuthorized)).All(result => result))
+            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Delete]);
+            if (!authRx.Succeeded)
             {
                 return new ForbidResult();
             }
@@ -98,16 +87,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new BadRequestResult();
             }
 
+            var umlage = Ctx.Umlagen.FindAsync(entry.Umlage!.Id);
+            var authRx = await Auth.AuthorizeAsync(user, umlage, [Operations.Delete]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
+            }
+
             try
             {
-                var allAuthorized = (await Ctx.Umlagen.FindAsync(entry.Umlage!.Id))!
-                    .Wohnungen
-                    .Select(async wohnung => (await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate])).Succeeded);
-                if (allAuthorized == null ||
-                    !(await Task.WhenAll(allAuthorized)).All(result => result))
-                {
-                    return new ForbidResult();
-                }
 
                 return new OkObjectResult(Add(entry));
             }
@@ -148,9 +136,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var allAuthorized = entity.Umlage.Wohnungen
-                .Select(async wohnung => (await Auth.AuthorizeAsync(user, wohnung, [Operations.Update])).Succeeded);
-            if (!(await Task.WhenAll(allAuthorized)).All(result => result))
+            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Update]);
+            if (!authRx.Succeeded)
             {
                 return new ForbidResult();
             }

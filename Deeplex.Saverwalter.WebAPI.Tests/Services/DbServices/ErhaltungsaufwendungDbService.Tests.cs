@@ -198,7 +198,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Erhaltungsaufwendungen.Add(entity);
             ctx.SaveChanges();
 
-            var result = await service.Put(user, entity.ErhaltungsaufwendungId + 1, entry);
+            var result = await service.Put(user, entity.ErhaltungsaufwendungId + 11, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }
