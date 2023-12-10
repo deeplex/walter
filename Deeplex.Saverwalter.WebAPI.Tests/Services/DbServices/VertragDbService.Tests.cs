@@ -125,7 +125,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var entry = new VertragEntry(entity);
             entry.Ende = new DateOnly(2021, 12, 31);
 
-            var result = await service.Put(user, entity.VertragId + 20, entry);
+            var result = await service.Put(user, entity.VertragId + 2220, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }

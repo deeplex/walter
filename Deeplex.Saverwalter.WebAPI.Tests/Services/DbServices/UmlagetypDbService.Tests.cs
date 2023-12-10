@@ -145,7 +145,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Umlagetypen.Add(entity);
             ctx.SaveChanges();
 
-            var result = await service.Put(user, entity.UmlagetypId + 1, entry);
+            var result = await service.Put(user, entity.UmlagetypId + 2221, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }

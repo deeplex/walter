@@ -119,17 +119,18 @@ namespace Deeplex.Saverwalter.WebAPI
             builder.Services.AddTransient(c => container.GetInstance<TokenService>());
             builder.Services.AddTransient(c => container.GetInstance<SaverwalterContext>());
             builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, AdressePermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, BetriebskostenrechnungPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, ErhaltungsaufwendungPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, MietePermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, MietminderungPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, UmlagePermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, UmlagenPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, UmlagetypPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, VertragPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, VertragVersionPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, ZaehlerPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, ZaehlerstandPermissionHandler>();
         }
 
         private static Container GetServiceContainer()
