@@ -29,12 +29,14 @@
 >
     <WalterMultiSelect disabled={readonly} bind:value {titleText} {entries} />
 
-    <WalterQuickAddButton
-        title="Umlagen"
-        bind:addEntry
-        addUrl={WalterUmlagetypEntry.ApiURL}
-        {onSubmit}
-    >
-        <WalterUmlage entry={addEntry} {fetchImpl} />
-    </WalterQuickAddButton>
+    {#if !readonly}
+        <WalterQuickAddButton
+            title="Umlagen"
+            bind:addEntry
+            addUrl={WalterUmlagetypEntry.ApiURL}
+            {onSubmit}
+        >
+            <WalterUmlage entry={addEntry} {fetchImpl} />
+        </WalterQuickAddButton>
+    {/if}
 </div>

@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 {
                     Read = true,
                     Update = true,
-                    Delete = true
+                    Remove = true
                 };
                 var entry = new KontaktEntry(entity, permissions);
                 return new OkObjectResult(entry);

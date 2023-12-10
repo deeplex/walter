@@ -1,4 +1,5 @@
 import { WalterApiHandler } from './WalterApiHandler';
+import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 
 export class WalterMieteEntry extends WalterApiHandler {
@@ -13,7 +14,8 @@ export class WalterMieteEntry extends WalterApiHandler {
         public repeat: number,
         public createdAt: Date,
         public lastModified: Date,
-        public vertrag: WalterSelectionEntry
+        public vertrag: WalterSelectionEntry,
+        public permissions: WalterPermissions
     ) {
         super();
     }
@@ -21,6 +23,7 @@ export class WalterMieteEntry extends WalterApiHandler {
     static fromJson(json: WalterMieteEntry) {
         const vertrag =
             json.vertrag && WalterSelectionEntry.fromJson(json.vertrag);
+        const permissions = WalterPermissions.fromJson(json.permissions);
 
         return new WalterMieteEntry(
             json.id,
@@ -31,7 +34,8 @@ export class WalterMieteEntry extends WalterApiHandler {
             json.repeat,
             json.createdAt,
             json.lastModified,
-            vertrag
+            vertrag,
+            permissions
         );
     }
 }

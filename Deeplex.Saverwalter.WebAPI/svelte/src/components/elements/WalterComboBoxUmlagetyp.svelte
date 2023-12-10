@@ -35,12 +35,14 @@
         {entries}
     />
 
-    <WalterQuickAddButton
-        title="Umlagetypen"
-        bind:addEntry
-        addUrl={WalterUmlagetypEntry.ApiURL}
-        {onSubmit}
-    >
-        <WalterUmlagetyp entry={addEntry} {fetchImpl} />
-    </WalterQuickAddButton>
+    {#if !readonly}
+        <WalterQuickAddButton
+            title="Umlagetypen"
+            bind:addEntry
+            addUrl={WalterUmlagetypEntry.ApiURL}
+            {onSubmit}
+        >
+            <WalterUmlagetyp entry={addEntry} {fetchImpl} />
+        </WalterQuickAddButton>
+    {/if}
 </div>

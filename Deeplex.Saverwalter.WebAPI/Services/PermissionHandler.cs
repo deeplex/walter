@@ -13,7 +13,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
             public bool Read { get; set; } = read;
             public bool Update { get; set; } = false;
-            public bool Delete { get; set; } = false;
+            public bool Remove { get; set; } = false;
         }
 
         public static async Task<Permissions> GetPermissions<T>(ClaimsPrincipal user, T entity, IAuthorizationService auth)
@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             {
                 return permissions;
             }
-            permissions.Delete = (await auth.AuthorizeAsync(user, entity, [Operations.Delete])).Succeeded;
+            permissions.Remove = (await auth.AuthorizeAsync(user, entity, [Operations.Delete])).Succeeded;
             return permissions;
         }
 

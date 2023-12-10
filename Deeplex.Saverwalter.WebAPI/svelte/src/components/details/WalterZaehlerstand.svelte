@@ -12,7 +12,7 @@
 
     export let entry: Partial<WalterZaehlerstandEntry> = {};
     export let fetchImpl: typeof fetch | undefined = undefined;
-    export let readonly = false;
+    export let readonly = entry?.permissions?.update === false;
 
     let maxDate: string | undefined;
     onMount(async () => {

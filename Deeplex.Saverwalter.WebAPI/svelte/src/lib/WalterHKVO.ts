@@ -1,4 +1,5 @@
 import { WalterApiHandler } from './WalterApiHandler';
+import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 
 export class WalterHKVOEntry extends WalterApiHandler {
@@ -13,7 +14,8 @@ export class WalterHKVOEntry extends WalterApiHandler {
         public strompauschale: number,
         public stromrechnung: WalterSelectionEntry,
         public createdAt: Date,
-        public lastModified: Date
+        public lastModified: Date,
+        public permissions: WalterPermissions
     ) {
         super();
     }
@@ -24,6 +26,7 @@ export class WalterHKVOEntry extends WalterApiHandler {
         const stromrechnung =
             json.stromrechnung &&
             WalterSelectionEntry.fromJson(json.stromrechnung);
+        const permissions = WalterPermissions.fromJson(json.permissions);
 
         return new WalterHKVOEntry(
             json.id,
@@ -34,7 +37,8 @@ export class WalterHKVOEntry extends WalterApiHandler {
             json.strompauschale,
             stromrechnung,
             json.createdAt,
-            json.lastModified
+            json.lastModified,
+            permissions
         );
     }
 }

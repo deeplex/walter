@@ -1,5 +1,6 @@
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterKontaktEntry } from './WalterKontakt';
+import { WalterPermissions } from './WalterPermissions';
 import { WalterWohnungEntry } from './WalterWohnung';
 import { WalterZaehlerEntry } from './WalterZaehler';
 
@@ -18,7 +19,8 @@ export class WalterAdresseEntry extends WalterApiHandler {
         public lastModified: Date,
         public wohnungen: WalterWohnungEntry[],
         public kontakte: WalterKontaktEntry[],
-        public zaehler: WalterZaehlerEntry[]
+        public zaehler: WalterZaehlerEntry[],
+        public permissions: WalterPermissions
     ) {
         super();
     }
@@ -27,6 +29,7 @@ export class WalterAdresseEntry extends WalterApiHandler {
         const wohnungen = json.wohnungen?.map(WalterWohnungEntry.fromJson);
         const kontakte = json.kontakte?.map(WalterKontaktEntry.fromJson);
         const zaehler = json.zaehler?.map(WalterZaehlerEntry.fromJson);
+        const permissions = WalterPermissions.fromJson(json.permissions);
 
         return new WalterAdresseEntry(
             json.id,
@@ -40,7 +43,8 @@ export class WalterAdresseEntry extends WalterApiHandler {
             json.lastModified,
             wohnungen,
             kontakte,
-            zaehler
+            zaehler,
+            permissions
         );
     }
 }

@@ -51,7 +51,11 @@
             title="Wohnungen"
             rows={data.entry.wohnungen}
         />
-        <WalterKontakte title="Personen" rows={data.entry.kontakte} />
+        <WalterKontakte
+            fetchImpl={data.fetchImpl}
+            title="Personen"
+            rows={data.entry.kontakte}
+        />
         <WalterZaehlerList
             fetchImpl={data.fetchImpl}
             title="Zähler"

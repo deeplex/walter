@@ -7,17 +7,12 @@
         WalterMultiSelectKontakt
     } from '$walter/components';
     import type { WalterVertragEntry } from '$walter/lib';
-    import { walter_selection } from '$walter/services/requests';
-    import {
-        Row,
-        TextInput,
-        TextInputSkeleton
-    } from 'carbon-components-svelte';
+    import { Row, TextInput } from 'carbon-components-svelte';
     import { convertDateGerman } from '$walter/services/utils';
 
     export let entry: Partial<WalterVertragEntry> = {};
     export let fetchImpl: typeof fetch;
-    export let readonly = false;
+    export let readonly = entry?.permissions?.update === false;
 </script>
 
 <Row>
@@ -42,11 +37,7 @@
         {readonly}
         bind:value={entry.wohnung}
     />
-    <TextInput
-        labelText="Vermieter"
-        readonly
-        value={entry.wohnung?.filter}
-    />
+    <TextInput labelText="Vermieter" readonly value={entry.wohnung?.filter} />
     <WalterComboBoxKontakt
         {fetchImpl}
         {readonly}

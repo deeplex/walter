@@ -21,7 +21,7 @@
     export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
     export let rechnungen: WalterBetriebskostenrechnungEntry[] = [];
     export let fetchImpl: typeof fetch;
-    export let readonly = false;
+    export let readonly = entry?.permissions?.update === false;
 
     const umlagetypen = walter_selection.umlagetypen(fetchImpl);
     const umlagen_wohnungen = walter_selection.umlagen_wohnungen(fetchImpl);

@@ -31,12 +31,14 @@
         {entries}
     />
 
-    <WalterQuickAddButton
-        title="Wohnungen"
-        {addEntry}
-        addUrl={'/api/wohnungen'}
-        {onSubmit}
-    >
-        <WalterWohnung {fetchImpl} entry={addEntry} />
-    </WalterQuickAddButton>
+    {#if !readonly}
+        <WalterQuickAddButton
+            title="Wohnungen"
+            {addEntry}
+            addUrl={'/api/wohnungen'}
+            {onSubmit}
+        >
+            <WalterWohnung {fetchImpl} entry={addEntry} />
+        </WalterQuickAddButton>
+    {/if}
 </div>

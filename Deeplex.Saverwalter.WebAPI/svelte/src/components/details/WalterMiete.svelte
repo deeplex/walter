@@ -13,7 +13,7 @@
     export let entry: Partial<WalterMieteEntry> = {};
     export let mieten: WalterMieteEntry[] = [];
     export const fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
-    export let readonly = false;
+    export let readonly = entry?.permissions?.update === false;
 </script>
 
 <Row>

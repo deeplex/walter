@@ -1,6 +1,6 @@
 <script lang="ts">
     import {
-    WalterAdresse,
+        WalterAdresse,
         WalterComboBox,
         WalterMultiSelectJuristischePerson,
         WalterTextArea,
@@ -13,17 +13,17 @@
 
     export let entry: Partial<WalterKontaktEntry>;
     export let fetchImpl: typeof fetch;
-    export let readonly = false;
+    export let readonly = entry?.permissions?.update === false;
     export let juristisch = false;
 
     const anreden = walter_selection.anreden(fetchImpl);
-    const rechtsformen = walter_selection.rechtsformen(fetchImpl)
-        .then(res => {
-            if (juristisch) // Disable selection of natuerliche Person
-            {
+    const rechtsformen = walter_selection
+        .rechtsformen(fetchImpl)
+        .then((res) => {
+            if (juristisch) {
+                // Disable selection of natuerliche Person
                 (res[0] as any).disabled = true;
-                if (entry.rechtsform?.id === 0)
-                {
+                if (entry.rechtsform?.id === 0) {
                     entry.rechtsform = res[1];
                 }
             }
@@ -35,7 +35,8 @@
     <WalterComboBox
         entries={rechtsformen}
         bind:value={entry.rechtsform}
-        titleText="Rechtsform" />
+        titleText="Rechtsform"
+    />
     {#if entry.rechtsform?.id === 0}
         <WalterComboBox
             entries={anreden}
@@ -83,7 +84,7 @@
             {fetchImpl}
             titleText="Mitglieder"
             bind:value={entry.selectedMitglieder}
-    />
+        />
     {/if}
 </Row>
 <Row>

@@ -3,6 +3,7 @@ import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnun
 import { WalterKontaktEntry } from './WalterKontakt';
 import { WalterMieteEntry } from './WalterMiete';
 import { WalterMietminderungEntry } from './WalterMietminderung';
+import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 import { WalterVertragVersionEntry } from './WalterVertragVersion';
 
@@ -24,7 +25,8 @@ export class WalterVertragEntry extends WalterApiHandler {
         public mieter: WalterKontaktEntry[],
         public mieten: WalterMieteEntry[],
         public mietminderungen: WalterMietminderungEntry[],
-        public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[]
+        public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
+        public permissions: WalterPermissions
     ) {
         super();
     }
@@ -49,6 +51,7 @@ export class WalterVertragEntry extends WalterApiHandler {
         const betriebskostenrechnungen = json.betriebskostenrechnungen?.map(
             WalterBetriebskostenrechnungEntry.fromJson
         );
+        const permissions = WalterPermissions.fromJson(json.permissions);
 
         return new WalterVertragEntry(
             json.id,
@@ -65,7 +68,8 @@ export class WalterVertragEntry extends WalterApiHandler {
             mieter,
             mieten,
             mietminderungen,
-            betriebskostenrechnungen
+            betriebskostenrechnungen,
+            permissions
         );
     }
 }
