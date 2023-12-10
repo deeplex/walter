@@ -82,7 +82,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Umlage = umlage
             };
-            var entry = new BetriebskostenrechnungEntry(entity);
+            var entry = new BetriebskostenrechnungEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -109,7 +109,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Betriebskostenrechnungen.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new BetriebskostenrechnungEntry(entity);
+            var entry = new BetriebskostenrechnungEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -134,7 +134,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             ctx.Betriebskostenrechnungen.Add(entity);
             ctx.SaveChanges();
-            var entry = new BetriebskostenrechnungEntry(entity);
+            var entry = new BetriebskostenrechnungEntry(entity, new());
             entry.Betrag = 2000;
 
             var result = await service.Put(user, entity.BetriebskostenrechnungId, entry);
@@ -164,7 +164,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Umlage = umlage
             };
-            var entry = new BetriebskostenrechnungEntry(entity);
+            var entry = new BetriebskostenrechnungEntry(entity, new());
             ctx.Betriebskostenrechnungen.Add(entity);
             ctx.SaveChanges();
 

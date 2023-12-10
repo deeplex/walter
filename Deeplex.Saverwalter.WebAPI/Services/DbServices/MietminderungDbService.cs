@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 ? Ctx.Mietminderungen.ToListAsync()
                 : GetListForUser(user));
 
-            return new OkObjectResult(list.Select(e => new MietminderungEntryBase(e)).ToList());
+            return new OkObjectResult(list.Select(e => new MietminderungEntryBase(e, new(true))).ToList());
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
@@ -43,15 +43,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Read]);
-            if (!authRx.Succeeded)
+            var permissions = await Utils.GetPermissions(user, entity, Auth);
+            if (!permissions.Read)
             {
                 return new ForbidResult();
             }
 
             try
             {
-                var entry = new MietminderungEntryBase(entity);
+                var entry = new MietminderungEntryBase(entity, permissions);
                 return new OkObjectResult(entry);
             }
             catch
@@ -116,7 +116,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Mietminderungen.Add(entity);
             Ctx.SaveChanges();
 
-            return new MietminderungEntryBase(entity);
+            return new MietminderungEntryBase(entity, entry.Permissions);
         }
 
         public async Task<IActionResult> Put(ClaimsPrincipal user, int id, MietminderungEntryBase entry)
@@ -153,7 +153,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Mietminderungen.Update(entity);
             Ctx.SaveChanges();
 
-            return new MietminderungEntryBase(entity);
+            return new MietminderungEntryBase(entity, entry.Permissions);
         }
 
         private void SetOptionalValues(Mietminderung entity, MietminderungEntryBase entry)

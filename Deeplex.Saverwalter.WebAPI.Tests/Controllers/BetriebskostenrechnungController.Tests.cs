@@ -65,7 +65,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Umlage = umlage
             };
-            var entry = new BetriebskostenrechnungEntry(entity);
+            var entry = new BetriebskostenrechnungEntry(entity, new());
 
             var result = await controller.Post(entry);
 
@@ -110,7 +110,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 throw new NullReferenceException("Betriebskostenrechnung is null");
             }
-            var entry = new BetriebskostenrechnungEntry(entity);
+            var entry = new BetriebskostenrechnungEntry(entity, new());
             entry.Betrag = 2000;
 
             var result = await controller.Put(entity.BetriebskostenrechnungId, entry);

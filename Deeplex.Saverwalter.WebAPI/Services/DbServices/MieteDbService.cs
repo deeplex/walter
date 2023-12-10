@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 ? Ctx.Mieten.ToListAsync()
                 : GetListForUser(user));
 
-            return new OkObjectResult(list.Select(e => new MieteEntryBase(e)).ToList());
+            return new OkObjectResult(list.Select(e => new MieteEntryBase(e, new(true))).ToList());
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
@@ -43,15 +43,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Read]);
-            if (!authRx.Succeeded)
+            var permissions = await Utils.GetPermissions(user, entity, Auth);
+            if (!permissions.Read)
             {
                 return new ForbidResult();
             }
 
             try
             {
-                var entry = new MieteEntryBase(entity);
+                var entry = new MieteEntryBase(entity, permissions);
                 return new OkObjectResult(entry);
             }
             catch
@@ -125,7 +125,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             Ctx.SaveChanges();
 
-            return new MieteEntryBase(mieten.First(), entry.Repeat);
+            return new MieteEntryBase(mieten.First(), entry.Permissions, entry.Repeat);
 
         }
 
@@ -164,7 +164,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Mieten.Update(entity);
             Ctx.SaveChanges();
 
-            return new MieteEntryBase(entity);
+            return new MieteEntryBase(entity, entry.Permissions);
         }
 
         private static void SetOptionalValues(Miete entity, MieteEntryBase entry)

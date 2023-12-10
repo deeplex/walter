@@ -63,7 +63,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 Ansprechpartner = vertrag.Ansprechpartner,
                 Wohnung = vertrag.Wohnung
             };
-            var entry = new VertragEntry(entity);
+            var entry = new VertragEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -80,7 +80,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new VertragDbService(ctx, auth);
             var entity = TestUtils.GetVertragForAbrechnung(ctx);
-            var entry = new VertragEntry(entity);
+            var entry = new VertragEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -98,7 +98,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var service = new VertragDbService(ctx, auth);
             var entity = TestUtils.GetVertragForAbrechnung(ctx);
 
-            var entry = new VertragEntry(entity);
+            var entry = new VertragEntry(entity, new());
             entry.Ende = new DateOnly(2021, 12, 31);
 
             var result = await service.Put(user, entity.VertragId, entry);
@@ -122,7 +122,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new VertragDbService(ctx, auth);
             var entity = TestUtils.GetVertragForAbrechnung(ctx);
-            var entry = new VertragEntry(entity);
+            var entry = new VertragEntry(entity, new());
             entry.Ende = new DateOnly(2021, 12, 31);
 
             var result = await service.Put(user, entity.VertragId + 2220, entry);

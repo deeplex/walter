@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 ? Ctx.Vertraege.ToListAsync()
                 : GetListForUser(user));
 
-            return new OkObjectResult(list.Select(e => new VertragEntryBase(e)).ToList());
+            return new OkObjectResult(list.Select(e => new VertragEntryBase(e, new(true))).ToList());
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
@@ -44,15 +44,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Read]);
-            if (!authRx.Succeeded)
+            var permissions = await Utils.GetPermissions(user, entity, Auth);
+            if (!permissions.Read)
             {
                 return new ForbidResult();
             }
 
             try
             {
-                var entry = new VertragEntry(entity);
+                var entry = new VertragEntry(entity, permissions);
                 return new OkObjectResult(entry);
             }
             catch
@@ -118,7 +118,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Vertraege.Add(entity);
             Ctx.SaveChanges();
 
-            return new VertragEntry(entity);
+            return new VertragEntry(entity, entry.Permissions);
         }
 
         public async Task<IActionResult> Put(ClaimsPrincipal user, int id, VertragEntry entry)
@@ -153,11 +153,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
             entity.Wohnung = (await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id))!;
 
-            SetOptionalValues(entity, entry);
+            await SetOptionalValues(entity, entry);
             Ctx.Vertraege.Update(entity);
             Ctx.SaveChanges();
 
-            return new VertragEntry(entity);
+            return new VertragEntry(entity, entry.Permissions);
         }
 
         private async Task SetOptionalValues(Vertrag entity, VertragEntry entry)

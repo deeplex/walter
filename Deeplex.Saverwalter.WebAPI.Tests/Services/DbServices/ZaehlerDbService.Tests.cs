@@ -62,7 +62,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Wohnung = TestUtils.GetVertragForAbrechnung(ctx).Wohnung
             };
-            var entry = new ZaehlerEntry(entity);
+            var entry = new ZaehlerEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -83,7 +83,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.ZaehlerSet.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new ZaehlerEntry(entity);
+            var entry = new ZaehlerEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -102,7 +102,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var entity = new Zaehler("Test", Zaehlertyp.Strom);
             ctx.ZaehlerSet.Add(entity);
             ctx.SaveChanges();
-            var entry = new ZaehlerEntry(entity);
+            var entry = new ZaehlerEntry(entity, new());
             entry.Kennnummer = "Neue Kennnummer";
 
             var result = await service.Put(user, entity.ZaehlerId, entry);
@@ -130,12 +130,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 Typ = new Umlagetyp("Dachrinnenreinigung")
             };
             var entity = new Zaehler("Test", Zaehlertyp.Strom);
-            var entry = new ZaehlerEntry(entity);
+            var entry = new ZaehlerEntry(entity, new());
             entry.Kennnummer = "Neue Kennnummer";
             ctx.ZaehlerSet.Add(entity);
             ctx.SaveChanges();
 
-            var result = await service.Put(user, entity.ZaehlerId + 1, entry);
+            var result = await service.Put(user, entity.ZaehlerId + 1312, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }

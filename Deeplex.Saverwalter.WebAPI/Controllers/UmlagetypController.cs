@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -18,8 +19,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
+            public Permissions Permissions { get; set; } = new Permissions();
+
             public UmlagetypEntryBase() { }
-            public UmlagetypEntryBase(Umlagetyp entity)
+            public UmlagetypEntryBase(Umlagetyp entity, Permissions permissions)
             {
                 Entity = entity;
 
@@ -29,15 +32,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 CreatedAt = Entity.CreatedAt;
                 LastModified = Entity.LastModified;
+
+                Permissions = permissions;
             }
         }
 
         public class UmlagetypEntry : UmlagetypEntryBase
         {
-            public IEnumerable<UmlageEntryBase>? Umlagen => Entity?.Umlagen.ToList().Select(e => new UmlageEntryBase(e));
+            public IEnumerable<UmlageEntryBase>? Umlagen => Entity?.Umlagen.ToList().Select(e => new UmlageEntryBase(e, new()));
 
             public UmlagetypEntry() : base() { }
-            public UmlagetypEntry(Umlagetyp entity) : base(entity) { }
+            public UmlagetypEntry(Umlagetyp entity, Permissions permissions) : base(entity, permissions) { }
         }
 
         private readonly ILogger<UmlagetypController> _logger;

@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var controller = new AdresseController(logger, dbService);
 
             var entity = new Adresse("Teststrasse", "1", "12345", "Teststadt");
-            var entry = new AdresseEntry(entity);
+            var entry = new AdresseEntry(entity, new());
 
             var result = await controller.Post(entry);
 
@@ -92,7 +92,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 throw new NullReferenceException("Adresse is null");
             }
-            var entry = new AdresseEntry(vertrag.Wohnung.Adresse);
+            var entry = new AdresseEntry(vertrag.Wohnung.Adresse, new());
             entry.Hausnummer = "2";
 
             var result = await controller.Put(vertrag.Wohnung.Adresse.AdresseId, entry);

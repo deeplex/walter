@@ -3,6 +3,7 @@ using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -22,8 +23,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
+            public Permissions Permissions { get; set; } = new Permissions();
+
             public BetriebskostenrechnungEntryBase() { }
-            public BetriebskostenrechnungEntryBase(Betriebskostenrechnung entity)
+            public BetriebskostenrechnungEntryBase(Betriebskostenrechnung entity, Permissions permissions)
             {
                 Id = entity.BetriebskostenrechnungId;
 
@@ -39,6 +42,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
+
+                Permissions = permissions;
             }
         }
 
@@ -47,11 +52,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             private Betriebskostenrechnung? Entity { get; }
 
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen
-                => Entity?.Umlage?.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e));
-            public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Umlage.Wohnungen.Select(e => new WohnungEntryBase(e));
+                => Entity?.Umlage?.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e, new()));
+            public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Umlage.Wohnungen.Select(e => new WohnungEntryBase(e, new()));
 
             public BetriebskostenrechnungEntry() : base() { }
-            public BetriebskostenrechnungEntry(Betriebskostenrechnung entity) : base(entity)
+            public BetriebskostenrechnungEntry(Betriebskostenrechnung entity, Permissions permissions) : base(entity, permissions)
             {
                 Entity = entity;
             }

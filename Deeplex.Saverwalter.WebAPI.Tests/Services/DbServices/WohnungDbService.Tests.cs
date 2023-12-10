@@ -75,7 +75,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Besitzer = besitzer
             };
-            var entry = new WohnungEntry(entity);
+            var entry = new WohnungEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -102,7 +102,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new WohnungEntry(entity);
+            var entry = new WohnungEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -128,7 +128,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
-            var entry = new WohnungEntry(entity);
+            var entry = new WohnungEntry(entity, new());
             entry.Wohnflaeche = 200;
 
             var result = await service.Put(user, entity.WohnungId, entry);
@@ -162,7 +162,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Besitzer = besitzer
             };
-            var entry = new WohnungEntry(entity);
+            var entry = new WohnungEntry(entity, new());
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
 

@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var controller = new UmlagetypController(logger, dbService);
 
             var entity = new Umlagetyp("Hausstrom");
-            var entry = new UmlagetypEntry(entity);
+            var entry = new UmlagetypEntry(entity, new());
 
             var result = await controller.Post(entry);
 
@@ -94,7 +94,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 throw new NullReferenceException("Umlagetyp is null");
             }
-            var entry = new UmlagetypEntry(entity);
+            var entry = new UmlagetypEntry(entity, new());
             entry.Bezeichnung = "Test";
 
             var result = await controller.Put(entity.UmlagetypId, entry);

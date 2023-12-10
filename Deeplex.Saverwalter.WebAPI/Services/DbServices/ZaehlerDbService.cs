@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 ? Ctx.ZaehlerSet.ToListAsync()
                 : GetListForUser(user));
 
-            return new OkObjectResult(list.Select(e => new ZaehlerEntryBase(e)).ToList());
+            return new OkObjectResult(list.Select(e => new ZaehlerEntryBase(e, new())).ToList());
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
@@ -46,15 +46,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Read]);
-            if (!authRx.Succeeded)
+            var permissions = await Utils.GetPermissions(user, entity, Auth);
+            if (!permissions.Read)
             {
                 return new ForbidResult();
             }
 
             try
             {
-                var entry = new ZaehlerEntry(entity);
+                var entry = new ZaehlerEntry(entity, permissions);
                 return new OkObjectResult(entry);
             }
             catch
@@ -118,7 +118,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.ZaehlerSet.Add(entity);
             Ctx.SaveChanges();
 
-            return new ZaehlerEntry(entity);
+            return new ZaehlerEntry(entity, entry.Permissions);
         }
         public async Task<IActionResult> Put(ClaimsPrincipal user, int id, ZaehlerEntry entry)
         {
@@ -154,7 +154,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.ZaehlerSet.Update(entity);
             Ctx.SaveChanges();
 
-            return new ZaehlerEntry(entity);
+            return new ZaehlerEntry(entity, entry.Permissions);
         }
 
         private async Task SetOptionalValues(Zaehler entity, ZaehlerEntry entry)

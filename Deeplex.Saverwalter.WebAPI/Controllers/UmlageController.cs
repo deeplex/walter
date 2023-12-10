@@ -5,6 +5,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungContro
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -22,8 +23,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Strompauschale { get; set; }
             public SelectionEntry Stromrechnung { get; set; } = null!;
 
+            public Permissions Permissions { get; set; } = new Permissions();
+
             public HKVOEntryBase() { }
-            public HKVOEntryBase(HKVO entity)
+            public HKVOEntryBase(HKVO entity, Permissions permissions)
             {
                 Id = entity.HKVOId;
 
@@ -32,6 +35,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 HKVO_P9 = new((int)entity.HKVO_P9, entity.HKVO_P9.ToDescriptionString());
                 Strompauschale = (int)(entity.Strompauschale * 100);
                 Stromrechnung = new SelectionEntry(entity.Betriebsstrom.UmlageId, entity.Betriebsstrom.Typ.Bezeichnung);
+
+                Permissions = permissions;
             }
         }
 
@@ -50,8 +55,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
+            public Permissions Permissions { get; set; } = new Permissions();
+
             protected UmlageEntryBase() { }
-            public UmlageEntryBase(Umlage entity)
+            public UmlageEntryBase(Umlage entity, Permissions permissions)
             {
                 Id = entity.UmlageId;
 
@@ -68,15 +75,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 SelectedZaehler = entity.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer));
 
-                Betriebskostenrechnungen = entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e));
+                Betriebskostenrechnungen = entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e, permissions));
 
                 if (entity.HKVO != null)
                 {
-                    HKVO = new HKVOEntryBase(entity.HKVO);
+                    HKVO = new HKVOEntryBase(entity.HKVO, permissions);
                 }
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
+
+                Permissions = permissions;
             }
         }
 
@@ -84,12 +93,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             private Umlage Entity { get; } = null!;
 
-            public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e));
-            public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
+            public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, Permissions));
+            public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e, Permissions));
             // TODO HKVO
 
             public UmlageEntry() : base() { }
-            public UmlageEntry(Umlage entity) : base(entity)
+            public UmlageEntry(Umlage entity, Permissions permissions) : base(entity, permissions)
             {
                 Entity = entity;
             }

@@ -54,7 +54,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Typ = typ
             };
-            var entry = new UmlageEntry(entity);
+            var entry = new UmlageEntry(entity, new());
 
             var result = await controller.Post(entry);
 
@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 throw new NullReferenceException("Umlage is null");
             }
-            var entry = new UmlageEntry(entity);
+            var entry = new UmlageEntry(entity, new());
             entry.Beschreibung = "Test";
 
             var result = await controller.Put(entity.UmlageId, entry);

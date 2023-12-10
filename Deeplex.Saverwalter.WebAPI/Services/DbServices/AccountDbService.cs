@@ -67,7 +67,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Add(entry));
+                return new OkObjectResult(await Add(entry));
             }
             catch
             {
@@ -75,7 +75,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private AccountEntryBase Add(AccountEntryBase entry)
+        private async Task<AccountEntryBase> Add(AccountEntryBase entry)
         {
 
             var entity = new UserAccount()
@@ -84,7 +84,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 Name = entry.Name,
                 Role = (UserRole)entry.Role.Id
             };
-            SetOptionalValues(entity, entry);
+            await SetOptionalValues(entity, entry);
             Ctx.UserAccounts.Add(entity);
             Ctx.SaveChanges();
 
@@ -119,20 +119,20 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return await _userService.CreateResetToken(user);
         }
 
-        private AccountEntryBase Update(AccountEntryBase entry, UserAccount entity)
+        private async Task<AccountEntryBase> Update(AccountEntryBase entry, UserAccount entity)
         {
             entity.Username = entry.Username;
             entity.Name = entry.Name;
             entity.Role = (UserRole)entry.Role.Id;
 
-            SetOptionalValues(entity, entry);
+            await SetOptionalValues(entity, entry);
             Ctx.UserAccounts.Update(entity);
             Ctx.SaveChanges();
 
             return new AccountEntryBase(entity);
         }
 
-        private void SetOptionalValues(UserAccount entity, AccountEntryBase entry)
+        private async Task SetOptionalValues(UserAccount entity, AccountEntryBase entry)
         {
             if (entity.Id != entry.Id)
             {

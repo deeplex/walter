@@ -74,7 +74,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new UmlagetypDbService(ctx, auth);
             var entity = new Umlagetyp("Hausstrom");
-            var entry = new UmlagetypEntry(entity);
+            var entry = new UmlagetypEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -94,7 +94,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             ctx.Umlagetypen.Add(entity);
             ctx.SaveChanges();
-            var entry = new UmlagetypEntry(entity);
+            var entry = new UmlagetypEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -115,7 +115,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Umlagetypen.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new UmlagetypEntry(entity);
+            var entry = new UmlagetypEntry(entity, new());
             entry.Bezeichnung = "Test";
 
             var result = await service.Put(user, entity.UmlagetypId, entry);
@@ -139,7 +139,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new UmlagetypDbService(ctx, auth);
             var entity = new Umlagetyp("Hausstrom");
-            var entry = new UmlagetypEntry(entity);
+            var entry = new UmlagetypEntry(entity, new());
             entry.Bezeichnung = "Test";
 
             ctx.Umlagetypen.Add(entity);

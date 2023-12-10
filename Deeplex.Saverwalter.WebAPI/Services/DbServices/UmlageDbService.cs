@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 ? Ctx.Umlagen.ToListAsync()
                 : GetListForUser(user));
 
-            return new OkObjectResult(list.Select(e => new UmlageEntryBase(e)).ToList());
+            return new OkObjectResult(list.Select(e => new UmlageEntryBase(e, new(true))).ToList());
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
@@ -44,15 +44,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Read]);
-            if (!authRx.Succeeded)
+            var permissions = await Utils.GetPermissions(user, entity, Auth);
+            if (!permissions.Read)
             {
                 return new ForbidResult();
             }
 
+
             try
             {
-                var entry = new UmlageEntry(entity);
+                var entry = new UmlageEntry(entity, permissions);
                 return new OkObjectResult(entry);
             }
             catch
@@ -126,7 +127,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Umlagen.Add(entity);
             Ctx.SaveChanges();
 
-            return new UmlageEntry(entity);
+            return new UmlageEntry(entity, entry.Permissions);
         }
 
         public async Task<IActionResult> Put(ClaimsPrincipal user, int id, UmlageEntry entry)
@@ -171,7 +172,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Umlagen.Update(entity);
             Ctx.SaveChanges();
 
-            return new UmlageEntry(entity);
+            return new UmlageEntry(entity, entry.Permissions);
         }
 
         private void SetOptionalValues(Umlage entity, UmlageEntry entry)

@@ -25,15 +25,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Read]);
-            if (!authRx.Succeeded)
+            var permissions = await Utils.GetPermissions(user, entity, Auth);
+            if (!permissions.Read)
             {
                 return new ForbidResult();
             }
 
             try
             {
-                var entry = new VertragVersionEntryBase(entity);
+                var entry = new VertragVersionEntryBase(entity, permissions);
                 return new OkObjectResult(entry);
             }
             catch
@@ -98,7 +98,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.VertragVersionen.Add(entity);
             Ctx.SaveChanges();
 
-            return new VertragVersionEntryBase(entity);
+            return new VertragVersionEntryBase(entity, entry.Permissions);
         }
 
         public async Task<IActionResult> Put(ClaimsPrincipal user, int id, VertragVersionEntryBase entry)
@@ -135,7 +135,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.VertragVersionen.Update(entity);
             Ctx.SaveChanges();
 
-            return new VertragVersionEntryBase(entity);
+            return new VertragVersionEntryBase(entity, entry.Permissions);
         }
 
         private void SetOptionalValues(VertragVersion entity, VertragVersionEntryBase entry)

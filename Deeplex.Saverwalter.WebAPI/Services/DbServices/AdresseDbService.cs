@@ -32,9 +32,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 ? Ctx.Adressen.ToListAsync()
                 : GetListForUser(user));
 
-            return new OkObjectResult(list.Select(e => new AdresseEntryBase(e)).ToList());
+            return new OkObjectResult(list.Select(e => new AdresseEntryBase(e, new(true))).ToList());
         }
-
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
         {
@@ -44,15 +43,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Read]);
-            if (!authRx.Succeeded)
+            var permissions = await Utils.GetPermissions(user, entity, Auth);
+            if (!permissions.Read)
             {
                 return new ForbidResult();
             }
 
             try
             {
-                var entry = new AdresseEntry(entity);
+                var entry = new AdresseEntry(entity, permissions);
                 return new OkObjectResult(entry);
             }
             catch
@@ -112,7 +111,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Adressen.Add(entity);
             Ctx.SaveChanges();
 
-            return new AdresseEntry(entity);
+            return new AdresseEntry(entity, entry.Permissions);
         }
 
         public async Task<IActionResult> Put(ClaimsPrincipal user, int id, AdresseEntry entry)
@@ -150,7 +149,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Adressen.Update(entity);
             Ctx.SaveChanges();
 
-            return new AdresseEntry(entity);
+            return new AdresseEntry(entity, entry.Permissions);
         }
 
         private void SetOptionalValues(Adresse entity, AdresseEntry entry)

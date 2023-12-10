@@ -74,7 +74,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Vertrag = vertrag
             };
-            var entry = new MieteEntryBase(entity);
+            var entry = new MieteEntryBase(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -97,7 +97,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             ctx.Mieten.Add(entity);
             ctx.SaveChanges();
-            var entry = new MieteEntryBase(entity);
+            var entry = new MieteEntryBase(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -122,7 +122,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Mieten.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new MieteEntryBase(entity);
+            var entry = new MieteEntryBase(entity, new());
             entry.Betrag = 2000;
 
             var result = await service.Put(user, entity.MieteId, entry);
@@ -150,7 +150,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Vertrag = vertrag
             };
-            var entry = new MieteEntryBase(entity);
+            var entry = new MieteEntryBase(entity, new());
             entry.Betrag = 2000;
 
             ctx.Mieten.Add(entity);

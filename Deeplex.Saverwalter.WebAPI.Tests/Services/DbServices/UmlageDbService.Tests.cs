@@ -79,7 +79,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Typ = typ
             };
-            var entry = new UmlageEntry(entity);
+            var entry = new UmlageEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -102,7 +102,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             ctx.Umlagen.Add(entity);
             ctx.SaveChanges();
-            var entry = new UmlageEntry(entity);
+            var entry = new UmlageEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -126,7 +126,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Umlagen.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new UmlageEntry(entity);
+            var entry = new UmlageEntry(entity, new());
             entry.Beschreibung = "Test";
 
             var result = await service.Put(user, entity.UmlageId, entry);
@@ -153,7 +153,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung")
             };
-            var entry = new UmlageEntry(entity);
+            var entry = new UmlageEntry(entity, new());
             entry.Beschreibung = "Test";
 
             ctx.Umlagen.Add(entity);

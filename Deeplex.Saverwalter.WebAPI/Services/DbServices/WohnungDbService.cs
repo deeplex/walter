@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 : GetListForUser(user));
 
 
-            return new OkObjectResult(list.Select(e => new WohnungEntryBase(e)).ToList());
+            return new OkObjectResult(list.Select(e => new WohnungEntryBase(e, new(true))).ToList());
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
@@ -46,15 +46,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Read]);
-            if (!authRx.Succeeded)
+            var permissions = await Utils.GetPermissions(user, entity, Auth);
+            if (!permissions.Read)
             {
                 return new ForbidResult();
             }
 
             try
             {
-                var entry = new WohnungEntry(entity);
+                var entry = new WohnungEntry(entity, permissions);
                 return new OkObjectResult(entry);
             }
             catch
@@ -112,7 +112,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Wohnungen.Add(entity);
             Ctx.SaveChanges();
 
-            return new WohnungEntry(entity);
+            return new WohnungEntry(entity, entry.Permissions);
         }
 
         public async Task<IActionResult> Put(ClaimsPrincipal user, int id, WohnungEntry entry)
@@ -151,7 +151,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Wohnungen.Update(entity);
             Ctx.SaveChanges();
 
-            return new WohnungEntry(entity);
+            return new WohnungEntry(entity, entry.Permissions);
         }
 
         private void SetOptionalValues(Wohnung entity, WohnungEntry entry)

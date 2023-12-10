@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 ? Ctx.Erhaltungsaufwendungen.ToListAsync()
                 : GetListForUser(user));
 
-            return new OkObjectResult(list.Select(e => new ErhaltungsaufwendungEntryBase(e)).ToList());
+            return new OkObjectResult(list.Select(e => new ErhaltungsaufwendungEntryBase(e, new(true))).ToList());
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
@@ -43,15 +43,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Read]);
-            if (!authRx.Succeeded)
+            var permissions = await Utils.GetPermissions(user, entity, Auth);
+            if (!permissions.Read)
             {
                 return new ForbidResult();
             }
 
+
             try
             {
-                var entry = new ErhaltungsaufwendungEntry(entity);
+                var entry = new ErhaltungsaufwendungEntry(entity, permissions);
                 return new OkObjectResult(entry);
             }
             catch
@@ -118,7 +119,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Erhaltungsaufwendungen.Add(entity);
             Ctx.SaveChanges();
 
-            return new ErhaltungsaufwendungEntry(entity);
+            return new ErhaltungsaufwendungEntry(entity, entry.Permissions);
         }
 
         public async Task<IActionResult> Put(ClaimsPrincipal user, int id, ErhaltungsaufwendungEntry entry)
@@ -157,7 +158,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Erhaltungsaufwendungen.Update(entity);
             Ctx.SaveChanges();
 
-            return new ErhaltungsaufwendungEntry(entity);
+            return new ErhaltungsaufwendungEntry(entity, entry.Permissions);
         }
 
         private void SetOptionalValues(Erhaltungsaufwendung entity, ErhaltungsaufwendungEntry entry)

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -25,8 +26,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
+            public Permissions Permissions { get; set; } = new Permissions();
+
             public AdresseEntryBase() { }
-            public AdresseEntryBase(Adresse entity)
+            public AdresseEntryBase(Adresse entity, Permissions permissions)
             {
                 Entity = entity;
                 Id = Entity.AdresseId;
@@ -37,30 +40,30 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Stadt = Entity.Stadt;
                 Anschrift = Entity.Anschrift;
                 Notiz = Entity.Notiz;
-
                 CreatedAt = Entity.CreatedAt;
                 LastModified = Entity.LastModified;
+
+                Permissions = permissions;
             }
         }
 
         public class AdresseEntry : AdresseEntryBase
         {
             public IEnumerable<WohnungEntryBase>? Wohnungen
-                => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e));
+                => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, new()));
             public IEnumerable<KontaktEntryBase>? Kontakte
-                => Entity?.Kontakte.Select(e => new KontaktEntryBase(e));
+                => Entity?.Kontakte.Select(e => new KontaktEntryBase(e, new()));
             public IEnumerable<ZaehlerEntryBase>? Zaehler
-                => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
-
+                => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e, new()));
 
             public AdresseEntry() : base() { }
-            public AdresseEntry(Adresse entity) : base(entity)
+            public AdresseEntry(Adresse entity, Permissions permissions) : base(entity, permissions)
             {
             }
         }
 
         private readonly ILogger<AdresseController> _logger;
-        AdresseDbService DbService { get; }
+        public AdresseDbService DbService { get; }
 
         public AdresseController(ILogger<AdresseController> logger, AdresseDbService dbService)
         {

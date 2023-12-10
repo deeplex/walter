@@ -64,7 +64,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Vertrag = vertrag
             };
-            var entry = new VertragVersionEntryBase(entity);
+            var entry = new VertragVersionEntryBase(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -82,7 +82,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var service = new VertragVersionDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity = vertrag.Versionen.First();
-            var entry = new VertragVersionEntryBase(entity);
+            var entry = new VertragVersionEntryBase(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity = vertrag.Versionen.First();
 
-            var entry = new VertragVersionEntryBase(entity);
+            var entry = new VertragVersionEntryBase(entity, new());
             entry.Personenzahl = 2;
 
             var result = await service.Put(user, entity.VertragVersionId, entry);
@@ -126,10 +126,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var service = new VertragVersionDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity = vertrag.Versionen.First();
-            var entry = new VertragVersionEntryBase(entity);
+            var entry = new VertragVersionEntryBase(entity, new());
             entry.Personenzahl = 2;
 
-            var result = await service.Put(user, entity.VertragVersionId + 20, entry);
+            var result = await service.Put(user, entity.VertragVersionId + 2312310, entry);
 
             result.Should().BeOfType<NotFoundResult>();
         }

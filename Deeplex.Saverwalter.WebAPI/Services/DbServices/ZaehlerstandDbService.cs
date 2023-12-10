@@ -25,15 +25,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity.Zaehler.Wohnung, [Operations.Read]);
-            if (!authRx.Succeeded)
+            var permissions = await Utils.GetPermissions(user, entity, Auth);
+            if (!permissions.Read)
             {
                 return new ForbidResult();
             }
 
             try
             {
-                var entry = new ZaehlerstandEntryBase(entity);
+                var entry = new ZaehlerstandEntryBase(entity, permissions);
                 return new OkObjectResult(entry);
             }
             catch
@@ -97,7 +97,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Zaehlerstaende.Add(entity);
             Ctx.SaveChanges();
 
-            return new ZaehlerstandEntryBase(entity);
+            return new ZaehlerstandEntryBase(entity, entry.Permissions);
         }
 
         public async Task<IActionResult> Put(ClaimsPrincipal user, int id, ZaehlerstandEntryBase entry)
@@ -133,7 +133,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Zaehlerstaende.Update(entity);
             Ctx.SaveChanges();
 
-            return new ZaehlerstandEntryBase(entity);
+            return new ZaehlerstandEntryBase(entity, entry.Permissions);
         }
 
         private void SetOptionalValues(Zaehlerstand entity, ZaehlerstandEntryBase entry)

@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Wohnung = TestUtils.GetVertragForAbrechnung(ctx).Wohnung
             };
-            var entry = new ZaehlerEntry(entity);
+            var entry = new ZaehlerEntry(entity, new());
 
             var result = await controller.Post(entry);
 
@@ -90,7 +90,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var entity = new Zaehler("Test", Zaehlertyp.Warmwasser);
             ctx.ZaehlerSet.Add(entity);
             ctx.SaveChanges();
-            var entry = new ZaehlerEntry(entity);
+            var entry = new ZaehlerEntry(entity, new());
             entry.Kennnummer = "ChangedNummer";
 
             var result = await controller.Put(entity.ZaehlerId, entry);

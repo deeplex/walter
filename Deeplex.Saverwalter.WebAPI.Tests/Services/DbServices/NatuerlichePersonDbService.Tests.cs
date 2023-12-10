@@ -70,7 +70,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new KontaktDbService(ctx, auth);
             var entity = new Kontakt("TestPerson", Rechtsform.natuerlich);
-            var entry = new KontaktEntry(entity);
+            var entry = new KontaktEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -88,7 +88,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var entity = new Kontakt("TestPerson", Rechtsform.natuerlich);
             ctx.Kontakte.Add(entity);
             ctx.SaveChanges();
-            var entry = new KontaktEntry(entity);
+            var entry = new KontaktEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -108,7 +108,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Kontakte.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new KontaktEntry(entity);
+            var entry = new KontaktEntry(entity, new());
             entry.Email = "TestPerson@saverwalter.de";
 
             var result = await service.Put(user, entity.KontaktId, entry);
@@ -131,7 +131,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new KontaktDbService(ctx, auth);
             var entity = new Kontakt("TestPerson", Rechtsform.natuerlich);
-            var entry = new KontaktEntry(entity);
+            var entry = new KontaktEntry(entity, new());
             entry.Email = "TestPerson@saverwalter.de";
 
             ctx.Kontakte.Add(entity);

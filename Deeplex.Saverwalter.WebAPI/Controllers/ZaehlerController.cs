@@ -5,6 +5,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -28,22 +29,24 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
+            public Permissions Permissions { get; set; } = new Permissions();
+
             public ZaehlerEntryBase() { }
-            public ZaehlerEntryBase(Zaehler entity)
+            public ZaehlerEntryBase(Zaehler entity, Permissions permissions)
             {
                 Entity = entity;
 
                 Id = Entity.ZaehlerId;
                 Kennnummer = Entity.Kennnummer;
                 Typ = new((int)Entity.Typ, Entity.Typ.ToString());
-                Adresse = Entity.Adresse is Adresse a ? new AdresseEntryBase(a) : null;
+                Adresse = Entity.Adresse is Adresse a ? new AdresseEntryBase(a, permissions) : null;
                 Wohnung = Entity.Wohnung is Wohnung w ? new(w.WohnungId, $"{w.Adresse?.Anschrift ?? "Unbekannte Anschrift"}, {w.Bezeichnung}") : null;
                 Notiz = Entity.Notiz;
                 var letzterStand = Entity.Staende?.OrderBy(s => s.Datum).ToList().LastOrDefault();
                 Ende = Entity.Ende;
                 if (letzterStand is Zaehlerstand stand)
                 {
-                    LastZaehlerstand = new ZaehlerstandEntryBase(letzterStand);
+                    LastZaehlerstand = new ZaehlerstandEntryBase(letzterStand, permissions);
                 }
 
                 SelectedUmlagen = entity.Umlagen.ToList()
@@ -51,16 +54,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 CreatedAt = Entity.CreatedAt;
                 LastModified = Entity.LastModified;
+
+                Permissions = permissions;
             }
         }
 
         public class ZaehlerEntry : ZaehlerEntryBase
         {
-            public IEnumerable<ZaehlerstandEntryBase>? Staende => Entity?.Staende.ToList().Select(e => new ZaehlerstandEntryBase(e));
-            public IEnumerable<UmlageEntryBase>? Umlagen => Entity?.Umlagen.ToList().Select(e => new UmlageEntryBase(e));
+            public IEnumerable<ZaehlerstandEntryBase>? Staende => Entity?.Staende.ToList().Select(e => new ZaehlerstandEntryBase(e, new()));
+            public IEnumerable<UmlageEntryBase>? Umlagen => Entity?.Umlagen.ToList().Select(e => new UmlageEntryBase(e, new()));
 
             public ZaehlerEntry() : base() { }
-            public ZaehlerEntry(Zaehler entity) : base(entity)
+            public ZaehlerEntry(Zaehler entity, Permissions permissions) : base(entity, permissions)
             {
             }
         }

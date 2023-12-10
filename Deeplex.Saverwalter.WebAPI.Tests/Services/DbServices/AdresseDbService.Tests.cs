@@ -67,7 +67,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new AdresseDbService(ctx, auth);
             var entity = new Adresse("Teststraße", "1", "12345", "Teststadt");
-            var entry = new AdresseEntry(entity);
+            var entry = new AdresseEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -90,7 +90,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Adressen.Add(entity);
             ctx.SaveChanges();
 
-            var adresseEntry = new AdresseEntry(entity);
+            var adresseEntry = new AdresseEntry(entity, new());
 
             var result = await service.Post(user, adresseEntry);
 
@@ -111,7 +111,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Adressen.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new AdresseEntry(entity);
+            var entry = new AdresseEntry(entity, new());
             entry.Hausnummer = "2";
 
             var result = await service.Put(user, entity.AdresseId, entry);
@@ -135,7 +135,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var service = new AdresseDbService(ctx, auth);
             var entity = new Adresse("Teststraße", "1", "12345", "Teststadt");
-            var entry = new AdresseEntry(entity);
+            var entry = new AdresseEntry(entity, new());
             entry.Hausnummer = "2";
 
             ctx.Adressen.Add(entity);

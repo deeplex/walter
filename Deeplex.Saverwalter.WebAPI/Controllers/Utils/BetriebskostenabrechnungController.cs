@@ -190,23 +190,23 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                     .SelectMany(umlage => umlage.Wohnungen)
                     .Distinct();
                 Wohnungen = wohnungen
-                    .Select(wohnung => new WohnungEntryBase(wohnung))
+                    .Select(wohnung => new WohnungEntryBase(wohnung, new()))
                     .ToList();
                 Vertraege = wohnungen
                     .SelectMany(wohnung => wohnung.Vertraege)
                     .Where(vertrag => vertrag.Beginn() <= abrechnung.Zeitraum.Abrechnungsende &&
                         (vertrag.Ende == null || vertrag.Ende >= abrechnung.Zeitraum.Abrechnungsbeginn))
-                    .Select(vertrag => new VertragEntryBase(vertrag))
+                    .Select(vertrag => new VertragEntryBase(vertrag, new()))
                     .ToList();
                 Zaehler = wohnungen
                     .SelectMany(wohnung => wohnung.Zaehler)
-                    .Select(e => new ZaehlerEntryBase(e))
+                    .Select(e => new ZaehlerEntryBase(e, new()))
                     .ToList();
                 Mieten = abrechnung.Vertrag.Mieten
                     .Where(miete =>
                         miete.BetreffenderMonat >= abrechnung.Zeitraum.Abrechnungsbeginn &&
                         miete.BetreffenderMonat <= abrechnung.Zeitraum.Abrechnungsende)
-                    .Select(miete => new MieteEntryBase(miete))
+                    .Select(miete => new MieteEntryBase(miete, new()))
                     .ToList();
             }
         }

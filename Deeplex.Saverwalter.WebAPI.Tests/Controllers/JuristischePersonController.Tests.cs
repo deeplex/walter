@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var controller = new KontaktController(logger, dbService);
 
             var entity = new Kontakt("TestFirma", Rechtsform.ag);
-            var entry = new KontaktEntry(entity);
+            var entry = new KontaktEntry(entity, new());
 
             var result = await controller.Post(entry);
 
@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Kontakte.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new KontaktEntry(entity);
+            var entry = new KontaktEntry(entity, new());
             entry.Email = "TestFirma@example.com";
 
             var result = await controller.Put(entity.KontaktId, entry);

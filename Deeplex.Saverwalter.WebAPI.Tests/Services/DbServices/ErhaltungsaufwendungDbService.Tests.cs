@@ -95,7 +95,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 Aussteller = aussteller,
                 Wohnung = vertrag.Wohnung
             };
-            var entry = new ErhaltungsaufwendungEntry(entity);
+            var entry = new ErhaltungsaufwendungEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -125,7 +125,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             ctx.Erhaltungsaufwendungen.Add(entity);
             ctx.SaveChanges();
-            var entry = new ErhaltungsaufwendungEntry(entity);
+            var entry = new ErhaltungsaufwendungEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -157,7 +157,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Erhaltungsaufwendungen.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new ErhaltungsaufwendungEntry(entity);
+            var entry = new ErhaltungsaufwendungEntry(entity, new());
             entry.Betrag = 2000;
 
             var result = await service.Put(user, entity.ErhaltungsaufwendungId, entry);
@@ -192,7 +192,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 Aussteller = aussteller,
                 Wohnung = vertrag.Wohnung
             };
-            var entry = new ErhaltungsaufwendungEntry(entity);
+            var entry = new ErhaltungsaufwendungEntry(entity, new());
             entry.Betrag = 2000;
 
             ctx.Erhaltungsaufwendungen.Add(entity);

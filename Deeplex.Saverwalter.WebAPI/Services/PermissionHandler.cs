@@ -5,6 +5,36 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 
 namespace Deeplex.Saverwalter.WebAPI.Services
 {
+    public static class Utils
+    {
+        public class Permissions(bool read)
+        {
+            public Permissions() : this(false) { }
+
+            public bool Read { get; set; } = read;
+            public bool Update { get; set; } = false;
+            public bool Delete { get; set; } = false;
+        }
+
+        public static async Task<Permissions> GetPermissions<T>(ClaimsPrincipal user, T entity, IAuthorizationService auth)
+        {
+            var permissions = new Permissions();
+            permissions.Read = (await auth.AuthorizeAsync(user, entity, [Operations.Read])).Succeeded;
+            if (!permissions.Read)
+            {
+                return permissions;
+            }
+            permissions.Update = (await auth.AuthorizeAsync(user, entity, [Operations.Update])).Succeeded;
+            if (!permissions.Update)
+            {
+                return permissions;
+            }
+            permissions.Delete = (await auth.AuthorizeAsync(user, entity, [Operations.Delete])).Succeeded;
+            return permissions;
+        }
+
+    }
+
     public static class Operations
     {
         public readonly static OperationAuthorizationRequirement SubCreate = new()

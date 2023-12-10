@@ -9,6 +9,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListContro
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -32,8 +33,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
+            public Permissions Permissions { get; set; } = new Permissions();
+
             public WohnungEntryBase() { }
-            public WohnungEntryBase(Wohnung entity)
+            public WohnungEntryBase(Wohnung entity, Permissions permissions)
             {
                 Entity = entity;
 
@@ -43,7 +46,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Nutzflaeche = Entity.Nutzflaeche;
                 Einheiten = Entity.Nutzeinheit;
                 Notiz = Entity.Notiz;
-                Adresse = Entity.Adresse is Adresse a ? new AdresseEntryBase(a) : null;
+                Adresse = Entity.Adresse is Adresse a ? new AdresseEntryBase(a, permissions) : null;
                 if (Entity.Besitzer is Kontakt k)
                 {
                     Besitzer = new(k.KontaktId, k.Bezeichnung);
@@ -56,22 +59,24 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 CreatedAt = Entity.CreatedAt;
                 LastModified = Entity.LastModified;
+
+                Permissions = permissions;
             }
         }
 
         public class WohnungEntry : WohnungEntryBase
         {
-            public IEnumerable<WohnungEntryBase>? Haus => Entity?.Adresse?.Wohnungen.Select(e => new WohnungEntryBase(e));
-            public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
-            public IEnumerable<VertragEntryBase>? Vertraege => Entity?.Vertraege.Select(e => new VertragEntryBase(e));
+            public IEnumerable<WohnungEntryBase>? Haus => Entity?.Adresse?.Wohnungen.Select(e => new WohnungEntryBase(e, new()));
+            public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e, new()));
+            public IEnumerable<VertragEntryBase>? Vertraege => Entity?.Vertraege.Select(e => new VertragEntryBase(e, new()));
             public IEnumerable<ErhaltungsaufwendungEntryBase>? Erhaltungsaufwendungen
-                => Entity?.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungEntryBase(e));
-            public IEnumerable<UmlageEntryBase>? Umlagen => Entity?.Umlagen.Select(e => new UmlageEntryBase(e));
+                => Entity?.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungEntryBase(e, new()));
+            public IEnumerable<UmlageEntryBase>? Umlagen => Entity?.Umlagen.Select(e => new UmlageEntryBase(e, new()));
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen
-                => Entity?.Umlagen.SelectMany(e => e.Betriebskostenrechnungen.Select(f => new BetriebskostenrechnungEntryBase(f)));
+                => Entity?.Umlagen.SelectMany(e => e.Betriebskostenrechnungen.Select(f => new BetriebskostenrechnungEntryBase(f, new())));
 
             public WohnungEntry() : base() { }
-            public WohnungEntry(Wohnung entity) : base(entity)
+            public WohnungEntry(Wohnung entity, Permissions permissions) : base(entity, permissions)
             {
             }
         }

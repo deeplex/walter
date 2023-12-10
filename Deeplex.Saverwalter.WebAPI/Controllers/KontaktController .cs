@@ -5,6 +5,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -31,8 +32,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
+            public Permissions Permissions { get; set; } = new Permissions();
+
             protected KontaktEntryBase() : base() { }
-            public KontaktEntryBase(Kontakt entity)
+            public KontaktEntryBase(Kontakt entity, Permissions permissions)
             {
                 Entity = entity;
                 Id = entity.KontaktId;
@@ -49,11 +52,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 if (Entity.Adresse is Adresse a)
                 {
-                    Adresse = new AdresseEntryBase(a);
+                    Adresse = new AdresseEntryBase(a, permissions);
                 }
 
                 CreatedAt = Entity.CreatedAt;
                 LastModified = Entity.LastModified;
+
+                Permissions = permissions;
             }
         }
 
@@ -66,26 +71,26 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 => Entity?.Mitglieder.Select(e => new SelectionEntry(e.KontaktId, e.Name));
 
             public IEnumerable<KontaktEntryBase>? JuristischePersonen
-                => Entity?.JuristischePersonen.Select(e => new KontaktEntryBase(e));
+                => Entity?.JuristischePersonen.Select(e => new KontaktEntryBase(e, new()));
 
             public IEnumerable<KontaktEntryBase>? Mitglieder
-                => Entity?.Mitglieder.Select(e => new KontaktEntryBase(e));
+                => Entity?.Mitglieder.Select(e => new KontaktEntryBase(e, new()));
 
             public IEnumerable<VertragEntryBase>? Vertraege
                 => Entity?.Mietvertraege
                 .Concat(Entity.Wohnungen.SelectMany(w => w.Vertraege))
                 .Distinct()
-                .Select(e => new VertragEntryBase(e));
+                .Select(e => new VertragEntryBase(e, new()));
 
             public IEnumerable<WohnungEntryBase>? Wohnungen
                 => Entity?.Mietvertraege
                 .Concat(Entity.Wohnungen.SelectMany(w => w.Vertraege))
                 .Select(e => e.Wohnung)
                 .Distinct()
-                .Select(e => new WohnungEntryBase(e));
+                .Select(e => new WohnungEntryBase(e, new()));
 
             public KontaktEntry() : base() { }
-            public KontaktEntry(Kontakt entity) : base(entity) { }
+            public KontaktEntry(Kontakt entity, Permissions permissions) : base(entity, permissions) { }
         }
 
         private readonly ILogger<KontaktController> _logger;

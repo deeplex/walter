@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -23,8 +24,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
+            public Permissions Permissions { get; set; } = new Permissions();
+
             public ErhaltungsaufwendungEntryBase() { }
-            public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity)
+            public ErhaltungsaufwendungEntryBase(Erhaltungsaufwendung entity, Permissions permissions)
             {
                 Entity = entity;
 
@@ -39,13 +42,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 CreatedAt = Entity.CreatedAt;
                 LastModified = Entity.LastModified;
+
+                Permissions = permissions;
             }
         }
 
         public class ErhaltungsaufwendungEntry : ErhaltungsaufwendungEntryBase
         {
             public ErhaltungsaufwendungEntry() { }
-            public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity) : base(entity)
+            public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity, Permissions permissions) : base(entity, permissions)
             {
             }
         }

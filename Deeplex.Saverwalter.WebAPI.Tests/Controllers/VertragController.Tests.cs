@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 Ansprechpartner = wohnung.Besitzer,
                 Wohnung = wohnung
             };
-            var entry = new VertragEntry(entity);
+            var entry = new VertragEntry(entity, new());
 
             var result = await controller.Post(entry);
 
@@ -97,7 +97,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var dbService = new VertragDbService(ctx, auth);
             var controller = new VertragController(logger, dbService);
 
-            var entry = new VertragEntry(entity);
+            var entry = new VertragEntry(entity, new());
             entry.Ende = new DateOnly(2021, 12, 31);
 
             var result = await controller.Put(entity.VertragId, entry);

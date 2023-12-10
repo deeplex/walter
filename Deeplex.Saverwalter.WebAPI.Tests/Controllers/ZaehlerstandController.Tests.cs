@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Zaehler = zaehler
             };
-            var entry = new ZaehlerstandEntryBase(entity);
+            var entry = new ZaehlerstandEntryBase(entity, new());
 
             var result = await controller.Post(entry);
 
@@ -71,7 +71,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var entity = vertrag.Wohnung.Zaehler.First().Staende.First();
 
-            var entry = new ZaehlerstandEntryBase(entity);
+            var entry = new ZaehlerstandEntryBase(entity, new());
             entry.Stand = 5000;
 
             var result = await controller.Put(entity.ZaehlerstandId, entry);

@@ -51,7 +51,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Vertrag = vertrag
             };
-            var entry = new MieteEntryBase(entity);
+            var entry = new MieteEntryBase(entity, new());
 
             var result = await controller.Post(entry);
 
@@ -100,7 +100,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 throw new NullReferenceException("Miete is null");
             }
-            var entry = new MieteEntryBase(vertrag.Mieten.First());
+            var entry = new MieteEntryBase(vertrag.Mieten.First(), new());
             entry.Betrag = 2000;
 
             var result = await controller.Put(vertrag.Mieten.First().MieteId, entry);

@@ -51,7 +51,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Vertrag = vertrag
             };
-            var entry = new MietminderungEntryBase(entity);
+            var entry = new MietminderungEntryBase(entity, new());
 
             var result = await controller.Post(entry);
 
@@ -104,7 +104,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Mietminderungen.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new MietminderungEntryBase(entity);
+            var entry = new MietminderungEntryBase(entity, new());
             entry.Ende = new DateOnly(2021, 1, 31);
 
             var result = await controller.Put(entity.MietminderungId, entry);

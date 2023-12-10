@@ -54,7 +54,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Besitzer = besitzer
             };
-            var entry = new WohnungEntry(entity);
+            var entry = new WohnungEntry(entity, new());
 
             var result = await controller.Post(entry);
 
@@ -100,7 +100,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
-            var entry = new WohnungEntry(entity);
+            var entry = new WohnungEntry(entity, new());
             entry.Wohnflaeche = 200;
 
             var result = await controller.Put(entity.WohnungId, entry);

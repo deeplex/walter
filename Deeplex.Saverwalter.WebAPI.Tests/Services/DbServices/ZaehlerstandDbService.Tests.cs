@@ -67,7 +67,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Zaehler = zaehler
             };
-            var entry = new ZaehlerstandEntryBase(entity);
+            var entry = new ZaehlerstandEntryBase(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -93,7 +93,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Zaehlerstaende.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new ZaehlerstandEntryBase(entity);
+            var entry = new ZaehlerstandEntryBase(entity, new());
 
             var result = await service.Post(user, entry);
 
@@ -112,7 +112,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var service = new ZaehlerstandDbService(ctx, auth);
             var zaehler = vertrag.Wohnung.Zaehler.First();
             var entity = zaehler.Staende.First();
-            var entry = new ZaehlerstandEntryBase(entity);
+            var entry = new ZaehlerstandEntryBase(entity, new());
             entry.Stand = 5000;
 
             var result = await service.Put(user, entity.ZaehlerstandId, entry);
@@ -139,7 +139,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 var service = new ZaehlerstandDbService(ctx, auth);
                 var zaehler = vertrag.Wohnung.Zaehler.First();
                 var entity = zaehler.Staende.First();
-                var entry = new ZaehlerstandEntryBase(entity);
+                var entry = new ZaehlerstandEntryBase(entity, new());
                 entry.Stand = 5000;
 
                 var result = await service.Put(user, entity.ZaehlerstandId + 31902, entry);
