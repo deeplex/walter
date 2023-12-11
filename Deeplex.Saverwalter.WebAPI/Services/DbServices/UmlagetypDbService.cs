@@ -2,7 +2,6 @@
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlagetypController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
@@ -18,19 +17,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Auth = authorizationService;
         }
 
-        private Task<List<Umlagetyp>> GetListForUser(ClaimsPrincipal user)
-        {
-            Guid.TryParse(user.FindAll(ClaimTypes.NameIdentifier).SingleOrDefault()?.Value, out Guid guid);
-            return Ctx.Umlagetypen
-                .Where(e => e.Umlagen.SelectMany(u => u.Wohnungen).Any(w => w.Verwalter.Any(v => v.UserAccount.Id == guid)))
-                .ToListAsync();
-        }
-
         public async Task<IActionResult> GetList(ClaimsPrincipal user)
         {
-            var list = await (user.IsInRole("Admin")
-                ? Ctx.Umlagetypen.ToListAsync()
-                : GetListForUser(user));
+            var list = await UmlagetypPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
             return new OkObjectResult(list.Select(e => new UmlagetypEntryBase(e, new(true))).ToList());
         }

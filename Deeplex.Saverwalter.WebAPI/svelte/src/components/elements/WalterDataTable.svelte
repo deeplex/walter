@@ -59,6 +59,13 @@
             filteredValues.some((e) => `${e}`.toLowerCase().includes(val))
         );
     }
+
+    function readRows(x: any) {
+        const rows = x.map((e: any) => {
+            return { ...e, disabled: e.permissions.read === false };
+        });
+        return rows;
+    }
 </script>
 
 <Content>
@@ -73,7 +80,7 @@
             zebra
             stickyHeader
             {headers}
-            rows={x}
+            rows={readRows(x)}
             class={fullHeight ? 'proper-list' : ''}
             style="cursor: pointer; max-height: none !important;"
         >

@@ -2,7 +2,6 @@
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
@@ -18,20 +17,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Auth = authorizationService;
         }
 
-        private Task<List<Adresse>> GetListForUser(ClaimsPrincipal user)
+        public async Task<ActionResult<IEnumerable<AdresseEntryBase>>> GetList(ClaimsPrincipal user)
         {
-            Guid.TryParse(user.FindAll(ClaimTypes.NameIdentifier).SingleOrDefault()?.Value, out Guid guid);
-            return Ctx.Adressen
-                .Where(e => e.Wohnungen.Any(w => w.Verwalter.Any(v => v.UserAccount.Id == guid)))
-                .ToListAsync();
-        }
-
-        public async Task<IActionResult> GetList(ClaimsPrincipal user)
-        {
-            var list = await (user.IsInRole("Admin")
-                ? Ctx.Adressen.ToListAsync()
-                : GetListForUser(user));
-
+            var list = await AdressePermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
             return new OkObjectResult(list.Select(e => new AdresseEntryBase(e, new(true))).ToList());
         }
 

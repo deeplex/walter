@@ -1,5 +1,6 @@
 ﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +10,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
     {
         public class SelectionEntry
         {
-            // string because UUID stuff
             public int Id { get; set; }
             public string Text { get; set; } = null!;
             public string? Filter { get; set; }
@@ -35,21 +35,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
 
         [HttpGet]
         [Route("api/selection/adressen")]
-        public IActionResult GetAdressen()
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetAdressen()
         {
-            var list = Ctx.Adressen.ToList()
-                .Select(e =>
-                    new SelectionEntry(
-                        e.AdresseId,
-                        e.Anschrift,
-                        null))
-                .ToList();
-            return new OkObjectResult(list);
+            var list = await AdressePermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
+            return Ok(list.Select(e => new SelectionEntry(e.AdresseId, e.Anschrift)));
         }
 
         [HttpGet]
         [Route("api/selection/verwalterrollen")]
-        public IActionResult GetVerwalterrollen()
+        public ActionResult<IEnumerable<SelectionEntry>> GetVerwalterrollen()
         {
             var list = Enum.GetValues(typeof(VerwalterRolle))
                 .Cast<VerwalterRolle>()
@@ -57,13 +51,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .Select(e => new SelectionEntry((int)e, e.ToString()))
                 .ToList();
 
-            return new OkObjectResult(list);
+            return Ok(list);
         }
 
         [HttpGet]
         [Route("api/selection/userrole")]
         [Authorize(Policy = "RequireAdmin")]
-        public IActionResult GetUserRole()
+        public ActionResult<IEnumerable<SelectionEntry>> GetUserRole()
         {
             var list = Enum.GetValues(typeof(UserRole))
                 .Cast<UserRole>()
@@ -71,163 +65,132 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .Select(e => new SelectionEntry((int)e, e.ToString()))
                 .ToList();
 
-            return new OkObjectResult(list);
+            return Ok(list);
         }
 
         [HttpGet]
         [Route("api/selection/betriebskostenrechnungen")]
-        public IActionResult GetBetriebskostenrechnungen()
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetBetriebskostenrechnungen()
         {
-            var list = Ctx.Betriebskostenrechnungen.ToList()
-                .Select(e =>
-                    new SelectionEntry(
-                        e.BetriebskostenrechnungId,
-                        $"{e.BetreffendesJahr} - {e.Umlage.Typ.Bezeichnung} - {e.Umlage.GetWohnungenBezeichnung()}",
-                        null))
-                .ToList();
+            var list = await BetriebskostenrechnungPermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
 
-            return new OkObjectResult(list);
+            return Ok(list.Select(e => new SelectionEntry(
+                e.BetriebskostenrechnungId,
+                $"{e.BetreffendesJahr} - {e.Umlage.Typ.Bezeichnung} - {e.Umlage.GetWohnungenBezeichnung()}")));
         }
 
         [HttpGet]
         [Route("api/selection/erhaltungsaufwendungen")]
-        public IActionResult GetErhaltungsaufwendungen()
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetErhaltungsaufwendungen()
         {
-            var list = Ctx.Erhaltungsaufwendungen.ToList()
-                .Select(e =>
-                    new SelectionEntry(
-                        e.ErhaltungsaufwendungId,
-                        $"{e.Bezeichnung} - {e.Aussteller.Bezeichnung}",
-                        null))
-                .ToList();
+            var list = await ErhaltungsaufwendungPermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
 
-            return new OkObjectResult(list);
+            return Ok(list.Select(e => new SelectionEntry(
+                e.ErhaltungsaufwendungId,
+                $"{e.Bezeichnung} - {e.Aussteller.Bezeichnung}")));
         }
 
         [HttpGet]
         [Route("api/selection/mieten")]
-        public IActionResult GetMieten()
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetMieten()
         {
-            var list = Ctx.Mieten.ToList()
-                .Select(e =>
-                    new SelectionEntry(
-                    e.MieteId,
-                    $"{e.Vertrag.Wohnung.Adresse?.Anschrift ?? "Unbekannt"} - {e.Vertrag.Wohnung.Bezeichnung} - {e.BetreffenderMonat.ToString("MM.yyyy")}",
-                    null))
-                .ToList();
+            var list = await MietePermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
 
-            return new OkObjectResult(list);
+            return Ok(list.Select(e => new SelectionEntry(
+                e.MieteId,
+                $"{e.Vertrag.Wohnung.Adresse?.Anschrift ?? "Unbekannt"} - {e.Vertrag.Wohnung.Bezeichnung} - {e.BetreffenderMonat.ToString("MM.yyyy")}")));
         }
 
         [HttpGet]
         [Route("api/selection/mietminderungen")]
-        public IActionResult GetMietminderungen()
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetMietminderungen()
         {
-            var list = Ctx.Mietminderungen.ToList()
-                .Select(e =>
-                    new SelectionEntry(
-                    e.MietminderungId,
-                    $"{e.Vertrag.Wohnung.Adresse?.Anschrift ?? "Unbekannt"} - {e.Vertrag.Wohnung.Bezeichnung} - {e.Beginn.ToString("MM.yyyy")}",
-                    null))
-                .ToList();
+            var list = await MietminderungPermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
 
-            return new OkObjectResult(list);
+            return Ok(list.Select(e => new SelectionEntry(
+                e.MietminderungId,
+                $"{e.Vertrag.Wohnung.Adresse?.Anschrift ?? "Unbekannt"} - {e.Vertrag.Wohnung.Bezeichnung} - {e.Beginn.ToString("MM.yyyy")}")));
         }
 
         [HttpGet]
         [Route("api/selection/umlagen")]
-        public IActionResult GetUmlagen()
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetUmlagen()
         {
-            var list = Ctx.Umlagen.ToList()
-                .Select(e =>
-                    new SelectionEntry(
-                        e.UmlageId,
-                        $"{e.Typ.Bezeichnung} - {e.Wohnungen.ToList().GetWohnungenBezeichnung()}",
-                        e.Typ.UmlagetypId.ToString()))
-                .ToList();
+            var list = await UmlagePermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
 
-            return new OkObjectResult(list);
+            return Ok(list.Select(e => new SelectionEntry(
+                e.UmlageId,
+                $"{e.Typ.Bezeichnung} - {e.Wohnungen.ToList().GetWohnungenBezeichnung()}",
+                e.Typ.UmlagetypId.ToString())));
         }
 
         [HttpGet]
         [Route("api/selection/umlagen_wohnungen")]
-        public IActionResult GetUmlagenWohnungen()
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetUmlagenWohnungen()
         {
-            var list = Ctx.Umlagen.ToList()
-                .Select(e =>
-                    new SelectionEntry(
-                        e.UmlageId,
-                        e.Wohnungen.ToList().GetWohnungenBezeichnung(),
-                        e.Typ.UmlagetypId.ToString()))
-                .ToList();
+            var list = await UmlagePermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
 
-            return new OkObjectResult(list);
+            return Ok(list.Select(e => new SelectionEntry(
+                e.UmlageId,
+                e.Wohnungen.ToList().GetWohnungenBezeichnung(),
+                e.Typ.UmlagetypId.ToString())));
         }
 
         [HttpGet]
         [Route("api/selection/umlagen_verbrauch")]
-        public IActionResult GetUmlagenVerbrauch()
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetUmlagenVerbrauch()
         {
-            var list = Ctx.Umlagen.ToList()
+            var list = await UmlagePermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
+
+            return Ok(list
                 .Where(e => e.Schluessel == Umlageschluessel.NachVerbrauch)
                 .Select(e => new SelectionEntry(
                     e.UmlageId,
-                    e.Typ.Bezeichnung + " - " + e.Wohnungen.ToList().GetWohnungenBezeichnung(),
-                    null))
-                .ToList();
-
-            return new OkObjectResult(list);
+                    e.Typ.Bezeichnung + " - " + e.Wohnungen.ToList().GetWohnungenBezeichnung())));
         }
 
         [HttpGet]
         [Route("api/selection/kontakte")]
-        public IActionResult GetKontakte()
+        public ActionResult<IEnumerable<SelectionEntry>> GetKontakte()
         {
             var list = Ctx.Kontakte
                 .Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung, null))
                 .ToList();
-            return new OkObjectResult(list);
+
+            return Ok(list);
         }
 
         [HttpGet]
         [Route("api/selection/juristischepersonen")]
-        public IActionResult GetJuristischePersonen()
+        public ActionResult<IEnumerable<SelectionEntry>> GetJuristischePersonen()
         {
             var list = Ctx.Kontakte
                 .Where(e => e.Rechtsform != Rechtsform.natuerlich)
                 .Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung, null))
                 .ToList();
 
-            return new OkObjectResult(list);
+            return Ok(list);
         }
 
         [HttpGet]
         [Route("api/selection/wohnungen")]
-        public IActionResult GetWohnungen()
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetWohnungen()
         {
-            // Filter is used for Besitzer in Vertrag. TODO find a better name than filter.
-            var entries = Ctx.Wohnungen
-                .ToList()
-                .Select(e =>
-                    new SelectionEntry(
-                            e.WohnungId,
-                            $"{e.Adresse?.Anschrift ?? ""} - {e.Bezeichnung}",
-                            e.Besitzer?.Bezeichnung))
-                .ToList();
+            var list = await WohnungPermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
 
-            return new OkObjectResult(entries);
+            return Ok(list.Select(e => new SelectionEntry(
+                e.WohnungId,
+                $"{e.Adresse?.Anschrift ?? ""} - {e.Bezeichnung}",
+                e.Besitzer?.Bezeichnung)));
         }
 
         [HttpGet]
         [Route("api/selection/vertraege")]
-        public IActionResult GetVertraege()
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetVertraege()
         {
-            var list = Ctx.Vertraege
-                .ToList()
-                .Select(vertrag => new SelectionEntry(vertrag.VertragId, GetVertragName(vertrag), null))
-                .ToList();
+            var list = await VertragPermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
 
-            return new OkObjectResult(list);
+            return Ok(list.Select(vertrag => new SelectionEntry(vertrag.VertragId, GetVertragName(vertrag))));
         }
 
         private static string GetVertragName(Vertrag vertrag)
@@ -242,14 +205,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
 
         [HttpGet]
         [Route("api/selection/zaehler")]
-        public IActionResult GetZaehler()
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetZaehler()
         {
-            var list = Ctx.ZaehlerSet
-                .ToList()
-                .Select(zaehler => new SelectionEntry(zaehler.ZaehlerId, getZaehlerName(zaehler), null))
-                .ToList();
+            var list = await ZaehlerPermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
 
-            return new OkObjectResult(list);
+            return Ok(list.Select(zaehler => new SelectionEntry(zaehler.ZaehlerId, getZaehlerName(zaehler))));
         }
 
         private static string getZaehlerName(Zaehler zaehler)
@@ -269,34 +229,27 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
 
         [HttpGet]
         [Route("api/selection/zaehlerstaende")]
-        public IActionResult GetZaehlerStaende()
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetZaehlerStaende()
         {
-            var list = Ctx.Zaehlerstaende
-                .ToList()
-                .Select(stand => new SelectionEntry(
-                    stand.ZaehlerstandId,
-                    $"{getZaehlerName(stand.Zaehler)} - {stand.Datum.ToString("dd.MM.yyyy")}",
-                    null))
-                .ToList();
+            var list = await ZaehlerstandPermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
 
-            return new OkObjectResult(list);
+            return Ok(list.Select(stand => new SelectionEntry(
+                stand.ZaehlerstandId,
+                $"{getZaehlerName(stand.Zaehler)} - {stand.Datum.ToString("dd.MM.yyyy")}")));
         }
 
         [HttpGet]
         [Route("api/selection/umlagetypen")]
-        public IActionResult GetUmlagetypen()
+        public async Task<ActionResult<IEnumerable<SelectionEntry>>> GetUmlagetypen()
         {
-            var list = Ctx.Umlagetypen
-                .ToList()
-                .Select(typ => new SelectionEntry(typ.UmlagetypId, typ.Bezeichnung, null))
-                .ToList();
+            var list = await UmlagetypPermissionHandler.GetList(Ctx, User, VerwalterRolle.Vollmacht);
 
-            return new OkObjectResult(list);
+            return Ok(list.Select(typ => new SelectionEntry(typ.UmlagetypId, typ.Bezeichnung)));
         }
 
         [HttpGet]
         [Route("api/selection/umlageschluessel")]
-        public IActionResult GetUmlageschluessel()
+        public ActionResult<IEnumerable<SelectionEntry>> GetUmlageschluessel()
         {
             var list = Enum.GetValues(typeof(Umlageschluessel))
                 .Cast<Umlageschluessel>()
@@ -304,12 +257,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .Select(t => new SelectionEntry((int)t, t.ToDescriptionString()))
                 .ToList();
 
-            return new OkObjectResult(list);
+            return Ok(list);
         }
 
         [HttpGet]
         [Route("api/selection/hkvo_p9a2")]
-        public IActionResult GetHKVO_P9A2()
+        public ActionResult<IEnumerable<SelectionEntry>> GetHKVO_P9A2()
         {
             var list = Enum.GetValues(typeof(HKVO_P9A2))
                 .Cast<HKVO_P9A2>()
@@ -317,12 +270,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .Select(e => new SelectionEntry((int)e, e.ToDescriptionString()))
                 .ToList();
 
-            return new OkObjectResult(list);
+            return Ok(list);
         }
 
         [HttpGet]
         [Route("api/selection/zaehlertypen")]
-        public IActionResult GetZaehlertypen()
+        public ActionResult<IEnumerable<SelectionEntry>> GetZaehlertypen()
         {
             var list = Enum.GetValues(typeof(Zaehlertyp))
                 .Cast<Zaehlertyp>()
@@ -335,7 +288,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
 
         [HttpGet]
         [Route("api/selection/anreden")]
-        public IActionResult GetAnreden()
+        public ActionResult<IEnumerable<SelectionEntry>> GetAnreden()
         {
             var list = Enum.GetValues(typeof(Anrede))
                 .Cast<Anrede>()
@@ -348,7 +301,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
 
         [HttpGet]
         [Route("api/selection/rechtsformen")]
-        public IActionResult GetRechtsformen()
+        public ActionResult<IEnumerable<SelectionEntry>> GetRechtsformen()
         {
             var list = Enum.GetValues(typeof(Rechtsform))
                 .Cast<Rechtsform>()

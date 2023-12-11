@@ -1,12 +1,24 @@
-﻿using System.Security.Claims;
+﻿using System.Linq.Expressions;
+using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace Deeplex.Saverwalter.WebAPI.Services
 {
     public static class Utils
     {
+        public static Expression<Func<Verwalter, bool>> HasRequiredAuth(VerwalterRolle rolle, Guid id)
+        {
+            return v =>
+                v.UserAccount.Id == id &&
+                (v.Rolle == VerwalterRolle.Eigentuemer ||
+                (v.Rolle == VerwalterRolle.Vollmacht && (rolle == VerwalterRolle.Vollmacht || rolle == VerwalterRolle.Keine)) ||
+                (v.Rolle == VerwalterRolle.Keine && rolle == VerwalterRolle.Keine));
+        }
+
         public class Permissions(bool read)
         {
             public Permissions() : this(false) { }
@@ -25,11 +37,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 return permissions;
             }
             permissions.Update = (await auth.AuthorizeAsync(user, entity, [Operations.Update])).Succeeded;
-            if (!permissions.Update)
-            {
-                return permissions;
-            }
-            permissions.Remove = (await auth.AuthorizeAsync(user, entity, [Operations.Delete])).Succeeded;
+            permissions.Remove = permissions.Update;
             return permissions;
         }
 
@@ -57,6 +65,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class AdressePermissionHandler : WohnungPermissionHandlerBase<Adresse>
     {
+        public static async Task<List<Adresse>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
+        {
+            return await (user.IsInRole("Admin")
+                ? ctx.Adressen.ToListAsync()
+                : GetEntriesForUser(user.GetUserId()));
+
+            Task<List<Adresse>> GetEntriesForUser(Guid guid) => ctx.Adressen
+                .Where(e => e.Wohnungen.Any(w => w.Verwalter.Any(v => v.UserAccount.Id == guid && (int)rolle >= (int)v.Rolle)))
+                .ToListAsync();
+        }
+
         protected override Task HandleRequirementAsync(
            AuthorizationHandlerContext context,
            OperationAuthorizationRequirement requirement,
@@ -68,6 +87,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class BetriebskostenrechnungPermissionHandler : WohnungPermissionHandlerBase<Betriebskostenrechnung>
     {
+        public static async Task<List<Betriebskostenrechnung>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
+        {
+            return await (user.IsInRole("Admin")
+                ? ctx.Betriebskostenrechnungen.ToListAsync()
+                : GetEntriesForUser(user.GetUserId()));
+
+            Task<List<Betriebskostenrechnung>> GetEntriesForUser(Guid guid) => ctx.Betriebskostenrechnungen
+                .Where(e => e.Umlage.Wohnungen.Any(w => w.Verwalter.Any(v => v.UserAccount.Id == guid && (int)rolle >= (int)v.Rolle)))
+                .ToListAsync();
+        }
+
         protected override Task HandleRequirementAsync(
            AuthorizationHandlerContext context,
            OperationAuthorizationRequirement requirement,
@@ -79,6 +109,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class ErhaltungsaufwendungPermissionHandler : WohnungPermissionHandlerBase<Erhaltungsaufwendung>
     {
+        public static async Task<List<Erhaltungsaufwendung>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
+        {
+            return await (user.IsInRole("Admin")
+                ? ctx.Erhaltungsaufwendungen.ToListAsync()
+                : GetEntriesForUser(user.GetUserId()));
+
+            Task<List<Erhaltungsaufwendung>> GetEntriesForUser(Guid guid) => ctx.Erhaltungsaufwendungen
+                .Where(e => e.Wohnung.Verwalter.Any(v => v.UserAccount.Id == guid && (int)rolle >= (int)v.Rolle))
+                .ToListAsync();
+        }
+
         protected override Task HandleRequirementAsync(
            AuthorizationHandlerContext context,
            OperationAuthorizationRequirement requirement,
@@ -90,6 +131,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class MietePermissionHandler : WohnungPermissionHandlerBase<Miete>
     {
+        public static async Task<List<Miete>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
+        {
+            return await (user.IsInRole("Admin")
+                ? ctx.Mieten.ToListAsync()
+                : GetEntriesForUser(user.GetUserId()));
+
+            Task<List<Miete>> GetEntriesForUser(Guid guid) => ctx.Mieten
+                .Where(e => e.Vertrag.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .ToListAsync();
+        }
+
         protected override Task HandleRequirementAsync(
            AuthorizationHandlerContext context,
            OperationAuthorizationRequirement requirement,
@@ -101,6 +153,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class MietminderungPermissionHandler : WohnungPermissionHandlerBase<Mietminderung>
     {
+        public static async Task<List<Mietminderung>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
+        {
+            return await (user.IsInRole("Admin")
+                ? ctx.Mietminderungen.ToListAsync()
+                : GetEntriesForUser(user.GetUserId()));
+
+            Task<List<Mietminderung>> GetEntriesForUser(Guid guid) => ctx.Mietminderungen
+                .Where(e => e.Vertrag.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .ToListAsync();
+        }
+
         protected override Task HandleRequirementAsync(
            AuthorizationHandlerContext context,
            OperationAuthorizationRequirement requirement,
@@ -112,6 +175,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class UmlagePermissionHandler : WohnungPermissionHandlerBase<Umlage>
     {
+        public static async Task<List<Umlage>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
+        {
+            return await (user.IsInRole("Admin")
+                ? ctx.Umlagen.ToListAsync()
+                : GetEntriesForUser(user.GetUserId()));
+
+            Task<List<Umlage>> GetEntriesForUser(Guid guid) => ctx.Umlagen
+                .Where(e => e.Wohnungen.Any(w => w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid))))
+                .ToListAsync();
+        }
+
         protected override Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
             OperationAuthorizationRequirement requirement,
@@ -134,6 +208,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class UmlagetypPermissionHandler : WohnungPermissionHandlerBase<Umlagetyp>
     {
+        public static async Task<List<Umlagetyp>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
+        {
+            return await (user.IsInRole("Admin")
+                ? ctx.Umlagetypen.ToListAsync()
+                : GetEntriesForUser(user.GetUserId()));
+
+            Task<List<Umlagetyp>> GetEntriesForUser(Guid guid) => ctx.Umlagetypen
+                .Where(e => e.Umlagen
+                    .Any(u => u.Wohnungen
+                    .Any(w => w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))))
+                .ToListAsync();
+        }
+
         protected override Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
             OperationAuthorizationRequirement requirement,
@@ -145,6 +232,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class VertragPermissionHandler : WohnungPermissionHandlerBase<Vertrag>
     {
+        public static async Task<List<Vertrag>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
+        {
+            return await (user.IsInRole("Admin")
+                ? ctx.Vertraege.ToListAsync()
+                : GetEntriesForUser(user.GetUserId()));
+
+            Task<List<Vertrag>> GetEntriesForUser(Guid guid) => ctx.Vertraege
+                .Where(e => e.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .ToListAsync();
+        }
+
         protected override Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
             OperationAuthorizationRequirement requirement,
@@ -156,6 +254,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class VertragVersionPermissionHandler : WohnungPermissionHandlerBase<VertragVersion>
     {
+        public static async Task<List<VertragVersion>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
+        {
+            return await (user.IsInRole("Admin")
+                ? ctx.VertragVersionen.ToListAsync()
+                : GetEntriesForUser(user.GetUserId()));
+
+            Task<List<VertragVersion>> GetEntriesForUser(Guid guid) => ctx.VertragVersionen
+                .Where(e => e.Vertrag.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .ToListAsync();
+        }
+
         protected override Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
             OperationAuthorizationRequirement requirement,
@@ -167,6 +276,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class WohnungPermissionHandler : WohnungPermissionHandlerBase<Wohnung>
     {
+        public static async Task<List<Wohnung>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
+        {
+            return await (user.IsInRole("Admin")
+                ? ctx.Wohnungen.ToListAsync()
+                : GetEntriesForUser(user.GetUserId()));
+
+            Task<List<Wohnung>> GetEntriesForUser(Guid guid) => ctx.Wohnungen
+                .Where(e => e.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .ToListAsync();
+        }
+
         protected override Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
             OperationAuthorizationRequirement requirement,
@@ -180,9 +300,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                                 .SingleOrDefault()?.Value,
                                 out var userId))
             {
-                if (requirement.Name == Operations.SubCreate.Name && (
-                    IsAuthorized(userId, entity, VerwalterRolle.Vollmacht) ||
-                    IsAuthorized(userId, entity, VerwalterRolle.Eigentuemer)))
+                if (requirement.Name == Operations.SubCreate.Name &&
+                    IsAuthorized(userId, entity, VerwalterRolle.Vollmacht))
                 {
                     context.Succeed(requirement);
                 }
@@ -197,6 +316,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class ZaehlerPermissionHandler : WohnungPermissionHandlerBase<Zaehler>
     {
+        public static async Task<List<Zaehler>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
+        {
+            return await (user.IsInRole("Admin")
+                ? ctx.ZaehlerSet.ToListAsync()
+                : GetEntriesForUser(user.GetUserId()));
+
+            Task<List<Zaehler>> GetEntriesForUser(Guid guid) => ctx.ZaehlerSet
+                .Where(e => e.Wohnung!.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .ToListAsync();
+        }
+
         protected override Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
             OperationAuthorizationRequirement requirement,
@@ -208,6 +338,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
     public class ZaehlerstandPermissionHandler : WohnungPermissionHandlerBase<Zaehlerstand>
     {
+        public static async Task<List<Zaehlerstand>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
+        {
+            return await (user.IsInRole("Admin")
+                ? ctx.Zaehlerstaende.ToListAsync()
+                : GetEntriesForUser(user.GetUserId()));
+
+            Task<List<Zaehlerstand>> GetEntriesForUser(Guid guid) => ctx.Zaehlerstaende
+                .Where(e => e.Zaehler.Wohnung!.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .ToListAsync();
+        }
+
         protected override Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
             OperationAuthorizationRequirement requirement,
@@ -245,9 +386,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             {
                 context.Succeed(requirement);
             }
-            else if (Guid.TryParse(context.User.FindAll(ClaimTypes.NameIdentifier)
-                                .SingleOrDefault()?.Value,
-                                out var userId))
+            else if (context.User.GetUserId() is Guid userId)
             {
                 return HandleWohnungSubRequirementAsync(context, requirement, entity, userId);
             }
@@ -262,20 +401,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             if ((
                 requirement.Name == Operations.Update.Name ||
                 requirement.Name == Operations.Delete.Name
-                ) && (
-                IsAuthorized(userId, entity, VerwalterRolle.Vollmacht) ||
-                IsAuthorized(userId, entity, VerwalterRolle.Eigentuemer)
-                ))
+                ) && IsAuthorized(userId, entity, VerwalterRolle.Vollmacht))
             {
                 context.Succeed(requirement);
             }
             else if (
                 requirement.Name == Operations.Read.Name
-                && (
-                IsAuthorized(userId, entity, VerwalterRolle.Keine) ||
-                IsAuthorized(userId, entity, VerwalterRolle.Vollmacht) ||
-                IsAuthorized(userId, entity, VerwalterRolle.Eigentuemer)
-                ))
+                && IsAuthorized(userId, entity, VerwalterRolle.Keine))
             {
                 context.Succeed(requirement);
             }
@@ -283,10 +415,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             return Task.CompletedTask;
         }
 
-        protected static bool MinAuthorized(Guid userId, Wohnung wohnung, VerwalterRolle rolle)
-            => wohnung.Verwalter.Any(verwalter => verwalter.Rolle >= rolle && verwalter.UserAccount.Id == userId);
-
         protected static bool IsAuthorized(Guid userId, Wohnung wohnung, VerwalterRolle rolle)
-            => wohnung.Verwalter.Any(verwalter => verwalter.Rolle == rolle && verwalter.UserAccount.Id == userId);
+            => wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, userId));
     }
 }

@@ -22,6 +22,7 @@ namespace Deeplex.Saverwalter.Model
         }
     }
 
+    // Je higher die Rolle, desto mehr Rechte hat der Verwalter
     public enum VerwalterRolle
     {
         Keine,
