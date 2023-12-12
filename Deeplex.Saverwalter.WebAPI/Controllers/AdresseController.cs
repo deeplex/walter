@@ -17,14 +17,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             protected Adresse? Entity { get; }
 
             public int Id { get; set; }
+
+            public string? Anschrift { get; set; }
             public string Strasse { get; set; } = string.Empty;
             public string Hausnummer { get; set; } = string.Empty;
             public string Postleitzahl { get; set; } = string.Empty;
             public string Stadt { get; set; } = string.Empty;
-            public string? Anschrift { get; set; }
-            public string? Notiz { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -34,14 +32,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Entity = entity;
                 Id = Entity.AdresseId;
 
+                Anschrift = entity.Anschrift;
                 Strasse = Entity.Strasse;
                 Hausnummer = Entity.Hausnummer;
                 Postleitzahl = Entity.Postleitzahl;
                 Stadt = Entity.Stadt;
-                Anschrift = Entity.Anschrift;
-                Notiz = Entity.Notiz;
-                CreatedAt = Entity.CreatedAt;
-                LastModified = Entity.LastModified;
 
                 Permissions = permissions;
             }
@@ -49,6 +44,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class AdresseEntry : AdresseEntryBase
         {
+            public string? Notiz { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
             public IEnumerable<WohnungEntryBase>? Wohnungen
                 => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, new()));
             public IEnumerable<KontaktEntryBase>? Kontakte
@@ -59,6 +58,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public AdresseEntry() : base() { }
             public AdresseEntry(Adresse entity, Permissions permissions) : base(entity, permissions)
             {
+                Notiz = entity.Notiz;
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 

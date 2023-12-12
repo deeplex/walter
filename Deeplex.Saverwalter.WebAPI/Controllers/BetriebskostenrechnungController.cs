@@ -17,11 +17,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public double Betrag { get; set; }
             public int BetreffendesJahr { get; set; }
             public DateOnly Datum { get; set; }
-            public string? Notiz { get; set; }
             public SelectionEntry? Typ { get; set; }
-            public SelectionEntry? Umlage { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -33,15 +29,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Betrag = entity.Betrag;
                 BetreffendesJahr = entity.BetreffendesJahr;
                 Datum = entity.Datum;
-                Notiz = entity.Notiz;
                 Typ = new SelectionEntry(entity.Umlage.Typ.UmlagetypId, entity.Umlage.Typ.Bezeichnung);
-                Umlage = new SelectionEntry(
-                    entity.Umlage.UmlageId,
-                    entity.Umlage.GetWohnungenBezeichnung(),
-                    entity.Umlage.Typ.UmlagetypId.ToString());
-
-                CreatedAt = entity.CreatedAt;
-                LastModified = entity.LastModified;
 
                 Permissions = permissions;
             }
@@ -49,6 +37,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class BetriebskostenrechnungEntry : BetriebskostenrechnungEntryBase
         {
+            public SelectionEntry? Umlage { get; set; }
+            public string? Notiz { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
             private Betriebskostenrechnung? Entity { get; }
 
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen
@@ -58,6 +51,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public BetriebskostenrechnungEntry() : base() { }
             public BetriebskostenrechnungEntry(Betriebskostenrechnung entity, Permissions permissions) : base(entity, permissions)
             {
+                Notiz = entity.Notiz;
+                Umlage = new SelectionEntry(
+                    entity.Umlage.UmlageId,
+                    entity.Umlage.GetWohnungenBezeichnung(),
+                    entity.Umlage.Typ.UmlagetypId.ToString());
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
+
                 Entity = entity;
             }
         }

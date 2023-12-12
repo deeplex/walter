@@ -16,12 +16,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public int Id { get; set; }
             public int Personenzahl { get; set; }
-            public string? Notiz { get; set; }
             public DateOnly Beginn { get; set; }
             public double Grundmiete { get; set; }
-            public SelectionEntry? Vertrag { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -31,16 +27,28 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Entity = entity;
                 Id = entity.VertragVersionId;
                 Personenzahl = entity.Personenzahl;
-                Notiz = entity.Notiz;
                 Beginn = entity.Beginn;
                 Grundmiete = entity.Grundmiete;
 
-                Vertrag = new(Entity.Vertrag.VertragId, "Name not implemented");
+                Permissions = permissions;
+            }
+        }
+
+        public class VertragVersionEntry : VertragVersionEntryBase
+        {
+            public string? Notiz { get; set; }
+            public SelectionEntry? Vertrag { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
+            public VertragVersionEntry() : base() { }
+            public VertragVersionEntry(VertragVersion entity, Permissions permissions) : base(entity, permissions)
+            {
+                Notiz = entity.Notiz;
+                Vertrag = new(entity.Vertrag.VertragId, "Name not implemented");
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
-
-                Permissions = permissions;
             }
         }
 
@@ -54,12 +62,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpPost]
-        public Task<IActionResult> Post([FromBody] VertragVersionEntryBase entry) => DbService.Post(User!, entry);
+        public Task<IActionResult> Post([FromBody] VertragVersionEntry entry) => DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
         public Task<IActionResult> Get(int id) => DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public Task<IActionResult> Put(int id, VertragVersionEntryBase entry) => DbService.Put(User!, id, entry);
+        public Task<IActionResult> Put(int id, VertragVersionEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<IActionResult> Delete(int id) => DbService.Delete(User!, id);
     }

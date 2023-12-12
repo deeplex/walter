@@ -6,7 +6,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class ZaehlerstandDbService : ICRUDService<ZaehlerstandEntryBase>
+    public class ZaehlerstandDbService : ICRUDService<ZaehlerstandEntry>
     {
         public SaverwalterContext Ctx { get; }
         private readonly IAuthorizationService Auth;
@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new ZaehlerstandEntryBase(entity, permissions);
+                var entry = new ZaehlerstandEntry(entity, permissions);
                 return new OkObjectResult(entry);
             }
             catch
@@ -62,7 +62,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public async Task<IActionResult> Post(ClaimsPrincipal user, ZaehlerstandEntryBase entry)
+        public async Task<IActionResult> Post(ClaimsPrincipal user, ZaehlerstandEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private async Task<ZaehlerstandEntryBase> Add(ZaehlerstandEntryBase entry)
+        private async Task<ZaehlerstandEntry> Add(ZaehlerstandEntry entry)
         {
             var zaehler = await Ctx.ZaehlerSet.FindAsync(entry.Zaehler!.Id!);
             var entity = new Zaehlerstand(entry.Datum, entry.Stand)
@@ -97,10 +97,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Zaehlerstaende.Add(entity);
             Ctx.SaveChanges();
 
-            return new ZaehlerstandEntryBase(entity, entry.Permissions);
+            return new ZaehlerstandEntry(entity, entry.Permissions);
         }
 
-        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, ZaehlerstandEntryBase entry)
+        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, ZaehlerstandEntry entry)
         {
             var entity = await Ctx.Zaehlerstaende.FindAsync(id);
             if (entity == null)
@@ -124,7 +124,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private ZaehlerstandEntryBase Update(ZaehlerstandEntryBase entry, Zaehlerstand entity)
+        private ZaehlerstandEntry Update(ZaehlerstandEntry entry, Zaehlerstand entity)
         {
             entity.Datum = entry.Datum;
             entity.Stand = entry.Stand;
@@ -133,10 +133,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Zaehlerstaende.Update(entity);
             Ctx.SaveChanges();
 
-            return new ZaehlerstandEntryBase(entity, entry.Permissions);
+            return new ZaehlerstandEntry(entity, entry.Permissions);
         }
 
-        private void SetOptionalValues(Zaehlerstand entity, ZaehlerstandEntryBase entry)
+        private void SetOptionalValues(Zaehlerstand entity, ZaehlerstandEntry entry)
         {
             entity.Stand = entry.Stand;
             entity.Notiz = entry.Notiz;

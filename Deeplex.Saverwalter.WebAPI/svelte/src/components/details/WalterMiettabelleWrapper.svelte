@@ -15,9 +15,9 @@
     const mieten = vertraege
         .flatMap((vertrag) => vertrag.mieten)
         .sort(
-            (a, b) =>
-                new Date(a.betreffenderMonat).getTime() -
-                new Date(b.betreffenderMonat).getTime()
+            (mieteA, mieteB) =>
+                new Date(mieteA.betreffenderMonat).getTime() -
+                new Date(mieteB.betreffenderMonat).getTime()
         );
     const years: number[] = [];
     for (

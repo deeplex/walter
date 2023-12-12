@@ -15,9 +15,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             protected Umlagetyp? Entity { get; }
             public int Id { get; set; }
             public string Bezeichnung { get; set; } = null!;
-            public string? Notiz { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -26,12 +23,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 Entity = entity;
 
-                Id = Entity.UmlagetypId;
-                Bezeichnung = Entity.Bezeichnung;
-                Notiz = Entity.Notiz;
-
-                CreatedAt = Entity.CreatedAt;
-                LastModified = Entity.LastModified;
+                Id = entity.UmlagetypId;
+                Bezeichnung = entity.Bezeichnung;
 
                 Permissions = permissions;
             }
@@ -39,10 +32,20 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class UmlagetypEntry : UmlagetypEntryBase
         {
+            public string? Notiz { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
             public IEnumerable<UmlageEntryBase>? Umlagen => Entity?.Umlagen.ToList().Select(e => new UmlageEntryBase(e, new()));
 
             public UmlagetypEntry() : base() { }
-            public UmlagetypEntry(Umlagetyp entity, Permissions permissions) : base(entity, permissions) { }
+            public UmlagetypEntry(Umlagetyp entity, Permissions permissions) : base(entity, permissions)
+            {
+                Notiz = entity.Notiz;
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
+            }
         }
 
         private readonly ILogger<UmlagetypController> _logger;

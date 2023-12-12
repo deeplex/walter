@@ -17,31 +17,42 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public double Betrag { get; set; }
             public DateOnly BetreffenderMonat { get; set; }
             public DateOnly Zahlungsdatum { get; set; }
-            public string? Notiz { get; set; }
+
             public SelectionEntry Vertrag { get; set; } = null!;
-            public int Repeat { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
             public MieteEntryBase() { }
-            public MieteEntryBase(Miete entity, Permissions permissions, int repeat = 0)
+            public MieteEntryBase(Miete entity, Permissions permissions)
             {
                 Id = entity.MieteId;
                 Betrag = entity.Betrag;
                 BetreffenderMonat = entity.BetreffenderMonat;
                 Zahlungsdatum = entity.Zahlungsdatum;
-                Notiz = entity.Notiz;
+
                 var v = entity.Vertrag;
                 var a = v.Wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift";
                 Vertrag = new(v.VertragId, a + " - " + v.Wohnung.Bezeichnung + " - " + Zahlungsdatum.Datum());
+
+                Permissions = permissions;
+            }
+        }
+
+        public class MieteEntry : MieteEntryBase
+        {
+            public string? Notiz { get; set; }
+            public int Repeat { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
+            public MieteEntry() { }
+            public MieteEntry(Miete entity, Permissions permissions, int repeat = 0) : base(entity, permissions)
+            {
                 Repeat = repeat;
+                Notiz = entity.Notiz;
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
-
-                Permissions = permissions;
             }
         }
 
@@ -58,12 +69,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public Task<IActionResult> Get() => DbService.GetList(User!);
 
         [HttpPost]
-        public Task<IActionResult> Post([FromBody] MieteEntryBase entry) => DbService.Post(User!, entry);
+        public Task<IActionResult> Post([FromBody] MieteEntry entry) => DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
         public Task<IActionResult> Get(int id) => DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public Task<IActionResult> Put(int id, [FromBody] MieteEntryBase entry) => DbService.Put(User!, id, entry);
+        public Task<IActionResult> Put(int id, [FromBody] MieteEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<IActionResult> Delete(int id) => DbService.Delete(User!, id);
     }

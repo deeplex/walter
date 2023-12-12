@@ -16,11 +16,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Id { get; set; }
             public double Stand { get; set; }
             public DateOnly Datum { get; set; }
-            public SelectionEntry Zaehler { get; set; } = null!;
             public string? Einheit { get; set; }
-            public string? Notiz { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -29,17 +25,30 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 Entity = entity;
 
-                Id = Entity.ZaehlerstandId;
-                Stand = Entity.Stand;
-                Datum = Entity.Datum;
-                Zaehler = new(Entity.Zaehler.ZaehlerId, Entity.Zaehler.Kennnummer);
-                Einheit = Entity.Zaehler.Typ.ToUnitString();
-                Notiz = Entity.Notiz;
-
-                CreatedAt = Entity.CreatedAt;
-                LastModified = Entity.LastModified;
+                Id = entity.ZaehlerstandId;
+                Stand = entity.Stand;
+                Datum = entity.Datum;
+                Einheit = entity.Zaehler.Typ.ToUnitString();
 
                 Permissions = permissions;
+            }
+        }
+
+        public class ZaehlerstandEntry : ZaehlerstandEntryBase
+        {
+            public SelectionEntry Zaehler { get; set; } = null!;
+            public string? Notiz { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
+            public ZaehlerstandEntry() : base() { }
+            public ZaehlerstandEntry(Zaehlerstand entity, Permissions permissions) : base(entity, permissions)
+            {
+                Zaehler = new(entity.Zaehler.ZaehlerId, entity.Zaehler.Kennnummer);
+                Notiz = entity.Notiz;
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 
@@ -53,12 +62,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpPost]
-        public Task<IActionResult> Post([FromBody] ZaehlerstandEntryBase entry) => DbService.Post(User!, entry);
+        public Task<IActionResult> Post([FromBody] ZaehlerstandEntry entry) => DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
         public Task<IActionResult> Get(int id) => DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public Task<IActionResult> Put(int id, ZaehlerstandEntryBase entry) => DbService.Put(User!, id, entry);
+        public Task<IActionResult> Put(int id, ZaehlerstandEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<IActionResult> Delete(int id) => DbService.Delete(User!, id);
     }

@@ -6,7 +6,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class MieteDbService : ICRUDService<MieteEntryBase>
+    public class MieteDbService : ICRUDService<MieteEntry>
     {
         public SaverwalterContext Ctx { get; }
         private readonly IAuthorizationService Auth;
@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new MieteEntryBase(entity, permissions);
+                var entry = new MieteEntry(entity, permissions);
                 return new OkObjectResult(entry);
             }
             catch
@@ -69,7 +69,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public async Task<IActionResult> Post(ClaimsPrincipal user, MieteEntryBase entry)
+        public async Task<IActionResult> Post(ClaimsPrincipal user, MieteEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -93,7 +93,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private async Task<MieteEntryBase> Add(MieteEntryBase entry)
+        private async Task<MieteEntryBase> Add(MieteEntry entry)
         {
             var mieten = new List<Miete>();
 
@@ -114,12 +114,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             Ctx.SaveChanges();
 
-            return new MieteEntryBase(mieten.First(), entry.Permissions, entry.Repeat);
+            return new MieteEntry(mieten.First(), entry.Permissions, entry.Repeat);
 
         }
 
 
-        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, MieteEntryBase entry)
+        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, MieteEntry entry)
         {
             var entity = await Ctx.Mieten.FindAsync(id);
             if (entity == null)
@@ -143,7 +143,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private MieteEntryBase Update(MieteEntryBase entry, Miete entity)
+        private MieteEntryBase Update(MieteEntry entry, Miete entity)
         {
             entity.BetreffenderMonat = entry.BetreffenderMonat;
             entity.Betrag = entry.Betrag;
@@ -153,10 +153,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Mieten.Update(entity);
             Ctx.SaveChanges();
 
-            return new MieteEntryBase(entity, entry.Permissions);
+            return new MieteEntry(entity, entry.Permissions);
         }
 
-        private static void SetOptionalValues(Miete entity, MieteEntryBase entry)
+        private static void SetOptionalValues(Miete entity, MieteEntry entry)
         {
             if (entity.MieteId != entry.Id)
             {

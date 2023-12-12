@@ -17,12 +17,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Id { get; set; }
             public double Betrag { get; set; }
             public DateOnly Datum { get; set; }
-            public string? Notiz { get; set; }
             public string Bezeichnung { get; set; } = null!;
             public SelectionEntry Aussteller { get; set; } = null!;
-            public SelectionEntry Wohnung { get; set; } = null!;
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -34,14 +30,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Id = Entity.ErhaltungsaufwendungId;
                 Betrag = Entity.Betrag;
                 Datum = Entity.Datum;
-                Notiz = Entity.Notiz;
                 Bezeichnung = Entity.Bezeichnung;
                 Aussteller = new(Entity.Aussteller.KontaktId, Entity.Aussteller.Bezeichnung);
-                var anschrift = Entity.Wohnung.Adresse is Adresse a ? a.Anschrift : "Unbekannte Anschrift";
-                Wohnung = new(Entity.Wohnung.WohnungId, $"{anschrift} - {Entity.Wohnung.Bezeichnung}");
 
-                CreatedAt = Entity.CreatedAt;
-                LastModified = Entity.LastModified;
 
                 Permissions = permissions;
             }
@@ -49,9 +40,20 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class ErhaltungsaufwendungEntry : ErhaltungsaufwendungEntryBase
         {
+            public SelectionEntry Wohnung { get; set; } = null!;
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+            public string? Notiz { get; set; }
+
             public ErhaltungsaufwendungEntry() { }
             public ErhaltungsaufwendungEntry(Erhaltungsaufwendung entity, Permissions permissions) : base(entity, permissions)
             {
+                Notiz = entity.Notiz;
+                var anschrift = entity.Wohnung.Adresse is Adresse a ? a.Anschrift : "Unbekannte Anschrift";
+                Wohnung = new(entity.Wohnung.WohnungId, $"{anschrift} - {Entity.Wohnung.Bezeichnung}");
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 

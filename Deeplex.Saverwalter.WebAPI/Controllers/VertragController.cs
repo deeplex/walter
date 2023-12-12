@@ -21,14 +21,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateOnly Beginn { get; set; }
             public DateOnly? Ende { get; set; }
             public SelectionEntry? Wohnung { get; set; }
-            public SelectionEntry Ansprechpartner { get; set; } = null!;
-            public string? Notiz { get; set; }
             public string? MieterAuflistung { get; set; }
-            public IEnumerable<SelectionEntry>? SelectedMieter { get; set; }
+
+            // For Tabelle
             public IEnumerable<MieteEntryBase>? Mieten { get; set; }
             public IEnumerable<VertragVersionEntryBase>? Versionen { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -43,22 +40,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     entity.Wohnung.WohnungId,
                     $"{anschrift} - {entity.Wohnung.Bezeichnung}",
                     entity.Wohnung.Besitzer?.Bezeichnung);
-                if (entity.Ansprechpartner is Kontakt a)
-                {
-                    Ansprechpartner = new(a.KontaktId, a.Bezeichnung);
-                }
-                Notiz = entity.Notiz;
-
-                var Mieter = entity.Mieter;
-
-                MieterAuflistung = string.Join(", ", Mieter.Select(a => a.Bezeichnung));
-                SelectedMieter = Mieter.Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung));
 
                 Mieten = entity.Mieten.ToList().Select(e => new MieteEntryBase(e, permissions));
                 Versionen = entity.Versionen.Select(e => new VertragVersionEntryBase(e, permissions));
-
-                CreatedAt = entity.CreatedAt;
-                LastModified = entity.LastModified;
 
                 Permissions = permissions;
             }
@@ -67,6 +51,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class VertragEntry : VertragEntryBase
         {
             private Vertrag Entity { get; } = null!;
+
+            public SelectionEntry Ansprechpartner { get; set; } = null!;
+            public string? Notiz { get; set; }
+            public IEnumerable<SelectionEntry>? SelectedMieter { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
 
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen => Entity?.Wohnung.Umlagen
                 .SelectMany(e => e.Betriebskostenrechnungen)
@@ -81,6 +71,20 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public VertragEntry(Vertrag entity, Permissions permissions) : base(entity, permissions)
             {
                 Entity = entity;
+
+                if (entity.Ansprechpartner is Kontakt a)
+                {
+                    Ansprechpartner = new(a.KontaktId, a.Bezeichnung);
+                }
+                Notiz = entity.Notiz;
+
+                var mieter = entity.Mieter;
+                MieterAuflistung = string.Join(", ", mieter.Select(a => a.Bezeichnung));
+                SelectedMieter = mieter.Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung));
+
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 

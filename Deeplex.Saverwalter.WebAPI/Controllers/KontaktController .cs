@@ -18,19 +18,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             protected Kontakt? Entity { get; }
 
             public int Id { get; set; }
-            public SelectionEntry? Anrede { get; set; }
-            public SelectionEntry Rechtsform { get; set; } = null!;
-            public string? Vorname { get; set; }
+
             public string? Bezeichnung { get; } = null!;
-            public string Name { get; set; } = null!;
             public string? Email { get; set; }
             public string? Fax { get; set; }
-            public string? Notiz { get; set; }
             public string? Telefon { get; set; }
             public string? Mobil { get; set; }
-            public AdresseEntryBase? Adresse { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -39,24 +32,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 Entity = entity;
                 Id = entity.KontaktId;
-                Anrede = new SelectionEntry((int)Entity.Anrede, Entity.Anrede.ToString());
-                Rechtsform = new SelectionEntry((int)Entity.Rechtsform, Entity.Rechtsform.ToDescriptionString());
-                Vorname = Entity.Vorname;
-                Name = Entity.Name;
-                Bezeichnung = Entity.Bezeichnung;
-                Email = Entity.Email;
-                Fax = Entity.Fax;
-                Notiz = Entity.Notiz;
-                Telefon = Entity.Telefon;
-                Mobil = Entity.Mobil;
 
-                if (Entity.Adresse is Adresse a)
-                {
-                    Adresse = new AdresseEntryBase(a, permissions);
-                }
-
-                CreatedAt = Entity.CreatedAt;
-                LastModified = Entity.LastModified;
+                Bezeichnung = entity.Bezeichnung;
+                Email = entity.Email;
+                Fax = entity.Fax;
+                Telefon = entity.Telefon;
+                Mobil = entity.Mobil;
 
                 Permissions = permissions;
             }
@@ -64,6 +45,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public sealed class KontaktEntry : KontaktEntryBase
         {
+            public string? Vorname { get; set; }
+            public string Name { get; set; } = null!;
+            public AdresseEntryBase? Adresse { get; set; }
+            public SelectionEntry? Anrede { get; set; }
+            public SelectionEntry Rechtsform { get; set; } = null!;
+            public string? Notiz { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
             public IEnumerable<SelectionEntry>? SelectedJuristischePersonen
                 => Entity?.JuristischePersonen.Select(e => new SelectionEntry(e.KontaktId, e.Name));
 
@@ -90,7 +80,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 .Select(e => new WohnungEntryBase(e, new()));
 
             public KontaktEntry() : base() { }
-            public KontaktEntry(Kontakt entity, Permissions permissions) : base(entity, permissions) { }
+            public KontaktEntry(Kontakt entity, Permissions permissions) : base(entity, permissions)
+            {
+                Anrede = new SelectionEntry((int)entity.Anrede, entity.Anrede.ToString());
+                Rechtsform = new SelectionEntry((int)entity.Rechtsform, entity.Rechtsform.ToDescriptionString());
+                Vorname = entity.Vorname;
+                Name = entity.Name;
+                if (entity.Adresse is Adresse a)
+                {
+                    Adresse = new AdresseEntryBase(a, permissions);
+                }
+                Notiz = entity.Notiz;
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
+            }
         }
 
         private readonly ILogger<KontaktController> _logger;

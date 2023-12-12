@@ -17,10 +17,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateOnly Beginn { get; set; }
             public DateOnly? Ende { get; set; }
             public double Minderung { get; set; }
-            public string? Notiz { get; set; }
-            public SelectionEntry Vertrag { get; set; } = null!;
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -31,15 +27,28 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Beginn = entity.Beginn;
                 Ende = entity.Ende;
                 Minderung = entity.Minderung;
-                Notiz = entity.Notiz;
+
+                Permissions = permissions;
+            }
+        }
+
+        public class MietminderungEntry : MietminderungEntryBase
+        {
+            public string? Notiz { get; set; }
+            public SelectionEntry Vertrag { get; set; } = null!;
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
+            public MietminderungEntry() : base() { }
+            public MietminderungEntry(Mietminderung entity, Permissions permissions) : base(entity, permissions)
+            {
                 var anschrift = entity.Vertrag.Wohnung.Adresse is Adresse a ? a.Anschrift : "Unbekannte Anschrift";
                 var vertragTitle = $"{anschrift} - {entity.Vertrag.Wohnung.Bezeichnung} - {Beginn.Datum()}";
+                Notiz = entity.Notiz;
                 Vertrag = new(entity.Vertrag.VertragId, vertragTitle);
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
-
-                Permissions = permissions;
             }
         }
 
@@ -56,12 +65,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public Task<IActionResult> Get() => DbService.GetList(User!);
 
         [HttpPost]
-        public Task<IActionResult> Post([FromBody] MietminderungEntryBase entry) => DbService.Post(User!, entry);
+        public Task<IActionResult> Post([FromBody] MietminderungEntry entry) => DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
         public Task<IActionResult> Get(int id) => DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public Task<IActionResult> Put(int id, [FromBody] MietminderungEntryBase entry) => DbService.Put(User!, id, entry);
+        public Task<IActionResult> Put(int id, [FromBody] MietminderungEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
         public Task<IActionResult> Delete(int id) => DbService.Delete(User!, id);
     }

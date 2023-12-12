@@ -23,15 +23,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public int Id { get; set; }
             public string Bezeichnung { get; set; } = null!;
-            public double Wohnflaeche { get; set; }
-            public double Nutzflaeche { get; set; }
-            public int Einheiten { get; set; }
-            public string? Notiz { get; set; }
             public AdresseEntryBase? Adresse { get; set; }
-            public string? Bewohner { get; set; }
             public SelectionEntry? Besitzer { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
+            public string? Bewohner { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -40,25 +34,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 Entity = entity;
 
-                Id = Entity.WohnungId;
-                Bezeichnung = Entity.Bezeichnung;
-                Wohnflaeche = Entity.Wohnflaeche;
-                Nutzflaeche = Entity.Nutzflaeche;
-                Einheiten = Entity.Nutzeinheit;
-                Notiz = Entity.Notiz;
-                Adresse = Entity.Adresse is Adresse a ? new AdresseEntryBase(a, permissions) : null;
-                if (Entity.Besitzer is Kontakt k)
+                Id = entity.WohnungId;
+                Bezeichnung = entity.Bezeichnung;
+                Adresse = entity.Adresse is Adresse a ? new AdresseEntryBase(a, permissions) : null;
+                if (entity.Besitzer is Kontakt k)
                 {
                     Besitzer = new(k.KontaktId, k.Bezeichnung);
                 }
 
-                var v = Entity.Vertraege.FirstOrDefault(e => e.Ende == null || e.Ende < DateOnly.FromDateTime(DateTime.Now));
+                var v = entity.Vertraege.FirstOrDefault(e => e.Ende == null || e.Ende < DateOnly.FromDateTime(DateTime.Now));
                 Bewohner = v != null ?
                     string.Join(", ", v.Mieter.Select(m => m.Bezeichnung)) :
                     null;
-
-                CreatedAt = Entity.CreatedAt;
-                LastModified = Entity.LastModified;
 
                 Permissions = permissions;
             }
@@ -66,6 +53,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class WohnungEntry : WohnungEntryBase
         {
+            public double Wohnflaeche { get; set; }
+            public double Nutzflaeche { get; set; }
+            public int Einheiten { get; set; }
+            public string? Notiz { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
             public IEnumerable<WohnungEntryBase>? Haus => Entity?.Adresse?.Wohnungen.Select(e => new WohnungEntryBase(e, new()));
             public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e, new()));
             public IEnumerable<VertragEntryBase>? Vertraege => Entity?.Vertraege.Select(e => new VertragEntryBase(e, new()));
@@ -78,6 +72,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public WohnungEntry() : base() { }
             public WohnungEntry(Wohnung entity, Permissions permissions) : base(entity, permissions)
             {
+                Wohnflaeche = entity.Wohnflaeche;
+                Nutzflaeche = entity.Nutzflaeche;
+                Einheiten = entity.Nutzeinheit;
+                Notiz = entity.Notiz;
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 

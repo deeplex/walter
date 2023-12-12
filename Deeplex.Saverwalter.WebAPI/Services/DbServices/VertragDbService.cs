@@ -165,7 +165,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     var entityVersion = new VertragVersion(entryVersion.Beginn, entryVersion.Grundmiete, entryVersion.Personenzahl)
                     {
                         Vertrag = entity,
-                        Notiz = entryVersion.Notiz,
                     };
                     entity.Versionen.Add(entityVersion);
                 }

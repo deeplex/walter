@@ -6,7 +6,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.VertragVersionController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class VertragVersionDbService : ICRUDService<VertragVersionEntryBase>
+    public class VertragVersionDbService : ICRUDService<VertragVersionEntry>
     {
         public SaverwalterContext Ctx { get; }
         private readonly IAuthorizationService Auth;
@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new VertragVersionEntryBase(entity, permissions);
+                var entry = new VertragVersionEntry(entity, permissions);
                 return new OkObjectResult(entry);
             }
             catch
@@ -62,7 +62,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public async Task<IActionResult> Post(ClaimsPrincipal user, VertragVersionEntryBase entry)
+        public async Task<IActionResult> Post(ClaimsPrincipal user, VertragVersionEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private async Task<VertragVersionEntryBase> Add(VertragVersionEntryBase entry)
+        private async Task<VertragVersionEntryBase> Add(VertragVersionEntry entry)
         {
             var vertrag = await Ctx.Vertraege.FindAsync(entry.Vertrag!.Id);
             var entity = new VertragVersion(entry.Beginn, entry.Grundmiete, entry.Personenzahl)
@@ -98,10 +98,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.VertragVersionen.Add(entity);
             Ctx.SaveChanges();
 
-            return new VertragVersionEntryBase(entity, entry.Permissions);
+            return new VertragVersionEntry(entity, entry.Permissions);
         }
 
-        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, VertragVersionEntryBase entry)
+        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, VertragVersionEntry entry)
         {
             var entity = await Ctx.VertragVersionen.FindAsync(id);
             if (entity == null)
@@ -125,7 +125,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private VertragVersionEntryBase Update(VertragVersionEntryBase entry, VertragVersion entity)
+        private VertragVersionEntry Update(VertragVersionEntry entry, VertragVersion entity)
         {
             entity.Beginn = entry.Beginn;
             entity.Grundmiete = entry.Grundmiete;
@@ -135,10 +135,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.VertragVersionen.Update(entity);
             Ctx.SaveChanges();
 
-            return new VertragVersionEntryBase(entity, entry.Permissions);
+            return new VertragVersionEntry(entity, entry.Permissions);
         }
 
-        private void SetOptionalValues(VertragVersion entity, VertragVersionEntryBase entry)
+        private void SetOptionalValues(VertragVersion entity, VertragVersionEntry entry)
         {
             if (entity.VertragVersionId != entry.Id)
             {

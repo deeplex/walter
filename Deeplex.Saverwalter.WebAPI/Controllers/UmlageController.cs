@@ -43,17 +43,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         public class UmlageEntryBase
         {
             public int Id { get; set; }
-            public string? Notiz { get; set; }
-            public string? Beschreibung { get; set; }
-            public SelectionEntry? Schluessel { get; set; }
             public SelectionEntry? Typ { get; set; }
-            public HKVOEntryBase? HKVO { get; set; }
-            public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
             public string? WohnungenBezeichnung { get; set; }
-            public IEnumerable<SelectionEntry>? SelectedZaehler { get; set; }
+
+            // For Tabelle
+            public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
 
@@ -62,28 +57,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 Id = entity.UmlageId;
 
-                Notiz = entity.Notiz;
-                Beschreibung = entity.Beschreibung;
-                Schluessel = new SelectionEntry((int)entity.Schluessel, entity.Schluessel.ToDescriptionString());
                 Typ = new SelectionEntry(entity.Typ.UmlagetypId, entity.Typ.Bezeichnung);
                 WohnungenBezeichnung = entity.GetWohnungenBezeichnung() ?? "";
 
+                Betriebskostenrechnungen = entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e, permissions));
                 SelectedWohnungen = entity.Wohnungen.Select(e =>
                     new SelectionEntry(
                         e.WohnungId,
                         $"{e.Adresse?.Anschrift ?? "Unbekannte Anschrift"} - {e.Bezeichnung}"));
-
-                SelectedZaehler = entity.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer));
-
-                Betriebskostenrechnungen = entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e, permissions));
-
-                if (entity.HKVO != null)
-                {
-                    HKVO = new HKVOEntryBase(entity.HKVO, permissions);
-                }
-
-                CreatedAt = entity.CreatedAt;
-                LastModified = entity.LastModified;
 
                 Permissions = permissions;
             }
@@ -93,14 +74,35 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             private Umlage Entity { get; } = null!;
 
+            public string? Notiz { get; set; }
+            public string? Beschreibung { get; set; }
+            public SelectionEntry? Schluessel { get; set; }
+            public HKVOEntryBase? HKVO { get; set; }
+            public IEnumerable<SelectionEntry>? SelectedZaehler { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
             public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, Permissions));
             public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e, Permissions));
-            // TODO HKVO
 
             public UmlageEntry() : base() { }
             public UmlageEntry(Umlage entity, Permissions permissions) : base(entity, permissions)
             {
                 Entity = entity;
+
+                Notiz = entity.Notiz;
+                Beschreibung = entity.Beschreibung;
+                Schluessel = new SelectionEntry((int)entity.Schluessel, entity.Schluessel.ToDescriptionString());
+
+                SelectedZaehler = entity.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer));
+
+                if (entity.HKVO != null)
+                {
+                    HKVO = new HKVOEntryBase(entity.HKVO, permissions);
+                }
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 
