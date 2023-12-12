@@ -26,7 +26,8 @@
         zaehler: { id: '' + data.entry.id, text: data.entry.kennnummer },
         datum: convertDateCanadian(new Date()),
         stand: lastZaehlerstand?.stand || 0,
-        einheit: lastZaehlerstand?.einheit
+        einheit: lastZaehlerstand?.einheit,
+        permissions: data.entry.permissions
     };
 
     const title = data.entry.kennnummer;

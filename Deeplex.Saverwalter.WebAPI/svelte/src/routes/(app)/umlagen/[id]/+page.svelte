@@ -40,7 +40,8 @@
             betreffendesJahr:
                 lastBetriebskostenrechnung?.betreffendesJahr + 1 ||
                 new Date().getFullYear(),
-            datum: convertDateCanadian(new Date())
+            datum: convertDateCanadian(new Date()),
+            permissions: data.entry.permissions
         };
 
     const title = `${data.entry.typ.text} - ${data.entry.wohnungenBezeichnung}`;

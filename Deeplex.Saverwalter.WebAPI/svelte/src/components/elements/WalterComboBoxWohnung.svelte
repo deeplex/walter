@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { WalterSelectionEntry } from '$walter/lib';
+    import { WalterSelectionEntry, WalterWohnungEntry } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
     import { WalterComboBox, WalterWohnung } from '..';
     import WalterQuickAddButton from './WalterQuickAddButton.svelte';
@@ -14,7 +14,7 @@
         entries = walter_selection.wohnungen(fetchImpl);
     }
 
-    const addEntry = {};
+    let addEntry: Partial<WalterWohnungEntry> = {};
 </script>
 
 <div
@@ -34,8 +34,8 @@
     {#if !readonly}
         <WalterQuickAddButton
             title="Wohnungen"
-            {addEntry}
-            addUrl={'/api/wohnungen'}
+            bind:addEntry
+            addUrl={WalterWohnungEntry.ApiURL}
             {onSubmit}
         >
             <WalterWohnung {fetchImpl} entry={addEntry} />

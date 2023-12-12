@@ -5,10 +5,12 @@
     import { page } from '$app/stores';
     import WalterDataWrapperQuickAdd from './WalterDataWrapperQuickAdd.svelte';
     import { walter_goto } from '$walter/services/utils';
+    import type { WalterPermissions } from '$walter/lib/WalterPermissions';
 
     export let fullHeight = false;
     export let addUrl: string | undefined = undefined;
-    export let addEntry: unknown | undefined = undefined;
+    export let addEntry: { permissions?: WalterPermissions } | undefined =
+        undefined;
     export let title: string | undefined = undefined;
     export let rows: unknown[];
     export let headers: {
@@ -50,7 +52,9 @@
     <AccordionItem title={`${title} (${rows.length})`} bind:open>
         <Tile>
             <WalterDataTable
-                add={addUrl && addEntry && quick_add}
+                add={addUrl && addEntry?.permissions?.update
+                    ? quick_add
+                    : undefined}
                 {on_click_row}
                 bind:rows
                 {headers}

@@ -28,10 +28,7 @@
 />
 
 <WalterGrid>
-    <WalterKontakt
-        bind:entry={data.entry}
-        fetchImpl={data.fetchImpl}
-    />
+    <WalterKontakt bind:entry={data.entry} fetchImpl={data.fetchImpl} />
 
     <WalterLinks>
         <WalterKontakte
@@ -41,10 +38,10 @@
         />
         {#if data.entry.rechtsform.id !== 0}
             <WalterKontakte
-            fetchImpl={data.fetchImpl}
-            title="Mitglieder"
-            rows={data.entry.mitglieder}
-    />
+                fetchImpl={data.fetchImpl}
+                title="Mitglieder"
+                rows={data.entry.mitglieder}
+            />
         {/if}
         <WalterWohnungen
             fetchImpl={data.fetchImpl}

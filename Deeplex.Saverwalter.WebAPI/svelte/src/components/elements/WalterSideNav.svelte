@@ -61,9 +61,7 @@
         <SideNavDivider />
 
         <SideNavMenu icon={ListBoxes} text="Erweitert">
-            <!-- <div style="margin-left: -3em"> -->
             <WalterSideNavLink
-                style="padding-left: 0"
                 icon={Money}
                 text="Betriebskostenrechnungen"
                 href="/betriebskostenrechnungen"

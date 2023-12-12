@@ -17,8 +17,9 @@
 
     export let title = 'Saverwalter';
     export let entry: {
+        createdAt: Date;
         lastModified: Date;
-        permissions: WalterPermissions;
+        permissions?: WalterPermissions;
     } & unknown;
     export let apiURL: string;
     export let fileWrapper: WalterS3FileWrapper | undefined = undefined;

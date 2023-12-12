@@ -27,7 +27,9 @@ export function convertDateGerman(date: Date | undefined): string | undefined {
     }
 }
 
-export function convertTime(text: string | undefined): string | undefined {
+export function convertTime(
+    text: Date | string | undefined
+): string | undefined {
     if (text) {
         return new Date(text).toLocaleString('de-DE');
     } else {

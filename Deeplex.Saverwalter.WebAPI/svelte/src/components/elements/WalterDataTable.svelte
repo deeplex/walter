@@ -62,7 +62,7 @@
 
     function readRows(x: any) {
         const rows = x.map((e: any) => {
-            return { ...e, disabled: e.permissions.read === false };
+            return { ...e, disabled: e.permissions?.read === false };
         });
         return rows;
     }

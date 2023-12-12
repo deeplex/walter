@@ -31,7 +31,8 @@
             id: `${data.entry.id}`,
             text: `${data.entry.adresse?.anschrift} - ${data.entry.bezeichnung}`
         },
-        adresse: data.entry.adresse ? { ...data.entry.adresse } : undefined
+        adresse: data.entry.adresse ? { ...data.entry.adresse } : undefined,
+        permissions: data.entry.permissions
     };
     const umlageEntry: Partial<WalterUmlageEntry> = {
         selectedWohnungen: [
@@ -42,7 +43,8 @@
                     ' - ' +
                     data.entry.bezeichnung
             }
-        ]
+        ],
+        permissions: data.entry.permissions
     };
     const erhaltungsaufwendungEntry: Partial<WalterErhaltungsaufwendungEntry> =
         {
@@ -53,7 +55,8 @@
                     ' - ' +
                     data.entry.bezeichnung
             },
-            datum: convertDateCanadian(new Date())
+            datum: convertDateCanadian(new Date()),
+            permissions: data.entry.permissions
         };
 
     const title =

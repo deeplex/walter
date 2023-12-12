@@ -22,9 +22,7 @@
         type WalterMietminderungEntry,
         type WalterVertragVersionEntry,
         WalterBetriebskostenrechnungEntry,
-
         WalterKontaktEntry
-
     } from '$walter/lib';
     import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
     import { ClickableTile, Row } from 'carbon-components-svelte';
@@ -32,16 +30,16 @@
     import WalterDataScatterChart from '$walter/components/data/WalterDataScatterChart.svelte';
     export let data: PageData;
 
-    const versionen = data.entry.versionen;
     const mietminderungEntry: Partial<WalterMietminderungEntry> =
-        getMietminderungEntry(`${data.id}`);
+        getMietminderungEntry(data.entry);
+
     const vertragversionEntry: Partial<WalterVertragVersionEntry> =
-        getVertragversionEntry(`${data.id}`, versionen[versionen.length - 1]);
-    const mieteEntry: Partial<WalterMieteEntry> = getMieteEntry(
-        `${data.id}`,
-        versionen[versionen.length - 1]
-    );
+        getVertragversionEntry(data.entry);
+
+    const mieteEntry: Partial<WalterMieteEntry> = getMieteEntry(data.entry);
+
     const mieterEntry: Partial<WalterKontaktEntry> = {};
+
     const betriebskostenrechnungEntry: Partial<WalterBetriebskostenrechnungEntry> =
         {};
 
@@ -69,6 +67,7 @@
         >
 
         <WalterKontakte
+            fetchImpl={data.fetchImpl}
             entry={mieterEntry}
             title="Mieter"
             rows={data.entry.mieter}

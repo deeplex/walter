@@ -20,7 +20,8 @@ export class WalterVerwalterEntry extends WalterApiHandler {
         const rolle = json.rolle && WalterSelectionEntry.fromJson(json.rolle);
         const wohnung =
             json.wohnung && WalterSelectionEntry.fromJson(json.wohnung);
-        const permissions = WalterPermissions.fromJson(json.permissions);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterVerwalterEntry(
             json.id,
