@@ -1,7 +1,7 @@
 <script lang="ts">
     import {
         WalterAdresse,
-        WalterComboBox,
+        WalterDropdown,
         WalterMultiSelectJuristischePerson,
         WalterTextArea,
         WalterTextInput
@@ -32,13 +32,13 @@
 </script>
 
 <Row>
-    <WalterComboBox
+    <WalterDropdown
         entries={rechtsformen}
         bind:value={entry.rechtsform}
         titleText="Rechtsform"
     />
     {#if entry.rechtsform?.id === 0}
-        <WalterComboBox
+        <WalterDropdown
             entries={anreden}
             bind:value={entry.anrede}
             titleText="Anrede"

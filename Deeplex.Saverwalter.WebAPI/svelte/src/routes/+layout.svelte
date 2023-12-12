@@ -124,10 +124,14 @@
         margin: 0px !important;
     }
 
+    :global(.bx--dropdown__wrapper) {
+        margin-right: -5px !important;
+    }
+
     /* Adjust size of content in detail view */
     :global(.bx--text-input-wrapper, .bx--form-item, .bx--list-box__wrapper) {
         margin: 10px;
-        flex: 1 1 auto !important;
+        flex: 1 1 0px !important;
         display: flex !important;
         flex-direction: column !important;
         flex-wrap: wrap !important;

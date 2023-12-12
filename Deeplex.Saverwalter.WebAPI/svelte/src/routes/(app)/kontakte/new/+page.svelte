@@ -2,24 +2,22 @@
     import {
         WalterGrid,
         WalterHeaderNew,
-        WalterKontakt,
+        WalterKontakt
     } from '$walter/components';
     import type { PageData } from './$types';
-    import {
-        WalterKontaktEntry
-    } from '$walter/lib';
+    import { WalterKontaktEntry } from '$walter/lib';
 
     export let data: PageData;
 
     const title = 'Neue Person';
 
-    const entry: Partial<WalterKontaktEntry> = {};
+    const entry: Partial<WalterKontaktEntry> = {
+        rechtsform: { id: 0, text: '' },
+        anrede: { id: 0, text: '' }
+    };
 </script>
 
-<WalterHeaderNew
-    apiURL={WalterKontaktEntry.ApiURL}
-    {title}
-    {entry} />
+<WalterHeaderNew apiURL={WalterKontaktEntry.ApiURL} {title} {entry} />
 
 <WalterGrid>
     <WalterKontakt {entry} fetchImpl={data.fetchImpl} />

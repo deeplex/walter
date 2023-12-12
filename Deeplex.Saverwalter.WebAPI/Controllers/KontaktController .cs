@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public SelectionEntry? Anrede { get; set; }
             public SelectionEntry Rechtsform { get; set; } = null!;
             public string? Vorname { get; set; }
-            public string Bezeichnung { get; } = null!;
+            public string? Bezeichnung { get; } = null!;
             public string Name { get; set; } = null!;
             public string? Email { get; set; }
             public string? Fax { get; set; }
