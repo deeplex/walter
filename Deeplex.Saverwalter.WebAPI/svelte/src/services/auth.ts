@@ -4,9 +4,10 @@ import { addToast } from '$walter/store';
 import { writable, type Writable } from 'svelte/store';
 
 export enum UserRole {
-    User = 0,
-    Owner = 1,
-    Admin = 2
+    Guest = 0,
+    User = 1,
+    Admin = 2,
+    Owner = 3
 }
 
 type SignInRequest = {

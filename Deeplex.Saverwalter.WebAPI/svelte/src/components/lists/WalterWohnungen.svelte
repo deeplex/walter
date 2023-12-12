@@ -4,6 +4,8 @@
     import { WalterDataWrapper, WalterWohnung } from '$walter/components';
     import { WalterWohnungEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
+    import { get } from 'svelte/store';
+    import { UserRole, authState } from '$walter/services/auth';
 
     const headers = [
         { key: 'adresse.anschrift', value: 'Anschrift' },
@@ -20,9 +22,13 @@
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch;
     export let entry: Partial<WalterWohnungEntry> | undefined = undefined;
+
+    const userRole = authState && get(authState)?.role;
+    const readonly = userRole !== UserRole.Owner && userRole !== UserRole.Admin;
 </script>
 
 <WalterDataWrapper
+    {readonly}
     addUrl={WalterWohnungEntry.ApiURL}
     addEntry={entry}
     {title}

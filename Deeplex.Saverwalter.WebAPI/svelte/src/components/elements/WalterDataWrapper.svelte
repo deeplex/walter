@@ -7,6 +7,7 @@
     import { walter_goto } from '$walter/services/utils';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
 
+    export let readonly = false;
     export let fullHeight = false;
     export let addUrl: string | undefined = undefined;
     export let addEntry: { permissions?: WalterPermissions } | undefined =
@@ -63,6 +64,7 @@
     </AccordionItem>
 {:else}
     <WalterDataTable
+        {readonly}
         add={normal_add}
         {fullHeight}
         {on_click_row}

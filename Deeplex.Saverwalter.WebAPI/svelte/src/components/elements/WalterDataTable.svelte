@@ -26,6 +26,7 @@
         key: string;
         value: string;
     }[];
+    export let readonly = false;
     export let rows: unknown[];
     export let add: (() => void) | undefined = undefined;
 
@@ -91,7 +92,7 @@
                         persistent
                         {shouldFilterRows}
                     />
-                    {#if !!add}
+                    {#if !!add && !readonly}
                         <Button
                             on:click={add}
                             iconDescription="Eintrag hinzufügen"
