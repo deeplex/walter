@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,16 +33,19 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         {
             public string UserId { get; }
             public string Token { get; }
+            public UserRole? Role { get; }
 
-            public LoginResult(string userId, string token)
+            public LoginResult(string userId, string token, UserRole role)
             {
                 UserId = userId;
                 Token = token;
+                Role = role;
             }
             public LoginResult(WebAPI.Services.SignInResult rx)
             {
                 UserId = rx.Account!.Id.ToString("D", CultureInfo.InvariantCulture);
                 Token = rx.SessionToken!;
+                Role = rx.Account.Role;
             }
         }
 

@@ -28,6 +28,8 @@
     } from 'carbon-icons-svelte';
     import { checkStackTodo, logout } from './WalterSideNav';
     import WalterSideNavLink from './WalterSideNavLink.svelte';
+    import { UserRole, authState } from '$walter/services/auth';
+    import { get } from 'svelte/store';
 
     export let fetchImpl: typeof fetch;
 
@@ -111,7 +113,7 @@
             icon={User}
             href="/user"
         />
-        {#if true}
+        {#if authState && get(authState)?.role === UserRole.Admin}
             <WalterSideNavLink
                 text="Adminbereich"
                 icon={NetworkAdminControl}
