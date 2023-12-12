@@ -23,15 +23,10 @@
         ).then((r) => r.text());
         passwordResetLink = `${window.location.origin}/reset-password/${token}`;
     }
-    const permissions = {
-        read: true,
-        update: true,
-        remove: true
-    };
 </script>
 
 <WalterHeaderDetail
-    entry={{ ...data.entry, permissions }}
+    bind:entry={data.entry}
     apiURL={data.apiURL}
     {title}
     bind:fileWrapper
