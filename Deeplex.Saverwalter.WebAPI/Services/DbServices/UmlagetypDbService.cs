@@ -23,7 +23,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             var list = await UmlagetypPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
-            return new OkObjectResult(list.Select(e => new UmlagetypEntryBase(e, new(true))).ToList());
+            return new OkObjectResult(await Task.WhenAll(list
+                .Select(async e => new UmlagetypEntryBase(e, await Utils.GetPermissions(user, e, Auth)))));
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
@@ -43,10 +44,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 var entry = new UmlagetypEntry(entity, permissions);
-                entry.Umlagen = entity.Umlagen.Where(u => u.Wohnungen
+                entry.Umlagen = await Task.WhenAll(entity.Umlagen.Where(u => u.Wohnungen
                     .Any(w => w.Verwalter.AsQueryable()
                     .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, user.GetUserId()))))
-                    .Select(e => new UmlageEntryBase(e, new()));
+                    .Select(async e => new UmlageEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
 
                 return new OkObjectResult(entry);
             }

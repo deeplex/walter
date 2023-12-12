@@ -21,7 +21,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             var list = await MietminderungPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
-            return new OkObjectResult(list.Select(e => new MietminderungEntryBase(e, new(true))).ToList());
+            return new OkObjectResult(await Task.WhenAll(list
+                .Select(async e => new MietminderungEntryBase(e, await Utils.GetPermissions(user, e, Auth)))));
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)

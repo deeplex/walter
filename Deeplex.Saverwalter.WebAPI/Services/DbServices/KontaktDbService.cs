@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
@@ -45,6 +47,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     Remove = true
                 };
                 var entry = new KontaktEntry(entity, permissions);
+
+                entry.JuristischePersonen = await Task.WhenAll(entity.JuristischePersonen
+                    .Select(async e => new KontaktEntryBase(e, await GetPermissions(user, e, Auth))));
+                entry.Mitglieder = await Task.WhenAll(entity.Mitglieder
+                    .Select(async e => new KontaktEntryBase(e, await GetPermissions(user, e, Auth))));
+                entry.Vertraege = await Task.WhenAll(entity.Mietvertraege
+                    .Concat(entity.Wohnungen.SelectMany(w => w.Vertraege))
+                    .Distinct()
+                    .Select(async e => new VertragEntryBase(e, await GetPermissions(user, e, Auth))));
+                entry.Wohnungen = await Task.WhenAll(entity.Mietvertraege
+                    .Concat(entity.Wohnungen.SelectMany(w => w.Vertraege))
+                    .Select(e => e.Wohnung)
+                    .Distinct()
+                    .Select(async e => new WohnungEntryBase(e, await GetPermissions(user, e, Auth))));
+
                 return new OkObjectResult(entry);
             }
             catch

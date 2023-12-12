@@ -26,7 +26,8 @@ export class WalterHKVOEntry extends WalterApiHandler {
         const stromrechnung =
             json.stromrechnung &&
             WalterSelectionEntry.fromJson(json.stromrechnung);
-        const permissions = WalterPermissions.fromJson(json.permissions);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterHKVOEntry(
             json.id,

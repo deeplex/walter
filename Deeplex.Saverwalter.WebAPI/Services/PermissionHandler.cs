@@ -326,7 +326,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Zaehler>> GetEntriesForUser(Guid guid) => ctx.ZaehlerSet
-                .Where(e => e.Wohnung!.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                // TODO e.Wohnung is null is obviously stupid. Fix this.
+                .Where(e => e.Wohnung == null || e.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
                 .ToListAsync();
         }
 
@@ -335,7 +336,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             OperationAuthorizationRequirement requirement,
             Zaehler entity)
         {
-            return HandleWohnungSubRequirementAsync(context, requirement, entity.Wohnung!);
+            if (entity.Wohnung is not null)
+            {
+                return HandleWohnungSubRequirementAsync(context, requirement, entity.Wohnung);
+            }
+            else
+            {
+                context.Succeed(requirement);
+                return Task.CompletedTask;
+            }
         }
     }
 

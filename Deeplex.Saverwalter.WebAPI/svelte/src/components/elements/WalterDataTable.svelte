@@ -61,13 +61,36 @@
         );
     }
 
-    function readRows(x: any) {
-        const rows = x.map((e: any) => {
-            return { ...e, disabled: e.permissions?.read === false };
-        });
-        return rows;
+    const disabledRows = rows
+        .filter((row) => !row.permissions?.read)
+        .map((row) => row.id);
+    const enabledRows = rows
+        .filter((row) => row.permissions?.read)
+        .map((row) => row.id);
+
+    const disabledSelector = disabledRows
+        .map((id) => `[data-row="${id}"]`)
+        .join(',');
+    const enabledSelector = enabledRows
+        .map((id) => `[data-row="${id}"]`)
+        .join(',');
+    const styles = `
+    <style>
+    ${disabledSelector} {
+        opacity: 0.5;
+        cursor: not-allowed !important;
+        pointer-events: none !important;
     }
+      ${enabledSelector} {
+        color: #ff0;
+        cursor: pointer !important;
+      }
+    <\/style>`;
 </script>
+
+<svelte:head>
+    {@html styles}
+</svelte:head>
 
 <Content>
     {#await rows}
@@ -81,9 +104,9 @@
             zebra
             stickyHeader
             {headers}
-            rows={readRows(x)}
+            rows={x}
             class={fullHeight ? 'proper-list' : ''}
-            style="cursor: pointer; max-height: none !important;"
+            style="cursor-events: none !important; max-height: none !important;"
         >
             <Toolbar>
                 <ToolbarContent>
@@ -105,6 +128,7 @@
                 style="text-overflow: ellipsis; white-space: nowrap; overflow:hidden;"
                 slot="cell"
                 let:cell
+                let:row
             >
                 {#if cell.value === null || cell.value === undefined || cell.value === ''}
                     ---

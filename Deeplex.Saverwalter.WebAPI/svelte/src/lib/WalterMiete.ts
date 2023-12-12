@@ -23,7 +23,8 @@ export class WalterMieteEntry extends WalterApiHandler {
     static fromJson(json: WalterMieteEntry) {
         const vertrag =
             json.vertrag && WalterSelectionEntry.fromJson(json.vertrag);
-        const permissions = WalterPermissions.fromJson(json.permissions);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterMieteEntry(
             json.id,

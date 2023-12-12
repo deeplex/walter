@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -22,7 +24,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             var list = await UmlagePermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
-            return new OkObjectResult(list.Select(e => new UmlageEntryBase(e, new(true))).ToList());
+            return new OkObjectResult(await Task.WhenAll(list
+                .Select(async e => new UmlageEntryBase(e, await Utils.GetPermissions(user, e, Auth)))));
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
@@ -43,6 +46,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 var entry = new UmlageEntry(entity, permissions);
+
+                entry.Wohnungen = await Task.WhenAll(entity.Wohnungen
+                    .Select(async e => new WohnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
+                entry.Zaehler = await Task.WhenAll(entity.Zaehler
+                    .Select(async e => new ZaehlerEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
+
                 return new OkObjectResult(entry);
             }
             catch

@@ -24,7 +24,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             var list = await ZaehlerPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
-            return new OkObjectResult(list.Select(e => new ZaehlerEntryBase(e, new())).ToList());
+            return new OkObjectResult(await Task.WhenAll(list
+                .Select(async e => new ZaehlerEntryBase(e, await Utils.GetPermissions(user, e, Auth)))));
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)

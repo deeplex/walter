@@ -43,6 +43,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 Mieten = entity.Mieten.ToList().Select(e => new MieteEntryBase(e, permissions));
                 Versionen = entity.Versionen.Select(e => new VertragVersionEntryBase(e, permissions));
+                MieterAuflistung = string.Join(", ", entity.Mieter.Select(a => a.Bezeichnung));
 
                 Permissions = permissions;
             }
@@ -58,13 +59,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
-            public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen => Entity?.Wohnung.Umlagen
-                .SelectMany(e => e.Betriebskostenrechnungen)
-                .Where(e => e.BetreffendesJahr >= Entity.Beginn().Year && (Entity.Ende == null || Entity.Ende.Value.Year >= e.BetreffendesJahr))
-                .Select(e => new BetriebskostenrechnungEntryBase(e, new()));
-            public IEnumerable<MietminderungEntryBase>? Mietminderungen => Entity?.Mietminderungen.ToList().Select(e => new MietminderungEntryBase(e, new()));
-            public IEnumerable<KontaktEntryBase>? Mieter => Entity?.Mieter
-                .Select(e => new KontaktEntryBase(e, new()));
+            public IEnumerable<BetriebskostenrechnungEntryBase> Betriebskostenrechnungen { get; set; } = [];
+            public IEnumerable<MietminderungEntryBase> Mietminderungen { get; set; } = [];
+            public IEnumerable<KontaktEntryBase> Mieter { get; set; } = [];
             // TODO Garagen
 
             public VertragEntry() : base() { }
@@ -78,10 +75,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 }
                 Notiz = entity.Notiz;
 
-                var mieter = entity.Mieter;
-                MieterAuflistung = string.Join(", ", mieter.Select(a => a.Bezeichnung));
-                SelectedMieter = mieter.Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung));
+                SelectedMieter = entity.Mieter.Select(e => new SelectionEntry(e.KontaktId, e.Bezeichnung));
 
+                Betriebskostenrechnungen = entity.Wohnung.Umlagen
+                    .SelectMany(e => e.Betriebskostenrechnungen)
+                    .Where(e => e.BetreffendesJahr >= entity.Beginn().Year && (entity.Ende == null || entity.Ende.Value.Year >= e.BetreffendesJahr))
+                    .Select(e => new BetriebskostenrechnungEntryBase(e, permissions));
+                Mietminderungen = entity.Mietminderungen.ToList().Select(e => new MietminderungEntryBase(e, permissions));
+                Mieter = entity.Mieter.Select(e => new KontaktEntryBase(e, permissions));
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;

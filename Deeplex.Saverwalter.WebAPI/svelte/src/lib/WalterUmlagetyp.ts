@@ -19,7 +19,8 @@ export class WalterUmlagetypEntry extends WalterApiHandler {
 
     static fromJson(json: WalterUmlagetypEntry) {
         const umlagen = json.umlagen?.map(WalterUmlageEntry.fromJson);
-        const permissions = WalterPermissions.fromJson(json.permissions);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterUmlagetypEntry(
             json.id,

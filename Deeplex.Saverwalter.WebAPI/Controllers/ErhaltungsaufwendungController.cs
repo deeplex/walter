@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 Notiz = entity.Notiz;
                 var anschrift = entity.Wohnung.Adresse is Adresse a ? a.Anschrift : "Unbekannte Anschrift";
-                Wohnung = new(entity.Wohnung.WohnungId, $"{anschrift} - {Entity.Wohnung.Bezeichnung}");
+                Wohnung = new(entity.Wohnung.WohnungId, $"{anschrift} - {entity.Wohnung.Bezeichnung}");
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;

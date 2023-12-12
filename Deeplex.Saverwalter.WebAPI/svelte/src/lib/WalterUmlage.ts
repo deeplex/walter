@@ -46,7 +46,8 @@ export class WalterUmlageEntry extends WalterApiHandler {
         const hkvo =
             json.hKVO && WalterHKVOEntry.fromJson(json.hKVO as WalterHKVOEntry);
         const zaehler = json.zaehler?.map(WalterZaehlerEntry.fromJson);
-        const permissions = WalterPermissions.fromJson(json.permissions);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterUmlageEntry(
             json.id,

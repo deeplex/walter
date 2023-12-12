@@ -54,8 +54,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
-            public IEnumerable<ZaehlerstandEntryBase>? Staende => Entity?.Staende.ToList().Select(e => new ZaehlerstandEntryBase(e, new()));
-            public IEnumerable<UmlageEntryBase>? Umlagen => Entity?.Umlagen.ToList().Select(e => new UmlageEntryBase(e, new()));
+            public IEnumerable<ZaehlerstandEntryBase> Staende { get; } = [];
+            public IEnumerable<UmlageEntryBase>? Umlagen { get; } = [];
 
             public ZaehlerEntry() : base() { }
             public ZaehlerEntry(Zaehler entity, Permissions permissions) : base(entity, permissions)
@@ -67,6 +67,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Notiz = entity.Notiz;
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
+
+                Staende = entity.Staende.ToList().Select(e => new ZaehlerstandEntryBase(e, permissions));
+                Umlagen = entity.Umlagen.ToList().Select(e => new UmlageEntryBase(e, permissions));
             }
         }
 

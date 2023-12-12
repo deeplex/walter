@@ -29,7 +29,8 @@ export class WalterAdresseEntry extends WalterApiHandler {
         const wohnungen = json.wohnungen?.map(WalterWohnungEntry.fromJson);
         const kontakte = json.kontakte?.map(WalterKontaktEntry.fromJson);
         const zaehler = json.zaehler?.map(WalterZaehlerEntry.fromJson);
-        const permissions = WalterPermissions.fromJson(json.permissions);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterAdresseEntry(
             json.id,

@@ -22,7 +22,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             var list = await VertragPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
-            return new OkObjectResult(list.Select(e => new VertragEntryBase(e, new(true))).ToList());
+            return new OkObjectResult(await Task.WhenAll(list
+                .Select(async e => new VertragEntryBase(e, await Utils.GetPermissions(user, e, Auth)))));
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
@@ -42,6 +43,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 var entry = new VertragEntry(entity, permissions);
+
                 return new OkObjectResult(entry);
             }
             catch

@@ -21,7 +21,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             var list = await ErhaltungsaufwendungPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
-            return new OkObjectResult(list.Select(e => new ErhaltungsaufwendungEntryBase(e, new(true))).ToList());
+            return new OkObjectResult(await Task.WhenAll(list
+                .Select(async e => new ErhaltungsaufwendungEntryBase(e, await Utils.GetPermissions(user, e, Auth)))));
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
@@ -37,7 +38,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 return new ForbidResult();
             }
-
 
             try
             {

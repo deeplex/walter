@@ -36,8 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
-            // NOTE: Umlagen are load in the GET method
-            public IEnumerable<UmlageEntryBase>? Umlagen { get; set; }
+            public IEnumerable<UmlageEntryBase> Umlagen { get; set; } = [];
 
             public UmlagetypEntry() : base() { }
             public UmlagetypEntry(Umlagetyp entity, Permissions permissions) : base(entity, permissions)

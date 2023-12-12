@@ -3,6 +3,9 @@ using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
@@ -20,7 +23,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         public async Task<ActionResult<IEnumerable<AdresseEntryBase>>> GetList(ClaimsPrincipal user)
         {
             var list = await AdressePermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
-            return new OkObjectResult(list.Select(e => new AdresseEntryBase(e, new(true))).ToList());
+
+            return new OkObjectResult(await Task.WhenAll(list
+                .Select(async e => new AdresseEntryBase(e, await Utils.GetPermissions(user, e, Auth)))));
         }
 
         public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
@@ -40,6 +45,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 var entry = new AdresseEntry(entity, permissions);
+
+                entry.Wohnungen = await Task.WhenAll(entity.Wohnungen
+                    .Select(async e => new WohnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
+                entry.Kontakte = await Task.WhenAll(entity.Kontakte
+                    .Select(async e => new KontaktEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
+                entry.Zaehler = await Task.WhenAll(entity.Zaehler
+                    .Select(async e => new ZaehlerEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
+
                 return new OkObjectResult(entry);
             }
             catch

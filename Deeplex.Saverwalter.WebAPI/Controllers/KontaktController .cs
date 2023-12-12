@@ -19,6 +19,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public int Id { get; set; }
 
+            public AdresseEntryBase? Adresse { get; set; }
             public string? Bezeichnung { get; } = null!;
             public string? Email { get; set; }
             public string? Fax { get; set; }
@@ -32,6 +33,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 Entity = entity;
                 Id = entity.KontaktId;
+
+                if (entity.Adresse is Adresse a)
+                {
+                    Adresse = new AdresseEntryBase(a, permissions);
+                }
 
                 Bezeichnung = entity.Bezeichnung;
                 Email = entity.Email;
@@ -47,7 +53,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             public string? Vorname { get; set; }
             public string Name { get; set; } = null!;
-            public AdresseEntryBase? Adresse { get; set; }
             public SelectionEntry? Anrede { get; set; }
             public SelectionEntry Rechtsform { get; set; } = null!;
             public string? Notiz { get; set; }
@@ -60,24 +65,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<SelectionEntry>? SelectedMitglieder
                 => Entity?.Mitglieder.Select(e => new SelectionEntry(e.KontaktId, e.Name));
 
-            public IEnumerable<KontaktEntryBase>? JuristischePersonen
-                => Entity?.JuristischePersonen.Select(e => new KontaktEntryBase(e, new()));
-
-            public IEnumerable<KontaktEntryBase>? Mitglieder
-                => Entity?.Mitglieder.Select(e => new KontaktEntryBase(e, new()));
-
-            public IEnumerable<VertragEntryBase>? Vertraege
-                => Entity?.Mietvertraege
-                .Concat(Entity.Wohnungen.SelectMany(w => w.Vertraege))
-                .Distinct()
-                .Select(e => new VertragEntryBase(e, new()));
-
-            public IEnumerable<WohnungEntryBase>? Wohnungen
-                => Entity?.Mietvertraege
-                .Concat(Entity.Wohnungen.SelectMany(w => w.Vertraege))
-                .Select(e => e.Wohnung)
-                .Distinct()
-                .Select(e => new WohnungEntryBase(e, new()));
+            public IEnumerable<KontaktEntryBase> JuristischePersonen { get; set; } = [];
+            public IEnumerable<KontaktEntryBase> Mitglieder { get; set; } = [];
+            public IEnumerable<VertragEntryBase> Vertraege { get; set; } = [];
+            public IEnumerable<WohnungEntryBase> Wohnungen { get; set; } = [];
 
             public KontaktEntry() : base() { }
             public KontaktEntry(Kontakt entity, Permissions permissions) : base(entity, permissions)
@@ -86,10 +77,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Rechtsform = new SelectionEntry((int)entity.Rechtsform, entity.Rechtsform.ToDescriptionString());
                 Vorname = entity.Vorname;
                 Name = entity.Name;
-                if (entity.Adresse is Adresse a)
-                {
-                    Adresse = new AdresseEntryBase(a, permissions);
-                }
                 Notiz = entity.Notiz;
 
                 CreatedAt = entity.CreatedAt;

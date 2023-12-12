@@ -82,8 +82,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
-            public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e, Permissions));
-            public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e, Permissions));
+            public IEnumerable<WohnungEntryBase> Wohnungen { get; set; } = [];
+            public IEnumerable<ZaehlerEntryBase> Zaehler { get; set; } = [];
 
             public UmlageEntry() : base() { }
             public UmlageEntry(Umlage entity, Permissions permissions) : base(entity, permissions)

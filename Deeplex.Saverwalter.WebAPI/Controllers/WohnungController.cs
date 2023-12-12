@@ -60,14 +60,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
-            public IEnumerable<WohnungEntryBase>? Haus => Entity?.Adresse?.Wohnungen.Select(e => new WohnungEntryBase(e, new()));
-            public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e, new()));
-            public IEnumerable<VertragEntryBase>? Vertraege => Entity?.Vertraege.Select(e => new VertragEntryBase(e, new()));
-            public IEnumerable<ErhaltungsaufwendungEntryBase>? Erhaltungsaufwendungen
-                => Entity?.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungEntryBase(e, new()));
-            public IEnumerable<UmlageEntryBase>? Umlagen => Entity?.Umlagen.Select(e => new UmlageEntryBase(e, new()));
-            public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen
-                => Entity?.Umlagen.SelectMany(e => e.Betriebskostenrechnungen.Select(f => new BetriebskostenrechnungEntryBase(f, new())));
+            public IEnumerable<WohnungEntryBase> Haus { get; set; } = [];
+            public IEnumerable<ZaehlerEntryBase> Zaehler { get; } = [];
+            public IEnumerable<VertragEntryBase> Vertraege { get; } = [];
+            public IEnumerable<ErhaltungsaufwendungEntryBase> Erhaltungsaufwendungen { get; } = [];
+            public IEnumerable<UmlageEntryBase> Umlagen { get; } = [];
+            public IEnumerable<BetriebskostenrechnungEntryBase> Betriebskostenrechnungen { get; } = [];
 
             public WohnungEntry() : base() { }
             public WohnungEntry(Wohnung entity, Permissions permissions) : base(entity, permissions)
@@ -79,6 +77,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
+
+                Zaehler = entity.Zaehler.Select(e => new ZaehlerEntryBase(e, permissions));
+                Vertraege = entity.Vertraege.Select(e => new VertragEntryBase(e, permissions));
+                Erhaltungsaufwendungen = entity.Erhaltungsaufwendungen.Select(e => new ErhaltungsaufwendungEntryBase(e, permissions));
+                Umlagen = entity.Umlagen.Select(e => new UmlageEntryBase(e, permissions));
+                Betriebskostenrechnungen = entity.Umlagen.SelectMany(e => e.Betriebskostenrechnungen.Select(f => new BetriebskostenrechnungEntryBase(f, permissions)));
             }
         }
 

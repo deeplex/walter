@@ -33,7 +33,8 @@ export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
         const betriebskostenrechnungen = json.betriebskostenrechnungen?.map(
             WalterBetriebskostenrechnungEntry.fromJson
         );
-        const permissions = WalterPermissions.fromJson(json.permissions);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterBetriebskostenrechnungEntry(
             json.id,
