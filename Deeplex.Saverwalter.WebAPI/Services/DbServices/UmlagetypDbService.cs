@@ -1,7 +1,9 @@
 ﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlagetypController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
@@ -41,6 +43,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 var entry = new UmlagetypEntry(entity, permissions);
+                entry.Umlagen = entity.Umlagen.Where(u => u.Wohnungen
+                    .Any(w => w.Verwalter.AsQueryable()
+                    .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, user.GetUserId()))))
+                    .Select(e => new UmlageEntryBase(e, new()));
+
                 return new OkObjectResult(entry);
             }
             catch

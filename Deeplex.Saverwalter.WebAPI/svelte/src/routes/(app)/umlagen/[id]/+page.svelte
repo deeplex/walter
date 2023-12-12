@@ -92,6 +92,7 @@
             <WalterDataLineChart
                 config={walter_data_rechnungen_year(
                     'Rechnungen',
+                    data.entry.typ.text,
                     data.entry.betriebskostenrechnungen
                 )}
             />

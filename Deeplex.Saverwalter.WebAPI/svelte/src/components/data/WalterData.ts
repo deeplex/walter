@@ -79,6 +79,7 @@ export function walter_data_rechnungen_diff(
 
 export function walter_data_rechnungen_year(
     title: string,
+    typ: string,
     rechnungen: WalterBetriebskostenrechnungEntry[]
 ): WalterDataConfigType {
     const options = {
@@ -95,7 +96,7 @@ export function walter_data_rechnungen_year(
     };
 
     const data = rechnungen.map((rechnung) => ({
-        group: `${rechnung.umlage.text}`,
+        group: `${typ}`,
         key: `${rechnung.betreffendesJahr}`,
         value: rechnung.betrag
     }));
