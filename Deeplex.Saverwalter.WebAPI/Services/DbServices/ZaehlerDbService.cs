@@ -89,7 +89,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     return new ForbidResult();
                 }
 
-                return new OkObjectResult(Add(entry));
+                return new OkObjectResult(await Add(entry));
             }
             catch
             {
@@ -125,7 +125,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Update(entry, entity));
+                return new OkObjectResult(await Update(entry, entity));
             }
             catch
             {

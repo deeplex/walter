@@ -78,7 +78,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
 
             var umlage = Ctx.Umlagen.FindAsync(entry.Umlage!.Id);
-            var authRx = await Auth.AuthorizeAsync(user, umlage, [Operations.Delete]);
+            var authRx = await Auth.AuthorizeAsync(user, umlage, [Operations.SubCreate]);
             if (!authRx.Succeeded)
             {
                 return new ForbidResult();
@@ -87,7 +87,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
 
-                return new OkObjectResult(Add(entry));
+                return new OkObjectResult(await Add(entry));
             }
             catch
             {
@@ -134,7 +134,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Update(entry, entity));
+                return new OkObjectResult(await Update(entry, entity));
             }
             catch
             {

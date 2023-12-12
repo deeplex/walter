@@ -102,9 +102,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             var entity = new Kontakt(entry.Name, (Rechtsform)entry.Rechtsform.Id);
 
-            await SetOptionalValues(entity, entry);
+            SetOptionalValues(entity, entry);
             Ctx.Kontakte.Add(entity);
-            Ctx.SaveChanges();
+            await Ctx.SaveChangesAsync();
 
             return new KontaktEntry(entity, entry.Permissions);
         }
@@ -126,7 +126,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Update(entry, entity));
+                return new OkObjectResult(await Update(entry, entity));
             }
             catch
             {
@@ -139,14 +139,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             entity.Name = entry.Name;
             entity.Rechtsform = (Rechtsform)entry.Rechtsform.Id;
 
-            await SetOptionalValues(entity, entry);
+            SetOptionalValues(entity, entry);
             Ctx.Kontakte.Update(entity);
-            Ctx.SaveChanges();
+            await Ctx.SaveChangesAsync();
 
             return new KontaktEntry(entity, entry.Permissions);
         }
 
-        private async Task SetOptionalValues(Kontakt entity, KontaktEntry entry)
+        private void SetOptionalValues(Kontakt entity, KontaktEntry entry)
         {
             if (entity.KontaktId != entry.Id)
             {

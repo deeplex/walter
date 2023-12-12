@@ -80,8 +80,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var newEntry = await Add(entry);
-                return new OkObjectResult(newEntry);
+                return new OkObjectResult(await Add(entry));
             }
             catch
             {
@@ -119,7 +118,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Update(entry, entity));
+                return new OkObjectResult(await Update(entry, entity));
             }
             catch
             {

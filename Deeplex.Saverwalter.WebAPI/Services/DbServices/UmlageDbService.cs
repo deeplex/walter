@@ -78,7 +78,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new BadRequestResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entry.Wohnungen, [Operations.SubCreate]);
+            var wohnungen = entry.Wohnungen!.SelectMany(wohnung => Ctx.Wohnungen.Where(w => w.WohnungId == wohnung.Id));
+            var authRx = await Auth.AuthorizeAsync(user, wohnungen, [Operations.SubCreate]);
             if (!authRx.Succeeded)
             {
                 return new ForbidResult();
@@ -135,7 +136,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Update(entry, entity));
+                return new OkObjectResult(await Update(entry, entity));
             }
             catch
             {
@@ -143,7 +144,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private UmlageEntry Update(UmlageEntry entry, Umlage entity)
+        private async Task<UmlageEntry> Update(UmlageEntry entry, Umlage entity)
         {
             if (entry.Typ == null)
             {
@@ -154,7 +155,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 throw new ArgumentException("entry has no Schluessel.");
             }
 
-            entity.Typ = Ctx.Umlagetypen.First(typ => typ.UmlagetypId == entry.Typ.Id);
+            entity.Typ = (await Ctx.Umlagetypen.FindAsync(entry.Typ.Id))!;
             entity.Schluessel = (Umlageschluessel)entry.Schluessel.Id;
 
             SetOptionalValues(entity, entry);

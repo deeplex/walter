@@ -30,14 +30,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
         public static async Task<Permissions> GetPermissions<T>(ClaimsPrincipal user, T entity, IAuthorizationService auth)
         {
-            var permissions = new Permissions();
-            permissions.Read = (await auth.AuthorizeAsync(user, entity, [Operations.Read])).Succeeded;
+            var permissions = new Permissions
+            {
+                Read = (await auth.AuthorizeAsync(user, entity, [Operations.Read])).Succeeded
+            };
             if (!permissions.Read)
             {
                 return permissions;
             }
             permissions.Update = (await auth.AuthorizeAsync(user, entity, [Operations.Update])).Succeeded;
             permissions.Remove = permissions.Update;
+
             return permissions;
         }
 
@@ -72,7 +75,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Adresse>> GetEntriesForUser(Guid guid) => ctx.Adressen
-                .Where(e => e.Wohnungen.Any(w => w.Verwalter.Any(v => v.UserAccount.Id == guid && (int)rolle >= (int)v.Rolle)))
+                .Where(e => e.Wohnungen.Any(w => w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid))))
                 .ToListAsync();
         }
 
@@ -94,7 +97,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Betriebskostenrechnung>> GetEntriesForUser(Guid guid) => ctx.Betriebskostenrechnungen
-                .Where(e => e.Umlage.Wohnungen.Any(w => w.Verwalter.Any(v => v.UserAccount.Id == guid && (int)rolle >= (int)v.Rolle)))
+                .Where(e => e.Umlage.Wohnungen.Any(w => w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid))))
                 .ToListAsync();
         }
 
@@ -116,7 +119,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Erhaltungsaufwendung>> GetEntriesForUser(Guid guid) => ctx.Erhaltungsaufwendungen
-                .Where(e => e.Wohnung.Verwalter.Any(v => v.UserAccount.Id == guid && (int)rolle >= (int)v.Rolle))
+                .Where(e => e.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
                 .ToListAsync();
         }
 

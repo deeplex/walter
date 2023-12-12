@@ -79,14 +79,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var wohnung = (await Ctx.Vertraege.FindAsync(entry.Wohnung.Id));
+                var wohnung = await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id);
                 var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate]);
                 if (!authRx.Succeeded)
                 {
                     return new ForbidResult();
                 }
 
-                return new OkObjectResult(Add(entry));
+                return new OkObjectResult(await Add(entry));
             }
             catch
             {
@@ -106,9 +106,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             SetOptionalValues(entity, entry);
             Ctx.Erhaltungsaufwendungen.Add(entity);
-            Ctx.SaveChanges();
+            await Ctx.SaveChangesAsync();
 
-            return new ErhaltungsaufwendungEntry(entity, entry.Permissions);
+            return new ErhaltungsaufwendungEntry(entity, new());
         }
 
         public async Task<IActionResult> Put(ClaimsPrincipal user, int id, ErhaltungsaufwendungEntry entry)
@@ -127,7 +127,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Update(entry, entity));
+                return new OkObjectResult(await Update(entry, entity));
             }
             catch
             {

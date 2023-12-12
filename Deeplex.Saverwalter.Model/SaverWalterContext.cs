@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<UserResetCredential> UserResetCredentials { get; set; } = null!;
         public DbSet<Pbkdf2PasswordCredential> Pbkdf2PasswordCredentials { get; set; } = null!;
 
-        public override int SaveChanges()
+        private void setLastModified()
         {
             var entries = ChangeTracker.Entries().Where(e => e.State == EntityState.Modified).ToList();
             foreach (var entry in entries)
@@ -37,7 +37,17 @@ namespace Deeplex.Saverwalter.Model
                     entry.Property("LastModified").CurrentValue = DateTime.Now.ToUniversalTime();
                 }
             }
+        }
 
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            setLastModified();
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        public override int SaveChanges()
+        {
+            setLastModified();
             return base.SaveChanges();
         }
 

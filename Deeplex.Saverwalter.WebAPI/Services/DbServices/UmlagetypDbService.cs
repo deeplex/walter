@@ -32,8 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new NotFoundResult();
             }
 
-            var wohnungen = entity.Umlagen.SelectMany(entity => entity.Wohnungen);
-            var permissions = await Utils.GetPermissions(user, wohnungen, Auth);
+            var permissions = await Utils.GetPermissions(user, entity, Auth);
             if (!permissions.Read)
             {
                 return new ForbidResult();
@@ -77,10 +76,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new BadRequestResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(
-                user,
-                entry.Umlagen!.Select(e => Ctx.Umlagen.Where(u => u.UmlageId == e.Id)),
-                [Operations.SubCreate]);
+            var umlagen = entry.Umlagen!.Select(e => Ctx.Umlagen.Where(u => u.UmlageId == e.Id));
+            var authRx = await Auth.AuthorizeAsync(user, umlagen, [Operations.SubCreate]);
             if (!authRx.Succeeded)
             {
                 return new ForbidResult();
@@ -141,7 +138,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new UmlagetypEntry(entity, entry.Permissions);
         }
 
-        private void SetOptionalValues(Umlagetyp entity, UmlagetypEntry entry)
+        private static void SetOptionalValues(Umlagetyp entity, UmlagetypEntry entry)
         {
             entity.Notiz = entry.Notiz;
         }

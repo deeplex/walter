@@ -85,7 +85,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     return new ForbidResult();
                 }
 
-                return new OkObjectResult(Add(entry));
+                return new OkObjectResult(await Add(entry));
             }
             catch
             {
@@ -98,7 +98,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             var mieten = new List<Miete>();
 
             // Be able to create multiple Mieten at once
-            for (int i = 0; i <= entry.Repeat; ++i)
+            for (var i = 0; i <= entry.Repeat; ++i)
             {
                 var vertrag = await Ctx.Vertraege.FindAsync(entry.Vertrag.Id);
                 var monat = entry.BetreffenderMonat.AddMonths(i);

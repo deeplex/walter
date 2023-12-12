@@ -71,14 +71,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var vertrag = await Ctx.ZaehlerSet.FindAsync(entry.Vertrag!.Id);
+                var vertrag = await Ctx.Vertraege.FindAsync(entry.Vertrag!.Id);
                 var authRx = await Auth.AuthorizeAsync(user, vertrag, [Operations.SubCreate]);
                 if (!authRx.Succeeded)
                 {
                     return new ForbidResult();
                 }
 
-                return new OkObjectResult(Add(entry));
+                return new OkObjectResult(await Add(entry));
             }
             catch
             {
