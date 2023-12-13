@@ -9,7 +9,10 @@
 
     export let entry: Partial<WalterVertragVersionEntry> = {};
     export const fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
-    export let readonly = entry?.permissions?.update === false;
+    export let readonly = false;
+    $: {
+        readonly = entry?.permissions?.update === false;
+    }
 </script>
 
 <Row>

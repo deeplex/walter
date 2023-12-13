@@ -23,7 +23,7 @@ export class WalterKontaktEntry extends WalterApiHandler {
         public lastModified: Date,
         public anrede: WalterSelectionEntry,
         public selectedJuristischePersonen: WalterSelectionEntry[],
-        public adresse: WalterAdresseEntry | null,
+        public adresse: WalterAdresseEntry | undefined,
         public juristischePersonen: WalterKontaktEntry[],
         public wohnungen: WalterWohnungEntry[],
         public vertraege: WalterVertragEntry[],

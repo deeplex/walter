@@ -12,7 +12,10 @@
 
     export let entry: Partial<WalterErhaltungsaufwendungEntry> = {};
     export let fetchImpl: typeof fetch;
-    export let readonly = entry?.permissions?.update === false;
+    export let readonly = false;
+    $: {
+        readonly = entry?.permissions?.update === false;
+    }
 </script>
 
 <Row>

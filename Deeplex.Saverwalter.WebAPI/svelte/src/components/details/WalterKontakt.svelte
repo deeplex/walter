@@ -13,7 +13,10 @@
 
     export let entry: Partial<WalterKontaktEntry>;
     export let fetchImpl: typeof fetch;
-    export let readonly = entry?.permissions?.update === false;
+    export let readonly = false;
+    $: {
+        readonly = entry?.permissions?.update === false;
+    }
     export let juristisch = false;
 
     const anreden = walter_selection.anreden(fetchImpl);

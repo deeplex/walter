@@ -48,6 +48,8 @@
                     {vertraege}
                 />
             </div>
+        </Tile>
+        <Tile>
             <div style="margin: 1em">
                 <WalterRechnungenTabelle
                     config={walter_data_rechnungentabelle(

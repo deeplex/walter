@@ -15,7 +15,10 @@
 
     export let entry: Partial<WalterUmlageEntry> = {};
     export let fetchImpl: typeof fetch;
-    export let readonly = entry?.permissions?.update === false;
+    export let readonly = false;
+    $: {
+        readonly = entry?.permissions?.update === false;
+    }
 
     const umlageschluessel = walter_selection.umlageschluessel(fetchImpl);
 </script>

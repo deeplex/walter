@@ -12,7 +12,7 @@
     import WalterDataHeatmapChart from '../data/WalterDataHeatmapChart.svelte';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import WalterBetriebskostenrechnung from './WalterBetriebskostenrechnung.svelte';
-    import { Grid } from 'carbon-components-svelte';
+    import { Grid, Row } from 'carbon-components-svelte';
 
     export let config: WalterDataConfigType;
     export let umlagen: WalterUmlageEntry[];
@@ -95,6 +95,10 @@
 </WalterDataWrapperQuickAdd>
 
 <Grid>
-    <h3>Umlagentabelle</h3>
-    <WalterDataHeatmapChart {click} bind:config />
+    <Row>
+        <h3>Umlagentabelle</h3>
+    </Row>
+    <Row>
+        <WalterDataHeatmapChart {click} bind:config />
+    </Row>
 </Grid>
