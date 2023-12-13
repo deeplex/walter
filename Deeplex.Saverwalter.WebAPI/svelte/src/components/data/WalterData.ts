@@ -261,7 +261,7 @@ export function walter_data_rechnungentabelle(
     const wohnungen = new Set();
     data.forEach((entry) => wohnungen.add(entry.group));
 
-    options.height = `${wohnungen.size * 3}em`;
+    options.height = `${Math.max(wohnungen.size * 3, 20)}em`;
 
     return { data, options };
 }

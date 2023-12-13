@@ -1,6 +1,12 @@
 <script lang="ts">
     import type { WalterUmlageEntry, WalterVertragEntry } from '$walter/lib';
-    import { Tab, Tabs, Tile } from 'carbon-components-svelte';
+    import {
+        StructuredList,
+        StructuredListBody,
+        StructuredListRow,
+        Tab,
+        Tabs
+    } from 'carbon-components-svelte';
     import WalterMiettabelle from './WalterMiettabelle.svelte';
     import WalterRechnungenTabelle from './WalterRechnungenTabelle.svelte';
     import {
@@ -34,33 +40,40 @@
         years.length - 1;
 </script>
 
-<Tabs bind:selected type="container">
-    {#each years as year}
-        <Tab label={`${year}`} />
-    {/each}
-    <svelte:fragment slot="content">
-        <Tile>
-            <div style="margin: 1em">
-                <WalterMiettabelle
-                    config={walter_data_miettabelle(vertraege, years[selected])}
-                    year={years[selected]}
-                    {mieten}
-                    {vertraege}
-                />
-            </div>
-        </Tile>
-        <Tile>
-            <div style="margin: 1em">
-                <WalterRechnungenTabelle
-                    config={walter_data_rechnungentabelle(
-                        umlagen,
-                        years[selected]
-                    )}
-                    year={years[selected]}
-                    {fetchImpl}
-                    {umlagen}
-                />
-            </div>
-        </Tile>
-    </svelte:fragment>
-</Tabs>
+<div>
+    <!-- svelte-ignore missing-declaration -->
+    <Tabs style="position: fixed; z-index: 3000" bind:selected type="container">
+        {#each years as year}
+            <Tab label={`${year}`} />
+        {/each}
+        <svelte:fragment slot="content">
+            <div style="height: 5em; width: 100vw; display: block" />
+            <StructuredList>
+                <StructuredListBody>
+                    <StructuredListRow>
+                        <WalterMiettabelle
+                            config={walter_data_miettabelle(
+                                vertraege,
+                                years[selected]
+                            )}
+                            year={years[selected]}
+                            {mieten}
+                            {vertraege}
+                        />
+                    </StructuredListRow>
+                    <StructuredListRow>
+                        <WalterRechnungenTabelle
+                            config={walter_data_rechnungentabelle(
+                                umlagen,
+                                years[selected]
+                            )}
+                            year={years[selected]}
+                            {fetchImpl}
+                            {umlagen}
+                        />
+                    </StructuredListRow>
+                </StructuredListBody>
+            </StructuredList>
+        </svelte:fragment>
+    </Tabs>
+</div>

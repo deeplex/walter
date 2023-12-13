@@ -62,7 +62,7 @@
     }
 
     const disabledRows = rows
-        .filter((row) => !row.permissions?.read)
+        .filter((row) => row.permissions && !row.permissions?.read)
         .map((row) => row.id);
     const enabledRows = rows
         .filter((row) => row.permissions?.read)

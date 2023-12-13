@@ -23,6 +23,7 @@
 </script>
 
 <HeatmapChart
+    style="min-height: 20em !important; width: 100em;"
     bind:this={heatMap}
     bind:data={config.data}
     bind:options={config.options}

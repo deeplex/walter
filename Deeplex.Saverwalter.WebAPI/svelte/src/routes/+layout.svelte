@@ -120,6 +120,11 @@
         padding: 0 !important;
     }
 
+    :global(#homepagetabs) {
+        position: fixed;
+        z-index: 3000;
+    }
+
     :global(.bx--list-box__menu-item) {
         margin: 0px !important;
     }

@@ -94,11 +94,9 @@
     />
 </WalterDataWrapperQuickAdd>
 
-<Grid>
-    <Row>
-        <h3>Umlagentabelle</h3>
-    </Row>
-    <Row>
+<div style="left: 0; min-height: 30em; display: block; min-width: 60em;">
+    <h3>Umlagentabelle</h3>
+    <div id="umlagentabelle">
         <WalterDataHeatmapChart {click} bind:config />
-    </Row>
-</Grid>
+    </div>
+</div>

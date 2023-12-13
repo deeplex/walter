@@ -40,6 +40,12 @@
     function closeSideNav() {
         isOpen = false;
     }
+
+    let username: string | undefined;
+    $: {
+        username = (authState && get(authState)?.name) || username;
+    }
+    authState?.subscribe((e) => (username = e?.name));
 </script>
 
 <svelte:window bind:innerWidth={winWidth} />
@@ -97,11 +103,7 @@
 
         <SideNavDivider />
         <div>
-            <SideNavMenu
-                id="usermenu"
-                icon={User}
-                text={authState && get(authState)?.name}
-            >
+            <SideNavMenu id="usermenu" icon={User} text={username}>
                 {#await checkStackTodo(fetchImpl)}
                     <WalterSideNavLink
                         icon={Loading}
