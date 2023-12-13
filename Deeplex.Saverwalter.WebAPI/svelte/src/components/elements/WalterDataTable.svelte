@@ -117,6 +117,7 @@
                     />
                     {#if !!add && !readonly}
                         <Button
+                            style="right: -1em; position: sticky;"
                             on:click={add}
                             iconDescription="Eintrag hinzufügen"
                             icon={Add}>Eintrag hinzufügen</Button

@@ -51,7 +51,7 @@
     {/if}
 
     <AccordionItem title={`${title} (${rows.length})`} bind:open>
-        <Tile>
+        <Tile style="overflow: auto">
             <WalterDataTable
                 add={addUrl && addEntry?.permissions?.update
                     ? quick_add
