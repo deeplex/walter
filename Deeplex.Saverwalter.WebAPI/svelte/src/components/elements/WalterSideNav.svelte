@@ -61,71 +61,87 @@
         <WalterSideNavLink icon={Building} text="Wohnungen" href="/wohnungen" />
         <WalterSideNavLink icon={Document} text="Verträge" href="/vertraege" />
         <SideNavDivider />
-
-        <SideNavMenu icon={ListBoxes} text="Erweitert">
-            <WalterSideNavLink
-                icon={Money}
-                text="Betriebskostenrechnungen"
-                href="/betriebskostenrechnungen"
-            />
-            <WalterSideNavLink
-                icon={ChartRelationship}
-                text="Umlagen"
-                href="/umlagen"
-            />
-            <WalterSideNavLink
-                icon={IbmDataReplication}
-                text="Umlagetypen"
-                href="/umlagetypen"
-            />
-            <WalterSideNavLink
-                icon={Tools}
-                text="Erhaltungsaufwendungen"
-                href="/erhaltungsaufwendungen"
-            />
-            <WalterSideNavLink icon={Meter} text="Zähler" href="/zaehler" />
-            <WalterSideNavLink
-                icon={Location}
-                text="Adressen"
-                href="/adressen"
-            />
-            <!-- </div> -->
-        </SideNavMenu>
+        <div>
+            <SideNavMenu icon={ListBoxes} text="Erweitert">
+                <WalterSideNavLink
+                    icon={Money}
+                    text="Betriebskostenrechnungen"
+                    href="/betriebskostenrechnungen"
+                />
+                <WalterSideNavLink
+                    icon={ChartRelationship}
+                    text="Umlagen"
+                    href="/umlagen"
+                />
+                <WalterSideNavLink
+                    icon={IbmDataReplication}
+                    text="Umlagetypen"
+                    href="/umlagetypen"
+                />
+                <WalterSideNavLink
+                    icon={Tools}
+                    text="Erhaltungsaufwendungen"
+                    href="/erhaltungsaufwendungen"
+                />
+                <WalterSideNavLink icon={Meter} text="Zähler" href="/zaehler" />
+                <WalterSideNavLink
+                    icon={Location}
+                    text="Adressen"
+                    href="/adressen"
+                />
+                <!-- </div> -->
+            </SideNavMenu>
+        </div>
 
         <li style="flex: 1" />
 
         <SideNavDivider />
+        <div>
+            <SideNavMenu
+                id="usermenu"
+                icon={User}
+                text={authState && get(authState)?.name}
+            >
+                {#await checkStackTodo(fetchImpl)}
+                    <WalterSideNavLink
+                        icon={Loading}
+                        text="Ablagestapel"
+                        href="/stack"
+                    />
+                {:then x}
+                    <WalterSideNavLink
+                        icon={x}
+                        text="Ablagestapel"
+                        href="/stack"
+                    />
+                {/await}
 
-        {#await checkStackTodo(fetchImpl)}
-            <WalterSideNavLink
-                icon={Loading}
-                text="Ablagestapel"
-                href="/stack"
-            />
-        {:then x}
-            <WalterSideNavLink icon={x} text="Ablagestapel" href="/stack" />
-        {/await}
+                <WalterSideNavLink
+                    icon={TrashCan}
+                    text="Papierkorb"
+                    href="/trash"
+                />
 
-        <WalterSideNavLink icon={TrashCan} text="Papierkorb" href="/trash" />
-
-        <WalterSideNavLink
-            text="Nutzereinstellungen"
-            icon={User}
-            href="/user"
-        />
-        {#if authState && get(authState)?.role === UserRole.Admin}
-            <WalterSideNavLink
-                text="Adminbereich"
-                icon={NetworkAdminControl}
-                href="/admin"
-            />
-        {/if}
-        <SideNavLink
-            icon={Logout}
-            on:click={logout}
-            text="Abmelden"
-            style="padding-left: 1em"
-        />
+                <WalterSideNavLink
+                    text="Nutzereinstellungen"
+                    icon={User}
+                    href="/user"
+                />
+                {#if authState && get(authState)?.role === UserRole.Admin}
+                    <WalterSideNavLink
+                        text="Adminbereich"
+                        icon={NetworkAdminControl}
+                        href="/admin"
+                    />
+                {/if}
+                <SideNavLink
+                    icon={Logout}
+                    on:click={logout}
+                    text="Abmelden"
+                    style="padding-left: 1em"
+                />
+            </SideNavMenu>
+        </div>
     </SideNavItems>
     <!-- To get the sidenav scrollable when window height is very small -->
     <div style="height: 4em" />

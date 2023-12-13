@@ -128,6 +128,10 @@
         margin-right: -5px !important;
     }
 
+    :global(#usermenu > .bx--side-nav__submenu-chevron) {
+        transform: scaleY(-1) !important;
+    }
+
     /* Adjust size of content in detail view */
     :global(.bx--text-input-wrapper, .bx--form-item, .bx--list-box__wrapper) {
         margin: 10px;

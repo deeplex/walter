@@ -18,12 +18,14 @@ export type SignInResponse = {
     userId: string;
     token: string;
     role: UserRole;
+    name: string;
 };
 
 export type AuthState = {
     userId: string;
     token: string;
     role: UserRole;
+    name: string;
 };
 
 export let authState: Writable<AuthState | null> | undefined = undefined;
@@ -102,7 +104,9 @@ function tryLoadAuthState(): AuthState | null {
         !('token' in authState) ||
         typeof authState.token !== 'string' ||
         !('role' in authState) ||
-        typeof authState.role !== 'number'
+        typeof authState.role !== 'number' ||
+        !('name' in authState) ||
+        typeof authState.name !== 'string'
     ) {
         return null;
     }
@@ -114,7 +118,8 @@ function tryLoadAuthState(): AuthState | null {
     return {
         userId: authState.userId,
         token: authState.token,
-        role: authState.role
+        role: authState.role,
+        name: authState.name
     };
 }
 function isTokenStillValid(token: string): boolean {

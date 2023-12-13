@@ -34,18 +34,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public string UserId { get; }
             public string Token { get; }
             public UserRole? Role { get; }
+            public string Name { get; }
 
-            public LoginResult(string userId, string token, UserRole role)
-            {
-                UserId = userId;
-                Token = token;
-                Role = role;
-            }
             public LoginResult(WebAPI.Services.SignInResult rx)
             {
                 UserId = rx.Account!.Id.ToString("D", CultureInfo.InvariantCulture);
                 Token = rx.SessionToken!;
                 Role = rx.Account.Role;
+                Name = rx.Account.Name;
             }
         }
 

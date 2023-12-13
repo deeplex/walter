@@ -15,7 +15,7 @@
     import { convertTime } from '$walter/services/utils';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
 
-    export let title = 'Saverwalter';
+    export let title: string;
     export let entry: {
         createdAt: Date;
         lastModified: Date;

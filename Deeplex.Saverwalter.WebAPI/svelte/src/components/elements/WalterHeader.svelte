@@ -3,7 +3,7 @@
     import { Button, Header } from 'carbon-components-svelte';
     import { Close, Menu } from 'carbon-icons-svelte';
 
-    export let title = 'Saverwalter';
+    export let title: string;
 
     let isSideNavOpen = true;
 
