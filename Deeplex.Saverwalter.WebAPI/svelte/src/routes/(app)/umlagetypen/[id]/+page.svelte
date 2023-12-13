@@ -11,7 +11,11 @@
 
     export let data: PageData;
 
-    const title = data.entry.bezeichnung;
+    let title = data.entry.bezeichnung;
+    $: {
+        title = data.entry.bezeichnung;
+    }
+
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.S3URL);

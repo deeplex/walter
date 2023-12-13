@@ -11,7 +11,10 @@
 
     export let data: PageData;
 
-    const title = data.entry.aussteller?.text + ' - ' + data.entry.bezeichnung;
+    let title = data.entry.aussteller?.text + ' - ' + data.entry.bezeichnung;
+    $: {
+        title = data.entry.aussteller?.text + ' - ' + data.entry.bezeichnung;
+    }
 
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.registerStack();

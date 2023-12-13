@@ -24,7 +24,10 @@
         adresse: { ...data.entry }
     };
 
-    const title = data.entry.anschrift;
+    let title = data.entry.anschrift;
+    $: {
+        title = data.entry.anschrift;
+    }
 
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.registerStack();

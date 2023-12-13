@@ -14,12 +14,20 @@
 
     export let data: PageData;
 
-    const title =
+    let title =
         data.entry.typ?.text +
         ' - ' +
         data.entry.betreffendesJahr +
         ' - ' +
         data.entry.umlage?.text;
+    $: {
+        title =
+            data.entry.typ?.text +
+            ' - ' +
+            data.entry.betreffendesJahr +
+            ' - ' +
+            data.entry.umlage?.text;
+    }
 
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
