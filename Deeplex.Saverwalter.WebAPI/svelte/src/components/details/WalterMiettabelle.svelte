@@ -103,7 +103,11 @@
 
 <div style="left: 0; min-height: 30em; display: block; min-width: 60em;">
     <h3>Miettabelle</h3>
-    <div id="miettabelle">
-        <WalterDataHeatmapChart {click} bind:config />
-    </div>
+    {#if mieten.length === 0}
+        <p>Keine Mieten vorhanden</p>
+    {:else}
+        <div id="miettabelle">
+            <WalterDataHeatmapChart {click} bind:config />
+        </div>
+    {/if}
 </div>

@@ -27,9 +27,10 @@
         );
     const years: number[] = [];
     for (
-        let i = new Date(mieten[0].betreffenderMonat).getFullYear();
+        let i = new Date(mieten[0]?.betreffenderMonat).getFullYear();
         i <
-        new Date(mieten[mieten.length - 1].betreffenderMonat).getFullYear() + 1;
+        new Date(mieten[mieten.length - 1]?.betreffenderMonat).getFullYear() +
+            1;
         ++i
     ) {
         years.push(i);

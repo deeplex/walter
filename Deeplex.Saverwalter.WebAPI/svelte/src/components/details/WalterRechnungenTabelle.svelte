@@ -96,7 +96,11 @@
 
 <div style="left: 0; min-height: 30em; display: block; min-width: 60em;">
     <h3>Umlagentabelle</h3>
-    <div id="umlagentabelle">
-        <WalterDataHeatmapChart {click} bind:config />
-    </div>
+    {#if config.data.length === 0}
+        <p>Keine Daten vorhanden</p>
+    {:else}
+        <div id="umlagentabelle">
+            <WalterDataHeatmapChart {click} bind:config />
+        </div>
+    {/if}
 </div>

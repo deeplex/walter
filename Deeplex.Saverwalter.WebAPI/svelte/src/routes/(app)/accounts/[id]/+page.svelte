@@ -39,7 +39,7 @@
     <WalterAccount admin entry={data.entry} fetchImpl={data.fetchImpl} />
     <div style="margin: 1em">
         <Row>
-            <Button on:click={get_password_link} kind="danger"
+            <Button size="small" on:click={get_password_link} kind="danger"
                 >Passwortlink anfordern</Button
             >
             <CodeSnippet code={passwordResetLink} />
