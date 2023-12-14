@@ -26,9 +26,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Get(user, entity.VertragId);
 
-            result.Should().BeOfType<OkObjectResult>();
-            var okResult = (OkObjectResult)result;
-            okResult.Value.Should().BeOfType<VertragEntry>();
+            result.Value.Should().NotBeNull();
+            result.Value.Should().BeOfType<VertragEntry>();
         }
 
         [Fact]
@@ -67,7 +66,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -84,7 +83,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
@@ -103,7 +102,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Put(user, entity.VertragId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             var updatedEntity = ctx.Vertraege.Find(entity.VertragId);
             if (updatedEntity == null)
             {
@@ -127,7 +126,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Put(user, entity.VertragId + 2220, entry);
 
-            result.Should().BeOfType<NotFoundResult>();
+            result.Result.Should().BeOfType<NotFoundResult>();
         }
     }
 }

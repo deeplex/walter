@@ -219,21 +219,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 
         [HttpGet]
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}")]
-        public IActionResult GetBetriebskostenabrechnung(int vertrag_id, int jahr)
+        public ActionResult<BetriebskostenabrechnungEntry> GetBetriebskostenabrechnung(int vertrag_id, int jahr)
         {
             return Service.Get(vertrag_id, jahr);
         }
 
         [HttpGet]
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}/word_document")]
-        public IActionResult GetBetriebskostenabrechnungWordDocument(int vertrag_id, int jahr)
+        public ActionResult<MemoryStream> GetBetriebskostenabrechnungWordDocument(int vertrag_id, int jahr)
         {
             return Service.GetWordDocument(vertrag_id, jahr);
         }
 
         [HttpGet]
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}/pdf_document")]
-        public IActionResult GetBetriebskostenabrechnungPdfDocument(int vertrag_id, int jahr)
+        public ActionResult<MemoryStream> GetBetriebskostenabrechnungPdfDocument(int vertrag_id, int jahr)
         {
             return Service.GetPdfDocument(vertrag_id, jahr);
         }

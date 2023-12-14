@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Auth = authorizationService;
         }
 
-        public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
+        public async Task<ActionResult<VertragVersionEntry>> Get(ClaimsPrincipal user, int id)
         {
             var entity = await Ctx.VertragVersionen.FindAsync(id);
             if (entity == null)
@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 var entry = new VertragVersionEntry(entity, permissions);
-                return new OkObjectResult(entry);
+                return entry;
             }
             catch
             {
@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        public async Task<IActionResult> Delete(ClaimsPrincipal user, int id)
+        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
             var entity = await Ctx.VertragVersionen.FindAsync(id);
             if (entity == null)
@@ -62,7 +62,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public async Task<IActionResult> Post(ClaimsPrincipal user, VertragVersionEntry entry)
+        public async Task<ActionResult<VertragVersionEntry>> Post(ClaimsPrincipal user, VertragVersionEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -78,7 +78,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     return new ForbidResult();
                 }
 
-                return new OkObjectResult(await Add(entry));
+                return await Add(entry);
             }
             catch
             {
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private async Task<VertragVersionEntryBase> Add(VertragVersionEntry entry)
+        private async Task<VertragVersionEntry> Add(VertragVersionEntry entry)
         {
             var vertrag = await Ctx.Vertraege.FindAsync(entry.Vertrag!.Id);
             var entity = new VertragVersion(entry.Beginn, entry.Grundmiete, entry.Personenzahl)
@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new VertragVersionEntry(entity, entry.Permissions);
         }
 
-        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, VertragVersionEntry entry)
+        public async Task<ActionResult<VertragVersionEntry>> Put(ClaimsPrincipal user, int id, VertragVersionEntry entry)
         {
             var entity = await Ctx.VertragVersionen.FindAsync(id);
             if (entity == null)
@@ -117,7 +117,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Update(entry, entity));
+                return Update(entry, entity);
             }
             catch
             {

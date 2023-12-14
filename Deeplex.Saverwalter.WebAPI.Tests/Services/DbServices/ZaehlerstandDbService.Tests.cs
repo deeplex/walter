@@ -28,9 +28,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Get(user, zaehler.Staende.First().ZaehlerstandId);
 
-            result.Should().BeOfType<OkObjectResult>();
-            var okResult = (OkObjectResult)result;
-            okResult.Value.Should().BeOfType<ZaehlerstandEntryBase>();
+            result.Value.Should().NotBeNull();
+            result.Value.Should().BeOfType<ZaehlerstandEntry>();
         }
 
         [Fact]
@@ -67,11 +66,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Zaehler = zaehler
             };
-            var entry = new ZaehlerstandEntryBase(entity, new());
+            var entry = new ZaehlerstandEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -93,11 +92,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Zaehlerstaende.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new ZaehlerstandEntryBase(entity, new());
+            var entry = new ZaehlerstandEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
@@ -112,12 +111,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var service = new ZaehlerstandDbService(ctx, auth);
             var zaehler = vertrag.Wohnung.Zaehler.First();
             var entity = zaehler.Staende.First();
-            var entry = new ZaehlerstandEntryBase(entity, new());
+            var entry = new ZaehlerstandEntry(entity, new());
             entry.Stand = 5000;
 
             var result = await service.Put(user, entity.ZaehlerstandId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             var updatedEntity = ctx.Zaehlerstaende.Find(entity.ZaehlerstandId);
             if (updatedEntity == null)
             {
@@ -139,12 +138,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 var service = new ZaehlerstandDbService(ctx, auth);
                 var zaehler = vertrag.Wohnung.Zaehler.First();
                 var entity = zaehler.Staende.First();
-                var entry = new ZaehlerstandEntryBase(entity, new());
+                var entry = new ZaehlerstandEntry(entity, new());
                 entry.Stand = 5000;
 
                 var result = await service.Put(user, entity.ZaehlerstandId + 31902, entry);
 
-                result.Should().BeOfType<NotFoundResult>();
+                result.Result.Should().BeOfType<NotFoundResult>();
             }
         }
     }

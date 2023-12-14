@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Auth = authorizationService;
         }
 
-        public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
+        public async Task<ActionResult<ZaehlerstandEntry>> Get(ClaimsPrincipal user, int id)
         {
             var entity = await Ctx.Zaehlerstaende.FindAsync(id);
             if (entity == null)
@@ -33,8 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entry = new ZaehlerstandEntry(entity, permissions);
-                return new OkObjectResult(entry);
+                return new ZaehlerstandEntry(entity, permissions);
             }
             catch
             {
@@ -42,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        public async Task<IActionResult> Delete(ClaimsPrincipal user, int id)
+        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
             var entity = await Ctx.Zaehlerstaende.FindAsync(id);
             if (entity == null)
@@ -62,7 +61,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public async Task<IActionResult> Post(ClaimsPrincipal user, ZaehlerstandEntry entry)
+        public async Task<ActionResult<ZaehlerstandEntry>> Post(ClaimsPrincipal user, ZaehlerstandEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -78,7 +77,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     return new ForbidResult();
                 }
 
-                return new OkObjectResult(await Add(entry));
+                return await Add(entry);
             }
             catch
             {
@@ -100,7 +99,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new ZaehlerstandEntry(entity, entry.Permissions);
         }
 
-        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, ZaehlerstandEntry entry)
+        public async Task<ActionResult<ZaehlerstandEntry>> Put(ClaimsPrincipal user, int id, ZaehlerstandEntry entry)
         {
             var entity = await Ctx.Zaehlerstaende.FindAsync(id);
             if (entity == null)
@@ -116,7 +115,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Update(entry, entity));
+                return Update(entry, entity);
             }
             catch
             {

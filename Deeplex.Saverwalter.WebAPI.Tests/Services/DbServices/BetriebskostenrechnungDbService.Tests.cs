@@ -38,9 +38,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 user,
                 vertrag.Wohnung.Umlagen.First().Betriebskostenrechnungen.First().BetriebskostenrechnungId);
 
-            result.Should().BeOfType<OkObjectResult>();
-            var okResult = (OkObjectResult)result;
-            okResult.Value.Should().BeOfType<BetriebskostenrechnungEntry>();
+            result.Value.Should().NotBeNull();
+            result.Value.Should().BeOfType<BetriebskostenrechnungEntry>();
         }
 
         [Fact]
@@ -86,7 +85,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -113,7 +112,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
@@ -139,7 +138,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Put(user, entity.BetriebskostenrechnungId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             var updatedEntity = ctx.Betriebskostenrechnungen.Find(entity.BetriebskostenrechnungId);
             if (updatedEntity == null)
             {
@@ -170,7 +169,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Put(user, entity.BetriebskostenrechnungId + 312, entry);
 
-            result.Should().BeOfType<NotFoundResult>();
+            result.Result.Should().BeOfType<NotFoundResult>();
         }
     }
 }

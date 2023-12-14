@@ -36,9 +36,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Get(user, vertrag.Wohnung.WohnungId);
 
-            result.Should().BeOfType<OkObjectResult>();
-            var okResult = (OkObjectResult)result;
-            okResult.Value.Should().BeOfType<WohnungEntry>();
+            result.Value.Should().NotBeNull();
+            result.Value.Should().BeOfType<WohnungEntry>();
         }
 
         [Fact]
@@ -79,7 +78,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -106,7 +105,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
@@ -133,7 +132,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Put(user, entity.WohnungId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             var updatedEntity = ctx.Wohnungen.Find(entity.WohnungId);
             if (updatedEntity == null)
             {
@@ -168,7 +167,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Put(user, entity.WohnungId + 11, entry);
 
-            result.Should().BeOfType<NotFoundResult>();
+            result.Result.Should().BeOfType<NotFoundResult>();
         }
     }
 }

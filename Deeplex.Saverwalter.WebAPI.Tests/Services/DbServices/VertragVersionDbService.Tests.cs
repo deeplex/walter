@@ -27,9 +27,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Get(user, entity.VertragVersionId);
 
-            result.Should().BeOfType<OkObjectResult>();
-            var okResult = (OkObjectResult)result;
-            okResult.Value.Should().BeOfType<VertragVersionEntryBase>();
+            result.Value.Should().NotBeNull();
+            result.Value.Should().BeOfType<VertragVersionEntry>();
         }
 
         [Fact]
@@ -64,11 +63,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Vertrag = vertrag
             };
-            var entry = new VertragVersionEntryBase(entity, new());
+            var entry = new VertragVersionEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -82,11 +81,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var service = new VertragVersionDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity = vertrag.Versionen.First();
-            var entry = new VertragVersionEntryBase(entity, new());
+            var entry = new VertragVersionEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
@@ -101,12 +100,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity = vertrag.Versionen.First();
 
-            var entry = new VertragVersionEntryBase(entity, new());
+            var entry = new VertragVersionEntry(entity, new());
             entry.Personenzahl = 2;
 
             var result = await service.Put(user, entity.VertragVersionId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             var updatedEntity = ctx.VertragVersionen.Find(entity.VertragVersionId);
             if (updatedEntity == null)
             {
@@ -126,12 +125,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var service = new VertragVersionDbService(ctx, auth);
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity = vertrag.Versionen.First();
-            var entry = new VertragVersionEntryBase(entity, new());
+            var entry = new VertragVersionEntry(entity, new());
             entry.Personenzahl = 2;
 
             var result = await service.Put(user, entity.VertragVersionId + 2312310, entry);
 
-            result.Should().BeOfType<NotFoundResult>();
+            result.Result.Should().BeOfType<NotFoundResult>();
         }
     }
 }

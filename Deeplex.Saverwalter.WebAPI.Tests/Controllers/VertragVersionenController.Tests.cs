@@ -30,11 +30,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Vertrag = vertrag
             };
-            var entry = new VertragVersionEntryBase(entity, new());
+            var entry = new VertragVersionEntry(entity, new());
 
             var result = await controller.Post(entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -57,7 +57,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.Get(entity.VertragVersionId);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -78,12 +78,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 throw new NullReferenceException("Vertrag has no Versionen");
             }
 
-            var entry = new VertragVersionEntryBase(entity, new());
+            var entry = new VertragVersionEntry(entity, new());
             entry.Personenzahl = 4;
 
             var result = await controller.Put(entity.VertragVersionId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             entity.Personenzahl.Should().Be(4);
         }
 

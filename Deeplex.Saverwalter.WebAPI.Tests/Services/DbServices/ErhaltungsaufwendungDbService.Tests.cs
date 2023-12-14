@@ -39,9 +39,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Get(user, entity.ErhaltungsaufwendungId);
 
-            result.Should().BeOfType<OkObjectResult>();
-            var okResult = (OkObjectResult)result;
-            okResult.Value.Should().BeOfType<ErhaltungsaufwendungEntry>();
+            result.Value.Should().NotBeNull();
+            result.Value.Should().BeOfType<ErhaltungsaufwendungEntry>();
         }
 
         [Fact]
@@ -99,7 +98,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -129,7 +128,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
@@ -162,7 +161,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Put(user, entity.ErhaltungsaufwendungId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             var updatedEntity = ctx.Erhaltungsaufwendungen.Find(entity.ErhaltungsaufwendungId);
             if (updatedEntity == null)
             {
@@ -200,7 +199,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Put(user, entity.ErhaltungsaufwendungId + 11, entry);
 
-            result.Should().BeOfType<NotFoundResult>();
+            result.Result.Should().BeOfType<NotFoundResult>();
         }
     }
 }

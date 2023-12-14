@@ -20,15 +20,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Auth = authorizationService;
         }
 
-        public async Task<IActionResult> GetList(ClaimsPrincipal user)
+        public async Task<ActionResult<IEnumerable<UmlageEntryBase>>> GetList(ClaimsPrincipal user)
         {
             var list = await UmlagePermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
-            return new OkObjectResult(await Task.WhenAll(list
-                .Select(async e => new UmlageEntryBase(e, await Utils.GetPermissions(user, e, Auth)))));
+            return await Task.WhenAll(list
+                .Select(async e => new UmlageEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
+        public async Task<ActionResult<UmlageEntry>> Get(ClaimsPrincipal user, int id)
         {
             var entity = await Ctx.Umlagen.FindAsync(id);
             if (entity == null)
@@ -52,7 +52,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 entry.Zaehler = await Task.WhenAll(entity.Zaehler
                     .Select(async e => new ZaehlerEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
 
-                return new OkObjectResult(entry);
+                return entry;
             }
             catch
             {
@@ -60,7 +60,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        public async Task<IActionResult> Delete(ClaimsPrincipal user, int id)
+        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
             var entity = await Ctx.Umlagen.FindAsync(id);
             if (entity == null)
@@ -80,7 +80,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public async Task<IActionResult> Post(ClaimsPrincipal user, UmlageEntry entry)
+        public async Task<ActionResult<UmlageEntry>> Post(ClaimsPrincipal user, UmlageEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -96,7 +96,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Add(entry));
+                return Add(entry);
             }
             catch
             {
@@ -129,7 +129,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new UmlageEntry(entity, entry.Permissions);
         }
 
-        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, UmlageEntry entry)
+        public async Task<ActionResult<UmlageEntry>> Put(ClaimsPrincipal user, int id, UmlageEntry entry)
         {
             var entity = await Ctx.Umlagen.FindAsync(id);
             if (entity == null)
@@ -145,7 +145,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(await Update(entry, entity));
+                return await Update(entry, entity);
             }
             catch
             {

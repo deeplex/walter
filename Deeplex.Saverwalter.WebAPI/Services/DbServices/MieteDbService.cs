@@ -17,15 +17,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Auth = authorizationService;
         }
 
-        public async Task<IActionResult> GetList(ClaimsPrincipal user)
+        public async Task<ActionResult<IEnumerable<MieteEntryBase>>> GetList(ClaimsPrincipal user)
         {
             var list = await MietePermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
-            return new OkObjectResult(await Task.WhenAll(list
-                .Select(async e => new MieteEntryBase(e, await Utils.GetPermissions(user, e, Auth)))));
+            return await Task.WhenAll(list
+                .Select(async e => new MieteEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
+        public async Task<ActionResult<MieteEntry>> Get(ClaimsPrincipal user, int id)
         {
             var entity = await Ctx.Mieten.FindAsync(id);
             if (entity == null)
@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
                 var entry = new MieteEntry(entity, permissions);
-                return new OkObjectResult(entry);
+                return entry;
             }
             catch
             {
@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        public async Task<IActionResult> Delete(ClaimsPrincipal user, int id)
+        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
             var entity = await Ctx.Mieten.FindAsync(id);
             if (entity == null)
@@ -70,7 +70,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public async Task<IActionResult> Post(ClaimsPrincipal user, MieteEntry entry)
+        public async Task<ActionResult<MieteEntry>> Post(ClaimsPrincipal user, MieteEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     return new ForbidResult();
                 }
 
-                return new OkObjectResult(await Add(entry));
+                return await Add(entry);
             }
             catch
             {
@@ -94,7 +94,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private async Task<MieteEntryBase> Add(MieteEntry entry)
+        private async Task<MieteEntry> Add(MieteEntry entry)
         {
             var mieten = new List<Miete>();
 
@@ -120,7 +120,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         }
 
 
-        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, MieteEntry entry)
+        public async Task<ActionResult<MieteEntry>> Put(ClaimsPrincipal user, int id, MieteEntry entry)
         {
             var entity = await Ctx.Mieten.FindAsync(id);
             if (entity == null)
@@ -136,7 +136,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Update(entry, entity));
+                return Update(entry, entity);
             }
             catch
             {
@@ -144,7 +144,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private MieteEntryBase Update(MieteEntry entry, Miete entity)
+        private MieteEntry Update(MieteEntry entry, Miete entity)
         {
             entity.BetreffenderMonat = entry.BetreffenderMonat;
             entity.Betrag = entry.Betrag;

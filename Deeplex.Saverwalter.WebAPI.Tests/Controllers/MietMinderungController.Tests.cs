@@ -29,10 +29,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
             var result = await controller.Get();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -51,11 +52,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Vertrag = vertrag
             };
-            var entry = new MietminderungEntryBase(entity, new());
+            var entry = new MietminderungEntry(entity, new());
 
             var result = await controller.Post(entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -83,7 +84,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.Get(vertrag.Mietminderungen.First().MietminderungId);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -104,12 +105,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Mietminderungen.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new MietminderungEntryBase(entity, new());
+            var entry = new MietminderungEntry(entity, new());
             entry.Ende = new DateOnly(2021, 1, 31);
 
             var result = await controller.Put(entity.MietminderungId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             vertrag.Mietminderungen.First().Ende.Should().Be(new DateOnly(2021, 1, 31));
         }
 

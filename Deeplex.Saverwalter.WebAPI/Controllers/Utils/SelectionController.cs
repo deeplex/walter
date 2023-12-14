@@ -257,7 +257,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .Select(t => new SelectionEntry((int)t, t.ToDescriptionString()))
                 .ToList();
 
-            return Ok(list);
+            return list;
         }
 
         [HttpGet]
@@ -270,7 +270,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .Select(e => new SelectionEntry((int)e, e.ToDescriptionString()))
                 .ToList();
 
-            return Ok(list);
+            return list;
         }
 
         [HttpGet]
@@ -283,7 +283,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .Select(e => new SelectionEntry((int)e, e.ToString()))
                 .ToList();
 
-            return new OkObjectResult(list);
+            return list;
         }
 
         [HttpGet]
@@ -296,7 +296,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .Select(e => new SelectionEntry((int)e, e.ToString()))
                 .ToList();
 
-            return new OkObjectResult(list);
+            return list;
         }
 
         [HttpGet]
@@ -309,7 +309,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Services
                 .Select(e => new SelectionEntry((int)e, e.ToDescriptionString()))
                 .ToList();
 
-            return new OkObjectResult(list);
+            return list;
         }
     }
 }

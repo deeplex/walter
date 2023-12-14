@@ -46,13 +46,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         }
 
         [HttpGet]
-        public IActionResult Get() => _userService.Get(User!);
+        public ActionResult<AccountEntryBase> Get() => _userService.Get(User!);
 
         [HttpPut]
-        public IActionResult Put(AccountEntryBase entry) => _userService.Put(User!, entry);
+        public ActionResult<AccountEntryBase> Put(AccountEntryBase entry) => _userService.Put(User!, entry);
 
         [HttpDelete]
-        public IActionResult Delete() => _userService.Delete(User!);
+        public ActionResult<AccountEntryBase> Delete() => _userService.Delete(User!);
 
         [HttpPost("refresh-token")]
         [ProducesErrorResponseType(typeof(void))] // https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/1752#issue-663991077

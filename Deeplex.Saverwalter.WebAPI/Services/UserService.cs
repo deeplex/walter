@@ -30,7 +30,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         private readonly SaverwalterContext walterContext;
         private readonly TokenService tokenService;
 
-        public IActionResult Get(ClaimsPrincipal user)
+        public ActionResult<AccountEntryBase> Get(ClaimsPrincipal user)
         {
             var name = user.Identity?.Name;
             var entity = walterContext.UserAccounts.Single(e => e.Username == name);
@@ -41,8 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
             try
             {
-                var entry = new AccountEntryBase(entity);
-                return new OkObjectResult(entry);
+                return new AccountEntryBase(entity);
             }
             catch
             {
@@ -51,7 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         }
 
 
-        public IActionResult Put(ClaimsPrincipal user, AccountEntryBase entry)
+        public ActionResult<AccountEntryBase> Put(ClaimsPrincipal user, AccountEntryBase entry)
         {
             var name = user.Identity?.Name;
             var entity = walterContext.UserAccounts.Single(e => e.Name == name);
@@ -62,7 +61,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
             try
             {
-                return new OkObjectResult(Update(entry, entity));
+                return Update(entry, entity);
             }
             catch
             {
@@ -80,7 +79,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             return new AccountEntryBase(entity);
         }
 
-        public IActionResult Delete(ClaimsPrincipal user)
+        public ActionResult Delete(ClaimsPrincipal user)
         {
             var name = user.Identity?.Name;
             var entity = walterContext.UserAccounts.Single(e => e.Name == name);

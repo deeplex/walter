@@ -29,10 +29,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
             var result = await controller.Get();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -51,11 +52,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Vertrag = vertrag
             };
-            var entry = new MieteEntryBase(entity, new());
+            var entry = new MieteEntry(entity, new());
 
             var result = await controller.Post(entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -79,7 +80,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.Get(vertrag.Mieten.First().MieteId);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -100,12 +101,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 throw new NullReferenceException("Miete is null");
             }
-            var entry = new MieteEntryBase(vertrag.Mieten.First(), new());
+            var entry = new MieteEntry(vertrag.Mieten.First(), new());
             entry.Betrag = 2000;
 
             var result = await controller.Put(vertrag.Mieten.First().MieteId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             vertrag.Mieten.First().Betrag.Should().Be(2000);
         }
 

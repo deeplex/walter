@@ -32,9 +32,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Get(user, entity.MieteId);
 
-            result.Should().BeOfType<OkObjectResult>();
-            var okResult = (OkObjectResult)result;
-            okResult.Value.Should().BeOfType<MieteEntryBase>();
+            result.Value.Should().NotBeNull();
+            result.Value.Should().BeOfType<MieteEntry>();
         }
 
         [Fact]
@@ -74,11 +73,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Vertrag = vertrag
             };
-            var entry = new MieteEntryBase(entity, new());
+            var entry = new MieteEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -97,11 +96,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             ctx.Mieten.Add(entity);
             ctx.SaveChanges();
-            var entry = new MieteEntryBase(entity, new());
+            var entry = new MieteEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
@@ -122,12 +121,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Mieten.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new MieteEntryBase(entity, new());
+            var entry = new MieteEntry(entity, new());
             entry.Betrag = 2000;
 
             var result = await service.Put(user, entity.MieteId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             var updatedEntity = ctx.Mieten.Find(entity.MieteId);
             if (updatedEntity == null)
             {
@@ -150,7 +149,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Vertrag = vertrag
             };
-            var entry = new MieteEntryBase(entity, new());
+            var entry = new MieteEntry(entity, new());
             entry.Betrag = 2000;
 
             ctx.Mieten.Add(entity);
@@ -158,7 +157,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Put(user, entity.MieteId + 111, entry);
 
-            result.Should().BeOfType<NotFoundResult>();
+            result.Result.Should().BeOfType<NotFoundResult>();
         }
     }
 }

@@ -82,17 +82,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get() => await DbService.GetList();
+        public async Task<ActionResult<List<AccountEntryBase>>> Get() => await DbService.GetList();
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] AccountEntryBase entry) => await DbService.Post(User!, entry);
+        public async Task<ActionResult<AccountEntryBase>> Post([FromBody] AccountEntryBase entry) => await DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(Guid id) => await DbService.Get(User!, id);
+        public async Task<ActionResult<AccountEntryBase>> Get(Guid id) => await DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(Guid id, AccountEntryBase entry) => await DbService.Put(User!, id, entry);
+        public async Task<ActionResult<AccountEntryBase>> Put(Guid id, AccountEntryBase entry) => await DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id) => await DbService.Delete(User!, id);
+        public async Task<ActionResult<AccountEntryBase>> Delete(Guid id) => await DbService.Delete(User!, id);
 
         [HttpPost("{userId}/reset-credentials")]
         [ProducesErrorResponseType(typeof(void))] // https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/1752#issue-663991077

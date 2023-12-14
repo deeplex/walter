@@ -30,7 +30,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.Post(entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.Get(entity.KontaktId);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -73,7 +73,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.Put(entity.KontaktId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             entry.Email.Should().Be("TestFirma@example.com");
         }
 

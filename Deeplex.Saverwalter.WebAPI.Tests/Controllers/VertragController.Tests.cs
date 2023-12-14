@@ -29,10 +29,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
             var result = await controller.Get();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -65,7 +66,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.Post(entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -82,7 +83,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.Get(entity.VertragId);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -102,7 +103,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.Put(entity.VertragId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             entity.Ende.Should().Be(new DateOnly(2021, 12, 31));
         }
 

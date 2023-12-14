@@ -62,13 +62,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpPost]
-        public Task<IActionResult> Post([FromBody] VertragVersionEntry entry) => DbService.Post(User!, entry);
+        public Task<ActionResult<VertragVersionEntry>> Post([FromBody] VertragVersionEntry entry) => DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
-        public Task<IActionResult> Get(int id) => DbService.Get(User!, id);
+        public Task<ActionResult<VertragVersionEntry>> Get(int id) => DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public Task<IActionResult> Put(int id, VertragVersionEntry entry) => DbService.Put(User!, id, entry);
+        public Task<ActionResult<VertragVersionEntry>> Put(int id, VertragVersionEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
-        public Task<IActionResult> Delete(int id) => DbService.Delete(User!, id);
+        public Task<ActionResult> Delete(int id) => DbService.Delete(User!, id);
     }
 }

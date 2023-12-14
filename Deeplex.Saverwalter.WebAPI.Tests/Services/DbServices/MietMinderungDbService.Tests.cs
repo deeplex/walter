@@ -32,9 +32,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Get(user, entity.MietminderungId);
 
-            result.Should().BeOfType<OkObjectResult>();
-            var okResult = (OkObjectResult)result;
-            okResult.Value.Should().BeOfType<MietminderungEntryBase>();
+            result.Value.Should().NotBeNull();
+            result.Value.Should().BeOfType<MietminderungEntry>();
         }
 
         [Fact]
@@ -74,11 +73,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Vertrag = vertrag
             };
-            var entry = new MietminderungEntryBase(entity, new());
+            var entry = new MietminderungEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -97,11 +96,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             ctx.Mietminderungen.Add(entity);
             ctx.SaveChanges();
-            var entry = new MietminderungEntryBase(entity, new());
+            var entry = new MietminderungEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
@@ -122,12 +121,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Mietminderungen.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new MietminderungEntryBase(entity, new());
+            var entry = new MietminderungEntry(entity, new());
             entry.Ende = new DateOnly(2021, 1, 31);
 
             var result = await service.Put(user, entity.MietminderungId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             var updatedEntity = ctx.Mietminderungen.Find(entity.MietminderungId);
             if (updatedEntity == null)
             {
@@ -150,7 +149,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Vertrag = vertrag
             };
-            var entry = new MietminderungEntryBase(entity, new());
+            var entry = new MietminderungEntry(entity, new());
             entry.Ende = new DateOnly(2021, 1, 31);
 
             ctx.Mietminderungen.Add(entity);
@@ -158,7 +157,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Put(user, entity.MietminderungId + 131231, entry);
 
-            result.Should().BeOfType<NotFoundResult>();
+            result.Result.Should().BeOfType<NotFoundResult>();
         }
     }
 }

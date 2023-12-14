@@ -18,15 +18,15 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Auth = authorizationService;
         }
 
-        public async Task<IActionResult> GetList(ClaimsPrincipal user)
+        public async Task<ActionResult<IEnumerable<BetriebskostenrechnungEntryBase>>> GetList(ClaimsPrincipal user)
         {
             var list = await BetriebskostenrechnungPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
-            return new OkObjectResult(await Task.WhenAll(list
-                .Select(async e => new BetriebskostenrechnungEntryBase(e, await Utils.GetPermissions(user, e, Auth)))));
+            return await Task.WhenAll(list
+                .Select(async e => new BetriebskostenrechnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public async Task<IActionResult> Get(ClaimsPrincipal user, int id)
+        public async Task<ActionResult<BetriebskostenrechnungEntry>> Get(ClaimsPrincipal user, int id)
         {
             var entity = await Ctx.Betriebskostenrechnungen.FindAsync(id);
             if (entity == null)
@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 entry.Wohnungen = await Task.WhenAll(entity.Umlage.Wohnungen
                     .Select(async e => new WohnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
 
-                return new OkObjectResult(entry);
+                return entry;
             }
             catch
             {
@@ -58,7 +58,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        public async Task<IActionResult> Delete(ClaimsPrincipal user, int id)
+        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
             var entity = await Ctx.Betriebskostenrechnungen.FindAsync(id);
             if (entity == null)
@@ -78,7 +78,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new OkResult();
         }
 
-        public async Task<IActionResult> Post(ClaimsPrincipal user, BetriebskostenrechnungEntry entry)
+        public async Task<ActionResult<BetriebskostenrechnungEntry>> Post(ClaimsPrincipal user, BetriebskostenrechnungEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -95,7 +95,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             try
             {
 
-                return new OkObjectResult(await Add(entry));
+                return await Add(entry);
             }
             catch
             {
@@ -126,7 +126,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new BetriebskostenrechnungEntry(entity, entry.Permissions);
         }
 
-        public async Task<IActionResult> Put(ClaimsPrincipal user, int id, BetriebskostenrechnungEntry entry)
+        public async Task<ActionResult<BetriebskostenrechnungEntry>> Put(ClaimsPrincipal user, int id, BetriebskostenrechnungEntry entry)
         {
             var entity = await Ctx.Betriebskostenrechnungen.FindAsync(id);
             if (entity == null)
@@ -142,7 +142,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(await Update(entry, entity));
+                return await Update(entry, entity);
             }
             catch
             {

@@ -31,11 +31,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Zaehler = zaehler
             };
-            var entry = new ZaehlerstandEntryBase(entity, new());
+            var entry = new ZaehlerstandEntry(entity, new());
 
             var result = await controller.Post(entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.Get(entity.ZaehlerstandId);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -71,12 +71,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var entity = vertrag.Wohnung.Zaehler.First().Staende.First();
 
-            var entry = new ZaehlerstandEntryBase(entity, new());
+            var entry = new ZaehlerstandEntry(entity, new());
             entry.Stand = 5000;
 
             var result = await controller.Put(entity.ZaehlerstandId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             entity.Stand.Should().Be(5000);
         }
 

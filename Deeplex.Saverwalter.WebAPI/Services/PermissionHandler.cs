@@ -75,7 +75,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Adresse>> GetEntriesForUser(Guid guid) => ctx.Adressen
-                .Where(e => e.Wohnungen.Any(w => w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid))))
+                .Where(e => e.Wohnungen.Any(w => w.Verwalter.Count > 0 && w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid))))
                 .ToListAsync();
         }
 
@@ -97,7 +97,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Betriebskostenrechnung>> GetEntriesForUser(Guid guid) => ctx.Betriebskostenrechnungen
-                .Where(e => e.Umlage.Wohnungen.Any(w => w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid))))
+                .Where(e => e.Umlage.Wohnungen.Any(w => w.Verwalter.Count > 0 && w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid))))
                 .ToListAsync();
         }
 
@@ -119,7 +119,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Erhaltungsaufwendung>> GetEntriesForUser(Guid guid) => ctx.Erhaltungsaufwendungen
-                .Where(e => e.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .Where(e => e.Wohnung.Verwalter.Count > 0 && e.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
                 .ToListAsync();
         }
 
@@ -141,7 +141,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Miete>> GetEntriesForUser(Guid guid) => ctx.Mieten
-                .Where(e => e.Vertrag.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .Where(e => e.Vertrag.Wohnung.Verwalter.Count > 0 && e.Vertrag.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
                 .ToListAsync();
         }
 
@@ -163,7 +163,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Mietminderung>> GetEntriesForUser(Guid guid) => ctx.Mietminderungen
-                .Where(e => e.Vertrag.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .Where(e => e.Vertrag.Wohnung.Verwalter.Count > 0 && e.Vertrag.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
                 .ToListAsync();
         }
 
@@ -185,7 +185,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Umlage>> GetEntriesForUser(Guid guid) => ctx.Umlagen
-                .Where(e => e.Wohnungen.Any(w => w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid))))
+                .Where(e => e.Wohnungen.Any(w => w.Verwalter.Count > 0 && w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid))))
                 .ToListAsync();
         }
 
@@ -220,7 +220,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             Task<List<Umlagetyp>> GetEntriesForUser(Guid guid) => ctx.Umlagetypen
                 .Where(e => e.Umlagen
                     .Any(u => u.Wohnungen
-                    .Any(w => w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))))
+                    .Any(w => w.Verwalter.Count > 0 && w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))))
                 .ToListAsync();
         }
 
@@ -242,7 +242,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Vertrag>> GetEntriesForUser(Guid guid) => ctx.Vertraege
-                .Where(e => e.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .Where(e => e.Wohnung.Verwalter.Count > 0 && e.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
                 .ToListAsync();
         }
 
@@ -264,7 +264,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<VertragVersion>> GetEntriesForUser(Guid guid) => ctx.VertragVersionen
-                .Where(e => e.Vertrag.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .Where(e => e.Vertrag.Wohnung.Verwalter.Count > 0 && e.Vertrag.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
                 .ToListAsync();
         }
 
@@ -286,7 +286,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Wohnung>> GetEntriesForUser(Guid guid) => ctx.Wohnungen
-                .Where(e => e.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .Where(e => e.Verwalter.Count > 0 && e.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
                 .ToListAsync();
         }
 
@@ -327,7 +327,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
             Task<List<Zaehler>> GetEntriesForUser(Guid guid) => ctx.ZaehlerSet
                 // TODO e.Wohnung is null is obviously stupid. Fix this.
-                .Where(e => e.Wohnung == null || e.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .Where(e => e.Wohnung == null || e.Wohnung.Verwalter.Count > 0 && e.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
                 .ToListAsync();
         }
 
@@ -357,7 +357,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Zaehlerstand>> GetEntriesForUser(Guid guid) => ctx.Zaehlerstaende
-                .Where(e => e.Zaehler.Wohnung!.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
+                .Where(e => e.Zaehler.Wohnung == null || e.Zaehler.Wohnung.Verwalter.Count > 0 && e.Zaehler.Wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))
                 .ToListAsync();
         }
 
@@ -428,6 +428,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         }
 
         protected static bool IsAuthorized(Guid userId, Wohnung wohnung, VerwalterRolle rolle)
-            => wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, userId));
+            => wohnung.Verwalter.Count > 0 && wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, userId));
     }
 }

@@ -38,9 +38,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Get(user, entity.KontaktId);
 
-            result.Should().BeOfType<OkObjectResult>();
-            var okResult = (OkObjectResult)result;
-            okResult.Value.Should().BeOfType<KontaktEntry>();
+            result.Value.Should().NotBeNull();
+            result.Value.Should().BeOfType<KontaktEntry>();
         }
 
         [Fact]
@@ -74,7 +73,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -92,7 +91,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
@@ -113,7 +112,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Put(user, entity.KontaktId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             var updatedEntity = ctx.Kontakte.Find(entity.KontaktId);
             if (updatedEntity == null)
             {
@@ -139,7 +138,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await service.Put(user, entity.KontaktId + 2221, entry);
 
-            result.Should().BeOfType<NotFoundResult>();
+            result.Result.Should().BeOfType<NotFoundResult>();
         }
     }
 }
