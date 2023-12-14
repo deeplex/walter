@@ -136,15 +136,20 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         public void SetUserPassword(UserAccount account, string password) => SetUserPassword(account, Encoding.UTF8.GetBytes(password));
         public void SetUserPassword(UserAccount account, byte[] utf8Password)
         {
-            var credential = new Pbkdf2PasswordCredential
+            var credential = account.Pbkdf2PasswordCredential;
+            if (credential == null)
             {
-                User = account,
-                Iterations = defaultIterations,
-                Salt = RandomNumberGenerator.GetBytes(32),
-            };
+                credential = new Pbkdf2PasswordCredential
+                {
+                    User = account,
+                };
+                account.Pbkdf2PasswordCredential = credential;
+                walterContext.Pbkdf2PasswordCredentials.Add(credential);
+            }
+
+            credential.Iterations = defaultIterations;
+            credential.Salt = RandomNumberGenerator.GetBytes(32);
             credential.PasswordHash = HashPassword(utf8Password, credential.Salt, credential.Iterations);
-            account.Pbkdf2PasswordCredential = credential;
-            walterContext.Pbkdf2PasswordCredentials.Add(credential);
         }
         public async Task UpdateUserPassword(UserAccount account, byte[] utf8Password)
         {
@@ -188,6 +193,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             var credential = await walterContext.UserResetCredentials
                 .Where(cred => cred.Token == decodedToken)
                 .Include(cred => cred.User)
+                    .ThenInclude(user => user.Pbkdf2PasswordCredential)
                 .SingleOrDefaultAsync();
 
             if (credential == null)
