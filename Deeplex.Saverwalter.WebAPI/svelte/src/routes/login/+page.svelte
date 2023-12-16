@@ -39,7 +39,7 @@
             login.password,
             LoginToast
         );
-        console.log(response);
+
         if (response == null) {
             invalid = true;
         } else {
