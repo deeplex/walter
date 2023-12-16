@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new AdresseDbService(ctx, auth);
-            var controller = new AdresseController(logger, dbService);
+            var controller = new AdresseController(logger, dbService, A.Fake<HttpClient>());
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new AdresseDbService(ctx, auth);
-            var controller = new AdresseController(logger, dbService);
+            var controller = new AdresseController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = new Adresse("Teststrasse", "1", "12345", "Teststadt");
             var entry = new AdresseEntry(entity, new());
@@ -64,7 +64,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new AdresseDbService(ctx, auth);
-            var controller = new AdresseController(logger, dbService);
+            var controller = new AdresseController(logger, dbService, A.Fake<HttpClient>());
 
             if (vertrag.Wohnung.Adresse == null)
             {
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new AdresseDbService(ctx, auth);
-            var controller = new AdresseController(logger, dbService);
+            var controller = new AdresseController(logger, dbService, A.Fake<HttpClient>());
 
             if (vertrag.Wohnung.Adresse == null)
             {
@@ -111,7 +111,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new AdresseDbService(ctx, auth);
-            var controller = new AdresseController(logger, dbService);
+            var controller = new AdresseController(logger, dbService, A.Fake<HttpClient>());
 
             if (vertrag.Wohnung.Adresse == null)
             {

@@ -282,7 +282,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = controller.GetUmlageschluessel();
 
-            result.Result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -299,7 +299,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = controller.GetHKVO_P9A2();
 
-            result.Result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -316,7 +316,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = controller.GetZaehlertypen();
 
-            result.Result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -333,7 +333,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = controller.GetAnreden();
 
-            result.Result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
     }
 }

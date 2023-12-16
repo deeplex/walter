@@ -1,7 +1,9 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Helper;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
@@ -9,7 +11,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/mieten")]
-    public class MieteController : ControllerBase
+    public class MieteController : FileControllerBase<MieteEntry, Miete>
     {
         public class MieteEntryBase
         {
@@ -57,9 +59,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<MieteController> _logger;
-        private MieteDbService DbService { get; }
+        protected override MieteDbService DbService { get; }
 
-        public MieteController(ILogger<MieteController> logger, MieteDbService dbService)
+        public MieteController(ILogger<MieteController> logger, MieteDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
             _logger = logger;

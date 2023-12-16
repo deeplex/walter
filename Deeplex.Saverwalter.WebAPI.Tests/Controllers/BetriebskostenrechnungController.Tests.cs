@@ -35,7 +35,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new BetriebskostenrechnungDbService(ctx, auth);
-            var controller = new BetriebskostenrechnungController(logger, dbService);
+            var controller = new BetriebskostenrechnungController(logger, dbService, A.Fake<HttpClient>());
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -54,7 +54,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new BetriebskostenrechnungDbService(ctx, auth);
-            var controller = new BetriebskostenrechnungController(logger, dbService);
+            var controller = new BetriebskostenrechnungController(logger, dbService, A.Fake<HttpClient>());
 
             var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
             {
@@ -82,7 +82,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new BetriebskostenrechnungDbService(ctx, auth);
-            var controller = new BetriebskostenrechnungController(logger, dbService);
+            var controller = new BetriebskostenrechnungController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = vertrag.Wohnung.Umlagen.First().Betriebskostenrechnungen.First();
             if (entity == null)
@@ -104,7 +104,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new BetriebskostenrechnungDbService(ctx, auth);
-            var controller = new BetriebskostenrechnungController(logger, dbService);
+            var controller = new BetriebskostenrechnungController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = vertrag.Wohnung.Umlagen.First().Betriebskostenrechnungen.First();
             if (entity == null)
@@ -129,7 +129,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new BetriebskostenrechnungDbService(ctx, auth);
-            var controller = new BetriebskostenrechnungController(logger, dbService);
+            var controller = new BetriebskostenrechnungController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = vertrag.Wohnung.Umlagen.First().Betriebskostenrechnungen.First();
             if (entity == null)

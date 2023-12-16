@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
@@ -6,6 +7,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MietminderungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragVersionController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
@@ -13,7 +15,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/vertraege")]
-    public class VertragController : ControllerBase
+    public class VertragController : FileControllerBase<VertragEntry, Vertrag>
     {
         public class VertragEntryBase
         {
@@ -90,9 +92,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<VertragController> _logger;
-        private VertragDbService DbService { get; }
+        protected override VertragDbService DbService { get; }
 
-        public VertragController(ILogger<VertragController> logger, VertragDbService dbService)
+        public VertragController(ILogger<VertragController> logger, VertragDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
             _logger = logger;

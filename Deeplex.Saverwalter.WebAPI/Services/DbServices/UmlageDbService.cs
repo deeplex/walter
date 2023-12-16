@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
@@ -9,15 +10,10 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class UmlageDbService : ICRUDService<UmlageEntry>
+    public class UmlageDbService : WalterDbServiceBase<UmlageEntry, Umlage>
     {
-        public SaverwalterContext Ctx { get; }
-        private readonly IAuthorizationService Auth;
-
-        public UmlageDbService(SaverwalterContext dbService, IAuthorizationService authorizationService)
+        public UmlageDbService(SaverwalterContext dbService, IAuthorizationService authorizationService) : base(dbService, authorizationService)
         {
-            Ctx = dbService;
-            Auth = authorizationService;
         }
 
         public async Task<ActionResult<IEnumerable<UmlageEntryBase>>> GetList(ClaimsPrincipal user)
@@ -28,23 +24,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 .Select(async e => new UmlageEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public async Task<ActionResult<UmlageEntry>> Get(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult<Umlage>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
             var entity = await Ctx.Umlagen.FindAsync(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            return await GetEntity(user, entity, op);
+        }
 
-            var permissions = await Utils.GetPermissions(user, entity, Auth);
-            if (!permissions.Read)
+        public override async Task<ActionResult<UmlageEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new ForbidResult();
-            }
-
-
-            try
-            {
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
                 var entry = new UmlageEntry(entity, permissions);
 
                 entry.Wohnungen = await Task.WhenAll(entity.Wohnungen
@@ -53,34 +43,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     .Select(async e => new ZaehlerEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
 
                 return entry;
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            });
         }
 
-        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = await Ctx.Umlagen.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                Ctx.Umlagen.Remove(entity);
+                await Ctx.SaveChangesAsync();
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Read]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
-
-            Ctx.Umlagen.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+                return new OkResult();
+            });
         }
 
-        public async Task<ActionResult<UmlageEntry>> Post(ClaimsPrincipal user, UmlageEntry entry)
+        public override async Task<ActionResult<UmlageEntry>> Post(ClaimsPrincipal user, UmlageEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -129,49 +106,28 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new UmlageEntry(entity, entry.Permissions);
         }
 
-        public async Task<ActionResult<UmlageEntry>> Put(ClaimsPrincipal user, int id, UmlageEntry entry)
+        public override async Task<ActionResult<UmlageEntry>> Put(ClaimsPrincipal user, int id, UmlageEntry entry)
         {
-            var entity = await Ctx.Umlagen.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                if (entry.Typ == null)
+                {
+                    throw new ArgumentException("entry has no Typ.");
+                }
+                if (entry.Schluessel == null)
+                {
+                    throw new ArgumentException("entry has no Schluessel.");
+                }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Update]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
+                entity.Typ = (await Ctx.Umlagetypen.FindAsync(entry.Typ.Id))!;
+                entity.Schluessel = (Umlageschluessel)entry.Schluessel.Id;
 
-            try
-            {
-                return await Update(entry, entity);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
-        }
+                SetOptionalValues(entity, entry);
+                Ctx.Umlagen.Update(entity);
+                Ctx.SaveChanges();
 
-        private async Task<UmlageEntry> Update(UmlageEntry entry, Umlage entity)
-        {
-            if (entry.Typ == null)
-            {
-                throw new ArgumentException("entry has no Typ.");
-            }
-            if (entry.Schluessel == null)
-            {
-                throw new ArgumentException("entry has no Schluessel.");
-            }
-
-            entity.Typ = (await Ctx.Umlagetypen.FindAsync(entry.Typ.Id))!;
-            entity.Schluessel = (Umlageschluessel)entry.Schluessel.Id;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Umlagen.Update(entity);
-            Ctx.SaveChanges();
-
-            return new UmlageEntry(entity, entry.Permissions);
+                return new UmlageEntry(entity, entry.Permissions);
+            });
         }
 
         private void SetOptionalValues(Umlage entity, UmlageEntry entry)

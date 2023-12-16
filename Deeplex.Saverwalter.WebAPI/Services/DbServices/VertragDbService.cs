@@ -1,21 +1,17 @@
 ﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class VertragDbService : ICRUDService<VertragEntry>
+    public class VertragDbService : WalterDbServiceBase<VertragEntry, Vertrag>
     {
-        public SaverwalterContext Ctx { get; }
-        private readonly IAuthorizationService Auth;
-
-        public VertragDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
+        public VertragDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
-            Auth = authorizationService;
         }
 
         public async Task<ActionResult<IEnumerable<VertragEntryBase>>> GetList(ClaimsPrincipal user)
@@ -26,53 +22,35 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 .Select(async e => new VertragEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public async Task<ActionResult<VertragEntry>> Get(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult<Vertrag>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
             var entity = await Ctx.Vertraege.FindAsync(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            return await GetEntity(user, entity, op);
+        }
 
-            var permissions = await Utils.GetPermissions(user, entity, Auth);
-            if (!permissions.Read)
+        public override async Task<ActionResult<VertragEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new ForbidResult();
-            }
-
-            try
-            {
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
                 var entry = new VertragEntry(entity, permissions);
 
                 return entry;
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            });
         }
 
-        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = await Ctx.Vertraege.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                Ctx.Vertraege.Remove(entity);
+                await Ctx.SaveChangesAsync();
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Delete]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
-
-            Ctx.Vertraege.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+                return new OkResult();
+            });
         }
 
-        public async Task<ActionResult<VertragEntry>> Post(ClaimsPrincipal user, VertragEntry entry)
+        public override async Task<ActionResult<VertragEntry>> Post(ClaimsPrincipal user, VertragEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -112,43 +90,22 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new VertragEntry(entity, entry.Permissions);
         }
 
-        public async Task<ActionResult<VertragEntry>> Put(ClaimsPrincipal user, int id, VertragEntry entry)
+        public override async Task<ActionResult<VertragEntry>> Put(ClaimsPrincipal user, int id, VertragEntry entry)
         {
-            var entity = await Ctx.Vertraege.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                if (entry.Wohnung == null)
+                {
+                    throw new ArgumentException("entry has no Wohnung.");
+                }
+                entity.Wohnung = (await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id))!;
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Update]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
+                await SetOptionalValues(entity, entry);
+                Ctx.Vertraege.Update(entity);
+                await Ctx.SaveChangesAsync();
 
-            try
-            {
-                return await Update(entry, entity);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
-        }
-
-        private async Task<VertragEntry> Update(VertragEntry entry, Vertrag entity)
-        {
-            if (entry.Wohnung == null)
-            {
-                throw new ArgumentException("entry has no Wohnung.");
-            }
-            entity.Wohnung = (await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id))!;
-
-            await SetOptionalValues(entity, entry);
-            Ctx.Vertraege.Update(entity);
-            Ctx.SaveChanges();
-
-            return new VertragEntry(entity, entry.Permissions);
+                return new VertragEntry(entity, entry.Permissions);
+            });
         }
 
         private async Task SetOptionalValues(Vertrag entity, VertragEntry entry)

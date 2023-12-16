@@ -23,7 +23,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new KontaktDbService(ctx, auth);
-            var controller = new KontaktController(logger, dbService);
+            var controller = new KontaktController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = new Kontakt("TestFirma", Rechtsform.ag);
             var entry = new KontaktEntry(entity, new());
@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new KontaktDbService(ctx, auth);
-            var controller = new KontaktController(logger, dbService);
+            var controller = new KontaktController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = new Kontakt("TestFirma", Rechtsform.ag);
             ctx.Kontakte.Add(entity);
@@ -62,7 +62,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new KontaktDbService(ctx, auth);
-            var controller = new KontaktController(logger, dbService);
+            var controller = new KontaktController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = new Kontakt("TestFirma", Rechtsform.gmbh);
             ctx.Kontakte.Add(entity);
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new KontaktDbService(ctx, auth);
-            var controller = new KontaktController(logger, dbService);
+            var controller = new KontaktController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = new Kontakt("TestFirma", Rechtsform.gbr);
             ctx.Kontakte.Add(entity);

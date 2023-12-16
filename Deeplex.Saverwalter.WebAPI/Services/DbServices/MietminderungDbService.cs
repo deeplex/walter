@@ -1,20 +1,16 @@
 ﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MietminderungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class MietminderungDbService : ICRUDService<MietminderungEntry>
+    public class MietminderungDbService : WalterDbServiceBase<MietminderungEntry, Mietminderung>
     {
-        public SaverwalterContext Ctx { get; }
-        private readonly IAuthorizationService Auth;
-
-        public MietminderungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
+        public MietminderungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
-            Auth = authorizationService;
         }
 
         public async Task<ActionResult<IEnumerable<MietminderungEntryBase>>> GetList(ClaimsPrincipal user)
@@ -25,52 +21,34 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 .Select(async e => new MietminderungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public async Task<ActionResult<MietminderungEntry>> Get(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult<Mietminderung>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
             var entity = await Ctx.Mietminderungen.FindAsync(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            return await GetEntity(user, entity, op);
+        }
 
-            var permissions = await Utils.GetPermissions(user, entity, Auth);
-            if (!permissions.Read)
+        public override async Task<ActionResult<MietminderungEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new ForbidResult();
-            }
-
-            try
-            {
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
                 var entry = new MietminderungEntry(entity, permissions);
                 return entry;
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            });
         }
 
-        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = await Ctx.Mietminderungen.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                Ctx.Mietminderungen.Remove(entity);
+                await Ctx.SaveChangesAsync();
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Delete]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
-
-            Ctx.Mietminderungen.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+                return new OkResult();
+            });
         }
 
-        public async Task<ActionResult<MietminderungEntry>> Post(ClaimsPrincipal user, MietminderungEntry entry)
+        public override async Task<ActionResult<MietminderungEntry>> Post(ClaimsPrincipal user, MietminderungEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -109,44 +87,23 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new MietminderungEntry(entity, entry.Permissions);
         }
 
-        public async Task<ActionResult<MietminderungEntry>> Put(ClaimsPrincipal user, int id, MietminderungEntry entry)
+        public override async Task<ActionResult<MietminderungEntry>> Put(ClaimsPrincipal user, int id, MietminderungEntry entry)
         {
-            var entity = await Ctx.Mietminderungen.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                entity.Ende = entry.Ende;
+                entity.Beginn = entry.Beginn;
+                entity.Minderung = entry.Minderung;
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Update]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
+                SetOptionalValues(entity, entry);
+                Ctx.Mietminderungen.Update(entity);
+                await Ctx.SaveChangesAsync();
 
-            try
-            {
-                return Update(entry, entity);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+                return new MietminderungEntry(entity, entry.Permissions);
+            });
         }
 
-        private MietminderungEntry Update(MietminderungEntry entry, Mietminderung entity)
-        {
-            entity.Ende = entry.Ende;
-            entity.Beginn = entry.Beginn;
-            entity.Minderung = entry.Minderung;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Mietminderungen.Update(entity);
-            Ctx.SaveChanges();
-
-            return new MietminderungEntry(entity, entry.Permissions);
-        }
-
-        private void SetOptionalValues(Mietminderung entity, MietminderungEntry entry)
+        private static void SetOptionalValues(Mietminderung entity, MietminderungEntry entry)
         {
             if (entity.MietminderungId != entry.Id)
             {

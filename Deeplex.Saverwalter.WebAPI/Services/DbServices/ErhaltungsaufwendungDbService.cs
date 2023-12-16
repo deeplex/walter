@@ -1,20 +1,16 @@
 ﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class ErhaltungsaufwendungDbService : ICRUDService<ErhaltungsaufwendungEntry>
+    public class ErhaltungsaufwendungDbService : WalterDbServiceBase<ErhaltungsaufwendungEntry, Erhaltungsaufwendung>
     {
-        public SaverwalterContext Ctx { get; }
-        private readonly IAuthorizationService Auth;
-
-        public ErhaltungsaufwendungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
+        public ErhaltungsaufwendungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
-            Auth = authorizationService;
         }
 
         public async Task<ActionResult<IEnumerable<ErhaltungsaufwendungEntryBase>>> GetList(ClaimsPrincipal user)
@@ -25,52 +21,34 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 .Select(async e => new ErhaltungsaufwendungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public async Task<ActionResult<ErhaltungsaufwendungEntry>> Get(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult<Erhaltungsaufwendung>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
             var entity = await Ctx.Erhaltungsaufwendungen.FindAsync(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            return await GetEntity(user, entity, op);
+        }
 
-            var permissions = await Utils.GetPermissions(user, entity, Auth);
-            if (!permissions.Read)
+        public override async Task<ActionResult<ErhaltungsaufwendungEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new ForbidResult();
-            }
-
-            try
-            {
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
                 var entry = new ErhaltungsaufwendungEntry(entity, permissions);
                 return entry;
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            });
         }
 
-        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = await Ctx.Erhaltungsaufwendungen.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                Ctx.Erhaltungsaufwendungen.Remove(entity);
+                await Ctx.SaveChangesAsync();
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Delete]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
-
-            Ctx.Erhaltungsaufwendungen.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+                return new OkResult();
+            });
         }
 
-        public async Task<ActionResult<ErhaltungsaufwendungEntry>> Post(ClaimsPrincipal user, ErhaltungsaufwendungEntry entry)
+        public override async Task<ActionResult<ErhaltungsaufwendungEntry>> Post(ClaimsPrincipal user, ErhaltungsaufwendungEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -111,46 +89,25 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new ErhaltungsaufwendungEntry(entity, new());
         }
 
-        public async Task<ActionResult<ErhaltungsaufwendungEntry>> Put(ClaimsPrincipal user, int id, ErhaltungsaufwendungEntry entry)
+        public override async Task<ActionResult<ErhaltungsaufwendungEntry>> Put(ClaimsPrincipal user, int id, ErhaltungsaufwendungEntry entry)
         {
-            var entity = await Ctx.Erhaltungsaufwendungen.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                entity.Betrag = entry.Betrag;
+                entity.Wohnung = (await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id))!;
+                entity.Bezeichnung = entry.Bezeichnung;
+                entity.Aussteller = (await Ctx.Kontakte.FindAsync(entry.Aussteller.Id))!;
+                entity.Datum = entry.Datum;
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Update]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
+                SetOptionalValues(entity, entry);
+                Ctx.Erhaltungsaufwendungen.Update(entity);
+                Ctx.SaveChanges();
 
-            try
-            {
-                return await Update(entry, entity);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+                return new ErhaltungsaufwendungEntry(entity, entry.Permissions);
+            });
         }
 
-        private async Task<ErhaltungsaufwendungEntry> Update(ErhaltungsaufwendungEntry entry, Erhaltungsaufwendung entity)
-        {
-            entity.Betrag = entry.Betrag;
-            entity.Wohnung = (await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id))!;
-            entity.Bezeichnung = entry.Bezeichnung;
-            entity.Aussteller = (await Ctx.Kontakte.FindAsync(entry.Aussteller.Id))!;
-            entity.Datum = entry.Datum;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Erhaltungsaufwendungen.Update(entity);
-            Ctx.SaveChanges();
-
-            return new ErhaltungsaufwendungEntry(entity, entry.Permissions);
-        }
-
-        private void SetOptionalValues(Erhaltungsaufwendung entity, ErhaltungsaufwendungEntry entry)
+        private static void SetOptionalValues(Erhaltungsaufwendung entity, ErhaltungsaufwendungEntry entry)
         {
             if (entity.ErhaltungsaufwendungId != entry.Id)
             {

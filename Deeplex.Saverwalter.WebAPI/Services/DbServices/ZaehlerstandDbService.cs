@@ -1,67 +1,45 @@
 ﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class ZaehlerstandDbService : ICRUDService<ZaehlerstandEntry>
+    public class ZaehlerstandDbService : WalterDbServiceBase<ZaehlerstandEntry, Zaehlerstand>
     {
-        public SaverwalterContext Ctx { get; }
-        private readonly IAuthorizationService Auth;
-
-        public ZaehlerstandDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
+        public ZaehlerstandDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
-            Auth = authorizationService;
         }
 
-        public async Task<ActionResult<ZaehlerstandEntry>> Get(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult<Zaehlerstand>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
             var entity = await Ctx.Zaehlerstaende.FindAsync(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            return await GetEntity(user, entity, op);
+        }
 
-            var permissions = await Utils.GetPermissions(user, entity, Auth);
-            if (!permissions.Read)
+        public override async Task<ActionResult<ZaehlerstandEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new ForbidResult();
-            }
-
-            try
-            {
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
                 return new ZaehlerstandEntry(entity, permissions);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            });
         }
 
-        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = await Ctx.Zaehlerstaende.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (w) =>
             {
-                return new NotFoundResult();
-            }
+                Ctx.Zaehlerstaende.Remove(w);
+                await Ctx.SaveChangesAsync();
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Delete]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
-
-            Ctx.Zaehlerstaende.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+                return new OkResult();
+            });
         }
 
-        public async Task<ActionResult<ZaehlerstandEntry>> Post(ClaimsPrincipal user, ZaehlerstandEntry entry)
+        public override async Task<ActionResult<ZaehlerstandEntry>> Post(ClaimsPrincipal user, ZaehlerstandEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -99,43 +77,22 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new ZaehlerstandEntry(entity, entry.Permissions);
         }
 
-        public async Task<ActionResult<ZaehlerstandEntry>> Put(ClaimsPrincipal user, int id, ZaehlerstandEntry entry)
+        public override async Task<ActionResult<ZaehlerstandEntry>> Put(ClaimsPrincipal user, int id, ZaehlerstandEntry entry)
         {
-            var entity = await Ctx.Zaehlerstaende.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                entity.Datum = entry.Datum;
+                entity.Stand = entry.Stand;
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Update]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
+                SetOptionalValues(entity, entry);
+                Ctx.Zaehlerstaende.Update(entity);
+                Ctx.SaveChanges();
 
-            try
-            {
-                return Update(entry, entity);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+                return new ZaehlerstandEntry(entity, entry.Permissions);
+            });
         }
 
-        private ZaehlerstandEntry Update(ZaehlerstandEntry entry, Zaehlerstand entity)
-        {
-            entity.Datum = entry.Datum;
-            entity.Stand = entry.Stand;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Zaehlerstaende.Update(entity);
-            Ctx.SaveChanges();
-
-            return new ZaehlerstandEntry(entity, entry.Permissions);
-        }
-
-        private void SetOptionalValues(Zaehlerstand entity, ZaehlerstandEntry entry)
+        private static void SetOptionalValues(Zaehlerstand entity, ZaehlerstandEntry entry)
         {
             entity.Stand = entry.Stand;
             entity.Notiz = entry.Notiz;

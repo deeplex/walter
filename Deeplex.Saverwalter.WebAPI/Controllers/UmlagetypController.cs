@@ -1,14 +1,16 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.UmlagetypController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/umlagetypen")]
-    public class UmlagetypController : ControllerBase
+    public class UmlagetypController : FileControllerBase<UmlagetypEntry, Umlagetyp>
     {
         public class UmlagetypEntryBase
         {
@@ -49,9 +51,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<UmlagetypController> _logger;
-        private UmlagetypDbService DbService { get; }
+        protected override UmlagetypDbService DbService { get; }
 
-        public UmlagetypController(ILogger<UmlagetypController> logger, UmlagetypDbService dbService)
+        public UmlagetypController(ILogger<UmlagetypController> logger, UmlagetypDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             _logger = logger;
             DbService = dbService;

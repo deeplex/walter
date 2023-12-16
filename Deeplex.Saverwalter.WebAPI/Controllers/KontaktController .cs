@@ -1,7 +1,9 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
@@ -11,7 +13,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/kontakte")]
-    public class KontaktController : ControllerBase
+    public class KontaktController : FileControllerBase<KontaktEntry, Kontakt>
     {
         public class KontaktEntryBase
         {
@@ -85,9 +87,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<KontaktController> _logger;
-        private KontaktDbService DbService { get; }
+        protected override KontaktDbService DbService { get; }
 
-        public KontaktController(ILogger<KontaktController> logger, KontaktDbService dbService)
+        public KontaktController(ILogger<KontaktController> logger, KontaktDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             _logger = logger;
             DbService = dbService;

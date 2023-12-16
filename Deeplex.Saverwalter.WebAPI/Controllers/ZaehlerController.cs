@@ -1,9 +1,11 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
@@ -11,7 +13,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/zaehler")]
-    public class ZaehlerController : ControllerBase
+    public class ZaehlerController : FileControllerBase<ZaehlerEntry, Zaehler>
     {
         public class ZaehlerEntryBase
         {
@@ -74,9 +76,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<ZaehlerController> _logger;
-        private ZaehlerDbService DbService { get; }
+        protected override ZaehlerDbService DbService { get; }
 
-        public ZaehlerController(ILogger<ZaehlerController> logger, ZaehlerDbService dbService)
+        public ZaehlerController(ILogger<ZaehlerController> logger, ZaehlerDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             _logger = logger;
             DbService = dbService;

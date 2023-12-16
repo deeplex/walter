@@ -1,4 +1,5 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungControll
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
@@ -15,7 +17,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/wohnungen")]
-    public class WohnungController : ControllerBase
+    public class WohnungController : FileControllerBase<WohnungEntry, Wohnung>
     {
         public class WohnungEntryBase
         {
@@ -87,9 +89,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<WohnungController> _logger;
-        private WohnungDbService DbService { get; }
+        protected override WohnungDbService DbService { get; }
 
-        public WohnungController(ILogger<WohnungController> logger, WohnungDbService dbService)
+        public WohnungController(ILogger<WohnungController> logger, WohnungDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
             _logger = logger;

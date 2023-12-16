@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new MieteDbService(ctx, auth);
-            var controller = new MieteController(logger, dbService);
+            var controller = new MieteController(logger, dbService, A.Fake<HttpClient>());
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -45,7 +45,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new MieteDbService(ctx, auth);
-            var controller = new MieteController(logger, dbService);
+            var controller = new MieteController(logger, dbService, A.Fake<HttpClient>());
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
 
             var entity = new Miete(new DateOnly(2021, 1, 1), new DateOnly(2021, 1, 1), 1000)
@@ -71,7 +71,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new MieteDbService(ctx, auth);
-            var controller = new MieteController(logger, dbService);
+            var controller = new MieteController(logger, dbService, A.Fake<HttpClient>());
 
             if (vertrag.Mieten.First() == null)
             {
@@ -95,7 +95,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new MieteDbService(ctx, auth);
-            var controller = new MieteController(logger, dbService);
+            var controller = new MieteController(logger, dbService, A.Fake<HttpClient>());
 
             if (vertrag.Mieten.First() == null)
             {
@@ -122,7 +122,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new MieteDbService(ctx, auth);
-            var controller = new MieteController(logger, dbService);
+            var controller = new MieteController(logger, dbService, A.Fake<HttpClient>());
 
             if (vertrag.Mieten.First() == null)
             {

@@ -125,7 +125,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 ctx.Adressen.Add(new Adresse("strasse", "hausnummer", "plz", "stadt3"));
                 ctx.SaveChanges();
 
-                var adresse = Utils.GetAdresse(adresseBase, ctx);
+                var adresse = Helper.Utils.GetAdresse(adresseBase, ctx);
 
                 adresse.Should().NotBe(null);
                 adresse!.Stadt.Should().Be(adresseBase.Stadt);
@@ -154,7 +154,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 ctx.Adressen.Add(new Adresse("strasse", "hausnummer", "plz", "stadt3"));
                 ctx.SaveChanges();
 
-                var adresse = Utils.GetAdresse(adresseBase, ctx);
+                var adresse = Helper.Utils.GetAdresse(adresseBase, ctx);
 
                 adresse.Should().NotBe(null);
                 adresse!.Stadt.Should().Be(adresseBase.Stadt);
@@ -190,7 +190,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 ctx.Adressen.Add(new Adresse("strasse", "hausnummer", "plz", "stadt3"));
                 ctx.SaveChanges();
 
-                var adresse = Utils.GetAdresse(adresseBase, ctx);
+                var adresse = Helper.Utils.GetAdresse(adresseBase, ctx);
 
                 adresse.Should().Be(null);
             }

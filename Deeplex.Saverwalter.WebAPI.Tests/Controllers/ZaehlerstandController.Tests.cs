@@ -23,7 +23,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ZaehlerstandDbService(ctx, auth);
-            var controller = new ZaehlerstandController(logger, dbService);
+            var controller = new ZaehlerstandController(logger, dbService, A.Fake<HttpClient>());
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var zaehler = vertrag.Wohnung.Zaehler.First();
 
@@ -48,7 +48,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ZaehlerstandDbService(ctx, auth);
-            var controller = new ZaehlerstandController(logger, dbService);
+            var controller = new ZaehlerstandController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = vertrag.Wohnung.Zaehler.First().Staende.First();
 
@@ -66,7 +66,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ZaehlerstandDbService(ctx, auth);
-            var controller = new ZaehlerstandController(logger, dbService);
+            var controller = new ZaehlerstandController(logger, dbService, A.Fake<HttpClient>());
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
 
             var entity = vertrag.Wohnung.Zaehler.First().Staende.First();
@@ -90,7 +90,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ZaehlerstandDbService(ctx, auth);
-            var controller = new ZaehlerstandController(logger, dbService);
+            var controller = new ZaehlerstandController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = vertrag.Wohnung.Zaehler.First().Staende.First();
             var id = entity.ZaehlerstandId;

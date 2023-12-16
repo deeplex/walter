@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
@@ -13,15 +14,10 @@ using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class KontaktDbService : ICRUDService<KontaktEntry>
+    public class KontaktDbService : WalterDbServiceBase<KontaktEntry, Kontakt>
     {
-        public SaverwalterContext Ctx { get; }
-        private readonly IAuthorizationService Auth;
-
-        public KontaktDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
+        public KontaktDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
-            Auth = authorizationService;
         }
 
         public async Task<ActionResult<IEnumerable<KontaktEntryBase>>> GetList()
@@ -30,16 +26,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return list.Select(e => new KontaktEntryBase(e, new(true))).ToList();
         }
 
-        public async Task<ActionResult<KontaktEntry>> Get(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult<Kontakt>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
             var entity = await Ctx.Kontakte.FindAsync(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            return await GetEntity(user, entity, op);
+        }
 
-            try
+        public override async Task<ActionResult<KontaktEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, async (entity) =>
             {
+                // TODO: Who can manage contacts?
                 var permissions = new Permissions()
                 {
                     Read = true,
@@ -63,35 +60,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     .Select(async e => new WohnungEntryBase(e, await GetPermissions(user, e, Auth))));
 
                 return entry;
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            });
         }
 
-        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = await Ctx.Kontakte.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                Ctx.Kontakte.Remove(entity);
+                await Ctx.SaveChangesAsync();
 
-            // TODO: Who can delete the contact?
-            //var authRx = await Auth.AuthorizeAsync(user, entity.Vertrag.Wohnung, [Operations.Delete]);
-            //if (!authRx.Succeeded)
-            //{
-            //    return new ForbidResult();
-            //}
-
-            Ctx.Kontakte.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+                return new OkResult();
+            });
         }
 
-        public async Task<ActionResult<KontaktEntry>> Post(ClaimsPrincipal user, KontaktEntry entry)
+        public override async Task<ActionResult<KontaktEntry>> Post(ClaimsPrincipal user, KontaktEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -126,41 +109,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new KontaktEntry(entity, entry.Permissions);
         }
 
-        public async Task<ActionResult<KontaktEntry>> Put(ClaimsPrincipal user, int id, KontaktEntry entry)
+        public override async Task<ActionResult<KontaktEntry>> Put(ClaimsPrincipal user, int id, KontaktEntry entry)
         {
-            var entity = await Ctx.Kontakte.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                entity.Name = entry.Name;
+                entity.Rechtsform = (Rechtsform)entry.Rechtsform.Id;
 
-            // TODO: Who can update entries?
-            //var authRx = await Auth.AuthorizeAsync(user, entity.Vertrag.Wohnung, [Operations.Update]);
-            //if (!authRx.Succeeded)
-            //{
-            //    return new ForbidResult();
-            //}
+                SetOptionalValues(entity, entry);
+                Ctx.Kontakte.Update(entity);
+                await Ctx.SaveChangesAsync();
 
-            try
-            {
-                return await Update(entry, entity);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
-        }
-
-        private async Task<KontaktEntry> Update(KontaktEntry entry, Kontakt entity)
-        {
-            entity.Name = entry.Name;
-            entity.Rechtsform = (Rechtsform)entry.Rechtsform.Id;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Kontakte.Update(entity);
-            await Ctx.SaveChangesAsync();
-
-            return new KontaktEntry(entity, entry.Permissions);
+                return new KontaktEntry(entity, entry.Permissions);
+            });
         }
 
         private void SetOptionalValues(Kontakt entity, KontaktEntry entry)

@@ -1,14 +1,16 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.VertragVersionController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/vertragversionen")]
-    public class VertragVersionController : ControllerBase
+    public class VertragVersionController : FileControllerBase<VertragVersionEntry, VertragVersion>
     {
         public class VertragVersionEntryBase
         {
@@ -53,9 +55,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<VertragVersionController> _logger;
-        private VertragVersionDbService DbService { get; }
+        protected override VertragVersionDbService DbService { get; }
 
-        public VertragVersionController(ILogger<VertragVersionController> logger, VertragVersionDbService dbService)
+        public VertragVersionController(ILogger<VertragVersionController> logger, VertragVersionDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
             _logger = logger;

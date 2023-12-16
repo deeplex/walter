@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
@@ -8,15 +9,10 @@ using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class WohnungDbService : ICRUDService<WohnungEntry>
+    public class WohnungDbService : WalterDbServiceBase<WohnungEntry, Wohnung>
     {
-        public SaverwalterContext Ctx { get; }
-        private readonly IAuthorizationService Auth;
-
-        public WohnungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
+        public WohnungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
-            Auth = authorizationService;
         }
 
         public async Task<ActionResult<IEnumerable<WohnungEntryBase>>> GetList(ClaimsPrincipal user)
@@ -27,26 +23,53 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 .Select(async e => new WohnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public async Task<ActionResult<WohnungEntry>> Get(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult<Wohnung>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
             var entity = await Ctx.Wohnungen.FindAsync(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            return await GetEntity(user, entity, op);
+        }
 
-            var permissions = await Utils.GetPermissions(user, entity, Auth);
-            if (!permissions.Read)
+        public override async Task<ActionResult<WohnungEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new ForbidResult();
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
+                var entry = new WohnungEntry(entity, permissions);
+                entry.Haus = await Task.WhenAll(entity.Adresse?
+                    .Wohnungen.Select(async e => new WohnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))) ?? []);
+
+                return entry;
+            });
+        }
+
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, async (entity) =>
+            {
+                Ctx.Wohnungen.Remove(entity);
+                await Ctx.SaveChangesAsync();
+
+                return new OkResult();
+            });
+        }
+
+        public override async Task<ActionResult<WohnungEntry>> Post(ClaimsPrincipal user, WohnungEntry entry)
+        {
+            if (entry.Id != 0)
+            {
+                return new BadRequestResult();
             }
 
             try
             {
-                var entry = new WohnungEntry(entity, permissions);
+                var entity = new Wohnung(entry.Bezeichnung, entry.Wohnflaeche, entry.Nutzflaeche, entry.Einheiten)
+                {
+                    Besitzer = await Ctx.Kontakte.FindAsync(entry.Besitzer!.Id)!
+                };
 
-                entry.Haus = await Task.WhenAll(entity.Adresse?
-                    .Wohnungen.Select(async e => new WohnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))) ?? []);
+                SetOptionalValues(entity, entry);
+                Ctx.Wohnungen.Add(entity);
+                Ctx.SaveChanges();
 
                 return entry;
             }
@@ -56,94 +79,22 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult<WohnungEntry>> Put(ClaimsPrincipal user, int id, WohnungEntry entry)
         {
-            var entity = await Ctx.Wohnungen.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                entity.Bezeichnung = entry.Bezeichnung;
+                entity.Wohnflaeche = entry.Wohnflaeche;
+                entity.Nutzflaeche = entry.Nutzflaeche;
+                entity.Nutzeinheit = entry.Einheiten;
+                entity.Besitzer = await Ctx.Kontakte.FindAsync(entry.Besitzer!.Id)!;
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Delete]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
+                SetOptionalValues(entity, entry);
+                Ctx.Wohnungen.Update(entity);
+                await Ctx.SaveChangesAsync();
 
-            Ctx.Wohnungen.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
-        }
-
-        public async Task<ActionResult<WohnungEntry>> Post(ClaimsPrincipal user, WohnungEntry entry)
-        {
-            if (entry.Id != 0)
-            {
-                return new BadRequestResult();
-            }
-
-            try
-            {
-                return await Add(entry);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
-        }
-
-        private async Task<WohnungEntry> Add(WohnungEntry entry)
-        {
-            var entity = new Wohnung(entry.Bezeichnung, entry.Wohnflaeche, entry.Nutzflaeche, entry.Einheiten)
-            {
-                Besitzer = await Ctx.Kontakte.FindAsync(entry.Besitzer!.Id)!
-            };
-
-            SetOptionalValues(entity, entry);
-            Ctx.Wohnungen.Add(entity);
-            Ctx.SaveChanges();
-
-            return new WohnungEntry(entity, entry.Permissions);
-        }
-
-        public async Task<ActionResult<WohnungEntry>> Put(ClaimsPrincipal user, int id, WohnungEntry entry)
-        {
-            var entity = await Ctx.Wohnungen.FindAsync(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
-
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Update]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
-
-            try
-            {
-                return await Update(entry, entity);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
-        }
-
-        private async Task<WohnungEntry> Update(WohnungEntry entry, Wohnung entity)
-        {
-            entity.Bezeichnung = entry.Bezeichnung;
-            entity.Wohnflaeche = entry.Wohnflaeche;
-            entity.Nutzflaeche = entry.Nutzflaeche;
-            entity.Nutzeinheit = entry.Einheiten;
-            entity.Besitzer = await Ctx.Kontakte.FindAsync(entry.Besitzer!.Id)!;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Wohnungen.Update(entity);
-            Ctx.SaveChanges();
-
-            return new WohnungEntry(entity, entry.Permissions);
+                return new WohnungEntry(entity, entry.Permissions);
+            });
         }
 
         private void SetOptionalValues(Wohnung entity, WohnungEntry entry)

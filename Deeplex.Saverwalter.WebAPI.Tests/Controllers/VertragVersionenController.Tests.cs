@@ -23,7 +23,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragVersionDbService(ctx, auth);
-            var controller = new VertragVersionController(logger, dbService);
+            var controller = new VertragVersionController(logger, dbService, A.Fake<HttpClient>());
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
 
             var entity = new VertragVersion(new DateOnly(2021, 6, 30), 1000, 2)
@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragVersionDbService(ctx, auth);
-            var controller = new VertragVersionController(logger, dbService);
+            var controller = new VertragVersionController(logger, dbService, A.Fake<HttpClient>());
             var entity = vertrag.Versionen.First();
 
             if (entity == null)
@@ -70,7 +70,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragVersionDbService(ctx, auth);
-            var controller = new VertragVersionController(logger, dbService);
+            var controller = new VertragVersionController(logger, dbService, A.Fake<HttpClient>());
             var entity = vertrag.Versionen.First();
 
             if (entity == null)
@@ -97,7 +97,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new VertragVersionDbService(ctx, auth);
-            var controller = new VertragVersionController(logger, dbService);
+            var controller = new VertragVersionController(logger, dbService, A.Fake<HttpClient>());
             var entity = vertrag.Versionen.First();
 
             var id = entity.VertragVersionId;

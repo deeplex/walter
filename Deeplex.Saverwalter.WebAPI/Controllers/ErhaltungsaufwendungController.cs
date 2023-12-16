@@ -1,6 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
@@ -8,7 +10,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/erhaltungsaufwendungen")]
-    public class ErhaltungsaufwendungController : ControllerBase
+    public class ErhaltungsaufwendungController : FileControllerBase<ErhaltungsaufwendungEntry, Erhaltungsaufwendung>
     {
         public class ErhaltungsaufwendungEntryBase
         {
@@ -58,9 +60,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<ErhaltungsaufwendungController> _logger;
-        private ErhaltungsaufwendungDbService DbService { get; }
+        protected override ErhaltungsaufwendungDbService DbService { get; }
 
-        public ErhaltungsaufwendungController(ILogger<ErhaltungsaufwendungController> logger, ErhaltungsaufwendungDbService dbService)
+        public ErhaltungsaufwendungController(ILogger<ErhaltungsaufwendungController> logger, ErhaltungsaufwendungDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
             _logger = logger;

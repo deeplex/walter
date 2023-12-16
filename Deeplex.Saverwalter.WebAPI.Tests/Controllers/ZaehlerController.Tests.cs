@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ZaehlerDbService(ctx, auth);
-            var controller = new ZaehlerController(logger, dbService);
+            var controller = new ZaehlerController(logger, dbService, A.Fake<HttpClient>());
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -45,7 +45,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ZaehlerDbService(ctx, auth);
-            var controller = new ZaehlerController(logger, dbService);
+            var controller = new ZaehlerController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = new Zaehler("Test", Zaehlertyp.Warmwasser)
             {
@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ZaehlerDbService(ctx, auth);
-            var controller = new ZaehlerController(logger, dbService);
+            var controller = new ZaehlerController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = vertrag.Wohnung.Zaehler.First();
 
@@ -86,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ZaehlerDbService(ctx, auth);
-            var controller = new ZaehlerController(logger, dbService);
+            var controller = new ZaehlerController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = new Zaehler("Test", Zaehlertyp.Warmwasser);
             ctx.ZaehlerSet.Add(entity);
@@ -110,7 +110,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ZaehlerDbService(ctx, auth);
-            var controller = new ZaehlerController(logger, dbService);
+            var controller = new ZaehlerController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = vertrag.Wohnung.Zaehler.First();
             var id = entity.ZaehlerId;

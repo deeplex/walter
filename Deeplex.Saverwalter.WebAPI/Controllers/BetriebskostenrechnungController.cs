@@ -1,6 +1,8 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
@@ -9,7 +11,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/betriebskostenrechnungen")]
-    public class BetriebskostenrechnungController : ControllerBase
+    public class BetriebskostenrechnungController : FileControllerBase<BetriebskostenrechnungEntry, Betriebskostenrechnung>
     {
         public class BetriebskostenrechnungEntryBase
         {
@@ -65,9 +67,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<BetriebskostenrechnungController> _logger;
-        BetriebskostenrechnungDbService DbService { get; }
+        protected override BetriebskostenrechnungDbService DbService { get; }
 
-        public BetriebskostenrechnungController(ILogger<BetriebskostenrechnungController> logger, BetriebskostenrechnungDbService dbService)
+        public BetriebskostenrechnungController(ILogger<BetriebskostenrechnungController> logger, BetriebskostenrechnungDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             _logger = logger;
             DbService = dbService;

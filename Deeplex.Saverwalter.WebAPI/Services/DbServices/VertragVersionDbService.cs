@@ -1,68 +1,46 @@
 ﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragVersionController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class VertragVersionDbService : ICRUDService<VertragVersionEntry>
+    public class VertragVersionDbService : WalterDbServiceBase<VertragVersionEntry, VertragVersion>
     {
-        public SaverwalterContext Ctx { get; }
-        private readonly IAuthorizationService Auth;
-
-        public VertragVersionDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
+        public VertragVersionDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
-            Auth = authorizationService;
         }
 
-        public async Task<ActionResult<VertragVersionEntry>> Get(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult<VertragVersion>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
             var entity = await Ctx.VertragVersionen.FindAsync(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            return await GetEntity(user, entity, op);
+        }
 
-            var permissions = await Utils.GetPermissions(user, entity, Auth);
-            if (!permissions.Read)
+        public override async Task<ActionResult<VertragVersionEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new ForbidResult();
-            }
-
-            try
-            {
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
                 var entry = new VertragVersionEntry(entity, permissions);
                 return entry;
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            });
         }
 
-        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = await Ctx.VertragVersionen.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                Ctx.VertragVersionen.Remove(entity);
+                await Ctx.SaveChangesAsync();
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Delete]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
-
-            Ctx.VertragVersionen.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+                return new OkResult();
+            });
         }
 
-        public async Task<ActionResult<VertragVersionEntry>> Post(ClaimsPrincipal user, VertragVersionEntry entry)
+        public override async Task<ActionResult<VertragVersionEntry>> Post(ClaimsPrincipal user, VertragVersionEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -101,44 +79,23 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new VertragVersionEntry(entity, entry.Permissions);
         }
 
-        public async Task<ActionResult<VertragVersionEntry>> Put(ClaimsPrincipal user, int id, VertragVersionEntry entry)
+        public override async Task<ActionResult<VertragVersionEntry>> Put(ClaimsPrincipal user, int id, VertragVersionEntry entry)
         {
-            var entity = await Ctx.VertragVersionen.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                entity.Beginn = entry.Beginn;
+                entity.Grundmiete = entry.Grundmiete;
+                entity.Personenzahl = entry.Personenzahl;
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Update]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
+                SetOptionalValues(entity, entry);
+                Ctx.VertragVersionen.Update(entity);
+                Ctx.SaveChanges();
 
-            try
-            {
-                return Update(entry, entity);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+                return new VertragVersionEntry(entity, entry.Permissions);
+            });
         }
 
-        private VertragVersionEntry Update(VertragVersionEntry entry, VertragVersion entity)
-        {
-            entity.Beginn = entry.Beginn;
-            entity.Grundmiete = entry.Grundmiete;
-            entity.Personenzahl = entry.Personenzahl;
-
-            SetOptionalValues(entity, entry);
-            Ctx.VertragVersionen.Update(entity);
-            Ctx.SaveChanges();
-
-            return new VertragVersionEntry(entity, entry.Permissions);
-        }
-
-        private void SetOptionalValues(VertragVersion entity, VertragVersionEntry entry)
+        private static void SetOptionalValues(VertragVersion entity, VertragVersionEntry entry)
         {
             if (entity.VertragVersionId != entry.Id)
             {

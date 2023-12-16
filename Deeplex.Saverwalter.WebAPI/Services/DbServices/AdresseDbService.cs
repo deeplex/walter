@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
@@ -9,15 +10,10 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class AdresseDbService : ICRUDService<AdresseEntry>
+    public class AdresseDbService : WalterDbServiceBase<AdresseEntry, Adresse>
     {
-        public SaverwalterContext Ctx { get; }
-        private readonly IAuthorizationService Auth;
-
-        public AdresseDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
+        public AdresseDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
-            Auth = authorizationService;
         }
 
         public async Task<ActionResult<IEnumerable<AdresseEntryBase>>> GetList(ClaimsPrincipal user)
@@ -28,22 +24,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 .Select(async e => new AdresseEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public async Task<ActionResult<AdresseEntry>> Get(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult<Adresse>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
             var entity = await Ctx.Adressen.FindAsync(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            return await GetEntity(user, entity, op);
+        }
 
-            var permissions = await Utils.GetPermissions(user, entity, Auth);
-            if (!permissions.Read)
+        public override async Task<ActionResult<AdresseEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new ForbidResult();
-            }
-
-            try
-            {
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
                 var entry = new AdresseEntry(entity, permissions);
 
                 entry.Wohnungen = await Task.WhenAll(entity.Wohnungen
@@ -54,34 +45,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     .Select(async e => new ZaehlerEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
 
                 return entry;
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            });
         }
 
-        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = await Ctx.Adressen.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                Ctx.Adressen.Remove(entity);
+                await Ctx.SaveChangesAsync();
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Delete]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
-
-            Ctx.Adressen.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+                return new OkResult();
+            });
         }
 
-        public async Task<ActionResult<AdresseEntry>> Post(ClaimsPrincipal user, AdresseEntry entry)
+        public override async Task<ActionResult<AdresseEntry>> Post(ClaimsPrincipal user, AdresseEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -115,45 +93,24 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new AdresseEntry(entity, entry.Permissions);
         }
 
-        public async Task<ActionResult<AdresseEntry>> Put(ClaimsPrincipal user, int id, AdresseEntry entry)
+        public override async Task<ActionResult<AdresseEntry>> Put(ClaimsPrincipal user, int id, AdresseEntry entry)
         {
-            var entity = await Ctx.Adressen.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                entity.Strasse = entry.Strasse;
+                entity.Hausnummer = entry.Hausnummer;
+                entity.Postleitzahl = entry.Postleitzahl;
+                entity.Stadt = entry.Stadt;
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Delete]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
+                SetOptionalValues(entity, entry);
+                Ctx.Adressen.Update(entity);
+                await Ctx.SaveChangesAsync();
 
-            try
-            {
-                return Update(entry, entity);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+                return new AdresseEntry(entity, entry.Permissions);
+            });
         }
 
-        private AdresseEntry Update(AdresseEntry entry, Adresse entity)
-        {
-            entity.Strasse = entry.Strasse;
-            entity.Hausnummer = entry.Hausnummer;
-            entity.Postleitzahl = entry.Postleitzahl;
-            entity.Stadt = entry.Stadt;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Adressen.Update(entity);
-            Ctx.SaveChanges();
-
-            return new AdresseEntry(entity, entry.Permissions);
-        }
-
-        private void SetOptionalValues(Adresse entity, AdresseEntry entry)
+        private static void SetOptionalValues(Adresse entity, AdresseEntry entry)
         {
             if (entity.AdresseId != entry.Id)
             {

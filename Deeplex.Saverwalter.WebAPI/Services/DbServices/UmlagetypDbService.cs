@@ -2,21 +2,17 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Helper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlagetypController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class UmlagetypDbService : ICRUDService<UmlagetypEntry>
+    public class UmlagetypDbService : WalterDbServiceBase<UmlagetypEntry, Umlagetyp>
     {
-        public SaverwalterContext Ctx { get; }
-        private readonly IAuthorizationService Auth;
-
-        public UmlagetypDbService(SaverwalterContext ctx, IAuthorizationService authorizationService)
+        public UmlagetypDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
-            Auth = authorizationService;
         }
 
         public async Task<ActionResult<IEnumerable<UmlagetypEntryBase>>> GetList(ClaimsPrincipal user)
@@ -27,22 +23,17 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 .Select(async e => new UmlagetypEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public async Task<ActionResult<UmlagetypEntry>> Get(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult<Umlagetyp>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
             var entity = await Ctx.Umlagetypen.FindAsync(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            return await GetEntity(user, entity, op);
+        }
 
-            var permissions = await Utils.GetPermissions(user, entity, Auth);
-            if (!permissions.Read)
+        public override async Task<ActionResult<UmlagetypEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new ForbidResult();
-            }
-
-            try
-            {
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
                 var entry = new UmlagetypEntry(entity, permissions);
                 entry.Umlagen = await Task.WhenAll(entity.Umlagen.Where(u => u.Wohnungen
                     .Any(w => w.Verwalter.Count > 0 && w.Verwalter.AsQueryable()
@@ -50,34 +41,21 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                     .Select(async e => new UmlageEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
 
                 return entry;
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            });
         }
 
-        public async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            var entity = await Ctx.Umlagetypen.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                Ctx.Umlagetypen.Remove(entity);
+                await Ctx.SaveChangesAsync();
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.Delete]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
-
-            Ctx.Umlagetypen.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+                return new OkResult();
+            });
         }
 
-        public async Task<ActionResult<UmlagetypEntry>> Post(ClaimsPrincipal user, UmlagetypEntry entry)
+        public override async Task<ActionResult<UmlagetypEntry>> Post(ClaimsPrincipal user, UmlagetypEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -111,39 +89,18 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return new UmlagetypEntry(entity, entry.Permissions);
         }
 
-        public async Task<ActionResult<UmlagetypEntry>> Put(ClaimsPrincipal user, int id, UmlagetypEntry entry)
+        public override async Task<ActionResult<UmlagetypEntry>> Put(ClaimsPrincipal user, int id, UmlagetypEntry entry)
         {
-            var entity = await Ctx.Umlagetypen.FindAsync(id);
-            if (entity == null)
+            return await HandleEntity(user, id, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                entity.Bezeichnung = entry.Bezeichnung;
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [Operations.SubCreate]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
+                SetOptionalValues(entity, entry);
+                Ctx.Umlagetypen.Update(entity);
+                await Ctx.SaveChangesAsync();
 
-            try
-            {
-                return Update(entry, entity);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
-        }
-
-        private UmlagetypEntry Update(UmlagetypEntry entry, Umlagetyp entity)
-        {
-            entity.Bezeichnung = entry.Bezeichnung;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Umlagetypen.Update(entity);
-            Ctx.SaveChanges();
-
-            return new UmlagetypEntry(entity, entry.Permissions);
+                return new UmlagetypEntry(entity, entry.Permissions);
+            });
         }
 
         private static void SetOptionalValues(Umlagetyp entity, UmlagetypEntry entry)

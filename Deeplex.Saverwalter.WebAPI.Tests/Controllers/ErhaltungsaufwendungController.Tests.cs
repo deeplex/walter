@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ErhaltungsaufwendungDbService(ctx, auth);
-            var controller = new ErhaltungsaufwendungController(logger, dbService);
+            var controller = new ErhaltungsaufwendungController(logger, dbService, A.Fake<HttpClient>());
             controller.ControllerContext = A.Fake<ControllerContext>();
             controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
             controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ErhaltungsaufwendungDbService(ctx, auth);
-            var controller = new ErhaltungsaufwendungController(logger, dbService);
+            var controller = new ErhaltungsaufwendungController(logger, dbService, A.Fake<HttpClient>());
 
             var aussteller = new Kontakt("TestPerson", Rechtsform.gmbh);
             ctx.Kontakte.Add(aussteller);
@@ -74,7 +74,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ErhaltungsaufwendungDbService(ctx, auth);
-            var controller = new ErhaltungsaufwendungController(logger, dbService);
+            var controller = new ErhaltungsaufwendungController(logger, dbService, A.Fake<HttpClient>());
 
             var aussteller = new Kontakt("TestPerson", Rechtsform.gmbh);
             ctx.Kontakte.Add(aussteller);
@@ -103,7 +103,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ErhaltungsaufwendungDbService(ctx, auth);
-            var controller = new ErhaltungsaufwendungController(logger, dbService);
+            var controller = new ErhaltungsaufwendungController(logger, dbService, A.Fake<HttpClient>());
 
             var aussteller = new Kontakt("TestPerson", Rechtsform.gmbh);
             ctx.Kontakte.Add(aussteller);
@@ -136,7 +136,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
             var dbService = new ErhaltungsaufwendungDbService(ctx, auth);
-            var controller = new ErhaltungsaufwendungController(logger, dbService);
+            var controller = new ErhaltungsaufwendungController(logger, dbService, A.Fake<HttpClient>());
 
             var aussteller = new Kontakt("TestPerson", Rechtsform.gmbh);
             ctx.Kontakte.Add(aussteller);

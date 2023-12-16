@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.WebAPI
 {
     public class Program
     {
-        public static string AppName = "Saverwalter";
+        public readonly static string AppName = "Saverwalter";
 
         public static async Task Main(string[] args)
         {

@@ -1,14 +1,16 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/zaehlerstaende")]
-    public class ZaehlerstandController : ControllerBase
+    public class ZaehlerstandController : FileControllerBase<ZaehlerstandEntry, Zaehlerstand>
     {
         public class ZaehlerstandEntryBase
         {
@@ -53,9 +55,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<ZaehlerstandController> _logger;
-        private ZaehlerstandDbService DbService { get; }
+        protected override ZaehlerstandDbService DbService { get; }
 
-        public ZaehlerstandController(ILogger<ZaehlerstandController> logger, ZaehlerstandDbService dbService)
+        public ZaehlerstandController(ILogger<ZaehlerstandController> logger, ZaehlerstandDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             _logger = logger;
             DbService = dbService;
