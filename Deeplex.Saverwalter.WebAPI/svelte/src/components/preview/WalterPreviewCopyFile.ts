@@ -81,12 +81,6 @@ export async function renameImpl(
 
     const failureTitle = 'Umbenennen fehlgeschlagen.';
 
-    const copyToast = new WalterToastContent(
-        undefined,
-        failureTitle,
-        undefined,
-        failureSubtitle
-    );
     const renameToast = new WalterToastContent(
         'Umbenennen erfolgreich',
         failureTitle,
@@ -95,14 +89,14 @@ export async function renameImpl(
     );
 
     const newFile = new File([file.Blob!], newFileName);
-    const S3URL = file.Key.slice(0, file.Key.length - file.FileName.length - 1);
-    const result = await walter_s3_post(newFile, S3URL, fetchImpl, copyToast);
-    if (result.ok) {
-        const result2 = await walter_s3_delete(file, renameToast);
-        return result2.ok;
-    }
+    const result = await walter_s3_post(
+        newFile,
+        file.Key,
+        fetchImpl,
+        renameToast
+    );
 
-    return false;
+    return result;
 }
 
 export async function moveImpl(

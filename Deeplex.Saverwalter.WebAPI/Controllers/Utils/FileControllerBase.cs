@@ -107,11 +107,38 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         [HttpPut("{id}/files/{filename}")]
         public async Task<IActionResult> WriteFile(int id, string filename)
         {
-            if (await Authorize(id, Operations.Read) is ActionResult authResult)
+            if (await Authorize(id, Operations.Update) is ActionResult authResult)
             {
                 return authResult;
             }
             return await ProcessFileRequest(_baseUrl, Request, _httpClient, filename);
+        }
+
+        [HttpPut("{id}/files/{old_filename}/{new_filename}")]
+        public async Task<IActionResult> MoveFile(int id, string old_filename, string new_filename)
+        {
+            if (await Authorize(id, Operations.Update) is ActionResult authResult)
+            {
+                return authResult;
+            }
+
+            var deletePath = GetS3Path(_baseUrl, Request.Path.Value, old_filename);
+            if (deletePath.Result is ActionResult deletePathResult)
+            {
+                return deletePathResult;
+            }
+
+            Request.Path = Request.Path.Value!.Replace(old_filename, new_filename);
+            var response = await ProcessFileRequest(_baseUrl, Request, _httpClient, new_filename);
+
+            if (response is FileContentResult)
+            {
+                // Put trash before the filename
+                var deleteRequest = new HttpRequestMessage(new HttpMethod(HttpMethod.Delete.Method), deletePath.Value) { Content = null };
+                await _httpClient.SendAsync(deleteRequest, CancellationToken.None);
+            }
+
+            return response;
         }
     }
 }
