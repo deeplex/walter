@@ -57,7 +57,10 @@
                 </HeaderPanelLinks>
                 {#if fileWrapper}
                     <div style="height: 1em; margin-top: 4em" />
-                    <WalterAnhaenge bind:fileWrapper />
+                    <WalterAnhaenge
+                        permissions={entry.permissions}
+                        bind:fileWrapper
+                    />
                 {/if}
             </HeaderAction>
         {:else}
@@ -75,7 +78,10 @@
                         preventCloseOnClickOutside
                         text="(...)"
                     >
-                        <WalterAnhaenge bind:fileWrapper />
+                        <WalterAnhaenge
+                            permissions={entry.permissions}
+                            bind:fileWrapper
+                        />
                     </HeaderAction>
                 {:then files}
                     <HeaderAction
@@ -83,7 +89,10 @@
                         preventCloseOnClickOutside
                         text="({files.length})"
                     >
-                        <WalterAnhaenge bind:fileWrapper />
+                        <WalterAnhaenge
+                            permissions={entry.permissions}
+                            bind:fileWrapper
+                        />
                     </HeaderAction>
                 {/await}
             {/if}

@@ -115,7 +115,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpPut("{id}/files/{old_filename}/{new_filename}")]
-        public async Task<IActionResult> MoveFile(int id, string old_filename, string new_filename)
+        public async Task<IActionResult> RenameFile(int id, string old_filename, string new_filename)
         {
             if (await Authorize(id, Operations.Update) is ActionResult authResult)
             {

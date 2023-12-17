@@ -10,8 +10,10 @@
     import WalterAnhaengeEntry from './WalterAnhaengeEntry.svelte';
     import type { WalterS3FileWrapper } from '$walter/lib';
     import { upload_new_files } from './WalterAnhaenge';
+    import type { WalterPermissions } from '$walter/lib/WalterPermissions';
 
     export let fileWrapper: WalterS3FileWrapper;
+    export let permissions: WalterPermissions | undefined;
 
     let newFiles: File[] = [];
 
@@ -23,18 +25,21 @@
 </script>
 
 <HeaderPanelLinks>
-    <FileUploaderDropContainer
-        style="scale: 0.9; margin-top: -2em"
-        bind:files={newFiles}
-        on:add={upload}
-        multiple
-    >
-        <svelte:fragment slot="labelText"
-            ><div style="font-size: medium">
-                Hier klicken oder Dateien ablegen um sie hochzuladen.
-            </div></svelte:fragment
+    {#if !permissions || permissions.update}
+        <FileUploaderDropContainer
+            style="scale: 0.9; margin-top: -2em"
+            bind:files={newFiles}
+            on:add={upload}
+            multiple
         >
-    </FileUploaderDropContainer>
+            <svelte:fragment slot="labelText"
+                ><div style="font-size: medium">
+                    Hier klicken oder Dateien ablegen um sie hochzuladen.
+                </div></svelte:fragment
+            >
+        </FileUploaderDropContainer>
+    {/if}
+
     <TextInput
         bind:value={filter}
         placeholder="Suche..."
