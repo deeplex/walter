@@ -80,7 +80,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 if (splits[5] == "trash")
                 {
-                    resourceUrl = _baseUrl + "/" + splits[2] + "/" + splits[3] + "/" + splits[5] + name;
+                    resourceUrl = _baseUrl + "/" + splits[2] + "/" + splits[3] + "/" + splits[5] + "/" + name;
                 }
                 else
                 {

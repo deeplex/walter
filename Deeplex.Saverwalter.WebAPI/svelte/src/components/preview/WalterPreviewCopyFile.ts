@@ -152,8 +152,11 @@ async function copyFile(
     }
     const S3URL =
         selectedTable.key === 'stack'
-            ? `${selectedTable.S3URL}`
-            : `${selectedTable.S3URL}/${selectedEntry?.id}`;
+            ? `${selectedTable.S3URL('')}`
+            : `${selectedTable.S3URL('' + selectedEntry?.id)}`;
+
+    console.log(selectedTable);
+    console.log(S3URL);
 
     const success = walter_s3_post(
         new File([file.Blob], file.FileName),
@@ -174,7 +177,7 @@ export type WalterPreviewCopyTable = {
             init?: RequestInit | undefined
         ) => Promise<Response>
     ) => Promise<unknown>;
-    S3URL: string;
+    S3URL: (id: string) => string;
     newPage: () => unknown;
 };
 
@@ -183,63 +186,63 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Adressen',
         key: 'adressen',
         fetch: walter_selection.adressen,
-        S3URL: S3URL.adressen,
+        S3URL: (id: string) => S3URL.adresse(id),
         newPage: () => WalterAdresse
     },
     {
         value: 'Betriebskostenrechnungen',
         key: 'betriebskostenrechnungen',
         fetch: walter_selection.betriebskostenrechnungen,
-        S3URL: S3URL.betriebskostenrechnungen,
+        S3URL: (id: string) => S3URL.betriebskostenrechnung(id),
         newPage: () => WalterBetriebskostenrechnung
     },
     {
         value: 'Erhaltungsaufwendungen',
         key: 'erhaltungsaufwendungen',
         fetch: walter_selection.erhaltungsaufwendungen,
-        S3URL: S3URL.erhaltungsaufwendungen,
+        S3URL: (id: string) => S3URL.erhaltungsaufwendung(id),
         newPage: () => WalterErhaltungsaufwendung
     },
     {
         value: 'Kontakte',
         key: 'kontakte',
         fetch: walter_selection.kontakte,
-        S3URL: S3URL.kontakte,
+        S3URL: (id: string) => S3URL.kontakt(id),
         newPage: () => WalterKontakt
     },
     {
         value: 'Mieten',
         key: 'mieten',
         fetch: walter_selection.mieten,
-        S3URL: S3URL.mieten,
+        S3URL: (id: string) => S3URL.miete(id),
         newPage: () => WalterMiete
     },
     {
         value: 'Mietminderungen',
         key: 'mietminderungen',
         fetch: walter_selection.mietminderungen,
-        S3URL: S3URL.mietminderungen,
+        S3URL: (id: string) => S3URL.mietminderung(id),
         newPage: () => WalterMietminderung
     },
     {
         value: 'Umlagen',
         key: 'umlagen',
         fetch: walter_selection.umlagen,
-        S3URL: S3URL.umlagen,
+        S3URL: (id: string) => S3URL.umlage(id),
         newPage: () => WalterUmlage
     },
     {
         value: 'Umlagetypen',
         key: 'umlagetypen',
         fetch: walter_selection.umlagetypen,
-        S3URL: S3URL.umlagetypen,
+        S3URL: (id: string) => S3URL.umlagetyp(id),
         newPage: () => WalterUmlagetyp
     },
     {
         value: 'Verträge',
         key: 'vertraege',
         fetch: walter_selection.vertraege,
-        S3URL: S3URL.vertraege,
+        S3URL: (id: string) => S3URL.vertrag(id),
         newPage: () => WalterVertrag
     },
     // {
@@ -252,28 +255,28 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Wohnungen',
         key: 'wohnungen',
         fetch: walter_selection.wohnungen,
-        S3URL: S3URL.wohnungen,
+        S3URL: (id: string) => S3URL.wohnung(id),
         newPage: () => WalterWohnung
     },
     {
         value: 'Zähler',
         key: 'zaehler',
         fetch: walter_selection.zaehler,
-        S3URL: S3URL.zaehlerSet,
+        S3URL: (id: string) => S3URL.zaehler(id),
         newPage: () => WalterZaehler
     },
     {
         value: 'Zählerstände',
         key: 'zaehlerstaende',
         fetch: walter_selection.zaehlerstaende,
-        S3URL: S3URL.zaehlerstaende,
+        S3URL: (id: string) => S3URL.zaehlerstand(id),
         newPage: () => WalterZaehlerstand
     },
     {
         value: 'Ablagestapel',
         key: 'stack',
         fetch: () => Promise.resolve(),
-        S3URL: S3URL.stack,
+        S3URL: (id: string) => S3URL.stack,
         newPage: () => undefined
     }
 ];
