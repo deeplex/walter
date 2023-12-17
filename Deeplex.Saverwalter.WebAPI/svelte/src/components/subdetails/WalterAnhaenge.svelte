@@ -59,7 +59,11 @@
             >
             {#each loadedFiles as file}
                 {#if file.FileName.toLowerCase().includes(filter.toLowerCase())}
-                    <WalterAnhaengeEntry {file} bind:fileWrapper />
+                    <WalterAnhaengeEntry
+                        {permissions}
+                        {file}
+                        bind:fileWrapper
+                    />
                 {/if}
             {/each}
         {/await}
