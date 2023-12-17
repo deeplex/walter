@@ -37,7 +37,7 @@ export const S3URL = {
     zaehler: (id: string) => `${WalterZaehlerEntry.ApiURL}/${id}/files`,
     zaehlerstand: (id: string) =>
         `${WalterZaehlerstandEntry.ApiURL}/${id}/files`,
-    stack: `stack`
+    stack: `/api/user/files`
 };
 
 type XMLResult = {

@@ -276,7 +276,7 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Ablagestapel',
         key: 'stack',
         fetch: () => Promise.resolve(),
-        S3URL: (id: string) => S3URL.stack,
+        S3URL: () => S3URL.stack,
         newPage: () => undefined
     }
 ];

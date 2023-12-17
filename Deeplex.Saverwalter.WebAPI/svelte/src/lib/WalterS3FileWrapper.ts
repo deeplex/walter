@@ -1,4 +1,4 @@
-import { walter_s3_get_files } from '$walter/services/s3';
+import { S3URL, walter_s3_get_files } from '$walter/services/s3';
 import type { WalterS3File } from '$walter/types';
 
 export class WalterS3FileWrapper {
@@ -13,7 +13,7 @@ export class WalterS3FileWrapper {
     }
 
     registerStack() {
-        this.register('Ablagestapel', 'stack');
+        this.register('Ablagestapel', S3URL.stack);
     }
 
     // target might be either an index of a S3URL that has to match the handles S3URL

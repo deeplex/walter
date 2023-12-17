@@ -3,9 +3,12 @@ using System.Security.Claims;
 using System.Text;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
+using Deeplex.Saverwalter.WebAPI.Helper;
 using Deeplex.Saverwalter.WebAPI.Services;
+using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AccountController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
@@ -16,12 +19,19 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         private readonly SaverwalterContext _dbContext;
         private readonly TokenService _tokenService;
         private readonly UserService _userService;
+        private readonly string? _baseUrl = Environment.GetEnvironmentVariable("S3_PROVIDER");
+        private readonly HttpClient _httpClient;
 
-        public UserController(SaverwalterContext dbContext, TokenService tokenService, UserService userService)
+        public UserController(
+            SaverwalterContext dbContext,
+            TokenService tokenService,
+            UserService userService,
+            HttpClient httpClient)
         {
             _dbContext = dbContext;
             _tokenService = tokenService;
             _userService = userService;
+            _httpClient = httpClient;
         }
 
         public class SignInRequest
@@ -135,6 +145,30 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 
             await _userService.UpdateUserPassword(account, Encoding.UTF8.GetBytes(updatePasswordRequest.NewPassword));
             return Ok();
+        }
+
+        [HttpGet("files")]
+        public async Task<IActionResult> GetFiles()
+        {
+            var userId = WebEncoders.Base64UrlEncode(User.GetUserId().ToByteArray());
+            var fullPath = _baseUrl + "?prefix=" + string.Join("/", ["user", userId]);
+            return await FileHandling.RedirectToFileServer(Request, _httpClient, fullPath);
+        }
+        [HttpGet("files/{filename}")]
+        public async Task<IActionResult> ReadFile(string filename)
+        {
+            var userId = WebEncoders.Base64UrlEncode(User.GetUserId().ToByteArray());
+            var fullPath = string.Join("/", [_baseUrl, "user", userId, filename]);
+            return await FileHandling.RedirectToFileServer(Request, _httpClient, fullPath);
+        }
+
+        [HttpDelete("files/{filename}")]
+        [HttpPut("files/{filename}")]
+        public async Task<IActionResult> WriteFile(string filename)
+        {
+            var userId = WebEncoders.Base64UrlEncode(User.GetUserId().ToByteArray());
+            var fullPath = string.Join("/", [_baseUrl, "user", userId, filename]);
+            return await FileHandling.RedirectToFileServer(Request, _httpClient, fullPath);
         }
     }
 }
