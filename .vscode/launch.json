@@ -68,7 +68,7 @@
                 "DATABASE_USER": "postgres",
                 "DATABASE_PASS": "postgres",
                 "WALTER_PASSWORD": "postgres",
-                "S3_PROVIDER": "http://s3:9001/saverwalter"
+                "S3_PROVIDER": "http://s3:9000/saverwalter"
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
@@ -95,7 +95,7 @@
                 "DATABASE_USER": "postgres",
                 "DATABASE_PASS": "postgres",
                 "WALTER_PASSWORD": "postgres",
-                "S3_PROVIDER": "http://s3:9001/saverwalter"
+                "S3_PROVIDER": "http://s3:9000/saverwalter"
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
