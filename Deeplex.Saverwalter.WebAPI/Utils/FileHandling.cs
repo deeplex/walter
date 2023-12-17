@@ -39,48 +39,7 @@ namespace Deeplex.Saverwalter.WebAPI.Utils
             return trashResponse;
         }
 
-        private static ActionResult<string> GetS3Path(string? baseUrl, string? requestPath, string? filename = null)
-        {
-            if (baseUrl is null)
-            {
-                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
-            }
-
-            if (string.IsNullOrEmpty(requestPath))
-            {
-                return new BadRequestResult();
-            }
-
-            var splits = requestPath.Split("/");
-
-            if (splits.Length < 4)
-            {
-                return new BadRequestResult();
-            }
-
-            string resourceUrl;
-
-            if (filename is string name)
-            {
-                if (splits[5] == "trash")
-                {
-                    resourceUrl = baseUrl + "/" + splits[2] + "/" + splits[3] + "/" + splits[5] + "/" + name;
-                }
-                else
-                {
-                    resourceUrl = baseUrl + "/" + splits[2] + "/" + splits[3] + "/" + name;
-                }
-            }
-            else
-            {
-                resourceUrl = baseUrl + "?prefix=" + splits[2] + "/" + splits[3];
-            }
-
-            return resourceUrl;
-        }
-
-
-        private static async Task<IActionResult> RedirectToFileServer(HttpRequest request, HttpClient client, string path)
+        public static async Task<IActionResult> RedirectToFileServer(HttpRequest request, HttpClient client, string path)
         {
             HttpContent content = null!;
             var requestMessage = new HttpRequestMessage(new HttpMethod(request.Method), path) { Content = content };
@@ -104,23 +63,6 @@ namespace Deeplex.Saverwalter.WebAPI.Utils
             var responseType = response.Content.Headers.ContentType?.MediaType ?? "plain/text";
 
             return new FileContentResult(responseContent, responseType);
-        }
-
-        public static async Task<IActionResult> ProcessFileRequest(string? baseUrl, HttpRequest request, HttpClient client, string? filename = null)
-        {
-            var s3Path = GetS3Path(baseUrl, request.Path.Value, filename);
-            if (s3Path.Result is ActionResult s3PathActionResult)
-            {
-                return s3PathActionResult;
-            }
-            else if (s3Path.Value is string fullPath)
-            {
-                return await RedirectToFileServer(request, client, fullPath);
-            }
-            else
-            {
-                return new BadRequestResult();
-            }
         }
     }
 }

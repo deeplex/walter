@@ -19,6 +19,65 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         protected abstract WalterDbServiceBase<T, U> DbService { get; }
 
+        private static ActionResult<string> GetS3Path(string? baseUrl, string? requestPath, string? filename = null)
+        {
+            if (baseUrl is null)
+            {
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
+            }
+
+            if (string.IsNullOrEmpty(requestPath))
+            {
+                return new BadRequestResult();
+            }
+
+            var splits = requestPath.Split("/");
+
+            if (splits.Length < 4)
+            {
+                return new BadRequestResult();
+            }
+
+            string resourceUrl;
+
+            if (filename is string name)
+            {
+                if (splits[5] == "trash")
+                {
+                    resourceUrl = baseUrl + "/" + splits[2] + "/" + splits[3] + "/" + splits[5] + "/" + name;
+                }
+                else
+                {
+                    resourceUrl = baseUrl + "/" + splits[2] + "/" + splits[3] + "/" + name;
+                }
+            }
+            else
+            {
+                resourceUrl = baseUrl + "?prefix=" + splits[2] + "/" + splits[3];
+            }
+
+            return resourceUrl;
+        }
+
+
+
+        private static async Task<IActionResult> ProcessFileRequest(string? baseUrl, HttpRequest request, HttpClient client, string? filename = null)
+        {
+            var s3Path = GetS3Path(baseUrl, request.Path.Value, filename);
+            if (s3Path.Result is ActionResult s3PathActionResult)
+            {
+                return s3PathActionResult;
+            }
+            else if (s3Path.Value is string fullPath)
+            {
+                return await FileHandling.RedirectToFileServer(request, client, fullPath);
+            }
+            else
+            {
+                return new BadRequestResult();
+            }
+        }
+
         private async Task<ActionResult?> Authorize(int id, OperationAuthorizationRequirement operation)
         {
             var entityResult = await DbService.GetEntity(User, id, operation);
@@ -32,7 +91,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 return authResult;
             }
-            return await FileHandling.ProcessFileRequest(_baseUrl, Request, _httpClient);
+            return await ProcessFileRequest(_baseUrl, Request, _httpClient);
         }
         [HttpGet("{id}/files/{filename}")]
         public async Task<IActionResult> ReadFile(int id, string filename)
@@ -41,7 +100,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 return authResult;
             }
-            return await FileHandling.ProcessFileRequest(_baseUrl, Request, _httpClient, filename);
+            return await ProcessFileRequest(_baseUrl, Request, _httpClient, filename);
         }
 
         [HttpDelete("{id}/files/{filename}")]
@@ -52,7 +111,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 return authResult;
             }
-            return await FileHandling.ProcessFileRequest(_baseUrl, Request, _httpClient, filename);
+            return await ProcessFileRequest(_baseUrl, Request, _httpClient, filename);
         }
     }
 }
