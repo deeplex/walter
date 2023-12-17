@@ -83,7 +83,7 @@ export async function renameImpl(
     const S3URL = file.Key.slice(0, file.Key.length - file.FileName.length - 1);
     const result = await walter_s3_post(newFile, S3URL, fetchImpl, copyToast);
     if (result.ok) {
-        const result2 = await walter_s3_delete(file, fetchImpl, renameToast);
+        const result2 = await walter_s3_delete(file, renameToast);
         return result2.ok;
     }
 
@@ -127,7 +127,7 @@ export async function moveImpl(
     );
 
     if (await copied) {
-        const deleted = walter_s3_delete(file, fetchImpl, moveToast);
+        const deleted = walter_s3_delete(file, moveToast);
         if ((await deleted).status === 200) {
             return true;
         }

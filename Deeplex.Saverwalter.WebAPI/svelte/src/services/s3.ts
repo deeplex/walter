@@ -109,31 +109,9 @@ export async function walter_s3_remove_folder_content(
 
 export async function walter_s3_delete(
     file: WalterS3File,
-    fetchImpl: typeof fetch,
     toast?: WalterToastContent
 ) {
-    const directory_path = `${file.Key}`.substring(
-        0,
-        file.Key.lastIndexOf('/')
-    );
-
-    console.log(directory_path);
-
-    if (file.Blob) {
-        const response = walter_s3_post(
-            new File([file.Blob], file.FileName),
-            `${directory_path}/trash`,
-            fetchImpl
-        );
-
-        if ((await response).ok) {
-            return walter_delete(file.Key, toast);
-        } else {
-            return response;
-        }
-    } else {
-        return walter_delete(file.Key, toast);
-    }
+    return walter_delete(file.Key, toast);
 }
 
 export function download_file_blob(blob: Blob, fileName: string) {

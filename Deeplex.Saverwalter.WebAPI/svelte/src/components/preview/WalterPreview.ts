@@ -25,12 +25,10 @@ export function remove(file: WalterS3File, fileWrapper: WalterS3FileWrapper) {
         danger: true,
         primaryButtonText: 'Löschen',
         submit: () =>
-            walter_s3_delete(file, fileWrapper.fetchImpl, deleteToast).then(
-                (e) => {
-                    if (e.status === 200) {
-                        fileWrapper.removeFile(file);
-                    }
+            walter_s3_delete(file, deleteToast).then((e) => {
+                if (e.status === 200) {
+                    fileWrapper.removeFile(file);
                 }
-            )
+            })
     });
 }

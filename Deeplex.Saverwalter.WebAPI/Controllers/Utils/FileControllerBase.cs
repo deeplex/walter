@@ -18,6 +18,39 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             _httpClient = httpClient;
         }
 
+        private static StreamContent FillContent(string path, HttpRequest request)
+        {
+            var content = new StreamContent(request.Body);
+
+            var contentLength = request.ContentLength ?? -1;
+            if (contentLength >= 0)
+            {
+                content.Headers.ContentLength = contentLength;
+            }
+
+            new FileExtensionContentTypeProvider()
+                .TryGetContentType(Path.GetExtension(path), out var contentType);
+            if (contentType != null)
+            {
+                content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+            }
+
+            return content;
+        }
+
+        private async static Task<HttpResponseMessage> SaveToTrash(string path, HttpRequest request, HttpClient httpClient)
+        {
+            HttpContent content = null!;
+            // Put trash before the filename
+            var splits = path.Split('/');
+            var trashPath = $"{string.Join('/', splits.Reverse().Skip(1).Reverse())}/trash/{splits.Last()}";
+            var trashRequest = new HttpRequestMessage(new HttpMethod(HttpMethod.Put.Method), trashPath) { Content = content };
+            trashRequest.Content = FillContent(path, request);
+            var trashResponse = await httpClient.SendAsync(trashRequest, CancellationToken.None);
+
+            return trashResponse;
+        }
+
         private async Task<IActionResult> RedirectToFileServer(string path)
         {
             var requestMethod = HttpContext.Request.Method;
@@ -27,20 +60,15 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             if (requestMethod == HttpMethod.Put.Method)
             {
-                content = new StreamContent(Request.Body);
+                request.Content = FillContent(path, Request);
+            }
+            else if (requestMethod == HttpMethod.Delete.Method)
+            {
+                var trashResponse = await SaveToTrash(path, Request, _httpClient);
 
-                var contentLength = Request.ContentLength ?? -1;
-                if (contentLength >= 0)
+                if (!trashResponse.IsSuccessStatusCode)
                 {
-                    content.Headers.ContentLength = contentLength;
-                }
-
-                request.Content = content;
-                new FileExtensionContentTypeProvider()
-                    .TryGetContentType(Path.GetExtension(path), out var contentType);
-                if (contentType != null)
-                {
-                    content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+                    return StatusCode((int)trashResponse.StatusCode);
                 }
             }
 
@@ -126,7 +154,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         [HttpDelete("{id}/files/{filename}")]
         [HttpPut("{id}/files/{filename}")]
-        [HttpPut("{id}/files/trash/{filename}")]
         public async Task<IActionResult> WriteFile(int id, string filename) => await ProcessFileRequest(id, Operations.Update, filename);
     }
 }
