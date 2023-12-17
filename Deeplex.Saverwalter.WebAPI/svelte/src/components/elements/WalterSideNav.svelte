@@ -119,12 +119,6 @@
                 {/await}
 
                 <WalterSideNavLink
-                    icon={TrashCan}
-                    text="Papierkorb"
-                    href="/trash"
-                />
-
-                <WalterSideNavLink
                     text="Nutzereinstellungen"
                     icon={User}
                     href="/user"
