@@ -14,6 +14,7 @@
         WalterS3FileWrapper,
         type WalterZaehlerstandEntry
     } from '$walter/lib';
+    import { S3URL } from '$walter/services/s3';
 
     export let data: PageData;
 
@@ -66,6 +67,7 @@
         {#if data.entry.adresse !== null}
             <WalterLinkTile
                 bind:fileWrapper
+                s3ref={S3URL.adresse(`${data.entry.adresse.id}`)}
                 name={`Adresse: ${data.entry.adresse?.anschrift}`}
                 href={`/adressen/${data.entry.adresse?.id}`}
             />
@@ -73,6 +75,7 @@
         {#if data.entry.wohnung !== null}
             <WalterLinkTile
                 bind:fileWrapper
+                s3ref={S3URL.adresse(`${data.entry.wohnung?.id}`)}
                 name={`Wohnung: ${data.entry.wohnung?.text}`}
                 href={`/wohnungen/${data.entry.wohnung?.id}`}
             />

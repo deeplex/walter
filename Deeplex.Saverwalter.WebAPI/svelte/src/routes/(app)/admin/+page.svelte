@@ -4,9 +4,10 @@
         WalterHeader,
         WalterLinkTile
     } from '$walter/components';
+    import { ClickableTile } from 'carbon-components-svelte';
 </script>
 
 <WalterHeader title="Adminbereich" />
 <WalterGrid>
-    <WalterLinkTile name="Nutzeraccounts" href="/accounts" />
+    <ClickableTile href="/accounts">Nutzeraccounts</ClickableTile>
 </WalterGrid>

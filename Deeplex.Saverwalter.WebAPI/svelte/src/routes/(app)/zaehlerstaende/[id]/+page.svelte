@@ -8,6 +8,7 @@
     import { convertDateGerman } from '$walter/services/utils';
     import type { PageData } from './$types';
     import { WalterS3FileWrapper } from '$walter/lib';
+    import { S3URL } from '$walter/services/s3';
 
     export let data: PageData;
 
@@ -38,6 +39,7 @@
     <WalterZaehlerstand fetchImpl={data.fetchImpl} entry={data.entry} />
     <WalterLinkTile
         bind:fileWrapper
+        s3ref={S3URL.adresse(`${data.entry.zaehler.id}`)}
         name={`Zähler: ${data.entry.zaehler.text}`}
         href={`/zaehler/${data.entry.zaehler.id}`}
     />

@@ -19,6 +19,7 @@
     import { Row } from 'carbon-components-svelte';
     import WalterDataLineChart from '$walter/components/data/WalterDataLineChart.svelte';
     import { walter_data_rechnungen_year } from '$walter/components/data/WalterData';
+    import { S3URL } from '$walter/services/s3';
 
     export let data: PageData;
 
@@ -86,6 +87,7 @@
         {/if}
         <WalterLinkTile
             {fileWrapper}
+            s3ref={S3URL.adresse(`${data.entry.typ.id}`)}
             name={`Umlagetyp ansehen`}
             href={`/umlagetypen/${data.entry.typ.id}`}
         />

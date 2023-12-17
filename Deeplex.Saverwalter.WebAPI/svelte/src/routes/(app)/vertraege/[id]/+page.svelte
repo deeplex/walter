@@ -28,6 +28,7 @@
     import { ClickableTile, Row } from 'carbon-components-svelte';
     import { walter_data_mieten } from '$walter/components/data/WalterData';
     import WalterDataScatterChart from '$walter/components/data/WalterDataScatterChart.svelte';
+    import { S3URL } from '$walter/services/s3';
     export let data: PageData;
 
     const mietminderungEntry: Partial<WalterMietminderungEntry> =
@@ -102,11 +103,13 @@
 
         <WalterLinkTile
             bind:fileWrapper
+            s3ref={S3URL.adresse(`${data.entry.ansprechpartner.id}`)}
             name={`Ansprechpartner: ${data.entry.ansprechpartner.text}`}
             href={`/kontakte/${data.entry.ansprechpartner.id}`}
         />
         <WalterLinkTile
             bind:fileWrapper
+            s3ref={S3URL.adresse(`${data.entry.wohnung.id}`)}
             name={`Wohnung: ${data.entry.wohnung.text}`}
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />

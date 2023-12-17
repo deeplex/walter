@@ -11,6 +11,7 @@
         WalterLinkTile
     } from '$walter/components';
     import { WalterS3FileWrapper } from '$walter/lib';
+    import { S3URL } from '$walter/services/s3';
 
     export let data: PageData;
 
@@ -62,6 +63,7 @@
 
         <WalterLinkTile
             bind:fileWrapper
+            s3ref={S3URL.adresse(`${data.entry.umlage.id}`)}
             name={`Umlage: ${data.entry.umlage.text}`}
             href={`/umlagen/${data.entry.umlage?.id}`}
         />

@@ -23,6 +23,7 @@
     import { Row } from 'carbon-components-svelte';
     import { walter_data_aufwendungen } from '$walter/components/data/WalterData';
     import WalterDataScatterChart from '$walter/components/data/WalterDataScatterChart.svelte';
+    import { S3URL } from '$walter/services/s3';
 
     export let data: PageData;
 
@@ -116,6 +117,7 @@
 
         <WalterLinkTile
             bind:fileWrapper
+            s3ref={S3URL.adresse(`${data.entry.adresse.id}`)}
             name={`Adresse: ${data.entry.adresse.anschrift}`}
             href={`/adressen/${data.entry.adresse.id}`}
         />
