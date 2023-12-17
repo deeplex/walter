@@ -21,7 +21,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public override async Task<ActionResult<ZaehlerstandEntry>> Get(ClaimsPrincipal user, int id)
         {
-            return await HandleEntity(user, id, async (entity) =>
+            return await HandleEntity(user, id, Operations.Read, async (entity) =>
             {
                 var permissions = await Utils.GetPermissions(user, entity, Auth);
                 return new ZaehlerstandEntry(entity, permissions);
@@ -30,7 +30,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            return await HandleEntity(user, id, async (w) =>
+            return await HandleEntity(user, id, Operations.Delete, async (w) =>
             {
                 Ctx.Zaehlerstaende.Remove(w);
                 await Ctx.SaveChangesAsync();
@@ -79,7 +79,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public override async Task<ActionResult<ZaehlerstandEntry>> Put(ClaimsPrincipal user, int id, ZaehlerstandEntry entry)
         {
-            return await HandleEntity(user, id, async (entity) =>
+            return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
                 entity.Datum = entry.Datum;
                 entity.Stand = entry.Stand;

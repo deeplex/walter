@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public override async Task<ActionResult<MieteEntry>> Get(ClaimsPrincipal user, int id)
         {
-            return await HandleEntity(user, id, async (entity) =>
+            return await HandleEntity(user, id, Operations.Read, async (entity) =>
             {
                 var permissions = await Utils.GetPermissions(user, entity, Auth);
                 var entry = new MieteEntry(entity, permissions);
@@ -39,7 +39,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            return await HandleEntity(user, id, async (entity) =>
+            return await HandleEntity(user, id, Operations.Delete, async (entity) =>
             {
                 Ctx.Mieten.Remove(entity);
                 await Ctx.SaveChangesAsync();
@@ -100,7 +100,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public override async Task<ActionResult<MieteEntry>> Put(ClaimsPrincipal user, int id, MieteEntry entry)
         {
-            return await HandleEntity(user, id, async (entity) =>
+            return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
                 entity.BetreffenderMonat = entry.BetreffenderMonat;
                 entity.Betrag = entry.Betrag;

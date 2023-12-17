@@ -17,16 +17,19 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         }
 
         protected readonly IAuthorizationService Auth;
-        public abstract Task<ActionResult<U>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op);
+        public abstract Task<ActionResult<U>> GetEntity(
+            ClaimsPrincipal user,
+            int id,
+            OperationAuthorizationRequirement operation);
 
-        protected async Task<ActionResult<U>> GetEntity(ClaimsPrincipal user, U? entity, OperationAuthorizationRequirement op)
+        protected async Task<ActionResult<U>> GetEntity(ClaimsPrincipal user, U? entity, OperationAuthorizationRequirement operation)
         {
             if (entity == null)
             {
                 return new NotFoundResult();
             }
 
-            var authRx = await Auth.AuthorizeAsync(user, entity, [op]);
+            var authRx = await Auth.AuthorizeAsync(user, entity, [operation]);
             if (!authRx.Succeeded)
             {
                 return new ForbidResult();
@@ -35,9 +38,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             return entity;
         }
 
-        protected async Task<ActionResult> HandleEntity(ClaimsPrincipal user, int id, Func<U, Task<ActionResult>> action)
+        protected async Task<ActionResult> HandleEntity(
+            ClaimsPrincipal user,
+            int id,
+            OperationAuthorizationRequirement operation,
+            Func<U, Task<ActionResult>> action)
         {
-            var entity = await GetEntity(user, id, Operations.Read);
+            var entity = await GetEntity(user, id, operation);
 
             if (entity.Result != null)
             {
@@ -53,9 +60,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             }
         }
 
-        protected async Task<ActionResult<T>> HandleEntity(ClaimsPrincipal user, int id, Func<U, Task<ActionResult<T>>> action)
+        protected async Task<ActionResult<T>> HandleEntity(
+            ClaimsPrincipal user,
+            int id,
+            OperationAuthorizationRequirement operation,
+            Func<U, Task<ActionResult<T>>> action)
         {
-            var entity = await GetEntity(user, id, Operations.Read);
+            var entity = await GetEntity(user, id, operation);
 
             if (entity.Result != null)
             {

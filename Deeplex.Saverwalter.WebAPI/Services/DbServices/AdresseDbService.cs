@@ -32,7 +32,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public override async Task<ActionResult<AdresseEntry>> Get(ClaimsPrincipal user, int id)
         {
-            return await HandleEntity(user, id, async (entity) =>
+            return await HandleEntity(user, id, Operations.Read, async (entity) =>
             {
                 var permissions = await Utils.GetPermissions(user, entity, Auth);
                 var entry = new AdresseEntry(entity, permissions);
@@ -50,7 +50,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
         {
-            return await HandleEntity(user, id, async (entity) =>
+            return await HandleEntity(user, id, Operations.Delete, async (entity) =>
             {
                 Ctx.Adressen.Remove(entity);
                 await Ctx.SaveChangesAsync();
@@ -67,7 +67,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
 
             var wohnungen = entry.Wohnungen!.SelectMany(wohnung => Ctx.Wohnungen.Where(w => w.WohnungId == wohnung.Id));
-            var authRx = await Auth.AuthorizeAsync(user, wohnungen, [Operations.Delete]);
+            var authRx = await Auth.AuthorizeAsync(user, wohnungen, [Operations.SubCreate]);
             if (!authRx.Succeeded)
             {
                 return new ForbidResult();
@@ -95,7 +95,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public override async Task<ActionResult<AdresseEntry>> Put(ClaimsPrincipal user, int id, AdresseEntry entry)
         {
-            return await HandleEntity(user, id, async (entity) =>
+            return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
                 entity.Strasse = entry.Strasse;
                 entity.Hausnummer = entry.Hausnummer;
