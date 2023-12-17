@@ -1,4 +1,19 @@
-import { WalterToastContent, type WalterSelectionEntry } from '$walter/lib';
+import {
+    WalterToastContent,
+    type WalterSelectionEntry,
+    WalterAdresseEntry,
+    WalterBetriebskostenrechnungEntry,
+    WalterErhaltungsaufwendungEntry,
+    WalterKontaktEntry,
+    WalterMieteEntry,
+    WalterMietminderungEntry,
+    WalterUmlageEntry,
+    WalterUmlagetypEntry,
+    WalterVertragEntry,
+    WalterWohnungEntry,
+    WalterZaehlerEntry,
+    WalterZaehlerstandEntry
+} from '$walter/lib';
 import { walter_selection } from '$walter/services/requests';
 import { S3URL, walter_s3_delete, walter_s3_post } from '$walter/services/s3';
 import type { WalterS3File } from '$walter/types';
@@ -177,6 +192,7 @@ export type WalterPreviewCopyTable = {
             init?: RequestInit | undefined
         ) => Promise<Response>
     ) => Promise<unknown>;
+    ApiURL: string;
     S3URL: (id: string) => string;
     newPage: () => unknown;
 };
@@ -186,6 +202,7 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Adressen',
         key: 'adressen',
         fetch: walter_selection.adressen,
+        ApiURL: WalterAdresseEntry.ApiURL,
         S3URL: (id: string) => S3URL.adresse(id),
         newPage: () => WalterAdresse
     },
@@ -193,6 +210,7 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Betriebskostenrechnungen',
         key: 'betriebskostenrechnungen',
         fetch: walter_selection.betriebskostenrechnungen,
+        ApiURL: WalterBetriebskostenrechnungEntry.ApiURL,
         S3URL: (id: string) => S3URL.betriebskostenrechnung(id),
         newPage: () => WalterBetriebskostenrechnung
     },
@@ -200,6 +218,7 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Erhaltungsaufwendungen',
         key: 'erhaltungsaufwendungen',
         fetch: walter_selection.erhaltungsaufwendungen,
+        ApiURL: WalterErhaltungsaufwendungEntry.ApiURL,
         S3URL: (id: string) => S3URL.erhaltungsaufwendung(id),
         newPage: () => WalterErhaltungsaufwendung
     },
@@ -207,6 +226,7 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Kontakte',
         key: 'kontakte',
         fetch: walter_selection.kontakte,
+        ApiURL: WalterKontaktEntry.ApiURL,
         S3URL: (id: string) => S3URL.kontakt(id),
         newPage: () => WalterKontakt
     },
@@ -214,6 +234,7 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Mieten',
         key: 'mieten',
         fetch: walter_selection.mieten,
+        ApiURL: WalterMieteEntry.ApiURL,
         S3URL: (id: string) => S3URL.miete(id),
         newPage: () => WalterMiete
     },
@@ -221,6 +242,7 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Mietminderungen',
         key: 'mietminderungen',
         fetch: walter_selection.mietminderungen,
+        ApiURL: WalterMietminderungEntry.ApiURL,
         S3URL: (id: string) => S3URL.mietminderung(id),
         newPage: () => WalterMietminderung
     },
@@ -228,6 +250,7 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Umlagen',
         key: 'umlagen',
         fetch: walter_selection.umlagen,
+        ApiURL: WalterUmlageEntry.ApiURL,
         S3URL: (id: string) => S3URL.umlage(id),
         newPage: () => WalterUmlage
     },
@@ -235,6 +258,7 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Umlagetypen',
         key: 'umlagetypen',
         fetch: walter_selection.umlagetypen,
+        ApiURL: WalterUmlagetypEntry.ApiURL,
         S3URL: (id: string) => S3URL.umlagetyp(id),
         newPage: () => WalterUmlagetyp
     },
@@ -242,6 +266,7 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Verträge',
         key: 'vertraege',
         fetch: walter_selection.vertraege,
+        ApiURL: WalterVertragEntry.ApiURL,
         S3URL: (id: string) => S3URL.vertrag(id),
         newPage: () => WalterVertrag
     },
@@ -255,6 +280,7 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Wohnungen',
         key: 'wohnungen',
         fetch: walter_selection.wohnungen,
+        ApiURL: WalterWohnungEntry.ApiURL,
         S3URL: (id: string) => S3URL.wohnung(id),
         newPage: () => WalterWohnung
     },
@@ -262,6 +288,7 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Zähler',
         key: 'zaehler',
         fetch: walter_selection.zaehler,
+        ApiURL: WalterZaehlerEntry.ApiURL,
         S3URL: (id: string) => S3URL.zaehler(id),
         newPage: () => WalterZaehler
     },
@@ -269,6 +296,7 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Zählerstände',
         key: 'zaehlerstaende',
         fetch: walter_selection.zaehlerstaende,
+        ApiURL: WalterZaehlerstandEntry.ApiURL,
         S3URL: (id: string) => S3URL.zaehlerstand(id),
         newPage: () => WalterZaehlerstand
     },
@@ -276,6 +304,7 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Ablagestapel',
         key: 'stack',
         fetch: () => Promise.resolve(),
+        ApiURL: '',
         S3URL: () => S3URL.stack,
         newPage: () => undefined
     }

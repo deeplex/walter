@@ -76,7 +76,7 @@
     async function selectEntryFromId(id: string) {
         selectedEntry = rows?.find((row) => row.id === id);
         entry = await walter_get(
-            `${selectedTable?.S3URL(`${selectedEntry?.id}`)}`,
+            `${selectedTable?.ApiURL}/${selectedEntry?.id}`,
             fileWrapper.fetchImpl
         );
     }
