@@ -164,6 +164,14 @@ export async function walter_s3_get_files(
     return parsed;
 }
 
+function hideTrash(contents: WalterS3File[]): WalterS3File[] {
+    return contents.filter((c) => {
+        const splits = c.Key.split('/');
+        const trash = splits[splits.length - 2];
+        return trash !== 'trash';
+    });
+}
+
 function parse_stream_into_walter_s3_files(
     uint8array: Uint8Array | undefined,
     S3URL: string
@@ -180,8 +188,9 @@ function parse_stream_into_walter_s3_files(
     if (!Contents) {
         return [];
     } else if (Array.isArray(Contents)) {
+        const filteredContents = hideTrash(Contents);
         return (
-            Contents.map((c) =>
+            filteredContents.map((c) =>
                 create_walter_s3_file_from_xml_parse(c, S3URL)
             ) || []
         );
