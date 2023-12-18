@@ -30,7 +30,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var tokenService = A.Fake<TokenService>();
             var userService = new UserService(ctx, tokenService);
-            var controller = new UserController(ctx, tokenService, userService);
+            var controller = new UserController(ctx, tokenService, userService, A.Fake<HttpClient>());
 
             var account = new UserAccount
             {
@@ -66,7 +66,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         {
             var tokenService = A.Fake<TokenService>();
             var userService = new UserService(ctx, tokenService);
-            var controller = new UserController(ctx, tokenService, userService);
+            var controller = new UserController(ctx, tokenService, userService, A.Fake<HttpClient>());
 
             var account = new UserAccount
             {
