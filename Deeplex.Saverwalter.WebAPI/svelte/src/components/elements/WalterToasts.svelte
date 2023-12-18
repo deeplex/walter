@@ -9,14 +9,16 @@
         const notification = document.querySelectorAll(`.toast-notification`)[
             index
         ] as HTMLElement;
+
         if (notification) {
             notification.style.transition =
                 'transform 1s ease, opacity 0.2s ease';
             notification.style.transform = 'translateX(200px)';
             notification.style.opacity = '0';
-            setTimeout(() => {
-                removeToast(index);
-            }, 200); // Adjust this timeout value to match your flyOut animation duration
+
+            setTimeout(() => removeToast(index), 200);
+        } else {
+            removeToast(index);
         }
     }
 
