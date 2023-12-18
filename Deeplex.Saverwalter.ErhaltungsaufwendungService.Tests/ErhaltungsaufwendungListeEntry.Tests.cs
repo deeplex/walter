@@ -1,4 +1,4 @@
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using FluentAssertions;
 using Xunit;
@@ -14,7 +14,7 @@ namespace Deeplex.Saverwalter.ErhaltungsaufwendungService.Tests
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var entity = new Erhaltungsaufwendung(1000, "Test", new DateOnly(2021, 1, 1))
             {
-                Aussteller = vertrag.Wohnung.Besitzer,
+                Aussteller = vertrag.Wohnung.Besitzer!,
                 Wohnung = vertrag.Wohnung
             };
 

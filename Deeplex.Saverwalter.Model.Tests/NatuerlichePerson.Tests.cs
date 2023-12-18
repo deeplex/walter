@@ -57,7 +57,7 @@ namespace Deeplex.Saverwalter.ModelTests.model
                 } }
             };
 
-        [Theory(Skip = "InMemoryDatabaseNotRunning")]
+        [Theory]
         [InlineData("Mustername")]
         public void ShouldAddNatuerlichePerson(string nachname)
         {
@@ -71,7 +71,7 @@ namespace Deeplex.Saverwalter.ModelTests.model
             // Assert
             result.Should().BeEquivalentTo(entity, options => options.ExcludingMissingMembers());
             result.Entity.KontaktId.Should().BeGreaterThan(0);
-            result.Entity.Bezeichnung.Should().BeEquivalentTo(string.Join(" ", entity.Vorname ?? "", entity.Name));
+            result.Entity.Bezeichnung.Should().BeEquivalentTo("Mustername");
             DatabaseContext.Set<Kontakt>().Should().Contain(entity);
         }
 
@@ -94,16 +94,17 @@ namespace Deeplex.Saverwalter.ModelTests.model
                 } }
             };
 
-        [Theory(Skip = "InMemoryDatabaseNotRunning")]
+        [Theory]
         [InlineData("Mustername")]
         public void ShouldNotAddNatuerlichePerson(string nachname)
         {
             // Arrange
             var entity = new Kontakt(nachname, Rechtsform.natuerlich);
+            entity.Name = null!;
 
             // Act
-            DatabaseContext.Add(entity);
-            var result = DatabaseContext.Set<Kontakt>().FirstOrDefault(e => e.KontaktId == entity.KontaktId);
+            DatabaseContext.Kontakte.Add(entity);
+            var result = DatabaseContext.Kontakte.FirstOrDefault(e => e.KontaktId == entity.KontaktId);
 
             // Assert
             try
@@ -120,7 +121,7 @@ namespace Deeplex.Saverwalter.ModelTests.model
             DatabaseContext.Set<Kontakt>().Should().NotContain(entity);
         }
 
-        [Theory(Skip = "InMemoryDatabaseNotRunning")]
+        [Theory]
         [InlineData("Mustername")]
         public void ShouldUpdateNatuerlichePerson(string nachname)
         {
@@ -128,11 +129,11 @@ namespace Deeplex.Saverwalter.ModelTests.model
             var entity = new Kontakt(nachname, Rechtsform.natuerlich);
             DatabaseContext.Add(entity);
             DatabaseContext.SaveChanges();
-            var testEntity = DatabaseContext.Set<Kontakt>().FirstOrDefault(e => e.KontaktId == entity.KontaktId)!;
+            var testEntity = DatabaseContext.Kontakte.FirstOrDefault(e => e.KontaktId == entity.KontaktId)!;
             testEntity.Email = "Updated Test Email";
 
             // Act
-            var result = DatabaseContext.Update(entity);
+            var result = DatabaseContext.Kontakte.Update(entity);
             DatabaseContext.SaveChanges();
 
             // Assert
@@ -142,15 +143,15 @@ namespace Deeplex.Saverwalter.ModelTests.model
             DatabaseContext.Set<Kontakt>().Should().Contain(entity);
         }
 
-        [Theory(Skip = "InMemoryDatabaseNotRunning")]
+        [Theory(Skip = "Find out why this does not work.")]
         [InlineData("Mustername")]
         public void ShouldNotUpdateNatuerlichePerson(string nachname)
         {
             // Arrange
             var entity = new Kontakt(nachname, Rechtsform.natuerlich);
-            DatabaseContext.Add(entity);
+            DatabaseContext.Kontakte.Add(entity);
             DatabaseContext.SaveChanges();
-            var testEntity = DatabaseContext.Set<Kontakt>().FirstOrDefault(e => e.KontaktId == entity.KontaktId)!;
+            var testEntity = DatabaseContext.Kontakte.FirstOrDefault(e => e.KontaktId == entity.KontaktId)!;
             testEntity.Email = "Updated Test Email";
             testEntity.Name = null!;
             DatabaseContext.Kontakte.Update(testEntity);

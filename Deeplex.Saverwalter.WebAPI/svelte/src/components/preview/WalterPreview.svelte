@@ -25,10 +25,12 @@
     } from './WalterPreviewCopyFile';
     import { get_file_and_update_url } from '../subdetails/WalterAnhaengeEntry';
     import WalterRenameFile from './WalterRenameFile.svelte';
+    import type { WalterPermissions } from '$walter/lib/WalterPermissions';
 
     export let open = false;
     export let file: WalterS3File;
     export let fileWrapper: WalterS3FileWrapper;
+    export let permissions: WalterPermissions | undefined;
 
     // Created here to keep them when the selection changes
     let entry = {};
@@ -162,9 +164,18 @@
             <Tabs bind:selected={selectedTab}>
                 <Tab label="Vorschau" />
                 <Tab label="Kopieren" />
-                <Tab label="Verschieben" />
-                <Tab label="Umbenennen" />
-                <Tab label="Löschen" />
+                <Tab
+                    label="Verschieben"
+                    disabled={permissions && !permissions?.update}
+                />
+                <Tab
+                    label="Umbenennen"
+                    disabled={permissions && !permissions?.update}
+                />
+                <Tab
+                    label="Löschen"
+                    disabled={permissions && !permissions?.update}
+                />
             </Tabs>
             <Button
                 on:click={fileBefore}
@@ -189,7 +200,7 @@
             />
         </div>
     </ModalHeader>
-    <ModalBody style="min-height: 40em;">
+    <ModalBody>
         {#if selectedTab === TabSelector.Preview}
             <WalterPreviewType bind:file />
         {:else if selectedTab === TabSelector.Copy || selectedTab === TabSelector.Move}

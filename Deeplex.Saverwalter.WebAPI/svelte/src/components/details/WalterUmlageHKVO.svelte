@@ -18,7 +18,10 @@
     export let entry: Partial<WalterUmlageEntry> = {};
     export let selectedWohnungen: WalterSelectionEntry[] | undefined;
     export let fetchImpl: typeof fetch;
-    export let readonly: boolean = false;
+    export let readonly = false;
+    $: {
+        readonly = entry?.permissions?.update === false;
+    }
 
     let visible: boolean = false;
     let oldHKVO: Partial<WalterHKVOEntry> = {};

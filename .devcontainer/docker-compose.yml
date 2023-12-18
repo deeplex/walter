@@ -27,6 +27,8 @@ services:
     volumes:
       - s3-data:/data
     command: server --console-address ":9001" /data
+    ports:
+      - 9001:9001
 
 volumes:
   postgres-data:

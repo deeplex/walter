@@ -15,6 +15,9 @@
     export let entry: Partial<WalterZaehlerEntry> = {};
     export let fetchImpl: typeof fetch;
     export let readonly = false;
+    $: {
+        readonly = entry?.permissions?.update === false;
+    }
 
     const zaehlertypen = walter_selection.zaehlertypen(fetchImpl);
 </script>

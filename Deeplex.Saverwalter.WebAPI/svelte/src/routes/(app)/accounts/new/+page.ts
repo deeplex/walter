@@ -1,10 +1,10 @@
+import { WalterAccountEntry } from '$walter/lib';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch }) => {
-    const S3URL = 'trash';
-
     return {
         fetchImpl: fetch,
-        S3URL
+        apiURL: `${WalterAccountEntry.ApiURL}`,
+        title: 'Neuen Nutzer anlegen'
     };
 };

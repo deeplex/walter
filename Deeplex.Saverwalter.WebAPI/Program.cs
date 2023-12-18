@@ -1,7 +1,11 @@
+﻿using System.Security.Claims;
+using System.Text;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +14,6 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
-using System.Text;
 
 [assembly: ApiController]
 
@@ -18,7 +21,7 @@ namespace Deeplex.Saverwalter.WebAPI
 {
     public class Program
     {
-        public static string AppName = "Saverwalter";
+        public readonly static string AppName = "Saverwalter";
 
         public static async Task Main(string[] args)
         {
@@ -49,10 +52,10 @@ namespace Deeplex.Saverwalter.WebAPI
             }
 
             app.UseAuthentication();
-            app.UseAuthorization();
 
             app.MapControllers();
             app.UseRouting();
+            app.UseAuthorization();
 
             app.UseStaticFiles();
             app.MapFallbackToFile("index.html");
@@ -101,10 +104,34 @@ namespace Deeplex.Saverwalter.WebAPI
                     policy.AddAuthenticationSchemes("TokenAuthentication");
                     policy.RequireAuthenticatedUser();
                 });
+
+                options.AddPolicy("RequireAdmin", policy =>
+                {
+                    policy.RequireClaim(ClaimTypes.Role, [UserRole.Admin.ToString()]);
+                });
+
+                options.AddPolicy("RequireOwner", policy =>
+                {
+                    policy.RequireClaim(ClaimTypes.Role, [UserRole.Owner.ToString()]);
+                });
             });
 
             builder.Services.AddTransient(c => container.GetInstance<TokenService>());
             builder.Services.AddTransient(c => container.GetInstance<SaverwalterContext>());
+            builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, AdressePermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, BetriebskostenrechnungPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, ErhaltungsaufwendungPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, KontaktPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, MietePermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, MietminderungPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, UmlagePermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, UmlagenPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, UmlagetypPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, VertragPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, VertragVersionPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, ZaehlerPermissionHandler>();
+            builder.Services.AddSingleton<IAuthorizationHandler, ZaehlerstandPermissionHandler>();
         }
 
         private static Container GetServiceContainer()
@@ -131,6 +158,7 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register<BetriebskostenabrechnungHandler>(Lifestyle.Scoped);
 
             container.Register<TokenService>(Lifestyle.Singleton);
+            container.Register<AccountDbService>(Lifestyle.Scoped);
             container.Register<UserService>(Lifestyle.Scoped);
 
             return container;
@@ -145,12 +173,12 @@ namespace Deeplex.Saverwalter.WebAPI
             var databasePass = Environment.GetEnvironmentVariable("DATABASE_PASS");
 
             var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
-            optionsBuilder.UseNpgsql(
-                 $@"Server={databaseHost}
+            var connection = $@"Server={databaseHost}
                 ;Port={databasePort}
                 ;Database={databaseName}
                 ;Username={databaseUser}
-                ;Password={databasePass}");
+                ;Password={databasePass}";
+            optionsBuilder.UseNpgsql(connection);
 
             return optionsBuilder.Options;
         }
@@ -176,7 +204,8 @@ namespace Deeplex.Saverwalter.WebAPI
                 using var tx = await dbContext.Database.BeginTransactionAsync();
 
                 var userService = container.GetInstance<UserService>();
-                var rootAccount = await userService.CreateUserAccount("root");
+                var rootAccount = await userService.CreateUserAccount("root", "root");
+                rootAccount.Role = UserRole.Admin;
                 await userService.UpdateUserPassword(rootAccount, Encoding.UTF8.GetBytes(rootPassword));
 
                 await tx.CommitAsync();

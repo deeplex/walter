@@ -11,10 +11,15 @@
         WalterKontakt
     } from '$walter/components';
     import { WalterS3FileWrapper } from '$walter/lib';
+    import { S3URL } from '$walter/services/s3';
 
     export let data: PageData;
 
-    const title = data.entry.name;
+    let title = data.entry.name;
+    $: {
+        title = data.entry.name;
+    }
+
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.S3URL);
@@ -28,10 +33,7 @@
 />
 
 <WalterGrid>
-    <WalterKontakt
-        bind:entry={data.entry}
-        fetchImpl={data.fetchImpl}
-    />
+    <WalterKontakt bind:entry={data.entry} fetchImpl={data.fetchImpl} />
 
     <WalterLinks>
         <WalterKontakte
@@ -41,10 +43,10 @@
         />
         {#if data.entry.rechtsform.id !== 0}
             <WalterKontakte
-            fetchImpl={data.fetchImpl}
-            title="Mitglieder"
-            rows={data.entry.mitglieder}
-    />
+                fetchImpl={data.fetchImpl}
+                title="Mitglieder"
+                rows={data.entry.mitglieder}
+            />
         {/if}
         <WalterWohnungen
             fetchImpl={data.fetchImpl}
@@ -60,6 +62,7 @@
         {#if data.entry.adresse}
             <WalterLinkTile
                 bind:fileWrapper
+                s3ref={S3URL.adresse(`${data.entry.adresse.id}`)}
                 name={`Adresse: ${data.entry.adresse.anschrift}`}
                 href={`/adressen/${data.entry.adresse.id}`}
             />

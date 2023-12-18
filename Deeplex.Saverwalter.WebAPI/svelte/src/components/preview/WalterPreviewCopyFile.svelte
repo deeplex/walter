@@ -60,10 +60,8 @@
         rows = (await selectedTable!.fetch(fileWrapper.fetchImpl)) || [];
     }
 
-    async function selectedTable_change(e: Event) {
-        selectedTable = tables.find(
-            (t) => t.key === (e.target as HTMLSelectElement)?.value
-        );
+    async function selectedTable_change(key: string) {
+        selectedTable = tables.find((t) => t.key === key);
         rows = undefined;
         if (selectedTable?.key === 'stack') {
             step = 3;
@@ -76,7 +74,7 @@
     async function selectEntryFromId(id: string) {
         selectedEntry = rows?.find((row) => row.id === id);
         entry = await walter_get(
-            `/api/${selectedTable?.S3URL}/${selectedEntry?.id}`,
+            `${selectedTable?.ApiURL}/${selectedEntry?.id}`,
             fileWrapper.fetchImpl
         );
     }
@@ -98,12 +96,7 @@
             padding-right: 0px !important;
         }
     </style>
-    <Step0SelectTable
-        bind:selectedTable
-        bind:step
-        {selectedTable_change}
-        {tables}
-    />
+    <Step0SelectTable bind:step {selectedTable_change} {tables} />
     <Step1SelectEntry
         bind:entry
         bind:step

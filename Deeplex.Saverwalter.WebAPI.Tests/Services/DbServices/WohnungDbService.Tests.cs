@@ -1,48 +1,70 @@
+﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
 {
-    public class WohnungDbServiceTests
+    public class WohnungDbServiceTests : IDisposable
     {
-        [Fact]
-        public void GetTest()
+        public SaverwalterContext ctx;
+        public WohnungDbServiceTests()
         {
-            var ctx = TestUtils.GetContext();
-            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var service = new WohnungDbService(ctx);
+            ctx = TestUtils.GetContext();
+        }
 
-            var result = service.Get(vertrag.Wohnung.WohnungId);
-
-            result.Should().BeOfType<OkObjectResult>();
-            var okResult = (OkObjectResult)result;
-            okResult.Value.Should().BeOfType<WohnungEntry>();
+        public void Dispose()
+        {
+            ctx.Dispose();
         }
 
         [Fact]
-        public void DeleteTest()
+        public async Task GetTest()
         {
-            var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var service = new WohnungDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new WohnungDbService(ctx, auth);
+
+            var result = await service.Get(user, vertrag.Wohnung.WohnungId);
+
+            result.Value.Should().NotBeNull();
+            result.Value.Should().BeOfType<WohnungEntry>();
+        }
+
+        [Fact]
+        public async Task DeleteTest()
+        {
+            var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new WohnungDbService(ctx, auth);
 
             var id = vertrag.Wohnung.WohnungId;
-            var result = service.Delete(id);
+            var result = await service.Delete(user, id);
 
             result.Should().BeOfType<OkResult>();
             ctx.Wohnungen.Find(id).Should().BeNull();
         }
 
         [Fact]
-        public void PostTest()
+        public async Task PostTest()
         {
-            var ctx = TestUtils.GetContext();
-            var service = new WohnungDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new WohnungDbService(ctx, auth);
 
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
@@ -52,18 +74,21 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Besitzer = besitzer
             };
-            var entry = new WohnungEntry(entity);
+            var entry = new WohnungEntry(entity, new());
 
-            var result = service.Post(entry);
+            var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
-        public void PostFailedTest()
+        public async Task PostFailedTest()
         {
-            var ctx = TestUtils.GetContext();
-            var service = new WohnungDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new WohnungDbService(ctx, auth);
 
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
@@ -76,18 +101,21 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new WohnungEntry(entity);
+            var entry = new WohnungEntry(entity, new());
 
-            var result = service.Post(entry);
+            var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
-        public void PutTest()
+        public async Task PutTest()
         {
-            var ctx = TestUtils.GetContext();
-            var service = new WohnungDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new WohnungDbService(ctx, auth);
 
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
@@ -99,12 +127,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
-            var entry = new WohnungEntry(entity);
+            var entry = new WohnungEntry(entity, new());
             entry.Wohnflaeche = 200;
 
-            var result = service.Put(entity.WohnungId, entry);
+            var result = await service.Put(user, entity.WohnungId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             var updatedEntity = ctx.Wohnungen.Find(entity.WohnungId);
             if (updatedEntity == null)
             {
@@ -114,10 +142,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public void PutFailedTest()
+        public async Task PutFailedTest()
         {
-            var ctx = TestUtils.GetContext();
-            var service = new WohnungDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new WohnungDbService(ctx, auth);
             var umlage = new Umlage(Umlageschluessel.NachWohnflaeche)
             {
                 Typ = new Umlagetyp("Dachrinnenreinigung")
@@ -130,13 +161,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Besitzer = besitzer
             };
-            var entry = new WohnungEntry(entity);
+            var entry = new WohnungEntry(entity, new());
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
 
-            var result = service.Put(entity.WohnungId + 1, entry);
+            var result = await service.Put(user, entity.WohnungId + 11, entry);
 
-            result.Should().BeOfType<NotFoundResult>();
+            result.Result.Should().BeOfType<NotFoundResult>();
         }
     }
 }

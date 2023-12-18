@@ -1,61 +1,77 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using System.Security.Claims;
+using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Helper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlagetypController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class UmlagetypDbService : IControllerService<UmlagetypEntry>
+    public class UmlagetypDbService : WalterDbServiceBase<UmlagetypEntry, Umlagetyp>
     {
-        public SaverwalterContext Ctx { get; }
-
-        public UmlagetypDbService(SaverwalterContext ctx)
+        public UmlagetypDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
         }
 
-        public IActionResult Get(int id)
+        public async Task<ActionResult<IEnumerable<UmlagetypEntryBase>>> GetList(ClaimsPrincipal user)
         {
-            var entity = Ctx.Umlagetypen.Find(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            var list = await UmlagetypPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
-            try
-            {
-                var entry = new UmlagetypEntry(entity);
-                return new OkObjectResult(entry);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            return await Task.WhenAll(list
+                .Select(async e => new UmlagetypEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public IActionResult Delete(int id)
+        public override async Task<ActionResult<Umlagetyp>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
-            var entity = Ctx.Umlagetypen.Find(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
-
-            Ctx.Umlagetypen.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+            var entity = await Ctx.Umlagetypen.FindAsync(id);
+            return await GetEntity(user, entity, op);
         }
 
-        public IActionResult Post(UmlagetypEntry entry)
+        public override async Task<ActionResult<UmlagetypEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, Operations.Read, async (entity) =>
+            {
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
+                var entry = new UmlagetypEntry(entity, permissions);
+                entry.Umlagen = await Task.WhenAll(entity.Umlagen.Where(u => u.Wohnungen
+                    .Any(w => w.Verwalter.Count > 0 && w.Verwalter.AsQueryable()
+                    .Any(Utils.HasRequiredAuth(VerwalterRolle.Keine, user.GetUserId()))))
+                    .Select(async e => new UmlageEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
+
+                return entry;
+            });
+        }
+
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, Operations.Delete, async (entity) =>
+            {
+                Ctx.Umlagetypen.Remove(entity);
+                await Ctx.SaveChangesAsync();
+
+                return new OkResult();
+            });
+        }
+
+        public override async Task<ActionResult<UmlagetypEntry>> Post(ClaimsPrincipal user, UmlagetypEntry entry)
         {
             if (entry.Id != 0)
             {
                 return new BadRequestResult();
             }
 
+            var umlagen = entry.Umlagen!.Select(e => Ctx.Umlagen.Where(u => u.UmlageId == e.Id));
+            var authRx = await Auth.AuthorizeAsync(user, umlagen, [Operations.SubCreate]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
+            }
+
             try
             {
-                return new OkObjectResult(Add(entry));
+                return Add(entry);
             }
             catch
             {
@@ -70,39 +86,24 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Umlagetypen.Add(entity);
             Ctx.SaveChanges();
 
-            return new UmlagetypEntry(entity);
+            return new UmlagetypEntry(entity, entry.Permissions);
         }
 
-        public IActionResult Put(int id, UmlagetypEntry entry)
+        public override async Task<ActionResult<UmlagetypEntry>> Put(ClaimsPrincipal user, int id, UmlagetypEntry entry)
         {
-            var entity = Ctx.Umlagetypen.Find(id);
-            if (entity == null)
+            return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                entity.Bezeichnung = entry.Bezeichnung;
 
-            try
-            {
-                return new OkObjectResult(Update(entry, entity));
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+                SetOptionalValues(entity, entry);
+                Ctx.Umlagetypen.Update(entity);
+                await Ctx.SaveChangesAsync();
+
+                return new UmlagetypEntry(entity, entry.Permissions);
+            });
         }
 
-        private UmlagetypEntry Update(UmlagetypEntry entry, Umlagetyp entity)
-        {
-            entity.Bezeichnung = entry.Bezeichnung;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Umlagetypen.Update(entity);
-            Ctx.SaveChanges();
-
-            return new UmlagetypEntry(entity);
-        }
-
-        private void SetOptionalValues(Umlagetyp entity, UmlagetypEntry entry)
+        private static void SetOptionalValues(Umlagetyp entity, UmlagetypEntry entry)
         {
             entity.Notiz = entry.Notiz;
         }

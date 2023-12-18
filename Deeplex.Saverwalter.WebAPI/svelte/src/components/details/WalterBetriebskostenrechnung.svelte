@@ -17,6 +17,7 @@
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
     import WalterBetriebskostenrechnungen from '../lists/WalterBetriebskostenrechnungen.svelte';
+    import { S3URL } from '$walter/services/s3';
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
     export let rechnungen: WalterBetriebskostenrechnungEntry[] = [];
@@ -24,21 +25,34 @@
     export let readonly = false;
 
     const umlagetypen = walter_selection.umlagetypen(fetchImpl);
-    const umlagen_wohnungen = walter_selection.umlagen_wohnungen(fetchImpl);
-
+    walter_selection.umlagen_wohnungen(fetchImpl).then((res) => {
+        umlagen_wohnungen = res;
+    });
+    let umlagen_wohnungen: WalterSelectionEntry[] = [];
     let umlageEntries: WalterSelectionEntry[] = [];
+    let selectedUmlage = entry?.umlage?.id;
 
-    onMount(async () => {
-        await updateUmlageEntries(entry.typ?.id);
-        entry.umlage = umlageEntries.find(
-            (umlage) => umlage.id === entry.umlage?.id
-        );
+    onMount(() => {
+        if (!entry.betreffendesJahr) {
+            entry.betreffendesJahr = new Date().getFullYear() - 1;
+        }
+        if (!entry.datum) {
+            entry.datum = convertDateCanadian(new Date());
+        }
     });
 
-    async function selectTyp(e: CustomEvent) {
-        const id = `${e.detail.selectedItem.id}`;
-        await updateUmlageEntries(id);
-        if (entry.typ?.id !== `${id}`) {
+    $: {
+        readonly = entry?.permissions?.update === false;
+        umlageEntries = umlagen_wohnungen.filter(
+            (umlage) => umlage.filter === `${entry.typ?.id}`
+        );
+        selectedUmlage = umlageEntries.find(
+            (umlage) => umlage.id === entry.umlage?.id
+        )?.id;
+    }
+
+    function selectTyp(e: CustomEvent) {
+        if (`${entry.typ?.id}` !== entry.umlage?.filter) {
             entry.umlage = undefined;
         }
         entry.typ = e.detail.selectedItem;
@@ -47,20 +61,8 @@
     function selectUmlage(e: CustomEvent) {
         if (e.detail.selectedItem) {
             entry.umlage = e.detail.selectedItem;
+            selectedUmlage = e.detail.selectedItem.id;
         }
-    }
-
-    async function updateUmlageEntries(id: string | number | undefined) {
-        umlageEntries = await umlagen_wohnungen.then((fulfilled) =>
-            fulfilled.filter((u) => u.filter === id)
-        );
-    }
-
-    if (!entry.betreffendesJahr) {
-        entry.betreffendesJahr = new Date().getFullYear() - 1;
-    }
-    if (!entry.datum) {
-        entry.datum = convertDateCanadian(new Date());
     }
 </script>
 
@@ -85,7 +87,7 @@
             invalid={!entry.umlage?.id}
             invalidText={'Wohnungen der Umlage ist ein notwendiges Feld'}
             disabled={readonly || !entry.typ}
-            selectedId={entry.umlage?.id}
+            bind:selectedId={selectedUmlage}
             on:select={selectUmlage}
             style="padding-right: 1rem"
             bind:items={umlageEntries}
@@ -124,6 +126,7 @@
 {#if $page.url.pathname !== `/umlagen/${entry.umlage?.id}`}
     <WalterLinks>
         <WalterLinkTile
+            s3ref={S3URL.umlage(`${entry.umlage?.id}`)}
             name={'Umlage ansehen'}
             href={`/umlagen/${entry.umlage?.id}`}
         />

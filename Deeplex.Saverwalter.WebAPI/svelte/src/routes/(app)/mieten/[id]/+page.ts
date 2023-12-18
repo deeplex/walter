@@ -14,7 +14,6 @@ export const load: PageLoad = async ({ params, fetch }) => {
         apiURL: apiURL,
         S3URL: s3URL,
         entry,
-        files: walter_s3_get_files(s3URL, fetch) as Promise<WalterS3File[]>,
         vertrag: entry.then((res) =>
             WalterVertragEntry.GetOne<WalterVertragEntry>(
                 res.vertrag.id.toString(),

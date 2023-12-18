@@ -1,6 +1,7 @@
 import type { WalterModalControl, WalterToast } from '$walter/types';
 import { get, writable, type Writable } from 'svelte/store';
 import type { WalterToastContent } from './lib/WalterToastContent';
+import type { AuthState } from './services/auth';
 
 export const toasts: Writable<Partial<WalterToast>[]> = writable([]);
 

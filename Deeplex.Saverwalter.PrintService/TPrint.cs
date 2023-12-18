@@ -815,7 +815,7 @@ namespace Deeplex.Saverwalter.PrintService
                 new PrintRun(Euro(Math.Abs(abrechnung.Result))) { Bold = true, Underlined = true },
                 new PrintRun(RefundDemand(abrechnung.Result)));
 
-            p.Paragraph(new PrintRun(GenerischerText(abrechnung.Vertrag.Wohnung, abrechnung.Abrechnungseinheiten, abrechnung.Zeitraum, abrechnung.Notes)));
+            p.Paragraph(new PrintRun(GenerischerText(abrechnung.Abrechnungseinheiten)));
         }
 
         public static T Print(Betriebskostenabrechnung abrechnung, IPrint<T> printImpl)

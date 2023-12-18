@@ -10,10 +10,11 @@
     } from 'carbon-components-svelte';
     import { Login } from 'carbon-icons-svelte';
     import { WalterToastContent } from '$walter/lib';
-    import { walter_sign_in } from '$walter/services/auth';
+    import { authState, walter_sign_in } from '$walter/services/auth';
     import type { PageData } from './$types';
     import { page } from '$app/stores';
     import { walter_goto } from '$walter/services/utils';
+    import { get } from 'svelte/store';
 
     export let data: PageData;
 
@@ -27,8 +28,8 @@
     const LoginToast = new WalterToastContent(
         'Anmeldung erfolgreich',
         'Anmeldung fehlgeschlagen',
-        () => `Anmeldung für Nutzer ${login.username} erfolgreich.`,
-        () => 'Nutzername oder Passwort falsch.'
+        () => `Willkommen ${get(authState!)?.name}`,
+        () => 'Anmeldung fehlgeschlagen.'
     );
 
     async function submit() {
@@ -38,6 +39,7 @@
             login.password,
             LoginToast
         );
+
         if (response == null) {
             invalid = true;
         } else {
@@ -58,25 +60,27 @@
 
 <Content>
     <WalterHeader title="Anmeldeseite" />
-    <FluidForm style="text-align: center; margin-top: 40vh">
-        <TextInput
-            bind:value={login.username}
-            labelText="Nutzername"
-            bind:invalid
-            invalidText="Nutzername oder Passwort falsch"
-            placeholder="Nutzername eintragen..."
-            required
-        />
-        <PasswordInput
-            bind:value={login.password}
-            bind:invalid
-            invalidText="Nutzername oder Passwort falsch"
-            required
-            type="password"
-            labelText="Passwort"
-            placeholder="Passwort eintragen..."
-            on:keydown={handleEnterKey}
-        />
-        <Button on:click={submit} icon={Login}>Anmelden</Button>
+    <FluidForm style="text-align: center; margin-top: 40vh;">
+        <div style="max-width: 40em; margin: auto">
+            <TextInput
+                bind:value={login.username}
+                labelText="Nutzername"
+                bind:invalid
+                invalidText="Nutzername oder Passwort falsch"
+                placeholder="Nutzername eintragen..."
+                required
+            />
+            <PasswordInput
+                bind:value={login.password}
+                bind:invalid
+                invalidText="Nutzername oder Passwort falsch"
+                required
+                type="password"
+                labelText="Passwort"
+                placeholder="Passwort eintragen..."
+                on:keydown={handleEnterKey}
+            />
+            <Button on:click={submit} icon={Login}>Anmelden</Button>
+        </div>
     </FluidForm>
 </Content>

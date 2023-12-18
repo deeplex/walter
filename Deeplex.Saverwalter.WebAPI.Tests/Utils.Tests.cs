@@ -1,4 +1,4 @@
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Helper;
 using FluentAssertions;
@@ -99,7 +99,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             int hour,
             int minute,
             int second,
-            string expected)
+            string? expected)
         {
             DateTime? date = year != 0 ? new DateTime(year, month, day, hour, minute, second) : null;
             var s = date.Zeit();
@@ -125,7 +125,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 ctx.Adressen.Add(new Adresse("strasse", "hausnummer", "plz", "stadt3"));
                 ctx.SaveChanges();
 
-                var adresse = Utils.GetAdresse(adresseBase, ctx);
+                var adresse = Helper.Utils.GetAdresse(adresseBase, ctx);
 
                 adresse.Should().NotBe(null);
                 adresse!.Stadt.Should().Be(adresseBase.Stadt);
@@ -154,7 +154,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 ctx.Adressen.Add(new Adresse("strasse", "hausnummer", "plz", "stadt3"));
                 ctx.SaveChanges();
 
-                var adresse = Utils.GetAdresse(adresseBase, ctx);
+                var adresse = Helper.Utils.GetAdresse(adresseBase, ctx);
 
                 adresse.Should().NotBe(null);
                 adresse!.Stadt.Should().Be(adresseBase.Stadt);
@@ -190,7 +190,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 ctx.Adressen.Add(new Adresse("strasse", "hausnummer", "plz", "stadt3"));
                 ctx.SaveChanges();
 
-                var adresse = Utils.GetAdresse(adresseBase, ctx);
+                var adresse = Helper.Utils.GetAdresse(adresseBase, ctx);
 
                 adresse.Should().Be(null);
             }

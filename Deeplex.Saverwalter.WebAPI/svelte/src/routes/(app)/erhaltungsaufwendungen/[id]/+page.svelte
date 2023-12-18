@@ -8,10 +8,14 @@
         WalterLinks
     } from '$walter/components';
     import { WalterS3FileWrapper } from '$walter/lib';
+    import { S3URL } from '$walter/services/s3';
 
     export let data: PageData;
 
-    const title = data.entry.aussteller?.text + ' - ' + data.entry.bezeichnung;
+    let title = data.entry.aussteller?.text + ' - ' + data.entry.bezeichnung;
+    $: {
+        title = data.entry.aussteller?.text + ' - ' + data.entry.bezeichnung;
+    }
 
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
@@ -31,11 +35,13 @@
     <WalterLinks>
         <WalterLinkTile
             bind:fileWrapper
+            s3ref={S3URL.wohnung(`${data.entry.wohnung.id}`)}
             name={`Wohnung: ${data.entry.wohnung.text}`}
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />
         <WalterLinkTile
             bind:fileWrapper
+            s3ref={S3URL.kontakt(`${data.entry.aussteller.id}`)}
             name={`Aussteller: ${data.entry.aussteller.text}`}
             href={`/kontakte/${data.entry.aussteller.id}`}
         />

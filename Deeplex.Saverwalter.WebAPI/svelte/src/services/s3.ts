@@ -3,51 +3,54 @@ import type { WalterS3File } from '$walter/types';
 import * as parser from 'fast-xml-parser';
 import { walter_delete, walter_fetch } from './requests';
 import type { WalterToastContent } from '../lib/WalterToastContent';
+import {
+    WalterAdresseEntry,
+    WalterBetriebskostenrechnungEntry,
+    WalterErhaltungsaufwendungEntry,
+    WalterKontaktEntry,
+    WalterMieteEntry,
+    WalterMietminderungEntry,
+    WalterUmlageEntry,
+    WalterUmlagetypEntry,
+    WalterVertragVersionEntry,
+    WalterWohnungEntry,
+    WalterZaehlerEntry,
+    WalterZaehlerstandEntry
+} from '$walter/lib';
 
 export const S3URL = {
-    adressen: `adressen`,
-    adresse: (id: string) => `${S3URL.adressen}/${id}`,
-    betriebskostenrechnungen: `betriebskostenrechnungen`,
+    adresse: (id: string) => `${WalterAdresseEntry.ApiURL}/${id}/files`,
     betriebskostenrechnung: (id: string) =>
-        `${S3URL.betriebskostenrechnungen}/${id}`,
-    erhaltungsaufwendungen: `erhaltungsaufwendungen`,
+        `${WalterBetriebskostenrechnungEntry.ApiURL}/${id}/files`,
     erhaltungsaufwendung: (id: string) =>
-        `${S3URL.erhaltungsaufwendungen}/${id}`,
-    mieten: `mieten`,
-    miete: (id: string) => `${S3URL.mieten}/${id}`,
-    mietminderungen: `mietminderungen`,
-    mietminderung: (id: string) => `${S3URL.mietminderungen}/${id}`,
-    kontakte: `kontakte`,
-    kontakt: (id: string) => `${S3URL.kontakt}/${id}`,
-    umlagen: `umlagen`,
-    umlage: (id: string) => `${S3URL.umlagen}/${id}`,
-    umlagetypen: `umlagetypen`,
-    umlagetyp: (id: string) => `${S3URL.umlagetypen}/${id}`,
-    vertraege: `vertraege`,
-    vertrag: (id: string) => `${S3URL.vertraege}/${id}`,
-    vertragversionen: `vertragversionen`,
-    vertragversion: (id: string) => `${S3URL.vertragversionen}/${id}`,
-    wohnungen: `wohnungen`,
-    wohnung: (id: string) => `${S3URL.wohnungen}/${id}`,
-    zaehlerSet: `zaehler`,
-    zaehler: (id: string) => `${S3URL.zaehlerSet}/${id}`,
-    zaehlerstaende: `zaehlerstaende`,
-    zaehlerstand: (id: string) => `${S3URL.zaehlerstaende}/${id}`,
-    stack: `stack`
+        `${WalterErhaltungsaufwendungEntry.ApiURL}/${id}/files`,
+    miete: (id: string) => `${WalterMieteEntry.ApiURL}/${id}/files`,
+    mietminderung: (id: string) =>
+        `${WalterMietminderungEntry.ApiURL}/${id}/files`,
+    kontakt: (id: string) => `${WalterKontaktEntry.ApiURL}/${id}/files`,
+    umlage: (id: string) => `${WalterUmlageEntry.ApiURL}/${id}/files`,
+    umlagetyp: (id: string) => `${WalterUmlagetypEntry.ApiURL}/${id}/files`,
+    vertrag: (id: string) => `${WalterVertragVersionEntry.ApiURL}/${id}/files`,
+    vertragversion: (id: string) =>
+        `${WalterVertragVersionEntry.ApiURL}/${id}/files`,
+    wohnung: (id: string) => `${WalterWohnungEntry.ApiURL}/${id}/files`,
+    zaehler: (id: string) => `${WalterZaehlerEntry.ApiURL}/${id}/files`,
+    zaehlerstand: (id: string) =>
+        `${WalterZaehlerstandEntry.ApiURL}/${id}/files`,
+    stack: `/api/user/files`
 };
 
-const baseURL = '/api/files';
 type XMLResult = {
     ListBucketResult?: { Contents?: WalterS3File | WalterS3File[] };
 };
 
 export const walter_s3_post = (
     file: File,
-    path: string,
+    S3URL: string,
     fetchImpl: typeof fetch,
     toast?: WalterToastContent
 ) =>
-    walter_fetch(fetchImpl, `${baseURL}/${path}/${file.name}`, {
+    walter_fetch(fetchImpl, `${S3URL}/${file.name}`, {
         method: 'PUT',
         headers: {
             // Ignored, due to header being replaced in walter_fetch
@@ -62,72 +65,13 @@ export async function finish_s3_post(e: Response, toast?: WalterToastContent) {
 }
 
 export const walter_s3_get = (S3URL: string): Promise<unknown> =>
-    walter_fetch(fetch, `${baseURL}/${S3URL}`, { method: 'GET' }).then((e) =>
-        e.blob()
-    );
-
-async function walter_s3_remove_folder_content_impl(
-    files: WalterS3File[],
-    toast?: WalterToastContent
-) {
-    let everything_okay = true;
-
-    for (const file of files) {
-        const file_path = `${baseURL}/${file.Key}`;
-        const result = await walter_delete(file_path);
-        if (!result.ok) {
-            everything_okay = false;
-        }
-    }
-
-    toast && addToast(toast, everything_okay);
-
-    if (everything_okay) {
-        files = [];
-    }
-
-    return everything_okay;
-}
-
-export async function walter_s3_remove_folder_content(
-    files: WalterS3File[],
-    toast?: WalterToastContent
-) {
-    const file_s =
-        files.length === 1 ? 'eine Datei' : `${files.length} Dateien`;
-    const content = `Bist du sicher, dass du ${file_s} endgültig löschen willst? Diese Änderung kann nicht rückgängig gemacht werden.`;
-
-    openModal({
-        modalHeading: 'Löschen',
-        content,
-        danger: true,
-        primaryButtonText: 'Löschen',
-        submit: () => walter_s3_remove_folder_content_impl(files, toast)
-    });
-}
+    walter_fetch(fetch, S3URL, { method: 'GET' }).then((e) => e.blob());
 
 export async function walter_s3_delete(
     file: WalterS3File,
-    fetchImpl: typeof fetch,
     toast?: WalterToastContent
 ) {
-    const file_path = `${baseURL}/${file.Key}`;
-
-    if (file.Blob) {
-        const response = walter_s3_post(
-            new File([file.Blob], file.FileName),
-            'trash',
-            fetchImpl
-        );
-
-        if ((await response).ok) {
-            return walter_delete(file_path, toast);
-        } else {
-            return response;
-        }
-    } else {
-        return walter_delete(file_path, toast);
-    }
+    return walter_delete(file.Key, toast);
 }
 
 export function download_file_blob(blob: Blob, fileName: string) {
@@ -142,13 +86,12 @@ export function download_file_blob(blob: Blob, fileName: string) {
 }
 
 export async function walter_s3_get_files(
-    S3prefixURL: string,
+    S3URL: string,
     fetchImpl: typeof fetch
 ): Promise<WalterS3File[]> {
-    const url = `${baseURL}?prefix=${S3prefixURL}`;
     const requestInit = { method: 'GET' };
 
-    const fetched = await walter_fetch(fetchImpl, url, requestInit);
+    const fetched = await walter_fetch(fetchImpl, S3URL, requestInit);
     const reader = fetched.body?.getReader();
 
     if (!reader) {
@@ -176,12 +119,23 @@ export async function walter_s3_get_files(
         }
     }
 
-    const parsed = parse_stream_into_walter_s3_files(result);
+    const parsed = parse_stream_into_walter_s3_files(result, S3URL);
 
     return parsed;
 }
 
-function parse_stream_into_walter_s3_files(uint8array: Uint8Array | undefined) {
+function hideTrash(contents: WalterS3File[]): WalterS3File[] {
+    return contents.filter((c) => {
+        const splits = c.Key.split('/');
+        const trash = splits[splits.length - 2];
+        return trash !== 'trash';
+    });
+}
+
+function parse_stream_into_walter_s3_files(
+    uint8array: Uint8Array | undefined,
+    S3URL: string
+) {
     if (!uint8array) {
         return [];
     }
@@ -194,9 +148,14 @@ function parse_stream_into_walter_s3_files(uint8array: Uint8Array | undefined) {
     if (!Contents) {
         return [];
     } else if (Array.isArray(Contents)) {
-        return Contents.map(create_walter_s3_file_from_xml_parse) || [];
+        const filteredContents = hideTrash(Contents);
+        return (
+            filteredContents.map((c) =>
+                create_walter_s3_file_from_xml_parse(c, S3URL)
+            ) || []
+        );
     } else {
-        return [create_walter_s3_file_from_xml_parse(Contents)];
+        return [create_walter_s3_file_from_xml_parse(Contents, S3URL)];
     }
 }
 
@@ -214,14 +173,18 @@ export function create_walter_s3_file_from_file(
     };
 }
 
-function create_walter_s3_file_from_xml_parse(e: WalterS3File): WalterS3File {
+function create_walter_s3_file_from_xml_parse(
+    e: WalterS3File,
+    S3URL: string
+): WalterS3File {
     const FileName = e.Key.split('/').pop();
     const Key = e.Key;
 
     if (FileName && Key) {
+        const FileName = e.Key.split('/').pop()!;
         return {
-            FileName: e.Key.split('/').pop()!,
-            Key: e.Key,
+            FileName,
+            Key: `${S3URL}/${FileName}`,
             LastModified: e.LastModified,
             Size: e.Size
         };

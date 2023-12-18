@@ -1,16 +1,19 @@
 <script lang="ts">
-    import { WalterHeader } from '$walter/components';
+    import { WalterGrid, WalterHeaderDetail } from '$walter/components';
+    import WalterAccount from '$walter/components/details/WalterAccount.svelte';
     import { WalterToastContent } from '$walter/lib';
     import { walter_post } from '$walter/services/requests';
     import { addToast } from '$walter/store';
     import {
-        Content,
-        PasswordInput,
-        Button,
-        Tile,
         Accordion,
-        AccordionItem
+        AccordionItem,
+        Button,
+        PasswordInput
     } from 'carbon-components-svelte';
+    import type { PageData } from './$types';
+
+    export let data: PageData;
+    const title = `Nutzereinstellungen`;
 
     let old_password = '';
     let new_password_1 = '';
@@ -29,7 +32,7 @@
             'Passwort konnte nicht geändert werden'
         );
 
-        const response = await walter_post('/api/account/update-password', {
+        const response = await walter_post('/api/user/update-password', {
             OldPassword: old_password,
             NewPassword: new_password_1
         });
@@ -48,10 +51,12 @@
     }
 </script>
 
-<WalterHeader title="Nutzereinstellungen" />
+<WalterHeaderDetail entry={data.entry} apiURL={data.apiURL} {title} />
 
-<Content>
-    <Accordion align="start" style="max-width: 40em">
+<WalterGrid>
+    <WalterAccount entry={data.entry} fetchImpl={data.fetchImpl} />
+
+    <Accordion align="start">
         <AccordionItem title="Passwort ändern">
             <PasswordInput
                 labelText="Aktuelles Passwort eingeben"
@@ -78,13 +83,5 @@
             </div>
             <div style="height: 2em" />
         </AccordionItem>
-        <AccordionItem title="Nutzernamen ändern">
-            <!-- TODO -->
-            <Tile light>Noch nicht implementiert.</Tile>
-        </AccordionItem>
-        <AccordionItem title="Person auswählen">
-            <!-- TODO -->
-            <Tile light>Noch nicht implementiert.</Tile>
-        </AccordionItem>
     </Accordion>
-</Content>
+</WalterGrid>

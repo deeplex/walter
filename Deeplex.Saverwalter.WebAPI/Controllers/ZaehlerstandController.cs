@@ -1,13 +1,16 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/zaehlerstaende")]
-    public class ZaehlerstandController : ControllerBase
+    public class ZaehlerstandController : FileControllerBase<ZaehlerstandEntry, Zaehlerstand>
     {
         public class ZaehlerstandEntryBase
         {
@@ -15,46 +18,59 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Id { get; set; }
             public double Stand { get; set; }
             public DateOnly Datum { get; set; }
-            public SelectionEntry Zaehler { get; set; } = null!;
             public string? Einheit { get; set; }
+
+            public Permissions Permissions { get; set; } = new Permissions();
+
+            public ZaehlerstandEntryBase() { }
+            public ZaehlerstandEntryBase(Zaehlerstand entity, Permissions permissions)
+            {
+                Entity = entity;
+
+                Id = entity.ZaehlerstandId;
+                Stand = entity.Stand;
+                Datum = entity.Datum;
+                Einheit = entity.Zaehler.Typ.ToUnitString();
+
+                Permissions = permissions;
+            }
+        }
+
+        public class ZaehlerstandEntry : ZaehlerstandEntryBase
+        {
+            public SelectionEntry Zaehler { get; set; } = null!;
             public string? Notiz { get; set; }
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
-            public ZaehlerstandEntryBase() { }
-            public ZaehlerstandEntryBase(Zaehlerstand entity)
+            public ZaehlerstandEntry() : base() { }
+            public ZaehlerstandEntry(Zaehlerstand entity, Permissions permissions) : base(entity, permissions)
             {
-                Entity = entity;
+                Zaehler = new(entity.Zaehler.ZaehlerId, entity.Zaehler.Kennnummer);
+                Notiz = entity.Notiz;
 
-                Id = Entity.ZaehlerstandId;
-                Stand = Entity.Stand;
-                Datum = Entity.Datum;
-                Zaehler = new(Entity.Zaehler.ZaehlerId, Entity.Zaehler.Kennnummer);
-                Einheit = Entity.Zaehler.Typ.ToUnitString();
-                Notiz = Entity.Notiz;
-
-                CreatedAt = Entity.CreatedAt;
-                LastModified = Entity.LastModified;
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 
         private readonly ILogger<ZaehlerstandController> _logger;
-        private ZaehlerstandDbService DbService { get; }
+        protected override ZaehlerstandDbService DbService { get; }
 
-        public ZaehlerstandController(ILogger<ZaehlerstandController> logger, ZaehlerstandDbService dbService)
+        public ZaehlerstandController(ILogger<ZaehlerstandController> logger, ZaehlerstandDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             _logger = logger;
             DbService = dbService;
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] ZaehlerstandEntryBase entry) => DbService.Post(entry);
+        public Task<ActionResult<ZaehlerstandEntry>> Post([FromBody] ZaehlerstandEntry entry) => DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id) => DbService.Get(id);
+        public Task<ActionResult<ZaehlerstandEntry>> Get(int id) => DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public IActionResult Put(int id, ZaehlerstandEntryBase entry) => DbService.Put(id, entry);
+        public Task<ActionResult<ZaehlerstandEntry>> Put(int id, ZaehlerstandEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id) => DbService.Delete(id);
+        public Task<ActionResult> Delete(int id) => DbService.Delete(User!, id);
     }
 }

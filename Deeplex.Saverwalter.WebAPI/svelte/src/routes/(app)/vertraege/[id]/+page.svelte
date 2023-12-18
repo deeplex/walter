@@ -22,32 +22,37 @@
         type WalterMietminderungEntry,
         type WalterVertragVersionEntry,
         WalterBetriebskostenrechnungEntry,
-
         WalterKontaktEntry
-
     } from '$walter/lib';
     import WalterBetriebskostenrechnungen from '$walter/components/lists/WalterBetriebskostenrechnungen.svelte';
     import { ClickableTile, Row } from 'carbon-components-svelte';
     import { walter_data_mieten } from '$walter/components/data/WalterData';
     import WalterDataScatterChart from '$walter/components/data/WalterDataScatterChart.svelte';
+    import { S3URL } from '$walter/services/s3';
     export let data: PageData;
 
-    const versionen = data.entry.versionen;
     const mietminderungEntry: Partial<WalterMietminderungEntry> =
-        getMietminderungEntry(`${data.id}`);
+        getMietminderungEntry(data.entry);
+
     const vertragversionEntry: Partial<WalterVertragVersionEntry> =
-        getVertragversionEntry(`${data.id}`, versionen[versionen.length - 1]);
-    const mieteEntry: Partial<WalterMieteEntry> = getMieteEntry(
-        `${data.id}`,
-        versionen[versionen.length - 1]
-    );
+        getVertragversionEntry(data.entry);
+
+    const mieteEntry: Partial<WalterMieteEntry> = getMieteEntry(data.entry);
+
     const mieterEntry: Partial<WalterKontaktEntry> = {};
+
     const betriebskostenrechnungEntry: Partial<WalterBetriebskostenrechnungEntry> =
         {};
 
-    const title = `${data.entry.wohnung?.text} - ${data.entry.mieter
+    let title = `${data.entry.wohnung?.text} - ${data.entry.mieter
         ?.map((mieter) => mieter.name)
         .join(', ')}`;
+    $: {
+        title = `${data.entry.wohnung?.text} - ${data.entry.mieter
+            ?.map((mieter) => mieter.name)
+            .join(', ')}`;
+    }
+
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.S3URL);
@@ -69,6 +74,7 @@
         >
 
         <WalterKontakte
+            fetchImpl={data.fetchImpl}
             entry={mieterEntry}
             title="Mieter"
             rows={data.entry.mieter}
@@ -97,11 +103,13 @@
 
         <WalterLinkTile
             bind:fileWrapper
+            s3ref={S3URL.kontakt(`${data.entry.ansprechpartner.id}`)}
             name={`Ansprechpartner: ${data.entry.ansprechpartner.text}`}
             href={`/kontakte/${data.entry.ansprechpartner.id}`}
         />
         <WalterLinkTile
             bind:fileWrapper
+            s3ref={S3URL.wohnung(`${data.entry.wohnung.id}`)}
             name={`Wohnung: ${data.entry.wohnung.text}`}
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />

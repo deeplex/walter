@@ -1,0 +1,104 @@
+import { expect, describe, it, afterEach, vi } from 'vitest';
+import { render, cleanup } from '@testing-library/svelte';
+import { writable } from 'svelte/store';
+
+import Page from './WalterErhaltungsaufwendungen.svelte';
+import { WalterErhaltungsaufwendungEntry } from '$walter/lib';
+import { convertDateGerman } from '$walter/services/utils';
+
+vi.mock('$app/stores', async (importOriginal) => {
+    return {
+        page: {
+            subscribe: writable<boolean>().subscribe,
+            url: {
+                pathname: 'mock'
+            }
+        }
+    };
+});
+
+function createEntryMocks(entries: number) {
+    const mocks = [];
+    for (let seed = 0; seed < entries; seed++) {
+        mocks.push(
+            new WalterErhaltungsaufwendungEntry(
+                seed,
+                seed * 100,
+                `2021-${(seed % 12) + 1}-${(seed % 28) + 1}`,
+                'Testnotiz',
+                `Testbezeichnung ${seed}`,
+                new Date(),
+                new Date(),
+                { id: 1, text: 'Testwohnung' },
+                { id: 2, text: 'Testaussteller' }
+            )
+        );
+    }
+
+    return mocks;
+}
+
+describe('adressen/page.svelte tests', () => {
+    afterEach(cleanup);
+
+    it('Should have header with 4 entries', () => {
+        render(Page, {
+            rows: createEntryMocks(5),
+            fetchImpl: vi.fn()
+        });
+
+        const header = document.getElementsByTagName('thead');
+        const headers = header.item(0)?.getElementsByTagName('th');
+
+        expect(headers?.item(0)?.innerHTML).toContain('Bezeichnung');
+        expect(headers?.item(1)?.innerHTML).toContain('Aussteller');
+        expect(headers?.item(2)?.innerHTML).toContain('Wohnung');
+        expect(headers?.item(3)?.innerHTML).toContain('Betrag');
+        expect(headers?.item(4)?.innerHTML).toContain('Datum');
+
+        expect(headers).toBeDefined();
+        expect(headers).toHaveLength(5);
+    });
+
+    it('Should have 15 entries', () => {
+        render(Page, {
+            rows: createEntryMocks(15),
+            fetchImpl: vi.fn()
+        });
+
+        const body = document.getElementsByTagName('tbody');
+        const rows = body.item(0)?.getElementsByTagName('tr');
+        76;
+        expect(rows?.length).toBe(15);
+
+        for (let i = 0; i < rows!.length; ++i) {
+            const cells = rows?.item(i)?.getElementsByTagName('td');
+            expect(cells?.length).toBe(5);
+            expect(cells?.item(0)?.innerHTML).toContain(`Testbezeichnung ${i}`);
+            expect(cells?.item(1)?.innerHTML).toContain('Testaussteller');
+            expect(cells?.item(2)?.innerHTML).toContain('Testwohnung');
+            expect(cells?.item(3)?.innerHTML).toContain(`${i * 100}`);
+            const date = new Date(`2021-${(i % 12) + 1}-${(i % 28) + 1}`);
+            expect(cells?.item(4)?.innerHTML).toContain(
+                convertDateGerman(date)
+            );
+        }
+    });
+
+    it('Should have a button to create a new entry', () => {
+        render(Page, {
+            rows: createEntryMocks(1),
+            fetchImpl: vi.fn()
+        });
+
+        const buttons = Array.from(document.getElementsByTagName('button'));
+
+        const addButtons = buttons.filter((e) =>
+            e.innerHTML.includes('Eintrag hinzufügen')
+        );
+
+        expect(addButtons.length).toBe(1);
+        // TODO: this should be true if user has only read rights
+        expect(addButtons[0].disabled).toBe(false);
+    });
+});

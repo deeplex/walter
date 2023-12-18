@@ -3,6 +3,7 @@
 
     export let file: WalterS3File;
     export let fileWrapper: WalterS3FileWrapper;
+    export let permissions: WalterPermissions | undefined;
 
     import {
         HeaderPanelLink,
@@ -12,6 +13,7 @@
     import type { WalterS3FileWrapper } from '$walter/lib';
     import { get_file_and_update_url } from './WalterAnhaengeEntry';
     import { page } from '$app/stores';
+    import type { WalterPermissions } from '$walter/lib/WalterPermissions';
 
     async function showModal() {
         selectedFile = await get_file_and_update_url(file);
@@ -34,6 +36,7 @@
 
 {#if selectedFile}
     <WalterPreview
+        {permissions}
         bind:fileWrapper
         bind:file={selectedFile}
         bind:open={previewOpen}

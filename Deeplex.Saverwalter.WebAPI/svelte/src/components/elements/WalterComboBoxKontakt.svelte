@@ -1,13 +1,7 @@
 <script lang="ts">
-    import {
-        WalterKontaktEntry,
-        type WalterSelectionEntry
-    } from '$walter/lib';
+    import { WalterKontaktEntry, WalterSelectionEntry } from '$walter/lib';
     import { walter_selection } from '$walter/services/requests';
-    import {
-        WalterComboBox,
-        WalterKontakt
-    } from '..';
+    import { WalterComboBox, WalterKontakt } from '..';
     import WalterQuickAddButton from './WalterQuickAddButton.svelte';
 
     export let readonly: boolean = false;
@@ -38,12 +32,14 @@
         {entries}
     />
 
-    <WalterQuickAddButton
-        title="Personen"
-        bind:addEntry
-        addUrl={WalterKontaktEntry.ApiURL}
-        {onSubmit}
-    >
-        <WalterKontakt entry={addEntry} {fetchImpl} />
-    </WalterQuickAddButton>
+    {#if !readonly}
+        <WalterQuickAddButton
+            title="Personen"
+            bind:addEntry
+            addUrl={WalterKontaktEntry.ApiURL}
+            {onSubmit}
+        >
+            <WalterKontakt entry={addEntry} {fetchImpl} />
+        </WalterQuickAddButton>
+    {/if}
 </div>

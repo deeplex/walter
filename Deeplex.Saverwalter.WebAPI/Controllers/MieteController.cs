@@ -1,14 +1,17 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Helper;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/mieten")]
-    public class MieteController : ControllerBase
+    public class MieteController : FileControllerBase<MieteEntry, Miete>
     {
         public class MieteEntryBase
         {
@@ -16,24 +19,39 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public double Betrag { get; set; }
             public DateOnly BetreffenderMonat { get; set; }
             public DateOnly Zahlungsdatum { get; set; }
-            public string? Notiz { get; set; }
+
             public SelectionEntry Vertrag { get; set; } = null!;
-            public int Repeat { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
+
+            public Permissions Permissions { get; set; } = new Permissions();
 
             public MieteEntryBase() { }
-            public MieteEntryBase(Miete entity, int repeat = 0)
+            public MieteEntryBase(Miete entity, Permissions permissions)
             {
                 Id = entity.MieteId;
                 Betrag = entity.Betrag;
                 BetreffenderMonat = entity.BetreffenderMonat;
                 Zahlungsdatum = entity.Zahlungsdatum;
-                Notiz = entity.Notiz;
+
                 var v = entity.Vertrag;
                 var a = v.Wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift";
                 Vertrag = new(v.VertragId, a + " - " + v.Wohnung.Bezeichnung + " - " + Zahlungsdatum.Datum());
+
+                Permissions = permissions;
+            }
+        }
+
+        public class MieteEntry : MieteEntryBase
+        {
+            public string? Notiz { get; set; }
+            public int Repeat { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
+            public MieteEntry() { }
+            public MieteEntry(Miete entity, Permissions permissions, int repeat = 0) : base(entity, permissions)
+            {
                 Repeat = repeat;
+                Notiz = entity.Notiz;
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
@@ -41,25 +59,25 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         private readonly ILogger<MieteController> _logger;
-        private MieteDbService DbService { get; }
+        protected override MieteDbService DbService { get; }
 
-        public MieteController(ILogger<MieteController> logger, MieteDbService dbService)
+        public MieteController(ILogger<MieteController> logger, MieteDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             DbService = dbService;
             _logger = logger;
         }
 
         [HttpGet]
-        public IActionResult Get()
-            => new OkObjectResult(DbService.Ctx.Mieten.ToList().Select(e => new MieteEntryBase(e)).ToList());
+        public Task<ActionResult<IEnumerable<MieteEntryBase>>> Get() => DbService.GetList(User!);
+
         [HttpPost]
-        public IActionResult Post([FromBody] MieteEntryBase entry) => DbService.Post(entry);
+        public Task<ActionResult<MieteEntry>> Post([FromBody] MieteEntry entry) => DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id) => DbService.Get(id);
+        public Task<ActionResult<MieteEntry>> Get(int id) => DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] MieteEntryBase entry) => DbService.Put(id, entry);
+        public Task<ActionResult<MieteEntry>> Put(int id, [FromBody] MieteEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id) => DbService.Delete(id);
+        public Task<ActionResult> Delete(int id) => DbService.Delete(User!, id);
     }
 }

@@ -3,6 +3,13 @@ import type { WalterToastContent } from '$walter/lib';
 import { addToast } from '$walter/store';
 import { writable, type Writable } from 'svelte/store';
 
+export enum UserRole {
+    Guest = 0,
+    User = 1,
+    Admin = 2,
+    Owner = 3
+}
+
 type SignInRequest = {
     username: string;
     password: string;
@@ -10,32 +17,36 @@ type SignInRequest = {
 export type SignInResponse = {
     userId: string;
     token: string;
+    role: UserRole;
+    name: string;
 };
 
 export type AuthState = {
     userId: string;
     token: string;
+    role: UserRole;
+    name: string;
 };
 
-let _authState: Writable<AuthState | null> | undefined = undefined;
+export let authState: Writable<AuthState | null> | undefined = undefined;
 let _accessToken: string | undefined = undefined;
 export function getAuthState(): Writable<AuthState | null> {
     if (!browser) {
         throw Error("Don't call me during ssr");
     }
-    if (_authState === undefined) {
-        _authState = writable(tryLoadAuthState());
-        _authState.subscribe((state) => {
+    if (authState === undefined) {
+        authState = writable(tryLoadAuthState());
+        authState.subscribe((state) => {
             if (state != null) {
                 _accessToken = state.token;
                 storeAuthState(state);
             }
         });
     }
-    return _authState;
+    return authState;
 }
 export function getAccessToken(): string | undefined {
-    if (browser && _authState == null) {
+    if (browser && authState == null) {
         getAuthState();
     }
     return _accessToken;
@@ -54,7 +65,7 @@ export async function walter_sign_in(
     password: string,
     toast?: WalterToastContent
 ): Promise<AuthState | null> {
-    const response = await fetchImpl('/api/account/sign-in', {
+    const response = await fetchImpl('/api/user/sign-in', {
         method: 'POST',
         body: JSON.stringify({ username, password } as SignInRequest),
         headers: { 'Content-Type': 'application/json' }
@@ -91,7 +102,11 @@ function tryLoadAuthState(): AuthState | null {
         !('userId' in authState) ||
         typeof authState.userId !== 'string' ||
         !('token' in authState) ||
-        typeof authState.token !== 'string'
+        typeof authState.token !== 'string' ||
+        !('role' in authState) ||
+        typeof authState.role !== 'number' ||
+        !('name' in authState) ||
+        typeof authState.name !== 'string'
     ) {
         return null;
     }
@@ -102,7 +117,9 @@ function tryLoadAuthState(): AuthState | null {
     }
     return {
         userId: authState.userId,
-        token: authState.token
+        token: authState.token,
+        role: authState.role,
+        name: authState.name
     };
 }
 function isTokenStillValid(token: string): boolean {

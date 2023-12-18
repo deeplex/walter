@@ -2,6 +2,7 @@ import { WalterAdresseEntry } from './WalterAdresse';
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
 import { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
+import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 import { WalterUmlageEntry } from './WalterUmlage';
 import { WalterVertragEntry } from './WalterVertrag';
@@ -27,7 +28,8 @@ export class WalterWohnungEntry extends WalterApiHandler {
         public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
         public erhaltungsaufwendungen: WalterErhaltungsaufwendungEntry[],
         public umlagen: WalterUmlageEntry[],
-        public bewohner: string
+        public bewohner: string,
+        public permissions: WalterPermissions
     ) {
         super();
     }
@@ -49,6 +51,8 @@ export class WalterWohnungEntry extends WalterApiHandler {
             WalterErhaltungsaufwendungEntry.fromJson
         );
         const umlagen = json.umlagen?.map(WalterUmlageEntry.fromJson);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterWohnungEntry(
             adresse,
@@ -67,7 +71,8 @@ export class WalterWohnungEntry extends WalterApiHandler {
             betriebskostenrechnungen,
             erhaltungsaufwendungen,
             umlagen,
-            json.bewohner
+            json.bewohner,
+            permissions
         );
     }
 }

@@ -23,6 +23,7 @@
     import { Row } from 'carbon-components-svelte';
     import { walter_data_aufwendungen } from '$walter/components/data/WalterData';
     import WalterDataScatterChart from '$walter/components/data/WalterDataScatterChart.svelte';
+    import { S3URL } from '$walter/services/s3';
 
     export let data: PageData;
 
@@ -31,7 +32,8 @@
             id: `${data.entry.id}`,
             text: `${data.entry.adresse?.anschrift} - ${data.entry.bezeichnung}`
         },
-        adresse: data.entry.adresse ? { ...data.entry.adresse } : undefined
+        adresse: data.entry.adresse ? { ...data.entry.adresse } : undefined,
+        permissions: data.entry.permissions
     };
     const umlageEntry: Partial<WalterUmlageEntry> = {
         selectedWohnungen: [
@@ -42,7 +44,8 @@
                     ' - ' +
                     data.entry.bezeichnung
             }
-        ]
+        ],
+        permissions: data.entry.permissions
     };
     const erhaltungsaufwendungEntry: Partial<WalterErhaltungsaufwendungEntry> =
         {
@@ -53,11 +56,15 @@
                     ' - ' +
                     data.entry.bezeichnung
             },
-            datum: convertDateCanadian(new Date())
+            datum: convertDateCanadian(new Date()),
+            permissions: data.entry.permissions
         };
 
-    const title =
-        data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung;
+    let title = data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung;
+    $: {
+        title = data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung;
+    }
+
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.S3URL);
@@ -110,6 +117,7 @@
 
         <WalterLinkTile
             bind:fileWrapper
+            s3ref={S3URL.adresse(`${data.entry.adresse.id}`)}
             name={`Adresse: ${data.entry.adresse.anschrift}`}
             href={`/adressen/${data.entry.adresse.id}`}
         />

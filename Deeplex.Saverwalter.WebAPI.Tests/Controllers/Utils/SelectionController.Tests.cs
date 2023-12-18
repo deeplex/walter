@@ -1,7 +1,9 @@
+﻿using System.Security.Claims;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers.Services;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -11,107 +13,139 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class SelectionControllerTests
     {
         [Fact]
-        public void GetAdressen()
+        public async Task GetAdressen()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.GetAdressen();
+            var result = await controller.GetAdressen();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetBetriebskostenrechnungen()
+        public async Task GetBetriebskostenrechnungen()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.GetBetriebskostenrechnungen();
+            var result = await controller.GetBetriebskostenrechnungen();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetErhaltungsaufwendungen()
+        public async Task GetErhaltungsaufwendungen()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.GetErhaltungsaufwendungen();
+            var result = await controller.GetErhaltungsaufwendungen();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetMieten()
+        public async Task GetMieten()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.GetMieten();
+            var result = await controller.GetMieten();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetMietminderungen()
+        public async Task GetMietminderungen()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.GetMietminderungen();
+            var result = await controller.GetMietminderungen();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetUmlagen()
+        public async Task GetUmlagen()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.GetUmlagen();
+            var result = await controller.GetUmlagen();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetUmlagenWohnungen()
+        public async Task GetUmlagenWohnungen()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.GetUmlagenWohnungen();
+            var result = await controller.GetUmlagenWohnungen();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetUmlagenVerbrauch()
+        public async Task GetUmlagenVerbrauch()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.GetUmlagenVerbrauch();
+            var result = await controller.GetUmlagenVerbrauch();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
@@ -121,10 +155,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
             var result = controller.GetKontakte();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
@@ -134,76 +172,100 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
             var result = controller.GetJuristischePersonen();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetWohnungen()
+        public async Task GetWohnungen()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.GetWohnungen();
+            var result = await controller.GetWohnungen();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetVertraege()
+        public async Task GetVertraege()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.GetVertraege();
+            var result = await controller.GetVertraege();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
 
         [Fact]
-        public void GetZaehler()
+        public async Task GetZaehler()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.GetZaehler();
+            var result = await controller.GetZaehler();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetZaehlerStaende()
+        public async Task GetZaehlerStaende()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.GetZaehlerStaende();
+            var result = await controller.GetZaehlerStaende();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
-        public void GetUmlagetypen()
+        public async Task GetUmlagetypen()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.GetUmlagetypen();
+            var result = await controller.GetUmlagetypen();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
@@ -213,10 +275,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
             var result = controller.GetUmlageschluessel();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -226,10 +292,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
             var result = controller.GetHKVO_P9A2();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -239,10 +309,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
             var result = controller.GetZaehlertypen();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -252,10 +326,14 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<SelectionListController>>();
             var controller = new SelectionListController(logger, ctx);
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
             var result = controller.GetAnreden();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
     }
 }

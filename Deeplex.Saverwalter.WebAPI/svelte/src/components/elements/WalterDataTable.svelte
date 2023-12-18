@@ -26,6 +26,7 @@
         key: string;
         value: string;
     }[];
+    export let readonly = false;
     export let rows: unknown[];
     export let add: (() => void) | undefined = undefined;
 
@@ -59,77 +60,104 @@
             filteredValues.some((e) => `${e}`.toLowerCase().includes(val))
         );
     }
+
+    const disabledRows = rows
+        .filter((row) => row.permissions && !row.permissions?.read)
+        .map((row) => row.id);
+    const enabledRows = rows
+        .filter((row) => row.permissions?.read)
+        .map((row) => row.id);
+
+    const disabledSelector = disabledRows
+        .map((id) => `[data-row="${id}"]`)
+        .join(',');
+    const enabledSelector = enabledRows
+        .map((id) => `[data-row="${id}"]`)
+        .join(',');
+    const styles = `
+    <style>
+    ${disabledSelector} {
+        opacity: 0.5;
+        cursor: not-allowed !important;
+        pointer-events: none !important;
+    }
+      ${enabledSelector} {
+        color: #ff0;
+        cursor: pointer !important;
+      }
+    <\/style>`;
 </script>
 
-<Content>
-    {#await rows}
-        <SkeletonPlaceholder style="margin:0; width: 100%; height:3rem" />
-        <DataTableSkeleton {headers} showHeader={false} showToolbar={false} />
-    {:then x}
-        <DataTable
-            {size}
-            on:click:row={on_click_row}
-            sortable
-            zebra
-            stickyHeader
-            {headers}
-            rows={x}
-            class={fullHeight ? 'proper-list' : ''}
-            style="cursor: pointer; max-height: none !important;"
-        >
-            <Toolbar>
-                <ToolbarContent>
-                    <ToolbarSearch
-                        placeholder="Suche mit ; separierter Liste..."
-                        persistent
-                        {shouldFilterRows}
-                    />
-                    {#if !!add}
-                        <Button
-                            on:click={add}
-                            iconDescription="Eintrag hinzufügen"
-                            icon={Add}>Eintrag hinzufügen</Button
-                        >
-                    {/if}
-                </ToolbarContent>
-            </Toolbar>
-            <span
-                style="text-overflow: ellipsis; white-space: nowrap; overflow:hidden;"
-                slot="cell"
-                let:cell
-            >
-                {#if cell.value === null || cell.value === undefined || cell.value === ''}
-                    ---
-                {:else if dates(cell.key)}
-                    {formatToTableDate(cell.value)}
-                {:else if time(cell.key)}
-                    {convertTime(cell.value)}
-                {:else if euro(cell.key)}
-                    {convertEuro(cell.value)}
-                {:else if cell.key === 'anteil'}
-                    {convertPercent(cell.value)}
-                {:else if cell.key === 'button'}
-                    <Button
-                        disabled={cell.value === 'disabled'}
-                        on:click={cell.value}
-                        tooltipPosition="left"
-                        style="position: absolute; margin-top: -15px; margin-left: 1em; scale: 0.65"
-                        kind="tertiary"
-                        icon={Add}
-                        iconDescription={'Hinzufügen'}
-                    />
-                {:else}
-                    {cell.value}
-                {/if}
-            </span>
-        </DataTable>
+<svelte:head>
+    {@html styles}
+</svelte:head>
 
-        <style>
-            .proper-list
-                > .bx--data-table_inner-container
-                > .bx--data-table--sticky-header {
-                max-height: none !important;
-            }
-        </style>
-    {/await}
+<Content>
+    <DataTable
+        {size}
+        on:click:row={on_click_row}
+        sortable
+        zebra
+        stickyHeader
+        {headers}
+        {rows}
+        class={fullHeight ? 'proper-list' : ''}
+        style="cursor-events: none !important; max-height: none !important;"
+    >
+        <Toolbar>
+            <ToolbarContent>
+                <ToolbarSearch
+                    placeholder="Suche mit ; separierter Liste..."
+                    persistent
+                    {shouldFilterRows}
+                />
+                {#if !!add && !readonly}
+                    <Button
+                        style="right: -1em; position: sticky;"
+                        on:click={add}
+                        iconDescription="Eintrag hinzufügen"
+                        icon={Add}>Eintrag hinzufügen</Button
+                    >
+                {/if}
+            </ToolbarContent>
+        </Toolbar>
+        <span
+            style="text-overflow: ellipsis; white-space: nowrap; overflow:hidden;"
+            slot="cell"
+            let:cell
+            let:row
+        >
+            {#if cell.value === null || cell.value === undefined || cell.value === ''}
+                ---
+            {:else if dates(cell.key)}
+                {formatToTableDate(cell.value)}
+            {:else if time(cell.key)}
+                {convertTime(cell.value)}
+            {:else if euro(cell.key)}
+                {convertEuro(cell.value)}
+            {:else if cell.key === 'anteil'}
+                {convertPercent(cell.value)}
+            {:else if cell.key === 'button'}
+                <Button
+                    disabled={cell.value === 'disabled'}
+                    on:click={cell.value}
+                    tooltipPosition="left"
+                    style="position: absolute; margin-top: -15px; margin-left: 1em; scale: 0.65"
+                    kind="tertiary"
+                    icon={Add}
+                    iconDescription={'Hinzufügen'}
+                />
+            {:else}
+                {cell.value}
+            {/if}
+        </span>
+    </DataTable>
+
+    <style>
+        .proper-list
+            > .bx--data-table_inner-container
+            > .bx--data-table--sticky-header {
+            max-height: none !important;
+        }
+    </style>
 </Content>

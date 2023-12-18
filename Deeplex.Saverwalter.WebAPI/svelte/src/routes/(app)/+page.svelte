@@ -3,10 +3,11 @@
     import { WalterHeader, WalterMiettabelleWrapper } from '$walter/components';
     import type { PageData } from './$types';
 
+    export let title = 'Walter';
     export let data: PageData;
 </script>
 
-<WalterHeader title="SaverWalter" />
+<WalterHeader {title} />
 <Content>
     <WalterMiettabelleWrapper
         fetchImpl={data.fetchImpl}

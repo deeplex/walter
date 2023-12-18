@@ -1,9 +1,9 @@
+﻿using System.Text;
 using Deeplex.Saverwalter.Model.Auth;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Services;
 using FakeItEasy;
 using FluentAssertions;
-using System.Text;
 using Xunit;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
@@ -17,7 +17,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var tokenService = A.Fake<TokenService>();
             var userService = new UserService(ctx, tokenService);
 
-            var result = await userService.CreateUserAccount("test");
+            var result = await userService.CreateUserAccount("test", "Miss test");
 
             result.Should().BeOfType<UserAccount>();
             result.Username.Should().Be("test");
@@ -29,7 +29,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var tokenService = A.Fake<TokenService>();
             var userService = new UserService(ctx, tokenService);
-            var account = await userService.CreateUserAccount("sign_in_async_user");
+            var account = await userService.CreateUserAccount("sign_in_async_user", "Mister sign_in_async_user");
             await userService.UpdateUserPassword(account, Encoding.UTF8.GetBytes("test"));
 
             var result = await userService.SignInAsync("sign_in_async_user", "test");
@@ -45,7 +45,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var ctx = TestUtils.GetContext();
             var tokenService = A.Fake<TokenService>();
             var userService = new UserService(ctx, tokenService);
-            var account = await userService.CreateUserAccount("test");
+            var account = await userService.CreateUserAccount("test", "Miss test");
             await userService.UpdateUserPassword(account, Encoding.UTF8.GetBytes("test"));
 
             var result = await userService.SignInAsync("test", "test2");

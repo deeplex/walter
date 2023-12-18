@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "compounds": [
         {
-            "name": "svelte + .net + edge",
+            "name": "svelte + .net",
             "configurations": [
                 "sveltekit",
                 "asp.net"
@@ -52,9 +52,36 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Deeplex.Saverwalter.WebAPI/bin/Debug/net6.0/Deeplex.Saverwalter.WebAPI.dll",
+            "program": "${workspaceFolder}/Deeplex.Saverwalter.WebAPI/bin/Debug/net8.0/Deeplex.Saverwalter.WebAPI.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Deeplex.Saverwalter.WebAPI",
+            "stopAtEntry": false,
+            // "serverReadyAction": {
+            //     "action": "debugWithEdge",
+            //     "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            // },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "DATABASE_HOST": "walter_dev_db",
+                "DATABASE_PORT": "5432",
+                "DATABASE_NAME": "walter_dev_generic_db",
+                "DATABASE_USER": "postgres",
+                "DATABASE_PASS": "postgres",
+                "WALTER_PASSWORD": "postgres",
+                "S3_PROVIDER": "http://s3:9000/saverwalter"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+            "name": "fill walter_dev_full_generic_db",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Deeplex.Saverwalter.InitiateTestDbs/bin/Debug/net8.0/Deeplex.Saverwalter.InitiateTestDbs.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Deeplex.Saverwalter.InitiateTestDbs",
             "stopAtEntry": false,
             // "serverReadyAction": {
             //     "action": "debugWithEdge",
@@ -68,7 +95,7 @@
                 "DATABASE_USER": "postgres",
                 "DATABASE_PASS": "postgres",
                 "WALTER_PASSWORD": "postgres",
-                "S3_PROVIDER": "http://s3:9001/saverwalter"
+                "S3_PROVIDER": "http://s3:9000/saverwalter"
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"

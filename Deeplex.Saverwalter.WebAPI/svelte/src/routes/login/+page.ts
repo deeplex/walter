@@ -17,7 +17,7 @@ export const load: PageLoad = async ({ fetch }) => {
             fetch
         };
     }
-    const response = await fetch('/api/account/refresh-token', {
+    const response = await fetch('/api/user/refresh-token', {
         method: 'POST',
         headers: {
             Authorization: `X-WalterToken ${accessToken}`

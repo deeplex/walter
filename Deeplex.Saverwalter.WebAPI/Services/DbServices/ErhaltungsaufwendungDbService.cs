@@ -1,52 +1,54 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using System.Security.Claims;
+using Deeplex.Saverwalter.Model;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class ErhaltungsaufwendungDbService : IControllerService<ErhaltungsaufwendungEntry>
+    public class ErhaltungsaufwendungDbService : WalterDbServiceBase<ErhaltungsaufwendungEntry, Erhaltungsaufwendung>
     {
-        public SaverwalterContext Ctx { get; }
-
-        public ErhaltungsaufwendungDbService(SaverwalterContext ctx)
+        public ErhaltungsaufwendungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
         }
 
-        public IActionResult Get(int id)
+        public async Task<ActionResult<IEnumerable<ErhaltungsaufwendungEntryBase>>> GetList(ClaimsPrincipal user)
         {
-            var entity = Ctx.Erhaltungsaufwendungen.Find(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            var list = await ErhaltungsaufwendungPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
-            try
-            {
-                var entry = new ErhaltungsaufwendungEntry(entity);
-                return new OkObjectResult(entry);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            return await Task.WhenAll(list
+                .Select(async e => new ErhaltungsaufwendungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public IActionResult Delete(int id)
+        public override async Task<ActionResult<Erhaltungsaufwendung>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
-            var entity = Ctx.Erhaltungsaufwendungen.Find(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
-
-            Ctx.Erhaltungsaufwendungen.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+            var entity = await Ctx.Erhaltungsaufwendungen.FindAsync(id);
+            return await GetEntity(user, entity, op);
         }
 
-        public IActionResult Post(ErhaltungsaufwendungEntry entry)
+        public override async Task<ActionResult<ErhaltungsaufwendungEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, Operations.Read, async (entity) =>
+            {
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
+                var entry = new ErhaltungsaufwendungEntry(entity, permissions);
+                return entry;
+            });
+        }
+
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, Operations.Delete, async (entity) =>
+            {
+                Ctx.Erhaltungsaufwendungen.Remove(entity);
+                await Ctx.SaveChangesAsync();
+
+                return new OkResult();
+            });
+        }
+
+        public override async Task<ActionResult<ErhaltungsaufwendungEntry>> Post(ClaimsPrincipal user, ErhaltungsaufwendungEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -55,7 +57,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Add(entry));
+                var wohnung = await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id);
+                var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate]);
+                if (!authRx.Succeeded)
+                {
+                    return new ForbidResult();
+                }
+
+                return await Add(entry);
             }
             catch
             {
@@ -63,10 +72,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private ErhaltungsaufwendungEntry Add(ErhaltungsaufwendungEntry entry)
+        private async Task<ErhaltungsaufwendungEntry> Add(ErhaltungsaufwendungEntry entry)
         {
-            var aussteller = Ctx.Kontakte.Find(entry.Aussteller.Id)!;
-            var wohnung = Ctx.Wohnungen.Find(entry.Wohnung.Id)!;
+            var aussteller = (await Ctx.Kontakte.FindAsync(entry.Aussteller.Id))!;
+            var wohnung = (await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id))!;
             var entity = new Erhaltungsaufwendung(entry.Betrag, entry.Bezeichnung, entry.Datum)
             {
                 Aussteller = aussteller,
@@ -75,45 +84,30 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             SetOptionalValues(entity, entry);
             Ctx.Erhaltungsaufwendungen.Add(entity);
-            Ctx.SaveChanges();
+            await Ctx.SaveChangesAsync();
 
-            return new ErhaltungsaufwendungEntry(entity);
+            return new ErhaltungsaufwendungEntry(entity, new());
         }
 
-        public IActionResult Put(int id, ErhaltungsaufwendungEntry entry)
+        public override async Task<ActionResult<ErhaltungsaufwendungEntry>> Put(ClaimsPrincipal user, int id, ErhaltungsaufwendungEntry entry)
         {
-            var entity = Ctx.Erhaltungsaufwendungen.Find(id);
-            if (entity == null)
+            return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                entity.Betrag = entry.Betrag;
+                entity.Wohnung = (await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id))!;
+                entity.Bezeichnung = entry.Bezeichnung;
+                entity.Aussteller = (await Ctx.Kontakte.FindAsync(entry.Aussteller.Id))!;
+                entity.Datum = entry.Datum;
 
-            try
-            {
-                return new OkObjectResult(Update(entry, entity));
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+                SetOptionalValues(entity, entry);
+                Ctx.Erhaltungsaufwendungen.Update(entity);
+                Ctx.SaveChanges();
+
+                return new ErhaltungsaufwendungEntry(entity, entry.Permissions);
+            });
         }
 
-        private ErhaltungsaufwendungEntry Update(ErhaltungsaufwendungEntry entry, Erhaltungsaufwendung entity)
-        {
-            entity.Betrag = entry.Betrag;
-            entity.Wohnung = Ctx.Wohnungen.Find(entry.Wohnung.Id)!;
-            entity.Bezeichnung = entry.Bezeichnung;
-            entity.Aussteller = Ctx.Kontakte.Find(entry.Aussteller.Id)!;
-            entity.Datum = entry.Datum;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Erhaltungsaufwendungen.Update(entity);
-            Ctx.SaveChanges();
-
-            return new ErhaltungsaufwendungEntry(entity);
-        }
-
-        private void SetOptionalValues(Erhaltungsaufwendung entity, ErhaltungsaufwendungEntry entry)
+        private static void SetOptionalValues(Erhaltungsaufwendung entity, ErhaltungsaufwendungEntry entry)
         {
             if (entity.ErhaltungsaufwendungId != entry.Id)
             {

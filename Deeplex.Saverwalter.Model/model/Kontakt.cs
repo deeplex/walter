@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Deeplex.Saverwalter.Model.Auth;
 
 namespace Deeplex.Saverwalter.Model
 {
@@ -22,14 +23,15 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
 
         // Only valid if Rechtsform != natuerlich
-        public virtual List<Kontakt> JuristischePersonen { get; set; } = new();
-        public virtual List<Kontakt> Mitglieder { get; set; } = new();
+        public virtual List<Kontakt> JuristischePersonen { get; set; } = [];
+        public virtual List<Kontakt> Mitglieder { get; set; } = [];
 
-        public virtual List<Vertrag> VerwaltetVertraege { get; private set; } = new();
-        public virtual List<Vertrag> Mietvertraege { get; private set; } = new();
-        public virtual List<Wohnung> Wohnungen { get; private set; } = new();
-        public virtual List<Garage> Garagen { get; private set; } = new();
-        public virtual List<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; private set; } = new();
+        public virtual List<Vertrag> VerwaltetVertraege { get; private set; } = [];
+        public virtual List<Vertrag> Mietvertraege { get; private set; } = [];
+        public virtual List<Wohnung> Wohnungen { get; private set; } = [];
+        public virtual List<Garage> Garagen { get; private set; } = [];
+        public virtual List<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; private set; } = [];
+        public virtual List<UserAccount> Accounts { get; private set; } = [];
 
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }

@@ -1,9 +1,12 @@
+﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -14,83 +17,105 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class ZaehlerControllerTests
     {
         [Fact]
-        public void Get()
+        public async Task Get()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<ZaehlerController>>();
-            var dbService = new ZaehlerDbService(ctx);
-            var controller = new ZaehlerController(logger, dbService);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new ZaehlerDbService(ctx, auth);
+            var controller = new ZaehlerController(logger, dbService, A.Fake<HttpClient>());
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.Get();
+            var result = await controller.Get();
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
-        public void Post()
+        public async Task Post()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<ZaehlerController>>();
-            var dbService = new ZaehlerDbService(ctx);
-            var controller = new ZaehlerController(logger, dbService);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new ZaehlerDbService(ctx, auth);
+            var controller = new ZaehlerController(logger, dbService, A.Fake<HttpClient>());
 
-            var entity = new Zaehler("Test", Zaehlertyp.Warmwasser);
-            var entry = new ZaehlerEntry(entity);
+            var entity = new Zaehler("Test", Zaehlertyp.Warmwasser)
+            {
+                Wohnung = TestUtils.GetVertragForAbrechnung(ctx).Wohnung
+            };
+            var entry = new ZaehlerEntry(entity, new());
 
-            var result = controller.Post(entry);
+            var result = await controller.Post(entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
-        public void GetId()
+        public async Task GetId()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<ZaehlerController>>();
-            var dbService = new ZaehlerDbService(ctx);
-            var controller = new ZaehlerController(logger, dbService);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new ZaehlerDbService(ctx, auth);
+            var controller = new ZaehlerController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = vertrag.Wohnung.Zaehler.First();
 
-            var result = controller.Get(entity.ZaehlerId);
+            var result = await controller.Get(entity.ZaehlerId);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
-        public void Put()
+        public async Task Put()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<ZaehlerController>>();
-            var dbService = new ZaehlerDbService(ctx);
-            var controller = new ZaehlerController(logger, dbService);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new ZaehlerDbService(ctx, auth);
+            var controller = new ZaehlerController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = new Zaehler("Test", Zaehlertyp.Warmwasser);
             ctx.ZaehlerSet.Add(entity);
             ctx.SaveChanges();
-            var entry = new ZaehlerEntry(entity);
+            var entry = new ZaehlerEntry(entity, new());
             entry.Kennnummer = "ChangedNummer";
 
-            var result = controller.Put(entity.ZaehlerId, entry);
+            var result = await controller.Put(entity.ZaehlerId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             entity.Kennnummer.Should().Be("ChangedNummer");
         }
 
         [Fact]
-        public void Delete()
+        public async Task Delete()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<ZaehlerController>>();
-            var dbService = new ZaehlerDbService(ctx);
-            var controller = new ZaehlerController(logger, dbService);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new ZaehlerDbService(ctx, auth);
+            var controller = new ZaehlerController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = vertrag.Wohnung.Zaehler.First();
             var id = entity.ZaehlerId;
 
-            var result = controller.Delete(id);
+            var result = await controller.Delete(id);
 
             result.Should().BeOfType<OkResult>();
             ctx.ZaehlerSet.Find(id).Should().BeNull();

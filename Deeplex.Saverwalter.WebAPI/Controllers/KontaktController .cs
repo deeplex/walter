@@ -1,113 +1,110 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/kontakte")]
-    public class KontaktController : ControllerBase
+    public class KontaktController : FileControllerBase<KontaktEntry, Kontakt>
     {
         public class KontaktEntryBase
         {
             protected Kontakt? Entity { get; }
 
             public int Id { get; set; }
-            public SelectionEntry? Anrede { get; set; }
-            public SelectionEntry Rechtsform { get; set; } = null!;
-            public string? Vorname { get; set; }
-            public string Bezeichnung { get; } = null!;
-            public string Name { get; set; } = null!;
+
+            public AdresseEntryBase? Adresse { get; set; }
+            public string? Bezeichnung { get; } = null!;
             public string? Email { get; set; }
             public string? Fax { get; set; }
-            public string? Notiz { get; set; }
             public string? Telefon { get; set; }
             public string? Mobil { get; set; }
-            public AdresseEntryBase? Adresse { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
+
+            public Permissions Permissions { get; set; } = new Permissions();
 
             protected KontaktEntryBase() : base() { }
-            public KontaktEntryBase(Kontakt entity)
+            public KontaktEntryBase(Kontakt entity, Permissions permissions)
             {
                 Entity = entity;
                 Id = entity.KontaktId;
-                Anrede = new SelectionEntry((int)Entity.Anrede, Entity.Anrede.ToString());
-                Rechtsform = new SelectionEntry((int)Entity.Rechtsform, Entity.Rechtsform.ToDescriptionString());
-                Vorname = Entity.Vorname;
-                Name = Entity.Name;
-                Bezeichnung = Entity.Bezeichnung;
-                Email = Entity.Email;
-                Fax = Entity.Fax;
-                Notiz = Entity.Notiz;
-                Telefon = Entity.Telefon;
-                Mobil = Entity.Mobil;
 
-                if (Entity.Adresse is Adresse a)
+                if (entity.Adresse is Adresse a)
                 {
-                    Adresse = new AdresseEntryBase(a);
+                    Adresse = new AdresseEntryBase(a, permissions);
                 }
 
-                CreatedAt = Entity.CreatedAt;
-                LastModified = Entity.LastModified;
+                Bezeichnung = entity.Bezeichnung;
+                Email = entity.Email;
+                Fax = entity.Fax;
+                Telefon = entity.Telefon;
+                Mobil = entity.Mobil;
+
+                Permissions = permissions;
             }
         }
 
         public sealed class KontaktEntry : KontaktEntryBase
         {
+            public string? Vorname { get; set; }
+            public string Name { get; set; } = null!;
+            public SelectionEntry? Anrede { get; set; }
+            public SelectionEntry Rechtsform { get; set; } = null!;
+            public string? Notiz { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
             public IEnumerable<SelectionEntry>? SelectedJuristischePersonen
                 => Entity?.JuristischePersonen.Select(e => new SelectionEntry(e.KontaktId, e.Name));
 
             public IEnumerable<SelectionEntry>? SelectedMitglieder
                 => Entity?.Mitglieder.Select(e => new SelectionEntry(e.KontaktId, e.Name));
 
-            public IEnumerable<KontaktEntryBase>? JuristischePersonen
-                => Entity?.JuristischePersonen.Select(e => new KontaktEntryBase(e));
-
-            public IEnumerable<KontaktEntryBase>? Mitglieder
-                => Entity?.Mitglieder.Select(e => new KontaktEntryBase(e));
-
-            public IEnumerable<VertragEntryBase>? Vertraege
-                => Entity?.Mietvertraege
-                .Concat(Entity.Wohnungen.SelectMany(w => w.Vertraege))
-                .Distinct()
-                .Select(e => new VertragEntryBase(e));
-
-            public IEnumerable<WohnungEntryBase>? Wohnungen
-                => Entity?.Mietvertraege
-                .Concat(Entity.Wohnungen.SelectMany(w => w.Vertraege))
-                .Select(e => e.Wohnung)
-                .Distinct()
-                .Select(e => new WohnungEntryBase(e));
+            public IEnumerable<KontaktEntryBase> JuristischePersonen { get; set; } = [];
+            public IEnumerable<KontaktEntryBase> Mitglieder { get; set; } = [];
+            public IEnumerable<VertragEntryBase> Vertraege { get; set; } = [];
+            public IEnumerable<WohnungEntryBase> Wohnungen { get; set; } = [];
 
             public KontaktEntry() : base() { }
-            public KontaktEntry(Kontakt entity) : base(entity) { }
+            public KontaktEntry(Kontakt entity, Permissions permissions) : base(entity, permissions)
+            {
+                Anrede = new SelectionEntry((int)entity.Anrede, entity.Anrede.ToString());
+                Rechtsform = new SelectionEntry((int)entity.Rechtsform, entity.Rechtsform.ToDescriptionString());
+                Vorname = entity.Vorname;
+                Name = entity.Name;
+                Notiz = entity.Notiz;
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
+            }
         }
 
         private readonly ILogger<KontaktController> _logger;
-        private KontaktDbService DbService { get; }
+        protected override KontaktDbService DbService { get; }
 
-        public KontaktController(ILogger<KontaktController> logger, KontaktDbService dbService)
+        public KontaktController(ILogger<KontaktController> logger, KontaktDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             _logger = logger;
             DbService = dbService;
         }
 
         [HttpGet]
-        public IActionResult Get() => new OkObjectResult(DbService.Ctx.Kontakte.ToList().Select(e => new KontaktEntryBase(e)).ToList());
+        public Task<ActionResult<IEnumerable<KontaktEntryBase>>> Get() => DbService.GetList();
         [HttpPost]
-        public IActionResult Post([FromBody] KontaktEntry entry) => DbService.Post(entry);
+        public Task<ActionResult<KontaktEntry>> Post([FromBody] KontaktEntry entry) => DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id) => DbService.Get(id);
+        public Task<ActionResult<KontaktEntry>> Get(int id) => DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public IActionResult Put(int id, KontaktEntry entry) => DbService.Put(id, entry);
+        public Task<ActionResult<KontaktEntry>> Put(int id, KontaktEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id) => DbService.Delete(id);
+        public Task<ActionResult> Delete(int id) => DbService.Delete(User!, id);
     }
 }

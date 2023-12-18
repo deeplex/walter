@@ -5,8 +5,11 @@
     import type { WalterUmlagetypEntry } from '$walter/lib';
 
     export let entry: Partial<WalterUmlagetypEntry> = {};
-    export let readonly = false;
     export const fetchImpl: typeof fetch | undefined = undefined; // NOTE: Needed to load copy preview fetchImpl...?
+    export let readonly = false;
+    $: {
+        readonly = entry?.permissions?.update === false;
+    }
 </script>
 
 <Row>

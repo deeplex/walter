@@ -1,62 +1,79 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using System.Security.Claims;
+using Deeplex.Saverwalter.Model;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class UmlageDbService : IControllerService<UmlageEntry>
+    public class UmlageDbService : WalterDbServiceBase<UmlageEntry, Umlage>
     {
-        public SaverwalterContext Ctx { get; }
-
-        public UmlageDbService(SaverwalterContext dbService)
+        public UmlageDbService(SaverwalterContext dbService, IAuthorizationService authorizationService) : base(dbService, authorizationService)
         {
-            Ctx = dbService;
         }
 
-        public IActionResult Get(int id)
+        public async Task<ActionResult<IEnumerable<UmlageEntryBase>>> GetList(ClaimsPrincipal user)
         {
-            var entity = Ctx.Umlagen.Find(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            var list = await UmlagePermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
-            try
-            {
-                var entry = new UmlageEntry(entity);
-                return new OkObjectResult(entry);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            return await Task.WhenAll(list
+                .Select(async e => new UmlageEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public IActionResult Delete(int id)
+        public override async Task<ActionResult<Umlage>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
-            var entity = Ctx.Umlagen.Find(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
-
-            Ctx.Umlagen.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+            var entity = await Ctx.Umlagen.FindAsync(id);
+            return await GetEntity(user, entity, op);
         }
 
-        public IActionResult Post(UmlageEntry entry)
+        public override async Task<ActionResult<UmlageEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, Operations.Read, async (entity) =>
+            {
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
+                var entry = new UmlageEntry(entity, permissions);
+
+                entry.Wohnungen = await Task.WhenAll(entity.Wohnungen
+                    .Select(async e => new WohnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
+                entry.Zaehler = await Task.WhenAll(entity.Zaehler
+                    .Select(async e => new ZaehlerEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
+
+                return entry;
+            });
+        }
+
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, Operations.Delete, async (entity) =>
+            {
+                Ctx.Umlagen.Remove(entity);
+                await Ctx.SaveChangesAsync();
+
+                return new OkResult();
+            });
+        }
+
+        public override async Task<ActionResult<UmlageEntry>> Post(ClaimsPrincipal user, UmlageEntry entry)
         {
             if (entry.Id != 0)
             {
                 return new BadRequestResult();
             }
 
+            var wohnungen = entry.Wohnungen!.SelectMany(wohnung => Ctx.Wohnungen.Where(w => w.WohnungId == wohnung.Id));
+            var authRx = await Auth.AuthorizeAsync(user, wohnungen, [Operations.SubCreate]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
+            }
+
             try
             {
-                return new OkObjectResult(Add(entry));
+                return Add(entry);
             }
             catch
             {
@@ -86,46 +103,31 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Umlagen.Add(entity);
             Ctx.SaveChanges();
 
-            return new UmlageEntry(entity);
+            return new UmlageEntry(entity, entry.Permissions);
         }
 
-        public IActionResult Put(int id, UmlageEntry entry)
+        public override async Task<ActionResult<UmlageEntry>> Put(ClaimsPrincipal user, int id, UmlageEntry entry)
         {
-            var entity = Ctx.Umlagen.Find(id);
-            if (entity == null)
+            return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                if (entry.Typ == null)
+                {
+                    throw new ArgumentException("entry has no Typ.");
+                }
+                if (entry.Schluessel == null)
+                {
+                    throw new ArgumentException("entry has no Schluessel.");
+                }
 
-            try
-            {
-                return new OkObjectResult(Update(entry, entity));
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
-        }
+                entity.Typ = (await Ctx.Umlagetypen.FindAsync(entry.Typ.Id))!;
+                entity.Schluessel = (Umlageschluessel)entry.Schluessel.Id;
 
-        private UmlageEntry Update(UmlageEntry entry, Umlage entity)
-        {
-            if (entry.Typ == null)
-            {
-                throw new ArgumentException("entry has no Typ.");
-            }
-            if (entry.Schluessel == null)
-            {
-                throw new ArgumentException("entry has no Schluessel.");
-            }
+                SetOptionalValues(entity, entry);
+                Ctx.Umlagen.Update(entity);
+                Ctx.SaveChanges();
 
-            entity.Typ = Ctx.Umlagetypen.First(typ => typ.UmlagetypId == entry.Typ.Id);
-            entity.Schluessel = (Umlageschluessel)entry.Schluessel.Id;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Umlagen.Update(entity);
-            Ctx.SaveChanges();
-
-            return new UmlageEntry(entity);
+                return new UmlageEntry(entity, entry.Permissions);
+            });
         }
 
         private void SetOptionalValues(Umlage entity, UmlageEntry entry)
@@ -140,10 +142,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             if (entry.SelectedWohnungen is IEnumerable<SelectionEntry> l)
             {
                 // Add missing Wohnungen
-                entity.Wohnungen
-                    .AddRange(l
+                entity.Wohnungen.AddRange(l
                     .Where(w => !entity.Wohnungen.Exists(e => w.Id == e.WohnungId))
-                    .Select(w => Ctx.Wohnungen.Find(w.Id)!));
+                    .SelectMany(w => Ctx.Wohnungen.Where(u => u.WohnungId == w.Id)));
                 // Remove old Wohnungen
                 entity.Wohnungen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.WohnungId));
             }
@@ -153,7 +154,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 // Add missing zaehler
                 entity.Zaehler.AddRange(zaehler
                     .Where(z => !entity.Zaehler.Exists(e => z.Id == e.ZaehlerId))
-                    .Select(w => Ctx.ZaehlerSet.Find(w.Id)!));
+                    .SelectMany(w => Ctx.ZaehlerSet.Where(u => u.ZaehlerId == w.Id)!));
                 // Remove old zaehler
                 entity.Zaehler.RemoveAll(w => !zaehler.ToList().Exists(e => e.Id == w.ZaehlerId));
             }

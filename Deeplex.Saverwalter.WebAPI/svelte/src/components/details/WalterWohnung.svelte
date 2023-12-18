@@ -12,12 +12,14 @@
     export let entry: Partial<WalterWohnungEntry> = {};
     export let fetchImpl: typeof fetch;
     export let readonly = false;
+    $: {
+        readonly = entry?.permissions?.update === false;
+    }
 </script>
 
 <Row>
     <WalterComboBoxKontakt
         {fetchImpl}
-        required
         {readonly}
         bind:value={entry.besitzer}
         title="Besitzer"

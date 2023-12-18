@@ -190,23 +190,23 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                     .SelectMany(umlage => umlage.Wohnungen)
                     .Distinct();
                 Wohnungen = wohnungen
-                    .Select(wohnung => new WohnungEntryBase(wohnung))
+                    .Select(wohnung => new WohnungEntryBase(wohnung, new()))
                     .ToList();
                 Vertraege = wohnungen
                     .SelectMany(wohnung => wohnung.Vertraege)
                     .Where(vertrag => vertrag.Beginn() <= abrechnung.Zeitraum.Abrechnungsende &&
                         (vertrag.Ende == null || vertrag.Ende >= abrechnung.Zeitraum.Abrechnungsbeginn))
-                    .Select(vertrag => new VertragEntryBase(vertrag))
+                    .Select(vertrag => new VertragEntryBase(vertrag, new()))
                     .ToList();
                 Zaehler = wohnungen
                     .SelectMany(wohnung => wohnung.Zaehler)
-                    .Select(e => new ZaehlerEntryBase(e))
+                    .Select(e => new ZaehlerEntryBase(e, new()))
                     .ToList();
                 Mieten = abrechnung.Vertrag.Mieten
                     .Where(miete =>
                         miete.BetreffenderMonat >= abrechnung.Zeitraum.Abrechnungsbeginn &&
                         miete.BetreffenderMonat <= abrechnung.Zeitraum.Abrechnungsende)
-                    .Select(miete => new MieteEntryBase(miete))
+                    .Select(miete => new MieteEntryBase(miete, new()))
                     .ToList();
             }
         }
@@ -219,21 +219,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 
         [HttpGet]
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}")]
-        public IActionResult GetBetriebskostenabrechnung(int vertrag_id, int jahr)
+        public ActionResult<BetriebskostenabrechnungEntry> GetBetriebskostenabrechnung(int vertrag_id, int jahr)
         {
             return Service.Get(vertrag_id, jahr);
         }
 
         [HttpGet]
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}/word_document")]
-        public IActionResult GetBetriebskostenabrechnungWordDocument(int vertrag_id, int jahr)
+        public ActionResult<MemoryStream> GetBetriebskostenabrechnungWordDocument(int vertrag_id, int jahr)
         {
             return Service.GetWordDocument(vertrag_id, jahr);
         }
 
         [HttpGet]
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}/pdf_document")]
-        public IActionResult GetBetriebskostenabrechnungPdfDocument(int vertrag_id, int jahr)
+        public ActionResult<MemoryStream> GetBetriebskostenabrechnungPdfDocument(int vertrag_id, int jahr)
         {
             return Service.GetPdfDocument(vertrag_id, jahr);
         }

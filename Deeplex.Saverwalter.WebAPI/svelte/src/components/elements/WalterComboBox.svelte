@@ -29,6 +29,18 @@
         walter_update_value(lastSavedValue, value?.id, e.detail.selectedItem);
         value = e.detail.selectedItem;
     }
+
+    function sanitizeEntries(
+        resolvedEntries: WalterSelectionEntry[],
+        selectedEntry: WalterSelectionEntry | undefined
+    ) {
+        if (!selectedEntry) {
+            return resolvedEntries;
+        }
+        return resolvedEntries.some((entry) => entry.id === selectedEntry.id)
+            ? resolvedEntries
+            : [selectedEntry];
+    }
 </script>
 
 {#await entries}
@@ -44,7 +56,7 @@
             selectedId={x?.id}
             on:select={select}
             style="padding-right: 1rem"
-            items={resolvedEntries}
+            items={sanitizeEntries(resolvedEntries, x)}
             value={x?.text}
             {titleText}
             {shouldFilterItem}

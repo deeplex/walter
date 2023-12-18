@@ -34,6 +34,23 @@
 <slot />
 
 <style>
+    :global(.bx--side-nav__link) {
+        padding-left: 1rem !important;
+    }
+
+    :global(.bx--side-nav__items) {
+        display: flex;
+        flex-direction: column;
+    }
+
+    :global(.bx--side-nav__item) {
+        min-height: 32px;
+    }
+
+    :global(.bx--side-nav__divider) {
+        min-height: 1px;
+    }
+
     :global(.bx--data-table) {
         overflow: auto;
     }
@@ -63,22 +80,6 @@
         background-color: #2e7d32 !important;
     }
 
-    :global(.bx--toast-notification) {
-        animation-name: fly;
-        animation-duration: 200ms;
-    }
-
-    @keyframes fly {
-        from {
-            transform: translateX(200px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-
     :global(.bx--file) {
         padding-top: 2em;
         display: flex;
@@ -103,14 +104,27 @@
         padding: 0 !important;
     }
 
+    :global(#homepagetabs) {
+        position: fixed;
+        z-index: 3000;
+    }
+
     :global(.bx--list-box__menu-item) {
         margin: 0px !important;
+    }
+
+    :global(.bx--dropdown__wrapper) {
+        margin-right: -5px !important;
+    }
+
+    :global(#usermenu > .bx--side-nav__submenu-chevron) {
+        transform: scaleY(-1) !important;
     }
 
     /* Adjust size of content in detail view */
     :global(.bx--text-input-wrapper, .bx--form-item, .bx--list-box__wrapper) {
         margin: 10px;
-        flex: 1 1 auto !important;
+        flex: 1 1 0px !important;
         display: flex !important;
         flex-direction: column !important;
         flex-wrap: wrap !important;

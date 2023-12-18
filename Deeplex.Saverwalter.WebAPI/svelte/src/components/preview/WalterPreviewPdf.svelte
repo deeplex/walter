@@ -20,7 +20,7 @@
 </script>
 
 {#if file.Blob}
-    <div style="height:100vh" id="pdf-container" />
+    <div style="height:50rem; overflow: hidden" id="pdf-container" />
 {:else}
     <WalterPreviewError {file} />
 {/if}

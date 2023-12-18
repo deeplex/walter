@@ -1,61 +1,79 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using System.Security.Claims;
+using Deeplex.Saverwalter.Model;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class BetriebskostenrechnungDbService : IControllerService<BetriebskostenrechnungEntry>
+    public class BetriebskostenrechnungDbService : WalterDbServiceBase<BetriebskostenrechnungEntry, Betriebskostenrechnung>
     {
-        public SaverwalterContext Ctx { get; }
-
-        public BetriebskostenrechnungDbService(SaverwalterContext ctx)
+        public BetriebskostenrechnungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
         }
 
-        public IActionResult Get(int id)
+        public async Task<ActionResult<IEnumerable<BetriebskostenrechnungEntryBase>>> GetList(ClaimsPrincipal user)
         {
-            var entity = Ctx.Betriebskostenrechnungen.Find(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            var list = await BetriebskostenrechnungPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
-            try
-            {
-                var entry = new BetriebskostenrechnungEntry(entity);
-                return new OkObjectResult(entry);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            return await Task.WhenAll(list
+                .Select(async e => new BetriebskostenrechnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public IActionResult Delete(int id)
+        public override async Task<ActionResult<Betriebskostenrechnung>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
-            var entity = Ctx.Betriebskostenrechnungen.Find(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
-
-            Ctx.Betriebskostenrechnungen.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+            var entity = await Ctx.Betriebskostenrechnungen.FindAsync(id);
+            return await GetEntity(user, entity, op);
         }
 
-        public IActionResult Post(BetriebskostenrechnungEntry entry)
+        public override async Task<ActionResult<BetriebskostenrechnungEntry>> Get(ClaimsPrincipal user, int id)
+        {
+
+            return await HandleEntity(user, id, Operations.Read, async (entity) =>
+            {
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
+                var entry = new BetriebskostenrechnungEntry(entity, permissions);
+
+                entry.Betriebskostenrechnungen = await Task.WhenAll(entity.Umlage.Betriebskostenrechnungen
+                        .Select(async e => new BetriebskostenrechnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
+                entry.Wohnungen = await Task.WhenAll(entity.Umlage.Wohnungen
+                        .Select(async e => new WohnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
+
+                return entry;
+            });
+        }
+
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, Operations.Delete, async (entity) =>
+            {
+                Ctx.Betriebskostenrechnungen.Remove(entity);
+                await Ctx.SaveChangesAsync();
+
+                return new OkResult();
+            });
+        }
+
+        public override async Task<ActionResult<BetriebskostenrechnungEntry>> Post(ClaimsPrincipal user, BetriebskostenrechnungEntry entry)
         {
             if (entry.Id != 0)
             {
                 return new BadRequestResult();
             }
 
+            var umlage = Ctx.Umlagen.FindAsync(entry.Umlage!.Id);
+            var authRx = await Auth.AuthorizeAsync(user, umlage, [Operations.SubCreate]);
+            if (!authRx.Succeeded)
+            {
+                return new ForbidResult();
+            }
+
             try
             {
-                return new OkObjectResult(Add(entry));
+
+                return await Add(entry);
             }
             catch
             {
@@ -63,17 +81,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private BetriebskostenrechnungEntry Add(BetriebskostenrechnungEntry entry)
+        private async Task<BetriebskostenrechnungEntry> Add(BetriebskostenrechnungEntry entry)
         {
             if (entry.Umlage == null)
             {
                 throw new ArgumentException("entry.Umlage can't be null.");
             }
-            var umlage = Ctx.Umlagen.Find(entry.Umlage.Id);
-            if (umlage == null)
-            {
-                throw new ArgumentException($"Did not find Umlage with Id {entry.Umlage.Id}");
-            }
+            var umlage = await Ctx.Umlagen.FindAsync(entry.Umlage.Id) ?? throw new ArgumentException($"Did not find Umlage with Id {entry.Umlage.Id}");
             var entity = new Betriebskostenrechnung(entry.Betrag, entry.Datum, entry.BetreffendesJahr)
             {
                 Umlage = umlage!
@@ -83,52 +97,31 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Betriebskostenrechnungen.Add(entity);
             Ctx.SaveChanges();
 
-            return new BetriebskostenrechnungEntry(entity);
+            return new BetriebskostenrechnungEntry(entity, entry.Permissions);
         }
 
-        public IActionResult Put(int id, BetriebskostenrechnungEntry entry)
+        public override async Task<ActionResult<BetriebskostenrechnungEntry>> Put(ClaimsPrincipal user, int id, BetriebskostenrechnungEntry entry)
         {
-            var entity = Ctx.Betriebskostenrechnungen.Find(id);
-            if (entity == null)
+            return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                entity.Betrag = entry.Betrag;
+                entity.Datum = entry.Datum;
+                entity.BetreffendesJahr = entry.BetreffendesJahr;
+                if (entry.Umlage == null)
+                {
+                    throw new ArgumentException("entry has no Umlage");
+                }
+                entity.Umlage = await Ctx.Umlagen.FindAsync(entry.Umlage.Id) ?? throw new ArgumentException($"entry has no Umlage with Id {entry.Umlage.Id}");
 
-            try
-            {
-                return new OkObjectResult(Update(entry, entity));
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+                SetOptionalValues(entity, entry);
+                Ctx.Betriebskostenrechnungen.Update(entity);
+                Ctx.SaveChanges();
+
+                return new BetriebskostenrechnungEntry(entity, entry.Permissions);
+            });
         }
 
-        private BetriebskostenrechnungEntry Update(BetriebskostenrechnungEntry entry, Betriebskostenrechnung entity)
-        {
-            entity.Betrag = entry.Betrag;
-            entity.Datum = entry.Datum;
-            entity.BetreffendesJahr = entry.BetreffendesJahr;
-            if (entry.Umlage == null)
-            {
-                throw new ArgumentException("entry has no Umlage");
-            }
-            var umlage = Ctx.Umlagen.Find(entry.Umlage.Id);
-            if (umlage == null)
-            {
-                throw new ArgumentException($"entry has no Umlage with Id {entry.Umlage.Id}");
-            }
-
-            entity.Umlage = umlage;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Betriebskostenrechnungen.Update(entity);
-            Ctx.SaveChanges();
-
-            return new BetriebskostenrechnungEntry(entity);
-        }
-
-        private void SetOptionalValues(Betriebskostenrechnung entity, BetriebskostenrechnungEntry entry)
+        private static void SetOptionalValues(Betriebskostenrechnung entity, BetriebskostenrechnungEntry entry)
         {
             if (entity.BetriebskostenrechnungId != entry.Id)
             {

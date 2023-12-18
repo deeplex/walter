@@ -1,5 +1,6 @@
 import { WalterAdresseEntry } from './WalterAdresse';
 import { WalterApiHandler } from './WalterApiHandler';
+import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 import { WalterVertragEntry } from './WalterVertrag';
 import { WalterWohnungEntry } from './WalterWohnung';
@@ -9,7 +10,6 @@ export class WalterKontaktEntry extends WalterApiHandler {
 
     constructor(
         public id: number,
-        public guid: string,
         public email: string,
         public telefon: string,
         public fax: string,
@@ -23,12 +23,13 @@ export class WalterKontaktEntry extends WalterApiHandler {
         public lastModified: Date,
         public anrede: WalterSelectionEntry,
         public selectedJuristischePersonen: WalterSelectionEntry[],
-        public adresse: WalterAdresseEntry,
+        public adresse: WalterAdresseEntry | undefined,
         public juristischePersonen: WalterKontaktEntry[],
         public wohnungen: WalterWohnungEntry[],
         public vertraege: WalterVertragEntry[],
         public selectedMitglieder: WalterSelectionEntry[],
-        public mitglieder: WalterKontaktEntry[]
+        public mitglieder: WalterKontaktEntry[],
+        public permissions: WalterPermissions
     ) {
         super();
     }
@@ -46,16 +47,22 @@ export class WalterKontaktEntry extends WalterApiHandler {
         const wohnungen = json.wohnungen?.map(WalterWohnungEntry.fromJson);
         const vertraege = json.vertraege?.map(WalterVertragEntry.fromJson);
         const mitglieder = json.mitglieder?.map(WalterKontaktEntry.fromJson);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
+        const rechtsform =
+            json.rechtsform && WalterSelectionEntry.fromJson(json.rechtsform);
+        const selectedMitglieder = json.selectedMitglieder?.map(
+            WalterSelectionEntry.fromJson
+        );
 
         return new WalterKontaktEntry(
             json.id,
-            json.guid,
             json.email,
             json.telefon,
             json.fax,
             json.mobil,
             json.notiz,
-            json.rechtsform,
+            rechtsform,
             json.bezeichnung,
             json.name,
             json.vorname,
@@ -67,8 +74,9 @@ export class WalterKontaktEntry extends WalterApiHandler {
             juristischePersonen,
             wohnungen,
             vertraege,
-            json.selectedMitglieder,
-            mitglieder
+            selectedMitglieder,
+            mitglieder,
+            permissions
         );
     }
 }

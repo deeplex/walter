@@ -16,7 +16,7 @@ namespace Deeplex.Saverwalter.WebAPI
             return new Betriebskostenabrechnung(vertrag, Jahr, beginn, ende);
         }
 
-        public IActionResult Get(int vertrag_id, int Jahr)
+        public ActionResult<BetriebskostenabrechnungEntry> Get(int vertrag_id, int Jahr)
         {
 
             try
@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.WebAPI
                 var abrechnung = CreateAbrechnung(vertrag, Jahr);
                 var controller = new BetriebskostenabrechnungEntry(abrechnung);
 
-                return new OkObjectResult(controller);
+                return controller;
             }
             catch
             {
@@ -33,7 +33,7 @@ namespace Deeplex.Saverwalter.WebAPI
             }
         }
 
-        public IActionResult GetWordDocument(int vertrag_id, int Jahr)
+        public ActionResult<MemoryStream> GetWordDocument(int vertrag_id, int Jahr)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace Deeplex.Saverwalter.WebAPI
                 abrechnung.SaveAsDocx(stream);
                 stream.Position = 0;
 
-                return new OkObjectResult(stream);
+                return stream;
             }
             catch
             {
@@ -51,7 +51,7 @@ namespace Deeplex.Saverwalter.WebAPI
             }
         }
 
-        public IActionResult GetPdfDocument(int vertrag_id, int Jahr)
+        public ActionResult<MemoryStream> GetPdfDocument(int vertrag_id, int Jahr)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace Deeplex.Saverwalter.WebAPI
                 abrechnung.SaveAsPdf(stream);
                 stream.Position = 0;
 
-                return new OkObjectResult(stream);
+                return stream;
             }
             catch (Exception ex)
             {

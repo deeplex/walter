@@ -1,4 +1,5 @@
 export { WalterToastContent } from './WalterToastContent';
+export { WalterAccountEntry } from './WalterAccount';
 export { WalterAdresseEntry } from './WalterAdresse';
 export { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
 export { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
@@ -13,6 +14,7 @@ export { WalterUmlageEntry } from './WalterUmlage';
 export { WalterUmlagetypEntry } from './WalterUmlagetyp';
 export { WalterVertragEntry } from './WalterVertrag';
 export { WalterVertragVersionEntry } from './WalterVertragVersion';
+export { WalterVerwalterEntry } from './WalterVerwalter';
 export { WalterWohnungEntry } from './WalterWohnung';
 export { WalterZaehlerEntry } from './WalterZaehler';
 export { WalterZaehlerstandEntry } from './WalterZaehlerstand';

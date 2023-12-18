@@ -1,7 +1,7 @@
 <script lang="ts">
     import {
-    WalterAdresse,
-        WalterComboBox,
+        WalterAdresse,
+        WalterDropdown,
         WalterMultiSelectJuristischePerson,
         WalterTextArea,
         WalterTextInput
@@ -11,19 +11,22 @@
     import { Row } from 'carbon-components-svelte';
     import WalterMultiSelectKontakt from '../elements/WalterMultiSelectKontakt.svelte';
 
-    export let entry: Partial<WalterKontaktEntry>;
+    export let entry: Partial<WalterKontaktEntry> = {};
     export let fetchImpl: typeof fetch;
     export let readonly = false;
+    $: {
+        readonly = entry?.permissions?.update === false;
+    }
     export let juristisch = false;
 
     const anreden = walter_selection.anreden(fetchImpl);
-    const rechtsformen = walter_selection.rechtsformen(fetchImpl)
-        .then(res => {
-            if (juristisch) // Disable selection of natuerliche Person
-            {
+    const rechtsformen = walter_selection
+        .rechtsformen(fetchImpl)
+        .then((res) => {
+            if (juristisch) {
+                // Disable selection of natuerliche Person
                 (res[0] as any).disabled = true;
-                if (entry.rechtsform?.id === 0)
-                {
+                if (entry.rechtsform?.id === 0) {
                     entry.rechtsform = res[1];
                 }
             }
@@ -32,12 +35,13 @@
 </script>
 
 <Row>
-    <WalterComboBox
+    <WalterDropdown
         entries={rechtsformen}
         bind:value={entry.rechtsform}
-        titleText="Rechtsform" />
+        titleText="Rechtsform"
+    />
     {#if entry.rechtsform?.id === 0}
-        <WalterComboBox
+        <WalterDropdown
             entries={anreden}
             bind:value={entry.anrede}
             titleText="Anrede"
@@ -83,7 +87,7 @@
             {fetchImpl}
             titleText="Mitglieder"
             bind:value={entry.selectedMitglieder}
-    />
+        />
     {/if}
 </Row>
 <Row>

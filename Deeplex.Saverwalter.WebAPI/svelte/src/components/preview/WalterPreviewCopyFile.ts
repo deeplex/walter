@@ -1,4 +1,19 @@
-import { WalterToastContent, type WalterSelectionEntry } from '$walter/lib';
+import {
+    WalterToastContent,
+    type WalterSelectionEntry,
+    WalterAdresseEntry,
+    WalterBetriebskostenrechnungEntry,
+    WalterErhaltungsaufwendungEntry,
+    WalterKontaktEntry,
+    WalterMieteEntry,
+    WalterMietminderungEntry,
+    WalterUmlageEntry,
+    WalterUmlagetypEntry,
+    WalterVertragEntry,
+    WalterWohnungEntry,
+    WalterZaehlerEntry,
+    WalterZaehlerstandEntry
+} from '$walter/lib';
 import { walter_selection } from '$walter/services/requests';
 import { S3URL, walter_s3_delete, walter_s3_post } from '$walter/services/s3';
 import type { WalterS3File } from '$walter/types';
@@ -66,12 +81,6 @@ export async function renameImpl(
 
     const failureTitle = 'Umbenennen fehlgeschlagen.';
 
-    const copyToast = new WalterToastContent(
-        undefined,
-        failureTitle,
-        undefined,
-        failureSubtitle
-    );
     const renameToast = new WalterToastContent(
         'Umbenennen erfolgreich',
         failureTitle,
@@ -80,14 +89,14 @@ export async function renameImpl(
     );
 
     const newFile = new File([file.Blob!], newFileName);
-    const S3URL = file.Key.slice(0, file.Key.length - file.FileName.length - 1);
-    const result = await walter_s3_post(newFile, S3URL, fetchImpl, copyToast);
-    if (result.ok) {
-        const result2 = await walter_s3_delete(file, fetchImpl, renameToast);
-        return result2.ok;
-    }
+    const result = await walter_s3_post(
+        newFile,
+        file.Key,
+        fetchImpl,
+        renameToast
+    );
 
-    return false;
+    return result;
 }
 
 export async function moveImpl(
@@ -127,7 +136,7 @@ export async function moveImpl(
     );
 
     if (await copied) {
-        const deleted = walter_s3_delete(file, fetchImpl, moveToast);
+        const deleted = walter_s3_delete(file, moveToast);
         if ((await deleted).status === 200) {
             return true;
         }
@@ -152,8 +161,11 @@ async function copyFile(
     }
     const S3URL =
         selectedTable.key === 'stack'
-            ? `${selectedTable.S3URL}`
-            : `${selectedTable.S3URL}/${selectedEntry?.id}`;
+            ? `${selectedTable.S3URL('')}`
+            : `${selectedTable.S3URL('' + selectedEntry?.id)}`;
+
+    console.log(selectedTable);
+    console.log(S3URL);
 
     const success = walter_s3_post(
         new File([file.Blob], file.FileName),
@@ -174,8 +186,9 @@ export type WalterPreviewCopyTable = {
             init?: RequestInit | undefined
         ) => Promise<Response>
     ) => Promise<unknown>;
-    S3URL: string;
-    newPage: () => unknown;
+    ApiURL: string;
+    S3URL: (id: string) => string;
+    newPage: () => ConstructorOfATypedSvelteComponent;
 };
 
 export const tables: WalterPreviewCopyTable[] = [
@@ -183,63 +196,72 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Adressen',
         key: 'adressen',
         fetch: walter_selection.adressen,
-        S3URL: S3URL.adressen,
+        ApiURL: WalterAdresseEntry.ApiURL,
+        S3URL: (id: string) => S3URL.adresse(id),
         newPage: () => WalterAdresse
     },
     {
         value: 'Betriebskostenrechnungen',
         key: 'betriebskostenrechnungen',
         fetch: walter_selection.betriebskostenrechnungen,
-        S3URL: S3URL.betriebskostenrechnungen,
+        ApiURL: WalterBetriebskostenrechnungEntry.ApiURL,
+        S3URL: (id: string) => S3URL.betriebskostenrechnung(id),
         newPage: () => WalterBetriebskostenrechnung
     },
     {
         value: 'Erhaltungsaufwendungen',
         key: 'erhaltungsaufwendungen',
         fetch: walter_selection.erhaltungsaufwendungen,
-        S3URL: S3URL.erhaltungsaufwendungen,
+        ApiURL: WalterErhaltungsaufwendungEntry.ApiURL,
+        S3URL: (id: string) => S3URL.erhaltungsaufwendung(id),
         newPage: () => WalterErhaltungsaufwendung
     },
     {
         value: 'Kontakte',
         key: 'kontakte',
         fetch: walter_selection.kontakte,
-        S3URL: S3URL.kontakte,
+        ApiURL: WalterKontaktEntry.ApiURL,
+        S3URL: (id: string) => S3URL.kontakt(id),
         newPage: () => WalterKontakt
     },
     {
         value: 'Mieten',
         key: 'mieten',
         fetch: walter_selection.mieten,
-        S3URL: S3URL.mieten,
+        ApiURL: WalterMieteEntry.ApiURL,
+        S3URL: (id: string) => S3URL.miete(id),
         newPage: () => WalterMiete
     },
     {
         value: 'Mietminderungen',
         key: 'mietminderungen',
         fetch: walter_selection.mietminderungen,
-        S3URL: S3URL.mietminderungen,
+        ApiURL: WalterMietminderungEntry.ApiURL,
+        S3URL: (id: string) => S3URL.mietminderung(id),
         newPage: () => WalterMietminderung
     },
     {
         value: 'Umlagen',
         key: 'umlagen',
         fetch: walter_selection.umlagen,
-        S3URL: S3URL.umlagen,
+        ApiURL: WalterUmlageEntry.ApiURL,
+        S3URL: (id: string) => S3URL.umlage(id),
         newPage: () => WalterUmlage
     },
     {
         value: 'Umlagetypen',
         key: 'umlagetypen',
         fetch: walter_selection.umlagetypen,
-        S3URL: S3URL.umlagetypen,
+        ApiURL: WalterUmlagetypEntry.ApiURL,
+        S3URL: (id: string) => S3URL.umlagetyp(id),
         newPage: () => WalterUmlagetyp
     },
     {
         value: 'Verträge',
         key: 'vertraege',
         fetch: walter_selection.vertraege,
-        S3URL: S3URL.vertraege,
+        ApiURL: WalterVertragEntry.ApiURL,
+        S3URL: (id: string) => S3URL.vertrag(id),
         newPage: () => WalterVertrag
     },
     // {
@@ -252,28 +274,32 @@ export const tables: WalterPreviewCopyTable[] = [
         value: 'Wohnungen',
         key: 'wohnungen',
         fetch: walter_selection.wohnungen,
-        S3URL: S3URL.wohnungen,
+        ApiURL: WalterWohnungEntry.ApiURL,
+        S3URL: (id: string) => S3URL.wohnung(id),
         newPage: () => WalterWohnung
     },
     {
         value: 'Zähler',
         key: 'zaehler',
         fetch: walter_selection.zaehler,
-        S3URL: S3URL.zaehlerSet,
+        ApiURL: WalterZaehlerEntry.ApiURL,
+        S3URL: (id: string) => S3URL.zaehler(id),
         newPage: () => WalterZaehler
     },
     {
         value: 'Zählerstände',
         key: 'zaehlerstaende',
         fetch: walter_selection.zaehlerstaende,
-        S3URL: S3URL.zaehlerstaende,
+        ApiURL: WalterZaehlerstandEntry.ApiURL,
+        S3URL: (id: string) => S3URL.zaehlerstand(id),
         newPage: () => WalterZaehlerstand
     },
     {
         value: 'Ablagestapel',
         key: 'stack',
         fetch: () => Promise.resolve(),
-        S3URL: S3URL.stack,
+        ApiURL: '',
+        S3URL: () => S3URL.stack,
         newPage: () => undefined
     }
 ];

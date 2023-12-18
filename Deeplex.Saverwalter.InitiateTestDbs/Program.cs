@@ -4,7 +4,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
 {
     internal class Program
     {
-        static async Task Main(string[] args)
+        static async Task Main()
         {
             var databaseUser = Environment.GetEnvironmentVariable("DATABASE_USER");
             if (databaseUser == null)

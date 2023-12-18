@@ -1,6 +1,5 @@
 import { WalterWohnungEntry } from '$walter/lib';
-import { S3URL, walter_s3_get_files } from '$walter/services/s3';
-import type { WalterS3File } from '$walter/types';
+import { S3URL } from '$walter/services/s3';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch }) => {
@@ -12,8 +11,6 @@ export const load: PageLoad = async ({ params, fetch }) => {
         id: params.id,
         apiURL: apiURL,
         S3URL: s3URL,
-        entry: WalterWohnungEntry.GetOne<WalterWohnungEntry>(params.id, fetch),
-
-        files: walter_s3_get_files(s3URL, fetch) as Promise<WalterS3File[]>
+        entry: WalterWohnungEntry.GetOne<WalterWohnungEntry>(params.id, fetch)
     };
 };

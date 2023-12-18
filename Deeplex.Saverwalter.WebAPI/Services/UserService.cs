@@ -1,8 +1,12 @@
-﻿using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.Model.Auth;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.Model.Auth;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AccountController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services
 {
@@ -25,6 +29,70 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
         private readonly SaverwalterContext walterContext;
         private readonly TokenService tokenService;
+
+        public ActionResult<AccountEntryBase> Get(ClaimsPrincipal user)
+        {
+            var name = user.Identity?.Name;
+            var entity = walterContext.UserAccounts.Single(e => e.Username == name);
+            if (entity == null)
+            {
+                return new NotFoundResult();
+            }
+
+            try
+            {
+                return new AccountEntryBase(entity);
+            }
+            catch
+            {
+                return new BadRequestResult();
+            }
+        }
+
+
+        public ActionResult<AccountEntryBase> Put(ClaimsPrincipal user, AccountEntryBase entry)
+        {
+            var name = user.Identity?.Name;
+            var entity = walterContext.UserAccounts.Single(e => e.Name == name);
+            if (entity == null)
+            {
+                return new NotFoundResult();
+            }
+
+            try
+            {
+                return Update(entry, entity);
+            }
+            catch
+            {
+                return new BadRequestResult();
+            }
+        }
+
+        private AccountEntryBase Update(AccountEntryBase entry, UserAccount entity)
+        {
+            entity.Name = entry.Name;
+
+            walterContext.UserAccounts.Update(entity);
+            walterContext.SaveChanges();
+
+            return new AccountEntryBase(entity);
+        }
+
+        public ActionResult Delete(ClaimsPrincipal user)
+        {
+            var name = user.Identity?.Name;
+            var entity = walterContext.UserAccounts.Single(e => e.Name == name);
+            if (entity == null)
+            {
+                return new NotFoundResult();
+            }
+
+            walterContext.UserAccounts.Remove(entity);
+            walterContext.SaveChanges();
+
+            return new OkResult();
+        }
 
         public UserService(SaverwalterContext walterContext, TokenService tokenService)
         {
@@ -56,24 +124,35 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             return new SignInResult { Succeeded = true, Account = account, SessionToken = token };
         }
 
-        public async Task<UserAccount> CreateUserAccount(string username)
+        public async Task<UserAccount> CreateUserAccount(string username, string name)
         {
-            var account = new UserAccount { Username = username };
+            var account = new UserAccount { Username = username, Name = name };
             walterContext.UserAccounts.Add(account);
             await walterContext.SaveChangesAsync();
             return account;
         }
+
+        public void SetUserPassword(UserAccount account, string password) => SetUserPassword(account, Encoding.UTF8.GetBytes(password));
+        public void SetUserPassword(UserAccount account, byte[] utf8Password)
+        {
+            var credential = account.Pbkdf2PasswordCredential;
+            if (credential == null)
+            {
+                credential = new Pbkdf2PasswordCredential
+                {
+                    User = account,
+                };
+                account.Pbkdf2PasswordCredential = credential;
+                walterContext.Pbkdf2PasswordCredentials.Add(credential);
+            }
+
+            credential.Iterations = defaultIterations;
+            credential.Salt = RandomNumberGenerator.GetBytes(32);
+            credential.PasswordHash = HashPassword(utf8Password, credential.Salt, credential.Iterations);
+        }
         public async Task UpdateUserPassword(UserAccount account, byte[] utf8Password)
         {
-            var credential = new Pbkdf2PasswordCredential
-            {
-                User = account,
-                Iterations = defaultIterations,
-                Salt = RandomNumberGenerator.GetBytes(32),
-            };
-            credential.PasswordHash = HashPassword(utf8Password, credential.Salt, credential.Iterations);
-            account.Pbkdf2PasswordCredential = credential;
-            walterContext.Pbkdf2PasswordCredentials.Add(credential);
+            SetUserPassword(account, utf8Password);
             await walterContext.SaveChangesAsync();
         }
 
@@ -82,6 +161,65 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             var passwordHash = HashPassword(utf8Password, credential.Salt, credential.Iterations);
             // TODO: Sleep(CSPRNG.random(0, 200))
             return ByteEquals(credential.PasswordHash, passwordHash);
+        }
+
+        public async Task<string> CreateResetToken(UserAccount user)
+        {
+            var token = RandomNumberGenerator.GetBytes(16);
+            user.UserResetCredential = new UserResetCredential
+            {
+                User = user,
+                Token = token,
+                ExpiresAt = DateTime.Now.AddDays(7).AsUtcKind(), // TODO: Make this configurable
+            };
+            walterContext.UserResetCredentials.Add(user.UserResetCredential);
+            await walterContext.SaveChangesAsync();
+
+            return WebEncoders.Base64UrlEncode(token);
+        }
+        public async Task<SignInResult> TryRedeemResetToken(string resetToken, string newUserPassword)
+        {
+            byte[] decodedToken;
+            try
+            {
+                decodedToken = WebEncoders.Base64UrlDecode(resetToken);
+            }
+            catch (FormatException)
+            {
+                return new SignInResult { Succeeded = false };
+            }
+
+            var credential = await walterContext.UserResetCredentials
+                .Where(cred => cred.Token == decodedToken)
+                .Include(cred => cred.User)
+                    .ThenInclude(user => user.Pbkdf2PasswordCredential)
+                .SingleOrDefaultAsync();
+
+            if (credential == null)
+            {
+                return new SignInResult { Succeeded = false };
+            }
+            try
+            {
+                if (credential.ExpiresAt < DateTime.Now)
+                {
+                    return new SignInResult { Succeeded = false };
+                }
+                SetUserPassword(credential.User, newUserPassword);
+                var sessionToken = tokenService.CreateTokenFor(credential.User);
+                return new SignInResult
+                {
+                    Succeeded = true,
+                    Account = credential.User,
+                    SessionToken = sessionToken,
+                };
+            }
+            finally
+            {
+                credential.User.UserResetCredential = null;
+                walterContext.Remove(credential);
+                await walterContext.SaveChangesAsync();
+            }
         }
 
         private static byte[] HashPassword(byte[] password, byte[] salt, int iterations)

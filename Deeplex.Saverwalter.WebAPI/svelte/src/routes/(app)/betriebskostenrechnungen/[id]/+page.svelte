@@ -11,15 +11,24 @@
         WalterLinkTile
     } from '$walter/components';
     import { WalterS3FileWrapper } from '$walter/lib';
+    import { S3URL } from '$walter/services/s3';
 
     export let data: PageData;
 
-    const title =
+    let title =
         data.entry.typ?.text +
         ' - ' +
         data.entry.betreffendesJahr +
         ' - ' +
         data.entry.umlage?.text;
+    $: {
+        title =
+            data.entry.typ?.text +
+            ' - ' +
+            data.entry.betreffendesJahr +
+            ' - ' +
+            data.entry.umlage?.text;
+    }
 
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
@@ -54,6 +63,7 @@
 
         <WalterLinkTile
             bind:fileWrapper
+            s3ref={S3URL.umlage(`${data.entry.umlage.id}`)}
             name={`Umlage: ${data.entry.umlage.text}`}
             href={`/umlagen/${data.entry.umlage?.id}`}
         />

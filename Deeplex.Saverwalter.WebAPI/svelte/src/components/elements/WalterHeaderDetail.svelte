@@ -13,9 +13,14 @@
     import { handle_save, handle_delete } from './WalterHeaderDetail';
     import type { WalterS3FileWrapper } from '$walter/lib';
     import { convertTime } from '$walter/services/utils';
+    import type { WalterPermissions } from '$walter/lib/WalterPermissions';
 
-    export let title = 'Saverwalter';
-    export let entry: { lastModified: Date } & unknown;
+    export let title: string;
+    export let entry: {
+        createdAt: Date;
+        lastModified: Date;
+        permissions?: WalterPermissions;
+    } & unknown;
     export let apiURL: string;
     export let fileWrapper: WalterS3FileWrapper | undefined = undefined;
 
@@ -39,21 +44,32 @@
         {#if winWidth < 1056}
             <HeaderAction preventCloseOnClickOutside>
                 <HeaderPanelLinks>
-                    <HeaderPanelLink on:click={click_save}
-                        >Speichern</HeaderPanelLink
-                    >
-                    <HeaderPanelLink on:click={click_delete}
-                        >Löschen</HeaderPanelLink
-                    >
+                    {#if entry?.permissions?.update}
+                        <HeaderPanelLink on:click={click_save}
+                            >Speichern</HeaderPanelLink
+                        >
+                    {/if}
+                    {#if entry?.permissions?.remove}
+                        <HeaderPanelLink on:click={click_delete}
+                            >Löschen</HeaderPanelLink
+                        >
+                    {/if}
                 </HeaderPanelLinks>
                 {#if fileWrapper}
                     <div style="height: 1em; margin-top: 4em" />
-                    <WalterAnhaenge bind:fileWrapper />
+                    <WalterAnhaenge
+                        permissions={entry.permissions}
+                        bind:fileWrapper
+                    />
                 {/if}
             </HeaderAction>
         {:else}
-            <HeaderGlobalAction on:click={click_save} icon={Save} />
-            <HeaderGlobalAction on:click={click_delete} icon={TrashCan} />
+            {#if entry?.permissions?.update}
+                <HeaderGlobalAction on:click={click_save} icon={Save} />
+            {/if}
+            {#if entry?.permissions?.remove}
+                <HeaderGlobalAction on:click={click_delete} icon={TrashCan} />
+            {/if}
 
             {#if fileWrapper}
                 {#await fileWrapper.handles[0].files}
@@ -62,7 +78,10 @@
                         preventCloseOnClickOutside
                         text="(...)"
                     >
-                        <WalterAnhaenge bind:fileWrapper />
+                        <WalterAnhaenge
+                            permissions={entry.permissions}
+                            bind:fileWrapper
+                        />
                     </HeaderAction>
                 {:then files}
                     <HeaderAction
@@ -70,7 +89,10 @@
                         preventCloseOnClickOutside
                         text="({files.length})"
                     >
-                        <WalterAnhaenge bind:fileWrapper />
+                        <WalterAnhaenge
+                            permissions={entry.permissions}
+                            bind:fileWrapper
+                        />
                     </HeaderAction>
                 {/await}
             {/if}

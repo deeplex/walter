@@ -1,8 +1,8 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.Model.Auth;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 {
@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
 
             await PopulateDatabase(ctx, databaseUser, databasePass, numberOfWohnungen);
 
-            ctx.Dispose();
+            await ctx.DisposeAsync();
         }
 
         public static async Task<SaverwalterContext> ConnectDatabase(
@@ -93,7 +93,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
         private static void CreateUserAccount(SaverwalterContext ctx, string databaseUser, string databasePass)
         {
             Console.WriteLine($"Erstelle Nutzer mit Nutzernamen {databaseUser} und Passwort {databasePass}");
-            var account = new UserAccount { Username = databaseUser };
+            var account = new UserAccount { Username = databaseUser, Name = "P. Laceholder" };
             ctx.UserAccounts.Add(account);
             var credential = new Pbkdf2PasswordCredential
             {
@@ -107,6 +107,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             credential.PasswordHash = Rfc2898DeriveBytes.Pbkdf2(utf8Password, credential.Salt, credential.Iterations, HashAlgorithmName.SHA512, 64);
             account.Pbkdf2PasswordCredential = credential;
             ctx.Pbkdf2PasswordCredentials.Add(credential);
+            ctx.SaveChanges();
         }
 
         static List<Adresse> FillAdressen(SaverwalterContext ctx)
@@ -223,8 +224,12 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                         Besitzer = besitzer,
                         Wohnflaeche = flaeche,
                         Nutzflaeche = flaeche,
-                        Nutzeinheit = 1
+                        Nutzeinheit = 1,
+                        Verwalter = {
+                            new Verwalter(VerwalterRolle.Keine) { UserAccount = ctx.UserAccounts.First() }
+                        },
                     });
+
                 }
             }
 
@@ -278,7 +283,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             for (var i = 0; i < wohnungen.Count; ++i)
             {
                 var wohnung = wohnungen[i];
-                DateOnly ende;
+                DateOnly ende = new DateOnly(2022, i % 12 + 1, 1);
                 if (i % 3 == 0)
                 {
                     var jahr = 2020 - (i % 5);

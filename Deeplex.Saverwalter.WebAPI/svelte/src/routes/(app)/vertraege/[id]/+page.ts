@@ -12,8 +12,6 @@ export const load: PageLoad = async ({ params, fetch }) => {
         id: params.id,
         apiURL: apiURL,
         S3URL: s3URL,
-        entry: WalterVertragEntry.GetOne<WalterVertragEntry>(params.id, fetch),
-
-        files: walter_s3_get_files(s3URL, fetch) as Promise<WalterS3File[]>
+        entry: WalterVertragEntry.GetOne<WalterVertragEntry>(params.id, fetch)
     };
 };

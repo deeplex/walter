@@ -1,7 +1,10 @@
+﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
+using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
@@ -11,89 +14,108 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class AdresseDbServiceTests
     {
         [Fact]
-        public void GetTest()
+        public async Task GetTest()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var service = new AdresseDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new AdresseDbService(ctx, auth);
             if (vertrag.Wohnung.Adresse == null)
             {
                 throw new Exception("Adresse not found");
             }
 
-            var result = service.Get(vertrag.Wohnung.Adresse.AdresseId);
+            var result = await service.Get(user, vertrag.Wohnung.Adresse.AdresseId);
 
-            result.Should().BeOfType<OkObjectResult>();
-            var okResult = (OkObjectResult)result;
-            okResult.Value.Should().BeOfType<AdresseEntry>();
+            result.Value.Should().NotBeNull();
+            result.Value.Should().BeOfType<AdresseEntry>();
         }
 
         [Fact]
-        public void DeleteTest()
+        public async Task DeleteTest()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
-            var service = new AdresseDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new AdresseDbService(ctx, auth);
             if (vertrag.Wohnung.Adresse == null)
             {
                 throw new Exception("Adresse not found");
             }
             var id = vertrag.Wohnung.Adresse.AdresseId;
 
-            var result = service.Delete(id);
+            var result = await service.Delete(user, id);
 
             result.Should().BeOfType<OkResult>();
             ctx.Adressen.Find(id).Should().BeNull();
         }
 
         [Fact]
-        public void PostTest()
+        public async Task PostTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new AdresseDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new AdresseDbService(ctx, auth);
             var entity = new Adresse("Teststraße", "1", "12345", "Teststadt");
-            var entry = new AdresseEntry(entity);
+            var entry = new AdresseEntry(entity, new());
 
-            var result = service.Post(entry);
+            var result = await service.Post(user, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             var postedAdresse = Helper.Utils.GetAdresse(entry, ctx);
             postedAdresse.Should().NotBeNull();
         }
 
         [Fact]
-        public void PostFailedTest()
+        public async Task PostFailedTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new AdresseDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new AdresseDbService(ctx, auth);
             var entity = new Adresse("Teststraße", "1", "12345", "Teststadt");
 
             ctx.Adressen.Add(entity);
             ctx.SaveChanges();
 
-            var adresseEntry = new AdresseEntry(entity);
+            var adresseEntry = new AdresseEntry(entity, new());
 
-            var result = service.Post(adresseEntry);
+            var result = await service.Post(user, adresseEntry);
 
-            result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
-        public void PutTest()
+        public async Task PutTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new AdresseDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new AdresseDbService(ctx, auth);
             var entity = new Adresse("Teststraße", "1", "12345", "Teststadt");
 
             ctx.Adressen.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new AdresseEntry(entity);
+            var entry = new AdresseEntry(entity, new());
             entry.Hausnummer = "2";
 
-            var result = service.Put(entity.AdresseId, entry);
+            var result = await service.Put(user, entity.AdresseId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             var updatedEntity = ctx.Adressen.Find(entity.AdresseId);
             if (updatedEntity == null)
             {
@@ -103,20 +125,24 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public void PutFailedTest()
+        public async Task PutFailedTest()
         {
             var ctx = TestUtils.GetContext();
-            var service = new AdresseDbService(ctx);
+            var user = A.Fake<ClaimsPrincipal>();
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var service = new AdresseDbService(ctx, auth);
             var entity = new Adresse("Teststraße", "1", "12345", "Teststadt");
-            var entry = new AdresseEntry(entity);
+            var entry = new AdresseEntry(entity, new());
             entry.Hausnummer = "2";
 
             ctx.Adressen.Add(entity);
             ctx.SaveChanges();
 
-            var result = service.Put(entity.AdresseId + 20, entry);
+            var result = await service.Put(user, entity.AdresseId + 22220, entry);
 
-            result.Should().BeOfType<NotFoundResult>();
+            result.Result.Should().BeOfType<NotFoundResult>();
         }
     }
 }

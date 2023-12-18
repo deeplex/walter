@@ -1,4 +1,5 @@
 import { WalterApiHandler } from './WalterApiHandler';
+import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 
 export class WalterErhaltungsaufwendungEntry extends WalterApiHandler {
@@ -16,7 +17,8 @@ export class WalterErhaltungsaufwendungEntry extends WalterApiHandler {
         public createdAt: Date,
         public lastModified: Date,
         public wohnung: WalterSelectionEntry,
-        public aussteller: WalterSelectionEntry
+        public aussteller: WalterSelectionEntry,
+        public permissions: WalterPermissions
     ) {
         super();
     }
@@ -26,6 +28,8 @@ export class WalterErhaltungsaufwendungEntry extends WalterApiHandler {
             json.wohnung && WalterSelectionEntry.fromJson(json.wohnung);
         const aussteller =
             json.aussteller && WalterSelectionEntry.fromJson(json.aussteller);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterErhaltungsaufwendungEntry(
             json.id,
@@ -36,7 +40,8 @@ export class WalterErhaltungsaufwendungEntry extends WalterApiHandler {
             json.createdAt,
             json.lastModified,
             wohnung,
-            aussteller
+            aussteller,
+            permissions
         );
     }
 }

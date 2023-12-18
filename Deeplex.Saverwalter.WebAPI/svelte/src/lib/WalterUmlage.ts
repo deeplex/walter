@@ -1,6 +1,7 @@
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
 import { WalterHKVOEntry } from './WalterHKVO';
+import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 import { WalterWohnungEntry } from './WalterWohnung';
 import { WalterZaehlerEntry } from './WalterZaehler';
@@ -22,7 +23,8 @@ export class WalterUmlageEntry extends WalterApiHandler {
         public schluessel: WalterSelectionEntry,
         public selectedWohnungen: WalterSelectionEntry[],
         public wohnungen: WalterWohnungEntry[],
-        public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[]
+        public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
+        public permissions: WalterPermissions
     ) {
         super();
     }
@@ -44,6 +46,8 @@ export class WalterUmlageEntry extends WalterApiHandler {
         const hkvo =
             json.hKVO && WalterHKVOEntry.fromJson(json.hKVO as WalterHKVOEntry);
         const zaehler = json.zaehler?.map(WalterZaehlerEntry.fromJson);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterUmlageEntry(
             json.id,
@@ -59,7 +63,8 @@ export class WalterUmlageEntry extends WalterApiHandler {
             schluessel,
             selectedWohnungen,
             wohnungen,
-            betriebskostenrechnungen
+            betriebskostenrechnungen,
+            permissions
         );
     }
 }

@@ -27,12 +27,14 @@
 >
     <WalterMultiSelect disabled={readonly} bind:value {titleText} {entries} />
 
-    <WalterQuickAddButton
-        title="Juristische Personen"
-        bind:addEntry
-        addUrl={WalterKontaktEntry.ApiURL}
-        {onSubmit}
-    >
-        <WalterKontakt juristisch entry={addEntry} {fetchImpl} />
-    </WalterQuickAddButton>
+    {#if !readonly}
+        <WalterQuickAddButton
+            title="Juristische Personen"
+            bind:addEntry
+            addUrl={WalterKontaktEntry.ApiURL}
+            {onSubmit}
+        >
+            <WalterKontakt juristisch entry={addEntry} {fetchImpl} />
+        </WalterQuickAddButton>
+    {/if}
 </div>

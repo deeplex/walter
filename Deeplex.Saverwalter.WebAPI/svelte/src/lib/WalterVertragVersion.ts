@@ -1,4 +1,5 @@
 import { WalterApiHandler } from './WalterApiHandler';
+import { WalterPermissions } from './WalterPermissions';
 import { WalterSelectionEntry } from './WalterSelection';
 
 export class WalterVertragVersionEntry extends WalterApiHandler {
@@ -12,7 +13,8 @@ export class WalterVertragVersionEntry extends WalterApiHandler {
         public grundmiete: number,
         public createdAt: Date,
         public lastModified: Date,
-        public vertrag: WalterSelectionEntry
+        public vertrag: WalterSelectionEntry,
+        public permissions: WalterPermissions
     ) {
         super();
     }
@@ -20,6 +22,8 @@ export class WalterVertragVersionEntry extends WalterApiHandler {
     static fromJson(json: WalterVertragVersionEntry) {
         const vertrag =
             json.vertrag && WalterSelectionEntry.fromJson(json.vertrag);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterVertragVersionEntry(
             json.id,
@@ -29,7 +33,8 @@ export class WalterVertragVersionEntry extends WalterApiHandler {
             json.grundmiete,
             json.createdAt,
             json.lastModified,
-            vertrag
+            vertrag,
+            permissions
         );
     }
 }

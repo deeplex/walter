@@ -1,9 +1,10 @@
-using Deeplex.Saverwalter.Model;
+﻿using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -14,73 +15,85 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class JuristischePersonControllerTests
     {
         [Fact]
-        public void Post()
+        public async Task Post()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<KontaktController>>();
-            var dbService = new KontaktDbService(ctx);
-            var controller = new KontaktController(logger, dbService);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new KontaktDbService(ctx, auth);
+            var controller = new KontaktController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = new Kontakt("TestFirma", Rechtsform.ag);
-            var entry = new KontaktEntry(entity);
+            var entry = new KontaktEntry(entity, new());
 
-            var result = controller.Post(entry);
+            var result = await controller.Post(entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
-        public void GetId()
+        public async Task GetId()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<KontaktController>>();
-            var dbService = new KontaktDbService(ctx);
-            var controller = new KontaktController(logger, dbService);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new KontaktDbService(ctx, auth);
+            var controller = new KontaktController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = new Kontakt("TestFirma", Rechtsform.ag);
             ctx.Kontakte.Add(entity);
             ctx.SaveChanges();
 
-            var result = controller.Get(entity.KontaktId);
+            var result = await controller.Get(entity.KontaktId);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
-        public void Put()
+        public async Task Put()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<KontaktController>>();
-            var dbService = new KontaktDbService(ctx);
-            var controller = new KontaktController(logger, dbService);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new KontaktDbService(ctx, auth);
+            var controller = new KontaktController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = new Kontakt("TestFirma", Rechtsform.gmbh);
             ctx.Kontakte.Add(entity);
             ctx.SaveChanges();
 
-            var entry = new KontaktEntry(entity);
+            var entry = new KontaktEntry(entity, new());
             entry.Email = "TestFirma@example.com";
 
-            var result = controller.Put(entity.KontaktId, entry);
+            var result = await controller.Put(entity.KontaktId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             entry.Email.Should().Be("TestFirma@example.com");
         }
 
         [Fact]
-        public void Delete()
+        public async Task Delete()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<KontaktController>>();
-            var dbService = new KontaktDbService(ctx);
-            var controller = new KontaktController(logger, dbService);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new KontaktDbService(ctx, auth);
+            var controller = new KontaktController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = new Kontakt("TestFirma", Rechtsform.gbr);
             ctx.Kontakte.Add(entity);
             ctx.SaveChanges();
             var id = entity.KontaktId;
 
-            var result = controller.Delete(id);
+            var result = await controller.Delete(id);
 
             result.Should().BeOfType<OkResult>();
             ctx.Kontakte.Find(id).Should().BeNull();

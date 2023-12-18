@@ -51,11 +51,12 @@
         betreffenderMonat: convertDateCanadian(dateMiete)
     };
 
-    const mieter = WalterKontaktEntry.GetAll<WalterKontaktEntry>(fetchImpl).then(
-        (res) =>
-            res.filter((kontakt) =>
-                abrechnung.mieter.some((m) => m.id === kontakt.guid)
-            )
+    const mieter = WalterKontaktEntry.GetAll<WalterKontaktEntry>(
+        fetchImpl
+    ).then((res) =>
+        res.filter((kontakt) =>
+            abrechnung.mieter.some((m) => m.id === kontakt.id)
+        )
     );
 </script>
 

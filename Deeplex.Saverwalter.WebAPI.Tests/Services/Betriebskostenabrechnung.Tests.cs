@@ -1,6 +1,5 @@
-using Deeplex.Saverwalter.ModelTests;
+﻿using Deeplex.Saverwalter.ModelTests;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
@@ -17,7 +16,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = handler.Get(vertrag.VertragId, 2021);
 
             result.Should().NotBeNull();
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -30,7 +29,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = handler.GetWordDocument(vertrag.VertragId, 2021);
 
             result.Should().NotBeNull();
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
@@ -43,7 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = handler.GetPdfDocument(vertrag.VertragId, 2021);
 
             result.Should().NotBeNull();
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
     }
 }

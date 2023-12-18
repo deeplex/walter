@@ -9,7 +9,11 @@
 
     export let data: PageData;
 
-    const title = data.entry.vertrag.text;
+    let title = data.entry.vertrag.text;
+    $: {
+        title = data.entry.vertrag.text;
+    }
+
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.S3URL);

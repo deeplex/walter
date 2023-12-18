@@ -1,55 +1,80 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using System.Security.Claims;
+using Deeplex.Saverwalter.Model;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class KontaktDbService : IControllerService<KontaktEntry>
+    public class KontaktDbService : WalterDbServiceBase<KontaktEntry, Kontakt>
     {
-        public SaverwalterContext Ctx { get; }
-
-        public KontaktDbService(SaverwalterContext ctx)
+        public KontaktDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
         }
 
-        public IActionResult Get(int id)
+        public async Task<ActionResult<IEnumerable<KontaktEntryBase>>> GetList()
         {
-            var entity = Ctx.Kontakte.Find(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
-
-            try
-            {
-                var entry = new KontaktEntry(entity);
-                return new OkObjectResult(entry);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            var list = await Ctx.Kontakte.ToListAsync();
+            return list.Select(e => new KontaktEntryBase(e, new(true))).ToList();
         }
 
-        public IActionResult Delete(int id)
+        public override async Task<ActionResult<Kontakt>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
-            var entity = Ctx.Kontakte.Find(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
-
-            Ctx.Kontakte.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+            var entity = await Ctx.Kontakte.FindAsync(id);
+            return await GetEntity(user, entity, op);
         }
 
-        public IActionResult Post(KontaktEntry entry)
+        public override async Task<ActionResult<KontaktEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, Operations.Read, async (entity) =>
+            {
+                // TODO: Who can manage contacts?
+                var permissions = new Permissions()
+                {
+                    Read = true,
+                    Update = true,
+                    Remove = true
+                };
+                var entry = new KontaktEntry(entity, permissions);
+
+                entry.JuristischePersonen = await Task.WhenAll(entity.JuristischePersonen
+                    .Select(async e => new KontaktEntryBase(e, await GetPermissions(user, e, Auth))));
+                entry.Mitglieder = await Task.WhenAll(entity.Mitglieder
+                    .Select(async e => new KontaktEntryBase(e, await GetPermissions(user, e, Auth))));
+                entry.Vertraege = await Task.WhenAll(entity.Mietvertraege
+                    .Concat(entity.Wohnungen.SelectMany(w => w.Vertraege))
+                    .Distinct()
+                    .Select(async e => new VertragEntryBase(e, await GetPermissions(user, e, Auth))));
+                entry.Wohnungen = await Task.WhenAll(entity.Mietvertraege
+                    .Concat(entity.Wohnungen.SelectMany(w => w.Vertraege))
+                    .Select(e => e.Wohnung)
+                    .Distinct()
+                    .Select(async e => new WohnungEntryBase(e, await GetPermissions(user, e, Auth))));
+
+                return entry;
+            });
+        }
+
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, Operations.Delete, async (entity) =>
+            {
+                Ctx.Kontakte.Remove(entity);
+                await Ctx.SaveChangesAsync();
+
+                return new OkResult();
+            });
+        }
+
+        public override async Task<ActionResult<KontaktEntry>> Post(ClaimsPrincipal user, KontaktEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -58,7 +83,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Add(entry));
+                // TODO: Who can post new contacts?
+                //var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate]);
+                //if (!authRx.Succeeded)
+                //{
+                //    return new ForbidResult();
+                //}
+
+                return await Add(entry);
             }
             catch
             {
@@ -66,45 +98,30 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private KontaktEntry Add(KontaktEntry entry)
+        private async Task<KontaktEntry> Add(KontaktEntry entry)
         {
             var entity = new Kontakt(entry.Name, (Rechtsform)entry.Rechtsform.Id);
 
             SetOptionalValues(entity, entry);
             Ctx.Kontakte.Add(entity);
-            Ctx.SaveChanges();
+            await Ctx.SaveChangesAsync();
 
-            return new KontaktEntry(entity);
+            return new KontaktEntry(entity, entry.Permissions);
         }
 
-        public IActionResult Put(int id, KontaktEntry entry)
+        public override async Task<ActionResult<KontaktEntry>> Put(ClaimsPrincipal user, int id, KontaktEntry entry)
         {
-            var entity = Ctx.Kontakte.Find(id);
-            if (entity == null)
+            return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                entity.Name = entry.Name;
+                entity.Rechtsform = (Rechtsform)entry.Rechtsform.Id;
 
-            try
-            {
-                return new OkObjectResult(Update(entry, entity));
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
-        }
+                SetOptionalValues(entity, entry);
+                Ctx.Kontakte.Update(entity);
+                await Ctx.SaveChangesAsync();
 
-        private KontaktEntry Update(KontaktEntry entry, Kontakt entity)
-        {
-            entity.Name = entry.Name;
-            entity.Rechtsform = (Rechtsform)entry.Rechtsform.Id;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Kontakte.Update(entity);
-            Ctx.SaveChanges();
-
-            return new KontaktEntry(entity);
+                return new KontaktEntry(entity, entry.Permissions);
+            });
         }
 
         private void SetOptionalValues(Kontakt entity, KontaktEntry entry)
@@ -131,7 +148,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 // Add new
                 entity.JuristischePersonen
                     .AddRange(l.Where(w => !entity.JuristischePersonen.Exists(e => w.Id == e.KontaktId))
-                    .Select(w => Ctx.Kontakte.Find(w.Id)!));
+                    .SelectMany(w => Ctx.Kontakte.Where(u => u.KontaktId == w.Id)));
                 // Remove old
                 entity.JuristischePersonen.RemoveAll(w => !l.ToList().Exists(e => e.Id == w.KontaktId));
             }
@@ -141,7 +158,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 // Add new
                 entity.Mitglieder
                     .AddRange(m.Where(w => !entity.Mitglieder.Exists(e => w.Id == e.KontaktId))
-                    .Select(w => Ctx.Kontakte.Find(w.Id)!));
+                    .SelectMany(w => Ctx.Kontakte.Where(u => u.KontaktId == w.Id)));
 
                 // Remove old
                 entity.Mitglieder.RemoveAll((w) => !m.ToList().Exists(e => e.Id == w.KontaktId));

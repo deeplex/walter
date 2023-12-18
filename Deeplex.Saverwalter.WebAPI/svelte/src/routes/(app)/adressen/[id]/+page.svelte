@@ -24,7 +24,10 @@
         adresse: { ...data.entry }
     };
 
-    const title = data.entry.anschrift;
+    let title = data.entry.anschrift;
+    $: {
+        title = data.entry.anschrift;
+    }
 
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
@@ -51,7 +54,11 @@
             title="Wohnungen"
             rows={data.entry.wohnungen}
         />
-        <WalterKontakte title="Personen" rows={data.entry.kontakte} />
+        <WalterKontakte
+            fetchImpl={data.fetchImpl}
+            title="Personen"
+            rows={data.entry.kontakte}
+        />
         <WalterZaehlerList
             fetchImpl={data.fetchImpl}
             title="Zähler"

@@ -1,52 +1,54 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using System.Security.Claims;
+using Deeplex.Saverwalter.Model;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class MieteDbService : IControllerService<MieteEntryBase>
+    public class MieteDbService : WalterDbServiceBase<MieteEntry, Miete>
     {
-        public SaverwalterContext Ctx { get; }
-
-        public MieteDbService(SaverwalterContext ctx)
+        public MieteDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
         }
 
-        public IActionResult Get(int id)
+        public async Task<ActionResult<IEnumerable<MieteEntryBase>>> GetList(ClaimsPrincipal user)
         {
-            var entity = Ctx.Mieten.Find(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
+            var list = await MietePermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
 
-            try
-            {
-                var entry = new MieteEntryBase(entity);
-                return new OkObjectResult(entry);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            return await Task.WhenAll(list
+                .Select(async e => new MieteEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
         }
 
-        public IActionResult Delete(int id)
+        public override async Task<ActionResult<Miete>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
-            var entity = Ctx.Mieten.Find(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
-
-            Ctx.Mieten.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+            var entity = await Ctx.Mieten.FindAsync(id);
+            return await GetEntity(user, entity, op);
         }
 
-        public IActionResult Post(MieteEntryBase entry)
+        public override async Task<ActionResult<MieteEntry>> Get(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, Operations.Read, async (entity) =>
+            {
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
+                var entry = new MieteEntry(entity, permissions);
+                return entry;
+            });
+        }
+
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, Operations.Delete, async (entity) =>
+            {
+                Ctx.Mieten.Remove(entity);
+                await Ctx.SaveChangesAsync();
+
+                return new OkResult();
+            });
+        }
+
+        public override async Task<ActionResult<MieteEntry>> Post(ClaimsPrincipal user, MieteEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -55,7 +57,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Add(entry));
+                var vertrag = (await Ctx.Vertraege.FindAsync(entry.Vertrag!.Id));
+                var authRx = await Auth.AuthorizeAsync(user, vertrag, [Operations.SubCreate]);
+                if (!authRx.Succeeded)
+                {
+                    return new ForbidResult();
+                }
+
+                return await Add(entry);
             }
             catch
             {
@@ -63,14 +72,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private MieteEntryBase Add(MieteEntryBase entry)
+        private async Task<MieteEntry> Add(MieteEntry entry)
         {
             var mieten = new List<Miete>();
 
             // Be able to create multiple Mieten at once
-            for (int i = 0; i <= entry.Repeat; ++i)
+            for (var i = 0; i <= entry.Repeat; ++i)
             {
-                var vertrag = Ctx.Vertraege.Find(entry.Vertrag.Id);
+                var vertrag = await Ctx.Vertraege.FindAsync(entry.Vertrag.Id);
                 var monat = entry.BetreffenderMonat.AddMonths(i);
                 var entity = new Miete(entry.Zahlungsdatum, monat, entry.Betrag)
                 {
@@ -84,43 +93,28 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             Ctx.SaveChanges();
 
-            return new MieteEntryBase(mieten.First(), entry.Repeat);
+            return new MieteEntry(mieten.First(), entry.Permissions, entry.Repeat);
 
         }
 
 
-        public IActionResult Put(int id, MieteEntryBase entry)
+        public override async Task<ActionResult<MieteEntry>> Put(ClaimsPrincipal user, int id, MieteEntry entry)
         {
-            var entity = Ctx.Mieten.Find(id);
-            if (entity == null)
+            return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                entity.BetreffenderMonat = entry.BetreffenderMonat;
+                entity.Betrag = entry.Betrag;
+                entity.Zahlungsdatum = entry.Zahlungsdatum;
 
-            try
-            {
-                return new OkObjectResult(Update(entry, entity));
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+                SetOptionalValues(entity, entry);
+                Ctx.Mieten.Update(entity);
+                await Ctx.SaveChangesAsync();
+
+                return new MieteEntry(entity, entry.Permissions);
+            });
         }
 
-        private MieteEntryBase Update(MieteEntryBase entry, Miete entity)
-        {
-            entity.BetreffenderMonat = entry.BetreffenderMonat;
-            entity.Betrag = entry.Betrag;
-            entity.Zahlungsdatum = entry.Zahlungsdatum;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Mieten.Update(entity);
-            Ctx.SaveChanges();
-
-            return new MieteEntryBase(entity);
-        }
-
-        private void SetOptionalValues(Miete entity, MieteEntryBase entry)
+        private static void SetOptionalValues(Miete entity, MieteEntry entry)
         {
             if (entity.MieteId != entry.Id)
             {

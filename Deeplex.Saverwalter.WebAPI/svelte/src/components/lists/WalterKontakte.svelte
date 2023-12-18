@@ -1,13 +1,8 @@
 <script lang="ts">
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
-    import {
-        WalterDataWrapper,
-        WalterTextInput
-    } from '$walter/components';
-    import { WalterKontaktEntry
-    } from '$walter/lib';
-    import { ContentSwitcher, Row, Switch } from 'carbon-components-svelte';
+    import { WalterDataWrapper } from '$walter/components';
+    import { WalterKontaktEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     import WalterKontakt from '../details/WalterKontakt.svelte';
 
@@ -19,14 +14,21 @@
         { key: 'email', value: 'E-Mail' }
     ];
 
-    const on_click_row = (e: CustomEvent<DataTableRow>) => navigation.kontakt(e.detail.id);
+    const on_click_row = (e: CustomEvent<DataTableRow>) =>
+        navigation.kontakt(e.detail.id);
 
     export let rows: WalterKontaktEntry[];
     export let fullHeight = false;
     export let title: string | undefined = undefined;
     export let fetchImpl: typeof fetch;
 
-    export let entry: Partial<WalterKontaktEntry> = {};
+    export let entry: Partial<WalterKontaktEntry> = {
+        permissions: {
+            read: true,
+            update: true,
+            remove: true
+        }
+    };
 </script>
 
 <WalterDataWrapper
@@ -38,5 +40,5 @@
     {headers}
     {fullHeight}
 >
-    <WalterKontakt {fetchImpl} entry={entry} />
+    <WalterKontakt {fetchImpl} {entry} />
 </WalterDataWrapper>

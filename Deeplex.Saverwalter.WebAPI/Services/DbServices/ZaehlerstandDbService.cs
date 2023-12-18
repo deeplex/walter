@@ -1,52 +1,45 @@
-﻿using Deeplex.Saverwalter.Model;
+﻿using System.Security.Claims;
+using Deeplex.Saverwalter.Model;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class ZaehlerstandDbService : IControllerService<ZaehlerstandEntryBase>
+    public class ZaehlerstandDbService : WalterDbServiceBase<ZaehlerstandEntry, Zaehlerstand>
     {
-        public SaverwalterContext Ctx { get; }
-
-        public ZaehlerstandDbService(SaverwalterContext ctx)
+        public ZaehlerstandDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
-            Ctx = ctx;
         }
 
-        public IActionResult Get(int id)
+        public override async Task<ActionResult<Zaehlerstand>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)
         {
-            var entity = Ctx.Zaehlerstaende.Find(id);
-            if (entity == null)
-            {
-                return new NotFoundResult();
-            }
-
-            try
-            {
-                var entry = new ZaehlerstandEntryBase(entity);
-                return new OkObjectResult(entry);
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+            var entity = await Ctx.Zaehlerstaende.FindAsync(id);
+            return await GetEntity(user, entity, op);
         }
 
-        public IActionResult Delete(int id)
+        public override async Task<ActionResult<ZaehlerstandEntry>> Get(ClaimsPrincipal user, int id)
         {
-            var entity = Ctx.Zaehlerstaende.Find(id);
-            if (entity == null)
+            return await HandleEntity(user, id, Operations.Read, async (entity) =>
             {
-                return new NotFoundResult();
-            }
-
-            Ctx.Zaehlerstaende.Remove(entity);
-            Ctx.SaveChanges();
-
-            return new OkResult();
+                var permissions = await Utils.GetPermissions(user, entity, Auth);
+                return new ZaehlerstandEntry(entity, permissions);
+            });
         }
 
-        public IActionResult Post(ZaehlerstandEntryBase entry)
+        public override async Task<ActionResult> Delete(ClaimsPrincipal user, int id)
+        {
+            return await HandleEntity(user, id, Operations.Delete, async (w) =>
+            {
+                Ctx.Zaehlerstaende.Remove(w);
+                await Ctx.SaveChangesAsync();
+
+                return new OkResult();
+            });
+        }
+
+        public override async Task<ActionResult<ZaehlerstandEntry>> Post(ClaimsPrincipal user, ZaehlerstandEntry entry)
         {
             if (entry.Id != 0)
             {
@@ -55,7 +48,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return new OkObjectResult(Add(entry));
+                var zaehler = await Ctx.ZaehlerSet.FindAsync(entry.Zaehler.Id);
+                var authRx = await Auth.AuthorizeAsync(user, zaehler, [Operations.SubCreate]);
+                if (!authRx.Succeeded)
+                {
+                    return new ForbidResult();
+                }
+
+                return await Add(entry);
             }
             catch
             {
@@ -63,9 +63,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private ZaehlerstandEntryBase Add(ZaehlerstandEntryBase entry)
+        private async Task<ZaehlerstandEntry> Add(ZaehlerstandEntry entry)
         {
-            var zaehler = Ctx.ZaehlerSet.Find(entry.Zaehler!.Id!);
+            var zaehler = await Ctx.ZaehlerSet.FindAsync(entry.Zaehler!.Id!);
             var entity = new Zaehlerstand(entry.Datum, entry.Stand)
             {
                 Zaehler = zaehler!
@@ -74,40 +74,25 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             Ctx.Zaehlerstaende.Add(entity);
             Ctx.SaveChanges();
 
-            return new ZaehlerstandEntryBase(entity);
+            return new ZaehlerstandEntry(entity, entry.Permissions);
         }
 
-        public IActionResult Put(int id, ZaehlerstandEntryBase entry)
+        public override async Task<ActionResult<ZaehlerstandEntry>> Put(ClaimsPrincipal user, int id, ZaehlerstandEntry entry)
         {
-            var entity = Ctx.Zaehlerstaende.Find(id);
-            if (entity == null)
+            return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
-                return new NotFoundResult();
-            }
+                entity.Datum = entry.Datum;
+                entity.Stand = entry.Stand;
 
-            try
-            {
-                return new OkObjectResult(Update(entry, entity));
-            }
-            catch
-            {
-                return new BadRequestResult();
-            }
+                SetOptionalValues(entity, entry);
+                Ctx.Zaehlerstaende.Update(entity);
+                Ctx.SaveChanges();
+
+                return new ZaehlerstandEntry(entity, entry.Permissions);
+            });
         }
 
-        private ZaehlerstandEntryBase Update(ZaehlerstandEntryBase entry, Zaehlerstand entity)
-        {
-            entity.Datum = entry.Datum;
-            entity.Stand = entry.Stand;
-
-            SetOptionalValues(entity, entry);
-            Ctx.Zaehlerstaende.Update(entity);
-            Ctx.SaveChanges();
-
-            return new ZaehlerstandEntryBase(entity);
-        }
-
-        private void SetOptionalValues(Zaehlerstand entity, ZaehlerstandEntryBase entry)
+        private static void SetOptionalValues(Zaehlerstand entity, ZaehlerstandEntry entry)
         {
             entity.Stand = entry.Stand;
             entity.Notiz = entry.Notiz;

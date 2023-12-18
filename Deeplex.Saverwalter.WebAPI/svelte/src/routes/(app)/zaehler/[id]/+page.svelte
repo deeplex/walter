@@ -14,6 +14,7 @@
         WalterS3FileWrapper,
         type WalterZaehlerstandEntry
     } from '$walter/lib';
+    import { S3URL } from '$walter/services/s3';
 
     export let data: PageData;
 
@@ -26,10 +27,15 @@
         zaehler: { id: '' + data.entry.id, text: data.entry.kennnummer },
         datum: convertDateCanadian(new Date()),
         stand: lastZaehlerstand?.stand || 0,
-        einheit: lastZaehlerstand?.einheit
+        einheit: lastZaehlerstand?.einheit,
+        permissions: data.entry.permissions
     };
 
-    const title = data.entry.kennnummer;
+    let title = data.entry.kennnummer;
+    $: {
+        title = data.entry.kennnummer;
+    }
+
     let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.S3URL);
@@ -61,6 +67,7 @@
         {#if data.entry.adresse !== null}
             <WalterLinkTile
                 bind:fileWrapper
+                s3ref={S3URL.adresse(`${data.entry.adresse.id}`)}
                 name={`Adresse: ${data.entry.adresse?.anschrift}`}
                 href={`/adressen/${data.entry.adresse?.id}`}
             />
@@ -68,6 +75,7 @@
         {#if data.entry.wohnung !== null}
             <WalterLinkTile
                 bind:fileWrapper
+                s3ref={S3URL.wohnung(`${data.entry.wohnung?.id}`)}
                 name={`Wohnung: ${data.entry.wohnung?.text}`}
                 href={`/wohnungen/${data.entry.wohnung?.id}`}
             />

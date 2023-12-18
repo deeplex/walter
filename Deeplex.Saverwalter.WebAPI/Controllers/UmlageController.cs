@@ -1,16 +1,19 @@
 ﻿using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.UmlageController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/umlagen")]
-    public class UmlageController : ControllerBase
+    public class UmlageController : FileControllerBase<UmlageEntry, Umlage>
     {
         public class HKVOEntryBase
         {
@@ -22,8 +25,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Strompauschale { get; set; }
             public SelectionEntry Stromrechnung { get; set; } = null!;
 
+            public Permissions Permissions { get; set; } = new Permissions();
+
             public HKVOEntryBase() { }
-            public HKVOEntryBase(HKVO entity)
+            public HKVOEntryBase(HKVO entity, Permissions permissions)
             {
                 Id = entity.HKVOId;
 
@@ -32,51 +37,38 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 HKVO_P9 = new((int)entity.HKVO_P9, entity.HKVO_P9.ToDescriptionString());
                 Strompauschale = (int)(entity.Strompauschale * 100);
                 Stromrechnung = new SelectionEntry(entity.Betriebsstrom.UmlageId, entity.Betriebsstrom.Typ.Bezeichnung);
+
+                Permissions = permissions;
             }
         }
 
         public class UmlageEntryBase
         {
             public int Id { get; set; }
-            public string? Notiz { get; set; }
-            public string? Beschreibung { get; set; }
-            public SelectionEntry? Schluessel { get; set; }
             public SelectionEntry? Typ { get; set; }
-            public HKVOEntryBase? HKVO { get; set; }
-            public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
             public string? WohnungenBezeichnung { get; set; }
-            public IEnumerable<SelectionEntry>? SelectedZaehler { get; set; }
+
+            // For Tabelle
+            public IEnumerable<SelectionEntry>? SelectedWohnungen { get; set; }
             public IEnumerable<BetriebskostenrechnungEntryBase>? Betriebskostenrechnungen { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime LastModified { get; set; }
+
+            public Permissions Permissions { get; set; } = new Permissions();
 
             protected UmlageEntryBase() { }
-            public UmlageEntryBase(Umlage entity)
+            public UmlageEntryBase(Umlage entity, Permissions permissions)
             {
                 Id = entity.UmlageId;
 
-                Notiz = entity.Notiz;
-                Beschreibung = entity.Beschreibung;
-                Schluessel = new SelectionEntry((int)entity.Schluessel, entity.Schluessel.ToDescriptionString());
                 Typ = new SelectionEntry(entity.Typ.UmlagetypId, entity.Typ.Bezeichnung);
                 WohnungenBezeichnung = entity.GetWohnungenBezeichnung() ?? "";
 
+                Betriebskostenrechnungen = entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e, permissions));
                 SelectedWohnungen = entity.Wohnungen.Select(e =>
                     new SelectionEntry(
                         e.WohnungId,
                         $"{e.Adresse?.Anschrift ?? "Unbekannte Anschrift"} - {e.Bezeichnung}"));
 
-                SelectedZaehler = entity.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer));
-
-                Betriebskostenrechnungen = entity.Betriebskostenrechnungen.Select(e => new BetriebskostenrechnungEntryBase(e));
-
-                if (entity.HKVO != null)
-                {
-                    HKVO = new HKVOEntryBase(entity.HKVO);
-                }
-
-                CreatedAt = entity.CreatedAt;
-                LastModified = entity.LastModified;
+                Permissions = permissions;
             }
         }
 
@@ -84,36 +76,59 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             private Umlage Entity { get; } = null!;
 
-            public IEnumerable<WohnungEntryBase>? Wohnungen => Entity?.Wohnungen.Select(e => new WohnungEntryBase(e));
-            public IEnumerable<ZaehlerEntryBase>? Zaehler => Entity?.Zaehler.Select(e => new ZaehlerEntryBase(e));
-            // TODO HKVO
+            public string? Notiz { get; set; }
+            public string? Beschreibung { get; set; }
+            public SelectionEntry? Schluessel { get; set; }
+            public HKVOEntryBase? HKVO { get; set; }
+            public IEnumerable<SelectionEntry>? SelectedZaehler { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public DateTime LastModified { get; set; }
+
+            public IEnumerable<WohnungEntryBase> Wohnungen { get; set; } = [];
+            public IEnumerable<ZaehlerEntryBase> Zaehler { get; set; } = [];
 
             public UmlageEntry() : base() { }
-            public UmlageEntry(Umlage entity) : base(entity)
+            public UmlageEntry(Umlage entity, Permissions permissions) : base(entity, permissions)
             {
                 Entity = entity;
+
+                Notiz = entity.Notiz;
+                Beschreibung = entity.Beschreibung;
+                Schluessel = new SelectionEntry((int)entity.Schluessel, entity.Schluessel.ToDescriptionString());
+
+                SelectedZaehler = entity.Zaehler.Select(e => new SelectionEntry(e.ZaehlerId, e.Kennnummer));
+
+                if (entity.HKVO != null)
+                {
+                    HKVO = new HKVOEntryBase(entity.HKVO, permissions);
+                }
+
+                CreatedAt = entity.CreatedAt;
+                LastModified = entity.LastModified;
             }
         }
 
         private readonly ILogger<UmlageController> _logger;
-        private UmlageDbService DbService { get; }
+        protected override UmlageDbService DbService { get; }
 
-        public UmlageController(ILogger<UmlageController> logger, UmlageDbService dbService)
+        public UmlageController(ILogger<UmlageController> logger, UmlageDbService dbService, HttpClient httpClient) : base(logger, httpClient)
         {
             _logger = logger;
             DbService = dbService;
         }
 
+
         [HttpGet]
-        public IActionResult Get() => new OkObjectResult(DbService.Ctx.Umlagen.ToList().Select(e => new UmlageEntryBase(e)).ToList());
+        public Task<ActionResult<IEnumerable<UmlageEntryBase>>> Get() => DbService.GetList(User!);
+
         [HttpPost]
-        public IActionResult Post([FromBody] UmlageEntry entry) => DbService.Post(entry);
+        public Task<ActionResult<UmlageEntry>> Post([FromBody] UmlageEntry entry) => DbService.Post(User!, entry);
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id) => DbService.Get(id);
+        public Task<ActionResult<UmlageEntry>> Get(int id) => DbService.Get(User!, id);
         [HttpPut("{id}")]
-        public IActionResult Put(int id, UmlageEntry entry) => DbService.Put(id, entry);
+        public Task<ActionResult<UmlageEntry>> Put(int id, UmlageEntry entry) => DbService.Put(User!, id, entry);
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id) => DbService.Delete(id);
+        public Task<ActionResult> Delete(int id) => DbService.Delete(User!, id);
     }
 }

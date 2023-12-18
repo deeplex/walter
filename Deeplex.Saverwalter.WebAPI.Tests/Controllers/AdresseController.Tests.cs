@@ -1,9 +1,12 @@
+﻿using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
 using Deeplex.Saverwalter.WebAPI.Controllers;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -14,83 +17,101 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class AdresseControllerTests
     {
         [Fact]
-        public void Get()
+        public async Task Get()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<AdresseController>>();
-            var dbService = new AdresseDbService(ctx);
-            var controller = new AdresseController(logger, dbService);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new AdresseDbService(ctx, auth);
+            var controller = new AdresseController(logger, dbService, A.Fake<HttpClient>());
+            controller.ControllerContext = A.Fake<ControllerContext>();
+            controller.ControllerContext.HttpContext = A.Fake<HttpContext>();
+            controller.ControllerContext.HttpContext.User = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => controller.ControllerContext.HttpContext.User.IsInRole("Admin")).Returns(true);
 
-            var result = controller.Get();
-
-            result.Should().BeOfType<OkObjectResult>();
+            var result = await controller.Get();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
-        public void Post()
+        public async Task Post()
         {
             var ctx = TestUtils.GetContext();
             var logger = A.Fake<ILogger<AdresseController>>();
-            var dbService = new AdresseDbService(ctx);
-            var controller = new AdresseController(logger, dbService);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new AdresseDbService(ctx, auth);
+            var controller = new AdresseController(logger, dbService, A.Fake<HttpClient>());
 
             var entity = new Adresse("Teststrasse", "1", "12345", "Teststadt");
-            var entry = new AdresseEntry(entity);
+            var entry = new AdresseEntry(entity, new());
 
-            var result = controller.Post(entry);
+            var result = await controller.Post(entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
-        public void GetId()
+        public async Task GetId()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<AdresseController>>();
-            var dbService = new AdresseDbService(ctx);
-            var controller = new AdresseController(logger, dbService);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new AdresseDbService(ctx, auth);
+            var controller = new AdresseController(logger, dbService, A.Fake<HttpClient>());
 
             if (vertrag.Wohnung.Adresse == null)
             {
                 throw new NullReferenceException("Adresse is null");
             }
 
-            var result = controller.Get(vertrag.Wohnung.Adresse.AdresseId);
+            var result = await controller.Get(vertrag.Wohnung.Adresse.AdresseId);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
         }
 
         [Fact]
-        public void Put()
+        public async Task Put()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<AdresseController>>();
-            var dbService = new AdresseDbService(ctx);
-            var controller = new AdresseController(logger, dbService);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new AdresseDbService(ctx, auth);
+            var controller = new AdresseController(logger, dbService, A.Fake<HttpClient>());
 
             if (vertrag.Wohnung.Adresse == null)
             {
                 throw new NullReferenceException("Adresse is null");
             }
-            var entry = new AdresseEntry(vertrag.Wohnung.Adresse);
+            var entry = new AdresseEntry(vertrag.Wohnung.Adresse, new());
             entry.Hausnummer = "2";
 
-            var result = controller.Put(vertrag.Wohnung.Adresse.AdresseId, entry);
+            var result = await controller.Put(vertrag.Wohnung.Adresse.AdresseId, entry);
 
-            result.Should().BeOfType<OkObjectResult>();
+            result.Value.Should().NotBeNull();
             vertrag.Wohnung.Adresse.Hausnummer.Should().Be("2");
         }
 
         [Fact]
-        public void Delete()
+        public async Task Delete()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var logger = A.Fake<ILogger<AdresseController>>();
-            var dbService = new AdresseDbService(ctx);
-            var controller = new AdresseController(logger, dbService);
+            var auth = A.Fake<IAuthorizationService>();
+            A.CallTo(() => auth.AuthorizeAsync(null!, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
+            var dbService = new AdresseDbService(ctx, auth);
+            var controller = new AdresseController(logger, dbService, A.Fake<HttpClient>());
 
             if (vertrag.Wohnung.Adresse == null)
             {
@@ -98,7 +119,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             }
             var id = vertrag.Wohnung.Adresse.AdresseId;
 
-            var result = controller.Delete(id);
+            var result = await controller.Delete(id);
 
             result.Should().BeOfType<OkResult>();
             ctx.Adressen.Find(id).Should().BeNull();
