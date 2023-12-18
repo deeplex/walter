@@ -188,7 +188,7 @@ export type WalterPreviewCopyTable = {
     ) => Promise<unknown>;
     ApiURL: string;
     S3URL: (id: string) => string;
-    newPage: () => unknown;
+    newPage: () => ConstructorOfATypedSvelteComponent;
 };
 
 export const tables: WalterPreviewCopyTable[] = [

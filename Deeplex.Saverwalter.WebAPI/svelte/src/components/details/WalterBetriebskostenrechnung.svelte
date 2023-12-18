@@ -53,8 +53,7 @@
     }
 
     function selectTyp(e: CustomEvent) {
-        const id = `${e.detail.selectedItem.id}`;
-        if (entry.typ?.id !== `${id}`) {
+        if (`${entry.typ?.id}` !== entry.umlage?.filter) {
             entry.umlage = undefined;
         }
         entry.typ = e.detail.selectedItem;
