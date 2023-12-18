@@ -1,22 +1,23 @@
 <script lang="ts">
-    import { RadioTile, TileGroup } from 'carbon-components-svelte';
     import type { WalterPreviewCopyTable } from './WalterPreviewCopyFile';
+    import { WalterDataTable } from '..';
+    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     export let step: number;
     export let tables: WalterPreviewCopyTable[];
-    export let selectedTable: WalterPreviewCopyTable | undefined;
-    export let selectedTable_change: (e: Event) => Promise<void>;
+    export let selectedTable_change: (key: string) => Promise<void>;
+
+    const headers = [{ key: 'text', value: 'Tabelle' }];
+    const rows = tables.map((table) => ({
+        id: table.key,
+        text: table.value
+    }));
+
+    function clicked(row: CustomEvent<DataTableRow>) {
+        selectedTable_change(row.detail.id);
+    }
 </script>
 
 {#if step === 0}
-    <TileGroup>
-        {#each tables as radio}
-            <RadioTile
-                checked={selectedTable?.key == radio.key}
-                on:change={selectedTable_change}
-                value={radio.key}
-                >{radio.value}
-            </RadioTile>
-        {/each}
-    </TileGroup>
+    <WalterDataTable on_click_row={clicked} fullHeight {headers} {rows} />
 {/if}

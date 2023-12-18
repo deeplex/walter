@@ -200,7 +200,7 @@
             />
         </div>
     </ModalHeader>
-    <ModalBody style="min-height: 40em;">
+    <ModalBody>
         {#if selectedTab === TabSelector.Preview}
             <WalterPreviewType bind:file />
         {:else if selectedTab === TabSelector.Copy || selectedTab === TabSelector.Move}

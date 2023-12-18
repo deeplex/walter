@@ -20,7 +20,6 @@
 <Row>
     <WalterComboBoxKontakt
         {fetchImpl}
-        required
         {readonly}
         bind:value={entry.besitzer}
         title="Besitzer"
