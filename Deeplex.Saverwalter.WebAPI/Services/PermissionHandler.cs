@@ -132,6 +132,27 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         }
     }
 
+    public class KontaktPermissionHandler : WohnungPermissionHandlerBase<Kontakt>
+    {
+        public static async Task<List<Kontakt>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
+        {
+            return await (user.IsInRole("Admin")
+                ? ctx.Kontakte.ToListAsync()
+                : GetEntriesForUser(user.GetUserId()));
+
+            Task<List<Kontakt>> GetEntriesForUser(Guid _) => ctx.Kontakte.ToListAsync();
+        }
+
+        protected override Task HandleRequirementAsync(
+           AuthorizationHandlerContext context,
+           OperationAuthorizationRequirement requirement,
+           Kontakt entity)
+        {
+            context.Succeed(requirement);
+            return Task.CompletedTask;
+        }
+    }
+
     public class MietePermissionHandler : WohnungPermissionHandlerBase<Miete>
     {
         public static async Task<List<Miete>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)
