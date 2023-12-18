@@ -33,7 +33,7 @@ export class WalterS3FileWrapper {
             return;
         }
 
-        this.handles[index].files = Promise.resolve([...files, file]);
+        return (this.handles[index].files = Promise.resolve([...files, file]));
     }
 
     async removeFile(file: WalterS3File) {

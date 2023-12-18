@@ -2,6 +2,7 @@
     import {
         FileUploaderDropContainer,
         HeaderPanelDivider,
+        HeaderPanelLink,
         HeaderPanelLinks,
         InlineLoading,
         TextInput
@@ -11,14 +12,19 @@
     import type { WalterS3FileWrapper } from '$walter/lib';
     import { upload_new_files } from './WalterAnhaenge';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
+    import type { WalterS3File } from '$walter/types';
 
     export let fileWrapper: WalterS3FileWrapper;
     export let permissions: WalterPermissions | undefined = undefined;
 
     let newFiles: File[] = [];
+    let mainFiles: WalterS3File[] = [];
+    fileWrapper.handles[0].files.then((files) => (mainFiles = files));
 
-    function upload(): void {
-        upload_new_files(fileWrapper, newFiles);
+    async function upload() {
+        mainFiles =
+            (await upload_new_files(fileWrapper, newFiles)) || mainFiles;
+        newFiles = [];
     }
 
     let filter = '';
@@ -53,11 +59,11 @@
                 style="margin-left: 2em"
                 description="Lade Dateien"
             />
-        {:then loadedFiles}
+        {:then}
             <HeaderPanelDivider
-                >{handle.name} ({loadedFiles.length})</HeaderPanelDivider
+                >{handle.name} ({mainFiles.length})</HeaderPanelDivider
             >
-            {#each loadedFiles as file}
+            {#each mainFiles as file}
                 {#if file.FileName.toLowerCase().includes(filter.toLowerCase())}
                     <WalterAnhaengeEntry
                         {permissions}
@@ -67,5 +73,13 @@
                 {/if}
             {/each}
         {/await}
+        {#each newFiles as file}
+            <HeaderPanelLink>
+                <div style="display: flex; wrap: nowrap">
+                    <InlineLoading style="margin-top: -5px" />
+                    <span style="marginLeft: 5px">{file.name}</span>
+                </div>
+            </HeaderPanelLink>
+        {/each}
     {/each}
 </HeaderPanelLinks>

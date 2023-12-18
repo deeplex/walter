@@ -6,14 +6,14 @@ import {
 import { openModal } from '$walter/store';
 
 function upload_finished(fileWrapper: WalterS3FileWrapper, file: File) {
-    fileWrapper.addFile(
+    return fileWrapper.addFile(
         create_walter_s3_file_from_file(file, fileWrapper.handles[0].S3URL),
         0
     );
 }
 
 function post_s3_file(fileWrapper: WalterS3FileWrapper, file: File) {
-    walter_s3_post(
+    return walter_s3_post(
         file,
         fileWrapper.handles[0].S3URL,
         fileWrapper.fetchImpl
@@ -36,7 +36,7 @@ export async function upload_new_files(
                     submit: () => post_s3_file(fileWrapper, file)
                 });
             } else {
-                post_s3_file(fileWrapper, file);
+                return post_s3_file(fileWrapper, file);
             }
         }
     }
