@@ -2,6 +2,7 @@
 using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using MigraDoc.DocumentObjectModel;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
@@ -21,7 +22,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         private static ActionResult<string> GetS3Path(string? baseUrl, string? requestPath, string? filename = null)
         {
-            if (baseUrl is null)
+            if (baseUrl.IsValueNullOrEmpty())
             {
                 return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
@@ -42,7 +43,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             if (filename is string name)
             {
-                if (splits[5] == "trash")
+                if (splits.Length > 5 && splits[5] == "trash")
                 {
                     resourceUrl = baseUrl + "/" + splits[2] + "/" + splits[3] + "/" + splits[5] + "/" + name;
                 }
