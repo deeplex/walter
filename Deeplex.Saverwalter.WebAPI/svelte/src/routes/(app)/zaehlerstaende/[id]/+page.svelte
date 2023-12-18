@@ -39,7 +39,7 @@
     <WalterZaehlerstand fetchImpl={data.fetchImpl} entry={data.entry} />
     <WalterLinkTile
         bind:fileWrapper
-        s3ref={S3URL.adresse(`${data.entry.zaehler.id}`)}
+        s3ref={S3URL.zaehler(`${data.entry.zaehler.id}`)}
         name={`Zähler: ${data.entry.zaehler.text}`}
         href={`/zaehler/${data.entry.zaehler.id}`}
     />

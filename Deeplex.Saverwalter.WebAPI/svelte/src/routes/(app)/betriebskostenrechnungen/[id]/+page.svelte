@@ -63,7 +63,7 @@
 
         <WalterLinkTile
             bind:fileWrapper
-            s3ref={S3URL.adresse(`${data.entry.umlage.id}`)}
+            s3ref={S3URL.umlage(`${data.entry.umlage.id}`)}
             name={`Umlage: ${data.entry.umlage.text}`}
             href={`/umlagen/${data.entry.umlage?.id}`}
         />

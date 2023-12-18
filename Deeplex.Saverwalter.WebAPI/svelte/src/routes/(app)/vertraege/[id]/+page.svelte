@@ -103,13 +103,13 @@
 
         <WalterLinkTile
             bind:fileWrapper
-            s3ref={S3URL.adresse(`${data.entry.ansprechpartner.id}`)}
+            s3ref={S3URL.kontakt(`${data.entry.ansprechpartner.id}`)}
             name={`Ansprechpartner: ${data.entry.ansprechpartner.text}`}
             href={`/kontakte/${data.entry.ansprechpartner.id}`}
         />
         <WalterLinkTile
             bind:fileWrapper
-            s3ref={S3URL.adresse(`${data.entry.wohnung.id}`)}
+            s3ref={S3URL.wohnung(`${data.entry.wohnung.id}`)}
             name={`Wohnung: ${data.entry.wohnung.text}`}
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />

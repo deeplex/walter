@@ -13,7 +13,7 @@
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
 
     export let fileWrapper: WalterS3FileWrapper;
-    export let permissions: WalterPermissions | undefined;
+    export let permissions: WalterPermissions | undefined = undefined;
 
     let newFiles: File[] = [];
 

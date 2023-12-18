@@ -46,7 +46,7 @@
 
 <WalterLinks>
     <WalterLinkTile
-        s3ref={S3URL.adresse(`${entry.vertrag?.id}`)}
+        s3ref={S3URL.vertrag(`${entry.vertrag?.id}`)}
         name={`Vertrag: ${mieten[0]?.vertrag?.text || 'ansehen'}`}
         href={`/vertraege/${entry.vertrag?.id}`}
     />

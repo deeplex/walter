@@ -128,7 +128,7 @@
 {#if $page.url.pathname !== `/umlagen/${entry.umlage?.id}`}
     <WalterLinks>
         <WalterLinkTile
-            s3ref={S3URL.adresse(`${entry.umlage?.id}`)}
+            s3ref={S3URL.umlage(`${entry.umlage?.id}`)}
             name={'Umlage ansehen'}
             href={`/umlagen/${entry.umlage?.id}`}
         />

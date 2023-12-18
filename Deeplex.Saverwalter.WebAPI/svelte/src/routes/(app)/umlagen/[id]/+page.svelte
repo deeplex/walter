@@ -87,7 +87,7 @@
         {/if}
         <WalterLinkTile
             {fileWrapper}
-            s3ref={S3URL.adresse(`${data.entry.typ.id}`)}
+            s3ref={S3URL.umlagetyp(`${data.entry.typ.id}`)}
             name={`Umlagetyp ansehen`}
             href={`/umlagetypen/${data.entry.typ.id}`}
         />

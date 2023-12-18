@@ -32,7 +32,7 @@
     <WalterVertragVersion entry={data.entry} />
     <WalterLinkTile
         bind:fileWrapper
-        s3ref={S3URL.adresse(`${data.entry.vertrag.id}`)}
+        s3ref={S3URL.vertrag(`${data.entry.vertrag.id}`)}
         name={`Vertrag: ${data.entry.vertrag.text}`}
         href={`/vertraege/${data.entry.vertrag.id}`}
     />
