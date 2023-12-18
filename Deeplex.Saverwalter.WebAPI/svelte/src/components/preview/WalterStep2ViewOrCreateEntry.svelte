@@ -13,11 +13,12 @@
     export let selectEntryFromId: (id: string) => void;
 
     async function save() {
-        const apiURL = `/api/${selectedTable?.S3URL}`;
-        var saved_entry = await handle_save(apiURL, entry);
-        await updateRows();
-        await selectEntryFromId(`${saved_entry.id}`);
-        setTimeout(() => (step = 3), 0);
+        if (selectedTable) {
+            var saved_entry = await handle_save(selectedTable.ApiURL, entry);
+            updateRows();
+            selectEntryFromId(`${saved_entry.id}`);
+            setTimeout(() => (step = 3), 0);
+        }
     }
 
     function proceed() {

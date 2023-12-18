@@ -49,6 +49,11 @@ export class WalterKontaktEntry extends WalterApiHandler {
         const mitglieder = json.mitglieder?.map(WalterKontaktEntry.fromJson);
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
+        const rechtsform =
+            json.rechtsform && WalterSelectionEntry.fromJson(json.rechtsform);
+        const selectedMitglieder = json.selectedMitglieder?.map(
+            WalterSelectionEntry.fromJson
+        );
 
         return new WalterKontaktEntry(
             json.id,
@@ -57,7 +62,7 @@ export class WalterKontaktEntry extends WalterApiHandler {
             json.fax,
             json.mobil,
             json.notiz,
-            json.rechtsform,
+            rechtsform,
             json.bezeichnung,
             json.name,
             json.vorname,
@@ -69,7 +74,7 @@ export class WalterKontaktEntry extends WalterApiHandler {
             juristischePersonen,
             wohnungen,
             vertraege,
-            json.selectedMitglieder,
+            selectedMitglieder,
             mitglieder,
             permissions
         );

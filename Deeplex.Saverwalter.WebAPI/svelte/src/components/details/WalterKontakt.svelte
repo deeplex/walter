@@ -11,7 +11,7 @@
     import { Row } from 'carbon-components-svelte';
     import WalterMultiSelectKontakt from '../elements/WalterMultiSelectKontakt.svelte';
 
-    export let entry: Partial<WalterKontaktEntry>;
+    export let entry: Partial<WalterKontaktEntry> = {};
     export let fetchImpl: typeof fetch;
     export let readonly = false;
     $: {

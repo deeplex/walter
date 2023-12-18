@@ -23,6 +23,9 @@
     onMount(() => {
         walter_subscribe_reset_changeTracker(updateLastSavedValue);
         updateLastSavedValue();
+        if (value === undefined) {
+            entries.then((res) => (value = res[0]));
+        }
     });
 
     function select(e: CustomEvent) {

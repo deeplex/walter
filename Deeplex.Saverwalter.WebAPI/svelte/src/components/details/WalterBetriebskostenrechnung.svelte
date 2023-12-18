@@ -25,15 +25,14 @@
     export let readonly = false;
 
     const umlagetypen = walter_selection.umlagetypen(fetchImpl);
+    walter_selection.umlagen_wohnungen(fetchImpl).then((res) => {
+        umlagen_wohnungen = res;
+    });
     let umlagen_wohnungen: WalterSelectionEntry[] = [];
     let umlageEntries: WalterSelectionEntry[] = [];
     let selectedUmlage = entry?.umlage?.id;
 
     onMount(() => {
-        walter_selection.umlagen_wohnungen(fetchImpl).then((res) => {
-            umlagen_wohnungen = res;
-        });
-
         if (!entry.betreffendesJahr) {
             entry.betreffendesJahr = new Date().getFullYear() - 1;
         }
