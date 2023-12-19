@@ -5,7 +5,6 @@
         TooltipDefinition
     } from 'carbon-components-svelte';
     import WalterPreview from '../preview/WalterPreview.svelte';
-    import type { WalterS3FileWrapper } from '$walter/lib';
     import { get_file_and_update_url } from './WalterAnhaengeEntry';
     import { page } from '$app/stores';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
@@ -15,6 +14,7 @@
     export let fetchImpl: typeof fetch;
     export let permissions: WalterPermissions | undefined;
     export let handle: WalterS3FileHandle;
+    export let allHandles: WalterS3FileHandle[];
 
     async function showModal() {
         selectedFile = await get_file_and_update_url(file);
@@ -39,6 +39,7 @@
     <WalterPreview
         {permissions}
         {fetchImpl}
+        bind:allHandles
         bind:handle
         bind:file={selectedFile}
         bind:open={previewOpen}

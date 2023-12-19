@@ -9,6 +9,7 @@
 
     export let permissions: WalterPermissions | undefined = undefined;
     export let fetchImpl: typeof fetch;
+    export let allHandles: WalterS3FileHandle[];
     export let handle: WalterS3FileHandle;
     export let filter: string;
 </script>
@@ -21,7 +22,13 @@
     >
     {#each files || [] as file}
         {#if file.FileName.toLowerCase().includes(filter.toLowerCase())}
-            <WalterAnhaengeEntry {permissions} {file} {fetchImpl} bind:handle />
+            <WalterAnhaengeEntry
+                bind:allHandles
+                {permissions}
+                {file}
+                {fetchImpl}
+                bind:handle
+            />
         {/if}
     {/each}
 {/await}

@@ -32,6 +32,7 @@
     export let fetchImpl: typeof fetch;
     export let permissions: WalterPermissions | undefined;
     export let handle: WalterS3FileHandle;
+    export let allHandles: WalterS3FileHandle[];
 
     // Created here to keep them when the selection changes
     let entry = {};
@@ -77,6 +78,16 @@
 
     let newFileName = file.FileName;
 
+    function updateOtherHandle() {
+        const otherHandleIndex = allHandles.findIndex(
+            (e) => e.name === selectedEntry!.text
+        );
+        if (otherHandleIndex !== -1) {
+            allHandles[otherHandleIndex].files =
+                allHandles[otherHandleIndex].addFile(file);
+        }
+    }
+
     async function copy() {
         const copied = await copyImpl(
             file,
@@ -86,7 +97,7 @@
         );
 
         if (copied && selectedTable && selectedEntry) {
-            handle.addFile(file);
+            updateOtherHandle();
             selectedTable = undefined;
             selectedEntry = undefined;
             step = 0;
@@ -103,9 +114,8 @@
 
         if (moved && selectedTable && selectedEntry) {
             open = false;
-            // TODO: Obviously bullshit. Select target handle somehow.
-            handle.addFile(file);
-            handle.removeFile(file);
+            updateOtherHandle();
+            handle.files = handle.removeFile(file);
         }
     }
 

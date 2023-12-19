@@ -16,7 +16,7 @@
     export let permissions: WalterPermissions | undefined = undefined;
 
     let newFiles: File[] = [];
-    let handles: WalterS3FileHandle[] = fileWrapper.handles;
+    let allHandles: WalterS3FileHandle[] = fileWrapper.handles;
 
     async function upload() {
         await upload_new_files(
@@ -24,7 +24,7 @@
             newFiles,
             fileWrapper.fetchImpl
         );
-        handles = fileWrapper.handles;
+        allHandles = fileWrapper.handles;
         newFiles = [];
     }
 
@@ -53,10 +53,11 @@
         size="sm"
         style="background-color: transparent; color: white"
     ></TextInput>
-    {#each handles as handle, i}
+    {#each allHandles as handle, i}
         <WalterAnhaengeHandle
             bind:filter
             fetchImpl={fileWrapper.fetchImpl}
+            bind:allHandles
             {permissions}
             bind:handle
         />
