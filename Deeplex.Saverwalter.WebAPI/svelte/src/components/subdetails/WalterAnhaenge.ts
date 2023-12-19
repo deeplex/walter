@@ -20,7 +20,7 @@ function post_s3_file(
     file: File,
     handle: WalterS3FileHandle,
     fetchImpl: typeof fetch
-): Promise<WalterS3File[] | undefined> {
+): Promise<WalterS3File[]> {
     return walter_s3_post(file, handle.S3URL, fetchImpl).then(() =>
         upload_finished(file, handle)
     );
@@ -31,7 +31,8 @@ export async function upload_new_files(
     newFiles: File[],
     fetchImpl: typeof fetch
 ) {
-    const files = await handle.files;
+    let files = await handle.files;
+
     for (const file of newFiles) {
         {
             if (files.map((e) => e.FileName).includes(file.name)) {
@@ -43,8 +44,10 @@ export async function upload_new_files(
                     submit: () => post_s3_file(file, handle, fetchImpl)
                 });
             } else {
-                return post_s3_file(file, handle, fetchImpl);
+                files = await post_s3_file(file, handle, fetchImpl);
             }
         }
     }
+
+    return files;
 }

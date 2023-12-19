@@ -5,7 +5,6 @@
     } from 'carbon-components-svelte';
     import { WalterAnhaengeEntry } from '..';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
-    import type { WalterS3FileWrapper } from '$walter/lib';
     import type { WalterS3FileHandle } from '$walter/lib/WalterS3FileWrapper';
 
     export let permissions: WalterPermissions | undefined = undefined;
