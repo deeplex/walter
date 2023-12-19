@@ -116,7 +116,7 @@
         <Accordion>
             <WalterData {abrechnung} />
             {#await mieter then mieter}
-                <WalterKontakte title="Mieter" rows={mieter} />
+                <WalterKontakte title="Mieter" rows={mieter} {fetchImpl} />
             {/await}
             <WalterMieten
                 entry={mietEntry}

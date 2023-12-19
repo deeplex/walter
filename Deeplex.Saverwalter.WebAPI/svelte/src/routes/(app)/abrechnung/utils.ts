@@ -4,7 +4,7 @@ import {
     create_abrechnung_word,
     loadAbrechnung
 } from '$walter/services/abrechnung';
-import { walter_file_post } from '$walter/services/files';
+import { fileURL, walter_file_post } from '$walter/services/files';
 import { WalterFile } from '$walter/lib/WalterFile';
 
 export async function create_word_doc(
@@ -16,11 +16,12 @@ export async function create_word_doc(
     const abrechnung = await create_abrechnung_word(
         vertragId,
         selectedYear,
-        title
+        title,
+        fetchImpl
     );
     if (abrechnung instanceof File) {
-        const fileURL = `vertraege/${vertragId}`;
-        return create_abrechnung(abrechnung, fileURL, fetchImpl);
+        const fileUrl = fileURL.vertrag(`${vertragId}`);
+        return create_abrechnung(abrechnung, fileUrl, fetchImpl);
     }
 }
 
@@ -33,11 +34,12 @@ export async function create_pdf_doc(
     const abrechnung = await create_abrechnung_pdf(
         vertragId,
         selectedYear,
-        title
+        title,
+        fetchImpl
     );
     if (abrechnung instanceof File) {
-        const fileURL = `vertraege/${vertragId}`;
-        return create_abrechnung(abrechnung, fileURL, fetchImpl);
+        const fileUrl = fileURL.vertrag(`${vertragId}`);
+        return create_abrechnung(abrechnung, fileUrl, fetchImpl);
     }
 }
 

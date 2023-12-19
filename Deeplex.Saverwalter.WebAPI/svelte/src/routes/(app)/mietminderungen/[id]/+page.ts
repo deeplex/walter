@@ -1,6 +1,5 @@
 import { WalterMietminderungEntry } from '$walter/lib';
-import { fileURL, walter_get_files } from '$walter/services/files';
-import type { WalterFile } from '$walter/types';
+import { fileURL } from '$walter/services/files';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch }) => {
