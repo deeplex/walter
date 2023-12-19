@@ -170,5 +170,25 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             var fullPath = string.Join("/", [_baseUrl, "user", userId, filename]);
             return await FileHandling.RedirectToFileServer(Request, _httpClient, fullPath);
         }
+
+        [HttpPut("files/{old_filename}/{new_filename}")]
+        public async Task<IActionResult> RenameFile(int id, string old_filename, string new_filename)
+        {
+            var userId = WebEncoders.Base64UrlEncode(User.GetUserId().ToByteArray());
+            var deletePath = string.Join("/", [_baseUrl, "user", userId, old_filename]);
+            var renamePath = string.Join("/", [_baseUrl, "user", userId, new_filename]);
+
+            Request.Path = Request.Path.Value!.Replace(old_filename, new_filename);
+            var response = await FileHandling.RedirectToFileServer(Request, _httpClient, renamePath);
+
+            if (response is FileContentResult)
+            {
+                // Put trash before the filename
+                var deleteRequest = new HttpRequestMessage(new HttpMethod(HttpMethod.Delete.Method), deletePath) { Content = null };
+                await _httpClient.SendAsync(deleteRequest, CancellationToken.None);
+            }
+
+            return response;
+        }
     }
 }

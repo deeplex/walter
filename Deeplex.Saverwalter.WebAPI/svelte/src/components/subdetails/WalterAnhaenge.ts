@@ -1,30 +1,38 @@
 import type { WalterS3FileWrapper } from '$walter/lib';
+import type { WalterS3FileHandle } from '$walter/lib/WalterS3FileWrapper';
 import {
     create_walter_s3_file_from_file,
     walter_s3_post
 } from '$walter/services/s3';
 import { openModal } from '$walter/store';
+import type { WalterS3File } from '$walter/types';
 
-function upload_finished(fileWrapper: WalterS3FileWrapper, file: File) {
-    fileWrapper.addFile(
-        create_walter_s3_file_from_file(file, fileWrapper.handles[0].S3URL),
-        0
+function upload_finished(
+    file: File,
+    handle: WalterS3FileHandle
+): Promise<WalterS3File[]> {
+    return handle.addFile(
+        create_walter_s3_file_from_file(file, `${handle.S3URL}/${file.name}`)
     );
 }
 
-function post_s3_file(fileWrapper: WalterS3FileWrapper, file: File) {
-    walter_s3_post(
-        file,
-        fileWrapper.handles[0].S3URL,
-        fileWrapper.fetchImpl
-    ).then(() => upload_finished(fileWrapper, file));
+function post_s3_file(
+    file: File,
+    handle: WalterS3FileHandle,
+    fetchImpl: typeof fetch
+): Promise<WalterS3File[]> {
+    return walter_s3_post(file, handle.S3URL, fetchImpl).then(() =>
+        upload_finished(file, handle)
+    );
 }
 
 export async function upload_new_files(
-    fileWrapper: WalterS3FileWrapper,
-    newFiles: File[]
+    handle: WalterS3FileHandle,
+    newFiles: File[],
+    fetchImpl: typeof fetch
 ) {
-    const files = await fileWrapper.handles[0].files;
+    let files = await handle.files;
+
     for (const file of newFiles) {
         {
             if (files.map((e) => e.FileName).includes(file.name)) {
@@ -33,11 +41,13 @@ export async function upload_new_files(
                     modalHeading: `Datei existiert bereits`,
                     content,
                     primaryButtonText: 'Überschreiben',
-                    submit: () => post_s3_file(fileWrapper, file)
+                    submit: () => post_s3_file(file, handle, fetchImpl)
                 });
             } else {
-                post_s3_file(fileWrapper, file);
+                files = await post_s3_file(file, handle, fetchImpl);
             }
         }
     }
+
+    return files;
 }

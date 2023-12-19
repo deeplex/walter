@@ -10,11 +10,8 @@
         Tabs
     } from 'carbon-components-svelte';
     import WalterPreviewCopyFile from './WalterPreviewCopyFile.svelte';
-    import { download, remove } from './WalterPreview';
-    import type {
-        WalterS3FileWrapper,
-        WalterSelectionEntry
-    } from '$walter/lib';
+    import { download } from './WalterPreview';
+    import { WalterToastContent, type WalterSelectionEntry } from '$walter/lib';
     import WalterPreviewType from './WalterPreviewDataTypeSelector.svelte';
     import { ArrowLeft, ArrowRight, Download } from 'carbon-icons-svelte';
     import {
@@ -26,11 +23,16 @@
     import { get_file_and_update_url } from '../subdetails/WalterAnhaengeEntry';
     import WalterRenameFile from './WalterRenameFile.svelte';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
+    import type { WalterS3FileHandle } from '$walter/lib/WalterS3FileWrapper';
+    import { openModal } from '$walter/store';
+    import { walter_s3_delete } from '$walter/services/s3';
 
     export let open = false;
     export let file: WalterS3File;
-    export let fileWrapper: WalterS3FileWrapper;
+    export let fetchImpl: typeof fetch;
     export let permissions: WalterPermissions | undefined;
+    export let handle: WalterS3FileHandle;
+    export let allHandles: WalterS3FileHandle[];
 
     // Created here to keep them when the selection changes
     let entry = {};
@@ -45,10 +47,6 @@
     }
 
     async function selectFileNextToSelectedFile(step: number) {
-        const handleIndex = fileWrapper.handles.findIndex(
-            (e) => e.S3URL === file?.Key.slice(0, e.S3URL.length)
-        );
-        const handle = fileWrapper.handles[handleIndex];
         const files = await handle.files;
         const fileIndex = files.findIndex((e) => e.Key === file.Key);
 
@@ -80,19 +78,26 @@
 
     let newFileName = file.FileName;
 
+    function updateOtherHandle() {
+        const otherHandleIndex = allHandles.findIndex(
+            (e) => e.name === selectedEntry!.text
+        );
+        if (otherHandleIndex !== -1) {
+            allHandles[otherHandleIndex].files =
+                allHandles[otherHandleIndex].addFile(file);
+        }
+    }
+
     async function copy() {
         const copied = await copyImpl(
             file,
-            fileWrapper.fetchImpl,
+            fetchImpl,
             selectedTable,
             selectedEntry
         );
 
         if (copied && selectedTable && selectedEntry) {
-            fileWrapper.addFile(
-                file,
-                `${selectedTable.key}/${selectedEntry.id}`
-            );
+            updateOtherHandle();
             selectedTable = undefined;
             selectedEntry = undefined;
             step = 0;
@@ -102,32 +107,57 @@
     async function move() {
         const moved = await moveImpl(
             file,
-            fileWrapper.fetchImpl,
+            fetchImpl,
             selectedTable,
             selectedEntry
         );
 
         if (moved && selectedTable && selectedEntry) {
             open = false;
-            fileWrapper.addFile(
-                file,
-                `${selectedTable.key}/${selectedEntry.id}`
-            );
-            fileWrapper.removeFile(file);
+            updateOtherHandle();
+            handle.files = handle.removeFile(file);
         }
     }
 
     async function rename() {
-        const renamed = await renameImpl(
-            file,
-            fileWrapper.fetchImpl,
-            newFileName
-        );
+        const renamed = await renameImpl(file, fetchImpl, newFileName);
 
         if (renamed) {
-            file.FileName = newFileName;
-            // TODO update sidenav
+            handle.files = handle.files.then((files) => {
+                const index = files.findIndex((e) => e.Key === file.Key);
+                files[index].FileName = newFileName;
+                files[index].Key = `${file.Key.substring(
+                    0,
+                    file.Key.lastIndexOf('/') + 1
+                )}${newFileName}`;
+                return files;
+            });
         }
+    }
+
+    async function remove(file: WalterS3File) {
+        const content = `Bist du sicher, dass du ${file.FileName} löschen möchtest?`;
+
+        const deleteToast = new WalterToastContent(
+            'Löschen erfolgreich',
+            'Löschen fehlgeschlagen',
+            () => `${file.FileName} erfolgreich gelöscht.`,
+            () => ''
+        );
+
+        openModal({
+            modalHeading: 'Löschen',
+            content,
+            danger: true,
+            primaryButtonText: 'Löschen',
+            submit: () =>
+                walter_s3_delete(file, deleteToast).then(async (e) => {
+                    if (e.status === 200) {
+                        handle.files = handle.removeFile(file);
+                        open = false;
+                    }
+                })
+        });
     }
 
     function submit() {
@@ -142,7 +172,7 @@
                 rename();
                 break;
             case TabSelector.Delete:
-                remove(file, fileWrapper);
+                remove(file);
                 break;
             default:
                 break;
@@ -210,7 +240,7 @@
                 bind:selectedTable
                 bind:selectedEntry
                 bind:step
-                {fileWrapper}
+                {fetchImpl}
             />
         {:else if selectedTab === TabSelector.Rename}
             <WalterRenameFile bind:value={newFileName} bind:file />

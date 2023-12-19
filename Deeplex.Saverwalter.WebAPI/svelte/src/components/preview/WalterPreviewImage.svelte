@@ -17,6 +17,10 @@
             src = URL.createObjectURL(file.Blob);
         }
     });
+
+    $: {
+        src = file.Blob ? URL.createObjectURL(file.Blob) : '';
+    }
 </script>
 
 {#if file.Blob}

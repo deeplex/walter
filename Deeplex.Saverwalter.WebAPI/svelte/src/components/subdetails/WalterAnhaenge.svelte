@@ -1,24 +1,31 @@
 <script lang="ts">
     import {
         FileUploaderDropContainer,
-        HeaderPanelDivider,
         HeaderPanelLinks,
         InlineLoading,
         TextInput
     } from 'carbon-components-svelte';
 
-    import WalterAnhaengeEntry from './WalterAnhaengeEntry.svelte';
     import type { WalterS3FileWrapper } from '$walter/lib';
     import { upload_new_files } from './WalterAnhaenge';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
+    import WalterAnhaengeHandle from './WalterAnhaengeHandle.svelte';
+    import type { WalterS3FileHandle } from '$walter/lib/WalterS3FileWrapper';
 
     export let fileWrapper: WalterS3FileWrapper;
     export let permissions: WalterPermissions | undefined = undefined;
 
     let newFiles: File[] = [];
+    let allHandles: WalterS3FileHandle[] = fileWrapper.handles;
 
-    function upload(): void {
-        upload_new_files(fileWrapper, newFiles);
+    async function upload() {
+        await upload_new_files(
+            fileWrapper.handles[0],
+            newFiles,
+            fileWrapper.fetchImpl
+        );
+        allHandles = fileWrapper.handles;
+        newFiles = [];
     }
 
     let filter = '';
@@ -46,26 +53,21 @@
         size="sm"
         style="background-color: transparent; color: white"
     ></TextInput>
-    {#each fileWrapper.handles as handle}
-        {#await handle.files}
-            <HeaderPanelDivider>{handle.name} (-)</HeaderPanelDivider>
-            <InlineLoading
-                style="margin-left: 2em"
-                description="Lade Dateien"
-            />
-        {:then loadedFiles}
-            <HeaderPanelDivider
-                >{handle.name} ({loadedFiles.length})</HeaderPanelDivider
-            >
-            {#each loadedFiles as file}
-                {#if file.FileName.toLowerCase().includes(filter.toLowerCase())}
-                    <WalterAnhaengeEntry
-                        {permissions}
-                        {file}
-                        bind:fileWrapper
-                    />
-                {/if}
+    {#each allHandles as handle, i}
+        <WalterAnhaengeHandle
+            bind:filter
+            fetchImpl={fileWrapper.fetchImpl}
+            bind:allHandles
+            {permissions}
+            bind:handle
+        />
+        {#if i === 0}
+            {#each newFiles as file}
+                <InlineLoading
+                    style="margin-left: 1em"
+                    description={file.name}
+                />
             {/each}
-        {/await}
+        {/if}
     {/each}
 </HeaderPanelLinks>
