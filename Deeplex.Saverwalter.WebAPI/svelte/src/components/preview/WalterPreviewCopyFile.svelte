@@ -6,13 +6,13 @@
     } from './WalterPreviewCopyFile';
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
-    import type { WalterSelectionEntry } from '$walter/lib';
     import Step0SelectTable from './WalterStep0SelectTable.svelte';
     import Step1SelectEntry from './WalterStep1SelectEntry.svelte';
     import Step2ViewOrCreateEntry from './WalterStep2ViewOrCreateEntry.svelte';
     import Step3CheckAndSubmit from './WalterStep3CheckAndSubmit.svelte';
     import WalterPreviewCopyFileStepper from './WalterStepper.svelte';
     import { walter_get } from '$walter/services/requests';
+    import type { WalterSelectionEntry } from '$walter/lib';
 
     export let fetchImpl: typeof fetch;
     export let step: number;
@@ -46,7 +46,10 @@
             return;
         }
 
-        rows = (await selectedTable!.fetch(fetchImpl)) || [];
+        rows =
+            ((await selectedTable!.fetch(
+                fetchImpl
+            )) as WalterSelectionEntry[]) || [];
         selectEntryFromId(id);
         if (selectedEntry) {
             step = 2;
@@ -54,7 +57,10 @@
     });
 
     async function updateRows() {
-        rows = (await selectedTable!.fetch(fetchImpl)) || [];
+        rows =
+            ((await selectedTable!.fetch(
+                fetchImpl
+            )) as WalterSelectionEntry[]) || [];
     }
 
     async function selectedTable_change(key: string) {

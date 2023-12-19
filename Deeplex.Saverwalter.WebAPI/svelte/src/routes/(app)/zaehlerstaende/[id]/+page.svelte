@@ -7,8 +7,8 @@
     } from '$walter/components';
     import { convertDateGerman } from '$walter/services/utils';
     import type { PageData } from './$types';
-    import { WalterS3FileWrapper } from '$walter/lib';
-    import { S3URL } from '$walter/services/s3';
+    import { WalterFileWrapper } from '$walter/lib';
+    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -23,9 +23,9 @@
             convertDateGerman(new Date(data.entry.datum));
     }
 
-    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
+    let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
-    fileWrapper.register(title, data.S3URL);
+    fileWrapper.register(title, data.fileURL);
 </script>
 
 <WalterHeaderDetail
@@ -39,7 +39,7 @@
     <WalterZaehlerstand fetchImpl={data.fetchImpl} entry={data.entry} />
     <WalterLinkTile
         bind:fileWrapper
-        s3ref={S3URL.zaehler(`${data.entry.zaehler.id}`)}
+        fileref={fileURL.zaehler(`${data.entry.zaehler.id}`)}
         name={`Zähler: ${data.entry.zaehler.text}`}
         href={`/zaehler/${data.entry.zaehler.id}`}
     />

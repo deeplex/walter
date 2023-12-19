@@ -1,6 +1,6 @@
 import type { WalterBetriebskostenabrechnungEntry } from '$walter/types';
 import { walter_fetch, walter_get } from './requests';
-import { finish_s3_post } from './s3';
+import { finish_file_post } from './files';
 
 const headers = {
     'Content-Type': 'application/octet-stream'
@@ -36,7 +36,7 @@ async function create_abrechnung_file(apiURL: string, fileName: string) {
     if (response.status === 200) {
         return response.blob().then((e) => new File([e], fileName));
     } else {
-        return finish_s3_post(response);
+        return finish_file_post(response);
     }
 }
 

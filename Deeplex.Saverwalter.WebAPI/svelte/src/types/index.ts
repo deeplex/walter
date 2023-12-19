@@ -5,4 +5,4 @@ export {
 } from './WalterBetriebskostenabrechnung.type';
 export { type WalterToast } from './WalterToast.type';
 export { type WalterModalControl } from './WalterModalControl';
-export { type WalterS3File } from './WalterS3File.type';
+export { type WalterFile } from '../lib/WalterFile';

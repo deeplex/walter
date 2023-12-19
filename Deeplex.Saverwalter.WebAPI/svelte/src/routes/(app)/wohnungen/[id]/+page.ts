@@ -1,16 +1,16 @@
 import { WalterWohnungEntry } from '$walter/lib';
-import { S3URL } from '$walter/services/s3';
+import { fileURL } from '$walter/services/files';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch }) => {
     const apiURL = `${WalterWohnungEntry.ApiURL}/${params.id}`;
-    const s3URL = S3URL.wohnung(params.id);
+    const fileUrl = fileURL.wohnung(params.id);
 
     return {
         fetchImpl: fetch,
         id: params.id,
         apiURL: apiURL,
-        S3URL: s3URL,
+        fileURL: fileUrl,
         entry: WalterWohnungEntry.GetOne<WalterWohnungEntry>(params.id, fetch)
     };
 };

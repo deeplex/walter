@@ -7,29 +7,24 @@
         HeaderUtilities
     } from 'carbon-components-svelte';
     import type { PageData } from './$types';
-    import {
-        create_walter_s3_file_from_file,
-        walter_s3_post
-    } from '$walter/services/s3';
+    import { walter_file_post } from '$walter/services/files';
     import { openModal } from '$walter/store';
-    import { WalterS3FileWrapper } from '$walter/lib';
+    import { WalterFileWrapper } from '$walter/lib';
+    import { WalterFile } from '$walter/lib/WalterFile';
 
     export let data: PageData;
 
     let newFiles: File[] = [];
 
     function upload_finished(file: File) {
-        if (data.files.some((e) => e.FileName == file.name)) {
+        if (data.files.some((e) => e.fileName == file.name)) {
             return;
         }
-        data.files = [
-            ...data.files,
-            create_walter_s3_file_from_file(file, data.S3URL)
-        ];
+        data.files = [...data.files, WalterFile.fromFile(file, data.fileURL)];
     }
 
-    function post_s3_file(file: File) {
-        walter_s3_post(file, data.S3URL, data.fetchImpl).then(() =>
+    function upload_file(file: File) {
+        walter_file_post(file, data.fileURL, data.fetchImpl).then(() =>
             upload_finished(file)
         );
     }
@@ -37,22 +32,22 @@
     async function upload() {
         for (const file of newFiles) {
             {
-                if (data.files.map((e) => e.FileName).includes(file.name)) {
+                if (data.files.map((e) => e.fileName).includes(file.name)) {
                     const content = `Eine Datei mit dem Namen ${file.name} existiert bereits in dieser Ablage. Bist du sicher, dass diese Datei hochgeladen werden soll?`;
                     openModal({
                         modalHeading: `Datei existiert bereits`,
                         content,
                         primaryButtonText: 'Überschreiben',
-                        submit: () => post_s3_file(file)
+                        submit: () => upload_file(file)
                     });
                 } else {
-                    post_s3_file(file);
+                    upload_file(file);
                 }
             }
         }
     }
 
-    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
+    let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
 </script>
 

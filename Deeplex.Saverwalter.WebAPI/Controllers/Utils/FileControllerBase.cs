@@ -1,4 +1,5 @@
-﻿using Deeplex.Saverwalter.WebAPI.Services;
+﻿using System.Text;
+using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -86,14 +87,24 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet("{id}/files")]
-        public async Task<IActionResult> GetFiles(int id)
+        public async Task<ActionResult<List<WalterFile>>> GetFiles(int id)
         {
             if (await Authorize(id, Operations.Read) is ActionResult authResult)
             {
                 return authResult;
             }
-            return await ProcessFileRequest(_baseUrl, Request, _httpClient);
+            var result = await ProcessFileRequest(_baseUrl, Request, _httpClient);
+            if (result is FileContentResult fileContentResult)
+            {
+                var files = FileHandling.ParseS3Stream(Encoding.UTF8.GetString(fileContentResult.FileContents), HttpContext.Request.Path.Value!);
+                return Ok(files);
+            }
+            else
+            {
+                return new BadRequestResult();
+            }
         }
+
         [HttpGet("{id}/files/{filename}")]
         public async Task<IActionResult> ReadFile(int id, string filename)
         {

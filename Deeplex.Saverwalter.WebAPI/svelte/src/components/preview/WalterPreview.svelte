@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { WalterS3File } from '$walter/types';
+    import type { WalterFile } from '$walter/types';
     import {
         Button,
         ComposedModal,
@@ -11,7 +11,11 @@
     } from 'carbon-components-svelte';
     import WalterPreviewCopyFile from './WalterPreviewCopyFile.svelte';
     import { download } from './WalterPreview';
-    import { WalterToastContent, type WalterSelectionEntry } from '$walter/lib';
+    import {
+        WalterToastContent,
+        type WalterSelectionEntry,
+        WalterFileHandle
+    } from '$walter/lib';
     import WalterPreviewType from './WalterPreviewDataTypeSelector.svelte';
     import { ArrowLeft, ArrowRight, Download } from 'carbon-icons-svelte';
     import {
@@ -23,16 +27,15 @@
     import { get_file_and_update_url } from '../subdetails/WalterAnhaengeEntry';
     import WalterRenameFile from './WalterRenameFile.svelte';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
-    import type { WalterS3FileHandle } from '$walter/lib/WalterS3FileWrapper';
     import { openModal } from '$walter/store';
-    import { walter_s3_delete } from '$walter/services/s3';
+    import { walter_file_delete } from '$walter/services/files';
 
     export let open = false;
-    export let file: WalterS3File;
+    export let file: WalterFile;
     export let fetchImpl: typeof fetch;
     export let permissions: WalterPermissions | undefined;
-    export let handle: WalterS3FileHandle;
-    export let allHandles: WalterS3FileHandle[];
+    export let handle: WalterFileHandle;
+    export let allHandles: WalterFileHandle[];
 
     // Created here to keep them when the selection changes
     let entry = {};
@@ -48,7 +51,7 @@
 
     async function selectFileNextToSelectedFile(step: number) {
         const files = await handle.files;
-        const fileIndex = files.findIndex((e) => e.Key === file.Key);
+        const fileIndex = files.findIndex((e) => e.key === file.key);
 
         const targetIndex = fileIndex + step;
 
@@ -56,7 +59,7 @@
             return;
         }
 
-        const nextFile: WalterS3File = files[targetIndex];
+        const nextFile: WalterFile = files[targetIndex];
         // First to update the fileName etc, then to load the blob
         file = nextFile;
         file = await get_file_and_update_url(nextFile);
@@ -76,7 +79,7 @@
     let selectedTable: WalterPreviewCopyTable | undefined = undefined;
     let selectedEntry: WalterSelectionEntry | undefined = undefined;
 
-    let newFileName = file.FileName;
+    let newFileName = file.fileName;
 
     function updateOtherHandle() {
         const otherHandleIndex = allHandles.findIndex(
@@ -124,24 +127,24 @@
 
         if (renamed) {
             handle.files = handle.files.then((files) => {
-                const index = files.findIndex((e) => e.Key === file.Key);
-                files[index].FileName = newFileName;
-                files[index].Key = `${file.Key.substring(
+                const index = files.findIndex((e) => e.key === file.key);
+                files[index].fileName = newFileName;
+                files[index].key = `${file.key.substring(
                     0,
-                    file.Key.lastIndexOf('/') + 1
+                    file.key.lastIndexOf('/') + 1
                 )}${newFileName}`;
                 return files;
             });
         }
     }
 
-    async function remove(file: WalterS3File) {
-        const content = `Bist du sicher, dass du ${file.FileName} löschen möchtest?`;
+    async function remove(file: WalterFile) {
+        const content = `Bist du sicher, dass du ${file.fileName} löschen möchtest?`;
 
         const deleteToast = new WalterToastContent(
             'Löschen erfolgreich',
             'Löschen fehlgeschlagen',
-            () => `${file.FileName} erfolgreich gelöscht.`,
+            () => `${file.fileName} erfolgreich gelöscht.`,
             () => ''
         );
 
@@ -151,7 +154,7 @@
             danger: true,
             primaryButtonText: 'Löschen',
             submit: () =>
-                walter_s3_delete(file, deleteToast).then(async (e) => {
+                walter_file_delete(file, deleteToast).then(async (e) => {
                     if (e.status === 200) {
                         handle.files = handle.removeFile(file);
                         open = false;
@@ -189,7 +192,7 @@
 </script>
 
 <ComposedModal size="lg" bind:open on:submit>
-    <ModalHeader bind:title={file.FileName}>
+    <ModalHeader bind:title={file.fileName}>
         <div style="display: flex; flex-direction: row">
             <Tabs bind:selected={selectedTab}>
                 <Tab label="Vorschau" />
@@ -245,7 +248,7 @@
         {:else if selectedTab === TabSelector.Rename}
             <WalterRenameFile bind:value={newFileName} bind:file />
         {:else if selectedTab === TabSelector.Delete}
-            <p>Datei {file.FileName} löschen</p>
+            <p>Datei {file.fileName} löschen</p>
         {/if}
     </ModalBody>
     {#if selectedTab !== TabSelector.Preview}

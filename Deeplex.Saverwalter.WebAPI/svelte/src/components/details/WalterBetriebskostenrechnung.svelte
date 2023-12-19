@@ -17,7 +17,7 @@
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
     import WalterBetriebskostenrechnungen from '../lists/WalterBetriebskostenrechnungen.svelte';
-    import { S3URL } from '$walter/services/s3';
+    import { fileURL } from '$walter/services/files';
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> = {};
     export let rechnungen: WalterBetriebskostenrechnungEntry[] = [];
@@ -126,7 +126,7 @@
 {#if $page.url.pathname !== `/umlagen/${entry.umlage?.id}`}
     <WalterLinks>
         <WalterLinkTile
-            s3ref={S3URL.umlage(`${entry.umlage?.id}`)}
+            fileref={fileURL.umlage(`${entry.umlage?.id}`)}
             name={'Umlage ansehen'}
             href={`/umlagen/${entry.umlage?.id}`}
         />

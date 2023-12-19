@@ -6,8 +6,8 @@
         WalterLinkTile
     } from '$walter/components';
     import type { PageData } from './$types';
-    import { WalterS3FileWrapper } from '$walter/lib';
-    import { S3URL } from '$walter/services/s3';
+    import { WalterFileWrapper } from '$walter/lib';
+    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -16,9 +16,9 @@
         title = data.entry.vertrag.text;
     }
 
-    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
+    let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
-    fileWrapper.register(title, data.S3URL);
+    fileWrapper.register(title, data.fileURL);
 </script>
 
 <WalterHeaderDetail
@@ -32,7 +32,7 @@
     <WalterVertragVersion entry={data.entry} />
     <WalterLinkTile
         bind:fileWrapper
-        s3ref={S3URL.vertrag(`${data.entry.vertrag.id}`)}
+        fileref={fileURL.vertrag(`${data.entry.vertrag.id}`)}
         name={`Vertrag: ${data.entry.vertrag.text}`}
         href={`/vertraege/${data.entry.vertrag.id}`}
     />

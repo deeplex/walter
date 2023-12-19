@@ -1,5 +1,5 @@
 import { WalterVertragEntry } from '$walter/lib';
-import { walter_s3_post } from '$walter/services/s3';
+import { walter_file_post } from '$walter/services/files';
 
 const headers = {
     'Content-Type': 'application/octet-stream'
@@ -13,7 +13,7 @@ export function post_files(id: number, jahr: number, fetchImpl: typeof fetch) {
     })
         .then((e) => e.blob())
         .then((e) =>
-            walter_s3_post(
+            walter_file_post(
                 new File([e], `Abrechnung ${jahr}.docx`),
                 `${WalterVertragEntry.ApiURL}/${id}/files`,
                 fetchImpl

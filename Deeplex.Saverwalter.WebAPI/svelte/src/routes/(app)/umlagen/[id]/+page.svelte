@@ -12,14 +12,14 @@
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
-        WalterS3FileWrapper,
+        WalterFileWrapper,
         type WalterBetriebskostenrechnungEntry,
         type WalterSelectionEntry
     } from '$walter/lib';
     import { Row } from 'carbon-components-svelte';
     import WalterDataLineChart from '$walter/components/data/WalterDataLineChart.svelte';
     import { walter_data_rechnungen_year } from '$walter/components/data/WalterData';
-    import { S3URL } from '$walter/services/s3';
+    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -50,9 +50,9 @@
         title = `${data.entry.typ.text} - ${data.entry.wohnungenBezeichnung}`;
     }
 
-    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
+    let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
-    fileWrapper.register(title, data.S3URL);
+    fileWrapper.register(title, data.fileURL);
 </script>
 
 <WalterHeaderDetail
@@ -87,7 +87,7 @@
         {/if}
         <WalterLinkTile
             {fileWrapper}
-            s3ref={S3URL.umlagetyp(`${data.entry.typ.id}`)}
+            fileref={fileURL.umlagetyp(`${data.entry.typ.id}`)}
             name={`Umlagetyp ansehen`}
             href={`/umlagetypen/${data.entry.typ.id}`}
         />

@@ -17,7 +17,7 @@
         getVertragversionEntry
     } from './utils';
     import {
-        WalterS3FileWrapper,
+        WalterFileWrapper,
         type WalterMieteEntry,
         type WalterMietminderungEntry,
         type WalterVertragVersionEntry,
@@ -28,7 +28,7 @@
     import { ClickableTile, Row } from 'carbon-components-svelte';
     import { walter_data_mieten } from '$walter/components/data/WalterData';
     import WalterDataScatterChart from '$walter/components/data/WalterDataScatterChart.svelte';
-    import { S3URL } from '$walter/services/s3';
+    import { fileURL } from '$walter/services/files';
     export let data: PageData;
 
     const mietminderungEntry: Partial<WalterMietminderungEntry> =
@@ -53,9 +53,9 @@
             .join(', ')}`;
     }
 
-    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
+    let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
-    fileWrapper.register(title, data.S3URL);
+    fileWrapper.register(title, data.fileURL);
 </script>
 
 <WalterHeaderDetail
@@ -103,13 +103,13 @@
 
         <WalterLinkTile
             bind:fileWrapper
-            s3ref={S3URL.kontakt(`${data.entry.ansprechpartner.id}`)}
+            fileref={fileURL.kontakt(`${data.entry.ansprechpartner.id}`)}
             name={`Ansprechpartner: ${data.entry.ansprechpartner.text}`}
             href={`/kontakte/${data.entry.ansprechpartner.id}`}
         />
         <WalterLinkTile
             bind:fileWrapper
-            s3ref={S3URL.wohnung(`${data.entry.wohnung.id}`)}
+            fileref={fileURL.wohnung(`${data.entry.wohnung.id}`)}
             name={`Wohnung: ${data.entry.wohnung.text}`}
             href={`/wohnungen/${data.entry.wohnung.id}`}
         />

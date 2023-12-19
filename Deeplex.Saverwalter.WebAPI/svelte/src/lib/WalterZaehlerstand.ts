@@ -12,6 +12,8 @@ export class WalterZaehlerstandEntry extends WalterApiHandler {
         public einheit: string,
         public zaehler: WalterSelectionEntry,
         public notiz: string,
+        public createdAt: Date,
+        public lastModified: Date,
         public permissions: WalterPermissions
     ) {
         super();
@@ -30,6 +32,8 @@ export class WalterZaehlerstandEntry extends WalterApiHandler {
             json.einheit,
             zaehler,
             json.notiz,
+            json.createdAt,
+            json.lastModified,
             permissions
         );
     }

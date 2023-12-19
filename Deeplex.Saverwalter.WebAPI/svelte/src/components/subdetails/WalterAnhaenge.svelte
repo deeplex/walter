@@ -6,17 +6,16 @@
         TextInput
     } from 'carbon-components-svelte';
 
-    import type { WalterS3FileWrapper } from '$walter/lib';
     import { upload_new_files } from './WalterAnhaenge';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
     import WalterAnhaengeHandle from './WalterAnhaengeHandle.svelte';
-    import type { WalterS3FileHandle } from '$walter/lib/WalterS3FileWrapper';
+    import type { WalterFileWrapper, WalterFileHandle } from '$walter/lib';
 
-    export let fileWrapper: WalterS3FileWrapper;
+    export let fileWrapper: WalterFileWrapper;
     export let permissions: WalterPermissions | undefined = undefined;
 
     let newFiles: File[] = [];
-    let allHandles: WalterS3FileHandle[] = fileWrapper.handles;
+    let allHandles: WalterFileHandle[] = fileWrapper.handles;
 
     async function upload() {
         await upload_new_files(

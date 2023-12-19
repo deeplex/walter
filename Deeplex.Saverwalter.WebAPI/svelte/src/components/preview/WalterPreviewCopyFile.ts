@@ -15,8 +15,12 @@ import {
     WalterZaehlerstandEntry
 } from '$walter/lib';
 import { walter_selection } from '$walter/services/requests';
-import { S3URL, walter_s3_delete, walter_s3_post } from '$walter/services/s3';
-import type { WalterS3File } from '$walter/types';
+import {
+    fileURL,
+    walter_file_delete,
+    walter_file_post
+} from '$walter/services/files';
+import type { WalterFile } from '$walter/types';
 import {
     WalterAdresse,
     WalterBetriebskostenrechnung,
@@ -33,7 +37,7 @@ import {
 } from '..';
 
 export async function copyImpl(
-    file: WalterS3File,
+    file: WalterFile,
     fetchImpl: typeof fetch,
     selectedTable?: WalterPreviewCopyTable,
     selectedEntry?: WalterSelectionEntry
@@ -46,8 +50,8 @@ export async function copyImpl(
         selectedTable.key === 'stack'
             ? 'auf den Ablagestapel'
             : `zu ${selectedEntry?.text}`;
-    const success = `Die Datei ${file.FileName} wurde erfolgreich ${target} kopiert.`;
-    const failure = `Die Datei ${file.FileName} konnte nicht zu ${selectedEntry?.text} kopiert werden.`;
+    const success = `Die Datei ${file.fileName} wurde erfolgreich ${target} kopiert.`;
+    const failure = `Die Datei ${file.fileName} konnte nicht zu ${selectedEntry?.text} kopiert werden.`;
 
     const copyToast = new WalterToastContent(
         'Kopieren erfolgreich',
@@ -68,15 +72,15 @@ export async function copyImpl(
 }
 
 export async function renameImpl(
-    file: WalterS3File,
+    file: WalterFile,
     fetchImpl: typeof fetch,
     newFileName: string
 ) {
     function successSubtitle() {
-        return `Die Datei ${file.FileName} wurde zu ${newFileName} umbenannt.`;
+        return `Die Datei ${file.fileName} wurde zu ${newFileName} umbenannt.`;
     }
     function failureSubtitle() {
-        return `Konnte ${file.FileName} nicht umbenennen. Ist die Dateiendung vielleicht nicht korrekt?`;
+        return `Konnte ${file.fileName} nicht umbenennen. Ist die Dateiendung vielleicht nicht korrekt?`;
     }
 
     const failureTitle = 'Umbenennen fehlgeschlagen.';
@@ -88,10 +92,10 @@ export async function renameImpl(
         failureSubtitle
     );
 
-    const newFile = new File([file.Blob!], newFileName);
-    const result = await walter_s3_post(
+    const newFile = new File([file.blob!], newFileName);
+    const result = await walter_file_post(
         newFile,
-        file.Key,
+        file.key,
         fetchImpl,
         renameToast
     );
@@ -100,7 +104,7 @@ export async function renameImpl(
 }
 
 export async function moveImpl(
-    file: WalterS3File,
+    file: WalterFile,
     fetchImpl: typeof fetch,
     selectedTable?: WalterPreviewCopyTable,
     selectedEntry?: WalterSelectionEntry
@@ -109,9 +113,9 @@ export async function moveImpl(
         return;
     }
 
-    const success = `Die Datei ${file.FileName} wurde erfolgreich zu ${selectedEntry?.text} verschoben.`;
+    const success = `Die Datei ${file.fileName} wurde erfolgreich zu ${selectedEntry?.text} verschoben.`;
     function failureSubtitle() {
-        return `Die Datei ${file.FileName} konnte nicht zu ${selectedEntry?.text} verschoben werden.`;
+        return `Die Datei ${file.fileName} konnte nicht zu ${selectedEntry?.text} verschoben werden.`;
     }
     const failureTitle = 'Verschieben fehlgeschlagen';
     const copyToast = new WalterToastContent(
@@ -136,7 +140,7 @@ export async function moveImpl(
     );
 
     if (await copied) {
-        const deleted = walter_s3_delete(file, moveToast);
+        const deleted = walter_file_delete(file, moveToast);
         if ((await deleted).status === 200) {
             return true;
         }
@@ -146,30 +150,27 @@ export async function moveImpl(
 }
 
 async function copyFile(
-    file: WalterS3File,
+    file: WalterFile,
     selectedTable: WalterPreviewCopyTable,
     selectedEntry: WalterSelectionEntry,
     fetchImpl: typeof fetch,
     toast: WalterToastContent | undefined
 ) {
-    if (!file.Blob) {
+    if (!file.blob) {
         return false;
     }
 
     if (!selectedTable) {
         return false;
     }
-    const S3URL =
+    const fileURL =
         selectedTable.key === 'stack'
-            ? `${selectedTable.S3URL('')}`
-            : `${selectedTable.S3URL('' + selectedEntry?.id)}`;
+            ? `${selectedTable.fileURL('')}`
+            : `${selectedTable.fileURL('' + selectedEntry?.id)}`;
 
-    console.log(selectedTable);
-    console.log(S3URL);
-
-    const success = walter_s3_post(
-        new File([file.Blob], file.FileName),
-        S3URL,
+    const success = walter_file_post(
+        new File([file.blob], file.fileName),
+        fileURL,
         fetchImpl,
         toast
     );
@@ -187,7 +188,7 @@ export type WalterPreviewCopyTable = {
         ) => Promise<Response>
     ) => Promise<unknown>;
     ApiURL: string;
-    S3URL: (id: string) => string;
+    fileURL: (id: string) => string;
     newPage: () => ConstructorOfATypedSvelteComponent;
 };
 
@@ -197,7 +198,7 @@ export const tables: WalterPreviewCopyTable[] = [
         key: 'adressen',
         fetch: walter_selection.adressen,
         ApiURL: WalterAdresseEntry.ApiURL,
-        S3URL: (id: string) => S3URL.adresse(id),
+        fileURL: (id: string) => fileURL.adresse(id),
         newPage: () => WalterAdresse
     },
     {
@@ -205,7 +206,7 @@ export const tables: WalterPreviewCopyTable[] = [
         key: 'betriebskostenrechnungen',
         fetch: walter_selection.betriebskostenrechnungen,
         ApiURL: WalterBetriebskostenrechnungEntry.ApiURL,
-        S3URL: (id: string) => S3URL.betriebskostenrechnung(id),
+        fileURL: (id: string) => fileURL.betriebskostenrechnung(id),
         newPage: () => WalterBetriebskostenrechnung
     },
     {
@@ -213,7 +214,7 @@ export const tables: WalterPreviewCopyTable[] = [
         key: 'erhaltungsaufwendungen',
         fetch: walter_selection.erhaltungsaufwendungen,
         ApiURL: WalterErhaltungsaufwendungEntry.ApiURL,
-        S3URL: (id: string) => S3URL.erhaltungsaufwendung(id),
+        fileURL: (id: string) => fileURL.erhaltungsaufwendung(id),
         newPage: () => WalterErhaltungsaufwendung
     },
     {
@@ -221,7 +222,7 @@ export const tables: WalterPreviewCopyTable[] = [
         key: 'kontakte',
         fetch: walter_selection.kontakte,
         ApiURL: WalterKontaktEntry.ApiURL,
-        S3URL: (id: string) => S3URL.kontakt(id),
+        fileURL: (id: string) => fileURL.kontakt(id),
         newPage: () => WalterKontakt
     },
     {
@@ -229,7 +230,7 @@ export const tables: WalterPreviewCopyTable[] = [
         key: 'mieten',
         fetch: walter_selection.mieten,
         ApiURL: WalterMieteEntry.ApiURL,
-        S3URL: (id: string) => S3URL.miete(id),
+        fileURL: (id: string) => fileURL.miete(id),
         newPage: () => WalterMiete
     },
     {
@@ -237,7 +238,7 @@ export const tables: WalterPreviewCopyTable[] = [
         key: 'mietminderungen',
         fetch: walter_selection.mietminderungen,
         ApiURL: WalterMietminderungEntry.ApiURL,
-        S3URL: (id: string) => S3URL.mietminderung(id),
+        fileURL: (id: string) => fileURL.mietminderung(id),
         newPage: () => WalterMietminderung
     },
     {
@@ -245,7 +246,7 @@ export const tables: WalterPreviewCopyTable[] = [
         key: 'umlagen',
         fetch: walter_selection.umlagen,
         ApiURL: WalterUmlageEntry.ApiURL,
-        S3URL: (id: string) => S3URL.umlage(id),
+        fileURL: (id: string) => fileURL.umlage(id),
         newPage: () => WalterUmlage
     },
     {
@@ -253,7 +254,7 @@ export const tables: WalterPreviewCopyTable[] = [
         key: 'umlagetypen',
         fetch: walter_selection.umlagetypen,
         ApiURL: WalterUmlagetypEntry.ApiURL,
-        S3URL: (id: string) => S3URL.umlagetyp(id),
+        fileURL: (id: string) => fileURL.umlagetyp(id),
         newPage: () => WalterUmlagetyp
     },
     {
@@ -261,21 +262,21 @@ export const tables: WalterPreviewCopyTable[] = [
         key: 'vertraege',
         fetch: walter_selection.vertraege,
         ApiURL: WalterVertragEntry.ApiURL,
-        S3URL: (id: string) => S3URL.vertrag(id),
+        fileURL: (id: string) => fileURL.vertrag(id),
         newPage: () => WalterVertrag
     },
     // {
     //     value: 'Vertragversionen',
     //     key: 'vertragsversionen',
     //     fetch: walter_selection.vertragversionen,
-    //     S3URL: 'S3URL.vertragversionen,
+    //     fileURL: 'fileURL.vertragversionen,
     // },
     {
         value: 'Wohnungen',
         key: 'wohnungen',
         fetch: walter_selection.wohnungen,
         ApiURL: WalterWohnungEntry.ApiURL,
-        S3URL: (id: string) => S3URL.wohnung(id),
+        fileURL: (id: string) => fileURL.wohnung(id),
         newPage: () => WalterWohnung
     },
     {
@@ -283,7 +284,7 @@ export const tables: WalterPreviewCopyTable[] = [
         key: 'zaehler',
         fetch: walter_selection.zaehler,
         ApiURL: WalterZaehlerEntry.ApiURL,
-        S3URL: (id: string) => S3URL.zaehler(id),
+        fileURL: (id: string) => fileURL.zaehler(id),
         newPage: () => WalterZaehler
     },
     {
@@ -291,7 +292,7 @@ export const tables: WalterPreviewCopyTable[] = [
         key: 'zaehlerstaende',
         fetch: walter_selection.zaehlerstaende,
         ApiURL: WalterZaehlerstandEntry.ApiURL,
-        S3URL: (id: string) => S3URL.zaehlerstand(id),
+        fileURL: (id: string) => fileURL.zaehlerstand(id),
         newPage: () => WalterZaehlerstand
     },
     {
@@ -299,7 +300,8 @@ export const tables: WalterPreviewCopyTable[] = [
         key: 'stack',
         fetch: () => Promise.resolve(),
         ApiURL: '',
-        S3URL: () => S3URL.stack,
-        newPage: () => undefined
+        fileURL: () => fileURL.stack,
+        newPage: () =>
+            undefined as unknown as ConstructorOfATypedSvelteComponent
     }
 ];

@@ -148,18 +148,29 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         }
 
         [HttpGet("files")]
-        public async Task<IActionResult> GetFiles()
+        public async Task<ActionResult<List<WalterFile>>> GetFiles()
         {
             var userId = WebEncoders.Base64UrlEncode(User.GetUserId().ToByteArray());
             var fullPath = _baseUrl + "?prefix=" + string.Join("/", ["user", userId]);
-            return await FileHandling.RedirectToFileServer(Request, _httpClient, fullPath);
+            var result = await FileHandling.RedirectToFileServer(Request, _httpClient, fullPath);
+            if (result is FileContentResult fileContentResult)
+            {
+                var files = FileHandling.ParseS3Stream(Encoding.UTF8.GetString(fileContentResult.FileContents), HttpContext.Request.Path.Value);
+                return Ok(files);
+            }
+            else
+            {
+                return new BadRequestResult();
+            }
         }
         [HttpGet("files/{filename}")]
-        public async Task<IActionResult> ReadFile(string filename)
+        public async Task<IActionResult> GetFileContent(string filename)
         {
             var userId = WebEncoders.Base64UrlEncode(User.GetUserId().ToByteArray());
             var fullPath = string.Join("/", [_baseUrl, "user", userId, filename]);
-            return await FileHandling.RedirectToFileServer(Request, _httpClient, fullPath);
+            var result = await FileHandling.RedirectToFileServer(Request, _httpClient, fullPath);
+
+            return result;
         }
 
         [HttpDelete("files/{filename}")]

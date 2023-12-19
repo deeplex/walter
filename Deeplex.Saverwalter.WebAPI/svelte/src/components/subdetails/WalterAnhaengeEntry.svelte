@@ -1,27 +1,28 @@
 <script lang="ts">
-    import type { WalterS3File } from '$walter/types';
+    import type { WalterFile } from '$walter/types';
+
+    import { get_file_and_update_url } from './WalterAnhaengeEntry';
+    import { page } from '$app/stores';
+    import type { WalterPermissions } from '$walter/lib/WalterPermissions';
     import {
         HeaderPanelLink,
         TooltipDefinition
     } from 'carbon-components-svelte';
-    import WalterPreview from '../preview/WalterPreview.svelte';
-    import { get_file_and_update_url } from './WalterAnhaengeEntry';
-    import { page } from '$app/stores';
-    import type { WalterPermissions } from '$walter/lib/WalterPermissions';
-    import type { WalterS3FileHandle } from '$walter/lib/WalterS3FileWrapper';
+    import { WalterPreview } from '..';
+    import type { WalterFileHandle } from '$walter/lib';
 
-    export let file: WalterS3File;
+    export let file: WalterFile;
     export let fetchImpl: typeof fetch;
     export let permissions: WalterPermissions | undefined;
-    export let handle: WalterS3FileHandle;
-    export let allHandles: WalterS3FileHandle[];
+    export let handle: WalterFileHandle;
+    export let allHandles: WalterFileHandle[];
 
     async function showModal() {
         selectedFile = await get_file_and_update_url(file);
         previewOpen = true;
     }
 
-    let selectedFile: WalterS3File;
+    let selectedFile: WalterFile;
     let previewOpen = false;
 
     const style = `
@@ -47,7 +48,7 @@
 {/if}
 
 <HeaderPanelLink
-    style={file.FileName === new URL($page.url).searchParams.get('file')
+    style={file.fileName === new URL($page.url).searchParams.get('file')
         ? 'background-color: #393939;'
         : ''}
     on:click={showModal}
@@ -55,11 +56,11 @@
     <TooltipDefinition style="top: -7px;" align="start" direction="top">
         <svelte:fragment slot="tooltip">
             <div style="width: 14em;">
-                {file.FileName}
+                {file.fileName}
             </div>
         </svelte:fragment>
         <p {style}>
-            {file.FileName}
+            {file.fileName}
         </p>
     </TooltipDefinition>
 </HeaderPanelLink>

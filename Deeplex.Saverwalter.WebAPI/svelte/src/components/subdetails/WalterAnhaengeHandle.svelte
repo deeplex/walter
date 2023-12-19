@@ -5,12 +5,12 @@
     } from 'carbon-components-svelte';
     import { WalterAnhaengeEntry } from '..';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
-    import type { WalterS3FileHandle } from '$walter/lib/WalterS3FileWrapper';
+    import type { WalterFileHandle } from '$walter/lib';
 
     export let permissions: WalterPermissions | undefined = undefined;
     export let fetchImpl: typeof fetch;
-    export let allHandles: WalterS3FileHandle[];
-    export let handle: WalterS3FileHandle;
+    export let allHandles: WalterFileHandle[];
+    export let handle: WalterFileHandle;
     export let filter: string;
 </script>
 
@@ -21,7 +21,7 @@
     <HeaderPanelDivider>{handle.name} ({files?.length || 0})</HeaderPanelDivider
     >
     {#each files || [] as file}
-        {#if file.FileName.toLowerCase().includes(filter.toLowerCase())}
+        {#if file.fileName.toLowerCase().includes(filter.toLowerCase())}
             <WalterAnhaengeEntry
                 bind:allHandles
                 {permissions}

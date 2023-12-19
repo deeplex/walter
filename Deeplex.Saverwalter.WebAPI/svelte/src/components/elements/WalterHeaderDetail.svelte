@@ -11,7 +11,7 @@
 
     import { WalterAnhaenge, WalterHeader } from '$walter/components';
     import { handle_save, handle_delete } from './WalterHeaderDetail';
-    import type { WalterS3FileWrapper } from '$walter/lib';
+    import type { WalterFileWrapper } from '$walter/lib';
     import { convertTime } from '$walter/services/utils';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
 
@@ -22,7 +22,7 @@
         permissions?: WalterPermissions;
     } & unknown;
     export let apiURL: string;
-    export let fileWrapper: WalterS3FileWrapper | undefined = undefined;
+    export let fileWrapper: WalterFileWrapper | undefined = undefined;
 
     let winWidth = 0;
 

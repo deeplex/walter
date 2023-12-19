@@ -9,7 +9,7 @@
     import { Row } from 'carbon-components-svelte';
     import type { WalterMieteEntry } from '$walter/lib';
     import WalterLinkTile from '../subdetails/WalterLinkTile.svelte';
-    import { S3URL } from '$walter/services/s3';
+    import { fileURL } from '$walter/services/files';
 
     export let entry: Partial<WalterMieteEntry> = {};
     export let mieten: WalterMieteEntry[] = [];
@@ -46,7 +46,7 @@
 
 <WalterLinks>
     <WalterLinkTile
-        s3ref={S3URL.vertrag(`${entry.vertrag?.id}`)}
+        fileref={fileURL.vertrag(`${entry.vertrag?.id}`)}
         name={`Vertrag: ${mieten[0]?.vertrag?.text || 'ansehen'}`}
         href={`/vertraege/${entry.vertrag?.id}`}
     />
