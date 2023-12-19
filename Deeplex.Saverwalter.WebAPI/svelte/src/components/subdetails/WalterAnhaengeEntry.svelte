@@ -1,10 +1,5 @@
 <script lang="ts">
     import type { WalterS3File } from '$walter/types';
-
-    export let file: WalterS3File;
-    export let fileWrapper: WalterS3FileWrapper;
-    export let permissions: WalterPermissions | undefined;
-
     import {
         HeaderPanelLink,
         TooltipDefinition
@@ -14,6 +9,12 @@
     import { get_file_and_update_url } from './WalterAnhaengeEntry';
     import { page } from '$app/stores';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
+    import type { WalterS3FileHandle } from '$walter/lib/WalterS3FileWrapper';
+
+    export let file: WalterS3File;
+    export let fetchImpl: typeof fetch;
+    export let permissions: WalterPermissions | undefined;
+    export let handle: WalterS3FileHandle;
 
     async function showModal() {
         selectedFile = await get_file_and_update_url(file);
@@ -37,15 +38,17 @@
 {#if selectedFile}
     <WalterPreview
         {permissions}
-        bind:fileWrapper
+        {fetchImpl}
+        bind:handle
         bind:file={selectedFile}
         bind:open={previewOpen}
     />
 {/if}
 
 <HeaderPanelLink
-    style={file.FileName === new URL($page.url).searchParams.get('file') &&
-        'background-color: #393939;'}
+    style={file.FileName === new URL($page.url).searchParams.get('file')
+        ? 'background-color: #393939;'
+        : ''}
     on:click={showModal}
 >
     <TooltipDefinition style="top: -7px;" align="start" direction="top">

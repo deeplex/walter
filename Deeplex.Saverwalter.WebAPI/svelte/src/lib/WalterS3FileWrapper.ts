@@ -15,40 +15,9 @@ export class WalterS3FileWrapper {
     registerStack() {
         this.register('Ablagestapel', S3URL.stack);
     }
-
-    // target might be either an index of a S3URL that has to match the handles S3URL
-    async addFile(file: WalterS3File, target: string | number) {
-        const index =
-            typeof target === 'number'
-                ? target
-                : this.handles.findIndex((e) => e.S3URL === target);
-
-        const files = await this.handles[index]?.files;
-
-        if (!files) {
-            return;
-        }
-        // Do not overwrite if the file already exists
-        if (files.some((e) => e.FileName === file.FileName)) {
-            return;
-        }
-
-        return (this.handles[index].files = Promise.resolve([...files, file]));
-    }
-
-    async removeFile(file: WalterS3File) {
-        for (const handle of this.handles) {
-            if (file.Key.includes(handle.S3URL)) {
-                const files = await handle.files;
-                handle.files = Promise.resolve(
-                    files.filter((e) => e.FileName !== file.FileName)
-                );
-            }
-        }
-    }
 }
 
-class WalterS3FileHandle {
+export class WalterS3FileHandle {
     files: Promise<WalterS3File[]>;
 
     constructor(
@@ -57,5 +26,32 @@ class WalterS3FileHandle {
         public fetchImpl: typeof fetch
     ) {
         this.files = walter_s3_get_files(this.S3URL, this.fetchImpl);
+    }
+
+    async removeFile(file: WalterS3File): Promise<WalterS3File[]> {
+        if (file.Key.includes(this.S3URL)) {
+            const these_files = await this.files;
+            this.files = Promise.resolve(
+                these_files.filter((e) => e.FileName !== file.FileName)
+            );
+        }
+
+        return this.files;
+    }
+
+    async addFile(file: WalterS3File): Promise<WalterS3File[]> {
+        const files = await this.files;
+
+        if (!files) {
+            return [];
+        }
+        // Do not overwrite if the file already exists
+        if (files.some((e) => e.FileName === file.FileName)) {
+            return this.files;
+        }
+
+        this.files = Promise.resolve([...files, file]);
+
+        return this.files;
     }
 }

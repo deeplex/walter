@@ -6,10 +6,7 @@
     } from './WalterPreviewCopyFile';
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
-    import type {
-        WalterS3FileWrapper,
-        WalterSelectionEntry
-    } from '$walter/lib';
+    import type { WalterSelectionEntry } from '$walter/lib';
     import Step0SelectTable from './WalterStep0SelectTable.svelte';
     import Step1SelectEntry from './WalterStep1SelectEntry.svelte';
     import Step2ViewOrCreateEntry from './WalterStep2ViewOrCreateEntry.svelte';
@@ -17,7 +14,7 @@
     import WalterPreviewCopyFileStepper from './WalterStepper.svelte';
     import { walter_get } from '$walter/services/requests';
 
-    export let fileWrapper: WalterS3FileWrapper;
+    export let fetchImpl: typeof fetch;
     export let step: number;
     export let selectedTable: WalterPreviewCopyTable | undefined = undefined;
     export let selectedEntry: WalterSelectionEntry | undefined = undefined;
@@ -49,7 +46,7 @@
             return;
         }
 
-        rows = (await selectedTable!.fetch(fileWrapper.fetchImpl)) || [];
+        rows = (await selectedTable!.fetch(fetchImpl)) || [];
         selectEntryFromId(id);
         if (selectedEntry) {
             step = 2;
@@ -57,7 +54,7 @@
     });
 
     async function updateRows() {
-        rows = (await selectedTable!.fetch(fileWrapper.fetchImpl)) || [];
+        rows = (await selectedTable!.fetch(fetchImpl)) || [];
     }
 
     async function selectedTable_change(key: string) {
@@ -75,7 +72,7 @@
         selectedEntry = rows?.find((row) => row.id === id);
         entry = await walter_get(
             `${selectedTable?.ApiURL}/${selectedEntry?.id}`,
-            fileWrapper.fetchImpl
+            fetchImpl
         );
     }
 
@@ -109,7 +106,7 @@
         bind:selectedEntry
         bind:selectedTable
         bind:entry
-        fetchImpl={fileWrapper.fetchImpl}
+        {fetchImpl}
         {updateRows}
         {selectEntryFromId}
     />
