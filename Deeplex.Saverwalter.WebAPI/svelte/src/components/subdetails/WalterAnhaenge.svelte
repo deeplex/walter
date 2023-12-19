@@ -74,12 +74,7 @@
             {/each}
         {/await}
         {#each newFiles as file}
-            <HeaderPanelLink>
-                <div style="display: flex; wrap: nowrap">
-                    <InlineLoading style="margin-top: -5px" />
-                    <span style="marginLeft: 5px">{file.name}</span>
-                </div>
-            </HeaderPanelLink>
+            <InlineLoading style="margin-left: 1em" description={file.name} />
         {/each}
     {/each}
 </HeaderPanelLinks>
