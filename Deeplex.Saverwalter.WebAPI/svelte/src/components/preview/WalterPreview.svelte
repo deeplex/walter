@@ -113,8 +113,15 @@
         const renamed = await renameImpl(file, fetchImpl, newFileName);
 
         if (renamed) {
-            file.FileName = newFileName;
-            // TODO update sidenav
+            handle.files = handle.files.then((files) => {
+                const index = files.findIndex((e) => e.Key === file.Key);
+                files[index].FileName = newFileName;
+                files[index].Key = `${file.Key.substring(
+                    0,
+                    file.Key.lastIndexOf('/') + 1
+                )}${newFileName}`;
+                return files;
+            });
         }
     }
 
