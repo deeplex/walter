@@ -7,7 +7,7 @@
         WalterUmlagetyp,
         WalterUmlagen
     } from '$walter/components';
-    import { WalterS3FileWrapper } from '$walter/lib';
+    import { WalterFileWrapper } from '$walter/lib';
 
     export let data: PageData;
 
@@ -16,9 +16,9 @@
         title = data.entry.bezeichnung;
     }
 
-    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
+    let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
-    fileWrapper.register(title, data.S3URL);
+    fileWrapper.register(title, data.fileURL);
 </script>
 
 <WalterHeaderDetail

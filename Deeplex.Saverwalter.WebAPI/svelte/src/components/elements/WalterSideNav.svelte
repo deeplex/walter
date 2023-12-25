@@ -22,7 +22,6 @@
         Money,
         NetworkAdminControl,
         Tools,
-        TrashCan,
         User,
         UserMultiple
     } from 'carbon-icons-svelte';

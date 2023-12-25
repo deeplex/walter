@@ -15,7 +15,7 @@
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
-        WalterS3FileWrapper,
+        WalterFileWrapper,
         type WalterErhaltungsaufwendungEntry,
         type WalterUmlageEntry,
         type WalterZaehlerEntry
@@ -23,7 +23,7 @@
     import { Row } from 'carbon-components-svelte';
     import { walter_data_aufwendungen } from '$walter/components/data/WalterData';
     import WalterDataScatterChart from '$walter/components/data/WalterDataScatterChart.svelte';
-    import { S3URL } from '$walter/services/s3';
+    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -65,9 +65,9 @@
         title = data.entry.adresse?.anschrift + ' - ' + data.entry.bezeichnung;
     }
 
-    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
+    let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
-    fileWrapper.register(title, data.S3URL);
+    fileWrapper.register(title, data.fileURL);
 </script>
 
 <WalterHeaderDetail
@@ -117,7 +117,7 @@
 
         <WalterLinkTile
             bind:fileWrapper
-            s3ref={S3URL.adresse(`${data.entry.adresse.id}`)}
+            fileref={fileURL.adresse(`${data.entry.adresse.id}`)}
             name={`Adresse: ${data.entry.adresse.anschrift}`}
             href={`/adressen/${data.entry.adresse.id}`}
         />

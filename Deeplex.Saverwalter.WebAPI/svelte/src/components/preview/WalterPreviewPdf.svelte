@@ -1,10 +1,10 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
     import PDFObject from 'pdfobject';
-    import type { WalterS3File } from '$walter/types';
+    import type { WalterFile } from '$walter/types';
     import { WalterPreviewError } from '$walter/components';
 
-    export let file: WalterS3File;
+    export let file: WalterFile;
 
     let src: string;
     onDestroy(() => {
@@ -12,14 +12,14 @@
     });
 
     onMount(() => {
-        if (file.Blob) {
-            src = URL.createObjectURL(file.Blob);
+        if (file.blob) {
+            src = URL.createObjectURL(file.blob);
             PDFObject.embed(src, '#pdf-container');
         }
     });
 </script>
 
-{#if file.Blob}
+{#if file.blob}
     <div style="height:50rem; overflow: hidden" id="pdf-container" />
 {:else}
     <WalterPreviewError {file} />

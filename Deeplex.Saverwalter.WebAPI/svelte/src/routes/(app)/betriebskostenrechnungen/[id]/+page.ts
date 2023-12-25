@@ -1,11 +1,10 @@
 import { WalterBetriebskostenrechnungEntry } from '$walter/lib';
-import { S3URL, walter_s3_get_files } from '$walter/services/s3';
-import type { WalterS3File } from '$walter/types';
+import { fileURL } from '$walter/services/files';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch }) => {
     const apiURL = `${WalterBetriebskostenrechnungEntry.ApiURL}/${params.id}`;
-    const s3URL = S3URL.betriebskostenrechnung(params.id);
+    const fileUrl = fileURL.betriebskostenrechnung(params.id);
     const entry =
         WalterBetriebskostenrechnungEntry.GetOne<WalterBetriebskostenrechnungEntry>(
             params.id,
@@ -16,7 +15,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         fetchImpl: fetch,
         id: params.id,
         apiURL: apiURL,
-        S3URL: s3URL,
+        filURL: fileUrl,
         entry
     };
 };

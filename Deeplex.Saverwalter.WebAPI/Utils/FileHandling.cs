@@ -1,11 +1,55 @@
 ﻿using System.Net.Http.Headers;
+using System.Xml;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace Deeplex.Saverwalter.WebAPI.Utils
 {
+    public class WalterFile
+    {
+        public string FileName { get; set; } = null!;
+        public string Key { get; set; } = null!;
+        public long LastModified { get; set; }
+        public long? Size { get; set; }
+        public byte[] Blob { get; set; } = null!;
+        public string Type { get; set; } = null!;
+    }
     public static class FileHandling
     {
+
+        public static List<WalterFile> ParseS3Stream(string xmlContent, string path)
+        {
+            List<WalterFile> walterFiles = [];
+
+            using (var stringReader = new StringReader(xmlContent))
+            {
+                using var reader = XmlReader.Create(stringReader);
+
+                while (reader.Read())
+                {
+                    if (reader.NodeType == XmlNodeType.Element && reader.Name == "Contents")
+                    {
+                        var walterFile = new WalterFile();
+
+                        reader.ReadToDescendant("Key");
+                        var s3key = reader.ReadElementContentAsString();
+                        walterFile.FileName = s3key.Split("/").Last();
+
+                        if (s3key.Split("/").Reverse().Skip(1).First() == "trash")
+                        {
+                            continue;
+                        }
+
+                        walterFile.Key = string.Join("/", path, walterFile.FileName);
+
+                        walterFiles.Add(walterFile);
+                    }
+                }
+            }
+
+            return walterFiles;
+        }
+
         private static StreamContent FillContent(string path, HttpRequest request)
         {
             var content = new StreamContent(request.Body);

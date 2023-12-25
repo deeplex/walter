@@ -2,12 +2,12 @@
     import { page } from '$app/stores';
     import { walter_goto } from '$walter/services/utils';
     import { isWalterSideNavOpen } from '$walter/store';
-    import { SideNavLink } from 'carbon-components-svelte';
-    import type { SvelteComponent } from 'svelte';
+    import { Loading, SideNavLink } from 'carbon-components-svelte';
+    import type { CarbonIcon } from 'carbon-icons-svelte';
 
     let winWidth = 0;
 
-    export let icon: typeof SvelteComponent;
+    export let icon: typeof CarbonIcon | typeof Loading;
     export let text: string;
     export let href: string;
 

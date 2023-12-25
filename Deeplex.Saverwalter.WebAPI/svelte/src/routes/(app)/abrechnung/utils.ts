@@ -4,10 +4,8 @@ import {
     create_abrechnung_word,
     loadAbrechnung
 } from '$walter/services/abrechnung';
-import {
-    create_walter_s3_file_from_file,
-    walter_s3_post
-} from '$walter/services/s3';
+import { fileURL, walter_file_post } from '$walter/services/files';
+import { WalterFile } from '$walter/lib/WalterFile';
 
 export async function create_word_doc(
     vertragId: number,
@@ -18,11 +16,12 @@ export async function create_word_doc(
     const abrechnung = await create_abrechnung_word(
         vertragId,
         selectedYear,
-        title
+        title,
+        fetchImpl
     );
     if (abrechnung instanceof File) {
-        const S3URL = `vertraege/${vertragId}`;
-        return create_abrechnung(abrechnung, S3URL, fetchImpl);
+        const fileUrl = fileURL.vertrag(`${vertragId}`);
+        return create_abrechnung(abrechnung, fileUrl, fetchImpl);
     }
 }
 
@@ -35,31 +34,32 @@ export async function create_pdf_doc(
     const abrechnung = await create_abrechnung_pdf(
         vertragId,
         selectedYear,
-        title
+        title,
+        fetchImpl
     );
     if (abrechnung instanceof File) {
-        const S3URL = `vertraege/${vertragId}`;
-        return create_abrechnung(abrechnung, S3URL, fetchImpl);
+        const fileUrl = fileURL.vertrag(`${vertragId}`);
+        return create_abrechnung(abrechnung, fileUrl, fetchImpl);
     }
 }
 
 async function create_abrechnung(
     abrechnung: File,
-    S3URL: string,
+    fileURL: string,
     fetchImpl: typeof fetch
 ) {
-    const file = create_walter_s3_file_from_file(abrechnung, S3URL);
+    const file = WalterFile.fromFile(abrechnung, fileURL);
 
     const toast = new WalterToastContent(
         'Hochladen erfolgreich',
         'Hochladen fehlgeschlagen',
-        () => `Die Datei: ${file.FileName} wurde erfolgreich hochgeladen`,
-        () => `Die Datei: ${file.FileName} konnte nicht hochgeladen werden.`
+        () => `Die Datei: ${file.fileName} wurde erfolgreich hochgeladen`,
+        () => `Die Datei: ${file.fileName} konnte nicht hochgeladen werden.`
     );
 
-    const response = await walter_s3_post(
-        new File([abrechnung], file.FileName),
-        S3URL,
+    const response = await walter_file_post(
+        new File([abrechnung], file.fileName),
+        fileURL,
         fetchImpl,
         toast
     );

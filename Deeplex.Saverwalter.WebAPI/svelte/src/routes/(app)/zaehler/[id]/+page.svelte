@@ -11,10 +11,10 @@
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
-        WalterS3FileWrapper,
+        WalterFileWrapper,
         type WalterZaehlerstandEntry
     } from '$walter/lib';
-    import { S3URL } from '$walter/services/s3';
+    import { fileURL } from '$walter/services/files';
 
     export let data: PageData;
 
@@ -36,9 +36,9 @@
         title = data.entry.kennnummer;
     }
 
-    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
+    let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
-    fileWrapper.register(title, data.S3URL);
+    fileWrapper.register(title, data.fileURL);
 </script>
 
 <WalterHeaderDetail
@@ -67,7 +67,7 @@
         {#if data.entry.adresse !== null}
             <WalterLinkTile
                 bind:fileWrapper
-                s3ref={S3URL.adresse(`${data.entry.adresse.id}`)}
+                fileref={fileURL.adresse(`${data.entry.adresse.id}`)}
                 name={`Adresse: ${data.entry.adresse?.anschrift}`}
                 href={`/adressen/${data.entry.adresse?.id}`}
             />
@@ -75,7 +75,7 @@
         {#if data.entry.wohnung !== null}
             <WalterLinkTile
                 bind:fileWrapper
-                s3ref={S3URL.wohnung(`${data.entry.wohnung?.id}`)}
+                fileref={fileURL.wohnung(`${data.entry.wohnung?.id}`)}
                 name={`Wohnung: ${data.entry.wohnung?.text}`}
                 href={`/wohnungen/${data.entry.wohnung?.id}`}
             />

@@ -1,10 +1,10 @@
 <script lang="ts">
     import { WalterPreviewError } from '$walter/components';
-    import type { WalterS3File } from '$walter/types';
+    import type { WalterFile } from '$walter/types';
     import { Tile } from 'carbon-components-svelte';
     import { onMount } from 'svelte';
 
-    export let file: WalterS3File;
+    export let file: WalterFile;
     let text = '';
 
     onMount(() => {
@@ -12,13 +12,13 @@
         reader.onload = function (event) {
             text = (event.target?.result as string) || '';
         };
-        if (file.Blob) {
-            reader.readAsText(file.Blob);
+        if (file.blob) {
+            reader.readAsText(file.blob);
         }
     });
 </script>
 
-{#if file.Blob}
+{#if file.blob}
     <Tile light>{text}</Tile>
 {:else}
     <WalterPreviewError {file} />

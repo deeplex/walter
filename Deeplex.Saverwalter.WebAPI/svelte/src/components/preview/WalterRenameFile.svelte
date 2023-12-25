@@ -1,12 +1,12 @@
 <script lang="ts">
-    import type { WalterS3File } from '$walter/types';
+    import type { WalterFile } from '$walter/types';
     import { TextInput } from 'carbon-components-svelte';
 
-    export let file: WalterS3File;
+    export let file: WalterFile;
     export let value: string;
 </script>
 
-<p>Aktueller Dateiname: {file.FileName}</p>
+<p>Aktueller Dateiname: {file.fileName}</p>
 <TextInput
     labelText="Neuer Dateiname"
     placeholder="Neuen Dateinamen eingeben"

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { WalterGrid, WalterHeaderDetail } from '$walter/components';
     import WalterAccount from '$walter/components/details/WalterAccount.svelte';
-    import { WalterS3FileWrapper } from '$walter/lib';
+    import { WalterFileWrapper } from '$walter/lib';
     import { Button, CodeSnippet, Row } from 'carbon-components-svelte';
     import type { PageData } from './$types';
     import { walter_post } from '$walter/services/requests';
@@ -13,9 +13,9 @@
         title = `${data.entry.username} - ${data.entry.name}`;
     }
 
-    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
+    let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
-    fileWrapper.register(title, data.S3URL);
+    fileWrapper.register(title, data.fileURL);
 
     let passwordResetLink = '';
 

@@ -1,10 +1,10 @@
 <script lang="ts">
     import { WalterPreviewError } from '$walter/components';
-    import type { WalterS3File } from '$walter/types';
+    import type { WalterFile } from '$walter/types';
     import { ImageLoader } from 'carbon-components-svelte';
     import { onDestroy, onMount } from 'svelte';
 
-    export let file: WalterS3File;
+    export let file: WalterFile;
 
     let src: string;
 
@@ -13,17 +13,17 @@
     });
 
     onMount(() => {
-        if (file.Blob) {
-            src = URL.createObjectURL(file.Blob);
+        if (file.blob) {
+            src = URL.createObjectURL(file.blob);
         }
     });
 
     $: {
-        src = file.Blob ? URL.createObjectURL(file.Blob) : '';
+        src = file.blob ? URL.createObjectURL(file.blob) : '';
     }
 </script>
 
-{#if file.Blob}
+{#if file.blob}
     <ImageLoader {src} />
 {:else}
     <WalterPreviewError {file} />

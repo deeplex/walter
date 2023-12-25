@@ -9,7 +9,7 @@
         WalterWohnungen,
         WalterZaehlerList
     } from '$walter/components';
-    import { WalterS3FileWrapper, type WalterWohnungEntry } from '$walter/lib';
+    import { WalterFileWrapper, type WalterWohnungEntry } from '$walter/lib';
     import { Column, Row } from 'carbon-components-svelte';
     import type { PageData } from './$types';
     import WalterDataPieChart from '$walter/components/data/WalterDataPieChart.svelte';
@@ -29,9 +29,9 @@
         title = data.entry.anschrift;
     }
 
-    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
+    let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
-    fileWrapper.register(title, data.S3URL);
+    fileWrapper.register(title, data.fileURL);
 </script>
 
 <WalterHeaderDetail

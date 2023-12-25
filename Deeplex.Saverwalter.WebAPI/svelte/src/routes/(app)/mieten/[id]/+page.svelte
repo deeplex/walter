@@ -5,7 +5,7 @@
         WalterMiete
     } from '$walter/components';
     import type { PageData } from './$types';
-    import { WalterS3FileWrapper } from '$walter/lib';
+    import { WalterFileWrapper } from '$walter/lib';
 
     export let data: PageData;
 
@@ -14,9 +14,9 @@
         title = data.entry.vertrag.text;
     }
 
-    let fileWrapper = new WalterS3FileWrapper(data.fetchImpl);
+    let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
-    fileWrapper.register(title, data.S3URL);
+    fileWrapper.register(title, data.fileURL);
 </script>
 
 <WalterHeaderDetail
