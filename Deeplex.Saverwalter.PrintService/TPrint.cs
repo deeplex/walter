@@ -1,4 +1,19 @@
-﻿using Deeplex.Saverwalter.BetriebskostenabrechnungService;
+// Copyright (c) 2023-2024 Kai Lawrence
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 using DocumentFormat.OpenXml;
 using static Deeplex.Saverwalter.BetriebskostenabrechnungService.Utils;
@@ -929,6 +944,14 @@ namespace Deeplex.Saverwalter.PrintService
             printImpl.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
 
             return printImpl.body;
+        }
+    }
+}
+> { col1, col2, col3, col4 }.Select(w => w.ToArray()).ToArray();
+
+printImpl.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
+
+return printImpl.body;
         }
     }
 }
