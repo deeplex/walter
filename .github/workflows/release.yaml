@@ -1,0 +1,16 @@
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  test:
+    uses: ./.github/workflows/reusable_test.yaml
+  build:
+    uses: ./.github/workflows/reusable_build.yaml
+  release:
+    needs:
+      - build
+    uses: ./.github/workflows/reusable_deploy.yaml
+    with:
+      tag: ${{ github.ref_name }}

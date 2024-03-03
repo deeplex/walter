@@ -1,0 +1,29 @@
+name: Test svelte and dotnet
+on: workflow_call
+
+jobs:
+  test-svelte:
+    runs-on: ubuntu-22.04
+    container:
+      image: node:18-alpine3.17
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Test svelte app
+        run: |
+          cd Deeplex.Saverwalter.WebAPI/svelte
+          yarn install
+          yarn run vitest --coverage
+
+  test-dotnet:
+    runs-on: ubuntu-22.04
+    container:
+      image: mcr.microsoft.com/devcontainers/dotnet:8.0
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Test dotnet app
+        run: |
+          export LC_ALL=de_DE.UTF-8
+          dotnet restore
+          dotnet test /p:CollectCoverage=true /p:ExcludeByFile="**/Migrations/Npgsql/*.cs" | grep '%' | awk '{print $0}{sum += substr($4,1,length($4)-1)} END {if (NR>0) print "Total coverage:" sum / NR "%" }'

@@ -1,0 +1,12 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  merge_group:
+
+jobs:
+  test:
+    uses: ./.github/workflows/reusable_test.yaml
+  build:
+    uses: ./.github/workflows/reusable_build.yaml

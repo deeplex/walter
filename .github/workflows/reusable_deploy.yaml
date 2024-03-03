@@ -1,0 +1,41 @@
+name: build and release docker
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+
+jobs:
+  build-docker:
+    runs-on: ubuntu-22.04
+    container:
+      image: docker:23.0
+    # needs:
+    #     - build-svelte
+    #     - build-dotnet
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: svelte-app
+          path: Deeplex.Saverwalter.WebAPI/wwwroot
+      - uses: actions/download-artifact@v3
+        with:
+          name: dotnet-app
+          path: Deeplex.Saverwalter.WebAPI/bin
+      - name: "Login to GitHub Container Registry"
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+      - name: Build docker image and deploy
+        run: |
+          cd Deeplex.Saverwalter.WebAPI
+          docker build -t ghcr.io/deeplex/walter:${{inputs.tag}} .
+          docker tag ghcr.io/deeplex/walter:${{inputs.tag}} ghcr.io/deeplex/walter:latest
+          docker push ghcr.io/deeplex/walter:latest
+          docker push ghcr.io/deeplex/walter:${{inputs.tag}}

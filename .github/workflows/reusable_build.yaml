@@ -1,0 +1,39 @@
+name: build svelte and dotnet app
+on: workflow_call
+
+jobs:
+  build-svelte:
+    runs-on: ubuntu-22.04
+    container:
+      image: node:18-alpine3.17
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Build svelte app
+        run: |
+          cd Deeplex.Saverwalter.WebAPI/svelte
+          yarn install
+          yarn build
+      - name: Upload svelte artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: svelte-app
+          path: Deeplex.Saverwalter.WebAPI/wwwroot
+
+  build-dotnet:
+    runs-on: ubuntu-22.04
+    container:
+      image: mcr.microsoft.com/devcontainers/dotnet:8.0
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Build dotnet app
+        run: |
+          cd Deeplex.Saverwalter.WebAPI
+          dotnet restore
+          dotnet publish -c release
+      - name: Upload dotnet artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dotnet-app
+          path: Deeplex.Saverwalter.WebAPI/bin
