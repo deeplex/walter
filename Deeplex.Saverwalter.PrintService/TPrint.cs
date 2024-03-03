@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+﻿// Copyright (c) 2023-2024 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -944,14 +944,6 @@ namespace Deeplex.Saverwalter.PrintService
             printImpl.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
 
             return printImpl.body;
-        }
-    }
-}
-> { col1, col2, col3, col4 }.Select(w => w.ToArray()).ToArray();
-
-printImpl.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
-
-return printImpl.body;
         }
     }
 }
