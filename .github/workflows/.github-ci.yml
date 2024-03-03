@@ -8,69 +8,87 @@ on:
 
 jobs:
   build-svelte:
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     container:
       image: node:18-alpine3.17
     steps:
-      - run: |
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Build svelte app
+        run: |
           cd Deeplex.Saverwalter.WebAPI/svelte
           yarn install
           yarn build
-      - name: svelte app
+      - name: Upload svelte artifact
         uses: actions/upload-artifact@v3
         with:
-          path: ./Deeplex.Saverwalter.WebAPI/wwwroot
+          name: svelte-app
+          path: Deeplex.Saverwalter.WebAPI/wwwroot
 
   test-svelte:
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     container:
       image: node:18-alpine3.17
     steps:
-      - run: |
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Test svelte app
+        run: |
           cd Deeplex.Saverwalter.WebAPI/svelte
           yarn install
           yarn run vitest --coverage
 
   build-dotnet:
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     container:
-      image: mcr.microsoft.com/devcontainers/dotnet:0-6.0
+      image: mcr.microsoft.com/devcontainers/dotnet:8.0
     steps:
-      - run: |
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Build dotnet app
+        run: |
           cd Deeplex.Saverwalter.WebAPI
           dotnet restore
           dotnet publish -c release
-      - name: dotnet app
+      - name: Upload dotnet artifact
         uses: actions/upload-artifact@v3
         with:
-          path: ./Deeplex.Saverwalter.WebAPI/bin
+          name: dotnet-app
+          path: Deeplex.Saverwalter.WebAPI/bin
 
   test-dotnet:
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     container:
-      image: mcr.microsoft.com/devcontainers/dotnet:0-6.0
+      image: mcr.microsoft.com/devcontainers/dotnet:8.0
     steps:
-      - run: |
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Test dotnet app
+        run: |
           export LC_ALL=de_DE.UTF-8
           dotnet restore
           dotnet test /p:CollectCoverage=true /p:ExcludeByFile="**/Migrations/Npgsql/*.cs" | grep '%' | awk '{print $0}{sum += substr($4,1,length($4)-1)} END {if (NR>0) print "Total coverage:" sum / NR "%" }'
 
   build-docker:
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     container:
       image: docker:23.0
     needs:
       - build-svelte
       - build-dotnet
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: svelte-app
+          path: Deeplex.Saverwalter.WebAPI/wwwroot
       - uses: actions/download-artifact@v3
         with:
-          name: svelte app
-          path: ./Deeplex.Saverwalter.WebAPI/wwwroot
-      - uses: actions/download-artifact@v3
-        with:
-          name: dotnet app
-          path: ./Deeplex.Saverwalter.WebAPI/bin
-      - run: |
+          name: dotnet-app
+          path: Deeplex.Saverwalter.WebAPI/bin
+      - name: Build docker image and deploy
+        run: |
           cd Deeplex.Saverwalter.WebAPI
           docker build -t "walter:latest" .
