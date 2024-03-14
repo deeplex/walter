@@ -8,9 +8,9 @@ jobs:
     uses: ./.github/workflows/reusable_test.yaml
   build:
     uses: ./.github/workflows/reusable_build.yaml
-  release:
+  deploy_release:
     needs:
       - build
-    uses: ./.github/workflows/reusable_deploy.yaml
+    uses: ./.github/workflows/reusable_deploy_release.yaml
     with:
       tag: ${{ github.ref_name }}
