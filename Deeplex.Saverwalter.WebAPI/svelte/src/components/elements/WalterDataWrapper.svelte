@@ -45,7 +45,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     };
 
     function normal_add() {
-        walter_goto(`${$page.url.pathname}/new`);
+        const newPath = $page.url.pathname.endsWith('/')
+            ? `${$page.url.pathname}new`
+            : `${$page.url.pathname}/new`;
+        walter_goto(newPath);
     }
 
     function onSubmit(new_value: unknown) {
