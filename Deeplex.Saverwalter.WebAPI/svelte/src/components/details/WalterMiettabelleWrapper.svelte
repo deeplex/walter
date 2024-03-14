@@ -52,9 +52,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         years.push(i);
     }
 
-    let selected =
-        years.findIndex((year) => year === new Date().getFullYear()) ||
-        years.length - 1;
+    let selected = years.findIndex((year) => year === new Date().getFullYear());
+    selected = selected === -1 ? years.length - 1 : selected;
 </script>
 
 <div>
