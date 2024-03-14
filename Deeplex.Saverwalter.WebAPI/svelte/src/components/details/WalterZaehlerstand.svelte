@@ -53,7 +53,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         label="Zählerstand"
     />
     <WalterDatePicker
-        {maxDate}
         required
         disabled={readonly}
         bind:value={entry.datum}
