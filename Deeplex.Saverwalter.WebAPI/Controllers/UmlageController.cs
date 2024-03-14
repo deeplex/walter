@@ -68,7 +68,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public Permissions Permissions { get; set; } = new Permissions();
 
-            protected UmlageEntryBase() { }
+            public UmlageEntryBase() { }
             public UmlageEntryBase(Umlage entity, Permissions permissions)
             {
                 Id = entity.UmlageId;

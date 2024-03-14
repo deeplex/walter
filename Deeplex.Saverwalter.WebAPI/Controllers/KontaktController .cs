@@ -45,7 +45,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
             public Permissions Permissions { get; set; } = new Permissions();
 
-            protected KontaktEntryBase() : base() { }
+            public KontaktEntryBase() : base() { }
             public KontaktEntryBase(Kontakt entity, Permissions permissions)
             {
                 Entity = entity;
