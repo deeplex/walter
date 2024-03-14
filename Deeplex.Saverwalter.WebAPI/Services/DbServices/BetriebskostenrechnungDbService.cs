@@ -78,7 +78,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new BadRequestResult();
             }
 
-            var umlage = Ctx.Umlagen.FindAsync(entry.Umlage!.Id);
+            var umlage = await Ctx.Umlagen.FindAsync(entry.Umlage!.Id);
             var authRx = await Auth.AuthorizeAsync(user, umlage, [Operations.SubCreate]);
             if (!authRx.Succeeded)
             {
