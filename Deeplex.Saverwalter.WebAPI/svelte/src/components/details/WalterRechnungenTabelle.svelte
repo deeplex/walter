@@ -28,17 +28,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import WalterDataHeatmapChart from '../data/WalterDataHeatmapChart.svelte';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import WalterBetriebskostenrechnung from './WalterBetriebskostenrechnung.svelte';
-    import { Grid, Row } from 'carbon-components-svelte';
 
     export let config: WalterDataConfigType;
     export let umlagen: WalterUmlageEntry[];
     export let fetchImpl: typeof fetch;
     export let year: number;
+    let addEntry: Partial<WalterBetriebskostenrechnungEntry> = {};
 
     function updateEntry(
-        umlageId: string,
+        umlageId: number,
         umlageTyp: string,
-        rechnungTyp: string
+        rechnungTyp: number
     ) {
         addEntry = {
             datum: convertDateCanadian(new Date()),
@@ -65,20 +65,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         const group = config.data.filter((entry) => entry.group === data.group);
 
         const thisEntry = group.find((entry) => entry.key === data.key);
+        console.log(thisEntry);
 
-        if (!thisEntry) return;
+        if (thisEntry?.id && thisEntry.id2 && thisEntry.key) {
+            const umlageTyp = thisEntry.key;
+            const rechnungTyp = +thisEntry.id2;
+            const umlageId = +thisEntry.id;
 
-        const umlageTyp = data.key;
-        const rechnungTyp = thisEntry.id2!;
-        const umlageId = thisEntry.id!;
-
-        if (umlageId) {
-            updateEntry(umlageId, umlageTyp!, rechnungTyp);
+            updateEntry(umlageId, umlageTyp, rechnungTyp);
             addModalOpen = true;
         }
     }
 
-    let addEntry: Partial<WalterBetriebskostenrechnungEntry> = {};
     let addModalOpen = false;
     let title = 'Umlage';
     let rechnungen = umlagen.flatMap((e) => e.betriebskostenrechnungen);
