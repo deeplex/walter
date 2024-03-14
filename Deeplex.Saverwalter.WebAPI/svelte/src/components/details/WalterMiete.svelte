@@ -41,7 +41,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         required
         {readonly}
         bind:value={entry.betrag}
-        label="Betrag"
+        label="Betrag (Warmmiete)"
     />
     <WalterDatePicker
         required
