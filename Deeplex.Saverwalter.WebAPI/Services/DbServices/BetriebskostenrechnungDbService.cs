@@ -87,7 +87,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-
                 return await Add(entry);
             }
             catch

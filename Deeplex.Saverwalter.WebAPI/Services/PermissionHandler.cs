@@ -420,6 +420,10 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             foreach (var wohnung in entities)
             {
                 HandleWohnungSubRequirementAsync(context, requirement, wohnung);
+                if (context.HasSucceeded)
+                {
+                    break;
+                }
             }
 
             return Task.CompletedTask;
@@ -447,6 +451,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             Guid userId)
         {
             if ((
+                requirement.Name == Operations.SubCreate.Name ||
                 requirement.Name == Operations.Update.Name ||
                 requirement.Name == Operations.Delete.Name
                 ) && IsAuthorized(userId, entity, VerwalterRolle.Vollmacht))

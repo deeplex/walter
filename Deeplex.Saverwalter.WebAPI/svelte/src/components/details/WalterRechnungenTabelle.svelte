@@ -65,7 +65,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         const group = config.data.filter((entry) => entry.group === data.group);
 
         const thisEntry = group.find((entry) => entry.key === data.key);
-        console.log(thisEntry);
 
         if (thisEntry?.id && thisEntry.id2 && thisEntry.key) {
             const umlageTyp = thisEntry.key;
