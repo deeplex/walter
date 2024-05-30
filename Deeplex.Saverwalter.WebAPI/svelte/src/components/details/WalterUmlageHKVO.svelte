@@ -41,7 +41,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     let visible: boolean = false;
     let oldHKVO: Partial<WalterHKVOEntry> = {};
-    let selectableUmlagen: Promise<WalterSelectionEntry[]>;
+    let selectableUmlagen: Promise<WalterSelectionEntry[]> = new Promise(
+        () => []
+    );
 
     onMount(() => {
         visible = !!entry.hKVO;
@@ -120,6 +122,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     function change(e: Event, p9a2: WalterSelectionEntry[]) {
         if ((e.target as HTMLInputElement).checked) {
             entry.hKVO = {
+                id: oldHKVO.id || 0,
                 hkvO_P7: oldHKVO.hkvO_P7 || 50,
                 hkvO_P8: oldHKVO.hkvO_P8 || 50,
                 hkvO_P9: oldHKVO.hkvO_P9 || p9a2[1],
@@ -132,13 +135,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 </script>
 
-{#if entry.schluessel?.id === '3'}
+{#if `${entry.schluessel?.id}` === '3'}
     <Tile>
         <Row>
             {#await hkvo_p9a2 then p9a2}
                 <div>
                     <Checkbox
-                        checked={visible}
+                        bind:checked={visible}
                         on:change={(e) => change(e, p9a2)}
                     />
                 </div>

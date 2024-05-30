@@ -24,7 +24,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterUmlage,
         WalterZaehlerList,
         WalterLinks,
-        WalterLinkTile
+        WalterLinkTile,
+        WalterZaehler
     } from '$walter/components';
     import { convertDateCanadian } from '$walter/services/utils';
     import {
@@ -94,7 +95,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             rows={data.entry.betriebskostenrechnungen}
         />
         <!-- Only show if Schlüssel is "nach Verbrauch" -->
-        {#if data.entry?.schluessel?.id === '3'}
+        {#if `${data.entry?.schluessel?.id}` === '3'}
             <WalterZaehlerList
                 fetchImpl={data.fetchImpl}
                 title="Zähler"

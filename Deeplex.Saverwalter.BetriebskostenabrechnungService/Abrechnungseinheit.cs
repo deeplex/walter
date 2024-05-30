@@ -156,10 +156,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             var verbrauchAnteil = verbrauchAnteile.First();
 
-
             if (verbrauchAnteil.Anteil.Count > 1)
             {
-                notes.Add($"Verbrauch von Rechnung {rechnung.Umlage.Typ} enthält mehr als einen Zählertypen",
+                notes.Add($"Verbrauch von Rechnung {rechnung.Umlage.Typ.Bezeichnung} enthält mehr als einen Zählertypen",
                     Severity.Error);
 
                 return 0;

@@ -92,6 +92,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     {
                         return 0;
                     }
+                    else if (version.Beginn > zeitraum.Abrechnungsende)
+                    {
+                        return 0;
+                    }
                     else
                     {
                         var last = Min(versionEnde ?? zeitraum.Abrechnungsende, zeitraum.Abrechnungsende).Month;

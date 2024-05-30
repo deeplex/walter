@@ -50,6 +50,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                         continue;
                     }
                     // Done because the first entry should not be in the last month.
+                    if (zaehler.Ende < zeitraum.Abrechnungsbeginn)
+                    {
+                        continue;
+                    }
                     var daysToFirstZaehler = zaehler.Staende
                         .OrderBy(stand => stand.Stand)
                         .FirstOrDefault()?
@@ -60,7 +64,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     {
                         continue;
                     }
-                    var verbrauch = new Verbrauch(zaehler, zeitraum.Abrechnungsbeginn, zeitraum.Abrechnungsende, notes);
+                    var verbrauch = new Verbrauch(
+                        zaehler,
+                        zeitraum.Abrechnungsbeginn,
+                        zeitraum.Abrechnungsende,
+                        notes);
                     AlleZaehler[unit].Add(verbrauch);
                     AlleVerbrauch[unit] += verbrauch.Delta;
 
