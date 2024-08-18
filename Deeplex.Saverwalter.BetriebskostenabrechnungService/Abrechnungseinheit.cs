@@ -92,7 +92,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     var delta = warmeRechnung.Betrag * hkvo.Strompauschale;
                     // Das wird bereits in der Heizkostenberechnung gemacht und als Pauschalbetrag verbucht.
                     // Für die Stromrechnung allerdings muss der Teil noch abgezogen werden.
-                    //warmeRechnung.Betrag += delta;
+                    // warmeRechnung.Betrag += delta;
                     stromRechnung.Betrag -= delta;
 
                     if (stromRechnung.Betrag < 0)

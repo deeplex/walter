@@ -26,6 +26,7 @@ import {
     WalterMietminderungEntry,
     WalterUmlageEntry,
     WalterUmlagetypEntry,
+    WalterVertragEntry,
     WalterVertragVersionEntry,
     WalterWohnungEntry,
     WalterZaehlerEntry,
@@ -44,7 +45,7 @@ export const fileURL = {
     kontakt: (id: string) => `${WalterKontaktEntry.ApiURL}/${id}/files`,
     umlage: (id: string) => `${WalterUmlageEntry.ApiURL}/${id}/files`,
     umlagetyp: (id: string) => `${WalterUmlagetypEntry.ApiURL}/${id}/files`,
-    vertrag: (id: string) => `${WalterVertragVersionEntry.ApiURL}/${id}/files`,
+    vertrag: (id: string) => `${WalterVertragEntry.ApiURL}/${id}/files`,
     vertragversion: (id: string) =>
         `${WalterVertragVersionEntry.ApiURL}/${id}/files`,
     wohnung: (id: string) => `${WalterWohnungEntry.ApiURL}/${id}/files`,
