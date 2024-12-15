@@ -254,7 +254,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Umlagetyp>> GetEntriesForUser(Guid guid) => ctx.Umlagetypen
-                .Where(e => e.Umlagen
+                .Where(e => e.Umlagen.Count == 0 || e.Umlagen
                     .Any(u => u.Wohnungen
                     .Any(w => w.Verwalter.Count > 0 && w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid)))))
                 .ToListAsync();
@@ -417,6 +417,11 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             OperationAuthorizationRequirement requirement,
             IEnumerable<Wohnung> entities)
         {
+            if (entities.Count() == 0)
+            {
+                context.Succeed(requirement);
+            }
+
             foreach (var wohnung in entities)
             {
                 HandleWohnungSubRequirementAsync(context, requirement, wohnung);
