@@ -34,6 +34,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/services/utils';
     import { dates, euro, formatToTableDate, time } from './WalterDataTable';
     import { Add } from 'carbon-icons-svelte';
+    import { onMount } from 'svelte';
+    import { page } from '$app/stores';
 
     export let fullHeight = false;
     export let size: 'compact' | 'short' | 'medium' | 'tall' | undefined =
@@ -45,6 +47,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let readonly = false;
     export let rows: unknown[];
     export let add: (() => void) | undefined = undefined;
+
+    const searchParams: URLSearchParams = new URL($page.url).searchParams;
+    let searchQuery = searchParams.get('search') || '';
+
+    function toolbarSearchInput() {
+        if (searchQuery) {
+            searchParams.set('search', searchQuery);
+            window.history.replaceState({}, '', `?${searchParams.toString()}`);
+        } else {
+            searchParams.delete('search');
+            window.history.replaceState({}, '', `?${searchParams.toString()}`);
+        }
+    }
 
     export let on_click_row: (
         e: CustomEvent<DataTableRow>
@@ -125,6 +140,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 <ToolbarSearch
                     placeholder="Suche mit ; separierter Liste..."
                     persistent
+                    on:input={toolbarSearchInput}
+                    bind:value={searchQuery}
                     {shouldFilterRows}
                 />
                 {#if !!add && !readonly}
