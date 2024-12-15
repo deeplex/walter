@@ -13,12 +13,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { expect, describe, it, afterEach, vi, beforeEach } from 'vitest';
+import { expect, describe, it, afterEach, vi } from 'vitest';
 import { render, cleanup } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 import Page from './WalterAdressen.svelte';
 import { WalterAdresseEntry } from '$walter/lib';
+import { WalterPermissions } from '$walter/lib/WalterPermissions';
 
 vi.mock('$app/stores', async (importOriginal) => {
     return {
@@ -47,7 +48,8 @@ function createEntryMocks(entries: number) {
                 new Date(),
                 [],
                 [],
-                []
+                [],
+                new WalterPermissions(true, true, true)
             )
         );
     }

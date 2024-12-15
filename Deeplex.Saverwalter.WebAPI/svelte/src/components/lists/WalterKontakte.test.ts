@@ -19,6 +19,7 @@ import { writable } from 'svelte/store';
 
 import Page from './WalterKontakte.svelte';
 import { WalterKontaktEntry } from '$walter/lib';
+import { WalterPermissions } from '$walter/lib/WalterPermissions';
 
 vi.mock('$app/stores', async (importOriginal) => {
     return {
@@ -50,12 +51,13 @@ function createEntryMocks(entries: number) {
                 new Date(),
                 { id: 0, text: 'Herr' },
                 [],
-                null,
+                undefined,
                 [],
                 [],
                 [],
                 [],
-                []
+                [],
+                new WalterPermissions(true, true, true)
             )
         );
     }

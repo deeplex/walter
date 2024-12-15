@@ -20,6 +20,7 @@ import { writable } from 'svelte/store';
 import Page from './WalterBetriebskostenrechnungen.svelte';
 import { WalterBetriebskostenrechnungEntry } from '$walter/lib';
 import { convertDateGerman } from '$walter/services/utils';
+import { WalterPermissions } from '$walter/lib/WalterPermissions';
 
 vi.mock('$app/stores', async (importOriginal) => {
     return {
@@ -47,7 +48,8 @@ function createEntryMocks(entries: number) {
                 { id: 1, text: 'Testtyp' },
                 { id: 2, text: 'Testumlage' },
                 [],
-                []
+                [],
+                new WalterPermissions(true, true, true)
             )
         );
     }

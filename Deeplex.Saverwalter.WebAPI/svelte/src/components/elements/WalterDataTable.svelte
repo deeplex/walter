@@ -48,16 +48,28 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let rows: unknown[];
     export let add: (() => void) | undefined = undefined;
 
-    const searchParams: URLSearchParams = new URL($page.url).searchParams;
-    let searchQuery = searchParams.get('search') || '';
+    const searchParams: URLSearchParams | null = $page
+        ? new URL($page.url).searchParams
+        : null;
+    let searchQuery = searchParams?.get('search') || '';
 
     function toolbarSearchInput() {
-        if (searchQuery) {
-            searchParams.set('search', searchQuery);
-            window.history.replaceState({}, '', `?${searchParams.toString()}`);
-        } else {
-            searchParams.delete('search');
-            window.history.replaceState({}, '', `?${searchParams.toString()}`);
+        if (searchParams) {
+            if (searchQuery) {
+                searchParams.set('search', searchQuery);
+                window.history.replaceState(
+                    {},
+                    '',
+                    `?${searchParams.toString()}`
+                );
+            } else {
+                searchParams.delete('search');
+                window.history.replaceState(
+                    {},
+                    '',
+                    `?${searchParams.toString()}`
+                );
+            }
         }
     }
 

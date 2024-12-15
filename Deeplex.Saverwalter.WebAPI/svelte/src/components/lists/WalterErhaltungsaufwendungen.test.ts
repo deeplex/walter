@@ -20,6 +20,7 @@ import { writable } from 'svelte/store';
 import Page from './WalterErhaltungsaufwendungen.svelte';
 import { WalterErhaltungsaufwendungEntry } from '$walter/lib';
 import { convertDateGerman } from '$walter/services/utils';
+import { WalterPermissions } from '$walter/lib/WalterPermissions';
 
 vi.mock('$app/stores', async (importOriginal) => {
     return {
@@ -45,7 +46,8 @@ function createEntryMocks(entries: number) {
                 new Date(),
                 new Date(),
                 { id: 1, text: 'Testwohnung' },
-                { id: 2, text: 'Testaussteller' }
+                { id: 2, text: 'Testaussteller' },
+                new WalterPermissions(true, true, true)
             )
         );
     }
