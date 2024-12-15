@@ -234,6 +234,14 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         }
     }
 
+    public class WohnungenPermissionHandler : WohnungPermissionHandlerBase<IEnumerable<Wohnung>>
+    {
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, OperationAuthorizationRequirement requirement, IEnumerable<Wohnung> entities)
+        {
+            return HandleWohnungRequirementAsync(context, requirement, entities);
+        }
+    }
+
     public class UmlagenPermissionHandler : WohnungPermissionHandlerBase<IEnumerable<Umlage>>
     {
         protected override Task HandleRequirementAsync(

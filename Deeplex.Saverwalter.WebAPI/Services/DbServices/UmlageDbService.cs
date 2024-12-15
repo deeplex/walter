@@ -79,15 +79,16 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 return new BadRequestResult();
             }
 
-            var wohnungen = entry.Wohnungen!.SelectMany(wohnung => Ctx.Wohnungen.Where(w => w.WohnungId == wohnung.Id));
-            var authRx = await Auth.AuthorizeAsync(user, wohnungen, [Operations.SubCreate]);
-            if (!authRx.Succeeded)
-            {
-                return new ForbidResult();
-            }
-
             try
             {
+                var wohnungen = entry.Wohnungen!
+                    .SelectMany(wohnung => Ctx.Wohnungen.Where(w => w.WohnungId == wohnung.Id));
+                var authRx = await Auth.AuthorizeAsync(user, wohnungen, [Operations.SubCreate]);
+                if (!authRx.Succeeded)
+                {
+                    return new ForbidResult();
+                }
+
                 return Add(entry);
             }
             catch
