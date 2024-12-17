@@ -125,6 +125,15 @@ namespace Deeplex.Saverwalter.PrintService
                 right2.Add("Kostenanteil = Kosten je Quadratmeter Nutzfläche mal Anteil Fläche je Wohnung.");
             }
 
+            if (NachMiteigentumsanteil(abrechnung.Abrechnungseinheiten))
+            {
+                left1.Add("n. MEA");
+                left2.Add("n. MEA");
+                right1.Add("nach Miteigentumsanteilen");
+                right2.Add("Kostenanteil = Kosten je Miteigentumsanteil je Wohnung");
+            }
+
+
             if (NachNutzeinheiten(abrechnung.Abrechnungseinheiten))
             {
                 left1.Add("n. NE");
@@ -184,6 +193,8 @@ namespace Deeplex.Saverwalter.PrintService
             var col1 = new List<string> { "Nutzeinheiten" };
             var col2 = new List<string> { "Wohnfläche" };
             var col3 = new List<string> { "Nutzfläche" };
+            // TODO MEA
+            // var colX = new List<string> { "Miteigentumsanteile" };
             var col4 = new List<string> { "Bewohner" };
             var col5 = new List<string> { "Nutzungsintervall" };
             var col6 = new List<string> { "Tage" };
@@ -196,6 +207,8 @@ namespace Deeplex.Saverwalter.PrintService
                 col1.Add(firstLine ? 1.ToString() : "");
                 col2.Add(firstLine ? Quadrat(abrechnung.Vertrag.Wohnung.Wohnflaeche) : "");
                 col3.Add(firstLine ? Quadrat(abrechnung.Vertrag.Wohnung.Nutzflaeche) : "");
+                // TODO MEA
+                // colX.Add(firstLine ? abrechnung.Vertrag.Wohnung.Miteigentumsanteil : "");
                 col4.Add(anteil.Personenzahl.ToString());
                 col5.Add(Datum(anteil.Beginn) + " - " + Datum(anteil.Ende));
                 col6.Add(anteil.Tage + "/" + abrechnung.Zeitraum.Abrechnungszeitraum);
@@ -304,6 +317,24 @@ namespace Deeplex.Saverwalter.PrintService
                     col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
                     col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
                     col4.Add(Prozent(abrechnungseinheit.NFZeitanteil));
+                    bold.Add(false);
+                    underlined.Add(true);
+                }
+
+                if (abrechnungseinheit.Rechnungen
+                    .Any(rechnung => rechnung.Key.Schluessel == Umlageschluessel.NachMiteigentumsanteil))
+                {
+                    col1.Add("bei Umlage nach Miteigentumsanteilen (n. MEA)");
+                    col2.Add("");
+                    col3.Add("");
+                    col4.Add("");
+                    bold.Add(true);
+                    underlined.Add(false);
+
+                    col1.Add(abrechnung.Vertrag.Wohnung.Miteigentumsanteile + " / " + abrechnungseinheit.GesamtMiteigentumsanteile);
+                    col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
+                    col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
+                    col4.Add(Prozent(abrechnungseinheit.MEAZeitanteil));
                     bold.Add(false);
                     underlined.Add(true);
                 }

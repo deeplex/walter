@@ -32,6 +32,7 @@ export class WalterWohnungEntry extends WalterApiHandler {
         public bezeichnung: string,
         public wohnflaeche: number,
         public nutzflaeche: number,
+        public miteigentumsanteile: number,
         public einheiten: number,
         public notiz: string,
         public createdAt: Date,

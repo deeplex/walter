@@ -46,6 +46,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 <StructuredListCell head>Nutzeinheiten</StructuredListCell>
                 <StructuredListCell head>Wohnfläche</StructuredListCell>
                 <StructuredListCell head>Nutzfläche</StructuredListCell>
+                <StructuredListCell head>Miteigentumsanteile</StructuredListCell
+                >
                 <StructuredListCell head>Bewohner</StructuredListCell>
                 <StructuredListCell head>Nutzungsintervall</StructuredListCell>
                 <StructuredListCell head>Tage</StructuredListCell>
@@ -62,6 +64,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     </StructuredListCell>
                     <StructuredListCell>
                         {!index ? convertM2(einheit.gesamtNutzflaeche) : ''}
+                    </StructuredListCell>
+                    <StructuredListCell>
+                        {!index ? einheit.gesamtMiteigentumsanteile : ''}
                     </StructuredListCell>
                     <StructuredListCell>
                         {intervall.gesamtPersonenzahl}

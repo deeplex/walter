@@ -54,5 +54,7 @@ namespace Deeplex.Saverwalter.Model
         NachVerbrauch,
         [Description("n. NF")]
         NachNutzflaeche,
+        [Description("n. MEA")]
+        NachMiteigentumsanteil
     }
 }

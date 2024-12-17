@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entity = new Wohnung(entry.Bezeichnung, entry.Wohnflaeche, entry.Nutzflaeche, entry.Einheiten)
+                var entity = new Wohnung(entry.Bezeichnung, entry.Wohnflaeche, entry.Nutzflaeche, entry.Miteigentumsanteile, entry.Einheiten)
                 {
                     Besitzer = await Ctx.Kontakte.FindAsync(entry.Besitzer!.Id)!
                 };

@@ -63,7 +63,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.GetFiles(1);
             result.Should().BeOfType<FileContentResult>();
-            ((FileContentResult)result).FileContents.Length.Should().Be(11); // "Fake Answer"
+            result.As<FileContentResult>().FileContents.Length.Should().Be(11); // "Fake Answer"
         }
 
         [Fact]
@@ -172,7 +172,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.GetFiles(1);
 
-            ((StatusCodeResult)result).StatusCode.Should().Be(StatusCodes.Status503ServiceUnavailable);
+            result.As<StatusCodeResult>().StatusCode.Should().Be(StatusCodes.Status503ServiceUnavailable);
         }
 
         [Fact]
@@ -198,8 +198,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = await controller.GetFiles(1);
 
             result.Should().BeOfType<StatusCodeResult>();
-            var statusCodeResult = result as StatusCodeResult;
-            statusCodeResult!.StatusCode.Should().Be(StatusCodes.Status503ServiceUnavailable);
+            result.As<StatusCodeResult>().StatusCode.Should().Be(StatusCodes.Status503ServiceUnavailable);
         }
     }
 }

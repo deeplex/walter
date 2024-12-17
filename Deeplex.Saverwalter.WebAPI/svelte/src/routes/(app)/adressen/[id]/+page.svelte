@@ -30,6 +30,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { PageData } from './$types';
     import WalterDataPieChart from '$walter/components/data/WalterDataPieChart.svelte';
     import {
+        walter_data_mea,
         walter_data_ne,
         walter_data_nf,
         walter_data_wf
@@ -92,6 +93,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <Column>
                 <WalterDataPieChart
                     config={walter_data_nf('Nutzfläche', data.entry.wohnungen)}
+                />
+            </Column>
+            <Column>
+                <WalterDataPieChart
+                    config={walter_data_mea(
+                        'Miteigentumsanteile',
+                        data.entry.wohnungen
+                    )}
                 />
             </Column>
             <Column>

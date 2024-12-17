@@ -48,6 +48,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 <StructuredListCell head>Nutzeinheiten</StructuredListCell>
                 <StructuredListCell head>Wohnfläche</StructuredListCell>
                 <StructuredListCell head>Nutzfläche</StructuredListCell>
+                <StructuredListCell head>Miteigentumsanteil</StructuredListCell>
                 <StructuredListCell head>Bewohner</StructuredListCell>
                 <StructuredListCell head>Nutzungsintervall</StructuredListCell>
                 <StructuredListCell head>Tage</StructuredListCell>
@@ -71,6 +72,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                             ? convertM2(einheit.gesamtNutzflaeche)
                             : ''}</StructuredListCell
                     >
+                    <StructuredListCell
+                        >{!index
+                            ? einheit.gesamtMiteigentumsanteil
+                            : ''}</StructuredListCell
+                    >
+
                     <StructuredListCell
                         >{intervall.gesamtPersonenzahl}</StructuredListCell
                     >
@@ -127,6 +134,25 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     )}
                     gesamt={convertM2(einheit.gesamtNutzflaeche)}
                     anteil={einheit.nfZeitanteil}
+                    tage={zeitraum.nutzungszeitraum}
+                />
+            {/if}
+            {#if einheit.rechnungen.some((r) => r.schluessel == 'n. MEA')}
+                <StructuredListRow>
+                    <StructuredListCell head
+                        >Bei Umlage nach Miteigentumsanteilen (n. MEA)</StructuredListCell
+                    >
+                </StructuredListRow>
+                <WalterAbrechnungEinheitPart
+                    beginn={zeitraum.nutzungsbeginn}
+                    ende={zeitraum.nutzungsende}
+                    value={convertM2(
+                        (einheit.gesamtMiteigentumsanteile *
+                            einheit.meaZeitanteil) /
+                            zeitraum.zeitanteil
+                    )}
+                    gesamt={einheit.gesamtMiteigentumsanteile}
+                    anteil={einheit.meaZeitanteil}
                     tage={zeitraum.nutzungszeitraum}
                 />
             {/if}

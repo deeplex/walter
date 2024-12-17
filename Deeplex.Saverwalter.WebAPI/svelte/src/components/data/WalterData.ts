@@ -326,10 +326,10 @@ function getVertragBeginn(vertrag: WalterVertragEntry): Date {
 function getVertragEnde(vertrag: WalterVertragEntry): Date | undefined {
     return vertrag.ende
         ? new Date(
-              new Date(vertrag.ende).getFullYear(),
-              new Date(vertrag.ende).getMonth(),
-              1
-          )
+            new Date(vertrag.ende).getFullYear(),
+            new Date(vertrag.ende).getMonth(),
+            1
+        )
         : undefined;
 }
 
@@ -431,6 +431,20 @@ export function walter_data_nf(
     const data = wohnungen.map((wohnung) => ({
         group: wohnung.bezeichnung,
         value: wohnung.nutzflaeche
+    }));
+
+    return { data, options };
+}
+
+export function walter_data_mea(
+    title: string,
+    wohnungen: WalterWohnungEntry[]
+): WalterDataConfigType {
+    const options = { ...baseOptions, title };
+
+    const data = wohnungen.map((wohnung) => ({
+        group: wohnung.bezeichnung,
+        value: wohnung.miteigentumsanteile
     }));
 
     return { data, options };

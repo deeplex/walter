@@ -57,9 +57,11 @@ export type WalterAbrechnungseinheit = {
     bezeichnung: string;
     gesamtWohnflaeche: number;
     gesamtNutzflaeche: number;
+    gesamtMiteigentumsanteile: number;
     gesamtEinheiten: number;
     wfZeitanteil: number;
     nfZeitanteil: number;
+    meaZeitanteil: number;
     neZeitanteil: number;
     verbrauchAnteil: WalterVerbrauchAnteil[];
     personenZeitanteil: WalterPersonenZeitanteil[];

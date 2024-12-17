@@ -71,6 +71,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             public double Wohnflaeche { get; set; }
             public double Nutzflaeche { get; set; }
+            public double Miteigentumsanteile { get; set; }
             public int Einheiten { get; set; }
             public string? Notiz { get; set; }
             public DateTime CreatedAt { get; set; }
@@ -88,6 +89,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             {
                 Wohnflaeche = entity.Wohnflaeche;
                 Nutzflaeche = entity.Nutzflaeche;
+                Miteigentumsanteile = entity.Miteigentumsanteile;
                 Einheiten = entity.Nutzeinheit;
                 Notiz = entity.Notiz;
 

@@ -27,9 +27,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public string Bezeichnung { get; }
         public double GesamtWohnflaeche { get; }
         public double GesamtNutzflaeche { get; }
+        public double GesamtMiteigentumsanteile { get; }
         public int GesamtEinheiten { get; }
         public double WFZeitanteil { get; }
         public double NFZeitanteil { get; }
+        public double MEAZeitanteil { get; }
         public double NEZeitanteil { get; }
         public List<VerbrauchAnteil> VerbrauchAnteile { get; }
         public List<PersonenZeitanteil> PersonenZeitanteile { get; }
@@ -44,11 +46,13 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             GesamtWohnflaeche = wohnungen.Sum(w => w.Wohnflaeche);
             GesamtNutzflaeche = wohnungen.Sum(w => w.Nutzflaeche);
             GesamtEinheiten = wohnungen.Sum(w => w.Nutzeinheit);
+            GesamtMiteigentumsanteile = wohnungen.Sum(w => w.Miteigentumsanteile);
 
             var wohnung = vertrag.Wohnung;
             WFZeitanteil = wohnung.Wohnflaeche / GesamtWohnflaeche * zeitraum.Zeitanteil;
             NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitraum.Zeitanteil;
             NEZeitanteil = (double)wohnung.Nutzeinheit / GesamtEinheiten * zeitraum.Zeitanteil;
+            MEAZeitanteil = wohnung.Miteigentumsanteile / GesamtMiteigentumsanteile * zeitraum.Zeitanteil;
 
             foreach (var umlage in umlagen)
             {
@@ -114,6 +118,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 Umlageschluessel.NachNutzeinheit => NEZeitanteil,
                 Umlageschluessel.NachWohnflaeche => WFZeitanteil,
                 Umlageschluessel.NachNutzflaeche => NFZeitanteil,
+                Umlageschluessel.NachMiteigentumsanteil => MEAZeitanteil,
                 Umlageschluessel.NachPersonenzahl => PersonenZeitanteile.Sum(anteil => anteil.Anteil),
                 Umlageschluessel.NachVerbrauch => VerbrauchAnteile
                     .SingleOrDefault(anteil => anteil.Umlage == umlage)?.Anteil?.Sum(a => a.Value) ?? 0,
@@ -130,6 +135,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 Umlageschluessel.NachNutzeinheit => rechnung.Betrag * NEZeitanteil,
                 Umlageschluessel.NachWohnflaeche => rechnung.Betrag * WFZeitanteil,
                 Umlageschluessel.NachNutzflaeche => rechnung.Betrag * NFZeitanteil,
+                Umlageschluessel.NachMiteigentumsanteil => rechnung.Betrag * MEAZeitanteil,
                 Umlageschluessel.NachPersonenzahl => rechnung.Betrag * PersZeitanteil,
                 Umlageschluessel.NachVerbrauch => rechnung.Betrag * GetVerbrauchAnteil(rechnung, notes),
                 _ => 0

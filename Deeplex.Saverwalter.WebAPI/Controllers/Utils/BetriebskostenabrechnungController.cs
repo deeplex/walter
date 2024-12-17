@@ -124,9 +124,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public string? Bezeichnung { get; }
             public double GesamtWohnflaeche { get; }
             public double GesamtNutzflaeche { get; }
+            public double GesamtMiteigentumsanteile { get; }
             public int GesamtEinheiten { get; }
             public double WFZeitanteil { get; }
             public double NFZeitanteil { get; }
+            public double MEAZeitanteil { get; }
             public double NEZeitanteil { get; }
             public List<VerbrauchAnteilEntry>? VerbrauchAnteil { get; }
             public List<PersonenZeitanteil>? PersonenZeitanteil { get; }
@@ -138,9 +140,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 Bezeichnung = einheit.Bezeichnung;
                 GesamtWohnflaeche = einheit.GesamtWohnflaeche;
                 GesamtNutzflaeche = einheit.GesamtNutzflaeche;
+                GesamtMiteigentumsanteile = einheit.GesamtMiteigentumsanteile;
                 GesamtEinheiten = einheit.GesamtEinheiten;
                 WFZeitanteil = einheit.WFZeitanteil;
                 NFZeitanteil = einheit.NFZeitanteil;
+                MEAZeitanteil = einheit.MEAZeitanteil;
                 NEZeitanteil = einheit.NEZeitanteil;
                 PersonenZeitanteil = einheit.PersonenZeitanteile;
                 Heizkostenberechnungen = einheit.Heizkostenberechnungen;

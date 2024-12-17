@@ -54,7 +54,7 @@ namespace Deeplex.Saverwalter.ModelTests
             ctx.Kontakte.Add(vermieter);
             ctx.SaveChanges();
 
-            var wohnung = new Wohnung("TestWohnung", 100, 100, 1)
+            var wohnung = new Wohnung("TestWohnung", 100, 100, 100, 1)
             {
                 Adresse = new Adresse("TestStraße", "TestHausnummer", "TestPLZ", "TestOrt"),
                 Besitzer = vermieter

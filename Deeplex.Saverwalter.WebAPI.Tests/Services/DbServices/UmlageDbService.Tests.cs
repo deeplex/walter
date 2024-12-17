@@ -42,7 +42,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 Typ = new Umlagetyp("Allgemeinstrom/Hausbeleuchtung")
             };
 
-            var wohnung = new Wohnung("whatever", 0, 0, 0);
+            var wohnung = new Wohnung("whatever", 0, 0, 0, 0);
             entity.Wohnungen.Add(wohnung);
 
             ctx.Wohnungen.Add(wohnung);

@@ -40,6 +40,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const nWF = rechnungen.some((rechnung) => rechnung.schluessel === 'n. WF');
     const nNE = rechnungen.some((rechnung) => rechnung.schluessel === 'n. NE');
     const nNF = rechnungen.some((rechnung) => rechnung.schluessel === 'n. NF');
+    const nMEA = rechnungen.some(
+        (rechnung) => rechnung.schluessel === 'n. MEA'
+    );
     const nPs = rechnungen.some(
         (rechnung) => rechnung.schluessel === 'n. Pers.'
     );
@@ -54,6 +57,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     if (nWF) wohnungSchluessel.push('n. WF');
     if (nNE) wohnungSchluessel.push('n. NE');
     if (nNF) wohnungSchluessel.push('n. NF');
+    if (nMEA) wohnungSchluessel.push('n. MEA');
     const wohnungText = wohnungSchluessel.join(', ');
 </script>
 
@@ -86,6 +90,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     <StructuredListCell>n. NF</StructuredListCell>
                     <StructuredListCell
                         >nach Nutzfläche in m²</StructuredListCell
+                    >
+                </StructuredListRow>
+            {/if}
+            {#if nMEA}
+                <StructuredListRow>
+                    <StructuredListCell>n. MEA</StructuredListCell>
+                    <StructuredListCell
+                        >nach Miteigentumsanteilen</StructuredListCell
                     >
                 </StructuredListRow>
             {/if}
