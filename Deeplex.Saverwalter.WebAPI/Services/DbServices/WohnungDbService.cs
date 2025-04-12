@@ -15,6 +15,7 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -77,13 +78,35 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var entity = new Wohnung(entry.Bezeichnung, entry.Wohnflaeche, entry.Nutzflaeche, entry.Miteigentumsanteile, entry.Einheiten)
+                var entity = new Wohnung(
+                    entry.Bezeichnung,
+                    entry.Wohnflaeche,
+                    entry.Nutzflaeche,
+                    entry.Miteigentumsanteile,
+                    entry.Einheiten);
+
+                var besitzer = await Ctx.Kontakte.FindAsync(entry.Besitzer?.Id);
+                if (besitzer != null)
                 {
-                    Besitzer = await Ctx.Kontakte.FindAsync(entry.Besitzer!.Id)!
-                };
+                    entity.Besitzer = besitzer;
+                }
 
                 SetOptionalValues(entity, entry);
                 Ctx.Wohnungen.Add(entity);
+
+                var userId = await Ctx.UserAccounts.FindAsync(user.GetUserId());
+                if (userId != null)
+                {
+                    var verwalterEntity = new Verwalter(VerwalterRolle.Vollmacht)
+                    {
+                        Wohnung = entity,
+                        UserAccount = userId
+                    };
+                    Ctx.VerwalterSet.Add(verwalterEntity);
+                }
+
+
+
                 Ctx.SaveChanges();
 
                 return entry;
@@ -98,11 +121,20 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
         {
             return await HandleEntity(user, id, Operations.Update, async (entity) =>
             {
+                if (entry.Besitzer != null)
+                {
+                    entity.Besitzer = await Ctx.Kontakte.FindAsync(entry.Besitzer.Id);
+                }
+                else
+                {
+                    entity.Besitzer = null;
+                }
+
                 entity.Bezeichnung = entry.Bezeichnung;
                 entity.Wohnflaeche = entry.Wohnflaeche;
                 entity.Nutzflaeche = entry.Nutzflaeche;
                 entity.Nutzeinheit = entry.Einheiten;
-                entity.Besitzer = await Ctx.Kontakte.FindAsync(entry.Besitzer!.Id)!;
+                entity.Miteigentumsanteile = entry.Miteigentumsanteile;
 
                 SetOptionalValues(entity, entry);
                 Ctx.Wohnungen.Update(entity);

@@ -54,13 +54,18 @@ namespace Deeplex.Saverwalter.PrintService
                 left.Add(GetBriefAnrede(m));
                 rows++;
             }
-            var mieterAdresse = abrechnung.Mieter.First(mieter => mieter.Adresse != null).Adresse;
+            var mieterAdresse = abrechnung.Mieter.FirstOrDefault(mieter => mieter.Adresse != null)?.Adresse;
             if (mieterAdresse != null)
             {
                 left.Add(mieterAdresse.Strasse + " " + mieterAdresse.Hausnummer);
                 left.Add(mieterAdresse.Postleitzahl + " " + mieterAdresse.Stadt);
-                rows += 2;
             }
+            else
+            {
+                left.Add("");
+                left.Add("");
+            }
+            rows += 2;
 
             for (; rows < 16; rows++) { left.Add(""); }
 
@@ -182,6 +187,8 @@ namespace Deeplex.Saverwalter.PrintService
 
             printImpl.Paragraph(runs);
         }
+
+        // @deprecated - TODO remove
         private static void AbrechnungWohnung(
             Betriebskostenabrechnung abrechnung,
             Abrechnungseinheit abrechnungseinheit,
@@ -222,6 +229,8 @@ namespace Deeplex.Saverwalter.PrintService
 
             printImpl.Table(widths, justification, bold, underlined, cols); ;
         }
+
+        // @deprecated - TODO remove
         private static void AbrechnungEinheit(Betriebskostenabrechnung abrechnung, Abrechnungseinheit abrechnungseinheit, IPrint<T> printImpl)
         {
             printImpl.SubHeading("Angaben zur Abrechnungseinheit:");
@@ -276,7 +285,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             if (abrechnungseinheit.GesamtEinheiten == 1)
             {
-                col1.Add("Direkte Zuordnung");
+                col1.Add("nach direkter Zuordnung");
                 col2.Add(Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende));
                 col3.Add(abrechnung.Zeitraum.Nutzungszeitraum.ToString() + " / " + abrechnung.Zeitraum.Abrechnungszeitraum.ToString());
                 col4.Add(Prozent(abrechnungseinheit.WFZeitanteil));
@@ -288,7 +297,7 @@ namespace Deeplex.Saverwalter.PrintService
                 if (abrechnungseinheit.Rechnungen
                     .Any(rechnung => rechnung.Key.Schluessel == Umlageschluessel.NachWohnflaeche))
                 {
-                    col1.Add("bei Umlage nach Wohnfläche (n. WF)");
+                    col1.Add("nach Wohnfläche (n. WF)");
                     col2.Add("");
                     col3.Add("");
                     col4.Add("");
@@ -306,7 +315,7 @@ namespace Deeplex.Saverwalter.PrintService
                 if (abrechnungseinheit.Rechnungen
                     .Any(rechnung => rechnung.Key.Schluessel == Umlageschluessel.NachNutzflaeche))
                 {
-                    col1.Add("bei Umlage nach Nutzfläche (n. NF)");
+                    col1.Add("nach Nutzfläche (n. NF)");
                     col2.Add("");
                     col3.Add("");
                     col4.Add("");
@@ -324,7 +333,7 @@ namespace Deeplex.Saverwalter.PrintService
                 if (abrechnungseinheit.Rechnungen
                     .Any(rechnung => rechnung.Key.Schluessel == Umlageschluessel.NachMiteigentumsanteil))
                 {
-                    col1.Add("bei Umlage nach Miteigentumsanteilen (n. MEA)");
+                    col1.Add("nach Miteigentumsanteilen (n. MEA)");
                     col2.Add("");
                     col3.Add("");
                     col4.Add("");
@@ -342,7 +351,7 @@ namespace Deeplex.Saverwalter.PrintService
                 if (abrechnungseinheit.Rechnungen
                     .Any(rechnung => rechnung.Key.Schluessel == Umlageschluessel.NachNutzeinheit))
                 {
-                    col1.Add("bei Umlage nach Nutzeinheiten (n. NE)");
+                    col1.Add("nach Nutzeinheiten (n. NE)");
                     col2.Add("");
                     col3.Add("");
                     col4.Add("");
@@ -360,7 +369,7 @@ namespace Deeplex.Saverwalter.PrintService
                 if (abrechnungseinheit.Rechnungen
                     .Any(rechnung => rechnung.Key.Schluessel == Umlageschluessel.NachPersonenzahl))
                 {
-                    col1.Add("bei Umlage nach Personenzahl (n. Pers.)");
+                    col1.Add("nach Personenzahl (n. Pers.)");
                     col2.Add("");
                     col3.Add("");
                     col4.Add("");
@@ -395,7 +404,7 @@ namespace Deeplex.Saverwalter.PrintService
                 if (abrechnungseinheit.Rechnungen
                     .Any(rechnung => rechnung.Key.Schluessel == Umlageschluessel.NachVerbrauch))
                 {
-                    col1.Add("bei Umlage nach Verbrauch (n. Verb.)");
+                    col1.Add("nach Verbrauch (n. Verb.)");
                     col2.Add("");
                     col3.Add("Zählernummer");
                     col4.Add("");
@@ -499,6 +508,13 @@ namespace Deeplex.Saverwalter.PrintService
                             Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende),
                             abrechnung.Zeitraum.Jahr,
                             abrechnungseinheit.NEZeitanteil);
+                        break;
+                    case Umlageschluessel.NachMiteigentumsanteil:
+                        kostenPunkt(
+                            umlage,
+                            Datum(abrechnung.Zeitraum.Nutzungsbeginn) + " - " + Datum(abrechnung.Zeitraum.Nutzungsende),
+                            abrechnung.Zeitraum.Jahr,
+                            abrechnungseinheit.MEAZeitanteil);
                         break;
                     case Umlageschluessel.NachPersonenzahl:
                         var first = true;
@@ -605,7 +621,7 @@ namespace Deeplex.Saverwalter.PrintService
             var col3 = new List<string> { "Tage" };
             var col4 = new List<string> { "Ihr Anteil" };
 
-            col1.Add("bei Umlage nach Nutzfläche (n. NF)");
+            col1.Add("nach Nutzfläche (n. NF)");
             col2.Add("");
             col3.Add("");
             col4.Add("");
@@ -624,7 +640,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             if (warmeRechnungen.Exists(umlage => umlage.Schluessel == Umlageschluessel.NachPersonenzahl))
             {
-                col1.Add("bei Umlage nach Personenzahl (n. Pers.)");
+                col1.Add("nach Personenzahl (n. Pers.)");
                 col2.Add("");
                 col3.Add("");
                 col4.Add("");
@@ -671,7 +687,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             if (warmeRechnungen.Exists(umlage => umlage.Schluessel == Umlageschluessel.NachVerbrauch))
             {
-                col1.Add("bei Umlage nach Verbrauch (n. Verb.)");
+                col1.Add("nach Verbrauch (n. Verb.)");
                 col2.Add("");
                 col3.Add("");
                 col4.Add("");
@@ -880,17 +896,17 @@ namespace Deeplex.Saverwalter.PrintService
 
             printImpl.PageBreak();
 
-            if (abrechnung.Abrechnungseinheiten.FirstOrDefault() is Abrechnungseinheit einheit)
-            {
-                AbrechnungWohnung(abrechnung, einheit, printImpl);
-            }
+            // if (abrechnung.Abrechnungseinheiten.FirstOrDefault() is Abrechnungseinheit einheit)
+            // {
+            //     AbrechnungWohnung(abrechnung, einheit, printImpl);
+            // }
 
-            printImpl.Break();
+            // printImpl.Break();
             printImpl.Heading("Abrechnung der Nebenkosten (kalte Betriebskosten)");
 
             foreach (var abrechnungseinheit in abrechnung.Abrechnungseinheiten.Where(einheit => einheit.GesamtEinheiten == 1))
             {
-                AbrechnungEinheit(abrechnung, abrechnungseinheit, printImpl);
+                // AbrechnungEinheit(abrechnung, abrechnungseinheit, printImpl);
                 printImpl.Break();
                 ErmittlungKalteEinheiten(abrechnung, abrechnungseinheit, printImpl);
                 printImpl.Break();
@@ -901,7 +917,7 @@ namespace Deeplex.Saverwalter.PrintService
 
             foreach (var abrechnungseinheit in abrechnung.Abrechnungseinheiten.Where(einheit => einheit.GesamtEinheiten > 1))
             {
-                AbrechnungEinheit(abrechnung, abrechnungseinheit, printImpl);
+                // AbrechnungEinheit(abrechnung, abrechnungseinheit, printImpl);
                 printImpl.Break();
                 ErmittlungKalteEinheiten(abrechnung, abrechnungseinheit, printImpl);
                 printImpl.Break();
@@ -923,7 +939,7 @@ namespace Deeplex.Saverwalter.PrintService
                     }
                     else
                     {
-                        AbrechnungEinheit(abrechnung, abrechnungseinheit, printImpl);
+                        // AbrechnungEinheit(abrechnung, abrechnungseinheit, printImpl);
                         printImpl.Break();
                         ErmittlungWarmeKosten(abrechnung, abrechnungseinheit, printImpl);
                         printImpl.EqHeizkostenV9_2(abrechnung, abrechnungseinheit);

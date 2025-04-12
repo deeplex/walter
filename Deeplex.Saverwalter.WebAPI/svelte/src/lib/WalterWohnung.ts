@@ -76,6 +76,7 @@ export class WalterWohnungEntry extends WalterApiHandler {
             json.bezeichnung,
             json.wohnflaeche,
             json.nutzflaeche,
+            json.miteigentumsanteile,
             json.einheiten,
             json.notiz,
             json.createdAt,

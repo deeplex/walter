@@ -158,8 +158,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                         entity.Mieter.Add((await Ctx.Kontakte.FindAsync(selectedMieter.Id))!);
                     }
                 }
+                var currentMieter = entity.Mieter.ToList();
                 // Remove mieter
-                foreach (var m in entity.Mieter)
+                foreach (var m in currentMieter)
                 {
                     if (!l.Any(e => m.KontaktId == e.Id))
                     {

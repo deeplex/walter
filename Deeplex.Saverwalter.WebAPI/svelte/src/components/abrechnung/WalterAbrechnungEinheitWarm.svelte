@@ -90,9 +90,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterAbrechnungEinheitHead />
         <StructuredListBody>
             <StructuredListRow>
-                <StructuredListCell head
-                    >Bei Umlage nach Nutzfläche (n. NF)</StructuredListCell
-                >
+                <StructuredListCell head>Nutzfläche (n. NF)</StructuredListCell>
             </StructuredListRow>
             <WalterAbrechnungEinheitPart
                 beginn={zeitraum.nutzungsbeginn}
@@ -108,7 +106,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
             <StructuredListRow>
                 <StructuredListCell head
-                    >Bei Umlage nach Verbrauch (n. Verb.)</StructuredListCell
+                    >Verbrauch (n. Verb.)</StructuredListCell
                 >
                 <StructuredListCell></StructuredListCell>
                 <StructuredListCell head>Zählernummer / Typ</StructuredListCell>
