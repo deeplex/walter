@@ -120,9 +120,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitraum.Zeitanteil;
 
             var q = dieseAnteile.Where(w => w.Zaehler.Typ == Zaehlertyp.Gas).Sum(verbrauch => verbrauch.Delta);
-            HeizkostenVerbrauchAnteil = q / checkQ;
+            HeizkostenVerbrauchAnteil = checkQ > 0 ? q / checkQ : 0;
             var v = dieseAnteile.Where(w => w.Zaehler.Typ == Zaehlertyp.Warmwasser).Sum(verbrauch => verbrauch.Delta);
-            WarmwasserVerbrauchAnteil = v / V;
+            WarmwasserVerbrauchAnteil = V > 0 ? v / V : 0;
 
             WaermeAnteilNF = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * NFZeitanteil;
             WaermeAnteilVerb = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * HeizkostenVerbrauchAnteil;

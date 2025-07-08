@@ -49,10 +49,14 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             GesamtMiteigentumsanteile = wohnungen.Sum(w => w.Miteigentumsanteile);
 
             var wohnung = vertrag.Wohnung;
-            WFZeitanteil = wohnung.Wohnflaeche / GesamtWohnflaeche * zeitraum.Zeitanteil;
-            NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitraum.Zeitanteil;
-            NEZeitanteil = (double)wohnung.Nutzeinheit / GesamtEinheiten * zeitraum.Zeitanteil;
-            MEAZeitanteil = wohnung.Miteigentumsanteile / GesamtMiteigentumsanteile * zeitraum.Zeitanteil;
+            WFZeitanteil = GesamtWohnflaeche > 0 ?
+                wohnung.Wohnflaeche / GesamtWohnflaeche * zeitraum.Zeitanteil : 0;
+            NFZeitanteil = GesamtNutzflaeche > 0 ?
+                wohnung.Nutzflaeche / GesamtNutzflaeche * zeitraum.Zeitanteil : 0;
+            NEZeitanteil = GesamtEinheiten > 0 ?
+                (double)wohnung.Nutzeinheit / GesamtEinheiten * zeitraum.Zeitanteil : 0;
+            MEAZeitanteil = GesamtMiteigentumsanteile > 0 ?
+                wohnung.Miteigentumsanteile / GesamtMiteigentumsanteile * zeitraum.Zeitanteil : 0;
 
             foreach (var umlage in umlagen)
             {
@@ -180,7 +184,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             // Group up all Wohnungen sharing the same Umlage
             var einheiten = vertrag.Wohnung.Umlagen
                 .GroupBy(umlage =>
-                    new SortedSet<int>(umlage.Wohnungen.Select(gr => gr.WohnungId).ToList()),
+                    [.. umlage.Wohnungen.Select(gr => gr.WohnungId).ToList()],
                     new SortedSetIntEqualityComparer())
                 .ToList();
             // Then create Rechnungsgruppen for every single one of those groups with respective information to calculate the distribution
@@ -196,9 +200,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Zeitraum zeitraum,
             List<Note> notes)
         {
-            return rechnungen
-                .Select(rechnung => new Heizkostenberechnung(rechnung, wohnung, verbrauchAnteile, zeitraum, notes))
-                .ToList();
+            return [.. rechnungen.Select(rechnung => new Heizkostenberechnung(rechnung, wohnung, verbrauchAnteile, zeitraum, notes))];
         }
 
     }
