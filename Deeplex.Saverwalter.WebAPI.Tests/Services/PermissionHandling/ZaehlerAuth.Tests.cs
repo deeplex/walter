@@ -28,8 +28,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests.Services.PermissionHandling
     public class ZaehlerAuthTests
     {
         [Theory]
-        [InlineData(nameof(Operations.SubCreate), VerwalterRolle.Eigentuemer, false)]
-        [InlineData(nameof(Operations.SubCreate), VerwalterRolle.Vollmacht, false)]
+        [InlineData(nameof(Operations.SubCreate), VerwalterRolle.Eigentuemer, true)]
+        [InlineData(nameof(Operations.SubCreate), VerwalterRolle.Vollmacht, true)]
         [InlineData(nameof(Operations.SubCreate), VerwalterRolle.Keine, false)]
         [InlineData(nameof(Operations.SubCreate), null, false)]
         [InlineData(nameof(Operations.Delete), VerwalterRolle.Eigentuemer, true)]

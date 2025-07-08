@@ -72,6 +72,21 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             };
             var entry = new WohnungEntry(entity, new());
 
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString())
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var user = new ClaimsPrincipal(identity);
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = user
+                }
+            };
+
             var result = await controller.Post(entry);
 
             result.Value.Should().NotBeNull();

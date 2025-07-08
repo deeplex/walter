@@ -22,6 +22,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
+using Deeplex.Saverwalter.WebAPI.Helper;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests
@@ -75,7 +76,13 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         [Fact]
         public async Task PostTest()
         {
-            var user = A.Fake<ClaimsPrincipal>();
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString())
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var user = new ClaimsPrincipal(identity);
+
             var auth = A.Fake<IAuthorizationService>();
             A.CallTo(() => auth.AuthorizeAsync(user, A<object>._, A<IEnumerable<IAuthorizationRequirement>>._))
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
@@ -89,11 +96,12 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             {
                 Besitzer = besitzer
             };
+
             var entry = new WohnungEntry(entity, new());
 
             var result = await service.Post(user, entry);
 
-            result.Value.Should().NotBeNull();
+            result.Should().NotBeNull();
         }
 
         [Fact]

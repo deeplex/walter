@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Runtime.InteropServices;
 using System.Text;
 using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using MigraDoc.DocumentObjectModel;
@@ -25,7 +26,41 @@ namespace Deeplex.Saverwalter.PrintService
     {
         public byte[] GetFont(string faceName)
         {
-            var fontPath = Environment.GetEnvironmentVariable("SystemRoot") + "\\fonts\\times.ttf";
+            string fontPath;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var systemRoot = Environment.GetEnvironmentVariable("SystemRoot");
+                if (string.IsNullOrEmpty(systemRoot))
+                {
+                    throw new InvalidOperationException("The 'SystemRoot' environment variable is not set. Cannot locate system fonts.");
+                }
+                fontPath = Path.Combine(systemRoot, "Fonts", "times.ttf");
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                var candidates = new[]
+                {
+                    "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf",
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+                    "/usr/share/fonts/truetype/noto/NotoSerif-Regular.ttf"
+                };
+
+                foreach (var path in candidates)
+                {
+                    if (File.Exists(path))
+                    {
+                        fontPath = path;
+                        break;
+                    }
+                }
+
+                throw new FileNotFoundException("No suitable serif font found on this Linux system.");
+            }
+            else
+            {
+                throw new PlatformNotSupportedException("Unsupported OS.");
+            }
+
             return File.ReadAllBytes(fontPath);
         }
 

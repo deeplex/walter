@@ -78,7 +78,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class WohnungEntry : WohnungEntryBase
         {
-           public string? Notiz { get; set; }
+            public string? Notiz { get; set; }
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 

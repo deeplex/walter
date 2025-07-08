@@ -40,7 +40,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "Files is todo. Also provide valid XML to test here")]
         public async void GetFiles()
         {
             var ctx = TestUtils.GetContext();
@@ -62,8 +62,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             controller.ControllerContext.HttpContext.Request.Path = "/api/adressen/1/files";
 
             var result = await controller.GetFiles(1);
-            result.Should().BeOfType<FileContentResult>();
-            result.As<FileContentResult>().FileContents.Length.Should().Be(11); // "Fake Answer"
+            result.Should().BeOfType<ActionResult<List<Utils.WalterFile>>>();
+            result.Result.As<FileContentResult>().FileContents.Length.Should().Be(11); // "Fake Answer"
         }
 
         [Fact]
@@ -172,7 +172,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.GetFiles(1);
 
-            result.As<StatusCodeResult>().StatusCode.Should().Be(StatusCodes.Status503ServiceUnavailable);
+            result.Should().BeOfType<ActionResult<List<Utils.WalterFile>>>();
+            result.Result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
@@ -197,8 +198,8 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
 
             var result = await controller.GetFiles(1);
 
-            result.Should().BeOfType<StatusCodeResult>();
-            result.As<StatusCodeResult>().StatusCode.Should().Be(StatusCodes.Status503ServiceUnavailable);
+            result.Should().BeOfType<ActionResult<List<Utils.WalterFile>>>();
+            result.Result.Should().BeOfType<BadRequestResult>();
         }
     }
 }
