@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
                 Typ = entity
             };
 
-            var wohnung = new Wohnung("whatever", 0, 0, 0);
+            var wohnung = new Wohnung("whatever", 0, 0, 0, 0);
 
             umlage.Wohnungen.Add(wohnung);
 

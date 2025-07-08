@@ -180,7 +180,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
                 {
                     var bezeichnung = $"Wohnung Nr. {j}";
                     var flaeche = 35 + (j * 35);
-                    wohnungen.Add(new Wohnung(bezeichnung, i * 2, i * 2, 1)
+                    wohnungen.Add(new Wohnung(bezeichnung, i * 2, i * 2, i * 2, 1)
                     {
                         Adresse = adresse,
                         Besitzer = besitzer,

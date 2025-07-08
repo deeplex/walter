@@ -27,9 +27,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public string Bezeichnung { get; }
         public double GesamtWohnflaeche { get; }
         public double GesamtNutzflaeche { get; }
+        public double GesamtMiteigentumsanteile { get; }
         public int GesamtEinheiten { get; }
         public double WFZeitanteil { get; }
         public double NFZeitanteil { get; }
+        public double MEAZeitanteil { get; }
         public double NEZeitanteil { get; }
         public List<VerbrauchAnteil> VerbrauchAnteile { get; }
         public List<PersonenZeitanteil> PersonenZeitanteile { get; }
@@ -44,11 +46,17 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             GesamtWohnflaeche = wohnungen.Sum(w => w.Wohnflaeche);
             GesamtNutzflaeche = wohnungen.Sum(w => w.Nutzflaeche);
             GesamtEinheiten = wohnungen.Sum(w => w.Nutzeinheit);
+            GesamtMiteigentumsanteile = wohnungen.Sum(w => w.Miteigentumsanteile);
 
             var wohnung = vertrag.Wohnung;
-            WFZeitanteil = wohnung.Wohnflaeche / GesamtWohnflaeche * zeitraum.Zeitanteil;
-            NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitraum.Zeitanteil;
-            NEZeitanteil = (double)wohnung.Nutzeinheit / GesamtEinheiten * zeitraum.Zeitanteil;
+            WFZeitanteil = GesamtWohnflaeche > 0 ?
+                wohnung.Wohnflaeche / GesamtWohnflaeche * zeitraum.Zeitanteil : 0;
+            NFZeitanteil = GesamtNutzflaeche > 0 ?
+                wohnung.Nutzflaeche / GesamtNutzflaeche * zeitraum.Zeitanteil : 0;
+            NEZeitanteil = GesamtEinheiten > 0 ?
+                (double)wohnung.Nutzeinheit / GesamtEinheiten * zeitraum.Zeitanteil : 0;
+            MEAZeitanteil = GesamtMiteigentumsanteile > 0 ?
+                wohnung.Miteigentumsanteile / GesamtMiteigentumsanteile * zeitraum.Zeitanteil : 0;
 
             foreach (var umlage in umlagen)
             {
@@ -114,6 +122,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 Umlageschluessel.NachNutzeinheit => NEZeitanteil,
                 Umlageschluessel.NachWohnflaeche => WFZeitanteil,
                 Umlageschluessel.NachNutzflaeche => NFZeitanteil,
+                Umlageschluessel.NachMiteigentumsanteil => MEAZeitanteil,
                 Umlageschluessel.NachPersonenzahl => PersonenZeitanteile.Sum(anteil => anteil.Anteil),
                 Umlageschluessel.NachVerbrauch => VerbrauchAnteile
                     .SingleOrDefault(anteil => anteil.Umlage == umlage)?.Anteil?.Sum(a => a.Value) ?? 0,
@@ -130,6 +139,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 Umlageschluessel.NachNutzeinheit => rechnung.Betrag * NEZeitanteil,
                 Umlageschluessel.NachWohnflaeche => rechnung.Betrag * WFZeitanteil,
                 Umlageschluessel.NachNutzflaeche => rechnung.Betrag * NFZeitanteil,
+                Umlageschluessel.NachMiteigentumsanteil => rechnung.Betrag * MEAZeitanteil,
                 Umlageschluessel.NachPersonenzahl => rechnung.Betrag * PersZeitanteil,
                 Umlageschluessel.NachVerbrauch => rechnung.Betrag * GetVerbrauchAnteil(rechnung, notes),
                 _ => 0
@@ -174,7 +184,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             // Group up all Wohnungen sharing the same Umlage
             var einheiten = vertrag.Wohnung.Umlagen
                 .GroupBy(umlage =>
-                    new SortedSet<int>(umlage.Wohnungen.Select(gr => gr.WohnungId).ToList()),
+                    [.. umlage.Wohnungen.Select(gr => gr.WohnungId).ToList()],
                     new SortedSetIntEqualityComparer())
                 .ToList();
             // Then create Rechnungsgruppen for every single one of those groups with respective information to calculate the distribution
@@ -190,9 +200,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Zeitraum zeitraum,
             List<Note> notes)
         {
-            return rechnungen
-                .Select(rechnung => new Heizkostenberechnung(rechnung, wohnung, verbrauchAnteile, zeitraum, notes))
-                .ToList();
+            return [.. rechnungen.Select(rechnung => new Heizkostenberechnung(rechnung, wohnung, verbrauchAnteile, zeitraum, notes))];
         }
 
     }

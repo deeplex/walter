@@ -66,11 +66,26 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Kontakte.Add(besitzer);
             ctx.SaveChanges();
 
-            var entity = new Wohnung("Test", 100, 100, 1)
+            var entity = new Wohnung("Test", 100, 100, 100, 1)
             {
                 Besitzer = besitzer
             };
             var entry = new WohnungEntry(entity, new());
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString())
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var user = new ClaimsPrincipal(identity);
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = user
+                }
+            };
 
             var result = await controller.Post(entry);
 
@@ -110,7 +125,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
 
-            var entity = new Wohnung("Test", 100, 100, 1)
+            var entity = new Wohnung("Test", 100, 100, 100, 1)
             {
                 Besitzer = besitzer
             };

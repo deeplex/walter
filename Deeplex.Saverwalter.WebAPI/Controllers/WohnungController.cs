@@ -42,7 +42,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public AdresseEntryBase? Adresse { get; set; }
             public SelectionEntry? Besitzer { get; set; }
             public string? Bewohner { get; set; }
-
+            public double Wohnflaeche { get; set; }
+            public double Nutzflaeche { get; set; }
+            public double Miteigentumsanteile { get; set; }
+            public int Einheiten { get; set; }
+ 
             public Permissions Permissions { get; set; } = new Permissions();
 
             public WohnungEntryBase() { }
@@ -58,6 +62,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     Besitzer = new(k.KontaktId, k.Bezeichnung);
                 }
 
+                Wohnflaeche = entity.Wohnflaeche;
+                Nutzflaeche = entity.Nutzflaeche;
+                Miteigentumsanteile = entity.Miteigentumsanteile;
+                Einheiten = entity.Nutzeinheit;
+
                 var v = entity.Vertraege.FirstOrDefault(e => e.Ende == null || e.Ende < DateOnly.FromDateTime(DateTime.Now));
                 Bewohner = v != null ?
                     string.Join(", ", v.Mieter.Select(m => m.Bezeichnung)) :
@@ -69,9 +78,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         public class WohnungEntry : WohnungEntryBase
         {
-            public double Wohnflaeche { get; set; }
-            public double Nutzflaeche { get; set; }
-            public int Einheiten { get; set; }
             public string? Notiz { get; set; }
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
@@ -86,9 +92,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public WohnungEntry() : base() { }
             public WohnungEntry(Wohnung entity, Permissions permissions) : base(entity, permissions)
             {
-                Wohnflaeche = entity.Wohnflaeche;
-                Nutzflaeche = entity.Nutzflaeche;
-                Einheiten = entity.Nutzeinheit;
                 Notiz = entity.Notiz;
 
                 CreatedAt = entity.CreatedAt;

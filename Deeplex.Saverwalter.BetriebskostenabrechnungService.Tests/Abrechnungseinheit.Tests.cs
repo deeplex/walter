@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
         {
             // Arrange
             var adresse = new Adresse("Teststraße", "Testhausnummer", "Testpostleitzahl", "Teststadt");
-            var wohnung = new Wohnung("Testwohnung", 100, 200, 1) { Adresse = adresse };
+            var wohnung = new Wohnung("Testwohnung", 100, 200, 100, 1) { Adresse = adresse };
             var wohnungen = new List<Wohnung> { wohnung };
             var umlage = new Umlage(Umlageschluessel.NachNutzeinheit)
             {
@@ -46,6 +46,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
             var abrechnungseinheit = new Abrechnungseinheit(umlagen, vertrag, zeitraum, notes);
 
             // Assert
+            abrechnungseinheit.GesamtMiteigentumsanteile.Should().Be(100);
             abrechnungseinheit.GesamtWohnflaeche.Should().Be(100);
             abrechnungseinheit.GesamtNutzflaeche.Should().Be(200);
             abrechnungseinheit.GesamtEinheiten.Should().Be(1);
@@ -59,10 +60,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
         {
             // Arrange
             var adresse = new Adresse("Teststraße", "Testhausnummer", "Testpostleitzahl", "Teststadt");
-            var wohnung = new Wohnung("Testwohnung1", 100, 200, 1) { Adresse = adresse };
+            var wohnung = new Wohnung("Testwohnung1", 100, 200, 100, 1) { Adresse = adresse };
             var wohnungen = new List<Wohnung> {
                 wohnung,
-                new("Testwohnung2", 150, 300, 2) { Adresse = adresse },
+                new("Testwohnung2", 150, 300, 100, 2) { Adresse = adresse },
             };
             var umlage = new Umlage(Umlageschluessel.NachNutzeinheit)
             {
@@ -82,6 +83,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
             var abrechnungseinheit = new Abrechnungseinheit(umlagen, vertrag, zeitraum, notes);
 
             // Assert
+            abrechnungseinheit.GesamtMiteigentumsanteile.Should().Be(200);
             abrechnungseinheit.GesamtWohnflaeche.Should().Be(250);
             abrechnungseinheit.GesamtNutzflaeche.Should().Be(500);
             abrechnungseinheit.GesamtEinheiten.Should().Be(3);
@@ -95,14 +97,14 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
         {
             // Arrange
             var adresse = new Adresse("Teststraße", "Testhausnummer", "Testpostleitzahl", "Teststadt");
-            var wohnung = new Wohnung("Testwohnung1", 100, 200, 1) { Adresse = adresse };
+            var wohnung = new Wohnung("Testwohnung1", 100, 200, 100, 1) { Adresse = adresse };
             var wohnungen1 = new List<Wohnung>
             {
                 wohnung
             };
             var wohnungen2 = new List<Wohnung> {
                 wohnung,
-                new("Testwohnung2", 150, 300, 2) { Adresse = adresse },
+                new("Testwohnung2", 150, 300, 100, 2) { Adresse = adresse },
             };
             var umlage1 = new Umlage(Umlageschluessel.NachNutzeinheit)
             {
@@ -127,7 +129,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService.Tests
             // Act
             var abrechnungseinheit = new Abrechnungseinheit(umlagen, vertrag, zeitraum, notes);
 
-            // // Assert
+            // Assert
+            abrechnungseinheit.GesamtMiteigentumsanteile.Should().Be(100);
             abrechnungseinheit.GesamtWohnflaeche.Should().Be(100);
             abrechnungseinheit.GesamtNutzflaeche.Should().Be(200);
             abrechnungseinheit.GesamtEinheiten.Should().Be(1);

@@ -48,6 +48,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 <StructuredListCell head>Nutzeinheiten</StructuredListCell>
                 <StructuredListCell head>Wohnfläche</StructuredListCell>
                 <StructuredListCell head>Nutzfläche</StructuredListCell>
+                <StructuredListCell head>Miteigentumsanteil</StructuredListCell>
                 <StructuredListCell head>Bewohner</StructuredListCell>
                 <StructuredListCell head>Nutzungsintervall</StructuredListCell>
                 <StructuredListCell head>Tage</StructuredListCell>
@@ -71,6 +72,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                             ? convertM2(einheit.gesamtNutzflaeche)
                             : ''}</StructuredListCell
                     >
+                    <StructuredListCell
+                        >{!index
+                            ? einheit.gesamtMiteigentumsanteile
+                            : ''}</StructuredListCell
+                    >
+
                     <StructuredListCell
                         >{intervall.gesamtPersonenzahl}</StructuredListCell
                     >
@@ -97,7 +104,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {#if einheit.rechnungen.some((r) => r.schluessel == 'n. WF')}
                 <StructuredListRow>
                     <StructuredListCell head
-                        >Bei Umlage nach Wohnfläche (n. WF)</StructuredListCell
+                        >Wohnfläche (n. WF)</StructuredListCell
                     >
                 </StructuredListRow>
                 <WalterAbrechnungEinheitPart
@@ -115,7 +122,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {#if einheit.rechnungen.some((r) => r.schluessel == 'n. NF')}
                 <StructuredListRow>
                     <StructuredListCell head
-                        >Bei Umlage nach Nutzfläche (n. NF)</StructuredListCell
+                        >Nutzfläche (n. NF)</StructuredListCell
                     >
                 </StructuredListRow>
                 <WalterAbrechnungEinheitPart
@@ -130,10 +137,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     tage={zeitraum.nutzungszeitraum}
                 />
             {/if}
+            {#if einheit.rechnungen.some((r) => r.schluessel == 'n. MEA')}
+                <StructuredListRow>
+                    <StructuredListCell head
+                        >Miteigentumsanteilen (n. MEA)</StructuredListCell
+                    >
+                </StructuredListRow>
+                <WalterAbrechnungEinheitPart
+                    beginn={zeitraum.nutzungsbeginn}
+                    ende={zeitraum.nutzungsende}
+                    value={convertM2(
+                        (einheit.gesamtMiteigentumsanteile *
+                            einheit.meaZeitanteil) /
+                            zeitraum.zeitanteil
+                    )}
+                    gesamt={einheit.gesamtMiteigentumsanteile}
+                    anteil={einheit.meaZeitanteil}
+                    tage={zeitraum.nutzungszeitraum}
+                />
+            {/if}
             {#if einheit.rechnungen.some((r) => r.schluessel == 'n. NE')}
                 <StructuredListRow>
                     <StructuredListCell head
-                        >Bei Umlage nach Nutzeinheiten (n. NE)</StructuredListCell
+                        >Nutzeinheiten (n. NE)</StructuredListCell
                     >
                 </StructuredListRow>
                 <WalterAbrechnungEinheitPart
@@ -149,7 +175,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {#if einheit.rechnungen.some((r) => r.schluessel == 'n. Pers.')}
                 <StructuredListRow>
                     <StructuredListCell head
-                        >Bei Umlage nach Personenzahl (n. Pers.)</StructuredListCell
+                        >Personenzahl (n. Pers.)</StructuredListCell
                     >
                 </StructuredListRow>
                 {#each einheit.personenZeitanteil as personen}
@@ -166,7 +192,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {#if einheit.rechnungen.some((r) => r.schluessel == 'n. Verb.')}
                 <StructuredListRow>
                     <StructuredListCell head
-                        >Bei Umlage nach Verbrauch (n. Verb.)</StructuredListCell
+                        >Verbrauch (n. Verb.)</StructuredListCell
                     >
                     <StructuredListCell></StructuredListCell>
                     <StructuredListCell head

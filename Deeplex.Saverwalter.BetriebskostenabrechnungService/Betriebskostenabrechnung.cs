@@ -74,8 +74,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             if (!vertrag.Mieter.Any(mieter => mieter.Adresse != null))
             {
                 Notes.Add(new Note(
-                    $"Die Adresse mindestens eines Mieters ist notwendig für die Betriebskostenabrechnung.",
-                    Severity.Error
+                    $"Es ist für keinen der Mieter eine Adresse hinterlegt. Entsprechend kann dem Briefkopf der Druckversion keine Adresse zugefügt werden.",
+                    Severity.Warning
                 ));
             }
 

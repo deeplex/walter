@@ -14,7 +14,7 @@ services:
     container_name: walter_dev_db
     restart: unless-stopped
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - ./test_data:/var/lib/postgresql/data
     environment:
       - POSTRES_DB=walter_dev_full_generic_db
       - POSTGRES_USER=postgres

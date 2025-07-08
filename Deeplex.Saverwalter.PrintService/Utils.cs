@@ -132,6 +132,8 @@ namespace Deeplex.Saverwalter.PrintService
             => UmlageSchluesselExistsInabrechnung(einheiten, Umlageschluessel.NachPersonenzahl);
         public static bool NachVerbrauch(List<Abrechnungseinheit> einheiten)
             => UmlageSchluesselExistsInabrechnung(einheiten, Umlageschluessel.NachVerbrauch);
+        public static bool NachMiteigentumsanteil(List<Abrechnungseinheit> einheiten)
+            => UmlageSchluesselExistsInabrechnung(einheiten, Umlageschluessel.NachMiteigentumsanteil);
 
         public const string Anmerkung
            = "Bei einer Nutzungsdauer, die kürzer als der Abrechnungszeitraum ist, werden Ihre Einheiten als Rechnungsfaktor mit Hilfe des Promille - Verfahrens ermittelt; Kosten je Einheit mal Ihre Einheiten = (zeitanteiliger) Kostenanteil";

@@ -64,6 +64,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterNumberInput
         required
         {readonly}
+        bind:value={entry.miteigentumsanteile}
+        label="Miteigentumsanteile"
+    />
+    <WalterNumberInput
+        required
+        {readonly}
         bind:value={entry.einheiten}
         label="Einheiten"
     />

@@ -162,7 +162,7 @@ namespace Deeplex.Saverwalter.PrintService.Tests
         public void MietobjektTest(string strasse, string hausnummer, string bezeichnung, string result)
         {
             var adresse = new Adresse(strasse, hausnummer, "irrelevant", "irrelevant");
-            var wohnung = new Wohnung(bezeichnung, 100, 100, 1)
+            var wohnung = new Wohnung(bezeichnung, 100, 100, 100, 1)
             {
                 Adresse = adresse
             };

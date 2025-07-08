@@ -78,7 +78,7 @@ namespace Deeplex.Saverwalter.ErhaltungsaufwendungService.Tests
                 Wohnung = vertrag.Wohnung
             };
 
-            var wohnung = new Wohnung("Test", 100, 100, 1);
+            var wohnung = new Wohnung("Test", 100, 100, 100, 1);
             var entity4 = new Erhaltungsaufwendung(2000, "Test4", new DateOnly(2021, 1, 1))
             {
                 Wohnung = wohnung

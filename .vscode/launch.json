@@ -64,10 +64,10 @@
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "DATABASE_HOST": "walter_dev_db",
                 "DATABASE_PORT": "5432",
-                "DATABASE_NAME": "walter_dev_generic_db",
+                "DATABASE_NAME": "saverdb",
                 "DATABASE_USER": "postgres",
-                "DATABASE_PASS": "postgres",
-                "WALTER_PASSWORD": "postgres",
+                "DATABASE_PASS": "admin",
+                "WALTER_PASSWORD": "verysecure",
                 "S3_PROVIDER": "http://s3:9000/saverwalter"
             },
             "sourceFileMap": {

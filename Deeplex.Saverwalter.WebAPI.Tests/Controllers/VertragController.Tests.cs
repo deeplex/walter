@@ -65,7 +65,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var besitzer = new Kontakt("Herr Test", Rechtsform.gmbh);
             ctx.Kontakte.Add(besitzer);
 
-            var wohnung = new Wohnung("Test", 100, 100, 1)
+            var wohnung = new Wohnung("Test", 100, 100, 100, 1)
             {
                 Besitzer = besitzer
             };

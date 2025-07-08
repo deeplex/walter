@@ -27,6 +27,8 @@ namespace Deeplex.Saverwalter.Model
         [Required]
         public double Nutzflaeche { get; set; }
         [Required]
+        public double Miteigentumsanteile { get; set; }
+        [Required]
         public int Nutzeinheit { get; set; } // TODO Rename to Nutzeinheiten
         public virtual Kontakt? Besitzer { get; set; }
         public virtual Adresse? Adresse { get; set; }
@@ -40,11 +42,12 @@ namespace Deeplex.Saverwalter.Model
 
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
-        public Wohnung(string bezeichnung, double wohnflaeche, double nutzflaeche, int nutzeinheit)
+        public Wohnung(string bezeichnung, double wohnflaeche, double nutzflaeche, double miteigentumsanteile, int nutzeinheit)
         {
             Bezeichnung = bezeichnung;
             Wohnflaeche = wohnflaeche;
             Nutzflaeche = nutzflaeche;
+            Miteigentumsanteile = miteigentumsanteile;
             Nutzeinheit = nutzeinheit;
         }
     }
