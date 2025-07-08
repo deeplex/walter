@@ -13,11 +13,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: svelte-app
           path: Deeplex.Saverwalter.WebAPI/wwwroot
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: dotnet-app
           path: Deeplex.Saverwalter.WebAPI/bin

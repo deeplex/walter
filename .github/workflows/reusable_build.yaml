@@ -15,7 +15,7 @@ jobs:
           yarn install
           yarn build
       - name: Upload svelte artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: svelte-app
           path: Deeplex.Saverwalter.WebAPI/wwwroot
@@ -33,7 +33,7 @@ jobs:
           dotnet restore
           dotnet publish -c release
       - name: Upload dotnet artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dotnet-app
           path: Deeplex.Saverwalter.WebAPI/bin
