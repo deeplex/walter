@@ -1,0 +1,10 @@
+on:
+  push:
+    branches:
+      - feature/*
+
+jobs:
+  test:
+    uses: ./.github/workflows/reusable_test.yaml
+  build:
+    uses: ./.github/workflows/reusable_build.yaml
