@@ -36,6 +36,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public int Id { get; set; }
             public string Kennnummer { get; set; } = null!;
             public SelectionEntry Typ { get; set; } = null!;
+            public AdresseEntryBase? Adresse { get; set; }
             public SelectionEntry? Wohnung { get; set; }
             public ZaehlerstandEntryBase? LastZaehlerstand { get; set; }
             public DateOnly? Ende { get; set; }
@@ -48,9 +49,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Entity = entity;
 
                 Id = entity.ZaehlerId;
+                Adresse = entity.Adresse is Adresse a ? new AdresseEntryBase(a, permissions) : null;
                 Kennnummer = entity.Kennnummer;
                 Typ = new((int)entity.Typ, entity.Typ.ToString());
-                Wohnung = entity.Wohnung is Wohnung w ? new(w.WohnungId, $"{w.Adresse?.Anschrift ?? "Unbekannte Anschrift"}, {w.Bezeichnung}") : null;
+                Wohnung = entity.Wohnung is Wohnung w ? new(w.WohnungId, w.Bezeichnung) : null;
                 var letzterStand = entity.Staende?.OrderBy(s => s.Datum).ToList().LastOrDefault();
                 Ende = entity.Ende;
                 if (letzterStand is Zaehlerstand stand)
@@ -66,7 +68,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         {
             public string? Notiz { get; set; }
             public IEnumerable<SelectionEntry>? SelectedUmlagen { get; set; }
-            public AdresseEntryBase? Adresse { get; set; }
             public DateTime CreatedAt { get; set; }
             public DateTime LastModified { get; set; }
 
@@ -76,7 +77,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public ZaehlerEntry() : base() { }
             public ZaehlerEntry(Zaehler entity, Permissions permissions) : base(entity, permissions)
             {
-                Adresse = entity.Adresse is Adresse a ? new AdresseEntryBase(a, permissions) : null;
                 SelectedUmlagen = entity.Umlagen.ToList()
                    .Select(e => new SelectionEntry(e.UmlageId, e.Typ.Bezeichnung + " - " + e.GetWohnungenBezeichnung()));
 

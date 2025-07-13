@@ -57,11 +57,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         if (searchParams) {
             if (searchQuery) {
                 searchParams.set('search', searchQuery);
-                window.history.replaceState(
-                    {},
-                    '',
-                    `?${searchParams.toString()}`
-                );
+                window.history.replaceState({}, '', `?${searchParams.toString()}`);
             } else {
                 searchParams.delete('search');
                 window.history.replaceState(
