@@ -57,11 +57,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         if (searchParams) {
             if (searchQuery) {
                 searchParams.set('search', searchQuery);
-                window.history.replaceState(
-                    {},
-                    '',
-                    `?${searchParams.toString()}`
-                );
+                window.history.replaceState({}, '', `?${searchParams.toString()}`);
             } else {
                 searchParams.delete('search');
                 window.history.replaceState(
@@ -161,8 +157,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         style="right: -1em; position: sticky;"
                         on:click={add}
                         iconDescription="Eintrag hinzufügen"
-                        icon={Add}>Eintrag hinzufügen</Button
-                    >
+                        icon={Add}>
+                        Eintrag hinzufügen
+                    </Button>
                 {/if}
             </ToolbarContent>
         </Toolbar>

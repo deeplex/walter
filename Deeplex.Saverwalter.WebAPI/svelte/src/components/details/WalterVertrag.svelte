@@ -36,11 +36,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <Row>
     <TextInput
-        placeholder="Wird aus Vertragsversion genommen"
+        placeholder="Wird aus Nachtrag genommen"
         required
         readonly
         value={entry.beginn && convertDateGerman(new Date(entry.beginn))}
-        labelText="Beginn (aus Vertragsversion)"
+        labelText="Beginn (aus Nachtrag)"
     />
     <WalterDatePicker
         disabled={readonly}

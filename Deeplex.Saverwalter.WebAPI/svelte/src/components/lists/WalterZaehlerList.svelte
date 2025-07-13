@@ -26,6 +26,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const headers = [
         { key: 'kennnummer', value: 'Kennnummer' },
+        { key: 'adresse.anschrift', value: 'Adresse'},
         { key: 'wohnung.text', value: 'Wohnung' },
         { key: 'typ.text', value: 'Typ' },
         { key: 'lastZaehlerstand.datum', value: 'Letztes Ablesedatum' },

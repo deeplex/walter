@@ -410,7 +410,24 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             OperationAuthorizationRequirement requirement,
             Zaehlerstand entity)
         {
-            return HandleWohnungSubRequirementAsync(context, requirement, entity.Zaehler.Wohnung!);
+            if (entity.Zaehler.Wohnung != null)
+            {
+                return HandleWohnungSubRequirementAsync(context, requirement, entity.Zaehler.Wohnung);
+            }
+            if (entity.Zaehler.Adresse == null || entity.Zaehler.Adresse.Wohnungen.Count == 0)
+            {
+                context.Succeed(requirement);
+                return Task.CompletedTask;
+            }
+            else
+            {
+                foreach (var wohnung in entity.Zaehler.Adresse.Wohnungen.ToList())
+                {
+                    HandleWohnungSubRequirementAsync(context, requirement, wohnung);
+                }
+
+                return Task.CompletedTask;
+            }
         }
     }
 
@@ -482,6 +499,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         }
 
         protected static bool IsAuthorized(Guid userId, Wohnung wohnung, VerwalterRolle rolle)
-            => wohnung.Verwalter.Count > 0 && wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, userId));
+            => wohnung != null &&
+               wohnung.Verwalter.Count > 0 &&
+               wohnung.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, userId));
     }
 }

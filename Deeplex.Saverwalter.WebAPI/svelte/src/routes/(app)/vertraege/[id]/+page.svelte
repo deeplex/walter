@@ -97,7 +97,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         />
         <WalterVertragVersionen
             entry={vertragversionEntry}
-            title="Versionen:"
+            title="Nachträge"
             rows={data.entry.versionen}
         />
         <WalterMieten
