@@ -40,6 +40,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <WalterGrid>
     <WalterVertrag fetchImpl={data.fetchImpl} {entry} />
-    <Tile light>Vertragsversion:</Tile>
+    <Tile light>Nachtrag:</Tile>
     <WalterVertragVersion entry={entryVersion} />
 </WalterGrid>
