@@ -43,7 +43,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     function close() {
         addModalOpen = false;
-        addEntry = {};
         changeTracker.set(tracker);
     }
 </script>
