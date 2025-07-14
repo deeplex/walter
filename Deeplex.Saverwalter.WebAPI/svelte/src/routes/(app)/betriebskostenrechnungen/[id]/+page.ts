@@ -30,7 +30,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         fetchImpl: fetch,
         id: params.id,
         apiURL: apiURL,
-        filURL: fileUrl,
+        fileURL: fileUrl,
         entry
     };
 };

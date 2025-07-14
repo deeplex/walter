@@ -25,7 +25,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         fetchImpl: fetch,
         id: params.id,
         apiURL: apiURL,
-        fileURl: fileUrl,
+        fileURL: fileUrl,
         entry: WalterUmlageEntry.GetOne<WalterUmlageEntry>(params.id, fetch)
     };
 };
