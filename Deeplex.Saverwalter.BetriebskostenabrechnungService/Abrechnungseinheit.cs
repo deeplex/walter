@@ -36,7 +36,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public List<VerbrauchAnteil> VerbrauchAnteile { get; }
         public List<PersonenZeitanteil> PersonenZeitanteile { get; }
         public List<Heizkostenberechnung> Heizkostenberechnungen { get; }
-        public double AllgStromFaktor { get; }
 
         public Abrechnungseinheit(List<Umlage> umlagen, Vertrag vertrag, Zeitraum zeitraum, List<Note> notes)
         {

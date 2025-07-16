@@ -133,7 +133,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public List<VerbrauchAnteilEntry>? VerbrauchAnteil { get; }
             public List<PersonenZeitanteil>? PersonenZeitanteil { get; }
             public List<Heizkostenberechnung>? Heizkostenberechnungen { get; }
-            public double AllgStromFaktor { get; }
 
             public AbrechnungseinheitEntry(Abrechnungseinheit einheit, int year)
             {
@@ -159,7 +158,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 GesamtBetragKalt = einheit.GesamtBetragKalt;
                 BetragWarm = einheit.BetragWarm;
                 GesamtBetragWarm = einheit.GesamtBetragWarm;
-                AllgStromFaktor = einheit.AllgStromFaktor;
             }
         }
 

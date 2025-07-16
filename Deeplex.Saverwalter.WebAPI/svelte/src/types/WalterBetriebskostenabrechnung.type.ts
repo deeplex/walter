@@ -66,7 +66,6 @@ export type WalterAbrechnungseinheit = {
     verbrauchAnteil: WalterVerbrauchAnteil[];
     personenZeitanteil: WalterPersonenZeitanteil[];
     heizkostenberechnungen: WalterHeizkostenberechnungEntry[];
-    allgStromFaktor: number;
 };
 
 export type WalterVerbrauchAnteil = {

@@ -585,11 +585,17 @@ namespace Deeplex.Saverwalter.PrintService
             var umlagen = abrechnungseinheit.Rechnungen
                 .Select(rechnung => rechnung.Key)
                 .Where(umlage => umlage.HKVO != null);
+
             foreach (var umlage in umlagen)
             {
                 var betrag = umlage.Betriebskostenrechnungen
                     .Where(rechnung => rechnung.BetreffendesJahr == abrechnung.Zeitraum.Jahr)
                     .Sum(b => b.Betrag);
+
+                var betriebskosten = umlage.Betriebskostenrechnungen
+                    .Where(rechnung => rechnung.BetreffendesJahr == abrechnung.Zeitraum.Jahr)
+                    .Sum(r => r.Betrag * r.Umlage.HKVO?.Strompauschale ?? 0);
+
                 var col1 = new List<string>
                 {
                     umlage.Typ.Bezeichnung,
@@ -601,8 +607,8 @@ namespace Deeplex.Saverwalter.PrintService
                 {
                     "Betrag",
                     Euro(betrag),
-                    Euro(abrechnungseinheit.AllgStromFaktor),
-                    Euro(betrag + abrechnungseinheit.AllgStromFaktor),
+                    Euro(betriebskosten),
+                    Euro(betrag + betriebskosten),
                 };
                 var cols = new List<List<string>> { col1, col2 }.Select(w => w.ToArray()).ToArray();
 
