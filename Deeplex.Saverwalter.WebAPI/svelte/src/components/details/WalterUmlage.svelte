@@ -37,6 +37,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     const umlageschluessel = walter_selection.umlageschluessel(fetchImpl);
+
+    console.log(entry.schluessel?.id);
 </script>
 
 <Row>
@@ -64,7 +66,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     />
 </Row>
 <!-- If entry.schluessel is nach Verbrauch -->
-{#if entry.schluessel?.id === '3'}
+{#if entry.schluessel?.id === 3}
     <Row>
         <WalterMultiSelectZaehler
             {fetchImpl}
