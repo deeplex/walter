@@ -74,13 +74,33 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                var wohnung = await Ctx.Wohnungen.FindAsync(entry.Wohnung!.Id);
-                var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate]);
-                if (!authRx.Succeeded)
+                if (entry.Wohnung != null)
                 {
-                    return new ForbidResult();
+                    var wohnung = await Ctx.Wohnungen.FindAsync(entry.Wohnung.Id);
+                    var authRx = await Auth.AuthorizeAsync(user, wohnung, [Operations.SubCreate]);
+                    if (!authRx.Succeeded)
+                    {
+                        return new ForbidResult();
+                    }
                 }
+                else if (entry.Adresse != null)
+                {
+                    var adresse = GetAdresse(entry.Adresse, Ctx);
 
+                    if (adresse != null)
+                    {
+                        var authRx = await Auth.AuthorizeAsync(user, adresse, [Operations.SubCreate]);
+                        if (!authRx.Succeeded)
+                        {
+                            return new ForbidResult();
+                        }
+                    }
+
+                }
+                else
+                {
+                    return new BadRequestResult();
+                }
                 return await Add(entry);
             }
             catch
