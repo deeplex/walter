@@ -13,12 +13,28 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-export {
-    type WalterBetriebskostenabrechnungEntry,
-    type WalterRechnungEntry,
-    type WalterAbrechnungseinheit,
-    type WalterBetriebskostenabrechnungResultatEntry
-} from './WalterBetriebskostenabrechnung.type';
-export { type WalterToast } from './WalterToast.type';
-export { type WalterModalControl } from './WalterModalControl';
-export { type WalterFile } from '../lib/WalterFile';
+using System.ComponentModel.DataAnnotations;
+
+namespace Deeplex.Saverwalter.Model;
+
+public class Abrechnungsresultat
+{
+    [Required]
+    public Guid AbrechnungsresultatId { get; set; }
+
+    [Required]
+    public virtual Vertrag Vertrag { get; set; } = null!;
+    [Required]
+    public int Jahr { get; set; }
+    [Required]
+    public double Kaltmiete { get; set; }
+    [Required]
+    public double Vorauszahlung { get; set; }
+    [Required]
+    public double Minderung { get; set; }
+    [Required]
+    public double Rechnungsbetrag { get; set; }
+    public bool Abgesendet { get; set; }
+    public bool IstBeglichen { get; set; }
+
+}

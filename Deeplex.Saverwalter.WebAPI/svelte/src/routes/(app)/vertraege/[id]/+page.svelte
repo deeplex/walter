@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import type { PageData } from './$types';
     import {
+        WalterAbrechnungsresultate,
         WalterKontakte,
         WalterMieten,
         WalterMietminderungen,
@@ -115,6 +116,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             fetchImpl={data.fetchImpl}
             title="Betriebskostenrechnungen"
             rows={data.entry.betriebskostenrechnungen}
+        />
+
+        <WalterAbrechnungsresultate
+            title="Abrechnungsresultate"
+            rows={data.entry.abrechnungsresultate}
         />
 
         <WalterLinkTile

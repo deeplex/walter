@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2025  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -57,7 +57,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         if (searchParams) {
             if (searchQuery) {
                 searchParams.set('search', searchQuery);
-                window.history.replaceState({}, '', `?${searchParams.toString()}`);
+                window.history.replaceState(
+                    {},
+                    '',
+                    `?${searchParams.toString()}`
+                );
             } else {
                 searchParams.delete('search');
                 window.history.replaceState(
@@ -157,7 +161,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         style="right: -1em; position: sticky;"
                         on:click={add}
                         iconDescription="Eintrag hinzufügen"
-                        icon={Add}>
+                        icon={Add}
+                    >
                         Eintrag hinzufügen
                     </Button>
                 {/if}

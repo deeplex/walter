@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2025  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -22,6 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterAbrechnungHeizkosten,
         WalterAbrechnungNotes,
         WalterAbrechnungResultat,
+        WalterAltesAbrechnungsresultat,
         WalterMieten,
         WalterAbrechnungNebenkosten,
         WalterKontakte
@@ -82,6 +83,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <Loading withOverlay={false} />
         </div>
     {:then}
+        <WalterAltesAbrechnungsresultat resultat={abrechnung.resultat} />
+        <hr />
         <Row>
             <Column>
                 {#if title}

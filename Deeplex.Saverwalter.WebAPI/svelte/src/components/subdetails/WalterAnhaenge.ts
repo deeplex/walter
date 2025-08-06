@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2025 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { WalterFileHandle, WalterFileWrapper } from '$walter/lib';
+import type { WalterFileHandle } from '$walter/lib';
 import { walter_file_post } from '$walter/services/files';
 import { openModal } from '$walter/store';
 import { WalterFile } from '$walter/lib/WalterFile';

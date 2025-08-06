@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2025 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -26,11 +26,12 @@ namespace Deeplex.Saverwalter.Model
         public string? Notiz { get; set; }
         public DateOnly? Ende { get; set; }
 
-        public virtual List<VertragVersion> Versionen { get; private set; } = new();
-        public virtual List<Miete> Mieten { get; private set; } = new();
-        public virtual List<Mietminderung> Mietminderungen { get; private set; } = new();
-        public virtual List<Garage> Garagen { get; private set; } = new();
-        public virtual List<Kontakt> Mieter { get; private set; } = new();
+        public virtual List<VertragVersion> Versionen { get; private set; } = [];
+        public virtual List<Miete> Mieten { get; private set; } = [];
+        public virtual List<Mietminderung> Mietminderungen { get; private set; } = [];
+        public virtual List<Garage> Garagen { get; private set; } = [];
+        public virtual List<Kontakt> Mieter { get; private set; } = [];
+        public virtual List<Abrechnungsresultat> Abrechnungsresultate { get; private set; } = [];
         public DateTime CreatedAt { get; private set; }
         public DateTime LastModified { get; set; }
         public Vertrag()

@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2025 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -114,6 +114,17 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             }
         }
 
+        public class AbrechnungsresultatEntry(Abrechnungsresultat result)
+        {
+            public int Jahr { get; } = result.Jahr;
+            public double Kaltmiete { get; } = result.Kaltmiete;
+            public double Vorauszahlung { get; } = result.Vorauszahlung;
+            public double Rechnungsbetrag { get; } = result.Rechnungsbetrag;
+            public double Minderung { get; } = result.Minderung;
+            public bool Abgesendet { get; } = result.Abgesendet;
+            public bool IstBeglichen { get; } = result.IstBeglichen;
+        }
+
         public class AbrechnungseinheitEntry
         {
             public List<RechnungEntry>? Rechnungen { get; }
@@ -182,8 +193,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public List<VertragEntryBase> Vertraege { get; }
             public List<ZaehlerEntryBase> Zaehler { get; }
             public List<MieteEntryBase> Mieten { get; }
+            public AbrechnungsresultatEntry? Resultat { get; }
 
-            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung abrechnung)
+            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung abrechnung, Abrechnungsresultat? resultat)
             {
                 Notes = abrechnung.Notes;
                 Vermieter = new SelectionEntry(abrechnung.Vermieter.KontaktId, abrechnung.Vermieter.Bezeichnung);
@@ -225,6 +237,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                         miete.BetreffenderMonat <= abrechnung.Zeitraum.Abrechnungsende)
                     .Select(miete => new MieteEntryBase(miete, new()))
                     .ToList();
+
+                if (resultat != null)
+                {
+                    Resultat = new AbrechnungsresultatEntry(resultat);
+                }
+
             }
         }
 
@@ -236,21 +254,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 
         [HttpGet]
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}")]
-        public ActionResult<BetriebskostenabrechnungEntry> GetBetriebskostenabrechnung(int vertrag_id, int jahr)
+        public Task<ActionResult<BetriebskostenabrechnungEntry>> GetBetriebskostenabrechnung(int vertrag_id, int jahr)
         {
             return Service.Get(vertrag_id, jahr);
         }
 
         [HttpGet]
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}/word_document")]
-        public ActionResult<MemoryStream> GetBetriebskostenabrechnungWordDocument(int vertrag_id, int jahr)
+        public Task<ActionResult<MemoryStream>> GetBetriebskostenabrechnungWordDocument(int vertrag_id, int jahr)
         {
             return Service.GetWordDocument(vertrag_id, jahr);
         }
 
         [HttpGet]
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}/pdf_document")]
-        public ActionResult<MemoryStream> GetBetriebskostenabrechnungPdfDocument(int vertrag_id, int jahr)
+        public Task<ActionResult<MemoryStream>> GetBetriebskostenabrechnungPdfDocument(int vertrag_id, int jahr)
         {
             return Service.GetPdfDocument(vertrag_id, jahr);
         }

@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2025 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -33,7 +33,7 @@ export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
         public umlage: WalterSelectionEntry,
         public wohnungen: WalterWohnungEntry[],
         public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
-        public permissions: WalterPermissions
+        public permissions: WalterPermissions,
     ) {
         super();
     }
@@ -63,7 +63,6 @@ export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
             umlage,
             wohnungen,
             betriebskostenrechnungen,
-            permissions
-        );
+            permissions);
     }
 }
