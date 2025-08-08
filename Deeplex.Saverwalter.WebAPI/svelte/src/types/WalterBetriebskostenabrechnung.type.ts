@@ -20,16 +20,7 @@ import type {
     WalterWohnungEntry,
     WalterZaehlerEntry
 } from '$walter/lib';
-
-export type WalterBetriebskostenabrechnungResultatEntry = {
-    jahr: number;
-    kaltmiete: number;
-    vorauszahlung: number;
-    rechnungsbetrag: number;
-    minderung: number;
-    abgesendet: boolean;
-    istBeglichen: boolean;
-}
+import { WalterAbrechnungsresultatEntry } from '$walter/lib';
 
 export type WalterBetriebskostenabrechnungEntry = {
     notes: WalterBetriebskostenabrechnungNote[];
@@ -51,7 +42,7 @@ export type WalterBetriebskostenabrechnungEntry = {
     wohnungen: WalterWohnungEntry[];
     vertraege: WalterVertragEntry[];
     mieten: WalterMieteEntry[];
-    resultat?: WalterBetriebskostenabrechnungResultatEntry;
+    resultat?: WalterAbrechnungsresultatEntry;
 };
 
 export type WalterBetriebskostenabrechnungNote = {

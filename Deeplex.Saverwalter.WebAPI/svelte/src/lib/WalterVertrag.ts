@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { WalterBetriebskostenabrechnungResultatEntry } from '$walter/types';
+import { WalterAbrechnungsresultatEntry } from './WalterAbrechnungsresultat';
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
 import { WalterKontaktEntry } from './WalterKontakt';
@@ -42,7 +42,7 @@ export class WalterVertragEntry extends WalterApiHandler {
         public mieten: WalterMieteEntry[],
         public mietminderungen: WalterMietminderungEntry[],
         public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
-        public abrechnungsresultate: WalterBetriebskostenabrechnungResultatEntry[],
+        public abrechnungsresultate: WalterAbrechnungsresultatEntry[],
         public permissions: WalterPermissions
     ) {
         super();

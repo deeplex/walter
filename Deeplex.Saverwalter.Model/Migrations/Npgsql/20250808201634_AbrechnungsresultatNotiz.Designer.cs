@@ -3,6 +3,7 @@ using System;
 using Deeplex.Saverwalter.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 {
     [DbContext(typeof(SaverwalterContext))]
-    partial class SaverwalterContextModelSnapshot : ModelSnapshot
+    [Migration("20250808201634_AbrechnungsresultatNotiz")]
+    partial class AbrechnungsresultatNotiz
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,10 +40,6 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasColumnType("boolean")
                         .HasColumnName("abgesendet");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
                     b.Property<bool>("IstBeglichen")
                         .HasColumnType("boolean")
                         .HasColumnName("ist_beglichen");
@@ -52,10 +51,6 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                     b.Property<double>("Kaltmiete")
                         .HasColumnType("double precision")
                         .HasColumnName("kaltmiete");
-
-                    b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_modified");
 
                     b.Property<double>("Minderung")
                         .HasColumnType("double precision")

@@ -43,6 +43,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from 'carbon-components-svelte';
     import { WalterKontaktEntry, type WalterMieteEntry } from '$walter/lib';
     import WalterData from '../data/WalterData.svelte';
+    import WalterAbrechnungsresultate from '../lists/WalterAbrechnungsresultate.svelte';
 
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
     export let title: string | undefined;

@@ -15,9 +15,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import { WalterAbrechnungsresultatEntry } from '$walter/lib';
     import { convertEuro } from '$walter/services/utils';
-    import type { WalterBetriebskostenabrechnungResultatEntry } from '$walter/types';
     import {
+        ClickableTile,
         Row,
         StructuredList,
         StructuredListBody,
@@ -27,65 +28,68 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         Tile
     } from 'carbon-components-svelte';
 
-    export let resultat:
-        | WalterBetriebskostenabrechnungResultatEntry
-        | undefined;
+    export let resultat: WalterAbrechnungsresultatEntry | undefined;
 </script>
 
 {#if resultat}
-    <Tile style="margin-bottom: -2em">
+    <ClickableTile href={`/abrechnungsresultate/${resultat.id}`}>
         <h4>Letzter Stand dieser Abrechnung:</h4>
-    </Tile>
-    <Row>
-        <StructuredList style="margin: 2em" condensed>
-            <StructuredListHead>
-                <StructuredListRow>
-                    <StructuredListCell head
-                        >Vorauszahlung Gesamt</StructuredListCell
-                    >
-                    <StructuredListCell head>Kaltmiete</StructuredListCell>
-                    <StructuredListCell head
-                        >Vorauszahlung Nebenkosten</StructuredListCell
-                    >
-                    <StructuredListCell head>Nebenkosten</StructuredListCell>
-                    <StructuredListCell head>Saldo</StructuredListCell>
-                    <StructuredListCell head>Ist versendet</StructuredListCell>
-                    <StructuredListCell head>Ist beglichen</StructuredListCell>
-                </StructuredListRow>
-            </StructuredListHead>
-            <StructuredListBody>
-                <StructuredListRow>
-                    <StructuredListCell>
-                        {convertEuro(resultat.vorauszahlung)}
-                    </StructuredListCell>
-                    <StructuredListCell>
-                        {convertEuro(resultat.kaltmiete)}
-                    </StructuredListCell>
-                    <StructuredListCell>
-                        {convertEuro(
-                            resultat.vorauszahlung - resultat.kaltmiete
-                        )}
-                    </StructuredListCell>
-                    <StructuredListCell>
-                        {convertEuro(resultat.rechnungsbetrag)}
-                    </StructuredListCell>
-                    <StructuredListCell>
-                        {convertEuro(
-                            resultat.vorauszahlung -
-                                resultat.kaltmiete -
-                                resultat.rechnungsbetrag
-                        )}
-                    </StructuredListCell>
-                    <StructuredListCell>
-                        {resultat.abgesendet ? 'Ja' : 'Nein'}
-                    </StructuredListCell>
-                    <StructuredListCell>
-                        {resultat.istBeglichen ? 'Ja' : 'Nein'}
-                    </StructuredListCell>
-                </StructuredListRow>
-            </StructuredListBody>
-        </StructuredList>
-    </Row>
+        <Row>
+            <StructuredList style="margin: 2em" condensed>
+                <StructuredListHead>
+                    <StructuredListRow>
+                        <StructuredListCell head
+                            >Vorauszahlung Gesamt</StructuredListCell
+                        >
+                        <StructuredListCell head>Kaltmiete</StructuredListCell>
+                        <StructuredListCell head
+                            >Vorauszahlung Nebenkosten</StructuredListCell
+                        >
+                        <StructuredListCell head>Nebenkosten</StructuredListCell
+                        >
+                        <StructuredListCell head>Saldo</StructuredListCell>
+                        <StructuredListCell head
+                            >Ist versendet</StructuredListCell
+                        >
+                        <StructuredListCell head
+                            >Ist beglichen</StructuredListCell
+                        >
+                    </StructuredListRow>
+                </StructuredListHead>
+                <StructuredListBody>
+                    <StructuredListRow>
+                        <StructuredListCell>
+                            {convertEuro(resultat.vorauszahlung)}
+                        </StructuredListCell>
+                        <StructuredListCell>
+                            {convertEuro(resultat.kaltmiete)}
+                        </StructuredListCell>
+                        <StructuredListCell>
+                            {convertEuro(
+                                resultat.vorauszahlung - resultat.kaltmiete
+                            )}
+                        </StructuredListCell>
+                        <StructuredListCell>
+                            {convertEuro(resultat.rechnungsbetrag)}
+                        </StructuredListCell>
+                        <StructuredListCell>
+                            {convertEuro(
+                                resultat.vorauszahlung -
+                                    resultat.kaltmiete -
+                                    resultat.rechnungsbetrag
+                            )}
+                        </StructuredListCell>
+                        <StructuredListCell>
+                            {resultat.abgesendet ? 'Ja' : 'Nein'}
+                        </StructuredListCell>
+                        <StructuredListCell>
+                            {resultat.istBeglichen ? 'Ja' : 'Nein'}
+                        </StructuredListCell>
+                    </StructuredListRow>
+                </StructuredListBody>
+            </StructuredList>
+        </Row>
+    </ClickableTile>
 {:else}
     <Tile>Bisher keine Abrechnung erstellt</Tile>
 {/if}

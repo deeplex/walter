@@ -16,7 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import { WalterDataWrapper } from '$walter/components';
-    import type { WalterBetriebskostenabrechnungResultatEntry } from '$walter/types';
+    import { WalterAbrechnungsresultatEntry } from '$walter/lib';
+    import { navigation } from '$walter/services/navigation';
+    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
     const headers = [
         { key: 'jahr', value: 'Jahr' },
@@ -24,12 +26,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         { key: 'istAbgesendet', value: 'Ist abgesendet' },
         { key: 'istBeglichen', value: 'Ist beglichen' }
     ];
-    export let rows: WalterBetriebskostenabrechnungResultatEntry[];
+    export let rows: WalterAbrechnungsresultatEntry[];
 
     let actualRows = rows
-        .map((row, i) => {
+        .map((row) => {
             return {
-                id: i,
+                id: row.id,
                 jahr: row.jahr,
                 saldo: row.vorauszahlung - row.kaltmiete - row.rechnungsbetrag,
                 istAbgesendet: row.abgesendet ? 'Ja' : 'Nein',
@@ -38,10 +40,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         })
         .sort((a, b) => b.jahr - a.jahr);
 
+    const on_click_row = (e: CustomEvent<DataTableRow>) =>
+        navigation.abrechnungsresultat(`${e.detail.id}`);
+
     export let title: string | undefined = undefined;
     const readonly = true;
     const fullHeight = false;
 </script>
 
-<WalterDataWrapper {readonly} {fullHeight} {title} rows={actualRows} {headers}
+<WalterDataWrapper
+    {on_click_row}
+    {readonly}
+    {fullHeight}
+    {title}
+    rows={actualRows}
+    {headers}
 ></WalterDataWrapper>

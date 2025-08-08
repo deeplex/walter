@@ -36,5 +36,7 @@ public class Abrechnungsresultat
     public double Rechnungsbetrag { get; set; }
     public bool Abgesendet { get; set; }
     public bool IstBeglichen { get; set; }
-
+    public string? Notiz { get; set; }
+    public DateTime CreatedAt { get; private set; }
+    public DateTime LastModified { get; set; }
 }

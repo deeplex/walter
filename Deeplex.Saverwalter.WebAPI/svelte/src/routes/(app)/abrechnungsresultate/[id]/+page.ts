@@ -13,11 +13,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-export {
-    type WalterBetriebskostenabrechnungEntry,
-    type WalterRechnungEntry,
-    type WalterAbrechnungseinheit,
-} from './WalterBetriebskostenabrechnung.type';
-export { type WalterToast } from './WalterToast.type';
-export { type WalterModalControl } from './WalterModalControl';
-export { type WalterFile } from '../lib/WalterFile';
+import { WalterAbrechnungsresultatEntry } from '$walter/lib';
+import type { PageLoad } from './$types';
+
+export const load: PageLoad = async ({ params, fetch }) => {
+    const apiURL = `${WalterAbrechnungsresultatEntry.ApiURL}/${params.id}`;
+    return {
+        fetchImpl: fetch,
+        id: params.id,
+        apiURL: apiURL,
+        entry: WalterAbrechnungsresultatEntry.GetOne<WalterAbrechnungsresultatEntry>(params.id, fetch)
+    };
+};
+

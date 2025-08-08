@@ -13,14 +13,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Security;
 using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AbrechnungsresultatController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 {
@@ -114,17 +117,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             }
         }
 
-        public class AbrechnungsresultatEntry(Abrechnungsresultat result)
-        {
-            public int Jahr { get; } = result.Jahr;
-            public double Kaltmiete { get; } = result.Kaltmiete;
-            public double Vorauszahlung { get; } = result.Vorauszahlung;
-            public double Rechnungsbetrag { get; } = result.Rechnungsbetrag;
-            public double Minderung { get; } = result.Minderung;
-            public bool Abgesendet { get; } = result.Abgesendet;
-            public bool IstBeglichen { get; } = result.IstBeglichen;
-        }
-
         public class AbrechnungseinheitEntry
         {
             public List<RechnungEntry>? Rechnungen { get; }
@@ -193,7 +185,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public List<VertragEntryBase> Vertraege { get; }
             public List<ZaehlerEntryBase> Zaehler { get; }
             public List<MieteEntryBase> Mieten { get; }
-            public AbrechnungsresultatEntry? Resultat { get; }
+            public AbrechnungsresultatEntryBase? Resultat { get; }
 
             public BetriebskostenabrechnungEntry(Betriebskostenabrechnung abrechnung, Abrechnungsresultat? resultat)
             {
@@ -240,7 +232,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 
                 if (resultat != null)
                 {
-                    Resultat = new AbrechnungsresultatEntry(resultat);
+                    var permissions = new Permissions
+                    {
+                        Read = true,
+                        Update = true,
+                        Remove = true
+                    };
+                    Resultat = new AbrechnungsresultatEntry(resultat, permissions);
                 }
 
             }
