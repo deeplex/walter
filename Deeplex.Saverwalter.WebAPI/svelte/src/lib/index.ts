@@ -17,6 +17,7 @@ export { WalterToastContent } from './WalterToastContent';
 export { WalterAccountEntry } from './WalterAccount';
 export { WalterAdresseEntry } from './WalterAdresse';
 export { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
+export { WalterAbrechnungsresultatEntry } from './WalterAbrechnungsresultat';
 export { WalterErhaltungsaufwendungEntry } from './WalterErhaltungsaufwendung';
 export { WalterHKVOEntry } from './WalterHKVO';
 export { WalterMieteEntry } from './WalterMiete';

@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2025 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -24,6 +24,7 @@ export { default as WalterAbrechnungHeizkosten } from './abrechnung/WalterAbrech
 export { default as WalterAbrechnungEinheitPart } from './abrechnung/WalterAbrechnungEinheitPart.svelte';
 export { default as WalterAbrechnungEinheitHead } from './abrechnung/WalterAbrechnungEinheitHead.svelte';
 export { default as WalterAbrechnungEinheitVerbrauch } from './abrechnung/WalterAbrechnungEinheitVerbrauch.svelte';
+export { default as WalterAltesAbrechnungsresultat } from './abrechnung/WalterAltesAbrechnungsresultat.svelte';
 
 export { default as WalterAnhaenge } from './subdetails/WalterAnhaenge.svelte';
 export { default as WalterAnhaengeEntry } from './subdetails/WalterAnhaengeEntry.svelte';
@@ -94,3 +95,4 @@ export { default as WalterZaehlerList } from './lists/WalterZaehlerList.svelte';
 export { default as WalterZaehlerstaende } from './lists/WalterZaehlerstaende.svelte';
 export { default as WalterMieten } from './lists/WalterMieten.svelte';
 export { default as WalterMietminderungen } from './lists/WalterMietminderungen.svelte';
+export { default as WalterAbrechnungsresultate } from './lists/WalterAbrechnungsresultate.svelte';

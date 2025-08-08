@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2025 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -13,14 +13,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Security;
 using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using Deeplex.Saverwalter.Model;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AbrechnungsresultatController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
+using static Deeplex.Saverwalter.WebAPI.Services.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 {
@@ -182,8 +185,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public List<VertragEntryBase> Vertraege { get; }
             public List<ZaehlerEntryBase> Zaehler { get; }
             public List<MieteEntryBase> Mieten { get; }
+            public AbrechnungsresultatEntryBase? Resultat { get; }
 
-            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung abrechnung)
+            public BetriebskostenabrechnungEntry(Betriebskostenabrechnung abrechnung, Abrechnungsresultat? resultat)
             {
                 Notes = abrechnung.Notes;
                 Vermieter = new SelectionEntry(abrechnung.Vermieter.KontaktId, abrechnung.Vermieter.Bezeichnung);
@@ -225,6 +229,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                         miete.BetreffenderMonat <= abrechnung.Zeitraum.Abrechnungsende)
                     .Select(miete => new MieteEntryBase(miete, new()))
                     .ToList();
+
+                if (resultat != null)
+                {
+                    var permissions = new Permissions
+                    {
+                        Read = true,
+                        Update = true,
+                        Remove = true
+                    };
+                    Resultat = new AbrechnungsresultatEntry(resultat, permissions);
+                }
+
             }
         }
 
@@ -236,21 +252,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 
         [HttpGet]
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}")]
-        public ActionResult<BetriebskostenabrechnungEntry> GetBetriebskostenabrechnung(int vertrag_id, int jahr)
+        public Task<ActionResult<BetriebskostenabrechnungEntry>> GetBetriebskostenabrechnung(int vertrag_id, int jahr)
         {
             return Service.Get(vertrag_id, jahr);
         }
 
         [HttpGet]
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}/word_document")]
-        public ActionResult<MemoryStream> GetBetriebskostenabrechnungWordDocument(int vertrag_id, int jahr)
+        public Task<ActionResult<MemoryStream>> GetBetriebskostenabrechnungWordDocument(int vertrag_id, int jahr)
         {
             return Service.GetWordDocument(vertrag_id, jahr);
         }
 
         [HttpGet]
         [Route("api/betriebskostenabrechnung/{vertrag_id}/{jahr}/pdf_document")]
-        public ActionResult<MemoryStream> GetBetriebskostenabrechnungPdfDocument(int vertrag_id, int jahr)
+        public Task<ActionResult<MemoryStream>> GetBetriebskostenabrechnungPdfDocument(int vertrag_id, int jahr)
         {
             return Service.GetPdfDocument(vertrag_id, jahr);
         }

@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2025  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -23,7 +23,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from '$walter/components';
     import { onMount } from 'svelte';
     import type { PageData } from './$types';
-    import type { WalterBetriebskostenabrechnungEntry } from '$walter/types';
+    import type {
+        WalterBetriebskostenabrechnungEntry,
+        WalterFile
+    } from '$walter/types';
     import { page } from '$app/stores';
     import {
         ComboBox,
@@ -40,6 +43,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { WalterSelectionEntry } from '$walter/lib';
     import { download } from '$walter/components/preview/WalterPreview';
     import { walter_goto } from '$walter/services/utils';
+    import { openModal } from '$walter/store';
 
     export let vertragId: number | null;
     export let selectedYear: number;
@@ -86,17 +90,43 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         update();
     }
 
-    async function click_word(): Promise<void> {
-        if (!vertragId || !selectedYear) return;
+    async function create_file(
+        submitFn: () => Promise<WalterFile | undefined>
+    ): Promise<WalterFile | undefined> {
+        let file;
+        if (!vertragId || !selectedYear) return undefined;
+        if ((await abrechnung)?.resultat) {
+            openModal({
+                modalHeading: 'Abrechnung existiert bereits',
+                content:
+                    'Es existiert bereits eine Abrechnung für diesen Vertrag und dieses Jahr. Möchtest du sie überschreiben?',
+                primaryButtonText: 'Überschreiben',
+                submit: async () => {
+                    file = await submitFn();
+                }
+            });
+        } else {
+            file = await submitFn();
+        }
 
-        const file = await create_word_doc(
-            vertragId,
-            selectedYear,
-            title,
-            data.fetchImpl
-        );
+        return file;
+    }
+
+    async function click_word(): Promise<void> {
+        let submit = async () => {
+            if (!vertragId || !selectedYear) return;
+            return await create_word_doc(
+                vertragId,
+                selectedYear,
+                title,
+                data.fetchImpl
+            );
+        };
+
+        let file = await create_file(submit);
 
         if (file) {
+            update();
             download(file);
         }
     }
@@ -104,14 +134,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     async function click_pdf(): Promise<void> {
         if (!vertragId || !selectedYear) return;
 
-        const file = await create_pdf_doc(
-            vertragId,
-            selectedYear,
-            title,
-            data.fetchImpl
-        );
+        let submit = async () => {
+            if (!vertragId || !selectedYear) return;
+            return await create_pdf_doc(
+                vertragId,
+                selectedYear,
+                title,
+                data.fetchImpl
+            );
+        };
+
+        let file = await create_file(submit);
 
         if (file) {
+            update();
             download(file);
         }
     }

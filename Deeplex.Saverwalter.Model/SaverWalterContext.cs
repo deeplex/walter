@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Henrik S. Gaßmann, Kai Lawrence
+// Copyright (c) 2023-2025 Henrik S. Gaßmann, Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -20,6 +20,7 @@ namespace Deeplex.Saverwalter.Model
 {
     public sealed class SaverwalterContext : DbContext
     {
+        public DbSet<Abrechnungsresultat> Abrechnungsresultate { get; set; } = null!;
         public DbSet<Adresse> Adressen { get; set; } = null!;
         public DbSet<Betriebskostenrechnung> Betriebskostenrechnungen { get; set; } = null!;
         public DbSet<Erhaltungsaufwendung> Erhaltungsaufwendungen { get; set; } = null!;

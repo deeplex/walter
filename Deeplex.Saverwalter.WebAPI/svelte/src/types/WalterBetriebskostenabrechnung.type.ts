@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2025 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -20,6 +20,7 @@ import type {
     WalterWohnungEntry,
     WalterZaehlerEntry
 } from '$walter/lib';
+import { WalterAbrechnungsresultatEntry } from '$walter/lib';
 
 export type WalterBetriebskostenabrechnungEntry = {
     notes: WalterBetriebskostenabrechnungNote[];
@@ -41,6 +42,7 @@ export type WalterBetriebskostenabrechnungEntry = {
     wohnungen: WalterWohnungEntry[];
     vertraege: WalterVertragEntry[];
     mieten: WalterMieteEntry[];
+    resultat?: WalterAbrechnungsresultatEntry;
 };
 
 export type WalterBetriebskostenabrechnungNote = {

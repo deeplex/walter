@@ -133,6 +133,7 @@ namespace Deeplex.Saverwalter.WebAPI
 
             builder.Services.AddTransient(c => container.GetInstance<TokenService>());
             builder.Services.AddTransient(c => container.GetInstance<SaverwalterContext>());
+            // TODO? AbrechnungsPermissionHandler?
             builder.Services.AddSingleton<IAuthorizationHandler, WohnungPermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, AdressePermissionHandler>();
             builder.Services.AddSingleton<IAuthorizationHandler, BetriebskostenrechnungPermissionHandler>();
@@ -157,6 +158,7 @@ namespace Deeplex.Saverwalter.WebAPI
             container.Register(CreateDbContextOptions, Lifestyle.Singleton);
             container.Register<SaverwalterContext>(Lifestyle.Scoped);
 
+            container.Register<AbrechnungsresultatDbService>(Lifestyle.Scoped);
             container.Register<AdresseDbService>(Lifestyle.Scoped);
             container.Register<BetriebskostenrechnungDbService>(Lifestyle.Scoped);
             container.Register<ErhaltungsaufwendungDbService>(Lifestyle.Scoped);

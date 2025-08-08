@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2025 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -22,39 +22,39 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class BetriebskostenabrechnungHandlerTests
     {
         [Fact]
-        public void GetTest()
+        public async Task GetTest()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var handler = new BetriebskostenabrechnungHandler(ctx);
 
-            var result = handler.Get(vertrag.VertragId, 2021);
+            var result = await handler.Get(vertrag.VertragId, 2021);
 
             result.Should().NotBeNull();
             result.Value.Should().NotBeNull();
         }
 
         [Fact]
-        public void GetWordDocumentTest()
+        public async Task GetWordDocumentTest()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var handler = new BetriebskostenabrechnungHandler(ctx);
 
-            var result = handler.GetWordDocument(vertrag.VertragId, 2021);
+            var result = await handler.GetWordDocument(vertrag.VertragId, 2021);
 
             result.Should().NotBeNull();
             result.Value.Should().NotBeNull();
         }
 
         [Fact(Skip = "PDF is TODO")]
-        public void GetPdfDocumentTest()
+        public async Task GetPdfDocumentTest()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var handler = new BetriebskostenabrechnungHandler(ctx);
 
-            var result = handler.GetPdfDocument(vertrag.VertragId, 2021);
+            var result = await handler.GetPdfDocument(vertrag.VertragId, 2021);
 
             result.Should().NotBeNull();
             result.Value.Should().NotBeNull();

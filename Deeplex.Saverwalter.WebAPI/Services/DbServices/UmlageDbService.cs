@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2025 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -179,7 +179,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 (Umlageschluessel)entry.Schluessel.Id == Umlageschluessel.NachVerbrauch &&
                 entry.HKVO is HKVOEntryBase hkvo)
             {
-                if (hkvo.Id == 0)
+                if (hkvo.Id == 0 && entity.HKVO == null)
                 {
                     var newHKVO = new HKVO(
                         ((double)hkvo.HKVO_P7) / 100,

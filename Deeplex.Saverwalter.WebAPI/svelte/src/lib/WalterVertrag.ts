@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { WalterAbrechnungsresultatEntry } from './WalterAbrechnungsresultat';
 import { WalterApiHandler } from './WalterApiHandler';
 import { WalterBetriebskostenrechnungEntry } from './WalterBetriebskostenrechnung';
 import { WalterKontaktEntry } from './WalterKontakt';
@@ -41,6 +42,7 @@ export class WalterVertragEntry extends WalterApiHandler {
         public mieten: WalterMieteEntry[],
         public mietminderungen: WalterMietminderungEntry[],
         public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
+        public abrechnungsresultate: WalterAbrechnungsresultatEntry[],
         public permissions: WalterPermissions
     ) {
         super();
@@ -69,6 +71,8 @@ export class WalterVertragEntry extends WalterApiHandler {
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
 
+        const abrechnungsresultate = json.abrechnungsresultate;
+
         return new WalterVertragEntry(
             json.id,
             json.beginn,
@@ -85,6 +89,7 @@ export class WalterVertragEntry extends WalterApiHandler {
             mieten,
             mietminderungen,
             betriebskostenrechnungen,
+            abrechnungsresultate,
             permissions
         );
     }

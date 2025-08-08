@@ -16,6 +16,7 @@
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
+using static Deeplex.Saverwalter.WebAPI.Controllers.AbrechnungsresultatController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.MieteController;
@@ -78,6 +79,8 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<BetriebskostenrechnungEntryBase> Betriebskostenrechnungen { get; set; } = [];
             public IEnumerable<MietminderungEntryBase> Mietminderungen { get; set; } = [];
             public IEnumerable<KontaktEntryBase> Mieter { get; set; } = [];
+
+            public IEnumerable<AbrechnungsresultatEntryBase> Abrechnungsresultate { get; set; } = [];
             // TODO Garagen
 
             public VertragEntry() : base() { }
@@ -97,8 +100,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                     .SelectMany(e => e.Betriebskostenrechnungen)
                     .Where(e => e.BetreffendesJahr >= entity.Beginn().Year && (entity.Ende == null || entity.Ende.Value.Year >= e.BetreffendesJahr))
                     .Select(e => new BetriebskostenrechnungEntryBase(e, permissions));
-                Mietminderungen = entity.Mietminderungen.ToList().Select(e => new MietminderungEntryBase(e, permissions));
+                Mietminderungen = entity.Mietminderungen.ToList().Select(e
+                    => new MietminderungEntryBase(e, permissions));
                 Mieter = entity.Mieter.Select(e => new KontaktEntryBase(e, permissions));
+                Abrechnungsresultate = entity.Abrechnungsresultate.Select(e
+                    => new AbrechnungsresultatEntry(e, permissions));
 
                 CreatedAt = entity.CreatedAt;
                 LastModified = entity.LastModified;
