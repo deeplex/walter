@@ -472,9 +472,8 @@ namespace Deeplex.Saverwalter.PrintService
 
             void kostenPunkt(Umlage umlage, string zeitraum, int Jahr, double anteil, bool firstLine = true)
             {
-                var betrag = umlage.Betriebskostenrechnungen
-                    .Where(rechnung => rechnung.BetreffendesJahr == abrechnung.Zeitraum.Jahr)
-                    .Sum(b => b.Betrag);
+                var rechnung = abrechnungseinheit.Rechnungen[umlage];
+                var betrag = rechnung != null ? rechnung.Betrag : 0;
                 col1.Add(firstLine ? umlage.Typ.Bezeichnung : "");
                 col2.Add(abrechnungseinheit.GesamtEinheiten == 1 ? "Direkt" : (firstLine ? umlage.Schluessel.ToDescriptionString() : ""));
                 col3.Add(zeitraum);

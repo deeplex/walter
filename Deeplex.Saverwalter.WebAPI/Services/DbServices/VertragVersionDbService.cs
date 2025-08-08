@@ -89,7 +89,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             SetOptionalValues(entity, entry);
             Ctx.VertragVersionen.Add(entity);
-            Ctx.SaveChanges();
+            await Ctx.SaveChangesAsync();
 
             return new VertragVersionEntry(entity, entry.Permissions);
         }
@@ -104,7 +104,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
                 SetOptionalValues(entity, entry);
                 Ctx.VertragVersionen.Update(entity);
-                Ctx.SaveChanges();
+                await Ctx.SaveChangesAsync();
 
                 return new VertragVersionEntry(entity, entry.Permissions);
             });

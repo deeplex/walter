@@ -24,6 +24,7 @@ using Deeplex.Saverwalter.WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using MigraDoc.DocumentObjectModel;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AccountController;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
@@ -170,7 +171,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             var result = await FileHandling.RedirectToFileServer(Request, _httpClient, fullPath);
             if (result is FileContentResult fileContentResult)
             {
-                var files = FileHandling.ParseS3Stream(Encoding.UTF8.GetString(fileContentResult.FileContents), HttpContext.Request.Path.Value);
+                var path = HttpContext.Request.Path.Value;
+                if (path.IsValueNullOrEmpty() || path == null)
+                {
+                    return new BadRequestResult();
+                }
+                var files = FileHandling.ParseS3Stream(Encoding.UTF8.GetString(fileContentResult.FileContents), path);
                 return Ok(files);
             }
             else

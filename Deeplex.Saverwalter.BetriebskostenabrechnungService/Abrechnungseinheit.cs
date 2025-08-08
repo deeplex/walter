@@ -13,13 +13,50 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Reflection.Metadata;
 using Deeplex.Saverwalter.Model;
 
 namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
+    public class BetriebskostenrechnungEntry
+    {
+        public Betriebskostenrechnung? Rechnung { get; }
+        public double Betrag { get; }
+        public BetriebskostenrechnungEntry(
+            Betriebskostenrechnung? rechnung,
+            Zeitraum zeitraum,
+            List<Note> notes)
+        {
+            Rechnung = rechnung;
+
+            if (rechnung != null)
+            {
+                var abzug = 0.0;
+                foreach (var hkvo in rechnung.Umlage.HKVOs)
+                {
+                    var rechnungen = hkvo.Heizkosten.Betriebskostenrechnungen.Where(r
+                        => r.BetreffendesJahr == zeitraum.Jahr).ToList();
+                    foreach (var r in rechnungen)
+                    {
+                        abzug += r.Betrag * hkvo.Strompauschale;
+                    }
+                }
+
+                Betrag = rechnung.Betrag - abzug;
+
+                if (Betrag < 0)
+                {
+                    notes.Add($"Pauschale der Heizkosten ist mehr als Allgemeinstromrechnung {Betrag:N2}€", Severity.Warning);
+                }
+
+
+            }
+        }
+    }
+
     public class Abrechnungseinheit
     {
-        public Dictionary<Umlage, Betriebskostenrechnung?> Rechnungen { get; } = new();
+        public Dictionary<Umlage, BetriebskostenrechnungEntry?> Rechnungen { get; } = new();
         public double BetragKalt { get; }
         public double BetragWarm { get; }
         public double GesamtBetragKalt { get; }
@@ -59,10 +96,13 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             foreach (var umlage in umlagen)
             {
-                Rechnungen[umlage] = umlage.Betriebskostenrechnungen
-                    .SingleOrDefault(rechnung => rechnung.BetreffendesJahr == zeitraum.Jahr);
+                // TODO: This limits us to one Rechnung per Umlage per Jahr
+                Rechnungen[umlage] = new BetriebskostenrechnungEntry(
+                    umlage.Betriebskostenrechnungen
+                     .SingleOrDefault(rechnung => rechnung.BetreffendesJahr == zeitraum.Jahr),
+                     zeitraum, notes);
 
-                if (Rechnungen[umlage] == null)
+                if (Rechnungen[umlage]?.Rechnung == null)
                 {
                     notes.Add($"Keine Rechnung für {umlage.Typ.Bezeichnung} gefunden.", Severity.Warning);
                 }
@@ -82,32 +122,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             Heizkostenberechnungen = CalculateHeizkosten(rechnungenWarm, wohnung, VerbrauchAnteile, zeitraum, notes);
             BetragWarm = Heizkostenberechnungen.Sum(heizkosten => heizkosten.Betrag);
-
-            rechnungenWarm.ForEach(warmeRechnung =>
-            {
-                if (warmeRechnung.Umlage.HKVO is HKVO hkvo)
-                {
-                    var stromRechnung = rechnungenKalt.FirstOrDefault(kalteRechnung =>
-                        kalteRechnung.Umlage.UmlageId == hkvo.Betriebsstrom.UmlageId);
-
-                    if (stromRechnung == null)
-                    {
-                        notes.Add("Keine Stromrechnung für Heizung gefunden", Severity.Error);
-                        return;
-                    }
-
-                    var delta = warmeRechnung.Betrag * hkvo.Strompauschale;
-                    // Das wird bereits in der Heizkostenberechnung gemacht und als Pauschalbetrag verbucht.
-                    // Für die Stromrechnung allerdings muss der Teil noch abgezogen werden.
-                    // warmeRechnung.Betrag += delta;
-                    stromRechnung.Betrag -= delta;
-
-                    if (stromRechnung.Betrag < 0)
-                    {
-                        notes.Add($"Pauschale der Heizkosten ({hkvo.Strompauschale:N2}%) ist mehr als Allgemeinstromrechnung {stromRechnung.Betrag:N2}€", Severity.Warning);
-                    }
-                }
-            });
 
             GesamtBetragWarm = rechnungenWarm.Sum(e => e.Betrag);
             BetragKalt = GetSum(rechnungenKalt, notes);
@@ -129,35 +143,53 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             };
         }
 
-        private double GetSum(List<Betriebskostenrechnung> rechnungen, List<Note> notes)
+        private double GetSum(List<BetriebskostenrechnungEntry> rechnungen, List<Note> notes)
         {
             var PersZeitanteil = PersonenZeitanteile.Sum(z => z.Anteil);
 
-            return rechnungen.Sum(rechnung => rechnung.Umlage.Schluessel switch
+            return rechnungen.Sum(rechnung =>
             {
-                Umlageschluessel.NachNutzeinheit => rechnung.Betrag * NEZeitanteil,
-                Umlageschluessel.NachWohnflaeche => rechnung.Betrag * WFZeitanteil,
-                Umlageschluessel.NachNutzflaeche => rechnung.Betrag * NFZeitanteil,
-                Umlageschluessel.NachMiteigentumsanteil => rechnung.Betrag * MEAZeitanteil,
-                Umlageschluessel.NachPersonenzahl => rechnung.Betrag * PersZeitanteil,
-                Umlageschluessel.NachVerbrauch => rechnung.Betrag * GetVerbrauchAnteil(rechnung, notes),
-                _ => 0
+                if (rechnung.Rechnung == null)
+                {
+                    notes.Add($"Keine Rechnung für {rechnung.Rechnung?.Umlage.Typ.Bezeichnung} gefunden.", Severity.Warning);
+
+                    return 0;
+                }
+
+                return rechnung.Rechnung.Umlage.Schluessel switch
+                {
+                    Umlageschluessel.NachNutzeinheit => rechnung.Betrag * NEZeitanteil,
+                    Umlageschluessel.NachWohnflaeche => rechnung.Betrag * WFZeitanteil,
+                    Umlageschluessel.NachNutzflaeche => rechnung.Betrag * NFZeitanteil,
+                    Umlageschluessel.NachMiteigentumsanteil => rechnung.Betrag * MEAZeitanteil,
+                    Umlageschluessel.NachPersonenzahl => rechnung.Betrag * PersZeitanteil,
+                    Umlageschluessel.NachVerbrauch => rechnung.Betrag * GetVerbrauchAnteil(rechnung, notes),
+                    _ => 0
+                };
             });
         }
 
-        private double GetVerbrauchAnteil(Betriebskostenrechnung rechnung, List<Note> notes)
+        private double GetVerbrauchAnteil(BetriebskostenrechnungEntry rechnung, List<Note> notes)
         {
-            var verbrauchAnteile = VerbrauchAnteile.Where(anteil => anteil.Umlage == rechnung.Umlage).ToList();
+            var lRechnung = rechnung.Rechnung;
+            if (lRechnung == null)
+            {
+                notes.Add($"Keine Rechnung für {rechnung.Rechnung?.Umlage.Typ.Bezeichnung} gefunden.",
+                    Severity.Error);
+                return 0;
+            }
+
+            var verbrauchAnteile = VerbrauchAnteile.Where(anteil => anteil.Umlage == lRechnung.Umlage).ToList();
             if (verbrauchAnteile.Count == 0)
             {
-                notes.Add($"Keinen Anteil für {rechnung.Umlage.Typ.Bezeichnung} gefunden",
+                notes.Add($"Keinen Anteil für {lRechnung.Umlage.Typ.Bezeichnung} gefunden",
                     Severity.Error);
 
                 return 0;
             }
             else if (verbrauchAnteile.Count > 1)
             {
-                notes.Add($"Mehr als einen Anteil für {rechnung.Umlage.Typ.Bezeichnung} gefunden",
+                notes.Add($"Mehr als einen Anteil für {lRechnung.Umlage.Typ.Bezeichnung} gefunden",
                     Severity.Error);
 
                 return 0;
@@ -167,7 +199,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             if (verbrauchAnteil.Anteil.Count > 1)
             {
-                notes.Add($"Verbrauch von Rechnung {rechnung.Umlage.Typ.Bezeichnung} enthält mehr als einen Zählertypen",
+                notes.Add($"Verbrauch von Rechnung {lRechnung.Umlage.Typ.Bezeichnung} enthält mehr als einen Zählertypen",
                     Severity.Error);
 
                 return 0;
@@ -193,7 +225,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         }
 
         private static List<Heizkostenberechnung> CalculateHeizkosten(
-            List<Betriebskostenrechnung> rechnungen,
+            List<BetriebskostenrechnungEntry> rechnungen,
             Wohnung wohnung,
             List<VerbrauchAnteil> verbrauchAnteile,
             Zeitraum zeitraum,

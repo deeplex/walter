@@ -44,14 +44,21 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
         public double Betrag { get; }
 
         public Heizkostenberechnung(
-            Betriebskostenrechnung rechnung,
+            BetriebskostenrechnungEntry rechnung,
             Wohnung wohnung,
             List<VerbrauchAnteil> verbrauchAnteile,
             Zeitraum zeitraum,
             List<Note> notes)
         {
+            var lRechnung = rechnung.Rechnung;
+            if (lRechnung == null)
+            {
+                notes.Add("Keine Rechnung für Heizkostenabrechnung gefunden.", Severity.Error);
+                return;
+            }
+
             GesamtBetrag = rechnung.Betrag;
-            if (rechnung.Umlage.HKVO is HKVO hkvo)
+            if (lRechnung.Umlage.HKVO is HKVO hkvo)
             {
                 PauschalBetrag = rechnung.Betrag + rechnung.Betrag * hkvo.Strompauschale;
             }
@@ -61,10 +68,10 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             }
 
             tw = 60;
-            Para7 = rechnung.Umlage.HKVO?.HKVO_P7 ?? 0.5; // HeizkostenV §7
-            Para8 = rechnung.Umlage.HKVO?.HKVO_P8 ?? 0.5; // HeizkostenV §8
+            Para7 = lRechnung.Umlage.HKVO?.HKVO_P7 ?? 0.5; // HeizkostenV §7
+            Para8 = lRechnung.Umlage.HKVO?.HKVO_P8 ?? 0.5; // HeizkostenV §8
 
-            var warmwasserZaehlerAbrechnungseinheit = rechnung.Umlage.Zaehler.Where(e => e.Typ == Zaehlertyp.Warmwasser).ToList();
+            var warmwasserZaehlerAbrechnungseinheit = lRechnung.Umlage.Zaehler.Where(e => e.Typ == Zaehlertyp.Warmwasser).ToList();
             if (warmwasserZaehlerAbrechnungseinheit.Count == 0)
             {
                 notes.Add("Keine Warmwasserzähler in Abrechnungseinheit gefunden.", Severity.Error);
@@ -76,7 +83,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 notes.Add("Keine Warmwasserzähler für Wohnung.", Severity.Error);
             }
 
-            var gasAllgemeinZaehler = rechnung.Umlage.Zaehler.Where(z => z.Wohnung == null && z.Typ == Zaehlertyp.Gas).ToList();
+            var gasAllgemeinZaehler = lRechnung.Umlage.Zaehler.Where(z => z.Wohnung == null && z.Typ == Zaehlertyp.Gas).ToList();
 
             if (gasAllgemeinZaehler.Count == 0)
             {
@@ -85,7 +92,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             }
 
 
-            var anteile = verbrauchAnteile.Where(anteil => anteil.Umlage == rechnung.Umlage);
+            var anteile = verbrauchAnteile.Where(anteil => anteil.Umlage == lRechnung.Umlage);
             var dieseAnteile = anteile.SelectMany(anteil => anteil.DieseZaehler.Values.SelectMany(value => value));
             var alleAnteile = anteile.SelectMany(anteil => anteil.AlleZaehler.Values.SelectMany(value => value));
 
@@ -116,7 +123,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                 notes.Add("Heizkostenverteilung nach $9(2) ist kleiner als 0%", Severity.Error);
             }
 
-            GesamtNutzflaeche = rechnung.Umlage.Wohnungen.Sum(w => w.Nutzflaeche);
+            GesamtNutzflaeche = lRechnung.Umlage.Wohnungen.Sum(w => w.Nutzflaeche);
             NFZeitanteil = wohnung.Nutzflaeche / GesamtNutzflaeche * zeitraum.Zeitanteil;
 
             var q = dieseAnteile.Where(w => w.Zaehler.Typ == Zaehlertyp.Gas).Sum(verbrauch => verbrauch.Delta);

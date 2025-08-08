@@ -99,10 +99,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double BetragLetztesJahr { get; }
             public string Beschreibung { get; }
 
-            public RechnungEntry(KeyValuePair<Umlage, Betriebskostenrechnung?> rechnung, Abrechnungseinheit einheit, int year)
+            public RechnungEntry(KeyValuePair<Umlage, BetriebskostenrechnungEntry?> rechnung, Abrechnungseinheit einheit, int year)
             {
                 Id = rechnung.Key.UmlageId;
-                RechnungId = rechnung.Value?.BetriebskostenrechnungId ?? 0;
+                RechnungId = rechnung.Value?.Rechnung?.BetriebskostenrechnungId ?? 0;
                 Typ = rechnung.Key.Typ.Bezeichnung;
                 TypId = rechnung.Key.Typ.UmlagetypId;
                 var key = rechnung.Key.Schluessel;
