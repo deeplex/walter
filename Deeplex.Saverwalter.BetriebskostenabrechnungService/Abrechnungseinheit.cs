@@ -151,8 +151,6 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             {
                 if (rechnung.Rechnung == null)
                 {
-                    notes.Add($"Keine Rechnung für {rechnung.Rechnung?.Umlage.Typ.Bezeichnung} gefunden.", Severity.Warning);
-
                     return 0;
                 }
 

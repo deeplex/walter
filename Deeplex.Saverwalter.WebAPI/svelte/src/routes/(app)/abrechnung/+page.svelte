@@ -103,6 +103,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 primaryButtonText: 'Überschreiben',
                 submit: async () => {
                     file = await submitFn();
+                    if (file) {
+                        update();
+                        download(file);
+                    }
                 }
             });
         } else {
