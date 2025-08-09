@@ -23,7 +23,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class VertragDbService : WalterDbServiceBase<VertragEntry, Vertrag>
+    public class VertragDbService : WalterDbServiceBase<VertragEntry, int, Vertrag>
     {
         public VertragDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {

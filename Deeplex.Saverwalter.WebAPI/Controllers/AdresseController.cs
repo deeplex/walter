@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/adressen")]
-    public class AdresseController : FileControllerBase<AdresseEntry, Adresse>
+    public class AdresseController : FileControllerBase<AdresseEntry, int, Adresse>
     {
         public class AdresseEntryBase
         {

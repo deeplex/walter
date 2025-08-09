@@ -25,7 +25,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class UmlageDbService : WalterDbServiceBase<UmlageEntry, Umlage>
+    public class UmlageDbService : WalterDbServiceBase<UmlageEntry, int, Umlage>
     {
         public UmlageDbService(SaverwalterContext dbService, IAuthorizationService authorizationService) : base(dbService, authorizationService)
         {

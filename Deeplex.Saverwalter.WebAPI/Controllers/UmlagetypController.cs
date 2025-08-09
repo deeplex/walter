@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/umlagetypen")]
-    public class UmlagetypController : FileControllerBase<UmlagetypEntry, Umlagetyp>
+    public class UmlagetypController : FileControllerBase<UmlagetypEntry, int, Umlagetyp>
     {
         public class UmlagetypEntryBase
         {

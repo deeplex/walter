@@ -31,7 +31,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/wohnungen")]
-    public class WohnungController : FileControllerBase<WohnungEntry, Wohnung>
+    public class WohnungController : FileControllerBase<WohnungEntry, int, Wohnung>
     {
         public class WohnungEntryBase
         {
@@ -46,7 +46,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public double Nutzflaeche { get; set; }
             public double Miteigentumsanteile { get; set; }
             public int Einheiten { get; set; }
- 
+
             public Permissions Permissions { get; set; } = new Permissions();
 
             public WohnungEntryBase() { }

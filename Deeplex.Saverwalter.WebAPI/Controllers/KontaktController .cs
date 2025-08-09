@@ -14,12 +14,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Deeplex.Saverwalter.Model;
-using Deeplex.Saverwalter.WebAPI.Controllers.Utils;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using Microsoft.AspNetCore.Mvc;
 using static Deeplex.Saverwalter.WebAPI.Controllers.AdresseController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.KontaktController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.Services.SelectionListController;
+using static Deeplex.Saverwalter.WebAPI.Controllers.TransaktionController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.VertragController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 using static Deeplex.Saverwalter.WebAPI.Services.Utils;
@@ -28,7 +28,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/kontakte")]
-    public class KontaktController : FileControllerBase<KontaktEntry, Kontakt>
+    public class KontaktController : FileControllerBase<KontaktEntry, int, Kontakt>
     {
         public class KontaktEntryBase
         {
@@ -86,6 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public IEnumerable<KontaktEntryBase> Mitglieder { get; set; } = [];
             public IEnumerable<VertragEntryBase> Vertraege { get; set; } = [];
             public IEnumerable<WohnungEntryBase> Wohnungen { get; set; } = [];
+            public IEnumerable<TransaktionEntryBase> Transaktionen { get; set; } = [];
 
             public KontaktEntry() : base() { }
             public KontaktEntry(Kontakt entity, Permissions permissions) : base(entity, permissions)

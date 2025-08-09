@@ -23,7 +23,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class BetriebskostenrechnungDbService : WalterDbServiceBase<BetriebskostenrechnungEntry, Betriebskostenrechnung>
+    public class BetriebskostenrechnungDbService : WalterDbServiceBase<BetriebskostenrechnungEntry, int, Betriebskostenrechnung>
     {
         public BetriebskostenrechnungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {

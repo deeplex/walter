@@ -3,6 +3,7 @@ using System;
 using Deeplex.Saverwalter.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 {
     [DbContext(typeof(SaverwalterContext))]
-    partial class SaverwalterContextModelSnapshot : ModelSnapshot
+    [Migration("20250809164258_Transaktionen")]
+    partial class Transaktionen
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,10 +41,8 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasColumnName("abgesendet");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("NOW()");
+                        .HasColumnName("created_at");
 
                     b.Property<int>("Jahr")
                         .HasColumnType("integer")
@@ -52,10 +53,8 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasColumnName("kaltmiete");
 
                     b.Property<DateTime>("LastModified")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_modified")
-                        .HasDefaultValueSql("NOW()");
+                        .HasColumnName("last_modified");
 
                     b.Property<double>("Minderung")
                         .HasColumnType("double precision")
@@ -722,16 +721,12 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasColumnName("betrag");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("NOW()");
+                        .HasColumnName("created_at");
 
                     b.Property<DateTime>("LastModified")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_modified")
-                        .HasDefaultValueSql("NOW()");
+                        .HasColumnName("last_modified");
 
                     b.Property<string>("Notiz")
                         .HasColumnType("text")
@@ -746,8 +741,8 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasColumnType("integer")
                         .HasColumnName("zahler_kontakt_id");
 
-                    b.Property<DateOnly>("Zahlungsdatum")
-                        .HasColumnType("date")
+                    b.Property<DateTime>("Zahlungsdatum")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("zahlungsdatum");
 
                     b.Property<int>("ZahlungsempfaengerKontaktId")

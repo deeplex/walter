@@ -35,7 +35,8 @@ public class Abrechnungsresultat
     [Required]
     public double Rechnungsbetrag { get; set; }
     public bool Abgesendet { get; set; }
-    public bool IstBeglichen { get; set; }
+    // Offener Betrag, der noch ausgeglichen werden muss
+    public double Saldo { get; set; }
     public string? Notiz { get; set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime LastModified { get; set; }

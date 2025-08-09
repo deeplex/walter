@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/umlagen")]
-    public class UmlageController : FileControllerBase<UmlageEntry, Umlage>
+    public class UmlageController : FileControllerBase<UmlageEntry, int, Umlage>
     {
         public class HKVOEntryBase
         {

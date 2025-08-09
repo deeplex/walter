@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/mietminderungen")]
-    public class MietminderungController : FileControllerBase<MietminderungEntry, Mietminderung>
+    public class MietminderungController : FileControllerBase<MietminderungEntry, int, Mietminderung>
     {
         public class MietminderungEntryBase
         {

@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2025 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -22,7 +22,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.ErhaltungsaufwendungControll
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class ErhaltungsaufwendungDbService : WalterDbServiceBase<ErhaltungsaufwendungEntry, Erhaltungsaufwendung>
+    public class ErhaltungsaufwendungDbService : WalterDbServiceBase<ErhaltungsaufwendungEntry, int, Erhaltungsaufwendung>
     {
         public ErhaltungsaufwendungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {
@@ -116,7 +116,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
                 SetOptionalValues(entity, entry);
                 Ctx.Erhaltungsaufwendungen.Update(entity);
-                Ctx.SaveChanges();
+                await Ctx.SaveChangesAsync();
 
                 return new ErhaltungsaufwendungEntry(entity, entry.Permissions);
             });

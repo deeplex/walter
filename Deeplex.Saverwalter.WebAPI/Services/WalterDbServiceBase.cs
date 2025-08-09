@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Deeplex.Saverwalter.WebAPI.Services
 {
-    public abstract class WalterDbServiceBase<T, U>
+    public abstract class WalterDbServiceBase<T, TId, U>
     {
         protected SaverwalterContext Ctx { get; }
 
@@ -34,7 +34,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         protected readonly IAuthorizationService Auth;
         public abstract Task<ActionResult<U>> GetEntity(
             ClaimsPrincipal user,
-            int id,
+            TId id,
             OperationAuthorizationRequirement operation);
 
         protected async Task<ActionResult<U>> GetEntity(ClaimsPrincipal user, U? entity, OperationAuthorizationRequirement operation)
@@ -55,7 +55,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
         protected async Task<ActionResult> HandleEntity(
             ClaimsPrincipal user,
-            int id,
+            TId id,
             OperationAuthorizationRequirement operation,
             Func<U, Task<ActionResult>> action)
         {
@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services
 
         protected async Task<ActionResult<T>> HandleEntity(
             ClaimsPrincipal user,
-            int id,
+            TId id,
             OperationAuthorizationRequirement operation,
             Func<U, Task<ActionResult<T>>> action)
         {
@@ -97,9 +97,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services
             }
         }
 
-        public abstract Task<ActionResult<T>> Get(ClaimsPrincipal user, int id);
-        public abstract Task<ActionResult<T>> Put(ClaimsPrincipal user, int id, T entry);
+        public abstract Task<ActionResult<T>> Get(ClaimsPrincipal user, TId id);
+        public abstract Task<ActionResult<T>> Put(ClaimsPrincipal user, TId id, T entry);
         public abstract Task<ActionResult<T>> Post(ClaimsPrincipal user, T entry);
-        public abstract Task<ActionResult> Delete(ClaimsPrincipal user, int id);
+        public abstract Task<ActionResult> Delete(ClaimsPrincipal user, TId id);
     }
 }

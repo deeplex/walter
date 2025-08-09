@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/betriebskostenrechnungen")]
-    public class BetriebskostenrechnungController : FileControllerBase<BetriebskostenrechnungEntry, Betriebskostenrechnung>
+    public class BetriebskostenrechnungController : FileControllerBase<BetriebskostenrechnungEntry, int, Betriebskostenrechnung>
     {
         public class BetriebskostenrechnungEntryBase
         {

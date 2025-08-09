@@ -27,6 +27,7 @@ export { WalterKontaktEntry } from './WalterKontakt';
 export { WalterFileHandle } from './WalterFileHandle';
 export { WalterFileWrapper } from './WalterFileWrapper';
 export { WalterSelectionEntry } from './WalterSelection';
+export { WalterTransaktionEntry } from './WalterTransaktion';
 export { WalterUmlageEntry } from './WalterUmlage';
 export { WalterUmlagetypEntry } from './WalterUmlagetyp';
 export { WalterVertragEntry } from './WalterVertrag';

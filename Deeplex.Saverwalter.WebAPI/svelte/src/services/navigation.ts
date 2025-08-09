@@ -26,6 +26,7 @@ export const navigation = {
     kontakt: (id: number) => walter_goto(`/kontakte/${id}`),
     miete: (id: number) => walter_goto(`/mieten/${id}`),
     mietminderung: (id: number) => walter_goto(`/mietminderungen/${id}`),
+    transaktion: (id: number) => walter_goto(`/transaktionen/${id}`),
     umlage: (id: number) => walter_goto(`/umlagen/${id}`),
     umlagetyp: (id: number) => walter_goto(`/umlagetypen/${id}`),
     vertrag: (id: number) => walter_goto(`/vertraege/${id}`),

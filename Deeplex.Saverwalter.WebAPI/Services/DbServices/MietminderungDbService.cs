@@ -22,7 +22,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.MietminderungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class MietminderungDbService : WalterDbServiceBase<MietminderungEntry, Mietminderung>
+    public class MietminderungDbService : WalterDbServiceBase<MietminderungEntry, int, Mietminderung>
     {
         public MietminderungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {

@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/zaehlerstaende")]
-    public class ZaehlerstandController : FileControllerBase<ZaehlerstandEntry, Zaehlerstand>
+    public class ZaehlerstandController : FileControllerBase<ZaehlerstandEntry, int, Zaehlerstand>
     {
         public class ZaehlerstandEntryBase
         {

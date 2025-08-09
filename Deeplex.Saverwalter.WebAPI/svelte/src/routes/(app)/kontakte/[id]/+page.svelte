@@ -26,8 +26,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterLinkTile,
         WalterKontakt
     } from '$walter/components';
-    import { WalterFileWrapper } from '$walter/lib';
+    import { WalterFileWrapper, WalterTransaktionEntry } from '$walter/lib';
     import { fileURL } from '$walter/services/files';
+    import WalterTransaktion from '$walter/components/details/WalterTransaktion.svelte';
+    import WalterTransaktionen from '$walter/components/lists/WalterTransaktionen.svelte';
+    import { convertDateCanadian } from '$walter/services/utils';
 
     export let data: PageData;
 
@@ -35,6 +38,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: {
         title = data.entry.name;
     }
+
+    const transaktion: Partial<WalterTransaktionEntry> = {
+        zahler: { id: data.entry.id, text: data.entry.bezeichnung },
+        zahlungsdatum: convertDateCanadian(new Date()),
+        permissions: data.entry.permissions
+    };
 
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
@@ -73,6 +82,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             fetchImpl={data.fetchImpl}
             title="Verträge"
             rows={data.entry.vertraege}
+        />
+
+        <WalterTransaktionen
+            fetchImpl={data.fetchImpl}
+            title="Transaktionen"
+            entry={transaktion}
+            rows={data.entry.transaktionen}
         />
 
         {#if data.entry.adresse}

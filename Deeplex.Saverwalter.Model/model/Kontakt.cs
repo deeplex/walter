@@ -80,6 +80,22 @@ namespace Deeplex.Saverwalter.Model
         [Description("GbR")]
         gbr,
         [Description("AG")]
-        ag
+        ag,
+        [Description("e.V.")]
+        ev,
+        [Description("KG")]
+        kg,
+        [Description("OHG")]
+        ohg,
+        [Description("UG (haftungsbeschränkt)")]
+        ug,
+        [Description("Stiftung")]
+        stiftung,
+        [Description("Verein")]
+        verein,
+        [Description("Genossenschaft")]
+        genossenschaft,
+        [Description("Sonstige")]
+        sonstige,
     }
 }

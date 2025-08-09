@@ -22,7 +22,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.ZaehlerstandController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class ZaehlerstandDbService : WalterDbServiceBase<ZaehlerstandEntry, Zaehlerstand>
+    public class ZaehlerstandDbService : WalterDbServiceBase<ZaehlerstandEntry, int, Zaehlerstand>
     {
         public ZaehlerstandDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {

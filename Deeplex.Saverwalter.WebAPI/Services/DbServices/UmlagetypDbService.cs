@@ -24,7 +24,7 @@ using static Deeplex.Saverwalter.WebAPI.Controllers.UmlagetypController;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class UmlagetypDbService : WalterDbServiceBase<UmlagetypEntry, Umlagetyp>
+    public class UmlagetypDbService : WalterDbServiceBase<UmlagetypEntry, int, Umlagetyp>
     {
         public UmlagetypDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {

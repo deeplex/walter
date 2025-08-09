@@ -24,7 +24,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/vertragversionen")]
-    public class VertragVersionController : FileControllerBase<VertragVersionEntry, VertragVersion>
+    public class VertragVersionController : FileControllerBase<VertragVersionEntry, int, VertragVersion>
     {
         public class VertragVersionEntryBase
         {

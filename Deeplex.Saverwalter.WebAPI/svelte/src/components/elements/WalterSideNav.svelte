@@ -26,6 +26,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         SideNavMenu
     } from 'carbon-components-svelte';
     import {
+        ArrowsHorizontal,
         Building,
         ChartRelationship,
         Document,
@@ -84,6 +85,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <SideNavDivider />
         <div>
             <SideNavMenu icon={ListBoxes} text="Erweitert">
+                <WalterSideNavLink
+                    icon={ArrowsHorizontal}
+                    text="Transaktionen"
+                    href="/transaktionen"
+                />
                 <WalterSideNavLink
                     icon={Money}
                     text="Betriebskostenrechnungen"

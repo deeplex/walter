@@ -25,7 +25,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/erhaltungsaufwendungen")]
-    public class ErhaltungsaufwendungController : FileControllerBase<ErhaltungsaufwendungEntry, Erhaltungsaufwendung>
+    public class ErhaltungsaufwendungController : FileControllerBase<ErhaltungsaufwendungEntry, int, Erhaltungsaufwendung>
     {
         public class ErhaltungsaufwendungEntryBase
         {

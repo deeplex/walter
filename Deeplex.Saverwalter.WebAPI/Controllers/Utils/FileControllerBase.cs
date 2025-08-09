@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Runtime.InteropServices;
 using System.Text;
 using Deeplex.Saverwalter.WebAPI.Services;
 using Deeplex.Saverwalter.WebAPI.Utils;
@@ -22,19 +23,19 @@ using MigraDoc.DocumentObjectModel;
 
 namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
-    public abstract class FileControllerBase<T, U> : ControllerBase
+    public abstract class FileControllerBase<T, TId, U> : ControllerBase
     {
-        private readonly ILogger<FileControllerBase<T, U>> _logger;
+        private readonly ILogger<FileControllerBase<T, TId, U>> _logger;
         private readonly string? _baseUrl = Environment.GetEnvironmentVariable("S3_PROVIDER");
         private readonly HttpClient _httpClient;
 
-        public FileControllerBase(ILogger<FileControllerBase<T, U>> logger, HttpClient httpClient)
+        public FileControllerBase(ILogger<FileControllerBase<T, TId, U>> logger, HttpClient httpClient)
         {
             _logger = logger;
             _httpClient = httpClient;
         }
 
-        protected abstract WalterDbServiceBase<T, U> DbService { get; }
+        protected abstract WalterDbServiceBase<T, TId, U> DbService { get; }
 
         private static ActionResult<string> GetS3Path(string? baseUrl, string? requestPath, string? filename = null)
         {
@@ -95,14 +96,14 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             }
         }
 
-        private async Task<ActionResult?> Authorize(int id, OperationAuthorizationRequirement operation)
+        private async Task<ActionResult?> Authorize(TId id, OperationAuthorizationRequirement operation)
         {
             var entityResult = await DbService.GetEntity(User, id, operation);
             return entityResult.Result;
         }
 
         [HttpGet("{id}/files")]
-        public async Task<ActionResult<List<WalterFile>>> GetFiles(int id)
+        public async Task<ActionResult<List<WalterFile>>> GetFiles(TId id)
         {
             if (await Authorize(id, Operations.Read) is ActionResult authResult)
             {
@@ -121,7 +122,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpGet("{id}/files/{filename}")]
-        public async Task<IActionResult> ReadFile(int id, string filename)
+        public async Task<IActionResult> ReadFile(TId id, string filename)
         {
             if (await Authorize(id, Operations.Read) is ActionResult authResult)
             {
@@ -132,7 +133,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
         [HttpDelete("{id}/files/{filename}")]
         [HttpPut("{id}/files/{filename}")]
-        public async Task<IActionResult> WriteFile(int id, string filename)
+        public async Task<IActionResult> WriteFile(TId id, string filename)
         {
             if (await Authorize(id, Operations.Update) is ActionResult authResult)
             {
@@ -142,7 +143,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
         }
 
         [HttpPut("{id}/files/{old_filename}/{new_filename}")]
-        public async Task<IActionResult> RenameFile(int id, string old_filename, string new_filename)
+        public async Task<IActionResult> RenameFile(TId id, string old_filename, string new_filename)
         {
             if (await Authorize(id, Operations.Update) is ActionResult authResult)
             {

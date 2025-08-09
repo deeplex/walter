@@ -12,9 +12,9 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/abrechnungsresultate")]
-    public class AbrechnungsresultatController : FileControllerBase<AbrechnungsresultatEntry, Abrechnungsresultat>
+    public class AbrechnungsresultatController : FileControllerBase<AbrechnungsresultatEntry, Guid, Abrechnungsresultat>
     {
-        protected override WalterDbServiceBase<AbrechnungsresultatEntry, Abrechnungsresultat> DbService => throw new NotImplementedException();
+        protected override WalterDbServiceBase<AbrechnungsresultatEntry, Guid, Abrechnungsresultat> DbService => throw new NotImplementedException();
 
         public class AbrechnungsresultatEntryBase
         {
@@ -27,7 +27,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             public double Rechnungsbetrag { get; set; }
             public double Minderung { get; set; }
             public bool Abgesendet { get; set; }
-            public bool IstBeglichen { get; set; }
+            public double Saldo { get; set; }
             public string? Notiz { get; set; }
 
             public Permissions Permissions { get; set; } = new Permissions();
@@ -44,7 +44,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Rechnungsbetrag = entity.Rechnungsbetrag;
                 Minderung = entity.Minderung;
                 Abgesendet = entity.Abgesendet;
-                IstBeglichen = entity.IstBeglichen;
+                Saldo = entity.Saldo;
                 Notiz = entity.Notiz;
 
                 Permissions = permissions;

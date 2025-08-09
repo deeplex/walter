@@ -125,6 +125,57 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         }
     }
 
+    public class TransaktionPermissionHandler : AuthorizationHandler<OperationAuthorizationRequirement, Transaktion>
+    {
+        public static async Task<List<Transaktion>> GetList(SaverwalterContext ctx, ClaimsPrincipal user)
+        {
+            return await (user.IsInRole("Admin")
+                ? ctx.Transaktionen.ToListAsync()
+                : GetEntriesForUser(user.GetUserId()));
+
+            async Task<List<Transaktion>> GetEntriesForUser(Guid guid) =>
+            // TODO: Limit access to transactions where the user is either the payer or the recipient.
+                await ctx.Transaktionen
+                    // .Include(e => e.Zahler.Accounts)
+                    // .Include(e => e.Zahlungsempfaenger.Accounts)
+                    // .Where(e =>
+                    //     e.Zahler.Accounts.Any(a => a.Id == guid) ||
+                    //     e.Zahlungsempfaenger.Accounts.Any(a => a.Id == guid))
+                    .ToListAsync();
+        }
+
+        protected override Task HandleRequirementAsync(
+           AuthorizationHandlerContext context,
+           OperationAuthorizationRequirement requirement,
+           Transaktion entity)
+        {
+            // TODO: Limit access to transactions where the user is either the payer or the recipient.
+            // if (context.User.IsInRole("Admin"))
+            // {
+            //     context.Succeed(requirement);
+            // }
+            // else if ((
+            //         requirement.Name == Operations.SubCreate.Name ||
+            //         requirement.Name == Operations.Update.Name ||
+            //         requirement.Name == Operations.Delete.Name
+            //    ) && entity.Zahler.Accounts.Any(a => a.Id == context.User.GetUserId()))
+            // {
+            //     context.Succeed(requirement);
+            // }
+            // else if (
+            //     requirement.Name == Operations.Read.Name
+            //     && (entity.
+            //     Zahler.Accounts.Any(a => a.Id == context.User.GetUserId()) ||
+            //         entity.Zahlungsempfaenger.Accounts.Any(a => a.Id == context.User.GetUserId())))
+            // {
+            //     context.Succeed(requirement);
+            // }
+
+            context.Succeed(requirement);
+            return Task.CompletedTask;
+        }
+    }
+
     public class ErhaltungsaufwendungPermissionHandler : WohnungPermissionHandlerBase<Erhaltungsaufwendung>
     {
         public static async Task<List<Erhaltungsaufwendung>> GetList(SaverwalterContext ctx, ClaimsPrincipal user, VerwalterRolle rolle)

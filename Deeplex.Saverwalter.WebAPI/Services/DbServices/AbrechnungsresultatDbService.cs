@@ -93,7 +93,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             resultat.Rechnungsbetrag = entry.Rechnungsbetrag;
             resultat.Minderung = entry.Minderung;
             resultat.Abgesendet = entry.Abgesendet;
-            resultat.IstBeglichen = entry.IstBeglichen;
+            resultat.Saldo = entry.Saldo;
             resultat.Notiz = entry.Notiz;
             Ctx.Abrechnungsresultate.Update(resultat);
             await Ctx.SaveChangesAsync();

@@ -25,7 +25,7 @@ using static Deeplex.Saverwalter.WebAPI.Helper.Utils;
 
 namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 {
-    public class WohnungDbService : WalterDbServiceBase<WohnungEntry, Wohnung>
+    public class WohnungDbService : WalterDbServiceBase<WohnungEntry, int, Wohnung>
     {
         public WohnungDbService(SaverwalterContext ctx, IAuthorizationService authorizationService) : base(ctx, authorizationService)
         {

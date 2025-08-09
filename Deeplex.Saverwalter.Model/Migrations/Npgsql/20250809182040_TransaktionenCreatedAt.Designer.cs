@@ -3,6 +3,7 @@ using System;
 using Deeplex.Saverwalter.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
 {
     [DbContext(typeof(SaverwalterContext))]
-    partial class SaverwalterContextModelSnapshot : ModelSnapshot
+    [Migration("20250809182040_TransaktionenCreatedAt")]
+    partial class TransaktionenCreatedAt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -746,8 +749,8 @@ namespace Deeplex.Saverwalter.Model.Migrations.Npgsql
                         .HasColumnType("integer")
                         .HasColumnName("zahler_kontakt_id");
 
-                    b.Property<DateOnly>("Zahlungsdatum")
-                        .HasColumnType("date")
+                    b.Property<DateTime>("Zahlungsdatum")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("zahlungsdatum");
 
                     b.Property<int>("ZahlungsempfaengerKontaktId")

@@ -47,7 +47,10 @@ namespace Deeplex.Saverwalter.WebAPI
                 Vorauszahlung = abrechnung.GezahlteMiete,
                 Rechnungsbetrag = abrechnung.BetragNebenkosten,
                 Minderung = abrechnung.Mietminderung,
-                IstBeglichen = false,
+                Saldo = abrechnung.GezahlteMiete +
+                    abrechnung.Mietminderung -
+                    abrechnung.KaltMiete -
+                    abrechnung.BetragNebenkosten
             };
 
             Ctx.Abrechnungsresultate.Add(resultat);

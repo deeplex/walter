@@ -30,6 +30,7 @@ namespace Deeplex.Saverwalter.Model
         public DbSet<Miete> Mieten { get; set; } = null!;
         public DbSet<Mietminderung> Mietminderungen { get; set; } = null!;
         public DbSet<Kontakt> Kontakte { get; set; } = null!;
+        public DbSet<Transaktion> Transaktionen { get; set; } = null!;
         public DbSet<Umlage> Umlagen { get; set; } = null!;
         public DbSet<Umlagetyp> Umlagetypen { get; set; } = null!;
         public DbSet<Vertrag> Vertraege { get; set; } = null!;
@@ -89,6 +90,8 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<Vertrag>().HasOne(u => u.Ansprechpartner).WithMany(u => u.VerwaltetVertraege);
             modelBuilder.Entity<Vertrag>().HasMany(u => u.Mieter).WithMany(u => u.Mietvertraege);
 
+            modelBuilder.Entity<Abrechnungsresultat>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Abrechnungsresultat>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Adresse>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Adresse>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Betriebskostenrechnung>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
@@ -107,6 +110,8 @@ namespace Deeplex.Saverwalter.Model
             modelBuilder.Entity<Miete>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Mietminderung>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Mietminderung>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Transaktion>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
+            modelBuilder.Entity<Transaktion>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Umlage>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Umlage>().Property(b => b.LastModified).HasDefaultValueSql("NOW()");
             modelBuilder.Entity<Umlagetyp>().Property(b => b.CreatedAt).HasDefaultValueSql("NOW()");
