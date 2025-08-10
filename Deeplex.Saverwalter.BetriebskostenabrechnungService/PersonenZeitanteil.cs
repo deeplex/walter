@@ -94,18 +94,21 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
         private static List<DateOnly> getTimestampsOfPersonenAnzahlChanges(List<Vertrag> vertraege, Zeitraum zeitraum)
         {
-            var personenzahl = 0;
-            var begins = vertraege
-                .SelectMany(e => e.Versionen)
-                .OrderBy(e => e.Beginn)
-                .Where(e =>
-                {
-                    var filter = e.Personenzahl != personenzahl;
-                    personenzahl = e.Personenzahl;
-                    return filter;
-                })
-                .Select(e => e.Beginn)
-                .ToList();
+            List<DateOnly> begins = [];
+            foreach (var vertrag in vertraege)
+            {
+                var personenzahl = 0;
+                begins.AddRange(vertrag.Versionen
+                    .OrderBy(e => e.Beginn)
+                    .Where(e =>
+                    {
+                        var filter = e.Personenzahl != personenzahl;
+                        personenzahl = e.Personenzahl;
+                        return filter;
+                    })
+                    .Select(e => e.Beginn));
+            }
+            begins.Sort();
 
             var ends = vertraege
                 .Where(e => e.Ende != null)
