@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Henrik S. Gaßmann, Kai Lawrence
+// Copyright (c) 2023-2025 Henrik S. Gaßmann, Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -28,7 +28,13 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         public TokenService TokenService { get; }
         private SaverwalterContext SaverwalterContext { get; }
 
-        public TokenAuthenticationHandler(TokenService tokenService, SaverwalterContext saverwalterContext, IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
+        public TokenAuthenticationHandler(
+            TokenService tokenService,
+            SaverwalterContext saverwalterContext,
+            IOptionsMonitor<AuthenticationSchemeOptions> options,
+            ILoggerFactory logger,
+            UrlEncoder encoder)
+                : base(options, logger, encoder)
         {
             TokenService = tokenService;
             SaverwalterContext = saverwalterContext;

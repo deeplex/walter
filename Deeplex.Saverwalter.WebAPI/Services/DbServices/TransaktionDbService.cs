@@ -44,7 +44,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public override async Task<ActionResult<TransaktionEntry>> Get(ClaimsPrincipal user, Guid id)
         {
-
             return await HandleEntity(user, id, Operations.Read, async (entity) =>
             {
                 var permissions = await Utils.GetPermissions(user, entity, Auth);
@@ -87,7 +86,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             {
                 return await Add(entry);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new BadRequestObjectResult($"Fehler beim Hinzufügen der Transaktion.");
             }

@@ -79,7 +79,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
             try
             {
-                return Add(entry);
+                return await Add(entry);
             }
             catch
             {
@@ -87,12 +87,12 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             }
         }
 
-        private UmlagetypEntry Add(UmlagetypEntry entry)
+        private async Task<UmlagetypEntry> Add(UmlagetypEntry entry)
         {
             var entity = new Umlagetyp(entry.Bezeichnung);
             SetOptionalValues(entity, entry);
             Ctx.Umlagetypen.Add(entity);
-            Ctx.SaveChanges();
+            await Ctx.SaveChangesAsync();
 
             return new UmlagetypEntry(entity, entry.Permissions);
         }

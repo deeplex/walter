@@ -87,7 +87,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             };
             SetOptionalValues(entity, entry);
             Ctx.Zaehlerstaende.Add(entity);
-            Ctx.SaveChanges();
+            await Ctx.SaveChangesAsync();
 
             return new ZaehlerstandEntry(entity, entry.Permissions);
         }
@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
                 SetOptionalValues(entity, entry);
                 Ctx.Zaehlerstaende.Update(entity);
-                Ctx.SaveChanges();
+                await Ctx.SaveChangesAsync();
 
                 return new ZaehlerstandEntry(entity, entry.Permissions);
             });
