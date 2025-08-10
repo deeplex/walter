@@ -35,26 +35,26 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async Task GetWordDocumentTest()
+        public void GetWordDocumentTest()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var handler = new BetriebskostenabrechnungHandler(ctx);
 
-            var result = await handler.GetWordDocument(vertrag.VertragId, 2021);
+            var result = handler.GetWordDocument(vertrag.VertragId, 2021);
 
             result.Should().NotBeNull();
             result.Value.Should().NotBeNull();
         }
 
         [Fact(Skip = "PDF is TODO")]
-        public async Task GetPdfDocumentTest()
+        public void GetPdfDocumentTest()
         {
             var ctx = TestUtils.GetContext();
             var vertrag = TestUtils.GetVertragForAbrechnung(ctx);
             var handler = new BetriebskostenabrechnungHandler(ctx);
 
-            var result = await handler.GetPdfDocument(vertrag.VertragId, 2021);
+            var result = handler.GetPdfDocument(vertrag.VertragId, 2021);
 
             result.Should().NotBeNull();
             result.Value.Should().NotBeNull();

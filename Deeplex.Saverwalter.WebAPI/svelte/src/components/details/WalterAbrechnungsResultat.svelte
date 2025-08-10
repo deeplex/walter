@@ -40,6 +40,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     };
 
     let editResult = false;
+    const edit = (e: Event) => {
+        editResult = (e.target as HTMLInputElement).checked;
+    };
 </script>
 
 <Row>
@@ -55,14 +58,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <Checkbox
             labelText="Ist diese Abrechnung an den Mieter versendet?"
             bind:checked={entry.abgesendet}
-            on:change={(e) => abgesendet(e)}
+            on:change={abgesendet}
         />
     </Tile>
 </Row>
 
 <Row>
     <div>
-        <Checkbox bind:checked={editResult} on:change={(e) => abgesendet(e)} />
+        <Checkbox bind:checked={editResult} on:change={edit} />
     </div>
     <p style="margin-top: 0.25em; margin-left: -0.5em">
         Ergebnisse der Abrechnung bearbeiten
