@@ -78,6 +78,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             _logger = logger;
         }
 
+        [HttpGet("vertrag/{vertragId}/jahr/{jahr}")]
+        public Task<ActionResult<AbrechnungsresultatEntry>> GetAbrechnungsResultatFromVertrag(int vertragId, int jahr)
+        {
+            return DbService.Get(User!, vertragId, jahr);
+
+        }
+
         [HttpGet("{id}")]
         public Task<ActionResult<AbrechnungsresultatEntry>> GetAbrechnungsResultat(Guid id)
         {

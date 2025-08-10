@@ -31,6 +31,39 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
             return await GetEntity(user, entity, op);
         }
 
+        public async Task<ActionResult<AbrechnungsresultatEntry>> Get(
+            ClaimsPrincipal user,
+            int VertragId,
+            int jahr)
+        {
+            var vertrag = await Ctx.Vertraege.FindAsync(VertragId);
+            if (vertrag == null)
+            {
+                return new NotFoundResult();
+            }
+
+            var permission = await Auth.AuthorizeAsync(user, vertrag, Operations.Read);
+            if (!permission.Succeeded)
+            {
+                return new ForbidResult();
+            }
+
+            var entity = vertrag.Abrechnungsresultate
+                .SingleOrDefault(e => e.Jahr == jahr);
+
+            if (entity == null)
+            {
+                return new NotFoundResult();
+            }
+
+            var permissions = await GetPermissions(user, entity, Auth);
+            var entry = new AbrechnungsresultatEntry(entity, permissions);
+
+            return entry;
+        }
+
+
+
         public override async Task<ActionResult<AbrechnungsresultatEntry>> Get(ClaimsPrincipal user, Guid id)
         {
             return await HandleEntity(user, id, Operations.Read, async (entity) =>

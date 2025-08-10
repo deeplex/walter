@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { WalterToastContent } from '$walter/lib';
+import { WalterAbrechnungsresultatEntry, WalterToastContent } from '$walter/lib';
 import {
     create_abrechnung_pdf,
     create_abrechnung_word,
@@ -21,6 +21,7 @@ import {
 } from '$walter/services/abrechnung';
 import { fileURL, walter_file_post } from '$walter/services/files';
 import { WalterFile } from '$walter/lib/WalterFile';
+import { walter_get } from '$walter/services/requests';
 
 export async function create_word_doc(
     vertragId: number,
@@ -37,7 +38,14 @@ export async function create_word_doc(
         fetchImpl
     );
     if (abrechnung instanceof File) {
-        const fileUrl = fileURL.vertrag(`${vertragId}`);
+        const resultatId = await walter_get(
+            `${WalterAbrechnungsresultatEntry.ApiURL}/vertrag/${vertragId}/jahr/${selectedYear}`,
+            fetchImpl) as WalterAbrechnungsresultatEntry;
+        console.log(resultatId);
+        if (!resultatId) {
+            return undefined;
+        }
+        const fileUrl = fileURL.abrechnungsresultat(`${resultatId.id}`);
         return create_abrechnung(abrechnung, fileUrl, fetchImpl);
     }
 }
@@ -57,7 +65,13 @@ export async function create_pdf_doc(
         fetchImpl
     );
     if (abrechnung instanceof File) {
-        const fileUrl = fileURL.vertrag(`${vertragId}`);
+        const resultatId = await walter_get(
+            `${WalterAbrechnungsresultatEntry.ApiURL}/vertrag/${vertragId}/jahr/${selectedYear}`,
+            fetchImpl) as WalterAbrechnungsresultatEntry;
+        if (!resultatId) {
+            return undefined;
+        }
+        const fileUrl = fileURL.abrechnungsresultat(`${resultatId.id}`);
         return create_abrechnung(abrechnung, fileUrl, fetchImpl);
     }
 }

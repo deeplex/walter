@@ -29,7 +29,7 @@ export function create_abrechnung_word(
     fetchImpl: typeof fetch
 ) {
     const apiURL = `/api/betriebskostenabrechnung/${vertrag_id}/${jahr}/word_document`;
-    const fileName = `Abrechnung ${jahr} - ${fileNameBase}.docx`;
+    const fileName = `${override_result ? '' : 'Entwurf: '}Abrechnung ${jahr} - ${fileNameBase}.docx`;
     return create_abrechnung_file(apiURL, fileName, override_result, fetchImpl);
 }
 
@@ -41,7 +41,7 @@ export function create_abrechnung_pdf(
     fetchImpl: typeof fetch
 ) {
     const apiURL = `/api/betriebskostenabrechnung/${vertrag_id}/${jahr}/pdf_document`;
-    const fileName = `Abrechnung ${jahr} - ${fileNameBase}.pdf`;
+    const fileName = `${override_result ? '' : 'Entwurf: '}Abrechnung ${jahr} - ${fileNameBase}.pdf`;
     return create_abrechnung_file(apiURL, fileName, override_result, fetchImpl);
 }
 

@@ -21,6 +21,10 @@ export class WalterFileWrapper {
 
     constructor(public fetchImpl: typeof fetch) { }
 
+    clear() {
+        this.handles = [];
+    }
+
     // Always register for the next to last position; the last is always the stack.
     register(name: string, fileURL: string) {
         const handle = new WalterFileHandle(name, fileURL, this.fetchImpl);

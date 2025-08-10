@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import {
         WalterAbrechnung,
+        WalterAnhaenge,
         WalterGrid,
         WalterHeader,
         WalterLink
@@ -32,6 +33,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         Checkbox,
         ComboBox,
+        HeaderAction,
+        HeaderUtilities,
         InlineNotification,
         Loading,
         Modal,
@@ -43,9 +46,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { shouldFilterItem } from '$walter/components/elements/WalterComboBox';
     import { create_pdf_doc, create_word_doc, updatePreview } from './utils';
     import { Download } from 'carbon-icons-svelte';
-    import type { WalterSelectionEntry } from '$walter/lib';
+    import { WalterFileWrapper, type WalterSelectionEntry } from '$walter/lib';
     import { download } from '$walter/components/preview/WalterPreview';
     import { walter_goto } from '$walter/services/utils';
+    import WalterHeaderDetail from '$walter/components/elements/WalterHeaderDetail.svelte';
+    import { fileURL } from '$walter/services/files';
 
     export let vertragId: number | null;
     export let selectedYear: number;
@@ -70,20 +75,48 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         submit: () => undefined
     };
 
+    let fileWrapper = new WalterFileWrapper(data.fetchImpl);
+    fileWrapper.registerStack();
+    let files = '(0)';
+
     async function update() {
         walter_goto(`?${searchParams.toString()}`, { noScroll: true });
         abrechnung = updatePreview(vertragId, selectedYear, data.fetchImpl);
 
         const value = data.vertraege.find((vertrag) => vertrag.id == vertragId);
         title = value?.text || 'Wähle einen Vertrag aus';
+
+        searchParams.set('jahr', `${selectedYear}`);
+        abrechnung.then(async (entry) => {
+            fileWrapper.clear();
+            fileWrapper.registerStack();
+
+            if (entry?.resultat) {
+                const furl = fileURL.abrechnungsresultat(
+                    `${entry.resultat.id}`
+                );
+                fileWrapper.register('Resultat', furl);
+                files = `(${
+                    (
+                        await fileWrapper.handles.find((h) => h.fileURL == furl)
+                            ?.files
+                    )?.length || 0
+                })`;
+            }
+
+            if (entry?.vertrag) {
+                fileWrapper.register(
+                    'Vertrag',
+                    fileURL.vertrag(`${entry.vertrag.id}`)
+                );
+            }
+        });
     }
 
     onMount(async () => {
         vertragId = +(searchParams.get('vertrag') || 0) || null;
         selectedYear = +(searchParams.get('jahr') || 0) || likelyYear;
         value = data.vertraege.find((vertrag) => vertrag.id == vertragId);
-
-        searchParams.set('jahr', `${selectedYear}`);
 
         update();
     });
@@ -119,6 +152,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         } else {
             override_active = true;
             file = await submitFn();
+            if (file) {
+                update();
+                download(file);
+            }
         }
 
         return file;
@@ -140,12 +177,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             );
         };
 
-        let file = await create_file(submit);
-
-        if (file) {
-            update();
-            download(file);
-        }
+        await create_file(submit);
     }
 
     async function click_pdf(): Promise<void> {
@@ -164,16 +196,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             );
         };
 
-        let file = await create_file(submit);
-
-        if (file) {
-            update();
-            download(file);
-        }
+        await create_file(submit);
     }
 </script>
 
-<WalterHeader {title} />
+<WalterHeader {title}>
+    <HeaderUtilities>
+        <HeaderAction isOpen preventCloseOnClickOutside bind:text={files}>
+            <WalterAnhaenge bind:fileWrapper />
+        </HeaderAction>
+    </HeaderUtilities>
+</WalterHeader>
 
 <Modal
     {...modalControl}

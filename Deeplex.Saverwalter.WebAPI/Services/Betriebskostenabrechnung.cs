@@ -34,33 +34,40 @@ namespace Deeplex.Saverwalter.WebAPI
 
         private async Task SaveAbrechnungsresultat(Betriebskostenabrechnung abrechnung)
         {
-            var altes_resultat = Ctx.Abrechnungsresultate.SingleOrDefault(e =>
+            var resultat = Ctx.Abrechnungsresultate.SingleOrDefault(e =>
                 e.Vertrag == abrechnung.Vertrag &&
                 e.Jahr == abrechnung.Zeitraum.Jahr);
 
-            var resultat = new Abrechnungsresultat
+            var is_new = resultat == null;
+            if (is_new)
             {
-                Vertrag = abrechnung.Vertrag,
-                Jahr = abrechnung.Zeitraum.Jahr,
-                Kaltmiete = abrechnung.KaltMiete,
-                Vorauszahlung = abrechnung.GezahlteMiete,
-                Rechnungsbetrag = abrechnung.BetragNebenkosten,
-                Minderung = abrechnung.Mietminderung,
-                // Positiv = Mieter muss zahlen, Negativ = Vermieter muss zahlen
-                Saldo = -(abrechnung.GezahlteMiete +
-                    abrechnung.Mietminderung -
-                    abrechnung.KaltMiete -
-                    abrechnung.BetragNebenkosten)
-            };
+                resultat = new Abrechnungsresultat();
+            }
 
-            if (altes_resultat != null)
+            if (resultat == null)
             {
-                resultat.AbrechnungsresultatId = altes_resultat.AbrechnungsresultatId;
-                Ctx.Abrechnungsresultate.Update(resultat);
+                throw new InvalidOperationException("Could not create or find Abrechnungsresultat.");
+            }
+
+            resultat.Vertrag = abrechnung.Vertrag;
+            resultat.Jahr = abrechnung.Zeitraum.Jahr;
+            resultat.Kaltmiete = abrechnung.KaltMiete;
+            resultat.Vorauszahlung = abrechnung.GezahlteMiete;
+            resultat.Rechnungsbetrag = abrechnung.BetragNebenkosten;
+            resultat.Minderung = abrechnung.Mietminderung;
+            // Positiv = Mieter muss zahlen, Negativ = Vermieter muss zahlen
+            resultat.Saldo = -(abrechnung.GezahlteMiete +
+                abrechnung.Mietminderung -
+                abrechnung.KaltMiete -
+                abrechnung.BetragNebenkosten);
+
+            if (is_new)
+            {
+                Ctx.Abrechnungsresultate.Add(resultat);
             }
             else
             {
-                Ctx.Abrechnungsresultate.Add(resultat);
+                Ctx.Abrechnungsresultate.Update(resultat);
             }
 
             await Ctx.SaveChangesAsync();
