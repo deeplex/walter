@@ -25,7 +25,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterAltesAbrechnungsresultat,
         WalterMieten,
         WalterAbrechnungNebenkosten,
-        WalterKontakte
+        WalterKontakte,
+        WalterLink
     } from '$walter/components';
     import {
         convertDateCanadian,
@@ -43,7 +44,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from 'carbon-components-svelte';
     import { WalterKontaktEntry, type WalterMieteEntry } from '$walter/lib';
     import WalterData from '../data/WalterData.svelte';
-    import WalterAbrechnungsresultate from '../lists/WalterAbrechnungsresultate.svelte';
 
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
     export let title: string | undefined;
@@ -90,7 +90,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <Column>
                 {#if title}
                     <Tile>
-                        <h4>{title} - {abrechnung.zeitraum.jahr}</h4>
+                        <div style="display: flex;">
+                            <WalterLink
+                                href={`/vertraege/${abrechnung.vertrag.id}`}
+                            >
+                                <h4>{title}</h4>
+                            </WalterLink>
+                            <h4 style="margin-left: 1ch">
+                                - {abrechnung.zeitraum.jahr}
+                            </h4>
+                        </div>
                     </Tile>
                 {/if}
             </Column>

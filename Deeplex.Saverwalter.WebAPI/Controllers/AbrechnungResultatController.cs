@@ -14,8 +14,6 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
     [Route("api/abrechnungsresultate")]
     public class AbrechnungsresultatController : FileControllerBase<AbrechnungsresultatEntry, Guid, Abrechnungsresultat>
     {
-        protected override WalterDbServiceBase<AbrechnungsresultatEntry, Guid, Abrechnungsresultat> DbService => throw new NotImplementedException();
-
         public class AbrechnungsresultatEntryBase
         {
             public Guid Id { get; set; }
@@ -69,33 +67,33 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
 
 
         private readonly ILogger<AbrechnungsresultatController> _logger;
-        private AbrechnungsresultatDbService Service { get; }
+        protected override AbrechnungsresultatDbService DbService { get; }
 
         public AbrechnungsresultatController(
             ILogger<AbrechnungsresultatController> logger,
             AbrechnungsresultatDbService service,
             HttpClient httpClient) : base(logger, httpClient)
         {
-            Service = service;
+            DbService = service;
             _logger = logger;
         }
 
         [HttpGet("{id}")]
         public Task<ActionResult<AbrechnungsresultatEntry>> GetAbrechnungsResultat(Guid id)
         {
-            return Service.Get(User!, id);
+            return DbService.Get(User!, id);
         }
 
         [HttpPut("{id}")]
         public Task<ActionResult<AbrechnungsresultatEntry>> PutAbrechnungsResultat(Guid id, AbrechnungsresultatEntry entry)
         {
-            return Service.Put(User!, id, entry);
+            return DbService.Put(User!, id, entry);
         }
 
         [HttpDelete("{id}")]
         public Task<ActionResult> DeleteAbrechnungsResultat(Guid id)
         {
-            return Service.Delete(User!, id);
+            return DbService.Delete(User!, id);
         }
     }
 }

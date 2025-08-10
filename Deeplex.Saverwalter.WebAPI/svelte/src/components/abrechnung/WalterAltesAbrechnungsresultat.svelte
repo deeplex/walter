@@ -47,12 +47,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                         >
                         <StructuredListCell head>Nebenkosten</StructuredListCell
                         >
-                        <StructuredListCell head>Saldo</StructuredListCell>
+                        <StructuredListCell head>Resultat</StructuredListCell>
                         <StructuredListCell head
-                            >Ist versendet</StructuredListCell
+                            >Abrechnung an Mieter versendet?</StructuredListCell
                         >
                         <StructuredListCell head
-                            >Ist beglichen</StructuredListCell
+                            >Verbleibender Saldo</StructuredListCell
                         >
                     </StructuredListRow>
                 </StructuredListHead>
@@ -83,7 +83,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                             {resultat.abgesendet ? 'Ja' : 'Nein'}
                         </StructuredListCell>
                         <StructuredListCell>
-                            {resultat.istBeglichen ? 'Ja' : 'Nein'}
+                            {convertEuro(resultat.saldo)}
                         </StructuredListCell>
                     </StructuredListRow>
                 </StructuredListBody>

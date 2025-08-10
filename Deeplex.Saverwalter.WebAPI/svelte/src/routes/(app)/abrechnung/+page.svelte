@@ -25,13 +25,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { PageData } from './$types';
     import type {
         WalterBetriebskostenabrechnungEntry,
-        WalterFile
+        WalterFile,
+        WalterModalControl
     } from '$walter/types';
     import { page } from '$app/stores';
     import {
+        Checkbox,
         ComboBox,
         InlineNotification,
         Loading,
+        Modal,
         NumberInput,
         OverflowMenu,
         OverflowMenuItem,
@@ -43,7 +46,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import type { WalterSelectionEntry } from '$walter/lib';
     import { download } from '$walter/components/preview/WalterPreview';
     import { walter_goto } from '$walter/services/utils';
-    import { openModal } from '$walter/store';
 
     export let vertragId: number | null;
     export let selectedYear: number;
@@ -57,6 +59,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const likelyYear = new Date().getFullYear() - 1;
 
     let value: WalterSelectionEntry | undefined;
+
+    let modalControl: WalterModalControl = {
+        open: false,
+        modalHeading: 'Abrechnung existiert bereits',
+        content:
+            'Es existiert bereits ein Ergebnis für die Abrechnung von diesem Vertrag in diesem Jahr. Möchtest du sie überschreiben?',
+        danger: false,
+        primaryButtonText: 'Bestätigen',
+        submit: () => undefined
+    };
 
     async function update() {
         walter_goto(`?${searchParams.toString()}`, { noScroll: true });
@@ -96,33 +108,34 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         let file;
         if (!vertragId || !selectedYear) return undefined;
         if ((await abrechnung)?.resultat) {
-            openModal({
-                modalHeading: 'Abrechnung existiert bereits',
-                content:
-                    'Es existiert bereits eine Abrechnung für diesen Vertrag und dieses Jahr. Möchtest du sie überschreiben?',
-                primaryButtonText: 'Überschreiben',
-                submit: async () => {
-                    file = await submitFn();
-                    if (file) {
-                        update();
-                        download(file);
-                    }
+            modalControl.open = true;
+            modalControl.submit = async () => {
+                file = await submitFn();
+                if (file) {
+                    update();
+                    download(file);
                 }
-            });
+            };
         } else {
+            override_active = true;
             file = await submitFn();
         }
 
         return file;
     }
 
+    let override_active = false;
+
     async function click_word(): Promise<void> {
         let submit = async () => {
             if (!vertragId || !selectedYear) return;
+            let override = override_active;
+            override_active = false;
             return await create_word_doc(
                 vertragId,
                 selectedYear,
                 title,
+                override,
                 data.fetchImpl
             );
         };
@@ -140,10 +153,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
         let submit = async () => {
             if (!vertragId || !selectedYear) return;
+            let override = override_active;
+            override_active = false;
             return await create_pdf_doc(
                 vertragId,
                 selectedYear,
                 title,
+                override,
                 data.fetchImpl
             );
         };
@@ -158,6 +174,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <WalterHeader {title} />
+
+<Modal
+    {...modalControl}
+    bind:open={modalControl.open}
+    secondaryButtonText="Abbrechen"
+    on:click:button--secondary={() => (modalControl.open = false)}
+    on:click:button--primary={() => (modalControl.open = false)}
+    on:open
+    on:close
+    on:submit={modalControl.submit}
+>
+    <p>{modalControl.content}</p>
+    <Checkbox
+        labelText="Abrechnungsergebnis überschreiben"
+        bind:checked={override_active}
+        style="margin-top: 1em"
+    />
+</Modal>
 
 <WalterGrid>
     <Row>

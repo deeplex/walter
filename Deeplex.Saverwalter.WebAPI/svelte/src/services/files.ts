@@ -18,6 +18,7 @@ import { WalterFile } from '$walter/lib/WalterFile';
 import { walter_delete, walter_fetch, walter_get } from './requests';
 import type { WalterToastContent } from '../lib/WalterToastContent';
 import {
+    WalterAbrechnungsresultatEntry,
     WalterAdresseEntry,
     WalterBetriebskostenrechnungEntry,
     WalterErhaltungsaufwendungEntry,
@@ -35,6 +36,8 @@ import {
 } from '$walter/lib';
 
 export const fileURL = {
+    abrechnungsresultat: (id: string) =>
+        `${WalterAbrechnungsresultatEntry.ApiURL}/${id}/files`,
     adresse: (id: string) => `${WalterAdresseEntry.ApiURL}/${id}/files`,
     betriebskostenrechnung: (id: string) =>
         `${WalterBetriebskostenrechnungEntry.ApiURL}/${id}/files`,

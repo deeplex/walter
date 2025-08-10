@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2025 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -16,7 +16,6 @@
 import type { WalterModalControl, WalterToast } from '$walter/types';
 import { get, writable, type Writable } from 'svelte/store';
 import type { WalterToastContent } from './lib/WalterToastContent';
-import type { AuthState } from './services/auth';
 
 export const toasts: Writable<Partial<WalterToast>[]> = writable([]);
 

@@ -34,10 +34,9 @@ namespace Deeplex.Saverwalter.WebAPI
 
         private async Task SaveAbrechnungsresultat(Betriebskostenabrechnung abrechnung)
         {
-            var resultate = Ctx.Abrechnungsresultate.Where(e =>
+            var altes_resultat = Ctx.Abrechnungsresultate.SingleOrDefault(e =>
                 e.Vertrag == abrechnung.Vertrag &&
                 e.Jahr == abrechnung.Zeitraum.Jahr);
-            Ctx.Abrechnungsresultate.RemoveRange(resultate);
 
             var resultat = new Abrechnungsresultat
             {
@@ -47,13 +46,23 @@ namespace Deeplex.Saverwalter.WebAPI
                 Vorauszahlung = abrechnung.GezahlteMiete,
                 Rechnungsbetrag = abrechnung.BetragNebenkosten,
                 Minderung = abrechnung.Mietminderung,
-                Saldo = abrechnung.GezahlteMiete +
+                // Positiv = Mieter muss zahlen, Negativ = Vermieter muss zahlen
+                Saldo = -(abrechnung.GezahlteMiete +
                     abrechnung.Mietminderung -
                     abrechnung.KaltMiete -
-                    abrechnung.BetragNebenkosten
+                    abrechnung.BetragNebenkosten)
             };
 
-            Ctx.Abrechnungsresultate.Add(resultat);
+            if (altes_resultat != null)
+            {
+                resultat.AbrechnungsresultatId = altes_resultat.AbrechnungsresultatId;
+                Ctx.Abrechnungsresultate.Update(resultat);
+            }
+            else
+            {
+                Ctx.Abrechnungsresultate.Add(resultat);
+            }
+
             await Ctx.SaveChangesAsync();
         }
 
@@ -76,7 +85,25 @@ namespace Deeplex.Saverwalter.WebAPI
             }
         }
 
-        public async Task<ActionResult<MemoryStream>> GetWordDocument(int vertrag_id, int jahr)
+        public ActionResult<MemoryStream> GetWordDocument(int vertrag_id, int jahr)
+        {
+            try
+            {
+                var vertrag = Ctx.Vertraege.Find(vertrag_id)!;
+                var stream = new MemoryStream();
+                var abrechnung = CreateAbrechnung(vertrag, jahr);
+                abrechnung.SaveAsDocx(stream);
+                stream.Position = 0;
+
+                return stream;
+            }
+            catch
+            {
+                return new BadRequestResult();
+            }
+        }
+
+        public async Task<ActionResult<MemoryStream>> GetWordDocumentAndSaveResult(int vertrag_id, int jahr)
         {
             try
             {
@@ -95,7 +122,25 @@ namespace Deeplex.Saverwalter.WebAPI
             }
         }
 
-        public async Task<ActionResult<MemoryStream>> GetPdfDocument(int vertrag_id, int Jahr)
+        public ActionResult<MemoryStream> GetPdfDocument(int vertrag_id, int Jahr)
+        {
+            try
+            {
+                var vertrag = Ctx.Vertraege.Find(vertrag_id)!;
+                var stream = new MemoryStream();
+                var abrechnung = CreateAbrechnung(vertrag, Jahr);
+                abrechnung.SaveAsPdf(stream);
+                stream.Position = 0;
+
+                return stream;
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(ex);
+            }
+        }
+
+        public async Task<ActionResult<MemoryStream>> GetPdfDocumentAndSaveResult(int vertrag_id, int Jahr)
         {
             try
             {

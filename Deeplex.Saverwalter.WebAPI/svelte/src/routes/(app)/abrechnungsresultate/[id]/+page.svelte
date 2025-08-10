@@ -17,12 +17,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import { WalterGrid, WalterHeaderDetail } from '$walter/components';
     import WalterAbrechnungsResultat from '$walter/components/details/WalterAbrechnungsResultat.svelte';
+    import { WalterFileWrapper } from '$walter/lib';
     import type { PageData } from './$types';
 
     export let data: PageData;
+
+    let fileWrapper = new WalterFileWrapper(data.fetchImpl);
+    fileWrapper.registerStack();
+    fileWrapper.register('Resultat', data.fileURL);
 </script>
 
-<WalterHeaderDetail apiURL={data.apiURL} entry={data.entry} title="Resultat" />
+<WalterHeaderDetail
+    bind:fileWrapper
+    apiURL={data.apiURL}
+    entry={data.entry}
+    title="Resultat"
+/>
 <WalterGrid>
     <WalterAbrechnungsResultat bind:entry={data.entry} />
 </WalterGrid>

@@ -19,13 +19,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import {
         Checkbox,
         ClickableTile,
-        Link,
-        Row
+        Row,
+        Tile
     } from 'carbon-components-svelte';
     import WalterLinkTile from '../subdetails/WalterLinkTile.svelte';
     import { fileURL } from '$walter/services/files';
     import { WalterAbrechnungsresultatEntry } from '$walter/lib/WalterAbrechnungsresultat';
     import WalterTextArea from '../elements/WalterTextArea.svelte';
+    import { convertEuro } from '$walter/services/utils';
 
     export let entry: WalterAbrechnungsresultatEntry;
 
@@ -38,65 +39,75 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         entry.abgesendet = (e.target as HTMLInputElement).checked;
     };
 
-    const istBeglichen = (e: Event) => {
-        entry.istBeglichen = (e.target as HTMLInputElement).checked;
-    };
+    let editResult = false;
 </script>
 
 <Row>
     <WalterNumberInput required readonly value={entry.jahr} label="Jahr" />
-
     <WalterNumberInput
         required
         {readonly}
+        bind:value={entry.saldo}
+        label="Verbleibender Saldo (Positiv = Mieter muss zahlen, Negativ = Vermieter muss zahlen)"
+    />
+
+    <Tile light style="margin: 1.5em">
+        <Checkbox
+            labelText="Ist diese Abrechnung an den Mieter versendet?"
+            bind:checked={entry.abgesendet}
+            on:change={(e) => abgesendet(e)}
+        />
+    </Tile>
+</Row>
+
+<Row>
+    <div>
+        <Checkbox bind:checked={editResult} on:change={(e) => abgesendet(e)} />
+    </div>
+    <p style="margin-top: 0.25em; margin-left: -0.5em">
+        Ergebnisse der Abrechnung bearbeiten
+    </p>
+</Row>
+
+<Row>
+    <WalterNumberInput
+        required
+        readonly={!editResult}
         bind:value={entry.vorauszahlung}
         label="Vorauszahlung Gesamt"
     />
 
     <WalterNumberInput
         required
-        {readonly}
+        readonly={!editResult}
         bind:value={entry.kaltmiete}
         label="Kaltmiete"
     />
 
     <WalterNumberInput
         required
-        {readonly}
+        readonly={!editResult}
         bind:value={entry.rechnungsbetrag}
         label="Rechnungsbetrag"
     />
 
     <WalterNumberInput
         required
-        {readonly}
+        readonly={!editResult}
         bind:value={entry.minderung}
         label="Mietminderungen"
     />
 </Row>
 
 <Row>
-    <div>
-        <Checkbox
-            bind:checked={entry.abgesendet}
-            on:change={(e) => abgesendet(e)}
-        />
-    </div>
-    <p style="margin-top: 0.25em; margin-left: -0.5em">
-        Ist diese Abrechnung an den Mieter versendet?
-    </p>
-</Row>
-
-<Row>
-    <div>
-        <Checkbox
-            bind:checked={entry.istBeglichen}
-            on:change={(e) => istBeglichen(e)}
-        />
-    </div>
-    <p style="margin-top: 0.25em; margin-left: -0.5em">
-        Ist diese Abrechnung beglichen?
-    </p>
+    <Tile light>
+        Resultat der Abrechnung: {convertEuro(
+            entry.vorauszahlung - entry.kaltmiete - entry.rechnungsbetrag
+        )}
+        {entry.vorauszahlung - entry.kaltmiete - entry.rechnungsbetrag < 0
+            ? ' (Schulden des Mieters)'
+            : ' (Guthaben des Mieters)'}
+    </Tile>
 </Row>
 
 <Row>

@@ -35,7 +35,7 @@ public class Abrechnungsresultat
     [Required]
     public double Rechnungsbetrag { get; set; }
     public bool Abgesendet { get; set; }
-    // Offener Betrag, der noch ausgeglichen werden muss
+    // Positiv = Mieter muss zahlen, Negativ = Vermieter muss zahlen
     public double Saldo { get; set; }
     public string? Notiz { get; set; }
     public DateTime CreatedAt { get; private set; }

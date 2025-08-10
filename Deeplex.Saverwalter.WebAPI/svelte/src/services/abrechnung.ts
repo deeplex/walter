@@ -25,31 +25,34 @@ export function create_abrechnung_word(
     vertrag_id: number,
     jahr: number,
     fileNameBase: string,
+    override_result: boolean,
     fetchImpl: typeof fetch
 ) {
     const apiURL = `/api/betriebskostenabrechnung/${vertrag_id}/${jahr}/word_document`;
     const fileName = `Abrechnung ${jahr} - ${fileNameBase}.docx`;
-    return create_abrechnung_file(apiURL, fileName, fetchImpl);
+    return create_abrechnung_file(apiURL, fileName, override_result, fetchImpl);
 }
 
 export function create_abrechnung_pdf(
     vertrag_id: number,
     jahr: number,
     fileNameBase: string,
+    override_result: boolean,
     fetchImpl: typeof fetch
 ) {
     const apiURL = `/api/betriebskostenabrechnung/${vertrag_id}/${jahr}/pdf_document`;
     const fileName = `Abrechnung ${jahr} - ${fileNameBase}.pdf`;
-    return create_abrechnung_file(apiURL, fileName, fetchImpl);
+    return create_abrechnung_file(apiURL, fileName, override_result, fetchImpl);
 }
 
 async function create_abrechnung_file(
     apiURL: string,
     fileName: string,
+    override_result: boolean,
     fetchImpl: typeof fetch
 ) {
     const fetchOptions = {
-        method: 'GET',
+        method: override_result ? 'POST' : 'GET',
         headers
     };
     const response = await walter_fetch(fetchImpl, apiURL, fetchOptions);

@@ -26,12 +26,14 @@ export async function create_word_doc(
     vertragId: number,
     selectedYear: number,
     title: string,
+    override_result: boolean,
     fetchImpl: typeof fetch
 ) {
     const abrechnung = await create_abrechnung_word(
         vertragId,
         selectedYear,
         title,
+        override_result,
         fetchImpl
     );
     if (abrechnung instanceof File) {
@@ -44,12 +46,14 @@ export async function create_pdf_doc(
     vertragId: number,
     selectedYear: number,
     title: string,
+    override_result: boolean,
     fetchImpl: typeof fetch
 ) {
     const abrechnung = await create_abrechnung_pdf(
         vertragId,
         selectedYear,
         title,
+        override_result,
         fetchImpl
     );
     if (abrechnung instanceof File) {
