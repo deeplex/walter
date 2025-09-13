@@ -56,7 +56,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
     public class Abrechnungseinheit
     {
-        public Dictionary<Umlage, BetriebskostenrechnungEntry?> Rechnungen { get; } = new();
+        public Dictionary<Umlage, List<BetriebskostenrechnungEntry>> Rechnungen { get; } = [];
         public double BetragKalt { get; }
         public double BetragWarm { get; }
         public double GesamtBetragKalt { get; }
@@ -96,13 +96,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             foreach (var umlage in umlagen)
             {
-                // TODO: This limits us to one Rechnung per Umlage per Jahr
-                Rechnungen[umlage] = new BetriebskostenrechnungEntry(
-                    umlage.Betriebskostenrechnungen
-                     .SingleOrDefault(rechnung => rechnung.BetreffendesJahr == zeitraum.Jahr),
-                     zeitraum, notes);
+                Rechnungen[umlage] = [.. umlage.Betriebskostenrechnungen
+                    .Where(rechnung => rechnung.BetreffendesJahr == zeitraum.Jahr)
+                    .Select(rechnung => new BetriebskostenrechnungEntry(rechnung, zeitraum, notes))];
 
-                if (Rechnungen[umlage]?.Rechnung == null)
+                if (Rechnungen[umlage].Count == 0)
                 {
                     notes.Add($"Keine Rechnung für {umlage.Typ.Bezeichnung} gefunden.", Severity.Warning);
                 }
@@ -110,11 +108,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 
             var rechnungenKalt = Rechnungen
                 .Where(e => e.Key.HKVO == null && e.Value != null)
-                .Select(e => e.Value!)
+                .SelectMany(e => e.Value!)
                 .ToList();
             var rechnungenWarm = Rechnungen
                 .Where(e => e.Key.HKVO != null && e.Value != null)
-                .Select(e => e.Value!)
+                .SelectMany(e => e.Value!)
                 .ToList();
 
             PersonenZeitanteile = PersonenZeitanteil.GetPersonenZeitanteile(vertrag, wohnungen, zeitraum);

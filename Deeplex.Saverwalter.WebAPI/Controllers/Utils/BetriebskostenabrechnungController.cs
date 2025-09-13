@@ -99,21 +99,21 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             public double BetragLetztesJahr { get; }
             public string Beschreibung { get; }
 
-            public RechnungEntry(KeyValuePair<Umlage, BetriebskostenrechnungEntry?> rechnung, Abrechnungseinheit einheit, int year)
+            public RechnungEntry(Umlage umlage, BetriebskostenrechnungEntry rechnung, Abrechnungseinheit einheit, int year)
             {
-                Id = rechnung.Key.UmlageId;
-                RechnungId = rechnung.Value?.Rechnung?.BetriebskostenrechnungId ?? 0;
-                Typ = rechnung.Key.Typ.Bezeichnung;
-                TypId = rechnung.Key.Typ.UmlagetypId;
-                var key = rechnung.Key.Schluessel;
+                Id = umlage.UmlageId;
+                RechnungId = rechnung.Rechnung?.BetriebskostenrechnungId ?? 0;
+                Typ = umlage.Typ.Bezeichnung;
+                TypId = umlage.Typ.UmlagetypId;
+                var key = umlage.Schluessel;
                 Schluessel = key.ToDescriptionString();
-                GesamtBetrag = rechnung.Value?.Betrag ?? 0;
-                Anteil = einheit.GetAnteil(rechnung.Key);
+                GesamtBetrag = rechnung?.Betrag ?? 0;
+                Anteil = einheit.GetAnteil(umlage);
                 Betrag = GesamtBetrag * Anteil;
-                BetragLetztesJahr = rechnung.Key.Betriebskostenrechnungen
+                BetragLetztesJahr = umlage.Betriebskostenrechnungen
                     .Where(bkr => (bkr.BetreffendesJahr + 1) == year)
                     .Sum(bkr => bkr.Betrag);
-                Beschreibung = rechnung.Key.Beschreibung ?? "";
+                Beschreibung = umlage.Beschreibung ?? "";
             }
         }
 
@@ -150,13 +150,12 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 NEZeitanteil = einheit.NEZeitanteil;
                 PersonenZeitanteil = einheit.PersonenZeitanteile;
                 Heizkostenberechnungen = einheit.Heizkostenberechnungen;
-                Rechnungen = einheit.Rechnungen
+                Rechnungen = [.. einheit.Rechnungen
                     .Where(rechnung => rechnung.Key.HKVO == null)
-                    .Select(rechnung => new RechnungEntry(rechnung, einheit, year))
-                    .ToList();
-                VerbrauchAnteil = einheit.VerbrauchAnteile
-                    .Select(anteil => new VerbrauchAnteilEntry(anteil))
-                    .ToList();
+                    .SelectMany(rechnungen =>
+                        rechnungen.Value.Select(
+                            rechnung => new RechnungEntry(rechnungen.Key, rechnung, einheit, year)))];
+                VerbrauchAnteil = [.. einheit.VerbrauchAnteile.Select(anteil => new VerbrauchAnteilEntry(anteil))];
                 BetragKalt = einheit.BetragKalt;
                 GesamtBetragKalt = einheit.GesamtBetragKalt;
                 BetragWarm = einheit.BetragWarm;
