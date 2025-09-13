@@ -84,7 +84,11 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             {
                 return 0;
             }
+
+            List<double> lasts = [];
+
             return vertrag.Versionen
+                .OrderBy(v => v.Beginn)
                 .Sum(version =>
                 {
                     var versionEnde = version.Ende();
@@ -99,8 +103,15 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     else
                     {
                         var last = Min(versionEnde ?? zeitraum.Abrechnungsende, zeitraum.Abrechnungsende).Month;
-                        var first = Max(version.Beginn, zeitraum.Abrechnungsbeginn).Month - 1;
-                        return (last - first) * version.Grundmiete;
+                        var first = Max(version.Beginn, zeitraum.Abrechnungsbeginn).Month;
+                        // Skip a month if it was already considered in a previous version (e.g. change in mid of month)
+                        if (lasts.Contains(first))
+                        {
+                            first++;
+                        }
+
+                        lasts.Add(last);
+                        return (last - first + 1) * version.Grundmiete;
                     }
                 });
         }
