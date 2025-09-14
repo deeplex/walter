@@ -46,8 +46,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     );
 
     onMount(() => {
-        visible = !!entry.hKVO;
-        oldHKVO = { ...entry.hKVO };
+        visible = !!entry.hkvo;
+        oldHKVO = { ...entry.hkvo };
         updateSelectableUmlagen();
     });
 
@@ -86,7 +86,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             );
 
             const filteredUmlagen = umlagenReponse.filter((umlage) => {
-                if (umlage.hKVO || umlage.id === entry.id) {
+                if (umlage.hkvo || umlage.id === entry.id) {
                     return false;
                 }
 
@@ -121,7 +121,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     function change(e: Event, p9a2: WalterSelectionEntry[]) {
         if ((e.target as HTMLInputElement).checked) {
-            entry.hKVO = {
+            entry.hkvo = {
                 id: oldHKVO.id || 0,
                 hkvO_P7: oldHKVO.hkvO_P7 || 50,
                 hkvO_P8: oldHKVO.hkvO_P8 || 50,
@@ -130,7 +130,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 stromrechnung: oldHKVO.stromrechnung || undefined
             };
         } else {
-            entry.hKVO = undefined;
+            entry.hkvo = undefined;
         }
     }
 </script>
@@ -154,10 +154,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 </p>
             {/await}
         </Row>
-        {#if entry.hKVO}
+        {#if entry.hkvo}
             <Row>
                 <WalterComboBox
-                    bind:value={entry.hKVO.stromrechnung}
+                    bind:value={entry.hkvo.stromrechnung}
                     {readonly}
                     required
                     bind:entries={selectableUmlagen}
@@ -172,7 +172,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     max={70}
                     fullWidth
                     labelText="HKVO §7 (in %)"
-                    bind:value={entry.hKVO.hkvO_P7}
+                    bind:value={entry.hkvo.hkvO_P7}
                 />
                 <Slider
                     disabled={readonly}
@@ -181,7 +181,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     max={70}
                     fullWidth
                     labelText="HKVO §8 (in %)"
-                    bind:value={entry.hKVO.hkvO_P8}
+                    bind:value={entry.hkvo.hkvO_P8}
                 />
                 <Slider
                     disabled={readonly}
@@ -190,13 +190,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     max={10}
                     fullWidth
                     labelText="Strompauschale (in %)"
-                    bind:value={entry.hKVO.strompauschale}
+                    bind:value={entry.hkvo.strompauschale}
                 />
                 <WalterComboBox
                     required
                     {readonly}
                     entries={hkvo_p9a2}
-                    bind:value={entry.hKVO.hkvO_P9}
+                    bind:value={entry.hkvo.hkvO_P9}
                     titleText="HKVO §9"
                 />
             </Row>

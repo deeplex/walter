@@ -179,7 +179,8 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 (Umlageschluessel)entry.Schluessel.Id == Umlageschluessel.NachVerbrauch &&
                 entry.HKVO is HKVOEntryBase hkvo)
             {
-                if (hkvo.Id == 0 && entity.HKVO == null)
+                var oldHKVO = entity.HKVO;
+                if (oldHKVO == null)
                 {
                     var newHKVO = new HKVO(
                         ((double)hkvo.HKVO_P7) / 100,
@@ -194,7 +195,6 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
                 }
                 else
                 {
-                    var oldHKVO = Ctx.HKVO.Single(e => e.HKVOId == hkvo.Id);
                     oldHKVO.HKVO_P7 = ((double)hkvo.HKVO_P7) / 100;
                     oldHKVO.HKVO_P8 = ((double)hkvo.HKVO_P8) / 100;
                     oldHKVO.HKVO_P9 = (HKVO_P9A2)hkvo.HKVO_P9.Id;
