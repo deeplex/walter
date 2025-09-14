@@ -55,7 +55,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                         continue;
                     }
                     var daysToFirstZaehler = zaehler.Staende
-                        .OrderBy(stand => stand.Stand)
+                        .OrderBy(stand => stand.Datum)
                         .FirstOrDefault()?
                         .Datum
                         .DayNumber - zeitraum.Abrechnungsende.DayNumber;
@@ -188,10 +188,9 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Zeitraum zeitraum,
             List<Note> notes)
         {
-            return umlagen
+            return [.. umlagen
                 .Where(umlage => umlage.Zaehler.Count > 0)
-                .Select(umlage => new VerbrauchAnteil(umlage, vertrag.Wohnung, zeitraum, notes))
-                .ToList();
+                .Select(umlage => new VerbrauchAnteil(umlage, vertrag.Wohnung, zeitraum, notes))];
         }
     }
 }
