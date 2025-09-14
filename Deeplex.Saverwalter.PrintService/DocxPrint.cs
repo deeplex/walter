@@ -175,12 +175,22 @@ namespace Deeplex.Saverwalter.PrintService
 
             var p = new Paragraph(Font(), new Run(Font(), new Break(), new Text("Davon der Warmwasseranteil nach HeizkostenV §9(2):"), new Break(), new Break()));
 
+            List<int> umlageIds = [];
             foreach (var hk in abrechnungseinheit.Heizkostenberechnungen)
             {
-                p.Append(new DocumentFormat.OpenXml.Math.Paragraph(justifyLeft(),
-                    new DocumentFormat.OpenXml.Math.OfficeMath(
-                    t("2,5 ×"), frac("V", "Q"), t(" × ("), tw(), t("-10°C)"), units(), t(" ⟹ "),
-                    t("2,5 ×"), frac(Utils.Unit(hk.V, "m³"), Utils.Unit(hk.Q, "kWh")), t(" × ("), t(Utils.Celsius((int)hk.tw)), t("-10°C)"), units(), t(" = "), t(Utils.Prozent(hk.Para9_2)))));
+                if (hk.UmlageId == 0)
+                {
+                    continue;
+                }
+
+                if (!umlageIds.Contains(hk.UmlageId))
+                {
+                    p.Append(new DocumentFormat.OpenXml.Math.Paragraph(justifyLeft(),
+                         new DocumentFormat.OpenXml.Math.OfficeMath(
+                         t("2,5 ×"), frac("V", "Q"), t(" × ("), tw(), t("-10°C)"), units(), t(" ⟹ "),
+                         t("2,5 ×"), frac(Utils.Unit(hk.V, "m³"), Utils.Unit(hk.Q, "kWh")), t(" × ("), t(Utils.Celsius((int)hk.tw)), t("-10°C)"), units(), t(" = "), t(Utils.Prozent(hk.Para9_2)))));
+                    umlageIds.Add(hk.UmlageId);
+                }
             }
             p.Append(new Break(), new Break(),
                 new Run(Font(), r("Wobei "), om("V"), r(" die Menge des Warmwassers, die im Abrechnungszeitraum gemessen wurde, "),

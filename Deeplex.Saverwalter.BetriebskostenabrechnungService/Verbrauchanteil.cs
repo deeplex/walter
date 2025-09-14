@@ -76,7 +76,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
                     {
                         var verbrauchMieter = new Verbrauch(zaehler, zeitraum.Nutzungsbeginn, zeitraum.Nutzungsende, notes);
                         DieseZaehler[unit].Add(verbrauchMieter);
-                        DieseVerbrauch[unit] += verbrauch.Delta;
+                        DieseVerbrauch[unit] += verbrauchMieter.Delta;
                     }
                 }
 

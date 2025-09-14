@@ -88,7 +88,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 
         public class RechnungEntry
         {
-            public int Id { get; }
+            public int UmlageId { get; }
             public int RechnungId { get; }
             public string Typ { get; }
             public int TypId { get; }
@@ -101,7 +101,7 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
 
             public RechnungEntry(Umlage umlage, BetriebskostenrechnungEntry rechnung, Abrechnungseinheit einheit, int year)
             {
-                Id = umlage.UmlageId;
+                UmlageId = umlage.UmlageId;
                 RechnungId = rechnung.Rechnung?.BetriebskostenrechnungId ?? 0;
                 Typ = umlage.Typ.Bezeichnung;
                 TypId = umlage.Typ.UmlagetypId;

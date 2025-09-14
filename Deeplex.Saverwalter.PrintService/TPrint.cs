@@ -700,7 +700,6 @@ namespace Deeplex.Saverwalter.PrintService
                 underlined.Add(false);
 
                 var verbrauchAnteile = abrechnungseinheit.VerbrauchAnteile;
-                // Kalte Betriebskosten are equal / warme are odd
                 var warmeAnteile = verbrauchAnteile.Where(verbrauch => verbrauch.Umlage.HKVO != null);
                 foreach (var verbrauchAnteil in warmeAnteile)
                 {
@@ -737,6 +736,22 @@ namespace Deeplex.Saverwalter.PrintService
 
             p.Table(widths, justification, bold.ToArray(), underlined.ToArray(), cols);
         }
+
+        private class WarmAnteilEntry
+        {
+            public double NFZeitanteil;
+            public double HeizkostenVerbrauchAnteil;
+            public double WarmwasserVerbrauchAnteil;
+            public double WaermeAnteilNF;
+            public double WaermeAnteilVerb;
+            public double WarmwasserAnteilNF;
+            public double WarmwasserAnteilVerb;
+            public double Para9_2;
+            public double Para7;
+            public double Para8;
+            public double PauschalBetrag;
+        }
+
         private static void ErmittlungWarmanteil(Betriebskostenabrechnung abrechnung, Abrechnungseinheit abrechnungseinheit, IPrint<T> p)
         {
             var widths = new int[] { 24, 13, 9, 14, 14, 13, 13 };
@@ -752,45 +767,81 @@ namespace Deeplex.Saverwalter.PrintService
 
             var wohnung = abrechnung.Vertrag.Wohnung;
 
-            foreach (var heizkostenberechnung in abrechnungseinheit.Heizkostenberechnungen)
+            Dictionary<int, WarmAnteilEntry> warmAnteile = [];
+            foreach (var r in abrechnungseinheit.Heizkostenberechnungen)
             {
+                if (r.UmlageId == 0)
+                {
+                    continue;
+                }
+
+                if (!warmAnteile.ContainsKey(r.UmlageId))
+                {
+                    warmAnteile[r.UmlageId] = new WarmAnteilEntry()
+                    {
+                        PauschalBetrag = r.PauschalBetrag,
+                        Para9_2 = r.Para9_2,
+                        Para7 = r.Para7,
+                        Para8 = r.Para8,
+                        NFZeitanteil = r.NFZeitanteil,
+                        HeizkostenVerbrauchAnteil = r.HeizkostenVerbrauchAnteil,
+                        WarmwasserVerbrauchAnteil = r.WarmwasserVerbrauchAnteil,
+                        WaermeAnteilNF = r.WaermeAnteilNF,
+                        WaermeAnteilVerb = r.WaermeAnteilVerb,
+                        WarmwasserAnteilNF = r.WarmwasserAnteilNF,
+                        WarmwasserAnteilVerb = r.WarmwasserAnteilVerb
+                    };
+                }
+                else
+                {
+                    warmAnteile[r.UmlageId].PauschalBetrag += r.PauschalBetrag;
+                    warmAnteile[r.UmlageId].WaermeAnteilNF += r.WaermeAnteilNF;
+                    warmAnteile[r.UmlageId].WaermeAnteilVerb += r.WaermeAnteilVerb;
+                    warmAnteile[r.UmlageId].WarmwasserAnteilNF += r.WarmwasserAnteilNF;
+                    warmAnteile[r.UmlageId].WarmwasserAnteilVerb += r.WarmwasserAnteilVerb;
+                }
+            }
+
+            foreach (var warmAnteil in warmAnteile.Values)
+            {
+
                 col1.Add("Heizung");
                 col2.Add(Umlageschluessel.NachNutzflaeche.ToDescriptionString());
-                col3.Add(Euro(heizkostenberechnung.PauschalBetrag));
-                col4.Add(Prozent(1 - heizkostenberechnung.Para9_2));
-                col5.Add(Prozent(1 - heizkostenberechnung.Para7));
-                col6.Add(Prozent(heizkostenberechnung.NFZeitanteil));
-                col7.Add(Euro(heizkostenberechnung.WaermeAnteilNF));
+                col3.Add(Euro(warmAnteil.PauschalBetrag));
+                col4.Add(Prozent(1 - warmAnteil.Para9_2));
+                col5.Add(Prozent(1 - warmAnteil.Para7));
+                col6.Add(Prozent(warmAnteil.NFZeitanteil));
+                col7.Add(Euro(warmAnteil.WaermeAnteilNF));
                 bold.Add(false);
                 underlined.Add(true);
 
                 col1.Add("Heizung");
                 col2.Add(Umlageschluessel.NachVerbrauch.ToDescriptionString());
-                col3.Add(Euro(heizkostenberechnung.PauschalBetrag));
-                col4.Add(Prozent(1 - heizkostenberechnung.Para9_2));
-                col5.Add(Prozent(heizkostenberechnung.Para7));
-                col6.Add(Prozent(heizkostenberechnung.HeizkostenVerbrauchAnteil));
-                col7.Add(Euro(heizkostenberechnung.WaermeAnteilVerb));
+                col3.Add(Euro(warmAnteil.PauschalBetrag));
+                col4.Add(Prozent(1 - warmAnteil.Para9_2));
+                col5.Add(Prozent(warmAnteil.Para7));
+                col6.Add(Prozent(warmAnteil.HeizkostenVerbrauchAnteil));
+                col7.Add(Euro(warmAnteil.WaermeAnteilVerb));
                 bold.Add(false);
                 underlined.Add(true);
 
                 col1.Add("Warmwasser");
                 col2.Add(Umlageschluessel.NachNutzflaeche.ToDescriptionString());
-                col3.Add(Euro(heizkostenberechnung.PauschalBetrag));
-                col4.Add(Prozent(heizkostenberechnung.Para9_2));
-                col5.Add(Prozent(heizkostenberechnung.Para8));
-                col6.Add(Prozent(heizkostenberechnung.NFZeitanteil));
-                col7.Add(Euro(heizkostenberechnung.WarmwasserAnteilNF));
+                col3.Add(Euro(warmAnteil.PauschalBetrag));
+                col4.Add(Prozent(warmAnteil.Para9_2));
+                col5.Add(Prozent(warmAnteil.Para8));
+                col6.Add(Prozent(warmAnteil.NFZeitanteil));
+                col7.Add(Euro(warmAnteil.WarmwasserAnteilNF));
                 bold.Add(false);
                 underlined.Add(true);
 
                 col1.Add("Warmwasser");
                 col2.Add(Umlageschluessel.NachVerbrauch.ToDescriptionString());
-                col3.Add(Euro(heizkostenberechnung.PauschalBetrag));
-                col4.Add(Prozent(heizkostenberechnung.Para9_2));
-                col5.Add(Prozent(heizkostenberechnung.Para8));
-                col6.Add(Prozent(heizkostenberechnung.WarmwasserVerbrauchAnteil));
-                col7.Add(Euro(heizkostenberechnung.WarmwasserAnteilVerb));
+                col3.Add(Euro(warmAnteil.PauschalBetrag));
+                col4.Add(Prozent(warmAnteil.Para9_2));
+                col5.Add(Prozent(warmAnteil.Para8));
+                col6.Add(Prozent(warmAnteil.WarmwasserVerbrauchAnteil));
+                col7.Add(Euro(warmAnteil.WarmwasserAnteilVerb));
                 bold.Add(false);
                 underlined.Add(true);
 

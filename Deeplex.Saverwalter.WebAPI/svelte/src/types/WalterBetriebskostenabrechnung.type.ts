@@ -105,7 +105,7 @@ export type WalterPersonenZeitanteil = {
 };
 
 export type WalterRechnungEntry = {
-    id: number;
+    umlageId: number;
     rechnungId: number;
     typ: string;
     typId: number;

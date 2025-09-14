@@ -19,6 +19,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
 {
     public sealed class Heizkostenberechnung
     {
+        public int UmlageId { get; }
         public double GesamtBetrag { get; }
         public double PauschalBetrag { get; }
 
@@ -50,6 +51,7 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             Zeitraum zeitraum,
             List<Note> notes)
         {
+            UmlageId = rechnung.Rechnung?.Umlage.UmlageId ?? 0;
             var lRechnung = rechnung.Rechnung;
             if (lRechnung == null)
             {

@@ -25,7 +25,7 @@ export function goto_or_create_rechnung(
     } else {
         const searchParams = new URLSearchParams();
         searchParams.set('typ', `${punkt.typId}`);
-        searchParams.set('umlage', `${punkt.id}`);
+        searchParams.set('umlage', `${punkt.umlageId}`);
         searchParams.set('jahr', `${year}`);
         // TODO betrag
 

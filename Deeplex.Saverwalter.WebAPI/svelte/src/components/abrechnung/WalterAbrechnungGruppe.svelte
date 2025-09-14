@@ -48,7 +48,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             betreffendesJahr: year,
             datum: convertDateCanadian(new Date()),
             typ: { id: `${rechnung.typId}`, text: rechnung.typ },
-            umlage: { id: `${rechnung.id}`, text: rechnung.typ },
+            umlage: { id: `${rechnung.umlageId}`, text: rechnung.typ },
             id: rechnung.rechnungId || undefined
         };
 
@@ -56,12 +56,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     const rowsAdd = rows.map((row) => ({
+        id: `${row.umlageId}-${row.rechnungId}`,
         ...row,
         button: row.rechnungId ? 'disabled' : (e: CustomEvent) => add(e, row)
     }));
 
     const on_click_row = (e: CustomEvent<DataTableRow>) => {
-        goto_or_create_rechnung(e.detail as WalterRechnungEntry, year);
+        goto_or_create_rechnung(
+            e.detail as unknown as WalterRechnungEntry,
+            year
+        );
     };
 
     let open = false;
