@@ -829,7 +829,7 @@ namespace Deeplex.Saverwalter.PrintService
                 col2.Add(Umlageschluessel.NachNutzflaeche.ToDescriptionString());
                 col3.Add(Euro(warmAnteil.PauschalBetrag));
                 col4.Add(Prozent(warmAnteil.Para9_2));
-                col5.Add(Prozent(warmAnteil.Para8));
+                col5.Add(Prozent(1 - warmAnteil.Para8));
                 col6.Add(Prozent(warmAnteil.NFZeitanteil));
                 col7.Add(Euro(warmAnteil.WarmwasserAnteilNF));
                 bold.Add(false);

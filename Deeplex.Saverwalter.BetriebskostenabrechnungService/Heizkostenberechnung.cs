@@ -134,8 +134,8 @@ namespace Deeplex.Saverwalter.BetriebskostenabrechnungService
             WarmwasserVerbrauchAnteil = V > 0 ? v / V : 0;
 
             WaermeAnteilNF = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * NFZeitanteil;
-            WaermeAnteilVerb = PauschalBetrag * (1 - Para9_2) * (1 - Para7) * HeizkostenVerbrauchAnteil;
-            WarmwasserAnteilNF = PauschalBetrag * Para9_2 * Para8 * NFZeitanteil;
+            WaermeAnteilVerb = PauschalBetrag * (1 - Para9_2) * Para7 * HeizkostenVerbrauchAnteil;
+            WarmwasserAnteilNF = PauschalBetrag * Para9_2 * (1 - Para8) * NFZeitanteil;
             WarmwasserAnteilVerb = PauschalBetrag * Para9_2 * Para8 * WarmwasserVerbrauchAnteil;
 
             Betrag = WaermeAnteilNF + WaermeAnteilVerb + WarmwasserAnteilNF + WarmwasserAnteilVerb;
