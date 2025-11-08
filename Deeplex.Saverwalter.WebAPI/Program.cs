@@ -67,11 +67,9 @@ namespace Deeplex.Saverwalter.WebAPI
             }
 
             app.UseAuthentication();
-
-            app.MapControllers();
-            app.UseRouting();
             app.UseAuthorization();
 
+            app.MapControllers();
             app.UseStaticFiles();
             app.MapFallbackToFile("index.html");
 
