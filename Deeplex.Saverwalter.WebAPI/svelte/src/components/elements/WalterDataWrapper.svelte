@@ -15,7 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { AccordionItem, Tile } from 'carbon-components-svelte';
+    import { Accordion, AccordionItem, Tile } from 'carbon-components-svelte';
 
     import { WalterDataTable } from '$walter/components';
     import { page } from '$app/stores';
@@ -86,21 +86,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </WalterDataWrapperQuickAdd>
     {/if}
 
-    <AccordionItem title={`${title} (${rows.length})`} bind:open>
-        <Tile style="overflow: auto">
-            <WalterDataTable
-                add={addUrl &&
-                canQuickAdd(addEntry) &&
-                addEntry.permissions?.update
-                    ? quick_add
-                    : undefined}
-                {on_click_row}
-                {rowHref}
-                bind:rows
-                {headers}
-            />
-        </Tile>
-    </AccordionItem>
+    <Accordion>
+        <AccordionItem title={`${title} (${rows.length})`} bind:open>
+            <Tile style="overflow: auto">
+                <WalterDataTable
+                    add={addUrl &&
+                    canQuickAdd(addEntry) &&
+                    addEntry.permissions?.update
+                        ? quick_add
+                        : undefined}
+                    {on_click_row}
+                    {rowHref}
+                    bind:rows
+                    {headers}
+                />
+            </Tile>
+        </AccordionItem>
+    </Accordion>
 {:else}
     <WalterDataTable
         {readonly}
