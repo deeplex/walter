@@ -13,11 +13,14 @@
         "lint": "prettier --check . && eslint .",
         "format": "prettier --write .",
         "vitest": "vitest",
-        "vitest:ui": "vitest --coverage --ui"
+        "vitest:ui": "vitest --coverage --ui",
+        "test:e2e": "playwright test",
+        "test:e2e:ui": "playwright test --ui"
     },
     "devDependencies": {
         "@carbon/charts-svelte": "^1.13.8",
         "@carbon/styles": "^1.42.1",
+        "@playwright/test": "^1.52.0",
         "@sveltejs/adapter-auto": "^2.1.1",
         "@sveltejs/adapter-static": "^2.0.3",
         "@sveltejs/kit": "^1.27.6",

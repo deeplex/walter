@@ -15,22 +15,30 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { WalterGrid, WalterHeaderNew } from '$walter/components';
+    import { browser } from '$app/environment';
+    import { WalterError, WalterGrid, WalterHeaderNew } from '$walter/components';
     import WalterAccount from '$walter/components/details/WalterAccount.svelte';
     import { WalterAccountEntry } from '$walter/lib';
+    import { UserRole, getAuthState } from '$walter/services/auth';
     import type { PageData } from './$types';
 
     const entry: Partial<WalterAccountEntry> = {};
 
     export let data: PageData;
+
+    const currentAuthState = browser ? getAuthState() : undefined;
 </script>
 
-<WalterHeaderNew
-    apiURL={WalterAccountEntry.ApiURL}
-    {entry}
-    title={data.title}
-/>
+{#if currentAuthState && $currentAuthState?.role === UserRole.Admin}
+    <WalterHeaderNew
+        apiURL={WalterAccountEntry.ApiURL}
+        {entry}
+        title={data.title}
+    />
 
-<WalterGrid>
-    <WalterAccount {entry} fetchImpl={data.fetchImpl} />
-</WalterGrid>
+    <WalterGrid>
+        <WalterAccount {entry} fetchImpl={data.fetchImpl} />
+    </WalterGrid>
+{:else}
+    <WalterError />
+{/if}

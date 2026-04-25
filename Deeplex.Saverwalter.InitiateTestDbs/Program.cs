@@ -19,47 +19,81 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
 {
     internal class Program
     {
-        static async Task Main()
+        static async Task Main(string[] args)
         {
-            var databaseUser = Environment.GetEnvironmentVariable("DATABASE_USER");
-            if (databaseUser == null)
+            var databaseUser = RequireEnv("DATABASE_USER");
+            var databasePass = RequireEnv("DATABASE_PASS");
+            var databaseHost = RequireEnv("DATABASE_HOST");
+            var databasePort = RequireEnv("DATABASE_PORT");
+
+            var printAccess = args.Contains("--print-access", StringComparer.OrdinalIgnoreCase);
+            var ensureDevUsers = args.Contains("--ensure-dev-users", StringComparer.OrdinalIgnoreCase);
+            var seedDatabases = !printAccess && !ensureDevUsers;
+
+            var targetDb = Environment.GetEnvironmentVariable("DATABASE_NAME") ?? "walter_dev_generic_db";
+
+            if (seedDatabases)
             {
-                Console.WriteLine("Can't find environment variable DATABASE_USER");
+                var defaultWohnungen = GetIntEnv("WALTER_DEV_TARGET_WOHNUNGEN", 120);
+                var fullWohnungen = GetIntEnv("WALTER_DEV_FULL_TARGET_WOHNUNGEN", 320);
+                var seed = GetIntEnv("WALTER_DEV_RANDOM_SEED", 1337);
+
+                await GenericDatabase.ConnectAndPopulate(
+                    databaseHost,
+                    databasePort,
+                    "walter_dev_generic_db",
+                    databaseUser,
+                    databasePass,
+                    defaultWohnungen,
+                    seed);
+
+                await GenericDatabase.ConnectAndPopulate(
+                    databaseHost,
+                    databasePort,
+                    "walter_dev_full_generic_db",
+                    databaseUser,
+                    databasePass,
+                    fullWohnungen,
+                    seed + 1);
+
+                Console.WriteLine($"Databases seeded: walter_dev_generic_db ({defaultWohnungen}), walter_dev_full_generic_db ({fullWohnungen})");
+
+                await GenericDatabase.PrintAccessOverview(databaseHost, databasePort, "walter_dev_generic_db", databaseUser, databasePass, databasePass);
+                await GenericDatabase.PrintAccessOverview(databaseHost, databasePort, "walter_dev_full_generic_db", databaseUser, databasePass, databasePass);
+                return;
             }
 
-            var databasePass = Environment.GetEnvironmentVariable("DATABASE_PASS");
-            if (databaseUser == null)
+            if (ensureDevUsers)
             {
-                Console.WriteLine("Can't find environment variable DATABASE_PASS");
+                await GenericDatabase.EnsureDevelopmentUsers(databaseHost, databasePort, targetDb, databaseUser, databasePass, databasePass);
             }
 
-            var databaseHost = Environment.GetEnvironmentVariable("DATABASE_HOST");
-            if (databaseUser == null)
+            if (printAccess)
             {
-                Console.WriteLine("Can't find environment variable DATABASE_HOST");
+                await GenericDatabase.PrintAccessOverview(databaseHost, databasePort, targetDb, databaseUser, databasePass, databasePass);
+            }
+        }
+
+        private static string RequireEnv(string name)
+        {
+            var value = Environment.GetEnvironmentVariable(name);
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new InvalidOperationException($"Missing required environment variable {name}");
             }
 
-            var databasePort = Environment.GetEnvironmentVariable("DATABASE_PORT");
-            if (databaseUser == null)
+            return value;
+        }
+
+        private static int GetIntEnv(string name, int defaultValue)
+        {
+            var raw = Environment.GetEnvironmentVariable(name);
+            if (int.TryParse(raw, out var parsed) && parsed > 0)
             {
-                Console.WriteLine("Can't find environment variable DATABASE_PORT");
+                return parsed;
             }
 
-            await GenericDatabase.ConnectAndPopulate(
-                databaseHost!,
-                databasePort!,
-                "walter_dev_generic_db",
-                databaseUser!,
-                databasePass!,
-                10);
-
-            await GenericDatabase.ConnectAndPopulate(
-                databaseHost!,
-                databasePort!,
-                "walter_dev_full_generic_db",
-                databaseUser!,
-                databasePass!,
-                100);
+            return defaultValue;
         }
     }
 }

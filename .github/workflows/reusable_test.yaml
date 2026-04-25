@@ -30,3 +30,46 @@ jobs:
           dotnet restore
           dotnet test /p:CollectCoverage=true /p:ExcludeByFile="**/Migrations/Npgsql/*.cs" | tee /tmp/test-output.txt
           grep '%' /tmp/test-output.txt | awk '{print $0}{sum += substr($4,1,length($4)-1)} END {if (NR>0) print "Total coverage: " sum / NR "%" }'
+
+  test-full-stack:
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: walter_dev_full_generic_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install Playwright browser dependencies
+        run: |
+          cd Deeplex.Saverwalter.WebAPI/svelte
+          yarn install
+          yarn playwright install --with-deps chromium
+      - name: Run full-stack test script
+        env:
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+          DATABASE_USER: postgres
+          DATABASE_PASS: postgres
+          WALTER_E2E_PASSWORD: postgres
+        run: bash ./scripts/test-full-stack.sh

@@ -37,6 +37,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
 
+    type WalterDataTableRow = DataTableRow & {
+        id: string | number;
+        permissions?: {
+            read?: boolean;
+        };
+    };
+
     export let fullHeight = false;
     export let size: 'compact' | 'short' | 'medium' | 'tall' | undefined =
         undefined;
@@ -45,7 +52,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         value: string;
     }[];
     export let readonly = false;
-    export let rows: unknown[];
+    export let rows: WalterDataTableRow[];
     export let add: (() => void) | undefined = undefined;
 
     const searchParams: URLSearchParams | null = $page
@@ -117,23 +124,35 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const enabledSelector = enabledRows
         .map((id) => `[data-row="${id}"]`)
         .join(',');
-    const styles = `
-    <style>
-    ${disabledSelector} {
+    const styleRules = [
+        disabledSelector
+            ? `${disabledSelector} {
         opacity: 0.5;
         cursor: not-allowed !important;
         pointer-events: none !important;
-    }
-      ${enabledSelector} {
+    }`
+            : '',
+        enabledSelector
+            ? `${enabledSelector} {
         color: #ff0;
         cursor: pointer !important;
-      }
-    <\/style>`;
-</script>
+      }`
+            : ''
+    ].filter(Boolean);
 
-<svelte:head>
-    {@html styles}
-</svelte:head>
+    onMount(() => {
+        const styleElements = styleRules.map((rule) => {
+            const styleElement = document.createElement('style');
+            styleElement.textContent = rule;
+            document.head.appendChild(styleElement);
+            return styleElement;
+        });
+
+        return () => {
+            styleElements.forEach((styleElement) => styleElement.remove());
+        };
+    });
+</script>
 
 <Content>
     <DataTable
