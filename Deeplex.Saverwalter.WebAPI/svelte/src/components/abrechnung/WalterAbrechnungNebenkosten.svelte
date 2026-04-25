@@ -134,7 +134,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {#each rechnungen as rechnung}
                 <StructuredListRow>
                     <StructuredListCell>
-                        <WalterLink href={`umlagen/${rechnung.id}`}>
+                        <WalterLink href={`umlagen/${rechnung.umlageId}`}>
                             {rechnung.typ}
                         </WalterLink>
                     </StructuredListCell>

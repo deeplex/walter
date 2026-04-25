@@ -473,6 +473,7 @@ export type WalterDataOptionsType = {
     legend: { enabled: boolean };
     heatmap: unknown;
     height: string;
+    title?: string;
     curve?: string;
     axes?: {
         bottom: unknown;
@@ -483,6 +484,7 @@ export type WalterDataOptionsType = {
             threshold: number;
         };
     };
+    [key: string]: unknown;
 };
 
 export type WalterDataType = WalterDataPoint[];

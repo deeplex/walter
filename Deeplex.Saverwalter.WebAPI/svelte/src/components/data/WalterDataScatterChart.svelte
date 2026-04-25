@@ -17,10 +17,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import '@carbon/styles/css/styles.css';
     import '@carbon/charts-svelte/styles.css';
-    import { ScatterChart } from '@carbon/charts-svelte';
+    import { ScatterChart, type ScatterChartOptions } from '@carbon/charts-svelte';
     import type { WalterDataConfigType } from './WalterData';
 
     export let config: WalterDataConfigType;
+    $: options = config.options as ScatterChartOptions;
 </script>
 
-<ScatterChart data={config.data} options={config.options} />
+<ScatterChart data={config.data} {options} />

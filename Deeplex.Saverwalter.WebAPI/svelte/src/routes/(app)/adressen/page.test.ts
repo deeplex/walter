@@ -19,6 +19,7 @@ import { writable } from 'svelte/store';
 
 import Page from './+page.svelte';
 import { WalterAdresseEntry } from '$walter/lib';
+import { WalterPermissions } from '$walter/lib/WalterPermissions';
 
 vi.mock('$app/stores', async (importOriginal) => {
     return {
@@ -47,7 +48,8 @@ function createWalterAdresseEntryMocks(entries: number) {
                 new Date(),
                 [],
                 [],
-                []
+                [],
+                new WalterPermissions(true, true, true)
             )
         );
     }
@@ -60,7 +62,7 @@ describe('adressen/page.svelte tests', () => {
 
     it('Should have title Adressen', () => {
         render(Page, {
-            data: { rows: createWalterAdresseEntryMocks(5) }
+            data: { rows: createWalterAdresseEntryMocks(5), fetch: vi.fn() }
         });
 
         const title = document.getElementsByTagName('a').item(0)?.innerHTML;
@@ -70,7 +72,7 @@ describe('adressen/page.svelte tests', () => {
 
     it('Should have header with 4 entries', () => {
         render(Page, {
-            data: { rows: createWalterAdresseEntryMocks(5) }
+            data: { rows: createWalterAdresseEntryMocks(5), fetch: vi.fn() }
         });
 
         const header = document.getElementsByTagName('thead');
@@ -87,7 +89,7 @@ describe('adressen/page.svelte tests', () => {
 
     it('Should have 15 entries', () => {
         render(Page, {
-            data: { rows: createWalterAdresseEntryMocks(15) }
+            data: { rows: createWalterAdresseEntryMocks(15), fetch: vi.fn() }
         });
 
         const body = document.getElementsByTagName('tbody');
@@ -107,7 +109,7 @@ describe('adressen/page.svelte tests', () => {
 
     it('Should have a button to create a new entry', () => {
         render(Page, {
-            data: { rows: createWalterAdresseEntryMocks(1) }
+            data: { rows: createWalterAdresseEntryMocks(1), fetch: vi.fn() }
         });
 
         const buttons = Array.from(document.getElementsByTagName('button'));

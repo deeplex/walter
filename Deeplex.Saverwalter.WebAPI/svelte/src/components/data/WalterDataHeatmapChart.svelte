@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import '@carbon/styles/css/styles.css';
     import '@carbon/charts-svelte/styles.css';
-    import { HeatmapChart } from '@carbon/charts-svelte';
+    import { HeatmapChart, type HeatmapChartOptions } from '@carbon/charts-svelte';
     import type { WalterDataConfigType } from './WalterData';
     import { onMount } from 'svelte';
 
@@ -25,6 +25,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let click:
         | ((e: CustomEvent<unknown>, config: WalterDataConfigType) => void)
         | undefined = undefined;
+    $: options = config.options as HeatmapChartOptions;
 
     let heatMap: HeatmapChart;
 
@@ -42,5 +43,5 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     style="min-height: 20em !important; width: 100em;"
     bind:this={heatMap}
     bind:data={config.data}
-    bind:options={config.options}
+    bind:options
 />

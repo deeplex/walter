@@ -24,7 +24,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     } from 'carbon-components-svelte';
     import WalterLinkTile from '../subdetails/WalterLinkTile.svelte';
     import { fileURL } from '$walter/services/files';
-    import { WalterAbrechnungsresultatEntry } from '$walter/lib/WalterAbrechnungsresultat';
+    import type { WalterAbrechnungsresultatEntry } from '$walter/lib/WalterAbrechnungsresultat';
     import WalterTextArea from '../elements/WalterTextArea.svelte';
     import { convertEuro } from '$walter/services/utils';
 

@@ -15,7 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
-    import { WalterAbrechnungsresultatEntry } from '$walter/lib';
+    import type { WalterAbrechnungsresultatEntry } from '$walter/lib';
     import { convertEuro } from '$walter/services/utils';
     import {
         ClickableTile,

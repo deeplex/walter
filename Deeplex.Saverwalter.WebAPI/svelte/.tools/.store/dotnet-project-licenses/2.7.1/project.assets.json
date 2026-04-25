@@ -1,0 +1,23 @@
+{
+  "version": 3,
+  "targets": {
+    "net8.0/linux-x64": {
+      "dotnet-project-licenses/2.7.1": {
+        "type": "package",
+        "tools": {
+          "tools/net7.0/any/CommandLine.dll": {},
+          "tools/net7.0/any/DotnetToolSettings.xml": {},
+          "tools/net7.0/any/HtmlAgilityPack.dll": {},
+          "tools/net7.0/any/Newtonsoft.Json.dll": {},
+          "tools/net7.0/any/NuGet.Versioning.dll": {},
+          "tools/net7.0/any/NugetUtility.deps.json": {},
+          "tools/net7.0/any/NugetUtility.dll": {},
+          "tools/net7.0/any/NugetUtility.pdb": {},
+          "tools/net7.0/any/NugetUtility.runtimeconfig.json": {}
+        }
+      }
+    }
+  },
+  "libraries": {},
+  "projectFileDependencyGroups": {}
+}

@@ -14,13 +14,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type {
+    WalterAbrechnungsresultatEntry,
     WalterMieteEntry,
     WalterSelectionEntry,
     WalterVertragEntry,
     WalterWohnungEntry,
     WalterZaehlerEntry
 } from '$walter/lib';
-import { WalterAbrechnungsresultatEntry } from '$walter/lib';
 
 export type WalterBetriebskostenabrechnungEntry = {
     notes: WalterBetriebskostenabrechnungNote[];

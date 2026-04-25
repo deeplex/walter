@@ -22,14 +22,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import WalterDataWrapperQuickAdd from './WalterDataWrapperQuickAdd.svelte';
     import { walter_goto } from '$walter/services/utils';
     import type { WalterPermissions } from '$walter/lib/WalterPermissions';
+    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
+
+    type WalterDataTableRow = DataTableRow & {
+        id: string | number;
+        permissions?: {
+            read?: boolean;
+            update?: boolean;
+        };
+    };
 
     export let readonly = false;
     export let fullHeight = false;
     export let addUrl: string | undefined = undefined;
-    export let addEntry: { permissions?: WalterPermissions } | undefined =
-        undefined;
+    export let addEntry: unknown = undefined;
     export let title: string | undefined = undefined;
-    export let rows: unknown[];
+    export let rows: WalterDataTableRow[];
     export let headers: {
         key: string;
         value: string;
@@ -52,7 +60,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     function onSubmit(new_value: unknown) {
-        rows = [...rows, new_value];
+        rows = [...rows, new_value as WalterDataTableRow];
+    }
+
+    function canQuickAdd(
+        entry: unknown
+    ): entry is { permissions?: WalterPermissions } {
+        return typeof entry === 'object' && entry !== null;
     }
 </script>
 
@@ -72,7 +86,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <AccordionItem title={`${title} (${rows.length})`} bind:open>
         <Tile style="overflow: auto">
             <WalterDataTable
-                add={addUrl && addEntry?.permissions?.update
+                add={addUrl && canQuickAdd(addEntry) && addEntry.permissions?.update
                     ? quick_add
                     : undefined}
                 {on_click_row}

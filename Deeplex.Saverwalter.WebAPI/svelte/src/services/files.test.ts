@@ -81,9 +81,35 @@ describe('files service', () => {
     it('builds entity file URLs', async () => {
         const { fileURL } = await import('./files');
 
+        expect(fileURL.abrechnungsresultat('1')).toBe(
+            '/api/abrechnungsresultate/1/files'
+        );
         expect(fileURL.wohnung('12')).toBe('/api/wohnungen/12/files');
         expect(fileURL.adresse('5')).toBe('/api/adressen/5/files');
+        expect(fileURL.betriebskostenrechnung('8')).toBe(
+            '/api/betriebskostenrechnungen/8/files'
+        );
+        expect(fileURL.erhaltungsaufwendung('7')).toBe(
+            '/api/erhaltungsaufwendungen/7/files'
+        );
+        expect(fileURL.miete('4')).toBe('/api/mieten/4/files');
+        expect(fileURL.mietminderung('6')).toBe(
+            '/api/mietminderungen/6/files'
+        );
+        expect(fileURL.kontakt('3')).toBe('/api/kontakte/3/files');
+        expect(fileURL.transaktion('13')).toBe(
+            '/api/transaktionen/13/files'
+        );
+        expect(fileURL.umlage('14')).toBe('/api/umlagen/14/files');
+        expect(fileURL.umlagetyp('15')).toBe('/api/umlagetypen/15/files');
         expect(fileURL.vertrag('9')).toBe('/api/vertraege/9/files');
+        expect(fileURL.vertragversion('10')).toBe(
+            '/api/vertragversionen/10/files'
+        );
+        expect(fileURL.zaehler('11')).toBe('/api/zaehler/11/files');
+        expect(fileURL.zaehlerstand('16')).toBe(
+            '/api/zaehlerstaende/16/files'
+        );
         expect(fileURL.stack).toBe('/api/user/files');
     });
 
@@ -131,10 +157,34 @@ describe('files service', () => {
     it('deletes files via walter_delete using the file key', async () => {
         walterDeleteMock.mockResolvedValue(new Response('', { status: 200 }));
         const { walter_file_delete } = await import('./files');
+        const toast = {
+            successTitle: 'ok',
+            failureTitle: 'fail',
+            subtitleSuccess: () => 'ok',
+            subtitleFailure: () => 'fail'
+        };
 
-        await walter_file_delete({ key: '/api/files/demo.txt' } as never);
+        await walter_file_delete({ key: '/api/files/demo.txt' } as never, toast);
 
-        expect(walterDeleteMock).toHaveBeenCalledWith('/api/files/demo.txt', undefined);
+        expect(walterDeleteMock).toHaveBeenCalledWith('/api/files/demo.txt', toast);
+    });
+
+    it('finish_file_post reports failed uploads through the toast branch', async () => {
+        const { finish_file_post } = await import('./files');
+        const toast = {
+            successTitle: 'ok',
+            failureTitle: 'fail',
+            subtitleSuccess: () => 'ok',
+            subtitleFailure: () => 'fail'
+        };
+
+        const response = await finish_file_post(
+            new Response('', { status: 500 }),
+            toast
+        );
+
+        expect(response.status).toBe(500);
+        expect(addToastMock).toHaveBeenCalledWith(toast, false);
     });
 
     it('downloads blobs through a temporary anchor element', async () => {

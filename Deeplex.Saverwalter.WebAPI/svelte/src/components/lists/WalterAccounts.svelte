@@ -35,14 +35,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let title: string | undefined = undefined;
     export let entry: Partial<WalterAccountEntry> | undefined = undefined;
     export let fetchImpl: typeof fetch;
+
+    $: wrapperRows = rows as unknown as DataTableRow[];
+    $: wrapperEntry = entry as unknown;
 </script>
 
 <WalterDataWrapper
     addUrl={WalterAccountEntry.ApiURL}
-    addEntry={entry}
+    addEntry={wrapperEntry}
     {title}
     {on_click_row}
-    {rows}
+    rows={wrapperRows}
     {headers}
     {fullHeight}
 >

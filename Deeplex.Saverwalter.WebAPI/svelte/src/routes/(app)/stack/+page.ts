@@ -16,7 +16,7 @@
 import { fileURL, walter_get_files } from '$walter/services/files';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ fetch }) => {
+export const load: PageLoad = async ({ fetch }: { fetch: typeof globalThis.fetch }) => {
     return {
         fetchImpl: fetch,
         fileURL: fileURL.stack,

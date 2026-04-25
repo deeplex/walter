@@ -57,6 +57,7 @@ function createEntryMocks(entries: number) {
                 [],
                 [],
                 [],
+                [],
                 new WalterPermissions(true, true, true)
             )
         );

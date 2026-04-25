@@ -15,8 +15,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import type { WalterAbrechnungsresultatEntry } from '$walter/lib';
     import { WalterDataWrapper } from '$walter/components';
-    import { WalterAbrechnungsresultatEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
     import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
 
@@ -35,7 +35,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 jahr: row.jahr,
                 saldo: row.vorauszahlung - row.kaltmiete - row.rechnungsbetrag,
                 istAbgesendet: row.abgesendet ? 'Ja' : 'Nein',
-                istBeglichen: row.istBeglichen ? 'Ja' : 'Nein'
+                istBeglichen: row.saldo === 0 ? 'Ja' : 'Nein'
             };
         })
         .sort((a, b) => b.jahr - a.jahr);
