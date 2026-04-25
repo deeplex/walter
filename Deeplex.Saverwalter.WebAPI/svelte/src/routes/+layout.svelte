@@ -22,7 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import 'carbon-components-svelte/css/all.css';
 
     beforeNavigate((e) => {
-        if (e.to && e.type !== 'goto') {
+        // Do not intercept browser back/forward; cancelling popstate breaks history traversal.
+        if (e.to && e.type === 'link') {
             e.cancel();
             walter_goto(e.to.url.href);
         }
