@@ -70,8 +70,13 @@ namespace Deeplex.Saverwalter.WebAPI
             app.UseAuthorization();
 
             app.MapControllers();
-            app.UseStaticFiles();
-            app.MapFallbackToFile("index.html");
+
+            var webRootPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+            if (Directory.Exists(webRootPath))
+            {
+                app.UseStaticFiles();
+                app.MapFallbackToFile("index.html");
+            }
 
             return app;
         }
@@ -203,31 +208,42 @@ namespace Deeplex.Saverwalter.WebAPI
 
         private static async Task CreateRootIfNoUserExists(Container container)
         {
-            await using (AsyncScopedLifestyle.BeginScope(container))
+            try
             {
-                var dbContext = container.GetInstance<SaverwalterContext>();
-
-                if (await dbContext.UserAccounts.CountAsync() > 0)
+                await using (AsyncScopedLifestyle.BeginScope(container))
                 {
-                    return;
+                    var dbContext = container.GetInstance<SaverwalterContext>();
+
+                    if (await dbContext.UserAccounts.CountAsync() > 0)
+                    {
+                        return;
+                    }
+
+                    var rootPassword = Environment.GetEnvironmentVariable("WALTER_PASSWORD");
+                    if (string.IsNullOrEmpty(rootPassword))
+                    {
+                        return;
+                    }
+
+                    // either create the account _and_ associate a password or do nothing
+                    using var tx = await dbContext.Database.BeginTransactionAsync();
+
+                    var userService = container.GetInstance<UserService>();
+                    var rootAccount = await userService.CreateUserAccount("root", "root");
+                    rootAccount.Role = UserRole.Admin;
+                    await userService.UpdateUserPassword(rootAccount, Encoding.UTF8.GetBytes(rootPassword));
+
+                    await tx.CommitAsync();
                 }
-
-                var rootPassword = Environment.GetEnvironmentVariable("WALTER_PASSWORD");
-                if (string.IsNullOrEmpty(rootPassword))
-                {
-                    return;
-                }
-
-                // either create the account _and_ associate a password or do nothing
-                using var tx = await dbContext.Database.BeginTransactionAsync();
-
-                var userService = container.GetInstance<UserService>();
-                var rootAccount = await userService.CreateUserAccount("root", "root");
-                rootAccount.Role = UserRole.Admin;
-                await userService.UpdateUserPassword(rootAccount, Encoding.UTF8.GetBytes(rootPassword));
-
-                await tx.CommitAsync();
+            }
+            catch (Exception ex) when (IsWatchMode())
+            {
+                Console.Error.WriteLine($"Skipping root account bootstrap in watch mode: {ex.GetBaseException().Message}");
             }
         }
+
+        private static bool IsWatchMode() =>
+            string.Equals(Environment.GetEnvironmentVariable("DOTNET_WATCH"), "1", StringComparison.Ordinal);
+
     }
 }

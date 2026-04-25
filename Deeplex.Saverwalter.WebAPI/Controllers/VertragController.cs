@@ -52,11 +52,18 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
                 Id = entity.VertragId;
                 Beginn = entity.Beginn();
                 Ende = entity.Ende;
-                var anschrift = entity.Wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift";
-                Wohnung = new(
-                    entity.Wohnung.WohnungId,
-                    $"{anschrift} - {entity.Wohnung.Bezeichnung}",
-                    entity.Wohnung.Besitzer?.Bezeichnung);
+                if (entity.Wohnung is Wohnung wohnung)
+                {
+                    var anschrift = wohnung.Adresse?.Anschrift ?? "Unbekannte Anschrift";
+                    Wohnung = new(
+                        wohnung.WohnungId,
+                        $"{anschrift} - {wohnung.Bezeichnung}",
+                        wohnung.Besitzer?.Bezeichnung);
+                }
+                else
+                {
+                    Wohnung = new(0, "Unbekannte Wohnung");
+                }
 
                 Mieten = entity.Mieten.ToList().Select(e => new MieteEntryBase(e, permissions));
                 Versionen = entity.Versionen.Select(e => new VertragVersionEntryBase(e, permissions));

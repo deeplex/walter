@@ -47,16 +47,33 @@ namespace Deeplex.Saverwalter.WebAPI.Services
         {
             var permissions = new Permissions
             {
-                Read = (await auth.AuthorizeAsync(user, entity, [Operations.Read])).Succeeded
+                Read = await IsAuthorized(user, entity, auth, Operations.Read)
             };
             if (!permissions.Read)
             {
                 return permissions;
             }
-            permissions.Update = (await auth.AuthorizeAsync(user, entity, [Operations.Update])).Succeeded;
+            permissions.Update = await IsAuthorized(user, entity, auth, Operations.Update);
             permissions.Remove = permissions.Update;
 
             return permissions;
+        }
+
+        private static async Task<bool> IsAuthorized<T>(ClaimsPrincipal user, T entity, IAuthorizationService auth, OperationAuthorizationRequirement operation)
+        {
+            if (auth is null)
+            {
+                return false;
+            }
+
+            var authTask = auth.AuthorizeAsync(user, entity, [operation]);
+            if (authTask is null)
+            {
+                return false;
+            }
+
+            var result = await authTask;
+            return result?.Succeeded == true;
         }
 
     }

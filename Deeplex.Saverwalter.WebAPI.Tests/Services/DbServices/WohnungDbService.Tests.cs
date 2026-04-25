@@ -188,7 +188,11 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             ctx.Wohnungen.Add(entity);
             ctx.SaveChanges();
 
-            var result = await service.Put(user, entity.WohnungId + 11, entry);
+            var missingId = ctx.Wohnungen
+                .Select(w => w.WohnungId)
+                .DefaultIfEmpty()
+                .Max() + 1_000_000;
+            var result = await service.Put(user, missingId, entry);
 
             result.Result.Should().BeOfType<NotFoundResult>();
         }

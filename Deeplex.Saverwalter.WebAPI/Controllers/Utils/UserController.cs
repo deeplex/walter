@@ -91,8 +91,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             {
                 return Unauthorized();
             }
-            var userIdClaim = user.Claims.Single((claim) => claim.Type == ClaimTypes.NameIdentifier);
-            var account = await _userService.GetUserById(Guid.Parse(userIdClaim.Value));
+            var userIdClaim = user.Claims.SingleOrDefault((claim) => claim.Type == ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var account = await _userService.GetUserById(userId);
             if (account == null)
             {
                 return Unauthorized();
@@ -145,8 +150,13 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
             {
                 return Unauthorized();
             }
-            var userIdClaim = user.Claims.Single((claim) => claim.Type == ClaimTypes.NameIdentifier);
-            var account = await _userService.GetUserById(Guid.Parse(userIdClaim.Value));
+            var userIdClaim = user.Claims.SingleOrDefault((claim) => claim.Type == ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var account = await _userService.GetUserById(userId);
             if (account?.Pbkdf2PasswordCredential == null)
             {
                 return Unauthorized();
