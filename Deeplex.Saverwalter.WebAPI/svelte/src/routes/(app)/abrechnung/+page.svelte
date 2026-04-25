@@ -49,13 +49,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { WalterFileWrapper, type WalterSelectionEntry } from '$walter/lib';
     import { download } from '$walter/components/preview/WalterPreview';
     import { walter_goto } from '$walter/services/utils';
-    import WalterHeaderDetail from '$walter/components/elements/WalterHeaderDetail.svelte';
     import { fileURL } from '$walter/services/files';
+    import { WalterVertragEntry } from '$walter/lib/WalterVertrag';
 
     export let vertragId: number | null;
     export let selectedYear: number;
 
     let abrechnung: Promise<WalterBetriebskostenabrechnungEntry | undefined>;
+    let resolvedAbrechnung: WalterBetriebskostenabrechnungEntry | undefined;
+    let abrechnungLoading = false;
+    let abrechnungError = false;
     let title: string;
     const searchParams: URLSearchParams = new URL($page.url).searchParams;
 
@@ -64,6 +67,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const likelyYear = new Date().getFullYear() - 1;
 
     let value: WalterSelectionEntry | undefined;
+    let availableYears: number[] = [];
+    let canCreateMiete = false;
+    let canReadMiete = false;
 
     let modalControl: WalterModalControl = {
         open: false,
@@ -79,15 +85,70 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     fileWrapper.registerStack();
     let files = '(0)';
 
+    async function updateContractContext() {
+        availableYears = [];
+        canCreateMiete = false;
+        canReadMiete = false;
+
+        if (!vertragId) return;
+
+        try {
+            const vertrag = await WalterVertragEntry.GetOne<WalterVertragEntry>(
+                `${vertragId}`,
+                data.fetchImpl
+            );
+
+            canCreateMiete = !!vertrag.permissions?.update;
+            canReadMiete =
+                !!vertrag.permissions?.read || !!vertrag.permissions?.update;
+
+            const start = new Date(vertrag.beginn).getFullYear();
+            const end = vertrag.ende
+                ? new Date(vertrag.ende).getFullYear()
+                : likelyYear;
+
+            if (!Number.isNaN(start) && !Number.isNaN(end)) {
+                const min = Math.min(start, end);
+                const max = Math.max(start, end);
+                availableYears = Array.from(
+                    { length: max - min + 1 },
+                    (_, i) => min + i
+                );
+            }
+        } catch {
+            // Keep defaults if contract details cannot be loaded.
+            availableYears = [];
+            canCreateMiete = false;
+            canReadMiete = false;
+        }
+    }
+
     async function update() {
+        if (vertragId) {
+            searchParams.set('vertrag', `${vertragId}`);
+        } else {
+            searchParams.delete('vertrag');
+        }
+        searchParams.set('jahr', `${selectedYear}`);
+
         walter_goto(`?${searchParams.toString()}`, { noScroll: true });
-        abrechnung = updatePreview(vertragId, selectedYear, data.fetchImpl);
+        abrechnungLoading = true;
+        abrechnungError = false;
+        updateContractContext();
+
+        const pendingAbrechnung = updatePreview(
+            vertragId,
+            selectedYear,
+            data.fetchImpl
+        );
+        abrechnung = pendingAbrechnung;
 
         const value = data.vertraege.find((vertrag) => vertrag.id == vertragId);
         title = value?.text || 'Wähle einen Vertrag aus';
 
-        searchParams.set('jahr', `${selectedYear}`);
-        abrechnung.then(async (entry) => {
+        pendingAbrechnung.then(async (entry) => {
+            if (abrechnung !== pendingAbrechnung) return;
+            resolvedAbrechnung = entry;
             fileWrapper.clear();
             fileWrapper.registerStack();
 
@@ -110,6 +171,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     fileURL.vertrag(`${entry.vertrag.id}`)
                 );
             }
+        }).catch(() => {
+            if (abrechnung !== pendingAbrechnung) return;
+            resolvedAbrechnung = undefined;
+            abrechnungError = true;
+        });
+
+        pendingAbrechnung.finally(() => {
+            if (abrechnung === pendingAbrechnung) {
+                abrechnungLoading = false;
+            }
         });
     }
 
@@ -123,15 +194,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     function select(e: CustomEvent) {
         vertragId = e.detail.selectedItem?.id || vertragId;
-        if (vertragId) {
-            searchParams.set('vertrag', `${vertragId}`);
-        }
         update();
     }
 
     function change(e: CustomEvent<number | null>) {
         selectedYear = e.detail || likelyYear;
-        searchParams.set('jahr', `${selectedYear}`);
+        update();
+    }
+
+    function selectSuggestedYear(year: number) {
+        selectedYear = year;
         update();
     }
 
@@ -262,33 +334,62 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </OverflowMenu>
     </Row>
 
-    {#await abrechnung}
-        <Loading />
-    {:then resolved}
-        {#if resolved && resolved.zeitraum}
-            {#if resolved.zeitraum.nutzungszeitraum > 0}
+    {#if abrechnungLoading}
+        <Loading withOverlay={false} />
+    {/if}
+
+    {#if resolvedAbrechnung && resolvedAbrechnung.zeitraum}
+        {#if resolvedAbrechnung.zeitraum.nutzungszeitraum > 0}
+            {#key `${resolvedAbrechnung.vertrag.id}-${resolvedAbrechnung.zeitraum.jahr}`}
                 <WalterAbrechnung
                     fetchImpl={data.fetchImpl}
-                    abrechnung={resolved}
+                    abrechnung={resolvedAbrechnung}
                     {title}
+                    {canCreateMiete}
+                    {canReadMiete}
                 />
-            {:else}
-                <InlineNotification
-                    lowContrast
-                    kind="error"
-                    hideCloseButton
-                    title="Abrechnungsjahr liegt außerhalb der Vertragslaufzeit."
-                >
-                    <WalterLink href={`vertraege/${vertragId}`}
+            {/key}
+        {:else}
+            <InlineNotification
+                lowContrast
+                kind="error"
+                hideCloseButton
+                title="Abrechnungsjahr liegt außerhalb der Vertragslaufzeit."
+            >
+                <p>
+                    <WalterLink href={`/vertraege/${vertragId}`}
                         >Klicke hier um zum Vertrag zu gelangen.</WalterLink
                     >
-                </InlineNotification>
-            {/if}
-        {:else if vertragId}
+                </p>
+                {#if availableYears.length > 0}
+                    <p style="margin-top: 0.5rem">
+                        Mögliche Jahre:
+                        {#each availableYears as year, i}
+                            <!-- svelte-ignore a11y-invalid-attribute -->
+                            <a
+                                href="#"
+                                on:click|preventDefault={() => selectSuggestedYear(year)}
+                                >{year}</a
+                            >{#if i < availableYears.length - 1}, {/if}
+                        {/each}
+                    </p>
+                {/if}
+            </InlineNotification>
+        {/if}
+    {:else if vertragId}
+        {#if abrechnungLoading}
+            <InlineNotification lowContrast kind="info" hideCloseButton>
+                Lade Abrechnung...
+            </InlineNotification>
+        {:else if abrechnungError}
+            <InlineNotification lowContrast kind="error" hideCloseButton>
+                Abrechnung konnte nicht geladen werden. Bitte versuche es erneut.
+            </InlineNotification>
+        {:else}
             <InlineNotification lowContrast kind="error" hideCloseButton>
                 Ups, da ist wohl irgendwas schiefgelaufen. Versuche die Seite
                 neu zu laden...
             </InlineNotification>
         {/if}
-    {/await}
+    {/if}
 </WalterGrid>

@@ -48,6 +48,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let abrechnung: WalterBetriebskostenabrechnungEntry;
     export let title: string | undefined;
     export let fetchImpl: typeof fetch;
+    export let canCreateMiete = false;
+    export let canReadMiete = false;
 
     const lastMiete = abrechnung.mieten.length
         ? abrechnung.mieten[abrechnung.mieten.length - 1]
@@ -66,7 +68,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         vertrag: abrechnung.vertrag,
         zahlungsdatum: convertDateCanadian(new Date()),
         betrag: lastMiete?.betrag,
-        betreffenderMonat: convertDateCanadian(dateMiete)
+        betreffenderMonat: convertDateCanadian(dateMiete),
+        permissions: {
+            read: true,
+            update: canCreateMiete,
+            remove: false
+        }
     };
 
     const mieter = WalterKontaktEntry.GetAll<WalterKontaktEntry>(
@@ -76,6 +83,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             abrechnung.mieter.some((m) => m.id === kontakt.id)
         )
     );
+
+    const mietenRows = canReadMiete
+        ? abrechnung.mieten.map((miete) => ({
+              ...miete,
+              permissions: {
+                  ...miete.permissions,
+                  read: true
+              }
+          }))
+        : abrechnung.mieten;
 </script>
 
 <Tile style="margin-top: 2rem">
@@ -150,7 +167,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <WalterMieten
                 entry={mietEntry}
                 title="Gezahlte Mieten ({abrechnung.gezahltMiete}€)"
-                rows={abrechnung.mieten}
+                rows={mietenRows}
             />
         </Accordion>
 
