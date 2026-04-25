@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Kai Lawrence
+// Copyright (c) 2023-2026 Kai Lawrence
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -259,6 +259,7 @@ export function walter_data_rechnungentabelle(
             data.push({
                 id: `${umlage.id}`,
                 id2: `${umlage.typ.id}`,
+                wohnungId: `${wohnung.id}`,
                 group: wohnung.text,
                 key: umlage.typ.text,
                 value: rechnungen.reduce((pre, cur) => pre + cur.betrag, 0)
@@ -326,10 +327,10 @@ function getVertragBeginn(vertrag: WalterVertragEntry): Date {
 function getVertragEnde(vertrag: WalterVertragEntry): Date | undefined {
     return vertrag.ende
         ? new Date(
-            new Date(vertrag.ende).getFullYear(),
-            new Date(vertrag.ende).getMonth(),
-            1
-        )
+              new Date(vertrag.ende).getFullYear(),
+              new Date(vertrag.ende).getMonth(),
+              1
+          )
         : undefined;
 }
 
@@ -392,6 +393,7 @@ export function walter_data_miettabelle(
             // Every entry that is eligible for miete gets an entry in the data array (value = 0)
             const entry = {
                 id: `${vertrag.id}`,
+                wohnungId: `${vertrag.wohnung.id}`,
                 year,
                 value: 0,
                 key: months[monthIndex],
@@ -495,6 +497,7 @@ export type WalterDataPoint = {
     group?: string; // row in heatmap
     id?: string; // id of vertrag
     id2?: string;
+    wohnungId?: string;
     key?: string; // column in heatmap
     date?: string; // Date in Canadian Format
 };

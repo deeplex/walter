@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -117,7 +117,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <WalterMiete entry={addEntry} {mieten} />
 </WalterDataWrapperQuickAdd>
 
-<div style="left: 0; min-height: 30em; display: block; min-width: 60em;">
+<div style="left: 0; min-height: 30em; display: block; width: 100%;">
     <h3>Miettabelle</h3>
     {#if mieten.length === 0}
         <p>Keine Mieten vorhanden</p>

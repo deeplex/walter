@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2023-2024  Kai Lawrence -->
+<!-- Copyright (C) 2023-2026  Kai Lawrence -->
 <!--
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -56,14 +56,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     selected = selected === -1 ? years.length - 1 : selected;
 </script>
 
-<div>
+<div class="homepage-heatmap-layout">
     <!-- svelte-ignore missing-declaration -->
-    <Tabs style="position: fixed; z-index: 3000" bind:selected type="container">
+    <Tabs id="homepagetabs" bind:selected type="container">
         {#each years as year}
             <Tab label={`${year}`} />
         {/each}
         <svelte:fragment slot="content">
-            <div style="height: 5em; width: 100vw; display: block" />
+            <div style="height: 5em; width: 100%; display: block" />
             <StructuredList>
                 <StructuredListBody>
                     <StructuredListRow>
@@ -93,3 +93,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         </svelte:fragment>
     </Tabs>
 </div>
+
+<style>
+    .homepage-heatmap-layout {
+        width: min(100%, 100em);
+    }
+</style>

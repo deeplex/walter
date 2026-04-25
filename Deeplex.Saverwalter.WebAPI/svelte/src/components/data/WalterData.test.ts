@@ -1,3 +1,18 @@
+// Copyright (c) 2023-2026 Kai Lawrence
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -117,7 +132,10 @@ describe('WalterData helpers', () => {
                 {
                     id: 1,
                     typ: { id: 11, text: 'Wasser' },
-                    selectedWohnungen: [{ text: 'W1' }, { text: 'W2' }],
+                    selectedWohnungen: [
+                        { id: 101, text: 'W1' },
+                        { id: 102, text: 'W2' }
+                    ],
                     betriebskostenrechnungen: [
                         { betreffendesJahr: 2026, betrag: 50 },
                         { betreffendesJahr: 2025, betrag: 20 }
@@ -126,7 +144,7 @@ describe('WalterData helpers', () => {
                 {
                     id: 2,
                     typ: { id: 12, text: 'Hausstrom' },
-                    selectedWohnungen: [{ text: 'W1' }],
+                    selectedWohnungen: [{ id: 101, text: 'W1' }],
                     betriebskostenrechnungen: [{ betreffendesJahr: 2026, betrag: -10 }]
                 }
             ] as never,
@@ -134,7 +152,12 @@ describe('WalterData helpers', () => {
         );
 
         expect(config.data).toContainEqual(
-            expect.objectContaining({ group: 'W1', key: 'Wasser', value: 50 })
+            expect.objectContaining({
+                group: 'W1',
+                key: 'Wasser',
+                value: 50,
+                wohnungId: '101'
+            })
         );
         expect(config.data).toContainEqual(
             expect.objectContaining({ group: 'W1', key: 'Hausstrom', value: undefined })
@@ -149,7 +172,7 @@ describe('WalterData helpers', () => {
                     id: 1,
                     beginn: '2026-01-01',
                     ende: undefined,
-                    wohnung: { text: 'W1' },
+                    wohnung: { id: 201, text: 'W1' },
                     versionen: [{ grundmiete: 700 }],
                     mieten: [
                         { betreffenderMonat: '2026-01-15', betrag: 700 },
@@ -160,7 +183,7 @@ describe('WalterData helpers', () => {
                     id: 2,
                     beginn: '2025-01-01',
                     ende: '2025-12-01',
-                    wohnung: { text: 'W2' },
+                    wohnung: { id: 202, text: 'W2' },
                     versionen: [{ grundmiete: 700 }],
                     mieten: [{ betreffenderMonat: '2026-01-15', betrag: 999 }]
                 },
@@ -168,7 +191,7 @@ describe('WalterData helpers', () => {
                     id: 3,
                     beginn: '2026-01-01',
                     ende: undefined,
-                    wohnung: { text: 'W3' },
+                    wohnung: { id: 203, text: 'W3' },
                     versionen: [{ grundmiete: 0 }],
                     mieten: [{ betreffenderMonat: '2026-01-15', betrag: 999 }]
                 }
@@ -179,7 +202,12 @@ describe('WalterData helpers', () => {
         expect(config.data.some((entry) => entry.group === 'W2')).toBe(false);
         expect(config.data.some((entry) => entry.group === 'W3')).toBe(false);
         expect(config.data).toContainEqual(
-            expect.objectContaining({ group: 'W1', key: 'Januar', value: 700 })
+            expect.objectContaining({
+                group: 'W1',
+                key: 'Januar',
+                value: 700,
+                wohnungId: '201'
+            })
         );
         expect(config.data).toContainEqual(
             expect.objectContaining({ group: 'W1', key: 'Februar', value: 710 })

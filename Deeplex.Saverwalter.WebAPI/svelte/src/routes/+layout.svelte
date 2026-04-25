@@ -89,10 +89,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         color: #2e7d32;
     }
     :global(
-            a.bx--side-nav__icon--small,
-            a.bx--side-nav__link[aria-current='page']::before,
-            a.bx--side-nav__link--current::before
-        ) {
+        a.bx--side-nav__icon--small,
+        a.bx--side-nav__link[aria-current='page']::before,
+        a.bx--side-nav__link--current::before
+    ) {
         background-color: #2e7d32 !important;
     }
 
@@ -121,8 +121,26 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     :global(#homepagetabs) {
-        position: fixed;
+        position: sticky;
+        top: 0;
         z-index: 3000;
+        width: 100%;
+        background: var(--cds-layer);
+    }
+
+    :global(#homepagetabs .bx--tabs--container) {
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-gutter: stable;
+    }
+
+    :global(#homepagetabs .bx--tabs--container .bx--tabs__nav) {
+        width: max-content;
+        min-width: 100%;
+    }
+
+    :global(.cds--cc--heatmap g.axis.left .tick text) {
+        text-anchor: end;
     }
 
     :global(.bx--list-box__menu-item) {
@@ -149,11 +167,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     /* Align datepicker to rest of elements */
     :global(
-            .bx--date-picker-container,
-            .flatpickr-input,
-            .flatpickr-wrapper,
-            .bx--date-picker.bx--date-picker--single
-        ) {
+        .bx--date-picker-container,
+        .flatpickr-input,
+        .flatpickr-wrapper,
+        .bx--date-picker.bx--date-picker--single
+    ) {
         width: 100% !important;
     }
 
