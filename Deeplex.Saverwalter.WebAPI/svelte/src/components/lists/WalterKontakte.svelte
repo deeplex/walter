@@ -32,6 +32,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.kontakt(e.detail.id);
+    const rowHref = (row: DataTableRow) => `/kontakte/${row.id}`;
 
     export let rows: WalterKontaktEntry[];
     export let fullHeight = false;
@@ -52,6 +53,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     addEntry={entry}
     {title}
     {on_click_row}
+    {rowHref}
     {rows}
     {headers}
     {fullHeight}

@@ -42,6 +42,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.abrechnungsresultat(`${e.detail.id}`);
+    const rowHref = (row: DataTableRow) => `/abrechnungsresultate/${row.id}`;
 
     export let title: string | undefined = undefined;
     const readonly = true;
@@ -50,6 +51,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <WalterDataWrapper
     {on_click_row}
+    {rowHref}
     {readonly}
     {fullHeight}
     {title}

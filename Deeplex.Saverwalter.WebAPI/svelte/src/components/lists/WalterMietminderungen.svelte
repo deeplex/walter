@@ -15,6 +15,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
+
     import { WalterDataWrapper, WalterMietminderung } from '$walter/components';
     import { WalterMietminderungEntry } from '$walter/lib';
     import { navigation } from '$walter/services/navigation';
@@ -31,6 +33,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const on_click_row = (e: CustomEvent) =>
         navigation.mietminderung(e.detail.id);
+    const rowHref = (row: DataTableRow) => `/mietminderungen/${row.id}`;
 
     export let entry: Partial<WalterMietminderungEntry> | undefined = undefined;
 </script>
@@ -38,6 +41,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <WalterDataWrapper
     addUrl={WalterMietminderungEntry.ApiURL}
     {on_click_row}
+    {rowHref}
     addEntry={entry}
     {title}
     {rows}

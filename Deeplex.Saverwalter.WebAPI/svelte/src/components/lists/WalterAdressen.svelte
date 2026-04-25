@@ -30,6 +30,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.adresse(e.detail.id);
+    const rowHref = (row: DataTableRow) => `/adressen/${row.id}`;
 
     export let fullHeight = false;
     export let rows: WalterAdresseEntry[];
@@ -42,6 +43,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     addEntry={entry}
     {title}
     {on_click_row}
+    {rowHref}
     {rows}
     {headers}
     {fullHeight}

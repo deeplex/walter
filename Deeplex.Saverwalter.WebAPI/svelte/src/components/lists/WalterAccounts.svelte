@@ -29,6 +29,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.account(e.detail.id);
+    const rowHref = (row: DataTableRow) => `/accounts/${row.id}`;
 
     export let fullHeight = false;
     export let rows: WalterAccountEntry[];
@@ -45,6 +46,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     addEntry={wrapperEntry}
     {title}
     {on_click_row}
+    {rowHref}
     rows={wrapperRows}
     {headers}
     {fullHeight}

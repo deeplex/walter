@@ -26,7 +26,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const headers = [
         { key: 'kennnummer', value: 'Kennnummer' },
-        { key: 'adresse.anschrift', value: 'Adresse'},
+        { key: 'adresse.anschrift', value: 'Adresse' },
         { key: 'wohnung.text', value: 'Wohnung' },
         { key: 'typ.text', value: 'Typ' },
         { key: 'lastZaehlerstand.datum', value: 'Letztes Ablesedatum' },
@@ -68,6 +68,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.zaehler(e.detail.id);
+    const rowHref = (row: DataTableRow) => `/zaehler/${row.id}`;
 </script>
 
 <WalterDataWrapperQuickAdd
@@ -84,6 +85,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     addEntry={entry}
     {title}
     {on_click_row}
+    {rowHref}
     rows={rowsAdd}
     {headers}
     {fullHeight}

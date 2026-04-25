@@ -25,6 +25,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.umlagetyp(e.detail.id);
+    const rowHref = (row: DataTableRow) => `/umlagetypen/${row.id}`;
 
     export let fullHeight = false;
     export let rows: WalterUmlagetypEntry[];
@@ -38,6 +39,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     addEntry={entry}
     {title}
     {on_click_row}
+    {rowHref}
     {rows}
     {headers}
     {fullHeight}

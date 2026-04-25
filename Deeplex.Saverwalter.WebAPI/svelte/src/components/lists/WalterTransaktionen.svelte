@@ -40,11 +40,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.transaktion(e.detail.id);
+    const rowHref = (row: DataTableRow) => `/transaktionen/${row.id}`;
 </script>
 
 <WalterDataWrapper
     addUrl={WalterTransaktionEntry.ApiURL}
     {on_click_row}
+    {rowHref}
     addEntry={entry}
     {title}
     {rows}

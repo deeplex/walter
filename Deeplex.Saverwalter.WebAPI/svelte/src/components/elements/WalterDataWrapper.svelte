@@ -45,6 +45,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let on_click_row: (
         e: CustomEvent
     ) => Promise<void> | void = () => {};
+    export let rowHref:
+        | ((row: WalterDataTableRow) => string | undefined)
+        | undefined = undefined;
 
     let open = false;
     let addModalOpen = false;
@@ -86,10 +89,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     <AccordionItem title={`${title} (${rows.length})`} bind:open>
         <Tile style="overflow: auto">
             <WalterDataTable
-                add={addUrl && canQuickAdd(addEntry) && addEntry.permissions?.update
+                add={addUrl &&
+                canQuickAdd(addEntry) &&
+                addEntry.permissions?.update
                     ? quick_add
                     : undefined}
                 {on_click_row}
+                {rowHref}
                 bind:rows
                 {headers}
             />
@@ -101,6 +107,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         add={normal_add}
         {fullHeight}
         {on_click_row}
+        {rowHref}
         {rows}
         {headers}
     />

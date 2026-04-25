@@ -37,6 +37,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.vertrag(e.detail.id);
+    const rowHref = (row: DataTableRow) => `/vertraege/${row.id}`;
 
     export let rows: WalterVertragEntry[];
     export let fullHeight = false;
@@ -99,6 +100,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     addEntry={entry}
     {title}
     {on_click_row}
+    {rowHref}
     rows={rowsAdd}
     {headers}
     {fullHeight}

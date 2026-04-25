@@ -32,6 +32,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         convertPercent,
         convertTime
     } from '$walter/services/utils';
+    import { walter_goto } from '$walter/services/utils';
     import { dates, euro, formatToTableDate, time } from './WalterDataTable';
     import { Add } from 'carbon-icons-svelte';
     import { onMount } from 'svelte';
@@ -54,6 +55,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let readonly = false;
     export let rows: WalterDataTableRow[];
     export let add: (() => void) | undefined = undefined;
+    export let rowHref:
+        | ((row: WalterDataTableRow) => string | undefined)
+        | undefined = undefined;
 
     const searchParams: URLSearchParams | null = $page
         ? new URL($page.url).searchParams
@@ -83,6 +87,61 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let on_click_row: (
         e: CustomEvent<DataTableRow>
     ) => Promise<void> | void = () => {};
+
+    function resolveRowHref(row: DataTableRow): string | undefined {
+        const typedRow = row as WalterDataTableRow;
+
+        if (typedRow.permissions && !typedRow.permissions.read) {
+            return undefined;
+        }
+
+        return rowHref?.(typedRow);
+    }
+
+    function onRowLinkClick(event: MouseEvent, href: string) {
+        // Keep browser-native link behavior for new-tab/window gestures.
+        if (
+            event.defaultPrevented ||
+            event.button !== 0 ||
+            event.metaKey ||
+            event.ctrlKey ||
+            event.shiftKey ||
+            event.altKey
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        walter_goto(href);
+    }
+
+    function getCellDisplayValue(cell: {
+        key: string;
+        value: unknown;
+    }): string {
+        if (
+            cell.value === null ||
+            cell.value === undefined ||
+            cell.value === ''
+        ) {
+            return '---';
+        }
+        if (dates(cell.key)) {
+            return formatToTableDate(`${cell.value}`);
+        }
+        if (time(cell.key)) {
+            return convertTime(cell.value as Date | string | undefined) || '---';
+        }
+        if (euro(cell.key)) {
+            return convertEuro(cell.value as number | undefined) || '---';
+        }
+        if (cell.key === 'anteil') {
+            return convertPercent(cell.value as number | undefined) || '---';
+        }
+
+        return `${cell.value}`;
+    }
 
     function shouldFilterRows(row: { [key: string]: unknown }, value: unknown) {
         const filteredValues = headers.map((headerObj) => {
@@ -193,17 +252,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             let:cell
             let:row
         >
-            {#if cell.value === null || cell.value === undefined || cell.value === ''}
-                ---
-            {:else if dates(cell.key)}
-                {formatToTableDate(cell.value)}
-            {:else if time(cell.key)}
-                {convertTime(cell.value)}
-            {:else if euro(cell.key)}
-                {convertEuro(cell.value)}
-            {:else if cell.key === 'anteil'}
-                {convertPercent(cell.value)}
-            {:else if cell.key === 'button'}
+            {#if cell.key === 'button'}
                 <Button
                     disabled={cell.value === 'disabled'}
                     on:click={cell.value}
@@ -214,7 +263,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     iconDescription={'Hinzufügen'}
                 />
             {:else}
-                {cell.value}
+                {@const href = resolveRowHref(row)}
+                {#if href}
+                    <a
+                        class="walter-table-link"
+                        {href}
+                        on:click={(event) => onRowLinkClick(event, href)}
+                    >
+                        {getCellDisplayValue(cell)}
+                    </a>
+                {:else}
+                    {getCellDisplayValue(cell)}
+                {/if}
             {/if}
         </span>
     </DataTable>
@@ -224,6 +284,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             > .bx--data-table_inner-container
             > .bx--data-table--sticky-header {
             max-height: none !important;
+        }
+
+        .walter-table-link {
+            color: inherit;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+            height: 100%;
         }
     </style>
 </Content>

@@ -15,6 +15,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import type { DataTableRow } from 'carbon-components-svelte/types/DataTable/DataTable.svelte';
+
     import { WalterDataWrapper, WalterZaehlerstand } from '$walter/components';
 
     import { WalterZaehlerstandEntry } from '$walter/lib';
@@ -34,11 +36,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const on_click_row = (e: CustomEvent) =>
         navigation.zaehlerstand(e.detail.id);
+    const rowHref = (row: DataTableRow) => `/zaehlerstaende/${row.id}`;
 </script>
 
 <WalterDataWrapper
     addUrl={WalterZaehlerstandEntry.ApiURL}
     {on_click_row}
+    {rowHref}
     addEntry={entry}
     {title}
     {rows}

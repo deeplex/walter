@@ -39,6 +39,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.betriebskostenrechnung(e.detail.id);
+    const rowHref = (row: DataTableRow) =>
+        `/betriebskostenrechnungen/${row.id}`;
 
     export let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined =
         undefined;
@@ -49,6 +51,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     addEntry={entry}
     {title}
     {on_click_row}
+    {rowHref}
     {rows}
     {headers}
     {fullHeight}

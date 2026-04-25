@@ -36,6 +36,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.vertragversion(e.detail.id);
+    const rowHref = (row: DataTableRow) => `/vertragversionen/${row.id}`;
 
     export let entry: Partial<WalterVertragVersionEntry> | undefined =
         undefined;
@@ -44,6 +45,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <WalterDataWrapper
     addUrl={WalterVertragVersionEntry.ApiURL}
     {on_click_row}
+    {rowHref}
     addEntry={entry}
     {title}
     {rows}

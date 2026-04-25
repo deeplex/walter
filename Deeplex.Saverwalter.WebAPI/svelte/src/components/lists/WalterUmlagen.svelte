@@ -28,6 +28,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     const on_click_row = (e: CustomEvent<DataTableRow>) =>
         navigation.umlage(e.detail.id);
+    const rowHref = (row: DataTableRow) => `/umlagen/${row.id}`;
 
     export let fullHeight = false;
     export let rows: WalterUmlageEntry[];
@@ -41,6 +42,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     addEntry={entry}
     {title}
     {on_click_row}
+    {rowHref}
     {rows}
     {headers}
     {fullHeight}
