@@ -10,6 +10,7 @@ jobs:
     uses: ./.github/workflows/reusable_build.yaml
   deploy_release:
     needs:
+      - test
       - build
     uses: ./.github/workflows/reusable_deploy_release.yaml
     with:
