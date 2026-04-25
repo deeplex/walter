@@ -263,17 +263,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     iconDescription={'Hinzufügen'}
                 />
             {:else}
+                {@const displayValue = getCellDisplayValue(cell)}
+                {@const tooltip = displayValue === '---' ? undefined : displayValue}
                 {@const href = resolveRowHref(row)}
                 {#if href}
                     <a
                         class="walter-table-link"
                         {href}
+                        title={tooltip}
                         on:click={(event) => onRowLinkClick(event, href)}
                     >
-                        {getCellDisplayValue(cell)}
+                        {displayValue}
                     </a>
                 {:else}
-                    {getCellDisplayValue(cell)}
+                    <span title={tooltip}>{displayValue}</span>
                 {/if}
             {/if}
         </span>
