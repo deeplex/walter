@@ -23,6 +23,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       - name: Test dotnet app
+        shell: bash
         run: |
           set -eo pipefail
           export LC_ALL=de_DE.UTF-8
