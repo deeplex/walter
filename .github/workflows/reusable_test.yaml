@@ -36,8 +36,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
-          cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
 
       - name: Enable corepack
         if: ${{ steps.changed-frontend.outputs.any_changed == 'true' }}
@@ -94,8 +92,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
-          cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
 
       - name: Enable corepack
         run: corepack enable
@@ -187,8 +183,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
-          cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
 
       - name: Enable corepack
         run: corepack enable

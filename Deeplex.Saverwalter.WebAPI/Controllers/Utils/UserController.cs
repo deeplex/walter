@@ -38,6 +38,10 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         private readonly string? _baseUrl = Environment.GetEnvironmentVariable("S3_PROVIDER");
         private readonly HttpClient _httpClient;
 
+        private bool HasValidFileProviderBaseUrl
+            => !string.IsNullOrWhiteSpace(_baseUrl)
+               && Uri.TryCreate(_baseUrl, UriKind.Absolute, out _);
+
         public UserController(
             SaverwalterContext dbContext,
             TokenService tokenService,
@@ -176,6 +180,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         [HttpGet("files")]
         public async Task<ActionResult<List<WalterFile>>> GetFiles()
         {
+            if (!HasValidFileProviderBaseUrl)
+            {
+                return Ok(new List<WalterFile>());
+            }
+
             var userId = WebEncoders.Base64UrlEncode(User.GetUserId().ToByteArray());
             var fullPath = _baseUrl + "?prefix=" + string.Join("/", ["user", userId]);
             var result = await FileHandling.RedirectToFileServer(Request, _httpClient, fullPath);
@@ -197,6 +206,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         [HttpGet("files/{filename}")]
         public async Task<IActionResult> GetFileContent(string filename)
         {
+            if (!HasValidFileProviderBaseUrl)
+            {
+                return BadRequest("File provider is not configured.");
+            }
+
             var userId = WebEncoders.Base64UrlEncode(User.GetUserId().ToByteArray());
             var fullPath = string.Join("/", [_baseUrl, "user", userId, filename]);
             var result = await FileHandling.RedirectToFileServer(Request, _httpClient, fullPath);
@@ -208,6 +222,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         [HttpPut("files/{filename}")]
         public async Task<IActionResult> WriteFile(string filename)
         {
+            if (!HasValidFileProviderBaseUrl)
+            {
+                return BadRequest("File provider is not configured.");
+            }
+
             var userId = WebEncoders.Base64UrlEncode(User.GetUserId().ToByteArray());
             var fullPath = string.Join("/", [_baseUrl, "user", userId, filename]);
             return await FileHandling.RedirectToFileServer(Request, _httpClient, fullPath);
@@ -216,6 +235,11 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
         [HttpPut("files/{old_filename}/{new_filename}")]
         public async Task<IActionResult> RenameFile(int id, string old_filename, string new_filename)
         {
+            if (!HasValidFileProviderBaseUrl)
+            {
+                return BadRequest("File provider is not configured.");
+            }
+
             var userId = WebEncoders.Base64UrlEncode(User.GetUserId().ToByteArray());
             var deletePath = string.Join("/", [_baseUrl, "user", userId, old_filename]);
             var renamePath = string.Join("/", [_baseUrl, "user", userId, new_filename]);
