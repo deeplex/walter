@@ -117,7 +117,7 @@ namespace Deeplex.Saverwalter.PrintService
                     para.AddLineBreak();
                 }
             }
-            para.Format.SpaceAfter = Unit.FromPoint(spacing);
+            para.Format.SpaceAfter = spacing;
 
             section.Add(para);
         }
@@ -128,7 +128,7 @@ namespace Deeplex.Saverwalter.PrintService
             var paragraph = section.AddParagraph();
             paragraph.Format.Font.Size = fontSize;
             paragraph.Format.Font.Name = font;
-            paragraph.Format.SpaceAfter = Unit.FromPoint(spacing);
+            paragraph.Format.SpaceAfter = spacing;
 
             paragraph.AddFormattedText(text);
         }
@@ -170,7 +170,7 @@ namespace Deeplex.Saverwalter.PrintService
             var paragraph = section.AddParagraph();
             paragraph.Format.Font.Size = fontSize;
             paragraph.Format.Font.Name = font;
-            paragraph.Format.SpaceAfter = Unit.FromPoint(spacing);
+            paragraph.Format.SpaceAfter = spacing;
 
             paragraph.AddFormattedText(text, TextFormat.Bold | TextFormat.Italic);
         }
@@ -181,7 +181,7 @@ namespace Deeplex.Saverwalter.PrintService
             var paragraph = section.AddParagraph();
             paragraph.Format.Font.Size = fontSize;
             paragraph.Format.Font.Name = font;
-            paragraph.Format.SpaceAfter = Unit.FromPoint(spacing);
+            paragraph.Format.SpaceAfter = spacing;
 
             paragraph.AddFormattedText(text, TextFormat.Bold);
         }

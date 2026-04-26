@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact(Skip = "Files is todo. Also provide valid XML to test here")]
-        public async void GetFiles()
+        public async Task GetFiles()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
@@ -67,7 +67,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void GetFile()
+        public async Task GetFile()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
@@ -94,7 +94,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void PostFile()
+        public async Task PostFile()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
@@ -122,7 +122,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void DeleteFile()
+        public async Task DeleteFile()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
@@ -150,7 +150,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void GetFilesNoServer()
+        public async Task GetFilesNoServer()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);
@@ -177,7 +177,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void GetFilesNoS3Provider()
+        public async Task GetFilesNoS3Provider()
         {
             var ctx = TestUtils.GetContext();
             TestUtils.GetVertragForAbrechnung(ctx);

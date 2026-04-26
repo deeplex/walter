@@ -26,7 +26,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
     public class UserServiceTests
     {
         [Fact]
-        public async void CreateUserAccount()
+        public async Task CreateUserAccount()
         {
             var ctx = TestUtils.GetContext();
             var tokenService = A.Fake<TokenService>();
@@ -39,7 +39,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void SignInAsync()
+        public async Task SignInAsync()
         {
             var ctx = TestUtils.GetContext();
             var tokenService = A.Fake<TokenService>();
@@ -55,7 +55,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void SignInAsyncFailed()
+        public async Task SignInAsyncFailed()
         {
             var ctx = TestUtils.GetContext();
             var tokenService = A.Fake<TokenService>();

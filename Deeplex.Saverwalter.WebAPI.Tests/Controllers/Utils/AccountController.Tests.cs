@@ -41,7 +41,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void SignInSuccess()
+        public async Task SignInSuccess()
         {
             var tokenService = A.Fake<TokenService>();
             var userService = new UserService(ctx, tokenService);
@@ -77,7 +77,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
         }
 
         [Fact]
-        public async void SignInFailed()
+        public async Task SignInFailed()
         {
             var tokenService = A.Fake<TokenService>();
             var userService = new UserService(ctx, tokenService);

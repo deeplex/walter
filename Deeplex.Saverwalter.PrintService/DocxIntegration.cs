@@ -26,9 +26,10 @@ namespace Deeplex.Saverwalter.PrintService
         {
             using (var wordDocument = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
             {
+                MainDocumentPart mainPart;
                 try
                 {
-                    MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
+                    mainPart = wordDocument.AddMainDocumentPart();
                     mainPart.Document = new Document();
                 }
                 catch (Exception)
@@ -36,7 +37,8 @@ namespace Deeplex.Saverwalter.PrintService
                     wordDocument.Dispose();
                     throw;
                 }
-                wordDocument.MainDocumentPart?.Document.AppendChild(body);
+
+                mainPart.Document.AppendChild(body);
             }
         }
 

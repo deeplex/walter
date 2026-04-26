@@ -31,13 +31,6 @@ jobs:
             Deeplex.Saverwalter.WebAPI/svelte/**/*.svelte
             Deeplex.Saverwalter.WebAPI/svelte/**/*.js
 
-      - name: Detect changed .NET files
-        id: changed-dotnet
-        uses: tj-actions/changed-files@v46
-        with:
-          files: |
-            **/*.cs
-
       - name: Setup Node.js
         if: ${{ steps.changed-frontend.outputs.any_changed == 'true' }}
         uses: actions/setup-node@v4
@@ -70,13 +63,11 @@ jobs:
           yarn prettier --check "${frontend_files[@]}"
 
       - name: Setup .NET SDK
-        if: ${{ steps.changed-dotnet.outputs.any_changed == 'true' }}
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Cache NuGet packages
-        if: ${{ steps.changed-dotnet.outputs.any_changed == 'true' }}
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
@@ -85,12 +76,10 @@ jobs:
             nuget-${{ runner.os }}-
 
       - name: Restore solution for style checks
-        if: ${{ steps.changed-dotnet.outputs.any_changed == 'true' }}
         run: dotnet restore "${{ env.SOLUTION_PATH }}"
 
-      - name: Verify changed .NET file formatting
-        if: ${{ steps.changed-dotnet.outputs.any_changed == 'true' }}
-        run: dotnet format whitespace "${{ env.SOLUTION_PATH }}" --verify-no-changes --no-restore --include ${{ steps.changed-dotnet.outputs.all_changed_files }}
+      - name: Verify .NET file formatting
+        run: dotnet format whitespace "${{ env.SOLUTION_PATH }}" --verify-no-changes --no-restore
 
   test-svelte-quality:
     runs-on: ubuntu-22.04
