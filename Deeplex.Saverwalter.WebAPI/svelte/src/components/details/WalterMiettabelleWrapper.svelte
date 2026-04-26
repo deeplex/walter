@@ -42,6 +42,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         walter_data_miettabelle,
         walter_data_rechnungentabelle
     } from '../data/WalterData';
+    import { openModal } from '$walter/store';
 
     export let vertraege: WalterVertragEntry[];
     export let umlagen: WalterUmlageEntry[];
@@ -258,18 +259,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let meterTasks: MeterTask[] = [];
     let invoiceTasks: InvoiceTask[] = [];
     
+    function refreshTaskLists(year: number) {
+        rentTasks = buildRentTasks(year);
+        meterTasks = buildMeterTasks(year);
+        invoiceTasks = buildInvoiceTasks(year);
+    }
+
     // Reactive statements that recalculate when data or year changes
     // Dependencies must be read in the block for Svelte to track them
     $: {
-        vertraege;    // Read to register as dependency
-        mieten;       // Read to register as dependency
-        umlagen;      // Read to register as dependency
-        selectedYear; // Read to register as dependency
-        
-        // Recalculate all task lists
-        rentTasks = buildRentTasks(selectedYear);
-        meterTasks = buildMeterTasks(selectedYear);
-        invoiceTasks = buildInvoiceTasks(selectedYear);
+        vertraege;
+        mieten;
+        umlagen;
+        selectedYear;
+
+        refreshTaskLists(selectedYear);
     }
 
     // Table headers and data transformation for WalterDataTable
@@ -392,7 +396,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     function onSubmitMiete(newValue: unknown) {
-        const value = newValue as WalterMieteEntry;
+        const value = {
+            ...(newValue as WalterMieteEntry),
+            vertrag:
+                (newValue as WalterMieteEntry).vertrag || addMieteEntry.vertrag
+        } as WalterMieteEntry;
         const vertrag = vertraege.find((entry) => entry.id === +value.vertrag?.id);
         if (!vertrag) {
             return;
@@ -405,12 +413,79 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 new Date(b.betreffenderMonat).getTime()
         );
         vertraege = [...vertraege];
+        refreshTaskLists(selectedYear);
         addMieteOpen = false;
         addMieteEntry = {};
     }
 
+    function dateToMonthKey(value: string | undefined) {
+        if (!value) {
+            return undefined;
+        }
+
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) {
+            return undefined;
+        }
+
+        return `${parsed.getFullYear()}-${`${parsed.getMonth() + 1}`.padStart(2, '0')}`;
+    }
+
+    function confirmDuplicateRentMonth(entryToCheck: unknown) {
+        const miete = entryToCheck as Partial<WalterMieteEntry>;
+        const vertragId = +(miete.vertrag?.id || 0);
+        const monthKey = dateToMonthKey(miete.betreffenderMonat);
+
+        const hasDuplicate =
+            !miete.id &&
+            vertragId > 0 &&
+            !!monthKey &&
+            mieten.some(
+                (row) =>
+                    +row.vertrag?.id === vertragId &&
+                    dateToMonthKey(row.betreffenderMonat) === monthKey
+            );
+
+        if (!hasDuplicate) {
+            return Promise.resolve(true);
+        }
+
+        return new Promise<boolean>((resolve) => {
+            openModal({
+                modalHeading: 'Miete bereits vorhanden',
+                content:
+                    'Für diesen Vertrag gibt es im ausgewählten Monat bereits mindestens eine Miete. Möchtest du trotzdem speichern?',
+                primaryButtonText: 'Trotzdem speichern',
+                submit: async () => {
+                    resolve(true);
+                    return true;
+                },
+                cancel: () => resolve(false),
+                danger: false
+            });
+        });
+    }
+
+    function onDeleteMonthMiete(value: WalterMieteEntry) {
+        const vertrag = vertraege.find((entry) => entry.id === +value.vertrag?.id);
+        if (vertrag) {
+            vertrag.mieten = (vertrag.mieten || []).filter(
+                (miete) => miete.id !== value.id
+            );
+        }
+
+        mieten = mieten.filter((miete) => miete.id !== value.id);
+        vertraege = [...vertraege];
+        refreshTaskLists(selectedYear);
+    }
+
     function onSubmitZaehlerstand(newValue: unknown) {
-        const value = newValue as WalterZaehlerstandEntry;
+        const value = {
+            ...(newValue as WalterZaehlerstandEntry),
+            zaehler:
+                (newValue as WalterZaehlerstandEntry).zaehler ||
+                addZaehlerstandEntry.zaehler
+        } as WalterZaehlerstandEntry;
 
         umlagen.forEach((umlage) => {
             (umlage.zaehler || []).forEach((zaehler) => {
@@ -422,12 +497,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         });
 
         umlagen = [...umlagen];
+        refreshTaskLists(selectedYear);
         addZaehlerstandOpen = false;
         addZaehlerstandEntry = {};
     }
 
     function onSubmitRechnung(newValue: unknown) {
-        const value = newValue as WalterBetriebskostenrechnungEntry;
+        const value = {
+            ...(newValue as WalterBetriebskostenrechnungEntry),
+            umlage:
+                (newValue as WalterBetriebskostenrechnungEntry).umlage ||
+                addRechnungEntry.umlage
+        } as WalterBetriebskostenrechnungEntry;
         const umlage = umlagen.find((entry) => entry.id === +value.umlage?.id);
         if (!umlage) {
             return;
@@ -435,6 +516,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
         umlage.betriebskostenrechnungen.push(value);
         umlagen = [...umlagen];
+        refreshTaskLists(selectedYear);
         addRechnungOpen = false;
         addRechnungEntry = {};
     }
@@ -446,9 +528,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         bind:addEntry={addMieteEntry}
         addUrl={WalterMieteEntry.ApiURL}
         bind:addModalOpen={addMieteOpen}
+        beforeSubmit={confirmDuplicateRentMonth}
         onSubmit={onSubmitMiete}
     >
-        <WalterMiete entry={addMieteEntry} {mieten} />
+        <WalterMiete
+            entry={addMieteEntry}
+            {mieten}
+            {vertraege}
+            onDeleteMonthMiete={onDeleteMonthMiete}
+            onRequestCloseModal={() => (addMieteOpen = false)}
+        />
     </WalterDataWrapperQuickAdd>
 
     <WalterDataWrapperQuickAdd

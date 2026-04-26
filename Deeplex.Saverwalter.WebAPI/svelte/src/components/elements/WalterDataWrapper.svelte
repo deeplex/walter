@@ -45,6 +45,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let on_click_row: (
         e: CustomEvent
     ) => Promise<void> | void = () => {};
+    export let beforeSubmit:
+        | undefined
+        | ((entry: unknown) => boolean | Promise<boolean>) = undefined;
     export let rowHref:
         | ((row: WalterDataTableRow) => string | undefined)
         | undefined = undefined;
@@ -80,6 +83,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {addUrl}
             bind:addModalOpen
             {onSubmit}
+            {beforeSubmit}
             {title}
         >
             <slot />

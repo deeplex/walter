@@ -42,6 +42,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     const rowHref = (row: DataTableRow) =>
         `/betriebskostenrechnungen/${row.id}`;
 
+    $: sortedRows = [...(rows || [])].sort((a, b) => {
+        const yearA = a.betreffendesJahr || 0;
+        const yearB = b.betreffendesJahr || 0;
+
+        if (yearA !== yearB) {
+            return yearB - yearA;
+        }
+
+        const dateA = new Date(a.datum).getTime();
+        const dateB = new Date(b.datum).getTime();
+
+        if (!Number.isNaN(dateA) && !Number.isNaN(dateB)) {
+            return dateB - dateA;
+        }
+
+        return `${b.datum || ''}`.localeCompare(`${a.datum || ''}`);
+    });
+
     export let entry: Partial<WalterBetriebskostenrechnungEntry> | undefined =
         undefined;
 </script>
@@ -52,7 +70,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {title}
     {on_click_row}
     {rowHref}
-    {rows}
+    rows={sortedRows}
     {headers}
     {fullHeight}
 >

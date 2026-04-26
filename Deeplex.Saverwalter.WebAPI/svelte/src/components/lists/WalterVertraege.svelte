@@ -47,6 +47,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     let earliest: Date = new Date();
     let quickAddEntry: Partial<WalterMieteEntry> = {};
+    let quickAddMieten: WalterMieteEntry[] = [];
+    let quickAddVertrag: WalterVertragEntry | undefined = undefined;
 
     function add(e: CustomEvent, vertrag: WalterVertragEntry) {
         e.stopPropagation();
@@ -75,6 +77,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             betrag: vertrag.mieten[0]?.betrag,
             betreffenderMonat: convertDateCanadian(dateMiete)
         };
+        quickAddMieten = [...vertrag.mieten];
+        quickAddVertrag = vertrag;
 
         open = true;
     }
@@ -92,7 +96,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     addUrl={WalterVertragEntry.ApiURL}
     bind:addModalOpen={open}
 >
-    <WalterMiete entry={quickAddEntry} />
+    <WalterMiete
+        entry={quickAddEntry}
+        mieten={quickAddMieten}
+        vertrag={quickAddVertrag}
+    />
 </WalterDataWrapperQuickAdd>
 
 <WalterDataWrapper

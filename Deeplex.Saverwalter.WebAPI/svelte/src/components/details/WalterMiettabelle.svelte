@@ -26,6 +26,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     import { convertDateCanadian } from '$walter/services/utils';
     import WalterDataWrapperQuickAdd from '../elements/WalterDataWrapperQuickAdd.svelte';
     import { WalterMiete } from '..';
+    import { openModal } from '$walter/store';
 
     export let config: WalterDataConfigType;
     export let vertraege: WalterVertragEntry[];
@@ -105,6 +106,66 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         vertrag!.mieten.push(value);
         config = walter_data_miettabelle(vertraege, year);
     }
+
+    function onDeleteMonthMiete(value: WalterMieteEntry) {
+        const vertrag = vertraege.find((entry) => entry.id === +value.vertrag?.id);
+        if (vertrag) {
+            vertrag.mieten = (vertrag.mieten || []).filter(
+                (miete) => miete.id !== value.id
+            );
+        }
+
+        mieten = mieten.filter((miete) => miete.id !== value.id);
+        config = walter_data_miettabelle(vertraege, year);
+    }
+
+    function dateToMonthKey(value: string | undefined) {
+        if (!value) {
+            return undefined;
+        }
+
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) {
+            return undefined;
+        }
+
+        return `${parsed.getFullYear()}-${`${parsed.getMonth() + 1}`.padStart(2, '0')}`;
+    }
+
+    function confirmDuplicateRentMonth(entryToCheck: unknown) {
+        const miete = entryToCheck as Partial<WalterMieteEntry>;
+        const vertragId = +(miete.vertrag?.id || 0);
+        const monthKey = dateToMonthKey(miete.betreffenderMonat);
+
+        const hasDuplicate =
+            !miete.id &&
+            vertragId > 0 &&
+            !!monthKey &&
+            mieten.some(
+                (row) =>
+                    +row.vertrag?.id === vertragId &&
+                    dateToMonthKey(row.betreffenderMonat) === monthKey
+            );
+
+        if (!hasDuplicate) {
+            return Promise.resolve(true);
+        }
+
+        return new Promise<boolean>((resolve) => {
+            openModal({
+                modalHeading: 'Miete bereits vorhanden',
+                content:
+                    'Für diesen Vertrag gibt es im ausgewählten Monat bereits mindestens eine Miete. Möchtest du trotzdem speichern?',
+                primaryButtonText: 'Trotzdem speichern',
+                submit: async () => {
+                    resolve(true);
+                    return true;
+                },
+                cancel: () => resolve(false),
+                danger: false
+            });
+        });
+    }
 </script>
 
 <WalterDataWrapperQuickAdd
@@ -112,9 +173,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     bind:addEntry
     addUrl={WalterMieteEntry.ApiURL}
     bind:addModalOpen
+    beforeSubmit={confirmDuplicateRentMonth}
     {title}
 >
-    <WalterMiete entry={addEntry} {mieten} />
+    <WalterMiete
+        entry={addEntry}
+        {mieten}
+        {vertraege}
+        onDeleteMonthMiete={onDeleteMonthMiete}
+        onRequestCloseModal={() => (addModalOpen = false)}
+    />
 </WalterDataWrapperQuickAdd>
 
 <div style="left: 0; min-height: 30em; display: block; width: 100%;">

@@ -33,6 +33,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     let fileWrapper = new WalterFileWrapper(data.fetchImpl);
     fileWrapper.registerStack();
     fileWrapper.register(title, data.fileURL);
+
+    function onDeleteMonthMiete(deletedMiete: { id: number }) {
+        data.vertrag.mieten = data.vertrag.mieten.filter(
+            (miete) => miete.id !== deletedMiete.id
+        );
+    }
 </script>
 
 <WalterHeaderDetail
@@ -43,5 +49,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 />
 
 <WalterGrid>
-    <WalterMiete entry={data.entry} mieten={data.vertrag.mieten} />
+    <WalterMiete
+        entry={data.entry}
+        mieten={data.vertrag.mieten}
+        vertrag={data.vertrag}
+        onDeleteMonthMiete={onDeleteMonthMiete}
+    />
 </WalterGrid>

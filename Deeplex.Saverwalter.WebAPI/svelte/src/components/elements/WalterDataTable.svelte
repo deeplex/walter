@@ -88,6 +88,65 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         e: CustomEvent<DataTableRow>
     ) => Promise<void> | void = () => {};
 
+    $: hasButtonColumn = headers.some((header) => header.key === 'button');
+    $: hasCompactButtonColumn = headers.some(
+        (header) => header.key === 'button' && `${header.value || ''}`.trim() === ''
+    );
+
+    function resolveActionButton(cellValue: unknown): {
+        disabled: boolean;
+        onClick: (e: CustomEvent) => void;
+        kind: string;
+        icon: typeof Add;
+        iconDescription: string;
+    } {
+        if (cellValue === 'disabled') {
+            return {
+                disabled: true,
+                onClick: () => {},
+                kind: 'tertiary',
+                icon: Add,
+                iconDescription: 'Hinzufügen'
+            };
+        }
+
+        if (typeof cellValue === 'function') {
+            return {
+                disabled: false,
+                onClick: cellValue as (e: CustomEvent) => void,
+                kind: 'tertiary',
+                icon: Add,
+                iconDescription: 'Hinzufügen'
+            };
+        }
+
+        if (typeof cellValue === 'object' && cellValue !== null) {
+            const buttonValue = cellValue as {
+                disabled?: boolean;
+                onClick?: (e: CustomEvent) => void;
+                kind?: string;
+                icon?: typeof Add;
+                iconDescription?: string;
+            };
+
+            return {
+                disabled: !!buttonValue.disabled,
+                onClick: buttonValue.onClick || (() => {}),
+                kind: buttonValue.kind || 'tertiary',
+                icon: buttonValue.icon || Add,
+                iconDescription: buttonValue.iconDescription || 'Hinzufügen'
+            };
+        }
+
+        return {
+            disabled: true,
+            onClick: () => {},
+            kind: 'tertiary',
+            icon: Add,
+            iconDescription: 'Hinzufügen'
+        };
+    }
+
     function resolveRowHref(row: DataTableRow): string | undefined {
         const typedRow = row as WalterDataTableRow;
 
@@ -214,17 +273,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <Content>
-    <DataTable
-        {size}
-        on:click:row={on_click_row}
-        sortable
-        zebra
-        stickyHeader
-        {headers}
-        {rows}
-        class={fullHeight ? 'proper-list' : ''}
-        style="cursor-events: none !important; max-height: none !important;"
-    >
+    <div class:has-compact-button-column={hasCompactButtonColumn}>
+        <DataTable
+            {size}
+            on:click:row={on_click_row}
+            sortable
+            zebra
+            stickyHeader
+            {headers}
+            {rows}
+            class={`${fullHeight ? 'proper-list' : ''} ${hasButtonColumn ? 'has-button-column' : ''}`}
+            style="cursor-events: none !important; max-height: none !important;"
+        >
         <Toolbar>
             <ToolbarContent>
                 <ToolbarSearch
@@ -247,21 +307,26 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             </ToolbarContent>
         </Toolbar>
         <span
-            style="text-overflow: ellipsis; white-space: nowrap; overflow:hidden;"
+            style="display: block; text-overflow: ellipsis; white-space: nowrap; overflow:hidden;"
             slot="cell"
             let:cell
             let:row
         >
             {#if cell.key === 'button'}
-                <Button
-                    disabled={cell.value === 'disabled'}
-                    on:click={cell.value}
-                    tooltipPosition="left"
-                    style="position: absolute; margin-top: -15px; margin-left: 1em; scale: 0.65"
-                    kind="tertiary"
-                    icon={Add}
-                    iconDescription={'Hinzufügen'}
-                />
+                {@const buttonConfig = resolveActionButton(cell.value)}
+                <span class="button-cell">
+                    <Button
+                        disabled={buttonConfig.disabled}
+                        on:click={buttonConfig.onClick}
+                        tooltipPosition="left"
+                        hasIconOnly
+                        size="sm"
+                        style="margin: 0;"
+                        kind={buttonConfig.kind}
+                        icon={buttonConfig.icon}
+                        iconDescription={buttonConfig.iconDescription}
+                    />
+                </span>
             {:else}
                 {@const displayValue = getCellDisplayValue(cell)}
                 {@const tooltip = displayValue === '---' ? undefined : displayValue}
@@ -280,7 +345,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 {/if}
             {/if}
         </span>
-    </DataTable>
+        </DataTable>
+    </div>
 
     <style>
         .proper-list
@@ -295,6 +361,26 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             display: block;
             width: 100%;
             height: 100%;
+        }
+
+        .button-cell {
+            align-items: center;
+            display: flex;
+            height: 100%;
+            justify-content: center;
+            min-height: 1.5rem;
+        }
+
+        :global(.has-compact-button-column .bx--data-table th:last-child),
+        :global(.has-compact-button-column .bx--data-table td:last-child) {
+            max-width: 2.75rem !important;
+            min-width: 2.75rem !important;
+            padding-left: 0.25rem !important;
+            padding-right: 0.25rem !important;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+            width: 2.75rem !important;
         }
     </style>
 </Content>

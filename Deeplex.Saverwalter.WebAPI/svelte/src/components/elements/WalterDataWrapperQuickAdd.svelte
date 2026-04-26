@@ -25,9 +25,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     export let addEntry: unknown;
     export let title: string | undefined = undefined;
     export let onSubmit: undefined | ((e: unknown) => void) = undefined;
+    export let beforeSubmit:
+        | undefined
+        | ((entry: unknown) => boolean | Promise<boolean>) = undefined;
 
     async function submit() {
         if (!addUrl) return;
+
+        if (beforeSubmit) {
+            const shouldContinue = await beforeSubmit(addEntry);
+            if (!shouldContinue) {
+                return;
+            }
+        }
 
         const parsed = await handle_save(addUrl, addEntry, title!);
 

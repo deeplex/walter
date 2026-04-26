@@ -20,4 +20,5 @@ export type WalterModalControl = {
     danger: boolean;
     primaryButtonText: string;
     submit: () => void;
+    cancel?: () => void;
 };
