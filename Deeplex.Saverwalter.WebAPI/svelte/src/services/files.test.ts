@@ -151,7 +151,10 @@ describe('files service', () => {
             '/api/files/test',
             expect.objectContaining({ method: 'GET' })
         );
-        expect(result).toBeInstanceOf(Blob);
+        expect(result).toBeDefined();
+        expect((result as Blob).constructor.name).toBe('Blob');
+        expect('size' in (result as Blob)).toBe(true);
+        expect('type' in (result as Blob)).toBe(true);
     });
 
     it('deletes files via walter_delete using the file key', async () => {
