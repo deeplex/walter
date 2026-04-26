@@ -13,8 +13,7 @@ env:
   FRONTEND_DIR: Deeplex.Saverwalter.WebAPI/svelte
 
 jobs:
-  style:
-    if: ${{ github.event_name != 'release' }}
+  style-svelte:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
@@ -60,6 +59,12 @@ jobs:
 
           yarn prettier --check "${frontend_files[@]}"
 
+  style-dotnet:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
@@ -79,7 +84,8 @@ jobs:
       - name: Verify .NET file formatting
         run: dotnet format whitespace "${{ env.SOLUTION_PATH }}" --verify-no-changes --no-restore
 
-  test-svelte-quality:
+  quality-svelte:
+    needs: style-svelte
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -113,7 +119,8 @@ jobs:
           path: Deeplex.Saverwalter.WebAPI/svelte/coverage
           if-no-files-found: error
 
-  test-dotnet:
+  quality-dotnet:
+    needs: style-dotnet
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
@@ -135,6 +142,9 @@ jobs:
       - name: Restore solution
         run: dotnet restore "${{ env.SOLUTION_PATH }}"
 
+      - name: Build .NET solution with warnings as errors
+        run: dotnet build "${{ env.SOLUTION_PATH }}" --configuration Release --no-restore /warnaserror
+
       - name: Run .NET test suite
         run: dotnet test "${{ env.SOLUTION_PATH }}" --configuration Release --no-restore --settings "${{ github.workspace }}/.runsettings" --collect:"XPlat Code Coverage" --logger trx --results-directory artifacts/test-results/dotnet
 
@@ -147,6 +157,9 @@ jobs:
           if-no-files-found: error
 
   test-full-stack:
+    needs:
+      - quality-svelte
+      - quality-dotnet
     runs-on: ubuntu-22.04
     services:
       postgres:
