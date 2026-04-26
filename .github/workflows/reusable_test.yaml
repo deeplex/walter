@@ -1,35 +1,165 @@
-name: Test svelte and dotnet
+name: quality and test
+
 on: workflow_call
 
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: 8.0.x
+  NODE_VERSION: 20
+  SOLUTION_FILE: Deeplex.Saverwalter.sln
+  SOLUTION_PATH: ${{ github.workspace }}/Deeplex.Saverwalter.sln
+  FRONTEND_DIR: Deeplex.Saverwalter.WebAPI/svelte
+
 jobs:
-  test-svelte:
+  style:
+    if: ${{ github.event_name != 'release' }}
     runs-on: ubuntu-22.04
-    container:
-      image: node:18-alpine3.17
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Test svelte app
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed frontend files
+        id: changed-frontend
+        uses: tj-actions/changed-files@v46
+        with:
+          files: |
+            Deeplex.Saverwalter.WebAPI/svelte/**/*.ts
+            Deeplex.Saverwalter.WebAPI/svelte/**/*.svelte
+            Deeplex.Saverwalter.WebAPI/svelte/**/*.js
+
+      - name: Detect changed .NET files
+        id: changed-dotnet
+        uses: tj-actions/changed-files@v46
+        with:
+          files: |
+            **/*.cs
+
+      - name: Setup Node.js
+        if: ${{ steps.changed-frontend.outputs.any_changed == 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+          cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
+
+      - name: Enable corepack
+        if: ${{ steps.changed-frontend.outputs.any_changed == 'true' }}
+        run: corepack enable
+
+      - name: Install frontend dependencies
+        if: ${{ steps.changed-frontend.outputs.any_changed == 'true' }}
+        working-directory: Deeplex.Saverwalter.WebAPI/svelte
+        run: yarn install --immutable
+
+      - name: Check changed frontend file formatting
+        if: ${{ steps.changed-frontend.outputs.any_changed == 'true' }}
+        working-directory: Deeplex.Saverwalter.WebAPI/svelte
+        shell: bash
         run: |
-          cd Deeplex.Saverwalter.WebAPI/svelte
-          yarn install
-          yarn vitest run --coverage
+          mapfile -t frontend_files < <(
+            printf '%s\n' "${{ steps.changed-frontend.outputs.all_changed_files }}" \
+              | tr ' ' '\n' \
+              | sed 's#^Deeplex.Saverwalter.WebAPI/svelte/##' \
+              | sed '/^$/d'
+          )
+
+          yarn prettier --check "${frontend_files[@]}"
+
+      - name: Setup .NET SDK
+        if: ${{ steps.changed-dotnet.outputs.any_changed == 'true' }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        if: ${{ steps.changed-dotnet.outputs.any_changed == 'true' }}
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore solution for style checks
+        if: ${{ steps.changed-dotnet.outputs.any_changed == 'true' }}
+        run: dotnet restore "${{ env.SOLUTION_PATH }}"
+
+      - name: Verify changed .NET file formatting
+        if: ${{ steps.changed-dotnet.outputs.any_changed == 'true' }}
+        run: dotnet format whitespace "${{ env.SOLUTION_PATH }}" --verify-no-changes --no-restore --include ${{ steps.changed-dotnet.outputs.all_changed_files }}
+
+  test-svelte-quality:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: Deeplex.Saverwalter.WebAPI/svelte
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+          cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install frontend dependencies
+        run: yarn install --immutable
+
+      - name: Type-check frontend sources
+        run: yarn check
+
+      - name: Run frontend unit tests
+        run: yarn vitest run --coverage
+
+      - name: Upload frontend coverage
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: Deeplex.Saverwalter.WebAPI/svelte/coverage
+          if-no-files-found: error
 
   test-dotnet:
     runs-on: ubuntu-22.04
-    container:
-      image: mcr.microsoft.com/devcontainers/dotnet:8.0
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Test dotnet app
-        shell: bash
-        run: |
-          set -eo pipefail
-          export LC_ALL=de_DE.UTF-8
-          dotnet restore
-          dotnet test /p:CollectCoverage=true /p:ExcludeByFile="**/Migrations/Npgsql/*.cs" | tee /tmp/test-output.txt
-          grep '%' /tmp/test-output.txt | awk '{print $0}{sum += substr($4,1,length($4)-1)} END {if (NR>0) print "Total coverage: " sum / NR "%" }'
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore solution
+        run: dotnet restore "${{ env.SOLUTION_PATH }}"
+
+      - name: Run .NET test suite
+        run: dotnet test "${{ env.SOLUTION_PATH }}" --configuration Release --no-restore --settings "${{ github.workspace }}/.runsettings" --collect:"XPlat Code Coverage" --logger trx --results-directory artifacts/test-results/dotnet
+
+      - name: Upload .NET test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-test-results
+          path: artifacts/test-results/dotnet
+          if-no-files-found: error
 
   test-full-stack:
     runs-on: ubuntu-22.04
@@ -48,23 +178,38 @@ jobs:
           --health-timeout=5s
           --health-retries=5
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Setup .NET
+
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
-      - name: Setup Node
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+          cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
+
       - name: Enable corepack
         run: corepack enable
-      - name: Install Playwright browser dependencies
+
+      - name: Install frontend dependencies and Playwright
+        working-directory: Deeplex.Saverwalter.WebAPI/svelte
         run: |
-          cd Deeplex.Saverwalter.WebAPI/svelte
-          yarn install
+          yarn install --immutable
           yarn playwright install --with-deps chromium
+
       - name: Run full-stack test script
         env:
           DATABASE_HOST: localhost
@@ -73,3 +218,13 @@ jobs:
           DATABASE_PASS: postgres
           WALTER_E2E_PASSWORD: postgres
         run: bash ./scripts/test-full-stack.sh
+
+      - name: Upload Playwright artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: |
+            Deeplex.Saverwalter.WebAPI/svelte/playwright-report
+            Deeplex.Saverwalter.WebAPI/svelte/test-results
+          if-no-files-found: ignore

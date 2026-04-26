@@ -1,7 +1,16 @@
+name: release
+
 on:
   release:
     types:
       - published
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   test:

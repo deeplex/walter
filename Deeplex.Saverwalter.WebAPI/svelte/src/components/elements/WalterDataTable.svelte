@@ -15,6 +15,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+    import type { ComponentType } from 'svelte';
     import {
         Button,
         Content,
@@ -90,14 +91,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
     $: hasButtonColumn = headers.some((header) => header.key === 'button');
     $: hasCompactButtonColumn = headers.some(
-        (header) => header.key === 'button' && `${header.value || ''}`.trim() === ''
+        (header) =>
+            header.key === 'button' && `${header.value || ''}`.trim() === ''
     );
 
     function resolveActionButton(cellValue: unknown): {
         disabled: boolean;
-        onClick: (e: CustomEvent) => void;
-        kind: string;
-        icon: typeof Add;
+        onClick: (e: MouseEvent) => void;
+        kind:
+            | 'danger'
+            | 'primary'
+            | 'secondary'
+            | 'tertiary'
+            | 'ghost'
+            | 'danger-tertiary'
+            | 'danger-ghost';
+        icon: ComponentType;
         iconDescription: string;
     } {
         if (cellValue === 'disabled') {
@@ -113,7 +122,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         if (typeof cellValue === 'function') {
             return {
                 disabled: false,
-                onClick: cellValue as (e: CustomEvent) => void,
+                onClick: cellValue as (e: MouseEvent) => void,
                 kind: 'tertiary',
                 icon: Add,
                 iconDescription: 'Hinzufügen'
@@ -123,9 +132,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         if (typeof cellValue === 'object' && cellValue !== null) {
             const buttonValue = cellValue as {
                 disabled?: boolean;
-                onClick?: (e: CustomEvent) => void;
-                kind?: string;
-                icon?: typeof Add;
+                onClick?: (e: MouseEvent) => void;
+                kind?:
+                    | 'danger'
+                    | 'primary'
+                    | 'secondary'
+                    | 'tertiary'
+                    | 'ghost'
+                    | 'danger-tertiary'
+                    | 'danger-ghost';
+                icon?: ComponentType;
                 iconDescription?: string;
             };
 
@@ -190,7 +206,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             return formatToTableDate(`${cell.value}`);
         }
         if (time(cell.key)) {
-            return convertTime(cell.value as Date | string | undefined) || '---';
+            return (
+                convertTime(cell.value as Date | string | undefined) || '---'
+            );
         }
         if (euro(cell.key)) {
             return convertEuro(cell.value as number | undefined) || '---';
@@ -285,66 +303,66 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             class={`${fullHeight ? 'proper-list' : ''} ${hasButtonColumn ? 'has-button-column' : ''}`}
             style="cursor-events: none !important; max-height: none !important;"
         >
-        <Toolbar>
-            <ToolbarContent>
-                <ToolbarSearch
-                    placeholder="Suche mit ; separierter Liste..."
-                    persistent
-                    on:input={toolbarSearchInput}
-                    bind:value={searchQuery}
-                    {shouldFilterRows}
-                />
-                {#if !!add && !readonly}
-                    <Button
-                        style="right: -1em; position: sticky;"
-                        on:click={add}
-                        iconDescription="Eintrag hinzufügen"
-                        icon={Add}
-                    >
-                        Eintrag hinzufügen
-                    </Button>
-                {/if}
-            </ToolbarContent>
-        </Toolbar>
-        <span
-            style="display: block; text-overflow: ellipsis; white-space: nowrap; overflow:hidden;"
-            slot="cell"
-            let:cell
-            let:row
-        >
-            {#if cell.key === 'button'}
-                {@const buttonConfig = resolveActionButton(cell.value)}
-                <span class="button-cell">
-                    <Button
-                        disabled={buttonConfig.disabled}
-                        on:click={buttonConfig.onClick}
-                        tooltipPosition="left"
-                        hasIconOnly
-                        size="sm"
-                        style="margin: 0;"
-                        kind={buttonConfig.kind}
-                        icon={buttonConfig.icon}
-                        iconDescription={buttonConfig.iconDescription}
+            <Toolbar>
+                <ToolbarContent>
+                    <ToolbarSearch
+                        placeholder="Suche mit ; separierter Liste..."
+                        persistent
+                        on:input={toolbarSearchInput}
+                        bind:value={searchQuery}
+                        {shouldFilterRows}
                     />
-                </span>
-            {:else}
-                {@const displayValue = getCellDisplayValue(cell)}
-                {@const tooltip = displayValue === '---' ? undefined : displayValue}
-                {@const href = resolveRowHref(row)}
-                {#if href}
-                    <a
-                        class="walter-table-link"
-                        {href}
-                        title={tooltip}
-                        on:click={(event) => onRowLinkClick(event, href)}
-                    >
-                        {displayValue}
-                    </a>
+                    {#if !!add && !readonly}
+                        <Button
+                            style="right: -1em; position: sticky;"
+                            on:click={add}
+                            iconDescription="Eintrag hinzufügen"
+                            icon={Add}
+                        >
+                            Eintrag hinzufügen
+                        </Button>
+                    {/if}
+                </ToolbarContent>
+            </Toolbar>
+            <span
+                style="display: block; text-overflow: ellipsis; white-space: nowrap; overflow:hidden;"
+                slot="cell"
+                let:cell
+                let:row
+            >
+                {#if cell.key === 'button'}
+                    {@const buttonConfig = resolveActionButton(cell.value)}
+                    <span class="button-cell">
+                        <Button
+                            disabled={buttonConfig.disabled}
+                            on:click={buttonConfig.onClick}
+                            tooltipPosition="left"
+                            size="small"
+                            style="margin: 0;"
+                            kind={buttonConfig.kind}
+                            icon={buttonConfig.icon}
+                            iconDescription={buttonConfig.iconDescription}
+                        />
+                    </span>
                 {:else}
-                    <span title={tooltip}>{displayValue}</span>
+                    {@const displayValue = getCellDisplayValue(cell)}
+                    {@const tooltip =
+                        displayValue === '---' ? undefined : displayValue}
+                    {@const href = resolveRowHref(row)}
+                    {#if href}
+                        <a
+                            class="walter-table-link"
+                            {href}
+                            title={tooltip}
+                            on:click={(event) => onRowLinkClick(event, href)}
+                        >
+                            {displayValue}
+                        </a>
+                    {:else}
+                        <span title={tooltip}>{displayValue}</span>
+                    {/if}
                 {/if}
-            {/if}
-        </span>
+            </span>
         </DataTable>
     </div>
 

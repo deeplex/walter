@@ -22,68 +22,73 @@ import type {
     WalterZaehlerstandEntry
 } from '$walter/lib';
 
+const defaultPermissions = { read: true, update: true, remove: true };
+
 // Mock data for testing
 const createMockVertrag = (
     id: number,
     beginn: string,
     ende?: string,
     mieten: WalterMieteEntry[] = [],
-    permissions = { read: true, write: true, update: true },
+    permissions = defaultPermissions,
     mieterAuflistung = 'Mieter A, Mieter B'
-): WalterVertragEntry => ({
-    id,
-    beginn,
-    ende,
-    mieten,
-    mieterAuflistung,
-    permissions,
-    versionen: [
-        {
+): WalterVertragEntry =>
+    ({
+        id,
+        beginn,
+        ende,
+        mieten,
+        mieterAuflistung,
+        permissions,
+        versionen: [
+            {
+                id: 1,
+                beginn: '2023-01-01',
+                grundmiete: 1000
+            }
+        ] as any,
+        wohnung: {
             id: 1,
-            beginn: '2023-01-01',
-            grundmiete: 1000
-        }
-    ] as any,
-    wohnung: {
-        id: 1,
-        text: `Wohnung ${id}`
-    } as any
-});
+            text: `Wohnung ${id}`
+        } as any
+    }) as WalterVertragEntry;
 
 const createMockZaehler = (
     id: number,
     kennnummer: string,
     staende: WalterZaehlerstandEntry[] = [],
-    permissions = { read: true, write: true, update: true }
-): WalterZaehlerEntry => ({
-    id,
-    kennnummer,
-    staende,
-    permissions,
-    typ: {
-        id: 1,
-        text: 'Strom'
-    } as any,
-    lastZaehlerstand: staende[staende.length - 1]
-});
+    permissions = defaultPermissions
+): WalterZaehlerEntry =>
+    ({
+        id,
+        kennnummer,
+        staende,
+        permissions,
+        typ: {
+            id: 1,
+            text: 'Strom'
+        } as any,
+        lastZaehlerstand: staende[staende.length - 1]
+    }) as WalterZaehlerEntry;
 
 const createMockUmlage = (
     id: number,
     typ: string = 'Nebenkosten',
     betriebskostenrechnungen: any[] = [],
-    permissions = { read: true, write: true, update: true }
-): WalterUmlageEntry => ({
-    id,
-    betriebskostenrechnungen,
-    permissions,
-    zaehler: [],
-    typ: {
-        id: 1,
-        text: typ
-    } as any,
-    beschreibung: `Umlage ${id}`,
-    wohnungenBezeichnung: 'Alle Wohnungen'
-});
+    permissions = defaultPermissions
+): WalterUmlageEntry =>
+    ({
+        id,
+        betriebskostenrechnungen,
+        permissions,
+        zaehler: [],
+        typ: {
+            id: 1,
+            text: typ
+        } as any,
+        beschreibung: `Umlage ${id}`,
+        wohnungenBezeichnung: 'Alle Wohnungen'
+    }) as unknown as WalterUmlageEntry;
 
 describe('WalterMiettabelleWrapper - Task Building Functions', () => {
     describe('buildRentTasks', () => {
@@ -91,8 +96,8 @@ describe('WalterMiettabelleWrapper - Task Building Functions', () => {
             const vertraege = [
                 createMockVertrag(1, '2023-01-01', undefined, [], {
                     read: true,
-                    write: false,
-                    update: false
+                    update: false,
+                    remove: false
                 })
             ];
 
@@ -121,7 +126,9 @@ describe('WalterMiettabelleWrapper - Task Building Functions', () => {
                     betrag: 1000
                 } as any
             ];
-            const vertraege = [createMockVertrag(1, '2024-01-01', undefined, mieten)];
+            const vertraege = [
+                createMockVertrag(1, '2024-01-01', undefined, mieten)
+            ];
 
             const result = buildRentTasks(vertraege, 2024);
             // Should only find missing months after January
@@ -182,14 +189,8 @@ describe('WalterMiettabelleWrapper - Task Building Functions', () => {
 
     describe('buildMeterTasks', () => {
         it('should deduplicate zaehler by ID', () => {
-            const zaehler1: WalterZaehlerEntry = createMockZaehler(
-                1,
-                'Z001'
-            );
-            const zaehler2: WalterZaehlerEntry = createMockZaehler(
-                2,
-                'Z002'
-            );
+            const zaehler1: WalterZaehlerEntry = createMockZaehler(1, 'Z001');
+            const zaehler2: WalterZaehlerEntry = createMockZaehler(2, 'Z002');
 
             const umlagen = [
                 createMockUmlage(1, 'Nebenkosten'),
@@ -205,11 +206,16 @@ describe('WalterMiettabelleWrapper - Task Building Functions', () => {
         });
 
         it('should filter by update permissions', () => {
-            const zaehler: WalterZaehlerEntry = createMockZaehler(1, 'Z001', [], {
-                read: true,
-                write: false,
-                update: false
-            });
+            const zaehler: WalterZaehlerEntry = createMockZaehler(
+                1,
+                'Z001',
+                [],
+                {
+                    read: true,
+                    update: false,
+                    remove: false
+                }
+            );
             const umlagen = [createMockUmlage(1)];
             umlagen[0].zaehler = [zaehler];
 
@@ -284,8 +290,8 @@ describe('WalterMiettabelleWrapper - Task Building Functions', () => {
             const umlagen = [
                 createMockUmlage(1, 'Nebenkosten', [], {
                     read: true,
-                    write: false,
-                    update: false
+                    update: false,
+                    remove: false
                 })
             ];
 
@@ -392,10 +398,11 @@ function buildRentTasks(
         const version = [...(vertrag.versionen || [])]
             .sort(
                 (a, b) =>
-                    new Date(a.beginn).getTime() -
-                    new Date(b.beginn).getTime()
+                    new Date(a.beginn).getTime() - new Date(b.beginn).getTime()
             )
-            .filter((entry) => new Date(entry.beginn).getTime() <= date.getTime())
+            .filter(
+                (entry) => new Date(entry.beginn).getTime() <= date.getTime()
+            )
             .at(-1);
 
         return version?.grundmiete || 0;
@@ -430,7 +437,9 @@ function buildRentTasks(
                             new Date(miete.betreffenderMonat).getFullYear() ===
                             year
                     )
-                    .map((miete) => new Date(miete.betreffenderMonat).getMonth())
+                    .map((miete) =>
+                        new Date(miete.betreffenderMonat).getMonth()
+                    )
             );
 
             const currentMonth = new Date().getMonth();
@@ -439,7 +448,11 @@ function buildRentTasks(
                     ? Math.max(startMonth, currentMonth)
                     : startMonth;
 
-            for (let monthIndex = searchStart; monthIndex <= endMonth; monthIndex += 1) {
+            for (
+                let monthIndex = searchStart;
+                monthIndex <= endMonth;
+                monthIndex += 1
+            ) {
                 if (existingMonths.has(monthIndex)) {
                     continue;
                 }
@@ -449,7 +462,8 @@ function buildRentTasks(
                 const amount =
                     latestMiete?.betrag ||
                     getGrundmieteForDate(vertrag, monthDate);
-                const mieterAuflistung = vertrag.mieterAuflistung || 'Keine Mieter';
+                const mieterAuflistung =
+                    vertrag.mieterAuflistung || 'Keine Mieter';
 
                 return {
                     vertrag,

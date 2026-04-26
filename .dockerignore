@@ -1,0 +1,11 @@
+.git
+.github
+.devcontainer
+**/bin
+**/obj
+**/node_modules
+**/.svelte-kit
+**/coverage
+**/playwright-report
+**/test-results
+**/.DS_Store

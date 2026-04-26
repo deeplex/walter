@@ -1,39 +1,122 @@
-name: build svelte and dotnet app
+name: build
+
 on: workflow_call
 
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: 8.0.x
+  NODE_VERSION: 20
+  SOLUTION_FILE: Deeplex.Saverwalter.sln
+  SOLUTION_PATH: ${{ github.workspace }}/Deeplex.Saverwalter.sln
+  WEBAPI_PROJECT: Deeplex.Saverwalter.WebAPI/Deeplex.Saverwalter.WebAPI.csproj
+  WEBAPI_PROJECT_PATH: ${{ github.workspace }}/Deeplex.Saverwalter.WebAPI/Deeplex.Saverwalter.WebAPI.csproj
+
 jobs:
+  build-dotnet-solution:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore solution
+        run: dotnet restore "${{ env.SOLUTION_PATH }}"
+
+      - name: Build solution
+        run: dotnet build "${{ env.SOLUTION_PATH }}" --configuration Release --no-restore
+
   build-svelte:
     runs-on: ubuntu-22.04
-    container:
-      image: node:18-alpine3.17
+    defaults:
+      run:
+        working-directory: Deeplex.Saverwalter.WebAPI/svelte
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Build svelte app
-        run: |
-          cd Deeplex.Saverwalter.WebAPI/svelte
-          yarn install
-          yarn build
-      - name: Upload svelte artifact
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+          cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install frontend dependencies
+        run: yarn install --immutable
+
+      - name: Build frontend assets
+        run: yarn build
+
+      - name: Upload frontend artifact
         uses: actions/upload-artifact@v4
         with:
           name: svelte-app
           path: Deeplex.Saverwalter.WebAPI/wwwroot
+          if-no-files-found: error
 
-  build-dotnet:
+  publish-webapi:
     runs-on: ubuntu-22.04
-    container:
-      image: mcr.microsoft.com/devcontainers/dotnet:8.0
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Build dotnet app
-        run: |
-          cd Deeplex.Saverwalter.WebAPI
-          dotnet restore
-          dotnet publish -c release
-      - name: Upload dotnet artifact
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+          cache-dependency-path: Deeplex.Saverwalter.WebAPI/svelte/yarn.lock
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install frontend dependencies
+        working-directory: Deeplex.Saverwalter.WebAPI/svelte
+        run: yarn install --immutable
+
+      - name: Build frontend assets
+        working-directory: Deeplex.Saverwalter.WebAPI/svelte
+        run: yarn build
+
+      - name: Restore solution
+        run: dotnet restore "${{ env.SOLUTION_PATH }}"
+
+      - name: Publish WebAPI
+        run: dotnet publish "${{ env.WEBAPI_PROJECT_PATH }}" --configuration Release --no-restore --output artifacts/publish/webapi
+
+      - name: Upload published WebAPI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-app
-          path: Deeplex.Saverwalter.WebAPI/bin
+          name: webapi-publish
+          path: artifacts/publish/webapi
+          if-no-files-found: error

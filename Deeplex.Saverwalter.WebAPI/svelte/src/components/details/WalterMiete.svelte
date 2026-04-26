@@ -24,10 +24,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         WalterTextArea
     } from '$walter/components';
     import { Row } from 'carbon-components-svelte';
-    import {
-        WalterMieteEntry,
-        type WalterVertragEntry
-    } from '$walter/lib';
+    import type { WalterMieteEntry, WalterVertragEntry } from '$walter/lib';
     import WalterLinkTile from '../subdetails/WalterLinkTile.svelte';
     import { fileURL } from '$walter/services/files';
 

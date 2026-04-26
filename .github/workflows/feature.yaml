@@ -1,7 +1,16 @@
+name: feature
+
 on:
   push:
     branches:
       - feature/*
+
+permissions:
+  contents: read
+
+concurrency:
+  group: feature-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
