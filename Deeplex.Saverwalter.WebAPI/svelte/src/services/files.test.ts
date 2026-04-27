@@ -43,7 +43,9 @@ vi.mock('./requests', () => ({
 vi.mock('$walter/lib', () => ({
     WalterAbrechnungsresultatEntry: { ApiURL: '/api/abrechnungsresultate' },
     WalterAdresseEntry: { ApiURL: '/api/adressen' },
-    WalterBetriebskostenrechnungEntry: { ApiURL: '/api/betriebskostenrechnungen' },
+    WalterBetriebskostenrechnungEntry: {
+        ApiURL: '/api/betriebskostenrechnungen'
+    },
     WalterErhaltungsaufwendungEntry: { ApiURL: '/api/erhaltungsaufwendungen' },
     WalterKontaktEntry: { ApiURL: '/api/kontakte' },
     WalterMieteEntry: { ApiURL: '/api/mieten' },
@@ -93,13 +95,9 @@ describe('files service', () => {
             '/api/erhaltungsaufwendungen/7/files'
         );
         expect(fileURL.miete('4')).toBe('/api/mieten/4/files');
-        expect(fileURL.mietminderung('6')).toBe(
-            '/api/mietminderungen/6/files'
-        );
+        expect(fileURL.mietminderung('6')).toBe('/api/mietminderungen/6/files');
         expect(fileURL.kontakt('3')).toBe('/api/kontakte/3/files');
-        expect(fileURL.transaktion('13')).toBe(
-            '/api/transaktionen/13/files'
-        );
+        expect(fileURL.transaktion('13')).toBe('/api/transaktionen/13/files');
         expect(fileURL.umlage('14')).toBe('/api/umlagen/14/files');
         expect(fileURL.umlagetyp('15')).toBe('/api/umlagetypen/15/files');
         expect(fileURL.vertrag('9')).toBe('/api/vertraege/9/files');
@@ -107,18 +105,21 @@ describe('files service', () => {
             '/api/vertragversionen/10/files'
         );
         expect(fileURL.zaehler('11')).toBe('/api/zaehler/11/files');
-        expect(fileURL.zaehlerstand('16')).toBe(
-            '/api/zaehlerstaende/16/files'
-        );
+        expect(fileURL.zaehlerstand('16')).toBe('/api/zaehlerstaende/16/files');
         expect(fileURL.stack).toBe('/api/user/files');
     });
 
     it('uploads files through walter_fetch and reports toast state', async () => {
         walterFetchMock.mockResolvedValue(
-            new Response('', { status: 200, headers: { 'Content-Type': 'application/json' } })
+            new Response('', {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            })
         );
         const { walter_file_post } = await import('./files');
-        const file = new File(['hello'], 'greeting.txt', { type: 'text/plain' });
+        const file = new File(['hello'], 'greeting.txt', {
+            type: 'text/plain'
+        });
         const toast = {
             successTitle: 'ok',
             failureTitle: 'fail',
@@ -126,7 +127,12 @@ describe('files service', () => {
             subtitleFailure: () => 'fail'
         };
 
-        const response = await walter_file_post(file, '/api/files', fetch, toast);
+        const response = await walter_file_post(
+            file,
+            '/api/files',
+            fetch,
+            toast
+        );
 
         expect(response.status).toBe(200);
         expect(walterFetchMock).toHaveBeenCalledWith(
@@ -139,9 +145,7 @@ describe('files service', () => {
 
     it('downloads file blobs using walter_fetch', async () => {
         const blob = new Blob(['abc'], { type: 'text/plain' });
-        walterFetchMock.mockResolvedValue(
-            new Response(blob, { status: 200 })
-        );
+        walterFetchMock.mockResolvedValue(new Response(blob, { status: 200 }));
         const { walter_file_get } = await import('./files');
 
         const result = await walter_file_get('/api/files/test');
@@ -167,9 +171,15 @@ describe('files service', () => {
             subtitleFailure: () => 'fail'
         };
 
-        await walter_file_delete({ key: '/api/files/demo.txt' } as never, toast);
+        await walter_file_delete(
+            { key: '/api/files/demo.txt' } as never,
+            toast
+        );
 
-        expect(walterDeleteMock).toHaveBeenCalledWith('/api/files/demo.txt', toast);
+        expect(walterDeleteMock).toHaveBeenCalledWith(
+            '/api/files/demo.txt',
+            toast
+        );
     });
 
     it('finish_file_post reports failed uploads through the toast branch', async () => {
@@ -193,7 +203,9 @@ describe('files service', () => {
     it('downloads blobs through a temporary anchor element', async () => {
         const appendChildSpy = vi.spyOn(document.body, 'appendChild');
         const removeChildSpy = vi.spyOn(document.body, 'removeChild');
-        const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+        const clickSpy = vi
+            .spyOn(HTMLAnchorElement.prototype, 'click')
+            .mockImplementation(() => {});
         const { download_file_blob } = await import('./files');
 
         download_file_blob(new Blob(['demo']), 'demo.txt');
