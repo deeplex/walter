@@ -99,6 +99,15 @@ url_port() {
   fi
 }
 
+probe_url() {
+  local url="$1"
+
+  # When services bind to 0.0.0.0 in CI, probing localhost can resolve to ::1
+  # first and miss an IPv4-only listener. Keep external URLs unchanged and only
+  # normalize the script-side readiness check to the IPv4 loopback.
+  echo "$url" | sed -E 's#^([a-zA-Z]+://)localhost([/:]|$)#\1127.0.0.1\2#'
+}
+
 ensure_local_port_is_free() {
   local host="$1"
   local port="$2"
@@ -138,6 +147,8 @@ API_HOST="$(url_host "$API_URL")"
 API_PORT="$(url_port "$API_URL")"
 UI_HOST="$(url_host "$UI_URL")"
 UI_PORT="$(url_port "$UI_URL")"
+API_PROBE_URL="$(probe_url "$API_URL")"
+UI_PROBE_URL="$(probe_url "$UI_URL")"
 
 ensure_local_port_is_free "$API_HOST" "$API_PORT" "Backend"
 ensure_local_port_is_free "$UI_HOST" "$UI_PORT" "Frontend"
@@ -163,13 +174,13 @@ echo "[6/7] Starting frontend"
 ) >/tmp/walter-frontend.log 2>&1 &
 frontend_pid="$!"
 
-if ! wait_for_http_connection "$API_URL" "$STARTUP_TIMEOUT_SECONDS"; then
+if ! wait_for_http_connection "$API_PROBE_URL" "$STARTUP_TIMEOUT_SECONDS"; then
   echo "Backend did not become ready at $API_URL"
   tail -n 80 /tmp/walter-backend.log || true
   exit 1
 fi
 
-if ! wait_for_http "$UI_URL/login" "$STARTUP_TIMEOUT_SECONDS"; then
+if ! wait_for_http "$UI_PROBE_URL/login" "$STARTUP_TIMEOUT_SECONDS"; then
   echo "Frontend did not become ready at $UI_URL"
   tail -n 80 /tmp/walter-frontend.log || true
   exit 1
