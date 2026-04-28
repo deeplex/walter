@@ -14,11 +14,26 @@ UI_URL="${PLAYWRIGHT_BASE_URL:-http://localhost:5173}"
 WALTER_E2E_PASSWORD="${WALTER_E2E_PASSWORD:-$DB_PASS}"
 PLAYWRIGHT_BROWSER="${PLAYWRIGHT_BROWSER:-chromium}"
 STARTUP_TIMEOUT_SECONDS="${WALTER_STARTUP_TIMEOUT_SECONDS:-180}"
+LOGS_DIR="${WALTER_LOG_DIR:-}"
+PRESERVE_LOGS_ON_FAILURE="${WALTER_PRESERVE_LOGS_ON_FAILURE:-0}"
+
+if [[ -z "$LOGS_DIR" ]]; then
+  LOGS_DIR="$(mktemp -d "${TMPDIR:-/tmp}/walter-full-stack.XXXXXX")"
+  LOGS_DIR_AUTO_CREATED=1
+else
+  mkdir -p "$LOGS_DIR"
+  LOGS_DIR_AUTO_CREATED=0
+fi
+
+BACKEND_LOG_PATH="$LOGS_DIR/backend.log"
+FRONTEND_LOG_PATH="$LOGS_DIR/frontend.log"
 
 backend_pid=""
 frontend_pid=""
 
 cleanup() {
+  local status=$?
+
   if [[ -n "$backend_pid" ]] && kill -0 "$backend_pid" >/dev/null 2>&1; then
     kill "$backend_pid" >/dev/null 2>&1 || true
   fi
@@ -26,6 +41,16 @@ cleanup() {
   if [[ -n "$frontend_pid" ]] && kill -0 "$frontend_pid" >/dev/null 2>&1; then
     kill "$frontend_pid" >/dev/null 2>&1 || true
   fi
+
+  if [[ "$LOGS_DIR_AUTO_CREATED" == "1" ]] && [[ "$status" -eq 0 ]]; then
+    rm -rf "$LOGS_DIR"
+  fi
+
+  if [[ "$LOGS_DIR_AUTO_CREATED" == "1" ]] && [[ "$status" -ne 0 ]] && [[ "$PRESERVE_LOGS_ON_FAILURE" != "1" ]]; then
+    rm -rf "$LOGS_DIR"
+  fi
+
+  return "$status"
 }
 
 trap cleanup EXIT INT TERM
@@ -60,23 +85,6 @@ wait_for_http() {
   return 1
 }
 
-wait_for_http_connection() {
-  local url="$1"
-  local seconds="${2:-180}"
-
-  for _ in $(seq 1 "$seconds"); do
-    # A non-2xx status is still acceptable for readiness; we only care that
-    # an HTTP server is reachable on the configured URL.
-    if curl --silent --show-error --output /dev/null "$url" >/dev/null 2>&1; then
-      return 0
-    fi
-
-    read -r -t 1 _ || true
-  done
-
-  return 1
-}
-
 url_host() {
   local url="$1"
   echo "$url" | sed -E 's#^[a-zA-Z]+://([^/:]+).*$#\1#'
@@ -99,6 +107,21 @@ url_port() {
   fi
 }
 
+bind_host() {
+  local url="$1"
+  local host
+  host="$(url_host "$url")"
+
+  case "$host" in
+    localhost|127.0.0.1|::1)
+      echo "127.0.0.1"
+      ;;
+    *)
+      echo "0.0.0.0"
+      ;;
+  esac
+}
+
 probe_url() {
   local url="$1"
 
@@ -118,6 +141,23 @@ ensure_local_port_is_free() {
     echo "Stop the existing process or override ${label} URL via env vars before rerunning."
     exit 1
   fi
+}
+
+print_startup_diagnostics() {
+  local label="$1"
+
+  echo "${label} diagnostics:"
+  echo "  Backend PID: ${backend_pid:-<none>}"
+  echo "  Frontend PID: ${frontend_pid:-<none>}"
+  echo "  Backend probe URL: ${API_PROBE_URL:-<unset>}"
+  echo "  Frontend probe URL: ${UI_PROBE_URL:-<unset>}"
+  echo "  Log directory: ${LOGS_DIR}"
+  echo "  Listening sockets:"
+  ss -lntp 2>/dev/null || true
+  echo "  Backend log tail:"
+  tail -n 80 "$BACKEND_LOG_PATH" || true
+  echo "  Frontend log tail:"
+  tail -n 80 "$FRONTEND_LOG_PATH" || true
 }
 
 echo "[1/7] Waiting for Postgres at ${DB_HOST}:${DB_PORT}"
@@ -149,9 +189,17 @@ UI_HOST="$(url_host "$UI_URL")"
 UI_PORT="$(url_port "$UI_URL")"
 API_PROBE_URL="$(probe_url "$API_URL")"
 UI_PROBE_URL="$(probe_url "$UI_URL")"
+API_BIND_HOST="$(bind_host "$API_URL")"
+UI_BIND_HOST="$(bind_host "$UI_URL")"
 
 ensure_local_port_is_free "$API_HOST" "$API_PORT" "Backend"
 ensure_local_port_is_free "$UI_HOST" "$UI_PORT" "Frontend"
+
+echo "Backend bind host: ${API_BIND_HOST}"
+echo "Backend probe URL: ${API_PROBE_URL}"
+echo "Frontend bind host: ${UI_BIND_HOST}"
+echo "Frontend probe URL: ${UI_PROBE_URL}"
+echo "Startup logs directory: ${LOGS_DIR}"
 
 echo "[5/7] Starting backend"
 # dotnet test in step [3/7] already compiled the WebAPI project; skip rebuild.
@@ -163,23 +211,23 @@ echo "[5/7] Starting backend"
   export DATABASE_PASS="$DB_PASS"
   export WALTER_PASSWORD="$DB_PASS"
   export ASPNETCORE_ENVIRONMENT="Development"
-  export ASPNETCORE_URLS="http://0.0.0.0:${API_PORT}"
+  export ASPNETCORE_URLS="http://${API_BIND_HOST}:${API_PORT}"
   dotnet run --no-build --project Deeplex.Saverwalter.WebAPI/Deeplex.Saverwalter.WebAPI.csproj --no-launch-profile
-) >/tmp/walter-backend.log 2>&1 &
+) >"$BACKEND_LOG_PATH" 2>&1 &
 backend_pid="$!"
 
 echo "[6/7] Starting frontend"
 (
   cd Deeplex.Saverwalter.WebAPI/svelte
-  yarn dev --host 0.0.0.0 --port "$UI_PORT" --strictPort
-) >/tmp/walter-frontend.log 2>&1 &
+  yarn dev --host "$UI_BIND_HOST" --port "$UI_PORT" --strictPort
+) >"$FRONTEND_LOG_PATH" 2>&1 &
 frontend_pid="$!"
 
 backend_ready=false
 for _ in $(seq 1 "$STARTUP_TIMEOUT_SECONDS"); do
   if ! kill -0 "$backend_pid" >/dev/null 2>&1; then
     echo "Backend process exited unexpectedly."
-    tail -n 80 /tmp/walter-backend.log || true
+    print_startup_diagnostics "Backend failure"
     exit 1
   fi
   if curl --silent --show-error --output /dev/null "$API_PROBE_URL" >/dev/null 2>&1; then
@@ -190,13 +238,13 @@ for _ in $(seq 1 "$STARTUP_TIMEOUT_SECONDS"); do
 done
 if [[ "$backend_ready" != "true" ]]; then
   echo "Backend did not become ready at $API_URL"
-  tail -n 80 /tmp/walter-backend.log || true
+  print_startup_diagnostics "Backend timeout"
   exit 1
 fi
 
 if ! wait_for_http "$UI_PROBE_URL/login" "$STARTUP_TIMEOUT_SECONDS"; then
   echo "Frontend did not become ready at $UI_URL"
-  tail -n 80 /tmp/walter-frontend.log || true
+  print_startup_diagnostics "Frontend timeout"
   exit 1
 fi
 

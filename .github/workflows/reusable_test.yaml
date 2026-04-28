@@ -213,6 +213,8 @@ jobs:
           DATABASE_USER: postgres
           DATABASE_PASS: postgres
           WALTER_E2E_PASSWORD: postgres
+          WALTER_LOG_DIR: ${{ runner.temp }}/walter-full-stack
+          WALTER_PRESERVE_LOGS_ON_FAILURE: 1
         run: bash ./scripts/test-full-stack.sh
 
       - name: Upload Playwright artifacts
@@ -223,4 +225,12 @@ jobs:
           path: |
             Deeplex.Saverwalter.WebAPI/svelte/playwright-report
             Deeplex.Saverwalter.WebAPI/svelte/test-results
+          if-no-files-found: ignore
+
+      - name: Upload full-stack startup logs
+        if: ${{ failure() && !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-stack-startup-logs
+          path: ${{ runner.temp }}/walter-full-stack
           if-no-files-found: ignore
