@@ -75,7 +75,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = await service.Delete(user, entity.UmlagetypId);
 
             result.Should().BeOfType<OkResult>();
-            ctx.Umlagen.Find(entity.UmlagetypId).Should().BeNull();
+            ctx.Umlagetypen.Find(entity.UmlagetypId).Should().BeNull();
         }
 
         [Fact]

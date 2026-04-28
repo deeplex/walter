@@ -36,7 +36,7 @@ namespace Deeplex.Saverwalter.ModelTests
         public static SaverwalterContext GetContext()
         {
             var optionsBuilder = new DbContextOptionsBuilder<SaverwalterContext>();
-            optionsBuilder.UseInMemoryDatabase("TestDb");
+            optionsBuilder.UseInMemoryDatabase($"TestDb-{Guid.NewGuid()}");
             optionsBuilder.ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning));
             var ctx = new SaverwalterContext(optionsBuilder.Options);
 
