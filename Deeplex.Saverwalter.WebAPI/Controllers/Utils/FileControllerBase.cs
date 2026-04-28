@@ -112,12 +112,22 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers
             var result = await ProcessFileRequest(_baseUrl, Request, _httpClient);
             if (result is FileContentResult fileContentResult)
             {
-                var files = FileHandling.ParseS3Stream(Encoding.UTF8.GetString(fileContentResult.FileContents), HttpContext.Request.Path.Value!);
-                return Ok(files);
+                if (
+                    FileHandling.TryParseS3Stream(
+                        Encoding.UTF8.GetString(fileContentResult.FileContents),
+                        HttpContext.Request.Path.Value!,
+                        out var files
+                    )
+                )
+                {
+                    return Ok(files);
+                }
+
+                return Ok(new List<WalterFile>());
             }
             else
             {
-                return new BadRequestResult();
+                return Ok(new List<WalterFile>());
             }
         }
 

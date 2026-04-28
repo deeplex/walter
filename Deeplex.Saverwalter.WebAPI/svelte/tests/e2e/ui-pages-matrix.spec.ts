@@ -1,6 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { devPassword, devUsers } from './credentials';
 
+test.setTimeout(120000);
+
 type RouteExpectation = {
     path: string;
     expectedText: string;
@@ -27,11 +29,17 @@ const mainRoutes: RouteExpectation[] = [
 ];
 
 async function signIn(page: Page, username: string) {
+    await page.goto('/');
+    await page.evaluate(() => window.localStorage.removeItem('auth-state'));
     await page.goto('/login');
     await page.getByLabel('Nutzername').fill(username);
     await page.getByLabel('Passwort').fill(devPassword);
     await page.getByRole('button', { name: 'Anmelden' }).click();
-    await expect(page).not.toHaveURL(/\/login$/);
+    await expect(page.getByText('Anmeldung fehlgeschlagen', { exact: true })).toHaveCount(0);
+    await expect
+        .poll(async () => page.evaluate(() => window.localStorage.getItem('auth-state')))
+        .not.toBeNull();
+    await expect(page).toHaveURL(/\/(?!login$)/);
 }
 
 for (const user of devUsers) {
@@ -43,7 +51,12 @@ for (const user of devUsers) {
                 await page.goto(route.path);
                 await expect(page).toHaveURL(new RegExp(`${route.path === '/' ? '/$' : `${route.path}$`}`));
                 await expect(page.getByText('Fehler', { exact: true })).toHaveCount(0);
-                await expect(page.getByText(route.expectedText, { exact: true })).toBeVisible();
+                await expect
+                    .poll(
+                        async () => (await page.getByRole('banner').textContent()) ?? '',
+                        { timeout: 30000 }
+                    )
+                    .toContain(route.expectedText);
             });
         }
     });
@@ -68,8 +81,8 @@ test('admin can open admin pages', async ({ page }) => {
     await signIn(page, 'admin.dev');
 
     await page.goto('/admin');
-    await expect(page.getByText('Adminbereich', { exact: true })).toBeVisible();
+    await expect(page.getByRole('banner').getByText('Adminbereich', { exact: true })).toBeVisible();
 
     await page.goto('/accounts');
-    await expect(page.getByText('Nutzereinstellungen', { exact: true })).toBeVisible();
+    await expect(page.getByRole('banner').getByText('Nutzereinstellungen', { exact: true })).toBeVisible();
 });

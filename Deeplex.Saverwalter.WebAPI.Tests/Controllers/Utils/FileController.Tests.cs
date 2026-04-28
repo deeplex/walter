@@ -173,7 +173,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = await controller.GetFiles(1);
 
             result.Should().BeOfType<ActionResult<List<Utils.WalterFile>>>();
-            result.Result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
+            var okResult = (OkObjectResult)result.Result!;
+            okResult.Value.Should().BeAssignableTo<List<Utils.WalterFile>>();
+            ((List<Utils.WalterFile>)okResult.Value!).Should().BeEmpty();
         }
 
         [Fact]
@@ -199,7 +202,10 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             var result = await controller.GetFiles(1);
 
             result.Should().BeOfType<ActionResult<List<Utils.WalterFile>>>();
-            result.Result.Should().BeOfType<BadRequestResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
+            var okResult = (OkObjectResult)result.Result!;
+            okResult.Value.Should().BeAssignableTo<List<Utils.WalterFile>>();
+            ((List<Utils.WalterFile>)okResult.Value!).Should().BeEmpty();
         }
     }
 }

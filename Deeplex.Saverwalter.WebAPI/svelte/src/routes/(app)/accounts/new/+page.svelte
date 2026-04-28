@@ -40,5 +40,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterAccount {entry} fetchImpl={data.fetchImpl} />
     </WalterGrid>
 {:else}
+    <WalterHeaderNew title="Fehler" apiURL={WalterAccountEntry.ApiURL} {entry} />
     <WalterError />
 {/if}

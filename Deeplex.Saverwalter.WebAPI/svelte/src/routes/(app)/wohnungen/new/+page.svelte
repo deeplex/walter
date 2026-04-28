@@ -39,5 +39,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterWohnung fetchImpl={data.fetchImpl} {entry} />
     </WalterGrid>
 {:else}
+    <WalterHeaderNew apiURL={data.apiURL} {entry} title="Fehler" />
     <WalterError />
 {/if}

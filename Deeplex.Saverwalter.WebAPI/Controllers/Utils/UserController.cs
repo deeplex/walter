@@ -195,12 +195,22 @@ namespace Deeplex.Saverwalter.WebAPI.Controllers.Utils
                 {
                     return new BadRequestResult();
                 }
-                var files = FileHandling.ParseS3Stream(Encoding.UTF8.GetString(fileContentResult.FileContents), path);
-                return Ok(files);
+                if (
+                    FileHandling.TryParseS3Stream(
+                        Encoding.UTF8.GetString(fileContentResult.FileContents),
+                        path,
+                        out var files
+                    )
+                )
+                {
+                    return Ok(files);
+                }
+
+                return Ok(new List<WalterFile>());
             }
             else
             {
-                return new BadRequestResult();
+                return Ok(new List<WalterFile>());
             }
         }
         [HttpGet("files/{filename}")]

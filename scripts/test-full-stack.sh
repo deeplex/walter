@@ -85,6 +85,19 @@ wait_for_http() {
   return 1
 }
 
+process_state() {
+  local pid="$1"
+  ps -o stat= -p "$pid" 2>/dev/null | awk '{print $1}'
+}
+
+process_is_running() {
+  local pid="$1"
+  local state
+  state="$(process_state "$pid")"
+
+  [[ -n "$state" && "$state" != Z* ]]
+}
+
 url_host() {
   local url="$1"
   echo "$url" | sed -E 's#^[a-zA-Z]+://([^/:]+).*$#\1#'
@@ -145,13 +158,38 @@ ensure_local_port_is_free() {
 
 print_startup_diagnostics() {
   local label="$1"
+  local backend_state="<none>"
+  local frontend_state="<none>"
+
+  if [[ -n "${backend_pid:-}" ]]; then
+    backend_state="$(process_state "$backend_pid")"
+    if [[ -z "$backend_state" ]]; then
+      backend_state="<exited>"
+    fi
+  fi
+
+  if [[ -n "${frontend_pid:-}" ]]; then
+    frontend_state="$(process_state "$frontend_pid")"
+    if [[ -z "$frontend_state" ]]; then
+      frontend_state="<exited>"
+    fi
+  fi
 
   echo "${label} diagnostics:"
   echo "  Backend PID: ${backend_pid:-<none>}"
+  echo "  Backend state: ${backend_state}"
   echo "  Frontend PID: ${frontend_pid:-<none>}"
+  echo "  Frontend state: ${frontend_state}"
   echo "  Backend probe URL: ${API_PROBE_URL:-<unset>}"
   echo "  Frontend probe URL: ${UI_PROBE_URL:-<unset>}"
   echo "  Log directory: ${LOGS_DIR}"
+  echo "  Process table entries:"
+  if [[ -n "${backend_pid:-}" ]]; then
+    ps -fp "$backend_pid" 2>/dev/null || true
+  fi
+  if [[ -n "${frontend_pid:-}" ]]; then
+    ps -fp "$frontend_pid" 2>/dev/null || true
+  fi
   echo "  Listening sockets:"
   ss -lntp 2>/dev/null || true
   echo "  Backend log tail:"
@@ -225,7 +263,7 @@ frontend_pid="$!"
 
 backend_ready=false
 for _ in $(seq 1 "$STARTUP_TIMEOUT_SECONDS"); do
-  if ! kill -0 "$backend_pid" >/dev/null 2>&1; then
+  if ! process_is_running "$backend_pid"; then
     echo "Backend process exited unexpectedly."
     print_startup_diagnostics "Backend failure"
     exit 1
@@ -242,7 +280,21 @@ if [[ "$backend_ready" != "true" ]]; then
   exit 1
 fi
 
-if ! wait_for_http "$UI_PROBE_URL/login" "$STARTUP_TIMEOUT_SECONDS"; then
+frontend_ready=false
+for _ in $(seq 1 "$STARTUP_TIMEOUT_SECONDS"); do
+  if ! process_is_running "$frontend_pid"; then
+    echo "Frontend process exited unexpectedly."
+    print_startup_diagnostics "Frontend failure"
+    exit 1
+  fi
+  if curl --fail --silent "$UI_PROBE_URL/login" >/dev/null 2>&1; then
+    frontend_ready=true
+    break
+  fi
+  read -r -t 1 _ || true
+done
+
+if [[ "$frontend_ready" != "true" ]]; then
   echo "Frontend did not become ready at $UI_URL"
   print_startup_diagnostics "Frontend timeout"
   exit 1

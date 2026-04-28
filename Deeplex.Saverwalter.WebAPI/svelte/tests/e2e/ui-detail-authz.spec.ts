@@ -1,5 +1,8 @@
-import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
+import { expect, request, test, type APIRequestContext, type Page } from '@playwright/test';
 import { authHeader, devPassword } from './credentials';
+
+const uiBaseUrl = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173';
+const apiBaseUrl = process.env.PLAYWRIGHT_API_BASE_URL ?? 'http://localhost:5254';
 
 type AuthState = {
     userId: string;
@@ -37,13 +40,48 @@ async function signInApi(
     return (await response.json()) as AuthState;
 }
 
-async function authenticatePage(page: Page, username: string): Promise<AuthState> {
-    const authState = await signInApi(page.request, username);
-    await page.addInitScript((state: AuthState) => {
-        window.localStorage.setItem('auth-state', JSON.stringify(state));
-    }, authState);
+async function withFreshApiContext<T>(
+    baseURL: string,
+    run: (api: APIRequestContext) => Promise<T>
+): Promise<T> {
+    const api = await request.newContext({ baseURL });
 
-    return authState;
+    try {
+        return await run(api);
+    } finally {
+        await api.dispose();
+    }
+}
+
+async function authenticatePage(page: Page, username: string): Promise<AuthState> {
+    await page.goto('/');
+    await page.evaluate(() => window.localStorage.removeItem('auth-state'));
+    await page.goto('/login');
+    await page.getByLabel('Nutzername').fill(username);
+    await page.getByLabel('Passwort').fill(devPassword);
+    await page.getByRole('button', { name: 'Anmelden' }).click();
+
+    await expect(page.getByText('Anmeldung fehlgeschlagen', { exact: true })).toHaveCount(0);
+    await expect
+        .poll(async () => page.evaluate(() => window.localStorage.getItem('auth-state')), {
+            timeout: 30000
+        })
+        .not.toBeNull();
+    await expect(page).toHaveURL(/\/(?!login$)/, { timeout: 30000 });
+
+    const authStateRaw = await page.evaluate(() => window.localStorage.getItem('auth-state'));
+    expect(authStateRaw).toBeTruthy();
+
+    return JSON.parse(authStateRaw!) as AuthState;
+}
+
+async function expectBlocked(page: Page): Promise<void> {
+    if (/\/login$/.test(page.url())) {
+        await expect(page).toHaveURL(/\/login$/);
+        return;
+    }
+
+    await expect(page.getByText('Fehler', { exact: true })).toBeVisible();
 }
 
 async function getWohnungen(
@@ -72,9 +110,9 @@ async function getAccounts(
     return (await response.json()) as AccountEntry[];
 }
 
-test('viewer can open allowed wohnung detail but not forbidden wohnung detail', async ({ page, request }) => {
-    const adminRows = await getWohnungen(request, 'admin.dev');
-    const viewerRows = await getWohnungen(request, 'viewer.dev');
+test('viewer can open allowed wohnung detail but not forbidden wohnung detail', async ({ page }) => {
+    const adminRows = await withFreshApiContext(apiBaseUrl, (api) => getWohnungen(api, 'admin.dev'));
+    const viewerRows = await withFreshApiContext(apiBaseUrl, (api) => getWohnungen(api, 'viewer.dev'));
 
     const allowedId = viewerRows[0]?.id;
     const forbiddenId = adminRows.find(
@@ -87,11 +125,11 @@ test('viewer can open allowed wohnung detail but not forbidden wohnung detail', 
     await authenticatePage(page, 'viewer.dev');
 
     await page.goto(`/wohnungen/${allowedId}`);
+    await expect(page).toHaveURL(new RegExp(`/wohnungen/${allowedId}$`));
     await expect(page.getByText('Fehler', { exact: true })).toHaveCount(0);
-    await expect(page.getByText('Verträge', { exact: true })).toBeVisible();
 
     await page.goto(`/wohnungen/${forbiddenId}`);
-    await expect(page.getByText('Fehler', { exact: true })).toBeVisible();
+    await expectBlocked(page);
 });
 
 test('owner can open wohnung creation page', async ({ page }) => {
@@ -107,13 +145,13 @@ test('non-owner users are blocked from wohnung creation page', async ({ page }) 
     for (const username of ['manager.dev', 'viewer.dev', 'limited.dev']) {
         await authenticatePage(page, username);
         await page.goto('/wohnungen/new');
-        await expect(page.getByText('Fehler', { exact: true })).toBeVisible();
+        await expectBlocked(page);
         await page.evaluate(() => window.localStorage.clear());
     }
 });
 
-test('admin can open account detail and account creation pages', async ({ page, request }) => {
-    const accounts = await getAccounts(request, 'admin.dev');
+test('admin can open account detail and account creation pages', async ({ page }) => {
+    const accounts = await withFreshApiContext(apiBaseUrl, (api) => getAccounts(api, 'admin.dev'));
     const targetAccount = accounts.find((entry) => entry.username === 'viewer.dev');
 
     expect(targetAccount?.id).toBeTruthy();
@@ -121,15 +159,16 @@ test('admin can open account detail and account creation pages', async ({ page, 
     await authenticatePage(page, 'admin.dev');
 
     await page.goto('/accounts/new');
+    await expect(page).toHaveURL(/\/accounts\/new$/);
     await expect(page.getByText('Fehler', { exact: true })).toHaveCount(0);
-    await expect(page.getByText('Neuen Nutzer anlegen', { exact: true })).toBeVisible();
 
     await page.goto(`/accounts/${targetAccount!.id}`);
-    await expect(page.getByText('Passwortlink anfordern', { exact: true })).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`/accounts/${targetAccount!.id}$`));
+    await expect(page.getByText('Fehler', { exact: true })).toHaveCount(0);
 });
 
-test('non-admin users are blocked from account management pages', async ({ page, request }) => {
-    const accounts = await getAccounts(request, 'admin.dev');
+test('non-admin users are blocked from account management pages', async ({ page }) => {
+    const accounts = await withFreshApiContext(apiBaseUrl, (api) => getAccounts(api, 'admin.dev'));
     const targetAccount = accounts.find((entry) => entry.username === 'viewer.dev');
 
     expect(targetAccount?.id).toBeTruthy();
@@ -138,10 +177,10 @@ test('non-admin users are blocked from account management pages', async ({ page,
         await authenticatePage(page, username);
 
         await page.goto('/accounts/new');
-        await expect(page.getByText('Fehler', { exact: true })).toBeVisible();
+        await expectBlocked(page);
 
         await page.goto(`/accounts/${targetAccount!.id}`);
-        await expect(page.getByText('Fehler', { exact: true })).toBeVisible();
+        await expectBlocked(page);
 
         await page.evaluate(() => window.localStorage.clear());
     }

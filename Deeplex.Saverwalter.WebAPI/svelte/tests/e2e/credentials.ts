@@ -1,16 +1,23 @@
 export const devPassword = process.env.WALTER_E2E_PASSWORD ?? 'postgres';
 
+const userRole = {
+    Guest: 0,
+    User: 1,
+    Admin: 2,
+    Owner: 3
+} as const;
+
 export type DevUser = {
     username: string;
-    expectedRole: 'Admin' | 'Owner' | 'Manager' | 'Viewer';
+    expectedRole: (typeof userRole)[keyof typeof userRole];
 };
 
 export const devUsers: DevUser[] = [
-    { username: 'admin.dev', expectedRole: 'Admin' },
-    { username: 'owner.dev', expectedRole: 'Owner' },
-    { username: 'manager.dev', expectedRole: 'Manager' },
-    { username: 'viewer.dev', expectedRole: 'Viewer' },
-    { username: 'limited.dev', expectedRole: 'Viewer' }
+    { username: 'admin.dev', expectedRole: userRole.Admin },
+    { username: 'owner.dev', expectedRole: userRole.Owner },
+    { username: 'manager.dev', expectedRole: userRole.User },
+    { username: 'viewer.dev', expectedRole: userRole.User },
+    { username: 'limited.dev', expectedRole: userRole.Guest }
 ];
 
 export function authHeader(token: string): Record<string, string> {

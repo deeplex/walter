@@ -65,6 +65,25 @@ namespace Deeplex.Saverwalter.WebAPI.Utils
             return walterFiles;
         }
 
+        public static bool TryParseS3Stream(string xmlContent, string path, out List<WalterFile> walterFiles)
+        {
+            try
+            {
+                walterFiles = ParseS3Stream(xmlContent, path);
+                return true;
+            }
+            catch (XmlException)
+            {
+                walterFiles = [];
+                return false;
+            }
+            catch (InvalidOperationException)
+            {
+                walterFiles = [];
+                return false;
+            }
+        }
+
         private static StreamContent FillContent(string path, HttpRequest request)
         {
             var content = new StreamContent(request.Body);
