@@ -154,6 +154,7 @@ ensure_local_port_is_free "$API_HOST" "$API_PORT" "Backend"
 ensure_local_port_is_free "$UI_HOST" "$UI_PORT" "Frontend"
 
 echo "[5/7] Starting backend"
+# dotnet test in step [3/7] already compiled the WebAPI project; skip rebuild.
 (
   export DATABASE_HOST="$DB_HOST"
   export DATABASE_PORT="$DB_PORT"
@@ -163,7 +164,7 @@ echo "[5/7] Starting backend"
   export WALTER_PASSWORD="$DB_PASS"
   export ASPNETCORE_ENVIRONMENT="Development"
   export ASPNETCORE_URLS="http://0.0.0.0:${API_PORT}"
-  dotnet run --project Deeplex.Saverwalter.WebAPI/Deeplex.Saverwalter.WebAPI.csproj --no-launch-profile
+  dotnet run --no-build --project Deeplex.Saverwalter.WebAPI/Deeplex.Saverwalter.WebAPI.csproj --no-launch-profile
 ) >/tmp/walter-backend.log 2>&1 &
 backend_pid="$!"
 
@@ -174,7 +175,20 @@ echo "[6/7] Starting frontend"
 ) >/tmp/walter-frontend.log 2>&1 &
 frontend_pid="$!"
 
-if ! wait_for_http_connection "$API_PROBE_URL" "$STARTUP_TIMEOUT_SECONDS"; then
+backend_ready=false
+for _ in $(seq 1 "$STARTUP_TIMEOUT_SECONDS"); do
+  if ! kill -0 "$backend_pid" >/dev/null 2>&1; then
+    echo "Backend process exited unexpectedly."
+    tail -n 80 /tmp/walter-backend.log || true
+    exit 1
+  fi
+  if curl --silent --show-error --output /dev/null "$API_PROBE_URL" >/dev/null 2>&1; then
+    backend_ready=true
+    break
+  fi
+  read -r -t 1 _ || true
+done
+if [[ "$backend_ready" != "true" ]]; then
   echo "Backend did not become ready at $API_URL"
   tail -n 80 /tmp/walter-backend.log || true
   exit 1
