@@ -64,7 +64,7 @@ wait_for_tcp() {
       return 0
     fi
 
-    read -r -t 1 _ || true
+    sleep 1
   done
 
   return 1
@@ -79,7 +79,7 @@ wait_for_http() {
       return 0
     fi
 
-    read -r -t 1 _ || true
+    sleep 1
   done
 
   return 1
@@ -273,7 +273,7 @@ for _ in $(seq 1 "$STARTUP_TIMEOUT_SECONDS"); do
     backend_ready=true
     break
   fi
-  read -r -t 1 _ || true
+  sleep 1
 done
 if [[ "$backend_ready" != "true" ]]; then
   echo "Backend did not become ready at $API_URL"
@@ -292,7 +292,7 @@ for _ in $(seq 1 "$STARTUP_TIMEOUT_SECONDS"); do
     frontend_ready=true
     break
   fi
-  read -r -t 1 _ || true
+  sleep 1
 done
 
 if [[ "$frontend_ready" != "true" ]]; then

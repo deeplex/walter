@@ -97,7 +97,7 @@ run_with_docker_db() {
     if [[ "$status" == "healthy" ]]; then
       break
     fi
-    read -r -t 1 _ || true
+    sleep 1
   done
 
   status="$(docker inspect --format='{{.State.Health.Status}}' "$container_name")"

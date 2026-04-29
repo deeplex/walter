@@ -20,8 +20,7 @@ for _ in {1..120}; do
     break
   fi
 
-  # wait ~1 second without using sleep
-  read -r -t 1 _ || true
+  sleep 1
 done
 
 if [[ "$ready" -ne 1 ]]; then
