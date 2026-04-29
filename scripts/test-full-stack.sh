@@ -257,6 +257,7 @@ backend_pid="$!"
 echo "[6/7] Starting frontend"
 (
   cd Deeplex.Saverwalter.WebAPI/svelte
+  export VITE_API_PROXY_TARGET="http://${API_BIND_HOST}:${API_PORT}"
   yarn dev --host "$UI_BIND_HOST" --port "$UI_PORT" --strictPort
 ) >"$FRONTEND_LOG_PATH" 2>&1 &
 frontend_pid="$!"
