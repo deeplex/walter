@@ -1,22 +1,15 @@
 import {
     expect,
-    request,
     test,
     type APIRequestContext,
     type Page
 } from '@playwright/test';
-import { authHeader, devPassword } from './credentials';
-
-const uiBaseUrl = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173';
-const apiBaseUrl =
-    process.env.PLAYWRIGHT_API_BASE_URL ?? 'http://localhost:5254';
-
-type AuthState = {
-    userId: string;
-    token: string;
-    role: number;
-    name: string;
-};
+import {
+    authHeader,
+    authenticatePage,
+    signInApi,
+    withFreshApiContext
+} from './auth';
 
 type WohnungListEntry = {
     id: number;
@@ -31,67 +24,6 @@ type AccountEntry = {
     id: string;
     username: string;
 };
-
-async function signInApi(
-    api: APIRequestContext,
-    username: string
-): Promise<AuthState> {
-    const response = await api.post('/api/user/sign-in', {
-        data: {
-            username,
-            password: devPassword
-        }
-    });
-
-    expect(response.ok()).toBeTruthy();
-    return (await response.json()) as AuthState;
-}
-
-async function withFreshApiContext<T>(
-    baseURL: string,
-    run: (api: APIRequestContext) => Promise<T>
-): Promise<T> {
-    const api = await request.newContext({ baseURL });
-
-    try {
-        return await run(api);
-    } finally {
-        await api.dispose();
-    }
-}
-
-async function authenticatePage(
-    page: Page,
-    username: string
-): Promise<AuthState> {
-    await page.goto('/');
-    await page.evaluate(() => window.localStorage.removeItem('auth-state'));
-    await page.goto('/login');
-    await page.getByLabel('Nutzername').fill(username);
-    await page.getByLabel('Passwort').fill(devPassword);
-    await page.getByRole('button', { name: 'Anmelden' }).click();
-
-    await expect(
-        page.getByText('Anmeldung fehlgeschlagen', { exact: true })
-    ).toHaveCount(0);
-    await expect
-        .poll(
-            async () =>
-                page.evaluate(() => window.localStorage.getItem('auth-state')),
-            {
-                timeout: 30000
-            }
-        )
-        .not.toBeNull();
-    await expect(page).toHaveURL(/\/(?!login$)/, { timeout: 30000 });
-
-    const authStateRaw = await page.evaluate(() =>
-        window.localStorage.getItem('auth-state')
-    );
-    expect(authStateRaw).toBeTruthy();
-
-    return JSON.parse(authStateRaw!) as AuthState;
-}
 
 async function expectBlocked(page: Page): Promise<void> {
     if (/\/login$/.test(page.url())) {
@@ -131,10 +63,10 @@ async function getAccounts(
 test('viewer can open allowed wohnung detail but not forbidden wohnung detail', async ({
     page
 }) => {
-    const adminRows = await withFreshApiContext(apiBaseUrl, (api) =>
+    const adminRows = await withFreshApiContext((api) =>
         getWohnungen(api, 'admin.dev')
     );
-    const viewerRows = await withFreshApiContext(apiBaseUrl, (api) =>
+    const viewerRows = await withFreshApiContext((api) =>
         getWohnungen(api, 'viewer.dev')
     );
 
@@ -179,7 +111,7 @@ test('non-owner users are blocked from wohnung creation page', async ({
 test('admin can open account detail and account creation pages', async ({
     page
 }) => {
-    const accounts = await withFreshApiContext(apiBaseUrl, (api) =>
+    const accounts = await withFreshApiContext((api) =>
         getAccounts(api, 'admin.dev')
     );
     const targetAccount = accounts.find(
@@ -202,7 +134,7 @@ test('admin can open account detail and account creation pages', async ({
 test('non-admin users are blocked from account management pages', async ({
     page
 }) => {
-    const accounts = await withFreshApiContext(apiBaseUrl, (api) =>
+    const accounts = await withFreshApiContext((api) =>
         getAccounts(api, 'admin.dev')
     );
     const targetAccount = accounts.find(

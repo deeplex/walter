@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
-import { devPassword, devUsers } from './credentials';
+import { devUsers } from './credentials';
+import { authenticatePage } from './auth';
 
 type RouteExpectation = {
     path: string;
@@ -26,49 +27,30 @@ const mainRoutes: RouteExpectation[] = [
     { path: '/user', expectedText: 'Nutzereinstellungen' }
 ];
 
-async function signIn(page: Page, username: string) {
-    await page.goto('/');
-    await page.evaluate(() => window.localStorage.removeItem('auth-state'));
-    await page.goto('/login');
-    await page.getByLabel('Nutzername').fill(username);
-    await page.getByLabel('Passwort').fill(devPassword);
-    await page.getByRole('button', { name: 'Anmelden' }).click();
-    await expect(
-        page.getByText('Anmeldung fehlgeschlagen', { exact: true })
-    ).toHaveCount(0);
-    await expect
-        .poll(async () =>
-            page.evaluate(() => window.localStorage.getItem('auth-state'))
-        )
-        .not.toBeNull();
-    await expect(page).toHaveURL(/\/(?!login$)/);
+async function visitMainRoutes(page: Page, username: string): Promise<void> {
+    for (const route of mainRoutes) {
+        await test.step(`${username} opens ${route.path}`, async () => {
+            await page.goto(route.path);
+            await expect(page).toHaveURL(
+                new RegExp(`${route.path === '/' ? '/$' : `${route.path}$`}`)
+            );
+            await expect(page.getByText('Fehler', { exact: true })).toHaveCount(
+                0
+            );
+            await expect
+                .poll(
+                    async () =>
+                        (await page.getByRole('banner').textContent()) ?? ''
+                )
+                .toContain(route.expectedText);
+        });
+    }
 }
 
 for (const user of devUsers) {
     test(`${user.username} can access all main app pages`, async ({ page }) => {
-        await signIn(page, user.username);
-
-        for (const route of mainRoutes) {
-            await test.step(`${user.username} opens ${route.path}`, async () => {
-                await page.goto(route.path);
-                await expect(page).toHaveURL(
-                    new RegExp(
-                        `${route.path === '/' ? '/$' : `${route.path}$`}`
-                    )
-                );
-                await expect(
-                    page.getByText('Fehler', { exact: true })
-                ).toHaveCount(0);
-                await expect
-                    .poll(
-                        async () =>
-                            (await page.getByRole('banner').textContent()) ??
-                            '',
-                        { timeout: 30000 }
-                    )
-                    .toContain(route.expectedText);
-            });
-        }
+        await authenticatePage(page, user.username);
+        await visitMainRoutes(page, user.username);
     });
 }
 
@@ -80,7 +62,7 @@ test('admin-only pages are locked for non-admin users', async ({ page }) => {
         'limited.dev'
     ]) {
         await test.step(`${username} cannot open /admin`, async () => {
-            await signIn(page, username);
+            await authenticatePage(page, username);
             await page.goto('/admin');
             await expect(
                 page.getByText('Fehler', { exact: true })
@@ -97,7 +79,7 @@ test('admin-only pages are locked for non-admin users', async ({ page }) => {
 });
 
 test('admin can open admin pages', async ({ page }) => {
-    await signIn(page, 'admin.dev');
+    await authenticatePage(page, 'admin.dev');
 
     await page.goto('/admin');
     await expect(

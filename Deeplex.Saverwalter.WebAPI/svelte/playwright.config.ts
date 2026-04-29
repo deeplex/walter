@@ -1,10 +1,9 @@
 import { defineConfig } from '@playwright/test';
 
-const uiBaseUrl = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173';
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5254';
 
 export default defineConfig({
     testDir: './tests/e2e',
-    timeout: 120_000,
     expect: {
         timeout: 7_500
     },
@@ -12,7 +11,7 @@ export default defineConfig({
     retries: process.env.CI ? 1 : 0,
     reporter: [['list'], ['html', { open: 'never' }]],
     use: {
-        baseURL: uiBaseUrl,
+        baseURL,
         trace: 'on-first-retry',
         screenshot: 'only-on-failure'
     }

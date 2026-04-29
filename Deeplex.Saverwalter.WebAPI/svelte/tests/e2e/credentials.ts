@@ -19,9 +19,3 @@ export const devUsers: DevUser[] = [
     { username: 'viewer.dev', expectedRole: userRole.User },
     { username: 'limited.dev', expectedRole: userRole.Guest }
 ];
-
-export function authHeader(token: string): Record<string, string> {
-    return {
-        Authorization: `X-WalterToken ${token}`
-    };
-}

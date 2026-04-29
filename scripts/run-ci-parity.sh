@@ -9,16 +9,14 @@ DB_PASS="${DATABASE_PASS:-postgres}"
 DB_PORT="${DATABASE_PORT:-5432}"
 DB_NAME="${DATABASE_NAME:-walter_dev_full_generic_db}"
 PARITY_LOG_DIR="${WALTER_PARITY_LOG_DIR:-${ROOT_DIR}/artifacts/local-ci-logs}"
-API_URL="${PLAYWRIGHT_API_BASE_URL:-http://localhost:15254}"
-UI_URL="${PLAYWRIGHT_BASE_URL:-http://localhost:15173}"
+APP_URL="${WALTER_APP_URL:-http://localhost:15254}"
 PLAYWRIGHT_PARITY_INSTALL_DEPS="${PLAYWRIGHT_PARITY_INSTALL_DEPS:-1}"
 
 mkdir -p "$PARITY_LOG_DIR"
 
 echo "Running local CI parity for full-stack test workflow..."
 echo "Log directory: $PARITY_LOG_DIR"
-echo "API URL: $API_URL"
-echo "UI URL: $UI_URL"
+echo "App URL: $APP_URL"
 
 ensure_playwright_runtime() {
   local browser_bin
@@ -66,8 +64,7 @@ run_with_existing_db() {
   DATABASE_USER="$DB_USER" \
   DATABASE_PASS="$DB_PASS" \
   WALTER_E2E_PASSWORD="$DB_PASS" \
-  PLAYWRIGHT_API_BASE_URL="$API_URL" \
-  PLAYWRIGHT_BASE_URL="$UI_URL" \
+  WALTER_APP_URL="$APP_URL" \
   WALTER_LOG_DIR="$PARITY_LOG_DIR/full-stack" \
   WALTER_PRESERVE_LOGS_ON_FAILURE=1 \
     bash ./scripts/test-full-stack.sh
@@ -113,8 +110,7 @@ run_with_docker_db() {
   DATABASE_PASS="$DB_PASS" \
   DATABASE_NAME="$DB_NAME" \
   WALTER_E2E_PASSWORD="$DB_PASS" \
-  PLAYWRIGHT_API_BASE_URL="$API_URL" \
-  PLAYWRIGHT_BASE_URL="$UI_URL" \
+  WALTER_APP_URL="$APP_URL" \
   WALTER_LOG_DIR="$PARITY_LOG_DIR/full-stack" \
   WALTER_PRESERVE_LOGS_ON_FAILURE=1 \
     bash ./scripts/test-full-stack.sh
