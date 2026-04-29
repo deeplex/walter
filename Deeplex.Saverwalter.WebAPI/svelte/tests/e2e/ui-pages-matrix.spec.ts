@@ -1,8 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { devPassword, devUsers } from './credentials';
 
-test.setTimeout(120000);
-
 type RouteExpectation = {
     path: string;
     expectedText: string;

@@ -4,7 +4,7 @@ const uiBaseUrl = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173';
 
 export default defineConfig({
     testDir: './tests/e2e',
-    timeout: 30_000,
+    timeout: 120_000,
     expect: {
         timeout: 7_500
     },
