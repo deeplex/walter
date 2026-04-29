@@ -135,6 +135,9 @@ namespace Deeplex.Saverwalter.WebAPI.Services
                 : GetEntriesForUser(user.GetUserId()));
 
             Task<List<Betriebskostenrechnung>> GetEntriesForUser(Guid guid) => ctx.Betriebskostenrechnungen
+                .AsSplitQuery()
+                .Include(e => e.Umlage).ThenInclude(u => u.Typ)
+                .Include(e => e.Umlage).ThenInclude(u => u.Wohnungen).ThenInclude(w => w.Adresse)
                 .Where(e => e.Umlage.Wohnungen.Any(w =>
                     w.Verwalter.Count > 0 &&
                     w.Verwalter.AsQueryable().Any(Utils.HasRequiredAuth(rolle, guid))))

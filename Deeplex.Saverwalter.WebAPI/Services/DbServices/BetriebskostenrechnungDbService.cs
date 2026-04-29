@@ -15,9 +15,11 @@
 
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
+using Deeplex.Saverwalter.WebAPI.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Deeplex.Saverwalter.WebAPI.Controllers.BetriebskostenrechnungController;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
@@ -31,10 +33,52 @@ namespace Deeplex.Saverwalter.WebAPI.Services.ControllerService
 
         public async Task<ActionResult<IEnumerable<BetriebskostenrechnungEntryBase>>> GetList(ClaimsPrincipal user)
         {
-            var list = await BetriebskostenrechnungPermissionHandler.GetList(Ctx, user, VerwalterRolle.Keine);
+            if (user.IsInRole("Admin"))
+            {
+                var allItems = await Ctx.Betriebskostenrechnungen
+                    .AsSplitQuery()
+                    .Include(e => e.Umlage).ThenInclude(u => u.Typ)
+                    .Include(e => e.Umlage).ThenInclude(u => u.Wohnungen).ThenInclude(w => w.Adresse)
+                    .ToListAsync();
+                var adminPerms = new Utils.Permissions { Read = true, Update = true, Remove = true };
+                return allItems.Select(e => new BetriebskostenrechnungEntryBase(e, adminPerms)).ToArray();
+            }
 
-            return await Task.WhenAll(list
-                .Select(async e => new BetriebskostenrechnungEntryBase(e, await Utils.GetPermissions(user, e, Auth))));
+            var userId = user.GetUserId();
+            var wohnungAccess = await Ctx.Wohnungen
+                .Where(w => w.Verwalter.Any(v => v.UserAccount.Id == userId))
+                .Select(w => new
+                {
+                    w.WohnungId,
+                    CanWrite = w.Verwalter.Any(v =>
+                        v.UserAccount.Id == userId &&
+                        (v.Rolle == VerwalterRolle.Eigentuemer || v.Rolle == VerwalterRolle.Vollmacht))
+                })
+                .ToListAsync();
+
+            if (wohnungAccess.Count == 0)
+            {
+                return Array.Empty<BetriebskostenrechnungEntryBase>();
+            }
+
+            var readableWohnungIds = wohnungAccess.Select(w => w.WohnungId).ToHashSet();
+            var writableWohnungIds = wohnungAccess
+                .Where(w => w.CanWrite)
+                .Select(w => w.WohnungId)
+                .ToHashSet();
+
+            var list = await Ctx.Betriebskostenrechnungen
+                .AsSplitQuery()
+                .Include(e => e.Umlage).ThenInclude(u => u.Typ)
+                .Include(e => e.Umlage).ThenInclude(u => u.Wohnungen).ThenInclude(w => w.Adresse)
+                .Where(e => e.Umlage.Wohnungen.Any(w => readableWohnungIds.Contains(w.WohnungId)))
+                .ToListAsync();
+
+            return list.Select(e =>
+            {
+                var canWrite = e.Umlage.Wohnungen.Any(w => writableWohnungIds.Contains(w.WohnungId));
+                return new BetriebskostenrechnungEntryBase(e, new Utils.Permissions { Read = true, Update = canWrite, Remove = canWrite });
+            }).ToArray();
         }
 
         public override async Task<ActionResult<Betriebskostenrechnung>> GetEntity(ClaimsPrincipal user, int id, OperationAuthorizationRequirement op)

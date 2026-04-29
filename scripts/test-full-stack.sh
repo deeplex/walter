@@ -240,7 +240,6 @@ echo "Frontend probe URL: ${UI_PROBE_URL}"
 echo "Startup logs directory: ${LOGS_DIR}"
 
 echo "[5/7] Starting backend"
-# dotnet test in step [3/7] already compiled the WebAPI project; skip rebuild.
 (
   export DATABASE_HOST="$DB_HOST"
   export DATABASE_PORT="$DB_PORT"
@@ -250,6 +249,7 @@ echo "[5/7] Starting backend"
   export WALTER_PASSWORD="$DB_PASS"
   export ASPNETCORE_ENVIRONMENT="Development"
   export ASPNETCORE_URLS="http://${API_BIND_HOST}:${API_PORT}"
+  # dotnet test in step [3/7] already compiled the WebAPI project; skip rebuild.
   dotnet run --no-build --project Deeplex.Saverwalter.WebAPI/Deeplex.Saverwalter.WebAPI.csproj --no-launch-profile
 ) >"$BACKEND_LOG_PATH" 2>&1 &
 backend_pid="$!"

@@ -47,9 +47,26 @@ namespace Deeplex.Saverwalter.WebAPI
 
             container.Verify();
 
-            await CreateRootIfNoUserExists(container);
+            // Run DB initialisation after the host starts so that a slow or
+            // temporarily unavailable database never prevents the app from
+            // binding to its port and writing startup log messages.
+            app.Lifetime.ApplicationStarted.Register(() =>
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await CreateRootIfNoUserExists(container);
+                    }
+                    catch (Exception ex)
+                    {
+                        // CreateRootIfNoUserExists handles watch-mode failures
+                        // internally; this catches unexpected non-watch errors.
+                        Console.Error.WriteLine(
+                            $"Root account initialisation failed: {ex.GetBaseException().Message}");
+                    }
+                }));
 
-            app.Run();
+            await app.RunAsync();
         }
 
         private static WebApplication Configure(WebApplicationBuilder builder, Container container)
