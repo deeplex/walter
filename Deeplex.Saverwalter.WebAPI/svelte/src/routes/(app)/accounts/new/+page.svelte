@@ -16,7 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import { browser } from '$app/environment';
-    import { WalterError, WalterGrid, WalterHeaderNew } from '$walter/components';
+    import {
+        WalterError,
+        WalterGrid,
+        WalterHeaderNew
+    } from '$walter/components';
     import WalterAccount from '$walter/components/details/WalterAccount.svelte';
     import { WalterAccountEntry } from '$walter/lib';
     import { UserRole, getAuthState } from '$walter/services/auth';
@@ -40,6 +44,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterAccount {entry} fetchImpl={data.fetchImpl} />
     </WalterGrid>
 {:else}
-    <WalterHeaderNew title="Fehler" apiURL={WalterAccountEntry.ApiURL} {entry} />
+    <WalterHeaderNew
+        title="Fehler"
+        apiURL={WalterAccountEntry.ApiURL}
+        {entry}
+    />
     <WalterError />
 {/if}

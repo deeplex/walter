@@ -108,7 +108,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     function onDeleteMonthMiete(value: WalterMieteEntry) {
-        const vertrag = vertraege.find((entry) => entry.id === +value.vertrag?.id);
+        const vertrag = vertraege.find(
+            (entry) => entry.id === +value.vertrag?.id
+        );
         if (vertrag) {
             vertrag.mieten = (vertrag.mieten || []).filter(
                 (miete) => miete.id !== value.id
@@ -180,7 +182,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         entry={addEntry}
         {mieten}
         {vertraege}
-        onDeleteMonthMiete={onDeleteMonthMiete}
+        {onDeleteMonthMiete}
         onRequestCloseModal={() => (addModalOpen = false)}
     />
 </WalterDataWrapperQuickAdd>

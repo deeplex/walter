@@ -99,7 +99,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             {disabled}
             style="width: 100%"
             type="text"
-            pattern={"\\d{1,2}\\.\\d{4}"}
+            pattern={'\\d{1,2}\\.\\d{4}'}
             {placeholder}
             {labelText}
         />

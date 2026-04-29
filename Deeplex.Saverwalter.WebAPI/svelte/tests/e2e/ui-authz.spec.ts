@@ -6,11 +6,17 @@ async function signIn(page: Page, username: string) {
     await page.getByLabel('Nutzername').fill(username);
     await page.getByLabel('Passwort').fill(devPassword);
     await page.getByRole('button', { name: 'Anmelden' }).click();
-    await expect(page.getByText('Anmeldung fehlgeschlagen', { exact: true })).toHaveCount(0);
+    await expect(
+        page.getByText('Anmeldung fehlgeschlagen', { exact: true })
+    ).toHaveCount(0);
     await expect
-        .poll(async () => page.evaluate(() => window.localStorage.getItem('auth-state')), {
-            timeout: 30000
-        })
+        .poll(
+            async () =>
+                page.evaluate(() => window.localStorage.getItem('auth-state')),
+            {
+                timeout: 30000
+            }
+        )
         .not.toBeNull();
     await expect(page).toHaveURL(/\/(?!login$)/, { timeout: 30000 });
 }
@@ -20,8 +26,12 @@ test('admin user can access admin area', async ({ page }) => {
 
     await page.goto('/admin');
 
-    await expect(page.getByRole('banner').getByText('Adminbereich', { exact: true })).toBeVisible();
-    await expect(page.locator('main').getByText('Nutzeraccounts', { exact: true })).toBeVisible();
+    await expect(
+        page.getByRole('banner').getByText('Adminbereich', { exact: true })
+    ).toBeVisible();
+    await expect(
+        page.locator('main').getByText('Nutzeraccounts', { exact: true })
+    ).toBeVisible();
 });
 
 test('non-admin user receives error view in admin area', async ({ page }) => {
@@ -30,5 +40,7 @@ test('non-admin user receives error view in admin area', async ({ page }) => {
     await page.goto('/admin');
 
     await expect(page.getByText('Fehler', { exact: true })).toBeVisible();
-    await expect(page.getByText('Nutzeraccounts', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('Nutzeraccounts', { exact: true })).toHaveCount(
+        0
+    );
 });

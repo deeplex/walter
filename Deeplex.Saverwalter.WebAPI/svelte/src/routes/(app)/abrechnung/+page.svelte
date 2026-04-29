@@ -146,36 +146,39 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         const value = data.vertraege.find((vertrag) => vertrag.id == vertragId);
         title = value?.text || 'Wähle einen Vertrag aus';
 
-        pendingAbrechnung.then(async (entry) => {
-            if (abrechnung !== pendingAbrechnung) return;
-            resolvedAbrechnung = entry;
-            fileWrapper.clear();
-            fileWrapper.registerStack();
+        pendingAbrechnung
+            .then(async (entry) => {
+                if (abrechnung !== pendingAbrechnung) return;
+                resolvedAbrechnung = entry;
+                fileWrapper.clear();
+                fileWrapper.registerStack();
 
-            if (entry?.resultat) {
-                const furl = fileURL.abrechnungsresultat(
-                    `${entry.resultat.id}`
-                );
-                fileWrapper.register('Resultat', furl);
-                files = `(${
-                    (
-                        await fileWrapper.handles.find((h) => h.fileURL == furl)
-                            ?.files
-                    )?.length || 0
-                })`;
-            }
+                if (entry?.resultat) {
+                    const furl = fileURL.abrechnungsresultat(
+                        `${entry.resultat.id}`
+                    );
+                    fileWrapper.register('Resultat', furl);
+                    files = `(${
+                        (
+                            await fileWrapper.handles.find(
+                                (h) => h.fileURL == furl
+                            )?.files
+                        )?.length || 0
+                    })`;
+                }
 
-            if (entry?.vertrag) {
-                fileWrapper.register(
-                    'Vertrag',
-                    fileURL.vertrag(`${entry.vertrag.id}`)
-                );
-            }
-        }).catch(() => {
-            if (abrechnung !== pendingAbrechnung) return;
-            resolvedAbrechnung = undefined;
-            abrechnungError = true;
-        });
+                if (entry?.vertrag) {
+                    fileWrapper.register(
+                        'Vertrag',
+                        fileURL.vertrag(`${entry.vertrag.id}`)
+                    );
+                }
+            })
+            .catch(() => {
+                if (abrechnung !== pendingAbrechnung) return;
+                resolvedAbrechnung = undefined;
+                abrechnungError = true;
+            });
 
         pendingAbrechnung.finally(() => {
             if (abrechnung === pendingAbrechnung) {
@@ -368,9 +371,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                             <!-- svelte-ignore a11y-invalid-attribute -->
                             <a
                                 href="#"
-                                on:click|preventDefault={() => selectSuggestedYear(year)}
-                                >{year}</a
-                            >{#if i < availableYears.length - 1}, {/if}
+                                on:click|preventDefault={() =>
+                                    selectSuggestedYear(year)}>{year}</a
+                            >{#if i < availableYears.length - 1},
+                            {/if}
                         {/each}
                     </p>
                 {/if}
@@ -383,7 +387,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             </InlineNotification>
         {:else if abrechnungError}
             <InlineNotification lowContrast kind="error" hideCloseButton>
-                Abrechnung konnte nicht geladen werden. Bitte versuche es erneut.
+                Abrechnung konnte nicht geladen werden. Bitte versuche es
+                erneut.
             </InlineNotification>
         {:else}
             <InlineNotification lowContrast kind="error" hideCloseButton>

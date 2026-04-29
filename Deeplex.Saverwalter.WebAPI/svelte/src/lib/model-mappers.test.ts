@@ -34,7 +34,9 @@ describe('model mapper helpers', () => {
         expect(result.role).toBeInstanceOf(WalterSelectionEntry);
         expect(result.verwalter[0]).toBeInstanceOf(WalterVerwalterEntry);
         expect(result.verwalter[0].rolle.text).toBe('Eigentuemer');
-        expect(result.verwalter[0].permissions).toBeInstanceOf(WalterPermissions);
+        expect(result.verwalter[0].permissions).toBeInstanceOf(
+            WalterPermissions
+        );
     });
 
     it('maps abrechnungsresultat JSON and builds its id URL', () => {

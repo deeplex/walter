@@ -26,17 +26,20 @@ describe('WalterDataWrapper helper', () => {
         );
 
         const { handle_save } = await import('./WalterDataWrapper');
-        const parsed = await handle_save('/api/test', { title: 'Demo' }, 'Eintrag');
+        const parsed = await handle_save(
+            '/api/test',
+            { title: 'Demo' },
+            'Eintrag'
+        );
 
         expect(walterPostMock).toHaveBeenCalledWith('/api/test', {
             title: 'Demo'
         });
         expect(parsed).toEqual({ id: 3, status: 'ok' });
-        expect(addToastMock).toHaveBeenCalledWith(
-            expect.anything(),
-            true,
-            { id: 3, status: 'ok' }
-        );
+        expect(addToastMock).toHaveBeenCalledWith(expect.anything(), true, {
+            id: 3,
+            status: 'ok'
+        });
     });
 
     it('reports failure toast state for non-200 responses', async () => {

@@ -1,8 +1,15 @@
-import { expect, request, test, type APIRequestContext, type Page } from '@playwright/test';
+import {
+    expect,
+    request,
+    test,
+    type APIRequestContext,
+    type Page
+} from '@playwright/test';
 import { authHeader, devPassword } from './credentials';
 
 const uiBaseUrl = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173';
-const apiBaseUrl = process.env.PLAYWRIGHT_API_BASE_URL ?? 'http://localhost:5254';
+const apiBaseUrl =
+    process.env.PLAYWRIGHT_API_BASE_URL ?? 'http://localhost:5254';
 
 type AuthState = {
     userId: string;
@@ -53,7 +60,10 @@ async function withFreshApiContext<T>(
     }
 }
 
-async function authenticatePage(page: Page, username: string): Promise<AuthState> {
+async function authenticatePage(
+    page: Page,
+    username: string
+): Promise<AuthState> {
     await page.goto('/');
     await page.evaluate(() => window.localStorage.removeItem('auth-state'));
     await page.goto('/login');
@@ -61,15 +71,23 @@ async function authenticatePage(page: Page, username: string): Promise<AuthState
     await page.getByLabel('Passwort').fill(devPassword);
     await page.getByRole('button', { name: 'Anmelden' }).click();
 
-    await expect(page.getByText('Anmeldung fehlgeschlagen', { exact: true })).toHaveCount(0);
+    await expect(
+        page.getByText('Anmeldung fehlgeschlagen', { exact: true })
+    ).toHaveCount(0);
     await expect
-        .poll(async () => page.evaluate(() => window.localStorage.getItem('auth-state')), {
-            timeout: 30000
-        })
+        .poll(
+            async () =>
+                page.evaluate(() => window.localStorage.getItem('auth-state')),
+            {
+                timeout: 30000
+            }
+        )
         .not.toBeNull();
     await expect(page).toHaveURL(/\/(?!login$)/, { timeout: 30000 });
 
-    const authStateRaw = await page.evaluate(() => window.localStorage.getItem('auth-state'));
+    const authStateRaw = await page.evaluate(() =>
+        window.localStorage.getItem('auth-state')
+    );
     expect(authStateRaw).toBeTruthy();
 
     return JSON.parse(authStateRaw!) as AuthState;
@@ -110,9 +128,15 @@ async function getAccounts(
     return (await response.json()) as AccountEntry[];
 }
 
-test('viewer can open allowed wohnung detail but not forbidden wohnung detail', async ({ page }) => {
-    const adminRows = await withFreshApiContext(apiBaseUrl, (api) => getWohnungen(api, 'admin.dev'));
-    const viewerRows = await withFreshApiContext(apiBaseUrl, (api) => getWohnungen(api, 'viewer.dev'));
+test('viewer can open allowed wohnung detail but not forbidden wohnung detail', async ({
+    page
+}) => {
+    const adminRows = await withFreshApiContext(apiBaseUrl, (api) =>
+        getWohnungen(api, 'admin.dev')
+    );
+    const viewerRows = await withFreshApiContext(apiBaseUrl, (api) =>
+        getWohnungen(api, 'viewer.dev')
+    );
 
     const allowedId = viewerRows[0]?.id;
     const forbiddenId = adminRows.find(
@@ -141,7 +165,9 @@ test('owner can open wohnung creation page', async ({ page }) => {
     await expect(page.getByText('Neue Wohnung', { exact: true })).toBeVisible();
 });
 
-test('non-owner users are blocked from wohnung creation page', async ({ page }) => {
+test('non-owner users are blocked from wohnung creation page', async ({
+    page
+}) => {
     for (const username of ['manager.dev', 'viewer.dev', 'limited.dev']) {
         await authenticatePage(page, username);
         await page.goto('/wohnungen/new');
@@ -150,9 +176,15 @@ test('non-owner users are blocked from wohnung creation page', async ({ page }) 
     }
 });
 
-test('admin can open account detail and account creation pages', async ({ page }) => {
-    const accounts = await withFreshApiContext(apiBaseUrl, (api) => getAccounts(api, 'admin.dev'));
-    const targetAccount = accounts.find((entry) => entry.username === 'viewer.dev');
+test('admin can open account detail and account creation pages', async ({
+    page
+}) => {
+    const accounts = await withFreshApiContext(apiBaseUrl, (api) =>
+        getAccounts(api, 'admin.dev')
+    );
+    const targetAccount = accounts.find(
+        (entry) => entry.username === 'viewer.dev'
+    );
 
     expect(targetAccount?.id).toBeTruthy();
 
@@ -167,13 +199,24 @@ test('admin can open account detail and account creation pages', async ({ page }
     await expect(page.getByText('Fehler', { exact: true })).toHaveCount(0);
 });
 
-test('non-admin users are blocked from account management pages', async ({ page }) => {
-    const accounts = await withFreshApiContext(apiBaseUrl, (api) => getAccounts(api, 'admin.dev'));
-    const targetAccount = accounts.find((entry) => entry.username === 'viewer.dev');
+test('non-admin users are blocked from account management pages', async ({
+    page
+}) => {
+    const accounts = await withFreshApiContext(apiBaseUrl, (api) =>
+        getAccounts(api, 'admin.dev')
+    );
+    const targetAccount = accounts.find(
+        (entry) => entry.username === 'viewer.dev'
+    );
 
     expect(targetAccount?.id).toBeTruthy();
 
-    for (const username of ['owner.dev', 'manager.dev', 'viewer.dev', 'limited.dev']) {
+    for (const username of [
+        'owner.dev',
+        'manager.dev',
+        'viewer.dev',
+        'limited.dev'
+    ]) {
         await authenticatePage(page, username);
 
         await page.goto('/accounts/new');

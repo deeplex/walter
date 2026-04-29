@@ -25,7 +25,10 @@ describe('WalterFileHandle', () => {
         } as never);
         const appended = await handle.addFile({ fileName: 'new.pdf' } as never);
 
-        expect(walterGetFilesMock).toHaveBeenCalledWith('/api/files', fetchImpl);
+        expect(walterGetFilesMock).toHaveBeenCalledWith(
+            '/api/files',
+            fetchImpl
+        );
         expect(duplicate).toEqual([
             { fileName: 'existing.pdf' },
             { fileName: 'other.pdf' }

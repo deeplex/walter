@@ -92,8 +92,8 @@ describe('requests auth behavior', () => {
         const fetchMock = vi.fn().mockImplementation(() =>
             Promise.resolve(
                 new Response(JSON.stringify([]), {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' }
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' }
                 })
             )
         );
@@ -102,7 +102,10 @@ describe('requests auth behavior', () => {
         const expectations: Array<[keyof typeof walter_selection, string]> = [
             ['adressen', '/api/selection/adressen'],
             ['anreden', '/api/selection/anreden'],
-            ['betriebskostenrechnungen', '/api/selection/betriebskostenrechnungen'],
+            [
+                'betriebskostenrechnungen',
+                '/api/selection/betriebskostenrechnungen'
+            ],
             ['erhaltungsaufwendungen', '/api/selection/erhaltungsaufwendungen'],
             ['hkvo_p9a2', '/api/selection/hkvo_p9a2'],
             ['juristischePersonen', '/api/selection/juristischepersonen'],

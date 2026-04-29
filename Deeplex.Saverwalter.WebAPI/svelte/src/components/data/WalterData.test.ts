@@ -145,7 +145,9 @@ describe('WalterData helpers', () => {
                     id: 2,
                     typ: { id: 12, text: 'Hausstrom' },
                     selectedWohnungen: [{ id: 101, text: 'W1' }],
-                    betriebskostenrechnungen: [{ betreffendesJahr: 2026, betrag: -10 }]
+                    betriebskostenrechnungen: [
+                        { betreffendesJahr: 2026, betrag: -10 }
+                    ]
                 }
             ] as never,
             2026
@@ -160,7 +162,11 @@ describe('WalterData helpers', () => {
             })
         );
         expect(config.data).toContainEqual(
-            expect.objectContaining({ group: 'W1', key: 'Hausstrom', value: undefined })
+            expect.objectContaining({
+                group: 'W1',
+                key: 'Hausstrom',
+                value: undefined
+            })
         );
         expect(config.options.height).toBe('20em');
     });

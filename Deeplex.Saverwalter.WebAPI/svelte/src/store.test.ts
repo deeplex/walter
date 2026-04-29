@@ -62,11 +62,21 @@ describe('store helpers', () => {
 
     it('ignores toast additions when the matching title is missing', () => {
         addToast(
-            new WalterToastContent(undefined, undefined, () => 'ok', () => 'fail'),
+            new WalterToastContent(
+                undefined,
+                undefined,
+                () => 'ok',
+                () => 'fail'
+            ),
             true
         );
         addToast(
-            new WalterToastContent(undefined, undefined, () => 'ok', () => 'fail'),
+            new WalterToastContent(
+                undefined,
+                undefined,
+                () => 'ok',
+                () => 'fail'
+            ),
             false
         );
 

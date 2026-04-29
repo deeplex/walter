@@ -115,7 +115,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     {fullHeight}
 >
     {#if entry}
-        <WalterMiete entry={entry} mieten={rows} />
+        <WalterMiete {entry} mieten={rows} />
         <WalterNumberInput
             label="Auch anwenden auf die nächsten Monate:"
             min={0}

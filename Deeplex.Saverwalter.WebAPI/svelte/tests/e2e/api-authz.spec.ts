@@ -1,7 +1,8 @@
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import { authHeader, devPassword, devUsers } from './credentials';
 
-const apiBaseUrl = process.env.PLAYWRIGHT_API_BASE_URL ?? 'http://localhost:5254';
+const apiBaseUrl =
+    process.env.PLAYWRIGHT_API_BASE_URL ?? 'http://localhost:5254';
 
 type LoginResult = {
     token: string;
@@ -25,7 +26,10 @@ type WohnungDetailEntry = {
     [key: string]: unknown;
 };
 
-async function signIn(api: APIRequestContext, username: string): Promise<LoginResult> {
+async function signIn(
+    api: APIRequestContext,
+    username: string
+): Promise<LoginResult> {
     const response = await api.post('/api/user/sign-in', {
         data: {
             username,
@@ -41,7 +45,10 @@ async function signIn(api: APIRequestContext, username: string): Promise<LoginRe
     return body;
 }
 
-async function getWohnungsCount(api: APIRequestContext, username: string): Promise<number> {
+async function getWohnungsCount(
+    api: APIRequestContext,
+    username: string
+): Promise<number> {
     return (await getWohnungen(api, username)).length;
 }
 
@@ -96,7 +103,9 @@ async function putWohnungDetail(
 test.describe('API authentication and authorization matrix', () => {
     test.use({ baseURL: apiBaseUrl });
 
-    test('all seeded users can sign in with shared dev password', async ({ request }) => {
+    test('all seeded users can sign in with shared dev password', async ({
+        request
+    }) => {
         for (const user of devUsers) {
             const login = await signIn(request, user.username);
             expect(login.role).toBe(user.expectedRole);
@@ -123,7 +132,9 @@ test.describe('API authentication and authorization matrix', () => {
         expect(managerResponse.status()).toBe(403);
     });
 
-    test('wohnung list visibility narrows by role assignment', async ({ request }) => {
+    test('wohnung list visibility narrows by role assignment', async ({
+        request
+    }) => {
         const managerCount = await getWohnungsCount(request, 'manager.dev');
         const viewerCount = await getWohnungsCount(request, 'viewer.dev');
         const limitedCount = await getWohnungsCount(request, 'limited.dev');
@@ -136,7 +147,9 @@ test.describe('API authentication and authorization matrix', () => {
         expect(viewerCount).toBeGreaterThan(limitedCount);
     });
 
-    test('wohnung permissions reflect role capabilities', async ({ request }) => {
+    test('wohnung permissions reflect role capabilities', async ({
+        request
+    }) => {
         const adminRows = await getWohnungen(request, 'admin.dev');
         const ownerRows = await getWohnungen(request, 'owner.dev');
         const managerRows = await getWohnungen(request, 'manager.dev');
@@ -152,11 +165,21 @@ test.describe('API authentication and authorization matrix', () => {
         expect(adminRows.every((row) => row.permissions.update)).toBeTruthy();
         expect(ownerRows.every((row) => row.permissions.update)).toBeTruthy();
         expect(managerRows.every((row) => row.permissions.update)).toBeTruthy();
-        expect(viewerRows.every((row) => !row.permissions.update && !row.permissions.remove)).toBeTruthy();
-        expect(limitedRows.every((row) => !row.permissions.update && !row.permissions.remove)).toBeTruthy();
+        expect(
+            viewerRows.every(
+                (row) => !row.permissions.update && !row.permissions.remove
+            )
+        ).toBeTruthy();
+        expect(
+            limitedRows.every(
+                (row) => !row.permissions.update && !row.permissions.remove
+            )
+        ).toBeTruthy();
     });
 
-    test('users cannot read wohnung details outside their visibility scope', async ({ request }) => {
+    test('users cannot read wohnung details outside their visibility scope', async ({
+        request
+    }) => {
         const adminRows = await getWohnungen(request, 'admin.dev');
         const viewerRows = await getWohnungen(request, 'viewer.dev');
         const limitedRows = await getWohnungen(request, 'limited.dev');
@@ -175,10 +198,26 @@ test.describe('API authentication and authorization matrix', () => {
         expect(viewerForbiddenId).toBeTruthy();
         expect(limitedForbiddenId).toBeTruthy();
 
-        const viewerAllowed = await getWohnungDetail(request, 'viewer.dev', viewerAllowedId!);
-        const viewerForbidden = await getWohnungDetail(request, 'viewer.dev', viewerForbiddenId!);
-        const limitedAllowed = await getWohnungDetail(request, 'limited.dev', limitedAllowedId!);
-        const limitedForbidden = await getWohnungDetail(request, 'limited.dev', limitedForbiddenId!);
+        const viewerAllowed = await getWohnungDetail(
+            request,
+            'viewer.dev',
+            viewerAllowedId!
+        );
+        const viewerForbidden = await getWohnungDetail(
+            request,
+            'viewer.dev',
+            viewerForbiddenId!
+        );
+        const limitedAllowed = await getWohnungDetail(
+            request,
+            'limited.dev',
+            limitedAllowedId!
+        );
+        const limitedForbidden = await getWohnungDetail(
+            request,
+            'limited.dev',
+            limitedForbiddenId!
+        );
 
         expect(viewerAllowed.responseStatus).toBe(200);
         expect(limitedAllowed.responseStatus).toBe(200);
@@ -186,18 +225,32 @@ test.describe('API authentication and authorization matrix', () => {
         expect(limitedForbidden.responseStatus).toBe(403);
     });
 
-    test('only users with update rights can save visible wohnung details', async ({ request }) => {
+    test('only users with update rights can save visible wohnung details', async ({
+        request
+    }) => {
         const managerRows = await getWohnungen(request, 'manager.dev');
         const viewerRows = await getWohnungen(request, 'viewer.dev');
 
-        const managerEditableId = managerRows.find((row) => row.permissions.update)?.id;
-        const viewerReadonlyId = viewerRows.find((row) => !row.permissions.update)?.id;
+        const managerEditableId = managerRows.find(
+            (row) => row.permissions.update
+        )?.id;
+        const viewerReadonlyId = viewerRows.find(
+            (row) => !row.permissions.update
+        )?.id;
 
         expect(managerEditableId).toBeTruthy();
         expect(viewerReadonlyId).toBeTruthy();
 
-        const managerDetail = await getWohnungDetail(request, 'manager.dev', managerEditableId!);
-        const viewerDetail = await getWohnungDetail(request, 'viewer.dev', viewerReadonlyId!);
+        const managerDetail = await getWohnungDetail(
+            request,
+            'manager.dev',
+            managerEditableId!
+        );
+        const viewerDetail = await getWohnungDetail(
+            request,
+            'viewer.dev',
+            viewerReadonlyId!
+        );
 
         expect(managerDetail.responseStatus).toBe(200);
         expect(viewerDetail.responseStatus).toBe(200);
@@ -217,7 +270,9 @@ test.describe('API authentication and authorization matrix', () => {
         expect(viewerPutStatus).toBe(403);
     });
 
-    test('owner-only wohnung creation policy is enforced', async ({ request }) => {
+    test('owner-only wohnung creation policy is enforced', async ({
+        request
+    }) => {
         const ownerLogin = await signIn(request, 'owner.dev');
         const ownerResponse = await request.post('/api/wohnungen', {
             headers: authHeader(ownerLogin.token),

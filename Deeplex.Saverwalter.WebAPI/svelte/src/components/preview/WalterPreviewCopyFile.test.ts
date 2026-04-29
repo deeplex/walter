@@ -60,7 +60,9 @@ vi.mock('$walter/lib', () => {
         WalterBetriebskostenrechnungEntry: {
             ApiURL: '/api/betriebskostenrechnungen'
         },
-        WalterErhaltungsaufwendungEntry: { ApiURL: '/api/erhaltungsaufwendungen' },
+        WalterErhaltungsaufwendungEntry: {
+            ApiURL: '/api/erhaltungsaufwendungen'
+        },
         WalterKontaktEntry: { ApiURL: '/api/kontakte' },
         WalterMieteEntry: { ApiURL: '/api/mieten' },
         WalterMietminderungEntry: { ApiURL: '/api/mietminderungen' },
@@ -185,8 +187,12 @@ describe('WalterPreviewCopyFile helpers', () => {
             key: '/api/files/move.pdf'
         } as never;
 
-        walterFilePostMock.mockResolvedValueOnce(new Response('', { status: 200 }));
-        walterFileDeleteMock.mockResolvedValueOnce(new Response('', { status: 200 }));
+        walterFilePostMock.mockResolvedValueOnce(
+            new Response('', { status: 200 })
+        );
+        walterFileDeleteMock.mockResolvedValueOnce(
+            new Response('', { status: 200 })
+        );
 
         const successResult = await moveImpl(
             file,
@@ -195,7 +201,9 @@ describe('WalterPreviewCopyFile helpers', () => {
             selectedEntry
         );
 
-        walterFilePostMock.mockResolvedValueOnce(new Response('', { status: 500 }));
+        walterFilePostMock.mockResolvedValueOnce(
+            new Response('', { status: 500 })
+        );
 
         const failedCopyResult = await moveImpl(
             file,
@@ -204,8 +212,12 @@ describe('WalterPreviewCopyFile helpers', () => {
             selectedEntry
         );
 
-        walterFilePostMock.mockResolvedValueOnce(new Response('', { status: 200 }));
-        walterFileDeleteMock.mockResolvedValueOnce(new Response('', { status: 500 }));
+        walterFilePostMock.mockResolvedValueOnce(
+            new Response('', { status: 200 })
+        );
+        walterFileDeleteMock.mockResolvedValueOnce(
+            new Response('', { status: 500 })
+        );
 
         const failedDeleteResult = await moveImpl(
             file,

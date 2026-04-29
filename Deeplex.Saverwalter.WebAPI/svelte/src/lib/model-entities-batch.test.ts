@@ -177,20 +177,21 @@ describe('lib entity mappers batch', () => {
     });
 
     it('maps utility and accounting entities', () => {
-        const betriebskostenrechnung = WalterBetriebskostenrechnungEntry.fromJson({
-            id: 10,
-            betrag: 120,
-            betreffendesJahr: 2026,
-            datum: '2026-02-01',
-            notiz: 'BK',
-            createdAt: new Date('2026-02-01T10:00:00Z'),
-            lastModified: new Date('2026-02-01T11:00:00Z'),
-            typ: { id: 1, text: 'Wasser' },
-            umlage: { id: 2, text: 'Umlage A' },
-            wohnungen: [],
-            betriebskostenrechnungen: [],
-            permissions: { read: true, update: false, remove: false }
-        } as never);
+        const betriebskostenrechnung =
+            WalterBetriebskostenrechnungEntry.fromJson({
+                id: 10,
+                betrag: 120,
+                betreffendesJahr: 2026,
+                datum: '2026-02-01',
+                notiz: 'BK',
+                createdAt: new Date('2026-02-01T10:00:00Z'),
+                lastModified: new Date('2026-02-01T11:00:00Z'),
+                typ: { id: 1, text: 'Wasser' },
+                umlage: { id: 2, text: 'Umlage A' },
+                wohnungen: [],
+                betriebskostenrechnungen: [],
+                permissions: { read: true, update: false, remove: false }
+            } as never);
 
         const umlage = WalterUmlageEntry.fromJson({
             id: 11,

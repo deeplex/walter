@@ -4,9 +4,9 @@ import { shouldFilterItem } from './WalterComboBox';
 
 describe('WalterComboBox helpers', () => {
     it('returns true for empty filter values', () => {
-        expect(
-            shouldFilterItem({ id: 1, text: 'Berlin' } as never, '')
-        ).toBe(true);
+        expect(shouldFilterItem({ id: 1, text: 'Berlin' } as never, '')).toBe(
+            true
+        );
     });
 
     it('matches all semicolon-separated tokens case-insensitively', () => {

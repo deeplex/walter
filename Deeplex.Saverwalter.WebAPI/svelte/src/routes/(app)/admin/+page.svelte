@@ -16,11 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import { browser } from '$app/environment';
-    import {
-        WalterError,
-        WalterGrid,
-        WalterHeader
-    } from '$walter/components';
+    import { WalterError, WalterGrid, WalterHeader } from '$walter/components';
     import { ClickableTile } from 'carbon-components-svelte';
     import { UserRole, getAuthState } from '$walter/services/auth';
 

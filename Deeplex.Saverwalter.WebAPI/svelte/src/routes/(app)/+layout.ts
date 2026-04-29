@@ -15,7 +15,11 @@
 
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ fetch }: { fetch: typeof globalThis.fetch }) => {
+export const load: PageLoad = async ({
+    fetch
+}: {
+    fetch: typeof globalThis.fetch;
+}) => {
     return {
         fetch: fetch
     };

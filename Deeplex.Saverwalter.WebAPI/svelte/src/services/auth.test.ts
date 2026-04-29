@@ -156,7 +156,8 @@ describe('auth service', () => {
     });
 
     it('sign-out clears state and localStorage', async () => {
-        const { walter_sign_in, walter_sign_out, getAccessToken } = await import('./auth');
+        const { walter_sign_in, walter_sign_out, getAccessToken } =
+            await import('./auth');
         const fetchImpl = vi.fn().mockResolvedValue(
             new Response(
                 JSON.stringify({

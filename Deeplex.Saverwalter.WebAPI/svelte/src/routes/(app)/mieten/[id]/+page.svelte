@@ -53,6 +53,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         entry={data.entry}
         mieten={data.vertrag.mieten}
         vertrag={data.vertrag}
-        onDeleteMonthMiete={onDeleteMonthMiete}
+        {onDeleteMonthMiete}
     />
 </WalterGrid>

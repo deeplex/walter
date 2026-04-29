@@ -107,7 +107,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 (a, b) =>
                     new Date(a.beginn).getTime() - new Date(b.beginn).getTime()
             )
-            .filter((entry) => new Date(entry.beginn).getTime() <= date.getTime())
+            .filter(
+                (entry) => new Date(entry.beginn).getTime() <= date.getTime()
+            )
             .at(-1);
 
         return version?.grundmiete || 0;
@@ -157,26 +159,39 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                     (vertrag.mieten || [])
                         .filter(
                             (miete) =>
-                                new Date(miete.betreffenderMonat).getFullYear() ===
-                                year
+                                new Date(
+                                    miete.betreffenderMonat
+                                ).getFullYear() === year
                         )
-                        .map((miete) => new Date(miete.betreffenderMonat).getMonth())
+                        .map((miete) =>
+                            new Date(miete.betreffenderMonat).getMonth()
+                        )
                 );
 
                 const searchStart =
-                    year === currentYear ? Math.max(startMonth, currentMonth) : startMonth;
+                    year === currentYear
+                        ? Math.max(startMonth, currentMonth)
+                        : startMonth;
 
-                for (let monthIndex = searchStart; monthIndex <= endMonth; monthIndex += 1) {
+                for (
+                    let monthIndex = searchStart;
+                    monthIndex <= endMonth;
+                    monthIndex += 1
+                ) {
                     if (existingMonths.has(monthIndex)) {
                         continue;
                     }
 
                     const monthDate = new Date(year, monthIndex, 1);
-                    const latestMiete = getLatestMieteBefore(vertrag, monthDate);
+                    const latestMiete = getLatestMieteBefore(
+                        vertrag,
+                        monthDate
+                    );
                     const amount =
                         latestMiete?.betrag ||
                         getGrundmieteForDate(vertrag, monthDate);
-                    const mieterAuflistung = vertrag.mieterAuflistung || 'Keine Mieter';
+                    const mieterAuflistung =
+                        vertrag.mieterAuflistung || 'Keine Mieter';
 
                     return {
                         vertrag,
@@ -253,12 +268,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     $: selectedYear = years[selected] ?? currentYear;
-    
+
     // Task lists - these must be declared first so they exist when table rows use them
     let rentTasks: RentTask[] = [];
     let meterTasks: MeterTask[] = [];
     let invoiceTasks: InvoiceTask[] = [];
-    
+
     function refreshTaskLists(year: number) {
         rentTasks = buildRentTasks(year);
         meterTasks = buildMeterTasks(year);
@@ -325,7 +340,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     $: invoiceTableRows = invoiceTasks.map((task) => ({
         id: `invoice-${task.umlage.id}`,
         typ: task.umlage.typ?.text || 'Umlage',
-        wohnungen: task.umlage.wohnungenBezeichnung || task.umlage.beschreibung || `Umlage ${task.umlage.id}`,
+        wohnungen:
+            task.umlage.wohnungenBezeichnung ||
+            task.umlage.beschreibung ||
+            `Umlage ${task.umlage.id}`,
         button: (e: CustomEvent) => {
             e.stopPropagation();
             openInvoiceQuickAdd(task);
@@ -388,7 +406,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
                 : undefined,
             umlage: {
                 id: task.umlage.id,
-                text: task.umlage.typ?.text || task.umlage.beschreibung || 'Umlage'
+                text:
+                    task.umlage.typ?.text ||
+                    task.umlage.beschreibung ||
+                    'Umlage'
             }
         };
 
@@ -401,7 +422,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             vertrag:
                 (newValue as WalterMieteEntry).vertrag || addMieteEntry.vertrag
         } as WalterMieteEntry;
-        const vertrag = vertraege.find((entry) => entry.id === +value.vertrag?.id);
+        const vertrag = vertraege.find(
+            (entry) => entry.id === +value.vertrag?.id
+        );
         if (!vertrag) {
             return;
         }
@@ -467,7 +490,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
     }
 
     function onDeleteMonthMiete(value: WalterMieteEntry) {
-        const vertrag = vertraege.find((entry) => entry.id === +value.vertrag?.id);
+        const vertrag = vertraege.find(
+            (entry) => entry.id === +value.vertrag?.id
+        );
         if (vertrag) {
             vertrag.mieten = (vertrag.mieten || []).filter(
                 (miete) => miete.id !== value.id
@@ -535,7 +560,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             entry={addMieteEntry}
             {mieten}
             {vertraege}
-            onDeleteMonthMiete={onDeleteMonthMiete}
+            {onDeleteMonthMiete}
             onRequestCloseModal={() => (addMieteOpen = false)}
         />
     </WalterDataWrapperQuickAdd>
@@ -560,7 +585,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <WalterBetriebskostenrechnung
             {fetchImpl}
             entry={addRechnungEntry}
-            rechnungen={umlagen.flatMap((entry) => entry.betriebskostenrechnungen)}
+            rechnungen={umlagen.flatMap(
+                (entry) => entry.betriebskostenrechnungen
+            )}
         />
     </WalterDataWrapperQuickAdd>
 

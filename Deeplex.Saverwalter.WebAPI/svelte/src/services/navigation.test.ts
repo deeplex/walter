@@ -15,7 +15,9 @@ describe('navigation service', () => {
     it('routes every entity helper to the correct page path', async () => {
         const { navigation } = await import('./navigation');
 
-        const expectations: Array<[keyof typeof navigation, string | number, string]> = [
+        const expectations: Array<
+            [keyof typeof navigation, string | number, string]
+        > = [
             ['abrechnungsresultat', 'abc', '/abrechnungsresultate/abc'],
             ['account', 1, '/accounts/1'],
             ['adresse', 2, '/adressen/2'],

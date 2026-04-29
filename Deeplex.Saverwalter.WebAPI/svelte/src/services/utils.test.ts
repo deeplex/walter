@@ -21,10 +21,7 @@ vi.mock('$app/navigation', () => ({
 }));
 
 import { goto } from '$app/navigation';
-import {
-    changeTracker,
-    walterModalControl
-} from '$walter/store';
+import { changeTracker, walterModalControl } from '$walter/store';
 import {
     convertDateCanadian,
     convertDateGerman,
