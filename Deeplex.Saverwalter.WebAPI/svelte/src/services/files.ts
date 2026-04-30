@@ -101,7 +101,9 @@ export function download_file_blob(blob: Blob, fileName: string) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Defer revoke so browsers (and Playwright) reliably observe the
+    // download attribute on the anchor before the blob URL goes away.
+    setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 export async function walter_get_files(

@@ -28,9 +28,11 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
 
             var printAccess = args.Contains("--print-access", StringComparer.OrdinalIgnoreCase);
             var ensureDevUsers = args.Contains("--ensure-dev-users", StringComparer.OrdinalIgnoreCase);
-            var seedDatabases = !printAccess && !ensureDevUsers;
+            var seedFiles = args.Contains("--seed-files", StringComparer.OrdinalIgnoreCase);
+            var seedDatabases = !printAccess && !ensureDevUsers && !seedFiles;
 
             var targetDb = Environment.GetEnvironmentVariable("DATABASE_NAME") ?? "walter_dev_generic_db";
+            var s3Provider = Environment.GetEnvironmentVariable("WALTER_DEV_S3_PROVIDER");
 
             if (seedDatabases)
             {
@@ -60,6 +62,17 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
 
                 await GenericDatabase.PrintAccessOverview(databaseHost, databasePort, "walter_dev_generic_db", databaseUser, databasePass, databasePass);
                 await GenericDatabase.PrintAccessOverview(databaseHost, databasePort, "walter_dev_full_generic_db", databaseUser, databasePass, databasePass);
+
+                if (!string.IsNullOrWhiteSpace(s3Provider))
+                {
+                    await SeedFilesFor(databaseHost, databasePort, "walter_dev_generic_db", databaseUser, databasePass, s3Provider, seed);
+                    await SeedFilesFor(databaseHost, databasePort, "walter_dev_full_generic_db", databaseUser, databasePass, s3Provider, seed + 1);
+                }
+                else
+                {
+                    Console.WriteLine("WALTER_DEV_S3_PROVIDER not set - skipping file storage seeding.");
+                }
+
                 return;
             }
 
@@ -72,6 +85,33 @@ namespace Deeplex.Saverwalter.InitiateTestDbs
             {
                 await GenericDatabase.PrintAccessOverview(databaseHost, databasePort, targetDb, databaseUser, databasePass, databasePass);
             }
+
+            if (seedFiles)
+            {
+                if (string.IsNullOrWhiteSpace(s3Provider))
+                {
+                    Console.WriteLine("WALTER_DEV_S3_PROVIDER must be set when --seed-files is requested.");
+                    Environment.ExitCode = 1;
+                    return;
+                }
+
+                var seed = GetIntEnv("WALTER_DEV_RANDOM_SEED", 1337);
+                await SeedFilesFor(databaseHost, databasePort, targetDb, databaseUser, databasePass, s3Provider, seed);
+            }
+        }
+
+        private static async Task SeedFilesFor(
+            string databaseHost,
+            string databasePort,
+            string databaseName,
+            string databaseUser,
+            string databasePass,
+            string s3Provider,
+            int seed)
+        {
+            Console.WriteLine($"Seeding sample files for {databaseName} into {s3Provider}");
+            await using var ctx = GenericDatabase.ConnectExistingDatabase(databaseHost, databasePort, databaseName, databaseUser, databasePass);
+            await FileStorage.SeedSampleFiles(ctx, s3Provider, seed);
         }
 
         private static string RequireEnv(string name)

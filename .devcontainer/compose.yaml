@@ -19,14 +19,45 @@ services:
       - POSTGRES_PASSWORD=postgres
       - PGDATA=/var/lib/postgresql/data
 
+  # MinIO is licensed under AGPL-3.0 (same license as Walter), so bundling it
+  # into the development setup does not create any licensing conflict.
   s3:
     image: minio/minio:RELEASE.2023-02-17T17-52-43Z
+    container_name: walter_dev_s3
     restart: unless-stopped
     volumes:
       - s3-data:/data
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
     command: server --console-address ":9001" /data
     ports:
+      - 9000:9000
       - 9001:9001
+
+  # One-shot helper that creates the saverwalter bucket and switches it to a
+  # public anonymous policy. The Walter file API talks to MinIO without
+  # signing requests, so the bucket needs to allow unauthenticated PUT/GET.
+  # This is acceptable for development only; production deployments must put
+  # MinIO (or another S3 provider) behind proper credentials.
+  s3-init:
+    image: minio/mc:RELEASE.2023-02-16T19-20-11Z
+    container_name: walter_dev_s3_init
+    depends_on:
+      - s3
+    restart: "no"
+    entrypoint: >
+      /bin/sh -c "
+      until /usr/bin/mc alias set walter http://s3:9000 minioadmin minioadmin >/dev/null 2>&1; do
+        echo 'Waiting for MinIO at s3:9000...';
+        sleep 1;
+      done;
+      /usr/bin/mc mb -p walter/saverwalter >/dev/null 2>&1 || true;
+      /usr/bin/mc anonymous set public walter/saverwalter >/dev/null 2>&1 \
+        || /usr/bin/mc policy set public walter/saverwalter >/dev/null 2>&1 \
+        || true;
+      echo 'MinIO bucket walter/saverwalter ready (public anonymous access for development).';
+      "
 
 volumes:
   postgres-data:

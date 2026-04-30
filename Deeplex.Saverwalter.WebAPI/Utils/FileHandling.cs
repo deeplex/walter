@@ -84,15 +84,15 @@ namespace Deeplex.Saverwalter.WebAPI.Utils
             }
         }
 
-        private static StreamContent FillContent(string path, HttpRequest request)
+        private static HttpContent FillContent(string path, HttpRequest request)
         {
             var content = new StreamContent(request.Body);
 
-            var contentLength = request.ContentLength ?? -1;
-            if (contentLength >= 0)
-            {
-                content.Headers.ContentLength = contentLength;
-            }
+            // S3-compatible servers (MinIO etc.) reject PUT without an explicit
+            // Content-Length unless they understand the AWS chunked signing
+            // protocol. Default missing lengths to zero so we never end up
+            // trying to chunk-encode a forwarded request.
+            content.Headers.ContentLength = request.ContentLength ?? 0L;
 
             new FileExtensionContentTypeProvider()
                 .TryGetContentType(Path.GetExtension(path), out var contentType);
@@ -106,15 +106,27 @@ namespace Deeplex.Saverwalter.WebAPI.Utils
 
         private async static Task<HttpResponseMessage> SaveToTrash(string path, HttpRequest request, HttpClient httpClient)
         {
-            HttpContent content = null!;
-            // Put trash before the filename
+            // The trash entry is a 0-byte tombstone: the listing logic uses it
+            // to hide trashed files from regular results. We deliberately do
+            // not forward the original request body here (DELETE requests
+            // typically don't have one) and we always send Content-Length: 0
+            // so MinIO accepts the PUT.
             var splits = path.Split('/');
             var trashPath = $"{string.Join('/', splits.Reverse().Skip(1).Reverse())}/trash/{splits.Last()}";
-            var trashRequest = new HttpRequestMessage(new HttpMethod(HttpMethod.Put.Method), trashPath) { Content = content };
-            trashRequest.Content = FillContent(path, request);
-            var trashResponse = await httpClient.SendAsync(trashRequest, CancellationToken.None);
+            var trashRequest = new HttpRequestMessage(HttpMethod.Put, trashPath)
+            {
+                Content = new ByteArrayContent(Array.Empty<byte>())
+            };
+            trashRequest.Content.Headers.ContentLength = 0L;
 
-            return trashResponse;
+            new FileExtensionContentTypeProvider()
+                .TryGetContentType(Path.GetExtension(path), out var contentType);
+            if (contentType != null)
+            {
+                trashRequest.Content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+            }
+
+            return await httpClient.SendAsync(trashRequest, CancellationToken.None);
         }
 
         public static async Task<IActionResult> RedirectToFileServer(HttpRequest request, HttpClient client, string path)

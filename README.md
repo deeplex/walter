@@ -36,6 +36,29 @@ Seeded development users (default password = `DATABASE_PASS`):
 - `viewer.dev`
 - `limited.dev`
 
+If MinIO is reachable at `s3:9000` (the devcontainer default), the bootstrap
+also uploads realistic placeholder PDFs to a sample of `vertraege`, `wohnungen`,
+`erhaltungsaufwendungen`, `adressen` and `kontakte` so the file panels in the
+UI are not empty. Override the target with `S3_PROVIDER=...` or skip the file
+seeding entirely with `WALTER_DEV_SKIP_FILE_SEED=1`.
+
+## File storage (S3 / MinIO)
+
+The dev compose stack runs MinIO as the S3-compatible file backend. Both
+Walter and MinIO are AGPL-3.0, so bundling them does not introduce any
+licensing conflict.
+
+- API endpoint: `http://s3:9000` (inside the devcontainer) /
+  `http://localhost:9000` (from the host)
+- Default bucket: `saverwalter`
+- Walter API base URL: `http://s3:9000/saverwalter`
+  (set as `S3_PROVIDER` for the backend)
+- Console: `http://localhost:9001` (login `minioadmin` / `minioadmin`)
+
+The bucket is created and switched to a public anonymous policy by the
+`s3-init` sidecar service. This is acceptable for development only; production
+deployments must put MinIO (or another S3 provider) behind real credentials.
+
 ## Run Full Dev Watch Stack (Inside Dev Container)
 
 Use this script to start both backend and frontend in watch mode, connected to your seeded development database:
@@ -81,6 +104,10 @@ The suite contains both browser and API tests and checks:
 - UI access to `/admin` for admin and error rendering for non-admin
 - UI access to dynamic detail/new routes such as `/wohnungen/:id`, `/wohnungen/new`, `/accounts/:id`, and `/accounts/new`
 - entity-level update restrictions based on backend permission flags
+- file storage round-trip (upload/list/download/trash) on a wohnung against MinIO
+- visibility of seeded sample files, viewer write protection, and the user-stack endpoint
+- generation of a Betriebskostenabrechnung PDF via the API
+- UI download flow on `/abrechnung` (PDF generation, override modal, S3 persistence)
 
 Required runtime setup before running tests:
 

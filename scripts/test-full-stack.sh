@@ -9,6 +9,10 @@ DB_PORT="${DATABASE_PORT:-5432}"
 DB_USER="${DATABASE_USER:-postgres}"
 DB_PASS="${DATABASE_PASS:-postgres}"
 DB_NAME="${DATABASE_NAME:-walter_dev_generic_db}"
+S3_HOST="${S3_HOST:-s3}"
+S3_PORT="${S3_PORT:-9000}"
+S3_BUCKET="${S3_BUCKET:-saverwalter}"
+S3_PROVIDER="${S3_PROVIDER:-http://${S3_HOST}:${S3_PORT}/${S3_BUCKET}}"
 APP_URL="${WALTER_APP_URL:-http://localhost:5254}"
 WALTER_E2E_PASSWORD="${WALTER_E2E_PASSWORD:-$DB_PASS}"
 PLAYWRIGHT_BROWSER="${PLAYWRIGHT_BROWSER:-chromium}"
@@ -162,6 +166,10 @@ DATABASE_HOST="$DB_HOST" \
 DATABASE_PORT="$DB_PORT" \
 DATABASE_USER="$DB_USER" \
 DATABASE_PASS="$DB_PASS" \
+S3_HOST="$S3_HOST" \
+S3_PORT="$S3_PORT" \
+S3_BUCKET="$S3_BUCKET" \
+S3_PROVIDER="$S3_PROVIDER" \
   ./scripts/bootstrap-dev.sh
 
 echo "[3/6] Running .NET test suite"
@@ -194,6 +202,7 @@ echo "[5/6] Starting backend (serves API and SPA)"
   export DATABASE_USER="$DB_USER"
   export DATABASE_PASS="$DB_PASS"
   export WALTER_PASSWORD="$DB_PASS"
+  export S3_PROVIDER="$S3_PROVIDER"
   export ASPNETCORE_ENVIRONMENT="Development"
   export ASPNETCORE_URLS="http://${APP_BIND_HOST}:${APP_PORT}"
   # dotnet test in step [3/6] already compiled the WebAPI project; skip rebuild.

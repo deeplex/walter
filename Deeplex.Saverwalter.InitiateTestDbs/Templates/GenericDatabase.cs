@@ -193,7 +193,7 @@ namespace Deeplex.Saverwalter.InitiateTestDbs.Templates
             return optionsBuilder.Options;
         }
 
-        private static SaverwalterContext ConnectExistingDatabase(
+        public static SaverwalterContext ConnectExistingDatabase(
             string databaseHost,
             string databasePort,
             string databaseName,
