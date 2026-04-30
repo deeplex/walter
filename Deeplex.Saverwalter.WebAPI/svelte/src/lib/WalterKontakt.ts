@@ -65,7 +65,8 @@ export class WalterKontaktEntry extends WalterApiHandler {
         const vertraege = json.vertraege?.map(WalterVertragEntry.fromJson);
         const mitglieder = json.mitglieder?.map(WalterKontaktEntry.fromJson);
         const transaktionen = json.transaktionen?.map(
-            WalterTransaktionEntry.fromJson);
+            WalterTransaktionEntry.fromJson
+        );
         const permissions =
             json.permissions && WalterPermissions.fromJson(json.permissions);
         const rechtsform =

@@ -13,12 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { WalterApiHandler } from "./WalterApiHandler";
-import { WalterPermissions } from "./WalterPermissions";
-import { WalterSelectionEntry } from "./WalterSelection";
+import { WalterApiHandler } from './WalterApiHandler';
+import { WalterPermissions } from './WalterPermissions';
+import { WalterSelectionEntry } from './WalterSelection';
 
 export class WalterAbrechnungsresultatEntry extends WalterApiHandler {
-
     public static ApiURL = `/api/abrechnungsresultate`;
     public static ApiURLId(id: string) {
         return `${WalterAbrechnungsresultatEntry.ApiURL}/${id}`;
@@ -42,8 +41,10 @@ export class WalterAbrechnungsresultatEntry extends WalterApiHandler {
     }
 
     static fromJson(json: WalterAbrechnungsresultatEntry) {
-        const vertrag = json.vertrag && WalterSelectionEntry.fromJson(json.vertrag);
-        const permissions = json.permissions && WalterPermissions.fromJson(json.permissions);
+        const vertrag =
+            json.vertrag && WalterSelectionEntry.fromJson(json.vertrag);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterAbrechnungsresultatEntry(
             json.id,

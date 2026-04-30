@@ -16,13 +16,13 @@
 using System.Security.Claims;
 using Deeplex.Saverwalter.Model;
 using Deeplex.Saverwalter.ModelTests;
+using Deeplex.Saverwalter.WebAPI.Helper;
 using Deeplex.Saverwalter.WebAPI.Services.ControllerService;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
-using Deeplex.Saverwalter.WebAPI.Helper;
 using static Deeplex.Saverwalter.WebAPI.Controllers.WohnungController;
 
 namespace Deeplex.Saverwalter.WebAPI.Tests

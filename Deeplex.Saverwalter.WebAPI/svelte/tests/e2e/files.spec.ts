@@ -72,14 +72,21 @@ test.describe('S3-backed file storage flow', () => {
         expect(wohnungenResp.ok()).toBeTruthy();
         const wohnungen = (await wohnungenResp.json()) as WohnungListEntry[];
         const target = wohnungen.find((w) => w.permissions.update);
-        expect(target, 'owner should be able to update at least one wohnung').toBeTruthy();
+        expect(
+            target,
+            'owner should be able to update at least one wohnung'
+        ).toBeTruthy();
 
         const wohnungId = target!.id;
         const filesUrl = `/api/wohnungen/${wohnungId}/files`;
         const fileName = await uniqueFileName('playwright-upload');
         const uploadUrl = `${filesUrl}/${encodeURIComponent(fileName)}`;
 
-        const beforeFiles = await listFiles(request, ownerLogin.token, filesUrl);
+        const beforeFiles = await listFiles(
+            request,
+            ownerLogin.token,
+            filesUrl
+        );
 
         const putStatus = await putFile(
             request,
@@ -101,7 +108,11 @@ test.describe('S3-backed file storage flow', () => {
         const downloaded = await downloadResp.body();
         expect(downloaded.subarray(0, 5).toString('latin1')).toBe('%PDF-');
 
-        const deleteStatus = await deleteFile(request, ownerLogin.token, uploadUrl);
+        const deleteStatus = await deleteFile(
+            request,
+            ownerLogin.token,
+            uploadUrl
+        );
         expect(deleteStatus).toBe(200);
 
         const finalFiles = await listFiles(request, ownerLogin.token, filesUrl);
@@ -118,7 +129,10 @@ test.describe('S3-backed file storage flow', () => {
         const readOnly = wohnungen.find(
             (w) => w.permissions.read && !w.permissions.update
         );
-        expect(readOnly, 'viewer should have a readable but read-only wohnung').toBeTruthy();
+        expect(
+            readOnly,
+            'viewer should have a readable but read-only wohnung'
+        ).toBeTruthy();
 
         const fileName = await uniqueFileName('playwright-viewer');
         const status = await putFile(
@@ -163,7 +177,9 @@ test.describe('S3-backed file storage flow', () => {
         ).toBeTruthy();
     });
 
-    test('user stack endpoint accepts upload and listing', async ({ request }) => {
+    test('user stack endpoint accepts upload and listing', async ({
+        request
+    }) => {
         const adminLogin = await signInApi(request, 'admin.dev');
         const fileName = await uniqueFileName('stack-test');
         const uploadUrl = `/api/user/files/${encodeURIComponent(fileName)}`;
@@ -184,7 +200,11 @@ test.describe('S3-backed file storage flow', () => {
         const stackFiles = (await listResp.json()) as WalterFileEntry[];
         expect(stackFiles.map((f) => f.fileName)).toContain(fileName);
 
-        const deleteStatus = await deleteFile(request, adminLogin.token, uploadUrl);
+        const deleteStatus = await deleteFile(
+            request,
+            adminLogin.token,
+            uploadUrl
+        );
         expect(deleteStatus).toBe(200);
     });
 });
@@ -210,8 +230,12 @@ test.describe('Abrechnung PDF generation and download', () => {
         // Try contracts in order until one returns a renderable abrechnung.
         // Generated test data always contains some unfinished contracts where
         // certain years are empty, so we walk a few candidates.
-        let resp: { status: number; body: Buffer; vertragId: number; jahr: number } | undefined;
-        const editable = vertraege.filter((v) => v.permissions.update).slice(0, 12);
+        let resp:
+            | { status: number; body: Buffer; vertragId: number; jahr: number }
+            | undefined;
+        const editable = vertraege
+            .filter((v) => v.permissions.update)
+            .slice(0, 12);
         for (const vertrag of editable) {
             const beginn = vertrag.beginn ? new Date(vertrag.beginn) : null;
             const ende = vertrag.ende ? new Date(vertrag.ende) : new Date();

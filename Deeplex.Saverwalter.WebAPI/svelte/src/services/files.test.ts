@@ -201,20 +201,26 @@ describe('files service', () => {
     });
 
     it('downloads blobs through a temporary anchor element', async () => {
-        const appendChildSpy = vi.spyOn(document.body, 'appendChild');
-        const removeChildSpy = vi.spyOn(document.body, 'removeChild');
-        const clickSpy = vi
-            .spyOn(HTMLAnchorElement.prototype, 'click')
-            .mockImplementation(() => {});
-        const { download_file_blob } = await import('./files');
+        vi.useFakeTimers();
+        try {
+            const appendChildSpy = vi.spyOn(document.body, 'appendChild');
+            const removeChildSpy = vi.spyOn(document.body, 'removeChild');
+            const clickSpy = vi
+                .spyOn(HTMLAnchorElement.prototype, 'click')
+                .mockImplementation(() => {});
+            const { download_file_blob } = await import('./files');
 
-        download_file_blob(new Blob(['demo']), 'demo.txt');
+            download_file_blob(new Blob(['demo']), 'demo.txt');
+            vi.runAllTimers();
 
-        expect(URL.createObjectURL).toHaveBeenCalled();
-        expect(clickSpy).toHaveBeenCalledOnce();
-        expect(appendChildSpy).toHaveBeenCalledOnce();
-        expect(removeChildSpy).toHaveBeenCalledOnce();
-        expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:test');
+            expect(URL.createObjectURL).toHaveBeenCalled();
+            expect(clickSpy).toHaveBeenCalledOnce();
+            expect(appendChildSpy).toHaveBeenCalledOnce();
+            expect(removeChildSpy).toHaveBeenCalledOnce();
+            expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:test');
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     it('maps fetched file metadata into WalterFile instances', async () => {

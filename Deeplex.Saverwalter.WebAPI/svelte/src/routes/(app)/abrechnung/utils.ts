@@ -13,7 +13,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { WalterAbrechnungsresultatEntry, WalterToastContent } from '$walter/lib';
+import {
+    WalterAbrechnungsresultatEntry,
+    WalterToastContent
+} from '$walter/lib';
 import {
     create_abrechnung_pdf,
     create_abrechnung_word,
@@ -38,9 +41,10 @@ export async function create_word_doc(
         fetchImpl
     );
     if (abrechnung instanceof File) {
-        const resultatId = await walter_get(
+        const resultatId = (await walter_get(
             `${WalterAbrechnungsresultatEntry.ApiURL}/vertrag/${vertragId}/jahr/${selectedYear}`,
-            fetchImpl) as WalterAbrechnungsresultatEntry;
+            fetchImpl
+        )) as WalterAbrechnungsresultatEntry;
         console.log(resultatId);
         if (!resultatId) {
             return undefined;
@@ -65,9 +69,10 @@ export async function create_pdf_doc(
         fetchImpl
     );
     if (abrechnung instanceof File) {
-        const resultatId = await walter_get(
+        const resultatId = (await walter_get(
             `${WalterAbrechnungsresultatEntry.ApiURL}/vertrag/${vertragId}/jahr/${selectedYear}`,
-            fetchImpl) as WalterAbrechnungsresultatEntry;
+            fetchImpl
+        )) as WalterAbrechnungsresultatEntry;
         if (!resultatId) {
             return undefined;
         }

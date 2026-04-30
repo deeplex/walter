@@ -18,7 +18,7 @@ export class WalterPermissions {
         public read: boolean,
         public update: boolean,
         public remove: boolean
-    ) { }
+    ) {}
 
     static fromJson(json: WalterPermissions) {
         return new WalterPermissions(json.read, json.update, json.remove);

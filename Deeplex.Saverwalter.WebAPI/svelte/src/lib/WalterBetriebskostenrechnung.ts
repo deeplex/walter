@@ -33,7 +33,7 @@ export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
         public umlage: WalterSelectionEntry,
         public wohnungen: WalterWohnungEntry[],
         public betriebskostenrechnungen: WalterBetriebskostenrechnungEntry[],
-        public permissions: WalterPermissions,
+        public permissions: WalterPermissions
     ) {
         super();
     }
@@ -63,6 +63,7 @@ export class WalterBetriebskostenrechnungEntry extends WalterApiHandler {
             umlage,
             wohnungen,
             betriebskostenrechnungen,
-            permissions);
+            permissions
+        );
     }
 }

@@ -49,18 +49,18 @@ namespace Deeplex.Saverwalter.PrintService
         {
             var resourceName = faceName switch
             {
-                SerifRegular    => $"{ResourceNamespace}.Fonts.LiberationSerif-Regular.ttf",
-                SerifBold       => $"{ResourceNamespace}.Fonts.LiberationSerif-Bold.ttf",
-                SerifItalic     => $"{ResourceNamespace}.Fonts.LiberationSerif-Italic.ttf",
+                SerifRegular => $"{ResourceNamespace}.Fonts.LiberationSerif-Regular.ttf",
+                SerifBold => $"{ResourceNamespace}.Fonts.LiberationSerif-Bold.ttf",
+                SerifItalic => $"{ResourceNamespace}.Fonts.LiberationSerif-Italic.ttf",
                 SerifBoldItalic => $"{ResourceNamespace}.Fonts.LiberationSerif-BoldItalic.ttf",
-                MonoRegular     => $"{ResourceNamespace}.Fonts.LiberationMono-Regular.ttf",
-                MonoBold        => $"{ResourceNamespace}.Fonts.LiberationMono-Bold.ttf",
-                MonoItalic      => $"{ResourceNamespace}.Fonts.LiberationMono-Italic.ttf",
-                MonoBoldItalic  => $"{ResourceNamespace}.Fonts.LiberationMono-BoldItalic.ttf",
-                SansRegular     => $"{ResourceNamespace}.Fonts.LiberationSans-Regular.ttf",
-                SansBold        => $"{ResourceNamespace}.Fonts.LiberationSans-Bold.ttf",
-                SansItalic      => $"{ResourceNamespace}.Fonts.LiberationSans-Italic.ttf",
-                SansBoldItalic  => $"{ResourceNamespace}.Fonts.LiberationSans-BoldItalic.ttf",
+                MonoRegular => $"{ResourceNamespace}.Fonts.LiberationMono-Regular.ttf",
+                MonoBold => $"{ResourceNamespace}.Fonts.LiberationMono-Bold.ttf",
+                MonoItalic => $"{ResourceNamespace}.Fonts.LiberationMono-Italic.ttf",
+                MonoBoldItalic => $"{ResourceNamespace}.Fonts.LiberationMono-BoldItalic.ttf",
+                SansRegular => $"{ResourceNamespace}.Fonts.LiberationSans-Regular.ttf",
+                SansBold => $"{ResourceNamespace}.Fonts.LiberationSans-Bold.ttf",
+                SansItalic => $"{ResourceNamespace}.Fonts.LiberationSans-Italic.ttf",
+                SansBoldItalic => $"{ResourceNamespace}.Fonts.LiberationSans-BoldItalic.ttf",
                 _ => $"{ResourceNamespace}.Fonts.LiberationSerif-Regular.ttf"
             };
 
@@ -84,10 +84,10 @@ namespace Deeplex.Saverwalter.PrintService
             {
                 var face = (isBold, isItalic) switch
                 {
-                    (true, true)   => SerifBoldItalic,
-                    (true, false)  => SerifBold,
-                    (false, true)  => SerifItalic,
-                    _              => SerifRegular
+                    (true, true) => SerifBoldItalic,
+                    (true, false) => SerifBold,
+                    (false, true) => SerifItalic,
+                    _ => SerifRegular
                 };
                 return new FontResolverInfo(face);
             }
@@ -98,10 +98,10 @@ namespace Deeplex.Saverwalter.PrintService
             {
                 var face = (isBold, isItalic) switch
                 {
-                    (true, true)   => MonoBoldItalic,
-                    (true, false)  => MonoBold,
-                    (false, true)  => MonoItalic,
-                    _              => MonoRegular
+                    (true, true) => MonoBoldItalic,
+                    (true, false) => MonoBold,
+                    (false, true) => MonoItalic,
+                    _ => MonoRegular
                 };
                 return new FontResolverInfo(face);
             }
@@ -112,10 +112,10 @@ namespace Deeplex.Saverwalter.PrintService
             {
                 var face = (isBold, isItalic) switch
                 {
-                    (true, true)   => SansBoldItalic,
-                    (true, false)  => SansBold,
-                    (false, true)  => SansItalic,
-                    _              => SansRegular
+                    (true, true) => SansBoldItalic,
+                    (true, false) => SansBold,
+                    (false, true) => SansItalic,
+                    _ => SansRegular
                 };
                 return new FontResolverInfo(face);
             }
@@ -124,10 +124,10 @@ namespace Deeplex.Saverwalter.PrintService
             // (avoids PlatformFontResolver failures on Linux for uninstalled fonts)
             var fallbackFace = (isBold, isItalic) switch
             {
-                (true, true)   => SerifBoldItalic,
-                (true, false)  => SerifBold,
-                (false, true)  => SerifItalic,
-                _              => SerifRegular
+                (true, true) => SerifBoldItalic,
+                (true, false) => SerifBold,
+                (false, true) => SerifItalic,
+                _ => SerifRegular
             };
             return new FontResolverInfo(fallbackFace);
         }

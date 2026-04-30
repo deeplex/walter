@@ -34,7 +34,9 @@ async function findRenderableAbrechnung(
             }
         }
     }
-    throw new Error('No contract with renderable Betriebskostenabrechnung in dev seed');
+    throw new Error(
+        'No contract with renderable Betriebskostenabrechnung in dev seed'
+    );
 }
 
 test.describe('Abrechnung UI download flow', () => {
@@ -43,7 +45,10 @@ test.describe('Abrechnung UI download flow', () => {
         request
     }) => {
         const ownerLogin = await signInApi(request, 'owner.dev');
-        const candidate = await findRenderableAbrechnung(request, ownerLogin.token);
+        const candidate = await findRenderableAbrechnung(
+            request,
+            ownerLogin.token
+        );
 
         await authenticatePage(page, 'owner.dev');
         await page.goto(
@@ -68,10 +73,14 @@ test.describe('Abrechnung UI download flow', () => {
         }
 
         // Carbon's OverflowMenu renders a button with the .bx--overflow-menu class.
-        const menuTrigger = page.locator('main button.bx--overflow-menu').first();
+        const menuTrigger = page
+            .locator('main button.bx--overflow-menu')
+            .first();
         await menuTrigger.click();
 
-        const downloadPromise = page.waitForEvent('download', { timeout: 60_000 });
+        const downloadPromise = page.waitForEvent('download', {
+            timeout: 60_000
+        });
         await page
             .getByRole('menuitem', { name: 'PDF-Dokument erstellen' })
             .click();

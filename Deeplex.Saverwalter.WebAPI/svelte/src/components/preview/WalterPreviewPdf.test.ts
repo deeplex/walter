@@ -28,12 +28,17 @@ describe('WalterPreviewPdf helper', () => {
 
     it('calls download_file_blob with blob and fileName when blob is present', async () => {
         const { downloadPdf } = await import('./WalterPreviewPdf');
-        const blob = new Blob(['%PDF-1.4 fake content'], { type: 'application/pdf' });
+        const blob = new Blob(['%PDF-1.4 fake content'], {
+            type: 'application/pdf'
+        });
 
         downloadPdf({ fileName: 'abrechnung.pdf', blob } as never);
 
         expect(downloadFileBlobMock).toHaveBeenCalledOnce();
-        expect(downloadFileBlobMock).toHaveBeenCalledWith(blob, 'abrechnung.pdf');
+        expect(downloadFileBlobMock).toHaveBeenCalledWith(
+            blob,
+            'abrechnung.pdf'
+        );
     });
 
     it('does nothing when no blob is present', async () => {

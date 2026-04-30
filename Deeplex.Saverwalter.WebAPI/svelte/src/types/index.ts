@@ -16,7 +16,7 @@
 export {
     type WalterBetriebskostenabrechnungEntry,
     type WalterRechnungEntry,
-    type WalterAbrechnungseinheit,
+    type WalterAbrechnungseinheit
 } from './WalterBetriebskostenabrechnung.type';
 export { type WalterToast } from './WalterToast.type';
 export { type WalterModalControl } from './WalterModalControl';

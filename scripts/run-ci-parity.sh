@@ -12,11 +12,77 @@ PARITY_LOG_DIR="${WALTER_PARITY_LOG_DIR:-${ROOT_DIR}/artifacts/local-ci-logs}"
 APP_URL="${WALTER_APP_URL:-http://localhost:15254}"
 PLAYWRIGHT_PARITY_INSTALL_DEPS="${PLAYWRIGHT_PARITY_INSTALL_DEPS:-1}"
 
+SOLUTION_PATH="${ROOT_DIR}/Deeplex.Saverwalter.sln"
+WEBAPI_PROJECT_PATH="${ROOT_DIR}/Deeplex.Saverwalter.WebAPI/Deeplex.Saverwalter.WebAPI.csproj"
+FRONTEND_DIR="${ROOT_DIR}/Deeplex.Saverwalter.WebAPI/svelte"
+
+SKIP_FULL_STACK="${WALTER_PARITY_SKIP_FULL_STACK:-0}"
+SKIP_PUBLISH="${WALTER_PARITY_SKIP_PUBLISH:-0}"
+
 mkdir -p "$PARITY_LOG_DIR"
 
-echo "Running local CI parity for full-stack test workflow..."
+stage() {
+  echo ""
+  echo "=================================================================="
+  echo "==> $*"
+  echo "=================================================================="
+}
+
+echo "Running local CI parity..."
 echo "Log directory: $PARITY_LOG_DIR"
 echo "App URL: $APP_URL"
+
+stage "style-svelte: prettier --check"
+(
+  cd "$FRONTEND_DIR"
+  yarn install --immutable
+  yarn prettier --check .
+)
+
+stage "style-dotnet: dotnet format whitespace --verify-no-changes"
+dotnet restore "$SOLUTION_PATH"
+dotnet format whitespace "$SOLUTION_PATH" --verify-no-changes --no-restore
+
+stage "quality-svelte: type-check"
+(
+  cd "$FRONTEND_DIR"
+  yarn check
+)
+
+stage "quality-svelte: vitest --coverage"
+(
+  cd "$FRONTEND_DIR"
+  yarn vitest run --coverage
+)
+
+stage "quality-dotnet: build with /warnaserror"
+dotnet build "$SOLUTION_PATH" --configuration Release --no-restore /warnaserror
+
+stage "quality-dotnet: test suite"
+mkdir -p "${ROOT_DIR}/artifacts/test-results/dotnet"
+dotnet test "$SOLUTION_PATH" \
+  --configuration Release \
+  --no-restore \
+  --settings "${ROOT_DIR}/.runsettings" \
+  --collect:"XPlat Code Coverage" \
+  --logger trx \
+  --results-directory "${ROOT_DIR}/artifacts/test-results/dotnet"
+
+stage "build-svelte: yarn build"
+(
+  cd "$FRONTEND_DIR"
+  yarn build
+)
+
+if [[ "$SKIP_PUBLISH" != "1" ]]; then
+  stage "publish-webapi: dotnet publish"
+  dotnet publish "$WEBAPI_PROJECT_PATH" \
+    --configuration Release \
+    --no-restore \
+    --output "${ROOT_DIR}/artifacts/publish/webapi"
+else
+  echo "Skipping publish-webapi (WALTER_PARITY_SKIP_PUBLISH=1)."
+fi
 
 ensure_playwright_runtime() {
   local browser_bin
@@ -29,7 +95,7 @@ ensure_playwright_runtime() {
 
   echo "Preparing Playwright runtime for parity run..."
   (
-    cd Deeplex.Saverwalter.WebAPI/svelte
+    cd "$FRONTEND_DIR"
     yarn install --immutable
 
     if [[ "$PLAYWRIGHT_PARITY_INSTALL_DEPS" == "1" ]]; then
@@ -116,12 +182,18 @@ run_with_docker_db() {
     bash ./scripts/test-full-stack.sh
 }
 
-if command -v docker >/dev/null 2>&1; then
-  ensure_playwright_runtime
-  run_with_docker_db
+if [[ "$SKIP_FULL_STACK" == "1" ]]; then
+  echo "Skipping test-full-stack (WALTER_PARITY_SKIP_FULL_STACK=1)."
 else
-  ensure_playwright_runtime
-  run_with_existing_db
+  stage "test-full-stack"
+  if command -v docker >/dev/null 2>&1; then
+    ensure_playwright_runtime
+    run_with_docker_db
+  else
+    ensure_playwright_runtime
+    run_with_existing_db
+  fi
 fi
 
+echo ""
 echo "Local CI parity run completed successfully."

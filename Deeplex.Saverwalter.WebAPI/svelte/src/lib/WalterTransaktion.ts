@@ -30,16 +30,19 @@ export class WalterTransaktionEntry extends WalterApiHandler {
         public notiz: string,
         public permissions: WalterPermissions,
         public createdAt: Date,
-        public lastModified: Date,
+        public lastModified: Date
     ) {
         super();
     }
 
     static fromJson(json: WalterTransaktionEntry): WalterTransaktionEntry {
-        const zahler = json.zahler && WalterSelectionEntry.fromJson(json.zahler);
+        const zahler =
+            json.zahler && WalterSelectionEntry.fromJson(json.zahler);
         const zahlungsEmpfaenger =
-            json.zahlungsempfaenger && WalterSelectionEntry.fromJson(json.zahlungsempfaenger);
-        const permissions = json.permissions && WalterPermissions.fromJson(json.permissions);
+            json.zahlungsempfaenger &&
+            WalterSelectionEntry.fromJson(json.zahlungsempfaenger);
+        const permissions =
+            json.permissions && WalterPermissions.fromJson(json.permissions);
 
         return new WalterTransaktionEntry(
             json.id,
