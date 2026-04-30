@@ -14,6 +14,25 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Liberation Serif 2.1.5 — SIL Open Font License 1.1 —
+         metrically equivalent to Times New Roman -->
+    <EmbeddedResource Include="Fonts\LiberationSerif-Regular.ttf" />
+    <EmbeddedResource Include="Fonts\LiberationSerif-Bold.ttf" />
+    <EmbeddedResource Include="Fonts\LiberationSerif-Italic.ttf" />
+    <EmbeddedResource Include="Fonts\LiberationSerif-BoldItalic.ttf" />
+    <!-- Liberation Sans 2.1.5 — SIL Open Font License 1.1 —
+         metrically equivalent to Arial (required by MigraDoc) -->
+    <EmbeddedResource Include="Fonts\LiberationSans-Regular.ttf" />
+    <EmbeddedResource Include="Fonts\LiberationSans-Bold.ttf" />
+    <EmbeddedResource Include="Fonts\LiberationSans-Italic.ttf" />
+    <EmbeddedResource Include="Fonts\LiberationSans-BoldItalic.ttf" />
+    <EmbeddedResource Include="Fonts\LiberationMono-Regular.ttf" />
+    <EmbeddedResource Include="Fonts\LiberationMono-Bold.ttf" />
+    <EmbeddedResource Include="Fonts\LiberationMono-Italic.ttf" />
+    <EmbeddedResource Include="Fonts\LiberationMono-BoldItalic.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Deeplex.Saverwalter.BetriebskostenabrechnungService\Deeplex.Saverwalter.BetriebskostenabrechnungService.csproj" />
     <ProjectReference Include="..\Deeplex.Saverwalter.ErhaltungsaufwendungService\Deeplex.Saverwalter.ErhaltungsaufwendungService.csproj" />
     <ProjectReference Include="..\Deeplex.Saverwalter.Model\Deeplex.Saverwalter.Model.csproj" />

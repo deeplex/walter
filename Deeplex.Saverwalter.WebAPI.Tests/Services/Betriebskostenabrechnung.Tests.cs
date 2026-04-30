@@ -47,7 +47,7 @@ namespace Deeplex.Saverwalter.WebAPI.Tests
             result.Value.Should().NotBeNull();
         }
 
-        [Fact(Skip = "PDF is TODO")]
+        [Fact]
         public void GetPdfDocumentTest()
         {
             var ctx = TestUtils.GetContext();

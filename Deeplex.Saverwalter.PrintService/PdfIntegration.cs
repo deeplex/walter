@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Runtime.InteropServices;
 using System.Text;
 using Deeplex.Saverwalter.BetriebskostenabrechnungService;
 using MigraDoc.DocumentObjectModel;
@@ -22,62 +21,115 @@ using PdfSharp.Fonts;
 
 namespace Deeplex.Saverwalter.PrintService
 {
+    // Liberation Serif 2.1.5 is bundled under the SIL Open Font License 1.1.
     public class CustomFontResolver : IFontResolver
     {
+        // Serif variants (metrically equivalent to Times New Roman)
+        private const string SerifRegular = "LiberationSerif-Regular";
+        private const string SerifBold = "LiberationSerif-Bold";
+        private const string SerifItalic = "LiberationSerif-Italic";
+        private const string SerifBoldItalic = "LiberationSerif-BoldItalic";
+
+        // Sans variants (metrically equivalent to Arial, required by MigraDoc)
+        private const string SansRegular = "LiberationSans-Regular";
+        private const string SansBold = "LiberationSans-Bold";
+        private const string SansItalic = "LiberationSans-Italic";
+        private const string SansBoldItalic = "LiberationSans-BoldItalic";
+
+        // Mono variants (metrically equivalent to Courier New, required by MigraDoc)
+        private const string MonoRegular = "LiberationMono-Regular";
+        private const string MonoBold = "LiberationMono-Bold";
+        private const string MonoItalic = "LiberationMono-Italic";
+        private const string MonoBoldItalic = "LiberationMono-BoldItalic";
+
+        private static readonly string ResourceNamespace =
+            typeof(CustomFontResolver).Namespace!;
+
         public byte[] GetFont(string faceName)
         {
-            string fontPath;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            var resourceName = faceName switch
             {
-                var systemRoot = Environment.GetEnvironmentVariable("SystemRoot");
-                if (string.IsNullOrEmpty(systemRoot))
-                {
-                    throw new InvalidOperationException("The 'SystemRoot' environment variable is not set. Cannot locate system fonts.");
-                }
-                fontPath = Path.Combine(systemRoot, "Fonts", "times.ttf");
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                var candidates = new[]
-                {
-                    "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf",
-                    "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
-                    "/usr/share/fonts/truetype/noto/NotoSerif-Regular.ttf"
-                };
+                SerifRegular    => $"{ResourceNamespace}.Fonts.LiberationSerif-Regular.ttf",
+                SerifBold       => $"{ResourceNamespace}.Fonts.LiberationSerif-Bold.ttf",
+                SerifItalic     => $"{ResourceNamespace}.Fonts.LiberationSerif-Italic.ttf",
+                SerifBoldItalic => $"{ResourceNamespace}.Fonts.LiberationSerif-BoldItalic.ttf",
+                MonoRegular     => $"{ResourceNamespace}.Fonts.LiberationMono-Regular.ttf",
+                MonoBold        => $"{ResourceNamespace}.Fonts.LiberationMono-Bold.ttf",
+                MonoItalic      => $"{ResourceNamespace}.Fonts.LiberationMono-Italic.ttf",
+                MonoBoldItalic  => $"{ResourceNamespace}.Fonts.LiberationMono-BoldItalic.ttf",
+                SansRegular     => $"{ResourceNamespace}.Fonts.LiberationSans-Regular.ttf",
+                SansBold        => $"{ResourceNamespace}.Fonts.LiberationSans-Bold.ttf",
+                SansItalic      => $"{ResourceNamespace}.Fonts.LiberationSans-Italic.ttf",
+                SansBoldItalic  => $"{ResourceNamespace}.Fonts.LiberationSans-BoldItalic.ttf",
+                _ => $"{ResourceNamespace}.Fonts.LiberationSerif-Regular.ttf"
+            };
 
-                foreach (var path in candidates)
-                {
-                    if (File.Exists(path))
-                    {
-                        fontPath = path;
-                        break;
-                    }
-                }
+            var assembly = typeof(CustomFontResolver).Assembly;
+            using var stream = assembly.GetManifestResourceStream(resourceName)
+                ?? throw new InvalidOperationException(
+                    $"Embedded font resource '{resourceName}' not found. " +
+                    $"Available: {string.Join(", ", assembly.GetManifestResourceNames())}");
 
-                throw new FileNotFoundException("No suitable serif font found on this Linux system.");
-            }
-            else
-            {
-                throw new PlatformNotSupportedException("Unsupported OS.");
-            }
-
-            return File.ReadAllBytes(fontPath);
+            using var ms = new MemoryStream();
+            stream.CopyTo(ms);
+            return ms.ToArray();
         }
 
         public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
         {
-            if (familyName.Equals("Times New Roman", StringComparison.CurrentCultureIgnoreCase))
+            // Map Times New Roman (and the bundled Liberation Serif name) to the
+            // embedded Liberation Serif variants, which are metrically equivalent.
+            if (familyName.Equals("Times New Roman", StringComparison.OrdinalIgnoreCase) ||
+                familyName.StartsWith("Liberation Serif", StringComparison.OrdinalIgnoreCase))
             {
-                return new FontResolverInfo("Times New Roman");
+                var face = (isBold, isItalic) switch
+                {
+                    (true, true)   => SerifBoldItalic,
+                    (true, false)  => SerifBold,
+                    (false, true)  => SerifItalic,
+                    _              => SerifRegular
+                };
+                return new FontResolverInfo(face);
             }
-            else if (familyName.Equals("Arial", StringComparison.CurrentCultureIgnoreCase))
+
+            // MigraDoc requires Courier New for its internal error font.
+            if (familyName.Equals("Courier New", StringComparison.OrdinalIgnoreCase) ||
+                familyName.StartsWith("Liberation Mono", StringComparison.OrdinalIgnoreCase))
             {
-                return new FontResolverInfo("Arial");
+                var face = (isBold, isItalic) switch
+                {
+                    (true, true)   => MonoBoldItalic,
+                    (true, false)  => MonoBold,
+                    (false, true)  => MonoItalic,
+                    _              => MonoRegular
+                };
+                return new FontResolverInfo(face);
             }
-            else
+
+            // MigraDoc requires Arial for its internal fonts.
+            if (familyName.Equals("Arial", StringComparison.OrdinalIgnoreCase) ||
+                familyName.StartsWith("Liberation Sans", StringComparison.OrdinalIgnoreCase))
             {
-                return PlatformFontResolver.ResolveTypeface(familyName, isBold, isItalic);
+                var face = (isBold, isItalic) switch
+                {
+                    (true, true)   => SansBoldItalic,
+                    (true, false)  => SansBold,
+                    (false, true)  => SansItalic,
+                    _              => SansRegular
+                };
+                return new FontResolverInfo(face);
             }
+
+            // Fall back to Liberation Serif for any unknown font family
+            // (avoids PlatformFontResolver failures on Linux for uninstalled fonts)
+            var fallbackFace = (isBold, isItalic) switch
+            {
+                (true, true)   => SerifBoldItalic,
+                (true, false)  => SerifBold,
+                (false, true)  => SerifItalic,
+                _              => SerifRegular
+            };
+            return new FontResolverInfo(fallbackFace);
         }
     }
 

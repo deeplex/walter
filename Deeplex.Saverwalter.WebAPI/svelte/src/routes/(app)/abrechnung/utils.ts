@@ -97,9 +97,7 @@ async function create_abrechnung(
         toast
     );
 
-    if (response.status === 200) {
-        return file;
-    }
+    return file;
 }
 
 export function updatePreview(

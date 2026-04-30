@@ -17,8 +17,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
     import PDFObject from 'pdfobject';
+    import { Button } from 'carbon-components-svelte';
+    import { Download } from 'carbon-icons-svelte';
     import type { WalterFile } from '$walter/types';
     import { WalterPreviewError } from '$walter/components';
+    import { downloadPdf } from './WalterPreviewPdf';
 
     export let file: WalterFile;
 
@@ -36,6 +39,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 {#if file.blob}
+    <Button kind="tertiary" icon={Download} on:click={() => downloadPdf(file)}>
+        PDF herunterladen
+    </Button>
     <div style="height:50rem; overflow: hidden" id="pdf-container" />
 {:else}
     <WalterPreviewError {file} />

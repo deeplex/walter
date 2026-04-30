@@ -22,7 +22,7 @@ namespace Deeplex.Saverwalter.PrintService.Tests
 {
     public class PdfIntegrationTests
     {
-        [Fact(Skip = "PDF is TODO")]
+        [Fact]
         public void EverythingZeroTest()
         {
             var ctx = TestUtils.GetContext();

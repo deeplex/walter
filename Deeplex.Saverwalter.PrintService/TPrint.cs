@@ -545,8 +545,9 @@ namespace Deeplex.Saverwalter.PrintService
                         }
                         break;
                     case Umlageschluessel.NachVerbrauch:
-                        var anteil = abrechnungseinheit.VerbrauchAnteile.Single(e => e.Umlage == umlage);
+                        var anteil = abrechnungseinheit.VerbrauchAnteile.SingleOrDefault(e => e.Umlage == umlage);
                         // TODO anteil can only have one ZaehlerTyp. Catch that?
+                        if (anteil == null) { break; }
 
                         kostenPunkt(
                             umlage,

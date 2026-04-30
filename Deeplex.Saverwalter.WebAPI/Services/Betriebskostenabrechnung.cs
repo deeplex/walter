@@ -143,7 +143,8 @@ namespace Deeplex.Saverwalter.WebAPI
             }
             catch (Exception ex)
             {
-                return new BadRequestObjectResult(ex);
+                Console.Error.WriteLine($"PDF generation failed: {ex}");
+                return new BadRequestObjectResult(ex.Message);
             }
         }
 
@@ -162,7 +163,8 @@ namespace Deeplex.Saverwalter.WebAPI
             }
             catch (Exception ex)
             {
-                return new BadRequestObjectResult(ex);
+                Console.Error.WriteLine($"PDF generation failed: {ex}");
+                return new BadRequestObjectResult(ex.Message);
             }
         }
 
